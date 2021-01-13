@@ -18,8 +18,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { configSchema as tilemapSchema } from '../tile_map/config';
-import { configSchema as regionmapSchema } from '../region_map/config';
 
 import {
   DEFAULT_EMS_FONT_LIBRARY_URL,
@@ -28,11 +26,50 @@ import {
   DEFAULT_EMS_FILE_API_URL,
 } from './common/ems_defaults';
 
+export const tilemapConfigSchema = schema.object({
+  url: schema.maybe(schema.string()),
+  options: schema.object({
+    attribution: schema.string({ defaultValue: '' }),
+    minZoom: schema.number({ defaultValue: 0, min: 0 }),
+    maxZoom: schema.number({ defaultValue: 10 }),
+    tileSize: schema.maybe(schema.number()),
+    subdomains: schema.maybe(schema.arrayOf(schema.string())),
+    errorTileUrl: schema.maybe(schema.string()),
+    tms: schema.maybe(schema.boolean()),
+    reuseTiles: schema.maybe(schema.boolean()),
+    bounds: schema.maybe(schema.arrayOf(schema.number({ min: 2 }))),
+    default: schema.maybe(schema.boolean()),
+  }),
+});
+
+const layerConfigSchema = schema.object({
+  url: schema.string(),
+  format: schema.object({
+    type: schema.string({ defaultValue: 'geojson' }),
+  }),
+  meta: schema.object({
+    feature_collection_path: schema.string({ defaultValue: 'data' }),
+  }),
+  attribution: schema.string(),
+  name: schema.string(),
+  fields: schema.arrayOf(
+    schema.object({
+      name: schema.string(),
+      description: schema.string(),
+    })
+  ),
+});
+
+export const regionmapConfigSchema = schema.object({
+  includeElasticMapsService: schema.boolean({ defaultValue: true }),
+  layers: schema.arrayOf(layerConfigSchema, { defaultValue: [] }),
+});
+
 export const configSchema = schema.object({
   includeElasticMapsService: schema.boolean({ defaultValue: true }),
   proxyElasticMapsServiceInMaps: schema.boolean({ defaultValue: false }),
-  tilemap: tilemapSchema,
-  regionmap: regionmapSchema,
+  tilemap: tilemapConfigSchema,
+  regionmap: regionmapConfigSchema,
   manifestServiceUrl: schema.string({ defaultValue: '' }),
 
   emsUrl: schema.conditional(
