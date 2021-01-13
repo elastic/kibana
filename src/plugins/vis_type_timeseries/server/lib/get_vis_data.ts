@@ -71,6 +71,14 @@ export function getVisData(
         )
         .toPromise();
     },
+    getIndexPatternsService: async () => {
+      const [, { data }] = await framework.core.getStartServices();
+
+      return await data.indexPatterns.indexPatternsServiceFactory(
+        requestContext.core.savedObjects.client,
+        requestContext.core.elasticsearch.client.asCurrentUser
+      );
+    },
   };
   const promises = reqFacade.payload.panels.map(getPanelData(reqFacade));
   return Promise.all(promises).then((res) => {
