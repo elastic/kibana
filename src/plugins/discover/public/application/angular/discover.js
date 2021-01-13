@@ -296,7 +296,7 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     createSearchSessionRestorationDataProvider({
       appStateContainer,
       data,
-      getSavedSearchId: () => savedSearch.id,
+      getSavedSearch: () => savedSearch,
     })
   );
 

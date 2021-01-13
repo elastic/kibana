@@ -16,13 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { IconType } from '@elastic/eui';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Adapters } from 'src/plugins/inspector';
-import { IndexPattern } from 'src/plugins/data/public';
-import { VisEditorConstructor } from 'src/plugins/visualize/public';
-import { ISchemas } from 'src/plugins/vis_default_editor/public';
+import { IndexPattern, AggGroupNames, AggParam, AggGroupName } from '../../../data/public';
 import { Vis, VisParams, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
 
 export interface VisTypeOptions {
@@ -37,6 +34,29 @@ export enum VisGroups {
   PROMOTED = 'promoted',
   TOOLS = 'tools',
   AGGBASED = 'aggbased',
+}
+
+export interface ISchemas {
+  [AggGroupNames.Buckets]: Schema[];
+  [AggGroupNames.Metrics]: Schema[];
+  all: Schema[];
+}
+
+export interface Schema {
+  aggFilter: string[];
+  editor: boolean | string;
+  group: AggGroupName;
+  max: number;
+  min: number;
+  name: string;
+  params: AggParam[];
+  title: string;
+  defaults: unknown;
+  hideCustomLabel?: boolean;
+  mustBeFirst?: boolean;
+  aggSettings?: any;
+  disabled?: boolean;
+  tooltip?: ReactNode;
 }
 
 /**
@@ -118,13 +138,6 @@ export interface VisType<TVisParams = unknown> {
   readonly schemas: ISchemas;
 
   readonly options: VisTypeOptions;
-
-  /**
-   * The editor that should be used to edit visualizations of this type.
-   * If this is not specified the default visualize editor will be used (and should be configured via schemas)
-   * and editorConfig.
-   */
-  readonly editor?: VisEditorConstructor;
 
   // TODO: The following types still need to be refined properly.
   readonly editorConfig: Record<string, any>;

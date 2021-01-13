@@ -35,7 +35,7 @@ export interface OptionTab {
 export const useOptionTabs = ({ type: visType }: Vis): [OptionTab[], (name: string) => void] => {
   const [optionTabs, setOptionTabs] = useState<OptionTab[]>(() => {
     const tabs = [
-      ...(visType.schemas.buckets || visType.schemas.metrics
+      ...(visType.schemas.buckets?.length || visType.schemas.metrics?.length
         ? [
             {
               name: 'data',
