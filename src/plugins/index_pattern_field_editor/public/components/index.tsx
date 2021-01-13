@@ -73,13 +73,17 @@ const Content = ({
   docLinks: DocLinksStart;
 }) => {
   const isNewField = !!indexPatternField?.name;
-  const a = 0;
   let getrf: any;
   const [fieldName, setFieldName] = useState<string>(indexPatternField?.name || '');
   // const [getRuntimeField, setGetRuntimeField] = useState<any>();
   const runtimeContent = RuntimeFields && (
     <RuntimeFields
-      defaultValue={indexPatternField?.runtimeField}
+      defaultValue={
+        indexPatternField?.runtimeField && {
+          name: indexPatternField?.name,
+          ...indexPatternField?.runtimeField,
+        }
+      }
       onChange={async (rf) => {
         // console.log('a', a++);
         getrf = rf.submit;
@@ -108,13 +112,11 @@ const Content = ({
           } = await getrf();
           if (!field) {
             indexPattern.saveRuntimeField(fieldName, {
-              name: fieldName,
               type,
               script,
             });
           } else {
             field.runtimeField = {
-              name: fieldName,
               type,
               script,
             };

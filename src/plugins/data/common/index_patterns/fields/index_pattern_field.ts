@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import type { RuntimeField } from 'src/plugins/runtime_fields/common';
+import type { RuntimeField } from '../types';
 import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import type { IFieldType } from './types';

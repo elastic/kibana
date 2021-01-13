@@ -46,6 +46,7 @@ import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateIndexPatternError } from '../errors';
+import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
@@ -413,16 +414,14 @@ export class IndexPatternsService {
         },
         spec.fieldAttrs
       );
-      // TODO
       // APPLY RUNTIME FIELDS
       for (const [key, value] of Object.entries(runtimeFieldMap || {})) {
-        // console.log(`${key}: ${value}`);
         if (spec.fields[key]) {
           spec.fields[key].runtimeField = value;
         } else {
           spec.fields[key] = {
             name: key,
-            type: 'string', // todo
+            type: castEsToKbnFieldTypeName(value.type),
             runtimeField: value,
             aggregatable: true,
             searchable: true,
