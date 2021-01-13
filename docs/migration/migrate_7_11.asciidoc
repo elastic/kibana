@@ -33,7 +33,7 @@ your application to {kib} 7.11.
 
 *Details:* The Reporting plugin added new validation for protocol strings in Network Policy configurations.
 
-*Impact*: See <<reporting-network-policy, Restrict requests with a Reporting network policy>>.
+*Impact*: See {kibana-ref}/reporting-network-policy.html[Restrict requests with a Reporting network policy].
 If the kibana.yml has a Reporting network policy before upgrade,
 the protocol strings must end with a colon. Otherwise, config validation
 will fail and Kibana will not start.
