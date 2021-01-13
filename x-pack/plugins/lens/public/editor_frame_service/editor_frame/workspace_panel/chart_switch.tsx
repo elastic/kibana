@@ -24,8 +24,7 @@ import { Visualization, FramePublicAPI, Datasource } from '../../../types';
 import { Action } from '../state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-// import { ToolbarButton } from '../../../shared_components';
-import { NewButton } from '../../../../../../../src/plugins/kibana_react/public';
+import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -230,13 +229,13 @@ export function ChartSwitch(props: Props) {
       panelClassName="lnsChartSwitch__popoverPanel"
       panelPaddingSize="s"
       button={
-        <NewButton
+        <ToolbarButton
           onClick={() => setFlyoutOpen(!flyoutOpen)}
           data-test-subj="lnsChartSwitchPopover"
           fontWeight="bold"
         >
           <VisualizationSummary {...props} />
-        </NewButton>
+        </ToolbarButton>
       }
       isOpen={flyoutOpen}
       closePopover={() => setFlyoutOpen(false)}

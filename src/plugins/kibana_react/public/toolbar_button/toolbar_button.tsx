@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import './new_button.scss';
+import './toolbar_button.scss';
 import React from 'react';
 import classNames from 'classnames';
 import { EuiButton, PropsOf, EuiButtonProps } from '@elastic/eui';
@@ -29,11 +29,17 @@ const groupPositionToClassMap = {
   right: 'toolbarButton--groupRight',
 };
 
-export type NewButtonProps = PropsOf<typeof EuiButton> & {
+type ButtonPosition = keyof typeof groupPositionToClassMap;
+export const POSITIONS = Object.keys(groupPositionToClassMap) as ButtonPosition[];
+
+type Weights = 'normal' | 'bold';
+export const WEIGHTS = ['normal', 'bold'] as Weights[];
+
+export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
   /**
    * Determines prominence
    */
-  fontWeight?: 'normal' | 'bold';
+  fontWeight?: Weights;
   /**
    * Smaller buttons also remove extra shadow for less prominence
    */
@@ -45,11 +51,11 @@ export type NewButtonProps = PropsOf<typeof EuiButton> & {
   /**
    * Adjusts the borders for groupings
    */
-  groupPosition?: 'none' | 'left' | 'center' | 'right';
+  groupPosition?: ButtonPosition;
   dataTestSubj?: string;
 };
 
-export const NewButton: React.FunctionComponent<NewButtonProps> = ({
+export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   children,
   className,
   fontWeight = 'normal',
