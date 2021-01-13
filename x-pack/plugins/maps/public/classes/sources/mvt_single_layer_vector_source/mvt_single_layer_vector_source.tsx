@@ -9,7 +9,7 @@ import uuid from 'uuid/v4';
 import React from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { BoundsFilters, GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
+import { ESGlobalFilters, GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
 import {
   FIELD_ORIGIN,
   MAX_ZOOM,
@@ -179,7 +179,7 @@ export class MVTSingleLayerVectorSource
   }
 
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: ESGlobalFilters,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     return null;

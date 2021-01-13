@@ -5,11 +5,12 @@
  */
 
 import { Feature, FeatureCollection } from 'geojson';
-import { AbstractVectorSource, GeoJsonWithMeta } from '../vector_source';
+import { AbstractVectorSource, ESGlobalFilters, GeoJsonWithMeta } from '../vector_source';
 import { EMPTY_FEATURE_COLLECTION, SOURCE_TYPES } from '../../../../common/constants';
-import { GeojsonFileSourceDescriptor } from '../../../../common/descriptor_types';
+import { GeojsonFileSourceDescriptor, MapExtent } from '../../../../common/descriptor_types';
 import { registerSource } from '../source_registry';
 import { IField } from '../../fields/field';
+import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
 
 function getFeatureCollection(geoJson: Feature | FeatureCollection | null): FeatureCollection {
   if (!geoJson) {
@@ -40,6 +41,18 @@ export class GeojsonFileSource extends AbstractVectorSource {
       __featureCollection: getFeatureCollection(geoJson),
       name,
     };
+  }
+
+  isBoundsAware(): boolean {
+    return true;
+  }
+
+  async getBoundsForFilters(
+    boundsFilters: ESGlobalFilters,
+    registerCancelCallback: (callback: () => void) => void
+  ): Promise<MapExtent | null> {
+    const featureCollection = (this._descriptor as GeojsonFileSourceDescriptor).__featureCollection;
+    return getFeatureCollectionBounds(featureCollection, false);
   }
 
   async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
