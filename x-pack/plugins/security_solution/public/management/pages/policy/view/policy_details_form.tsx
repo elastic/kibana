@@ -12,12 +12,14 @@ import { LinuxEvents, MacEvents, WindowsEvents } from './policy_forms/events';
 import { AdvancedPolicyForms } from './policy_advanced';
 import { AntivirusRegistrationForm } from './components/antivirus_registration_form';
 import { Ransomware } from './policy_forms/protections/ransomware';
+import { useLicense } from '../../../../common/hooks/use_license';
 
 export const PolicyDetailsForm = memo(() => {
   const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
   const handleAdvancedPolicyClick = useCallback(() => {
     setShowAdvancedPolicy(!showAdvancedPolicy);
   }, [showAdvancedPolicy]);
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
 
   return (
     <>
@@ -33,7 +35,7 @@ export const PolicyDetailsForm = memo(() => {
       <EuiSpacer size="xs" />
       <MalwareProtections />
       <EuiSpacer size="xs" />
-      <Ransomware />
+      {isPlatinumPlus && <Ransomware />}
       <EuiSpacer size="l" />
 
       <EuiText size="xs" color="subdued">

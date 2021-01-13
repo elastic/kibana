@@ -37,7 +37,6 @@ import { policyConfig } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 import { popupVersionsMap } from './popup_options_to_versions';
-import { useLicense } from '../../../../../../common/hooks/use_license';
 
 const ProtectionRadioGroup = styled.div`
   display: flex;
@@ -55,19 +54,16 @@ const ProtectionRadio = React.memo(({ id, label }: { id: ProtectionModes; label:
   const radioButtonId = useMemo(() => htmlIdGenerator()(), []);
   // currently just taking windows.ransomware, but both windows.ransomware and mac.ransomware should be the same value
   const selected = policyDetailsConfig && policyDetailsConfig.windows.ransomware.mode;
-  const isPlatinumPlus = useLicense().isPlatinumPlus();
 
   const handleRadioChange = useCallback(() => {
     if (policyDetailsConfig) {
       const newPayload = cloneDeep(policyDetailsConfig);
       for (const os of OSes) {
         newPayload[os][protection].mode = id;
-        if (isPlatinumPlus) {
-          if (id === ProtectionModes.prevent) {
-            newPayload[os].popup[protection].enabled = true;
-          } else {
-            newPayload[os].popup[protection].enabled = false;
-          }
+        if (id === ProtectionModes.prevent) {
+          newPayload[os].popup[protection].enabled = true;
+        } else {
+          newPayload[os].popup[protection].enabled = false;
         }
       }
       dispatch({
@@ -75,7 +71,7 @@ const ProtectionRadio = React.memo(({ id, label }: { id: ProtectionModes; label:
         payload: { policyConfig: newPayload },
       });
     }
-  }, [dispatch, id, policyDetailsConfig, isPlatinumPlus]);
+  }, [dispatch, id, policyDetailsConfig]);
 
   /**
    *  Passing an arbitrary id because EuiRadio
@@ -127,7 +123,6 @@ export const Ransomware = React.memo(() => {
     policyDetailsConfig && policyDetailsConfig.windows.popup.ransomware.enabled;
   const userNotificationMessage =
     policyDetailsConfig && policyDetailsConfig.windows.popup.ransomware.message;
-  const isPlatinumPlus = useLicense().isPlatinumPlus();
 
   const radios: Immutable<
     Array<{
@@ -161,16 +156,12 @@ export const Ransomware = React.memo(() => {
         if (event.target.checked === false) {
           for (const os of OSes) {
             newPayload[os][protection].mode = ProtectionModes.off;
-            if (isPlatinumPlus) {
-              newPayload[os].popup[protection].enabled = event.target.checked;
-            }
+            newPayload[os].popup[protection].enabled = event.target.checked;
           }
         } else {
           for (const os of OSes) {
             newPayload[os][protection].mode = ProtectionModes.prevent;
-            if (isPlatinumPlus) {
-              newPayload[os].popup[protection].enabled = event.target.checked;
-            }
+            newPayload[os].popup[protection].enabled = event.target.checked;
           }
         }
         dispatch({
@@ -179,7 +170,7 @@ export const Ransomware = React.memo(() => {
         });
       }
     },
-    [dispatch, policyDetailsConfig, isPlatinumPlus]
+    [dispatch, policyDetailsConfig]
   );
 
   const handleUserNotificationCheckbox = useCallback(
@@ -235,32 +226,31 @@ export const Ransomware = React.memo(() => {
             );
           })}
         </ProtectionRadioGroup>
-        {isPlatinumPlus && (
-          <>
-            <ConfigFormHeading>
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policyDetailsConfig.userNotification"
-                defaultMessage="User Notification"
-              />
-            </ConfigFormHeading>
-            <SupportedVersionNotice optionName="ransomware" />
-            <EuiSpacer size="s" />
-            <EuiCheckbox
-              data-test-subj="ransomwareUserNotificationCheckbox"
-              id="xpack.securitySolution.endpoint.policyDetail.ransomware.userNotification"
-              onChange={handleUserNotificationCheckbox}
-              checked={userNotificationSelected}
-              disabled={selected === ProtectionModes.off}
-              label={i18n.translate(
-                'xpack.securitySolution.endpoint.policyDetail.ransomware.notifyUser',
-                {
-                  defaultMessage: 'Notify User',
-                }
-              )}
+
+        <>
+          <ConfigFormHeading>
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyDetailsConfig.userNotification"
+              defaultMessage="User Notification"
             />
-          </>
-        )}
-        {isPlatinumPlus && userNotificationSelected && (
+          </ConfigFormHeading>
+          <SupportedVersionNotice optionName="ransomware" />
+          <EuiSpacer size="s" />
+          <EuiCheckbox
+            data-test-subj="ransomwareUserNotificationCheckbox"
+            id="xpack.securitySolution.endpoint.policyDetail.ransomware.userNotification"
+            onChange={handleUserNotificationCheckbox}
+            checked={userNotificationSelected}
+            disabled={selected === ProtectionModes.off}
+            label={i18n.translate(
+              'xpack.securitySolution.endpoint.policyDetail.ransomware.notifyUser',
+              {
+                defaultMessage: 'Notify User',
+              }
+            )}
+          />
+        </>
+        {userNotificationSelected && (
           <>
             <EuiSpacer size="s" />
             <EuiFlexGroup gutterSize="s">
@@ -315,7 +305,6 @@ export const Ransomware = React.memo(() => {
   }, [
     radios,
     selected,
-    isPlatinumPlus,
     handleUserNotificationCheckbox,
     userNotificationSelected,
     userNotificationMessage,

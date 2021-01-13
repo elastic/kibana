@@ -6,7 +6,7 @@
 
 import { ILicense } from '../../../licensing/common/types';
 import { isAtLeast } from './license';
-import { PolicyConfig } from '../endpoint/types';
+import { PolicyConfig, ProtectionModes } from '../endpoint/types';
 import { DefaultMalwareMessage, factory } from '../endpoint/models/policy_config';
 
 /**
@@ -40,6 +40,26 @@ export const isEndpointPolicyValidForLicense = (
     return false;
   }
 
+  // only platinum or higher may enable ransomware
+  if (policy.windows.ransomware.mode || policy.mac.ransomware.mode !== ProtectionModes.off) {
+    return false;
+  }
+
+  // only platinum or higher may enable ransomware notification
+  if (policy.windows.popup.ransomware.enabled || policy.mac.popup.ransomware.enabled !== false) {
+    return false;
+  }
+
+  // Only Platinum or higher may change the ransomware message (which can be blank or what Endpoint defaults)
+  if (
+    [policy.windows, policy.mac].some(
+      (p) =>
+        p.popup.ransomware.message !== '' && p.popup.ransomware.message !== DefaultMalwareMessage
+    )
+  ) {
+    return false;
+  }
+
   return true;
 };
 
@@ -51,16 +71,32 @@ export const unsetPolicyFeaturesAboveLicenseLevel = (
   policy: PolicyConfig,
   license: ILicense | null
 ): PolicyConfig => {
+  const defaults = factory();
   if (isAtLeast(license, 'platinum')) {
+    // Ransomware options default to on for platinum licenses
+    policy.windows.ransomware.mode = defaults.windows.ransomware.mode;
+    policy.mac.ransomware.mode = defaults.mac.ransomware.mode;
+    policy.windows.popup.ransomware.enabled = defaults.windows.popup.ransomware.enabled;
+    policy.mac.popup.ransomware.enabled = defaults.mac.popup.ransomware.enabled;
+    policy.windows.popup.ransomware.message = defaults.windows.popup.ransomware.message;
+    policy.mac.popup.ransomware.message = defaults.mac.popup.ransomware.message;
+
     return policy;
   }
 
-  const defaults = factory();
   // set any license-gated features back to the defaults
   policy.windows.popup.malware.enabled = defaults.windows.popup.malware.enabled;
   policy.mac.popup.malware.enabled = defaults.mac.popup.malware.enabled;
   policy.windows.popup.malware.message = defaults.windows.popup.malware.message;
   policy.mac.popup.malware.message = defaults.mac.popup.malware.message;
+
+  // Ransomware options default off for gold and below licenses
+  policy.windows.ransomware.mode = ProtectionModes.off;
+  policy.mac.ransomware.mode = ProtectionModes.off;
+  policy.windows.popup.ransomware.enabled = false;
+  policy.mac.popup.ransomware.enabled = false;
+  policy.windows.popup.ransomware.message = defaults.windows.popup.ransomware.message;
+  policy.mac.popup.ransomware.message = defaults.mac.popup.ransomware.message;
 
   return policy;
 };
