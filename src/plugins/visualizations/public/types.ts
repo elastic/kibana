@@ -26,20 +26,8 @@ import {
 import { ExpressionAstExpression } from '../../expressions/public';
 
 import { SerializedVis, Vis, VisParams } from './vis';
-import { ExprVis } from './expressions/vis';
 
 export { Vis, SerializedVis, VisParams };
-
-export interface VisualizationController {
-  render(visData: any, visParams: any): Promise<void>;
-  destroy(): void;
-  isLoaded?(): Promise<void> | void;
-}
-
-export type VisualizationControllerConstructor = new (
-  el: HTMLElement,
-  vis: ExprVis
-) => VisualizationController;
 
 export interface SavedVisState {
   title: string;

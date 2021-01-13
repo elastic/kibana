@@ -32,7 +32,7 @@ import {
   TimeRange,
   Query,
 } from '../../../data/public';
-import { Vis, VisParams, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
+import { Vis, VisParams, VisToExpressionAst } from '../types';
 import { PersistedState, VisualizeEmbeddableContract } from '../index';
 
 export interface VisTypeOptions {
@@ -131,7 +131,6 @@ export interface VisType<TVisParams = unknown> {
    */
   readonly titleInWizard: string;
   readonly requiresSearch: boolean;
-  readonly useCustomNoDataScreen: boolean;
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);
   readonly inspectorAdapters?: Adapters | (() => Adapters);
   /**
@@ -143,7 +142,6 @@ export interface VisType<TVisParams = unknown> {
   readonly getInfoMessage?: (vis: Vis) => React.ReactNode;
 
   readonly toExpressionAst?: VisToExpressionAst<TVisParams>;
-  readonly visualization?: VisualizationControllerConstructor;
 
   readonly setup?: (vis: Vis<TVisParams>) => Promise<Vis<TVisParams>>;
   hidden: boolean;
