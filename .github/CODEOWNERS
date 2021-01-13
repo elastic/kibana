@@ -236,6 +236,7 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-core
 /src/plugins/security_oss/ @elastic/kibana-security
+/src/plugins/spaces_oss/ @elastic/kibana-security
 /test/security_functional/ @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security

@@ -96,7 +96,6 @@ export class Embeddable
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
-  private autoRefreshFetchSubscription: Subscription;
   private isInitialized = false;
   private activeData: Partial<DefaultInspectorAdapters> | undefined;
 
@@ -126,10 +125,6 @@ export class Embeddable
     this.subscription = this.getUpdated$().subscribe(() =>
       this.onContainerStateChanged(this.input)
     );
-
-    this.autoRefreshFetchSubscription = deps.timefilter
-      .getAutoRefreshFetch$()
-      .subscribe(this.reload.bind(this));
 
     const input$ = this.getInput$();
 
@@ -450,6 +445,5 @@ export class Embeddable
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    this.autoRefreshFetchSubscription.unsubscribe();
   }
 }
