@@ -67,7 +67,7 @@ import {
 } from './utils';
 import { XYAxis, XYEndzones, XYCurrentTime, XYSettings, XYThresholdLine } from './components';
 import { getConfig } from './config';
-import { getThemeService, getDataActions } from './services';
+import { getThemeService, getDataActions, getPalettesService } from './services';
 import { ChartType } from '../common';
 
 import './_chart.scss';
@@ -84,7 +84,6 @@ export interface VisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   syncColors: boolean;
-  palettes: PaletteRegistry;
 }
 
 export type VisComponentType = typeof VisComponent;
@@ -96,6 +95,7 @@ const VisComponent = (props: VisComponentProps) => {
       props.visParams.addLegend == null ? true : props.visParams.addLegend;
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
+  const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
   useEffect(() => {
     const fn = () => {
       props?.uiState?.emit?.('reload');
@@ -115,6 +115,14 @@ const VisComponent = (props: VisComponentProps) => {
     },
     [props]
   );
+
+  useEffect(() => {
+    const fetchPalettes = async () => {
+      const palettes = await getPalettesService().getPalettes();
+      setPalettesRegistry(palettes);
+    };
+    fetchPalettes();
+  }, []);
 
   const handleFilterClick = useCallback(
     (
@@ -224,7 +232,7 @@ const VisComponent = (props: VisComponentProps) => {
     [props.uiState]
   );
 
-  const { visData, visParams, syncColors, palettes } = props;
+  const { visData, visParams, syncColors } = props;
 
   const config = getConfig(visData, visParams);
   const timeZone = getTimeZone();
@@ -268,7 +276,7 @@ const VisComponent = (props: VisComponentProps) => {
       if (Object.keys(overwriteColors).includes(seriesName)) {
         return overwriteColors[seriesName];
       }
-      const outputColor = palettes.get(visParams.palette.name).getColor(
+      const outputColor = palettesRegistry?.get(visParams.palette.name).getColor(
         [
           {
             name: seriesName,
@@ -295,7 +303,7 @@ const VisComponent = (props: VisComponentProps) => {
       splitAccessors,
       syncColors,
       visParams.palette.name,
-      palettes,
+      palettesRegistry,
     ]
   );
   const xAccessor = getXAccessor(config.aspects.x);

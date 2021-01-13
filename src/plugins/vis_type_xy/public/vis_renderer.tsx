@@ -30,7 +30,6 @@ import { XyVisType } from '../common';
 import { SplitChartWarning } from './components/split_chart_warning';
 import { VisComponentType } from './vis_component';
 import { RenderValue, visName } from './xy_vis_fn';
-import { getPalettesService } from './services';
 
 // @ts-ignore
 const VisComponent = lazy<VisComponentType>(() => import('./vis_component'));
@@ -49,7 +48,6 @@ export const xyVisRenderer: ExpressionRenderDefinition<RenderValue> = {
   render: async (domNode, { visData, visConfig, visType, syncColors }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData, visType);
     const isSplitChart = Boolean(visConfig.dimensions.splitRow);
-    const palettes = await getPalettesService().getPalettes();
 
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
     render(
@@ -64,7 +62,6 @@ export const xyVisRenderer: ExpressionRenderDefinition<RenderValue> = {
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
               syncColors={syncColors}
-              palettes={palettes}
             />
           </VisualizationContainer>
         </>
