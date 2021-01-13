@@ -16,26 +16,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { uniq } from 'lodash';
+import { PanelSchema } from '../common/types';
 
-import { AbstractSearchStrategy, ReqFacade } from './abstract_search_strategy';
-import { DefaultSearchCapabilities } from '../default_search_capabilities';
-import { VisPayload } from '../../../../common/types';
+export function extractIndexPatterns(
+  panel: PanelSchema,
+  defaultIndex?: PanelSchema['default_index_pattern']
+) {
+  const patterns: string[] = [];
 
-export class DefaultSearchStrategy extends AbstractSearchStrategy {
-  name = 'default';
+  if (panel.index_pattern) {
+    patterns.push(panel.index_pattern);
+  }
 
-  checkForViability(req: ReqFacade<VisPayload>) {
-    return Promise.resolve({
-      isViable: true,
-      capabilities: new DefaultSearchCapabilities(req),
+  panel.series.forEach((series) => {
+    const indexPattern = series.series_index_pattern;
+    if (indexPattern && series.override_index_pattern) {
+      patterns.push(indexPattern);
+    }
+  });
+
+  if (panel.annotations) {
+    panel.annotations.forEach((item) => {
+      const indexPattern = item.index_pattern;
+      if (indexPattern) {
+        patterns.push(indexPattern);
+      }
     });
   }
 
-  async getFieldsForWildcard<TPayload = unknown>(
-    req: ReqFacade<TPayload>,
-    indexPattern: string,
-    capabilities?: unknown
-  ) {
-    return super.getFieldsForWildcard(req, indexPattern, capabilities);
+  if (patterns.length === 0 && defaultIndex) {
+    patterns.push(defaultIndex);
   }
+
+  return uniq<string>(patterns).sort();
 }

@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-const percentileNumberTest = /\d+\.\d+/;
 
-export const toPercentileNumber = (value) =>
-  percentileNumberTest.test(`${value}`) ? value : `${value}.0`;
+export enum FIELD_TYPES {
+  BOOLEAN = 'boolean',
+  DATE = 'date',
+  GEO = 'geo_point',
+  NUMBER = 'number',
+  STRING = 'string',
+}

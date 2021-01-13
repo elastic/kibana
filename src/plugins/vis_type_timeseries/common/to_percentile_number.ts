@@ -16,13 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+const percentileNumberTest = /\d+\.\d+/;
 
-import { MODEL_TYPES } from './model_options';
-
-describe('src/legacy/core_plugins/metrics/common/model_options.js', () => {
-  describe('MODEL_TYPES', () => {
-    test('should match a snapshot of constants', () => {
-      expect(MODEL_TYPES).toMatchSnapshot();
-    });
-  });
-});
+export const toPercentileNumber = (value: string) =>
+  percentileNumberTest.test(`${value}`) ? value : `${value}.0`;

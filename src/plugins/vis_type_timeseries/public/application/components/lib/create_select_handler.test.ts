@@ -17,28 +17,26 @@
  * under the License.
  */
 
-/**
- * Time Range data modes.
- * @constant
- * @public
- */
-export const TIME_RANGE_DATA_MODES = {
-  /**
-   * Entire timerange mode will match all the documents selected in the
-   * timerange timepicker
-   */
-  ENTIRE_TIME_RANGE: 'entire_time_range',
+import { createSelectHandler, HandleChange } from './create_select_handler';
 
-  /**
-   * Last value mode will match only the documents for the specified interval
-   * from the end of the timerange.
-   */
-  LAST_VALUE: 'last_value',
-};
+describe('createSelectHandler', () => {
+  describe('createSelectHandler()', () => {
+    let handleChange: HandleChange;
+    let changeHandler: ReturnType<typeof createSelectHandler>;
 
-/**
- * Key for getting the Time Range mode from the Panel configuration object.
- * @constant
- * @public
- */
-export const TIME_RANGE_MODE_KEY = 'time_range_mode';
+    beforeEach(() => {
+      handleChange = jest.fn();
+      changeHandler = createSelectHandler(handleChange);
+    });
+
+    test('should calls handleChange() function with the correct data', () => {
+      const fn = changeHandler('test');
+
+      fn([{ value: 'foo', label: 'foo' }]);
+
+      expect(handleChange).toHaveBeenCalledWith({
+        test: 'foo',
+      });
+    });
+  });
+});

@@ -17,15 +17,24 @@
  * under the License.
  */
 
-import { isBasicAgg } from './agg_lookup';
+import { AbstractSearchStrategy, DefaultSearchCapabilities, ReqFacade } from '../../..';
 
-describe('aggLookup', () => {
-  describe('isBasicAgg(metric)', () => {
-    test('returns true for a basic metric (count)', () => {
-      expect(isBasicAgg({ type: 'count' })).toEqual(true);
-    });
-    test('returns false for a pipeline metric (derivative)', () => {
-      expect(isBasicAgg({ type: 'derivative' })).toEqual(false);
-    });
-  });
-});
+export const createFieldsFetcher = (
+  req: ReqFacade,
+  searchStrategy: AbstractSearchStrategy,
+  capabilities: DefaultSearchCapabilities
+) => {
+  const fieldsCacheMap = new Map();
+
+  return async (index: string) => {
+    if (fieldsCacheMap.has(index)) {
+      return fieldsCacheMap.get(index);
+    }
+
+    const fields = await searchStrategy.getFieldsForWildcard(req, index, capabilities);
+
+    fieldsCacheMap.set(index, fields);
+
+    return fields;
+  };
+};

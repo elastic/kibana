@@ -19,21 +19,23 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { includes } from 'lodash';
-import { injectI18n } from '@kbn/i18n/react';
 import { EuiComboBox } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { calculateSiblings } from '../lib/calculate_siblings';
 import { calculateLabel } from '../../../../common/calculate_label';
 import { basicAggs } from '../../../../common/basic_aggs';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../../common/metric_types';
 
-function createTypeFilter(restrict, exclude) {
+function createTypeFilter(restrict, exclude = []) {
   return (metric) => {
-    if (includes(exclude, metric.type)) return false;
+    if (exclude.includes(metric.type)) {
+      return false;
+    }
     switch (restrict) {
       case 'basic':
-        return includes(basicAggs, metric.type);
+        return basicAggs.includes(metric.type);
       default:
         return true;
     }
@@ -55,21 +57,20 @@ export function filterRows(includeSiblings) {
   };
 }
 
-function MetricSelectUi(props) {
+export function MetricSelect(props) {
   const {
     additionalOptions,
     restrict,
     metric,
+    fields,
     metrics,
     onChange,
     value,
     exclude,
     includeSiblings,
     clearable,
-    intl,
     ...rest
   } = props;
-
   const calculatedMetrics = metrics.filter(createTypeFilter(restrict, exclude));
 
   const siblings = calculateSiblings(calculatedMetrics, metric);
@@ -80,7 +81,7 @@ function MetricSelectUi(props) {
   const percentileOptions = siblings
     .filter((row) => /^percentile/.test(row.type))
     .reduce((acc, row) => {
-      const label = calculateLabel(row, calculatedMetrics);
+      const label = calculateLabel(row, calculatedMetrics, fields);
 
       switch (row.type) {
         case METRIC_TYPES.PERCENTILE_RANK:
@@ -110,7 +111,7 @@ function MetricSelectUi(props) {
     }, []);
 
   const options = siblings.filter(filterRows(includeSiblings)).map((row) => {
-    const label = calculateLabel(row, calculatedMetrics);
+    const label = calculateLabel(row, calculatedMetrics, fields);
     return { value: row.id, label };
   });
   const allOptions = [...options, ...additionalOptions, ...percentileOptions];
@@ -122,8 +123,7 @@ function MetricSelectUi(props) {
 
   return (
     <EuiComboBox
-      placeholder={intl.formatMessage({
-        id: 'visTypeTimeseries.metricSelect.selectMetricPlaceholder',
+      placeholder={i18n.translate('visTypeTimeseries.metricSelect.selectMetricPlaceholder', {
         defaultMessage: 'Select metric…',
       })}
       options={allOptions}
@@ -136,7 +136,7 @@ function MetricSelectUi(props) {
   );
 }
 
-MetricSelectUi.defaultProps = {
+MetricSelect.defaultProps = {
   additionalOptions: [],
   exclude: [],
   metric: {},
@@ -144,7 +144,7 @@ MetricSelectUi.defaultProps = {
   includeSiblings: false,
 };
 
-MetricSelectUi.propTypes = {
+MetricSelect.propTypes = {
   additionalOptions: PropTypes.array,
   exclude: PropTypes.array,
   metric: PropTypes.object,
@@ -153,5 +153,3 @@ MetricSelectUi.propTypes = {
   value: PropTypes.string,
   includeSiblings: PropTypes.bool,
 };
-
-export const MetricSelect = injectI18n(MetricSelectUi);
