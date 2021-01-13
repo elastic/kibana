@@ -6,5 +6,8 @@
   "pluginsFile": "new_e2e/cypress/plugins/index.js",
   "screenshotsFolder": "new_e2e/cypress/screenshots",
   "supportFile": "new_e2e/cypress/support/index.js",
-  "videosFolder": "new_e2e/cypress/videos"
+  "videosFolder": "new_e2e/cypress/videos",
+  "defaultCommandTimeout": 60000,
+  "execTimeout": 120000,
+  "pageLoadTimeout": 120000
 }
