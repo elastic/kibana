@@ -9,7 +9,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
-import { Space } from '../../../common/model/space';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { findTestSubject } from '@kbn/test/jest';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { CopyModeControl } from './copy_mode_control';

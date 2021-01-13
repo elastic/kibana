@@ -5,13 +5,23 @@
  */
 
 import React from 'react';
+import DateMath from '@elastic/datemath';
 import { PingHistogramComponent, PingHistogramComponentProps } from './ping_histogram';
-import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../lib';
-import moment from 'moment';
+import { render } from '../../../lib/helper/rtl_helpers';
+import { mockDataPlugin, mockMoment, mockMomentTimezone } from '../../../lib/helper/test_helpers';
 
 describe('PingHistogram component', () => {
+  let dateMathSpy: any;
   beforeAll(() => {
-    moment.prototype.fromNow = jest.fn(() => 'a year ago');
+    mockMoment();
+    mockMomentTimezone();
+    mockDataPlugin();
+    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy.mockReturnValue(20);
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
   });
 
   const props: PingHistogramComponentProps = {
@@ -48,18 +58,13 @@ describe('PingHistogram component', () => {
     },
   };
 
-  it('shallow renders the component without errors', () => {
-    const component = shallowWithRouter(<PingHistogramComponent {...props} />);
-    expect(component).toMatchSnapshot();
-  });
-
   it('renders the component without errors', () => {
-    const component = renderWithRouter(
-      <MountWithReduxProvider>
-        <PingHistogramComponent {...props} />
-      </MountWithReduxProvider>
+    const { getByLabelText, getByText } = render(<PingHistogramComponent {...props} />);
+    expect(getByText('Pings over time'));
+    expect(
+      getByLabelText(
+        'Bar Chart showing uptime status over time from 15 minutes ago to 15 minutes ago.'
+      )
     );
-
-    expect(component).toMatchSnapshot();
   });
 });
