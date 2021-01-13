@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { normalizeIndexShards, normalizeNodeShards } from '../normalize_shard_objects';
+import { normalizeIndexShards, normalizeNodeShards } from './normalize_shard_objects';
 
 function getIndexShardBucket(indexName) {
   return {
@@ -121,17 +120,17 @@ describe('Normalizing Shard Data', () => {
       const indices = [getIndexShardBucket('nodes'), getIndexShardBucket('toads')];
       const result = indices.reduce(normalizeIndexShards, {});
 
-      expect(result.nodes.status).to.be.eql('red');
-      expect(result.nodes.primary).to.be.eql(2); // "STARTED" and "RELOCATING" shards are counted as assigned primaries
-      expect(result.nodes.replica).to.be.eql(0);
-      expect(result.nodes.unassigned.primary).to.be.eql(1);
-      expect(result.nodes.unassigned.replica).to.be.eql(2);
+      expect(result.nodes.status).toBe('red');
+      expect(result.nodes.primary).toBe(2); // "STARTED" and "RELOCATING" shards are counted as assigned primaries
+      expect(result.nodes.replica).toBe(0);
+      expect(result.nodes.unassigned.primary).toBe(1);
+      expect(result.nodes.unassigned.replica).toBe(2);
 
-      expect(result.toads.status).to.be.eql('red');
-      expect(result.toads.primary).to.be.eql(2);
-      expect(result.toads.replica).to.be.eql(0);
-      expect(result.toads.unassigned.primary).to.be.eql(1);
-      expect(result.toads.unassigned.replica).to.be.eql(2);
+      expect(result.toads.status).toBe('red');
+      expect(result.toads.primary).toBe(2);
+      expect(result.toads.replica).toBe(0);
+      expect(result.toads.unassigned.primary).toBe(1);
+      expect(result.toads.unassigned.replica).toBe(2);
     });
   });
 
@@ -141,16 +140,16 @@ describe('Normalizing Shard Data', () => {
       const normalizeFn = normalizeNodeShards('someMasterNode');
       const result = nodes.reduce(normalizeFn, {});
 
-      expect(result.someMasterNode.node_ids).to.be.an('object');
-      expect(result.someMasterNode.indexCount).to.be(6);
-      expect(result.someMasterNode.shardCount).to.be(30);
-      expect(result.someMasterNode.name).to.be('Spider-Woman');
-      expect(result.someMasterNode.type).to.be('master');
+      expect(result.someMasterNode.node_ids).toBeInstanceOf(Object);
+      expect(result.someMasterNode.indexCount).toBe(6);
+      expect(result.someMasterNode.shardCount).toBe(30);
+      expect(result.someMasterNode.name).toBe('Spider-Woman');
+      expect(result.someMasterNode.type).toBe('master');
 
-      expect(result.somePlainNode.node_ids).to.be.an('object');
-      expect(result.somePlainNode.indexCount).to.be(6);
-      expect(result.somePlainNode.shardCount).to.be(30);
-      expect(result.somePlainNode.type).to.be('node');
+      expect(result.somePlainNode.node_ids).toBeInstanceOf(Object);
+      expect(result.somePlainNode.indexCount).toBe(6);
+      expect(result.somePlainNode.shardCount).toBe(30);
+      expect(result.somePlainNode.type).toBe('node');
     });
   });
 });

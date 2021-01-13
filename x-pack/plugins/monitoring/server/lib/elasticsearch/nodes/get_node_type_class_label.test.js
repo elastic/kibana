@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { getNodeTypeClassLabel } from '../get_node_type_class_label';
+import { getNodeTypeClassLabel } from './get_node_type_class_label';
 
 describe('Node Type and Label', () => {
   describe('when master node', () => {
@@ -14,25 +13,25 @@ describe('Node Type and Label', () => {
         master: true,
       };
       const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(node);
-      expect(nodeType).to.be('master');
-      expect(nodeTypeLabel).to.be('Master Node');
-      expect(nodeTypeClass).to.be('starFilled');
+      expect(nodeType).toBe('master');
+      expect(nodeTypeLabel).toBe('Master Node');
+      expect(nodeTypeClass).toBe('starFilled');
     });
     it('type is indicated by string', () => {
       const node = {};
       const type = 'master';
       const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(node, type);
-      expect(nodeType).to.be('master');
-      expect(nodeTypeLabel).to.be('Master Node');
-      expect(nodeTypeClass).to.be('starFilled');
+      expect(nodeType).toBe('master');
+      expect(nodeTypeLabel).toBe('Master Node');
+      expect(nodeTypeClass).toBe('starFilled');
     });
   });
   it('when type is generic node', () => {
     const node = {};
     const type = 'node';
     const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(node, type);
-    expect(nodeType).to.be('node');
-    expect(nodeTypeLabel).to.be('Node');
-    expect(nodeTypeClass).to.be('storage');
+    expect(nodeType).toBe('node');
+    expect(nodeTypeLabel).toBe('Node');
+    expect(nodeTypeClass).toBe('storage');
   });
 });
