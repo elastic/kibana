@@ -51,20 +51,13 @@ describe('ExecutedStep', () => {
     ['succeeded', 'Succeeded'],
     ['failed', 'Failed'],
     ['skipped', 'Skipped'],
+    ['somegarbage', '4.'],
   ])('supplies status badge correct status', (status, expectedStatus) => {
     step.synthetics = {
       payload: { status },
     };
     const { getByText } = render(<ExecutedStep index={3} step={step} checkGroup={'fake-group'} />);
     expect(getByText(expectedStatus));
-  });
-
-  it('renders a null string for bad status input', () => {
-    step.synthetics = {
-      payload: { status: 'somegarbage' },
-    };
-    const { getByText } = render(<ExecutedStep index={3} step={step} checkGroup={'fake-group'} />);
-    expect(getByText('4.'));
   });
 
   it('renders accordion for step', () => {
