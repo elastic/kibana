@@ -225,6 +225,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       >
         <EuiDataGrid
           aria-label={dataGridAriaLabel}
+          data-test-subj="lnsDataTable"
           columns={columns}
           columnVisibility={columnVisibility}
           trailingControlColumns={trailingControlColumns}
