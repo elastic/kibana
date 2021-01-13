@@ -19,8 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  // https://github.com/elastic/kibana/issues/86160
-  describe.skip('creation_saved_search', function () {
+  describe('creation_saved_search', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
