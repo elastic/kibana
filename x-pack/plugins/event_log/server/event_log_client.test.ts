@@ -11,7 +11,7 @@ import { merge } from 'lodash';
 import moment from 'moment';
 
 describe('EventLogStart', () => {
-  describe('findEventsBySavedObject', () => {
+  describe('findEventsBySavedObjectIds', () => {
     test('verifies that the user can access the specified saved object', async () => {
       const esContext = contextMock.create();
       const savedObjectGetter = jest.fn();
@@ -29,9 +29,9 @@ describe('EventLogStart', () => {
         references: [],
       });
 
-      await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id');
+      await eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id']);
 
-      expect(savedObjectGetter).toHaveBeenCalledWith('saved-object-type', 'saved-object-id');
+      expect(savedObjectGetter).toHaveBeenCalledWith('saved-object-type', ['saved-object-id']);
     });
 
     test('throws when the user doesnt have permission to access the specified saved object', async () => {
@@ -48,7 +48,7 @@ describe('EventLogStart', () => {
       savedObjectGetter.mockRejectedValue(new Error('Fail'));
 
       expect(
-        eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id')
+        eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'])
       ).rejects.toMatchInlineSnapshot(`[Error: Fail]`);
     });
 
@@ -107,17 +107,17 @@ describe('EventLogStart', () => {
         total: expectedEvents.length,
         data: expectedEvents,
       };
-      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue(result);
+      esContext.esAdapter.queryEventsBySavedObjects.mockResolvedValue(result);
 
       expect(
-        await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id')
+        await eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'])
       ).toEqual(result);
 
-      expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
+      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith(
         esContext.esNames.indexPattern,
         undefined,
         'saved-object-type',
-        'saved-object-id',
+        ['saved-object-id'],
         {
           page: 1,
           per_page: 10,
@@ -182,23 +182,23 @@ describe('EventLogStart', () => {
         total: expectedEvents.length,
         data: expectedEvents,
       };
-      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue(result);
+      esContext.esAdapter.queryEventsBySavedObjects.mockResolvedValue(result);
 
       const start = moment().subtract(1, 'days').toISOString();
       const end = moment().add(1, 'days').toISOString();
 
       expect(
-        await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
+        await eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'], {
           start,
           end,
         })
       ).toEqual(result);
 
-      expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
+      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith(
         esContext.esNames.indexPattern,
         undefined,
         'saved-object-type',
-        'saved-object-id',
+        ['saved-object-id'],
         {
           page: 1,
           per_page: 10,
@@ -228,7 +228,7 @@ describe('EventLogStart', () => {
         references: [],
       });
 
-      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue({
+      esContext.esAdapter.queryEventsBySavedObjects.mockResolvedValue({
         page: 0,
         per_page: 0,
         total: 0,
@@ -236,7 +236,7 @@ describe('EventLogStart', () => {
       });
 
       expect(
-        eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
+        eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'], {
           start: 'not a date string',
         })
       ).rejects.toMatchInlineSnapshot(`[Error: [start]: Invalid Date]`);
@@ -260,7 +260,7 @@ describe('EventLogStart', () => {
         references: [],
       });
 
-      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue({
+      esContext.esAdapter.queryEventsBySavedObjects.mockResolvedValue({
         page: 0,
         per_page: 0,
         total: 0,
@@ -268,7 +268,7 @@ describe('EventLogStart', () => {
       });
 
       expect(
-        eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
+        eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'], {
           end: 'not a date string',
         })
       ).rejects.toMatchInlineSnapshot(`[Error: [end]: Invalid Date]`);
