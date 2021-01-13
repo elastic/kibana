@@ -338,7 +338,7 @@ def call(Map params = [:], Closure closure) {
             buildState.set('shouldSetCommitStatus', true)
           }
           if (config.checkPrChanges && githubPr.isPr()) {
-            // pipelineLibraryTests() // TODO re-enable
+            pipelineLibraryTests()
 
             print "Checking PR for changes to determine if CI needs to be run..."
 
@@ -420,20 +420,18 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
     def config = [name: 'ci-worker', size: 'xxl', ramDisk: true] + (params.worker ?: [:])
 
     workers.ci(config) {
-      withCiTaskQueue(parallel: 1) { // TODO change back
-      // withCiTaskQueue(parallel: 24) {
-        // TODO re-enable
-        // parallel([
-        //   docker: {
-        //     retry(2) {
-        //       buildDocker()
-        //     }
-        //   },
+      withCiTaskQueue(parallel: 24) {
+        parallel([
+          docker: {
+            retry(2) {
+              buildDocker()
+            }
+          },
 
-        //   // There are integration tests etc that require the plugins to be built first, so let's go ahead and build them before set up the parallel workspaces
-        //   ossPlugins: { buildOssPlugins() },
-        //   xpackPlugins: { buildXpackPlugins() },
-        // ])
+          // There are integration tests etc that require the plugins to be built first, so let's go ahead and build them before set up the parallel workspaces
+          ossPlugins: { buildOssPlugins() },
+          xpackPlugins: { buildXpackPlugins() },
+        ])
 
         catchErrors {
           closure()
@@ -445,12 +443,11 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
 
 def allCiTasks() {
   withTasks {
-    // TODO re-enable
-    // tasks.check()
-    // tasks.lint()
-    // tasks.test()
-    // tasks.functionalOss()
-    // tasks.functionalXpack()
+    tasks.check()
+    tasks.lint()
+    tasks.test()
+    tasks.functionalOss()
+    tasks.functionalXpack()
     tasks.storybooksCi()
   }
 }
