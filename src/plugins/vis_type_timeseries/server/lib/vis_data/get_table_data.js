@@ -16,13 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { buildRequestBody } from './table/build_request_body';
 import { handleErrorResponse } from './handle_error_response';
 import { get } from 'lodash';
 import { processBucket } from './table/process_bucket';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getIndexPatternObject } from './helpers/get_index_pattern';
-import { UI_SETTINGS } from '../../../../data/common';
+import { createFieldsFetcher } from './helpers/fields_fetcher';
+import { extractFieldLabel } from '../../../common/calculate_label';
 
 export async function getTableData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
@@ -33,18 +35,33 @@ export async function getTableData(req, panel) {
   } = await req.framework.searchStrategyRegistry.getViableStrategy(req, panelIndexPattern);
   const esQueryConfig = await getEsQueryConfig(req);
   const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
+  const extractFields = createFieldsFetcher(req, searchStrategy, capabilities);
+
+  const calculatePivotLabel = async () => {
+    if (panel.pivot_id && indexPatternObject?.title) {
+      const fields = await extractFields(indexPatternObject.title);
+
+      return extractFieldLabel(fields, panel.pivot_id);
+    }
+    return panel.pivot_id;
+  };
 
   const meta = {
     type: panel.type,
+    pivot_label: panel.pivot_label || (await calculatePivotLabel()),
     uiRestrictions: capabilities.uiRestrictions,
   };
 
   try {
     const uiSettings = req.getUiSettingsService();
-    const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities, {
-      maxBarsUiSettings: await uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-      barTargetUiSettings: await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-    });
+    const body = await buildRequestBody(
+      req,
+      panel,
+      esQueryConfig,
+      indexPatternObject,
+      capabilities,
+      uiSettings
+    );
 
     const [resp] = await searchStrategy.search(req, [
       {
@@ -59,9 +76,13 @@ export async function getTableData(req, panel) {
       []
     );
 
+    const series = await Promise.all(
+      buckets.map(processBucket(panel, req, searchStrategy, capabilities, extractFields))
+    );
+
     return {
       ...meta,
-      series: buckets.map(processBucket(panel)),
+      series,
     };
   } catch (err) {
     if (err.body || err.name === 'KQLSyntaxError') {

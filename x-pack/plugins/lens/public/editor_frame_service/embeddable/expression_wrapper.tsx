@@ -15,6 +15,7 @@ import {
 } from 'src/plugins/expressions/public';
 import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
+import classNames from 'classnames';
 import { getOriginalRequestErrorMessage } from '../error_helper';
 
 export interface ExpressionWrapperProps {
@@ -29,7 +30,10 @@ export interface ExpressionWrapperProps {
     inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => void;
   renderMode?: RenderMode;
+  syncColors?: boolean;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
+  style?: React.CSSProperties;
+  className?: string;
 }
 
 export function ExpressionWrapper({
@@ -41,7 +45,10 @@ export function ExpressionWrapper({
   searchSessionId,
   onData$,
   renderMode,
+  syncColors,
   hasCompatibleActions,
+  style,
+  className,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -60,7 +67,7 @@ export function ExpressionWrapper({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <div className="lnsExpressionRenderer">
+        <div className={classNames('lnsExpressionRenderer', className)} style={style}>
           <ExpressionRendererComponent
             className="lnsExpressionRenderer__component"
             padding="s"
@@ -70,6 +77,7 @@ export function ExpressionWrapper({
             searchSessionId={searchSessionId}
             onData$={onData$}
             renderMode={renderMode}
+            syncColors={syncColors}
             renderError={(errorMessage, error) => (
               <div data-test-subj="expression-renderer-error">
                 <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">

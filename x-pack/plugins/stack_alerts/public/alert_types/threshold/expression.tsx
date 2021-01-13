@@ -71,6 +71,10 @@ interface KibanaDeps {
   http: HttpSetup;
 }
 
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
   AlertTypeParamsExpressionProps<IndexThresholdAlertParams>
 > = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, charts, data }) => {
@@ -190,10 +194,10 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
             };
           })}
           onChange={async (selected: EuiComboBoxOptionOption[]) => {
-            setAlertParams(
-              'index',
-              selected.map((aSelected) => aSelected.value)
-            );
+            const indicies: string[] = selected
+              .map((aSelected) => aSelected.value)
+              .filter<string>(isString);
+            setAlertParams('index', indicies);
             const indices = selected.map((s) => s.value as string);
 
             // reset time field and expression fields if indices are deleted
@@ -249,7 +253,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           fullWidth
           name="thresholdTimeField"
           data-test-subj="thresholdAlertTimeFieldSelect"
-          value={timeField}
+          value={timeField || ''}
           onChange={(e) => {
             setAlertParams('timeField', e.target.value);
           }}

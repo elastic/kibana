@@ -138,6 +138,10 @@
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
 /x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
+/x-pack/plugins/stack_alerts/server/alert_types/geo_containment @elastic/kibana-gis
+/x-pack/plugins/stack_alerts/public/alert_types/geo_containment @elastic/kibana-gis
+/x-pack/plugins/stack_alerts/server/alert_types/geo_threshold @elastic/kibana-gis
+/x-pack/plugins/stack_alerts/public/alert_types/geo_threshold @elastic/kibana-gis
 #CC# /src/plugins/maps_legacy/ @elastic/kibana-gis
 #CC# /src/plugins/maps_oss/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
@@ -232,6 +236,7 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-core
 /src/plugins/security_oss/ @elastic/kibana-security
+/src/plugins/spaces_oss/ @elastic/kibana-security
 /test/security_functional/ @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security

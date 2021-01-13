@@ -25,9 +25,9 @@ import {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
-  IEditorController,
   VisualizeEditorVisInstance,
 } from '../../types';
+import type { IEditorController } from '../../../../../visualizations/public';
 
 export const useEditorUpdates = (
   services: VisualizeServices,

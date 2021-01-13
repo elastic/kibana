@@ -4,7 +4,8 @@ exports[`APIKeysGridPage renders a callout when API keys are not enabled 1`] = `
 <NotEnabled
   docLinks={
     DocumentationLinksService {
-      "esDocBasePath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/",
+      "apiKeySettings": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings",
+      "createApiKey": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-api-create-api-key.html",
     }
   }
 >

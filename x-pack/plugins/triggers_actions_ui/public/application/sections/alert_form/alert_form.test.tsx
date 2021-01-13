@@ -9,7 +9,13 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
-import { ValidationResult, Alert, AlertType } from '../../../types';
+import {
+  ValidationResult,
+  Alert,
+  AlertType,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../types';
 import { AlertForm } from './alert_form';
 import { coreMock } from 'src/core/public/mocks';
 import { ALERTS_FEATURE_ID, RecoveredActionGroup } from '../../../../../alerts/common';
@@ -35,20 +41,26 @@ describe('alert_form', () => {
     requiresAppContext: false,
   };
 
-  const actionType = {
+  const actionType = actionTypeRegistryMock.createMockActionTypeModel({
     id: 'my-action-type',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {
+        config: {
+          errors: {},
+        },
+        secrets: {
+          errors: {},
+        },
+      };
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): GenericValidationResult<unknown> => {
       const validationResult = { errors: {} };
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
-  };
+  });
 
   const alertTypeNonEditable = {
     id: 'non-edit-alert-type',
@@ -153,7 +165,7 @@ describe('alert_form', () => {
       alertTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
-
+      actionTypeRegistry.get.mockReturnValue(actionType);
       const initialAlert = ({
         name: 'test',
         params: {},
@@ -172,7 +184,7 @@ describe('alert_form', () => {
         <AlertForm
           alert={initialAlert}
           dispatch={() => {}}
-          errors={{ name: [], interval: [] }}
+          errors={{ name: [], interval: [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           alertTypeRegistry={alertTypeRegistry}
@@ -324,6 +336,7 @@ describe('alert_form', () => {
         },
       ]);
       alertTypeRegistry.has.mockReturnValue(true);
+      actionTypeRegistry.get.mockReturnValue(actionType);
 
       const initialAlert = ({
         name: 'non alerting consumer test',
@@ -343,7 +356,7 @@ describe('alert_form', () => {
         <AlertForm
           alert={initialAlert}
           dispatch={() => {}}
-          errors={{ name: [], interval: [] }}
+          errors={{ name: [], interval: [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           alertTypeRegistry={alertTypeRegistry}
@@ -405,7 +418,7 @@ describe('alert_form', () => {
         <AlertForm
           alert={initialAlert}
           dispatch={() => {}}
-          errors={{ name: [], interval: [] }}
+          errors={{ name: [], interval: [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           alertTypeRegistry={alertTypeRegistry}

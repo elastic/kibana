@@ -8,18 +8,20 @@ import {
   AlertsClient,
   PartialAlert,
   AlertType,
+  AlertTypeParams,
   AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
   AlertExecutorOptions,
 } from '../../../../../alerts/server';
 import { Alert } from '../../../../../alerts/common';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 
-export interface RuleNotificationAlertType extends Alert {
-  params: {
-    ruleAlertId: string;
-  };
+export interface RuleNotificationAlertTypeParams extends AlertTypeParams {
+  ruleAlertId: string;
 }
+export type RuleNotificationAlertType = Alert<RuleNotificationAlertTypeParams>;
 
 export interface FindNotificationParams {
   alertsClient: AlertsClient;
@@ -76,32 +78,36 @@ export interface ReadNotificationParams {
 }
 
 export const isAlertTypes = (
-  partialAlert: PartialAlert[]
+  partialAlert: Array<PartialAlert<AlertTypeParams>>
 ): partialAlert is RuleNotificationAlertType[] => {
   return partialAlert.every((rule) => isAlertType(rule));
 };
 
 export const isAlertType = (
-  partialAlert: PartialAlert
+  partialAlert: PartialAlert<AlertTypeParams>
 ): partialAlert is RuleNotificationAlertType => {
   return partialAlert.alertTypeId === NOTIFICATIONS_ID;
 };
 
-export type NotificationExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
-  params: {
-    ruleAlertId: string;
-  };
-};
+export type NotificationExecutorOptions = AlertExecutorOptions<
+  RuleNotificationAlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
 
 // This returns true because by default a NotificationAlertTypeDefinition is an AlertType
 // since we are only increasing the strictness of params.
 export const isNotificationAlertExecutor = (
   obj: NotificationAlertTypeDefinition
-): obj is AlertType => {
+): obj is AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext> => {
   return true;
 };
 
-export type NotificationAlertTypeDefinition = Omit<AlertType, 'executor'> & {
+export type NotificationAlertTypeDefinition = Omit<
+  AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext, 'default'>,
+  'executor'
+> & {
   executor: ({
     services,
     params,
