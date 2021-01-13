@@ -233,7 +233,7 @@ export function LayerPanel(
               >
                 <>
                   <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
-                    {group.accessors.map((accessorConfig) => {
+                    {group.accessors.map((accessorConfig, index) => {
                       const accessor = accessorConfig.columnId;
                       const { dragging } = dragDropContext;
                       const dragType =
@@ -248,6 +248,7 @@ export function LayerPanel(
                           ? 'replace'
                           : 'reorder'
                         : 'add';
+                        console.log('dropType',group.groupId, dropType)
 
                       const isCompatibleFromOtherGroup =
                         dragging?.groupId !== group.groupId &&
@@ -274,6 +275,9 @@ export function LayerPanel(
 
                       return (
                         <DragDrop
+                          order={
+                            isFromTheSameGroup ? undefined : [2, layerIndex, groupIndex, index]
+                          }
                           key={accessor}
                           draggable={!activeId}
                           dragType={dragType}
@@ -282,6 +286,15 @@ export function LayerPanel(
                           itemsInGroup={group.accessors.map((a) =>
                             typeof a === 'string' ? a : a.columnId
                           )}
+                          dropTargetIdentifier={
+                            isFromTheSameGroup
+                              ? undefined
+                              : {
+                                  groupId: group.groupId,
+                                  layerId,
+                                  id: accessor,
+                                }
+                          }
                           className={'lnsLayerPanel__dimensionContainer'}
                           value={{
                             columnId: accessor,
@@ -329,6 +342,16 @@ export function LayerPanel(
                                   prevState: props.visualizationState,
                                 })
                               );
+                              if (typeof dropResult === 'object') {
+                                // When a column is moved, we delete the reference to the old
+                                props.updateVisualization(
+                                  activeVisualization.removeDimension({
+                                    layerId,
+                                    columnId: dropResult.deleted,
+                                    prevState: props.visualizationState,
+                                  })
+                                );
+                              }
                             }
                           }}
                           onDrop={(droppedItem) => {
@@ -445,9 +468,10 @@ export function LayerPanel(
                           groupId: group.groupId,
                           layerId,
                           isNew: true,
+                          // activeId: newId
                         }}
                         /* 2 to leave room for data panel and workspace, then go by layer index, then by group index */
-                        order={[2, layerIndex, groupIndex]}
+                        order={[2, layerIndex, groupIndex, group.accessors.length]}
                         onDrop={(droppedItem) => {
                           const dropResult = layerDatasource.onDrop({
                             ...layerDatasourceDropProps,

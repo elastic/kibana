@@ -127,14 +127,15 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
       order: number[],
       dropTarget?: DropTargetIdentifier,
       canDrop?: (dragging: unknown) => boolean
-    ) =>
-      setActiveDropTargetState((s) => ({
+    ) => {
+      return setActiveDropTargetState((s) => ({
         ...s,
         dropTargetsByOrder: {
           ...s.dropTargetsByOrder,
           [order.join(',')]: dropTarget ? { dropTarget, canDrop } : undefined,
         },
-      })),
+      }));
+    },
     [setActiveDropTargetState]
   );
 
@@ -152,32 +153,44 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
 }
 
 export function nextValidDropTarget(
-  dropTargetsByOrder: Record<string, { dropTarget: DropTargetIdentifier } | undefined>,
+  bla: Record<string, { dropTarget: DropTargetIdentifier } | undefined>,
   dragging: unknown,
-  currentlyActiveDropTargetOrder?: number[]
+  currentlyActiveDropTargetOrder?: number[],
+  reverse = false
 ) {
-  const nextDropTarget = Object.entries(dropTargetsByOrder)
+  const dropTargetsByOrder = bla.dropTargetsByOrder;
+  const nextDropTargets = Object.entries(dropTargetsByOrder)
     .filter(([, target]) => !!target)
     .sort(([orderA], [orderB]) => {
       const parsedOrderA = orderA.split(',').map((v) => Number(v));
       const parsedOrderB = orderB.split(',').map((v) => Number(v));
 
       const relevantLevel = parsedOrderA.findIndex((v, i) => parsedOrderA[i] !== parsedOrderB[i]);
-      return parsedOrderA[relevantLevel] - parsedOrderB[relevantLevel];
-    })
-    .find(([targetOrder, target]) => {
-      const parsedOrder = targetOrder.split(',').map((v) => Number(v));
-
-      const relevantLevel = parsedOrder.findIndex(
-        (v, i) =>
-          parsedOrder[i] !==
-          (currentlyActiveDropTargetOrder ? currentlyActiveDropTargetOrder[i] : 0)
-      );
-      return (
-        parsedOrder[relevantLevel] -
-        (currentlyActiveDropTargetOrder ? currentlyActiveDropTargetOrder[relevantLevel] : 0)
-      );
+      return reverse
+        ? parsedOrderB[relevantLevel] - parsedOrderA[relevantLevel]
+        : parsedOrderA[relevantLevel] - parsedOrderB[relevantLevel];
     });
+
+  console.log('nextDropTargets', nextDropTargets, currentlyActiveDropTargetOrder);
+
+  const lastIndex = nextDropTargets.length - 1;
+
+  const nextDropTarget = nextDropTargets.find(([targetOrder, target]) => {
+    const parsedOrder = targetOrder.split(',').map((v) => Number(v));
+
+    const relevantLevel = parsedOrder.findIndex(
+      (v, i) =>
+        parsedOrder[i] !== (currentlyActiveDropTargetOrder ? currentlyActiveDropTargetOrder[i] : 0)
+    );
+    return (
+      parsedOrder[relevantLevel] -
+      (currentlyActiveDropTargetOrder ? currentlyActiveDropTargetOrder[relevantLevel] : 0)
+    );
+  });
+
+  if (bla.activeDropTarget === nextDropTargets[lastIndex][1].dropTarget) {
+    return undefined;
+  }
 
   if (nextDropTarget) {
     return nextDropTarget[1]?.dropTarget;
