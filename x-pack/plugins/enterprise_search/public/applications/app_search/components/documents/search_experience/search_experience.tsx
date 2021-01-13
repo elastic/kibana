@@ -69,7 +69,7 @@ export const SearchExperience: React.FC = () => {
     searchKey: engine.apiKey,
   });
 
-  const searchProviderConfig = buildSearchUIConfig(connector, engine.schema || {});
+  const searchProviderConfig = buildSearchUIConfig(connector, engine.schema || {}, fields);
 
   return (
     <div className="documentsSearchExperience">

@@ -5,8 +5,17 @@
  */
 
 import { Schema } from '../../../../shared/types';
+import { Fields } from './types';
 
-export const buildSearchUIConfig = (apiConnector: object, schema: Schema) => {
+export const buildSearchUIConfig = (apiConnector: object, schema: Schema, fields: Fields) => {
+  const facets = fields.filterFields.reduce(
+    (facetsConfig, fieldName) => ({
+      ...facetsConfig,
+      [fieldName]: { type: 'value', size: 30 },
+    }),
+    {}
+  );
+
   return {
     alwaysSearchOnInitialLoad: true,
     apiConnector,
@@ -16,6 +25,8 @@ export const buildSearchUIConfig = (apiConnector: object, schema: Schema) => {
       sortField: 'id',
     },
     searchQuery: {
+      disjunctiveFacets: fields.filterFields,
+      facets,
       result_fields: Object.keys(schema).reduce((acc: { [key: string]: object }, key: string) => {
         acc[key] = {
           snippet: {
