@@ -74,16 +74,18 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
         </>
       }
       actions={
-        <EuiButton
-          color="primary"
-          fill
-          href={createAgentConfigurationHref(search, basePath)}
-        >
-          {i18n.translate(
-            'xpack.apm.agentConfig.configTable.createConfigButtonLabel',
-            { defaultMessage: 'Create configuration' }
-          )}
-        </EuiButton>
+        canSave ? (
+          <EuiButton
+            color="primary"
+            fill
+            href={createAgentConfigurationHref(search, basePath)}
+          >
+            {i18n.translate(
+              'xpack.apm.agentConfig.configTable.createConfigButtonLabel',
+              { defaultMessage: 'Create configuration' }
+            )}
+          </EuiButton>
+        ) : null
       }
     />
   );
