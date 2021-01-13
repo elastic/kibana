@@ -19,13 +19,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new user', async function () {
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'newuser',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'newuserFirst newuserLast',
+        confirm_password: 'changeme',
+        full_name: 'newuserFirst newuserLast',
         email: 'newuser@myEmail.com',
-        save: true,
         roles: ['kibana_admin', 'superuser'],
       });
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
