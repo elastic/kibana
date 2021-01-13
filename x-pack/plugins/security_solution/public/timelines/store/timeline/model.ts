@@ -56,7 +56,7 @@ export interface TimelineModel {
   deletedEventIds: string[];
   /** A summary of the events and notes in this timeline */
   description: string;
-  /** Typoe of event you want to see in this timeline */
+  /** Type of event you want to see in this timeline */
   eventType?: TimelineEventsType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;

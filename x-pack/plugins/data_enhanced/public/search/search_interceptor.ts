@@ -12,7 +12,7 @@ import {
   SearchInterceptorDeps,
   UI_SETTINGS,
   IKibanaSearchRequest,
-  SessionState,
+  SearchSessionState,
 } from '../../../../../src/plugins/data/public';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
@@ -64,20 +64,24 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     const search = () => this.runSearch({ id, ...request }, searchOptions);
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-    const isCurrentSession = () =>
-      !!options.sessionId && options.sessionId === this.deps.session.getSessionId();
 
-    const untrackSearch = isCurrentSession() && this.deps.session.trackSearch({ abort });
+    const untrackSearch =
+      this.deps.session.isCurrentSession(options.sessionId) &&
+      this.deps.session.trackSearch({ abort });
 
     // track if this search's session will be send to background
     // if yes, then we don't need to cancel this search when it is aborted
     let isSavedToBackground = false;
     const savedToBackgroundSub =
-      isCurrentSession() &&
+      this.deps.session.isCurrentSession(options.sessionId) &&
       this.deps.session.state$
         .pipe(
           skip(1), // ignore any state, we are only interested in transition x -> BackgroundLoading
-          filter((state) => isCurrentSession() && state === SessionState.BackgroundLoading),
+          filter(
+            (state) =>
+              this.deps.session.isCurrentSession(options.sessionId) &&
+              state === SearchSessionState.BackgroundLoading
+          ),
           take(1)
         )
         .subscribe(() => {
@@ -93,7 +97,8 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);
         cleanup();
-        if (untrackSearch && isCurrentSession()) {
+        if (untrackSearch && this.deps.session.isCurrentSession(options.sessionId)) {
+          // untrack if this search still belongs to current session
           untrackSearch();
         }
         if (savedToBackgroundSub) {

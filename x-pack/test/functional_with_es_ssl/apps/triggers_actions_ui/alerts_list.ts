@@ -406,6 +406,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ).to.equal('Error found in 1 alert.');
       });
 
+      await refreshAlertsList();
       expect(await testSubjects.getVisibleText('totalAlertsCount')).to.be(
         'Showing: 2 of 2 alerts.'
       );

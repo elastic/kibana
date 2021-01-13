@@ -33,6 +33,7 @@ import {
   ILegacyClusterClient,
   StatusServiceSetup,
   ServiceStatus,
+  SavedObjectsBulkGetObject,
 } from '../../../../src/core/server';
 
 import {
@@ -370,7 +371,10 @@ export class AlertingPlugin {
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
       const client = getAlertsClientWithRequest(request);
-      return (type: string, id: string) => client.get({ id });
+      return (objects?: SavedObjectsBulkGetObject[]) =>
+        objects
+          ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
+          : Promise.resolve([]);
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
