@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from 'kibana/server';
 import { tilemapConfigSchema } from '../../maps_legacy/config';
 
