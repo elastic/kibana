@@ -14,10 +14,10 @@ export async function APMCypressVisualTestRunner({
 }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
-  // const esArchiver = getService('esArchiver');
+  const esArchiver = getService('esArchiver');
 
-  // await esArchiver.load('empty_kibana');
-  // await esArchiver.load('auditbeat');
+  // Load apm data on ES
+  await esArchiver.load('apm_8.0.0');
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
