@@ -51,12 +51,8 @@ export function getAspects(
     y: getAspectsFromDimension(columns, y) ?? [],
     z: z && z?.length > 0 ? getAspectsFromDimension(columns, z[0]) : undefined,
     series: getAspectsFromDimension(columns, seriesDimensions),
-    splitColumn:
-      splitColumn && splitColumn?.length > 0
-        ? getAspectsFromDimension(columns, splitColumn[0])
-        : undefined,
-    splitRow:
-      splitRow && splitRow?.length > 0 ? getAspectsFromDimension(columns, splitRow[0]) : undefined,
+    splitColumn: splitColumn?.length ? getAspectsFromDimension(columns, splitColumn[0]) : undefined,
+    splitRow: splitRow?.length ? getAspectsFromDimension(columns, splitRow[0]) : undefined,
   };
 }
 
