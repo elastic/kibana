@@ -111,12 +111,34 @@ tags:(success and info and security)
 [discrete]
 === Range queries
 
-KQL supports `>`, `>=`, `<`, and `<=` on numeric and date types. For example:
+KQL supports `>`, `>=`, `<`, and `<=` on numeric and date types.
 
 [source,yaml]
 -------------------
-account_number >= 100 and items_sold <= 200 and @timestamp >= now-5m
+account_number >= 100 and items_sold <= 200
 -------------------
+
+[discrete]
+=== Date range queries
+
+Typically, Kibana's <<set-time-filter,time filter>> is sufficient for setting a time range,
+but in some cases you might need to search on dates. Include the date range in quotes.
+
+[source,yaml]
+-------------------
+@timestamp < "2021-01-02T21:55:59"
+-------------------
+
+[source,yaml]
+-------------------
+@timestamp < "2021-01"
+-------------------
+
+[source,yaml]
+-------------------
+@timestamp < "2021"
+-------------------
+
 
 [discrete]
 === Exist queries
