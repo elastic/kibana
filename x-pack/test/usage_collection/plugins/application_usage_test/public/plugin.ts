@@ -17,10 +17,7 @@ export class ApplicationUsageTest implements Plugin {
       return;
     }
     const applications = await core.application.applications$.pipe(first()).toPromise();
-    const appIds = [...applications.keys()]
-      .sort()
-      // Discard "test" plugins
-      .filter((appId) => !/test/i.test(appId));
+    const appIds = [...applications.keys()].sort();
 
     try {
       // When the lists don't match, the entire page load will fail.
