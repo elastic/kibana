@@ -10,13 +10,7 @@ import { useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
 
-import { LogRetentionLogic, LogRetentionOptions } from '../';
-import { AnalyticsLogRetentionMessage, ApiLogRetentionMessage } from '../messaging';
-
-const CONTENT_MAP = {
-  [LogRetentionOptions.Analytics]: <AnalyticsLogRetentionMessage />,
-  [LogRetentionOptions.API]: <ApiLogRetentionMessage />,
-};
+import { LogRetentionLogic, LogRetentionMessage, LogRetentionOptions } from '../';
 
 interface Props {
   type: LogRetentionOptions;
@@ -25,8 +19,6 @@ interface Props {
 export const LogRetentionTooltip: React.FC<Props> = ({ type, position = 'bottom' }) => {
   const { logRetention } = useValues(LogRetentionLogic);
   const hasILM = logRetention !== null;
-
-  const tooltipContent = CONTENT_MAP[type];
 
   return hasILM ? (
     <EuiIconTip
@@ -37,7 +29,7 @@ export const LogRetentionTooltip: React.FC<Props> = ({ type, position = 'bottom'
       type="iInCircle"
       color="primary"
       position={position}
-      content={tooltipContent}
+      content={<LogRetentionMessage type={type} />}
     />
   ) : null;
 };

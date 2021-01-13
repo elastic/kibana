@@ -6,17 +6,11 @@
 
 import { setMockValues } from '../../../../__mocks__/kea.mock';
 
-jest.mock('../messaging', () => ({
-  AnalyticsLogRetentionMessage: jest.fn(),
-  ApiLogRetentionMessage: jest.fn(),
-}));
-import { AnalyticsLogRetentionMessage, ApiLogRetentionMessage } from '../messaging';
-
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { EuiIconTip } from '@elastic/eui';
 
-import { LogRetentionOptions } from '../';
+import { LogRetentionOptions, LogRetentionMessage } from '../';
 import { LogRetentionTooltip } from './';
 
 describe('LogRetentionTooltip', () => {
@@ -29,14 +23,16 @@ describe('LogRetentionTooltip', () => {
     const wrapper = shallow(<LogRetentionTooltip type={LogRetentionOptions.Analytics} />);
     const tooltipContent = wrapper.find(EuiIconTip).prop('content') as React.ReactElement;
 
-    expect(tooltipContent.type).toEqual(AnalyticsLogRetentionMessage);
+    expect(tooltipContent.type).toEqual(LogRetentionMessage);
+    expect(tooltipContent.props.type).toEqual('analytics');
   });
 
   it('renders an API tooltip', () => {
     const wrapper = shallow(<LogRetentionTooltip type={LogRetentionOptions.API} />);
     const tooltipContent = wrapper.find(EuiIconTip).prop('content') as React.ReactElement;
 
-    expect(tooltipContent.type).toEqual(ApiLogRetentionMessage);
+    expect(tooltipContent.type).toEqual(LogRetentionMessage);
+    expect(tooltipContent.props.type).toEqual('api');
   });
 
   it('passes custom tooltip positions', () => {
