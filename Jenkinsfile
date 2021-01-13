@@ -28,58 +28,7 @@ timeout(time: 120, unit: 'MINUTES') {
       slackNotifications.onFailure {
         node(workers.label('l')) {
           catchErrors {
-            def VERSION
-            def SNAPSHOT_ID
-            def DESTINATION
-
-            def scmVars = checkoutEs(ES_BRANCH)
-            def GIT_COMMIT = scmVars.GIT_COMMIT
-            def GIT_COMMIT_SHORT = sh(script: "git rev-parse --short ${GIT_COMMIT}", returnStdout: true).trim()
-
-            buildArchives('to-archive')
-
-            dir('to-archive') {
-              def now = new Date()
-              def date = now.format("yyyyMMdd-HHmmss")
-
-              def filesRaw = sh(script: "ls -1", returnStdout: true).trim()
-              def files = filesRaw
-                .split("\n")
-                .collect { filename ->
-                  // Filename examples
-                  // elasticsearch-oss-8.0.0-SNAPSHOT-linux-x86_64.tar.gz
-                  // elasticsearch-8.0.0-SNAPSHOT-linux-x86_64.tar.gz
-                  def parts = filename.replace("elasticsearch-oss", "oss").split("-")
-
-                  VERSION = VERSION ?: parts[1]
-                  SNAPSHOT_ID = SNAPSHOT_ID ?: "${date}_${GIT_COMMIT_SHORT}"
-                  DESTINATION = DESTINATION ?: "${VERSION}/archives/${SNAPSHOT_ID}"
-
-                  return [
-                    filename: filename,
-                    checksum: filename + '.sha512',
-                    url: "https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${DESTINATION}/${filename}".toString(),
-                    version: parts[1],
-                    platform: parts[3],
-                    architecture: parts[4].split('\\.')[0],
-                    license: parts[0] == 'oss' ? 'oss' : 'default',
-                  ]
-                }
-
-              sh 'find * -exec bash -c "shasum -a 512 {} > {}.sha512" \\;'
-
-              def manifest = [
-                bucket: "kibana-ci-es-snapshots-daily/${DESTINATION}".toString(),
-                branch: ES_BRANCH,
-                sha: GIT_COMMIT,
-                sha_short: GIT_COMMIT_SHORT,
-                version: VERSION,
-                generated: now.format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC")),
-                archives: files,
-              ]
-              def manifestJson = toJSON(manifest).toString()
-              writeFile file: 'manifest.json', text: manifestJson
-            }
+            error "This is a test"
           }
 
           kibanaPipeline.sendMail()
