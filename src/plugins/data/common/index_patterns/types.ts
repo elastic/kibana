@@ -103,18 +103,19 @@ export interface SavedObjectsClientCommon {
 }
 
 export interface GetFieldsOptions {
-  patternList?: string[];
-  pattern: string;
-  type?: string;
+  allowNoIndex?: boolean;
+  formatFields?: boolean;
   lookBack?: boolean;
   metaFields?: string[];
+  pattern: string;
+  patternList?: string[];
   rollupIndex?: string;
-  allowNoIndex?: boolean;
+  type?: string;
 }
 
 export interface GetPatternListFieldsOptions extends GetFieldsOptions {
+  formatFields?: boolean;
   patternList: string[];
-  formatFields: boolean;
 }
 
 export interface GetFieldsOptionsTimePattern {
@@ -225,28 +226,32 @@ interface FieldInfo {
   name: string;
   type?: string;
 }
-export interface IndexField {
+
+export interface FieldDescriptor {
+  /** Whether the field's values can be aggregated */
+  aggregatable: boolean;
+  /** the elastic type as mapped in the index */
+  esTypes: string[];
+  /** The name of the field */
+  name: string;
+  readFromDocValues: boolean;
+  /** Whether the field's values can be efficiently searched for */
+  searchable: boolean;
+  subType?: IFieldSubType;
+  /** The type of the field's values as recognized by Kibana */
+  type: string;
+}
+
+export interface IndexField extends FieldDescriptor {
   /** Where the field belong */
   category: string;
   /** Example of field's value */
   example?: Maybe<string | number>;
   /** whether the field's belong to an alias index */
   indexes: Array<Maybe<string>>;
-  /** The name of the field */
-  name: string;
-  /** The type of the field's values as recognized by Kibana */
-  type: string;
-  /** Whether the field's values can be efficiently searched for */
-  searchable: boolean;
-  /** Whether the field's values can be aggregated */
-  aggregatable: boolean;
   /** Description of the field */
   description?: Maybe<string>;
   format?: Maybe<string>;
-  /** the elastic type as mapped in the index */
-  esTypes?: string[];
-  subType?: IFieldSubType;
-  readFromDocValues: boolean;
 }
 
 export type BeatFields = Record<string, FieldInfo>;

@@ -27,21 +27,8 @@ import {
   getCapabilitiesForRollupIndices,
   mergeCapabilitiesWithFields,
 } from './lib';
-
-export interface FieldDescriptor {
-  aggregatable: boolean;
-  name: string;
-  readFromDocValues: boolean;
-  searchable: boolean;
-  type: string;
-  esTypes: string[];
-  subType?: FieldSubType;
-}
-
-interface FieldSubType {
-  multi?: { parent: string };
-  nested?: { path: string };
-}
+import { FieldDescriptor } from '../../../common/index_patterns';
+export { FieldDescriptor };
 
 export class IndexPatternsFetcher {
   private elasticsearchClient: ElasticsearchClient;

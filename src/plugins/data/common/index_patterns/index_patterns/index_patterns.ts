@@ -46,7 +46,7 @@ import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateIndexPatternError } from '../errors';
-import { formatIndexFields } from './utils';
+import { combineFields, formatIndexFields } from './utils';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
@@ -222,9 +222,9 @@ export class IndexPatternsService {
    */
   getFieldsForWildcardPatternList = async (
     options: GetPatternListFieldsOptions
-  ): Promise<IndexField[]> => {
+  ): Promise<FieldDescriptor[] | IndexField[]> => {
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    const responsesIndexFields = await Promise.all(
+    const responsesIndexFields: Array<FieldDescriptor[] | false> = await Promise.all(
       options.patternList
         .map((index) =>
           this.apiClient.getFieldsForWildcard({
@@ -237,16 +237,11 @@ export class IndexPatternsService {
         )
         .map((p) => p.catch((e) => false))
     );
-    console.log('one');
+    const fields = responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][];
     if (!options.formatFields) {
-      console.log('returning non-format fields');
-      return responsesIndexFields;
+      return combineFields(fields);
     }
-    console.log('two');
-    return formatIndexFields(
-      responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
-      options.patternList
-    );
+    return formatIndexFields(fields, options.patternList);
   };
 
   /**
@@ -259,13 +254,14 @@ export class IndexPatternsService {
     }
 
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    return this.apiClient.getFieldsForWildcard({
+    const hey = await this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
       allowNoIndex: options.allowNoIndex,
     });
+    return hey;
   };
 
   /**
