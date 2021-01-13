@@ -13,5 +13,6 @@
     { "path": "./plugins/telemetry_collection_xpack/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "./plugins/vis_type_timeseries_enhanced/tsconfig.json" },
+    { "path": "./plugins/translations/tsconfig.json" },
   ]
 }
