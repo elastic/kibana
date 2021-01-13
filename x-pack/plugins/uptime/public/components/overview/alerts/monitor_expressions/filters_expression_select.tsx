@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FilterPopover } from '../../filter_group/filter_popover';
 import { filterLabels } from '../../filter_group/translations';
-import { alertFilterLabels } from './translations';
+import { alertFilterLabels, filterAriaLabels } from './translations';
 import { FilterExpressionsSelectProps } from './filters_expression_select_container';
 import { OverviewFiltersState } from '../../../../state/reducers/overview_filters';
 
@@ -58,6 +58,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
 
   const monitorFilters = [
     {
+      'aria-label': filterAriaLabels.PORT,
       onFilterFieldChange,
       loading: false,
       fieldName: 'url.port',
@@ -71,6 +72,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       value: selectedPorts.length === 0 ? alertFilterLabels.ANY_PORT : selectedPorts?.join(','),
     },
     {
+      'aria-label': filterAriaLabels.TAG,
       onFilterFieldChange,
       loading: false,
       fieldName: 'tags',
@@ -83,6 +85,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       value: selectedTags.length === 0 ? alertFilterLabels.ANY_TAG : selectedTags?.join(','),
     },
     {
+      'aria-label': filterAriaLabels.SCHEME,
       onFilterFieldChange,
       loading: false,
       fieldName: 'monitor.type',
@@ -95,6 +98,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       value: selectedSchemes.length === 0 ? alertFilterLabels.ANY_TYPE : selectedSchemes?.join(','),
     },
     {
+      'aria-label': filterAriaLabels.LOCATION,
       onFilterFieldChange,
       loading: false,
       fieldName: 'observer.geo.name',
@@ -132,7 +136,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
               {...item}
               btnContent={
                 <EuiExpression
-                  aria-label={'ariaLabel'} // this is bad
+                  aria-label={item['aria-label']}
                   color={'secondary'}
                   data-test-subj={'uptimeCreateStatusAlert.' + item.id}
                   description={description}
@@ -148,7 +152,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              aria-label="Remove filter" // this needs to be translated
+              aria-label={alertFilterLabels.REMOVE_FILTER_LABEL}
               iconType="trash"
               color="danger"
               onClick={() => {
