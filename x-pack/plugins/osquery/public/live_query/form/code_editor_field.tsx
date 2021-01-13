@@ -4,13 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { OsqueryEditor } from '../../editor';
 
-const CodeEditorFieldComponent = (payload) => {
-  console.error('CodeEditorFieldComponent', payload);
-  return <OsqueryEditor />;
+const CodeEditorFieldComponent = ({ field }) => {
+  console.error('CodeEditorFieldComponent', field);
+
+  const handleChange = useCallback(
+    (newQuery) => {
+      field.setValue({
+        ...field.value,
+        query: newQuery,
+      });
+    },
+    [field]
+  );
+
+  return <OsqueryEditor defaultValue={field.value.query} onChange={handleChange} />;
 };
 
 export const CodeEditorField = React.memo(CodeEditorFieldComponent);

@@ -25,10 +25,7 @@ const EditLiveQueryPageComponent = () => {
 
   return (
     <>
-      <LiveQueryForm
-        agents={actionDetails?.fields?.agents}
-        commands={actionDetails?._source?.data?.commands}
-      />
+      <LiveQueryForm type="edit" actionDetails={actionDetails} />
       <EuiSpacer />
       <ResultTabs />
     </>

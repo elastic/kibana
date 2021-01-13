@@ -6,12 +6,13 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
-import React, { useState, useRef } from 'react';
+import { find } from 'lodash/fp';
+import React, { useEffect, useState, useRef } from 'react';
 import { EuiBasicTable, EuiHealth } from '@elastic/eui';
 
 import { useAllAgents } from './use_all_agents';
 
-export const AgentsTable = () => {
+export const AgentsTable = ({ selectedAgents, onChange }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [sortField, setSortField] = useState('firstName');
@@ -30,8 +31,10 @@ export const AgentsTable = () => {
     setSortDirection(sortDirection);
   };
 
-  const onSelectionChange = (selectedItems) => {
-    setSelectedItems(selectedItems);
+  const onSelectionChange = (newSelectedItems) => {
+    console.error('onSelectionChange', newSelectedItems);
+    setSelectedItems(newSelectedItems);
+    onChange(newSelectedItems.map((item) => item._id));
   };
 
   const renderStatus = (online) => {
@@ -86,14 +89,22 @@ export const AgentsTable = () => {
     selectable: (agent) => agent.active,
     selectableMessage: (selectable) => (!selectable ? 'User is currently offline' : undefined),
     onSelectionChange,
-    initialSelected: [],
+    initialSelected: selectedItems,
   };
+
+  useEffect(() => {
+    if (selectedAgents?.length && agents.length && selectedItems.length !== selectedItems.length) {
+      tableRef?.current.setSelection(
+        selectedAgents.map((agentId) => find({ _id: agentId }, agents))
+      );
+    }
+  }, [selectedAgents, agents, selectedItems.length]);
 
   return (
     <EuiBasicTable
       ref={tableRef}
       items={agents}
-      itemId="id"
+      itemId="_id"
       columns={columns}
       pagination={pagination}
       sorting={sorting}

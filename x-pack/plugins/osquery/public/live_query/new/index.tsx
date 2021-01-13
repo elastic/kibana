@@ -4,18 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 
-import { AgentListPage } from '../../../../fleet/public';
-import { OsqueryEditor } from '../../editor';
+import { useKibana } from '../../common/lib/kibana';
+import { LiveQueryForm } from '../form';
 
 const NewLiveQueryPageComponent = () => {
+  const { http } = useKibana().services;
+
+  const handleSubmit = useCallback(
+    async (props) => {
+      console.error('submit', props);
+      const response = await http.post('/api/osquery/queries', props);
+      console.error('handleSubmit response', response);
+      // console.error('htt', http);
+      // http.post({});
+    },
+    [http]
+  );
+
   return (
     <>
-      <OsqueryEditor />
-      <EuiSpacer />
-      <AgentListPage />
+      <LiveQueryForm onSubmit={handleSubmit} />
     </>
   );
 };

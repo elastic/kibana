@@ -4,12 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { AgentListPage } from '../../../../fleet/public';
+import React, { useCallback } from 'react';
+// import { AgentListPage } from '../../../../fleet/public';
+import { AgentsTable } from '../../agents/agents_table';
 
 const AgentsTableFieldComponent = (payload) => {
   console.error('AgentsTableFieldComponent', payload);
-  return <AgentListPage />;
+
+  const handleChange = useCallback(
+    (props) => {
+      console.error('handleChange', payload, props);
+
+      if (props !== payload.field.value) {
+        // payload.field.setValue
+        return payload.field.setValue(props);
+      }
+    },
+    [payload]
+  );
+
+  return <AgentsTable selectedAgents={payload.field.value} onChange={handleChange} />;
 };
 
 export const AgentsTableField = React.memo(AgentsTableFieldComponent);

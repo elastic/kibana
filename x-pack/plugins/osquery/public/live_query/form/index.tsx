@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { getUseField, UseField, Field, Form, useForm } from '../../shared_imports';
@@ -16,29 +17,51 @@ const FORM_ID = 'liveQueryForm';
 
 const CommonUseField = getUseField({ component: Field });
 
-const LiveQueryFormComponent = ({ agents = [], commands = [] }) => {
-  const initialState = useMemo(
-    () => ({
-      agents,
-      commands,
-    }),
-    [agents, commands]
-  );
+const LiveQueryFormComponent = ({ type, actionDetails, onSubmit }) => {
+  if (type === 'edit' && isEmpty(actionDetails)) {
+    return null;
+  }
+
+  // const initialState = useMemo(
+  //   () => ({
+  //     agents,
+  //     commands,
+  //   }),
+  //   [agents, commands]
+  // );
   const handleSubmit = useCallback((payload) => {
     console.error('payload sub,it', payload);
+    onSubmit(payload);
     return Promise.resolve();
   }, []);
 
-  console.error('initialSAtate', initialState);
+  // console.error('initialSAtate', initialState);
 
   const { form } = useForm({
     id: FORM_ID,
-    schema: formSchema,
+    // schema: formSchema,
     onSubmit: handleSubmit,
     options: {
       stripEmptyFields: false,
     },
-    defaultValue: initialState,
+    defaultValue: actionDetails,
+    serializer: (props) => {
+      console.error('serializerProps', props);
+      return props;
+    },
+    deserializer: ({ fields, _source, ...props }) => {
+      console.error('deserializer props', props);
+
+      console.error('deserializer outoput', {
+        agents: fields?.agents,
+        command: _source?.data?.commands[0],
+      });
+
+      return {
+        agents: fields?.agents,
+        command: _source?.data?.commands[0],
+      };
+    },
   });
 
   const { isSubmitted, isSubmitting, submit } = form;
@@ -47,7 +70,8 @@ const LiveQueryFormComponent = ({ agents = [], commands = [] }) => {
     <Form form={form}>
       <UseField path="agents" component={AgentsTableField} />
       <EuiSpacer />
-      <UseField path="commands" component={CodeEditorField} />
+      <UseField path="command" component={CodeEditorField} />
+      <EuiButton onClick={submit}>Send query</EuiButton>
     </Form>
   );
 };

@@ -19,19 +19,24 @@ const EDITOR_SET_OPTIONS = {
 
 interface OsqueryEditorProps {
   defaultValue: string;
+  onChange: (newValue: string) => void;
 }
 
-const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue }) => {
-  const onChange = useCallback((newValue) => {
-    console.log('change', newValue);
-  }, []);
+const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, onChange }) => {
+  const handleChange = useCallback(
+    (newValue) => {
+      console.log('change', newValue);
+      onChange(newValue);
+    },
+    [onChange]
+  );
 
   return (
     <AceEditor
       value={defaultValue}
       mode="sql"
       theme="tomorrow"
-      onChange={onChange}
+      onChange={handleChange}
       name="osquery_editor"
       setOptions={EDITOR_SET_OPTIONS}
       editorProps={{ $blockScrolling: true }}

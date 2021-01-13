@@ -8,14 +8,9 @@ import { FIELD_TYPES, FormSchema, fieldValidators } from '../../shared_imports';
 
 export const formSchema: FormSchema = {
   agents: {
-    type: FIELD_TYPES.TEXT,
-    validations: [
-      {
-        validator: fieldValidators.emptyField(''),
-      },
-    ],
+    type: FIELD_TYPES.MULTI_SELECT,
   },
-  commands: {
+  command: {
     type: FIELD_TYPES.TEXTAREA,
     validations: [],
   },
