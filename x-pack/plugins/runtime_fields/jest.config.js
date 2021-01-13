@@ -7,5 +7,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/runtime_field_editor'],
+  roots: ['<rootDir>/x-pack/plugins/runtime_fields'],
 };
