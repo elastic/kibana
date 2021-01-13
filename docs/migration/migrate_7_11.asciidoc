@@ -4,6 +4,8 @@
 <titleabbrev>7.11</titleabbrev>
 ++++
 
+coming::[7.11.0]
+
 This page discusses the breaking changes that you need to be aware of when migrating
 your application to {kib} 7.11.
 
