@@ -58,7 +58,7 @@ interface AbsoluteTimings {
   };
 }
 
-interface PhaseAgeInMilliseconds {
+export interface PhaseAgeInMilliseconds {
   total: number;
   phases: {
     hot: number;
@@ -170,7 +170,7 @@ const millisecondsToDays = (milliseconds?: number): string | undefined => {
       });
 };
 
-const normalizeTimingsToHumanReadable = ({
+export const normalizeTimingsToHumanReadable = ({
   total,
   phases,
 }: PhaseAgeInMilliseconds): { total?: string; hot?: string; warm?: string; cold?: string } => {
@@ -181,6 +181,8 @@ const normalizeTimingsToHumanReadable = ({
     cold: millisecondsToDays(phases.cold),
   };
 };
+
+export const calculateRelativeTimingMs = flow(formDataToAbsoluteTimings, calculateMilliseconds);
 
 export const absoluteTimingToRelativeTiming = flow(
   formDataToAbsoluteTimings,
