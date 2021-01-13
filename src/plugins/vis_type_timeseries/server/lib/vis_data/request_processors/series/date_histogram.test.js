@@ -19,6 +19,7 @@
 
 import { DefaultSearchCapabilities } from '../../../search_strategies/default_search_capabilities';
 import { dateHistogram } from './date_histogram';
+import { UI_SETTINGS } from '../../../../../../data/common';
 
 describe('dateHistogram(req, panel, series)', () => {
   let panel;
@@ -51,20 +52,30 @@ describe('dateHistogram(req, panel, series)', () => {
     };
     indexPatternObject = {};
     capabilities = new DefaultSearchCapabilities(req);
-    uiSettings = { maxBarsUiSettings: 100, barTargetUiSettings: 50 };
+    uiSettings = {
+      get: async (key) => (key === UI_SETTINGS.HISTOGRAM_MAX_BARS ? 100 : 50),
+    };
   });
 
-  test('calls next when finished', () => {
+  test('calls next when finished', async () => {
     const next = jest.fn();
-    dateHistogram(req, panel, series, config, indexPatternObject, capabilities, uiSettings)(next)(
-      {}
-    );
+
+    await dateHistogram(
+      req,
+      panel,
+      series,
+      config,
+      indexPatternObject,
+      capabilities,
+      uiSettings
+    )(next)({});
+
     expect(next.mock.calls.length).toEqual(1);
   });
 
-  test('returns valid date histogram', () => {
+  test('returns valid date histogram', async () => {
     const next = (doc) => doc;
-    const doc = dateHistogram(
+    const doc = await dateHistogram(
       req,
       panel,
       series,
@@ -102,10 +113,10 @@ describe('dateHistogram(req, panel, series)', () => {
     });
   });
 
-  test('returns valid date histogram (offset by 1h)', () => {
+  test('returns valid date histogram (offset by 1h)', async () => {
     series.offset_time = '1h';
     const next = (doc) => doc;
-    const doc = dateHistogram(
+    const doc = await dateHistogram(
       req,
       panel,
       series,
@@ -143,13 +154,13 @@ describe('dateHistogram(req, panel, series)', () => {
     });
   });
 
-  test('returns valid date histogram with overridden index pattern', () => {
+  test('returns valid date histogram with overridden index pattern', async () => {
     series.override_index_pattern = 1;
     series.series_index_pattern = '*';
     series.series_time_field = 'timestamp';
     series.series_interval = '20s';
     const next = (doc) => doc;
-    const doc = dateHistogram(
+    const doc = await dateHistogram(
       req,
       panel,
       series,
@@ -188,12 +199,12 @@ describe('dateHistogram(req, panel, series)', () => {
   });
 
   describe('dateHistogram for entire time range mode', () => {
-    test('should ignore entire range mode for timeseries', () => {
+    test('should ignore entire range mode for timeseries', async () => {
       panel.time_range_mode = 'entire_time_range';
       panel.type = 'timeseries';
 
       const next = (doc) => doc;
-      const doc = dateHistogram(
+      const doc = await dateHistogram(
         req,
         panel,
         series,
@@ -207,11 +218,11 @@ describe('dateHistogram(req, panel, series)', () => {
       expect(doc.aggs.test.aggs.timeseries.date_histogram).toBeDefined();
     });
 
-    test('should returns valid date histogram for entire range mode', () => {
+    test('should returns valid date histogram for entire range mode', async () => {
       panel.time_range_mode = 'entire_time_range';
 
       const next = (doc) => doc;
-      const doc = dateHistogram(
+      const doc = await dateHistogram(
         req,
         panel,
         series,

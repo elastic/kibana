@@ -129,7 +129,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       )}
       {distribution && (
         <EuiFlexItem data-test-subj={'mlMetricDistribution'}>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <ExpandedRowFieldHeader>
               <FormattedMessage
                 id="xpack.ml.fieldDataCardExpandedRow.numberContent.distributionTitle"
@@ -138,7 +138,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
             </ExpandedRowFieldHeader>
           </EuiFlexItem>
 
-          <EuiFlexItem style={{ width: '100%' }}>
+          <EuiFlexItem className={'mlMetricDistributionChartContainer'}>
             <MetricDistributionChart
               width={METRIC_DISTRIBUTION_CHART_WIDTH}
               height={METRIC_DISTRIBUTION_CHART_HEIGHT}
