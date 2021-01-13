@@ -249,16 +249,29 @@ A brief description of the plugin can then be displayed in the automatically gen
 
 ## Technology: ts-morph vs api-extractor
 
-[Api-extractor](https://api-extractor.com/) is a utility built from microsoft that parses typescript code into json files that can then be used in a custom [api-documenter](https://api-extractor.com/pages/setup/generating_docs/) in order to build documentation. This is what we [have now](https://github.com/elastic/kibana/tree/master/docs/development), except we use the default api-documenter. Unfortunately, because our plugins aren’t separate packages, and the way api-extractor works, we can’t build cross plugin links this way.
+[Api-extractor](https://api-extractor.com/) is a utility built from microsoft that parses typescript code into json files that can then be used in a custom [api-documenter](https://api-extractor.com/pages/setup/generating_docs/) in order to build documentation. This is what we [have now](https://github.com/elastic/kibana/tree/master/docs/development), except we use the default api-documenter. Currently our plugins aren’t separate packages, and given the way api-extractor works, we can’t build cross plugin links. We could potentially work around this
+by supplying a `packageJsonFullPath` to a generated `packageJson` with the name of the plugin, in order to get the correct package names in the generated api.json files.
 
 It is unknown whether the work with bazel will allow us to use this technology. I suspect not, because even though there will be separate `.d.ts` files, the plugins will still be importing types via relative links.
 
 [ts-morph](https://github.com/dsherret/ts-morph) is a utility built and maintained by a single person, which sits a layer above the raw typescript compiler. It affords greater flexibility, thus supports cross plugin links (among other things like links to source files). The downsides of using this library are:
 
- - Risks of relying on a package maintained by a single developer
- - Less re-usability across repositories. What if EUI wanted to use the same system?  
+ 1. Risks of not being able to upgrade typescript without significant effort in the docs system.
+ 2. Risks of relying on a package maintained by a single developer.
+ 3. Less re-usability across repositories. What if EUI wanted to use the same system?  
 
-I recommend we move ahead with ts-morph, acknowleding the possibility of migrating to api-extractor in the future. If so, the effort shouldn’t be a large one, either way we will need logic to transform data into ApiDeclarations, it will either be ts-morph nodes, or api-extractor json output.
+The first risk is the most concerning, as Kibana needs to be able to upgrade typescript.
+
+### Recommendation: ts-morph
+
+I recommend that we move ahead with ts-morph because we have a working implementation today, one that offers capabilities not possible with api-extractor, such as
+cross plugin linking and source file links. I consider cross plugin links essential to useful docs. In addition, both options require custom code that will come with a mainenance burden, since the
+default api-documenter (that is in use today) does not provide very useful
+results (for example, one file per declaration).
+
+We should however be prepared to re-evalute an api-extractor implementation, based on progress made in that repository, as well as what happens with the risks mentioned above.
+We should also be prepared to make the difficult decision to turn off our API reference documentation if it inhibits us from upgrading typescript, and the 
+realized efforts of maintaining our ts-morph implementation.
 
 ![image](../images/api_doc_tech_compare.png)
 
