@@ -91,6 +91,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         let alert: any;
         await retry.tryForTime(15000, async () => {
           const apiResponse = await supertest.get('/api/alerts/_find?search=uptime-test');
+          console.log('api response', JSON.stringify(apiResponse, null, 2));
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === 'uptime-test'
           );
