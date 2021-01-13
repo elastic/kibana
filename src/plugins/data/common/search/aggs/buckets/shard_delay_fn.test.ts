@@ -53,13 +53,6 @@ describe('agg_expression_functions', () => {
       });
 
       expect(actual.value.params.json).toEqual('{ "foo": true }');
-
-      expect(() => {
-        fn({
-          delay: '1000ms',
-          json: '/// intentionally malformed json ///',
-        });
-      });
     });
   });
 });

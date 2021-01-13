@@ -89,14 +89,6 @@ describe('agg_expression_functions', () => {
       });
 
       expect(actual.value.params.json).toEqual('{ "foo": true }');
-
-      expect(() => {
-        fn({
-          field: 'ip_field',
-          ipRangeType: IP_RANGE_TYPES.FROM_TO,
-          json: '/// intentionally malformed json ///',
-        });
-      });
     });
   });
 });

@@ -119,12 +119,6 @@ describe('agg_expression_functions', () => {
       });
 
       expect(actual.value.params.json).toEqual('{ "foo": true }');
-      expect(() => {
-        fn({
-          json: '/// intentionally malformed json ///',
-          buckets_path: 'the_sum',
-        });
-      });
     });
   });
 });

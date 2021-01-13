@@ -88,13 +88,6 @@ describe('agg_expression_functions', () => {
       });
 
       expect(actual.value.params.json).toEqual('{ "foo": true }');
-
-      expect(() => {
-        fn({
-          field: 'number_field',
-          json: '/// intentionally malformed json ///',
-        });
-      });
     });
   });
 });

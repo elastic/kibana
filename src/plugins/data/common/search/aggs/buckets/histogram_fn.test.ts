@@ -99,14 +99,6 @@ describe('agg_expression_functions', () => {
       });
 
       expect(actual.value.params.json).toEqual('{ "foo": true }');
-
-      expect(() => {
-        fn({
-          field: 'field',
-          interval: '10',
-          json: '/// intentionally malformed json ///',
-        });
-      });
     });
   });
 });

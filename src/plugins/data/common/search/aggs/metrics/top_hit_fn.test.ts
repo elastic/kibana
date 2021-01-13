@@ -90,13 +90,6 @@ describe('agg_expression_functions', () => {
       });
 
       expect(actual.value.params.json).toEqual('{ "foo": true }');
-      expect(() => {
-        fn({
-          field: 'machine.os.keyword',
-          aggregate: 'min',
-          json: '/// intentionally malformed json ///',
-        });
-      });
     });
   });
 });
