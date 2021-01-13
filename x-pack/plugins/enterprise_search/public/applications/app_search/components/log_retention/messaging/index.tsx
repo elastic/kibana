@@ -9,7 +9,7 @@ import React from 'react';
 import { useValues } from 'kea';
 import moment from 'moment';
 
-import { AppLogic } from '../../../../app_logic';
+import { AppLogic } from '../../../app_logic';
 import { LogRetentionLogic } from '../log_retention_logic';
 import { LogRetentionOptions } from '../types';
 
