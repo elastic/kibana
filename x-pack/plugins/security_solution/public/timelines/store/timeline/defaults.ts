@@ -55,6 +55,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   sort: [
     {
       columnId: '@timestamp',
+      columnType: 'number',
       sortDirection: Direction.desc,
     },
   ],
