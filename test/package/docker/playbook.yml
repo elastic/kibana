@@ -65,10 +65,11 @@
     become: yes
     docker_image:
       name: kibana
-      load_path: /packages/kibana-8.0.0-SNAPSHOT-docker-build-context.tar.gz
+      load_path: /packages/kibana-8.0.0-SNAPSHOT-docker-image.tar.gz
       source: load
       state: present
   - name: start kibana
+
     become: yes
     community.general.docker_container:
       name: kibana
