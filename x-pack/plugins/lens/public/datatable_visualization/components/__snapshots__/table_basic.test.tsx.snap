@@ -133,6 +133,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
           },
         ]
       }
+      data-test-subj="lnsDataTable"
       gridStyle={
         Object {
           "border": "horizontal",
@@ -293,6 +294,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
           },
         ]
       }
+      data-test-subj="lnsDataTable"
       gridStyle={
         Object {
           "border": "horizontal",
