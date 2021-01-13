@@ -29,6 +29,7 @@ import { listMock } from '../../../../../lists/server/mocks';
 import { getListClientMock } from '../../../../../lists/server/services/lists/list_client.mock';
 import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -147,8 +148,7 @@ describe('rules_notification_alert_type', () => {
         total: { value: 10 },
       },
     });
-    // @ts-expect-error missing HTTP response stuff. This is fine we don't care about meta and path etc..
-    alertServices.scopedClusterClient.fieldCaps.mockResolvedValue({
+    const value: Partial<ApiResponse> = {
       statusCode: 200,
       body: {
         fields: {
@@ -161,7 +161,8 @@ describe('rules_notification_alert_type', () => {
           },
         },
       },
-    });
+    };
+    alertServices.scopedClusterClient.fieldCaps.mockResolvedValue(value as ApiResponse);
     const ruleAlert = getResult();
     alertServices.savedObjectsClient.get.mockResolvedValue({
       id: 'id',
