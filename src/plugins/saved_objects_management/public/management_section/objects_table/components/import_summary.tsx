@@ -22,9 +22,10 @@ import _ from 'lodash';
 import React, { Fragment, FC, useMemo } from 'react';
 import {
   EuiText,
-  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCallOut,
+  EuiButton,
   EuiToolTip,
   EuiIcon,
   EuiIconTip,
@@ -193,21 +194,13 @@ const ImportWarnings: FC<{ warnings: SavedObjectsImportWarning[]; basePath: IBas
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h4 className=" savedObjectsManagementImportSummary__warningsTitle">
-          <FormattedMessage
-            id="savedObjectsManagement.importSummary.warningsLabel"
-            defaultMessage="{warningCount, plural, one {1 warning} other {# warnings}}"
-            values={{ warningCount: warnings.length }}
-          />
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <ul>
-        {warnings.map((warning, index) => (
-          <ImportWarning key={`warning-${index}`} warning={warning} basePath={basePath} />
-        ))}
-      </ul>
+      <EuiSpacer size="m" />
+      {warnings.map((warning, index) => (
+        <Fragment key={`warning-${index}`}>
+          <ImportWarning warning={warning} basePath={basePath} />
+          {index < warnings.length - 1 && <EuiSpacer size="s" />}
+        </Fragment>
+      ))}
     </>
   );
 };
@@ -219,15 +212,39 @@ const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePat
   const warningContent = useMemo(() => {
     if (warning.type === 'action_required') {
       return (
-        <EuiLink href={basePath.prepend(warning.actionUrl)} target="_blank">
-          {warning.message}
-        </EuiLink>
+        <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              color="warning"
+              href={basePath.prepend(warning.actionUrl)}
+              target="_blank"
+            >
+              {warning.buttonLabel || (
+                <FormattedMessage
+                  id="savedObjectsManagement.importSummary.warnings.defaultButtonLabel"
+                  defaultMessage="Go"
+                />
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
-    return <p>{warning.message}</p>;
+    return null;
   }, [warning, basePath]);
 
-  return <li className="savedObjectsManagementImportSummary__warning">{warningContent}</li>;
+  return (
+    <EuiCallOut
+      color="warning"
+      size="s"
+      iconType="alert"
+      className="savedObjectsManagementImportSummary__warning"
+      title={warning.message}
+    >
+      {warningContent}
+    </EuiCallOut>
+  );
 };
 
 export const ImportSummary: FC<ImportSummaryProps> = ({
@@ -266,13 +283,8 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
       <CountIndicators importItems={importItems} />
+      <ImportWarnings warnings={importWarnings} basePath={basePath} />
       <EuiHorizontalRule />
-      {importWarnings.length && (
-        <>
-          <ImportWarnings warnings={importWarnings} basePath={basePath} />
-          <EuiHorizontalRule />
-        </>
-      )}
       {importItems.map((item, index) => {
         const { type, title, icon } = item;
         return (
