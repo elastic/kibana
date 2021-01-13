@@ -13,7 +13,6 @@ import { EmptyPrompt } from './empty_prompt';
 import { findTestSubject } from '@kbn/test/jest';
 import { EuiLink } from '@elastic/eui';
 import { act } from '@testing-library/react';
-import { DocumentationLinksService } from '../documentation_links';
 
 import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
@@ -42,7 +41,7 @@ describe('RoleMappingsGridPage', () => {
         rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
         navigateToApp={coreStart.application.navigateToApp}
       />
@@ -71,7 +70,7 @@ describe('RoleMappingsGridPage', () => {
         rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
         navigateToApp={coreStart.application.navigateToApp}
       />
@@ -108,7 +107,7 @@ describe('RoleMappingsGridPage', () => {
         rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
         navigateToApp={coreStart.application.navigateToApp}
       />
@@ -144,7 +143,7 @@ describe('RoleMappingsGridPage', () => {
         rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
         navigateToApp={coreStart.application.navigateToApp}
       />
@@ -178,7 +177,7 @@ describe('RoleMappingsGridPage', () => {
         rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
         navigateToApp={coreStart.application.navigateToApp}
       />
@@ -218,7 +217,7 @@ describe('RoleMappingsGridPage', () => {
         rolesAPIClient={rolesAPIClientMock.create()}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
         navigateToApp={coreStart.application.navigateToApp}
       />
@@ -281,7 +280,7 @@ describe('RoleMappingsGridPage', () => {
         rolesAPIClient={roleAPIClient}
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
         navigateToApp={coreStart.application.navigateToApp}
       />

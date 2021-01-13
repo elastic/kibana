@@ -5,15 +5,14 @@
  */
 
 import React, { Fragment } from 'react';
-import { ApplicationStart } from 'kibana/public';
+import type { ApplicationStart, DocLinksStart } from 'kibana/public';
 
 import { EuiEmptyPrompt, EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DocumentationLinksService } from '../../documentation_links';
 
 interface Props {
   isAdmin: boolean;
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
   navigateToApp: ApplicationStart['navigateToApp'];
 }
 
@@ -47,7 +46,7 @@ export const EmptyPrompt: React.FunctionComponent<Props> = ({
             defaultMessage="You can create an {link} from Console."
             values={{
               link: (
-                <EuiLink href={`${docLinks.getCreateApiKeyDocUrl()}`} target="_blank">
+                <EuiLink href={`${docLinks.links.apis.createApiKey}`} target="_blank">
                   <FormattedMessage
                     id="xpack.security.management.apiKeys.table.emptyPromptDocsLinkMessage"
                     defaultMessage="API key"

@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { PluginStartDependencies } from '../../plugin';
-import { DocumentationLinksService } from './documentation_links';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
@@ -50,7 +49,7 @@ export const apiKeysManagementApp = Object.freeze({
             <APIKeysGridPage
               navigateToApp={application.navigateToApp}
               notifications={notifications}
-              docLinks={new DocumentationLinksService(docLinks)}
+              docLinks={docLinks}
               apiKeysAPIClient={new APIKeysAPIClient(http)}
             />
           </i18nStart.Context>,

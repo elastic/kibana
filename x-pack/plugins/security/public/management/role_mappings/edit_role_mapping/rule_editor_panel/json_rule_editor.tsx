@@ -11,14 +11,14 @@ import 'brace/theme/github';
 import { EuiCodeEditor, EuiFormRow, EuiButton, EuiSpacer, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { DocumentationLinksService } from '../../documentation_links';
+import type { DocLinksStart } from 'src/core/public';
 import { Rule, RuleBuilderError, generateRulesFromRaw } from '../../model';
 
 interface Props {
   rules: Rule | null;
   onChange: (updatedRules: Rule | null) => void;
   onValidityChange: (isValid: boolean) => void;
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
 }
 
 export const JSONRuleEditor = (props: Props) => {
@@ -108,7 +108,7 @@ export const JSONRuleEditor = (props: Props) => {
               values={{
                 roleMappingAPI: (
                   <EuiLink
-                    href={props.docLinks.getRoleMappingAPIDocUrl()}
+                    href={props.docLinks.links.apis.createRoleMapping}
                     external={true}
                     target="_blank"
                   >

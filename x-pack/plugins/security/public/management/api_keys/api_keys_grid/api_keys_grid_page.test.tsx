@@ -13,7 +13,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { NotEnabled } from './not_enabled';
 import { PermissionDenied } from './permission_denied';
 import { APIKeysAPIClient } from '../api_keys_api_client';
-import { DocumentationLinksService } from '../documentation_links';
 import { APIKeysGridPage } from './api_keys_grid_page';
 
 import { coreMock } from '../../../../../../../src/core/public/mocks';
@@ -70,7 +69,7 @@ describe('APIKeysGridPage', () => {
   const getViewProperties = () => {
     const { docLinks, notifications, application } = coreStart;
     return {
-      docLinks: new DocumentationLinksService(docLinks),
+      docLinks,
       navigateToApp: application.navigateToApp,
       notifications,
       apiKeysAPIClient: apiClientMock,
@@ -96,7 +95,7 @@ describe('APIKeysGridPage', () => {
       return updatedWrapper.find(NotEnabled).length > 0;
     });
 
-    expect(wrapper.find(NotEnabled)).toMatchSnapshot();
+    expect(wrapper.find(NotEnabled).find(EuiCallOut)).toMatchSnapshot();
   });
 
   it('renders permission denied if user does not have required permissions', async () => {

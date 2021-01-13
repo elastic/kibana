@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { PluginStartDependencies } from '../../plugin';
-import { DocumentationLinksService } from './documentation_links';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
@@ -53,7 +52,6 @@ export const roleMappingsManagementApp = Object.freeze({
         ]);
 
         const roleMappingsAPIClient = new RoleMappingsAPIClient(http);
-        const dockLinksService = new DocumentationLinksService(docLinks);
         const RoleMappingsGridPageWithBreadcrumbs = () => {
           setBreadcrumbs(roleMappingsBreadcrumbs);
           return (
@@ -61,7 +59,7 @@ export const roleMappingsManagementApp = Object.freeze({
               notifications={notifications}
               rolesAPIClient={new RolesAPIClient(http)}
               roleMappingsAPI={roleMappingsAPIClient}
-              docLinks={dockLinksService}
+              docLinks={docLinks}
               history={history}
               navigateToApp={coreStart.application.navigateToApp}
             />
@@ -92,7 +90,7 @@ export const roleMappingsManagementApp = Object.freeze({
               roleMappingsAPI={roleMappingsAPIClient}
               rolesAPIClient={new RolesAPIClient(http)}
               notifications={notifications}
-              docLinks={dockLinksService}
+              docLinks={docLinks}
               history={history}
             />
           );

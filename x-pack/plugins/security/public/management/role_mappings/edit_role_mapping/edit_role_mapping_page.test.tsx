@@ -20,7 +20,6 @@ import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
 import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
 import { RolesAPIClient } from '../../roles';
 import { Role } from '../../../../common/model';
-import { DocumentationLinksService } from '../documentation_links';
 
 import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
@@ -56,7 +55,7 @@ describe('EditRoleMappingPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         rolesAPIClient={rolesAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
       />
     );
@@ -119,7 +118,7 @@ describe('EditRoleMappingPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         rolesAPIClient={rolesAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
       />
     );
@@ -167,7 +166,7 @@ describe('EditRoleMappingPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         rolesAPIClient={rolesAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
       />
     );
@@ -195,7 +194,7 @@ describe('EditRoleMappingPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         rolesAPIClient={rolesAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
       />
     );
@@ -233,7 +232,7 @@ describe('EditRoleMappingPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         rolesAPIClient={rolesAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
       />
     );
@@ -274,7 +273,7 @@ describe('EditRoleMappingPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         rolesAPIClient={rolesAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
       />
     );
@@ -317,7 +316,7 @@ describe('EditRoleMappingPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         rolesAPIClient={rolesAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
       />
     );
@@ -372,7 +371,7 @@ describe('EditRoleMappingPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         rolesAPIClient={rolesAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
       />
     );
@@ -428,7 +427,7 @@ describe('EditRoleMappingPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         rolesAPIClient={rolesAPI}
         notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
+        docLinks={docLinks}
         history={history}
       />
     );

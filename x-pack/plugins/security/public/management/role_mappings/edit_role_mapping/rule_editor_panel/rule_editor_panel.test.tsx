@@ -17,7 +17,6 @@ import '@kbn/test/target/jest/utils/stub_web_worker';
 
 import { AllRule, FieldRule } from '../../model';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { DocumentationLinksService } from '../../documentation_links';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
@@ -28,7 +27,7 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
     };
     const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
@@ -49,7 +48,7 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
     };
     const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
@@ -73,7 +72,7 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
     };
     const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
 
@@ -109,7 +108,7 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
     };
     const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
 

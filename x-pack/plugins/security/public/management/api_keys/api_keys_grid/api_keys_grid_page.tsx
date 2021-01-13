@@ -28,11 +28,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import moment from 'moment-timezone';
-import { ApplicationStart, NotificationsStart } from 'src/core/public';
+import type { ApplicationStart, DocLinksStart, NotificationsStart } from 'src/core/public';
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { APIKeysAPIClient } from '../api_keys_api_client';
-import { DocumentationLinksService } from '../documentation_links';
 import { PermissionDenied } from './permission_denied';
 import { EmptyPrompt } from './empty_prompt';
 import { NotEnabled } from './not_enabled';
@@ -40,7 +39,7 @@ import { InvalidateProvider } from './invalidate_provider';
 
 interface Props {
   notifications: NotificationsStart;
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
   apiKeysAPIClient: PublicMethodsOf<APIKeysAPIClient>;
   navigateToApp: ApplicationStart['navigateToApp'];
 }

@@ -7,10 +7,10 @@
 import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DocumentationLinksService } from '../../documentation_links';
+import type { DocLinksStart } from 'src/core/public';
 
 interface Props {
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
 }
 
 export const NotEnabled: React.FunctionComponent<Props> = ({ docLinks }) => (
@@ -29,7 +29,7 @@ export const NotEnabled: React.FunctionComponent<Props> = ({ docLinks }) => (
       defaultMessage="Contact your system administrator and refer to the {link} to enable API keys."
       values={{
         link: (
-          <EuiLink href={`${docLinks.getApiKeyServiceSettingsDocUrl()}`} target="_blank">
+          <EuiLink href={`${docLinks.links.security.apiKeyServiceSettings}`} target="_blank">
             <FormattedMessage
               id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorLinkText"
               defaultMessage="docs"
