@@ -50,7 +50,7 @@ export interface IIndexPattern {
 }
 
 /**
- * Used for index pattern saved object
+ * Interface for an index pattern saved object
  */
 export interface IndexPatternAttributes {
   type: string;
