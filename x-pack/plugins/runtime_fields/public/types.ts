@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-export type {
-  RuntimeField,
-  RuntimeType,
-  RUNTIME_FIELD_TYPES,
-} from 'src/plugins/runtime_fields/common';
 
+import { RUNTIME_FIELD_TYPES } from './constants';
 import { OpenRuntimeFieldEditorProps } from './load_editor';
 
 export interface LoadEditorResponse {
@@ -28,6 +24,16 @@ export interface SetupPlugins {}
 
 export interface StartPlugins {
   data: DataPublicPluginStart;
+}
+
+export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+
+export interface RuntimeField {
+  name: string;
+  type: RuntimeType;
+  script: {
+    source: string;
+  };
 }
 
 export interface ComboBoxOption<T = unknown> {
