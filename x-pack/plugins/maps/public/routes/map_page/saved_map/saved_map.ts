@@ -45,6 +45,7 @@ import { copyPersistentState } from '../../../reducers/util';
 import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
+import { whenLicenseInitialized } from '../../../licensed_features';
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
@@ -87,6 +88,8 @@ export class SavedMap {
   }
 
   async whenReady() {
+    await whenLicenseInitialized();
+
     if (!this._mapEmbeddableInput) {
       this._attributes = {
         title: '',

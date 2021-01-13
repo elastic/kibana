@@ -41,7 +41,15 @@ let isEnterprisePlus: boolean = false;
 export const getLicenseId = () => licenseId;
 export const getIsGoldPlus = () => isGoldPlus;
 
+let initializeLicense: (value: unknown) => void;
+const licenseInitialized = new Promise((resolve) => {
+  initializeLicense = resolve;
+});
+
 export const getIsEnterprisePlus = () => isEnterprisePlus;
+export const whenLicenseInitialized = async (): Promise<void> => {
+  await licenseInitialized;
+};
 
 export function registerLicensedFeatures(licensingPlugin: LicensingPluginSetup) {
   for (const licensedFeature of Object.values(LICENSED_FEATURES)) {
@@ -70,6 +78,8 @@ export async function setLicensingPluginStart(licensingPlugin: LicensingPluginSt
 
   licensingPluginStart = licensingPlugin;
   licensingPluginStart.license$.subscribe(updateLicenseState);
+
+  initializeLicense(undefined);
 }
 
 export function notifyLicensedFeatureUsage(licensedFeature: LICENSED_FEATURES) {
