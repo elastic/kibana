@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../../__mocks__/kea.mock';
+import { LogicMounter } from '../../../__mocks__/kea.mock';
 
-import { mockHttpValues } from '../../../../__mocks__';
-jest.mock('../../../../shared/http', () => ({
+import { mockHttpValues } from '../../../__mocks__';
+jest.mock('../../../shared/http', () => ({
   HttpLogic: { values: mockHttpValues },
 }));
 const { http } = mockHttpValues;
 
-jest.mock('../../../../shared/flash_messages', () => ({
+jest.mock('../../../shared/flash_messages', () => ({
   flashAPIErrors: jest.fn(),
 }));
-import { flashAPIErrors } from '../../../../shared/flash_messages';
+import { flashAPIErrors } from '../../../shared/flash_messages';
 
 import { LogRetentionOptions } from './types';
 import { LogRetentionLogic } from './log_retention_logic';
