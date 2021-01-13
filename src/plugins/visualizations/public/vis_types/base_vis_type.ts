@@ -20,52 +20,8 @@
 import { defaultsDeep } from 'lodash';
 
 import { VisParams } from '../types';
-import { VisType, VisTypeOptions, VisGroups } from './types';
+import { VisTypeDefinition, VisTypeOptions, VisGroups } from './types';
 import { Schemas } from './schemas';
-
-interface CommonBaseVisTypeOptions<TVisParams>
-  extends Pick<
-      VisType<TVisParams>,
-      | 'description'
-      | 'editor'
-      | 'getInfoMessage'
-      | 'getSupportedTriggers'
-      | 'hierarchicalData'
-      | 'icon'
-      | 'image'
-      | 'inspectorAdapters'
-      | 'name'
-      | 'requestHandler'
-      | 'responseHandler'
-      | 'setup'
-      | 'title'
-    >,
-    Pick<
-      Partial<VisType<TVisParams>>,
-      | 'editorConfig'
-      | 'hidden'
-      | 'stage'
-      | 'getUsedIndexPattern'
-      | 'visConfig'
-      | 'group'
-      | 'titleInWizard'
-      | 'note'
-    > {
-  options?: Partial<VisType<TVisParams>['options']>;
-}
-
-interface ExpressionBaseVisTypeOptions<TVisParams> extends CommonBaseVisTypeOptions<TVisParams> {
-  toExpressionAst: VisType<TVisParams>['toExpressionAst'];
-  visualization?: undefined;
-}
-
-interface VisualizationBaseVisTypeOptions<TVisParams> extends CommonBaseVisTypeOptions<TVisParams> {
-  toExpressionAst?: undefined;
-}
-
-export type BaseVisTypeOptions<TVisParams = VisParams> =
-  | ExpressionBaseVisTypeOptions<TVisParams>
-  | VisualizationBaseVisTypeOptions<TVisParams>;
 
 const defaultOptions: VisTypeOptions = {
   showTimePicker: true,
@@ -75,7 +31,7 @@ const defaultOptions: VisTypeOptions = {
   hierarchicalData: false, // we should get rid of this i guess ?
 };
 
-export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> {
+export class BaseVisType<TVisParams = VisParams> {
   public readonly name;
   public readonly title;
   public readonly description;
@@ -86,13 +42,12 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly stage;
   public readonly group;
   public readonly titleInWizard;
-  public readonly options;
+  public readonly options: VisTypeOptions;
   public readonly visConfig;
   public readonly editor;
   public readonly editorConfig;
   public hidden;
-  public readonly requestHandler;
-  public readonly responseHandler;
+  public readonly requiresSearch;
   public readonly hierarchicalData;
   public readonly setup;
   public readonly getUsedIndexPattern;
@@ -101,7 +56,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly getInfoMessage;
   public readonly schemas;
 
-  constructor(opts: BaseVisTypeOptions<TVisParams>) {
+  constructor(opts: VisTypeDefinition<TVisParams>) {
     if (!opts.icon && !opts.image) {
       throw new Error('vis_type must define its icon or image');
     }
@@ -121,8 +76,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.group = opts.group ?? VisGroups.AGGBASED;
     this.titleInWizard = opts.titleInWizard ?? '';
     this.hidden = opts.hidden ?? false;
-    this.requestHandler = opts.requestHandler ?? 'courier';
-    this.responseHandler = opts.responseHandler ?? 'none';
+    this.requiresSearch = opts.requiresSearch ?? false;
     this.setup = opts.setup;
     this.hierarchicalData = opts.hierarchicalData ?? false;
     this.getUsedIndexPattern = opts.getUsedIndexPattern;
@@ -131,9 +85,5 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.getInfoMessage = opts.getInfoMessage;
 
     this.schemas = new Schemas(this.editorConfig?.schemas ?? []);
-  }
-
-  public get requiresSearch(): boolean {
-    return this.requestHandler !== 'none';
   }
 }

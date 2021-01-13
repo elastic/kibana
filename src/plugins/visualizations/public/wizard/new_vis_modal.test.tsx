@@ -19,21 +19,16 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { TypesStart, VisType, VisGroups } from '../vis_types';
+import { TypesStart, VisGroups } from '../vis_types';
 import NewVisModal from './new_vis_modal';
 import { ApplicationStart, SavedObjectsStart, DocLinksStart } from '../../../../core/public';
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';
+import { BaseVisType } from '../vis_types';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
     hidden: false,
-    visualization: class Controller {
-      public render = jest.fn();
-      public destroy = jest.fn();
-    },
     requiresSearch: false,
-    requestHandler: 'none',
-    responseHandler: 'none',
   };
   const _visTypes = [
     {
@@ -74,18 +69,18 @@ describe('NewVisModal', () => {
     },
   ];
   const visTypes: TypesStart = {
-    get<T>(id: string): VisType<T> {
-      return (_visTypes.find((vis) => vis.name === id) as unknown) as VisType<T>;
+    get<T>(id: string): BaseVisType<T> {
+      return (_visTypes.find((vis) => vis.name === id) as unknown) as BaseVisType<T>;
     },
     all: () => {
-      return (_visTypes as unknown) as VisType[];
+      return (_visTypes as unknown) as BaseVisType[];
     },
     getAliases: () => [],
     unRegisterAlias: () => [],
     getByGroup: (group: VisGroups) => {
       return (_visTypes.filter((type) => {
         return type.group === group;
-      }) as unknown) as VisType[];
+      }) as unknown) as BaseVisType[];
     },
   };
   const addBasePath = (url: string) => `testbasepath${url}`;

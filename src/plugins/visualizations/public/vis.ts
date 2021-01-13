@@ -33,7 +33,6 @@ import { i18n } from '@kbn/i18n';
 
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
-import { VisType } from './vis_types';
 import {
   IAggConfigs,
   IndexPattern,
@@ -41,6 +40,7 @@ import {
   AggConfigOptions,
   SearchSourceFields,
 } from '../../../plugins/data/public';
+import { BaseVisType } from './vis_types';
 
 export interface SerializedVisData {
   expression?: string;
@@ -85,7 +85,7 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
 
 export class Vis<TVisParams = VisParams> {
-  public readonly type: VisType<TVisParams>;
+  public readonly type: BaseVisType<TVisParams>;
   public readonly id?: string;
   public title: string = '';
   public description: string = '';

@@ -69,7 +69,5 @@ export const markdownVisDefinition = {
     showTimePicker: false,
     showFilterBar: false,
   },
-  requestHandler: 'none',
-  responseHandler: 'none',
   inspectorAdapters: {},
 };

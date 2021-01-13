@@ -20,12 +20,12 @@
 export * from './types_service';
 export { Schemas } from './schemas';
 export { VisGroups } from './types';
+export { BaseVisType } from './base_vis_type';
 export type {
-  VisType,
+  VisTypeDefinition,
   ISchemas,
   Schema,
   IEditorController,
   VisEditorConstructor,
   EditorRenderProps,
 } from './types';
-export type { BaseVisTypeOptions } from './base_vis_type';

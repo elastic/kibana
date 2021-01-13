@@ -49,7 +49,6 @@ export class CustomVisualizationsPublicPlugin
           },
         ],
       },
-      requestHandler: 'none',
     });
   }
 

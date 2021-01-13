@@ -73,10 +73,10 @@ export interface Schema {
 }
 
 /**
- * A visualization type representing one specific type of "classical"
+ * A visualization type definition representing a spec of one specific type of "classical"
  * visualizations (i.e. not Lens visualizations).
  */
-export interface VisType<TVisParams = unknown> {
+export interface VisTypeDefinition<TVisParams = unknown> {
   /**
    * Visualization unique name
    */
@@ -92,7 +92,7 @@ export interface VisType<TVisParams = unknown> {
   /**
    * If given, it will be diplayed on the wizard vis card as a note in italic.
    */
-  readonly note: string;
+  readonly note?: string;
   /**
    * If given, it will return the supported triggers for this vis.
    */
@@ -105,8 +105,6 @@ export interface VisType<TVisParams = unknown> {
   readonly getUsedIndexPattern?: (visParams: VisParams) => IndexPattern[] | Promise<IndexPattern[]>;
 
   readonly isAccessible?: boolean;
-  readonly requestHandler?: string | unknown;
-  readonly responseHandler?: string | unknown;
   /**
    * It is the visualization icon, displayed on the wizard.
    */
@@ -118,19 +116,19 @@ export interface VisType<TVisParams = unknown> {
   /**
    * Describes the visualization stage
    */
-  readonly stage: 'experimental' | 'beta' | 'production';
+  readonly stage?: 'experimental' | 'beta' | 'production';
   /**
    * Describes the experience group that the visualization belongs.
    * It can be on tools, aggregation based or promoted group.
    */
-  readonly group: VisGroups;
+  readonly group?: VisGroups;
   /**
    * If given, it will be displayed on the wizard instead of the title.
    * We use it because we want to differentiate the vis title from the
    * way it is presented on the wizard
    */
-  readonly titleInWizard: string;
-  readonly requiresSearch: boolean;
+  readonly titleInWizard?: string;
+  readonly requiresSearch?: boolean;
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);
   readonly inspectorAdapters?: Adapters | (() => Adapters);
   /**
@@ -144,11 +142,11 @@ export interface VisType<TVisParams = unknown> {
   readonly toExpressionAst?: VisToExpressionAst<TVisParams>;
 
   readonly setup?: (vis: Vis<TVisParams>) => Promise<Vis<TVisParams>>;
-  hidden: boolean;
+  hidden?: boolean;
 
-  readonly schemas: ISchemas;
+  readonly schemas?: ISchemas;
 
-  readonly options: VisTypeOptions;
+  readonly options?: Partial<VisTypeOptions>;
 
   /**
    * The editor that should be used to edit visualizations of this type.
@@ -158,7 +156,7 @@ export interface VisType<TVisParams = unknown> {
   readonly editor?: VisEditorConstructor;
 
   // TODO: The following types still need to be refined properly.
-  readonly editorConfig: Record<string, any>;
+  readonly editorConfig?: Record<string, any>;
   readonly visConfig: Record<string, any>;
 }
 

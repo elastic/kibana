@@ -18,14 +18,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '../../data/public';
-import { BaseVisTypeOptions } from '../../visualizations/public';
+import { VisTypeDefinition } from '../../visualizations/public';
 
 import { TableOptions } from './components/table_vis_options_lazy';
 import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
 import { toExpressionAst } from './to_ast';
 import { TableVisParams } from './types';
 
-export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
+export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
   name: 'table',
   title: i18n.translate('visTypeTable.tableVisTitle', {
     defaultMessage: 'Data table',

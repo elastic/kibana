@@ -18,7 +18,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { BaseVisTypeOptions } from '../../visualizations/public';
+import { VisTypeDefinition } from '../../visualizations/public';
 import { truncatedColorSchemas } from '../../charts/public';
 import { ORIGIN } from '../../maps_legacy/public';
 
@@ -33,7 +33,7 @@ export function createRegionMapTypeDefinition({
   uiSettings,
   regionmapsConfig,
   getServiceSettings,
-}: RegionMapVisualizationDependencies): BaseVisTypeOptions<RegionMapVisParams> {
+}: RegionMapVisualizationDependencies): VisTypeDefinition<RegionMapVisParams> {
   return {
     name: 'region_map',
     getInfoMessage: getDeprecationMessage,

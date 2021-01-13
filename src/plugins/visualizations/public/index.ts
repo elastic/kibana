@@ -38,8 +38,7 @@ export { VisualizationsSetup, VisualizationsStart };
 export { VisGroups } from './vis_types';
 export type {
   VisTypeAlias,
-  VisType,
-  BaseVisTypeOptions,
+  VisTypeDefinition,
   Schema,
   ISchemas,
   VisEditorConstructor,

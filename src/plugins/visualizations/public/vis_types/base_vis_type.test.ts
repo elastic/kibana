@@ -27,7 +27,9 @@ describe('BaseVisType', () => {
           name: 'test',
           title: 'test',
           description: 'test',
-          visualization: {} as any,
+          visConfig: {
+            defaults: {},
+          },
         });
       }).toThrow();
     });

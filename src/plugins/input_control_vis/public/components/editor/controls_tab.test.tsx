@@ -40,8 +40,6 @@ beforeEach(() => {
         name: 'test',
         title: 'test',
         visualization: null,
-        requestHandler: 'test',
-        responseHandler: 'test',
         stage: 'beta',
         requiresSearch: false,
         hidden: false,

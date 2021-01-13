@@ -21,13 +21,13 @@ import { i18n } from '@kbn/i18n';
 
 import { AggGroupNames } from '../../data/public';
 import { ColorMode, ColorSchemas } from '../../charts/public';
-import { BaseVisTypeOptions } from '../../visualizations/public';
+import { VisTypeDefinition } from '../../visualizations/public';
 
 import { getGaugeCollections, GaugeOptions } from './editor';
 import { toExpressionAst } from './to_ast';
 import { GaugeType, BasicVislibParams } from './types';
 
-export const goalVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
+export const goalVisTypeDefinition: VisTypeDefinition<BasicVislibParams> = {
   name: 'goal',
   title: i18n.translate('visTypeVislib.goal.goalTitle', { defaultMessage: 'Goal' }),
   icon: 'visGoal',
