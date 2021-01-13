@@ -235,7 +235,7 @@ suggestions. This value must be a whole number greater than zero.
 
 [NOTE]
 ============
-Logging settings can be reloaded issuing a `SIGHUP` signal to Kibana.
+To reload the logging settings, send a SIGHUP signal to {kib}.
 ============
 
 [cols="2*<"]
