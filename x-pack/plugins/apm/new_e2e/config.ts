@@ -21,7 +21,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
     ...kibanaCommonTestsConfig.getAll(),
 
     esArchiver: {
-      directory: resolve(__dirname, 'cypress/fixtures/es_archives'),
+      directory: resolve(__dirname, 'cypress/fixtures/es_archiver'),
     },
 
     esTestCluster: {

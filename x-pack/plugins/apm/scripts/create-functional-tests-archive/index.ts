@@ -5,7 +5,7 @@
  */
 
 import { argv } from 'yargs';
-import { execSync } from 'child_process';
+import { execSync, exec } from 'child_process';
 import moment from 'moment';
 import path from 'path';
 import fs from 'fs';
@@ -121,8 +121,18 @@ async function run() {
   };
 
   const root = path.join(__dirname, '../../../../..');
-  const commonDir = path.join(root, 'x-pack/test/apm_api_integration/common');
-  const archivesDir = path.join(commonDir, 'fixtures/es_archiver');
+  const esArchiverDir = 'fixtures/es_archiver/';
+
+  const apiIntegrationDir = path.join(
+    root,
+    'x-pack/test/apm_api_integration/common',
+    esArchiverDir
+  );
+  const e2eCypressDir = path.join(
+    __dirname,
+    '../../new_e2e/cypress',
+    esArchiverDir
+  );
 
   const options = parseIndexUrl(esUrl);
 
@@ -154,14 +164,14 @@ async function run() {
     ) ?? [];
 
   // create the archive
-
+  const tmpDir = path.join(__dirname, 'tmp');
   execSync(
     `node scripts/es_archiver save ${archiveName} ${indicesWithDocs
       .filter((index) => !index.startsWith('.kibana'))
       .concat('.kibana')
       .join(
         ','
-      )} --dir=${archivesDir} --kibana-url=${kibanaUrl} --es-url=${esUrl} --query='${JSON.stringify(
+      )} --dir=${tmpDir} --kibana-url=${kibanaUrl} --es-url=${esUrl} --query='${JSON.stringify(
       query
     )}'`,
     {
@@ -173,7 +183,7 @@ async function run() {
   const currentConfig = {};
 
   // get the current metadata and extend/override metadata for the new archive
-  const configFilePath = path.join(commonDir, 'archives_metadata.ts');
+  const configFilePath = path.join(tmpDir, 'archives_metadata.ts');
 
   try {
     Object.assign(currentConfig, (await import(configFilePath)).default);
@@ -191,7 +201,9 @@ async function run() {
 
   fs.writeFileSync(
     configFilePath,
-    `export default ${JSON.stringify(newConfig, null, 2)}`,
+    `
+    /* eslint-disable import/no-default-export*/
+    export default ${JSON.stringify(newConfig, null, 2)}`,
     { encoding: 'utf-8' }
   );
 
@@ -201,6 +213,11 @@ async function run() {
     cwd: root,
     stdio: 'inherit',
   });
+
+  const sourceDir = path.join(tmpDir, '/*');
+  exec(`cp -r ${sourceDir} ${e2eCypressDir}`);
+  exec(`cp -r ${sourceDir} ${apiIntegrationDir}`);
+  exec(`rm -rf ${tmpDir}`);
 }
 
 run()

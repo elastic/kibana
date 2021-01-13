@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import archives_metadata from '../../../common/archives_metadata';
+import archives_metadata from '../../../common/fixtures/es_archiver/archives_metadata';
 import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 

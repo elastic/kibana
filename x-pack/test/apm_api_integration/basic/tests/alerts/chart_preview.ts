@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { format } from 'url';
-import archives from '../../../common/archives_metadata';
+import archives from '../../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

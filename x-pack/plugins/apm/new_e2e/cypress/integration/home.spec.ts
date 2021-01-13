@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import url from 'url';
-import archives_metadata from '../fixtures/es_archives/archives_metadata';
+import archives_metadata from '../fixtures/es_archiver/archives_metadata';
 
 describe('home', () => {
   const { start, end } = archives_metadata['apm_8.0.0'];

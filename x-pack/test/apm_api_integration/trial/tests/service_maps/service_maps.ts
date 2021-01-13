@@ -7,7 +7,7 @@
 import querystring from 'querystring';
 import expect from '@kbn/expect';
 import { isEmpty, uniq } from 'lodash';
-import archives_metadata from '../../../common/archives_metadata';
+import archives_metadata from '../../../common/fixtures/es_archiver/archives_metadata';
 import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 

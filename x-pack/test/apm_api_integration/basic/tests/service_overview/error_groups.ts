@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import qs from 'querystring';
 import { pick, uniqBy } from 'lodash';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import archives from '../../../common/archives_metadata';
+import archives from '../../../common/fixtures/es_archiver/archives_metadata';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
