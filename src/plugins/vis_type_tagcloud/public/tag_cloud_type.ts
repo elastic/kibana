@@ -118,4 +118,5 @@ export const tagCloudVisTypeDefinition = {
       },
     ],
   },
+  requiresSearch: true,
 };

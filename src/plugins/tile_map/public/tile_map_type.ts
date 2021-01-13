@@ -158,5 +158,6 @@ export function createTileMapTypeDefinition(
       }
       return vis;
     },
+    requiresSearch: true,
   };
 }

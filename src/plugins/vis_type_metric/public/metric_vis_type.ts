@@ -122,4 +122,5 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
       },
     ],
   },
+  requiresSearch: true,
 });

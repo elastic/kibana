@@ -109,4 +109,5 @@ export const goalVisTypeDefinition: VisTypeDefinition<BasicVislibParams> = {
       },
     ],
   },
+  requiresSearch: true,
 };

@@ -149,5 +149,6 @@ provided base maps, or add your own. Darker colors represent higher values.',
 
       return vis;
     },
+    requiresSearch: true,
   };
 }

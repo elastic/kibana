@@ -199,4 +199,5 @@ export const getHorizontalBarVisTypeDefinition = (
       },
     ],
   },
+  requiresSearch: true,
 });

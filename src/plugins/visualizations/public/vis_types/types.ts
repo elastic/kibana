@@ -115,11 +115,13 @@ export interface VisTypeDefinition<TVisParams = unknown> {
   readonly image?: string;
   /**
    * Describes the visualization stage
+   * @default 'production'
    */
   readonly stage?: 'experimental' | 'beta' | 'production';
   /**
    * Describes the experience group that the visualization belongs.
    * It can be on tools, aggregation based or promoted group.
+   * @default 'aggbased'
    */
   readonly group?: VisGroups;
   /**
@@ -128,6 +130,11 @@ export interface VisTypeDefinition<TVisParams = unknown> {
    * way it is presented on the wizard
    */
   readonly titleInWizard?: string;
+  /**
+   * The flag is necessary for aggregation based visualizations.
+   * When "true", an additional step on the vis creation wizard will be provided
+   * with the selection of a search source - an index pattern or a saved search.
+   */
   readonly requiresSearch?: boolean;
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);
   readonly inspectorAdapters?: Adapters | (() => Adapters);

@@ -104,4 +104,5 @@ export const pieVisTypeDefinition: VisTypeDefinition<PieVisParams> = {
     ],
   },
   hierarchicalData: true,
+  requiresSearch: true,
 };

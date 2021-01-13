@@ -200,4 +200,5 @@ export const getHistogramVisTypeDefinition = (
       },
     ],
   },
+  requiresSearch: true,
 });

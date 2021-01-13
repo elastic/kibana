@@ -88,4 +88,5 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
   },
   toExpressionAst,
   hierarchicalData: (vis) => vis.params.showPartialRows || vis.params.showMetricsAtAllLevels,
+  requiresSearch: true,
 };

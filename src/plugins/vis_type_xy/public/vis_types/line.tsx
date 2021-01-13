@@ -191,4 +191,5 @@ export const getLineVisTypeDefinition = (
       },
     ],
   },
+  requiresSearch: true,
 });

@@ -138,4 +138,5 @@ export const heatmapVisTypeDefinition: VisTypeDefinition<BasicVislibParams> = {
       },
     ],
   },
+  requiresSearch: true,
 };

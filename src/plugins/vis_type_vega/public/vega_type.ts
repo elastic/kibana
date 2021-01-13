@@ -76,5 +76,9 @@ export const createVegaTypeDefinition = (): VisTypeDefinition<VisParams> => {
       return [];
     },
     inspectorAdapters: createInspectorAdapters,
+    /**
+     * This is necessary for showing actions bar in top of vega editor
+     */
+    requiresSearch: true,
   };
 };

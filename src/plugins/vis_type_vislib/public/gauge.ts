@@ -146,4 +146,5 @@ export const gaugeVisTypeDefinition: VisTypeDefinition<BasicVislibParams> = {
       },
     ],
   },
+  requiresSearch: true,
 };
