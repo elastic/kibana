@@ -19,6 +19,7 @@
 
 import { Socket } from 'net';
 import { DetailedPeerCertificate, PeerCertificate, TLSSocket } from 'tls';
+import { promisify } from 'util';
 
 /**
  * A tiny abstraction for TCP socket.
@@ -39,6 +40,20 @@ export interface IKibanaSocket {
   getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 
   /**
+   * Returns a string containing the negotiated SSL/TLS protocol version of the current connection. The value 'unknown' will be returned for
+   * connected sockets that have not completed the handshaking process. The value null will be returned for server sockets or disconnected
+   * client sockets. See https://www.openssl.org/docs/man1.0.2/ssl/SSL_get_version.html for more information.
+   */
+  getProtocol(): string | null;
+
+  /**
+   * Renegotiates a connection to obtain the peer's certificate. This cannot be used when the protocol version is TLSv1.3.
+   * @param options - The options may contain the following fields: rejectUnauthorized, requestCert (See tls.createServer() for details).
+   * @returns A Promise that will be resolved if renegotiation succeeded, or will be rejected if renegotiation failed.
+   */
+  renegotiate(options: { rejectUnauthorized?: boolean; requestCert?: boolean }): Promise<void>;
+
+  /**
    * Indicates whether or not the peer certificate was signed by one of the specified CAs. When TLS
    * isn't used the value is `undefined`.
    */
@@ -52,15 +67,14 @@ export interface IKibanaSocket {
 }
 
 export class KibanaSocket implements IKibanaSocket {
-  readonly authorized?: boolean;
-  readonly authorizationError?: Error;
-
-  constructor(private readonly socket: Socket) {
-    if (this.socket instanceof TLSSocket) {
-      this.authorized = this.socket.authorized;
-      this.authorizationError = this.socket.authorizationError;
-    }
+  public get authorized() {
+    return this.socket instanceof TLSSocket ? this.socket.authorized : undefined;
   }
+  public get authorizationError() {
+    return this.socket instanceof TLSSocket ? this.socket.authorizationError : undefined;
+  }
+
+  constructor(public readonly socket: Socket) {}
 
   getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
   getPeerCertificate(detailed: false): PeerCertificate | null;
@@ -75,5 +89,19 @@ export class KibanaSocket implements IKibanaSocket {
       if (peerCertificate && Object.keys(peerCertificate).length > 0) return peerCertificate;
     }
     return null;
+  }
+
+  public getProtocol() {
+    if (this.socket instanceof TLSSocket) {
+      return this.socket.getProtocol();
+    }
+    return null;
+  }
+
+  public async renegotiate(options: { rejectUnauthorized?: boolean; requestCert?: boolean }) {
+    if (this.socket instanceof TLSSocket) {
+      return promisify(this.socket.renegotiate.bind(this.socket))(options);
+    }
+    return Promise.reject(new Error('Cannot renegotiate a connection when TLS is not enabled.'));
   }
 }

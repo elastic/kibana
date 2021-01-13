@@ -48,7 +48,7 @@ function getMockPeerCertificate(chain: string[] | string, isChainIncomplete = fa
       }
 
       // Imitate other fields for logging assertions
-      certificate.subject = 'mock subject';
+      certificate.subject = `mock subject(${fingerprint})`;
       certificate.issuer = 'mock issuer';
       certificate.subjectaltname = 'mock subjectaltname';
       certificate.valid_from = 'mock valid_from';
@@ -65,17 +65,25 @@ function getMockPeerCertificate(chain: string[] | string, isChainIncomplete = fa
 function getMockSocket({
   authorized = false,
   peerCertificate = null,
+  protocol = 'TLSv1.2',
+  renegotiateError = null,
 }: {
   authorized?: boolean;
   peerCertificate?: MockPeerCertificate | null;
+  protocol?: string;
+  renegotiateError?: Error | null;
 } = {}) {
   const socket = new TLSSocket(new Socket());
   socket.authorized = authorized;
   if (!authorized) {
     socket.authorizationError = new Error('mock authorization error');
   }
-  socket.getPeerCertificate = jest.fn().mockReturnValue(peerCertificate);
-  return { socket };
+  const mockGetPeerCertificate = jest.fn().mockReturnValue(peerCertificate);
+  const mockRenegotiate = jest.fn().mockImplementation((_, callback) => callback(renegotiateError));
+  socket.getPeerCertificate = mockGetPeerCertificate;
+  socket.renegotiate = mockRenegotiate;
+  socket.getProtocol = jest.fn().mockReturnValue(protocol);
+  return { socket, mockGetPeerCertificate, mockRenegotiate };
 }
 
 function expectAuthenticateCall(
@@ -119,7 +127,7 @@ describe('PKIAuthenticationProvider', () => {
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
       expectDebugLogs(
-        'Peer certificate chain: [{"subject":"mock subject","issuer":"mock issuer","issuerCertType":"object","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
+        'Peer certificate chain: [{"subject":"mock subject(2A:7A:C2:DD)","issuer":"mock issuer","issuerCertType":"object","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
         'Authentication is not possible since peer certificate was not authorized: Error: mock authorization error.'
       );
     });
@@ -138,19 +146,151 @@ describe('PKIAuthenticationProvider', () => {
       );
     });
 
-    it('does not handle requests with an incomplete certificate chain.', async () => {
-      const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD', true);
-      const { socket } = getMockSocket({ authorized: true, peerCertificate });
-      const request = httpServerMock.createKibanaRequest({ socket });
+    describe('incomplete certificate chain', () => {
+      it('when the protocol does not allow renegotiation', async () => {
+        const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD', true);
+        const { socket, mockGetPeerCertificate, mockRenegotiate } = getMockSocket({
+          authorized: true,
+          peerCertificate,
+          protocol: 'TLSv1.3',
+        });
+        const request = httpServerMock.createKibanaRequest({ socket });
 
-      await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
+        await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
 
-      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-      expectDebugLogs(
-        'Peer certificate chain: [{"subject":"mock subject","issuer":"mock issuer","issuerCertType":"undefined","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
-        'Authentication is not possible due to incomplete peer certificate chain.'
-      );
+        expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+        expectDebugLogs(
+          `Detected incomplete certificate chain with protocol 'TLSv1.3', cannot renegotiate connection.`,
+          'Peer certificate chain: [{"subject":"mock subject(2A:7A:C2:DD)","issuer":"mock issuer","issuerCertType":"undefined","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
+          'Authentication is not possible due to incomplete peer certificate chain.'
+        );
+        expect(mockGetPeerCertificate).toHaveBeenCalledTimes(1);
+        expect(mockRenegotiate).not.toHaveBeenCalled();
+      });
+
+      it('when renegotiation fails', async () => {
+        const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD', true);
+        const { socket, mockGetPeerCertificate, mockRenegotiate } = getMockSocket({
+          authorized: true,
+          peerCertificate,
+          renegotiateError: new Error('Oh no!'),
+        });
+        const request = httpServerMock.createKibanaRequest({ socket });
+
+        await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
+
+        expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+        expectDebugLogs(
+          `Detected incomplete certificate chain with protocol 'TLSv1.2', attempting to renegotiate connection.`,
+          `Failed to renegotiate connection: Error: Oh no!.`,
+          'Peer certificate chain: [{"subject":"mock subject(2A:7A:C2:DD)","issuer":"mock issuer","issuerCertType":"undefined","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
+          'Authentication is not possible due to incomplete peer certificate chain.'
+        );
+        expect(mockGetPeerCertificate).toHaveBeenCalledTimes(1);
+        expect(mockRenegotiate).toHaveBeenCalledTimes(1);
+      });
+
+      it('when renegotiation results in an incomplete cert chain', async () => {
+        const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD', true);
+        const { socket, mockGetPeerCertificate, mockRenegotiate } = getMockSocket({
+          authorized: true,
+          peerCertificate,
+        });
+        const request = httpServerMock.createKibanaRequest({ socket });
+
+        await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
+
+        expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+        expectDebugLogs(
+          `Detected incomplete certificate chain with protocol 'TLSv1.2', attempting to renegotiate connection.`,
+          'Peer certificate chain: [{"subject":"mock subject(2A:7A:C2:DD)","issuer":"mock issuer","issuerCertType":"undefined","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
+          'Authentication is not possible due to incomplete peer certificate chain.'
+        );
+        expect(mockGetPeerCertificate).toHaveBeenCalledTimes(2);
+        expect(mockRenegotiate).toHaveBeenCalledTimes(1);
+      });
+
+      it('when renegotiation results in a complete cert chain with an unauthorized socket', async () => {
+        const { socket, mockGetPeerCertificate, mockRenegotiate } = getMockSocket({
+          authorized: true,
+        });
+        const peerCertificate1 = getMockPeerCertificate('2A:7A:C2:DD', true); // incomplete chain
+        const peerCertificate2 = getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']); // complete chain
+        mockGetPeerCertificate.mockReturnValue(peerCertificate2);
+        mockGetPeerCertificate.mockReturnValueOnce(peerCertificate1);
+        mockRenegotiate.mockImplementation((_, callback) => {
+          socket.authorized = false;
+          socket.authorizationError = new Error('Oh no!');
+          callback();
+        });
+        const request = httpServerMock.createKibanaRequest({ socket });
+
+        await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
+
+        expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+        expectDebugLogs(
+          `Detected incomplete certificate chain with protocol 'TLSv1.2', attempting to renegotiate connection.`,
+          'Self-signed certificate is detected in certificate chain',
+          'Peer certificate chain: [{"subject":"mock subject(2A:7A:C2:DD)","issuer":"mock issuer","issuerCertType":"object","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}, {"subject":"mock subject(3B:8B:D3:EE)","issuer":"mock issuer","issuerCertType":"object","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
+          'Authentication is not possible since peer certificate was not authorized: Error: Oh no!.'
+        );
+        expect(mockGetPeerCertificate).toHaveBeenCalledTimes(2);
+        expect(mockRenegotiate).toHaveBeenCalledTimes(1);
+      });
+
+      it('when renegotiation results in a complete cert chain with an authorized socket', async () => {
+        const user = mockAuthenticatedUser();
+        const { socket, mockGetPeerCertificate, mockRenegotiate } = getMockSocket({
+          authorized: true,
+        });
+        const peerCertificate1 = getMockPeerCertificate('2A:7A:C2:DD', true); // incomplete chain
+        const peerCertificate2 = getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']); // complete chain
+        mockGetPeerCertificate.mockReturnValue(peerCertificate2);
+        mockGetPeerCertificate.mockReturnValueOnce(peerCertificate1);
+        const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
+
+        const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+        mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+        mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+        mockOptions.client.callAsInternalUser.mockResolvedValue({ access_token: 'access-token' });
+
+        await expect(operation(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(
+            { ...user, authentication_provider: 'pki' },
+            {
+              authHeaders: { authorization: 'Bearer access-token' },
+              state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
+            }
+          )
+        );
+
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+          body: {
+            x509_certificate_chain: [
+              'fingerprint:2A:7A:C2:DD:base64',
+              'fingerprint:3B:8B:D3:EE:base64',
+            ],
+          },
+        });
+
+        expectAuthenticateCall(mockOptions.client, {
+          headers: { authorization: 'Bearer access-token' },
+        });
+
+        expectDebugLogs(
+          `Detected incomplete certificate chain with protocol 'TLSv1.2', attempting to renegotiate connection.`,
+          'Self-signed certificate is detected in certificate chain',
+          'Peer certificate chain: [{"subject":"mock subject(2A:7A:C2:DD)","issuer":"mock issuer","issuerCertType":"object","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}, {"subject":"mock subject(3B:8B:D3:EE)","issuer":"mock issuer","issuerCertType":"object","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
+          'Successfully retrieved access token in exchange to peer certificate chain.'
+        );
+        expect(mockGetPeerCertificate).toHaveBeenCalledTimes(2);
+        expect(mockRenegotiate).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('gets an access token in exchange to peer certificate chain and stores it in the state.', async () => {
