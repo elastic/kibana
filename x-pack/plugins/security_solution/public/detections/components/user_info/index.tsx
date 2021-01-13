@@ -14,6 +14,7 @@ import { useKibana } from '../../../common/lib/kibana';
 export interface State {
   canUserCRUD: boolean | null;
   hasIndexManage: boolean | null;
+  hasIndexMaintenance: boolean | null;
   hasIndexWrite: boolean | null;
   hasIndexUpdateDelete: boolean | null;
   isSignalIndexExists: boolean | null;
@@ -27,6 +28,7 @@ export interface State {
 export const initialState: State = {
   canUserCRUD: null,
   hasIndexManage: null,
+  hasIndexMaintenance: null,
   hasIndexWrite: null,
   hasIndexUpdateDelete: null,
   isSignalIndexExists: null,
@@ -42,6 +44,10 @@ export type Action =
   | {
       type: 'updateHasIndexManage';
       hasIndexManage: boolean | null;
+    }
+  | {
+      type: 'updateHasIndexMaintenance';
+      hasIndexMaintenance: boolean | null;
     }
   | {
       type: 'updateHasIndexWrite';
@@ -88,6 +94,12 @@ export const userInfoReducer = (state: State, action: Action): State => {
       return {
         ...state,
         hasIndexManage: action.hasIndexManage,
+      };
+    }
+    case 'updateHasIndexMaintenance': {
+      return {
+        ...state,
+        hasIndexMaintenance: action.hasIndexMaintenance,
       };
     }
     case 'updateHasIndexWrite': {
@@ -162,6 +174,7 @@ export const useUserInfo = (): State => {
     {
       canUserCRUD,
       hasIndexManage,
+      hasIndexMaintenance,
       hasIndexWrite,
       hasIndexUpdateDelete,
       isSignalIndexExists,
@@ -178,6 +191,7 @@ export const useUserInfo = (): State => {
     isAuthenticated: isApiAuthenticated,
     hasEncryptionKey: isApiEncryptionKey,
     hasIndexManage: hasApiIndexManage,
+    hasIndexMaintenance: hasApiIndexMaintenance,
     hasIndexWrite: hasApiIndexWrite,
     hasIndexUpdateDelete: hasApiIndexUpdateDelete,
   } = usePrivilegeUser();
@@ -223,6 +237,16 @@ export const useUserInfo = (): State => {
       });
     }
   }, [dispatch, loading, hasIndexUpdateDelete, hasApiIndexUpdateDelete]);
+
+  useEffect(() => {
+    if (
+      !loading &&
+      hasIndexMaintenance !== hasApiIndexMaintenance &&
+      hasApiIndexMaintenance != null
+    ) {
+      dispatch({ type: 'updateHasIndexMaintenance', hasIndexMaintenance: hasApiIndexMaintenance });
+    }
+  }, [dispatch, loading, hasIndexMaintenance, hasApiIndexMaintenance]);
 
   useEffect(() => {
     if (
@@ -298,6 +322,7 @@ export const useUserInfo = (): State => {
     hasEncryptionKey,
     canUserCRUD,
     hasIndexManage,
+    hasIndexMaintenance,
     hasIndexWrite,
     hasIndexUpdateDelete,
     signalIndexName,
