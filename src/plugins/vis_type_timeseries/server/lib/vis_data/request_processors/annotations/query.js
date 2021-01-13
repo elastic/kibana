@@ -19,7 +19,7 @@
 
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getTimerange } from '../../helpers/get_timerange';
-import { esQuery } from '../../../../../../data/server';
+import { esQuery, UI_SETTINGS } from '../../../../../../data/server';
 
 export function query(
   req,
@@ -28,9 +28,10 @@ export function query(
   esQueryConfig,
   indexPattern,
   capabilities,
-  { barTargetUiSettings }
+  uiSettings
 ) {
-  return (next) => (doc) => {
+  return (next) => async (doc) => {
+    const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
     const timeField = annotation.time_field;
     const { bucketSize } = getBucketSize(req, 'auto', capabilities, barTargetUiSettings);
     const { from, to } = getTimerange(req);

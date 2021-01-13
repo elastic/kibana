@@ -41,12 +41,16 @@ const specialFields = ['_id', '_index', '_type', '_score'];
 const mergeTimelineFieldsWithHit = <T>(
   fieldName: string,
   flattenedFields: T,
-  hit: { fields: Record<string, unknown[]> },
+  hit: { _source: {}; fields: Record<string, unknown[]> },
   dataFields: readonly string[],
   ecsFields: readonly string[]
 ) => {
   if (fieldName != null || dataFields.includes(fieldName)) {
-    if (has(fieldName, hit.fields) || specialFields.includes(fieldName)) {
+    if (
+      has(fieldName, hit._source) ||
+      has(fieldName, hit.fields) ||
+      specialFields.includes(fieldName)
+    ) {
       const objectWithProperty = {
         node: {
           ...get('node', flattenedFields),
@@ -59,6 +63,8 @@ const mergeTimelineFieldsWithHit = <T>(
                     ? toStringArray(get(fieldName, hit))
                     : isGeoField(fieldName)
                     ? formatGeoLocation(hit.fields[fieldName])
+                    : has(fieldName, hit._source)
+                    ? toStringArray(get(fieldName, hit._source))
                     : toStringArray(hit.fields[fieldName]),
                 },
               ]
@@ -70,7 +76,11 @@ const mergeTimelineFieldsWithHit = <T>(
                 ...fieldName.split('.').reduceRight(
                   // @ts-expect-error
                   (obj, next) => ({ [next]: obj }),
-                  toStringArray(hit.fields[fieldName])
+                  toStringArray(
+                    has(fieldName, hit._source)
+                      ? get(fieldName, hit._source)
+                      : hit.fields[fieldName]
+                  )
                 ),
               }
             : get('node.ecs', flattenedFields),

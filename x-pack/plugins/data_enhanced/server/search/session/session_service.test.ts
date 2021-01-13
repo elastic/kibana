@@ -10,17 +10,15 @@ import type { SearchStrategyDependencies } from '../../../../../../src/plugins/d
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { SearchSessionStatus } from '../../../common';
 import { SEARCH_SESSION_TYPE } from '../../saved_objects';
-import {
-  SearchSessionDependencies,
-  SearchSessionService,
-  INMEM_TRACKING_INTERVAL,
-  MAX_UPDATE_RETRIES,
-  SessionInfo,
-} from './session_service';
+import { SearchSessionDependencies, SearchSessionService, SessionInfo } from './session_service';
 import { createRequestHash } from './utils';
 import moment from 'moment';
 import { coreMock } from 'src/core/server/mocks';
 import { ConfigSchema } from '../../../config';
+// @ts-ignore
+import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { INMEM_TRACKING_INTERVAL, MAX_UPDATE_RETRIES } from './constants';
+import { SearchStatus } from './types';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -340,6 +338,7 @@ describe('SearchSessionService', () => {
           [requestHash]: {
             id: searchId,
             strategy: MOCK_STRATEGY,
+            status: SearchStatus.IN_PROGRESS,
           },
         },
       });
@@ -421,7 +420,11 @@ describe('SearchSessionService', () => {
           },
         },
       });
-      await service.start(coreMock.createStart(), config$);
+      const mockTaskManager = taskManagerMock.createStart();
+      await service.start(coreMock.createStart(), {
+        config$,
+        taskManager: mockTaskManager,
+      });
       await flushPromises();
     });
 
