@@ -61,31 +61,38 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
         </h2>
       }
       body={
-        canSave ? (
-          <p>
-            {i18n.translate(
-              'xpack.apm.agentConfig.configTable.emptyPromptText',
-              {
-                defaultMessage:
-                  "Let's change that! You can fine-tune agent configuration directly from Kibana without having to redeploy. Get started by creating your first configuration.",
-              }
-            )}
-          </p>
-        ) : null
+        <p>
+          {i18n.translate('xpack.apm.agentConfig.configTable.emptyPromptText', {
+            defaultMessage:
+              "Let's change that! You can fine-tune agent configuration directly from Kibana without having to redeploy. Get started by creating your first configuration.",
+          })}
+        </p>
       }
       actions={
-        canSave ? (
+        <EuiToolTip
+          content={
+            !canSave &&
+            i18n.translate(
+              'xpack.apm.settings.agentConfig.createConfigButton.tooltip',
+              {
+                defaultMessage:
+                  "You don't have permissions to create agent configurations",
+              }
+            )
+          }
+        >
           <EuiButton
             color="primary"
             fill
             href={createAgentConfigurationHref(search, basePath)}
+            disabled={!canSave}
           >
             {i18n.translate(
               'xpack.apm.agentConfig.configTable.createConfigButtonLabel',
               { defaultMessage: 'Create configuration' }
             )}
           </EuiButton>
-        ) : null
+        </EuiToolTip>
       }
     />
   );
