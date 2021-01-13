@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { once } from 'lodash';
 import { throwError, Subscription } from 'rxjs';
 import { tap, finalize, catchError, filter, take, skip } from 'rxjs/operators';
 import {
@@ -83,9 +84,9 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           isSavedToBackground = true;
         });
 
-    const cancel = () => {
+    const cancel = once(() => {
       if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
-    };
+    });
 
     return pollSearch(search, cancel, { ...options, abortSignal: combinedSignal }).pipe(
       tap((response) => (id = response.id)),
