@@ -19,7 +19,7 @@ describe('LogRetentionCallout', () => {
     myRole: { canManageLogSettings: true },
   };
   const DISABLED = {
-    disabledAt: '02 Jan 1970 00:00:00 +0000',
+    disabledAt: '01 Jan 1970 12:00:00 +0000',
     enabled: false,
   };
 
