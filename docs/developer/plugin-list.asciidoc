@@ -312,6 +312,10 @@ which will load the visualization's editor.
 |To access an elasticsearch instance that has live data you have two options:
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/bar/README.md[bar]
+|A Kibana plugin
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/beats_management/readme.md[beatsManagement]
 |Notes:
 Failure to have auth enabled in Kibana will make for a broken UI. UI-based errors not yet in place
