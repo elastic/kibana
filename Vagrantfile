@@ -22,5 +22,6 @@ Vagrant.configure("2") do |config|
     docker.vm.provision "ansible" do |ansible|
       ansible.playbook = "test/package/docker/playbook.yml"
     end
+    docker.vm.network "private_network", ip: "192.168.50.7"
   end
 end

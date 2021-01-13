@@ -1,5 +1,5 @@
 ---
-- name: Install Docker
+- name: install docker
   hosts: all
   environment:
     PYTHONPATH: "/home/path/.local/lib/python3.8/site-packages"
@@ -13,7 +13,7 @@
       - python3-pip
 
   tasks:
-  - name: Update apt packages
+  - name: update apt packages
     become: yes
     apt:
       update_cache: "yes"
@@ -26,7 +26,7 @@
       state: present
       force_apt_get: "yes"
 
-  - name: add Docker GPG apt Key
+  - name: add docker gpg key
     become: yes
     apt_key:
       url: https://download.docker.com/linux/ubuntu/gpg
@@ -37,7 +37,7 @@
     register: ubuntu_version
     changed_when: false
 
-  - name: add Docker Repository
+  - name: add docker repository
     become: yes
     apt_repository:
       repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ubuntu_version.stdout }} stable"
@@ -49,7 +49,7 @@
       update_cache: "yes"
       cache_valid_time: 3600
 
-  - name: install Docker
+  - name: install docker
     become: yes
     apt:
       name: "docker-ce"
@@ -68,12 +68,14 @@
       load_path: /packages/kibana-8.0.0-SNAPSHOT-docker-image.tar.gz
       source: load
       state: present
-  - name: start kibana
 
+  - name: start kibana
     become: yes
     community.general.docker_container:
       name: kibana
-      image: kibana
+      image: docker.elastic.co/kibana/kibana:8.0.0-SNAPSHOT
+      container_default_behavior: no_defaults
+      network_mode: host
       env:
         SERVER_HOST: 0.0.0.0
-        ELASTICSEARCH_HOSTS: 192.168.50.1
+        ELASTICSEARCH_HOSTS: http://192.168.50.1
