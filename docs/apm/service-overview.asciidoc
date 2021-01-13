@@ -3,3 +3,106 @@
 === Service overview
 
 Selecting a <<services,*service*>> brings you to the *Service overview*.
+The *Service overview* contains a wide variety of charts and tables that provide
+visibility into how a service performs across your infrastructure.
+
+[discrete]
+[[service-latency]]
+=== Latency
+
+Response times for the service. You can filter the *Latency* chart to display the average,
+95th, or 99th percentile latency times for the service.
+
+[role="screenshot"]
+image::apm/images/latency.png[Service latency]
+
+[discrete]
+[[service-traffic-transactions]]
+=== Traffic and transactions
+
+The *Traffic* chart visualizes the average number of transactions per minute for the selected service.
+
+The *Transactions* table displays a list of _transaction groups_ for the
+selected service and includes the latency, traffic, error rate, and the impact for each transaction.
+Transactions that share the same name are grouped, and only one entry is displayed for each group.
+
+By default, transaction groups are sorted by _Impact_ to show the most used and slowest endpoints in your
+service. If there is a particular endpoint you are interested in, click *View transactions* to view a
+list of similar transactions on the <<transactions, transactions overview>> page.
+
+[role="screenshot"]
+image::apm/images/traffic-transactions.png[Traffic and transactions]
+
+[discrete]
+[[service-error-rates]]
+=== Error rate and errors
+
+The *Error rate* chart displays the average error rates relating to the service, within a specific time range.
+
+The *Errors* table provides a high-level view of each error message when it first and last occurred,
+along with the total number of occurrences. This makes it very easy to quickly see which errors affect
+your services and take actions to rectify them. To do so, click *View errors*.
+
+[role="screenshot"]
+image::apm/images/error-rate.png[Error rate and errors]
+
+[discrete]
+[[service-span-duration]]
+=== Span types average duration and dependencies
+
+The *Average duration by span type* chart visualizes each span type's average duration and helps you determine
+which spans could be slowing down transactions. The "app" label displayed under the
+chart indicates that something was happening within the application. This could signal that the
+agent does not have auto-instrumentation for whatever was happening during that time or that the time was spent in the
+application code and not in database or external requests.
+
+The *Dependencies* table displays a list of downstream services or external connections relevant
+to the service at the selected time range. The table displays latency, traffic, error rate, and the impact of
+each dependency. By default, dependencies are sorted by _Impact_ to show the most used and the slowest dependency.
+If there is a particular dependency you are interested in, click *View service map* to view the related
+<<service-maps, service map>>.
+
+[role="screenshot"]
+image::apm/images/spans-dependencies.png[Span type duration and dependencies]
+
+[discrete]
+[[service-instances]]
+=== All instances
+
+The *All instances* table displays a list of all the available service instances within the selected time range.
+Depending on how the service runs, the instance could be a host or a container. The table displays latency, traffic,
+errors, CPU usage, and memory usage for each instance. By default, instances are sorted by _Traffic_.
+
+[role="screenshot"]
+image::apm/images/all-instances.png[All instances]
+
+[discrete]
+[[service-metadata]]
+=== Service metadata
+
+To view metadata relating to the service agent, and if relevant, the container and cloud provider,
+click on each icon located at the top of the page beside the service name.
+
+[role="screenshot"]
+image::apm/images/metadata-icons.png[Service metadata]
+
+*Service information*
+
+* Service version
+* Runtime name and version
+* Framework name
+* Agent name and version
+
+*Container information*
+
+* Operating system
+* Containerized - Yes or no.
+* Total number of instances
+* Orchestration
+
+*Cloud provider information*
+
+* Cloud provider
+* Availability zones
+* Machine types
+* Project ID

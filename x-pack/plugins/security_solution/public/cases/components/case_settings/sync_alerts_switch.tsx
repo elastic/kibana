@@ -39,6 +39,7 @@ const SyncAlertsSwitchComponent: React.FC<Props> = ({
       checked={isOn}
       onChange={onChange}
       disabled={disabled}
+      data-test-subj="sync-alerts-switch"
     />
   );
 };

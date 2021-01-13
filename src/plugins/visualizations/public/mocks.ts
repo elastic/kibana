@@ -18,7 +18,8 @@
  */
 
 import { PluginInitializerContext } from '../../../core/public';
-import { VisualizationsSetup, VisualizationsStart } from './';
+import { Schema, VisualizationsSetup, VisualizationsStart } from './';
+import { Schemas } from './vis_types';
 import { VisualizationsPlugin } from './plugin';
 import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
 import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
@@ -85,6 +86,9 @@ const createInstance = async () => {
     doStart,
   };
 };
+
+export const createMockedVisEditorSchemas = (schemas: Array<Partial<Schema>>) =>
+  new Schemas(schemas);
 
 export const visualizationsPluginMock = {
   createSetupContract,
