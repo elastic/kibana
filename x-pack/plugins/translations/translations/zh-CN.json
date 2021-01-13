@@ -3190,8 +3190,6 @@
     "savedObjectsManagement.importSummary.createdOutcomeLabel": "已创建",
     "savedObjectsManagement.importSummary.errorCountHeader": "{errorCount} 个错误",
     "savedObjectsManagement.importSummary.errorOutcomeLabel": "{errorMessage}",
-    "savedObjectsManagement.importSummary.headerLabelPlural": "{importCount} 个对象已导入",
-    "savedObjectsManagement.importSummary.headerLabelSingular": "1 个对象已导入",
     "savedObjectsManagement.importSummary.overwrittenCountHeader": "{overwrittenCount} 个已覆盖",
     "savedObjectsManagement.importSummary.overwrittenOutcomeLabel": "已覆盖",
     "savedObjectsManagement.indexPattern.confirmOverwriteButton": "覆盖",

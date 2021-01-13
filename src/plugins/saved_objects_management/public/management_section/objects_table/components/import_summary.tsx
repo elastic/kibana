@@ -19,9 +19,10 @@
 
 import './import_summary.scss';
 import _ from 'lodash';
-import React, { Fragment } from 'react';
+import React, { Fragment, FC, useMemo } from 'react';
 import {
   EuiText,
+  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
@@ -33,15 +34,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SavedObjectsImportSuccess } from 'kibana/public';
-import { FailedImport } from '../../..';
-import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
+import type {
+  SavedObjectsImportSuccess,
+  SavedObjectsImportWarning,
+  IBasePath,
+} from 'kibana/public';
+import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
 
 const DEFAULT_ICON = 'apps';
 
 export interface ImportSummaryProps {
   failedImports: FailedImport[];
   successfulImports: SavedObjectsImportSuccess[];
+  importWarnings: SavedObjectsImportWarning[];
+  basePath: IBasePath;
 }
 
 interface ImportItem {
@@ -83,7 +89,7 @@ const mapImportSuccess = (obj: SavedObjectsImportSuccess): ImportItem => {
   return { type, id, title, icon, outcome };
 };
 
-const getCountIndicators = (importItems: ImportItem[]) => {
+const CountIndicators: FC<{ importItems: ImportItem[] }> = ({ importItems }) => {
   if (!importItems.length) {
     return null;
   }
@@ -141,7 +147,8 @@ const getCountIndicators = (importItems: ImportItem[]) => {
   );
 };
 
-const getStatusIndicator = ({ outcome, errorMessage = 'Error' }: ImportItem) => {
+const StatusIndicator: FC<{ item: ImportItem }> = ({ item }) => {
+  const { outcome, errorMessage = 'Error' } = item;
   switch (outcome) {
     case 'created':
       return (
@@ -176,13 +183,69 @@ const getStatusIndicator = ({ outcome, errorMessage = 'Error' }: ImportItem) => 
   }
 };
 
-export const ImportSummary = ({ failedImports, successfulImports }: ImportSummaryProps) => {
-  const importItems: ImportItem[] = _.sortBy(
-    [
-      ...failedImports.map((x) => mapFailedImport(x)),
-      ...successfulImports.map((x) => mapImportSuccess(x)),
-    ],
-    ['type', 'title']
+const ImportWarnings: FC<{ warnings: SavedObjectsImportWarning[]; basePath: IBasePath }> = ({
+  warnings,
+  basePath,
+}) => {
+  if (!warnings.length) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h4 className=" savedObjectsManagementImportSummary__warningsTitle">
+          <FormattedMessage
+            id="savedObjectsManagement.importSummary.warningsLabel"
+            defaultMessage="{warningCount, plural, one {1 warning} other {# warnings}}"
+            values={{ warningCount: warnings.length }}
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <ul>
+        {warnings.map((warning, index) => (
+          <ImportWarning key={`warning-${index}`} warning={warning} basePath={basePath} />
+        ))}
+      </ul>
+    </>
+  );
+};
+
+const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePath }> = ({
+  warning,
+  basePath,
+}) => {
+  const warningContent = useMemo(() => {
+    if (warning.type === 'action_required') {
+      return (
+        <EuiLink href={basePath.prepend(warning.actionUrl)} target="_blank">
+          {warning.message}
+        </EuiLink>
+      );
+    }
+    return <p>{warning.message}</p>;
+  }, [warning, basePath]);
+
+  return <li className="savedObjectsManagementImportSummary__warning">{warningContent}</li>;
+};
+
+export const ImportSummary: FC<ImportSummaryProps> = ({
+  failedImports,
+  successfulImports,
+  importWarnings,
+  basePath,
+}) => {
+  const importItems: ImportItem[] = useMemo(
+    () =>
+      _.sortBy(
+        [
+          ...failedImports.map((x) => mapFailedImport(x)),
+          ...successfulImports.map((x) => mapImportSuccess(x)),
+        ],
+        ['type', 'title']
+      ),
+    [successfulImports, failedImports]
   );
 
   return (
@@ -194,23 +257,22 @@ export const ImportSummary = ({ failedImports, successfulImports }: ImportSummar
         }
       >
         <h3>
-          {importItems.length === 1 ? (
-            <FormattedMessage
-              id="savedObjectsManagement.importSummary.headerLabelSingular"
-              defaultMessage="1 object imported"
-            />
-          ) : (
-            <FormattedMessage
-              id="savedObjectsManagement.importSummary.headerLabelPlural"
-              defaultMessage="{importCount} objects imported"
-              values={{ importCount: importItems.length }}
-            />
-          )}
+          <FormattedMessage
+            id="savedObjectsManagement.importSummary.headerLabel"
+            defaultMessage="{importCount, plural, one {1 object} other {# objects}} imported"
+            values={{ importCount: importItems.length }}
+          />
         </h3>
       </EuiTitle>
-      <EuiSpacer size="m" />
-      {getCountIndicators(importItems)}
+      <EuiSpacer size="s" />
+      <CountIndicators importItems={importItems} />
       <EuiHorizontalRule />
+      {importWarnings.length && (
+        <>
+          <ImportWarnings warnings={importWarnings} basePath={basePath} />
+          <EuiHorizontalRule />
+        </>
+      )}
       {importItems.map((item, index) => {
         const { type, title, icon } = item;
         return (
@@ -234,7 +296,9 @@ export const ImportSummary = ({ failedImports, successfulImports }: ImportSummar
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <div className="eui-textRight">{getStatusIndicator(item)}</div>
+              <div className="eui-textRight">
+                <StatusIndicator item={item} />
+              </div>
             </EuiFlexItem>
           </EuiFlexGroup>
         );

@@ -42,7 +42,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { OverlayStart, HttpStart } from 'src/core/public';
+import { OverlayStart, HttpStart, IBasePath } from 'src/core/public';
 import {
   IndexPatternsContract,
   IIndexPattern,
@@ -80,6 +80,7 @@ export interface FlyoutProps {
   indexPatterns: IndexPatternsContract;
   overlays: OverlayStart;
   http: HttpStart;
+  basePath: IBasePath;
   search: DataPublicPluginStart['search'];
 }
 
@@ -628,6 +629,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       successfulImports = [],
       isLegacyFile,
       importMode,
+      importWarnings,
     } = this.state;
 
     if (status === 'loading') {
@@ -644,8 +646,15 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       );
     }
 
-    if (isLegacyFile === false && status === 'success') {
-      return <ImportSummary failedImports={failedImports} successfulImports={successfulImports} />;
+    if (!isLegacyFile && status === 'success') {
+      return (
+        <ImportSummary
+          basePath={this.props.http.basePath}
+          failedImports={failedImports}
+          successfulImports={successfulImports}
+          importWarnings={importWarnings ?? []}
+        />
+      );
     }
 
     // Import summary for failed legacy import

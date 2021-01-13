@@ -3186,8 +3186,6 @@
     "savedObjectsManagement.importSummary.createdOutcomeLabel": "作成済み",
     "savedObjectsManagement.importSummary.errorCountHeader": "{errorCount}件のエラー",
     "savedObjectsManagement.importSummary.errorOutcomeLabel": "{errorMessage}",
-    "savedObjectsManagement.importSummary.headerLabelPlural": "{importCount}個のオブジェクトがインポートされました",
-    "savedObjectsManagement.importSummary.headerLabelSingular": "1個のオブジェクトがインポートされました",
     "savedObjectsManagement.importSummary.overwrittenCountHeader": "{overwrittenCount}件上書きされました",
     "savedObjectsManagement.importSummary.overwrittenOutcomeLabel": "上書き",
     "savedObjectsManagement.indexPattern.confirmOverwriteButton": "上書き",

@@ -21,6 +21,7 @@ import { HttpService } from './http_service';
 import { HttpSetup } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { BasePath } from './base_path';
+import { basePathMock } from './base_path.mock';
 
 export type HttpSetupMock = jest.Mocked<HttpSetup> & {
   basePath: BasePath;
@@ -64,4 +65,5 @@ export const httpServiceMock = {
   create: createMock,
   createSetupContract: createServiceMock,
   createStartContract: createServiceMock,
+  createBasePath: basePathMock.create,
 };

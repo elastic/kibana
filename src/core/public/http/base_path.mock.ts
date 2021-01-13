@@ -16,10 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FtrProviderContext } from '../../services';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Saved Object API', function () {
-    loadTestFile(require.resolve('./import'));
-  });
-}
+import { IBasePath } from './types';
+
+const createBasePathMock = ({
+  publicBaseUrl = '/',
+  serverBasePath = '/',
+}: { publicBaseUrl?: string; serverBasePath?: string } = {}) => {
+  const mock: jest.Mocked<IBasePath> = {
+    prepend: jest.fn(),
+    get: jest.fn(),
+    remove: jest.fn(),
+    publicBaseUrl,
+    serverBasePath,
+  };
+
+  return mock;
+};
+
+export const basePathMock = {
+  create: createBasePathMock,
+};
