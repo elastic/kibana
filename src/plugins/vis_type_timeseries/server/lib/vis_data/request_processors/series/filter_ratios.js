@@ -17,10 +17,11 @@
  * under the License.
  */
 
-const filter = (metric) => metric.type === 'filter_ratio';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { overwrite } from '../../helpers';
 import { esQuery } from '../../../../../../data/server';
+
+const filter = (metric) => metric.type === 'filter_ratio';
 
 export function ratios(req, panel, series, esQueryConfig, indexPatternObject) {
   return (next) => (doc) => {
