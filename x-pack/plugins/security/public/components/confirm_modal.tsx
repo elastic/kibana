@@ -53,11 +53,16 @@ export const ConfirmModal: FunctionComponent<ConfirmModalProps> = ({
       <EuiModalHeader>
         <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody>{children}</EuiModalBody>
+      <EuiModalBody data-test-subj="confirmModalBodyText">{children}</EuiModalBody>
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="right" isDisabled={isLoading} onClick={onCancel}>
+            <EuiButtonEmpty
+              data-test-subj="confirmModalCancelButton"
+              flush="right"
+              isDisabled={isLoading}
+              onClick={onCancel}
+            >
               <FormattedMessage
                 id="xpack.security.confirmModal.cancelButton"
                 defaultMessage="Cancel"
@@ -66,6 +71,7 @@ export const ConfirmModal: FunctionComponent<ConfirmModalProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="confirmModalConfirmButton"
               color={buttonColor}
               fill
               isLoading={isLoading}

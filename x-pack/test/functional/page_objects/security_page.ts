@@ -276,7 +276,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async clickCancelEditUser() {
-      await testSubjects.click('userFormCancelButton');
+      await find.clickByButtonText('Cancel');
     }
 
     async clickCancelEditRole() {
@@ -284,7 +284,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async clickSaveEditUser() {
-      await testSubjects.click('userFormSaveButton');
+      await find.clickByButtonText('Update user');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -401,14 +401,14 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       const self = this;
       await this.clickNewUser();
       log.debug('username = ' + userObj.username);
-      await testSubjects.setValue('userFormUserNameInput', userObj.username);
-      await testSubjects.setValue('passwordInput', userObj.password);
-      await testSubjects.setValue('passwordConfirmationInput', userObj.confirmPassword);
+      await find.setValue('[name=username]', userObj.username);
+      await find.setValue('[name=password]', userObj.password);
+      await find.setValue('[name=confirm_password]', userObj.confirmPassword);
       if (userObj.fullname) {
-        await testSubjects.setValue('userFormFullNameInput', userObj.fullname);
+        await find.setValue('[name=full_name]', userObj.fullname);
       }
       if (userObj.email) {
-        await testSubjects.setValue('userFormEmailInput', userObj.email);
+        await find.setValue('[name=email]', userObj.email);
       }
 
       log.debug('Add roles: ', userObj.roles);
@@ -418,9 +418,9 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       }
       log.debug('After Add role: , userObj.roleName');
       if (userObj.save === true) {
-        await testSubjects.click('userFormSaveButton');
+        await find.clickByButtonText('Create user');
       } else {
-        await testSubjects.click('userFormCancelButton');
+        await find.clickByButtonText('Cancel');
       }
     }
 
@@ -504,32 +504,19 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       await testSubjects.find(`roleOption-${role}`);
     }
 
-    deleteUser(username: string) {
-      let alertText: string;
+    async deleteUser(username: string) {
       log.debug('Delete user ' + username);
-      return find
-        .clickByDisplayedLinkText(username)
-        .then(() => {
-          return PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-        })
-        .then(() => {
-          log.debug('Find delete button and click');
-          return testSubjects.click('userFormDeleteButton');
-        })
-        .then(() => {
-          return PageObjects.common.sleep(2000);
-        })
-        .then(() => {
-          return testSubjects.getVisibleText('confirmModalBodyText');
-        })
-        .then((alert) => {
-          alertText = alert;
-          log.debug('Delete user alert text = ' + alertText);
-          return testSubjects.click('confirmModalConfirmButton');
-        })
-        .then(() => {
-          return alertText;
-        });
+      await find.clickByDisplayedLinkText(username);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+
+      log.debug('Find delete button and click');
+      await find.clickByButtonText('Delete user');
+      await PageObjects.common.sleep(2000);
+
+      const confirmText = await testSubjects.getVisibleText('confirmModalBodyText');
+      log.debug('Delete user alert text = ' + confirmText);
+      await testSubjects.click('confirmModalConfirmButton');
+      return confirmText;
     }
   }
   return new SecurityPage();
