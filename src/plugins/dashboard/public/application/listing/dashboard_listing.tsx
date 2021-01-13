@@ -150,7 +150,7 @@ export const DashboardListing = ({
   );
 
   const createItem = useCallback(() => {
-    if (dashboardPanelStorage.dashboardHasUnsavedEdits()) {
+    if (!dashboardPanelStorage.dashboardHasUnsavedEdits()) {
       redirectTo({ destination: 'dashboard' });
     } else {
       confirmCreateWithUnsaved(

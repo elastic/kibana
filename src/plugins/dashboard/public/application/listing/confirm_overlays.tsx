@@ -42,7 +42,7 @@ export const confirmCreateWithUnsaved = (
   contineCallback: () => void
 ) =>
   overlays
-    .openConfirm(leaveConfirmStrings.getDiscardSubtitle(), {
+    .openConfirm(createConfirmStrings.getCreateSubtitle(), {
       confirmButtonText: createConfirmStrings.getConfirmButtonText(),
       cancelButtonText: createConfirmStrings.getCancelButtonText(),
       defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,

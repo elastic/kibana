@@ -142,15 +142,23 @@ export class DashboardStateManager {
 
     // setup initial state by merging defaults with state from url & panels storage
     // also run migration, as state in url could be of older version
+    const initialUrlState = this.kbnUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY);
     const initialState = migrateAppState(
       {
         ...this.stateDefaults,
         ...this.getUnsavedPanelState(),
-        ...this.kbnUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY),
+        ...initialUrlState,
       },
       kibanaVersion,
       usageCollection
     );
+
+    this.isDirty = false;
+
+    if (initialUrlState?.panels && !_.isEqual(initialUrlState.panels, this.stateDefaults.panels)) {
+      this.isDirty = true;
+      this.setUnsavedPanels(initialState.panels);
+    }
 
     // setup state container using initial state both from defaults and from url
     this.stateContainer = createStateContainer<DashboardAppState, DashboardAppStateTransitions>(
@@ -166,8 +174,6 @@ export class DashboardStateManager {
         }),
       }
     );
-
-    this.isDirty = false;
 
     // We can't compare the filters stored on this.appState to this.savedDashboard because in order to apply
     // the filters to the visualizations, we need to save it on the dashboard. We keep track of the original
