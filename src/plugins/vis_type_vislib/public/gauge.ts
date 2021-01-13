@@ -146,5 +146,4 @@ export const gaugeVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
       },
     ],
   },
-  useCustomNoDataScreen: true,
 };

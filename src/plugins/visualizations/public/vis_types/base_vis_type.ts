@@ -46,7 +46,6 @@ interface CommonBaseVisTypeOptions<TVisParams>
       | 'hidden'
       | 'stage'
       | 'getUsedIndexPattern'
-      | 'useCustomNoDataScreen'
       | 'visConfig'
       | 'group'
       | 'titleInWizard'
@@ -62,7 +61,6 @@ interface ExpressionBaseVisTypeOptions<TVisParams> extends CommonBaseVisTypeOpti
 
 interface VisualizationBaseVisTypeOptions<TVisParams> extends CommonBaseVisTypeOptions<TVisParams> {
   toExpressionAst?: undefined;
-  visualization: VisType<TVisParams>['visualization'];
 }
 
 export type BaseVisTypeOptions<TVisParams = VisParams> =
@@ -89,7 +87,6 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly group;
   public readonly titleInWizard;
   public readonly options;
-  public readonly visualization;
   public readonly visConfig;
   public readonly editor;
   public readonly editorConfig;
@@ -99,7 +96,6 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly hierarchicalData;
   public readonly setup;
   public readonly getUsedIndexPattern;
-  public readonly useCustomNoDataScreen;
   public readonly inspectorAdapters;
   public readonly toExpressionAst;
   public readonly getInfoMessage;
@@ -117,7 +113,6 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.title = opts.title;
     this.icon = opts.icon;
     this.image = opts.image;
-    this.visualization = opts.visualization;
     this.visConfig = defaultsDeep({}, opts.visConfig, { defaults: {} });
     this.editor = opts.editor;
     this.editorConfig = defaultsDeep({}, opts.editorConfig, { collections: {} });
@@ -131,7 +126,6 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.setup = opts.setup;
     this.hierarchicalData = opts.hierarchicalData ?? false;
     this.getUsedIndexPattern = opts.getUsedIndexPattern;
-    this.useCustomNoDataScreen = opts.useCustomNoDataScreen ?? false;
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
     this.getInfoMessage = opts.getInfoMessage;

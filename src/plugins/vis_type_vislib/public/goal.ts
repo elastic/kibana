@@ -109,5 +109,4 @@ export const goalVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
       },
     ],
   },
-  useCustomNoDataScreen: true,
 };
