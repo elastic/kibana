@@ -54,7 +54,7 @@ export async function runDockerGenerator(
   const imageFlavor = build.isOss() ? '-oss' : '';
   const imageTag = 'docker.elastic.co/kibana/kibana';
   const version = config.getBuildVersion();
-  const artifactArchitecture = flags.architecture === 'x64' ? 'x86_64' : 'aarch64';
+  const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
   const artifactTarball = `kibana${imageFlavor}-${version}-linux-${artifactArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDate = new Date().toISOString();
