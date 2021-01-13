@@ -15,8 +15,8 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
 import { Capabilities, ApplicationStart } from 'src/core/public';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { addSpaceIdToPath, SPACE_SEARCH_COUNT_THRESHOLD, ENTER_SPACE_PATH } from '../../../common';
-import { Space } from '../../../common/model/space';
 import { ManageSpacesButton } from './manage_spaces_button';
 import { SpaceAvatar } from '../../space_avatar';
 
