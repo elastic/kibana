@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { UiCounterMetricType, METRIC_TYPE } from '@kbn/analytics';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -30,12 +30,12 @@ import {
   PalettePicker,
 } from '../../../../vis_default_editor/public';
 import { TruncateLabelsOption } from './truncate_labels';
-import { PaletteRegistry } from '../../../../charts/public';
+import { PaletteRegistry, ChartsPluginSetup } from '../../../../charts/public';
 import { PieVisParams, LabelPositions, ValueFormats } from '../../types';
 import { getLabelPositions, getValuesFormats } from '../collections';
 
 export interface PieOptionsProps extends VisOptionsProps<PieVisParams> {
-  palettes: PaletteRegistry | undefined;
+  palettes: ChartsPluginSetup['palettes'] | undefined;
   showElasticChartsOptions: boolean;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
@@ -46,6 +46,16 @@ const PieOptions = (props: PieOptionsProps) => {
     paramName: T,
     value: PieVisParams['labels'][T]
   ) => setValue('labels', { ...stateParams.labels, [paramName]: value });
+
+  const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | undefined>(undefined);
+
+  useEffect(() => {
+    const fetchPalettes = async () => {
+      const palettes = await props?.palettes?.getPalettes();
+      setPalettesRegistry(palettes);
+    };
+    fetchPalettes();
+  }, [props.palettes]);
 
   return (
     <>
@@ -84,9 +94,9 @@ const PieOptions = (props: PieOptionsProps) => {
             data-test-subj="visTypePieNestedLegendSwitch"
           />
         )}
-        {props.showElasticChartsOptions && props.palettes && (
+        {props.showElasticChartsOptions && palettesRegistry && (
           <PalettePicker
-            palettes={props.palettes}
+            palettes={palettesRegistry}
             activePalette={stateParams.palette}
             paramName="palette"
             setPalette={(paramName, value) => {

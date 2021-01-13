@@ -19,13 +19,13 @@
 import { UiCounterMetricType } from '@kbn/analytics';
 import React, { lazy } from 'react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { PieVisParams } from '../../types';
 
 const PieOptionsLazy = lazy(() => import('./pie'));
 
 export const getPieOptions = (
-  palettes: PaletteRegistry | undefined,
+  palettes: ChartsPluginSetup['palettes'] | undefined,
   showElasticChartsOptions: boolean,
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void
 ) => (props: VisOptionsProps<PieVisParams>) => (

@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { AggGroupNames } from '../../../data/public';
-import { PaletteRegistry } from '../../../charts/public';
+import { ChartsPluginSetup } from '../../../charts/public';
 import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions } from '../../../visualizations/public';
 
 import { PieVisParams, LabelPositions, ValueFormats } from '../types';
@@ -32,7 +32,7 @@ import { SplitTooltip } from './split_tooltip';
 
 export const getPieVisTypeDefinition = (
   showElasticChartsOptions = false,
-  palettes: PaletteRegistry | undefined,
+  palettes: ChartsPluginSetup['palettes'] | undefined,
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void
 ): BaseVisTypeOptions<PieVisParams> => ({
   name: 'pie',

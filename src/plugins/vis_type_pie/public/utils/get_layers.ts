@@ -29,7 +29,7 @@ export const getLayers = (
   visParams: PieVisParams,
   overwriteColors: { [key: string]: string },
   totalSeries: number,
-  palettes: PaletteRegistry,
+  palettes: PaletteRegistry | null,
   formatter: DataPublicPluginStart['fieldFormats'],
   syncColors: boolean
 ): PartitionLayer[] => {
@@ -88,7 +88,7 @@ export const getLayers = (
             return lightenColor(overwriteColor, seriesLayers.length, columns.length);
           }
 
-          const outputColor = palettes.get(visParams.palette.name).getColor(seriesLayers, {
+          const outputColor = palettes?.get(visParams.palette.name).getColor(seriesLayers, {
             behindText: visParams.labels.show,
             maxDepth: columns.length,
             totalSeries,

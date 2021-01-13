@@ -19,7 +19,7 @@
 import { CoreSetup, CoreStart, DocLinksStart } from 'src/core/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { ChartsPluginSetup, PaletteRegistry } from '../../charts/public';
+import { ChartsPluginSetup } from '../../charts/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { LEGACY_CHARTS_LIBRARY } from '../common';
@@ -43,7 +43,7 @@ export interface VisTypePiePluginStartDependencies {
 /** @internal */
 export interface VisTypePieDependencies {
   theme: ChartsPluginSetup['theme'];
-  palettes: PaletteRegistry;
+  palettes: ChartsPluginSetup['palettes'];
   getStartDeps: () => Promise<{ data: DataPublicPluginStart; docLinks: DocLinksStart }>;
 }
 
@@ -63,12 +63,10 @@ export class VisTypePiePlugin {
       const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'vis_type_pie');
 
       [createPieVisFn].forEach(expressions.registerFunction);
-      charts.palettes.getPalettes().then((palettes) => {
-        expressions.registerRenderer(
-          getPieVisRenderer({ theme: charts.theme, palettes, getStartDeps })
-        );
-        visualizations.createBaseVisualization(pieVisType(true, palettes, trackUiMetric));
-      });
+      expressions.registerRenderer(
+        getPieVisRenderer({ theme: charts.theme, palettes: charts.palettes, getStartDeps })
+      );
+      visualizations.createBaseVisualization(pieVisType(true, charts.palettes, trackUiMetric));
     }
     return {};
   }

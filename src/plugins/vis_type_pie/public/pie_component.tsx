@@ -24,6 +24,7 @@ import React, {
   useCallback,
   useMemo,
   useState,
+  useEffect,
 } from 'react';
 
 import {
@@ -70,7 +71,7 @@ export interface PieComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   chartsThemeService: ChartsPluginSetup['theme'];
-  palettes: PaletteRegistry;
+  palettes: ChartsPluginSetup['palettes'];
   services: DataPublicPluginStart;
   syncColors: boolean;
 }
@@ -79,6 +80,7 @@ const PieComponent = (props: PieComponentProps) => {
   const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
   const [showLegend, setShowLegend] = useState(true);
+  const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -88,6 +90,14 @@ const PieComponent = (props: PieComponentProps) => {
     },
     [props]
   );
+
+  useEffect(() => {
+    const fetchPalettes = async () => {
+      const palettes = await props.palettes.getPalettes();
+      setPalettesRegistry(palettes);
+    };
+    fetchPalettes();
+  }, [props.palettes]);
 
   // handles slice click event
   const handleSliceClick = useCallback(
@@ -161,7 +171,7 @@ const PieComponent = (props: PieComponentProps) => {
     [props.uiState]
   );
 
-  const { visData, visParams, palettes, services, syncColors } = props;
+  const { visData, visParams, services, syncColors } = props;
 
   function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
     if (typeof d[metricColumn.id] === 'number' && d[metricColumn.id] !== 0) {
@@ -193,13 +203,13 @@ const PieComponent = (props: PieComponentProps) => {
         visParams,
         props.uiState?.get('vis.colors', {}),
         visData.rows.length,
-        palettes,
+        palettesRegistry,
         services.fieldFormats,
         syncColors
       ),
     [
       bucketColumns,
-      palettes,
+      palettesRegistry,
       props.uiState,
       services.fieldFormats,
       visData.rows.length,

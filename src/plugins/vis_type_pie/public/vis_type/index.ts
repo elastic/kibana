@@ -17,12 +17,12 @@
  * under the License.
  */
 import { UiCounterMetricType } from '@kbn/analytics';
-import { PaletteRegistry } from '../../../charts/public';
+import { ChartsPluginSetup } from '../../../charts/public';
 import { getPieVisTypeDefinition } from './pie';
 
 export const pieVisType = (
   showElasticChartsOptions?: boolean,
-  palettes?: PaletteRegistry,
+  palettes?: ChartsPluginSetup['palettes'],
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void
 ) => {
   return getPieVisTypeDefinition(showElasticChartsOptions, palettes, trackUiMetric);
