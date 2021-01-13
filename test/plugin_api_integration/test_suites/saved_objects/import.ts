@@ -19,9 +19,9 @@
 
 import { join } from 'path';
 import expect from '@kbn/expect';
-import { PluginFunctionalProviderContext } from '../../services';
+import { FtrProviderContext } from '../../services';
 
-export default function ({ getService }: PluginFunctionalProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const importFile = (fileName: string) =>

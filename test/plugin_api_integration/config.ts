@@ -21,7 +21,7 @@ import path from 'path';
 import fs from 'fs';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const apiIntegConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
@@ -30,34 +30,24 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   return {
-    testFiles: [
-      require.resolve('./test_suites/core'),
-      require.resolve('./test_suites/custom_visualizations'),
-      require.resolve('./test_suites/panel_actions'),
-      require.resolve('./test_suites/core_plugins'),
-      require.resolve('./test_suites/management'),
-      require.resolve('./test_suites/doc_views'),
-      require.resolve('./test_suites/application_links'),
-      require.resolve('./test_suites/data_plugin'),
-    ],
+    testFiles: [require.resolve('./test_suites/saved_objects')],
     services: {
-      ...functionalConfig.get('services'),
+      ...apiIntegConfig.get('services'),
     },
-    pageObjects: functionalConfig.get('pageObjects'),
-    servers: functionalConfig.get('servers'),
-    esTestCluster: functionalConfig.get('esTestCluster'),
-    apps: functionalConfig.get('apps'),
+    servers: apiIntegConfig.get('servers'),
+    esTestCluster: apiIntegConfig.get('esTestCluster'),
+    apps: apiIntegConfig.get('apps'),
     esArchiver: {
       directory: path.resolve(__dirname, '../es_archives'),
     },
-    screenshots: functionalConfig.get('screenshots'),
+    screenshots: apiIntegConfig.get('screenshots'),
     junit: {
-      reportName: 'Plugin Functional Tests',
+      reportName: 'Plugin Api Integration Tests',
     },
     kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
+      ...apiIntegConfig.get('kbnTestServer'),
       serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        ...apiIntegConfig.get('kbnTestServer.serverArgs'),
 
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
