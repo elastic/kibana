@@ -16023,7 +16023,6 @@
     "xpack.observability.overview.apm.appLink": "在应用中查看",
     "xpack.observability.overview.apm.services": "服务",
     "xpack.observability.overview.apm.title": "APM",
-    "xpack.observability.overview.apm.transactionsPerMinute": "每分钟事务数",
     "xpack.observability.overview.breadcrumb": "概览",
     "xpack.observability.overview.loadingObservability": "正在加载可观测性",
     "xpack.observability.overview.logs.appLink": "在应用中查看",

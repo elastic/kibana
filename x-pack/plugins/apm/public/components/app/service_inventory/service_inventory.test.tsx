@@ -106,7 +106,7 @@ describe('ServiceInventory', () => {
         {
           serviceName: 'My Python Service',
           agentName: 'python',
-          trafficPerMinute: 100,
+          transactionsPerMinute: 100,
           errorsPerMinute: 200,
           avgResponseTime: 300,
           environments: ['test', 'dev'],
@@ -115,7 +115,7 @@ describe('ServiceInventory', () => {
         {
           serviceName: 'My Go Service',
           agentName: 'go',
-          trafficPerMinute: 400,
+          transactionsPerMinute: 400,
           errorsPerMinute: 500,
           avgResponseTime: 600,
           environments: [],
@@ -216,7 +216,7 @@ describe('ServiceInventory', () => {
           {
             serviceName: 'My Python Service',
             agentName: 'python',
-            trafficPerMinute: 100,
+            transactionsPerMinute: 100,
             errorsPerMinute: 200,
             avgResponseTime: 300,
             environments: ['test', 'dev'],
@@ -242,7 +242,7 @@ describe('ServiceInventory', () => {
           {
             serviceName: 'My Python Service',
             agentName: 'python',
-            trafficPerMinute: 100,
+            transactionsPerMinute: 100,
             errorsPerMinute: 200,
             avgResponseTime: 300,
             environments: ['test', 'dev'],

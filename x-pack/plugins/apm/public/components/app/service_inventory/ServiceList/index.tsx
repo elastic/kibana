@@ -162,18 +162,17 @@ export function getServiceColumns({
       width: px(unit * 10),
     },
     {
-      field: 'trafficPerMinute',
-      name: i18n.translate(
-        'xpack.apm.servicesTable.trafficPerMinuteColumnLabel',
-        { defaultMessage: 'Traffic (per min)' }
-      ),
+      field: 'transactionsPerMinute',
+      name: i18n.translate('xpack.apm.servicesTable.throughputColumnLabel', {
+        defaultMessage: 'Throughput',
+      }),
       sortable: true,
       dataType: 'number',
-      render: (_, { trafficPerMinute }) => (
+      render: (_, { transactionsPerMinute }) => (
         <ServiceListMetric
-          series={trafficPerMinute?.timeseries}
+          series={transactionsPerMinute?.timeseries}
           color="euiColorVis0"
-          valueLabel={asTransactionRate(trafficPerMinute?.value)}
+          valueLabel={asTransactionRate(transactionsPerMinute?.value)}
         />
       ),
       align: 'left',
@@ -224,7 +223,7 @@ export function ServiceList({ items, noItemsMessage }: Props) {
     : serviceColumns.filter((column) => column.field !== 'healthStatus');
   const initialSortField = displayHealthStatus
     ? 'healthStatus'
-    : 'trafficPerMinute';
+    : 'transactionsPerMinute';
 
   return (
     <EuiFlexGroup
@@ -278,7 +277,7 @@ export function ServiceList({ items, noItemsMessage }: Props) {
                         ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus)
                         : -1;
                     },
-                    (item) => item.trafficPerMinute?.value ?? 0,
+                    (item) => item.transactionsPerMinute?.value ?? 0,
                   ],
                   [sortDirection, sortDirection]
                 )
@@ -291,8 +290,8 @@ export function ServiceList({ items, noItemsMessage }: Props) {
                       // bottom/top.
                       case 'avgResponseTime':
                         return item.avgResponseTime?.value ?? -1;
-                      case 'trafficPerMinute':
-                        return item.trafficPerMinute?.value ?? -1;
+                      case 'transactionsPerMinute':
+                        return item.transactionsPerMinute?.value ?? -1;
                       case 'transactionErrorRate':
                         return item.transactionErrorRate?.value ?? -1;
                       default:

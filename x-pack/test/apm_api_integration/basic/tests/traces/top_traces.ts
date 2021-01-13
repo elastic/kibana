@@ -72,7 +72,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "serviceName": "opbeans-java",
             "transactionName": "DispatcherServlet#doPost",
             "transactionType": "request",
-            "trafficPerMinute": 0.0333333333333333,
+            "transactionsPerMinute": 0.0333333333333333,
           }
         `);
 
@@ -87,7 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "serviceName": "kibana",
             "transactionName": "POST /api/apm/settings/agent-configuration/search",
             "transactionType": "request",
-            "trafficPerMinute": 13.1666666666667,
+            "transactionsPerMinute": 13.1666666666667,
           }
         `);
 

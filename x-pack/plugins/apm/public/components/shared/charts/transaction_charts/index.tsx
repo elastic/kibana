@@ -46,14 +46,14 @@ export function TransactionCharts() {
                 <EuiTitle size="xs">
                   <span>
                     {i18n.translate(
-                      'xpack.apm.metrics.transactionChart.trafficPerMinuteLabel',
-                      { defaultMessage: 'Traffic (per min)' }
+                      'xpack.apm.metrics.transactionChart.throughputLabel',
+                      { defaultMessage: 'Throughput' }
                     )}
                   </span>
                 </EuiTitle>
                 <TimeseriesChart
                   fetchStatus={throughputChartsStatus}
-                  id="trafficPerMinute"
+                  id="transactionsPerMinute"
                   timeseries={throughputTimeseries}
                   yLabelFormat={asTransactionRate}
                 />

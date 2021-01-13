@@ -15981,7 +15981,6 @@
     "xpack.observability.overview.apm.appLink": "アプリで表示",
     "xpack.observability.overview.apm.services": "サービス",
     "xpack.observability.overview.apm.title": "APM",
-    "xpack.observability.overview.apm.transactionsPerMinute": "1分あたりのトランザクション数",
     "xpack.observability.overview.breadcrumb": "概要",
     "xpack.observability.overview.loadingObservability": "オブザーバビリティを読み込んでいます",
     "xpack.observability.overview.logs.appLink": "アプリで表示",

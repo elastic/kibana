@@ -99,12 +99,10 @@ export function TransactionList({ items, isLoading }: Props) {
         render: (time: number) => asMillisecondDuration(time),
       },
       {
-        field: 'trafficPerMinute',
+        field: 'transactionsPerMinute',
         name: i18n.translate(
-          'xpack.apm.transactionsTable.trafficPerMinuteColumnLabel',
-          {
-            defaultMessage: 'Traffic (per min)',
-          }
+          'xpack.apm.transactionsTable.throughputColumnLabel',
+          { defaultMessage: 'Throughput' }
         ),
         sortable: true,
         dataType: 'number',

@@ -20,7 +20,7 @@ image::apm/images/latency.png[Service latency]
 [[service-traffic-transactions]]
 === Traffic and transactions
 
-The *Traffic* chart visualizes the average number of transactions per minute for the selected service.
+The *Throughput* chart visualizes the average number of transactions per minute for the selected service.
 
 The *Transactions* table displays a list of _transaction groups_ for the
 selected service and includes the latency, traffic, error rate, and the impact for each transaction.
@@ -71,7 +71,7 @@ image::apm/images/spans-dependencies.png[Span type duration and dependencies]
 
 The *All instances* table displays a list of all the available service instances within the selected time range.
 Depending on how the service runs, the instance could be a host or a container. The table displays latency, traffic,
-errors, CPU usage, and memory usage for each instance. By default, instances are sorted by _Traffic_.
+errors, CPU usage, and memory usage for each instance. By default, instances are sorted by _Throughput_.
 
 [role="screenshot"]
 image::apm/images/all-instances.png[All instances]

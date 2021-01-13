@@ -178,7 +178,7 @@ export async function getServiceTransactionStats({
             })
           ),
         },
-        trafficPerMinute: {
+        transactionsPerMinute: {
           value: calculateAvgDuration({
             value: topTransactionTypeBucket.real_document_count.value,
             deltaAsMinutes,
