@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -31,14 +31,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(searchSessionId2).not.to.be(searchSessionId1);
     });
 
-    // NOTE: this test will be revised when
-    // `searchSessionId` functionality actually works
-    it('search session id should be picked up from the URL', async () => {
+    it('search session id should be picked up from the URL, non existing session id errors out', async () => {
       const url = await browser.getCurrentUrl();
       const fakeSearchSessionId = '__test__';
       const savedSessionURL = url + `&searchSessionId=${fakeSearchSessionId}`;
       await browser.navigateTo(savedSessionURL);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('discoverNoResultsError'); // expect error because of fake searchSessionId
       const searchSessionId1 = await getSearchSessionId();
       expect(searchSessionId1).to.be(fakeSearchSessionId);
       await queryBar.clickQuerySubmitButton();
