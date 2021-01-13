@@ -20,31 +20,30 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-export function fetchAnchorProvider(indexPatterns, searchSource) {
-  return async function fetchAnchor(indexPatternId, anchorId, sort) {
+export function fetchAnchorProvider(indexPatterns, searchSource, timefilter) {
+  return async function fetchAnchor(props) {
+    const { indexPatternId, anchorId, sort, timeRange, routing } = props;
     const indexPattern = await indexPatterns.get(indexPatternId);
+
+    const filters = [{ ids: { values: [anchorId] } }];
+    if (timeRange) {
+      // Use the time filter if available to improve performance. This is not always available
+      // because in previous versions of Discover the URL was missing time
+      filters.push(timefilter.createFilter(indexPattern, timeRange));
+    }
+
     searchSource
       .setParent(undefined)
       .setField('index', indexPattern)
       .setField('version', true)
       .setField('size', 1)
-      .setField('query', {
-        query: {
-          constant_score: {
-            filter: {
-              ids: {
-                values: [anchorId],
-              },
-            },
-          },
-        },
-        language: 'lucene',
-      })
-      .setField('sort', sort)
-      // This query is missing a time filter, so it hits every shard. This parameter
-      // lets us skip shards as soon as we find a match, and can improve performance
-      // when the document is in the latest shards.
-      .setField('terminate_after', 1);
+      .setField('filter', filters)
+      .setField('sort', sort);
+
+    if (routing) {
+      // If the document is assigned to a specific shard we can query it directly
+      searchSource.setField('routing', routing);
+    }
 
     const response = await searchSource.fetch();
 

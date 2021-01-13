@@ -29,8 +29,12 @@ import { FAILURE_REASONS, LOADING_STATUS } from './index';
 import { MarkdownSimple } from '../../../../../../kibana_react/public';
 
 export function QueryActionsProvider(Promise) {
-  const { filterManager, indexPatterns, data } = getServices();
-  const fetchAnchor = fetchAnchorProvider(indexPatterns, data.search.searchSource.createEmpty());
+  const { filterManager, indexPatterns, data, timefilter } = getServices();
+  const fetchAnchor = fetchAnchorProvider(
+    indexPatterns,
+    data.search.searchSource.createEmpty(),
+    timefilter
+  );
   const { fetchSurroundingDocs } = fetchContextProvider(indexPatterns);
   const { setPredecessorCount, setQueryParameters, setSuccessorCount } = getQueryParameterActions(
     filterManager,
@@ -56,7 +60,7 @@ export function QueryActionsProvider(Promise) {
 
   const fetchAnchorRow = (state) => () => {
     const {
-      queryParameters: { indexPatternId, anchorId, sort, tieBreakerField },
+      queryParameters: { indexPatternId, anchorId, sort, tieBreakerField, time, routing },
     } = state;
 
     if (!tieBreakerField) {
@@ -70,7 +74,13 @@ export function QueryActionsProvider(Promise) {
     setLoadingStatus(state)('anchor');
 
     return Promise.try(() =>
-      fetchAnchor(indexPatternId, anchorId, [_.fromPairs([sort]), { [tieBreakerField]: sort[1] }])
+      fetchAnchor({
+        indexPatternId,
+        anchorId,
+        sort: [_.fromPairs([sort]), { [tieBreakerField]: sort[1] }],
+        timeRange: time,
+        routing,
+      })
     ).then(
       (anchorDocument) => {
         setLoadedStatus(state)('anchor');

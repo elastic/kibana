@@ -110,12 +110,15 @@ export function createTableRowDirective($compile: ng.ICompileService) {
       };
 
       $scope.getContextAppHref = () => {
-        return getContextUrl(
-          $scope.row._id,
-          $scope.indexPattern.id,
-          $scope.columns,
-          getServices().filterManager
-        );
+        return getContextUrl({
+          documentId: $scope.row._id,
+          indexPatternId: $scope.indexPattern.id,
+          columns: $scope.columns,
+          filterManager: getServices().filterManager,
+          // Use absolute time so that refreshing the page will work
+          timeRange: getServices().timefilter.getAbsoluteTime(),
+          routing: $scope.row._routing,
+        });
       };
 
       // create a tr element that lists the value for each *column*

@@ -26,16 +26,44 @@ const filterManager = ({
 
 describe('Get context url', () => {
   test('returning a valid context url', async () => {
-    const url = await getContextUrl('docId', 'ipId', ['test1', 'test2'], filterManager);
+    const url = await getContextUrl({
+      documentId: 'docId',
+      indexPatternId: 'ipId',
+      columns: ['test1', 'test2'],
+      filterManager,
+      timeRange: { from: 'now-7d', to: 'now', mode: 'relative' },
+      routing: undefined,
+    });
     expect(url).toMatchInlineSnapshot(
-      `"#/context/ipId/docId?_g=(filters:!())&_a=(columns:!(test1,test2),filters:!())"`
+      `"#/context/ipId/docId?_g=(filters:!(),time:(from:now-7d,mode:relative,to:now))&_a=(columns:!(test1,test2),filters:!())"`
+    );
+  });
+
+  test('returning a valid context url with routing info', async () => {
+    const url = await getContextUrl({
+      documentId: 'docId',
+      indexPatternId: 'ipId',
+      columns: ['test1', 'test2'],
+      filterManager,
+      timeRange: { from: 'now-7d', to: 'now', mode: 'relative' },
+      routing: 'shard1',
+    });
+    expect(url).toMatchInlineSnapshot(
+      `"#/context/ipId/docId?_g=(filters:!(),time:(from:now-7d,mode:relative,to:now))&_a=(columns:!(test1,test2),filters:!(),routing:shard1)"`
     );
   });
 
   test('returning a valid context url when docId contains whitespace', async () => {
-    const url = await getContextUrl('doc Id', 'ipId', ['test1', 'test2'], filterManager);
+    const url = await getContextUrl({
+      documentId: 'doc Id',
+      indexPatternId: 'ipId',
+      columns: ['test1', 'test2'],
+      filterManager,
+      timeRange: { from: 'now-7d', to: 'now', mode: 'relative' },
+      routing: undefined,
+    });
     expect(url).toMatchInlineSnapshot(
-      `"#/context/ipId/doc%20Id?_g=(filters:!())&_a=(columns:!(test1,test2),filters:!())"`
+      `"#/context/ipId/doc%20Id?_g=(filters:!(),time:(from:now-7d,mode:relative,to:now))&_a=(columns:!(test1,test2),filters:!())"`
     );
   });
 });

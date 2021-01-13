@@ -27,6 +27,8 @@ export function createInitialQueryParametersState(
     defaultStepSize,
     filters: [],
     indexPatternId: null,
+    time: null,
+    routing: null,
     predecessorCount: 0,
     successorCount: 0,
     sort: [],

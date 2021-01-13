@@ -32,6 +32,18 @@ export function createIndexPatternsStub() {
   };
 }
 
+export function createTimefilterStub() {
+  return {
+    createFilter: sinon.spy((indexPattern, timeRange) =>
+      timeRange
+        ? {
+            range: { from: timeRange.from, to: timeRange.to },
+          }
+        : undefined
+    ),
+  };
+}
+
 /**
  * A stubbed search source with a `fetch` method that returns all of `_stubHits`.
  */

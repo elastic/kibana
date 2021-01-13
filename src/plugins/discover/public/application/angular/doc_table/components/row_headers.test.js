@@ -69,6 +69,7 @@ describe('Doc Table', () => {
     setServices({
       uiSettings: core.uiSettings,
       filterManager: dataMock.query.filterManager,
+      timefilter: dataMock.query.timefilter.timefilter,
     });
 
     setDocViewsRegistry({
