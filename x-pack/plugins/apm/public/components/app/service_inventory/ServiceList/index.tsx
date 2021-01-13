@@ -146,8 +146,8 @@ export function getServiceColumns({
       : []),
     {
       field: 'avgResponseTime',
-      name: i18n.translate('xpack.apm.servicesTable.avgLatencyColumnLabel', {
-        defaultMessage: 'Avg. latency',
+      name: i18n.translate('xpack.apm.servicesTable.latencyAvgColumnLabel', {
+        defaultMessage: 'Latency (avg.)',
       }),
       sortable: true,
       dataType: 'number',
