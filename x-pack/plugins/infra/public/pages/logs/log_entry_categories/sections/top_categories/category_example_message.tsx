@@ -127,6 +127,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
                 onClick: () => {
                   const logEntry: LogEntry = {
                     id,
+                    index: '', // TODO: use real index when loading via async search
                     context,
                     cursor: { time: timestamp, tiebreaker },
                     columns: [],

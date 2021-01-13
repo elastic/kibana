@@ -155,6 +155,7 @@ export class InfraLogEntriesDomain {
     const entries = documents.map((doc) => {
       return {
         id: doc.id,
+        index: doc.index,
         cursor: doc.cursor,
         columns: columnDefinitions.map(
           (column): LogColumn => {
@@ -316,6 +317,7 @@ export type LogEntryQuery = JsonObject;
 
 export interface LogEntryDocument {
   id: string;
+  index: string;
   fields: Fields;
   highlights: Highlights;
   cursor: LogEntryCursor;
