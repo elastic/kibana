@@ -2464,6 +2464,14 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
 }
 
 // @public
+export interface SavedObjectsImportActionRequiredWarning {
+    actionUrl: string;
+    message: string;
+    // (undocumented)
+    type: 'action_required';
+}
+
+// @public
 export interface SavedObjectsImportAmbiguousConflictError {
     // (undocumented)
     destinations: Array<{
@@ -2487,10 +2495,11 @@ export interface SavedObjectsImportConflictError {
 export class SavedObjectsImporter {
     // (undocumented)
     #private;
-    constructor({ savedObjectsClient, typeRegistry, importSizeLimit, }: {
+    constructor({ savedObjectsClient, typeRegistry, importSizeLimit, importHooks, }: {
         savedObjectsClient: SavedObjectsClientContract;
         typeRegistry: ISavedObjectTypeRegistry;
         importSizeLimit: number;
+        importHooks: Record<string, SavedObjectsImportHook[]>;
     });
     import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
     resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
@@ -2533,6 +2542,14 @@ export interface SavedObjectsImportFailure {
 }
 
 // @public
+export type SavedObjectsImportHook<T = unknown> = (objects: Array<SavedObject<T>>) => SavedObjectsImportHookResult | Promise<SavedObjectsImportHookResult>;
+
+// @public
+export interface SavedObjectsImportHookResult {
+    warnings?: SavedObjectsImportWarning[];
+}
+
+// @public
 export interface SavedObjectsImportMissingReferencesError {
     // (undocumented)
     references: Array<{
@@ -2561,6 +2578,8 @@ export interface SavedObjectsImportResponse {
     successCount: number;
     // (undocumented)
     successResults?: SavedObjectsImportSuccess[];
+    // (undocumented)
+    warnings: SavedObjectsImportWarning[];
 }
 
 // @public
@@ -2580,6 +2599,13 @@ export interface SavedObjectsImportRetry {
     }>;
     // (undocumented)
     type: string;
+}
+
+// @public
+export interface SavedObjectsImportSimpleWarning {
+    message: string;
+    // (undocumented)
+    type: 'simple';
 }
 
 // @public
@@ -2614,6 +2640,9 @@ export interface SavedObjectsImportUnsupportedTypeError {
     // (undocumented)
     type: 'unsupported_type';
 }
+
+// @public
+export type SavedObjectsImportWarning = SavedObjectsImportSimpleWarning | SavedObjectsImportActionRequiredWarning;
 
 // @public (undocumented)
 export interface SavedObjectsIncrementCounterField {
@@ -2732,6 +2761,7 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
+    registerImportHook: (type: string, hook: SavedObjectsImportHook) => void;
     registerType: (type: SavedObjectsType) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
