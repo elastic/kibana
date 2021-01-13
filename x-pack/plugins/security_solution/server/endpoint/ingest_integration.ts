@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExceptionListClient } from '../../../lists/server';
 import { PluginStartContract as AlertsStartContract } from '../../../alerts/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ExternalCallback } from '../../../fleet/server';
@@ -84,7 +85,8 @@ export const getPackagePolicyCreateCallback = (
   appClientFactory: AppClientFactory,
   maxTimelineImportExportSize: number,
   securitySetup: SecurityPluginSetup,
-  alerts: AlertsStartContract
+  alerts: AlertsStartContract,
+  exceptionsClient: ExceptionListClient | undefined
 ): ExternalCallback[1] => {
   const handlePackagePolicyCreate = async (
     newPackagePolicy: NewPackagePolicy,
@@ -119,7 +121,8 @@ export const getPackagePolicyCreateCallback = (
         appClient,
         alerts.getAlertsClientWithRequest(request),
         frameworkRequest,
-        maxTimelineImportExportSize
+        maxTimelineImportExportSize,
+        exceptionsClient
       );
     } catch (err) {
       logger.error(

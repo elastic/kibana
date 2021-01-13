@@ -360,6 +360,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerIngestCallback,
       savedObjectsStart: core.savedObjects,
       licenseService,
+      exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
     });
 
     if (exceptionListsStartEnabled() && this.manifestTask) {

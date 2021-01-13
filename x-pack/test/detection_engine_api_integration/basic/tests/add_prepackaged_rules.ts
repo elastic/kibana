@@ -105,5 +105,31 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(prepackagedRules.timelines_installed).to.eql(0);
       });
     });
+
+    it('should create the endpoint exceptions list if one does not yet exist', async () => {
+      // no endpoint exception list exists
+      const { body } = await supertest
+        .get('/api/exception_lists?list_id=endpoint_list&namespace_type=agnostic')
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+      expect(body.message).to.eql();
+
+      await waitFor(async () => {
+        const { status } = await supertest
+          .get(DETECTION_ENGINE_PREPACKAGED_URL)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        return status === 200;
+      }, DETECTION_ENGINE_PREPACKAGED_URL);
+
+      // endpoint exception list exists
+      const { body: getListBody } = await supertest
+        .get('/api/exception_lists?list_id=endpoint_list&namespace_type=agnostic')
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+      expect(getListBody.message).to.eql();
+    });
   });
 };
