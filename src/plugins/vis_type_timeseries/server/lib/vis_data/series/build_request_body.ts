@@ -34,8 +34,8 @@ import { processors } from '../request_processors/series/index';
  * ]
  * @returns {Object} doc - processed body
  */
-export function buildRequestBody(...args: any[]) {
+export async function buildRequestBody(...args: any[]) {
   const processor = buildProcessorFunction(processors, ...args);
-  const doc = processor({});
+  const doc = await processor({});
   return doc;
 }
