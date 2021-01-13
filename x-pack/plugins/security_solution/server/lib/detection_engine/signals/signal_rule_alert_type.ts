@@ -236,7 +236,7 @@ export const signalRulesAlertType = ({
               ? timestampFieldCaps.body.indices
               : timestampFieldCaps?.body?.fields[params.timestampOverride]?.unmapped?.indices
           )}`;
-          logger.debug(buildRuleMessage(errorString));
+          logger.error(buildRuleMessage(errorString));
           await ruleStatusService.partialFailure(errorString);
           wroteStatus = true;
         } else if (
@@ -252,7 +252,7 @@ export const signalRulesAlertType = ({
               ? timestampFieldCaps.body.indices
               : timestampFieldCaps?.body?.fields['@timestamp']?.unmapped?.indices
           )}`;
-          logger.debug(buildRuleMessage(errorString));
+          logger.error(buildRuleMessage(errorString));
           await ruleStatusService.partialFailure(errorString);
           wroteStatus = true;
         }

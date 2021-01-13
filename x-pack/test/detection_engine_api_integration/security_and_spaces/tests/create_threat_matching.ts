@@ -54,11 +54,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating threat match rule', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
+        await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
+        await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -73,12 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
           getCreateThreatMatchRulesSchemaMock('rule-1', true)
         );
 
-        // expecting a 'partial failure' status because the threat match rule mock
-        // does not have any indices listed in the rule definition so the rule will
-        // technically be querying ".kibana_1", ".kibana_task_manager_1", and ".security"
-        // as those are the only indices defined.
-        // This mocked rule should be updated to query against an index like auditbeat-*
-        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id, 'partial failure');
+        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id, 'succeeded');
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -88,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock(true));
-        expect(statusBody[ruleResponse.id].current_status.status).to.eql('partial failure');
+        expect(statusBody[ruleResponse.id].current_status.status).to.eql('succeeded');
       });
     });
 

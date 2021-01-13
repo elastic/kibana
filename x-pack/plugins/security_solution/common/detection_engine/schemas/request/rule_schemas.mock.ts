@@ -45,6 +45,7 @@ export const getCreateThreatMatchRulesSchemaMock = (
 ): ThreatMatchCreateSchema => ({
   description: 'Detecting root and admin users',
   enabled,
+  index: ['auditbeat-*'],
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
   severity: 'high',
