@@ -80,27 +80,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('autorefreshes and shows items on the server', async () => {
         await esArchiver.load('data/search_sessions');
 
-        const nameColumnText = await testSubjects
-          .findAll('session-mgmt-table-col-name')
-          .then((nCol) => Promise.all(nCol.map((n) => n.getVisibleText())));
-
-        expect(nameColumnText.length).to.be(10);
-
-        expectSnapshot(nameColumnText).toMatchInline(`
-          Array [
-            "In-Progress Session 1",
-            "Completed Session 1",
-            "Expired Session 1",
-            "Cancelled Session 1",
-            "Error Session 1",
-            "In-Progress Session 2",
-            "Completed Session 2",
-            "Expired Session 2",
-            "Cancelled Session 2",
-            "A very very very very very very very very very very very very very very very very very very very very very very very long name Error Session 2",
-          ]
-        `);
-
         const createdColText = await testSubjects
           .findAll('session-mgmt-table-col-created')
           .then((nCol) => Promise.all(nCol.map((n) => n.getVisibleText())));
@@ -109,16 +88,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expectSnapshot(createdColText).toMatchInline(`
           Array [
-            "1 Dec, 2020, 00:00:00",
-            "2 Dec, 2020, 00:00:00",
-            "3 Dec, 2020, 00:00:00",
-            "4 Dec, 2020, 00:00:00",
-            "5 Dec, 2020, 00:00:00",
-            "6 Dec, 2020, 00:00:00",
-            "7 Dec, 2020, 00:00:00",
-            "8 Dec, 2020, 00:00:00",
-            "9 Dec, 2020, 00:00:00",
-            "10 Dec, 2020, 00:00:00",
+            "25 Dec, 2020, 00:00:00",
+            "24 Dec, 2020, 00:00:00",
+            "23 Dec, 2020, 00:00:00",
+            "22 Dec, 2020, 00:00:00",
+            "21 Dec, 2020, 00:00:00",
+            "20 Dec, 2020, 00:00:00",
+            "19 Dec, 2020, 00:00:00",
+            "18 Dec, 2020, 00:00:00",
+            "17 Dec, 2020, 00:00:00",
+            "16 Dec, 2020, 00:00:00",
           ]
         `);
 
@@ -131,14 +110,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(expiresColText).toMatchInline(`
           Array [
             "--",
-            "3 Dec, 2020, 00:00:00",
-            "4 Dec, 2020, 00:00:00",
-            "5 Dec, 2020, 00:00:00",
+            "25 Dec, 2020, 00:00:00",
+            "24 Dec, 2020, 00:00:00",
+            "23 Dec, 2020, 00:00:00",
             "--",
             "--",
-            "8 Dec, 2020, 00:00:00",
-            "9 Dec, 2020, 00:00:00",
-            "10 Dec, 2020, 00:00:00",
+            "20 Dec, 2020, 00:00:00",
+            "19 Dec, 2020, 00:00:00",
+            "18 Dec, 2020, 00:00:00",
             "--",
           ]
         `);
