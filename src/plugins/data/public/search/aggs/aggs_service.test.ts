@@ -31,6 +31,7 @@ import {
   AggsStartDependencies,
   createGetConfig,
 } from './aggs_service';
+import { createNowProviderMock } from '../../now_provider/mocks';
 
 const { uiSettings } = coreMock.createSetup();
 
@@ -44,6 +45,7 @@ describe('AggsService - public', () => {
     setupDeps = {
       registerFunction: expressionsPluginMock.createSetupContract().registerFunction,
       uiSettings,
+      nowProvider: createNowProviderMock(),
     };
     startDeps = {
       fieldFormats: fieldFormatsServiceMock.createStartContract(),

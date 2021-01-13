@@ -16,6 +16,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./error_handling'));
     loadTestFile(require.resolve('./visualize_field'));
     loadTestFile(require.resolve('./value_suggestions'));
-    loadTestFile(require.resolve('./async_search'));
   });
 }
