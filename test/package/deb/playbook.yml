@@ -1,27 +1,26 @@
-- name: install rpm package
+- name: install deb package
   hosts: all
   tasks:
     - name: upgrade all packages
       become: yes
-      yum:
+      apt:
         name: '*'
         state: latest
 
     - name: install dependencies
       become: yes
-      yum:
+      apt:
         name:
-          - nss
-          - fontconfig
-          - freetype
+          - libnss3
+          - fonts-liberation
+          - libfontconfig
         state: latest
 
     - name: install kibana from local file
       become: yes
-      yum:
-        name: /packages/kibana-8.0.0-SNAPSHOT-x86_64.rpm
+      apt:
+        deb: /packages/kibana-8.0.0-SNAPSHOT-amd64.deb
         state: present
-        disable_gpg_check: yes
 
     - name: copy kibana configuration
       become: yes
@@ -29,12 +28,6 @@
         src: ../files/kibana.yml
         dest: /etc/kibana/kibana.yml
       register: config
-
-    - name: open port 5601/tcp
-      become: yes
-      ansible.posix.firewalld:
-        port: 5601/tcp
-        state: enabled
 
     - name: start kibana
       become: yes

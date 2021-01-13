@@ -1,11 +1,12 @@
 Vagrant.configure("2") do |config|
   config.vm.synced_folder 'target/', '/packages'
-  config.vm.define "tar" do |tar|
-    tar.vm.box = 'generic/centos/8'
-  end
 
   config.vm.define "deb" do |deb|
     deb.vm.box = 'generic/debian9'
+    deb.vm.provision "ansible" do |ansible|
+      ansible.playbook = "test/package/deb/playbook.yml"
+    end
+    deb.vm.network "private_network", ip: "192.168.50.5"
   end
 
   config.vm.define "rpm" do |rpm|
