@@ -17,30 +17,8 @@
  * under the License.
  */
 
-type TimelionFunctionArgsTypes = 'seriesList' | 'number' | 'string' | 'boolean' | 'null';
+import { SavedVisState } from '../types';
 
-export interface TimelionFunctionArgsSuggestion {
-  name: string;
-  help: string;
-}
+declare function updateOldState(oldState: unknown): SavedVisState;
 
-export interface TimelionFunctionArgs {
-  name: string;
-  help?: string;
-  multi?: boolean;
-  types: TimelionFunctionArgsTypes[];
-  suggestions?: TimelionFunctionArgsSuggestion[];
-}
-
-export interface ITimelionFunction {
-  aliases: string[];
-  args: TimelionFunctionArgs[];
-  name: string;
-  help: string;
-  chainable: boolean;
-  extended: boolean;
-  isAlias: boolean;
-  argsByName: {
-    [key: string]: TimelionFunctionArgs[];
-  };
-}
+export { updateOldState };

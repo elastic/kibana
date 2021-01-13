@@ -17,30 +17,5 @@
  * under the License.
  */
 
-type TimelionFunctionArgsTypes = 'seriesList' | 'number' | 'string' | 'boolean' | 'null';
-
-export interface TimelionFunctionArgsSuggestion {
-  name: string;
-  help: string;
-}
-
-export interface TimelionFunctionArgs {
-  name: string;
-  help?: string;
-  multi?: boolean;
-  types: TimelionFunctionArgsTypes[];
-  suggestions?: TimelionFunctionArgsSuggestion[];
-}
-
-export interface ITimelionFunction {
-  aliases: string[];
-  args: TimelionFunctionArgs[];
-  name: string;
-  help: string;
-  chainable: boolean;
-  extended: boolean;
-  isAlias: boolean;
-  argsByName: {
-    [key: string]: TimelionFunctionArgs[];
-  };
-}
+require('../src/setup_node_env');
+require('../src/dev/run_licenses_csv_report');

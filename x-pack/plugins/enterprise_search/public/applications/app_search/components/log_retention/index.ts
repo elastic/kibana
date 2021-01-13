@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ESSearchSource } from './es_search_source';
-export {
-  createDefaultLayerDescriptor,
-  esDocumentsLayerWizardConfig,
-} from './es_documents_layer_wizard';
+export { LogRetentionLogic } from './log_retention_logic';
+export * from './types';
+export * from './messaging';
