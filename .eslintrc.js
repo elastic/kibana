@@ -71,11 +71,6 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  */
 `;
 
-const allMochaRulesOff = {};
-Object.keys(require('eslint-plugin-mocha').rules).forEach((k) => {
-  allMochaRulesOff['mocha/' + k] = 'off';
-});
-
 module.exports = {
   root: true,
 
@@ -573,7 +568,9 @@ module.exports = {
      */
     {
       files: ['test/harden/*.js', 'packages/elastic-safer-lodash-set/test/*.js'],
-      rules: allMochaRulesOff,
+      rules: {
+        'mocha/handle-done-callback': 'off',
+      },
     },
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
