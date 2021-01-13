@@ -373,7 +373,7 @@ describe('EnhancedSearchInterceptor', () => {
 
     test('should NOT DELETE a running SAVED async search on abort', async () => {
       const sessionId = 'sessionId';
-      sessionService.getSessionId.mockImplementation(() => sessionId);
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
       const responses = [
         {
           time: 10,
@@ -479,6 +479,7 @@ describe('EnhancedSearchInterceptor', () => {
 
     test('should track searches', async () => {
       const sessionId = 'sessionId';
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
       sessionService.getSessionId.mockImplementation(() => sessionId);
 
       const untrack = jest.fn();
@@ -496,6 +497,7 @@ describe('EnhancedSearchInterceptor', () => {
 
     test('session service should be able to cancel search', async () => {
       const sessionId = 'sessionId';
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
       sessionService.getSessionId.mockImplementation(() => sessionId);
 
       const untrack = jest.fn();
@@ -519,6 +521,7 @@ describe('EnhancedSearchInterceptor', () => {
 
     test("don't track non current session searches", async () => {
       const sessionId = 'sessionId';
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
       sessionService.getSessionId.mockImplementation(() => sessionId);
 
       const untrack = jest.fn();
@@ -539,6 +542,7 @@ describe('EnhancedSearchInterceptor', () => {
 
     test("don't track if no current session", async () => {
       sessionService.getSessionId.mockImplementation(() => undefined);
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => false);
 
       const untrack = jest.fn();
       sessionService.trackSearch.mockImplementation(() => untrack);

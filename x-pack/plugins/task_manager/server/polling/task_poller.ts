@@ -10,7 +10,7 @@
 
 import { performance } from 'perf_hooks';
 import { after } from 'lodash';
-import { Subject, merge, interval, of, Observable } from 'rxjs';
+import { Subject, merge, of, Observable, combineLatest, timer } from 'rxjs';
 import { mapTo, filter, scan, concatMap, tap, catchError, switchMap } from 'rxjs/operators';
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -33,6 +33,7 @@ type WorkFn<T, H> = (...params: T[]) => Promise<H>;
 interface Opts<T, H> {
   logger: Logger;
   pollInterval$: Observable<number>;
+  pollIntervalDelay$: Observable<number>;
   bufferCapacity: number;
   getCapacity: () => number;
   pollRequests$: Observable<Option<T>>;
@@ -56,6 +57,7 @@ interface Opts<T, H> {
 export function createTaskPoller<T, H>({
   logger,
   pollInterval$,
+  pollIntervalDelay$,
   getCapacity,
   pollRequests$,
   bufferCapacity,
@@ -70,11 +72,21 @@ export function createTaskPoller<T, H>({
     // emit a polling event on demand
     pollRequests$,
     // emit a polling event on a fixed interval
-    pollInterval$.pipe(
-      switchMap((period) => {
-        logger.debug(`Task poller now using interval of ${period}ms`);
-        return interval(period);
-      }),
+    combineLatest([
+      pollInterval$.pipe(
+        tap((period) => {
+          logger.debug(`Task poller now using interval of ${period}ms`);
+        })
+      ),
+      pollIntervalDelay$.pipe(
+        tap((pollDelay) => {
+          logger.debug(`Task poller now delaying emission by ${pollDelay}ms`);
+        })
+      ),
+    ]).pipe(
+      // pollDelay can only shift `timer` at the scale of `period`, so we round
+      // the delay to modulo the interval period
+      switchMap(([period, pollDelay]) => timer(period + (pollDelay % period), period)),
       mapTo(none)
     )
   ).pipe(

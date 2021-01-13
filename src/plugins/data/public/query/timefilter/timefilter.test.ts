@@ -19,21 +19,12 @@
 
 jest.useFakeTimers();
 
-jest.mock('./lib/parse_querystring', () => ({
-  parseQueryString: () => {
-    return {
-      // Can not access local variable from within a mock
-      // @ts-ignore
-      forceNow: global.nowTime,
-    };
-  },
-}));
-
 import sinon from 'sinon';
 import moment from 'moment';
 import { Timefilter } from './timefilter';
 import { Subscription } from 'rxjs';
 import { TimeRange, RefreshInterval } from '../../../common';
+import { createNowProviderMock } from '../../now_provider/mocks';
 
 import { timefilterServiceMock } from './timefilter_service.mock';
 const timefilterSetupMock = timefilterServiceMock.createSetupContract();
@@ -42,16 +33,16 @@ const timefilterConfig = {
   timeDefaults: { from: 'now-15m', to: 'now' },
   refreshIntervalDefaults: { pause: false, value: 0 },
 };
-const timefilter = new Timefilter(timefilterConfig, timefilterSetupMock.history);
+
+const nowProviderMock = createNowProviderMock();
+const timefilter = new Timefilter(timefilterConfig, timefilterSetupMock.history, nowProviderMock);
 
 function stubNowTime(nowTime: any) {
-  // @ts-ignore
-  global.nowTime = nowTime;
+  nowProviderMock.get.mockImplementation(() => (nowTime ? new Date(nowTime) : new Date()));
 }
 
 function clearNowTimeStub() {
-  // @ts-ignore
-  delete global.nowTime;
+  nowProviderMock.get.mockReset();
 }
 
 test('isTimeTouched is initially set to false', () => {
