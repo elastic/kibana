@@ -4,10 +4,10 @@
   left: $euiSizeM;
   bottom: $euiSizeM;
   pointer-events: none;
-  background-color: $euiColorEmptyShade;
   color: $euiTextColor;
-  border: 2px solid $euiTextColor;
-  border-top: $euiTextColor;
+  border-left: 2px solid $euiTextColor;
+  border-bottom: 2px solid $euiTextColor;
+  text-align: right;
 }
 
 .mapScaleControlFullScreen {
