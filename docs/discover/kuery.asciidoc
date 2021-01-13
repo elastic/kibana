@@ -131,7 +131,7 @@ but in some cases you might need to search on dates. Include the date range in q
 
 [source,yaml]
 -------------------
-@timestamp < "@timestamp < "2021-01"
+@timestamp < "2021-01"
 -------------------
 
 [source,yaml]
