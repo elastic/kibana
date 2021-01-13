@@ -60,6 +60,8 @@ const layerConfigSchema = schema.object({
   ),
 });
 
+export type LayerConfig = TypeOf<typeof layerConfigSchema>;
+
 export const regionmapConfigSchema = schema.object({
   includeElasticMapsService: schema.boolean({ defaultValue: true }),
   layers: schema.arrayOf(layerConfigSchema, { defaultValue: [] }),

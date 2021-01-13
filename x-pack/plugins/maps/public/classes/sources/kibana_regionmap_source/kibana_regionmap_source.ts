@@ -14,7 +14,7 @@ import { registerSource } from '../source_registry';
 import { KibanaRegionmapSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
-import { LayerConfig } from '../../../../../../../src/plugins/region_map/config';
+import { LayerConfig } from '../../../../../../../src/plugins/maps_legacy/config';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
   defaultMessage: 'Configured GeoJSON',
