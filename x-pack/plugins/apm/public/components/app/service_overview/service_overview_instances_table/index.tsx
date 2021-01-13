@@ -117,9 +117,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
       field: 'throughputValue',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnThroughput',
-        {
-          defaultMessage: 'Traffic',
-        }
+        { defaultMessage: 'Throughput' }
       ),
       width: px(unit * 10),
       render: (_, { throughput }) => {
