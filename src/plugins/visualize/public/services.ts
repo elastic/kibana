@@ -20,8 +20,8 @@
 import { ApplicationStart, IUiSettingsClient } from '../../../core/public';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
 import { IndexPatternsContract, DataPublicPluginStart } from '../../../plugins/data/public';
-import { VisEditorConstructor } from '../../../plugins/visualizations/public';
 import { SharePluginStart } from '../../../plugins/share/public';
+import { VisEditorsRegistry } from './vis_editors_registry';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -33,9 +33,10 @@ export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatt
   'IndexPatterns'
 );
 
-export const [getDefaultEditor, setDefaultEditor] = createGetterSetter<VisEditorConstructor>(
-  'DefaultEditor'
-);
+export const [
+  getVisEditorsRegistry,
+  setVisEditorsRegistry,
+] = createGetterSetter<VisEditorsRegistry>('VisEditorsRegistry');
 
 export const [getQueryService, setQueryService] = createGetterSetter<
   DataPublicPluginStart['query']
