@@ -72,7 +72,7 @@ export const getTimelionVisualizationConfig = (
       help: '',
     },
   },
-  async fn(input, args) {
+  async fn(input, args, { getSearchSessionId }) {
     const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
     const visParams = { expression: args.expression, interval: args.interval };
@@ -82,6 +82,7 @@ export const getTimelionVisualizationConfig = (
       query: get(input, 'query') as Query,
       filters: get(input, 'filters') as Filter[],
       visParams,
+      searchSessionId: getSearchSessionId(),
     });
 
     response.visType = TIMELION_VIS_NAME;
