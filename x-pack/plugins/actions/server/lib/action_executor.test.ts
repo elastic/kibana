@@ -324,7 +324,7 @@ test('throws an error when passing isESOAvailable with value of false', async ()
   await expect(
     customActionExecutor.execute(executeParams)
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+    `"Unable to execute action because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
   );
 });
 
