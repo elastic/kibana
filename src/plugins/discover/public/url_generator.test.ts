@@ -62,7 +62,7 @@ describe('Discover url generator', () => {
     const url = await generator.createUrl({ savedSearchId });
     const { _a, _g } = getStatesFromKbnUrl(url, ['_a', '_g']);
 
-    expect(url.startsWith(`${appBasePath}#/${savedSearchId}`)).toBe(true);
+    expect(url.startsWith(`${appBasePath}#/view/${savedSearchId}`)).toBe(true);
     expect(_a).toEqual({});
     expect(_g).toEqual({});
   });
