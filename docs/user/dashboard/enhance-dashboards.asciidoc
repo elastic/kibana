@@ -5,24 +5,6 @@ Now that you have added panels to your dashboard, you can add filter panels to i
 To make your dashboard look the way you want, use the editing options.
 
 [float]
-[[arrange-panels]]
-[[moving-containers]]
-[[resizing-containers]]
-=== Arrange panels
-
-To compare the data in the panels, arrange the panels on the dashboard, or remove the panel from the dashboard.
-
-. From the toolbar, click *Edit*, then use the following options:
-
-* To move, click and hold the panel header, then drag to the new location.
-
-* To resize, click the resize control, then drag to the new dimensions.
-
-* To delete, open the panel menu, then select *Delete from dashboard*.
-
-. To save your changes, click *Save* in the toolbar.
-
-[float]
 [[add-controls]]
 === Add controls
 
@@ -85,54 +67,5 @@ The following image is displayed:
 
 [role="screenshot"]
 image::images/markdown_example_4.png[]
-
-[float]
-[[filter-in-dashboard]]
-=== Filter your data
-
-Filters enable you to focus on only the data that's important to you.
-You can filter results to include or exclude specific fields, filter for a value in a range,
-and more. The *Add filter* popup prompts you with the fields you can filter
-and the operators you can use.
-
-Filter the dashboard to display only ios data:
-
-. Click *Add filter*.
-. Set *Field* to *machine.os*, *Operator* to *is*, and *Value* to *ios*.
-. *Save* the filter.
-. To remove the filter, click *x* next to the filter.
-
-[float]
-[[dashboard-customize-filter]]
-=== Customize time ranges
-
-You can specify the time range for each panel on the dashboard. For example, you configure a panel to display
-the monthly trend for CPU usage, and a different to display the current CPU usage. Custom time ranges override the global <<set-time-filter,time filter>>.
-
-. Open the panel menu, then select *More > Customize time range*.
-
-. On the *Customize panel time range* window, specify the new time range, then click *Add to panel*.
-+
-[role="screenshot"]
-image:images/time_range_per_panel.gif[Time range per dashboard panel]
-
-[float]
-[[clone-panels]]
-=== Clone panels
-
-To duplicate a panel and the configured functionality, clone the panel. Cloned panels continue to replicate all of the functionality from the original panel, 
-including renaming, editing, and cloning. When you clone a panel, the clone appears beside the original panel, and moves other panels to provide a space on the 
-dashboard.
-
-. From the toolbar, click *Edit*. 
-
-. Open the panel menu, then select *Clone panel*. 
-+
-[role="screenshot"]
-image:images/clone_panel.gif[clone panel]
-+
-{kib} automatically saves the cloned panel in *Visualize*. To access the cloned panel, open the main menu, then click *Visualize*.
-
-
 
 

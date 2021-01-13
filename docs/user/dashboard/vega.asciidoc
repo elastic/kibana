@@ -1,30 +1,28 @@
 [[vega]]
-=== Create panels with Vega
+=== Vega and Vega-Lite
 
-With *Vega*, you create visualizations by editing the *Vega* and *Vega-Lite* specs.
+*Vega* and *Vega-Lite* are both grammars for creating custom visualizations.
+They are recommended for advanced users who are comfortable writing {es} queries manually.
+*Vega-Lite* is a good starting point for users who are new to both grammars, but they are
+not compatible.
 
-The specs use https://hjson.github.io/[HJSON], which is similar to JSON, but optimized for editing. 
+Both *Vega* and *Vega-Lite* use JSON, but {kib} has made this simpler to type by integrating
+https://hjson.github.io/[HJSON]. HJSON supports the following:
 
-HJSON supports the following:
-
-* Comments using // or /* syntax
-* Object keys without quotes
-* String values without quotes
+* Optional quotes
+* Double quotes or single quotes
 * Optional commas
-* Double or single quotes
+* Comments using // or /* syntax
 * Multiline strings
 
 [float]
-==== Tutorials: Create custom panels with Vega and Vega-lite
+==== Tutorials: Create custom panels
 
-To become familiar with how to use *Vega* and *Vega-Lite*, follow the tutorials to help you learn how to edit the specs and create custom visualizations.
+Learn how to connect *Vega-Lite* with {kib} filters and {es} data, then learn how to create more {kib} interaction using *Vega*.
 
 As you edit the specs, work in small steps, and frequently save your work. Small changes can cause unexpected results. To save, click *Save* in the toolbar.
 
-[float]
-===== Add the data and create the dashboard
-
-Add the eCommerce sample data that you'll use to create the stacked area chart, then create the dashboard.
+Before starting, add the eCommerce sample data that you'll use in your spec, then create the dashboard.
 
 . From the {kib} *Home* page, click *Try our sample data*.
 
@@ -35,13 +33,13 @@ Add the eCommerce sample data that you'll use to create the stacked area chart, 
 . Click *Create dashboard*.
 
 [float]
-===== Open and set up Vega
+===== Open and set up Vega-Lite
 
-Open *Vega* and change the time range. 
+Open *Vega-Lite* and change the time range.
 
 . On the dashboard, click *Create panel*.
 
-. On the *New visualization* window, click *Vega*.
+. On the *New visualization* window, click *Custom visualization*.
 +
 A pre-populated line chart displays the total number of documents. 
 
@@ -50,7 +48,7 @@ A pre-populated line chart displays the total number of documents.
 [float]
 ===== Create a stacked area chart from an {es} search query
 
-To learn how to edit and use the *Vega-Lite* spec, create a stacked area chart from an {es} query.
+Learn how to query {es} from *Vega-Lite*, displaying the results in a stacked area chart.
 
 . In the *Vega-Lite* spec, replace `index: _all` with the following, then click *Update*:
 
