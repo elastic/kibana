@@ -47,17 +47,23 @@ export class SavedObjectsImporter {
     savedObjectsClient,
     typeRegistry,
     importSizeLimit,
-    importHooks,
   }: {
     savedObjectsClient: SavedObjectsClientContract;
     typeRegistry: ISavedObjectTypeRegistry;
     importSizeLimit: number;
-    importHooks: Record<string, SavedObjectsImportHook[]>;
   }) {
     this.#savedObjectsClient = savedObjectsClient;
     this.#typeRegistry = typeRegistry;
     this.#importSizeLimit = importSizeLimit;
-    this.#importHooks = importHooks;
+    this.#importHooks = typeRegistry.getAllTypes().reduce((hooks, type) => {
+      if (type.onImport) {
+        return {
+          ...hooks,
+          [type.name]: [type.onImport],
+        };
+      }
+      return hooks;
+    }, {} as Record<string, SavedObjectsImportHook[]>);
   }
 
   /**

@@ -35,12 +35,11 @@ export class SavedObjectHooksPlugin implements Plugin {
         importableAndExportable: true,
         getTitle: (obj) => obj.attributes.title,
       },
-    });
-
-    savedObjects.registerImportHook('test_import_warning_1', (objects) => {
-      return {
-        warnings: [{ type: 'simple', message: 'warning for test_import_warning_1' }],
-      };
+      onImport: (objects) => {
+        return {
+          warnings: [{ type: 'simple', message: 'warning for test_import_warning_1' }],
+        };
+      },
     });
 
     savedObjects.registerType({
@@ -57,18 +56,17 @@ export class SavedObjectHooksPlugin implements Plugin {
         importableAndExportable: true,
         getTitle: (obj) => obj.attributes.title,
       },
-    });
-
-    savedObjects.registerImportHook('test_import_warning_2', (objects) => {
-      return {
-        warnings: [
-          {
-            type: 'action_required',
-            message: 'warning for test_import_warning_2',
-            actionUrl: '/some/url',
-          },
-        ],
-      };
+      onImport: (objects) => {
+        return {
+          warnings: [
+            {
+              type: 'action_required',
+              message: 'warning for test_import_warning_2',
+              actionUrl: '/some/url',
+            },
+          ],
+        };
+      },
     });
   }
 

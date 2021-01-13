@@ -188,7 +188,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
       registerType: deps.savedObjects.registerType,
-      registerImportHook: deps.savedObjects.registerImportHook,
     },
     status: {
       core$: deps.status.core$,
