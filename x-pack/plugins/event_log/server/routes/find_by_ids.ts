@@ -19,21 +19,25 @@ import { findOptionsSchema, FindOptionsType } from '../event_log_client';
 
 const paramSchema = schema.object({
   type: schema.string(),
-  id: schema.string(),
 });
 
-export const findRoute = (router: IRouter, systemLogger: Logger) => {
-  router.get(
+const bodySchema = schema.object({
+  ids: schema.arrayOf(schema.string(), { defaultValue: [] }),
+});
+
+export const findByIdsRoute = (router: IRouter, systemLogger: Logger) => {
+  router.post(
     {
-      path: `${BASE_EVENT_LOG_API_PATH}/{type}/{id}/_find`,
+      path: `${BASE_EVENT_LOG_API_PATH}/{type}/_find`,
       validate: {
         params: paramSchema,
         query: findOptionsSchema,
+        body: bodySchema,
       },
     },
     router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, FindOptionsType, unknown>,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, FindOptionsType, TypeOf<typeof bodySchema>>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
       if (!context.eventLog) {
@@ -41,16 +45,17 @@ export const findRoute = (router: IRouter, systemLogger: Logger) => {
       }
       const eventLogClient = context.eventLog.getEventLogClient();
       const {
-        params: { id, type },
+        params: { type },
+        body: { ids },
         query,
       } = req;
 
       try {
         return res.ok({
-          body: await eventLogClient.findEventsBySavedObjectIds(type, [id], query),
+          body: await eventLogClient.findEventsBySavedObjectIds(type, ids, query),
         });
       } catch (err) {
-        const call = `findEventsBySavedObjectIds(${type}, [${id}], ${JSON.stringify(query)})`;
+        const call = `findEventsBySavedObjectIds(${type}, [${ids}], ${JSON.stringify(query)})`;
         systemLogger.debug(`error calling eventLog ${call}: ${err.message}`);
         return res.notFound();
       }

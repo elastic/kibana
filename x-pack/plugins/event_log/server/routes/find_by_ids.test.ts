@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { findRoute } from './find';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { mockHandlerArguments, fakeEvent } from './_mock_handler_arguments';
 import { eventLogClientMock } from '../event_log_client.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
+import { findByIdsRoute } from './find_by_ids';
 
 const eventLogClient = eventLogClientMock.create();
 const systemLogger = loggingSystemMock.createLogger();
@@ -17,15 +17,15 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe('find', () => {
+describe('find_by_ids', () => {
   it('finds events with proper parameters', async () => {
     const router = httpServiceMock.createRouter();
 
-    findRoute(router, systemLogger);
+    findByIdsRoute(router, systemLogger);
 
-    const [config, handler] = router.get.mock.calls[0];
+    const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/event_log/{type}/{id}/_find"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/event_log/{type}/_find"`);
 
     const events = [fakeEvent(), fakeEvent()];
     const result = {
@@ -39,7 +39,8 @@ describe('find', () => {
     const [context, req, res] = mockHandlerArguments(
       eventLogClient,
       {
-        params: { id: '1', type: 'action' },
+        params: { type: 'action' },
+        body: { ids: ['1'] },
       },
       ['ok']
     );
@@ -60,9 +61,9 @@ describe('find', () => {
   it('supports optional pagination parameters', async () => {
     const router = httpServiceMock.createRouter();
 
-    findRoute(router, systemLogger);
+    findByIdsRoute(router, systemLogger);
 
-    const [, handler] = router.get.mock.calls[0];
+    const [, handler] = router.post.mock.calls[0];
     eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce({
       page: 0,
       per_page: 10,
@@ -73,7 +74,8 @@ describe('find', () => {
     const [context, req, res] = mockHandlerArguments(
       eventLogClient,
       {
-        params: { id: '1', type: 'action' },
+        params: { type: 'action' },
+        body: { ids: ['1'] },
         query: { page: 3, per_page: 10 },
       },
       ['ok']
@@ -83,9 +85,9 @@ describe('find', () => {
 
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
 
-    const [type, ids, options] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
+    const [type, id, options] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
     expect(type).toEqual(`action`);
-    expect(ids).toEqual(['1']);
+    expect(id).toEqual(['1']);
     expect(options).toMatchObject({});
 
     expect(res.ok).toHaveBeenCalledWith({
@@ -101,15 +103,16 @@ describe('find', () => {
   it('logs a warning when the query throws an error', async () => {
     const router = httpServiceMock.createRouter();
 
-    findRoute(router, systemLogger);
+    findByIdsRoute(router, systemLogger);
 
-    const [, handler] = router.get.mock.calls[0];
+    const [, handler] = router.post.mock.calls[0];
     eventLogClient.findEventsBySavedObjectIds.mockRejectedValueOnce(new Error('oof!'));
 
     const [context, req, res] = mockHandlerArguments(
       eventLogClient,
       {
-        params: { id: '1', type: 'action' },
+        params: { type: 'action' },
+        body: { ids: ['1'] },
         query: { page: 3, per_page: 10 },
       },
       ['ok']
