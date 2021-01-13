@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
+// @ts-ignore
 import { handleError } from '../../../../lib/errors/handle_error';
+// @ts-ignore
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+// @ts-ignore
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
+import { ElasticsearchResponse } from '../../../../../common/types/es';
+import { LegacyRequest } from '../../../../types';
 
-function getFormattedLeaderIndex(leaderIndex) {
+function getFormattedLeaderIndex(leaderIndex: string) {
   let leader = leaderIndex;
   if (leader.includes(':')) {
     const leaderSplit = leader.split(':');
@@ -21,7 +25,7 @@ function getFormattedLeaderIndex(leaderIndex) {
   return leader;
 }
 
-async function getCcrStat(req, esIndexPattern, filters) {
+async function getCcrStat(req: LegacyRequest, esIndexPattern: string, filters: unknown[]) {
   const min = moment.utc(req.payload.timeRange.min).valueOf();
   const max = moment.utc(req.payload.timeRange.max).valueOf();
 
@@ -68,7 +72,7 @@ async function getCcrStat(req, esIndexPattern, filters) {
   return await callWithRequest(req, 'search', params);
 }
 
-export function ccrShardRoute(server) {
+export function ccrShardRoute(server: { route: (p: any) => void; config: () => {} }) {
   server.route({
     method: 'POST',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ccr/{index}/shard/{shardId}',
@@ -88,7 +92,7 @@ export function ccrShardRoute(server) {
         }),
       },
     },
-    async handler(req) {
+    async handler(req: LegacyRequest) {
       const config = server.config();
       const index = req.params.index;
       const shardId = req.params.shardId;
@@ -120,7 +124,7 @@ export function ccrShardRoute(server) {
       ];
 
       try {
-        const [metrics, ccrResponse] = await Promise.all([
+        const [metrics, ccrResponse]: [unknown, ElasticsearchResponse] = await Promise.all([
           getMetrics(
             req,
             esIndexPattern,
@@ -133,18 +137,15 @@ export function ccrShardRoute(server) {
           getCcrStat(req, esIndexPattern, filters),
         ]);
 
-        const stat = get(ccrResponse, 'hits.hits[0]._source.ccr_stats', {});
-        const oldestStat = get(
-          ccrResponse,
-          'hits.hits[0].inner_hits.oldest.hits.hits[0]._source.ccr_stats',
-          {}
-        );
+        const stat = ccrResponse.hits?.hits[0]._source.ccr_stats ?? {};
+        const oldestStat =
+          ccrResponse.hits?.hits[0].inner_hits?.oldest.hits?.hits[0]._source.ccr_stats ?? {};
 
         return {
           metrics,
           stat,
-          formattedLeader: getFormattedLeaderIndex(stat.leader_index),
-          timestamp: get(ccrResponse, 'hits.hits[0]._source.timestamp'),
+          formattedLeader: getFormattedLeaderIndex(stat.leader_index ?? ''),
+          timestamp: ccrResponse.hits?.hits[0]._source.timestamp,
           oldestStat,
         };
       } catch (err) {

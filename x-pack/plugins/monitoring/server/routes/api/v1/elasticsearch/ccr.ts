@@ -7,11 +7,15 @@
 import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import { get, groupBy } from 'lodash';
+// @ts-ignore
 import { handleError } from '../../../../lib/errors/handle_error';
+// @ts-ignore
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
+import { ElasticsearchResponse } from '../../../../../common/types/es';
+import { LegacyRequest } from '../../../../types';
 
-function getBucketScript(max, min) {
+function getBucketScript(max: string, min: string) {
   return {
     bucket_script: {
       buckets_path: {
@@ -23,7 +27,13 @@ function getBucketScript(max, min) {
   };
 }
 
-function buildRequest(req, config, esIndexPattern) {
+function buildRequest(
+  req: LegacyRequest,
+  config: {
+    get: (key: string) => string | undefined;
+  },
+  esIndexPattern: string
+) {
   const min = moment.utc(req.payload.timeRange.min).valueOf();
   const max = moment.utc(req.payload.timeRange.max).valueOf();
   const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
@@ -168,7 +178,12 @@ function buildRequest(req, config, esIndexPattern) {
   };
 }
 
-export function ccrRoute(server) {
+export function ccrRoute(server: {
+  route: (p: any) => void;
+  config: () => {
+    get: (key: string) => string | undefined;
+  };
+}) {
   server.route({
     method: 'POST',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ccr',
@@ -186,14 +201,14 @@ export function ccrRoute(server) {
         }),
       },
     },
-    async handler(req) {
+    async handler(req: LegacyRequest) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
       try {
         const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-        const response = await callWithRequest(
+        const response: ElasticsearchResponse = await callWithRequest(
           req,
           'search',
           buildRequest(req, config, esIndexPattern)
@@ -203,8 +218,8 @@ export function ccrRoute(server) {
           return { data: [] };
         }
 
-        const fullStats = get(response, 'hits.hits').reduce((accum, hit) => {
-          const innerHits = get(hit, 'inner_hits.by_shard.hits.hits');
+        const fullStats = response.hits?.hits.reduce((accum, hit) => {
+          const innerHits = hit.inner_hits?.by_shard.hits?.hits ?? [];
           const innerHitsSource = innerHits.map((innerHit) => get(innerHit, '_source.ccr_stats'));
           const grouped = groupBy(
             innerHitsSource,
@@ -217,36 +232,52 @@ export function ccrRoute(server) {
           };
         }, {});
 
-        const buckets = get(response, 'aggregations.by_follower_index.buckets');
-        const data = buckets.reduce((accum, bucket) => {
+        const buckets = response.aggregations.by_follower_index.buckets;
+        const data = buckets.reduce((accum: any, bucket: any) => {
           const leaderIndex = get(bucket, 'leader_index.buckets[0].key');
           const remoteCluster = get(
             bucket,
             'leader_index.buckets[0].remote_cluster.buckets[0].key'
           );
           const follows = remoteCluster ? `${leaderIndex} on ${remoteCluster}` : leaderIndex;
-          const stat = {
+          const stat: {
+            [key: string]: any;
+            shards: Array<{
+              error?: string;
+              opsSynced: number;
+              syncLagTime: number;
+              syncLagOps: number;
+            }>;
+          } = {
             id: bucket.key,
             index: bucket.key,
             follows,
+            shards: [],
+            error: undefined,
+            opsSynced: undefined,
+            syncLagTime: undefined,
+            syncLagOps: undefined,
           };
 
-          stat.shards = get(bucket, 'by_shard_id.buckets').reduce((accum, shardBucket) => {
-            const fullStat = get(fullStats[`${bucket.key}:${shardBucket.key}`], '[0]', {});
-            const shardStat = {
-              shardId: shardBucket.key,
-              error: fullStat.read_exceptions.length
-                ? fullStat.read_exceptions[0].exception.type
-                : null,
-              opsSynced: get(shardBucket, 'ops_synced.value'),
-              syncLagTime: fullStat.time_since_last_read_millis,
-              syncLagOps: get(shardBucket, 'lag_ops.value'),
-              syncLagOpsLeader: get(shardBucket, 'leader_lag_ops.value'),
-              syncLagOpsFollower: get(shardBucket, 'follower_lag_ops.value'),
-            };
-            accum.push(shardStat);
-            return accum;
-          }, []);
+          stat.shards = get(bucket, 'by_shard_id.buckets').reduce(
+            (accum2: any, shardBucket: any) => {
+              const fullStat = get(fullStats, [`${bucket.key}:${shardBucket.key}`, '[0]'], {});
+              const shardStat = {
+                shardId: shardBucket.key,
+                error: fullStat.read_exceptions.length
+                  ? fullStat.read_exceptions[0].exception.type
+                  : null,
+                opsSynced: get(shardBucket, 'ops_synced.value'),
+                syncLagTime: fullStat.time_since_last_read_millis,
+                syncLagOps: get(shardBucket, 'lag_ops.value'),
+                syncLagOpsLeader: get(shardBucket, 'leader_lag_ops.value'),
+                syncLagOpsFollower: get(shardBucket, 'follower_lag_ops.value'),
+              };
+              accum2.push(shardStat);
+              return accum2;
+            },
+            []
+          );
 
           stat.error = (stat.shards.find((shard) => shard.error) || {}).error;
           stat.opsSynced = stat.shards.reduce((sum, { opsSynced }) => sum + opsSynced, 0);

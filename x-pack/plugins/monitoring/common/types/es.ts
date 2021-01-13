@@ -233,6 +233,9 @@ export interface ElasticsearchLegacySource {
     relocating_node?: string;
     node?: string;
   };
+  ccr_stats?: {
+    leader_index?: string;
+  };
 }
 
 export interface ElasticsearchMetricbeatNode {
