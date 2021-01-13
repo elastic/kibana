@@ -5,16 +5,15 @@
  */
 
 import { Logger } from 'src/core/server';
-import { AlertingSetup, StackAlertsStartDeps } from '../../types';
+import { AlertingSetup } from '../../types';
 import { getAlertType } from './alert_type';
 
 interface RegisterParams {
   logger: Logger;
-  data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
   alerts: AlertingSetup;
 }
 
 export function register(params: RegisterParams) {
-  const { logger, data, alerts } = params;
-  alerts.registerType(getAlertType(logger, data));
+  const { logger, alerts } = params;
+  alerts.registerType(getAlertType(logger));
 }

@@ -5,35 +5,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
-import { AlertType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
-import { ActionContext, BaseActionContext, addMessages } from './action_context';
+import { AlertType, AlertExecutorOptions } from '../../types';
+import { ActionContext, EsQueryAlertActionContext, addMessages } from './action_context';
+import {
+  EsQueryAlertParams,
+  EsQueryAlertParamsSchema,
+  EsQueryAlertParamsSchemaProperties,
+} from './alert_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
-import { TimeSeriesQuery } from '../../../../triggers_actions_ui/server';
-import { ComparatorFns, ComparatorFnNames, getInvalidComparatorMessage } from '../lib';
-import { AlertTypeParams } from '../../../../alerts/server';
-import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
+import { ComparatorFns, getHumanReadableComparator, getInvalidComparatorMessage } from '../lib';
+import { executeEsQuery, ExecuteEsQueryAlertParams } from './es_query';
 
 export const ES_QUERY_ID = '.es-query';
 
 const ActionGroupId = 'doc count threshold met';
-
-export const ParamsSchema = schema.object({
-  indices: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-  timeField: schema.string({ minLength: 1 }),
-  esQuery: schema.string({ minLength: 1 }),
-  timeWindowSize: schema.number({ min: 1 }),
-  timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
-  threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
-  thresholdComparator: schema.string({ validate: validateComparator }),
-});
-
-export type EsQueryAlertParams = TypeOf<typeof ParamsSchema>;
+const ConditionMetAlertInstanceId = 'matched documents';
 
 export function getAlertType(
-  logger: Logger,
-  data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
+  logger: Logger
 ): AlertType<EsQueryAlertParams, {}, {}, ActionContext, typeof ActionGroupId> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
     defaultMessage: 'ES query',
@@ -78,13 +68,22 @@ export function getAlertType(
     }
   );
 
+  const alertParamsVariables = Object.keys(EsQueryAlertParamsSchemaProperties).map(
+    (propKey: string) => {
+      return {
+        name: propKey,
+        description: propKey,
+      };
+    }
+  );
+
   return {
     id: ES_QUERY_ID,
     name: alertTypeName,
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     defaultActionGroupId: ActionGroupId,
     validate: {
-      params: ParamsSchema,
+      params: EsQueryAlertParamsSchema,
     },
     actionVariables: {
       context: [
@@ -94,6 +93,7 @@ export function getAlertType(
         { name: 'value', description: actionVariableContextValueLabel },
         { name: 'conditions', description: actionVariableContextConditionsLabel },
       ],
+      params: alertParamsVariables,
     },
     minimumLicenseRequired: 'basic',
     executor,
@@ -105,70 +105,55 @@ export function getAlertType(
   ) {
     const { alertId, name, services, params } = options;
 
+    const callCluster = services.callCluster;
+
+    logger.info('EXECUTING SEARCH ALERT');
+    logger.info(JSON.stringify(params));
+
+    // parameter validation
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
       throw new Error(getInvalidComparatorError(params.thresholdComparator));
     }
 
-    const callCluster = services.callCluster;
-    const date = new Date().toISOString();
-    // the undefined values below are for config-schema optional types
-    //   const queryParams: TimeSeriesQuery = {
-    //     index: params.indices,
-    //     timeField: params.timeField,
-    //     esQuery: params.esQuery,
-    //     dateStart: date,
-    //     dateEnd: date,
-    //     timeWindowSize: params.timeWindowSize,
-    //     timeWindowUnit: params.timeWindowUnit,
-    //     interval: undefined,
-    //   };
-    //   // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
-    //   const result = await (await data).timeSeriesQuery({
-    //     logger,
-    //     callCluster,
-    //     query: queryParams,
-    //   });
-    //   logger.debug(
-    //     `alert ${ES_QUERY_ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`
-    //   );
+    const date = Date.now();
 
-    //   const groupResults = result.results || [];
-    //   // console.log(`index_threshold: response: ${JSON.stringify(groupResults, null, 4)}`);
-    //   for (const groupResult of groupResults) {
-    //     const instanceId = groupResult.group;
-    //     const value = groupResult.metrics[0][1];
-    //     const met = compareFn(value, params.threshold);
+    const queryParams: ExecuteEsQueryAlertParams = {
+      ...params,
+      date,
+    };
 
-    //     if (!met) continue;
+    const numMatchingDocs = await executeEsQuery({ logger, callCluster, query: queryParams });
+    logger.info(`alert ${ES_QUERY_ID}:${alertId} "${name}" query has ${numMatchingDocs} matches`);
+    logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query has ${numMatchingDocs} matches`);
 
-    //     const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
-    //     const humanFn = `${agg} is ${getHumanReadableComparator(
-    //       params.thresholdComparator
-    //     )} ${params.threshold.join(' and ')}`;
+    // apply the alert condition
+    const conditionMet = compareFn(numMatchingDocs, params.threshold);
+    if (conditionMet) {
+      const humanFn = `number of matching documents is ${getHumanReadableComparator(
+        params.thresholdComparator
+      )} ${params.threshold.join(' and ')}`;
 
-    //     const baseContext: BaseActionContext = {
-    //       date,
-    //       group: instanceId,
-    //       value,
-    //       conditions: humanFn,
-    //     };
-    //     const actionContext = addMessages(options, baseContext, params);
-    //     const alertInstance = options.services.alertInstanceFactory(instanceId);
-    //     alertInstance.scheduleActions(ActionGroupId, actionContext);
-    //     logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
-    //   }
+      const baseContext: EsQueryAlertActionContext = {
+        date: new Date(date).toISOString(),
+        value: numMatchingDocs,
+        conditions: humanFn,
+      };
+
+      const actionContext = addMessages(options, baseContext, params);
+      const alertInstance = options.services.alertInstanceFactory(ConditionMetAlertInstanceId);
+      alertInstance.scheduleActions(ActionGroupId, actionContext);
+      logger.info(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+      logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+    } else {
+      logger.info('NO ACTIVE ALERT');
+    }
   }
 }
 
 function getInvalidComparatorError(comparator: string) {
   return getInvalidComparatorMessage(
-    'xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage',
+    'xpack.stackAlerts.esQuery.invalidComparatorErrorMessage',
     comparator
   );
-}
-function validateComparator(comparator: string): string | undefined {
-  if (ComparatorFnNames.has(comparator)) return;
-
-  return getInvalidComparatorError(comparator);
 }
