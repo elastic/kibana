@@ -76,10 +76,6 @@ export enum TaskRunResult {
   Success = 'Success',
   // Recurring Task completed successfully
   SuccessRescheduled = 'Success',
-  // // Task completed successfully after a retry
-  // SuccessfulRetry = 'SuccessfulRetry',
-  // // Recurring Task completed successfully after a retry
-  // SuccessfulRetryRescheduled = 'SuccessfulRetry',
   // Task has failed and a retry has been scheduled
   RetryScheduled = 'RetryScheduled',
   // Task has failed
