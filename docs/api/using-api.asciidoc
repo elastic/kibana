@@ -1,11 +1,12 @@
 [[using-api]]
 == Using the APIs
 
-Interact with the {kib} APIs through the `curl` command and HTTP and HTTPs protocols.
+Interact with the {kib} APIs through the `curl` command, and HTTP and HTTPs protocols.
 
-It is recommended that you use HTTPs on port 5601 because it is more secure.
+It is recommended that you use HTTPs on a secure port, such as 5601.
 
-NOTE: The {kib} Console supports only Elasticsearch APIs. You are unable to interact with the {kib} APIs with the Console and must use `curl` or another HTTP tool instead. For more information, refer to <<console-kibana,Console>>.
+NOTE: The {kib} *Console* supports only {es} APIs. You are unable to interact with the 
+{kib} APIs with the *Console* and must use `curl` or another HTTP tool instead. For more information, refer to <<console-kibana,Console>>.
 
 [float]
 [[api-authentication]]
@@ -16,9 +17,8 @@ The {kib} APIs support key- and token-based authentication.
 [[token-api-authentication]]
 ==== Token-based authentication
 
-To use token-based authentication, you use the same username and password that you use to log into Elastic.  
-In a given HTTP tool, and when available, you can select to use its 'Basic Authentication' option, 
-which is where the username and password are stored in order to be passed as part of the call. 
+To use token-based authentication, you use the same username and password that you use to log into {kib}.  
+In an HTTP tool, you can use <<basic-authentication,basic authentication>>, where the username and password are stored and passed as part of the call to the API endpoint. 
 
 [float]
 [[key-authentication]]
@@ -31,7 +31,8 @@ For information about API keys, refer to <<api-keys,API keys>>.
 [float]
 [[api-calls]]
 === API calls
-API calls are stateless. Each request that you make happens in isolation from other calls and must include all of the necessary information for {kib} to fulfill the request. API requests return JSON output, which is a format that is machine-readable and works well for automation.
+API calls are stateless. Each request that you make happens in isolation from other calls and must include all of the necessary information for {kib} to fulfill the request. 
+API requests return JSON output, which is a format that is machine-readable and works well for automation.
 
 Calls to the API endpoints require different operations. To interact with the {kib} APIs, use the following operations:
 

@@ -132,7 +132,7 @@ Import an index pattern and dashboard:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_import -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import --form file=@file.ndjson
 --------------------------------------------------
 // KIBANA
 
@@ -181,7 +181,7 @@ Import an index pattern, visualization, *Canvas* workpad, and dashboard that inc
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_import -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import --form file=@file.ndjson
 --------------------------------------------------
 // KIBANA
 
@@ -292,7 +292,7 @@ Import a visualization and dashboard when the index pattern for the visualizatio
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_import -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import --form file=@file.ndjson
 --------------------------------------------------
 // KIBANA
 
