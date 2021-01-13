@@ -61,7 +61,7 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
         </h2>
       }
       body={
-        <>
+        canSave ? (
           <p>
             {i18n.translate(
               'xpack.apm.agentConfig.configTable.emptyPromptText',
@@ -71,7 +71,7 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
               }
             )}
           </p>
-        </>
+        ) : null
       }
       actions={
         canSave ? (
