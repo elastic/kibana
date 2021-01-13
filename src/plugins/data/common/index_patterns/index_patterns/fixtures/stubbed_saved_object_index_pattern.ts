@@ -22,6 +22,18 @@ import stubbedLogstashFields from './logstash_fields';
 
 const mockLogstashFields = stubbedLogstashFields();
 
+export const mockPatternLists = {
+  patternListActive: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  patternList: [
+    'apm-*-transaction*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+};
+
 export function stubbedSavedObjectIndexPattern(id: string | null = null) {
   return {
     id,
@@ -31,6 +43,7 @@ export function stubbedSavedObjectIndexPattern(id: string | null = null) {
       customFormats: {},
       fields: mockLogstashFields,
       title: 'title',
+      ...mockPatternLists,
     },
     version: '2',
   };

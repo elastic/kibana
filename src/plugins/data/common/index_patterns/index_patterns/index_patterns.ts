@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { FieldDescriptor } from 'src/plugins/data/server';
-import { GetCollectionFieldsOptions, IndexField, SavedObjectsClientCommon } from '../..';
+import { GetPatternListFieldsOptions, IndexField, SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
@@ -217,13 +217,15 @@ export class IndexPatternsService {
   };
 
   /**
-   * Get field list by providing { collection }
+   * Get field list by providing { patternList }
    * @param options
    */
-  getFieldsForWildcardCollection = async (options: GetCollectionFieldsOptions) => {
+  getFieldsForWildcardPatternList = async (
+    options: GetPatternListFieldsOptions
+  ): Promise<IndexField[]> => {
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
     const responsesIndexFields = await Promise.all(
-      options.collection
+      options.patternList
         .map((index) =>
           this.apiClient.getFieldsForWildcard({
             pattern: index,
@@ -235,12 +237,16 @@ export class IndexPatternsService {
         )
         .map((p) => p.catch((e) => false))
     );
-    const indexFields: IndexField[] = await formatIndexFields(
+    console.log('one');
+    if (!options.formatFields) {
+      console.log('returning non-format fields');
+      return responsesIndexFields;
+    }
+    console.log('two');
+    return formatIndexFields(
       responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
-      options.collection
+      options.patternList
     );
-    console.log('collection fields:', indexFields);
-    return indexFields;
   };
 
   /**
@@ -248,8 +254,8 @@ export class IndexPatternsService {
    * @param options
    */
   getFieldsForWildcard = async (options: GetFieldsOptions) => {
-    if (options.collection != null) {
-      return this.getFieldsForWildcardCollection(options as GetCollectionFieldsOptions);
+    if (options.patternList != null) {
+      return this.getFieldsForWildcardPatternList(options as GetPatternListFieldsOptions);
     }
 
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
@@ -375,14 +381,13 @@ export class IndexPatternsService {
       id,
       version,
       attributes: {
-        activeCollection,
-        aliasCollection,
         allowNoIndex,
         fieldAttrs,
         fieldFormatMap,
         fields,
         intervalName,
-        label,
+        patternList,
+        patternListActive,
         sourceFilters,
         timeFieldName,
         title,
@@ -398,18 +403,17 @@ export class IndexPatternsService {
     const parsedFieldAttrs: FieldAttrs = fieldAttrs ? JSON.parse(fieldAttrs) : {};
 
     return {
-      activeCollection,
-      aliasCollection,
       allowNoIndex,
       fieldAttrs: parsedFieldAttrs,
       fieldFormats: parsedFieldFormatMap,
       fields: this.fieldArrayToMap(parsedFields, parsedFieldAttrs),
       id,
       intervalName,
-      label,
+      patternList,
+      patternListActive,
       sourceFilters: parsedSourceFilters,
       timeFieldName,
-      title: title ?? label,
+      title,
       type,
       typeMeta: parsedTypeMeta,
       version,
@@ -428,7 +432,7 @@ export class IndexPatternsService {
 
     const spec = this.savedObjectToSpec(savedObject);
 
-    const { activeCollection: collection, title, type, typeMeta } = spec;
+    const { patternListActive, title, type, typeMeta } = spec;
     spec.fieldAttrs = savedObject.attributes.fieldAttrs
       ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
@@ -439,7 +443,7 @@ export class IndexPatternsService {
         id,
         spec.title as string,
         {
-          collection,
+          patternList: patternListActive,
           pattern: title as string,
           metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
           type,
@@ -508,7 +512,6 @@ export class IndexPatternsService {
       metaFields,
     });
 
-    console.log('LOGGG create: indexPattern', indexPattern);
     if (!skipFetchFields) {
       await this.refreshFields(indexPattern);
     }

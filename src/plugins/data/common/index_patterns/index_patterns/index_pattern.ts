@@ -52,11 +52,10 @@ type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
 
 export class IndexPattern implements IIndexPattern {
   public id?: string;
-  public title: string = ''; // deprecate or remove?
+  public title: string = ''; // label, not pattern string
 
-  public aliasCollection?: string[];
-  public activeCollection?: string[];
-  public label?: string;
+  public patternList?: string[];
+  public patternListActive?: string[];
   public fieldFormatMap: Record<string, any>;
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
@@ -119,9 +118,8 @@ export class IndexPattern implements IIndexPattern {
     this.fieldAttrs = spec.fieldAttrs || {};
     this.intervalName = spec.intervalName;
     this.allowNoIndex = spec.allowNoIndex || false;
-    this.activeCollection = spec.activeCollection;
-    this.aliasCollection = spec.aliasCollection;
-    this.label = spec.label;
+    this.patternListActive = spec.patternListActive;
+    this.patternList = spec.patternList;
   }
 
   /**
@@ -217,9 +215,8 @@ export class IndexPattern implements IIndexPattern {
       fieldAttrs: this.fieldAttrs,
       intervalName: this.intervalName,
       allowNoIndex: this.allowNoIndex,
-      activeCollection: this.activeCollection,
-      aliasCollection: this.aliasCollection,
-      label: this.label,
+      patternListActive: this.patternListActive,
+      patternList: this.patternList,
     };
   }
 
@@ -326,9 +323,8 @@ export class IndexPattern implements IIndexPattern {
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
-      activeCollection: this.activeCollection,
-      aliasCollection: this.aliasCollection,
-      label: this.label,
+      patternListActive: this.patternListActive,
+      patternList: this.patternList,
     };
   }
 

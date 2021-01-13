@@ -10,6 +10,20 @@ Object {
   "fields": Object {},
   "id": "id",
   "intervalName": undefined,
+  "patternList": Array [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*",
+  ],
+  "patternListActive": Array [
+    "auditbeat-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*",
+  ],
   "sourceFilters": Array [
     Object {
       "value": "item1",

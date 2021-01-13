@@ -22,13 +22,13 @@ import React from 'react';
 import * as i18n from './translations';
 
 interface AliasCollectionProps {
-  aliasCollection: string[];
-  activeCollection: string[];
+  patternList: string[];
+  patternListActive: string[];
 }
-export const AliasCollection = ({ aliasCollection, activeCollection }: AliasCollectionProps) => (
+export const AliasCollection = ({ patternList, patternListActive }: AliasCollectionProps) => (
   <>
-    {aliasCollection.map((label) => {
-      const isActive = activeCollection.includes(label);
+    {patternList.map((label) => {
+      const isActive = patternListActive.includes(label);
       const badgeContent = isActive ? i18n.ACTIVE : i18n.INACTIVE;
       return (
         <EuiToolTip content={badgeContent} key={label} position="top">

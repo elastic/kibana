@@ -27,16 +27,16 @@ export const getIndexPatterns = async (
 ) => {
   const response = await savedObjectsClient.find<IIndexPattern>({
     type: 'index-pattern',
-    fields: ['title', 'label', 'activeCollection', 'aliasCollection'],
+    fields: ['title', 'label', 'patternListActive', 'patternList'],
     perPage: 10000,
   });
   return response.savedObjects.length > 0
     ? response.savedObjects
         .map((pattern) => {
           const id = pattern.id;
-          const title = pattern.get('title') != null ? pattern.get('title') : pattern.get('label');
-          const activeCollection = pattern.get('activeCollection');
-          const aliasCollection = pattern.get('aliasCollection');
+          const title = pattern.get('title');
+          const patternListActive = pattern.get('patternListActive');
+          const patternList = pattern.get('patternList');
           const isDefault = defaultIndex === id;
 
           const tags = (indexPatternManagementStart as IndexPatternManagementStart).list.getIndexPatternTags(
@@ -45,8 +45,8 @@ export const getIndexPatterns = async (
           );
 
           return {
-            activeCollection,
-            aliasCollection,
+            patternListActive,
+            patternList,
             default: isDefault,
             id,
             tags,

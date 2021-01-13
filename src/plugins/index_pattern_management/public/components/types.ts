@@ -30,6 +30,6 @@ export interface IndexPatternTableItem {
   tag?: string[];
   sort: string;
   label?: string;
-  aliasCollection?: string[];
-  activeCollection?: string[];
+  patternList?: string[];
+  patternListActive?: string[];
 }

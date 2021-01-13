@@ -28,7 +28,7 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export interface IIndexPattern {
   fields: IFieldType[];
-  title: string; // deprecate or remove?
+  title: string; // label, not pattern string
   id?: string;
   type?: string;
   timeFieldName?: string;
@@ -42,7 +42,7 @@ export interface IIndexPattern {
 export interface IndexPatternAttributes {
   type: string;
   fields: string;
-  title?: string; // deprecate or remove?
+  title: string; // label, not pattern string
   typeMeta: string;
   timeFieldName?: string;
   intervalName?: string;
@@ -54,9 +54,8 @@ export interface IndexPatternAttributes {
    */
   allowNoIndex?: boolean;
 
-  activeCollection?: string[];
-  aliasCollection?: string[];
-  label?: string;
+  patternListActive?: string[];
+  patternList?: string[];
 }
 
 export interface FieldAttrs {
@@ -104,7 +103,7 @@ export interface SavedObjectsClientCommon {
 }
 
 export interface GetFieldsOptions {
-  collection?: string[];
+  patternList?: string[];
   pattern: string;
   type?: string;
   lookBack?: boolean;
@@ -113,8 +112,9 @@ export interface GetFieldsOptions {
   allowNoIndex?: boolean;
 }
 
-export interface GetCollectionFieldsOptions extends GetFieldsOptions {
-  collection: string[];
+export interface GetPatternListFieldsOptions extends GetFieldsOptions {
+  patternList: string[];
+  formatFields: boolean;
 }
 
 export interface GetFieldsOptionsTimePattern {
@@ -198,7 +198,7 @@ export type IndexPatternFieldMap = Record<string, FieldSpec>;
 export interface IndexPatternSpec {
   id?: string;
   version?: string;
-  title?: string; // deprecate or remove?
+  title?: string; // label, not pattern string
   intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
@@ -208,9 +208,8 @@ export interface IndexPatternSpec {
   fieldFormats?: Record<string, SerializedFieldFormat>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
-  activeCollection?: string[];
-  aliasCollection?: string[];
-  label?: string;
+  patternListActive?: string[];
+  patternList?: string[];
 }
 
 export interface SourceFilter {

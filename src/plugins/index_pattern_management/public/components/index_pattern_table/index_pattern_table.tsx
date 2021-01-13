@@ -181,14 +181,14 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
       className: 'inpBlockColumn',
       name: '',
       render: ({
-        aliasCollection,
-        activeCollection,
+        patternList,
+        patternListActive,
       }: {
-        aliasCollection?: string[];
-        activeCollection?: string[];
+        patternList?: string[];
+        patternListActive?: string[];
       }) =>
-        aliasCollection && activeCollection ? (
-          <AliasCollection aliasCollection={aliasCollection} activeCollection={activeCollection} />
+        patternList && patternListActive ? (
+          <AliasCollection patternList={patternList} patternListActive={patternListActive} />
         ) : null,
     },
   ];

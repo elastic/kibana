@@ -20,7 +20,10 @@
 import { defaults } from 'lodash';
 import { IndexPatternsService, IndexPattern } from '.';
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
+import {
+  mockPatternLists,
+  stubbedSavedObjectIndexPattern,
+} from './fixtures/stubbed_saved_object_index_pattern';
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
@@ -43,7 +46,7 @@ describe('IndexPatterns', () => {
   let SOClientGetDelay = 0;
 
   beforeEach(() => {
-    const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
+    const indexPatternObj = { id: 'id', version: 'a', attributes: object.attributes };
     savedObjectsClient = {} as SavedObjectsClientCommon;
     savedObjectsClient.find = jest.fn(
       () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
@@ -235,6 +238,7 @@ describe('IndexPatterns', () => {
       version: 'version',
       attributes: {
         title: 'kibana-*',
+        ...mockPatternLists,
         timeFieldName: '@timestamp',
         fields: '[]',
         sourceFilters: '[{"value":"item1"},{"value":"item2"}]',

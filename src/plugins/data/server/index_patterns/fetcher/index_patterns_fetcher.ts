@@ -69,7 +69,6 @@ export class IndexPatternsFetcher {
     rollupIndex?: string;
   }): Promise<FieldDescriptor[]> {
     const { pattern, metaFields, fieldCapsOptions, type, rollupIndex } = options;
-    console.log('getFieldsForWildcard PATTERN', pattern);
     const fieldCapsResponse = await getFieldCapabilities(
       this.elasticsearchClient,
       pattern,

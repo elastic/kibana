@@ -28,9 +28,24 @@ const mockManagementPluginStart = mockManagementPlugin.createStartContract();
   savedObjects: [
     {
       id: 'test',
-      get: () => {
+      attributes: {
+        activeCollection: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        aliasCollection: [
+          'apm-*-transaction*',
+          'auditbeat-*',
+          'endgame-*',
+          'filebeat-*',
+          'packetbeat-*',
+          'winlogbeat-*',
+        ],
+        label: 'Label',
+      },
+      get title() {
         return 'test name';
       },
+      // get: (key: string) => {
+      //   return this?[key];
+      // },
     },
     {
       id: 'test1',

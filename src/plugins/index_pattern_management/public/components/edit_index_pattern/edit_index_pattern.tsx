@@ -165,20 +165,20 @@ export const EditIndexPattern = withRouter(
 
     const indexPatternCollections = useMemo(
       () =>
-        indexPattern.aliasCollection && indexPattern.activeCollection ? (
+        indexPattern.patternList && indexPattern.patternListActive ? (
           <div>
             <FormattedMessage
-              id="indexPatternManagement.editIndexPattern.indexAliasCollections.aliasCollection"
+              id="indexPatternManagement.editIndexPattern.indexAliasCollections.patternList"
               defaultMessage="Index Alias Collection: "
             />
             <AliasCollection
-              aliasCollection={indexPattern.aliasCollection}
-              activeCollection={indexPattern.activeCollection}
+              patternList={indexPattern.patternList}
+              patternListActive={indexPattern.patternListActive}
             />
             <EuiSpacer size="m" />
           </div>
         ) : null,
-      [indexPattern.activeCollection, indexPattern.aliasCollection]
+      [indexPattern.patternListActive, indexPattern.patternList]
     );
 
     return (
