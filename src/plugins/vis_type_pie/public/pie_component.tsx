@@ -72,6 +72,7 @@ export interface PieComponentProps {
   chartsThemeService: ChartsPluginSetup['theme'];
   palettes: PaletteRegistry;
   services: DataPublicPluginStart;
+  syncColors: boolean;
 }
 
 const PieComponent = (props: PieComponentProps) => {
@@ -160,7 +161,7 @@ const PieComponent = (props: PieComponentProps) => {
     [props.uiState]
   );
 
-  const { visData, visParams, palettes, services } = props;
+  const { visData, visParams, palettes, services, syncColors } = props;
 
   function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
     if (typeof d[metricColumn.id] === 'number' && d[metricColumn.id] !== 0) {
@@ -193,9 +194,18 @@ const PieComponent = (props: PieComponentProps) => {
         props.uiState?.get('vis.colors', {}),
         visData.rows.length,
         palettes,
-        services.fieldFormats
+        services.fieldFormats,
+        syncColors
       ),
-    [bucketColumns, palettes, props.uiState, services.fieldFormats, visData.rows.length, visParams]
+    [
+      bucketColumns,
+      palettes,
+      props.uiState,
+      services.fieldFormats,
+      visData.rows.length,
+      visParams,
+      syncColors,
+    ]
   );
   const config = useMemo(() => getConfig(visParams, chartTheme), [chartTheme, visParams]);
   const tooltip: TooltipProps = {

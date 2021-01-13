@@ -30,7 +30,8 @@ export const getLayers = (
   overwriteColors: { [key: string]: string },
   totalSeries: number,
   palettes: PaletteRegistry,
-  formatter: DataPublicPluginStart['fieldFormats']
+  formatter: DataPublicPluginStart['fieldFormats'],
+  syncColors: boolean
 ): PartitionLayer[] => {
   const fillLabel: Partial<PartitionFillLabel> = {
     textInvertible: true,
@@ -91,6 +92,7 @@ export const getLayers = (
             behindText: visParams.labels.show,
             maxDepth: columns.length,
             totalSeries,
+            syncColors,
           });
 
           return outputColor || 'rgba(0,0,0,0)';

@@ -43,7 +43,7 @@ export const getPieVisRenderer: (
   name: vislibPieName,
   displayName: 'Pie visualization',
   reuseDomNode: true,
-  render: async (domNode, { visConfig, visData }, handlers) => {
+  render: async (domNode, { visConfig, visData, syncColors }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData);
     const isSplitChart = Boolean(visConfig.dimensions.splitRow);
 
@@ -67,6 +67,7 @@ export const getPieVisRenderer: (
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
               services={services.data}
+              syncColors={syncColors}
             />
           </VisualizationContainer>
         </>

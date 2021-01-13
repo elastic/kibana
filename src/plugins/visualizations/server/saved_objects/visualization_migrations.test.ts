@@ -1707,7 +1707,7 @@ describe('migration visualization', () => {
       },
     });
 
-    it('should decorate existing docs with the kibana legacy palette', () => {
+    it('should decorate existing docs with the kibana legacy palette - pie', () => {
       const migratedTestDoc = migrate(getTestDoc('pie'));
       const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
 
@@ -1721,7 +1721,7 @@ describe('migration visualization', () => {
       expect(isVislibVis).toEqual(true);
     });
 
-    it('should decorate existing docs with the kibana legacy palette', () => {
+    it('should decorate existing docs with the kibana legacy palette - xy', () => {
       const migratedTestDoc = migrate(getTestDoc());
       const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
 

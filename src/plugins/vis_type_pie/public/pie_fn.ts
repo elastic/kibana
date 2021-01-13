@@ -31,6 +31,7 @@ export interface RenderValue {
   visData: Datatable;
   visType: string;
   visConfig: PieVisParams;
+  syncColors: boolean;
 }
 
 export type VisTypePieExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -67,6 +68,7 @@ export const createPieVisFn = (): VisTypePieExpressionFunctionDefinition => ({
       value: {
         visData: context,
         visConfig,
+        syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         visType: 'pie',
         params: {
           listenOnChange: true,

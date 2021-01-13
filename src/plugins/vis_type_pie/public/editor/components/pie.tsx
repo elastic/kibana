@@ -27,9 +27,9 @@ import {
   BasicOptions,
   SwitchOption,
   SelectOption,
+  PalettePicker,
 } from '../../../../vis_default_editor/public';
 import { TruncateLabelsOption } from './truncate_labels';
-import { PalettePicker } from './palette_picker';
 import { PaletteRegistry } from '../../../../charts/public';
 import { PieVisParams, LabelPositions, ValueFormats } from '../../types';
 import { getLabelPositions, getValuesFormats } from '../collections';
