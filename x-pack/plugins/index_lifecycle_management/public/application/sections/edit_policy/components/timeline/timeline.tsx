@@ -5,8 +5,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useMemo } from 'react';
-import { EuiText, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiText, EuiIcon, EuiIconProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { PhasesExceptDelete } from '../../../../../../common/types';
 import { useFormData } from '../../../../../shared_imports';
 
 import { FormInternal } from '../../types';
@@ -18,6 +19,11 @@ import {
 } from '../../lib';
 
 import './_timeline.scss';
+import InfinityIconSvg from './infinity_icon.svg';
+
+const InfinityIcon: FunctionComponent<Omit<EuiIconProps, 'type'>> = (props) => (
+  <EuiIcon type={InfinityIconSvg} {...props} />
+);
 
 const toPercent = (n: number, total: number) => (n / total) * 100;
 
@@ -66,7 +72,7 @@ const calculateWidths = (inputs: PhaseAgeInMilliseconds) => {
 
 const TimelinePhaseText: FunctionComponent<{
   phaseName: string;
-  durationInPhase?: string;
+  durationInPhase?: React.ReactNode | string;
 }> = ({ phaseName, durationInPhase }) => (
   <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
     <EuiFlexItem>
@@ -74,10 +80,14 @@ const TimelinePhaseText: FunctionComponent<{
         <strong>{phaseName}</strong>
       </EuiText>
     </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiText className="ilmTimeline__timelinePhaseText__durationText" size="s">
-        {durationInPhase}
-      </EuiText>
+    <EuiFlexItem grow={false}>
+      {typeof durationInPhase === 'string' ? (
+        <EuiText className="ilmTimeline__timelinePhaseText__durationText" size="s">
+          {durationInPhase}
+        </EuiText>
+      ) : (
+        durationInPhase
+      )}
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -94,6 +104,9 @@ export const Timeline: FunctionComponent = () => {
   ]);
 
   const widths = calculateWidths(phaseTimingInMs);
+
+  const getDurationInPhaseContent = (phase: PhasesExceptDelete): string | React.ReactNode =>
+    phaseTimingInMs.phases[phase] === Infinity ? <InfinityIcon /> : humanReadableTimings[phase];
 
   return (
     <div
@@ -113,7 +126,7 @@ export const Timeline: FunctionComponent = () => {
               <div className="ilmTimeline__colorBarCommon ilmTimeline__hotPhase__colorBar" />
               <TimelinePhaseText
                 phaseName={i18nTexts.hotPhase}
-                durationInPhase={humanReadableTimings.hot}
+                durationInPhase={getDurationInPhaseContent('hot')}
               />
             </div>
             {formData._meta?.warm.enabled && (
@@ -121,7 +134,7 @@ export const Timeline: FunctionComponent = () => {
                 <div className="ilmTimeline__colorBarCommon ilmTimeline__warmPhase__colorBar" />
                 <TimelinePhaseText
                   phaseName={i18nTexts.warmPhase}
-                  durationInPhase={humanReadableTimings.warm}
+                  durationInPhase={getDurationInPhaseContent('warm')}
                 />
               </div>
             )}
@@ -130,7 +143,7 @@ export const Timeline: FunctionComponent = () => {
                 <div className="ilmTimeline__colorBarCommon ilmTimeline__coldPhase__colorBar" />
                 <TimelinePhaseText
                   phaseName={i18nTexts.coldPhase}
-                  durationInPhase={humanReadableTimings.cold}
+                  durationInPhase={getDurationInPhaseContent('cold')}
                 />
               </div>
             )}
