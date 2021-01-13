@@ -272,6 +272,7 @@ export const sendAlertToTimelineAction = async ({
       notes: null,
       timeline: {
         ...timelineDefaults,
+        kqlMode: 'search',
         filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
         dataProviders: [
           {
