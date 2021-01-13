@@ -25,6 +25,7 @@ import { SecurityPluginSetup } from '../../security/public';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
 import { MlPluginSetup, MlPluginStart } from '../../ml/public';
+import { GlobalSearchPluginSetup } from '../../global_search/public';
 
 import { Detections } from './detections';
 import { Cases } from './cases';
@@ -42,6 +43,7 @@ export interface SetupPlugins {
   usageCollection?: UsageCollectionSetup;
   telemetryManagementSection?: TelemetryManagementSectionPluginSetup;
   ml?: MlPluginSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 
 export interface StartPlugins {

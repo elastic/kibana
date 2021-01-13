@@ -65,6 +65,7 @@ import { licenseService } from './common/hooks/use_license';
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
+import { getSearchProvider } from './search_provider';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -314,6 +315,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         return () => true;
       },
     });
+    const { globalSearch } = plugins;
+    if (globalSearch) {
+      globalSearch.registerResultProvider(
+        getSearchProvider(
+          core.getStartServices().then(
+            ([
+              {
+                application: { capabilities },
+              },
+            ]) => capabilities
+          )
+        )
+      );
+    }
 
     plugins.triggersActionsUi.actionTypeRegistry.register(getCaseConnectorUI());
 
