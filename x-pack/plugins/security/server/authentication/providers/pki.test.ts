@@ -31,7 +31,7 @@ interface MockPeerCertificate extends Partial<PeerCertificate> {
   fingerprint256: string;
 }
 
-function getMockPeerCertificate(chain: string[] | string) {
+function getMockPeerCertificate(chain: string[] | string, isChainIncomplete = false) {
   const mockPeerCertificate = {} as MockPeerCertificate;
 
   (Array.isArray(chain) ? chain : [chain]).reduce(
@@ -39,8 +39,13 @@ function getMockPeerCertificate(chain: string[] | string) {
       certificate.fingerprint256 = fingerprint;
       certificate.raw = { toString: (enc: string) => `fingerprint:${fingerprint}:${enc}` };
 
-      // Imitate self-signed certificate that is issuer for itself.
-      certificate.issuerCertificate = index === fingerprintChain.length - 1 ? certificate : {};
+      if (index === fingerprintChain.length - 1) {
+        // If the chain is incomplete, set the issuer to undefined.
+        // Otherwise, imitate self-signed certificate that is issuer for itself.
+        certificate.issuerCertificate = isChainIncomplete ? undefined : certificate;
+      } else {
+        certificate.issuerCertificate = {};
+      }
 
       // Imitate other fields for logging assertions
       certificate.subject = 'mock subject';
@@ -70,7 +75,7 @@ function getMockSocket({
     socket.authorizationError = new Error('mock authorization error');
   }
   socket.getPeerCertificate = jest.fn().mockReturnValue(peerCertificate);
-  return socket;
+  return { socket };
 }
 
 function expectAuthenticateCall(
@@ -95,72 +100,64 @@ describe('PKIAuthenticationProvider', () => {
 
   afterEach(() => jest.clearAllMocks());
 
+  function expectDebugLogs(...messages: string[]) {
+    for (const message of messages) {
+      expect(mockOptions.logger.debug).toHaveBeenCalledWith(message);
+    }
+  }
+
   function defineCommonLoginAndAuthenticateTests(
     operation: (request: KibanaRequest) => Promise<AuthenticationResult>
   ) {
     it('does not handle unauthorized requests.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        socket: getMockSocket({
-          authorized: false,
-          peerCertificate: getMockPeerCertificate('2A:7A:C2:DD'),
-        }),
-      });
+      const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD');
+      const { socket } = getMockSocket({ authorized: false, peerCertificate });
+      const request = httpServerMock.createKibanaRequest({ socket });
 
       await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-      expect(mockOptions.logger.debug).toHaveBeenCalledWith(
-        'Peer certificate chain: [{"subject":"mock subject","issuer":"mock issuer","issuerCertType":"object","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]'
-      );
-      expect(mockOptions.logger.debug).toHaveBeenCalledWith(
+      expectDebugLogs(
+        'Peer certificate chain: [{"subject":"mock subject","issuer":"mock issuer","issuerCertType":"object","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
         'Authentication is not possible since peer certificate was not authorized: Error: mock authorization error.'
       );
     });
 
     it('does not handle requests with a missing certificate chain.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        socket: getMockSocket({ authorized: true, peerCertificate: null }),
-      });
+      const { socket } = getMockSocket({ authorized: true, peerCertificate: null });
+      const request = httpServerMock.createKibanaRequest({ socket });
 
       await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-      expect(mockOptions.logger.debug).toHaveBeenCalledWith('Peer certificate chain: []');
-      expect(mockOptions.logger.debug).toHaveBeenCalledWith(
+      expectDebugLogs(
+        'Peer certificate chain: []',
         'Authentication is not possible due to missing peer certificate chain.'
       );
     });
 
     it('does not handle requests with an incomplete certificate chain.', async () => {
-      const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD');
-      (peerCertificate as any).issuerCertificate = undefined; // This behavior has been observed, even though it's not valid according to the type definition
-      const request = httpServerMock.createKibanaRequest({
-        socket: getMockSocket({ authorized: true, peerCertificate }),
-      });
+      const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD', true);
+      const { socket } = getMockSocket({ authorized: true, peerCertificate });
+      const request = httpServerMock.createKibanaRequest({ socket });
 
       await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-      expect(mockOptions.logger.debug).toHaveBeenCalledWith(
-        'Peer certificate chain: [{"subject":"mock subject","issuer":"mock issuer","issuerCertType":"undefined","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]'
-      );
-      expect(mockOptions.logger.debug).toHaveBeenCalledWith(
+      expectDebugLogs(
+        'Peer certificate chain: [{"subject":"mock subject","issuer":"mock issuer","issuerCertType":"undefined","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
         'Authentication is not possible due to incomplete peer certificate chain.'
       );
     });
 
     it('gets an access token in exchange to peer certificate chain and stores it in the state.', async () => {
       const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest({
-        headers: {},
-        socket: getMockSocket({
-          authorized: true,
-          peerCertificate: getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']),
-        }),
-      });
+      const peerCertificate = getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']);
+      const { socket } = getMockSocket({ authorized: true, peerCertificate });
+      const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
       mockOptions.client.callAsInternalUser.mockResolvedValue({
         authentication: user,
@@ -193,13 +190,9 @@ describe('PKIAuthenticationProvider', () => {
 
     it('gets an access token in exchange to a self-signed certificate and stores it in the state.', async () => {
       const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest({
-        headers: {},
-        socket: getMockSocket({
-          authorized: true,
-          peerCertificate: getMockPeerCertificate('2A:7A:C2:DD'),
-        }),
-      });
+      const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD');
+      const { socket } = getMockSocket({ authorized: true, peerCertificate });
+      const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
       mockOptions.client.callAsInternalUser.mockResolvedValue({
         authentication: user,
@@ -226,12 +219,9 @@ describe('PKIAuthenticationProvider', () => {
     });
 
     it('fails if could not retrieve an access token in exchange to peer certificate chain.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        socket: getMockSocket({
-          authorized: true,
-          peerCertificate: getMockPeerCertificate('2A:7A:C2:DD'),
-        }),
-      });
+      const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD');
+      const { socket } = getMockSocket({ authorized: true, peerCertificate });
+      const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
       const failureReason = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
       mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
@@ -287,13 +277,9 @@ describe('PKIAuthenticationProvider', () => {
     });
 
     it('does not exchange peer certificate to access token if request does not require authentication.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        routeAuthRequired: false,
-        socket: getMockSocket({
-          authorized: true,
-          peerCertificate: getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']),
-        }),
-      });
+      const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD');
+      const { socket } = getMockSocket({ authorized: true, peerCertificate });
+      const request = httpServerMock.createKibanaRequest({ socket, routeAuthRequired: false });
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.notHandled()
       );
@@ -303,12 +289,11 @@ describe('PKIAuthenticationProvider', () => {
     });
 
     it('does not exchange peer certificate to access token for Ajax requests.', async () => {
+      const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD');
+      const { socket } = getMockSocket({ authorized: true, peerCertificate });
       const request = httpServerMock.createKibanaRequest({
+        socket,
         headers: { 'kbn-xsrf': 'xsrf' },
-        socket: getMockSocket({
-          authorized: true,
-          peerCertificate: getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']),
-        }),
       });
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.notHandled()
@@ -319,9 +304,8 @@ describe('PKIAuthenticationProvider', () => {
     });
 
     it('fails with non-401 error if state is available, peer is authorized, but certificate is not available.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        socket: getMockSocket({ authorized: true }),
-      });
+      const { socket } = getMockSocket({ authorized: true });
+      const request = httpServerMock.createKibanaRequest({ socket });
 
       const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
 
@@ -333,7 +317,8 @@ describe('PKIAuthenticationProvider', () => {
     });
 
     it('invalidates token and fails with 401 if state is present, but peer certificate is not.', async () => {
-      const request = httpServerMock.createKibanaRequest({ socket: getMockSocket() });
+      const { socket } = getMockSocket();
+      const request = httpServerMock.createKibanaRequest({ socket });
       const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
@@ -347,9 +332,9 @@ describe('PKIAuthenticationProvider', () => {
     });
 
     it('invalidates token and fails with 401 if new certificate is present, but not authorized.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        socket: getMockSocket({ peerCertificate: getMockPeerCertificate('2A:7A:C2:DD') }),
-      });
+      const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD');
+      const { socket } = getMockSocket({ peerCertificate });
+      const request = httpServerMock.createKibanaRequest({ socket });
       const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
@@ -364,12 +349,9 @@ describe('PKIAuthenticationProvider', () => {
 
     it('invalidates existing token and gets a new one if fingerprints do not match.', async () => {
       const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest({
-        socket: getMockSocket({
-          authorized: true,
-          peerCertificate: getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']),
-        }),
-      });
+      const peerCertificate = getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']);
+      const { socket } = getMockSocket({ authorized: true, peerCertificate });
+      const request = httpServerMock.createKibanaRequest({ socket });
       const state = { accessToken: 'existing-token', peerCertificateFingerprint256: '3A:9A:C5:DD' };
 
       mockOptions.client.callAsInternalUser.mockResolvedValue({
@@ -422,7 +404,7 @@ describe('PKIAuthenticationProvider', () => {
         socket: getMockSocket({
           authorized: true,
           peerCertificate: getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']),
-        }),
+        }).socket,
       });
       const nonAjaxState = {
         accessToken: 'existing-token',
@@ -440,7 +422,7 @@ describe('PKIAuthenticationProvider', () => {
         socket: getMockSocket({
           authorized: true,
           peerCertificate: getMockPeerCertificate(['3A:7A:C2:DD', '3B:8B:D3:EE']),
-        }),
+        }).socket,
       });
       const ajaxState = {
         accessToken: 'existing-token',
@@ -458,7 +440,7 @@ describe('PKIAuthenticationProvider', () => {
         socket: getMockSocket({
           authorized: true,
           peerCertificate: getMockPeerCertificate(['4A:7A:C2:DD', '3B:8B:D3:EE']),
-        }),
+        }).socket,
       });
       const optionalAuthState = {
         accessToken: 'existing-token',
@@ -503,7 +485,8 @@ describe('PKIAuthenticationProvider', () => {
     });
 
     it('fails with 401 if existing token is expired, but certificate is not present.', async () => {
-      const request = httpServerMock.createKibanaRequest({ socket: getMockSocket() });
+      const { socket } = getMockSocket();
+      const request = httpServerMock.createKibanaRequest({ socket });
       const state = { accessToken: 'existing-token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
 
       const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
@@ -524,13 +507,9 @@ describe('PKIAuthenticationProvider', () => {
     it('succeeds if state contains a valid token.', async () => {
       const user = mockAuthenticatedUser();
       const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
-      const request = httpServerMock.createKibanaRequest({
-        headers: {},
-        socket: getMockSocket({
-          authorized: true,
-          peerCertificate: getMockPeerCertificate(state.peerCertificateFingerprint256),
-        }),
-      });
+      const peerCertificate = getMockPeerCertificate(state.peerCertificateFingerprint256);
+      const { socket } = getMockSocket({ authorized: true, peerCertificate });
+      const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
       const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
@@ -552,13 +531,9 @@ describe('PKIAuthenticationProvider', () => {
 
     it('fails if token from the state is rejected because of unknown reason.', async () => {
       const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
-      const request = httpServerMock.createKibanaRequest({
-        headers: {},
-        socket: getMockSocket({
-          authorized: true,
-          peerCertificate: getMockPeerCertificate(state.peerCertificateFingerprint256),
-        }),
-      });
+      const peerCertificate = getMockPeerCertificate(state.peerCertificateFingerprint256);
+      const { socket } = getMockSocket({ authorized: true, peerCertificate });
+      const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
       const failureReason = new errors.ServiceUnavailable();
       const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
