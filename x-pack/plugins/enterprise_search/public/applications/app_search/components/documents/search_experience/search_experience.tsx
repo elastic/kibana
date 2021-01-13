@@ -7,20 +7,20 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { useValues } from 'kea';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 // @ts-expect-error types are not available for this package yet;
-import { SearchProvider, SearchBox, Sorting } from '@elastic/react-search-ui';
+import { SearchProvider, SearchBox, Sorting, Facet } from '@elastic/react-search-ui';
 // @ts-expect-error types are not available for this package yet
 import AppSearchAPIConnector from '@elastic/search-ui-app-search-connector';
 
 import './search_experience.scss';
 
-import { Fields, SortOption } from './types';
-import { EngineLogic } from '../../engine';
 import { externalUrl } from '../../../../shared/enterprise_search_url';
 import { useLocalStorage } from '../../../../shared/use_local_storage';
+import { EngineLogic } from '../../engine';
 
-import { SearchBoxView, SortingView } from './views';
+import { Fields, SortOption } from './types';
+import { SearchBoxView, SortingView, MultiCheckboxFacetsView } from './views';
 import { SearchExperienceContent } from './search_experience_content';
 import { buildSearchUIConfig } from './build_search_ui_config';
 import { CustomizationCallout } from './customization_callout';
@@ -102,7 +102,36 @@ export const SearchExperience: React.FC = () => {
               view={SortingView}
             />
             <EuiSpacer />
-            <CustomizationCallout onClick={openCustomizationModal} />
+            {fields.filterFields.length > 0 ? (
+              <>
+                {fields.filterFields.map((fieldName) => (
+                  <div key={fieldName}>
+                    <Facet
+                      field={fieldName}
+                      label={fieldName}
+                      view={MultiCheckboxFacetsView}
+                      filterType="any"
+                    />
+                    <EuiSpacer size="l" />
+                  </div>
+                ))}
+                <EuiButton
+                  data-test-subj="customize"
+                  color="primary"
+                  iconType="gear"
+                  onClick={openCustomizationModal}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.documents.search.customizationButton',
+                    {
+                      defaultMessage: 'Customize filters and sort',
+                    }
+                  )}
+                </EuiButton>
+              </>
+            ) : (
+              <CustomizationCallout onClick={openCustomizationModal} />
+            )}
           </EuiFlexItem>
           <EuiFlexItem className="documentsSearchExperience__content">
             <SearchExperienceContent />

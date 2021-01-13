@@ -25,4 +25,20 @@
     background-color: $euiPageBackgroundColor;
     padding: $euiSizeL;
   }
+  
+  .documentsSearchExperience__facet {
+    .euiCheckboxGroup__item {
+      // Adding text-overflow to euiCheckbox__label below
+      // causes approximately 3px of bottom margin. this corrects
+      // that.
+      margin-bottom: -3px;
+    }
+
+    .euiCheckbox__label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+  }
 }
