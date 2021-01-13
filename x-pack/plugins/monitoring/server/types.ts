@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
-import { IRouter, ILegacyClusterClient, Logger } from 'kibana/server';
+import { IRouter, ILegacyClusterClient, Logger, ILegacyCustomClusterClient } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
 import { PluginStartContract as ActionsPluginsStartContact } from '../../actions/server';
@@ -53,9 +53,11 @@ export interface MonitoringCoreConfig {
 }
 
 export interface RouteDependencies {
+  cluster: ILegacyCustomClusterClient;
   router: IRouter;
   licenseService: MonitoringLicenseService;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
+  logger: Logger;
 }
 
 export interface MonitoringCore {

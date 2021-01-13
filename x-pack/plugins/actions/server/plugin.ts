@@ -19,6 +19,7 @@ import {
   ElasticsearchServiceStart,
   ILegacyClusterClient,
   SavedObjectsClientContract,
+  SavedObjectsBulkGetObject,
 } from '../../../../src/core/server';
 
 import {
@@ -333,7 +334,12 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     this.eventLogService!.registerSavedObjectProvider('action', (request) => {
       const client = secureGetActionsClientWithRequest(request);
-      return async (type: string, id: string) => (await client).get({ id });
+      return (objects?: SavedObjectsBulkGetObject[]) =>
+        objects
+          ? Promise.all(
+              objects.map(async (objectItem) => await (await client).get({ id: objectItem.id }))
+            )
+          : Promise.resolve([]);
     });
 
     const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
