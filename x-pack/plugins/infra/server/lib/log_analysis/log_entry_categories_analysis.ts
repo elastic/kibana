@@ -5,7 +5,6 @@
  */
 
 import type { ILegacyScopedClusterClient } from 'src/core/server';
-import { LogEntryContext } from '../../../common/http_api';
 import {
   compareDatasetsByMaximumAnomalyScore,
   getJobId,
@@ -13,6 +12,7 @@ import {
   logEntryCategoriesJobTypes,
 } from '../../../common/log_analysis';
 import { CategorySort } from '../../../common/http_api/log_analysis';
+import { LogEntryContext } from '../../../common/log_entry';
 import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';

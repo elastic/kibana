@@ -32,7 +32,7 @@ describe('LogEntryActionsMenu component', () => {
               fields: [{ field: 'host.ip', value: ['HOST_IP'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -62,7 +62,7 @@ describe('LogEntryActionsMenu component', () => {
               fields: [{ field: 'container.id', value: ['CONTAINER_ID'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -92,7 +92,7 @@ describe('LogEntryActionsMenu component', () => {
               fields: [{ field: 'kubernetes.pod.uid', value: ['POD_UID'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -126,7 +126,7 @@ describe('LogEntryActionsMenu component', () => {
               ],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -158,7 +158,7 @@ describe('LogEntryActionsMenu component', () => {
               fields: [],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -192,7 +192,7 @@ describe('LogEntryActionsMenu component', () => {
               fields: [{ field: 'trace.id', value: ['1234567'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -226,7 +226,7 @@ describe('LogEntryActionsMenu component', () => {
               ],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
@@ -256,7 +256,7 @@ describe('LogEntryActionsMenu component', () => {
               fields: [],
               id: 'ITEM_ID',
               index: 'INDEX',
-              key: {
+              cursor: {
                 time: 0,
                 tiebreaker: 0,
               },
