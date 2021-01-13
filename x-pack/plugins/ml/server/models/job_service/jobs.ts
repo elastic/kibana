@@ -433,7 +433,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
               job_id: jobId,
             });
 
-        const isGroup = body.jobs.some((j) => j.groups.includes(jobId));
+        const isGroup = body.jobs.some((j) => j.groups !== undefined && j.groups.includes(jobId));
         results[jobId] = { exists: body.count > 0, isGroup };
       } catch (e) {
         // if a non-wildcarded job id is supplied, the get jobs endpoint will 404
