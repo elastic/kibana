@@ -17,10 +17,7 @@ import {
 import { ContainerType } from '../../../common/service_metadata';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import {
-  getProcessorEventForAggregatedTransactions,
-  getDocumentTypeFilterForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 type ServiceMetadataIconsRaw = Pick<
@@ -56,9 +53,6 @@ export async function getServiceMetadataIcons({
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
-    ...getDocumentTypeFilterForAggregatedTransactions(
-      searchAggregatedTransactions
-    ),
   ];
 
   const params = {
@@ -69,6 +63,7 @@ export async function getServiceMetadataIcons({
         ),
         ProcessorEvent.error,
         ProcessorEvent.span,
+        ProcessorEvent.metric,
       ],
     },
     terminateAfter: 1,

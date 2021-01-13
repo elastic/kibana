@@ -22,10 +22,7 @@ import {
 import { ContainerType } from '../../../common/service_metadata';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { should } from './get_service_metadata_icons';
 
@@ -75,9 +72,6 @@ export async function getServiceMetadataDetails({
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
-    ...getDocumentTypeFilterForAggregatedTransactions(
-      searchAggregatedTransactions
-    ),
   ];
 
   const params = {
@@ -88,6 +82,7 @@ export async function getServiceMetadataDetails({
         ),
         ProcessorEvent.error,
         ProcessorEvent.span,
+        ProcessorEvent.metric,
       ],
     },
     body: {
