@@ -22,6 +22,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { getUISettings, getI18n } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
 
+export const TSVB_EDITOR_NAME = 'tsvbEditor';
+
 export class EditorController {
   constructor(el, vis, eventEmitter, embeddableHandler) {
     this.el = el;

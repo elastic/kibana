@@ -6,6 +6,7 @@
     "plugins/apm/scripts/**/*",
     "plugins/console_extensions/**/*",
     "plugins/data_enhanced/**/*",
+    "plugins/discover_enhanced/**/*",
     "plugins/dashboard_enhanced/**/*",
     "plugins/global_search/**/*",
     "plugins/graph/**/*",
@@ -16,7 +17,9 @@
     "plugins/security_solution/cypress/**/*",
     "plugins/task_manager/**/*",
     "plugins/telemetry_collection_xpack/**/*",
+    "plugins/translations/**/*",
     "plugins/ui_actions_enhanced/**/*",
+    "plugins/vis_type_timeseries_enhanced/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -25,6 +28,7 @@
   },
   "references": [
     { "path": "../src/core/tsconfig.json" },
+    { "path": "../src/plugins/telemetry_management_section/tsconfig.json" },
     { "path": "../src/plugins/management/tsconfig.json" },
     { "path": "../src/plugins/bfetch/tsconfig.json" },
     { "path": "../src/plugins/charts/tsconfig.json" },
@@ -58,6 +62,7 @@
 
     { "path": "./plugins/console_extensions/tsconfig.json" },
     { "path": "./plugins/data_enhanced/tsconfig.json" },
+    { "path": "./plugins/discover_enhanced/tsconfig.json" },
     { "path": "./plugins/global_search/tsconfig.json" },
     { "path": "./plugins/features/tsconfig.json" },
     { "path": "./plugins/graph/tsconfig.json" },
@@ -67,5 +72,7 @@
     { "path": "./plugins/task_manager/tsconfig.json" },
     { "path": "./plugins/telemetry_collection_xpack/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
+    { "path": "./plugins/vis_type_timeseries_enhanced/tsconfig.json" },
+    { "path": "./plugins/translations/tsconfig.json" },
   ]
 }
