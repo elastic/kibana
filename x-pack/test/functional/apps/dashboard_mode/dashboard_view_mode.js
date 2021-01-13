@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
           email: 'example@example.com',
           full_name: 'dashuser',
           roles: ['kibana_dashboard_only_user', 'logstash-data'],
-        })
+        });
       });
 
       before('Create user with mixes roles', async () => {
@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }) {
           email: 'example@example.com',
           full_name: 'mixeduser',
           roles: ['kibana_dashboard_only_user', 'kibana_admin', 'logstash-data'],
-        })
+        });
       });
 
       before('Create user with dashboard and superuser role', async () => {
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
           email: 'example@example.com',
           full_name: 'mixeduser',
           roles: ['kibana_dashboard_only_user', 'superuser'],
-        })
+        });
       });
 
       after(async () => {
