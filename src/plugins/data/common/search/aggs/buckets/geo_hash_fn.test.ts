@@ -99,14 +99,7 @@ describe('agg_expression_functions', () => {
         json: '{ "foo": true }',
       });
 
-      expect(actual.value.params.json).toEqual({ foo: true });
-
-      expect(() => {
-        fn({
-          field: 'geo_field',
-          json: '/// intentionally malformed json ///',
-        });
-      }).toThrowErrorMatchingInlineSnapshot(`"Unable to parse json argument string"`);
+      expect(actual.value.params.json).toEqual('{ "foo": true }');
     });
   });
 });
