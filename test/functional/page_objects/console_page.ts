@@ -82,20 +82,25 @@ export function ConsolePageProvider({ getService }: FtrProviderContext) {
       return await this.getFontSize(await this.getRequestEditor());
     }
 
+    public async getEditor() {
+      return testSubjects.find('console-application');
+    }
+
     public async dismissTutorial() {
       try {
-        const closeButton = await find.byCssSelector('.euiFlyout__closeButton');
+        const closeButton = await testSubjects.find('help-close-button');
         await closeButton.click();
       } catch (e) {
         // Ignore because it is probably not there.
       }
     }
 
-    public async promptAutocomplete(editor: WebElementWrapper) {
+    public async promptAutocomplete() {
       // This focusses the cursor on the bottom of the text area
+      const editor = await this.getEditor();
       const content = await editor.findByCssSelector('.ace_content');
       await content.click();
-      const textArea = await editor.findByCssSelector('#ConAppInputTextarea');
+      const textArea = await testSubjects.find('console-textarea');
       // There should be autocomplete for this on all license levels
       await textArea.pressKeys('\nGET s');
       await textArea.pressKeys([Key.CONTROL, Key.SPACE]);

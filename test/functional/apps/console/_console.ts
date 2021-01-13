@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should resize the editor', async () => {
-      const editor = await find.byCssSelector('.conApp');
+      const editor = await PageObjects.console.getEditor();
       await browser.setWindowSize(1300, 1100);
       const initialSize = await editor.getSize();
       await browser.setWindowSize(1000, 1100);
@@ -95,9 +95,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should provide basic auto-complete functionality', async () => {
       // Ensure that the text area can be interacted with
       await PageObjects.console.dismissTutorial();
-      const editor = await find.byCssSelector('.conApp');
       expect(await PageObjects.console.hasAutocompleter()).to.be(false);
-      await PageObjects.console.promptAutocomplete(editor);
+      await PageObjects.console.promptAutocomplete();
       retry.waitFor('autocomplete to be visible', () => PageObjects.console.hasAutocompleter());
     });
   });
