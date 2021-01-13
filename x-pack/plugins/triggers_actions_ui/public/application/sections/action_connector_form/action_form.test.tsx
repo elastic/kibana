@@ -159,6 +159,24 @@ describe('action_form', () => {
           },
           isPreconfigured: false,
         },
+        {
+          secrets: {},
+          id: '.servicenow',
+          actionTypeId: actionType.id,
+          name: 'Connector created from cases',
+          config: {
+            isCaseOwned: true,
+          },
+          isPreconfigured: false,
+        },
+        {
+          secrets: {},
+          id: '.servicenow',
+          actionTypeId: actionType.id,
+          name: 'Connector created from cases with mapping',
+          config: { incidentConfiguration: { mapping: [] } },
+          isPreconfigured: false,
+        },
       ]);
       const mocks = coreMock.createSetup();
       const [
@@ -391,6 +409,29 @@ describe('action_form', () => {
         `[data-test-subj="${actionTypeWithoutParams.id}-ActionTypeSelectOption"]`
       );
       expect(actionOption.exists()).toBeFalsy();
+    });
+
+    it('does NOT renders connectors created in cases', async () => {
+      await setup();
+      const actionOption = wrapper.find(
+        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+      );
+      actionOption.first().simulate('click');
+      const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}"]`);
+      expect((combobox.first().props() as any).options).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            label: 'Connector created from cases',
+            key: '.servicenow',
+            id: '.servicenow',
+          }),
+          expect.objectContaining({
+            label: 'Connector created from cases with mapping',
+            key: '.servicenow',
+            id: '.servicenow',
+          }),
+        ])
+      );
     });
   });
 });
