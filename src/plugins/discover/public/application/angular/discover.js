@@ -184,7 +184,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($element, $route, $scope, $timeout, Promise, uiCapabilities) {
+function discoverController($route, $scope, $timeout, Promise, uiCapabilities) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
@@ -722,7 +722,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     $scope.minimumVisibleRows = $scope.hits;
 
     // delay scrolling to after the rows have been rendered
-    const bottomMarker = $element.find('#discoverBottomMarker');
+    const bottomMarker = document.getElementById('discoverBottomMarker');
     $timeout(() => {
       bottomMarker.focus();
       // The anchor tag is not technically empty (it's a hack to make Safari scroll)
