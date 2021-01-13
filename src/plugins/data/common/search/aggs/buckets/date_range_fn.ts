@@ -107,7 +107,6 @@ export const aggDateRange = (): FunctionDefinition => ({
         type: BUCKET_TYPES.DATE_RANGE,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
           ranges: getParsedValue(args, 'ranges'),
         },
       },
