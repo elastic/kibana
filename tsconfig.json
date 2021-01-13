@@ -17,6 +17,7 @@
     "src/plugins/data/**/*",
     "src/plugins/dev_tools/**/*",
     "src/plugins/embeddable/**/*",
+    "src/plugins/es_ui_shared/**/*",
     "src/plugins/expressions/**/*",
     "src/plugins/home/**/*",
     "src/plugins/inspector/**/*",
@@ -50,7 +51,7 @@
     "src/plugins/vis_type_vislib/**/*",
     "src/plugins/vis_type_xy/**/*",
     "src/plugins/visualizations/**/*",
-    "src/plugins/visualize/**/*",
+    "src/plugins/visualize/**/*"
     // In the build we actually exclude **/public/**/* from this config so that
     // we can run the TSC on both this and the .browser version of this config
     // file, but if we did it during development IDEs would not be able to find
@@ -69,6 +70,7 @@
     { "path": "./src/plugins/data/tsconfig.json" },
     { "path": "./src/plugins/dev_tools/tsconfig.json" },
     { "path": "./src/plugins/embeddable/tsconfig.json" },
+    { "path": "./src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "./src/plugins/expressions/tsconfig.json" },
     { "path": "./src/plugins/home/tsconfig.json" },
     { "path": "./src/plugins/inspector/tsconfig.json" },
@@ -101,6 +103,6 @@
     { "path": "./src/plugins/vis_type_vislib/tsconfig.json" },
     { "path": "./src/plugins/vis_type_xy/tsconfig.json" },
     { "path": "./src/plugins/visualizations/tsconfig.json" },
-    { "path": "./src/plugins/visualize/tsconfig.json" },
+    { "path": "./src/plugins/visualize/tsconfig.json" }
   ]
 }
