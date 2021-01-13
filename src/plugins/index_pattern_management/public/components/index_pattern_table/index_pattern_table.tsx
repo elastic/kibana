@@ -19,16 +19,16 @@
 import './columns.scss';
 import {
   EuiBadge,
+  EuiBadgeGroup,
+  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiPageContent,
   EuiSpacer,
   EuiText,
-  EuiBadgeGroup,
-  EuiPageContent,
   EuiTitle,
-  HorizontalAlignment,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -145,7 +145,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
 
   chrome.docTitle.change(title);
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<IndexPatternTableItem>> = [
     {
       field: 'title',
       name: 'Pattern',
@@ -177,7 +177,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
       width: '25%',
     },
     {
-      align: 'right' as HorizontalAlignment,
+      align: 'right',
       className: 'inpBlockColumn',
       name: '',
       render: ({

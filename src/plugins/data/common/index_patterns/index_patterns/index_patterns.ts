@@ -249,11 +249,11 @@ export class IndexPatternsService {
    */
   getFieldsForWildcard = async (options: GetFieldsOptions) => {
     if (options.collection != null) {
-      return await this.getFieldsForWildcardCollection(options as GetCollectionFieldsOptions);
+      return this.getFieldsForWildcardCollection(options as GetCollectionFieldsOptions);
     }
 
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    return await this.apiClient.getFieldsForWildcard({
+    return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,

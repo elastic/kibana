@@ -29,4 +29,7 @@ export interface IndexPatternTableItem {
   default: boolean;
   tag?: string[];
   sort: string;
+  label?: string;
+  aliasCollection?: string[];
+  activeCollection?: string[];
 }

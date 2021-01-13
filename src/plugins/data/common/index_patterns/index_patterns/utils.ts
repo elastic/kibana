@@ -168,5 +168,6 @@ export const formatIndexFields = async (
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const beatFields: BeatFields = require('./fields').fieldsBeat;
   const fields = await formatFirstFields(beatFields, responsesIndexFields, indexesAlias);
-  return await formatSecondFields(fields);
+  const secondFields = await formatSecondFields(fields);
+  return secondFields;
 };

@@ -24,5 +24,5 @@ export const ACTIVE = i18n.translate('indexPatternManagement.indexAliasCollectio
 });
 
 export const INACTIVE = i18n.translate('indexPatternManagement.indexAliasCollections.inactive', {
-  defaultMessage: 'Inactive',
+  defaultMessage: 'Inactive; index alias does not match any indices',
 });
