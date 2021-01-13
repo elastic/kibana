@@ -5,13 +5,14 @@
  */
 
 import React from 'react';
-import { createMemoryHistory } from 'history';
+import { fireEvent } from '@testing-library/react';
 import { Typeahead } from './typehead';
 import { render } from '../../../../lib/helper/rtl_helpers';
+import { act } from 'react-dom/test-utils';
 
 describe('Type head', () => {
   it('it renders all tabs', () => {
-    const { getByText } = render(
+    const { getByTestId } = render(
       <Typeahead
         ariaLabel={'Search for data'}
         dataTestSubj={'kueryBar'}
@@ -25,28 +26,21 @@ describe('Type head', () => {
         queryExample=""
       />
     );
-    expect(getByText('Overview')).toBeInTheDocument();
-    expect(getByText('Certificates')).toBeInTheDocument();
-    expect(getByText('Settings')).toBeInTheDocument();
-  });
 
-  it('it keep params while switching', () => {
-    const { getByTestId } = render(<Typeahead />, {
-      history: createMemoryHistory({
-        initialEntries: ['/settings/?g=%22%22&dateRangeStart=now-10m&dateRangeEnd=now'],
-      }),
+    // open popover to change
+    fireEvent.click(getByTestId('syntaxChangeKql'));
+
+    act(() => {
+      // change syntax
+      fireEvent.click(getByTestId('toggleKqlSyntax'));
     });
-    expect(getByTestId('uptimeSettingsToOverviewLink')).toHaveAttribute(
-      'href',
-      '/?dateRangeStart=now-10m'
-    );
-    expect(getByTestId('uptimeCertificatesLink')).toHaveAttribute(
-      'href',
-      '/certificates?dateRangeStart=now-10m'
-    );
-    expect(getByTestId('settings-page-link')).toHaveAttribute(
-      'href',
-      '/settings?dateRangeStart=now-10m'
-    );
+
+    act(() => {
+      //  close popover
+      fireEvent.click(getByTestId('kueryBar'));
+    });
+
+    expect(getByTestId('syntaxChangeSimple')).toBeInTheDocument();
+    expect(getByTestId('toggleKqlSyntax')).toBeInTheDocument();
   });
 });

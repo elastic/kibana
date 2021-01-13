@@ -64,9 +64,15 @@ export const SearchType = ({ kqlSyntax, setKqlSyntax }: Props) => {
   }, [isPopoverOpen, query, search, updateUrlParams]);
 
   const button = kqlSyntax ? (
-    <EuiButtonEmpty onClick={onButtonClick}>KQL</EuiButtonEmpty>
+    <EuiButtonEmpty data-test-subj="syntaxChangeSimple" onClick={onButtonClick}>
+      KQL
+    </EuiButtonEmpty>
   ) : (
-    <BoxesVerticalIcon type="boxesVertical" onClick={onButtonClick} />
+    <BoxesVerticalIcon
+      type="boxesVertical"
+      onClick={onButtonClick}
+      data-test-subj="syntaxChangeKql"
+    />
   );
 
   return (
@@ -97,6 +103,7 @@ export const SearchType = ({ kqlSyntax, setKqlSyntax }: Props) => {
               label={kqlSyntax ? 'On' : 'Off'}
               checked={kqlSyntax}
               onChange={() => setKqlSyntax(!kqlSyntax)}
+              data-test-subj="toggleKqlSyntax"
             />
           </EuiFormRow>
         </div>
