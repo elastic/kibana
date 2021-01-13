@@ -5,9 +5,9 @@
  */
 
 import { EventHit } from '../../../../../../common/search_strategy';
-import { getDataFromHits } from './helpers';
+import { getDataFromFieldsHits } from './helpers';
 
-describe('#getDataFromHits', () => {
+describe('#getDataFromFieldsHits', () => {
   it('happy path', () => {
     const response: EventHit = {
       _index: 'auditbeat-7.8.0-2020.11.05-000003',
@@ -47,7 +47,7 @@ describe('#getDataFromHits', () => {
       aggregations: {},
     };
 
-    expect(getDataFromHits(response.fields)).toEqual([
+    expect(getDataFromFieldsHits(response.fields)).toEqual([
       {
         category: 'event',
         field: 'event.category',
