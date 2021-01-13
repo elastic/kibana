@@ -82,7 +82,7 @@ This change adds `incrementBy` to the config `SavedObjectsIncrementCounterOption
 `SavedObjectsRepository.incrementCounter()`.
 
 The config `incrementBy` allows incrementing the counter by a custom number instead of
-a hardcoded `1`. If no value is specified it will increment the counter by `1`.
+a hardcoded `1`. If no value is specified, the counter is incremented by `1`.
 
 Example:
 
