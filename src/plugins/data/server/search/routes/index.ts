@@ -20,4 +20,3 @@
 export * from './call_msearch';
 export * from './msearch';
 export * from './search';
-export * from './shim_hits_total';

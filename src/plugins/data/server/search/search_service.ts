@@ -29,7 +29,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { catchError, first, map } from 'rxjs/operators';
+import { catchError, first } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import {
@@ -44,7 +44,7 @@ import { AggsService } from './aggs';
 
 import { FieldFormatsStart } from '../field_formats';
 import { IndexPatternsServiceStart } from '../index_patterns';
-import { getCallMsearch, registerMsearchRoute, registerSearchRoute, shimHitsTotal } from './routes';
+import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 import { DataPluginStart } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
@@ -72,7 +72,7 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
-import { SessionService, IScopedSessionService, ISessionService } from './session';
+import { IScopedSessionService, ISessionService, SessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
 
 declare module 'src/core/server' {
@@ -162,14 +162,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             .search(requestData, options)
             .pipe(
               first(),
-              map((response) => {
-                return {
-                  ...response,
-                  ...{
-                    rawResponse: shimHitsTotal(response.rawResponse),
-                  },
-                };
-              }),
               catchError((err) => {
                 // eslint-disable-next-line no-throw-literal
                 throw {
@@ -257,7 +249,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           const searchSourceDependencies: SearchSourceDependencies = {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: asScoped(request).search,
-            onResponse: (req, res) => shimHitsTotal(res),
+            onResponse: (req, res) => res,
             legacy: {
               callMsearch: getCallMsearch({
                 esClient,

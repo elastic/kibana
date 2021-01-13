@@ -38,7 +38,7 @@ export const securitySolutionTimelineSearchStrategyProvider = <T extends Timelin
           return {
             ...response,
             ...{
-              rawResponse: shimHitsTotal(response.rawResponse),
+              rawResponse: shimHitsTotal(response.rawResponse, options),
             },
           };
         }),

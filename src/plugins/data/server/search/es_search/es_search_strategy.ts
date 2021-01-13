@@ -23,7 +23,7 @@ import type { Logger, SharedGlobalConfig } from 'kibana/server';
 import type { ISearchStrategy } from '../types';
 import type { SearchUsage } from '../collectors';
 import { getDefaultSearchParams, getShardTimeout, shimAbortSignal } from './request_utils';
-import { toKibanaSearchResponse } from './response_utils';
+import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
 import { searchUsageObserver } from '../collectors/usage';
 import { KbnServerError } from '../../../../kibana_utils/server';
 
@@ -32,7 +32,7 @@ export const esSearchStrategyProvider = (
   logger: Logger,
   usage?: SearchUsage
 ): ISearchStrategy => ({
-  search: (request, { abortSignal }, { esClient, uiSettingsClient }) => {
+  search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
     // Only default index pattern type is supported here.
     // See data_enhanced for other type support.
     if (request.indexType) {
@@ -48,7 +48,8 @@ export const esSearchStrategyProvider = (
       };
       const promise = esClient.asCurrentUser.search<SearchResponse<unknown>>(params);
       const { body } = await shimAbortSignal(promise, abortSignal);
-      return toKibanaSearchResponse(body);
+      const response = shimHitsTotal(body, options);
+      return toKibanaSearchResponse(response);
     };
 
     return from(search()).pipe(tap(searchUsageObserver(logger, usage)));

@@ -1632,6 +1632,7 @@ export interface ISearchOptions {
     abortSignal?: AbortSignal;
     isRestore?: boolean;
     isStored?: boolean;
+    legacyHitsTotal?: boolean;
     sessionId?: string;
     strategy?: string;
 }
