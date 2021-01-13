@@ -12,6 +12,7 @@ import {
 import { SecuritySolutionTimelineFactory } from '../types';
 import { timelineEventsAll } from './all';
 import { timelineEventsDetails } from './details';
+import { timelineKpi } from './kpi';
 import { timelineEventsLastEventTime } from './last_event_time';
 
 export const timelineEventsFactory: Record<
@@ -20,5 +21,6 @@ export const timelineEventsFactory: Record<
 > = {
   [TimelineEventsQueries.all]: timelineEventsAll,
   [TimelineEventsQueries.details]: timelineEventsDetails,
+  [TimelineEventsQueries.kpi]: timelineKpi,
   [TimelineEventsQueries.lastEventTime]: timelineEventsLastEventTime,
 };

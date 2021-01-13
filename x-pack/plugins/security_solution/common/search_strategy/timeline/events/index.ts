@@ -11,5 +11,6 @@ export * from './last_event_time';
 export enum TimelineEventsQueries {
   all = 'eventsAll',
   details = 'eventsDetails',
+  kpi = 'eventsKpi',
   lastEventTime = 'eventsLastEventTime',
 }
