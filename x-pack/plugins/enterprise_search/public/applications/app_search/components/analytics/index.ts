@@ -5,3 +5,5 @@
  */
 
 export { ANALYTICS_TITLE } from './constants';
+export { AnalyticsChart } from './components';
+export { convertToChartData } from './utils';
