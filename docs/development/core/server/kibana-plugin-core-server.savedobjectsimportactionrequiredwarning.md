@@ -19,6 +19,7 @@ export interface SavedObjectsImportActionRequiredWarning
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [actionUrl](./kibana-plugin-core-server.savedobjectsimportactionrequiredwarning.actionurl.md) | <code>string</code> | The path (without the basePath) that the user should be redirect to to address this warning. |
-|  [message](./kibana-plugin-core-server.savedobjectsimportactionrequiredwarning.message.md) | <code>string</code> | The translated message to display to the user |
+|  [buttonLabel](./kibana-plugin-core-server.savedobjectsimportactionrequiredwarning.buttonlabel.md) | <code>string</code> | An optional label to use for the link button. If unspecified, a default label will be used. |
+|  [message](./kibana-plugin-core-server.savedobjectsimportactionrequiredwarning.message.md) | <code>string</code> | The translated message to display to the user. |
 |  [type](./kibana-plugin-core-server.savedobjectsimportactionrequiredwarning.type.md) | <code>'action_required'</code> |  |
 

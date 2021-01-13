@@ -1228,6 +1228,7 @@ export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObject
 // @public
 export interface SavedObjectsImportActionRequiredWarning {
     actionUrl: string;
+    buttonLabel?: string;
     message: string;
     // (undocumented)
     type: 'action_required';

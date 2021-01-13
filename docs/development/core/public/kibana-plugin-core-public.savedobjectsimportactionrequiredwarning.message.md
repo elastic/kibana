@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportActionRequiredWarning.message property
 
-The translated message to display to the user
+The translated message to display to the user.
 
 <b>Signature:</b>
 
