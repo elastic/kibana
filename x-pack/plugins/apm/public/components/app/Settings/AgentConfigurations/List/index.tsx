@@ -85,7 +85,7 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
             color="primary"
             fill
             href={createAgentConfigurationHref(search, basePath)}
-            disabled={!canSave}
+            isDisabled={!canSave}
           >
             {i18n.translate(
               'xpack.apm.agentConfig.configTable.createConfigButtonLabel',
