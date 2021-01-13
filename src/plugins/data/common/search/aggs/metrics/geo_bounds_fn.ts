@@ -92,7 +92,6 @@ export const aggGeoBounds = (): FunctionDefinition => ({
         type: METRIC_TYPES.GEO_BOUNDS,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

@@ -92,7 +92,6 @@ export const aggMedian = (): FunctionDefinition => ({
         type: METRIC_TYPES.MEDIAN,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

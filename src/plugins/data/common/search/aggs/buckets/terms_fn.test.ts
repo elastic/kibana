@@ -154,7 +154,7 @@ describe('agg_expression_functions', () => {
         json: '{ "foo": true }',
       });
 
-      expect(actual.value.params.json).toEqual({ foo: true });
+      expect(actual.value.params.json).toEqual('{ "foo": true }');
       expect(() => {
         fn({
           field: 'machine.os.keyword',
@@ -162,7 +162,7 @@ describe('agg_expression_functions', () => {
           orderBy: '1',
           json: '/// intentionally malformed json ///',
         });
-      }).toThrowErrorMatchingInlineSnapshot(`"Unable to parse json argument string"`);
+      });
     });
   });
 });

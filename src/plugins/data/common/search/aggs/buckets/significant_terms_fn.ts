@@ -113,7 +113,6 @@ export const aggSignificantTerms = (): FunctionDefinition => ({
         type: BUCKET_TYPES.SIGNIFICANT_TERMS,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

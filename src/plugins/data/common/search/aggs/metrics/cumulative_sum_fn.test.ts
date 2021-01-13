@@ -108,13 +108,13 @@ describe('agg_expression_functions', () => {
         buckets_path: 'the_sum',
       });
 
-      expect(actual.value.params.json).toEqual({ foo: true });
+      expect(actual.value.params.json).toEqual('{ "foo": true }');
       expect(() => {
         fn({
           json: '/// intentionally malformed json ///',
           buckets_path: 'the_sum',
         });
-      }).toThrowErrorMatchingInlineSnapshot(`"Unable to parse json argument string"`);
+      });
     });
   });
 });

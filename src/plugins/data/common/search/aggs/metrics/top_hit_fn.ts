@@ -119,7 +119,6 @@ export const aggTopHit = (): FunctionDefinition => ({
         type: METRIC_TYPES.TOP_HITS,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

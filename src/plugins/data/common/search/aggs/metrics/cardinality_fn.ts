@@ -92,7 +92,6 @@ export const aggCardinality = (): FunctionDefinition => ({
         type: METRIC_TYPES.CARDINALITY,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

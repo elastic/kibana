@@ -105,7 +105,6 @@ export const aggGeoTile = (): FunctionDefinition => ({
         type: BUCKET_TYPES.GEOTILE_GRID,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

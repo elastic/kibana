@@ -99,7 +99,6 @@ export const aggPercentileRanks = (): FunctionDefinition => ({
         type: METRIC_TYPES.PERCENTILE_RANKS,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

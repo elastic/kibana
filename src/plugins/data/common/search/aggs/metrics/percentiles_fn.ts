@@ -99,7 +99,6 @@ export const aggPercentiles = (): FunctionDefinition => ({
         type: METRIC_TYPES.PERCENTILES,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

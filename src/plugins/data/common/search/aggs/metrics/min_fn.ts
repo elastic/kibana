@@ -87,7 +87,6 @@ export const aggMin = (): FunctionDefinition => ({
         type: METRIC_TYPES.MIN,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

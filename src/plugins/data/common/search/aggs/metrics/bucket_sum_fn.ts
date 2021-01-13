@@ -104,7 +104,6 @@ export const aggBucketSum = (): FunctionDefinition => ({
           ...rest,
           customBucket: args.customBucket?.value,
           customMetric: args.customMetric?.value,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

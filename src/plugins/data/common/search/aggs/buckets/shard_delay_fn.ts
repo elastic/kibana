@@ -93,7 +93,6 @@ export const aggShardDelay = (): FunctionDefinition => ({
         type: SHARD_DELAY_AGG_NAME,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

@@ -120,7 +120,6 @@ export const aggMovingAvg = (): FunctionDefinition => ({
         params: {
           ...rest,
           customMetric: args.customMetric?.value,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

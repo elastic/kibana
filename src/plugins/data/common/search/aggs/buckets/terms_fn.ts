@@ -160,7 +160,6 @@ export const aggTerms = (): FunctionDefinition => ({
         params: {
           ...rest,
           orderAgg: args.orderAgg?.value,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

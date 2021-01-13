@@ -92,7 +92,6 @@ export const aggStdDeviation = (): FunctionDefinition => ({
         type: METRIC_TYPES.STD_DEV,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

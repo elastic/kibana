@@ -87,7 +87,6 @@ export const aggMax = (): FunctionDefinition => ({
         type: METRIC_TYPES.MAX,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

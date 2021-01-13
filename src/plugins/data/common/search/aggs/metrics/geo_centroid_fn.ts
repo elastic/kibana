@@ -92,7 +92,6 @@ export const aggGeoCentroid = (): FunctionDefinition => ({
         type: METRIC_TYPES.GEO_CENTROID,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

@@ -87,7 +87,6 @@ export const aggAvg = (): FunctionDefinition => ({
         type: METRIC_TYPES.AVG,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

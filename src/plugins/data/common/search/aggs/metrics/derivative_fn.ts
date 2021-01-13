@@ -107,7 +107,6 @@ export const aggDerivative = (): FunctionDefinition => ({
         params: {
           ...rest,
           customMetric: args.customMetric?.value,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

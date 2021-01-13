@@ -87,7 +87,6 @@ export const aggSum = (): FunctionDefinition => ({
         type: METRIC_TYPES.SUM,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };
