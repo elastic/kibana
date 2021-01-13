@@ -182,9 +182,8 @@ export const signalRulesAlertType = ({
       try {
         const inputIndex = await getInputIndex(services, version, index);
         const privileges = await checkPrivileges(services, inputIndex);
-        const timestampFields: string[] = params.timestampOverride
-          ? ['@timestamp', params.timestampOverride]
-          : ['@timestamp'];
+        const timestampFields: string[] =
+          timestampOverride != null ? ['@timestamp', timestampOverride] : ['@timestamp'];
 
         const indexNames = Object.keys(privileges.index);
         const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
