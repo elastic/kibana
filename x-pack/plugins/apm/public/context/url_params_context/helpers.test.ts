@@ -25,8 +25,8 @@ describe('url_params_context helpers', () => {
     });
 
     describe('given a non-parsable date', () => {
-      it('returns undefined', () => {
-        expect(helpers.getParsedDate('nope')).toEqual(undefined);
+      it('returns null', () => {
+        expect(helpers.getParsedDate('nope')).toEqual(null);
       });
     });
   });
