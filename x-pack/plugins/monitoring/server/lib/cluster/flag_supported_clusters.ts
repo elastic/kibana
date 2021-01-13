@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import { get, find } from 'lodash';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
+import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
+import { LegacyRequest } from '../../types';
 
 async function findSupportedBasicLicenseCluster(
-  req,
-  clusters,
-  kbnIndexPattern,
-  kibanaUuid,
-  serverLog
+  req: LegacyRequest,
+  clusters: ElasticsearchModifiedSource[],
+  kbnIndexPattern: string,
+  kibanaUuid: string,
+  serverLog: (message: string) => void
 ) {
   checkParam(kbnIndexPattern, 'kbnIndexPattern in cluster/findSupportedBasicLicenseCluster');
 
@@ -25,7 +26,7 @@ async function findSupportedBasicLicenseCluster(
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const gte = req.payload.timeRange.min;
   const lte = req.payload.timeRange.max;
-  const kibanaDataResult = await callWithRequest(req, 'search', {
+  const kibanaDataResult: ElasticsearchResponse = (await callWithRequest(req, 'search', {
     index: kbnIndexPattern,
     size: 1,
     ignoreUnavailable: true,
@@ -42,11 +43,13 @@ async function findSupportedBasicLicenseCluster(
         },
       },
     },
-  });
-  const supportedClusterUuid = get(kibanaDataResult, 'hits.hits[0]._source.cluster_uuid');
-  const supportedCluster = find(clusters, { cluster_uuid: supportedClusterUuid });
-  // only this basic cluster is supported
-  set(supportedCluster, 'isSupported', true);
+  })) as ElasticsearchResponse;
+  const supportedClusterUuid = kibanaDataResult.hits?.hits[0]._source.cluster_uuid ?? undefined;
+  for (const cluster of clusters) {
+    if (cluster.cluster_uuid === supportedClusterUuid) {
+      cluster.isSupported = true;
+    }
+  }
 
   serverLog(
     `Found basic license admin cluster UUID for Monitoring UI support: ${supportedClusterUuid}.`
@@ -69,12 +72,12 @@ async function findSupportedBasicLicenseCluster(
  * Non-Basic license clusters and any cluster in a single-cluster environment
  * are also flagged as supported in this method.
  */
-export function flagSupportedClusters(req, kbnIndexPattern) {
+export function flagSupportedClusters(req: LegacyRequest, kbnIndexPattern: string) {
   checkParam(kbnIndexPattern, 'kbnIndexPattern in cluster/flagSupportedClusters');
 
   const config = req.server.config();
-  const serverLog = (msg) => req.getLogger('supported-clusters').debug(msg);
-  const flagAllSupported = (clusters) => {
+  const serverLog = (message: string) => req.getLogger('supported-clusters').debug(message);
+  const flagAllSupported = (clusters: ElasticsearchModifiedSource[]) => {
     clusters.forEach((cluster) => {
       if (cluster.license) {
         cluster.isSupported = true;
@@ -83,7 +86,7 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
     return clusters;
   };
 
-  return async function (clusters) {
+  return async function (clusters: ElasticsearchModifiedSource[]) {
     // Standalone clusters are automatically supported in the UI so ignore those for
     // our calculations here
     let linkedClusterCount = 0;
@@ -110,7 +113,7 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
 
       // if all linked are basic licenses
       if (linkedClusterCount === basicLicenseCount) {
-        const kibanaUuid = config.get('server.uuid');
+        const kibanaUuid = config.get('server.uuid') as string;
         return await findSupportedBasicLicenseCluster(
           req,
           clusters,

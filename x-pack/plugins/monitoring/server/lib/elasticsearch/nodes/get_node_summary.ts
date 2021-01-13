@@ -5,35 +5,49 @@
  */
 
 import { get } from 'lodash';
-import { checkParam } from '../../error_missing_required';
-import { createQuery } from '../../create_query';
-import { ElasticsearchMetric } from '../../metrics';
-import { getDefaultNodeFromId } from './get_default_node_from_id';
-import { calculateNodeType } from './calculate_node_type';
-import { getNodeTypeClassLabel } from './get_node_type_class_label';
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
+import { checkParam } from '../../error_missing_required';
+// @ts-ignore
+import { createQuery } from '../../create_query';
+// @ts-ignore
+import { ElasticsearchMetric } from '../../metrics';
+// @ts-ignore
+import { getDefaultNodeFromId } from './get_default_node_from_id';
+// @ts-ignore
+import { calculateNodeType } from './calculate_node_type';
+// @ts-ignore
+import { getNodeTypeClassLabel } from './get_node_type_class_label';
+import {
+  ElasticsearchSource,
+  ElasticsearchResponse,
+  ElasticsearchLegacySource,
+  ElasticsearchMetricbeatNode,
+} from '../../../../common/types/es';
+import { LegacyRequest } from '../../../types';
 
-export function handleResponse(clusterState, shardStats, nodeUuid) {
-  return (response) => {
+export function handleResponse(
+  clusterState: ElasticsearchSource['cluster_state'],
+  shardStats: any,
+  nodeUuid: string
+) {
+  return (response: ElasticsearchResponse) => {
     let nodeSummary = {};
-    const nodeStatsHits = get(response, 'hits.hits', []);
-    const nodes = nodeStatsHits.map((hit) =>
-      get(hit, '_source.elasticsearch.node', hit._source.source_node)
-    ); // using [0] value because query results are sorted desc per timestamp
+    const nodeStatsHits = response.hits?.hits ?? [];
+    const nodes: Array<
+      ElasticsearchLegacySource['source_node'] | ElasticsearchMetricbeatNode
+    > = nodeStatsHits.map((hit) => hit._source.elasticsearch?.node || hit._source.source_node); // using [0] value because query results are sorted desc per timestamp
     const node = nodes[0] || getDefaultNodeFromId(nodeUuid);
     const sourceStats =
-      get(response, 'hits.hits[0]._source.elasticsearch.node.stats') ||
-      get(response, 'hits.hits[0]._source.node_stats');
-    const clusterNode = get(clusterState, ['nodes', nodeUuid]);
+      response.hits?.hits[0]._source.elasticsearch?.node?.stats ||
+      response.hits?.hits[0]._source.node_stats;
+    const clusterNode =
+      clusterState && clusterState.nodes ? clusterState.nodes[nodeUuid] : undefined;
     const stats = {
       resolver: nodeUuid,
-      node_ids: nodes.map((node) => node.id || node.uuid),
+      node_ids: nodes.map((_node) => node.id || node.uuid),
       attributes: node.attributes,
-      transport_address: get(
-        response,
-        'hits.hits[0]._source.service.address',
-        node.transport_address
-      ),
+      transport_address: response.hits?.hits[0]._source.service?.address || node.transport_address,
       name: node.name,
       type: node.type,
     };
@@ -48,22 +62,19 @@ export function handleResponse(clusterState, shardStats, nodeUuid) {
 
       nodeSummary = {
         type: nodeType,
-        nodeTypeLabel: nodeTypeLabel,
-        nodeTypeClass: nodeTypeClass,
+        nodeTypeLabel,
+        nodeTypeClass,
         totalShards: _shardStats.shardCount,
         indexCount: _shardStats.indexCount,
-        documents: get(sourceStats, 'indices.docs.count'),
+        documents: sourceStats?.indices?.docs?.count,
         dataSize:
-          get(sourceStats, 'indices.store.size_in_bytes') ||
-          get(sourceStats, 'indices.store.size.bytes'),
+          sourceStats?.indices?.store?.size_in_bytes || sourceStats?.indices?.store?.size?.bytes,
         freeSpace:
-          get(sourceStats, 'fs.total.available_in_bytes') ||
-          get(sourceStats, 'fs.summary.available.bytes'),
+          sourceStats?.fs?.total?.available_in_bytes || sourceStats?.fs?.summary?.available?.bytes,
         totalSpace:
-          get(sourceStats, 'fs.total.total_in_bytes') || get(sourceStats, 'fs.summary.total.bytes'),
+          sourceStats?.fs?.total?.total_in_bytes || sourceStats?.fs?.summary?.total?.bytes,
         usedHeap:
-          get(sourceStats, 'jvm.mem.heap_used_percent') ||
-          get(sourceStats, 'jvm.mem.heap.used.pct'),
+          sourceStats?.jvm?.mem?.heap_used_percent || sourceStats?.jvm?.mem?.heap?.used?.pct,
         status: i18n.translate('xpack.monitoring.es.nodes.onlineStatusLabel', {
           defaultMessage: 'Online',
         }),
@@ -89,11 +100,16 @@ export function handleResponse(clusterState, shardStats, nodeUuid) {
 }
 
 export function getNodeSummary(
-  req,
-  esIndexPattern,
-  clusterState,
-  shardStats,
-  { clusterUuid, nodeUuid, start, end }
+  req: LegacyRequest,
+  esIndexPattern: string,
+  clusterState: ElasticsearchSource['cluster_state'],
+  shardStats: any,
+  {
+    clusterUuid,
+    nodeUuid,
+    start,
+    end,
+  }: { clusterUuid: string; nodeUuid: string; start: number; end: number }
 ) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getNodeSummary');
 

@@ -5,13 +5,21 @@
  */
 
 import moment from 'moment';
+// @ts-ignore
 import { checkParam } from '../../../error_missing_required';
+// @ts-ignore
 import { createQuery } from '../../../create_query';
+// @ts-ignore
 import { calculateAuto } from '../../../calculate_auto';
+// @ts-ignore
 import { ElasticsearchMetric } from '../../../metrics';
+// @ts-ignore
 import { getMetricAggs } from './get_metric_aggs';
 import { handleResponse } from './handle_response';
+// @ts-ignore
 import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_metrics';
+import { LegacyRequest } from '../../../../types';
+import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
 
 /* Run an aggregation on node_stats to get stat data for the selected time
  * range for all the active nodes.  Every option is a key to a configuration
@@ -30,7 +38,13 @@ import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_me
  * @param {Object} nodesShardCount: per-node information about shards
  * @return {Array} node info combined with metrics for each node from handle_response
  */
-export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, nodesShardCount) {
+export async function getNodes(
+  req: LegacyRequest,
+  esIndexPattern: string,
+  pageOfNodes: Array<{ uuid: string }>,
+  clusterStats: ElasticsearchModifiedSource,
+  nodesShardCount: { nodes: { [nodeId: string]: { shardCount: number } } }
+) {
   checkParam(esIndexPattern, 'esIndexPattern in getNodes');
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();
@@ -45,7 +59,7 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, n
   const min = start;
 
   const bucketSize = Math.max(
-    config.get('monitoring.ui.min_interval_seconds'),
+    parseInt(config.get('monitoring.ui.min_interval_seconds') as string, 10),
     calculateAuto(100, duration).asSeconds()
   );
 

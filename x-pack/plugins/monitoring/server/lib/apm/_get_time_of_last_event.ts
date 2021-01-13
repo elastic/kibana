@@ -8,7 +8,8 @@
 import { createApmQuery } from './create_apm_query';
 // @ts-ignore
 import { ApmClusterMetric } from '../metrics';
-import { LegacyRequest, ElasticsearchResponse } from '../../types';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
 
 export async function getTimeOfLastEvent({
   req,

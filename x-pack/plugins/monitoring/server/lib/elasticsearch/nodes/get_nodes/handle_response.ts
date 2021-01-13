@@ -6,8 +6,11 @@
 
 import { get } from 'lodash';
 import { mapNodesInfo } from './map_nodes_info';
+// @ts-ignore
 import { mapNodesMetrics } from './map_nodes_metrics';
+// @ts-ignore
 import { uncovertMetricNames } from '../../convert_metric_names';
+import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../../../common/types/es';
 
 /*
  * Process the response from the get_nodes query
@@ -18,18 +21,18 @@ import { uncovertMetricNames } from '../../convert_metric_names';
  * @return {Array} node info combined with metrics for each node
  */
 export function handleResponse(
-  response,
-  clusterStats,
-  nodesShardCount,
-  pageOfNodes,
+  response: ElasticsearchResponse,
+  clusterStats: ElasticsearchModifiedSource,
+  nodesShardCount: { nodes: { [nodeId: string]: { shardCount: number } } },
+  pageOfNodes: Array<{ uuid: string }>,
   timeOptions = {}
 ) {
   if (!get(response, 'hits.hits')) {
     return [];
   }
 
-  const nodeHits = get(response, 'hits.hits', []);
-  const nodesInfo = mapNodesInfo(nodeHits, clusterStats, nodesShardCount);
+  const nodeHits = response.hits?.hits ?? [];
+  const nodesInfo: { [key: string]: any } = mapNodesInfo(nodeHits, clusterStats, nodesShardCount);
 
   /*
    * Every node bucket is an object with a field for nodeId and fields for
@@ -37,19 +40,29 @@ export function handleResponse(
    * with a sub-object for all the metrics buckets
    */
   const nodeBuckets = get(response, 'aggregations.nodes.buckets', []);
-  const metricsForNodes = nodeBuckets.reduce((accum, { key: nodeId, by_date: byDate }) => {
-    return {
-      ...accum,
-      [nodeId]: uncovertMetricNames(byDate),
-    };
-  }, {});
-  const nodesMetrics = mapNodesMetrics(metricsForNodes, nodesInfo, timeOptions); // summarize the metrics of online nodes
+  const metricsForNodes = nodeBuckets.reduce(
+    (
+      accum: { [nodeId: string]: any },
+      { key: nodeId, by_date: byDate }: { key: string; by_date: any }
+    ) => {
+      return {
+        ...accum,
+        [nodeId]: uncovertMetricNames(byDate),
+      };
+    },
+    {}
+  );
+  const nodesMetrics: { [key: string]: any } = mapNodesMetrics(
+    metricsForNodes,
+    nodesInfo,
+    timeOptions
+  ); // summarize the metrics of online nodes
 
   // nodesInfo is the source of truth for the nodeIds, where nodesMetrics will lack metrics for offline nodes
   const nodes = pageOfNodes.map((node) => ({
     ...node,
-    ...nodesInfo[node.uuid],
-    ...nodesMetrics[node.uuid],
+    ...(nodesInfo && nodesInfo[node.uuid] ? nodesInfo[node.uuid] : {}),
+    ...(nodesMetrics && nodesMetrics[node.uuid] ? nodesMetrics[node.uuid] : {}),
     resolver: node.uuid,
   }));
 

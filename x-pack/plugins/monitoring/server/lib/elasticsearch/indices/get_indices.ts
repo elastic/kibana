@@ -5,43 +5,54 @@
  */
 
 import { get } from 'lodash';
-import { checkParam } from '../../error_missing_required';
-import { ElasticsearchMetric } from '../../metrics';
-import { createQuery } from '../../create_query';
-import { calculateRate } from '../../calculate_rate';
-import { getUnassignedShards } from '../shards';
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
+import { checkParam } from '../../error_missing_required';
+// @ts-ignore
+import { ElasticsearchMetric } from '../../metrics';
+// @ts-ignore
+import { createQuery } from '../../create_query';
+// @ts-ignore
+import { calculateRate } from '../../calculate_rate';
+// @ts-ignore
+import { getUnassignedShards } from '../shards';
+import { ElasticsearchResponse } from '../../../../common/types/es';
+import { LegacyRequest } from '../../../types';
 
-export function handleResponse(resp, min, max, shardStats) {
+export function handleResponse(
+  resp: ElasticsearchResponse,
+  min: number,
+  max: number,
+  shardStats: any
+) {
   // map the hits
-  const hits = get(resp, 'hits.hits', []);
+  const hits = resp.hits?.hits ?? [];
   return hits.map((hit) => {
-    const stats = get(hit, '_source.index_stats');
-    const earliestStats = get(hit, 'inner_hits.earliest.hits.hits[0]._source.index_stats');
+    const stats = hit._source.index_stats;
+    const earliestStats = hit.inner_hits?.earliest?.hits?.hits[0]._source.index_stats;
 
     const rateOptions = {
-      hitTimestamp: get(hit, '_source.timestamp'),
-      earliestHitTimestamp: get(hit, 'inner_hits.earliest.hits.hits[0]._source.timestamp'),
+      hitTimestamp: hit._source.timestamp,
+      earliestHitTimestamp: hit.inner_hits?.earliest?.hits?.hits[0]._source.timestamp,
       timeWindowMin: min,
       timeWindowMax: max,
     };
 
-    const earliestIndexingHit = get(earliestStats, 'primaries.indexing');
+    const earliestIndexingHit = earliestStats?.primaries?.indexing;
     const { rate: indexRate } = calculateRate({
-      latestTotal: get(stats, 'primaries.indexing.index_total'),
-      earliestTotal: get(earliestIndexingHit, 'index_total'),
+      latestTotal: stats?.primaries?.indexing?.index_total,
+      earliestTotal: earliestIndexingHit?.index_total,
       ...rateOptions,
     });
 
-    const earliestSearchHit = get(earliestStats, 'total.search');
+    const earliestSearchHit = earliestStats?.total?.search;
     const { rate: searchRate } = calculateRate({
-      latestTotal: get(stats, 'total.search.query_total'),
-      earliestTotal: get(earliestSearchHit, 'query_total'),
+      latestTotal: stats?.total?.search?.query_total,
+      earliestTotal: earliestSearchHit?.query_total,
       ...rateOptions,
     });
 
-    const shardStatsForIndex = get(shardStats, ['indices', stats.index]);
-
+    const shardStatsForIndex = get(shardStats, ['indices', stats?.index ?? '']);
     let status;
     let statusSort;
     let unassignedShards;
@@ -65,10 +76,10 @@ export function handleResponse(resp, min, max, shardStats) {
     }
 
     return {
-      name: stats.index,
+      name: stats?.index,
       status,
-      doc_count: get(stats, 'primaries.docs.count'),
-      data_size: get(stats, 'total.store.size_in_bytes'),
+      doc_count: stats?.primaries?.docs?.count,
+      data_size: stats?.total?.store?.size_in_bytes,
       index_rate: indexRate,
       search_rate: searchRate,
       unassigned_shards: unassignedShards,
@@ -78,9 +89,14 @@ export function handleResponse(resp, min, max, shardStats) {
 }
 
 export function buildGetIndicesQuery(
-  esIndexPattern,
-  clusterUuid,
-  { start, end, size, showSystemIndices = false }
+  esIndexPattern: string,
+  clusterUuid: string,
+  {
+    start,
+    end,
+    size,
+    showSystemIndices = false,
+  }: { start: number; end: number; size: number; showSystemIndices: boolean }
 ) {
   const filters = [];
   if (!showSystemIndices) {
@@ -134,7 +150,12 @@ export function buildGetIndicesQuery(
   };
 }
 
-export function getIndices(req, esIndexPattern, showSystemIndices = false, shardStats) {
+export function getIndices(
+  req: LegacyRequest,
+  esIndexPattern: string,
+  showSystemIndices: boolean = false,
+  shardStats: any
+) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndices');
 
   const { min: start, max: end } = req.payload.timeRange;
@@ -145,7 +166,7 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
     start,
     end,
     showSystemIndices,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    size: parseInt(config.get('monitoring.ui.max_bucket_size') || '', 10),
   });
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

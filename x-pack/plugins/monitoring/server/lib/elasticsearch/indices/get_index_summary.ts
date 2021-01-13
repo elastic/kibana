@@ -5,22 +5,27 @@
  */
 
 import { get } from 'lodash';
-import { checkParam } from '../../error_missing_required';
-import { createQuery } from '../../create_query';
-import { ElasticsearchMetric } from '../../metrics';
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
+import { checkParam } from '../../error_missing_required';
+// @ts-ignore
+import { createQuery } from '../../create_query';
+// @ts-ignore
+import { ElasticsearchMetric } from '../../metrics';
+import { ElasticsearchResponse } from '../../../../common/types/es';
+import { LegacyRequest } from '../../../types';
 
-export function handleResponse(shardStats, indexUuid) {
-  return (response) => {
-    const indexStats = get(response, 'hits.hits[0]._source.index_stats');
-    const primaries = get(indexStats, 'primaries');
-    const total = get(indexStats, 'total');
+export function handleResponse(shardStats: any, indexUuid: string) {
+  return (response: ElasticsearchResponse) => {
+    const indexStats = response.hits?.hits[0]._source.index_stats;
+    const primaries = indexStats?.primaries;
+    const total = indexStats?.total;
 
     const stats = {
-      documents: get(primaries, 'docs.count'),
+      documents: primaries?.docs?.count,
       dataSize: {
-        primaries: get(primaries, 'store.size_in_bytes'),
-        total: get(total, 'store.size_in_bytes'),
+        primaries: primaries?.store?.size_in_bytes,
+        total: total?.store?.size_in_bytes,
       },
     };
 
@@ -55,10 +60,15 @@ export function handleResponse(shardStats, indexUuid) {
 }
 
 export function getIndexSummary(
-  req,
-  esIndexPattern,
-  shardStats,
-  { clusterUuid, indexUuid, start, end }
+  req: LegacyRequest,
+  esIndexPattern: string,
+  shardStats: any,
+  {
+    clusterUuid,
+    indexUuid,
+    start,
+    end,
+  }: { clusterUuid: string; indexUuid: string; start: number; end: number }
 ) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndexSummary');
 

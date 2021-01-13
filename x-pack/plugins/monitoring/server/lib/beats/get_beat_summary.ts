@@ -5,7 +5,8 @@
  */
 
 import { upperFirst } from 'lodash';
-import { LegacyRequest, ElasticsearchResponse } from '../../types';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
 // @ts-ignore
 import { checkParam } from '../error_missing_required';
 // @ts-ignore

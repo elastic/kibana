@@ -4,19 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import moment from 'moment';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
+// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
+// @ts-ignore
 import { createQuery } from '../create_query';
+import { ElasticsearchResponse } from '../../../common/types/es';
+import { LegacyRequest } from '../../types';
 
-export function handleResponse(response) {
-  const isEnabled = get(response, 'hits.hits[0]._source.stack_stats.xpack.ccr.enabled');
-  const isAvailable = get(response, 'hits.hits[0]._source.stack_stats.xpack.ccr.available');
+export function handleResponse(response: ElasticsearchResponse) {
+  const isEnabled = response.hits?.hits[0]._source.stack_stats?.xpack?.ccr?.enabled ?? false;
+  const isAvailable = response.hits?.hits[0]._source.stack_stats?.xpack?.ccr?.available ?? false;
   return isEnabled && isAvailable;
 }
 
-export async function checkCcrEnabled(req, esIndexPattern) {
+export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string) {
   checkParam(esIndexPattern, 'esIndexPattern in getNodes');
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();

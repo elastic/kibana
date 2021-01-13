@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
+// @ts-ignore
 import { createQuery } from '../create_query';
+// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
+// @ts-ignore
 import { parseCrossClusterPrefix } from '../ccs_utils';
 import { getClustersState } from './get_clusters_state';
+import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
+import { LegacyRequest } from '../../types';
 
 /**
  * This will fetch the cluster stats and cluster state as a single object per cluster.
@@ -19,10 +24,10 @@ import { getClustersState } from './get_clusters_state';
  * @param  {String} clusterUuid (optional) If not undefined, getClusters will filter for a single cluster
  * @return {Promise} A promise containing an array of clusters.
  */
-export function getClustersStats(req, esIndexPattern, clusterUuid) {
+export function getClustersStats(req: LegacyRequest, esIndexPattern: string, clusterUuid: string) {
   return (
     fetchClusterStats(req, esIndexPattern, clusterUuid)
-      .then((response) => handleClusterStats(response, req.server))
+      .then((response) => handleClusterStats(response))
       // augment older documents (e.g., from 2.x - 5.4) with their cluster_state
       .then((clusters) => getClustersState(req, esIndexPattern, clusters))
   );
@@ -36,7 +41,7 @@ export function getClustersStats(req, esIndexPattern, clusterUuid) {
  * @param {String} clusterUuid (optional) - if not undefined, getClusters filters for a single clusterUuid
  * @return {Promise} Object representing each cluster.
  */
-function fetchClusterStats(req, esIndexPattern, clusterUuid) {
+function fetchClusterStats(req: LegacyRequest, esIndexPattern: string, clusterUuid: string) {
   checkParam(esIndexPattern, 'esIndexPattern in getClusters');
 
   const config = req.server.config();
@@ -81,15 +86,15 @@ function fetchClusterStats(req, esIndexPattern, clusterUuid) {
  * @param {Object} response The response from Elasticsearch.
  * @return {Array} Objects representing each cluster.
  */
-export function handleClusterStats(response) {
-  const hits = get(response, 'hits.hits', []);
+export function handleClusterStats(response: ElasticsearchResponse) {
+  const hits = response.hits?.hits ?? [];
 
   return hits
     .map((hit) => {
-      const cluster = get(hit, '_source');
+      const cluster = hit._source as ElasticsearchModifiedSource;
 
       if (cluster) {
-        const indexName = get(hit, '_index', '');
+        const indexName = hit._index;
         const ccs = parseCrossClusterPrefix(indexName);
 
         // use CCS whenever we come across it so that we can avoid talking to other monitoring clusters whenever possible

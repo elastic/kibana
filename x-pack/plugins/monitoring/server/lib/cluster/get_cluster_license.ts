@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
+// @ts-ignore
 import { createQuery } from '../create_query';
+// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
+import { ElasticsearchResponse } from '../../../common/types/es';
+import { LegacyRequest } from '../../types';
 
-export function getClusterLicense(req, esIndexPattern, clusterUuid) {
+export function getClusterLicense(req: LegacyRequest, esIndexPattern: string, clusterUuid: string) {
   checkParam(esIndexPattern, 'esIndexPattern in getClusterLicense');
 
   const params = {
@@ -28,7 +32,7 @@ export function getClusterLicense(req, esIndexPattern, clusterUuid) {
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params).then((response) => {
-    return get(response, 'hits.hits[0]._source.license', {});
+  return callWithRequest(req, 'search', params).then((response: ElasticsearchResponse) => {
+    return response.hits?.hits[0]._source.license;
   });
 }
