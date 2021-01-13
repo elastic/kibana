@@ -226,3 +226,22 @@ export const sourceConfigData = {
     consumerKey: 'elastic_enterprise_search_123',
   },
 };
+
+export const exampleResult = {
+  sourceName: 'source',
+  searchResultConfig: {
+    titleField: 'otherTitle',
+    urlField: 'myLink',
+    color: '#e3e3e3',
+    descriptionField: 'about',
+    detailFields: [{ fieldName: 'cats', labal: 'Felines' }],
+  },
+  titleFieldHover: false,
+  urlFieldHover: false,
+  exampleDocuments: [
+    {
+      myLink: 'http://foo',
+      otherTitle: 'foo',
+    },
+  ],
+};
