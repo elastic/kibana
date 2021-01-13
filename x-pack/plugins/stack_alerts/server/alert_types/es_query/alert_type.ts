@@ -30,20 +30,20 @@ export function getAlertType(
   });
 
   const actionGroupName = i18n.translate('xpack.stackAlerts.esQuery.actionGroupThresholdMetTitle', {
-    defaultMessage: 'Doc Count Threshold Met',
+    defaultMessage: 'Doc count threshold met',
   });
 
   const actionVariableContextDateLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextDateLabel',
     {
-      defaultMessage: 'The date the alert matched the threshold condition.',
+      defaultMessage: 'The date the alert met the threshold condition.',
     }
   );
 
   const actionVariableContextValueLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextValueLabel',
     {
-      defaultMessage: 'The value that matched the threshold condition.',
+      defaultMessage: 'The value that met the threshold condition.',
     }
   );
 

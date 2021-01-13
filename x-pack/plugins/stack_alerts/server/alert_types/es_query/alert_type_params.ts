@@ -31,7 +31,11 @@ const betweenComparators = new Set(['between', 'notBetween']);
 
 // using direct type not allowed, circular reference, so body is typed to any
 function validateParams(anyParams: unknown): string | undefined {
-  const { thresholdComparator, threshold }: EsQueryAlertParams = anyParams as EsQueryAlertParams;
+  const {
+    esQuery,
+    thresholdComparator,
+    threshold,
+  }: EsQueryAlertParams = anyParams as EsQueryAlertParams;
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
     return i18n.translate('xpack.stackAlerts.esQuery.invalidThreshold2ErrorMessage', {
@@ -40,6 +44,20 @@ function validateParams(anyParams: unknown): string | undefined {
       values: {
         thresholdComparator,
       },
+    });
+  }
+
+  try {
+    const parsedQuery = JSON.parse(esQuery);
+
+    if (parsedQuery && !parsedQuery.query) {
+      return i18n.translate('xpack.stackAlerts.esQuery.missingEsQueryErrorMessage', {
+        defaultMessage: '[esQuery]: must contain "query"',
+      });
+    }
+  } catch (err) {
+    return i18n.translate('xpack.stackAlerts.esQuery.invalidEsQueryErrorMessage', {
+      defaultMessage: '[esQuery]: must be valid JSON',
     });
   }
 }

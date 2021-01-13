@@ -9,4 +9,5 @@ export {
   CoreQueryParams,
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
+  validateTimeWindowUnits,
 } from './core_query_types';
