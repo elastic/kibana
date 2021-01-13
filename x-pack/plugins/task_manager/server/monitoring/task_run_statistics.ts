@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineLatest, merge, Observable, of } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, startWith, map } from 'rxjs/operators';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { isNumber, mapValues } from 'lodash';
