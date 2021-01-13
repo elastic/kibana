@@ -50,18 +50,21 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
   // refresh behavior
   const doRefresh = useCallback(async () => {
     setIsLoading(true);
+    const renderResults = (results: UISession[]) => {
+      setTableData(results);
+    };
+    showLatestResultsHandler.current = renderResults;
     try {
-      const renderResults = (results: UISession[]) => {
-        setTableData(results);
-      };
-      showLatestResultsHandler.current = renderResults;
       const results = await api.fetchTableData();
 
-      if (showLatestResultsHandler.current === renderResults) renderResults(results || []);
+      if (showLatestResultsHandler.current === renderResults) {
+        renderResults(results || []);
+        setIsLoading(false);
+      }
     } catch (e) {
       setTableData([]);
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, [api]);
 
   // initial data load
