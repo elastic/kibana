@@ -62,6 +62,7 @@ import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { getIndexPatternLoad } from './index_patterns/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
+import { NowProvider, NowProviderInternalContract } from './now_provider';
 
 export class DataPublicPlugin
   implements
@@ -77,6 +78,7 @@ export class DataPublicPlugin
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
   private usageCollection: UsageCollectionSetup | undefined;
+  private readonly nowProvider: NowProviderInternalContract;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -84,6 +86,7 @@ export class DataPublicPlugin
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
+    this.nowProvider = new NowProvider();
   }
 
   public setup(
@@ -96,9 +99,17 @@ export class DataPublicPlugin
 
     this.usageCollection = usageCollection;
 
+    const searchService = this.searchService.setup(core, {
+      bfetch,
+      usageCollection,
+      expressions,
+      nowProvider: this.nowProvider,
+    });
+
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
       storage: this.storage,
+      nowProvider: this.nowProvider,
     });
 
     uiActions.registerTrigger(applyFilterTrigger);
@@ -120,12 +131,6 @@ export class DataPublicPlugin
         uiActions: startServices().plugins.uiActions,
       }))
     );
-
-    const searchService = this.searchService.setup(core, {
-      bfetch,
-      usageCollection,
-      expressions,
-    });
 
     inspector.registerView(
       getTableViewDescription(() => ({
@@ -200,6 +205,7 @@ export class DataPublicPlugin
       indexPatterns,
       query,
       search,
+      nowProvider: this.nowProvider,
     };
 
     const SearchBar = createSearchBar({
