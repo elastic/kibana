@@ -57,7 +57,6 @@
     { "path": "./plugins/global_search/tsconfig.json" },
     { "path": "./plugins/features/tsconfig.json" },
     { "path": "./plugins/graph/tsconfig.json" },
-    { "path": "./plugins/lens/tsconfig.json" },
     { "path": "./plugins/embeddable_enhanced/tsconfig.json" },
     { "path": "./plugins/licensing/tsconfig.json" },
     { "path": "./plugins/task_manager/tsconfig.json" },

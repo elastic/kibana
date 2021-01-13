@@ -7,7 +7,7 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["public/**/*", "server/**/*"],
+  "include": ["public/**/*", "server/**/*", "*.ts"],
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },

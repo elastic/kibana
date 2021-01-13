@@ -10,7 +10,11 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "*.ts"
   ],
-  "references": []
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../visualizations/tsconfig.json" }
+  ]
 }
