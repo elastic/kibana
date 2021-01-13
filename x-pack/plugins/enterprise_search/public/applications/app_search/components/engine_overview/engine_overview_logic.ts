@@ -16,7 +16,6 @@ interface EngineOverviewApiData {
   apiLogsUnavailable: boolean;
   documentCount: number;
   startDate: string;
-  endDate: string;
   operationsPerDay: number[];
   queriesPerDay: number[];
   totalClicks: number;
@@ -59,12 +58,6 @@ export const EngineOverviewLogic = kea<MakeLogicType<EngineOverviewValues, Engin
       '',
       {
         setPolledData: (_, { startDate }) => startDate,
-      },
-    ],
-    endDate: [
-      '',
-      {
-        setPolledData: (_, { endDate }) => endDate,
       },
     ],
     queriesPerDay: [

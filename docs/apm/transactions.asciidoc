@@ -24,6 +24,7 @@ Like in the Transaction duration graph, you can zoom in on anomalies to further 
 
 *Error rate*::
 Visualize the total number of transactions with errors divided by the total number of transactions.
+The error rate value is based on the `event.outcome` field and is the relative number of failed transactions.
 Any unexpected increases, decreases, or irregular patterns can be investigated further
 with the <<errors,errors overview>>.
 

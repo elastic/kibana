@@ -6,6 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ANALYTICS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.analytics.title',
+  { defaultMessage: 'Analytics' }
+);
+
 export const TOTAL_DOCUMENTS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalDocuments',
   { defaultMessage: 'Total documents' }
@@ -25,3 +30,8 @@ export const TOTAL_CLICKS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalClicks',
   { defaultMessage: 'Total clicks' }
 );
+
+// Moment date format conversions
+export const SERVER_DATE_FORMAT = 'YYYY-MM-DD';
+export const TOOLTIP_DATE_FORMAT = 'MMMM D, YYYY';
+export const X_AXIS_DATE_FORMAT = 'M/D';
