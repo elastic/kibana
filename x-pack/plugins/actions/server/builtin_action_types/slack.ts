@@ -6,8 +6,7 @@
 
 import { URL } from 'url';
 import { curry } from 'lodash';
-import { HttpsProxyAgent } from 'https-proxy-agent';
-import HttpProxyAgent from 'http-proxy-agent';
+import { Agent } from 'http';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
@@ -24,7 +23,7 @@ import {
   ExecutorType,
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { getProxyAgent } from './lib/get_proxy_agent';
+import { getProxyAgents } from './lib/get_proxy_agents';
 
 export type SlackActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 export type SlackActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -128,9 +127,13 @@ async function slackExecutor(
   const { webhookUrl } = secrets;
   const { message } = params;
 
-  let proxyAgent: HttpsProxyAgent | HttpProxyAgent | undefined;
+  let httpProxyAgent: Agent | undefined;
   if (execOptions.proxySettings) {
-    proxyAgent = getProxyAgent(execOptions.proxySettings, logger);
+    const httpProxyAgents = getProxyAgents(execOptions.proxySettings, logger);
+    httpProxyAgent = webhookUrl.toLowerCase().startsWith('https')
+      ? httpProxyAgents.httpsAgent
+      : httpProxyAgents.httpAgent;
+
     logger.debug(`IncomingWebhook was called with proxyUrl ${execOptions.proxySettings.proxyUrl}`);
   }
 
@@ -138,8 +141,7 @@ async function slackExecutor(
     // https://slack.dev/node-slack-sdk/webhook
     // node-slack-sdk use Axios inside :)
     const webhook = new IncomingWebhook(webhookUrl, {
-      // @ts-expect-error The types exposed by 'HttpsProxyAgent' isn't up to date with 'Agent'
-      agent: proxyAgent,
+      agent: httpProxyAgent,
     });
     result = await webhook.send(message);
   } catch (err) {
