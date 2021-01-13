@@ -1,6 +1,6 @@
-# Runtime fields editor
+# Runtime fields
 
-Welcome to the home of the runtime field editor!
+Welcome to the home of the runtime field editor and everything related to runtime fields!
 
 ## The runtime field editor
 
