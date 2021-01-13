@@ -608,7 +608,7 @@ export const createSearchAfterReturnTypeFromResponse = ({
   return createSearchAfterReturnType({
     success:
       searchResult._shards.failed === 0 ||
-      searchResult?._shards?.failures?.every((failure) => {
+      searchResult._shards.failures?.every((failure) => {
         return (
           failure.reason?.reason === 'No mapping found for [@timestamp] in order to sort on' ||
           failure.reason?.reason ===
