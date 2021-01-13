@@ -6,11 +6,11 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { JestContext } from '../../../test/context_jest';
-import { PagePreview } from '../page_preview';
-import { getRenderedElement as element } from '../../../test/selectors';
+import { JestContext } from '../../test/context_jest';
+import { PagePreview } from './page_preview';
+import { getRenderedElement as element } from '../../test/selectors';
 
-jest.mock('../../../supported_renderers');
+jest.mock('../../supported_renderers');
 
 describe('<PagePreview />', () => {
   test('null workpad renders nothing', () => {
