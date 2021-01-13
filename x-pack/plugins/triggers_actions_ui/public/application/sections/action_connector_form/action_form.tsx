@@ -126,12 +126,18 @@ export const ActionForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const isCaseConnector = (connector: ActionConnector) =>
+    !connector.isPreconfigured &&
+    (connector?.config?.isCaseOwned === true || connector.config?.incidentConfiguration?.mapping);
+
   // load connectors
   useEffect(() => {
     (async () => {
       try {
         setIsLoadingConnectors(true);
-        const loadedConnectors = await loadConnectors({ http });
+        const loadedConnectors = (await loadConnectors({ http })).filter(
+          (connector) => !isCaseConnector(connector)
+        );
         setConnectors(loadedConnectors);
       } catch (e) {
         toastNotifications.addDanger({
