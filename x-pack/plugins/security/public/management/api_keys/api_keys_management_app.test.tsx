@@ -43,7 +43,7 @@ describe('apiKeysManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: '/', text: 'API Keys' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Page: {"notifications":{"toasts":{}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"apiKeysAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}}}
+        Page: {"notifications":{"toasts":{}},"docLinks":{"apiKeySettings":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings","createApiKey":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-api-create-api-key.html"},"apiKeysAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}}}
       </div>
     `);
 
