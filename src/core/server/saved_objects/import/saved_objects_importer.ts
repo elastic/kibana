@@ -104,6 +104,7 @@ export class SavedObjectsImporter {
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
+      importHooks: this.#importHooks,
     });
   }
 }

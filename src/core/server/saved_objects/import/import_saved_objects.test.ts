@@ -29,7 +29,7 @@ import { savedObjectsClientMock } from '../../mocks';
 import { ISavedObjectTypeRegistry } from '..';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { importSavedObjectsFromStream, ImportSavedObjectsOptions } from './import_saved_objects';
-import { SavedObjectsImportHook } from './types';
+import { SavedObjectsImportHook, SavedObjectsImportWarning } from './types';
 
 import {
   collectSavedObjects,
@@ -38,6 +38,7 @@ import {
   checkConflicts,
   checkOriginConflicts,
   createSavedObjects,
+  executeImportHooks,
 } from './lib';
 
 jest.mock('./lib/collect_saved_objects');
@@ -46,6 +47,7 @@ jest.mock('./lib/validate_references');
 jest.mock('./lib/check_conflicts');
 jest.mock('./lib/check_origin_conflicts');
 jest.mock('./lib/create_saved_objects');
+jest.mock('./lib/execute_import_hooks');
 
 const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameters<T>) => U) =>
   fn as jest.MockedFunction<(...args: Parameters<T>) => U>;
@@ -73,6 +75,7 @@ describe('#importSavedObjectsFromStream', () => {
       pendingOverwrites: new Set(),
     });
     getMockFn(createSavedObjects).mockResolvedValue({ errors: [], createdObjects: [] });
+    getMockFn(executeImportHooks).mockResolvedValue([]);
   });
 
   let readStream: Readable;
@@ -169,6 +172,31 @@ describe('#importSavedObjectsFromStream', () => {
         savedObjectsClient,
         namespace
       );
+    });
+
+    test('execute import hooks', async () => {
+      const importHooks = {
+        foo: [jest.fn()],
+      };
+
+      const options = setupOptions({ importHooks });
+      const collectedObjects = [createObject()];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(),
+      });
+      getMockFn(createSavedObjects).mockResolvedValue({
+        errors: [],
+        createdObjects: collectedObjects,
+      });
+
+      await importSavedObjectsFromStream(options);
+
+      expect(executeImportHooks).toHaveBeenCalledWith({
+        objects: collectedObjects,
+        importHooks,
+      });
     });
 
     describe('with createNewCopies disabled', () => {
@@ -349,6 +377,27 @@ describe('#importSavedObjectsFromStream', () => {
         errors: [expect.any(Object)],
         warnings: [],
       });
+    });
+
+    test('returns warnings from the import hooks', async () => {
+      const options = setupOptions();
+      const collectedObjects = [createObject()];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(),
+      });
+      getMockFn(createSavedObjects).mockResolvedValue({
+        errors: [],
+        createdObjects: collectedObjects,
+      });
+
+      const warnings: SavedObjectsImportWarning[] = [{ type: 'simple', message: 'foo' }];
+      getMockFn(executeImportHooks).mockResolvedValue(warnings);
+
+      const result = await importSavedObjectsFromStream(options);
+
+      expect(result.warnings).toEqual(warnings);
     });
 
     describe('handles a mix of successes and errors and injects metadata', () => {

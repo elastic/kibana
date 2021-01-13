@@ -22,6 +22,7 @@ import { SavedObject, SavedObjectsClientContract, SavedObjectsImportRetry } from
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import {
   SavedObjectsImportFailure,
+  SavedObjectsImportHook,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
 } from './types';
@@ -35,6 +36,7 @@ import {
   createSavedObjects,
   getImportIdMapForRetries,
   checkConflicts,
+  executeImportHooks,
 } from './lib';
 
 /**
@@ -49,6 +51,8 @@ export interface ResolveSavedObjectsImportErrorsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   /** The registry of all known saved object types */
   typeRegistry: ISavedObjectTypeRegistry;
+  /** List of registered import hooks */
+  importHooks: Record<string, SavedObjectsImportHook[]>;
   /** saved object import references to retry */
   retries: SavedObjectsImportRetry[];
   /** if specified, will import in given namespace */
@@ -69,6 +73,7 @@ export async function resolveSavedObjectsImportErrors({
   retries,
   savedObjectsClient,
   typeRegistry,
+  importHooks,
   namespace,
   createNewCopies,
 }: ResolveSavedObjectsImportErrorsOptions): Promise<SavedObjectsImportResponse> {
@@ -157,6 +162,7 @@ export async function resolveSavedObjectsImportErrors({
 
   // Bulk create in two batches, overwrites and non-overwrites
   let successResults: SavedObjectsImportSuccess[] = [];
+  let successObjects: SavedObject[] = [];
   const accumulatedErrors = [...errorAccumulator];
   const bulkCreateObjects = async (
     objects: Array<SavedObject<{ title?: string }>>,
@@ -173,6 +179,7 @@ export async function resolveSavedObjectsImportErrors({
     const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
       createSavedObjectsParams
     );
+    successObjects = [...successObjects, ...createdObjects];
     errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
     successCount += createdObjects.length;
     successResults = [
@@ -211,10 +218,15 @@ export async function resolveSavedObjectsImportErrors({
     };
   });
 
+  const warnings = await executeImportHooks({
+    objects: successObjects,
+    importHooks,
+  });
+
   return {
     successCount,
     success: errorAccumulator.length === 0,
-    warnings: [], // TODO: wire
+    warnings,
     ...(successResults.length && { successResults }),
     ...(errorResults.length && { errors: errorResults }),
   };
