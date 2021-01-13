@@ -61,6 +61,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       let isPresent = false;
       await retry.try(async () => {
         isPresent = await testSubjects.exists(testSubj, { timeout: 20000 });
+        if (!isPresent) {
+          isPresent = await testSubjects.exists('visNoResult', { timeout: 1000 });
+        }
       });
       if (!isPresent) {
         throw new Error(`TSVB ${name} tab is not loaded`);
