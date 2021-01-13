@@ -22,21 +22,26 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { take, toArray } from 'rxjs/operators';
 import { getSessionsClientMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
-import { SessionState } from './session_state';
+import { SearchSessionState } from './search_session_state';
+import { createNowProviderMock } from '../../now_provider/mocks';
+import { NowProviderInternalContract } from '../../now_provider';
 
 describe('Session service', () => {
   let sessionService: ISessionService;
-  let state$: BehaviorSubject<SessionState>;
+  let state$: BehaviorSubject<SearchSessionState>;
+  let nowProvider: jest.Mocked<NowProviderInternalContract>;
 
   beforeEach(() => {
     const initializerContext = coreMock.createPluginInitializerContext();
+    nowProvider = createNowProviderMock();
     sessionService = new SessionService(
       initializerContext,
       coreMock.createSetup().getStartServices,
       getSessionsClientMock(),
+      nowProvider,
       { freezeState: false } // needed to use mocks inside state container
     );
-    state$ = new BehaviorSubject<SessionState>(SessionState.None);
+    state$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
     sessionService.state$.subscribe(state$);
   });
 
@@ -44,8 +49,10 @@ describe('Session service', () => {
     it('Creates and clears a session', async () => {
       sessionService.start();
       expect(sessionService.getSessionId()).not.toBeUndefined();
+      expect(nowProvider.set).toHaveBeenCalled();
       sessionService.clear();
       expect(sessionService.getSessionId()).toBeUndefined();
+      expect(nowProvider.reset).toHaveBeenCalled();
     });
 
     it('Restores a session', async () => {
@@ -65,17 +72,17 @@ describe('Session service', () => {
 
     it('Tracks searches for current session', () => {
       expect(() => sessionService.trackSearch({ abort: () => {} })).toThrowError();
-      expect(state$.getValue()).toBe(SessionState.None);
+      expect(state$.getValue()).toBe(SearchSessionState.None);
 
       sessionService.start();
       const untrack1 = sessionService.trackSearch({ abort: () => {} });
-      expect(state$.getValue()).toBe(SessionState.Loading);
+      expect(state$.getValue()).toBe(SearchSessionState.Loading);
       const untrack2 = sessionService.trackSearch({ abort: () => {} });
-      expect(state$.getValue()).toBe(SessionState.Loading);
+      expect(state$.getValue()).toBe(SearchSessionState.Loading);
       untrack1();
-      expect(state$.getValue()).toBe(SessionState.Loading);
+      expect(state$.getValue()).toBe(SearchSessionState.Loading);
       untrack2();
-      expect(state$.getValue()).toBe(SessionState.Completed);
+      expect(state$.getValue()).toBe(SearchSessionState.Completed);
     });
 
     it('Cancels all tracked searches within current session', async () => {

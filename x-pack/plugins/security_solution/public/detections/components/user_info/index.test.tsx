@@ -37,6 +37,7 @@ describe('useUserInfo', () => {
           canUserCRUD: null,
           hasEncryptionKey: null,
           hasIndexManage: null,
+          hasIndexMaintenance: null,
           hasIndexWrite: null,
           hasIndexUpdateDelete: null,
           isAuthenticated: null,
