@@ -17,32 +17,14 @@
  * under the License.
  */
 
+import { FeatureCollection } from 'geojson';
 import type { SchemaConfig } from 'src/plugins/visualizations/public';
 import type { DatatableColumnMeta } from 'src/plugins/expressions';
 import type { WMSOptions } from 'src/plugins/maps_legacy/public';
 import type { MapTypes } from './utils/map_types';
 
-export interface Feature {
-  type: 'Feature';
-  geometry: {
-    type: 'Point';
-    coordinates: [number, number];
-  };
-  properties: {
-    geohash: string;
-    geohash_meta: {
-      center: [number, number];
-      rectangle: Array<[number, number]>;
-    };
-    value: number;
-  };
-}
-
 export interface TileMapVisData {
-  featureCollection: {
-    type: 'FeatureCollection';
-    features: Feature[];
-  };
+  featureCollection: FeatureCollection;
   meta: {
     min: number;
     max: number;
