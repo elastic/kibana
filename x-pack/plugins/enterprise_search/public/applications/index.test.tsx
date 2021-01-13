@@ -9,6 +9,7 @@ import { getContext } from 'kea';
 
 import { coreMock } from 'src/core/public/mocks';
 import { licensingMock } from '../../../licensing/public/mocks';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 import { renderApp, renderHeaderActions } from './';
 import { EnterpriseSearch } from './enterprise_search';
@@ -20,7 +21,10 @@ describe('renderApp', () => {
   const kibanaDeps = {
     params: coreMock.createAppMountParamters(),
     core: coreMock.createStart(),
-    plugins: { licensing: licensingMock.createStart() },
+    plugins: {
+      licensing: licensingMock.createStart(),
+      charts: chartPluginMock.createStartContract(),
+    },
   } as any;
   const pluginData = {
     config: {},
