@@ -36,6 +36,8 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
+const serviceNowIncidentTable = 'incident';
+
 export const ActionTypeId = '.servicenow';
 // action type definition
 export function getActionType(
@@ -60,7 +62,7 @@ export function getActionType(
       }),
       params: ExecutorParamsSchema,
     },
-    executor: curry(executor)({ logger, configurationUtilities }),
+    executor: curry(executor)({ logger, configurationUtilities, table: serviceNowIncidentTable }),
   };
 }
 
@@ -69,8 +71,8 @@ const supportedSubActions: string[] = ['getFields', 'pushToService'];
 async function executor(
   {
     logger,
-    configurationUtilities,
-  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
+    table,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities; table: string },
   execOptions: ActionTypeExecutorOptions<
     ServiceNowPublicConfigurationType,
     ServiceNowSecretConfigurationType,
@@ -82,6 +84,7 @@ async function executor(
   let data: ServiceNowExecutorResultData | null = null;
 
   const externalService = createExternalService(
+    table,
     {
       config,
       secrets,
