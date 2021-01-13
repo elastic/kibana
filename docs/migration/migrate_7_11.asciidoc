@@ -20,7 +20,7 @@ your application to {kib} 7.11.
 
 *Impact*:
 
-* The app url change from /app/ingestManager to /app/fleet.ß
+* The app url change from /app/ingestManager to /app/fleet.
 * The privilege `feature_ingestManager.*` is not valid anymore and should be replaced by `feature_fleet.*`.
 
 *via https://github.com/elastic/kibana/pull/83200[#83200]*
