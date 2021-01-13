@@ -15,6 +15,7 @@ import AppSearchAPIConnector from '@elastic/search-ui-app-search-connector';
 
 import './search_experience.scss';
 
+import { Fields, SortOption } from './types';
 import { EngineLogic } from '../../engine';
 import { externalUrl } from '../../../../shared/enterprise_search_url';
 import { useLocalStorage } from '../../../../shared/use_local_storage';
@@ -24,8 +25,9 @@ import { SearchExperienceContent } from './search_experience_content';
 import { buildSearchUIConfig } from './build_search_ui_config';
 import { CustomizationCallout } from './customization_callout';
 import { CustomizationModal } from './customization_modal';
+import { buildSortOptions } from './build_sort_options';
 
-const DEFAULT_SORT_OPTIONS = [
+const DEFAULT_SORT_OPTIONS: SortOption[] = [
   {
     name: i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.recentlyUploadedDesc', {
       defaultMessage: 'Recently Uploaded (desc)',
@@ -50,16 +52,15 @@ export const SearchExperience: React.FC = () => {
   const openCustomizationModal = () => setShowCustomizationModal(true);
   const closeCustomizationModal = () => setShowCustomizationModal(false);
 
-  const [fields, setFields] = useLocalStorage(
+  const [fields, setFields] = useLocalStorage<Fields>(
     `documents-search-experience-customization--${engine.name}`,
     {
-      filterFields: [] as string[],
-      sortFields: [] as string[],
+      filterFields: [],
+      sortFields: [],
     }
   );
 
-  // TODO const sortFieldsOptions = _flatten(fields.sortFields.map(fieldNameToSortOptions)) // we need to flatten this array since fieldNameToSortOptions returns an array of two sorting options
-  const sortingOptions = [...DEFAULT_SORT_OPTIONS /* TODO ...sortFieldsOptions*/];
+  const sortingOptions = buildSortOptions(fields, DEFAULT_SORT_OPTIONS);
 
   const connector = new AppSearchAPIConnector({
     cacheResponses: false,
