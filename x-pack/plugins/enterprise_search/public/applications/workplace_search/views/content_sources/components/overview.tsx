@@ -39,7 +39,6 @@ import {
 } from '../../../routes';
 
 import { AppLogic } from '../../../app_logic';
-import { User } from '../../../types';
 
 import { ComponentLoader } from '../../../components/shared/component_loader';
 import { CredentialItem } from '../../../components/shared/credential_item';
