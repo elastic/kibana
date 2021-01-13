@@ -222,21 +222,6 @@ export const Overview: React.FC = () => {
   };
 
   const GroupsSummary = () => {
-    const GroupAvatars = ({ users }: { users: User[] }) => {
-      const MAX_USERS = 4;
-      return (
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
-          {users.slice(MAX_USERS).length > 0 && (
-            <EuiFlexItem>
-              <EuiText color="subdued" size="xs">
-                <strong>+{users.slice(MAX_USERS).length}</strong>
-              </EuiText>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      );
-    };
-
     return !groups.length ? null : (
       <>
         <EuiText>
@@ -256,9 +241,6 @@ export const Overview: React.FC = () => {
                     <EuiText size="s" className="eui-textTruncate">
                       <strong>{group.name}</strong>
                     </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <GroupAvatars users={group.users} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanelTo>
