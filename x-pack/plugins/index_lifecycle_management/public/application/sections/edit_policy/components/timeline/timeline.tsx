@@ -37,6 +37,10 @@ const msTimeToOverallPercent = (ms: number, totalMs: number) => {
   return toPercent(ms, totalMs);
 };
 
+/**
+ * Each phase, if active, should have a minimum width it occupies. The higher this
+ * base amount, the smaller the variance in phase size in the timeline.
+ */
 const SCORE_BUFFER_AMOUNT = 200;
 
 const i18nTexts = {
