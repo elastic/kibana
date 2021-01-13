@@ -78,7 +78,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       disabled: tags?.length === 0,
       items: tags ?? [],
       selectedItems: selectedTags,
-      title: filterLabels.TAGS,
+      title: filterLabels.TAG,
       description: selectedTags.length === 0 ? alertFilterLabels.WITH : alertFilterLabels.WITH_TAG,
       value: selectedTags.length === 0 ? alertFilterLabels.ANY_TAG : selectedTags?.join(','),
     },
@@ -132,7 +132,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
               {...item}
               btnContent={
                 <EuiExpression
-                  aria-label={'ariaLabel'}
+                  aria-label={'ariaLabel'} // this is bad
                   color={'secondary'}
                   data-test-subj={'uptimeCreateStatusAlert.' + item.id}
                   description={description}
@@ -148,7 +148,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              aria-label="Remove filter"
+              aria-label="Remove filter" // this needs to be translated
               iconType="trash"
               color="danger"
               onClick={() => {

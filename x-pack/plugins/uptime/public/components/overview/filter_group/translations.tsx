@@ -17,7 +17,7 @@ export const filterLabels = {
     defaultMessage: 'Scheme',
   }),
 
-  TAGS: i18n.translate('xpack.uptime.filterBar.options.tagsLabel', {
-    defaultMessage: 'Tags',
+  TAG: i18n.translate('xpack.uptime.filterBar.options.tagsLabel', {
+    defaultMessage: 'Tag',
   }),
 };

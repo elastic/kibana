@@ -124,6 +124,11 @@ export const FilterPopover = ({
       {!loading &&
         itemsToDisplay.map((item) => (
           <EuiFilterSelectItem
+            // move to labels folder
+            aria-label={i18n.translate('xpack.uptime.filterPopover.filterItem.label', {
+              defaultMessage: 'Filter by {title} {item}.',
+              values: { item, title },
+            })}
             checked={isItemSelected(tempSelectedItems, item)}
             data-test-subj={`filter-popover-item_${item}`}
             key={item}
