@@ -45,11 +45,14 @@ export async function getSeriesData(req, panel) {
     );
     const data = await searchStrategy.search(req, searches);
 
-    const handleResponseBodyFn = handleResponseBody(panel);
+    const handleResponseBodyFn = handleResponseBody(panel, req, searchStrategy, capabilities);
 
-    const series = data.map((resp) =>
-      handleResponseBodyFn(resp.rawResponse ? resp.rawResponse : resp)
+    const series = await Promise.all(
+      data.map(
+        async (resp) => await handleResponseBodyFn(resp.rawResponse ? resp.rawResponse : resp)
+      )
     );
+
     let annotations = null;
 
     if (panel.annotations && panel.annotations.length) {

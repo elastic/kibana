@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { newMetricAggFn } from './new_metric_agg_fn';
 import { isBasicAgg } from '../../../../common/agg_lookup';
 import { handleAdd, handleChange } from './collection_actions';
@@ -30,8 +29,10 @@ export const seriesChangeHandler = (props, items) => (doc) => {
     handleAdd.call(null, props, () => {
       const metric = newMetricAggFn();
       metric.type = doc.type;
-      const incompatPipelines = ['calculation', 'series_agg'];
-      if (!_.includes(incompatPipelines, doc.type)) metric.field = doc.id;
+
+      if (!['calculation', 'series_agg'].includes(doc.type)) {
+        metric.field = doc.id;
+      }
       return metric;
     });
   } else {

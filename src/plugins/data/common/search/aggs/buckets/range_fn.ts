@@ -102,7 +102,6 @@ export const aggRange = (): FunctionDefinition => ({
         type: BUCKET_TYPES.RANGE,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
           ranges: getParsedValue(args, 'ranges'),
         },
       },
