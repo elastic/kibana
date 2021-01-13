@@ -44,7 +44,7 @@ import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/pub
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-import { VisEditorConstructor, VisualizeServices } from './application/types';
+import { VisualizeServices } from './application/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
@@ -57,10 +57,11 @@ import {
   setIndexPatterns,
   setQueryService,
   setShareService,
-  setDefaultEditor,
+  setVisEditorsRegistry,
 } from './services';
 import { visualizeFieldAction } from './actions/visualize_field_action';
 import { createVisualizeUrlGenerator } from './url_generator';
+import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -83,7 +84,7 @@ export interface VisualizePluginSetupDependencies {
 }
 
 export interface VisualizePluginSetup {
-  setDefaultEditor: (editor: VisEditorConstructor) => void;
+  visEditorsRegistry: VisEditorsRegistry;
 }
 
 export class VisualizePlugin
@@ -97,6 +98,8 @@ export class VisualizePlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
+
+  private readonly visEditorsRegistry = createVisEditorsRegistry();
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -202,6 +205,7 @@ export class VisualizePlugin
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
           embeddable: pluginsStart.embeddable,
+          stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
@@ -243,13 +247,12 @@ export class VisualizePlugin
     }
 
     return {
-      setDefaultEditor: (editor) => {
-        setDefaultEditor(editor);
-      },
+      visEditorsRegistry: this.visEditorsRegistry,
     } as VisualizePluginSetup;
   }
 
   public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {
+    setVisEditorsRegistry(this.visEditorsRegistry);
     setApplication(core.application);
     setIndexPatterns(plugins.data.indexPatterns);
     setQueryService(plugins.data.query);

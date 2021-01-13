@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Position, Fit } from '@elastic/charts';
 
-import { Schemas } from '../../../vis_default_editor/public';
 import { AggGroupNames } from '../../../data/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../visualizations/public';
 import { defaultCountLabel, LabelRotation } from '../../../charts/public';
@@ -120,6 +119,10 @@ export const getLineVisTypeDefinition = (
       ],
       addTooltip: true,
       detailedTooltip: true,
+      palette: {
+        type: 'palette',
+        name: 'default',
+      },
       addLegend: true,
       legendPosition: Position.Right,
       fittingFunction: Fit.Linear,
@@ -139,7 +142,7 @@ export const getLineVisTypeDefinition = (
   editorConfig: {
     collections: getConfigCollections(),
     optionTabs: getOptionTabs(showElasticChartsOptions),
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -190,6 +193,6 @@ export const getLineVisTypeDefinition = (
           tooltip: <SplitTooltip />,
         }),
       },
-    ]),
+    ],
   },
 });

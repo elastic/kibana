@@ -35,9 +35,16 @@
       },
       "technique": [
         {
-          "id": "T1035",
-          "name": "Service Execution",
-          "reference": "https://attack.mitre.org/techniques/T1035/"
+          "id": "T1569",
+          "name": "System Services",
+          "reference": "https://attack.mitre.org/techniques/T1569/",
+          "subtechnique": [
+            {
+              "id": "T1569.002",
+              "name": "Service Execution",
+              "reference": "https://attack.mitre.org/techniques/T1569/002/"
+            }
+          ]
         }
       ]
     },
@@ -48,15 +55,9 @@
         "name": "Lateral Movement",
         "reference": "https://attack.mitre.org/tactics/TA0008/"
       },
-      "technique": [
-        {
-          "id": "T1035",
-          "name": "Service Execution",
-          "reference": "https://attack.mitre.org/techniques/T1035/"
-        }
-      ]
+      "technique": []
     }
   ],
   "type": "eql",
-  "version": 5
+  "version": 6
 }

@@ -49,7 +49,6 @@ import { Vis, SerializedVis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { TriggerId } from '../../../ui_actions/public';
 import { SavedObjectAttributes } from '../../../../core/types';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { VisSavedObject } from '../types';
@@ -103,13 +102,13 @@ export class VisualizeEmbeddable
   private query?: Query;
   private filters?: Filter[];
   private searchSessionId?: string;
+  private syncColors?: boolean;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression: string = '';
   private vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
@@ -147,15 +146,12 @@ export class VisualizeEmbeddable
     );
     this.deps = deps;
     this.timefilter = timefilter;
+    this.syncColors = this.input.syncColors;
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
     this.savedVisualizationsLoader = savedVisualizationsLoader;
-
-    this.autoRefreshFetchSubscription = timefilter
-      .getAutoRefreshFetch$()
-      .subscribe(this.updateHandler.bind(this));
 
     this.subscriptions.push(
       this.getUpdated$().subscribe(() => {
@@ -251,6 +247,11 @@ export class VisualizeEmbeddable
 
     if (this.searchSessionId !== this.input.searchSessionId) {
       this.searchSessionId = this.input.searchSessionId;
+      dirty = true;
+    }
+
+    if (this.syncColors !== this.input.syncColors) {
+      this.syncColors = this.input.syncColors;
       dirty = true;
     }
 
@@ -369,7 +370,6 @@ export class VisualizeEmbeddable
       this.handler.destroy();
       this.handler.getElement().remove();
     }
-    this.autoRefreshFetchSubscription.unsubscribe();
   }
 
   public reload = () => {
@@ -384,6 +384,7 @@ export class VisualizeEmbeddable
         filters: this.input.filters,
       },
       searchSessionId: this.input.searchSessionId,
+      syncColors: this.input.syncColors,
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
     };
@@ -414,7 +415,7 @@ export class VisualizeEmbeddable
     });
   };
 
-  public supportedTriggers(): TriggerId[] {
+  public supportedTriggers(): string[] {
     return this.vis.type.getSupportedTriggers?.() ?? [];
   }
 

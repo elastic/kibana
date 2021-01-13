@@ -18,14 +18,14 @@
  */
 
 import { History } from 'history';
-import { TimeRange, Query, Filter, DataPublicPluginStart } from 'src/plugins/data/public';
+import { Query, Filter, DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
 import {
-  PersistedState,
   SavedVisState,
   VisualizationsStart,
   Vis,
   VisualizeEmbeddableContract,
   VisSavedObject,
+  PersistedState,
 } from 'src/plugins/visualizations/public';
 import {
   CoreStart,
@@ -43,7 +43,7 @@ import {
 } from 'src/plugins/kibana_utils/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
-import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { EventEmitter } from 'events';
 import { DashboardStart } from '../../../dashboard/public';
@@ -80,21 +80,8 @@ export type VisualizeAppStateContainer = ReduxLikeStateContainer<
   VisualizeAppStateTransitions
 >;
 
-export interface EditorRenderProps {
-  core: CoreStart;
-  data: DataPublicPluginStart;
-  filters: Filter[];
-  timeRange: TimeRange;
-  query?: Query;
-  savedSearch?: SavedObject;
-  uiState: PersistedState;
-  /**
-   * Flag to determine if visualiztion is linked to the saved search
-   */
-  linked: boolean;
-}
-
 export interface VisualizeServices extends CoreStart {
+  stateTransferService: EmbeddableStateTransfer;
   embeddable: EmbeddableStart;
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -128,6 +115,7 @@ export interface SavedVisInstance {
 
 export interface ByValueVisInstance {
   vis: Vis;
+  savedVis: VisSavedObject;
   savedSearch?: SavedObject;
   embeddableHandler: VisualizeEmbeddableContract;
 }
@@ -144,4 +132,18 @@ export type VisEditorConstructor = new (
 export interface IEditorController {
   render(props: EditorRenderProps): Promise<void> | void;
   destroy(): void;
+}
+
+export interface EditorRenderProps {
+  core: CoreStart;
+  data: DataPublicPluginStart;
+  filters: Filter[];
+  timeRange: TimeRange;
+  query?: Query;
+  savedSearch?: SavedObject;
+  uiState: PersistedState;
+  /**
+   * Flag to determine if visualiztion is linked to the saved search
+   */
+  linked: boolean;
 }
