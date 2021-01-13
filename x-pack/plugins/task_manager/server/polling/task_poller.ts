@@ -84,8 +84,9 @@ export function createTaskPoller<T, H>({
         })
       ),
     ]).pipe(
-      // pollDelay can only shift `timer` at the scale of `period`, so we round
-      // the delay to modulo the interval period
+      // We don't have control over `pollDelay` in the poller, and a change to `delayOnClaimConflicts` could accidentally cause us to pause Task Manager
+      // polling for a far longer duration that we intended.
+      // Since the goal is to shift it within the range of `period`, we use modulo as a safe guard to ensure this doesn't happen.
       switchMap(([period, pollDelay]) => timer(period + (pollDelay % period), period)),
       mapTo(none)
     )
