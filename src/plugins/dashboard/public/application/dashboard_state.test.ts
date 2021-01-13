@@ -19,11 +19,11 @@
 
 import { createBrowserHistory } from 'history';
 import { getSavedDashboardMock } from './test_helpers';
-import { DashboardContainer, DashboardContainerInput } from '.';
+import { DashboardContainer, DashboardContainerInput, DashboardPanelState } from '.';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { DashboardContainerServices } from './embeddable/dashboard_container';
 
-import { ViewMode } from '../services/embeddable';
+import { EmbeddableInput, ViewMode } from '../services/embeddable';
 import { createKbnUrlStateStorage } from '../services/kibana_utils';
 import { InputTimeRange, TimefilterContract, TimeRange } from '../services/data';
 
@@ -133,6 +133,11 @@ describe('DashboardState', function () {
 
       const dashboardContainer = initDashboardContainer({
         expandedPanelId: 'theCoolestPanelOnThisDashboard',
+        panels: {
+          theCoolestPanelOnThisDashboard: {
+            explicitInput: { id: 'theCoolestPanelOnThisDashboard' },
+          } as DashboardPanelState<EmbeddableInput>,
+        },
       });
 
       dashboardState.handleDashboardContainerChanges(dashboardContainer);
@@ -148,15 +153,39 @@ describe('DashboardState', function () {
 
       const dashboardContainer = initDashboardContainer({
         expandedPanelId: 'theCoolestPanelOnThisDashboard',
+        panels: {
+          theCoolestPanelOnThisDashboard: {
+            explicitInput: { id: 'theCoolestPanelOnThisDashboard' },
+          } as DashboardPanelState<EmbeddableInput>,
+        },
       });
 
       dashboardState.handleDashboardContainerChanges(dashboardContainer);
       dashboardState.handleDashboardContainerChanges(dashboardContainer);
       expect(dashboardState.setExpandedPanelId).toHaveBeenCalledTimes(1);
+    });
 
-      dashboardContainer.updateInput({ expandedPanelId: 'woah it changed' });
+    test('expandedPanelId is set to undefined if panel does not exist in input', () => {
+      dashboardState.setExpandedPanelId = jest
+        .fn()
+        .mockImplementation(dashboardState.setExpandedPanelId);
+      const dashboardContainer = initDashboardContainer({
+        expandedPanelId: 'theCoolestPanelOnThisDashboard',
+        panels: {
+          theCoolestPanelOnThisDashboard: {
+            explicitInput: { id: 'theCoolestPanelOnThisDashboard' },
+          } as DashboardPanelState<EmbeddableInput>,
+        },
+      });
+
       dashboardState.handleDashboardContainerChanges(dashboardContainer);
-      expect(dashboardState.setExpandedPanelId).toHaveBeenCalledTimes(2);
+      expect(dashboardState.setExpandedPanelId).toHaveBeenCalledWith(
+        'theCoolestPanelOnThisDashboard'
+      );
+
+      dashboardContainer.updateInput({ expandedPanelId: 'theLeastCoolPanelOnThisDashboard' });
+      dashboardState.handleDashboardContainerChanges(dashboardContainer);
+      expect(dashboardState.setExpandedPanelId).toHaveBeenCalledWith(undefined);
     });
   });
 
