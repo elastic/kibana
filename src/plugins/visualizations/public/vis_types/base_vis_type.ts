@@ -18,15 +18,15 @@
  */
 
 import { defaultsDeep } from 'lodash';
-import { ISchemas } from 'src/plugins/vis_default_editor/public';
+
 import { VisParams } from '../types';
 import { VisType, VisTypeOptions, VisGroups } from './types';
+import { Schemas } from './schemas';
 
 interface CommonBaseVisTypeOptions<TVisParams>
   extends Pick<
       VisType<TVisParams>,
       | 'description'
-      | 'editor'
       | 'getInfoMessage'
       | 'getSupportedTriggers'
       | 'hierarchicalData'
@@ -90,7 +90,6 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly options;
   public readonly visualization;
   public readonly visConfig;
-  public readonly editor;
   public readonly editorConfig;
   public hidden;
   public readonly requestHandler;
@@ -102,6 +101,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly inspectorAdapters;
   public readonly toExpressionAst;
   public readonly getInfoMessage;
+  public readonly schemas;
 
   constructor(opts: BaseVisTypeOptions<TVisParams>) {
     if (!opts.icon && !opts.image) {
@@ -117,7 +117,6 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.image = opts.image;
     this.visualization = opts.visualization;
     this.visConfig = defaultsDeep({}, opts.visConfig, { defaults: {} });
-    this.editor = opts.editor;
     this.editorConfig = defaultsDeep({}, opts.editorConfig, { collections: {} });
     this.options = defaultsDeep({}, opts.options, defaultOptions);
     this.stage = opts.stage ?? 'production';
@@ -133,10 +132,8 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
     this.getInfoMessage = opts.getInfoMessage;
-  }
 
-  public get schemas(): ISchemas {
-    return this.editorConfig?.schemas ?? [];
+    this.schemas = new Schemas(this.editorConfig?.schemas ?? []);
   }
 
   public get requiresSearch(): boolean {

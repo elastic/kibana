@@ -204,7 +204,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
 
   const history = getHistory();
-  // used for restoring background session
+  // used for restoring a search session
   let isInitialSearch = true;
 
   // search session requested a data refresh
@@ -295,7 +295,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     createSearchSessionRestorationDataProvider({
       appStateContainer,
       data,
-      getSavedSearchId: () => savedSearch.id,
+      getSavedSearch: () => savedSearch,
     })
   );
 
