@@ -7,8 +7,10 @@
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test/jest';
 import { FiltersExpressionsSelect } from './filters_expression_select';
+import { render } from '../../../../lib/helper/rtl_helpers';
+import { filterAriaLabels } from './translations';
 
-describe('filters expression select component', () => {
+describe('FiltersExpressionSelect', () => {
   it('is empty when no filters available', () => {
     const component = shallowWithIntl(
       <FiltersExpressionsSelect
@@ -35,11 +37,27 @@ describe('filters expression select component', () => {
     `);
   });
 
-  it('contains provided new filter values', () => {
-    const component = shallowWithIntl(
+  it.each([
+    [
+      ['observer.geo.name'],
+      [filterAriaLabels.LOCATION],
+      [filterAriaLabels.TAG, filterAriaLabels.PORT, filterAriaLabels.SCHEME],
+    ],
+    [
+      ['observer.geo.name', 'tags'],
+      [filterAriaLabels.LOCATION, filterAriaLabels.TAG],
+      [filterAriaLabels.PORT, filterAriaLabels.SCHEME],
+    ],
+    [
+      ['url.port', 'monitor.type'],
+      [filterAriaLabels.PORT, filterAriaLabels.SCHEME],
+      [filterAriaLabels.LOCATION, filterAriaLabels.TAG],
+    ],
+  ])('contains provided new filter values', (newFilters, expectedLabels, absentLabels) => {
+    const { getByLabelText, queryByLabelText } = render(
       <FiltersExpressionsSelect
         alertParams={{}}
-        newFilters={['observer.geo.name']}
+        newFilters={newFilters}
         onRemoveFilter={jest.fn()}
         filters={{
           tags: [],
@@ -52,125 +70,63 @@ describe('filters expression select component', () => {
         shouldUpdateUrl={false}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <Fragment>
-        <EuiFlexGroup
-          key="filter_location"
-        >
-          <EuiFlexItem>
-            <FilterPopover
-              btnContent={
-                <EuiExpression
-                  aria-label="ariaLabel"
-                  color="secondary"
-                  data-test-subj="uptimeCreateStatusAlert.filter_location"
-                  description="From"
-                  onClick={[Function]}
-                  value="any location"
-                />
-              }
-              disabled={true}
-              fieldName="observer.geo.name"
-              forceOpen={false}
-              id="filter_location"
-              items={Array []}
-              loading={false}
-              onFilterFieldChange={[Function]}
-              selectedItems={Array []}
-              setForceOpen={[Function]}
-              title="Scheme"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <EuiButtonIcon
-              aria-label="Remove filter"
-              color="danger"
-              iconType="trash"
-              onClick={[Function]}
-            />
-          </EuiFlexItem>
-          <EuiSpacer
-            size="xs"
-          />
-        </EuiFlexGroup>
-        <EuiSpacer
-          size="xs"
-        />
-      </Fragment>
-    `);
+    expectedLabels.forEach((label) => expect(getByLabelText(label)));
+    absentLabels.forEach((label) => expect(queryByLabelText(label)).toBeNull());
   });
 
-  it('contains provided selected filter values', () => {
-    const component = shallowWithIntl(
-      <FiltersExpressionsSelect
-        alertParams={{}}
-        newFilters={['tags']}
-        onRemoveFilter={jest.fn()}
-        filters={{
-          tags: ['foo', 'bar'],
-          ports: [],
-          schemes: [],
-          locations: [],
-        }}
-        setAlertParams={jest.fn()}
-        setUpdatedFieldValues={jest.fn()}
-        shouldUpdateUrl={false}
-      />
-    );
-    expect(component).toMatchInlineSnapshot(`
-      <Fragment>
-        <EuiFlexGroup
-          key="filter_tags"
-        >
-          <EuiFlexItem>
-            <FilterPopover
-              btnContent={
-                <EuiExpression
-                  aria-label="ariaLabel"
-                  color="secondary"
-                  data-test-subj="uptimeCreateStatusAlert.filter_tags"
-                  description="Using"
-                  onClick={[Function]}
-                  value="any tag"
-                />
-              }
-              disabled={false}
-              fieldName="tags"
-              forceOpen={false}
-              id="filter_tags"
-              items={
-                Array [
-                  "foo",
-                  "bar",
-                ]
-              }
-              loading={false}
-              onFilterFieldChange={[Function]}
-              selectedItems={Array []}
-              setForceOpen={[Function]}
-              title="Tags"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <EuiButtonIcon
-              aria-label="Remove filter"
-              color="danger"
-              iconType="trash"
-              onClick={[Function]}
-            />
-          </EuiFlexItem>
-          <EuiSpacer
-            size="xs"
-          />
-        </EuiFlexGroup>
-        <EuiSpacer
-          size="xs"
+  it.each([
+    [
+      {
+        tags: ['foo', 'bar'],
+        ports: [],
+        schemes: [],
+        locations: [],
+      },
+      filterAriaLabels.TAG,
+    ],
+    [
+      {
+        tags: [],
+        ports: [5601, 9200],
+        schemes: [],
+        locations: [],
+      },
+      filterAriaLabels.TAG,
+    ],
+    [
+      {
+        tags: [],
+        ports: [],
+        schemes: ['http', 'tcp'],
+        locations: [],
+      },
+      filterAriaLabels.TAG,
+    ],
+    [
+      {
+        tags: [],
+        ports: [],
+        schemes: [],
+        locations: ['nyc', 'fairbanks'],
+      },
+      filterAriaLabels.TAG,
+    ],
+  ])(
+    'applies accessible label to filter expressions, and contains selected filters',
+    async (filters, expectedLabel) => {
+      const { getByLabelText } = render(
+        <FiltersExpressionsSelect
+          alertParams={{}}
+          newFilters={['tags']}
+          onRemoveFilter={jest.fn()}
+          filters={filters}
+          setAlertParams={jest.fn()}
+          setUpdatedFieldValues={jest.fn()}
+          shouldUpdateUrl={false}
         />
-      </Fragment>
-    `);
-  });
+      );
+
+      expect(getByLabelText(expectedLabel));
+    }
+  );
 });
