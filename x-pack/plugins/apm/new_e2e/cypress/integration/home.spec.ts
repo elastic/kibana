@@ -3,17 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import url from 'url';
+import archives_metadata from '../fixtures/es_archives/archives_metadata';
 
 describe('home', () => {
-  // before(() => {
-  // this for some reason does not work.
-  //   esArchiverLoad('apm_8.0.0');
-  // });
-  // after(() => {
-  //   esArchiverUnload('apm_8.0.0');
-  // });
+  const { start, end } = archives_metadata['apm_8.0.0'];
 
   it('test', () => {
-    cy.visit('/');
+    const baseUrl = url.format({
+      pathname: '/app/apm',
+      query: { rangeFrom: start, rangeTo: end },
+    });
+
+    cy.visit(baseUrl);
   });
 });

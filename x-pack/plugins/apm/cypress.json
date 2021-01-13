@@ -1,5 +1,4 @@
 {
-  "baseUrl": "http://localhost:5601",
   "fileServerFolder": "new_e2e/cypress",
   "fixturesFolder": "new_e2e/cypress/fixtures",
   "integrationFolder": "new_e2e/cypress/integration",
