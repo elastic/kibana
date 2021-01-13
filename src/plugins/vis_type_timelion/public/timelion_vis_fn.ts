@@ -30,23 +30,21 @@ import { KibanaContext, Filter, Query, TimeRange } from '../../data/public';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<TimelionRenderValue>>;
-interface Arguments {
-  expression: string;
-  interval: string;
-}
-
 export interface TimelionRenderValue {
   visData: TimelionSuccessResponse;
   visType: 'timelion';
   visParams: TimelionVisParams;
 }
 
-export type TimelionVisParams = Arguments;
+export interface TimelionVisParams {
+  expression: string;
+  interval: string;
+}
 
 export type TimelionExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'timelion_vis',
   Input,
-  Arguments,
+  TimelionVisParams,
   Output
 >;
 
