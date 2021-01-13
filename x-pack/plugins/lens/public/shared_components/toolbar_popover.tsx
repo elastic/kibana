@@ -6,9 +6,9 @@
 
 import React, { useState } from 'react';
 import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle, IconType } from '@elastic/eui';
-import { ToolbarButton, ToolbarButtonProps } from './toolbar_button';
+import { ToolbarButton } from './toolbar_button';
 import { EuiIconLegend } from '../assets/legend';
-import { NewButton } from '../../../../../src/plugins/kibana_react/public';
+import { NewButton, NewButtonProps } from '../../../../../src/plugins/kibana_react/public';
 
 const typeToIconMap: { [type: string]: string | IconType } = {
   legend: EuiIconLegend as IconType,
@@ -32,7 +32,7 @@ export interface ToolbarPopoverProps {
   /**
    * Button group position
    */
-  groupPosition?: ToolbarButtonProps['groupPosition'];
+  groupPosition?: NewButtonProps['groupPosition'];
   buttonDataTestSubj?: string;
 }
 

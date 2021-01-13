@@ -9,9 +9,9 @@ import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
 import { IndexPatternRef } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { ToolbarButtonProps, ToolbarButton } from '../shared_components';
+import { NewButton, NewButtonProps } from '../../../../../src/plugins/kibana_react/public';
 
-export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
+export type ChangeIndexPatternTriggerProps = NewButtonProps & {
   label: string;
   title?: string;
 };
@@ -34,14 +34,9 @@ export function ChangeIndexPattern({
   const createTrigger = function () {
     const { label, title, ...rest } = trigger;
     return (
-      <ToolbarButton
-        title={title}
-        onClick={() => setPopoverIsOpen(!isPopoverOpen)}
-        fullWidth
-        {...rest}
-      >
+      <NewButton title={title} onClick={() => setPopoverIsOpen(!isPopoverOpen)} fullWidth {...rest}>
         {label}
-      </ToolbarButton>
+      </NewButton>
     );
   };
 
