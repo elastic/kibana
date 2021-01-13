@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
-import { Observable, Subject } from 'rxjs';
+import { distinctUntilChanged, filter, map, pluck, switchMap, startWith } from 'rxjs/operators';
+import { combineLatest, Observable, Subject } from 'rxjs';
 import {
   CardinalityModelPlotHigh,
   CardinalityValidationResult,
@@ -63,39 +63,49 @@ export function isCardinalityModelPlotHigh(
 export function cardinalityValidator(
   jobCreator$: Subject<JobCreator>
 ): Observable<CardinalityValidatorResult> {
-  return jobCreator$.pipe(
-    // Perform a cardinality check only with enabled model plot.
-    filter((jobCreator) => {
-      return jobCreator?.modelPlot;
-    }),
-    map((jobCreator) => {
-      return {
-        jobCreator,
-        analysisConfigString: JSON.stringify(jobCreator.jobConfig.analysis_config),
-      };
-    }),
-    // No need to perform an API call if the analysis configuration hasn't been changed
-    distinctUntilChanged((prev, curr) => {
-      return prev.analysisConfigString === curr.analysisConfigString;
-    }),
-    switchMap(({ jobCreator }) => {
-      return ml.validateCardinality$({
-        ...jobCreator.jobConfig,
-        datafeed_config: jobCreator.datafeedConfig,
-      } as CombinedJob);
-    }),
-    map((validationResults) => {
-      for (const validationResult of validationResults) {
-        if (isCardinalityModelPlotHigh(validationResult)) {
-          return {
-            highCardinality: {
-              value: validationResult.modelPlotCardinality,
-              severity: VALIDATOR_SEVERITY.WARNING,
-            },
-          };
-        }
-      }
-      return null;
+  return combineLatest([
+    jobCreator$.pipe(pluck('modelPlot')),
+    jobCreator$.pipe(
+      filter((jobCreator) => {
+        return jobCreator?.modelPlot;
+      }),
+      map((jobCreator) => {
+        return {
+          jobCreator,
+          analysisConfigString: JSON.stringify(jobCreator.jobConfig.analysis_config, null, 2),
+        };
+      }),
+      distinctUntilChanged((prev, curr) => {
+        return prev.analysisConfigString === curr.analysisConfigString;
+      }),
+      switchMap(({ jobCreator }) => {
+        // Perform a cardinality check only with enabled model plot.
+        return ml
+          .validateCardinality$({
+            ...jobCreator.jobConfig,
+            datafeed_config: jobCreator.datafeedConfig,
+          } as CombinedJob)
+          .pipe(
+            map((validationResults) => {
+              for (const validationResult of validationResults) {
+                if (isCardinalityModelPlotHigh(validationResult)) {
+                  return {
+                    highCardinality: {
+                      value: validationResult.modelPlotCardinality,
+                      severity: VALIDATOR_SEVERITY.WARNING,
+                    },
+                  };
+                }
+              }
+              return null;
+            })
+          );
+      }),
+      startWith(null)
+    ),
+  ]).pipe(
+    map(([isModelPlotEnabled, cardinalityValidationResult]) => {
+      return isModelPlotEnabled ? cardinalityValidationResult : null;
     })
   );
 }
