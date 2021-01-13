@@ -23,6 +23,7 @@ import {
 } from '../../../../common/constants';
 
 import { EuiButtonTo } from '../react_router_helpers';
+import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { SetAppSearchChrome, SetWorkplaceSearchChrome } from '../kibana_chrome';
 import { SendAppSearchTelemetry, SendWorkplaceSearchTelemetry } from '../telemetry';
 import { LicensingLogic } from '../licensing';
@@ -38,7 +39,7 @@ interface NotFoundProps {
     SUPPORT_URL: string;
   };
   // Optional breadcrumbs
-  breadcrumbs?: string[];
+  breadcrumbs?: BreadcrumbTrail;
 }
 
 export const NotFound: React.FC<NotFoundProps> = ({ product = {}, breadcrumbs }) => {
