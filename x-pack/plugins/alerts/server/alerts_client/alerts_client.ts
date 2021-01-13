@@ -30,6 +30,7 @@ import {
   AlertExecutionStatusValues,
   AlertNotifyWhenType,
   AlertTypeParams,
+  AlertInstanceStatus,
 } from '../types';
 import {
   validateAlertTypeParams,
@@ -107,6 +108,11 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
+export interface FindInstancesOptions extends FindOptions {
+  dateStart?: string;
+  dateEnd?: string;
+}
+
 export interface AggregateOptions extends IndexType {
   search?: string;
   defaultSearchOperator?: 'AND' | 'OR';
@@ -131,6 +137,13 @@ export interface FindResult<Params extends AlertTypeParams> {
   perPage: number;
   total: number;
   data: Array<SanitizedAlert<Params>>;
+}
+
+export interface FindInstanceResult<Params extends AlertTypeParams> {
+  page: number;
+  perPage: number;
+  total: number;
+  data: Array<AlertInstanceSummary & { params: Params }>;
 }
 
 export interface CreateOptions<Params extends AlertTypeParams> {
@@ -433,6 +446,49 @@ export class AlertsClient {
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
     });
+  }
+
+  public async findAlertsInstancesSummaries<Params extends AlertTypeParams = never>({
+    options: { fields, ...options } = {},
+  }: { options?: FindInstancesOptions } = {}): Promise<FindInstanceResult<Params>> {
+    try {
+      // 1. get all alerts by filter options
+      const findAlertsResult = await this.find(omit(options, 'dateStart', 'dateEnd', 'page', 'perPage'));
+      // TODO: fix paging issue
+      const alertIds = findAlertsResult.data.map((alertObject) => alertObject.id);
+      const dateNow = new Date();
+      const parsedDateStart = parseDate(options.dateStart, 'dateStart', dateNow);
+      const parsedDateEnd = parseDate(options.dateStart, 'dateEnd', dateNow);
+
+      const eventLogClient = await this.getEventLogClient();
+
+      this.logger.debug(`getInstances(): search the event log for alerts by ids=[${alertIds}]`);
+
+      const eventsResults = await eventLogClient.findEventsBySavedObjectIds('alert', alertIds, {
+        page: 1,
+        per_page: 10000,
+        start: parsedDateStart.toISOString(),
+        end: parsedDateEnd.toISOString(),
+        sort_order: 'desc',
+      });
+      const events = eventsResults.data;
+      const extendedAlertsSummary = alertsSummaryResults.data.map((alertSummary) => {
+        const alert = findAlertsResult.data.find((alert) => alert.id === alertSummary.id)
+        return {
+        ...alertInstanceSummaryFromEventLog({
+          alert,
+          alertSummary.events,
+          dateStart: parsedDateStart.toISOString(),
+          dateEnd: dateNow.toISOString(),
+        }),
+        params:
+      } 
+      });
+      return;
+    } catch (err) {
+      this.logger.debug(`alertsClient.getInstances(): error: ${err.message}`);
+    }
+
   }
 
   public async find<Params extends AlertTypeParams = never>({
