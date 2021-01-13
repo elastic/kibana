@@ -5,7 +5,28 @@
  */
 import expect from '@kbn/expect';
 
+import { rgb, nest } from 'd3';
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+function getColorStats(iD: number[]) {
+  const pixels: number[][] = [];
+  for (let i = 0; i < iD.length; i += 4) {
+    pixels.push([iD[i], iD[i + 1], iD[i + 2]]);
+  }
+
+  const pixelsLength = pixels.length;
+
+  const stats = nest<number[]>()
+    .key((d) => rgb(d[0], d[1], d[2]).toString().toUpperCase())
+    .entries(pixels);
+
+  return stats
+    .map((s) => ({
+      key: s.key,
+      value: Math.round((s.values.length / pixelsLength) * 10) * 10,
+    }))
+    .filter((s) => s.value > 0);
+}
 
 export function TransformWizardProvider({ getService }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
@@ -184,7 +205,12 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async assertIndexPreviewHistogramCharts(
-      expectedHistogramCharts: Array<{ chartAvailable: boolean; id: string; legend: string }>
+      expectedHistogramCharts: Array<{
+        chartAvailable: boolean;
+        id: string;
+        legend: string;
+        colorStats?: any[];
+      }>
     ) {
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
@@ -194,6 +220,20 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
           if (expected.chartAvailable) {
             await testSubjects.existOrFail(`mlDataGridChart-${index}-histogram`);
+
+            const chartWrapper = await testSubjects.find(`mlDataGridChart-${index}-histogram`);
+            const imageData = await chartWrapper.getImageData(
+              `[data-test-subj="mlDataGridChart-${index}-histogram"] .echCanvasRenderer`
+            );
+
+            const actualColorStats = getColorStats(imageData);
+
+            expect(actualColorStats).to.eql(
+              expected.colorStats,
+              `Color stats for column '${expected.id}' should be '${JSON.stringify(
+                expected.colorStats
+              )}' (got '${JSON.stringify(actualColorStats)}')`
+            );
           } else {
             await testSubjects.missingOrFail(`mlDataGridChart-${index}-histogram`);
           }
@@ -201,7 +241,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
           const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${index}-legend`);
           expect(actualLegend).to.eql(
             expected.legend,
-            `Legend text for column '${index}' should be '${expected.legend}' (got '${actualLegend}')`
+            `Legend text for column '${expected.id}' should be '${expected.legend}' (got '${actualLegend}')`
           );
 
           const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${index}-id`);
