@@ -34,13 +34,16 @@ describe('create', () => {
           type: ConnectorTypes.jira,
           fields: { issueType: 'Task', priority: 'High', parent: null },
         },
+        settings: {
+          syncAlerts: true,
+        },
       } as CasePostRequest;
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseConfigureSavedObject: mockCaseConfigure,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.create({ theCase: postCase });
 
       expect(res).toEqual({
@@ -65,6 +68,9 @@ describe('create', () => {
         updated_at: null,
         updated_by: null,
         version: 'WzksMV0=',
+        settings: {
+          syncAlerts: true,
+        },
       });
 
       expect(
@@ -79,9 +85,9 @@ describe('create', () => {
               full_name: 'Awesome D00d',
               username: 'awesome',
             },
-            action_field: ['description', 'status', 'tags', 'title', 'connector'],
+            action_field: ['description', 'status', 'tags', 'title', 'connector', 'settings'],
             new_value:
-              '{"description":"This is a brand new case of a bad meanie defacing data","title":"Super Bad Security Issue","tags":["defacement"],"connector":{"id":"123","name":"Jira","type":".jira","fields":{"issueType":"Task","priority":"High","parent":null}}}',
+              '{"description":"This is a brand new case of a bad meanie defacing data","title":"Super Bad Security Issue","tags":["defacement"],"connector":{"id":"123","name":"Jira","type":".jira","fields":{"issueType":"Task","priority":"High","parent":null}},"settings":{"syncAlerts":true}}',
             old_value: null,
           },
           references: [
@@ -106,12 +112,15 @@ describe('create', () => {
           type: ConnectorTypes.none,
           fields: null,
         },
+        settings: {
+          syncAlerts: true,
+        },
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.create({ theCase: postCase });
 
       expect(res).toEqual({
@@ -131,6 +140,9 @@ describe('create', () => {
         updated_at: null,
         updated_by: null,
         version: 'WzksMV0=',
+        settings: {
+          syncAlerts: true,
+        },
       });
     });
 
@@ -145,12 +157,18 @@ describe('create', () => {
           type: ConnectorTypes.none,
           fields: null,
         },
+        settings: {
+          syncAlerts: true,
+        },
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient, true);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({
+        savedObjectsClient,
+        badAuth: true,
+      });
       const res = await caseClient.client.create({ theCase: postCase });
 
       expect(res).toEqual({
@@ -174,6 +192,9 @@ describe('create', () => {
         updated_at: null,
         updated_by: null,
         version: 'WzksMV0=',
+        settings: {
+          syncAlerts: true,
+        },
       });
     });
   });
@@ -195,7 +216,7 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         // @ts-expect-error
         .create({ theCase: postCase })
@@ -222,7 +243,7 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         // @ts-expect-error
         .create({ theCase: postCase })
@@ -249,7 +270,7 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         // @ts-expect-error
         .create({ theCase: postCase })
@@ -271,7 +292,7 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         // @ts-expect-error
         .create({ theCase: postCase })
@@ -299,7 +320,7 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         // @ts-expect-error
         .create({ theCase: postCase })
@@ -323,12 +344,15 @@ describe('create', () => {
           type: ConnectorTypes.none,
           fields: null,
         },
+        settings: {
+          syncAlerts: true,
+        },
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.create({ theCase: postCase }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
@@ -347,11 +371,14 @@ describe('create', () => {
           type: ConnectorTypes.none,
           fields: null,
         },
+        settings: {
+          syncAlerts: true,
+        },
       };
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
 
       caseClient.client.create({ theCase: postCase }).catch((e) => {
         expect(e).not.toBeNull();

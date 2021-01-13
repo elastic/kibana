@@ -9,24 +9,24 @@ import {
   UserActionField,
   UserAction,
   CaseConnector,
-  CommentType,
+  CommentRequest,
   CaseStatuses,
+  CaseAttributes,
+  CasePatchRequest,
 } from '../../../../case/common/api';
 
 export { CaseConnector, ActionConnector } from '../../../../case/common/api';
 
-export interface Comment {
+export type Comment = CommentRequest & {
   id: string;
   createdAt: string;
   createdBy: ElasticUser;
-  comment: string;
-  type: CommentType.user;
   pushedAt: string | null;
   pushedBy: string | null;
   updatedAt: string | null;
   updatedBy: ElasticUser | null;
   version: string;
-}
+};
 export interface CaseUserActions {
   actionId: string;
   actionField: UserActionField;
@@ -65,6 +65,7 @@ export interface Case {
   updatedAt: string | null;
   updatedBy: ElasticUser | null;
   version: string;
+  settings: CaseAttributes['settings'];
 }
 
 export interface QueryParams {
@@ -131,4 +132,24 @@ export interface ActionLicense {
 export interface DeleteCase {
   id: string;
   title?: string;
+}
+
+export interface FieldMappings {
+  id: string;
+  title?: string;
+}
+
+export type UpdateKey = keyof Pick<
+  CasePatchRequest,
+  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings'
+>;
+
+export interface UpdateByKey {
+  updateKey: UpdateKey;
+  updateValue: CasePatchRequest[UpdateKey];
+  fetchCaseUserActions?: (caseId: string) => void;
+  updateCase?: (newCase: Case) => void;
+  caseData: Case;
+  onSuccess?: () => void;
+  onError?: () => void;
 }

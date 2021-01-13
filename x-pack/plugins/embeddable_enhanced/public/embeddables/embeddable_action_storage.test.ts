@@ -12,7 +12,7 @@ import {
 import { UiActionsEnhancedSerializedEvent } from '../../../ui_actions_enhanced/public';
 import { of } from '../../../../../src/plugins/kibana_utils/public';
 // use real const to make test fail in case someone accidentally changes it
-import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/data/public';
 
 class TestEmbeddable extends Embeddable<EmbeddableWithDynamicActionsInput> {
   public readonly type = 'test';

@@ -8,6 +8,7 @@ import uuid from 'uuid/v4';
 import {
   AggDescriptor,
   ColorDynamicOptions,
+  ESTermSourceDescriptor,
   LayerDescriptor,
 } from '../../../common/descriptor_types';
 import {
@@ -21,7 +22,6 @@ import {
 import { VectorStyle } from '../styles/vector/vector_style';
 import { EMSFileSource } from '../sources/ems_file_source';
 // @ts-ignore
-import { ESGeoGridSource } from '../sources/es_geo_grid_source';
 import { VectorLayer } from './vector_layer/vector_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
@@ -35,9 +35,13 @@ export function createAggDescriptor(metricAgg: string, metricFieldName?: string)
   });
   const aggType = aggTypeKey ? AGG_TYPE[aggTypeKey as keyof typeof AGG_TYPE] : undefined;
 
-  return aggType && metricFieldName
-    ? { type: aggType, field: metricFieldName }
-    : { type: AGG_TYPE.COUNT };
+  if (!aggType || aggType === AGG_TYPE.COUNT || !metricFieldName) {
+    return { type: AGG_TYPE.COUNT };
+  } else if (aggType === AGG_TYPE.PERCENTILE) {
+    return { type: aggType, field: metricFieldName, percentile: 50 };
+  } else {
+    return { type: aggType, field: metricFieldName };
+  }
 }
 
 export function createRegionMapLayerDescriptor({
@@ -45,6 +49,7 @@ export function createRegionMapLayerDescriptor({
   emsLayerId,
   leftFieldName,
   termsFieldName,
+  termsSize,
   colorSchema,
   indexPatternId,
   indexPatternTitle,
@@ -55,6 +60,7 @@ export function createRegionMapLayerDescriptor({
   emsLayerId?: string;
   leftFieldName?: string;
   termsFieldName?: string;
+  termsSize?: number;
   colorSchema: string;
   indexPatternId?: string;
   indexPatternTitle?: string;
@@ -75,21 +81,25 @@ export function createRegionMapLayerDescriptor({
   const colorPallette = NUMERICAL_COLOR_PALETTES.find((pallette) => {
     return pallette.value.toLowerCase() === colorSchema.toLowerCase();
   });
+  const termSourceDescriptor: ESTermSourceDescriptor = {
+    type: SOURCE_TYPES.ES_TERM_SOURCE,
+    id: joinId,
+    indexPatternId,
+    indexPatternTitle: indexPatternTitle ? indexPatternTitle : indexPatternId,
+    term: termsFieldName,
+    metrics: [metricsDescriptor],
+    applyGlobalQuery: true,
+    applyGlobalTime: true,
+  };
+  if (termsSize !== undefined) {
+    termSourceDescriptor.size = termsSize;
+  }
   return VectorLayer.createDescriptor({
     label,
     joins: [
       {
         leftField: leftFieldName,
-        right: {
-          type: SOURCE_TYPES.ES_TERM_SOURCE,
-          id: joinId,
-          indexPatternId,
-          indexPatternTitle: indexPatternTitle ? indexPatternTitle : indexPatternId,
-          term: termsFieldName,
-          metrics: [metricsDescriptor],
-          applyGlobalQuery: true,
-          applyGlobalTime: true,
-        },
+        right: termSourceDescriptor,
       },
     ],
     sourceDescriptor: EMSFileSource.createDescriptor({

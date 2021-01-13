@@ -14,21 +14,21 @@ import { i18nTexts } from '../../../i18n_texts';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
-import { LearnMoreLink, DescribedFormField } from '../../';
+import { LearnMoreLink, DescribedFormRow } from '../../';
 
 interface Props {
   phase: 'hot' | 'warm';
 }
 
-export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
+export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
   const { policy } = useEditPolicyContext();
 
   const initialToggleValue = useMemo<boolean>(() => {
-    return Boolean(policy.phases[phase]?.actions?.forcemerge);
+    return policy.phases[phase]?.actions?.forcemerge != null;
   }, [policy, phase]);
 
   return (
-    <DescribedFormField
+    <DescribedFormRow
       title={
         <h3>
           <FormattedMessage
@@ -43,7 +43,7 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
             id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableExplanationText"
             defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
           />{' '}
-          <LearnMoreLink docPath="indices-forcemerge.html" />
+          <LearnMoreLink docPath="ilm-forcemerge.html" />
         </EuiTextColor>
       }
       titleSize="xs"
@@ -82,6 +82,6 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
           }}
         />
       </div>
-    </DescribedFormField>
+    </DescribedFormRow>
   );
 };

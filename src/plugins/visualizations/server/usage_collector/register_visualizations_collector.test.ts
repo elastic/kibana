@@ -62,7 +62,7 @@ describe('registerVisualizationsCollector', () => {
     const mockCollectorFetchContext = createCollectorFetchContextMock();
     const fetchResult = await usageCollector.fetch(mockCollectorFetchContext);
     expect(mockGetStats).toBeCalledTimes(1);
-    expect(mockGetStats).toBeCalledWith(mockCollectorFetchContext.callCluster, mockIndex);
+    expect(mockGetStats).toBeCalledWith(mockCollectorFetchContext.esClient, mockIndex);
     expect(fetchResult).toBe(mockStats);
   });
 });

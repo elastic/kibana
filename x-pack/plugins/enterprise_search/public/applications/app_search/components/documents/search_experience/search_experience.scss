@@ -2,6 +2,10 @@
   .sui-results-container {
     flex-grow: 1;
     padding: 0;
+
+    > li + li {
+      margin-top: $euiSize;
+    }
   }
 
   .documentsSearchExperience__sidebar {

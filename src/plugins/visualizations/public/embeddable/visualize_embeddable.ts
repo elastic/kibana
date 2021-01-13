@@ -19,7 +19,6 @@
 
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
-import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
@@ -50,7 +49,6 @@ import { Vis, SerializedVis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { TriggerId } from '../../../ui_actions/public';
 import { SavedObjectAttributes } from '../../../../core/types';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { VisSavedObject } from '../types';
@@ -72,6 +70,9 @@ export interface VisualizeInput extends EmbeddableInput {
   };
   savedVis?: SerializedVis;
   table?: unknown;
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -100,13 +101,13 @@ export class VisualizeEmbeddable
   private timeRange?: TimeRange;
   private query?: Query;
   private filters?: Filter[];
+  private searchSessionId?: string;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression: string = '';
   private vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
@@ -150,13 +151,12 @@ export class VisualizeEmbeddable
     this.attributeService = attributeService;
     this.savedVisualizationsLoader = savedVisualizationsLoader;
 
-    this.autoRefreshFetchSubscription = timefilter
-      .getAutoRefreshFetch$()
-      .subscribe(this.updateHandler.bind(this));
-
     this.subscriptions.push(
-      Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
-        this.handleChanges();
+      this.getUpdated$().subscribe(() => {
+        const isDirty = this.handleChanges();
+        if (isDirty && this.handler) {
+          this.updateHandler();
+        }
       })
     );
 
@@ -220,7 +220,7 @@ export class VisualizeEmbeddable
     }
   }
 
-  public async handleChanges() {
+  private handleChanges(): boolean {
     this.transferCustomizationsToUiState();
 
     let dirty = false;
@@ -243,13 +243,16 @@ export class VisualizeEmbeddable
       dirty = true;
     }
 
+    if (this.searchSessionId !== this.input.searchSessionId) {
+      this.searchSessionId = this.input.searchSessionId;
+      dirty = true;
+    }
+
     if (this.vis.description && this.domNode) {
       this.domNode.setAttribute('data-description', this.vis.description);
     }
 
-    if (this.handler && dirty) {
-      this.updateHandler();
-    }
+    return dirty;
   }
 
   // this is a hack to make editor still work, will be removed once we clean up editor
@@ -360,7 +363,6 @@ export class VisualizeEmbeddable
       this.handler.destroy();
       this.handler.getElement().remove();
     }
-    this.autoRefreshFetchSubscription.unsubscribe();
   }
 
   public reload = () => {
@@ -395,6 +397,7 @@ export class VisualizeEmbeddable
   }
 
   private handleVisUpdate = async () => {
+    this.handleChanges();
     this.updateHandler();
   };
 
@@ -404,7 +407,7 @@ export class VisualizeEmbeddable
     });
   };
 
-  public supportedTriggers(): TriggerId[] {
+  public supportedTriggers(): string[] {
     return this.vis.type.getSupportedTriggers?.() ?? [];
   }
 

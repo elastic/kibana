@@ -35,7 +35,12 @@ export const configSchema = schema.object({
   regionmap: regionmapSchema,
   manifestServiceUrl: schema.string({ defaultValue: '' }),
 
-  emsUrl: schema.string({ defaultValue: '' }),
+  emsUrl: schema.conditional(
+    schema.siblingRef('proxyElasticMapsServiceInMaps'),
+    true,
+    schema.never(),
+    schema.string({ defaultValue: '' })
+  ),
 
   emsFileApiUrl: schema.string({ defaultValue: DEFAULT_EMS_FILE_API_URL }),
   emsTileApiUrl: schema.string({ defaultValue: DEFAULT_EMS_TILE_API_URL }),

@@ -15,6 +15,7 @@ const alwaysImportedTests = [
   require.resolve('../test/security_functional/oidc.config.ts'),
   require.resolve('../test/security_functional/saml.config.ts'),
   require.resolve('../test/functional_embedded/config.ts'),
+  require.resolve('../test/functional_cors/config.ts'),
   require.resolve('../test/functional_enterprise_search/without_host_configured.config.ts'),
 ];
 const onlyNotInCoverageTests = [
@@ -44,6 +45,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/security_api_integration/oidc_implicit_flow.config.ts'),
   require.resolve('../test/security_api_integration/token.config.ts'),
   require.resolve('../test/security_api_integration/anonymous.config.ts'),
+  require.resolve('../test/security_api_integration/anonymous_es_anonymous.config.ts'),
   require.resolve('../test/observability_api_integration/basic/config.ts'),
   require.resolve('../test/observability_api_integration/trial/config.ts'),
   require.resolve('../test/encrypted_saved_objects_api_integration/config.ts'),

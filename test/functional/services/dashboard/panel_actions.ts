@@ -33,6 +33,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
+  const inspector = getService('inspector');
 
   return new (class DashboardPanelActions {
     async findContextMenu(parent?: WebElementWrapper) {
@@ -163,7 +164,17 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       await this.openInspector(header);
     }
 
-    async openInspector(parent: WebElementWrapper) {
+    async getSearchSessionIdByTitle(title: string) {
+      await this.openInspectorByTitle(title);
+      await inspector.openInspectorRequestsView();
+      const searchSessionId = await (
+        await testSubjects.find('inspectorRequestSearchSessionId')
+      ).getAttribute('data-search-session-id');
+      await inspector.close();
+      return searchSessionId;
+    }
+
+    async openInspector(parent?: WebElementWrapper) {
       await this.openContextMenu(parent);
       const exists = await testSubjects.exists(OPEN_INSPECTOR_TEST_SUBJ);
       if (!exists) {
@@ -247,7 +258,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       await testSubjects.click('customizePanelHideTitle');
     }
 
-    async toggleHidePanelTitle(originalTitle: string) {
+    async toggleHidePanelTitle(originalTitle?: string) {
       log.debug(`hidePanelTitle(${originalTitle})`);
       if (originalTitle) {
         const panelOptions = await this.getPanelHeading(originalTitle);
@@ -277,7 +288,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       await testSubjects.click('saveNewTitleButton');
     }
 
-    async resetCustomPanelTitle(panel: WebElementWrapper) {
+    async resetCustomPanelTitle(panel?: WebElementWrapper) {
       log.debug('resetCustomPanelTitle');
       await this.customizePanel(panel);
       await testSubjects.click('resetCustomEmbeddablePanelTitle');

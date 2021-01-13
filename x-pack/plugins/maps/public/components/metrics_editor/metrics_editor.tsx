@@ -4,14 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { MetricEditor } from './metric_editor';
 import { DEFAULT_METRIC } from '../../classes/sources/es_agg_source';
 import { IFieldType } from '../../../../../../src/plugins/data/public';
-import { AggDescriptor } from '../../../common/descriptor_types';
+import { AggDescriptor, FieldedAggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE } from '../../../common/constants';
+
+export function isMetricValid(aggDescriptor: AggDescriptor) {
+  return aggDescriptor.type === AGG_TYPE.COUNT
+    ? true
+    : (aggDescriptor as FieldedAggDescriptor).field !== undefined;
+}
 
 interface Props {
   allowMultipleMetrics: boolean;
@@ -21,24 +27,54 @@ interface Props {
   metricsFilter?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;
 }
 
-export function MetricsEditor({
-  fields,
-  metrics = [DEFAULT_METRIC],
-  onChange,
-  allowMultipleMetrics = true,
-  metricsFilter,
-}: Props) {
-  function renderMetrics() {
-    // There was a bug in 7.8 that initialized metrics to [].
-    // This check is needed to handle any saved objects created before the bug was patched.
-    const nonEmptyMetrics = metrics.length === 0 ? [DEFAULT_METRIC] : metrics;
-    return nonEmptyMetrics.map((metric, index) => {
+interface State {
+  metrics: AggDescriptor[];
+}
+
+export class MetricsEditor extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      // There was a bug in 7.8 that initialized metrics to [].
+      // This check is needed to handle any saved objects created before the bug was patched.
+      metrics: this.props.metrics.length === 0 ? [DEFAULT_METRIC] : this.props.metrics,
+    };
+  }
+
+  _onSubmit() {
+    const hasInvalidMetric = this.state.metrics.some((metric) => {
+      return !isMetricValid(metric);
+    });
+    if (!hasInvalidMetric) {
+      this.props.onChange(this.state.metrics);
+    }
+  }
+
+  _renderMetrics() {
+    return this.state.metrics.map((metric, index) => {
       const onMetricChange = (updatedMetric: AggDescriptor) => {
-        onChange([...metrics.slice(0, index), updatedMetric, ...metrics.slice(index + 1)]);
+        this.setState(
+          {
+            metrics: [
+              ...this.state.metrics.slice(0, index),
+              updatedMetric,
+              ...this.state.metrics.slice(index + 1),
+            ],
+          },
+          this._onSubmit
+        );
       };
 
       const onRemove = () => {
-        onChange([...metrics.slice(0, index), ...metrics.slice(index + 1)]);
+        this.setState(
+          {
+            metrics: [
+              ...this.state.metrics.slice(0, index),
+              ...this.state.metrics.slice(index + 1),
+            ],
+          },
+          this._onSubmit
+        );
       };
 
       return (
@@ -46,8 +82,8 @@ export function MetricsEditor({
           <MetricEditor
             onChange={onMetricChange}
             metric={metric}
-            fields={fields}
-            metricsFilter={metricsFilter}
+            fields={this.props.fields}
+            metricsFilter={this.props.metricsFilter}
             showRemoveButton={index > 0}
             onRemove={onRemove}
           />
@@ -56,12 +92,12 @@ export function MetricsEditor({
     });
   }
 
-  function addMetric() {
-    onChange([...metrics, { type: AGG_TYPE.AVG }]);
-  }
+  _addMetric = () => {
+    this.setState({ metrics: [...this.state.metrics, { type: AGG_TYPE.COUNT }] }, this._onSubmit);
+  };
 
-  function renderAddMetricButton() {
-    if (!allowMultipleMetrics) {
+  _renderAddMetricButton() {
+    if (!this.props.allowMultipleMetrics) {
       return null;
     }
 
@@ -69,7 +105,7 @@ export function MetricsEditor({
       <Fragment>
         <EuiSpacer size="xs" />
         <EuiTextAlign textAlign="center">
-          <EuiButtonEmpty onClick={addMetric} size="xs" iconType="plusInCircleFilled">
+          <EuiButtonEmpty onClick={this._addMetric} size="xs" iconType="plusInCircleFilled">
             <FormattedMessage
               id="xpack.maps.metricsEditor.addMetricButtonLabel"
               defaultMessage="Add metric"
@@ -80,11 +116,13 @@ export function MetricsEditor({
     );
   }
 
-  return (
-    <Fragment>
-      <div className="mapMapLayerPanel__metrics">{renderMetrics()}</div>
+  render() {
+    return (
+      <Fragment>
+        <div className="mapMapLayerPanel__metrics">{this._renderMetrics()}</div>
 
-      {renderAddMetricButton()}
-    </Fragment>
-  );
+        {this._renderAddMetricButton()}
+      </Fragment>
+    );
+  }
 }

@@ -8,8 +8,31 @@ import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
   editPolicy: {
+    shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.indexFieldLabel', {
+      defaultMessage: 'Shrink index',
+    }),
+    searchableSnapshotInHotPhase: {
+      searchableSnapshotDisallowed: {
+        calloutTitle: i18n.translate(
+          'xpack.indexLifecycleMgmt.searchableSnapshot.disallowedCalloutTitle',
+          {
+            defaultMessage: 'Searchable snapshot disabled',
+          }
+        ),
+        calloutBody: i18n.translate(
+          'xpack.indexLifecycleMgmt.searchableSnapshot.disallowedCalloutBody',
+          {
+            defaultMessage:
+              'To use searchable snapshot in this phase you must disable searchable snapshot in the hot phase.',
+          }
+        ),
+      },
+    },
     forceMergeEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.enableLabel', {
       defaultMessage: 'Force merge data',
+    }),
+    readonlyEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.readonlyFieldLabel', {
+      defaultMessage: 'Make index read only',
     }),
     maxNumSegmentsFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.forceMerge.numberOfSegmentsLabel',
@@ -44,6 +67,12 @@ export const i18nTexts = {
       'xpack.indexLifecycleMgmt.editPolicy.dataTierAllocation.nodeAllocationFieldLabel',
       {
         defaultMessage: 'Select a node attribute',
+      }
+    ),
+    searchableSnapshotsFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldLabel',
+      {
+        defaultMessage: 'Searchable snapshot repository',
       }
     ),
     errors: {
@@ -132,6 +161,12 @@ export const i18nTexts = {
         'xpack.indexLifecycleMgmt.editPolicy.policyNameTooLongError',
         {
           defaultMessage: 'A policy name cannot be longer than 255 bytes.',
+        }
+      ),
+      searchableSnapshotRepoRequired: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoRequiredError',
+        {
+          defaultMessage: 'A snapshot repository name is required.',
         }
       ),
     },

@@ -8,7 +8,7 @@ import { first, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { combineLatest } from 'rxjs';
-import { SecurityPluginSetup } from '../../security/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -19,7 +19,7 @@ import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { AlertsClientFactory } from './alerts_client_factory';
-import { LicenseState } from './lib/license_state';
+import { ILicenseState, LicenseState } from './lib/license_state';
 import {
   KibanaRequest,
   Logger,
@@ -33,6 +33,7 @@ import {
   ILegacyClusterClient,
   StatusServiceSetup,
   ServiceStatus,
+  SavedObjectsBulkGetObject,
 } from '../../../../src/core/server';
 
 import {
@@ -54,12 +55,20 @@ import {
   unmuteAlertInstanceRoute,
   healthRoute,
 } from './routes';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LICENSE_TYPE, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '../../actions/server';
-import { AlertsHealth, Services } from './types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertsHealth,
+  AlertType,
+  AlertTypeParams,
+  AlertTypeState,
+  Services,
+} from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
@@ -90,8 +99,25 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
 };
 
 export interface PluginSetupContract {
-  registerType: AlertTypeRegistry['register'];
+  registerType<
+    Params extends AlertTypeParams = AlertTypeParams,
+    State extends AlertTypeState = AlertTypeState,
+    InstanceState extends AlertInstanceState = AlertInstanceState,
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+    ActionGroupIds extends string = never,
+    RecoveryActionGroupId extends string = never
+  >(
+    alertType: AlertType<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >
+  ): void;
 }
+
 export interface PluginStartContract {
   listTypes: AlertTypeRegistry['list'];
   getAlertsClientWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsClient>;
@@ -114,7 +140,9 @@ export interface AlertingPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   features: FeaturesPluginStart;
   eventLog: IEventLogClientService;
+  licensing: LicensingPluginStart;
   spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
 }
 
 export class AlertingPlugin {
@@ -122,7 +150,7 @@ export class AlertingPlugin {
   private readonly logger: Logger;
   private alertTypeRegistry?: AlertTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
-  private licenseState: LicenseState | null = null;
+  private licenseState: ILicenseState | null = null;
   private isESOUsingEphemeralEncryptionKey?: boolean;
   private security?: SecurityPluginSetup;
   private readonly alertsClientFactory: AlertsClientFactory;
@@ -180,6 +208,8 @@ export class AlertingPlugin {
     const alertTypeRegistry = new AlertTypeRegistry({
       taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
+      licenseState: this.licenseState,
+      licensing: plugins.licensing,
     });
     this.alertTypeRegistry = alertTypeRegistry;
 
@@ -203,8 +233,7 @@ export class AlertingPlugin {
       this.logger,
       core.getStartServices(),
       plugins.taskManager,
-      this.config,
-      this.security
+      this.config
     );
 
     core.getStartServices().then(async ([, startPlugins]) => {
@@ -250,7 +279,28 @@ export class AlertingPlugin {
     healthRoute(router, this.licenseState, plugins.encryptedSavedObjects);
 
     return {
-      registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
+      registerType<
+        Params extends AlertTypeParams = AlertTypeParams,
+        State extends AlertTypeState = AlertTypeState,
+        InstanceState extends AlertInstanceState = AlertInstanceState,
+        InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+        ActionGroupIds extends string = never,
+        RecoveryActionGroupId extends string = never
+      >(
+        alertType: AlertType<
+          Params,
+          State,
+          InstanceState,
+          InstanceContext,
+          ActionGroupIds,
+          RecoveryActionGroupId
+        >
+      ) {
+        if (!(alertType.minimumLicenseRequired in LICENSE_TYPE)) {
+          throw new Error(`"${alertType.minimumLicenseRequired}" is not a valid license type`);
+        }
+        alertTypeRegistry.register(alertType);
+      },
     };
   }
 
@@ -262,7 +312,10 @@ export class AlertingPlugin {
       alertTypeRegistry,
       alertsClientFactory,
       security,
+      licenseState,
     } = this;
+
+    licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: ['alert'],
@@ -279,6 +332,7 @@ export class AlertingPlugin {
       logger,
       taskManager: plugins.taskManager,
       securityPluginSetup: security,
+      securityPluginStart: plugins.security,
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {
@@ -312,11 +366,15 @@ export class AlertingPlugin {
       basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+      alertTypeRegistry: this.alertTypeRegistry!,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
       const client = getAlertsClientWithRequest(request);
-      return (type: string, id: string) => client.get({ id });
+      return (objects?: SavedObjectsBulkGetObject[]) =>
+        objects
+          ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
+          : Promise.resolve([]);
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);

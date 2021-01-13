@@ -68,7 +68,11 @@ export class TopTermPercentageField implements IESAggField {
     return false;
   }
 
-  async getOrdinalFieldMetaRequest(): Promise<unknown> {
+  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
+    return null;
+  }
+
+  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
     return null;
   }
 

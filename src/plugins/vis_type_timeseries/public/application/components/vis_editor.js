@@ -40,13 +40,8 @@ export class VisEditor extends Component {
   constructor(props) {
     super(props);
     this.localStorage = new Storage(window.localStorage);
-    this.state = {
-      model: props.visParams,
-      dirty: false,
-      autoApply: true,
-      visFields: props.visFields,
-      extractedIndexPatterns: [''],
-    };
+    this.state = {};
+
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
 
@@ -74,20 +69,29 @@ export class VisEditor extends Component {
     this.props.eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });
+
+    const extractedIndexPatterns = extractIndexPatterns(
+      this.state.model,
+      this.state.model.default_index_pattern
+    );
+    if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
+      this.abortableFetchFields(extractedIndexPatterns).then((visFields) => {
+        this.setState({
+          visFields,
+          extractedIndexPatterns,
+        });
+      });
+    }
   }, VIS_STATE_DEBOUNCE_DELAY);
 
-  debouncedFetchFields = debounce(
-    (extractedIndexPatterns) => {
-      if (this.abortControllerFetchFields) {
-        this.abortControllerFetchFields.abort();
-      }
-      this.abortControllerFetchFields = new AbortController();
+  abortableFetchFields = (extractedIndexPatterns) => {
+    if (this.abortControllerFetchFields) {
+      this.abortControllerFetchFields.abort();
+    }
+    this.abortControllerFetchFields = new AbortController();
 
-      return fetchFields(extractedIndexPatterns, this.abortControllerFetchFields.signal);
-    },
-    VIS_STATE_DEBOUNCE_DELAY,
-    { leading: true }
-  );
+    return fetchFields(extractedIndexPatterns, this.abortControllerFetchFields.signal);
+  };
 
   handleChange = (partialModel) => {
     if (isEmpty(partialModel)) {
@@ -103,16 +107,6 @@ export class VisEditor extends Component {
       this.updateVisState();
 
       dirty = false;
-    }
-
-    const extractedIndexPatterns = extractIndexPatterns(nextModel);
-    if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-      this.debouncedFetchFields(extractedIndexPatterns).then((visFields) =>
-        this.setState({
-          visFields,
-          extractedIndexPatterns,
-        })
-      );
     }
 
     this.setState({
@@ -195,6 +189,31 @@ export class VisEditor extends Component {
   }
 
   componentDidMount() {
+    const dataStart = getDataStart();
+
+    dataStart.indexPatterns.getDefault().then(async (index) => {
+      const defaultIndexTitle = index?.title ?? '';
+      const indexPatterns = extractIndexPatterns(this.props.visParams, defaultIndexTitle);
+
+      this.setState({
+        model: {
+          ...this.props.visParams,
+          /** @legacy
+           *  please use IndexPatterns service instead
+           * **/
+          default_index_pattern: defaultIndexTitle,
+          /** @legacy
+           *  please use IndexPatterns service instead
+           * **/
+          default_timefield: index?.timeFieldName ?? '',
+        },
+        dirty: false,
+        autoApply: true,
+        visFields: await fetchFields(indexPatterns),
+        extractedIndexPatterns: [''],
+      });
+    });
+
     this.props.eventEmitter.on('updateEditor', this.updateModel);
   }
 
@@ -211,10 +230,8 @@ VisEditor.defaultProps = {
 VisEditor.propTypes = {
   vis: PropTypes.object,
   visData: PropTypes.object,
-  visFields: PropTypes.object,
   renderComplete: PropTypes.func,
   config: PropTypes.object,
-  savedObj: PropTypes.object,
   timeRange: PropTypes.object,
   appState: PropTypes.object,
 };

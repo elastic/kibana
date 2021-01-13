@@ -5,6 +5,7 @@
  */
 
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
+import { cleanKibana } from '../tasks/common';
 
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
@@ -14,6 +15,7 @@ import { HOSTS_URL } from '../urls/navigation';
 
 describe('timeline search or filter KQL bar', () => {
   beforeEach(() => {
+    cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
   });
 
@@ -22,11 +24,6 @@ describe('timeline search or filter KQL bar', () => {
     openTimelineUsingToggle();
     executeTimelineKQL(hostExistsQuery);
 
-    cy.get(SERVER_SIDE_EVENT_COUNT)
-      .invoke('text')
-      .then((strCount) => {
-        const intCount = +strCount;
-        cy.wrap(intCount).should('be.above', 0);
-      });
+    cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
   });
 });

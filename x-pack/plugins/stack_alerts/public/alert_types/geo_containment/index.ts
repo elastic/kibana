@@ -7,14 +7,11 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { validateExpression } from './validation';
 import { GeoContainmentAlertParams } from './types';
-import { AlertTypeModel, AlertsContextValue } from '../../../../triggers_actions_ui/public';
+import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 
-export function getAlertType(): AlertTypeModel<GeoContainmentAlertParams, AlertsContextValue> {
+export function getAlertType(): AlertTypeModel<GeoContainmentAlertParams> {
   return {
     id: '.geo-containment',
-    name: i18n.translate('xpack.stackAlerts.geoContainment.name.trackingContainment', {
-      defaultMessage: 'Tracking containment',
-    }),
     description: i18n.translate('xpack.stackAlerts.geoContainment.descriptionText', {
       defaultMessage: 'Alert when an entity is contained within a geo boundary.',
     }),

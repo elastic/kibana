@@ -54,6 +54,20 @@ export const basicComment: Comment = {
   version: 'WzQ3LDFc',
 };
 
+export const alertComment: Comment = {
+  alertId: 'alert-id-1',
+  index: 'alert-index-1',
+  type: CommentType.alert,
+  id: 'alert-comment-id',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  pushedAt: null,
+  pushedBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
 export const basicCase: Case = {
   closedAt: null,
   closedBy: null,
@@ -76,6 +90,9 @@ export const basicCase: Case = {
   updatedAt: basicUpdatedAt,
   updatedBy: elasticUser,
   version: 'WzQ3LDFd',
+  settings: {
+    syncAlerts: true,
+  },
 };
 
 export const basicCasePost: Case = {
@@ -141,7 +158,6 @@ const basicAction = {
 };
 
 export const casePushParams = {
-  actionBy: elasticUser,
   savedObjectId: basicCaseId,
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
@@ -153,6 +169,7 @@ export const casePushParams = {
   description: 'nice',
   comments: null,
 };
+
 export const actionTypeExecutorResult = {
   actionId: 'string',
   status: 'ok',
@@ -191,8 +208,8 @@ export const elasticUserSnake = {
   email: 'leslie.knope@elastic.co',
 };
 export const basicCommentSnake: CommentResponse = {
-  ...basicComment,
   comment: 'Solve this fast!',
+  type: CommentType.user,
   id: basicCommentId,
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
@@ -200,6 +217,7 @@ export const basicCommentSnake: CommentResponse = {
   pushed_by: null,
   updated_at: null,
   updated_by: null,
+  version: 'WzQ3LDFc',
 };
 
 export const basicCaseSnake: CaseResponse = {
@@ -305,6 +323,15 @@ export const getUserAction = (af: UserActionField, a: UserAction) => ({
     a === 'push-to-service' && af[0] === 'pushed'
       ? JSON.stringify(basicPushSnake)
       : basicAction.newValue,
+});
+
+export const getAlertUserAction = () => ({
+  ...basicAction,
+  actionId: 'alert-action-id',
+  actionField: ['comment'],
+  action: 'create',
+  commentId: 'alert-comment-id',
+  newValue: '{"type":"alert","alertId":"alert-id-1","index":"index-id-1"}',
 });
 
 export const caseUserActions: CaseUserActions[] = [

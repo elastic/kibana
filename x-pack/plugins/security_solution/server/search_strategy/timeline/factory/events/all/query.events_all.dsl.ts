@@ -6,10 +6,10 @@
 import { isEmpty } from 'lodash/fp';
 
 import {
-  SortField,
   TimerangeFilter,
   TimerangeInput,
   TimelineEventsAllRequestOptions,
+  TimelineRequestSortField,
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
@@ -27,31 +27,35 @@ export const buildTimelineEventsAllQuery = ({
   const getTimerangeFilter = (timerangeOption: TimerangeInput | undefined): TimerangeFilter[] => {
     if (timerangeOption) {
       const { to, from } = timerangeOption;
-      return [
-        {
-          range: {
-            '@timestamp': {
-              gte: from,
-              lte: to,
-              format: 'strict_date_optional_time',
+      return !isEmpty(to) && !isEmpty(from)
+        ? [
+            {
+              range: {
+                '@timestamp': {
+                  gte: from,
+                  lte: to,
+                  format: 'strict_date_optional_time',
+                },
+              },
             },
-          },
-        },
-      ];
+          ]
+        : [];
     }
     return [];
   };
 
   const filter = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
 
-  const getSortField = (sortField: SortField) => {
-    if (sortField.field) {
-      const field: string = sortField.field === 'timestamp' ? '@timestamp' : sortField.field;
-
-      return [{ [field]: sortField.direction }];
-    }
-    return [];
-  };
+  const getSortField = (sortFields: TimelineRequestSortField[]) =>
+    sortFields.map((item) => {
+      const field: string = item.field === 'timestamp' ? '@timestamp' : item.field;
+      return {
+        [field]: {
+          order: item.direction,
+          unmapped_type: item.type,
+        },
+      };
+    });
 
   const dslQuery = {
     allowNoIndices: true,
@@ -68,7 +72,8 @@ export const buildTimelineEventsAllQuery = ({
       size: querySize,
       track_total_hits: true,
       sort: getSortField(sort),
-      _source: fields,
+      fields,
+      _source: ['signal.*'],
     },
   };
 

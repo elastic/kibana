@@ -31,6 +31,7 @@ import {
   AggsStartDependencies,
   createGetConfig,
 } from './aggs_service';
+import { createNowProviderMock } from '../../now_provider/mocks';
 
 const { uiSettings } = coreMock.createSetup();
 
@@ -44,6 +45,7 @@ describe('AggsService - public', () => {
     setupDeps = {
       registerFunction: expressionsPluginMock.createSetupContract().registerFunction,
       uiSettings,
+      nowProvider: createNowProviderMock(),
     };
     startDeps = {
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
@@ -88,11 +90,12 @@ describe('AggsService - public', () => {
   describe('start()', () => {
     test('exposes proper contract', () => {
       const start = service.start(startDeps);
-      expect(Object.keys(start).length).toBe(4);
+      expect(Object.keys(start).length).toBe(5);
       expect(start).toHaveProperty('calculateAutoTimeExpression');
       expect(start).toHaveProperty('getDateMetaByDatatableColumn');
       expect(start).toHaveProperty('createAggConfigs');
       expect(start).toHaveProperty('types');
+      expect(start).toHaveProperty('datatableUtilities');
     });
 
     test('types registry returns initialized agg types', () => {

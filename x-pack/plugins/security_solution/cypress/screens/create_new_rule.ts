@@ -23,8 +23,6 @@ export const ADD_REFERENCE_URL_BTN =
 
 export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
 
-export const MITRE_BTN = '[data-test-subj="addMitre"]';
-
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
 
 export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
@@ -35,8 +33,7 @@ export const COMBO_BOX_RESULT = '.euiFilterSelectItem';
 
 export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 
-export const CUSTOM_QUERY_INPUT =
-  '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="queryInput"]';
+export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
 export const THREAT_MATCH_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineThreatRuleQueryBar"] [data-test-subj="queryInput"]';
@@ -85,10 +82,17 @@ export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]
 
 export const MITRE_TACTIC = '.euiContextMenuItem__text';
 
-export const MITRE_TACTIC_DROPDOWN = '[data-test-subj="mitreTactic"]';
+export const MITRE_ATTACK_TACTIC_DROPDOWN = '[data-test-subj="mitreAttackTactic"]';
 
-export const MITRE_TECHNIQUES_INPUT =
-  '[data-test-subj="mitreTechniques"] [data-test-subj="comboBoxSearchInput"]';
+export const MITRE_ATTACK_TECHNIQUE_DROPDOWN = '[data-test-subj="mitreAttackTechnique"]';
+
+export const MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN = '[data-test-subj="mitreAttackSubtechnique"]';
+
+export const MITRE_ATTACK_ADD_TACTIC_BUTTON = '[data-test-subj="addMitreAttackTactic"]';
+
+export const MITRE_ATTACK_ADD_TECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackTechnique"]';
+
+export const MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackSubtechnique"]';
 
 export const QUERY_PREVIEW_BUTTON = '[data-test-subj="queryPreviewButton"]';
 
@@ -97,7 +101,11 @@ export const REFERENCE_URLS_INPUT =
 
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
 
-export const RISK_INPUT = '.euiRangeInput';
+export const DEFAULT_RISK_SCORE_INPUT =
+  '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeInput';
+
+export const DEFAULT_RISK_SCORE_SLIDER =
+  '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeSlider';
 
 export const RISK_MAPPING_OVERRIDE_OPTION = '#risk_score-mapping-override';
 

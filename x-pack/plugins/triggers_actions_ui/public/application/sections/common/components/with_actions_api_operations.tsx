@@ -21,9 +21,6 @@ export function withActionOperations<T>(
 ): React.FunctionComponent<PropsWithOptionalApiHandlers<T>> {
   return (props: PropsWithOptionalApiHandlers<T>) => {
     const { http } = useKibana().services;
-    if (!http) {
-      throw new Error('KibanaContext has not been initalized correctly.');
-    }
     return (
       <WrappedComponent {...(props as T)} loadActionTypes={async () => loadActionTypes({ http })} />
     );

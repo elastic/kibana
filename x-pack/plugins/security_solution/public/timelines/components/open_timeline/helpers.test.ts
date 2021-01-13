@@ -15,7 +15,6 @@ import {
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
 import {
-  setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
@@ -40,7 +39,12 @@ import { KueryFilterQueryKind } from '../../../common/store/model';
 import { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
-import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
@@ -237,10 +241,12 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -302,7 +308,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -312,10 +317,13 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'number',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.default,
@@ -336,10 +344,12 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -401,7 +411,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -411,10 +420,13 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'number',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.template,
@@ -435,10 +447,12 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -500,7 +514,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -510,10 +523,13 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'number',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.default,
@@ -532,10 +548,12 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -597,7 +615,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -607,10 +624,13 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'number',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.default,
@@ -629,6 +649,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         savedObjectId: 'savedObject-1',
         columns: [
           {
@@ -639,7 +660,7 @@ describe('helpers', () => {
             example: undefined,
             id: '@timestamp',
             placeholder: undefined,
-            type: undefined,
+            type: 'number',
             width: 190,
           },
           {
@@ -732,7 +753,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         title: '',
@@ -745,10 +765,13 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'number',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         id: 'savedObject-1',
       });
@@ -795,11 +818,13 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         savedObjectId: 'savedObject-1',
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -899,7 +924,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         title: '',
@@ -912,10 +936,13 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'number',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         id: 'savedObject-1',
       });
@@ -932,10 +959,12 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -997,7 +1026,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -1007,10 +1035,13 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'number',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.immutable,
         title: 'Awesome Timeline',
         timelineType: TimelineType.template,
@@ -1031,10 +1062,12 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -1096,7 +1129,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -1106,10 +1138,13 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'number',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.active,
         title: 'Awesome Timeline',
         timelineType: TimelineType.default,
@@ -1394,7 +1429,6 @@ describe('helpers', () => {
         timeline: mockTimelineModel,
       })();
 
-      expect(dispatchSetKqlFilterQueryDraft).not.toHaveBeenCalled();
       expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
     });
 
@@ -1419,7 +1453,6 @@ describe('helpers', () => {
             kuery: null,
             serializedQuery: 'some-serialized-query',
           },
-          filterQueryDraft: null,
         },
       };
       timelineDispatch({
@@ -1431,7 +1464,6 @@ describe('helpers', () => {
         timeline: mockTimeline,
       })();
 
-      expect(dispatchSetKqlFilterQueryDraft).not.toHaveBeenCalled();
       expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
     });
 
@@ -1443,7 +1475,6 @@ describe('helpers', () => {
             kuery: { expression: 'expression', kind: 'kuery' as KueryFilterQueryKind },
             serializedQuery: 'some-serialized-query',
           },
-          filterQueryDraft: null,
         },
       };
       timelineDispatch({
@@ -1455,13 +1486,6 @@ describe('helpers', () => {
         timeline: mockTimeline,
       })();
 
-      expect(dispatchSetKqlFilterQueryDraft).toHaveBeenCalledWith({
-        id: TimelineId.active,
-        filterQueryDraft: {
-          kind: 'kuery',
-          expression: 'expression',
-        },
-      });
       expect(dispatchApplyKqlFilterQuery).toHaveBeenCalledWith({
         id: TimelineId.active,
         filterQuery: {
@@ -1497,11 +1521,13 @@ describe('helpers', () => {
         notes: [
           {
             created: new Date('2020-03-26T14:35:56.356Z'),
+            eventId: null,
             id: 'note-id',
             lastEdit: new Date('2020-03-26T14:35:56.356Z'),
             note: 'I am a note',
             user: 'unknown',
             saveObjectId: 'note-id',
+            timelineId: null,
             version: undefined,
           },
         ],

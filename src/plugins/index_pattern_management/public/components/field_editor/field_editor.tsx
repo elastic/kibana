@@ -425,7 +425,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         helpText={
           <FormattedMessage
             id="indexPatternManagement.labelHelpText"
-            defaultMessage="Set a custom label to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+            defaultMessage="Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
           />
         }
       >

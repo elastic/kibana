@@ -18,7 +18,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '../../data/public';
-import { Schemas } from '../../vis_default_editor/public';
 import { BaseVisTypeOptions } from '../../visualizations/public';
 
 import { TableOptions } from './components/table_vis_options_lazy';
@@ -43,18 +42,15 @@ export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
       perPage: 10,
       showPartialRows: false,
       showMetricsAtAllLevels: false,
-      sort: {
-        columnIndex: null,
-        direction: null,
-      },
       showTotal: false,
+      showToolbar: false,
       totalFunc: 'sum',
       percentageCol: '',
     },
   },
   editorConfig: {
     optionsTemplate: TableOptions,
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -88,10 +84,8 @@ export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
         max: 1,
         aggFilter: ['!filter'],
       },
-    ]),
+    ],
   },
   toExpressionAst,
-  hierarchicalData: (vis) => {
-    return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
-  },
+  hierarchicalData: (vis) => vis.params.showPartialRows || vis.params.showMetricsAtAllLevels,
 };

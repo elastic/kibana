@@ -4,21 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { FunctionComponent } from 'react';
-import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import {
-  useFormData,
-  UseField,
-  NumericField,
-  SelectField,
-} from '../../../../../../../shared_imports';
+import { UseField, NumericField, SelectField } from '../../../../../../../shared_imports';
 
 import { LearnMoreLink } from '../../../learn_more_link';
-import { useRolloverPath } from '../../../../constants';
+import { useConfigurationIssues } from '../../../../form';
 
 import { getUnitsAriaLabelForPhase, getTimingLabelForPhase } from './util';
 
@@ -29,8 +23,7 @@ interface Props {
 }
 
 export const MinAgeInputField: FunctionComponent<Props> = ({ phase }): React.ReactElement => {
-  const [formData] = useFormData({ watch: useRolloverPath });
-  const rolloverEnabled = get(formData, useRolloverPath);
+  const { isUsingRollover: rolloverEnabled } = useConfigurationIssues();
 
   let daysOptionLabel;
   let hoursOptionLabel;

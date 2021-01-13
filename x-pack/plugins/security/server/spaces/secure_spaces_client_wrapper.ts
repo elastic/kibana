@@ -6,10 +6,16 @@
 
 import Boom from '@hapi/boom';
 import { KibanaRequest } from 'src/core/server';
-import { GetAllSpacesPurpose, GetSpaceResult } from '../../../spaces/common/model/types';
-import { Space, ISpacesClient } from '../../../spaces/server';
+import {
+  Space,
+  ISpacesClient,
+  GetAllSpacesOptions,
+  GetAllSpacesPurpose,
+  GetSpaceResult,
+} from '../../../spaces/server';
 import { LegacySpacesAuditLogger } from './legacy_audit_logger';
 import { AuthorizationServiceSetup } from '../authorization';
+import { AuditLogger, EventOutcome, SpaceAuditAction, spaceAuditEvent } from '../audit';
 import { SecurityPluginSetup } from '..';
 
 const PURPOSE_PRIVILEGE_MAP: Record<
@@ -28,11 +34,6 @@ const PURPOSE_PRIVILEGE_MAP: Record<
   ],
 };
 
-interface GetAllSpacesOptions {
-  purpose?: GetAllSpacesPurpose;
-  includeAuthorizedPurposes?: boolean;
-}
-
 export class SecureSpacesClientWrapper implements ISpacesClient {
   private readonly useRbac = this.authorization.mode.useRbacForRequest(this.request);
 
@@ -40,6 +41,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     private readonly spacesClient: ISpacesClient,
     private readonly request: KibanaRequest,
     private readonly authorization: AuthorizationServiceSetup,
+    private readonly auditLogger: AuditLogger,
     private readonly legacyAuditLogger: LegacySpacesAuditLogger
   ) {}
 
@@ -50,6 +52,15 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     const allSpaces = await this.spacesClient.getAll({ purpose, includeAuthorizedPurposes });
 
     if (!this.useRbac) {
+      allSpaces.forEach(({ id }) =>
+        this.auditLogger.log(
+          spaceAuditEvent({
+            action: SpaceAuditAction.FIND,
+            savedObject: { type: 'space', id },
+          })
+        )
+      );
+
       return allSpaces;
     }
 
@@ -108,61 +119,156 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
       .filter(this.filterUnauthorizedSpaceResults);
 
     if (authorizedSpaces.length === 0) {
+      const error = Boom.forbidden();
+
       this.legacyAuditLogger.spacesAuthorizationFailure(username, 'getAll');
-      throw Boom.forbidden(); // Note: there is a catch for this in `SpacesSavedObjectsClient.find`; if we get rid of this error, remove that too
+      this.auditLogger.log(
+        spaceAuditEvent({
+          action: SpaceAuditAction.FIND,
+          error,
+        })
+      );
+
+      throw error; // Note: there is a catch for this in `SpacesSavedObjectsClient.find`; if we get rid of this error, remove that too
     }
 
     const authorizedSpaceIds = authorizedSpaces.map((space) => space.id);
+
     this.legacyAuditLogger.spacesAuthorizationSuccess(username, 'getAll', authorizedSpaceIds);
+    authorizedSpaces.forEach(({ id }) =>
+      this.auditLogger.log(
+        spaceAuditEvent({
+          action: SpaceAuditAction.FIND,
+          savedObject: { type: 'space', id },
+        })
+      )
+    );
 
     return authorizedSpaces;
   }
 
   public async get(id: string) {
     if (this.useRbac) {
-      await this.ensureAuthorizedAtSpace(
-        id,
-        this.authorization.actions.login,
-        'get',
-        `Unauthorized to get ${id} space`
-      );
+      try {
+        await this.ensureAuthorizedAtSpace(
+          id,
+          this.authorization.actions.login,
+          'get',
+          `Unauthorized to get ${id} space`
+        );
+      } catch (error) {
+        this.auditLogger.log(
+          spaceAuditEvent({
+            action: SpaceAuditAction.GET,
+            savedObject: { type: 'space', id },
+            error,
+          })
+        );
+        throw error;
+      }
     }
 
-    return this.spacesClient.get(id);
+    const space = this.spacesClient.get(id);
+
+    this.auditLogger.log(
+      spaceAuditEvent({
+        action: SpaceAuditAction.GET,
+        savedObject: { type: 'space', id },
+      })
+    );
+
+    return space;
   }
 
   public async create(space: Space) {
     if (this.useRbac) {
-      await this.ensureAuthorizedGlobally(
-        this.authorization.actions.space.manage,
-        'create',
-        'Unauthorized to create spaces'
-      );
+      try {
+        await this.ensureAuthorizedGlobally(
+          this.authorization.actions.space.manage,
+          'create',
+          'Unauthorized to create spaces'
+        );
+      } catch (error) {
+        this.auditLogger.log(
+          spaceAuditEvent({
+            action: SpaceAuditAction.CREATE,
+            savedObject: { type: 'space', id: space.id },
+            error,
+          })
+        );
+        throw error;
+      }
     }
+
+    this.auditLogger.log(
+      spaceAuditEvent({
+        action: SpaceAuditAction.CREATE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'space', id: space.id },
+      })
+    );
 
     return this.spacesClient.create(space);
   }
 
   public async update(id: string, space: Space) {
     if (this.useRbac) {
-      await this.ensureAuthorizedGlobally(
-        this.authorization.actions.space.manage,
-        'update',
-        'Unauthorized to update spaces'
-      );
+      try {
+        await this.ensureAuthorizedGlobally(
+          this.authorization.actions.space.manage,
+          'update',
+          'Unauthorized to update spaces'
+        );
+      } catch (error) {
+        this.auditLogger.log(
+          spaceAuditEvent({
+            action: SpaceAuditAction.UPDATE,
+            savedObject: { type: 'space', id },
+            error,
+          })
+        );
+        throw error;
+      }
     }
+
+    this.auditLogger.log(
+      spaceAuditEvent({
+        action: SpaceAuditAction.UPDATE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'space', id },
+      })
+    );
 
     return this.spacesClient.update(id, space);
   }
 
   public async delete(id: string) {
     if (this.useRbac) {
-      await this.ensureAuthorizedGlobally(
-        this.authorization.actions.space.manage,
-        'delete',
-        'Unauthorized to delete spaces'
-      );
+      try {
+        await this.ensureAuthorizedGlobally(
+          this.authorization.actions.space.manage,
+          'delete',
+          'Unauthorized to delete spaces'
+        );
+      } catch (error) {
+        this.auditLogger.log(
+          spaceAuditEvent({
+            action: SpaceAuditAction.DELETE,
+            savedObject: { type: 'space', id },
+            error,
+          })
+        );
+        throw error;
+      }
     }
+
+    this.auditLogger.log(
+      spaceAuditEvent({
+        action: SpaceAuditAction.DELETE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type: 'space', id },
+      })
+    );
 
     return this.spacesClient.delete(id);
   }

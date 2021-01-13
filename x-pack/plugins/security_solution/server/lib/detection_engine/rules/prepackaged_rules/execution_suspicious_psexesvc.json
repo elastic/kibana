@@ -8,10 +8,10 @@
     "winlogbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License",
   "name": "Suspicious Process Execution via Renamed PsExec Executable",
-  "query": "event.category:process and event.type:(start or process_started) and (process.pe.original_file_name:(psexesvc.exe or PSEXESVC.exe) or winlog.event_data.OriginalFileName:(psexesvc.exe or PSEXESVC.exe)) and process.parent.name:services.exe and not process.name:(psexesvc.exe or PSEXESVC.exe)",
+  "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n  process.pe.original_file_name : \"psexesvc.exe\" and not process.name : \"PSEXESVC.exe\"\n",
   "risk_score": 47,
   "rule_id": "e2f9fdf5-8076-45ad-9427-41e0e03dc9c2",
   "severity": "medium",
@@ -32,13 +32,20 @@
       },
       "technique": [
         {
-          "id": "T1035",
-          "name": "Service Execution",
-          "reference": "https://attack.mitre.org/techniques/T1035/"
+          "id": "T1569",
+          "name": "System Services",
+          "reference": "https://attack.mitre.org/techniques/T1569/",
+          "subtechnique": [
+            {
+              "id": "T1569.002",
+              "name": "Service Execution",
+              "reference": "https://attack.mitre.org/techniques/T1569/002/"
+            }
+          ]
         }
       ]
     }
   ],
-  "type": "query",
-  "version": 1
+  "type": "eql",
+  "version": 2
 }

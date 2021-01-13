@@ -5,7 +5,7 @@
  */
 
 import * as selectors from './selectors';
-import { DataState } from '../../types';
+import { DataState, TimeRange } from '../../types';
 import { ResolverAction } from '../actions';
 import { dataReducer } from './reducer';
 import { createStore } from 'redux';
@@ -13,15 +13,76 @@ import {
   mockTreeWithNoAncestorsAnd2Children,
   mockTreeWith2AncestorsAndNoChildren,
   mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
-  mockTreeWithAllProcessesTerminated,
   mockTreeWithNoProcessEvents,
 } from '../../mocks/resolver_tree';
-import * as eventModel from '../../../../common/endpoint/models/event';
-import { EndpointEvent } from '../../../../common/endpoint/types';
+import { endpointSourceSchema } from './../../mocks/tree_schema';
+import * as nodeModel from '../../../../common/endpoint/models/node';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
+import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import { mockEndpointEvent } from '../../mocks/endpoint_event';
+import { maxDate } from '../../models/time_range';
+
+function mockNodeDataWithAllProcessesTerminated({
+  originID,
+  firstAncestorID,
+  secondAncestorID,
+}: {
+  secondAncestorID: string;
+  firstAncestorID: string;
+  originID: string;
+}): SafeResolverEvent[] {
+  const secondAncestor: SafeResolverEvent = mockEndpointEvent({
+    entityID: secondAncestorID,
+    processName: 'a',
+    parentEntityID: 'none',
+    timestamp: 1600863932316,
+  });
+  const firstAncestor: SafeResolverEvent = mockEndpointEvent({
+    entityID: firstAncestorID,
+    processName: 'b',
+    parentEntityID: secondAncestorID,
+    timestamp: 1600863932317,
+  });
+  const originEvent: SafeResolverEvent = mockEndpointEvent({
+    entityID: originID,
+    processName: 'c',
+    parentEntityID: firstAncestorID,
+    timestamp: 1600863932318,
+  });
+  const secondAncestorTermination: SafeResolverEvent = mockEndpointEvent({
+    entityID: secondAncestorID,
+    processName: 'a',
+    parentEntityID: 'none',
+    timestamp: 1600863932316,
+    eventType: 'end',
+  });
+  const firstAncestorTermination: SafeResolverEvent = mockEndpointEvent({
+    entityID: firstAncestorID,
+    processName: 'b',
+    parentEntityID: secondAncestorID,
+    timestamp: 1600863932317,
+    eventType: 'end',
+  });
+  const originEventTermination: SafeResolverEvent = mockEndpointEvent({
+    entityID: originID,
+    processName: 'c',
+    parentEntityID: firstAncestorID,
+    timestamp: 1600863932318,
+    eventType: 'end',
+  });
+
+  return [
+    originEvent,
+    originEventTermination,
+    firstAncestor,
+    firstAncestorTermination,
+    secondAncestor,
+    secondAncestorTermination,
+  ];
+}
 
 describe('data state', () => {
-  let actions: ResolverAction[] = [];
+  let actions: ResolverAction[];
 
   /**
    * Get state, given an ordered collection of actions.
@@ -54,6 +115,10 @@ describe('data state', () => {
       .join('\n');
   };
 
+  beforeEach(() => {
+    actions = [];
+  });
+
   it(`shouldn't initially be loading, or have an error, or have more children or ancestors, or have a request to make, or have a pending request that needs to be aborted.`, () => {
     expect(viewAsAString(state())).toMatchInlineSnapshot(`
       "is loading: false
@@ -79,6 +144,8 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            shouldUpdate: false,
+            filters: {},
           },
         },
       ];
@@ -92,7 +159,7 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[]}
+        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
         requires a pending request to be aborted: null"
       `);
     });
@@ -103,7 +170,7 @@ describe('data state', () => {
       actions = [
         {
           type: 'appRequestedResolverData',
-          payload: { databaseDocumentID, indices: [] },
+          payload: { databaseDocumentID, indices: [], filters: {} },
         },
       ];
     });
@@ -122,7 +189,7 @@ describe('data state', () => {
         has more children: false
         has more ancestors: false
         parameters to fetch: null
-        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[]}"
+        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
       `);
     });
   });
@@ -140,11 +207,13 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            shouldUpdate: false,
+            filters: {},
           },
         },
         {
           type: 'appRequestedResolverData',
-          payload: { databaseDocumentID, indices: [] },
+          payload: { databaseDocumentID, indices: [], filters: {} },
         },
       ];
     });
@@ -168,7 +237,7 @@ describe('data state', () => {
       beforeEach(() => {
         actions.push({
           type: 'serverFailedToReturnResolverData',
-          payload: { databaseDocumentID, indices: [] },
+          payload: { databaseDocumentID, indices: [], filters: {} },
         });
       });
       it('should not be loading', () => {
@@ -205,12 +274,14 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            shouldUpdate: false,
+            filters: {},
           },
         },
         // this happens when the middleware starts the request
         {
           type: 'appRequestedResolverData',
-          payload: { databaseDocumentID: firstDatabaseDocumentID, indices: [] },
+          payload: { databaseDocumentID: firstDatabaseDocumentID, indices: [], filters: {} },
         },
         // receive a different databaseDocumentID. this should cause the middleware to abort the existing request and start a new one
         {
@@ -221,6 +292,8 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            shouldUpdate: false,
+            filters: {},
           },
         },
       ];
@@ -247,15 +320,15 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[]}
-        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"indices\\":[]}"
+        parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
+        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
       `);
     });
     describe('and when the old request was aborted', () => {
       beforeEach(() => {
         actions.push({
           type: 'appAbortedResolverDataRequest',
-          payload: { databaseDocumentID: firstDatabaseDocumentID, indices: [] },
+          payload: { databaseDocumentID: firstDatabaseDocumentID, indices: [], filters: {} },
         });
       });
       it('should not require a pending request to be aborted', () => {
@@ -275,7 +348,7 @@ describe('data state', () => {
           has an error: false
           has more children: false
           has more ancestors: false
-          parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[]}
+          parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
           requires a pending request to be aborted: null"
         `);
       });
@@ -283,7 +356,7 @@ describe('data state', () => {
         beforeEach(() => {
           actions.push({
             type: 'appRequestedResolverData',
-            payload: { databaseDocumentID: secondDatabaseDocumentID, indices: [] },
+            payload: { databaseDocumentID: secondDatabaseDocumentID, indices: [], filters: {} },
           });
         });
         it('should not have a document ID to fetch', () => {
@@ -305,23 +378,122 @@ describe('data state', () => {
       });
     });
   });
+  describe('with a mock tree of no ancestors and two children', () => {
+    const databaseDocumentID = 'doc id';
+    const resolverComponentInstanceID = 'instance';
+    const originID = 'origin';
+    const firstChildID = 'first';
+    const secondChildID = 'second';
+    const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+      originID,
+      firstChildID,
+      secondChildID,
+    });
+    const { schema, dataSource } = endpointSourceSchema();
+    describe('when resolver receives external properties without time range filters', () => {
+      beforeEach(() => {
+        actions = [
+          {
+            type: 'appReceivedNewExternalProperties',
+            payload: {
+              databaseDocumentID,
+              resolverComponentInstanceID,
+              locationSearch: '',
+              indices: [],
+              shouldUpdate: false,
+              filters: {},
+            },
+          },
+          {
+            type: 'appRequestedResolverData',
+            payload: { databaseDocumentID, indices: [], filters: {} },
+          },
+          {
+            type: 'serverReturnedResolverData',
+            payload: {
+              result: resolverTree,
+              dataSource,
+              schema,
+              parameters: { databaseDocumentID, indices: [], filters: {} },
+            },
+          },
+        ];
+      });
+      it('uses the default time range filters', () => {
+        expect(selectors.timeRangeFilters(state())?.from).toBe(new Date(0).toISOString());
+        expect(selectors.timeRangeFilters(state())?.to).toBe(new Date(maxDate).toISOString());
+      });
+      describe('when resolver receives time range filters', () => {
+        const timeRangeFilters: TimeRange = {
+          to: 'to',
+          from: 'from',
+        };
+        beforeEach(() => {
+          actions = [
+            ...actions,
+            {
+              type: 'appReceivedNewExternalProperties',
+              payload: {
+                databaseDocumentID,
+                resolverComponentInstanceID,
+                locationSearch: '',
+                indices: [],
+                shouldUpdate: false,
+                filters: timeRangeFilters,
+              },
+            },
+            {
+              type: 'appRequestedResolverData',
+              payload: {
+                databaseDocumentID,
+                indices: [],
+                filters: timeRangeFilters,
+              },
+            },
+            {
+              type: 'serverReturnedResolverData',
+              payload: {
+                result: resolverTree,
+                dataSource,
+                schema,
+                parameters: {
+                  databaseDocumentID,
+                  indices: [],
+                  filters: timeRangeFilters,
+                },
+              },
+            },
+          ];
+        });
+        it('uses the received time range filters', () => {
+          expect(selectors.timeRangeFilters(state())?.from).toBe('from');
+          expect(selectors.timeRangeFilters(state())?.to).toBe('to');
+        });
+      });
+    });
+  });
   describe('with a tree with no descendants and 2 ancestors', () => {
     const originID = 'c';
     const firstAncestorID = 'b';
     const secondAncestorID = 'a';
     beforeEach(() => {
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: mockTreeWith2AncestorsAndNoChildren({
-            originID,
-            firstAncestorID,
-            secondAncestorID,
-          }),
-          // this value doesn't matter
-          parameters: mockTreeFetcherParameters(),
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: mockTreeWith2AncestorsAndNoChildren({
+              originID,
+              firstAncestorID,
+              secondAncestorID,
+            }),
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
         },
-      });
+      ];
     });
     it('should have no flowto candidate for the origin', () => {
       expect(selectors.ariaFlowtoCandidate(state())(originID)).toBe(null);
@@ -337,28 +509,33 @@ describe('data state', () => {
     const originID = 'c';
     const firstAncestorID = 'b';
     const secondAncestorID = 'a';
+    const nodeData = mockNodeDataWithAllProcessesTerminated({
+      originID,
+      firstAncestorID,
+      secondAncestorID,
+    });
     beforeEach(() => {
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: mockTreeWithAllProcessesTerminated({
-            originID,
-            firstAncestorID,
-            secondAncestorID,
-          }),
-          // this value doesn't matter
-          parameters: mockTreeFetcherParameters(),
+      actions = [
+        {
+          type: 'serverReturnedNodeData',
+          payload: {
+            nodeData,
+            requestedIDs: new Set([originID, firstAncestorID, secondAncestorID]),
+            // mock the requested size being larger than the returned number of events so we
+            // avoid the case where the limit was reached
+            numberOfRequestedEvents: nodeData.length + 1,
+          },
         },
-      });
+      ];
     });
     it('should have origin as terminated', () => {
-      expect(selectors.isProcessTerminated(state())(originID)).toBe(true);
+      expect(selectors.nodeDataStatus(state())(originID)).toBe('terminated');
     });
     it('should have first ancestor as termianted', () => {
-      expect(selectors.isProcessTerminated(state())(firstAncestorID)).toBe(true);
+      expect(selectors.nodeDataStatus(state())(firstAncestorID)).toBe('terminated');
     });
     it('should have second ancestor as terminated', () => {
-      expect(selectors.isProcessTerminated(state())(secondAncestorID)).toBe(true);
+      expect(selectors.nodeDataStatus(state())(secondAncestorID)).toBe('terminated');
     });
   });
   describe('with a tree with 2 children and no ancestors', () => {
@@ -366,14 +543,24 @@ describe('data state', () => {
     const firstChildID = 'd';
     const secondChildID = 'e';
     beforeEach(() => {
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
-          // this value doesn't matter
-          parameters: mockTreeFetcherParameters(),
-        },
+      const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+        originID,
+        firstChildID,
+        secondChildID,
       });
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
+        },
+      ];
     });
     it('should have no flowto candidate for the origin', () => {
       expect(selectors.ariaFlowtoCandidate(state())(originID)).toBe(null);
@@ -390,28 +577,31 @@ describe('data state', () => {
     const firstChildID = 'd';
     const secondChildID = 'e';
     beforeEach(() => {
-      const tree = mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID });
-      for (const event of tree.lifecycle) {
-        // delete the process.parent key, if present
-        // cast as `EndpointEvent` because `ResolverEvent` can also be `LegacyEndpointEvent` which has no `process` field
-        delete (event as EndpointEvent).process?.parent;
-      }
-
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: tree,
-          // this value doesn't matter
-          parameters: mockTreeFetcherParameters(),
-        },
+      const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+        originID,
+        firstChildID,
+        secondChildID,
       });
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
+        },
+      ];
     });
     it('should be able to calculate the aria flowto candidates for all processes nodes', () => {
-      const graphables = selectors.graphableProcesses(state());
+      const graphables = selectors.graphableNodes(state());
       expect(graphables.length).toBe(3);
-      for (const event of graphables) {
+      for (const node of graphables) {
         expect(() => {
-          selectors.ariaFlowtoCandidate(state())(eventModel.entityIDSafeVersion(event)!);
+          selectors.ariaFlowtoCandidate(state())(nodeModel.nodeID(node)!);
         }).not.toThrow();
       }
     });
@@ -428,30 +618,40 @@ describe('data state', () => {
         firstChildID,
         secondChildID,
       });
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: tree,
-          // this value doesn't matter
-          parameters: mockTreeFetcherParameters(),
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: tree,
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
         },
-      });
+      ];
     });
     it('should have 4 graphable processes', () => {
-      expect(selectors.graphableProcesses(state()).length).toBe(4);
+      expect(selectors.graphableNodes(state()).length).toBe(4);
     });
   });
   describe('with a tree with no process events', () => {
     beforeEach(() => {
+      const { schema, dataSource } = endpointSourceSchema();
       const tree = mockTreeWithNoProcessEvents();
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: tree,
-          // this value doesn't matter
-          parameters: mockTreeFetcherParameters(),
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: tree,
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
         },
-      });
+      ];
     });
     it('should return an empty layout', () => {
       expect(selectors.layout(state())).toMatchInlineSnapshot(`

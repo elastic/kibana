@@ -90,6 +90,10 @@
                             "type": "keyword",
                             "ignore_above": 1024
                         },
+                        "action_subgroup": {
+                            "type": "keyword",
+                            "ignore_above": 1024
+                        },
                         "status": {
                             "type": "keyword",
                             "ignore_above": 1024

@@ -31,6 +31,8 @@ import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { Setup as InspectorSetup } from '../../inspector/public';
+import { NowProviderPublicContract } from './now_provider';
 
 export interface DataPublicPluginEnhancements {
   search: SearchEnhancements;
@@ -40,6 +42,7 @@ export interface DataSetupDependencies {
   bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   uiActions: UiActionsSetup;
+  inspector: InspectorSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -116,6 +119,8 @@ export interface DataPublicPluginStart {
    * {@link DataPublicPluginStartUi}
    */
   ui: DataPublicPluginStartUi;
+
+  nowProvider: NowProviderPublicContract;
 }
 
 export interface IDataPluginServices extends Partial<CoreStart> {

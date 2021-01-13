@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { Loading } from '../../../shared/loading';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
-import { ResultFieldValue } from '../result_field_value';
+import { ResultFieldValue } from '../result';
 
 import { DocumentDetailLogic } from './document_detail_logic';
 import { FieldDetails } from './types';

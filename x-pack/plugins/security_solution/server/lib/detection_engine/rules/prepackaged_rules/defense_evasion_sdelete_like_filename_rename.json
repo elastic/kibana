@@ -8,11 +8,11 @@
     "winlogbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "lucene",
+  "language": "eql",
   "license": "Elastic License",
   "name": "Potential Secure File Deletion via SDelete Utility",
   "note": "Verify process details such as command line and hash to confirm this activity legitimacy.",
-  "query": "event.category:file AND event.type:change AND file.name:/.+A+\\.AAA/",
+  "query": "file where event.type == \"change\" and wildcard(file.name,\"*AAA.AAA\")\n",
   "risk_score": 21,
   "rule_id": "5aee924b-6ceb-4633-980e-1bde8cdb40c5",
   "severity": "low",
@@ -33,13 +33,20 @@
       },
       "technique": [
         {
-          "id": "T1107",
-          "name": "File Deletion",
-          "reference": "https://attack.mitre.org/techniques/T1107/"
+          "id": "T1070",
+          "name": "Indicator Removal on Host",
+          "reference": "https://attack.mitre.org/techniques/T1070/",
+          "subtechnique": [
+            {
+              "id": "T1070.004",
+              "name": "File Deletion",
+              "reference": "https://attack.mitre.org/techniques/T1070/004/"
+            }
+          ]
         }
       ]
     }
   ],
-  "type": "query",
-  "version": 1
+  "type": "eql",
+  "version": 2
 }

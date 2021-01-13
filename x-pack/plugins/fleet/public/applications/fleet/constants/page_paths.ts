@@ -18,6 +18,7 @@ export type StaticPage =
 
 export type DynamicPage =
   | 'integration_details'
+  | 'integration_policy_edit'
   | 'policy_details'
   | 'add_integration_from_policy'
   | 'add_integration_to_policy'
@@ -41,6 +42,7 @@ export const PAGE_ROUTING_PATHS = {
   integrations_all: '/integrations',
   integrations_installed: '/integrations/installed',
   integration_details: '/integrations/detail/:pkgkey/:panel?',
+  integration_policy_edit: '/integrations/edit-integration/:packagePolicyId',
   policies: '/policies',
   policies_list: '/policies',
   policy_details: '/policies/:policyId/:tabId?',
@@ -69,6 +71,8 @@ export const pagePathGetters: {
   integrations_installed: () => '/integrations/installed',
   integration_details: ({ pkgkey, panel }) =>
     `/integrations/detail/${pkgkey}${panel ? `/${panel}` : ''}`,
+  integration_policy_edit: ({ packagePolicyId }) =>
+    `/integrations/edit-integration/${packagePolicyId}`,
   policies: () => '/policies',
   policies_list: () => '/policies',
   policy_details: ({ policyId, tabId }) => `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,

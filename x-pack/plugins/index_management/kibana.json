@@ -9,6 +9,6 @@
   "requiredBundles": [
     "kibanaReact",
     "esUiShared",
-    "runtimeFields"
+    "runtimeFieldEditor"
   ]
 }

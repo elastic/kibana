@@ -12,16 +12,25 @@ import {
 } from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
+import { injectActionParams } from './inject_action_params';
 import {
   AlertAction,
+  AlertTypeParams,
+  AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  AlertType,
-  AlertTypeParams,
   RawAlert,
 } from '../types';
+import { NormalizedAlertType } from '../alert_type_registry';
 
-interface CreateExecutionHandlerOptions {
+export interface CreateExecutionHandlerOptions<
+  Params extends AlertTypeParams,
+  State extends AlertTypeState,
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
   alertId: string;
   alertName: string;
   tags?: string[];
@@ -29,21 +38,40 @@ interface CreateExecutionHandlerOptions {
   actions: AlertAction[];
   spaceId: string;
   apiKey: RawAlert['apiKey'];
-  alertType: AlertType;
+  alertType: NormalizedAlertType<
+    Params,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >;
   logger: Logger;
   eventLogger: IEventLogger;
   request: KibanaRequest;
   alertParams: AlertTypeParams;
 }
 
-interface ExecutionHandlerOptions {
-  actionGroup: string;
+interface ExecutionHandlerOptions<ActionGroupIds extends string> {
+  actionGroup: ActionGroupIds;
+  actionSubgroup?: string;
   alertInstanceId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
 }
 
-export function createExecutionHandler({
+export type ExecutionHandler<ActionGroupIds extends string> = (
+  options: ExecutionHandlerOptions<ActionGroupIds>
+) => Promise<void>;
+
+export function createExecutionHandler<
+  Params extends AlertTypeParams,
+  State extends AlertTypeState,
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+>({
   logger,
   alertId,
   alertName,
@@ -56,11 +84,24 @@ export function createExecutionHandler({
   eventLogger,
   request,
   alertParams,
-}: CreateExecutionHandlerOptions) {
+}: CreateExecutionHandlerOptions<
+  Params,
+  State,
+  InstanceState,
+  InstanceContext,
+  ActionGroupIds,
+  RecoveryActionGroupId
+>): ExecutionHandler<ActionGroupIds | RecoveryActionGroupId> {
   const alertTypeActionGroups = new Map(
     alertType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
   );
-  return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
+  return async ({
+    actionGroup,
+    actionSubgroup,
+    context,
+    state,
+    alertInstanceId,
+  }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
     if (!alertTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
       return;
@@ -71,20 +112,31 @@ export function createExecutionHandler({
         return {
           ...action,
           params: transformActionParams({
+            actionsPlugin,
             alertId,
+            actionTypeId: action.actionTypeId,
             alertName,
             spaceId,
             tags,
             alertInstanceId,
             alertActionGroup: actionGroup,
             alertActionGroupName: alertTypeActionGroups.get(actionGroup)!,
+            alertActionSubgroup: actionSubgroup,
             context,
             actionParams: action.params,
             state,
             alertParams,
           }),
         };
-      });
+      })
+      .map((action) => ({
+        ...action,
+        params: injectActionParams({
+          alertId,
+          actionParams: action.params,
+          actionTypeId: action.actionTypeId,
+        }),
+      }));
 
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 
@@ -120,6 +172,7 @@ export function createExecutionHandler({
           alerting: {
             instance_id: alertInstanceId,
             action_group_id: actionGroup,
+            action_subgroup: actionSubgroup,
           },
           saved_objects: [
             { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
@@ -128,7 +181,11 @@ export function createExecutionHandler({
         },
       };
 
-      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled actionGroup: '${actionGroup}' action: ${actionLabel}`;
+      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
+        actionSubgroup
+          ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
+          : `actionGroup: '${actionGroup}'`
+      } action: ${actionLabel}`;
       eventLogger.logEvent(event);
     }
   };

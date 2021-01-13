@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockUuidv4 } from '../../import/__mocks__';
+import { mockUuidv4 } from '../../import/lib/__mocks__';
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerResolveImportErrorsRoute } from '../resolve_import_errors';
@@ -27,6 +27,7 @@ import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_st
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectConfig } from '../../saved_objects_config';
+import { SavedObjectsImporter } from '../..';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -79,10 +80,19 @@ describe(`POST ${URL}`, () => {
     savedObjectsClient = handlerContext.savedObjects.client;
     savedObjectsClient.checkConflicts.mockResolvedValue({ errors: [] });
 
+    const importer = new SavedObjectsImporter({
+      savedObjectsClient,
+      typeRegistry: handlerContext.savedObjects.typeRegistry,
+      importSizeLimit: 10000,
+    });
+    handlerContext.savedObjects.importer.resolveImportErrors.mockImplementation((options) =>
+      importer.resolveImportErrors(options)
+    );
+
     const router = httpSetup.createRouter('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsResolveImportErrors.mockRejectedValue(
-      new Error('Oh no!') // this error is intentionally swallowed so the export does not fail
+      new Error('Oh no!') // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     );
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     registerResolveImportErrorsRoute(router, { config, coreUsageData });
@@ -117,7 +127,7 @@ describe(`POST ${URL}`, () => {
     expect(result.body).toEqual({ success: true, successCount: 0 });
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
     expect(coreUsageStatsClient.incrementSavedObjectsResolveImportErrors).toHaveBeenCalledWith({
-      headers: expect.anything(),
+      request: expect.anything(),
       createNewCopies: false,
     });
   });

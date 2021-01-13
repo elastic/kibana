@@ -17,7 +17,6 @@ import {
   TestProviders,
   defaultHeaders,
   createSecuritySolutionStorageMock,
-  mockIndexPattern,
   kibanaObservable,
 } from '../../../common/mock';
 
@@ -32,17 +31,16 @@ import {
 } from './actions';
 
 import {
-  TimelineComponent,
-  Props as TimelineComponentProps,
-} from '../../components/timeline/timeline';
-import { mockBrowserFields } from '../../../common/containers/source/mock';
+  QueryTabContentComponent,
+  Props as QueryTabContentComponentProps,
+} from '../../components/timeline/query_tab_content';
 import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
 import { Sort } from '../../components/timeline/body/sort';
 import { Direction } from '../../../graphql/types';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
-import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('../../containers/local_storage');
 
@@ -59,15 +57,16 @@ describe('epicLocalStorage', () => {
     storage
   );
 
-  let props = {} as TimelineComponentProps;
-  const sort: Sort = {
-    columnId: '@timestamp',
-    sortDirection: Direction.desc,
-  };
+  let props = {} as QueryTabContentComponentProps;
+  const sort: Sort[] = [
+    {
+      columnId: '@timestamp',
+      columnType: 'number',
+      sortDirection: Direction.desc,
+    },
+  ];
   const startDate = '2018-03-23T18:49:23.132Z';
   const endDate = '2018-03-24T03:33:52.253Z';
-
-  const indexPattern = mockIndexPattern;
 
   beforeEach(() => {
     store = createStore(
@@ -78,33 +77,28 @@ describe('epicLocalStorage', () => {
       storage
     );
     props = {
-      browserFields: mockBrowserFields,
       columns: defaultHeaders,
-      id: 'foo',
       dataProviders: mockDataProviders,
-      docValueFields: [],
       end: endDate,
+      eventType: 'all',
+      expandedEvent: {},
       filters: [],
-      indexNames: [],
-      indexPattern,
       isLive: false,
-      isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
-      kqlMode: 'search' as TimelineComponentProps['kqlMode'],
+      kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
-      loadingSourcerer: false,
-      onChangeItemsPerPage: jest.fn(),
-      onClose: jest.fn(),
-      show: true,
+      onEventClosed: jest.fn(),
       showCallOutUnauthorizedMsg: false,
+      showEventDetails: false,
       start: startDate,
       status: TimelineStatus.active,
       sort,
-      timelineType: TimelineType.default,
+      timelineId: 'foo',
       timerangeKind: 'absolute',
-      toggleColumn: jest.fn(),
-      usersViewing: ['elastic'],
+      updateEventTypeAndIndexesName: jest.fn(),
+      activeTab: TimelineTabs.query,
+      show: true,
     };
   });
 
@@ -116,7 +110,7 @@ describe('epicLocalStorage', () => {
   it('persist adding / reordering of a column correctly', async () => {
     shallow(
       <TestProviders store={store}>
-        <TimelineComponent {...props} />
+        <QueryTabContentComponent {...props} />
       </TestProviders>
     );
     store.dispatch(upsertColumn({ id: 'test', index: 1, column: defaultHeaders[0] }));
@@ -126,7 +120,7 @@ describe('epicLocalStorage', () => {
   it('persist timeline when removing a column ', async () => {
     shallow(
       <TestProviders store={store}>
-        <TimelineComponent {...props} />
+        <QueryTabContentComponent {...props} />
       </TestProviders>
     );
     store.dispatch(removeColumn({ id: 'test', columnId: '@timestamp' }));
@@ -136,7 +130,7 @@ describe('epicLocalStorage', () => {
   it('persists resizing of a column', async () => {
     shallow(
       <TestProviders store={store}>
-        <TimelineComponent {...props} />
+        <QueryTabContentComponent {...props} />
       </TestProviders>
     );
     store.dispatch(applyDeltaToColumnWidth({ id: 'test', columnId: '@timestamp', delta: 80 }));
@@ -146,7 +140,7 @@ describe('epicLocalStorage', () => {
   it('persist the resetting of the fields', async () => {
     shallow(
       <TestProviders store={store}>
-        <TimelineComponent {...props} />
+        <QueryTabContentComponent {...props} />
       </TestProviders>
     );
     store.dispatch(updateColumns({ id: 'test', columns: defaultHeaders }));
@@ -156,7 +150,7 @@ describe('epicLocalStorage', () => {
   it('persist items per page', async () => {
     shallow(
       <TestProviders store={store}>
-        <TimelineComponent {...props} />
+        <QueryTabContentComponent {...props} />
       </TestProviders>
     );
     store.dispatch(updateItemsPerPage({ id: 'test', itemsPerPage: 50 }));
@@ -166,16 +160,19 @@ describe('epicLocalStorage', () => {
   it('persist the sorting of a column', async () => {
     shallow(
       <TestProviders store={store}>
-        <TimelineComponent {...props} />
+        <QueryTabContentComponent {...props} />
       </TestProviders>
     );
     store.dispatch(
       updateSort({
         id: 'test',
-        sort: {
-          columnId: 'event.severity',
-          sortDirection: Direction.desc,
-        },
+        sort: [
+          {
+            columnId: 'event.severity',
+            columnType: 'number',
+            sortDirection: Direction.desc,
+          },
+        ],
       })
     );
     await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());

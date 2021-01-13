@@ -214,31 +214,43 @@ Note:
 2. If the source is a < v6.5 `.kibana` index or < 7.4 `.kibana_task_manager`
    index prepare the legacy index for a migration:
    1. Mark the legacy index as read-only and wait for all in-flight operations to drain (requires https://github.com/elastic/elasticsearch/pull/58094). This prevents any further writes from outdated nodes. Assuming this API is similar to the existing `/<index>/_close` API, we expect to receive `"acknowledged" : true` and `"shards_acknowledged" : true`. If all shards don’t acknowledge within the timeout, retry the operation until it succeeds.
-   2. Clone the legacy index into a new index which has writes enabled. Use a fixed index name i.e `.kibana_pre6.5.0_001` or `.kibana_task_manager_pre7.4.0_001`. `POST /.kibana/_clone/.kibana_pre6.5.0_001?wait_for_active_shards=all {"settings": {"index.blocks.write": false}}`. Ignore errors if the clone already exists. Ignore errors if the legacy source doesn't exist.
-   3. Wait for the cloning to complete `GET /_cluster/health/.kibana_pre6.5.0_001?wait_for_status=green&timeout=60s` If cloning doesn’t complete within the 60s timeout, log a warning for visibility and poll again.
-   4. Apply the `convertToAlias` script if defined `POST /.kibana_pre6.5.0_001/_update_by_query?conflicts=proceed {"script": {...}}`. The `convertToAlias` script will have to be idempotent, preferably setting `ctx.op="noop"` on subsequent runs to avoid unecessary writes.
+   2. Create a new index which will become the source index after the legacy
+      pre-migration is complete. This index should have the same mappings as
+      the legacy index. Use a fixed index name i.e `.kibana_pre6.5.0_001` or
+      `.kibana_task_manager_pre7.4.0_001`. Ignore index already exists errors.
+   3. Reindex the legacy index into the new source index with the
+      `convertToAlias` script if specified. Use `wait_for_completion: false`
+      to run this as a task. Ignore errors if the legacy source doesn't exist. 
+   4. Wait for the reindex task to complete. If the task doesn’t complete
+      within the 60s timeout, log a warning for visibility and poll again.
+      Ignore errors if the legacy source doesn't exist.
    5. Delete the legacy index and replace it with an alias of the same name
       ```
       POST /_aliases
       {
         "actions" : [
-            { "add":  { "index": ".kibana_pre6.5.0_001", "alias": ".kibana" } },
             { "remove_index": { "index": ".kibana" } }
+            { "add":  { "index": ".kibana_pre6.5.0_001", "alias": ".kibana" } },
         ]
       }
       ```.
       Unlike the delete index API, the `remove_index` action will fail if
-      provided with an _alias_. Ignore "The provided expression [.kibana]
-      matches an alias, specify the corresponding concrete indices instead."
-      or "index_not_found_exception" errors. These actions are applied
-      atomically so that other Kibana instances will always see either a
-      `.kibana` index or an alias, but never neither.
-   6. Use the cloned `.kibana_pre6.5.0_001` as the source for the rest of the migration algorithm.
+      provided with an _alias_. Therefore, if another instance completed this
+      step, the `.kibana` alias won't be added to `.kibana_pre6.5.0_001` a
+      second time. This avoids a situation where `.kibana` could point to both
+      `.kibana_pre6.5.0_001` and `.kibana_7.10.0_001`. These actions are
+      applied atomically so that other Kibana instances will always see either
+      a `.kibana` index or an alias, but never neither. 
+      
+      Ignore "The provided expression [.kibana] matches an alias, specify the
+      corresponding concrete indices instead." or "index_not_found_exception"
+      errors as this means another instance has already completed this step.
+   6. Use the reindexed legacy `.kibana_pre6.5.0_001` as the source for the rest of the migration algorithm.
 3. If `.kibana` and `.kibana_7.10.0` both exists and are pointing to the same index this version's migration has already been completed.
    1. Because the same version can have plugins enabled at any point in time,
-      perform the mappings update in step (6) and migrate outdated documents
-      with step (7).
-   2. Skip to step (9) to start serving traffic.
+      perform the mappings update in step (7) and migrate outdated documents
+      with step (8).
+   2. Skip to step (10) to start serving traffic.
 4. Fail the migration if:
    1. `.kibana` is pointing to an index that belongs to a later version of Kibana .e.g. `.kibana_7.12.0_001`
    2. (Only in 8.x) The source index contains documents that belong to an unknown Saved Object type (from a disabled plugin). Log an error explaining that the plugin that created these documents needs to be enabled again or that these objects should be deleted. See section (4.2.1.4).

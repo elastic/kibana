@@ -37,6 +37,7 @@ import { OptInExampleFlyout } from './opt_in_example_flyout';
 import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
 import { LazyField } from '../../../advanced_settings/public';
 import { ToastsStart } from '../../../../core/public';
+import { TrackApplicationView } from '../../../usage_collection/public';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
 
@@ -105,13 +106,17 @@ export class TelemetryManagementSection extends Component<Props, State> {
     return (
       <Fragment>
         {showExample && (
-          <OptInExampleFlyout
-            fetchExample={telemetryService.fetchExample}
-            onClose={this.toggleExample}
-          />
+          <TrackApplicationView viewId="optInExampleFlyout">
+            <OptInExampleFlyout
+              fetchExample={telemetryService.fetchExample}
+              onClose={this.toggleExample}
+            />
+          </TrackApplicationView>
         )}
         {showSecurityExample && securityExampleEnabled && (
-          <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
+          <TrackApplicationView viewId="optInSecurityExampleFlyout">
+            <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
+          </TrackApplicationView>
         )}
         <EuiPanel paddingSize="l">
           <EuiForm>

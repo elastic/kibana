@@ -36,7 +36,7 @@ export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
   ),
 };
 
-export const OPERATOR_TITLE: { [K in ConditionEntry<ConditionEntryField>['operator']]: string } = {
+export const OPERATOR_TITLE: { [K in ConditionEntry['operator']]: string } = {
   included: i18n.translate('xpack.securitySolution.trustedapps.card.operator.includes', {
     defaultMessage: 'is',
   }),

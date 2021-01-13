@@ -20,7 +20,7 @@
 import { defaults } from 'lodash';
 import { IndexPatternsService, IndexPattern } from '.';
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
+import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
@@ -114,6 +114,21 @@ describe('IndexPatterns', () => {
     SOClientGetDelay = 0;
   });
 
+  test('allowNoIndex flag preserves existing fields when index is missing', async () => {
+    const id = '2';
+    setDocsourcePayload(id, {
+      id: 'foo',
+      version: 'foo',
+      attributes: {
+        title: 'something',
+        allowNoIndex: true,
+        fields: '[{"name":"field"}]',
+      },
+    });
+
+    expect((await indexPatterns.get(id)).fields.length).toBe(1);
+  });
+
   test('savedObjectCache pre-fetches only title', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
@@ -189,6 +204,20 @@ describe('IndexPatterns', () => {
 
     await indexPatterns.create({ title });
     expect(indexPatterns.refreshFields).toBeCalled();
+  });
+
+  test('find', async () => {
+    const search = 'kibana*';
+    const size = 10;
+    await indexPatterns.find('kibana*', size);
+
+    expect(savedObjectsClient.find).lastCalledWith({
+      type: 'index-pattern',
+      fields: ['title'],
+      search,
+      searchFields: ['title'],
+      perPage: size,
+    });
   });
 
   test('createAndSave', async () => {

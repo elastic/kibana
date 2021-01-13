@@ -28,6 +28,10 @@ import {
 import { Layouts } from '../layouts/layouts';
 import { ConsoleAppender, ConsoleAppenderConfig } from './console/console_appender';
 import { FileAppender, FileAppenderConfig } from './file/file_appender';
+import {
+  RollingFileAppender,
+  RollingFileAppenderConfig,
+} from './rolling_file/rolling_file_appender';
 
 /**
  * Config schema for validting the shape of the `appenders` key in in {@link LoggerContextConfigType} or
@@ -39,10 +43,15 @@ export const appendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
   FileAppender.configSchema,
   LegacyAppender.configSchema,
+  RollingFileAppender.configSchema,
 ]);
 
 /** @public */
-export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig;
+export type AppenderConfigType =
+  | ConsoleAppenderConfig
+  | FileAppenderConfig
+  | LegacyAppenderConfig
+  | RollingFileAppenderConfig;
 
 /** @internal */
 export class Appenders {
@@ -57,10 +66,10 @@ export class Appenders {
     switch (config.kind) {
       case 'console':
         return new ConsoleAppender(Layouts.create(config.layout));
-
       case 'file':
         return new FileAppender(Layouts.create(config.layout), config.path);
-
+      case 'rolling-file':
+        return new RollingFileAppender(config);
       case 'legacy-appender':
         return new LegacyAppender(config.legacyLoggingConfig);
 

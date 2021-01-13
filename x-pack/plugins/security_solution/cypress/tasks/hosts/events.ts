@@ -42,7 +42,7 @@ export const loadMoreEvents = () => {
 export const openEventsViewerFieldsBrowser = () => {
   cy.get(EVENTS_VIEWER_FIELDS_BUTTON).click({ force: true });
 
-  cy.get(SERVER_SIDE_EVENT_COUNT).invoke('text').should('not.equal', '0');
+  cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
 
   cy.get(FIELDS_BROWSER_CONTAINER).should('exist');
 };

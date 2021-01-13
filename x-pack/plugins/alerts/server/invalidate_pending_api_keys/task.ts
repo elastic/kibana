@@ -12,7 +12,7 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../../security/server';
+import { InvalidateAPIKeysParams, SecurityPluginStart } from '../../../security/server';
 import {
   RunContext,
   TaskManagerSetupContract,
@@ -27,14 +27,14 @@ import { InvalidatePendingApiKey } from '../types';
 const TASK_TYPE = 'alerts_invalidate_api_keys';
 export const TASK_ID = `Alerts-${TASK_TYPE}`;
 
-const invalidateAPIKey = async (
-  params: InvalidateAPIKeyParams,
-  securityPluginSetup?: SecurityPluginSetup
+const invalidateAPIKeys = async (
+  params: InvalidateAPIKeysParams,
+  securityPluginStart?: SecurityPluginStart
 ): Promise<InvalidateAPIKeyResult> => {
-  if (!securityPluginSetup) {
+  if (!securityPluginStart) {
     return { apiKeysEnabled: false };
   }
-  const invalidateAPIKeyResult = await securityPluginSetup.authc.invalidateAPIKeyAsInternalUser(
+  const invalidateAPIKeyResult = await securityPluginStart.authc.apiKeys.invalidateAsInternalUser(
     params
   );
   // Null when Elasticsearch security is disabled
@@ -51,16 +51,9 @@ export function initializeApiKeyInvalidator(
   logger: Logger,
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
   taskManager: TaskManagerSetupContract,
-  config: Promise<AlertsConfig>,
-  securityPluginSetup?: SecurityPluginSetup
+  config: Promise<AlertsConfig>
 ) {
-  registerApiKeyInvalitorTaskDefinition(
-    logger,
-    coreStartServices,
-    taskManager,
-    config,
-    securityPluginSetup
-  );
+  registerApiKeyInvalidatorTaskDefinition(logger, coreStartServices, taskManager, config);
 }
 
 export async function scheduleApiKeyInvalidatorTask(
@@ -84,17 +77,16 @@ export async function scheduleApiKeyInvalidatorTask(
   }
 }
 
-function registerApiKeyInvalitorTaskDefinition(
+function registerApiKeyInvalidatorTaskDefinition(
   logger: Logger,
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
   taskManager: TaskManagerSetupContract,
-  config: Promise<AlertsConfig>,
-  securityPluginSetup?: SecurityPluginSetup
+  config: Promise<AlertsConfig>
 ) {
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: 'Invalidate alert API Keys',
-      createTaskRunner: taskRunner(logger, coreStartServices, config, securityPluginSetup),
+      createTaskRunner: taskRunner(logger, coreStartServices, config),
     },
   });
 }
@@ -120,8 +112,7 @@ function getFakeKibanaRequest(basePath: string) {
 function taskRunner(
   logger: Logger,
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
-  config: Promise<AlertsConfig>,
-  securityPluginSetup?: SecurityPluginSetup
+  config: Promise<AlertsConfig>
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
@@ -130,7 +121,10 @@ function taskRunner(
         let totalInvalidated = 0;
         const configResult = await config;
         try {
-          const [{ savedObjects, http }, { encryptedSavedObjects }] = await coreStartServices;
+          const [
+            { savedObjects, http },
+            { encryptedSavedObjects, security },
+          ] = await coreStartServices;
           const savedObjectsClient = savedObjects.getScopedClient(
             getFakeKibanaRequest(http.basePath.serverBasePath),
             {
@@ -160,7 +154,7 @@ function taskRunner(
               savedObjectsClient,
               apiKeysToInvalidate,
               encryptedSavedObjectsClient,
-              securityPluginSetup
+              security
             );
 
             hasApiKeysPendingInvalidation = apiKeysToInvalidate.total > PAGE_SIZE;
@@ -197,31 +191,37 @@ async function invalidateApiKeys(
   savedObjectsClient: SavedObjectsClientContract,
   apiKeysToInvalidate: SavedObjectsFindResponse<InvalidatePendingApiKey>,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-  securityPluginSetup?: SecurityPluginSetup
+  securityPluginStart?: SecurityPluginStart
 ) {
   let totalInvalidated = 0;
-  await Promise.all(
+  const apiKeyIds = await Promise.all(
     apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
       const decryptedApiKey = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<InvalidatePendingApiKey>(
         'api_key_pending_invalidation',
         apiKeyObj.id
       );
-      const apiKeyId = decryptedApiKey.attributes.apiKeyId;
-      const response = await invalidateAPIKey({ id: apiKeyId }, securityPluginSetup);
-      if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-        logger.error(`Failed to invalidate API Key [id="${apiKeyObj.attributes.apiKeyId}"]`);
-      } else {
-        try {
-          await savedObjectsClient.delete('api_key_pending_invalidation', apiKeyObj.id);
-          totalInvalidated++;
-        } catch (err) {
-          logger.error(
-            `Failed to cleanup api key "${apiKeyObj.attributes.apiKeyId}". Error: ${err.message}`
-          );
-        }
-      }
+      return decryptedApiKey.attributes.apiKeyId;
     })
   );
-  logger.debug(`Total invalidated api keys "${totalInvalidated}"`);
+  if (apiKeyIds.length > 0) {
+    const response = await invalidateAPIKeys({ ids: apiKeyIds }, securityPluginStart);
+    if (response.apiKeysEnabled === true && response.result.error_count > 0) {
+      logger.error(`Failed to invalidate API Keys [ids="${apiKeyIds.join(', ')}"]`);
+    } else {
+      await Promise.all(
+        apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
+          try {
+            await savedObjectsClient.delete('api_key_pending_invalidation', apiKeyObj.id);
+            totalInvalidated++;
+          } catch (err) {
+            logger.error(
+              `Failed to delete invalidated API key "${apiKeyObj.attributes.apiKeyId}". Error: ${err.message}`
+            );
+          }
+        })
+      );
+    }
+  }
+  logger.debug(`Total invalidated API keys "${totalInvalidated}"`);
   return totalInvalidated;
 }

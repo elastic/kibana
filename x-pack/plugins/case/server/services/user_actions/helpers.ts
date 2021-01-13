@@ -129,6 +129,7 @@ const userActionFieldsAllowed: UserActionField = [
   'tags',
   'title',
   'status',
+  'settings',
 ];
 
 export const buildCaseUserActions = ({

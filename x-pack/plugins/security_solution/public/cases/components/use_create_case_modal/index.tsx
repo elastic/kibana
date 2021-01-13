@@ -8,37 +8,42 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { Case } from '../../containers/types';
 import { CreateCaseModal } from './create_case_modal';
 
-interface Props {
+export interface UseCreateCaseModalProps {
   onCaseCreated: (theCase: Case) => void;
 }
-export interface UseAllCasesModalReturnedValues {
-  Modal: React.FC;
+export interface UseCreateCaseModalReturnedValues {
+  modal: JSX.Element;
   isModalOpen: boolean;
   closeModal: () => void;
   openModal: () => void;
 }
 
-export const useCreateCaseModal = ({ onCaseCreated }: Props) => {
+export const useCreateCaseModal = ({ onCaseCreated }: UseCreateCaseModalProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
-
-  const Modal: React.FC = useCallback(
-    () =>
-      isModalOpen ? (
-        <CreateCaseModal onCloseCaseModal={closeModal} onCaseCreated={onCaseCreated} />
-      ) : null,
-    [closeModal, isModalOpen, onCaseCreated]
+  const onSuccess = useCallback(
+    (theCase) => {
+      onCaseCreated(theCase);
+      closeModal();
+    },
+    [onCaseCreated, closeModal]
   );
 
   const state = useMemo(
     () => ({
-      Modal,
+      modal: (
+        <CreateCaseModal
+          isModalOpen={isModalOpen}
+          onCloseCaseModal={closeModal}
+          onSuccess={onSuccess}
+        />
+      ),
       isModalOpen,
       closeModal,
       openModal,
     }),
-    [isModalOpen, closeModal, openModal, Modal]
+    [isModalOpen, closeModal, onSuccess, openModal]
   );
 
   return state;

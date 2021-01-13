@@ -16,15 +16,19 @@ import {
   InfraWaffleMapNode,
   InfraWaffleMapOptions,
 } from '../../../../../lib/lib';
+import { ConditionalToolTip } from './conditional_tooltip';
 import { colorFromValue } from '../../lib/color_from_value';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { NodeContextPopover } from '../node_details/overlay';
 
 import { NodeContextMenu } from './node_context_menu';
+import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
+import { findInventoryFields } from '../../../../../../common/inventory_models';
 
 const initialState = {
   isPopoverOpen: false,
   isOverlayOpen: false,
+  isAlertFlyoutVisible: false,
 };
 
 type State = Readonly<typeof initialState>;
@@ -43,7 +47,7 @@ export const Node = class extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
     const { nodeType, node, options, squareSize, bounds, formatter, currentTime } = this.props;
-    const { isPopoverOpen } = this.state;
+    const { isPopoverOpen, isAlertFlyoutVisible } = this.state;
     const metric = first(node.metrics);
     const valueMode = squareSize > 70;
     const ellipsisMode = squareSize > 30;
@@ -54,6 +58,8 @@ export const Node = class extends React.PureComponent<Props, State> {
       defaultMessage: '{nodeName}, click to open menu',
       values: { nodeName: node.name },
     });
+
+    const nodeBorder = this.state.isOverlayOpen ? { border: 'solid 4px #000' } : undefined;
 
     return (
       <>
@@ -67,30 +73,40 @@ export const Node = class extends React.PureComponent<Props, State> {
           popoverPosition="downCenter"
           openNewOverlay={this.toggleNewOverlay}
         >
-          <NodeContainer
-            data-test-subj="nodeContainer"
-            style={{ width: squareSize || 0, height: squareSize || 0 }}
-            onClick={this.togglePopover}
+          <ConditionalToolTip
+            currentTime={currentTime}
+            formatter={formatter}
+            hidden={isPopoverOpen}
+            node={node}
+            options={options}
+            nodeType={nodeType}
           >
-            <SquareOuter color={color}>
-              <SquareInner color={color}>
-                {valueMode ? (
-                  <ValueInner aria-label={nodeAriaLabel}>
-                    <Label color={color}>{node.name}</Label>
-                    <Value color={color}>{value}</Value>
-                  </ValueInner>
-                ) : (
-                  ellipsisMode && (
+            <NodeContainer
+              data-test-subj="nodeContainer"
+              style={{ width: squareSize || 0, height: squareSize || 0 }}
+              onClick={this.togglePopover}
+            >
+              <SquareOuter color={color} style={nodeBorder}>
+                <SquareInner color={color}>
+                  {valueMode ? (
                     <ValueInner aria-label={nodeAriaLabel}>
-                      <Label color={color}>...</Label>
+                      <Label color={color}>{node.name}</Label>
+                      <Value color={color}>{value}</Value>
                     </ValueInner>
-                  )
-                )}
-              </SquareInner>
-            </SquareOuter>
-          </NodeContainer>
+                  ) : (
+                    ellipsisMode && (
+                      <ValueInner aria-label={nodeAriaLabel}>
+                        <Label color={color}>...</Label>
+                      </ValueInner>
+                    )
+                  )}
+                </SquareInner>
+              </SquareOuter>
+            </NodeContainer>
+          </ConditionalToolTip>
         </NodeContextMenu>
         <NodeContextPopover
+          openAlertFlyout={this.openAlertFlyout}
           node={node}
           nodeType={nodeType}
           isOpen={this.state.isOverlayOpen}
@@ -98,9 +114,33 @@ export const Node = class extends React.PureComponent<Props, State> {
           currentTime={currentTime}
           onClose={this.toggleNewOverlay}
         />
+        <AlertFlyout
+          filter={
+            options.fields
+              ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
+              : ''
+          }
+          options={options}
+          nodeType={nodeType}
+          setVisible={this.setAlertFlyoutVisible}
+          visible={isAlertFlyoutVisible}
+        />
       </>
     );
   }
+
+  private openAlertFlyout = () => {
+    this.setState({
+      isOverlayOpen: false,
+      isAlertFlyoutVisible: true,
+    });
+  };
+
+  private setAlertFlyoutVisible = (isOpen: boolean) => {
+    this.setState({
+      isAlertFlyoutVisible: isOpen,
+    });
+  };
 
   private togglePopover = () => {
     const { nodeType } = this.props;

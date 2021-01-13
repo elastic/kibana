@@ -30,9 +30,12 @@ import { capabilitiesProvider } from './capabilities_provider';
 
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
 import { EmbeddableSetup } from '../../embeddable/server';
+import { UsageCollectionSetup } from '../../usage_collection/server';
+import { registerDashboardUsageCollector } from './usage/register_collector';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export class DashboardPlugin
@@ -55,6 +58,7 @@ export class DashboardPlugin
     );
     core.capabilities.registerProvider(capabilitiesProvider);
 
+    registerDashboardUsageCollector(plugins.usageCollection, plugins.embeddable);
     return {};
   }
 

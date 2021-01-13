@@ -19,7 +19,7 @@ const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, sel
 
   const onCaseCreated = useCallback(() => refetchCases(), [refetchCases]);
 
-  const { Modal: CreateCaseModal, openModal } = useCreateCaseModal({ onCaseCreated });
+  const { modal, openModal } = useCreateCaseModal({ onCaseCreated });
 
   const onChange = useCallback(
     (id: string) => {
@@ -46,7 +46,7 @@ const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, sel
         selectedCase={selectedCase ?? undefined}
         onCaseChanged={onChange}
       />
-      <CreateCaseModal />
+      {modal}
     </>
   );
 };

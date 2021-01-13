@@ -77,7 +77,6 @@ export const aggCumulativeSum = (): FunctionDefinition => ({
     },
     buckets_path: {
       types: ['string'],
-      required: true,
       help: i18n.translate('data.search.aggs.metrics.cumulative_sum.buckets_path.help', {
         defaultMessage: 'Path to the metric of interest',
       }),

@@ -12,10 +12,7 @@ object XPackJest : BuildType({
   kibanaAgent(16)
 
   steps {
-      runbld("X-Pack Jest Unit", """
-        cd x-pack
-        node --max-old-space-size=6144 scripts/jest --ci --verbose --maxWorkers=6
-      """.trimIndent())
+    runbld("X-Pack Jest Unit", "./.ci/teamcity/default/jest.sh")
   }
 
   addTestSettings()
