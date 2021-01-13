@@ -29,14 +29,14 @@ export interface CardinalityValidatorError {
 }
 
 const jobExistsErrorMessage = i18n.translate(
-  'xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists',
+  'xpack.ml.newJob.wizard.validateJob.asyncJobNameAlreadyExists',
   {
     defaultMessage:
       'Job ID already exists. A job ID cannot be the same as an existing job or group.',
   }
 );
 const groupExistsErrorMessage = i18n.translate(
-  'xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists',
+  'xpack.ml.newJob.wizard.validateJob.asyncGroupNameAlreadyExists',
   {
     defaultMessage:
       'Group ID already exists. A group ID cannot be the same as an existing group or job.',
