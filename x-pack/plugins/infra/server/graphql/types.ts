@@ -56,12 +56,6 @@ export interface InfraSource {
   configuration: InfraSourceConfiguration;
   /** The status of the source */
   status: InfraSourceStatus;
-  /** A consecutive span of log entries surrounding a point in time */
-  logEntriesAround: InfraLogEntryInterval;
-  /** A consecutive span of log entries within an interval */
-  logEntriesBetween: InfraLogEntryInterval;
-  /** Sequences of log entries matching sets of highlighting queries within an interval */
-  logEntryHighlights: InfraLogEntryInterval[];
 
   /** A snapshot of nodes */
   snapshot?: InfraSnapshotResponse | null;
@@ -157,80 +151,6 @@ export interface InfraIndexField {
   /** Whether the field should be displayed based on event.module and a ECS allowed list */
   displayable: boolean;
 }
-/** A consecutive sequence of log entries */
-export interface InfraLogEntryInterval {
-  /** The key corresponding to the start of the interval covered by the entries */
-  start?: InfraTimeKey | null;
-  /** The key corresponding to the end of the interval covered by the entries */
-  end?: InfraTimeKey | null;
-  /** Whether there are more log entries available before the start */
-  hasMoreBefore: boolean;
-  /** Whether there are more log entries available after the end */
-  hasMoreAfter: boolean;
-  /** The query the log entries were filtered by */
-  filterQuery?: string | null;
-  /** The query the log entries were highlighted with */
-  highlightQuery?: string | null;
-  /** A list of the log entries */
-  entries: InfraLogEntry[];
-}
-/** A representation of the log entry's position in the event stream */
-export interface InfraTimeKey {
-  /** The timestamp of the event that the log entry corresponds to */
-  time: number;
-  /** The tiebreaker that disambiguates events with the same timestamp */
-  tiebreaker: number;
-}
-/** A log entry */
-export interface InfraLogEntry {
-  /** A unique representation of the log entry's position in the event stream */
-  key: InfraTimeKey;
-  /** The log entry's id */
-  gid: string;
-  /** The source id */
-  source: string;
-  /** The columns used for rendering the log entry */
-  columns: InfraLogEntryColumn[];
-}
-/** A special built-in column that contains the log entry's timestamp */
-export interface InfraLogEntryTimestampColumn {
-  /** The id of the corresponding column configuration */
-  columnId: string;
-  /** The timestamp */
-  timestamp: number;
-}
-/** A special built-in column that contains the log entry's constructed message */
-export interface InfraLogEntryMessageColumn {
-  /** The id of the corresponding column configuration */
-  columnId: string;
-  /** A list of the formatted log entry segments */
-  message: InfraLogMessageSegment[];
-}
-/** A segment of the log entry message that was derived from a field */
-export interface InfraLogMessageFieldSegment {
-  /** The field the segment was derived from */
-  field: string;
-  /** The segment's message */
-  value: string;
-  /** A list of highlighted substrings of the value */
-  highlights: string[];
-}
-/** A segment of the log entry message that was derived from a string literal */
-export interface InfraLogMessageConstantSegment {
-  /** The segment's message */
-  constant: string;
-}
-/** A column that contains the value of a field of the log entry */
-export interface InfraLogEntryFieldColumn {
-  /** The id of the corresponding column configuration */
-  columnId: string;
-  /** The field name of the column */
-  field: string;
-  /** The value of the field in the log entry */
-  value: string;
-  /** A list of highlighted substrings of the value */
-  highlights: string[];
-}
 
 export interface InfraSnapshotResponse {
   /** Nodes of type host, container or pod grouped by 0, 1 or 2 terms */
@@ -303,21 +223,6 @@ export interface DeleteSourceResult {
 // ====================================================
 // InputTypes
 // ====================================================
-
-export interface InfraTimeKeyInput {
-  time: number;
-
-  tiebreaker: number;
-}
-/** A highlighting definition */
-export interface InfraLogEntryHighlightInput {
-  /** The query to highlight by */
-  query: string;
-  /** The number of highlighted documents to include beyond the beginning of the interval */
-  countBefore: number;
-  /** The number of highlighted documents to include beyond the end of the interval */
-  countAfter: number;
-}
 
 export interface InfraTimerangeInput {
   /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
@@ -408,34 +313,6 @@ export interface UpdateSourceTimestampLogColumnInput {
 export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
-}
-export interface LogEntriesAroundInfraSourceArgs {
-  /** The sort key that corresponds to the point in time */
-  key: InfraTimeKeyInput;
-  /** The maximum number of preceding to return */
-  countBefore?: number | null;
-  /** The maximum number of following to return */
-  countAfter?: number | null;
-  /** The query to filter the log entries by */
-  filterQuery?: string | null;
-}
-export interface LogEntriesBetweenInfraSourceArgs {
-  /** The sort key that corresponds to the start of the interval */
-  startKey: InfraTimeKeyInput;
-  /** The sort key that corresponds to the end of the interval */
-  endKey: InfraTimeKeyInput;
-  /** The query to filter the log entries by */
-  filterQuery?: string | null;
-}
-export interface LogEntryHighlightsInfraSourceArgs {
-  /** The sort key that corresponds to the start of the interval */
-  startKey: InfraTimeKeyInput;
-  /** The sort key that corresponds to the end of the interval */
-  endKey: InfraTimeKeyInput;
-  /** The query to filter the log entries by */
-  filterQuery?: string | null;
-  /** The highlighting to apply to the log entries */
-  highlights: InfraLogEntryHighlightInput[];
 }
 export interface SnapshotInfraSourceArgs {
   timerange: InfraTimerangeInput;
@@ -593,15 +470,6 @@ export type InfraSourceLogColumn =
   | InfraSourceMessageLogColumn
   | InfraSourceFieldLogColumn;
 
-/** A column of a log entry */
-export type InfraLogEntryColumn =
-  | InfraLogEntryTimestampColumn
-  | InfraLogEntryMessageColumn
-  | InfraLogEntryFieldColumn;
-
-/** A segment of the log entry message */
-export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
-
 // ====================================================
 // END: Typescript template
 // ====================================================
@@ -650,12 +518,6 @@ export namespace InfraSourceResolvers {
     configuration?: ConfigurationResolver<InfraSourceConfiguration, TypeParent, Context>;
     /** The status of the source */
     status?: StatusResolver<InfraSourceStatus, TypeParent, Context>;
-    /** A consecutive span of log entries surrounding a point in time */
-    logEntriesAround?: LogEntriesAroundResolver<InfraLogEntryInterval, TypeParent, Context>;
-    /** A consecutive span of log entries within an interval */
-    logEntriesBetween?: LogEntriesBetweenResolver<InfraLogEntryInterval, TypeParent, Context>;
-    /** Sequences of log entries matching sets of highlighting queries within an interval */
-    logEntryHighlights?: LogEntryHighlightsResolver<InfraLogEntryInterval[], TypeParent, Context>;
 
     /** A snapshot of nodes */
     snapshot?: SnapshotResolver<InfraSnapshotResponse | null, TypeParent, Context>;
@@ -693,51 +555,6 @@ export namespace InfraSourceResolvers {
     Parent = InfraSource,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
-  export type LogEntriesAroundResolver<
-    R = InfraLogEntryInterval,
-    Parent = InfraSource,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context, LogEntriesAroundArgs>;
-  export interface LogEntriesAroundArgs {
-    /** The sort key that corresponds to the point in time */
-    key: InfraTimeKeyInput;
-    /** The maximum number of preceding to return */
-    countBefore?: number | null;
-    /** The maximum number of following to return */
-    countAfter?: number | null;
-    /** The query to filter the log entries by */
-    filterQuery?: string | null;
-  }
-
-  export type LogEntriesBetweenResolver<
-    R = InfraLogEntryInterval,
-    Parent = InfraSource,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context, LogEntriesBetweenArgs>;
-  export interface LogEntriesBetweenArgs {
-    /** The sort key that corresponds to the start of the interval */
-    startKey: InfraTimeKeyInput;
-    /** The sort key that corresponds to the end of the interval */
-    endKey: InfraTimeKeyInput;
-    /** The query to filter the log entries by */
-    filterQuery?: string | null;
-  }
-
-  export type LogEntryHighlightsResolver<
-    R = InfraLogEntryInterval[],
-    Parent = InfraSource,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context, LogEntryHighlightsArgs>;
-  export interface LogEntryHighlightsArgs {
-    /** The sort key that corresponds to the start of the interval */
-    startKey: InfraTimeKeyInput;
-    /** The sort key that corresponds to the end of the interval */
-    endKey: InfraTimeKeyInput;
-    /** The query to filter the log entries by */
-    filterQuery?: string | null;
-    /** The highlighting to apply to the log entries */
-    highlights: InfraLogEntryHighlightInput[];
-  }
 
   export type SnapshotResolver<
     R = InfraSnapshotResponse | null,
@@ -1056,229 +873,6 @@ export namespace InfraIndexFieldResolvers {
   export type DisplayableResolver<
     R = boolean,
     Parent = InfraIndexField,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** A consecutive sequence of log entries */
-export namespace InfraLogEntryIntervalResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogEntryInterval> {
-    /** The key corresponding to the start of the interval covered by the entries */
-    start?: StartResolver<InfraTimeKey | null, TypeParent, Context>;
-    /** The key corresponding to the end of the interval covered by the entries */
-    end?: EndResolver<InfraTimeKey | null, TypeParent, Context>;
-    /** Whether there are more log entries available before the start */
-    hasMoreBefore?: HasMoreBeforeResolver<boolean, TypeParent, Context>;
-    /** Whether there are more log entries available after the end */
-    hasMoreAfter?: HasMoreAfterResolver<boolean, TypeParent, Context>;
-    /** The query the log entries were filtered by */
-    filterQuery?: FilterQueryResolver<string | null, TypeParent, Context>;
-    /** The query the log entries were highlighted with */
-    highlightQuery?: HighlightQueryResolver<string | null, TypeParent, Context>;
-    /** A list of the log entries */
-    entries?: EntriesResolver<InfraLogEntry[], TypeParent, Context>;
-  }
-
-  export type StartResolver<
-    R = InfraTimeKey | null,
-    Parent = InfraLogEntryInterval,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type EndResolver<
-    R = InfraTimeKey | null,
-    Parent = InfraLogEntryInterval,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type HasMoreBeforeResolver<
-    R = boolean,
-    Parent = InfraLogEntryInterval,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type HasMoreAfterResolver<
-    R = boolean,
-    Parent = InfraLogEntryInterval,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type FilterQueryResolver<
-    R = string | null,
-    Parent = InfraLogEntryInterval,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type HighlightQueryResolver<
-    R = string | null,
-    Parent = InfraLogEntryInterval,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type EntriesResolver<
-    R = InfraLogEntry[],
-    Parent = InfraLogEntryInterval,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** A representation of the log entry's position in the event stream */
-export namespace InfraTimeKeyResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraTimeKey> {
-    /** The timestamp of the event that the log entry corresponds to */
-    time?: TimeResolver<number, TypeParent, Context>;
-    /** The tiebreaker that disambiguates events with the same timestamp */
-    tiebreaker?: TiebreakerResolver<number, TypeParent, Context>;
-  }
-
-  export type TimeResolver<R = number, Parent = InfraTimeKey, Context = InfraContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type TiebreakerResolver<
-    R = number,
-    Parent = InfraTimeKey,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** A log entry */
-export namespace InfraLogEntryResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogEntry> {
-    /** A unique representation of the log entry's position in the event stream */
-    key?: KeyResolver<InfraTimeKey, TypeParent, Context>;
-    /** The log entry's id */
-    gid?: GidResolver<string, TypeParent, Context>;
-    /** The source id */
-    source?: SourceResolver<string, TypeParent, Context>;
-    /** The columns used for rendering the log entry */
-    columns?: ColumnsResolver<InfraLogEntryColumn[], TypeParent, Context>;
-  }
-
-  export type KeyResolver<
-    R = InfraTimeKey,
-    Parent = InfraLogEntry,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type GidResolver<R = string, Parent = InfraLogEntry, Context = InfraContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type SourceResolver<R = string, Parent = InfraLogEntry, Context = InfraContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type ColumnsResolver<
-    R = InfraLogEntryColumn[],
-    Parent = InfraLogEntry,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** A special built-in column that contains the log entry's timestamp */
-export namespace InfraLogEntryTimestampColumnResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogEntryTimestampColumn> {
-    /** The id of the corresponding column configuration */
-    columnId?: ColumnIdResolver<string, TypeParent, Context>;
-    /** The timestamp */
-    timestamp?: TimestampResolver<number, TypeParent, Context>;
-  }
-
-  export type ColumnIdResolver<
-    R = string,
-    Parent = InfraLogEntryTimestampColumn,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type TimestampResolver<
-    R = number,
-    Parent = InfraLogEntryTimestampColumn,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** A special built-in column that contains the log entry's constructed message */
-export namespace InfraLogEntryMessageColumnResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogEntryMessageColumn> {
-    /** The id of the corresponding column configuration */
-    columnId?: ColumnIdResolver<string, TypeParent, Context>;
-    /** A list of the formatted log entry segments */
-    message?: MessageResolver<InfraLogMessageSegment[], TypeParent, Context>;
-  }
-
-  export type ColumnIdResolver<
-    R = string,
-    Parent = InfraLogEntryMessageColumn,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type MessageResolver<
-    R = InfraLogMessageSegment[],
-    Parent = InfraLogEntryMessageColumn,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** A segment of the log entry message that was derived from a field */
-export namespace InfraLogMessageFieldSegmentResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogMessageFieldSegment> {
-    /** The field the segment was derived from */
-    field?: FieldResolver<string, TypeParent, Context>;
-    /** The segment's message */
-    value?: ValueResolver<string, TypeParent, Context>;
-    /** A list of highlighted substrings of the value */
-    highlights?: HighlightsResolver<string[], TypeParent, Context>;
-  }
-
-  export type FieldResolver<
-    R = string,
-    Parent = InfraLogMessageFieldSegment,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type ValueResolver<
-    R = string,
-    Parent = InfraLogMessageFieldSegment,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type HighlightsResolver<
-    R = string[],
-    Parent = InfraLogMessageFieldSegment,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** A segment of the log entry message that was derived from a string literal */
-export namespace InfraLogMessageConstantSegmentResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogMessageConstantSegment> {
-    /** The segment's message */
-    constant?: ConstantResolver<string, TypeParent, Context>;
-  }
-
-  export type ConstantResolver<
-    R = string,
-    Parent = InfraLogMessageConstantSegment,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** A column that contains the value of a field of the log entry */
-export namespace InfraLogEntryFieldColumnResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogEntryFieldColumn> {
-    /** The id of the corresponding column configuration */
-    columnId?: ColumnIdResolver<string, TypeParent, Context>;
-    /** The field name of the column */
-    field?: FieldResolver<string, TypeParent, Context>;
-    /** The value of the field in the log entry */
-    value?: ValueResolver<string, TypeParent, Context>;
-    /** A list of highlighted substrings of the value */
-    highlights?: HighlightsResolver<string[], TypeParent, Context>;
-  }
-
-  export type ColumnIdResolver<
-    R = string,
-    Parent = InfraLogEntryFieldColumn,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type FieldResolver<
-    R = string,
-    Parent = InfraLogEntryFieldColumn,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type ValueResolver<
-    R = string,
-    Parent = InfraLogEntryFieldColumn,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type HighlightsResolver<
-    R = string[],
-    Parent = InfraLogEntryFieldColumn,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
