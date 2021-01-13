@@ -26,6 +26,13 @@ const CaseStatusRt = rt.union([
 
 export const caseStatuses = Object.values(CaseStatuses);
 
+export enum CaseType {
+  parent = 'parent',
+  individual = 'individual',
+}
+
+const CaseTypeRt = rt.union([rt.literal(CaseType.parent), rt.literal(CaseType.individual)]);
+
 const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
 });
@@ -35,6 +42,7 @@ const CaseBasicRt = rt.type({
   status: CaseStatusRt,
   tags: rt.array(rt.string),
   title: rt.string,
+  type: CaseTypeRt,
   connector: CaseConnectorRt,
   settings: SettingsRt,
 });
@@ -77,6 +85,11 @@ export const CasePostRequestRt = rt.type({
   title: rt.string,
   connector: CaseConnectorRt,
   settings: SettingsRt,
+});
+
+export const CaseClientPostRequestRt = rt.type({
+  type: CaseTypeRt,
+  ...CasePostRequestRt.props,
 });
 
 export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;
@@ -126,6 +139,8 @@ export const CasesPatchRequestRt = rt.type({ cases: rt.array(CasePatchRequestRt)
 export const CasesResponseRt = rt.array(CaseResponseRt);
 
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
+// TODO: document how this is different from the CasePostRequest
+export type CaseClientPostRequest = rt.TypeOf<typeof CaseClientPostRequestRt>;
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
 export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;

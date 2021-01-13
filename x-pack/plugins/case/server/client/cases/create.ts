@@ -12,11 +12,11 @@ import { identity } from 'fp-ts/lib/function';
 import { flattenCaseSavedObject, transformNewCase } from '../../routes/api/utils';
 
 import {
-  CasePostRequestRt,
   throwErrors,
   excess,
   CaseResponseRt,
   CaseResponse,
+  CaseClientPostRequestRt,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import {
@@ -34,7 +34,7 @@ export const create = ({
   request,
 }: CaseClientFactoryArguments) => async ({ theCase }: CaseClientCreate): Promise<CaseResponse> => {
   const query = pipe(
-    excess(CasePostRequestRt).decode(theCase),
+    excess(CaseClientPostRequestRt).decode(theCase),
     fold(throwErrors(Boom.badRequest), identity)
   );
 

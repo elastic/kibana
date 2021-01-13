@@ -7,7 +7,7 @@
 import { KibanaRequest, SavedObjectsClientContract, RequestHandlerContext } from 'kibana/server';
 import { ActionsClient } from '../../../actions/server';
 import {
-  CasePostRequest,
+  CaseClientPostRequest,
   CaseResponse,
   CasesPatchRequest,
   CasesResponse,
@@ -24,7 +24,7 @@ import {
 } from '../services';
 import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
 export interface CaseClientCreate {
-  theCase: CasePostRequest;
+  theCase: CaseClientPostRequest;
 }
 
 export interface CaseClientUpdate {

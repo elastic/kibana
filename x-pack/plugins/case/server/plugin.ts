@@ -143,6 +143,7 @@ export class CasePlugin {
       });
     };
 
+    // TODO I think we need to create a return type for the start function to include this
     return {
       getCaseClientWithRequestAndContext,
     };

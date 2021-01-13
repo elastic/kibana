@@ -7,10 +7,10 @@
 import { SavedObjectsType } from 'src/core/server';
 import { caseMigrations } from './migrations';
 
-export const CASE_SAVED_OBJECT = 'cases';
+export const CHILD_CASE_SAVED_OBJECT = 'child_case';
 
 export const caseSavedObjectType: SavedObjectsType = {
-  name: CASE_SAVED_OBJECT,
+  name: CHILD_CASE_SAVED_OBJECT,
   hidden: false,
   namespaceType: 'single',
   mappings: {
@@ -47,78 +47,7 @@ export const caseSavedObjectType: SavedObjectsType = {
           },
         },
       },
-      description: {
-        type: 'text',
-      },
-      connector: {
-        properties: {
-          id: {
-            type: 'keyword',
-          },
-          name: {
-            type: 'text',
-          },
-          type: {
-            type: 'keyword',
-          },
-          fields: {
-            properties: {
-              key: {
-                type: 'text',
-              },
-              value: {
-                type: 'text',
-              },
-            },
-          },
-        },
-      },
-      external_service: {
-        properties: {
-          pushed_at: {
-            type: 'date',
-          },
-          pushed_by: {
-            properties: {
-              username: {
-                type: 'keyword',
-              },
-              full_name: {
-                type: 'keyword',
-              },
-              email: {
-                type: 'keyword',
-              },
-            },
-          },
-          connector_id: {
-            type: 'keyword',
-          },
-          connector_name: {
-            type: 'keyword',
-          },
-          external_id: {
-            type: 'keyword',
-          },
-          external_title: {
-            type: 'text',
-          },
-          external_url: {
-            type: 'text',
-          },
-        },
-      },
-      title: {
-        type: 'keyword',
-      },
       status: {
-        type: 'keyword',
-      },
-      tags: {
-        type: 'keyword',
-      },
-      // parent or individual
-      type: {
         type: 'keyword',
       },
       updated_at: {
@@ -139,6 +68,7 @@ export const caseSavedObjectType: SavedObjectsType = {
       },
       settings: {
         properties: {
+          // TODO do we need this?
           syncAlerts: {
             type: 'boolean',
           },
@@ -146,5 +76,5 @@ export const caseSavedObjectType: SavedObjectsType = {
       },
     },
   },
-  migrations: caseMigrations,
+  // TODO migration
 };

@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`create happy path it creates the case correctly 1`] = `
+Array [
+  Object {
+    "attributes": Object {
+      "action": "create",
+      "action_at": "2019-11-25T21:54:48.952Z",
+      "action_by": Object {
+        "email": "d00d@awesome.com",
+        "full_name": "Awesome D00d",
+        "username": "awesome",
+      },
+      "action_field": Array [
+        "description",
+        "status",
+        "tags",
+        "title",
+        "connector",
+        "settings",
+      ],
+      "new_value": "{\\"description\\":\\"This is a brand new case of a bad meanie defacing data\\",\\"title\\":\\"Super Bad Security Issue\\",\\"tags\\":[\\"defacement\\"],\\"type\\":\\"individual\\",\\"connector\\":{\\"id\\":\\"123\\",\\"name\\":\\"Jira\\",\\"type\\":\\".jira\\",\\"fields\\":{\\"issueType\\":\\"Task\\",\\"priority\\":\\"High\\",\\"parent\\":null}},\\"settings\\":{\\"syncAlerts\\":true}}",
+      "old_value": null,
+    },
+    "references": Array [
+      Object {
+        "id": "mock-it",
+        "name": "associated-cases",
+        "type": "cases",
+      },
+    ],
+  },
+]
+`;

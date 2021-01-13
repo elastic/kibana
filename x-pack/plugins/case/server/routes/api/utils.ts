@@ -34,6 +34,7 @@ import {
   excess,
   throwErrors,
   CaseStatuses,
+  CaseClientPostRequest,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
@@ -52,7 +53,7 @@ export const transformNewCase = ({
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
-  newCase: CasePostRequest;
+  newCase: CaseClientPostRequest;
   username?: string | null;
 }): ESCaseAttributes => ({
   ...newCase,
