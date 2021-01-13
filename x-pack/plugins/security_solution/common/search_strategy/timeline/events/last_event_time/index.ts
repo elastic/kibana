@@ -25,6 +25,15 @@ export interface TimelineEventsLastEventTimeStrategyResponse extends IEsSearchRe
   inspect?: Maybe<Inspect>;
 }
 
+export interface TimelineKpiStrategyResponse extends IEsSearchResponse {
+  destinationIpCount: Maybe<number>;
+  inspect?: Maybe<Inspect>;
+  hostCount: Maybe<number>;
+  processCount: Maybe<number>;
+  sourceIpCount: Maybe<number>;
+  userCount: Maybe<number>;
+}
+
 export interface TimelineEventsLastEventTimeRequestOptions
   extends Omit<TimelineRequestBasicOptions, 'filterQuery' | 'timerange'> {
   indexKey: LastEventIndexKey;

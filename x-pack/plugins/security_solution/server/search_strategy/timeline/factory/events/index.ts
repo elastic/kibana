@@ -20,5 +20,6 @@ export const timelineEventsFactory: Record<
 > = {
   [TimelineEventsQueries.all]: timelineEventsAll,
   [TimelineEventsQueries.details]: timelineEventsDetails,
+  [TimelineEventsQueries.kpi]: timelineKpi,
   [TimelineEventsQueries.lastEventTime]: timelineEventsLastEventTime,
 };
