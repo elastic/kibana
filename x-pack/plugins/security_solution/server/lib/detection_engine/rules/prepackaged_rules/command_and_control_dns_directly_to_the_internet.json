@@ -35,13 +35,7 @@
         "name": "Command and Control",
         "reference": "https://attack.mitre.org/tactics/TA0011/"
       },
-      "technique": [
-        {
-          "id": "T1043",
-          "name": "Commonly Used Port",
-          "reference": "https://attack.mitre.org/techniques/T1043/"
-        }
-      ]
+      "technique": []
     }
   ],
   "type": "query",

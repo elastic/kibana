@@ -7,7 +7,7 @@
 import { AxiosInstance, Method, AxiosResponse, AxiosBasicCredentials } from 'axios';
 import { Logger } from '../../../../../../src/core/server';
 import { ProxySettings } from '../../types';
-import { getProxyAgent } from './get_proxy_agent';
+import { getProxyAgents } from './get_proxy_agents';
 
 export const request = async <T = unknown>({
   axios,
@@ -32,15 +32,17 @@ export const request = async <T = unknown>({
   validateStatus?: (status: number) => boolean;
   auth?: AxiosBasicCredentials;
 }): Promise<AxiosResponse> => {
+  const { httpAgent, httpsAgent } = getProxyAgents(proxySettings, logger);
+
   return await axios(url, {
     method,
     data: data ?? {},
     params,
     auth,
-    // use httpsAgent and embedded proxy: false, to be able to handle fail on invalid certs
-    httpsAgent: proxySettings ? getProxyAgent(proxySettings, logger) : undefined,
-    httpAgent: proxySettings ? getProxyAgent(proxySettings, logger) : undefined,
-    proxy: false, // the same way as it done for IncomingWebhook in
+    // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
+    httpAgent,
+    httpsAgent,
+    proxy: false,
     headers,
     validateStatus,
   });
