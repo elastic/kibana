@@ -194,6 +194,10 @@ so they can properly protect the data within their clusters.
 |Replaces the legacy ui/share module for registering share context menus.
 
 
+|{kib-repo}blob/{branch}/src/plugins/spaces_oss/README.md[spacesOss]
+|Bridge plugin for consumption of the Spaces feature from OSS plugins.
+
+
 |{kib-repo}blob/{branch}/src/plugins/telemetry/README.md[telemetry]
 |Telemetry allows Kibana features to have usage tracked in the wild. The general term "telemetry" refers to multiple things:
 

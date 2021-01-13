@@ -7,17 +7,19 @@
 import { DocLinksStart } from 'src/core/public';
 
 export class DocumentationLinksService {
-  private readonly esDocBasePath: string;
+  private readonly apiKeySettings: string;
+  private readonly createApiKey: string;
 
   constructor(docLinks: DocLinksStart) {
-    this.esDocBasePath = `${docLinks.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/`;
+    this.apiKeySettings = `${docLinks.links.security.apiKeyServiceSettings}`;
+    this.createApiKey = `${docLinks.links.apis.createApiKey}`;
   }
 
   public getApiKeyServiceSettingsDocUrl() {
-    return `${this.esDocBasePath}security-settings.html#api-key-service-settings`;
+    return `${this.apiKeySettings}`;
   }
 
   public getCreateApiKeyDocUrl() {
-    return `${this.esDocBasePath}security-api-create-api-key.html`;
+    return `${this.createApiKey}`;
   }
 }
