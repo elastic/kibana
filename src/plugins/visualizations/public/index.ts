@@ -44,9 +44,6 @@ export type {
   ReactVisTypeOptions,
   Schema,
   ISchemas,
-  VisEditorConstructor,
-  IEditorController,
-  EditorRenderProps,
 } from './vis_types';
 export { VisParams, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
