@@ -411,7 +411,7 @@ export class AlertsClient {
     this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
     let events: IEvent[];
     try {
-      const queryResults = await eventLogClient.findEventsBySavedObject('alert', id, {
+      const queryResults = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
         page: 1,
         per_page: 10000,
         start: parsedDateStart.toISOString(),

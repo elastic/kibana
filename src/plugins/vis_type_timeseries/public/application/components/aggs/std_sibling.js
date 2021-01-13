@@ -40,7 +40,7 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 const StandardSiblingAggUi = (props) => {
-  const { siblings, intl } = props;
+  const { siblings, intl, fields, indexPattern } = props;
   const defaults = { sigma: '' };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
@@ -158,6 +158,7 @@ const StandardSiblingAggUi = (props) => {
               onChange={handleSelectChange('field')}
               exclude={[METRIC_TYPES.PERCENTILE, METRIC_TYPES.TOP_HIT]}
               metrics={siblings}
+              fields={fields[indexPattern]}
               metric={model}
               value={model.field}
             />
@@ -173,6 +174,7 @@ const StandardSiblingAggUi = (props) => {
 StandardSiblingAggUi.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
+  indexPattern: PropTypes.string,
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onChange: PropTypes.func,
