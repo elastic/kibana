@@ -9,7 +9,6 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
-  EuiAvatar,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -227,16 +226,6 @@ export const Overview: React.FC = () => {
       const MAX_USERS = 4;
       return (
         <EuiFlexGroup gutterSize="xs" alignItems="center">
-          {users.slice(0, MAX_USERS).map((user) => (
-            <EuiFlexItem key={user.id}>
-              <EuiAvatar
-                size="s"
-                initials={user.initials}
-                name={user.name || user.initials}
-                imageUrl={user.pictureUrl || ''}
-              />
-            </EuiFlexItem>
-          ))}
           {users.slice(MAX_USERS).length > 0 && (
             <EuiFlexItem>
               <EuiText color="subdued" size="xs">
