@@ -5,10 +5,11 @@
  */
 
 import axios from 'axios';
-import HttpProxyAgent from 'http-proxy-agent';
 import { Logger } from '../../../../../../src/core/server';
 import { addTimeZoneToDate, request, patch, getErrorMessage } from './axios_utils';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { getProxyAgents } from './get_proxy_agents';
+
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 jest.mock('axios');
 const axiosMock = (axios as unknown) as jest.Mock;
@@ -27,6 +28,7 @@ describe('addTimeZoneToDate', () => {
 
 describe('request', () => {
   beforeEach(() => {
+    jest.resetAllMocks();
     axiosMock.mockImplementation(() => ({
       status: 200,
       headers: { 'content-type': 'application/json' },
@@ -58,23 +60,57 @@ describe('request', () => {
     });
   });
 
-  test('it have been called with proper proxy agent', async () => {
+  test('it have been called with proper proxy agent for a valid url', async () => {
+    const proxySettings = {
+      proxyRejectUnauthorizedCertificates: true,
+      proxyUrl: 'https://localhost:1212',
+    };
+    const { httpAgent, httpsAgent } = getProxyAgents(proxySettings, logger);
+
     const res = await request({
       axios,
-      url: '/testProxy',
+      url: 'http://testProxy',
       logger,
       proxySettings: {
-        proxyUrl: 'http://localhost:1212',
+        proxyUrl: 'https://localhost:1212',
+        proxyRejectUnauthorizedCertificates: true,
+      },
+    });
+
+    expect(axiosMock).toHaveBeenCalledWith('http://testProxy', {
+      method: 'get',
+      data: {},
+      headers: undefined,
+      httpAgent,
+      httpsAgent,
+      params: undefined,
+      proxy: false,
+      validateStatus: undefined,
+    });
+    expect(res).toEqual({
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+      data: { incidentId: '123' },
+    });
+  });
+
+  test('it have been called with proper proxy agent for an invalid url', async () => {
+    const res = await request({
+      axios,
+      url: 'https://testProxy',
+      logger,
+      proxySettings: {
+        proxyUrl: ':nope:',
         proxyRejectUnauthorizedCertificates: false,
       },
     });
 
-    expect(axiosMock).toHaveBeenCalledWith('/testProxy', {
+    expect(axiosMock).toHaveBeenCalledWith('https://testProxy', {
       method: 'get',
       data: {},
       headers: undefined,
-      httpAgent: new HttpProxyAgent('http://localhost:1212'),
-      httpsAgent: new HttpProxyAgent('http://localhost:1212'),
+      httpAgent: undefined,
+      httpsAgent: undefined,
       params: undefined,
       proxy: false,
       validateStatus: undefined,

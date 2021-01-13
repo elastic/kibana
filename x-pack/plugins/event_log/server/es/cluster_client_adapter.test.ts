@@ -327,11 +327,11 @@ describe('queryEventsBySavedObject', () => {
         total: { value: 0 },
       },
     });
-    await clusterClientAdapter.queryEventsBySavedObject(
+    await clusterClientAdapter.queryEventsBySavedObjects(
       'index-name',
       'namespace',
       'saved-object-type',
-      'saved-object-id',
+      ['saved-object-id'],
       DEFAULT_OPTIONS
     );
 
@@ -365,10 +365,10 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           Object {
-                            "term": Object {
-                              "kibana.saved_objects.id": Object {
-                                "value": "saved-object-id",
-                              },
+                            "terms": Object {
+                              "kibana.saved_objects.id": Array [
+                                "saved-object-id",
+                              ],
                             },
                           },
                           Object {
@@ -406,11 +406,11 @@ describe('queryEventsBySavedObject', () => {
         total: { value: 0 },
       },
     });
-    await clusterClientAdapter.queryEventsBySavedObject(
+    await clusterClientAdapter.queryEventsBySavedObjects(
       'index-name',
       undefined,
       'saved-object-type',
-      'saved-object-id',
+      ['saved-object-id'],
       DEFAULT_OPTIONS
     );
 
@@ -444,10 +444,10 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           Object {
-                            "term": Object {
-                              "kibana.saved_objects.id": Object {
-                                "value": "saved-object-id",
-                              },
+                            "terms": Object {
+                              "kibana.saved_objects.id": Array [
+                                "saved-object-id",
+                              ],
                             },
                           },
                           Object {
@@ -487,11 +487,11 @@ describe('queryEventsBySavedObject', () => {
         total: { value: 0 },
       },
     });
-    await clusterClientAdapter.queryEventsBySavedObject(
+    await clusterClientAdapter.queryEventsBySavedObjects(
       'index-name',
       'namespace',
       'saved-object-type',
-      'saved-object-id',
+      ['saved-object-id'],
       { ...DEFAULT_OPTIONS, sort_field: 'event.end', sort_order: 'desc' }
     );
 
@@ -515,11 +515,11 @@ describe('queryEventsBySavedObject', () => {
 
     const start = '2020-07-08T00:52:28.350Z';
 
-    await clusterClientAdapter.queryEventsBySavedObject(
+    await clusterClientAdapter.queryEventsBySavedObjects(
       'index-name',
       'namespace',
       'saved-object-type',
-      'saved-object-id',
+      ['saved-object-id'],
       { ...DEFAULT_OPTIONS, start }
     );
 
@@ -553,10 +553,10 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           Object {
-                            "term": Object {
-                              "kibana.saved_objects.id": Object {
-                                "value": "saved-object-id",
-                              },
+                            "terms": Object {
+                              "kibana.saved_objects.id": Array [
+                                "saved-object-id",
+                              ],
                             },
                           },
                           Object {
@@ -605,11 +605,11 @@ describe('queryEventsBySavedObject', () => {
     const start = '2020-07-08T00:52:28.350Z';
     const end = '2020-07-08T00:00:00.000Z';
 
-    await clusterClientAdapter.queryEventsBySavedObject(
+    await clusterClientAdapter.queryEventsBySavedObjects(
       'index-name',
       'namespace',
       'saved-object-type',
-      'saved-object-id',
+      ['saved-object-id'],
       { ...DEFAULT_OPTIONS, start, end }
     );
 
@@ -643,10 +643,10 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           Object {
-                            "term": Object {
-                              "kibana.saved_objects.id": Object {
-                                "value": "saved-object-id",
-                              },
+                            "terms": Object {
+                              "kibana.saved_objects.id": Array [
+                                "saved-object-id",
+                              ],
                             },
                           },
                           Object {

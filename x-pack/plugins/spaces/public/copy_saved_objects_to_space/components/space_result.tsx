@@ -15,9 +15,9 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { SummarizedCopyToSpaceResult } from '../index';
 import { SpaceAvatar } from '../../space_avatar';
-import { Space } from '../../../common/model/space';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
 import { SpaceCopyResultDetails } from './space_result_details';
 import { ImportRetry } from '../types';
