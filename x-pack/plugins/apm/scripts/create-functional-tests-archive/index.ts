@@ -5,7 +5,7 @@
  */
 
 import { argv } from 'yargs';
-import { execSync, exec } from 'child_process';
+import { execSync } from 'child_process';
 import moment from 'moment';
 import path from 'path';
 import fs from 'fs';
@@ -121,18 +121,6 @@ async function run() {
   };
 
   const root = path.join(__dirname, '../../../../..');
-  const esArchiverDir = 'fixtures/es_archiver/';
-
-  const apiIntegrationDir = path.join(
-    root,
-    'x-pack/test/apm_api_integration/common',
-    esArchiverDir
-  );
-  const e2eCypressDir = path.join(
-    __dirname,
-    '../../new_e2e/cypress',
-    esArchiverDir
-  );
 
   const options = parseIndexUrl(esUrl);
 
@@ -164,7 +152,7 @@ async function run() {
     ) ?? [];
 
   // create the archive
-  const tmpDir = path.join(__dirname, 'tmp');
+  const tmpDir = path.join(__dirname, 'tmp/');
   execSync(
     `node scripts/es_archiver save ${archiveName} ${indicesWithDocs
       .filter((index) => !index.startsWith('.kibana'))
@@ -208,16 +196,28 @@ async function run() {
   );
 
   // run ESLint on the generated metadata files
-
   execSync('node scripts/eslint **/*/archives_metadata.ts --fix', {
     cwd: root,
     stdio: 'inherit',
   });
 
-  const sourceDir = path.join(tmpDir, '/*');
-  exec(`cp -r ${sourceDir} ${e2eCypressDir}`);
-  exec(`cp -r ${sourceDir} ${apiIntegrationDir}`);
-  exec(`rm -rf ${tmpDir}`);
+  const esArchiverDir = 'fixtures/es_archiver/';
+
+  const apiIntegrationDir = path.join(
+    root,
+    'x-pack/test/apm_api_integration/common',
+    esArchiverDir
+  );
+  const e2eDir = path.join(__dirname, '../../new_e2e/cypress', esArchiverDir);
+
+  // Copy generated files to e2e test folder
+  execSync(`cp -r ${tmpDir} ${e2eDir}`);
+
+  // Copy generated files to API integration test folder
+  execSync(`cp -r ${tmpDir} ${apiIntegrationDir}`);
+
+  // Delete tmp folder
+  execSync(`rm -rf ${tmpDir}`);
 }
 
 run()
