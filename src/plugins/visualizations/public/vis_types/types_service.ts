@@ -19,7 +19,6 @@
 
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 import { BaseVisType, BaseVisTypeOptions } from './base_vis_type';
-import { ReactVisType, ReactVisTypeOptions } from './react_vis_type';
 import { VisType, VisGroups } from './types';
 
 /**
@@ -50,14 +49,6 @@ export class TypesService {
        */
       createBaseVisualization: <TVisParams>(config: BaseVisTypeOptions<TVisParams>): void => {
         const vis = new BaseVisType(config);
-        this.registerVisualization(vis);
-      },
-      /**
-       * registers a visualization which uses react for rendering
-       * @param config - visualization type definition
-       */
-      createReactVisualization: <TVisParams>(config: ReactVisTypeOptions<TVisParams>): void => {
-        const vis = new ReactVisType(config);
         this.registerVisualization(vis);
       },
       /**
@@ -130,6 +121,3 @@ export type TypesStart = ReturnType<TypesService['start']>;
 
 /** @public types */
 export { VisTypeAlias };
-
-/** @public static code */
-// TODO once items are moved from ui/vis into this service

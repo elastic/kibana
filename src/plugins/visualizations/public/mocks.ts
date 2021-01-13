@@ -33,7 +33,6 @@ import { savedObjectsPluginMock } from '../../../plugins/saved_objects/public/mo
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
-  createReactVisualization: jest.fn(),
   registerAlias: jest.fn(),
   hideTypes: jest.fn(),
 });

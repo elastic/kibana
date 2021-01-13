@@ -22,7 +22,6 @@ import {
   Capabilities,
   ChromeStart,
   HttpStart,
-  I18nStart,
   IUiSettingsClient,
   OverlayStart,
   SavedObjectsStart,
@@ -58,8 +57,6 @@ export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObject
 );
 
 export const [getTypes, setTypes] = createGetterSetter<TypesStart>('Types');
-
-export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 
 export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('DocLinks');
 

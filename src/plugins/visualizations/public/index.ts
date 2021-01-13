@@ -41,7 +41,6 @@ export type {
   VisTypeAlias,
   VisType,
   BaseVisTypeOptions,
-  ReactVisTypeOptions,
   Schema,
   ISchemas,
   VisEditorConstructor,

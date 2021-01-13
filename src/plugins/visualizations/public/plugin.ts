@@ -31,7 +31,6 @@ import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
   setUISettings,
   setTypes,
-  setI18n,
   setApplication,
   setCapabilities,
   setHttp,
@@ -166,7 +165,6 @@ export class VisualizationsPlugin
     { data, expressions, uiActions, embeddable, dashboard, savedObjects }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
-    setI18n(core.i18n);
     setTypes(types);
     setEmbeddable(embeddable);
     setApplication(core.application);

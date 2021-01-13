@@ -29,4 +29,3 @@ export type {
   EditorRenderProps,
 } from './types';
 export type { BaseVisTypeOptions } from './base_vis_type';
-export type { ReactVisTypeOptions } from './react_vis_type';
