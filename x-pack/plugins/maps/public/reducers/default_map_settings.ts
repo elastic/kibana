@@ -22,7 +22,7 @@ export function getDefaultMapSettings(): MapSettings {
     browserLocation: { zoom: 2 },
     maxZoom: MAX_ZOOM,
     minZoom: MIN_ZOOM,
-    showScaleControl: true,
+    showScaleControl: false,
     showSpatialFilters: true,
     spatialFiltersAlpa: 0.3,
     spatialFiltersFillColor: '#DA8B45',
