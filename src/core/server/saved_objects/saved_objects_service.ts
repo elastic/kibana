@@ -54,6 +54,7 @@ import { SavedObjectsImporter, ISavedObjectsImporter, SavedObjectsImportHook } f
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
+
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -153,7 +154,40 @@ export interface SavedObjectsServiceSetup {
   registerType: (type: SavedObjectsType) => void;
 
   /**
-   * TODO: documentation
+   * Register an {@link SavedObjectsImportHook | import hook} for given type.
+   *
+   * Import hooks are executed during the savedObjects import process and allow to interact
+   * with the imported objects. See the {@link SavedObjectsImportHook | hook documentation}
+   * for more info.
+   *
+   * @example
+   * Registering a hook displaying a warning about a specific type of object
+   * ```ts
+   * // src/plugins/my_plugin/server/plugin.ts
+   * import { myType } from './saved_objects';
+   *
+   * export class Plugin() {
+   *   setup: (core: CoreSetup) => {
+   *     core.savedObjects.registerType(myType);
+   *     core.savedObjects.registerImportHook(myType.name, (objects) => {
+   *       if(someActionIsNeeded(objects)) {
+   *         return {
+   *            warnings: [
+   *              {
+   *                type: 'action_required',
+   *                message: 'Objects need to be manually enabled after import',
+   *                actionUrl: '/app/my-app/require-activation',
+   *              },
+   *            ]
+   *         }
+   *       }
+   *       return {};
+   *     });
+   *   }
+   * }
+   * ```
+   *
+   * @remark messages returned in the warnings are user facing and must be translated.
    */
   registerImportHook: (type: string, hook: SavedObjectsImportHook) => void;
 }
