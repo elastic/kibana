@@ -90,7 +90,7 @@ export const CustomPolicy: React.FC<Props> = ({ type }) => (
 export const DefaultPolicy: React.FC<Props> = ({ type, minAgeDays }) => (
   <FormattedMessage
     id="xpack.enterpriseSearch.appSearch.logRetention.defaultPolicy"
-    defaultMessage="Your {logsType} logs are being stored for at least {minAgeDays} days."
+    defaultMessage="Your {logsType} logs are being stored for at least {minAgeDays, plural, one {# day} other {# days}}."
     values={{ logsType: CAPITALIZATION_MAP[type].lowercase, minAgeDays }}
   />
 );
