@@ -26,4 +26,5 @@ This is only internal for now, and will only be public when we expose the regist
 |  [migrations](./kibana-plugin-core-server.savedobjectstype.migrations.md) | <code>SavedObjectMigrationMap</code> | An optional map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used to migrate the type. |
 |  [name](./kibana-plugin-core-server.savedobjectstype.name.md) | <code>string</code> | The name of the type, which is also used as the internal id. |
 |  [namespaceType](./kibana-plugin-core-server.savedobjectstype.namespacetype.md) | <code>SavedObjectsNamespaceType</code> | The [namespace type](./kibana-plugin-core-server.savedobjectsnamespacetype.md) for the type. |
+|  [onImport](./kibana-plugin-core-server.savedobjectstype.onimport.md) | <code>SavedObjectsImportHook</code> | An optional [import hook](./kibana-plugin-core-server.savedobjectsimporthook.md) to use when importing given type.<!-- -->Import hooks are executed during the savedObjects import process and allow to interact with the imported objects. See the [hook documentation](./kibana-plugin-core-server.savedobjectsimporthook.md) for more info. |
 

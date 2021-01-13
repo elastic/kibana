@@ -2495,11 +2495,10 @@ export interface SavedObjectsImportConflictError {
 export class SavedObjectsImporter {
     // (undocumented)
     #private;
-    constructor({ savedObjectsClient, typeRegistry, importSizeLimit, importHooks, }: {
+    constructor({ savedObjectsClient, typeRegistry, importSizeLimit, }: {
         savedObjectsClient: SavedObjectsClientContract;
         typeRegistry: ISavedObjectTypeRegistry;
         importSizeLimit: number;
-        importHooks: Record<string, SavedObjectsImportHook[]>;
     });
     import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
     resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
@@ -2761,7 +2760,6 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
-    registerImportHook: (type: string, hook: SavedObjectsImportHook) => void;
     registerType: (type: SavedObjectsType) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
@@ -2797,6 +2795,7 @@ export interface SavedObjectsType {
     migrations?: SavedObjectMigrationMap;
     name: string;
     namespaceType: SavedObjectsNamespaceType;
+    onImport?: SavedObjectsImportHook;
 }
 
 // @public
