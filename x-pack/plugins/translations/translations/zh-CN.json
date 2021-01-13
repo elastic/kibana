@@ -22490,8 +22490,6 @@
     "xpack.uptime.synthetics.screenshot.noImageMessage": "没有可用图像",
     "xpack.uptime.synthetics.screenshotDisplay.altText": "名称为“{stepName}”的步骤的屏幕截图",
     "xpack.uptime.synthetics.screenshotDisplay.altTextWithoutName": "屏幕截图",
-    "xpack.uptime.synthetics.screenshotDisplay.fullScreenshotAltText": "名称为“{stepName}”的步骤的完整屏幕截图",
-    "xpack.uptime.synthetics.screenshotDisplay.fullScreenshotAltTextWithoutName": "完整屏幕截图",
     "xpack.uptime.synthetics.screenshotDisplay.thumbnailAltText": "名称为“{stepName}”的步骤的缩略屏幕截图",
     "xpack.uptime.synthetics.screenshotDisplay.thumbnailAltTextWithoutName": "缩略屏幕截图",
     "xpack.uptime.synthetics.statusBadge.failedMessage": "失败",

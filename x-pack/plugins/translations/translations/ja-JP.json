@@ -22439,8 +22439,6 @@
     "xpack.uptime.synthetics.screenshot.noImageMessage": "画像がありません",
     "xpack.uptime.synthetics.screenshotDisplay.altText": "名前「{stepName}」のステップのスクリーンショット",
     "xpack.uptime.synthetics.screenshotDisplay.altTextWithoutName": "スクリーンショット",
-    "xpack.uptime.synthetics.screenshotDisplay.fullScreenshotAltText": "名前「{stepName}」のステップの詳細スクリーンショット",
-    "xpack.uptime.synthetics.screenshotDisplay.fullScreenshotAltTextWithoutName": "詳細スクリーンショット",
     "xpack.uptime.synthetics.screenshotDisplay.thumbnailAltText": "名前「{stepName}」のステップのサムネイルスクリーンショット",
     "xpack.uptime.synthetics.screenshotDisplay.thumbnailAltTextWithoutName": "サムネイルスクリーンショット",
     "xpack.uptime.synthetics.statusBadge.failedMessage": "失敗",
