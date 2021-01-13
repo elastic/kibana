@@ -774,4 +774,19 @@ export class WebElementWrapper {
     PNG.bitblt(src, dst, x, y, width, height, 0, 0);
     return PNG.sync.write(dst);
   }
+
+  /**
+   * Gets the image data of a canvas element
+   *
+   * @returns {Promis<void>}
+   */
+  public async getImageData(selector: string): Promise<any> {
+    return await this.driver.executeScript(
+      `
+      const el = document.querySelector('${selector}');
+      const ctx = el.getContext('2d');
+      return ctx.getImageData(0, 0, el.width, el.height).data;
+      `
+    );
+  }
 }
