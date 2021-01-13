@@ -29,6 +29,7 @@ import {
   SessionStateContainer,
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
+import { NowProviderInternalContract } from '../../now_provider';
 
 export type ISessionService = PublicContract<SessionService>;
 
@@ -60,40 +61,54 @@ export class SessionService {
   private readonly state: SessionStateContainer<TrackSearchDescriptor>;
 
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
-  private appChangeSubscription$?: Subscription;
+  private subscription = new Subscription();
   private curApp?: string;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
     getStartServices: StartServicesAccessor,
     private readonly sessionsClient: ISessionsClient,
+    private readonly nowProvider: NowProviderInternalContract,
     { freezeState = true }: { freezeState: boolean } = { freezeState: true }
   ) {
-    const { stateContainer, sessionState$ } = createSessionStateContainer<TrackSearchDescriptor>({
+    const {
+      stateContainer,
+      sessionState$,
+      sessionStartTime$,
+    } = createSessionStateContainer<TrackSearchDescriptor>({
       freeze: freezeState,
     });
     this.state$ = sessionState$;
     this.state = stateContainer;
 
+    this.subscription.add(
+      sessionStartTime$.subscribe((startTime) => {
+        if (startTime) this.nowProvider.set(startTime);
+        else this.nowProvider.reset();
+      })
+    );
+
     getStartServices().then(([coreStart]) => {
       // Apps required to clean up their sessions before unmounting
       // Make sure that apps don't leave sessions open.
-      this.appChangeSubscription$ = coreStart.application.currentAppId$.subscribe((appName) => {
-        if (this.state.get().sessionId) {
-          const message = `Application '${this.curApp}' had an open session while navigating`;
-          if (initializerContext.env.mode.dev) {
-            // TODO: This setTimeout is necessary due to a race condition while navigating.
-            setTimeout(() => {
-              coreStart.fatalErrors.add(message);
-            }, 100);
-          } else {
-            // eslint-disable-next-line no-console
-            console.warn(message);
-            this.clear();
+      this.subscription.add(
+        coreStart.application.currentAppId$.subscribe((appName) => {
+          if (this.state.get().sessionId) {
+            const message = `Application '${this.curApp}' had an open session while navigating`;
+            if (initializerContext.env.mode.dev) {
+              // TODO: This setTimeout is necessary due to a race condition while navigating.
+              setTimeout(() => {
+                coreStart.fatalErrors.add(message);
+              }, 100);
+            } else {
+              // eslint-disable-next-line no-console
+              console.warn(message);
+              this.clear();
+            }
           }
-        }
-        this.curApp = appName;
-      });
+          this.curApp = appName;
+        })
+      );
     });
   }
 
@@ -122,9 +137,7 @@ export class SessionService {
   }
 
   public destroy() {
-    if (this.appChangeSubscription$) {
-      this.appChangeSubscription$.unsubscribe();
-    }
+    this.subscription.unsubscribe();
     this.clear();
   }
 

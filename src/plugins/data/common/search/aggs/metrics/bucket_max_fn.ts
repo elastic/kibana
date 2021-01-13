@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
 export const aggBucketMaxFnName = 'aggBucketMax';
 
@@ -104,7 +103,6 @@ export const aggBucketMax = (): FunctionDefinition => ({
           ...rest,
           customBucket: args.customBucket?.value,
           customMetric: args.customMetric?.value,
-          json: getParsedValue(args, 'json'),
         },
       },
     };
