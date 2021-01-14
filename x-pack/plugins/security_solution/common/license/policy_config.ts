@@ -73,14 +73,6 @@ export const unsetPolicyFeaturesAboveLicenseLevel = (
 ): PolicyConfig => {
   const defaults = factory();
   if (isAtLeast(license, 'platinum')) {
-    // Ransomware options default to on for platinum licenses
-    policy.windows.ransomware.mode = defaults.windows.ransomware.mode;
-    policy.mac.ransomware.mode = defaults.mac.ransomware.mode;
-    policy.windows.popup.ransomware.enabled = defaults.windows.popup.ransomware.enabled;
-    policy.mac.popup.ransomware.enabled = defaults.mac.popup.ransomware.enabled;
-    policy.windows.popup.ransomware.message = defaults.windows.popup.ransomware.message;
-    policy.mac.popup.ransomware.message = defaults.mac.popup.ransomware.message;
-
     return policy;
   }
 
