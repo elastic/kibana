@@ -40,6 +40,8 @@ const OPERATING_SYSTEM_TO_OS_TYPE: Mapping<OperatingSystem, OsType> = {
   [OperatingSystem.WINDOWS]: 'windows',
 };
 
+const POLICY_REFERENCE_PREFIX = 'policy:';
+
 const filterUndefined = <T>(list: Array<T | undefined>): T[] => {
   return list.filter((item: T | undefined): item is T => item !== undefined);
 };
@@ -52,16 +54,16 @@ export const createConditionEntry = <T extends ConditionEntryField>(
 };
 
 export const tagsToEffectScope = (tags: string[]): EffectScope => {
-  const policyReferenceTags = tags.filter((tag) => tag.startsWith('policy:'));
+  const policyReferenceTags = tags.filter((tag) => tag.startsWith(POLICY_REFERENCE_PREFIX));
 
-  if (policyReferenceTags.some((tag) => tag === 'policy:all')) {
+  if (policyReferenceTags.some((tag) => tag === `${POLICY_REFERENCE_PREFIX}all`)) {
     return {
       type: 'global',
     };
   } else {
     return {
       type: 'policy',
-      policies: policyReferenceTags.map((tag) => tag.substr(7)),
+      policies: policyReferenceTags.map((tag) => tag.substr(POLICY_REFERENCE_PREFIX.length)),
     };
   }
 };
@@ -165,9 +167,9 @@ export const createEntryNested = (field: string, entries: NestedEntriesArray): E
 
 export const effectScopeToTags = (effectScope: EffectScope) => {
   if (effectScope.type === 'policy') {
-    return effectScope.policies.map((policy) => `policy:${policy}`);
+    return effectScope.policies.map((policy) => `${POLICY_REFERENCE_PREFIX}${policy}`);
   } else {
-    return ['policy:all'];
+    return [`${POLICY_REFERENCE_PREFIX}all`];
   }
 };
 
