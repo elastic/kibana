@@ -125,7 +125,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 "value": 0.941324615478516,
               },
               "throughput": Object {
-                "value": 75,
+                "value": 2.5,
               },
             }
           `);
