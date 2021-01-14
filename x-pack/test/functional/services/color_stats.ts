@@ -45,7 +45,11 @@ export function getColorStats(
   const colors: string[] = [];
   for (let i = 0; i < imageData.length; i += 4) {
     // uses d3's `rgb` method create a color object, `toString()` returns the hex value
-    colors.push(rgb(imageData[i], imageData[i + 1], imageData[i + 2]).toString());
+    colors.push(
+      rgb(imageData[i], imageData[i + 1], imageData[i + 2])
+        .toString()
+        .toUpperCase()
+    );
   }
 
   const expectedColorStatsMap =
