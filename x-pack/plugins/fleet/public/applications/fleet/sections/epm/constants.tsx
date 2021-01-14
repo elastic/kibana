@@ -30,8 +30,9 @@ export const AssetTitleMap: Record<AssetType, string> = {
   data_stream_ilm_policy: 'Data Stream ILM Policy',
 };
 
-export const ServiceTitleMap: Record<Extract<ServiceName, 'kibana'>, string> = {
+export const ServiceTitleMap: Record<ServiceName, string> = {
   kibana: 'Kibana',
+  elasticsearch: 'Elasticsearch',
 };
 
 export const AssetIcons: Record<KibanaAssetType, IconType> = {
@@ -39,7 +40,7 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   index_pattern: 'indexPatternApp',
   search: 'searchProfilerApp',
   visualization: 'visualizeApp',
-  map: 'mapApp',
+  map: 'emsApp',
 };
 
 export const ServiceIcons: Record<ServiceName, IconType> = {
