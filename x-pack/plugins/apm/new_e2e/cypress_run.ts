@@ -5,15 +5,15 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-import { cypressOpenTests } from './cypress_start';
+import { cypressRunTests } from './cypress_start';
 
-async function openE2ETests({ readConfigFile }: FtrConfigProviderContext) {
+async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
   const cypressConfig = await readConfigFile(require.resolve('./config.ts'));
   return {
     ...cypressConfig.getAll(),
-    testRunner: cypressOpenTests,
+    testRunner: cypressRunTests,
   };
 }
 
 // eslint-disable-next-line import/no-default-export
-export default openE2ETests;
+export default runE2ETests;
