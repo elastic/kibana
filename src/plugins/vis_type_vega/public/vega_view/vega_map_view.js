@@ -21,8 +21,32 @@ import { i18n } from '@kbn/i18n';
 import { vega } from '../lib/vega';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
-import { getEmsTileLayerId, getUISettings } from '../services';
-import { lazyLoadMapsLegacyModules } from '../../../maps_legacy/public';
+import { getMapsLegacyConfig, getUISettings } from '../services';
+import { lazyLoadMapsLegacyModules, TMS_IN_YML_ID } from '../../../maps_legacy/public';
+
+const isUserConfiguredTmsLayer = ({ tilemap }) => Boolean(tilemap.url);
+
+const getMapStyleOptions = async (serviceSettings, mapConfig, isDarkMode) => {
+  const mapsLegacyConfig = getMapsLegacyConfig();
+  const tmsServices = await serviceSettings.getTMSServices();
+  let mapStyle;
+
+  if (isUserConfiguredTmsLayer(mapsLegacyConfig)) {
+    mapStyle = TMS_IN_YML_ID;
+  } else {
+    mapStyle =
+      mapConfig.mapStyle === 'default'
+        ? mapsLegacyConfig.emsTileLayerId.bright
+        : mapConfig.mapStyle;
+  }
+
+  const mapOptions = tmsServices.find((s) => s.id === mapStyle);
+
+  return {
+    ...mapOptions,
+    ...(await serviceSettings.getAttributesForTMSLayer(mapOptions, true, isDarkMode)),
+  };
+};
 
 export class VegaMapView extends VegaBaseView {
   constructor(opts) {
@@ -35,30 +59,15 @@ export class VegaMapView extends VegaBaseView {
     let limitMinZ = 0;
     let limitMaxZ = 25;
 
+    // In some cases, Vega may be initialized twice, e.g. after awaiting...
+    if (!this._$container) return;
+
     if (mapConfig.mapStyle !== false) {
-      const tmsServices = await this._serviceSettings.getTMSServices();
-      // In some cases, Vega may be initialized twice, e.g. after awaiting...
-      if (!this._$container) return;
-      const emsTileLayerId = getEmsTileLayerId();
-      const mapStyle =
-        mapConfig.mapStyle === 'default' ? emsTileLayerId.bright : mapConfig.mapStyle;
       const isDarkMode = getUISettings().get('theme:darkMode');
-      baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
-      baseMapOpts = {
-        ...baseMapOpts,
-        ...(await this._serviceSettings.getAttributesForTMSLayer(baseMapOpts, true, isDarkMode)),
-      };
-      if (!baseMapOpts) {
-        this.onWarn(
-          i18n.translate('visTypeVega.mapView.mapStyleNotFoundWarningMessage', {
-            defaultMessage: '{mapStyleParam} was not found',
-            values: { mapStyleParam: `"mapStyle": ${JSON.stringify(mapStyle)}` },
-          })
-        );
-      } else {
-        limitMinZ = baseMapOpts.minZoom;
-        limitMaxZ = baseMapOpts.maxZoom;
-      }
+      baseMapOpts = await getMapStyleOptions(this._serviceSettings, mapConfig, isDarkMode);
+
+      limitMinZ = baseMapOpts.minZoom;
+      limitMaxZ = baseMapOpts.maxZoom;
     }
 
     const validate = (name, value, dflt, min, max) => {
