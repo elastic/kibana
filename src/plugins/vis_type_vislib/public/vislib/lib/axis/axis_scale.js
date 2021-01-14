@@ -49,8 +49,17 @@ export class AxisScale {
     });
   }
 
-  getTimeDomain(data) {
+  getDomainExtent(data) {
     return [this.minExtent(data), this.maxExtent(data)];
+  }
+
+  getOrdinalDomain(values = []) {
+    if (this.ordered?.interval !== undefined) {
+      const [min, max] = this.getDomainExtent(values);
+      return _.range(min, max + this.ordered.interval, this.ordered.interval);
+    }
+
+    return values;
   }
 
   minExtent(data) {
@@ -149,8 +158,8 @@ export class AxisScale {
 
   getExtents() {
     if (this.axisConfig.get('type') === 'category') {
-      if (this.axisConfig.isTimeDomain()) return this.getTimeDomain(this.values);
-      if (this.axisConfig.isOrdinal()) return this.values;
+      if (this.axisConfig.isTimeDomain()) return this.getDomainExtent(this.values);
+      if (this.axisConfig.isOrdinal()) return this.getOrdinalDomain(this.values);
     }
 
     const min = this.axisConfig.get('scale.min', this.getYMin());
