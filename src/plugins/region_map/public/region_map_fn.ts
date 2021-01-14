@@ -16,50 +16,58 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { convertToGeoJson } from '../../maps_legacy/public';
+
 import { i18n } from '@kbn/i18n';
 
-export const createTileMapFn = () => ({
-  name: 'tilemap',
+import type { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { RegionMapVisConfig } from './region_map_types';
+
+interface Arguments {
+  visConfig: string | null;
+}
+
+export interface RegionMapVisRenderValue {
+  visData: Datatable;
+  visType: 'region_map';
+  visConfig: RegionMapVisConfig;
+}
+
+export type RegionMapExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  'regionmap',
+  Datatable,
+  Arguments,
+  Render<RegionMapVisRenderValue>
+>;
+
+export const createRegionMapFn = (): RegionMapExpressionFunctionDefinition => ({
+  name: 'regionmap',
   type: 'render',
   context: {
     types: ['datatable'],
   },
-  help: i18n.translate('tileMap.function.help', {
-    defaultMessage: 'Tilemap visualization',
+  help: i18n.translate('regionMap.function.help', {
+    defaultMessage: 'Regionmap visualization',
   }),
   args: {
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
+      help: '',
     },
   },
   fn(context, args, handlers) {
-    const visConfig = JSON.parse(args.visConfig);
-    const { geohash, metric, geocentroid } = visConfig.dimensions;
-    const convertedData = convertToGeoJson(context, {
-      geohash,
-      metric,
-      geocentroid,
-    });
-
-    if (geohash && geohash.accessor) {
-      convertedData.meta.geohash = context.columns[geohash.accessor].meta;
-    }
+    const visConfig = args.visConfig && JSON.parse(args.visConfig);
 
     if (handlers?.inspectorAdapters?.tables) {
       handlers.inspectorAdapters.tables.logDatatable('default', context);
     }
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'region_map_vis',
       value: {
-        visData: convertedData,
-        visType: 'tile_map',
+        visData: context,
+        visType: 'region_map',
         visConfig,
-        params: {
-          listenOnChange: true,
-        },
       },
     };
   },
