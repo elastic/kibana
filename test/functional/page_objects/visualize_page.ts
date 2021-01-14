@@ -20,6 +20,13 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 import { VisualizeConstants } from '../../../src/plugins/visualize/public/application/visualize_constants';
 
+interface VisualizeSaveModalArgs {
+  saveAsNew?: boolean;
+  redirectToOrigin?: boolean;
+  addToDashboard?: boolean;
+  dashboardId?: string;
+}
+
 export function VisualizePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -348,7 +355,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async saveVisualization(
       vizName: string,
-      { saveAsNew = false, redirectToOrigin = false } = {}
+      { saveAsNew, redirectToOrigin, addToDashboard, dashboardId }: VisualizeSaveModalArgs = {}
     ) {
       await this.ensureSavePanelOpen();
       await testSubjects.setValue('savedObjectTitle', vizName);
@@ -366,6 +373,22 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
         log.debug('redirect to origin checkbox exists. Setting its state to', state);
         await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
       }
+
+      const dashboardSelectorExists = await testSubjects.exists('add-to-dashboard-options');
+      if (dashboardSelectorExists) {
+        const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
+        let optionSelector = 'add-to-library-option';
+        if (addToDashboard) {
+          optionSelector = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
+        }
+        log.debug('dashboard selector exists, choosing option:', optionSelector);
+        const label = await dashboardSelector.findByCssSelector(`label[for="${optionSelector}"]`);
+        await label.click();
+
+        if (dashboardId) {
+          // TODO - selecting an existing dashboard
+        }
+      }
       log.debug('Click Save Visualization button');
 
       await testSubjects.click('confirmSaveSavedObjectButton');
@@ -381,9 +404,14 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async saveVisualizationExpectSuccess(
       vizName: string,
-      { saveAsNew = false, redirectToOrigin = false } = {}
+      { saveAsNew, redirectToOrigin, addToDashboard, dashboardId }: VisualizeSaveModalArgs = {}
     ) {
-      const saveMessage = await this.saveVisualization(vizName, { saveAsNew, redirectToOrigin });
+      const saveMessage = await this.saveVisualization(vizName, {
+        saveAsNew,
+        redirectToOrigin,
+        addToDashboard,
+        dashboardId,
+      });
       if (!saveMessage) {
         throw new Error(
           `Expected saveVisualization to respond with the saveMessage from the toast, got ${saveMessage}`
