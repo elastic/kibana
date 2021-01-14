@@ -12,9 +12,12 @@ import { useActions, useValues } from 'kea';
 
 import { DOCS_PREFIX } from '../../../routes';
 
-import { LogRetentionLogic } from './log_retention_logic';
-import { AnalyticsLogRetentionMessage, ApiLogRetentionMessage } from './messaging';
-import { LogRetentionOptions } from './types';
+import {
+  LogRetentionLogic,
+  LogRetentionOptions,
+  AnalyticsLogRetentionMessage,
+  ApiLogRetentionMessage,
+} from '../../log_retention';
 
 export const LogRetentionPanel: React.FC = () => {
   const { toggleLogRetention, fetchLogRetention } = useActions(LogRetentionLogic);
