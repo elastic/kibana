@@ -92,7 +92,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           <SparkPlot
             color="euiColorVis1"
             series={latency.timeseries}
-            valueLabel={asMillisecondDuration(latency?.value)}
+            valueLabel={asMillisecondDuration(latency.value)}
           />
         );
       },

@@ -201,7 +201,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
             color="euiColorVis1"
             compact
             series={latency.timeseries ?? undefined}
-            valueLabel={asMillisecondDuration(latency?.value)}
+            valueLabel={asMillisecondDuration(latency.value)}
           />
         );
       },
