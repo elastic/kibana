@@ -146,6 +146,7 @@ kibana_vars=(
     xpack.actions.proxyHeaders
     xpack.actions.proxyRejectUnauthorizedCertificates
     xpack.actions.rejectUnauthorized
+    xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
     xpack.apm.enabled
