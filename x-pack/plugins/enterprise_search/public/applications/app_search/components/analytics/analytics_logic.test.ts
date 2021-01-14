@@ -122,21 +122,8 @@ describe('AnalyticsLogic', () => {
         expect(AnalyticsLogic.values).toEqual({
           ...DEFAULT_VALUES,
           dataLoading: false,
+          analyticsUnavailable: false,
           // TODO: more state will get set here in future PRs
-        });
-      });
-
-      it('should set analyticsUnavailable based on response', () => {
-        mount();
-        AnalyticsLogic.actions.onAnalyticsDataLoad({
-          ...MOCK_ANALYTICS_RESPONSE,
-          analyticsUnavailable: true,
-        });
-
-        expect(AnalyticsLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          dataLoading: false,
-          analyticsUnavailable: true,
         });
       });
     });
@@ -149,21 +136,8 @@ describe('AnalyticsLogic', () => {
         expect(AnalyticsLogic.values).toEqual({
           ...DEFAULT_VALUES,
           dataLoading: false,
+          analyticsUnavailable: false,
           // TODO: more state will get set here in future PRs
-        });
-      });
-
-      it('should set analyticsUnavailable based on response', () => {
-        mount();
-        AnalyticsLogic.actions.onQueryDataLoad({
-          ...MOCK_QUERY_RESPONSE,
-          analyticsUnavailable: true,
-        });
-
-        expect(AnalyticsLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          dataLoading: false,
-          analyticsUnavailable: true,
         });
       });
     });

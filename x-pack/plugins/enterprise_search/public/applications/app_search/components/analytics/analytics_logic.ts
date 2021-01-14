@@ -50,8 +50,8 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
       false,
       {
         onAnalyticsUnavailable: () => true,
-        onAnalyticsDataLoad: (_, { analyticsUnavailable }) => analyticsUnavailable,
-        onQueryDataLoad: (_, { analyticsUnavailable }) => analyticsUnavailable,
+        onAnalyticsDataLoad: () => false,
+        onQueryDataLoad: () => false,
       },
     ],
   }),
