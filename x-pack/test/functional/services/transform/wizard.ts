@@ -5,28 +5,9 @@
  */
 import expect from '@kbn/expect';
 
-import { rgb, nest } from 'd3';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-function getColorStats(iD: number[]) {
-  const pixels: number[][] = [];
-  for (let i = 0; i < iD.length; i += 4) {
-    pixels.push([iD[i], iD[i + 1], iD[i + 2]]);
-  }
-
-  const pixelsLength = pixels.length;
-
-  const stats = nest<number[]>()
-    .key((d) => rgb(d[0], d[1], d[2]).toString().toUpperCase())
-    .entries(pixels);
-
-  return stats
-    .map((s) => ({
-      key: s.key,
-      value: Math.round((s.values.length / pixelsLength) * 10) * 10,
-    }))
-    .filter((s) => s.value > 0);
-}
+import { getColorStats } from '../color_stats';
 
 export function TransformWizardProvider({ getService }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
@@ -221,19 +202,23 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
           if (expected.chartAvailable) {
             await testSubjects.existOrFail(`mlDataGridChart-${index}-histogram`);
 
-            const chartWrapper = await testSubjects.find(`mlDataGridChart-${index}-histogram`);
-            const imageData = await chartWrapper.getImageData(
-              `[data-test-subj="mlDataGridChart-${index}-histogram"] .echCanvasRenderer`
-            );
+            if (expected.colorStats !== undefined) {
+              const chartWrapper = await testSubjects.find(`mlDataGridChart-${index}-histogram`);
+              const imageData = await chartWrapper.getImageData(
+                `[data-test-subj="mlDataGridChart-${index}-histogram"] .echCanvasRenderer`
+              );
 
-            const actualColorStats = getColorStats(imageData);
+              const actualColorStats = getColorStats(imageData, expected.colorStats);
 
-            expect(actualColorStats).to.eql(
-              expected.colorStats,
-              `Color stats for column '${expected.id}' should be '${JSON.stringify(
-                expected.colorStats
-              )}' (got '${JSON.stringify(actualColorStats)}')`
-            );
+              expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
+                true,
+                `Color stats for column '${
+                  expected.id
+                }' should be within tolerance. Expected: '${JSON.stringify(
+                  expected.colorStats
+                )}' (got '${JSON.stringify(actualColorStats)}')`
+              );
+            }
           } else {
             await testSubjects.missingOrFail(`mlDataGridChart-${index}-histogram`);
           }

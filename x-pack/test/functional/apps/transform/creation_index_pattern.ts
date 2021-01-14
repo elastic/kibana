@@ -176,8 +176,8 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'customer_gender',
               legend: '2 categories',
               colorStats: [
-                { key: '#000000', value: 10 },
-                { key: '#54B399', value: 80 },
+                { key: '#000000', value: 15 },
+                { key: '#54B399', value: 85 },
               ],
             },
             {
@@ -185,7 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'customer_id',
               legend: 'top 20 of 46 categories',
               colorStats: [
-                { key: '#54B399', value: 40 },
+                { key: '#54B399', value: 35 },
                 { key: '#000000', value: 60 },
               ],
             },
@@ -205,7 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
               legend: '7 categories',
               colorStats: [
                 { key: '#000000', value: 20 },
-                { key: '#54B399', value: 80 },
+                { key: '#54B399', value: 75 },
               ],
             },
           ],
