@@ -15,6 +15,11 @@
   .visLegend__toggle {
     border-bottom-right-radius: 0;
     border-top-left-radius: 0;
+    opacity: 0; /* 1 */
+
+    &:focus {
+      opacity: 1; /* 2 */
+    }
   }
 }
 
@@ -30,14 +35,6 @@
 .embPanel:hover {
   .visLegend__toggle {
     opacity: 1;
-  }
-}
-
-.embPanel .visLegend__toggle {
-  opacity: 0; /* 1 */
-
-  &:focus {
-    opacity: 1; /* 2 */
   }
 }
 

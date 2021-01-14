@@ -65,14 +65,9 @@
 
   .metric-value {
     opacity: 1;
-    fill: #32A7C2;
-  }
-
-  .metric-value {
-    opacity: 1;
     fill: transparent;
     stroke: #32A7C2;
-    stroke-width: 0px;
+    stroke-width: 0;
   }
 
   .anomaly-marker {

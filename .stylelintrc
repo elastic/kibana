@@ -1,6 +1,47 @@
 plugins:
   - stylelint-scss
 rules:
+  color-no-invalid-hex: true
+  function-calc-no-invalid: true
+  string-no-newline: true
+  unit-no-unknown: true
+  property-no-unknown:
+    - true
+    # Used in css modules
+    - ignoreProperties:
+      - composes
+  block-no-empty: true
+  selector-pseudo-class-no-unknown:
+    - true
+    # Used in css modules
+    - ignorePseudoClasses:
+      - local
+      - global
+  selector-pseudo-element-no-unknown: true
+  media-feature-name-no-unknown: true
+  at-rule-no-unknown:
+    - true
+    # Sass related mixins
+    - ignoreAtRules:
+      - include
+      - mixin
+      - if
+      - else
+      - each
+      - extend
+      - function
+      - return
+      - for
+  comment-no-empty: true
+  no-duplicate-at-import-rules: true
+  no-duplicate-selectors: true
+  no-extra-semicolons: true
+  alpha-value-notation: number
+  color-named: never
+  length-zero-no-unit: true
+  no-eol-whitespace: true
+  max-empty-lines: 1
+  # no-descending-specificity: true
   number-leading-zero: never
   color-hex-case: upper
   string-quotes: single
