@@ -2,6 +2,7 @@ package projects
 
 import jetbrains.buildServer.configs.kotlin.v2019_2.AbsoluteId
 import jetbrains.buildServer.configs.kotlin.v2019_2.DslContext
+import makeSafeId
 import org.junit.Assert.*
 import org.junit.Test
 

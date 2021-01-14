@@ -6,7 +6,6 @@
 
 import { SCALING_TYPES, SOURCE_TYPES } from '../../../../common/constants';
 import { BlendedVectorLayer } from './blended_vector_layer';
-// @ts-expect-error
 import { ESSearchSource } from '../../sources/es_search_source';
 import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
 
