@@ -21,7 +21,7 @@ import { Vis } from '../../visualizations/public';
 import { buildExpression } from '../../expressions/public';
 
 import { PieVisParams } from './types';
-import { samplePieVis } from '../../vis_type_vislib/public/sample_vis.test.mocks';
+import { samplePieVis } from './sample_vis.test.mocks';
 import { toExpressionAst } from './to_ast';
 
 jest.mock('../../expressions/public', () => ({
