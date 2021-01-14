@@ -77,8 +77,8 @@ async function executor(
     connectorMappingsService,
     userActionService,
     alertsService,
-    // TODO: When case connector is enabled we should figure out how to pass the context.
-    context: {} as RequestHandlerContext,
+    // TODO: pass in the index
+    index: '.siem-index-todo',
   });
 
   if (!supportedSubActions.includes(subAction)) {
@@ -89,7 +89,8 @@ async function executor(
 
   if (subAction === 'create') {
     data = await caseClient.create({
-      theCase: { ...(subActionParams as CasePostRequest), type: CaseType.individual },
+      // TODO: is it possible for the action framework to create an individual case that is not associated with sub cases?
+      theCase: { ...(subActionParams as CasePostRequest), type: CaseType.parent },
     });
   }
 

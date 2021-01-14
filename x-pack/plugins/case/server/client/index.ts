@@ -14,67 +14,13 @@ import { updateAlertsStatus } from './alerts/update_status';
 
 export { CaseClient } from './types';
 
-export const createCaseClient = ({
-  caseConfigureService,
-  caseService,
-  connectorMappingsService,
-  request,
-  savedObjectsClient,
-  userActionService,
-  alertsService,
-  context,
-}: CaseClientFactoryArguments): CaseClient => {
+export const createCaseClient = (clientArgs: CaseClientFactoryArguments): CaseClient => {
   return {
-    create: create({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      context,
-      request,
-      savedObjectsClient,
-      userActionService,
-    }),
-    update: update({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      context,
-      request,
-      savedObjectsClient,
-      userActionService,
-    }),
-    addComment: addComment({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      context,
-      request,
-      savedObjectsClient,
-      userActionService,
-    }),
+    create: create(clientArgs),
+    update: update(clientArgs),
+    addComment: addComment(clientArgs),
     getFields: getFields(),
-    getMappings: getMappings({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      context,
-      request,
-      savedObjectsClient,
-      userActionService,
-    }),
-    updateAlertsStatus: updateAlertsStatus({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      context,
-      request,
-      savedObjectsClient,
-      userActionService,
-    }),
+    getMappings: getMappings(clientArgs),
+    updateAlertsStatus: updateAlertsStatus(clientArgs),
   };
 };

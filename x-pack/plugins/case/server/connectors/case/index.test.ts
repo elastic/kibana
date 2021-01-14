@@ -9,7 +9,13 @@ import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../../actions/server/mocks';
 import { validateParams } from '../../../../actions/server/lib';
-import { ConnectorTypes, CommentType, CaseStatuses } from '../../../common/api';
+import {
+  ConnectorTypes,
+  CommentType,
+  CaseStatuses,
+  CaseType,
+  AssociationType,
+} from '../../../common/api';
 import {
   connectorMappingsServiceMock,
   createCaseServiceMock,
@@ -678,9 +684,7 @@ describe('case connector', () => {
         expect(validateParams(caseActionType, params)).toEqual(params);
       });
 
-      // TODO: Enable when the creation of comments of type alert is supported
-      // https://github.com/elastic/kibana/issues/85750
-      it.skip('succeeds when type is an alert', () => {
+      it('succeeds when type is an alert', () => {
         const params: Record<string, unknown> = {
           subAction: 'addComment',
           subActionParams: {
@@ -699,26 +703,6 @@ describe('case connector', () => {
       it('fails when params is not valid', () => {
         const params: Record<string, unknown> = {
           subAction: 'addComment',
-        };
-
-        expect(() => {
-          validateParams(caseActionType, params);
-        }).toThrow();
-      });
-
-      // TODO: Remove it when the creation of comments of type alert is supported
-      // https://github.com/elastic/kibana/issues/85750
-      it('fails when type is an alert', () => {
-        const params: Record<string, unknown> = {
-          subAction: 'addComment',
-          subActionParams: {
-            caseId: 'case-id',
-            comment: {
-              type: CommentType.alert,
-              alertId: 'test-id',
-              index: 'test-index',
-            },
-          },
         };
 
         expect(() => {
@@ -748,9 +732,7 @@ describe('case connector', () => {
         });
       });
 
-      // TODO: Enable when the creation of comments of type alert is supported
-      // https://github.com/elastic/kibana/issues/85750
-      it.skip('fails when missing attributes: type alert', () => {
+      it('fails when missing attributes: type alert', () => {
         const allParams = {
           type: CommentType.alert,
           comment: 'a comment',
@@ -792,9 +774,7 @@ describe('case connector', () => {
         });
       });
 
-      // TODO: Enable when the creation of comments of type alert is supported
-      // https://github.com/elastic/kibana/issues/85750
-      it.skip('fails when excess attributes are provided: type alert', () => {
+      it('fails when excess attributes are provided: type alert', () => {
         ['comment'].forEach((attribute) => {
           const params: Record<string, unknown> = {
             subAction: 'addComment',
@@ -857,6 +837,7 @@ describe('case connector', () => {
           },
           title: 'Case from case connector!!',
           tags: ['case', 'connector'],
+          type: CaseType.parent,
           description: 'Yo fields!!',
           external_service: null,
           status: CaseStatuses.open,
@@ -917,6 +898,7 @@ describe('case connector', () => {
                 parent: null,
               },
             },
+            type: CaseType.parent,
           },
         });
       });
@@ -952,6 +934,7 @@ describe('case connector', () => {
             tags: ['defacement'],
             title: 'Update title',
             totalComment: 0,
+            type: CaseType.parent,
             updated_at: '2019-11-25T21:54:48.952Z',
             updated_by: {
               email: 'd00d@awesome.com',
@@ -1024,11 +1007,13 @@ describe('case connector', () => {
           title: 'Super Bad Security Issue',
           status: CaseStatuses.open,
           tags: ['defacement'],
+          type: CaseType.parent,
           updated_at: null,
           updated_by: null,
           version: 'WzksMV0=',
           comments: [
             {
+              associationType: AssociationType.case,
               comment: 'a comment',
               type: CommentType.user as const,
               created_at: '2020-10-23T21:54:48.952Z',

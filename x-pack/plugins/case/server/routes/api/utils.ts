@@ -17,7 +17,6 @@ import {
 } from 'kibana/server';
 
 import {
-  CasePostRequest,
   CaseResponse,
   CasesFindResponse,
   CommentResponse,
@@ -35,6 +34,7 @@ import {
   throwErrors,
   CaseStatuses,
   CaseClientPostRequest,
+  AssociationType,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
@@ -69,6 +69,7 @@ export const transformNewCase = ({
 });
 
 type NewCommentArgs = CommentRequest & {
+  associationType: AssociationType;
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
@@ -76,6 +77,7 @@ type NewCommentArgs = CommentRequest & {
 };
 
 export const transformNewComment = ({
+  associationType,
   createdDate,
   email,
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -83,6 +85,7 @@ export const transformNewComment = ({
   username,
   ...comment
 }: NewCommentArgs): CommentAttributes => ({
+  associationType,
   ...comment,
   created_at: createdDate,
   created_by: { email, full_name, username },

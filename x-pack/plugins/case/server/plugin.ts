@@ -15,6 +15,7 @@ import {
 } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
+import Boom from '@hapi/boom';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as ActionsPluginSetup } from '../../actions/server';
 import { APP_ID } from '../common/constants';
@@ -45,6 +46,21 @@ import { registerConnectors } from './connectors';
 
 function createConfig$(context: PluginInitializerContext) {
   return context.config.create<ConfigType>().pipe(map((config) => config));
+}
+
+type PartialExceptFor<T, K extends keyof T> = Partial<T> & Pick<T, K>;
+
+/**
+ * TODO: This is a temporary solution until we can figure out how to get access to
+ * the signals index while not using the context.
+ */
+function getSignalsIndex(context?: PartialExceptFor<RequestHandlerContext, 'core'>) {
+  const securitySolutionClient = context?.securitySolution?.getAppClient();
+  if (securitySolutionClient == null) {
+    throw Boom.notFound('securitySolutionClient client have not been found');
+  }
+
+  return securitySolutionClient.getSignalsIndex();
 }
 
 export interface PluginsSetup {
@@ -131,6 +147,8 @@ export class CasePlugin {
       context: RequestHandlerContext,
       request: KibanaRequest
     ) => {
+      const index = getSignalsIndex(context);
+
       return createCaseClient({
         savedObjectsClient: core.savedObjects.getScopedClient(request),
         request,
@@ -139,7 +157,7 @@ export class CasePlugin {
         connectorMappingsService: this.connectorMappingsService!,
         userActionService: this.userActionService!,
         alertsService: this.alertsService!,
-        context,
+        index,
       });
     };
 
@@ -170,6 +188,7 @@ export class CasePlugin {
   }): IContextProvider<RequestHandler<unknown, unknown, unknown>, typeof APP_ID> => {
     return async (context, request) => {
       const [{ savedObjects }] = await core.getStartServices();
+      const index = getSignalsIndex(context);
       return {
         getCaseClient: () => {
           return createCaseClient({
@@ -180,7 +199,7 @@ export class CasePlugin {
             userActionService,
             alertsService,
             request,
-            context,
+            index,
           });
         },
       };

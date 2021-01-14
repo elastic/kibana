@@ -77,6 +77,7 @@ describe('create', () => {
 
       expect(
         caseClient.services.userActionService.postUserActions.mock.calls[0][0].actions
+        // using a snapshot here so we don't have to update the text field manually each time it changes
       ).toMatchSnapshot();
     });
 

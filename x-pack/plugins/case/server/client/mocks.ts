@@ -67,23 +67,6 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
 
   const alertsService = { initialize: jest.fn(), updateAlertsStatus: jest.fn() };
 
-  const context = {
-    core: {
-      savedObjects: {
-        client: savedObjectsClient,
-      },
-    },
-    actions: { getActionsClient: () => actionsMock },
-    case: {
-      getCaseClient: () => caseClient,
-    },
-    securitySolution: {
-      getAppClient: () => ({
-        getSignalsIndex: () => '.siem-signals',
-      }),
-    },
-  };
-
   const caseClient = createCaseClient({
     savedObjectsClient,
     request,
@@ -92,7 +75,8 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     connectorMappingsService,
     userActionService,
     alertsService,
-    context: (omit(omitFromContext, context) as unknown) as RequestHandlerContext,
+    // TODO: refactor this to a variable across the tests
+    index: '.siem-signals',
   });
   return {
     client: caseClient,

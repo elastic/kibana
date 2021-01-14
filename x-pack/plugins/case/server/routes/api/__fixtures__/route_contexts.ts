@@ -44,11 +44,12 @@ export const createRouteContext = async (client: any, badAuth = false) => {
     case: {
       getCaseClient: () => caseClient,
     },
-    securitySolution: {
+    // TODO: remove
+    /* securitySolution: {
       getAppClient: () => ({
         getSignalsIndex: () => '.siem-signals',
       }),
-    },
+    },*/
   } as unknown) as RequestHandlerContext;
 
   const connectorMappingsService = await connectorMappingsServicePlugin.setup();
@@ -63,7 +64,8 @@ export const createRouteContext = async (client: any, badAuth = false) => {
       getUserActions: jest.fn(),
     },
     alertsService,
-    context,
+    // TODO: move this to a variable shared across tests
+    index: '.siem-signals',
   });
 
   return context;

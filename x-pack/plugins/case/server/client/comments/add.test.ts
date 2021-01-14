@@ -41,22 +41,7 @@ describe('addComment', () => {
 
       expect(res.id).toEqual('mock-id-1');
       expect(res.totalComment).toEqual(res.comments!.length);
-      expect(res.comments![res.comments!.length - 1]).toEqual({
-        comment: 'Wow, good luck catching that bad meanie!',
-        type: CommentType.user,
-        created_at: '2020-10-23T21:54:48.952Z',
-        created_by: {
-          email: 'd00d@awesome.com',
-          full_name: 'Awesome D00d',
-          username: 'awesome',
-        },
-        id: 'mock-comment',
-        pushed_at: null,
-        pushed_by: null,
-        updated_at: null,
-        updated_by: null,
-        version: 'WzksMV0=',
-      });
+      expect(res.comments![res.comments!.length - 1]).toMatchSnapshot();
     });
 
     test('it adds a comment of type alert correctly', async () => {
@@ -78,23 +63,7 @@ describe('addComment', () => {
 
       expect(res.id).toEqual('mock-id-1');
       expect(res.totalComment).toEqual(res.comments!.length);
-      expect(res.comments![res.comments!.length - 1]).toEqual({
-        type: CommentType.alert,
-        alertId: 'test-id',
-        index: 'test-index',
-        created_at: '2020-10-23T21:54:48.952Z',
-        created_by: {
-          email: 'd00d@awesome.com',
-          full_name: 'Awesome D00d',
-          username: 'awesome',
-        },
-        id: 'mock-comment',
-        pushed_at: null,
-        pushed_by: null,
-        updated_at: null,
-        updated_by: null,
-        version: 'WzksMV0=',
-      });
+      expect(res.comments![res.comments!.length - 1]).toMatchSnapshot();
     });
 
     test('it updates the case correctly after adding a comment', async () => {
@@ -189,22 +158,7 @@ describe('addComment', () => {
       });
 
       expect(res.id).toEqual('mock-id-1');
-      expect(res.comments![res.comments!.length - 1]).toEqual({
-        comment: 'Wow, good luck catching that bad meanie!',
-        type: CommentType.user,
-        created_at: '2020-10-23T21:54:48.952Z',
-        created_by: {
-          email: null,
-          full_name: null,
-          username: null,
-        },
-        id: 'mock-comment',
-        pushed_at: null,
-        pushed_by: null,
-        updated_at: null,
-        updated_by: null,
-        version: 'WzksMV0=',
-      });
+      expect(res.comments![res.comments!.length - 1]).toMatchSnapshot();
     });
 
     test('it update the status of the alert if the case is synced with alerts', async () => {

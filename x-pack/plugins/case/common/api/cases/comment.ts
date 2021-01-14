@@ -8,7 +8,22 @@ import * as rt from 'io-ts';
 
 import { UserRT } from '../user';
 
+/**
+ * this is used to differentiate between an alert attached to a top-level case and a group of alerts that should only
+ * be attached to a sub case. The reason we need this is because an alert group comment will have references to both a case and
+ * sub case when it is created. For us to be able to filter out alert groups in a top-level case we need a field to
+ * use as a filter.
+ */
+export enum AssociationType {
+  case = 'case',
+  subCase = 'sub_case',
+}
+
 export const CommentAttributesBasicRt = rt.type({
+  associationType: rt.union([
+    rt.literal(AssociationType.case),
+    rt.literal(AssociationType.subCase),
+  ]),
   created_at: rt.string,
   created_by: UserRT,
   pushed_at: rt.union([rt.string, rt.null]),
@@ -17,14 +32,19 @@ export const CommentAttributesBasicRt = rt.type({
   updated_by: rt.union([UserRT, rt.null]),
 });
 
+export enum CommentType {
+  user = 'user',
+  alert = 'alert',
+}
+
 export const ContextTypeUserRt = rt.type({
   comment: rt.string,
-  type: rt.literal('user'),
+  type: rt.literal(CommentType.user),
 });
 
 export const ContextTypeAlertRt = rt.type({
-  type: rt.literal('alert'),
-  alertId: rt.string,
+  type: rt.literal(CommentType.alert),
+  alertId: rt.union([rt.array(rt.string), rt.string]),
   index: rt.string,
 });
 
@@ -72,11 +92,6 @@ export const CommentsResponseRt = rt.type({
   per_page: rt.number,
   total: rt.number,
 });
-
-export enum CommentType {
-  user = 'user',
-  alert = 'alert',
-}
 
 export const AllCommentsResponseRt = rt.array(CommentResponseRt);
 

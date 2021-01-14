@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, SavedObjectsClientContract, RequestHandlerContext } from 'kibana/server';
+import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { ActionsClient } from '../../../actions/server';
 import {
   CaseClientPostRequest,
@@ -43,8 +43,6 @@ export interface CaseClientUpdateAlertsStatus {
   status: CaseStatuses;
 }
 
-type PartialExceptFor<T, K extends keyof T> = Partial<T> & Pick<T, K>;
-
 export interface CaseClientFactoryArguments {
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
@@ -53,7 +51,7 @@ export interface CaseClientFactoryArguments {
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
-  context?: PartialExceptFor<RequestHandlerContext, 'core'>;
+  index: string;
 }
 
 export interface ConfigureFields {

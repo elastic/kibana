@@ -18,6 +18,7 @@ import {
   CaseResponse,
   CommentType,
   CaseStatuses,
+  AssociationType,
 } from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
@@ -46,6 +47,15 @@ export const addComment = ({
     caseId,
   });
 
+  /**
+   * TODO: check if myCase is a 'case' or a 'subCase'
+   * if case then the association type should be 'case'
+   * if subCase then the association should be 'subCase'
+   *
+   * Alternatively we could not save both references...need to figure out what the tradeoff is
+   */
+  const associationType = AssociationType.case;
+
   // An alert cannot be attach to a closed case.
   if (query.type === CommentType.alert && myCase.attributes.status === CaseStatuses.closed) {
     throw Boom.badRequest('Alert cannot be attached to a closed case');
@@ -59,6 +69,7 @@ export const addComment = ({
     caseService.postNewComment({
       client: savedObjectsClient,
       attributes: transformNewComment({
+        associationType,
         createdDate,
         ...query,
         username,
@@ -86,8 +97,11 @@ export const addComment = ({
 
   // If the case is synced with alerts the newly attached alert must match the status of the case.
   if (newComment.attributes.type === CommentType.alert && myCase.attributes.settings.syncAlerts) {
+    const ids = Array.isArray(newComment.attributes.alertId)
+      ? newComment.attributes.alertId
+      : [newComment.attributes.alertId];
     caseClient.updateAlertsStatus({
-      ids: [newComment.attributes.alertId],
+      ids,
       status: myCase.attributes.status,
     });
   }

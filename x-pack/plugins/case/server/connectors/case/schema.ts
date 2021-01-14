@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
+import { CommentType } from '../../../common/api';
 import { validateConnector } from './validators';
 
 // Reserved for future implementation
 export const CaseConfigurationSchema = schema.object({});
 
 const ContextTypeUserSchema = schema.object({
-  type: schema.literal('user'),
+  type: schema.literal(CommentType.user),
   comment: schema.string(),
 });
 
 /**
+ * TODO: remove
  * ContextTypeAlertSchema has been deleted.
  * Comments of type alert need the siem signal index.
  * Case connector is not being passed the context which contains the
@@ -25,16 +27,18 @@ const ContextTypeUserSchema = schema.object({
  *
  * The schema:
  *
- * const ContextTypeAlertSchema = schema.object({
- *  type: schema.literal('alert'),
- *  alertId: schema.string(),
- *  index: schema.string(),
- * });
  *
  * Issue: https://github.com/elastic/kibana/issues/85750
  *  */
 
-export const CommentSchema = schema.oneOf([ContextTypeUserSchema]);
+const ContextTypeAlertSchema = schema.object({
+  type: schema.literal(CommentType.alert),
+  // allowing either an array or a single value to preserve the previous API of attaching a single alert ID
+  alertId: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+  index: schema.string(),
+});
+
+export const CommentSchema = schema.oneOf([ContextTypeUserSchema, ContextTypeAlertSchema]);
 
 const JiraFieldsSchema = schema.object({
   issueType: schema.string(),
