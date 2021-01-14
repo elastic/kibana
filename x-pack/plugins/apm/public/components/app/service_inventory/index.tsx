@@ -27,6 +27,7 @@ import { NoServicesMessage } from './no_services_message';
 import { ServiceList } from './ServiceList';
 import { MLCallout } from './ServiceList/MLCallout';
 import { useAnomalyDetectionJobsFetcher } from './use_anomaly_detection_jobs_fetcher';
+import { getUpgradeAssistantHref } from '../../shared/Links/kibana';
 
 const initialData = {
   items: [],
@@ -70,12 +71,7 @@ function useServicesFetcher() {
                 "You're running Elastic Stack 7.0+ and we've detected incompatible data from a previous 6.x version. If you want to view this data in APM, you should migrate it. See more in ",
             })}
 
-            <EuiLink
-              href={url.format({
-                pathname: core.http.basePath.prepend('/app/kibana'),
-                hash: '/management/stack/upgrade_assistant',
-              })}
-            >
+            <EuiLink href={getUpgradeAssistantHref(core.http.basePath)}>
               {i18n.translate(
                 'xpack.apm.serviceInventory.upgradeAssistantLinkText',
                 {
