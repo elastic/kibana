@@ -9,13 +9,13 @@ import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../../plugin';
 
 const querySchema = {
-  start: schema.maybe(schema.string({ minLength: 10, maxLength: 10 })), // Date string, format 'YYYY-MM-DD'
-  end: schema.maybe(schema.string({ minLength: 10, maxLength: 10 })), // Date string, format 'YYYY-MM-DD'
+  start: schema.maybe(schema.string()), // Date string, expected format 'YYYY-MM-DD'
+  end: schema.maybe(schema.string()), // Date string, expected format 'YYYY-MM-DD'
   tag: schema.maybe(schema.string()),
 };
 const queriesSchema = {
   ...querySchema,
-  size: schema.maybe(schema.number({ max: 20 })),
+  size: schema.maybe(schema.number()),
 };
 
 export function registerAnalyticsRoutes({

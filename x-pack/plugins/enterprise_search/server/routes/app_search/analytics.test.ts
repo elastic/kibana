@@ -54,18 +54,13 @@ describe('analytics routes', () => {
         mockRouter.shouldValidate(request);
       });
 
-      it('incorrect start/end date strings', () => {
+      it('incorrect types', () => {
         const request = {
           query: {
-            start: '01/01/70',
-            end: 'January 1st 1970',
+            start: 100,
+            size: '100',
           },
         };
-        mockRouter.shouldThrow(request);
-      });
-
-      it('large sizes', () => {
-        const request = { query: { size: 100 } };
         mockRouter.shouldThrow(request);
       });
     });
@@ -115,11 +110,11 @@ describe('analytics routes', () => {
         mockRouter.shouldValidate(request);
       });
 
-      it('incorrect start/end date strings', () => {
+      it('incorrect types', () => {
         const request = {
           query: {
-            start: '01/01/70',
-            end: 'January 1st 1970',
+            start: 100,
+            tag: false,
           },
         };
         mockRouter.shouldThrow(request);
