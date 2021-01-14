@@ -15,7 +15,12 @@ interface Props {
 
 export const CustomizationCallout: React.FC<Props> = ({ onClick }) => {
   return (
-    <EuiFlexGroup direction="column" alignItems="center" gutterSize="none">
+    <EuiFlexGroup
+      direction="column"
+      className="customizationCallout"
+      alignItems="center"
+      gutterSize="none"
+    >
       <EuiIcon type="iInCircle" color="primary" size="xxl" />
       <EuiSpacer />
       <EuiText size="s" textAlign="center">
