@@ -50,7 +50,12 @@ export function getResponsePayloadBytes(response: Request['response']): number |
       return JSON.stringify(response.source).length;
     } else if (response.headers['content-length']) {
       const contentLength = response.headers['content-length'];
-      return parseInt(Array.isArray(contentLength) ? String(contentLength) : contentLength, 10);
+      const val = parseInt(
+        // hapi response headers can be `string | string[]`, so we need to handle both cases
+        Array.isArray(contentLength) ? String(contentLength) : contentLength,
+        10
+      );
+      return !isNaN(val) ? val : undefined;
     }
   } catch (e) {
     // We intentionally swallow any errors as this information is
