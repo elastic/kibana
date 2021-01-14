@@ -5,17 +5,25 @@
  */
 
 import { UserConfiguredActionConnector } from '../../../../types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/servicenow/types';
+import {
+  ExecutorSubActionPushParamsIM,
+  ExecutorSubActionPushParamsSIR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../actions/server/builtin_action_types/servicenow/types';
 
 export type ServiceNowActionConnector = UserConfiguredActionConnector<
   ServiceNowConfig,
   ServiceNowSecrets
 >;
 
-export interface ServiceNowActionParams {
+export interface ServiceNowIMActionParams {
   subAction: string;
-  subActionParams: ExecutorSubActionPushParams;
+  subActionParams: ExecutorSubActionPushParamsIM;
+}
+
+export interface ServiceNowSIRActionParams {
+  subAction: string;
+  subActionParams: ExecutorSubActionPushParamsSIR;
 }
 
 export interface ServiceNowConfig {

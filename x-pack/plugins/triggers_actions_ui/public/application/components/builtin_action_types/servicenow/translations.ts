@@ -13,10 +13,24 @@ export const SERVICENOW_DESC = i18n.translate(
   }
 );
 
+export const SERVICENOW_SIR_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.selectMessageText',
+  {
+    defaultMessage: 'Create an incident in ServiceNow SIR.',
+  }
+);
+
 export const SERVICENOW_TITLE = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.actionTypeTitle',
   {
     defaultMessage: 'ServiceNow',
+  }
+);
+
+export const SERVICENOW_SIR_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.actionTypeTitle',
+  {
+    defaultMessage: 'ServiceNow SIR',
   }
 );
 
@@ -98,65 +112,65 @@ export const PASSWORD_REQUIRED = i18n.translate(
   }
 );
 
-export const API_TOKEN_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiTokenTextFieldLabel',
+export const TITLE_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredShortDescTextField',
   {
-    defaultMessage: 'Api token',
+    defaultMessage: 'Short description is required.',
   }
 );
 
-export const API_TOKEN_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredApiTokenTextField',
+export const SOURCE_IP_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.sourceIPTitle',
   {
-    defaultMessage: 'Api token is required.',
+    defaultMessage: 'Source IP',
   }
 );
 
-export const EMAIL_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.emailTextFieldLabel',
+export const DEST_IP_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.destinationIPTitle',
   {
-    defaultMessage: 'Email',
+    defaultMessage: 'Destination IP',
   }
 );
 
-export const EMAIL_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredEmailTextField',
+export const INCIDENT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.title',
   {
-    defaultMessage: 'Email is required.',
+    defaultMessage: 'Incident',
   }
 );
 
-export const MAPPING_FIELD_SHORT_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.mappingFieldShortDescription',
+export const SHORT_DESCRIPTION_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.titleFieldLabel',
   {
-    defaultMessage: 'Short Description',
+    defaultMessage: 'Short description (required)',
   }
 );
 
-export const MAPPING_FIELD_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.mappingFieldDescription',
+export const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.descriptionTextAreaFieldLabel',
   {
     defaultMessage: 'Description',
   }
 );
 
-export const MAPPING_FIELD_COMMENTS = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.mappingFieldComments',
+export const COMMENTS_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.commentsTextAreaFieldLabel',
   {
-    defaultMessage: 'Comments',
+    defaultMessage: 'Additional comments',
   }
 );
 
-export const DESCRIPTION_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredDescriptionTextField',
+export const MALWARE_URL_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareURLTitle',
   {
-    defaultMessage: 'Description is required.',
+    defaultMessage: 'Malware URL',
   }
 );
 
-export const TITLE_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredShortDescTextField',
+export const MALWARE_HASH_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareHashTitle',
   {
-    defaultMessage: 'Short description is required.',
+    defaultMessage: 'Malware hash',
   }
 );
