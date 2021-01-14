@@ -61,7 +61,7 @@ export const getComplexAccessor = (fieldName: string, isComplex: boolean = false
   const accessor = aspect.accessor;
   const fn: AccessorFn = (d) => {
     const v = d[accessor];
-    if (!v) {
+    if (v === undefined) {
       return;
     }
     const f = formatter(v);
