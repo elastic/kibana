@@ -158,7 +158,7 @@ export class MapsPlugin
     });
   }
 
-  public start(core: CoreStart, plugins: MapsPluginStartDependencies): Promise<MapsStartApi> {
+  public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
     setLicensingPluginStart(plugins.licensing);
     plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
     setStartServices(core, plugins);
