@@ -29,12 +29,7 @@ import {
 } from '../../../core/public';
 import { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
-import {
-  DataPublicPluginStart,
-  FilterManager,
-  IndexPatternsContract,
-  TimefilterContract,
-} from '../../../plugins/data/public';
+import { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data/public';
 import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
 import { ExpressionsStart } from '../../../plugins/expressions/public';
 import { UiActionsStart } from '../../../plugins/ui_actions/public';
@@ -60,15 +55,7 @@ export const [getTypes, setTypes] = createGetterSetter<TypesStart>('Types');
 
 export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('DocLinks');
 
-export const [getFilterManager, setFilterManager] = createGetterSetter<FilterManager>(
-  'FilterManager'
-);
-
 export const [getTimeFilter, setTimeFilter] = createGetterSetter<TimefilterContract>('TimeFilter');
-
-export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
-  'IndexPatterns'
-);
 
 export const [getSearch, setSearch] = createGetterSetter<DataPublicPluginStart['search']>('Search');
 

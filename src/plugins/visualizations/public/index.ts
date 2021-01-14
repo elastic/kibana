@@ -42,15 +42,8 @@ export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbedda
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export { VisualizeInput } from './embeddable';
 export { SchemaConfig, BuildPipelineParams } from './legacy/build_pipeline';
-// @ts-ignore
 export { updateOldState } from './legacy/vis_update_state';
 export { PersistedState } from './persisted_state';
-export {
-  SavedVisState,
-  ISavedVis,
-  VisSavedObject,
-  VisResponseValue,
-  VisToExpressionAst,
-} from './types';
+export { SavedVisState, ISavedVis, VisSavedObject, VisToExpressionAst } from './types';
 export { VisualizationListItem, VisualizationStage } from './vis_types/vis_type_alias_registry';
 export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';

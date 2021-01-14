@@ -133,7 +133,7 @@ export interface VisTypeDefinition<TVisParams = unknown> {
    */
   readonly getInfoMessage?: (vis: Vis) => React.ReactNode;
 
-  readonly toExpressionAst?: VisToExpressionAst<TVisParams>;
+  readonly toExpressionAst: VisToExpressionAst<TVisParams>;
 
   readonly setup?: (vis: Vis<TVisParams>) => Promise<Vis<TVisParams>>;
   hidden?: boolean;

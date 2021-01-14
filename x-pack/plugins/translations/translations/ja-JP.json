@@ -4697,7 +4697,6 @@
     "visualizations.function.visDimension.format.help": "フォーマット",
     "visualizations.function.visDimension.formatParams.help": "フォーマットパラメーター",
     "visualizations.function.visDimension.help": "visConfig ディメンションオブジェクトを生成します",
-    "visualizations.functions.visualization.help": "シンプルなビジュアライゼーションです",
     "visualizations.initializeWithoutIndexPatternErrorMessage": "インデックスパターンなしで集約を初期化しようとしています",
     "visualizations.newVisWizard.aggBasedGroupDescription": "クラシック Visualize ライブラリを使用して、アグリゲーションに基づいてグラフを作成します。",
     "visualizations.newVisWizard.aggBasedGroupTitle": "アグリゲーションに基づく",

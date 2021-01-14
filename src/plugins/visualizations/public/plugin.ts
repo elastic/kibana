@@ -34,11 +34,9 @@ import {
   setApplication,
   setCapabilities,
   setHttp,
-  setIndexPatterns,
   setSearch,
   setSavedObjects,
   setUsageCollector,
-  setFilterManager,
   setExpressions,
   setUiActions,
   setSavedVisualizationsLoader,
@@ -57,7 +55,6 @@ import {
 } from './embeddable';
 import { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
-import { visualization as visualizationFunction } from './expressions/visualization_function';
 import { range as rangeExpressionFunction } from './expression_functions/range';
 import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
@@ -147,7 +144,6 @@ export class VisualizationsPlugin
     setUISettings(core.uiSettings);
     setUsageCollector(usageCollection);
 
-    expressions.registerFunction(visualizationFunction); // to be removed
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
@@ -170,9 +166,7 @@ export class VisualizationsPlugin
     setHttp(core.http);
     setSavedObjects(core.savedObjects);
     setDocLinks(core.docLinks);
-    setIndexPatterns(data.indexPatterns);
     setSearch(data.search);
-    setFilterManager(data.query.filterManager);
     setExpressions(expressions);
     setUiActions(uiActions);
     setTimeFilter(data.query.timefilter.timefilter);

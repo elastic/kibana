@@ -49,13 +49,6 @@ export interface ISavedVis {
 
 export interface VisSavedObject extends SavedObject, ISavedVis {}
 
-export interface VisResponseValue {
-  visType: string;
-  visData: object;
-  visConfig: object;
-  params?: object;
-}
-
 export interface VisToExpressionAstParams {
   timefilter: TimefilterContract;
   timeRange?: any;

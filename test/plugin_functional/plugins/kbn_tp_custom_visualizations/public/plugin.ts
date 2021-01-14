@@ -28,7 +28,7 @@ export interface SetupDependencies {
 export class CustomVisualizationsPublicPlugin
   implements Plugin<CustomVisualizationsSetup, CustomVisualizationsStart> {
   public setup(core: CoreSetup, setupDeps: SetupDependencies) {
-    setupDeps.visualizations.createReactVisualization({
+    setupDeps.visualizations.createBaseVisualization({
       name: 'self_changing_vis',
       title: 'Self Changing Vis',
       icon: 'controlsHorizontal',

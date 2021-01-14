@@ -4702,7 +4702,6 @@
     "visualizations.function.visDimension.format.help": "格式",
     "visualizations.function.visDimension.formatParams.help": "格式参数",
     "visualizations.function.visDimension.help": "生成 visConfig 维度对象",
-    "visualizations.functions.visualization.help": "简单可视化",
     "visualizations.initializeWithoutIndexPatternErrorMessage": "正在尝试在不使用索引模式的情况下初始化聚合",
     "visualizations.newVisWizard.aggBasedGroupDescription": "使用我们的经典可视化库，基于聚合创建图表。",
     "visualizations.newVisWizard.aggBasedGroupTitle": "基于聚合",
