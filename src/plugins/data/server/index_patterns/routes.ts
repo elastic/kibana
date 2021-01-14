@@ -19,7 +19,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { HttpServiceSetup, RequestHandlerContext, StartServicesAccessor } from 'kibana/server';
-import { IndexPatternsFetcher } from './fetcher';
+import { FieldDescriptor, IndexPatternsFetcher } from './fetcher';
 import { registerCreateIndexPatternRoute } from './routes/create_index_pattern';
 import { registerGetIndexPatternRoute } from './routes/get_index_pattern';
 import { registerDeleteIndexPatternRoute } from './routes/delete_index_pattern';
@@ -31,6 +31,7 @@ import { registerGetScriptedFieldRoute } from './routes/scripted_fields/get_scri
 import { registerDeleteScriptedFieldRoute } from './routes/scripted_fields/delete_scripted_field';
 import { registerUpdateScriptedFieldRoute } from './routes/scripted_fields/update_scripted_field';
 import type { DataPluginStart, DataPluginStartDependencies } from '../plugin';
+import { combineFields, formatIndexFields } from './utils';
 
 export function registerRoutes(
   http: HttpServiceSetup,
@@ -69,7 +70,8 @@ export function registerRoutes(
       path: '/api/index_patterns/_fields_for_wildcard',
       validate: {
         query: schema.object({
-          pattern: schema.string(),
+          pattern_list: schema.arrayOf(schema.string()),
+          format_fields: schema.maybe(schema.boolean()),
           meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
@@ -83,7 +85,8 @@ export function registerRoutes(
       const { asCurrentUser } = context.core.elasticsearch.client;
       const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
       const {
-        pattern,
+        pattern_list: patternList,
+        format_fields: formatFields,
         meta_fields: metaFields,
         type,
         rollup_index: rollupIndex,
@@ -96,17 +99,29 @@ export function registerRoutes(
       } catch (error) {
         return response.badRequest();
       }
-      console.log('PATTERNHERE:', pattern);
+      console.log('PATTERNHERE:', patternList);
       try {
-        const fields = await indexPatterns.getFieldsForWildcard({
-          pattern,
-          metaFields: parsedFields,
-          type,
-          rollupIndex,
-          fieldCapsOptions: {
-            allow_no_indices: allowNoIndex || false,
-          },
-        });
+        const fieldsArr: Array<FieldDescriptor[] | boolean> = await Promise.all(
+          patternList
+            .map((pattern) =>
+              indexPatterns.getFieldsForWildcard({
+                fieldCapsOptions: {
+                  allow_no_indices: allowNoIndex || false,
+                },
+                metaFields: parsedFields,
+                pattern,
+                rollupIndex,
+                type,
+              })
+            )
+            .map((p) => p.catch(() => false))
+        );
+        const responsesIndexFields = fieldsArr.filter(
+          (rif) => rif !== false
+        ) as FieldDescriptor[][];
+        const fields = !formatFields
+          ? await combineFields(responsesIndexFields)
+          : await formatIndexFields(responsesIndexFields, patternList);
 
         return response.ok({
           body: { fields },

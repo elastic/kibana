@@ -54,8 +54,8 @@ export class IndexPattern implements IIndexPattern {
   public id?: string;
   public title: string = ''; // label, not pattern string
 
-  public patternList?: string[];
-  public patternListActive?: string[];
+  public patternList: string[];
+  public patternListActive: string[];
   public fieldFormatMap: Record<string, any>;
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
@@ -83,7 +83,11 @@ export class IndexPattern implements IIndexPattern {
   public readonly allowNoIndex: boolean = false;
 
   constructor({
-    spec = {},
+    spec = {
+      title: '',
+      patternList: [],
+      patternListActive: [],
+    },
     fieldFormats,
     shortDotsEnable = false,
     metaFields = [],

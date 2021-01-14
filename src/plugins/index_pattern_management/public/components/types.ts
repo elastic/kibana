@@ -29,7 +29,6 @@ export interface IndexPatternTableItem {
   default: boolean;
   tag?: string[];
   sort: string;
-  label?: string;
-  patternList?: string[];
-  patternListActive?: string[];
+  patternList: string[];
+  patternListActive: string[];
 }

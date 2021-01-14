@@ -184,8 +184,8 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         patternList,
         patternListActive,
       }: {
-        patternList?: string[];
-        patternListActive?: string[];
+        patternList: string[];
+        patternListActive: string[];
       }) =>
         patternList && patternListActive ? (
           <AliasCollection patternList={patternList} patternListActive={patternListActive} />

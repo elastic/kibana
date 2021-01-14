@@ -22,8 +22,10 @@ import {
   GetFieldsOptions,
   IIndexPatternsApiClient,
   GetFieldsOptionsTimePattern,
+  FieldDescriptor,
 } from '../../common/index_patterns/types';
 import { IndexPatternsFetcher } from './fetcher';
+import { combineFields, formatIndexFields } from './utils';
 
 export class IndexPatternsApiServer implements IIndexPatternsApiClient {
   esClient: ElasticsearchClient;
@@ -31,20 +33,30 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
     this.esClient = elasticsearchClient;
   }
   async getFieldsForWildcard({
-    pattern,
-    metaFields,
-    type,
-    rollupIndex,
     allowNoIndex,
+    formatFields,
+    metaFields,
+    patternList,
+    rollupIndex,
+    type,
   }: GetFieldsOptions) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
-    console.log('this one getFieldsForWildcard');
-    return await indexPatterns.getFieldsForWildcard({
-      pattern,
-      metaFields,
-      type,
-      rollupIndex,
-    });
+    const fieldsArr: Array<FieldDescriptor[] | boolean> = await Promise.all(
+      patternList
+        .map((pattern) =>
+          indexPatterns.getFieldsForWildcard({
+            metaFields,
+            pattern,
+            rollupIndex,
+            type,
+          })
+        )
+        .map((p) => p.catch(() => false))
+    );
+    const responsesIndexFields = fieldsArr.filter((rif) => rif !== false) as FieldDescriptor[][];
+    return !formatFields
+      ? combineFields(responsesIndexFields)
+      : formatIndexFields(responsesIndexFields, patternList);
   }
   async getFieldsForTimePattern(options: GetFieldsOptionsTimePattern) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient);

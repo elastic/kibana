@@ -19,8 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { FieldDescriptor } from 'src/plugins/data/server';
-import { GetPatternListFieldsOptions, IndexField, SavedObjectsClientCommon } from '../..';
+import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
@@ -46,7 +45,6 @@ import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateIndexPatternError } from '../errors';
-import { combineFields, formatIndexFields } from './utils';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
@@ -217,51 +215,20 @@ export class IndexPatternsService {
   };
 
   /**
-   * Get field list by providing { patternList }
-   * @param options
-   */
-  getFieldsForWildcardPatternList = async (
-    options: GetPatternListFieldsOptions
-  ): Promise<FieldDescriptor[] | IndexField[]> => {
-    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    const responsesIndexFields: Array<FieldDescriptor[] | false> = await Promise.all(
-      options.patternList
-        .map((index) =>
-          this.apiClient.getFieldsForWildcard({
-            pattern: index,
-            metaFields,
-            type: options.type,
-            rollupIndex: options.rollupIndex,
-            allowNoIndex: options.allowNoIndex,
-          })
-        )
-        .map((p) => p.catch((e) => false))
-    );
-    const fields = responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][];
-    if (!options.formatFields) {
-      return combineFields(fields);
-    }
-    return formatIndexFields(fields, options.patternList);
-  };
-
-  /**
    * Get field list by providing { pattern }
    * @param options
    */
   getFieldsForWildcard = async (options: GetFieldsOptions) => {
-    if (options.patternList != null) {
-      return this.getFieldsForWildcardPatternList(options as GetPatternListFieldsOptions);
-    }
+    console.log('getFieldsForWildcard index_patterns', options.patternList);
 
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    const hey = await this.apiClient.getFieldsForWildcard({
-      pattern: options.pattern,
+    return this.apiClient.getFieldsForWildcard({
+      patternList: options.patternList,
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
       allowNoIndex: options.allowNoIndex,
     });
-    return hey;
   };
 
   /**
@@ -277,7 +244,7 @@ export class IndexPatternsService {
       type: indexPattern.type,
       rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
       ...options,
-      pattern: indexPattern.title as string,
+      patternList: indexPattern.patternListActive,
     });
   };
 
@@ -440,7 +407,6 @@ export class IndexPatternsService {
         spec.title as string,
         {
           patternList: patternListActive,
-          pattern: title as string,
           metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
           type,
           rollupIndex: typeMeta?.params?.rollup_index,

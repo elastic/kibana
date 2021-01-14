@@ -54,8 +54,8 @@ export interface IndexPatternAttributes {
    */
   allowNoIndex?: boolean;
 
-  patternListActive?: string[];
-  patternList?: string[];
+  patternListActive: string[];
+  patternList: string[];
 }
 
 export interface FieldAttrs {
@@ -107,8 +107,7 @@ export interface GetFieldsOptions {
   formatFields?: boolean;
   lookBack?: boolean;
   metaFields?: string[];
-  pattern: string;
-  patternList?: string[];
+  patternList: string[];
   rollupIndex?: string;
   type?: string;
 }
@@ -197,20 +196,20 @@ export interface FieldSpec {
 export type IndexPatternFieldMap = Record<string, FieldSpec>;
 
 export interface IndexPatternSpec {
-  id?: string;
-  version?: string;
-  title?: string; // label, not pattern string
-  intervalName?: string;
-  timeFieldName?: string;
-  sourceFilters?: SourceFilter[];
-  fields?: IndexPatternFieldMap;
-  typeMeta?: TypeMeta;
-  type?: string;
-  fieldFormats?: Record<string, SerializedFieldFormat>;
-  fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
-  patternListActive?: string[];
-  patternList?: string[];
+  fieldAttrs?: FieldAttrs;
+  fieldFormats?: Record<string, SerializedFieldFormat>;
+  fields?: IndexPatternFieldMap;
+  id?: string;
+  intervalName?: string;
+  patternList: string[];
+  patternListActive: string[];
+  sourceFilters?: SourceFilter[];
+  timeFieldName?: string;
+  title: string; // label, not pattern string
+  type?: string;
+  typeMeta?: TypeMeta;
+  version?: string;
 }
 
 export interface SourceFilter {

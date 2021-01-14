@@ -62,8 +62,26 @@ const addAllowNoIndex: SavedObjectMigrationFn<any, any> = (doc) => ({
   },
 });
 
+const migrateTitleToPatternList: SavedObjectMigrationFn<any, any> = (doc) => {
+  console.log('migrateTitleToPatternList!!!');
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      patternList:
+        doc.attributes.patternList == null
+          ? doc.attributes.title.split(',')
+          : doc.attributes.patternList,
+      patternListActive:
+        doc.attributes.patternListActive == null
+          ? doc.attributes.title.split(',')
+          : doc.attributes.patternListActive,
+    },
+  };
+};
+
 export const indexPatternSavedObjectTypeMigrations = {
   '6.5.0': flow(migrateAttributeTypeAndAttributeTypeMeta),
   '7.6.0': flow(migrateSubTypeAndParentFieldProperties),
-  '7.11.0': flow(addAllowNoIndex),
+  '7.11.0': flow(addAllowNoIndex, migrateTitleToPatternList),
 };
