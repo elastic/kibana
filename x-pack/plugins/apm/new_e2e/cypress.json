@@ -6,10 +6,11 @@
   "screenshotsFolder": "./cypress/screenshots",
   "supportFile": "./cypress/support/index.js",
   "videosFolder": "./cypress/videos",
-  "defaultCommandTimeout": 15000,
+  "defaultCommandTimeout": 30000,
   "execTimeout": 120000,
   "pageLoadTimeout": 120000,
   "viewportHeight": 900,
   "viewportWidth": 1440,
-  "video": false
+  "video": false,
+  "screenshotOnRunFailure": false
 }
