@@ -19,6 +19,7 @@ import { setQueuedErrorMessage } from '../../../shared/flash_messages';
 
 import { Loading } from '../../../shared/loading';
 import { EngineOverview } from '../engine_overview';
+import { AnalyticsRouter } from '../analytics';
 
 import { EngineRouter } from './';
 
@@ -93,6 +94,6 @@ describe('EngineRouter', () => {
     setMockValues({ ...values, myRole: { canViewEngineAnalytics: true } });
     const wrapper = shallow(<EngineRouter />);
 
-    expect(wrapper.find('[data-test-subj="AnalyticsTODO"]')).toHaveLength(1);
+    expect(wrapper.find(AnalyticsRouter)).toHaveLength(1);
   });
 });
