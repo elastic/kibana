@@ -257,11 +257,11 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                 </EuiDescribedFormGroup>
               ) : null}
 
-              <EuiSpacer />
+              <EuiHorizontalRule />
 
               <Timeline />
 
-              <EuiSpacer />
+              <EuiSpacer size="l" />
 
               <HotPhase />
 

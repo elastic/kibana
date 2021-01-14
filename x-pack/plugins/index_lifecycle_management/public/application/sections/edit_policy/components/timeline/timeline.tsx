@@ -39,9 +39,10 @@ const msTimeToOverallPercent = (ms: number, totalMs: number) => {
 
 /**
  * Each phase, if active, should have a minimum width it occupies. The higher this
- * base amount, the smaller the variance in phase size in the timeline.
+ * base amount, the smaller the variance in phase size in the timeline. This functions
+ * as a min-width constraint.
  */
-const SCORE_BUFFER_AMOUNT = 200;
+const SCORE_BUFFER_AMOUNT = 50;
 
 const i18nTexts = {
   hotPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.hotPhaseSectionTitle', {
@@ -78,7 +79,7 @@ const TimelinePhaseText: FunctionComponent<{
   phaseName: string;
   durationInPhase?: React.ReactNode | string;
 }> = ({ phaseName, durationInPhase }) => (
-  <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
+  <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
     <EuiFlexItem>
       <EuiText size="s">
         <strong>{phaseName}</strong>
@@ -86,9 +87,7 @@ const TimelinePhaseText: FunctionComponent<{
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       {typeof durationInPhase === 'string' ? (
-        <EuiText className="ilmTimeline__timelinePhaseText__durationText" size="s">
-          {durationInPhase}
-        </EuiText>
+        <EuiText size="s">{durationInPhase}</EuiText>
       ) : (
         durationInPhase
       )}

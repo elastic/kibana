@@ -1,5 +1,4 @@
 $colorBarHeight: $euiSizeS;
-$phaseMinWidth: 100px;
 
 .ilmTimeline {
   overflow: hidden;
@@ -26,7 +25,6 @@ $phaseMinWidth: 100px;
 
     &__phase {
       display: inline-block;
-      min-width: $phaseMinWidth;
 
       padding-left: $euiSizeS;
       padding-right: $euiSizeS;
@@ -35,10 +33,6 @@ $phaseMinWidth: 100px;
 
   &__deleteIconContainer {
     padding-left: $euiSizeS;
-  }
-
-  &__timelinePhaseText__durationText {
-    text-align: right;
   }
 
   &__colorBarCommon {

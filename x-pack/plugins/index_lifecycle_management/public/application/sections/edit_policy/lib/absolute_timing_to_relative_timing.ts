@@ -161,7 +161,7 @@ const millisecondsToDays = (milliseconds?: number): string | undefined => {
   const days = milliseconds / 8.64e7;
   return days < 1
     ? i18nTexts.lessThanADay
-    : `${days === 1 ? i18nTexts.day : i18nTexts.days} ${Math.floor(days)}`;
+    : `${Math.floor(days)} ${days === 1 ? i18nTexts.day : i18nTexts.days}`;
 };
 
 export const normalizeTimingsToHumanReadable = ({
