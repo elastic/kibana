@@ -21,7 +21,11 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { UiSettingsParams } from 'kibana/server';
-import { DIMMING_OPACITY_SETTING, HEATMAP_MAX_BUCKETS_SETTING } from '../common';
+import {
+  DIMMING_OPACITY_SETTING,
+  HEATMAP_MAX_BUCKETS_SETTING,
+  LEGACY_CHARTS_LIBRARY,
+} from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
   // TODO: move this to vis_type_xy when vislib is removed
@@ -57,5 +61,22 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     ),
     category: ['visualization'],
     schema: schema.number(),
+  },
+  // TODO: Remove this when vis_type_vislib is removed
+  // https://github.com/elastic/kibana/issues/56143
+  [LEGACY_CHARTS_LIBRARY]: {
+    name: i18n.translate('visTypeVislib.advancedSettings.visualization.legacyChartsLibrary.name', {
+      defaultMessage: 'Legacy charts library',
+    }),
+    value: false,
+    description: i18n.translate(
+      'visTypeVislib.advancedSettings.visualization.legacyChartsLibrary.description',
+      {
+        defaultMessage:
+          'Enables legacy charts library for area, line and bar charts in visualize. Currently, only legacy charts library supports split chart aggregation.',
+      }
+    ),
+    category: ['visualization'],
+    schema: schema.boolean(),
   },
 };

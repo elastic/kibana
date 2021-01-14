@@ -24,7 +24,7 @@ import { VisualizationsSetup } from '../../visualizations/public';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { LEGACY_CHARTS_LIBRARY } from '../../vis_type_xy/public';
+import { LEGACY_CHARTS_LIBRARY } from '../common';
 
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
