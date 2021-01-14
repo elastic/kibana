@@ -174,7 +174,7 @@ describe('#importSavedObjectsFromStream', () => {
       );
     });
 
-    test('execute import hooks', async () => {
+    test('executes import hooks', async () => {
       const importHooks = {
         foo: [jest.fn()],
       };

@@ -488,7 +488,7 @@ describe('#importSavedObjectsFromStream', () => {
       });
     });
 
-    test('execute import hooks', async () => {
+    test('executes import hooks', async () => {
       const options = setupOptions();
       const collectedObjects = [createObject()];
       getMockFn(collectSavedObjects).mockResolvedValue({
