@@ -40,7 +40,8 @@ export class SearchAPI {
   constructor(
     private readonly dependencies: SearchAPIDependencies,
     private readonly abortSignal?: AbortSignal,
-    public readonly inspectorAdapters?: VegaInspectorAdapters
+    public readonly inspectorAdapters?: VegaInspectorAdapters,
+    private readonly searchSessionId?: string
   ) {}
 
   search(searchRequests: SearchRequest[]) {
@@ -60,10 +61,7 @@ export class SearchAPI {
         }
 
         return search
-          .search(
-            { params },
-            { abortSignal: this.abortSignal, sessionId: search.session.getSessionId() }
-          )
+          .search({ params }, { abortSignal: this.abortSignal, sessionId: this.searchSessionId })
           .pipe(
             tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
             map((data) => ({

@@ -16,6 +16,7 @@ import {
   FIELDS_BROWSER_SELECTED_CATEGORY_COUNT,
   FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
 } from '../screens/fields_browser';
+import { TIMELINE_FIELDS_BUTTON } from '../screens/timeline';
 import { cleanKibana } from '../tasks/common';
 
 import {
@@ -181,6 +182,20 @@ describe('Fields Browser', () => {
       resetFields();
 
       cy.get(FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER).should('not.exist');
+    });
+
+    it('restores focus to the Customize Columns button when `Reset Fields` is clicked', () => {
+      openTimelineFieldsBrowser();
+      resetFields();
+
+      cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
+    });
+
+    it('restores focus to the Customize Columns button when Esc is pressed', () => {
+      openTimelineFieldsBrowser();
+      cy.get('body').type('{esc}');
+
+      cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
     });
   });
 });

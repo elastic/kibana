@@ -135,7 +135,6 @@ export const aggHistogram = (): FunctionDefinition => ({
         params: {
           ...rest,
           extended_bounds: getParsedValue(args, 'extended_bounds'),
-          json: getParsedValue(args, 'json'),
         },
       },
     };

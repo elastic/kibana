@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { geohashColumns } from './decode_geo_hash';
+import { geohashColumns } from './geohash_columns';
 
 const defaultMaxPrecision = 12;
 const minGeoHashPixels = 16;
