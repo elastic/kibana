@@ -46,6 +46,7 @@ export enum KibanaAssetType {
   search = 'search',
   indexPattern = 'index_pattern',
   map = 'map',
+  lens = 'lens',
 }
 
 /*
@@ -57,6 +58,7 @@ export enum KibanaSavedObjectType {
   search = 'search',
   indexPattern = 'index-pattern',
   map = 'map',
+  lens = 'lens',
 }
 
 export enum ElasticsearchAssetType {
