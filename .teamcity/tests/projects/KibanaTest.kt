@@ -1,11 +1,5 @@
 package projects
 
-<<<<<<< HEAD
-=======
-import jetbrains.buildServer.configs.kotlin.v2019_2.AbsoluteId
-import jetbrains.buildServer.configs.kotlin.v2019_2.DslContext
-import makeSafeId
->>>>>>> 245d521c9ad... [CI] Prep TeamCity pipelines to run in parallel with Jenkins (#87589)
 import org.junit.Assert.*
 import org.junit.Test
 
