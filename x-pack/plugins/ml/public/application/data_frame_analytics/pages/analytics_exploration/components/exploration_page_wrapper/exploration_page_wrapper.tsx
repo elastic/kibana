@@ -9,16 +9,19 @@ import React, { FC, useCallback, useState } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { getAnalysisType, getDependentVar } from '../../../../../../../common/util/analytics_utils';
+
 import {
   defaultSearchQuery,
+  getScatterplotMatrixLegendType,
   useResultsViewConfig,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
-import { ResultsSearchQuery } from '../../../../common/analytics';
+import { ResultsSearchQuery, ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 
 import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 
-import { ExpandableSectionAnalytics } from '../expandable_section';
+import { ExpandableSectionAnalytics, ExpandableSectionSplom } from '../expandable_section';
 import { ExplorationResultsTable } from '../exploration_results_table';
 import { ExplorationQueryBar } from '../exploration_query_bar';
 import { JobConfigErrorCallout } from '../job_config_error_callout';
@@ -125,6 +128,9 @@ export const ExplorationPageWrapper: FC<Props> = ({
     );
   }
 
+  const jobType =
+    jobConfig && jobConfig.analysis ? getAnalysisType(jobConfig?.analysis) : undefined;
+
   return (
     <>
       {typeof jobConfig?.description !== 'undefined' && (
@@ -178,6 +184,26 @@ export const ExplorationPageWrapper: FC<Props> = ({
       {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
         <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
       )}
+
+      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
+      {isLoadingJobConfig === false &&
+        jobConfig !== undefined &&
+        isInitialized === true &&
+        typeof jobConfig?.id === 'string' &&
+        jobConfig?.analyzed_fields.includes.length > 1 &&
+        typeof jobConfig?.analysis !== 'undefined' && (
+          <ExpandableSectionSplom
+            fields={jobConfig?.analyzed_fields.includes}
+            index={jobConfig?.dest.index}
+            color={
+              jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+              jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+                ? getDependentVar(jobConfig.analysis)
+                : undefined
+            }
+            legendType={getScatterplotMatrixLegendType(jobType)}
+          />
+        )}
 
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false &&
