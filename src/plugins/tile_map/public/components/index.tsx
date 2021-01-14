@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export { tsvbTelemetrySavedObjectType } from './tsvb_telemetry';
+import React, { lazy } from 'react';
+import type { TileMapOptionsProps } from './tile_map_options';
+
+const TileMapOptions = lazy(() => import('./tile_map_options'));
+
+export const TileMapOptionsLazy = (props: TileMapOptionsProps) => <TileMapOptions {...props} />;
