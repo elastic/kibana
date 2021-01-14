@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { formatExpression, SerializedFieldFormat } from '../../../../plugins/expressions/public';
-import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';
-import { Vis } from '../types';
+import { SerializedFieldFormat } from '../../expressions/public';
+import { IAggConfig, search } from '../../data/public';
+
+import { Vis, VisToExpressionAstParams } from './types';
+
 const { isDateHistogramBucketAggConfig } = search.aggs;
 
 interface SchemaConfigParams {
@@ -49,15 +51,10 @@ export interface Schemas {
   // catch all for schema name
   [key: string]: any[] | undefined;
 }
-export interface BuildPipelineParams {
-  timefilter: TimefilterContract;
-  timeRange?: any;
-  abortSignal?: AbortSignal;
-}
 
-export const getSchemas = <TVisParams>(
+export const getVisSchemas = <TVisParams>(
   vis: Vis<TVisParams>,
-  { timeRange, timefilter }: BuildPipelineParams
+  { timeRange, timefilter }: VisToExpressionAstParams
 ): Schemas => {
   const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
     if (isDateHistogramBucketAggConfig(agg)) {
@@ -147,80 +144,4 @@ export const getSchemas = <TVisParams>(
     }
   });
   return schemas;
-};
-
-export const prepareJson = (variable: string, data?: object): string => {
-  if (data === undefined) {
-    return '';
-  }
-  return `${variable}='${JSON.stringify(data).replace(/\\/g, `\\\\`).replace(/'/g, `\\'`)}' `;
-};
-
-export const escapeString = (data: string): string => {
-  return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
-};
-
-export const prepareString = (variable: string, data?: string): string => {
-  if (data === undefined) {
-    return '';
-  }
-  return `${variable}='${escapeString(data)}' `;
-};
-
-export const prepareValue = (variable: string, data: any, raw: boolean = false) => {
-  if (data === undefined) {
-    return '';
-  }
-  if (raw) {
-    return `${variable}=${data} `;
-  }
-  switch (typeof data) {
-    case 'string':
-      return prepareString(variable, data);
-    case 'object':
-      return prepareJson(variable, data);
-    default:
-      return `${variable}=${data} `;
-  }
-};
-
-export const prepareDimension = (variable: string, data: any) => {
-  if (data === undefined) {
-    return '';
-  }
-
-  let expr = `${variable}={visdimension ${data.accessor} `;
-  if (data.format) {
-    expr += prepareValue('format', data.format.id);
-    expr += prepareJson('formatParams', data.format.params);
-  }
-  expr += '} ';
-
-  return expr;
-};
-
-export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
-  const { searchSource } = vis.data;
-  const query = searchSource!.getField('query');
-  const filters = searchSource!.getField('filter');
-
-  // context
-  let pipeline = `kibana | kibana_context `;
-  if (query) {
-    pipeline += prepareJson('query', query);
-  }
-  if (filters) {
-    pipeline += prepareJson('filters', filters);
-  }
-  if (vis.data.savedSearchId) {
-    pipeline += prepareString('savedSearchId', vis.data.savedSearchId);
-  }
-  pipeline += '| ';
-
-  if (vis.type.toExpressionAst) {
-    const visAst = await vis.type.toExpressionAst(vis, params);
-    pipeline += formatExpression(visAst);
-  }
-
-  return pipeline;
 };

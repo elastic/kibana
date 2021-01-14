@@ -43,8 +43,8 @@ import {
   IExpressionLoaderParams,
   ExpressionsStart,
   ExpressionRenderError,
+  ExpressionAstExpression,
 } from '../../../../plugins/expressions/public';
-import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis, SerializedVis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
@@ -52,6 +52,7 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { SavedObjectAttributes } from '../../../../core/types';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { VisSavedObject } from '../types';
+import { toExpressionAst } from './to_ast';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -105,7 +106,7 @@ export class VisualizeEmbeddable
   private syncColors?: boolean;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
-  private expression: string = '';
+  private expression?: ExpressionAstExpression;
   private vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
@@ -393,7 +394,7 @@ export class VisualizeEmbeddable
     }
     this.abortController = new AbortController();
     const abortController = this.abortController;
-    this.expression = await buildPipeline(this.vis, {
+    this.expression = await toExpressionAst(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
       abortSignal: this.abortController!.signal,

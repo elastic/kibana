@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import { TimefilterContract } from 'src/plugins/data/public';
+import { Vis } from 'src/plugins/visualizations/public';
+
 import { toExpressionAst } from './to_ast';
-import { BuildPipelineParams, Vis } from '../../visualizations/public';
 import { VisParams } from './types';
 
 describe('metric vis toExpressionAst function', () => {
@@ -43,13 +45,17 @@ describe('metric vis toExpressionAst function', () => {
 
   it('without params', () => {
     vis.params = { metric: {} } as VisParams;
-    const actual = toExpressionAst(vis, {} as BuildPipelineParams);
+    const actual = toExpressionAst(vis, {
+      timefilter: {} as TimefilterContract,
+    });
     expect(actual).toMatchSnapshot();
   });
 
   it('with percentage mode should have percentage format', () => {
     vis.params = { metric: { percentageMode: true } } as VisParams;
-    const actual = toExpressionAst(vis, {} as BuildPipelineParams);
+    const actual = toExpressionAst(vis, {
+      timefilter: {} as TimefilterContract,
+    });
     expect(actual).toMatchSnapshot();
   });
 });

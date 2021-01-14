@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { BuildPipelineParams, getVisSchemas, SchemaConfig, Vis } from '../../visualizations/public';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { MetricVisExpressionFunctionDefinition } from './metric_vis_fn';
 import {
@@ -38,7 +38,7 @@ const prepareDimension = (params: SchemaConfig) => {
   return buildExpression([visdimension]);
 };
 
-export const toExpressionAst = (vis: Vis<VisParams>, params: BuildPipelineParams) => {
+export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: buildExpression([
       buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {

@@ -30,10 +30,6 @@ describe('BaseVisType', () => {
           visConfig: {
             defaults: {},
           },
-          toExpressionAst: () => ({
-            type: 'expression',
-            chain: [],
-          }),
         });
       }).toThrow();
     });
