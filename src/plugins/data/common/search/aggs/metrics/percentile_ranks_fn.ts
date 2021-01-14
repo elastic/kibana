@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
 export const aggPercentileRanksFnName = 'aggPercentileRanks';
 
@@ -99,7 +98,6 @@ export const aggPercentileRanks = (): FunctionDefinition => ({
         type: METRIC_TYPES.PERCENTILE_RANKS,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

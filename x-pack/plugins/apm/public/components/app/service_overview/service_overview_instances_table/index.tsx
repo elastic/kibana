@@ -17,7 +17,7 @@ import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import {
-  asDuration,
+  asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
@@ -107,7 +107,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
           <SparkPlot
             color="euiColorVis1"
             series={latency?.timeseries}
-            valueLabel={asDuration(latency?.value)}
+            valueLabel={asMillisecondDuration(latency?.value)}
           />
         );
       },
@@ -117,9 +117,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
       field: 'throughputValue',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnThroughput',
-        {
-          defaultMessage: 'Traffic',
-        }
+        { defaultMessage: 'Throughput' }
       ),
       width: px(unit * 10),
       render: (_, { throughput }) => {
@@ -232,8 +230,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
     memoryUsageValue: item.memoryUsage?.value ?? 0,
   }));
 
-  const isLoading =
-    status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING;
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">

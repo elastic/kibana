@@ -110,7 +110,6 @@ export const aggIpRange = (): FunctionDefinition => ({
         type: BUCKET_TYPES.IP_RANGE,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
           ranges: getParsedValue(args, 'ranges'),
         },
       },

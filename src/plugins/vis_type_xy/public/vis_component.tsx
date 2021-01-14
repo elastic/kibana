@@ -48,6 +48,7 @@ import {
   LegendToggle,
   getBrushFromChartBrushEventFn,
   ClickTriggerEvent,
+  PaletteRegistry,
 } from '../../charts/public';
 import { Datatable, IInterpreterRenderHandlers } from '../../expressions/public';
 import type { PersistedState } from '../../visualizations/public';
@@ -62,10 +63,11 @@ import {
   getLegendActions,
   useColorPicker,
   getXAccessor,
+  getAllSeries,
 } from './utils';
 import { XYAxis, XYEndzones, XYCurrentTime, XYSettings, XYThresholdLine } from './components';
 import { getConfig } from './config';
-import { getThemeService, getColorsService, getDataActions } from './services';
+import { getThemeService, getDataActions, getPalettesService } from './services';
 import { ChartType } from '../common';
 
 import './_chart.scss';
@@ -81,22 +83,19 @@ export interface VisComponentProps {
   uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
+  syncColors: boolean;
 }
 
 export type VisComponentType = typeof VisComponent;
 
 const VisComponent = (props: VisComponentProps) => {
-  /**
-   * Stores all series labels to replicate vislib color map lookup
-   */
-  const allSeries: Array<string | number> = useMemo(() => [], []);
   const [showLegend, setShowLegend] = useState<boolean>(() => {
     // TODO: Check when this bwc can safely be removed
     const bwcLegendStateDefault =
       props.visParams.addLegend == null ? true : props.visParams.addLegend;
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
-
+  const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
   useEffect(() => {
     const fn = () => {
       props?.uiState?.emit?.('reload');
@@ -116,6 +115,14 @@ const VisComponent = (props: VisComponentProps) => {
     },
     [props]
   );
+
+  useEffect(() => {
+    const fetchPalettes = async () => {
+      const palettes = await getPalettesService().getPalettes();
+      setPalettesRegistry(palettes);
+    };
+    fetchPalettes();
+  }, []);
 
   const handleFilterClick = useCallback(
     (
@@ -225,7 +232,8 @@ const VisComponent = (props: VisComponentProps) => {
     [props.uiState]
   );
 
-  const { visData, visParams } = props;
+  const { visData, visParams, syncColors } = props;
+
   const config = getConfig(visData, visParams);
   const timeZone = getTimeZone();
   const xDomain =
@@ -245,21 +253,58 @@ const VisComponent = (props: VisComponentProps) => {
   const isDarkMode = getThemeService().useDarkMode();
   const getSeriesName = getSeriesNameFn(config.aspects, config.aspects.y.length > 1);
 
+  const splitAccessors = config.aspects.series?.map(({ accessor, formatter }) => {
+    return { accessor, formatter };
+  });
+
+  const allSeries = useMemo(() => getAllSeries(visData.rows, splitAccessors, config.aspects.y), [
+    config.aspects.y,
+    splitAccessors,
+    visData.rows,
+  ]);
+
   const getSeriesColor = useCallback(
     (series: XYChartSeriesIdentifier) => {
-      const seriesName = getSeriesName(series);
+      const seriesName = getSeriesName(series) as string;
       if (!seriesName) {
-        return;
+        return null;
       }
-
       const overwriteColors: Record<string, string> = props.uiState?.get
         ? props.uiState.get('vis.colors', {})
         : {};
 
-      allSeries.push(seriesName);
-      return getColorsService().createColorLookupFunction(allSeries, overwriteColors)(seriesName);
+      if (Object.keys(overwriteColors).includes(seriesName)) {
+        return overwriteColors[seriesName];
+      }
+      const outputColor = palettesRegistry?.get(visParams.palette.name).getColor(
+        [
+          {
+            name: seriesName,
+            rankAtDepth: splitAccessors
+              ? allSeries.findIndex((name) => name === seriesName)
+              : config.aspects.y.findIndex((aspect) => aspect.accessor === series.yAccessor),
+            totalSeriesAtDepth: splitAccessors ? allSeries.length : config.aspects.y.length,
+          },
+        ],
+        {
+          maxDepth: 1,
+          totalSeries: splitAccessors ? allSeries.length : config.aspects.y.length,
+          behindText: false,
+          syncColors,
+        }
+      );
+      return outputColor || null;
     },
-    [allSeries, getSeriesName, props.uiState]
+    [
+      allSeries,
+      config.aspects.y,
+      getSeriesName,
+      props.uiState,
+      splitAccessors,
+      syncColors,
+      visParams.palette.name,
+      palettesRegistry,
+    ]
   );
   const xAccessor = getXAccessor(config.aspects.x);
   const splitSeriesAccessors = config.aspects.series
