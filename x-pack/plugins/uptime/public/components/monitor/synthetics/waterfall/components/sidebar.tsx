@@ -18,11 +18,10 @@ import { WaterfallChartProps } from './waterfall_chart';
 
 interface SidebarProps {
   items: Required<IWaterfallContext>['sidebarItems'];
-  height: number;
   render: Required<WaterfallChartProps>['renderSidebarItem'];
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ items, height, render }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
   return (
     <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
       <WaterfallChartSidebarContainer height={items.length * FIXED_AXIS_HEIGHT}>

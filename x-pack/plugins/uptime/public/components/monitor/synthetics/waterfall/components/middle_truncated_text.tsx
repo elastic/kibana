@@ -29,10 +29,12 @@ const FirstChunk = styled.span`
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  line-height: 22px;
 `;
 
 const LastChunk = styled.span`
   flex-shrink: 0;
+  line-height: 22px;
 `;
 
 export const getChunks = (text: string) => {

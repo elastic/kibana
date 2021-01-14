@@ -33,7 +33,7 @@ import {
   WaterfallChartTooltip,
 } from './styles';
 import { WaterfallData } from '../types';
-import { BAR_HEIGHT, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE, FIXED_AXIS_HEIGHT } from './constants';
+import { BAR_HEIGHT, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
 import { Sidebar } from './sidebar';
 import { Legend } from './legend';
 import { CANVAS_MAX_ITEMS, useTimingsCharts } from './use_timings_charts';
@@ -72,7 +72,7 @@ export interface WaterfallChartProps {
 
 const getChartHeight = (data: WaterfallData, ind: number): number => {
   // We get the last item x(number of bars) and adds 1 to cater for 0 index
-  return (data[data.length - 1].x + 1 - ind * CANVAS_MAX_ITEMS) * BAR_HEIGHT;
+  return (data[data.length - 1]?.x + 1 - ind * CANVAS_MAX_ITEMS) * BAR_HEIGHT;
 };
 
 export const WaterfallChart = ({

@@ -13,26 +13,28 @@ interface Props {
 
 export const CANVAS_MAX_ITEMS = 200;
 
-export const useTimingsCharts = ({ data }: Props) => {
+export const useTimingsCharts = ({ data = [] }: Props) => {
   const [charts, setCharts] = useState<Array<IWaterfallContext['data']>>([]);
 
   useEffect(() => {
-    let chartIndex = 1;
+    if (data.length > 0) {
+      let chartIndex = 1;
 
-    const firstCanvasItems = data.filter((item) => item.x <= CANVAS_MAX_ITEMS);
+      const firstCanvasItems = data.filter((item) => item.x <= CANVAS_MAX_ITEMS);
 
-    const chartsN: Array<IWaterfallContext['data']> = [firstCanvasItems];
+      const chartsN: Array<IWaterfallContext['data']> = [firstCanvasItems];
 
-    data.forEach((item) => {
-      // Subtract 1 to account for x value starting from 0
-      if (item.x === CANVAS_MAX_ITEMS * chartIndex && !chartsN[item.x / CANVAS_MAX_ITEMS]) {
-        chartsN.push([]);
-        chartIndex++;
-      }
-      chartsN[chartIndex - 1].push(item);
-    });
+      data.forEach((item) => {
+        // Subtract 1 to account for x value starting from 0
+        if (item.x === CANVAS_MAX_ITEMS * chartIndex && !chartsN[item.x / CANVAS_MAX_ITEMS]) {
+          chartsN.push([]);
+          chartIndex++;
+        }
+        chartsN[chartIndex - 1].push(item);
+      });
 
-    setCharts(chartsN);
+      setCharts(chartsN);
+    }
   }, [data]);
 
   return charts;
