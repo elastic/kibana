@@ -406,9 +406,6 @@ The log will be less verbose with `warn` level for the `server` context:
 [2017-07-25T18:54:41.639Z][FATAL][server] Message with `fatal` log level.
 ```
 
-### Usage Example: Ops metrics
-Ops metrics are logged under the `info` level from the metrics service. 
-
 ### Logging config migration
 Compatibility with the legacy logging system is assured until the end of the `v7` version.
 All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
