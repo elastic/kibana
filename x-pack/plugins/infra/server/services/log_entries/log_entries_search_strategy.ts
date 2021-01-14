@@ -123,7 +123,7 @@ export const logEntriesSearchStrategyProvider = ({
             forkJoin([sourceConfiguration$, messageFormattingRules$]).pipe(
               map(([{ configuration }, messageFormattingRules]) => {
                 const entries = esResponse.rawResponse.hits.hits.map(
-                  createLogEntryFromHit(configuration.logColumns, messageFormattingRules)
+                  getLogEntryFromHit(configuration.logColumns, messageFormattingRules)
                 );
                 const topCursor = null;
                 const bottomCursor = null;
@@ -135,7 +135,6 @@ export const logEntriesSearchStrategyProvider = ({
                     : {}),
                   rawResponse: logEntriesSearchResponsePayloadRT.encode({
                     data: { entries, topCursor, bottomCursor },
-                    // data: esResponse.rawResponse.hits.hits.map(createLogEntryFromHit)[0] ?? null,
                     errors: (esResponse.rawResponse._shards.failures ?? []).map(
                       createErrorFromShardFailure
                     ),
@@ -165,7 +164,7 @@ const { asyncInitialRequestRT, asyncRecoveredRequestRT, asyncRequestRT } = creat
   logEntriesSearchRequestParamsRT
 );
 
-const createLogEntryFromHit = (
+const getLogEntryFromHit = (
   columnDefinitions: LogSourceColumnConfiguration[],
   messageFormattingRules: CompiledLogMessageFormattingRule
 ) => (hit: LogEntryHit): LogEntry => {
