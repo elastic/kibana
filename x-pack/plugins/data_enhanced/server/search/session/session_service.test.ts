@@ -123,6 +123,18 @@ describe('SearchSessionService', () => {
       error: jest.fn(),
     };
     service = new SearchSessionService(mockLogger, config$);
+    const coreStart = coreMock.createStart();
+    const mockTaskManager = taskManagerMock.createStart();
+    jest.useFakeTimers();
+    await flushPromises();
+    await service.start(coreStart, {
+      taskManager: mockTaskManager,
+    });
+  });
+
+  afterEach(() => {
+    service.stop();
+    jest.useRealTimers();
   });
 
   it('search throws if `name` is not provided', () => {
@@ -425,20 +437,6 @@ describe('SearchSessionService', () => {
   });
 
   describe('Monitor', () => {
-    beforeEach(async () => {
-      jest.useFakeTimers();
-      const mockTaskManager = taskManagerMock.createStart();
-      await service.start(coreMock.createStart(), {
-        taskManager: mockTaskManager,
-      });
-      await flushPromises();
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-      service.stop();
-    });
-
     it('schedules the next iteration', async () => {
       const findSpy = jest.fn().mockResolvedValue({ saved_objects: [] });
       createMockInternalSavedObjectClient(findSpy);
