@@ -53,6 +53,7 @@ export class MetricsExpression extends Component {
         fields={this.props.rightFields}
         metrics={this.props.metrics}
         onChange={this.props.onChange}
+        allowMultipleMetrics={true}
       />
     );
   };
