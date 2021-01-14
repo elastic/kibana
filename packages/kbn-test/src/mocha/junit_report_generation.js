@@ -64,19 +64,40 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     classname: `${reportName}.${getPath(node).replace(/\./g, '·')}`,
   });
 
-  const getTeamcityTestName = (node) => {
-    const nodes = [node];
+  const getParentsAsc = (node) => {
+    const parents = [];
     while (node.parent) {
-      nodes.unshift(node.parent);
+      parents.push(node.parent);
       node = node.parent;
     }
+    return parents;
+  };
+
+  const getTeamcityTestName = (node) => {
+    // get all the parent suites of this test which have names, with the list starting
+    // with the closest parent and progressing to the farthest parent
+    const parentSuites = getParentsAsc(node).filter((s) => !!s.title.trim());
+
+    // the suites around this node which will extend the title of the tests
+    const localSuites = [];
+
+    // move parentSuites to the localSuites when they are in the same file and there is
+    // at least one more parent that can be used to define the context for this test.
+    // If this test's file isn't within another file then stop at the last suite so that
+    // in most cases there will be at least one parent suite, even if it's in the same file
+    while (parentSuites.length > 1 && parentSuites[0].file === node.file) {
+      localSuites.unshift(parentSuites.shift());
+    }
+
+    // parent suites are closest=>farthest, but switch that order before printing
+    parentSuites.reverse();
 
     return {
-      name: nodes
-        .map((n) => n.title?.trim() ?? '')
-        .filter((t) => !!t)
-        .join(' > '),
       classname: '',
+      name: [
+        ...parentSuites.map((n) => n.title),
+        [...localSuites, node].map((n) => n.title).join(' '),
+      ].join(' > '),
     };
   };
 
