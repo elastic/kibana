@@ -23,8 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { AppCategory } from 'kibana/public';
 import _ from 'lodash';
 import React, { ChangeEvent, Component, ReactElement } from 'react';
+import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
 import { KibanaFeatureConfig } from '../../../../../../plugins/features/public';
-import { Space } from '../../../../common/model/space';
 import { getEnabledFeatures } from '../../lib/feature_utils';
 import './feature_table.scss';
 

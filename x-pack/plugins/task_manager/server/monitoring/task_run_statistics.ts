@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, merge, Observable, of } from 'rxjs';
 import { filter, startWith, map } from 'rxjs/operators';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { isNumber, mapValues } from 'lodash';
@@ -36,6 +36,7 @@ import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
 
 interface FillPoolStat extends JsonObject {
   last_successful_poll: string;
+  last_polling_delay: string;
   duration: number[];
   claim_conflicts: number[];
   claim_mismatches: number[];
@@ -51,11 +52,13 @@ export interface TaskRunStat extends JsonObject {
   drift: number[];
   load: number[];
   execution: ExecutionStat;
-  polling: FillPoolStat | Omit<FillPoolStat, 'last_successful_poll'>;
+  polling: Omit<FillPoolStat, 'last_successful_poll' | 'last_polling_delay'> &
+    Pick<Partial<FillPoolStat>, 'last_successful_poll' | 'last_polling_delay'>;
 }
 
 interface FillPoolRawStat extends JsonObject {
   last_successful_poll: string;
+  last_polling_delay: string;
   result_frequency_percent_as_number: {
     [FillPoolResult.Failed]: number;
     [FillPoolResult.NoAvailableWorkers]: number;
@@ -123,37 +126,61 @@ export function createTaskRunAggregator(
   const pollingDurationQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimConflictsQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimMismatchesQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  const taskPollingEvents$: Observable<
-    Pick<TaskRunStat, 'polling'>
-  > = taskPollingLifecycle.events.pipe(
-    filter(
-      (taskEvent: TaskLifecycleEvent) =>
-        isTaskPollingCycleEvent(taskEvent) && isOk<ClaimAndFillPoolResult, unknown>(taskEvent.event)
+  const taskPollingEvents$: Observable<Pick<TaskRunStat, 'polling'>> = combineLatest([
+    // get latest polling stats
+    taskPollingLifecycle.events.pipe(
+      filter(
+        (taskEvent: TaskLifecycleEvent) =>
+          isTaskPollingCycleEvent(taskEvent) &&
+          isOk<ClaimAndFillPoolResult, unknown>(taskEvent.event)
+      ),
+      map((taskEvent: TaskLifecycleEvent) => {
+        const {
+          result,
+          stats: { tasksClaimed, tasksUpdated, tasksConflicted } = {},
+        } = ((taskEvent.event as unknown) as Ok<ClaimAndFillPoolResult>).value;
+        const duration = (taskEvent?.timing?.stop ?? 0) - (taskEvent?.timing?.start ?? 0);
+        return {
+          polling: {
+            last_successful_poll: new Date().toISOString(),
+            // Track how long the polling cycle took from begining until all claimed tasks were marked as running
+            duration: duration ? pollingDurationQueue(duration) : pollingDurationQueue(),
+            // Track how many version conflicts occured during polling
+            claim_conflicts: isNumber(tasksConflicted)
+              ? claimConflictsQueue(tasksConflicted)
+              : claimConflictsQueue(),
+            // Track how much of a mismatch there is between claimed and updated
+            claim_mismatches:
+              isNumber(tasksClaimed) && isNumber(tasksUpdated)
+                ? claimMismatchesQueue(tasksUpdated - tasksClaimed)
+                : claimMismatchesQueue(),
+            result_frequency_percent_as_number: resultFrequencyQueue(result),
+          },
+        };
+      })
     ),
-    map((taskEvent: TaskLifecycleEvent) => {
-      const {
-        result,
-        stats: { tasksClaimed, tasksUpdated, tasksConflicted } = {},
-      } = ((taskEvent.event as unknown) as Ok<ClaimAndFillPoolResult>).value;
-      const duration = (taskEvent?.timing?.stop ?? 0) - (taskEvent?.timing?.start ?? 0);
-      return {
-        polling: {
-          last_successful_poll: new Date().toISOString(),
-          // Track how long the polling cycle took from begining until all claimed tasks were marked as running
-          duration: duration ? pollingDurationQueue(duration) : pollingDurationQueue(),
-          // Track how many version conflicts occured during polling
-          claim_conflicts: isNumber(tasksConflicted)
-            ? claimConflictsQueue(tasksConflicted)
-            : claimConflictsQueue(),
-          // Track how much of a mismatch there is between claimed and updated
-          claim_mismatches:
-            isNumber(tasksClaimed) && isNumber(tasksUpdated)
-              ? claimMismatchesQueue(tasksUpdated - tasksClaimed)
-              : claimMismatchesQueue(),
-          result_frequency_percent_as_number: resultFrequencyQueue(result),
-        },
-      };
-    })
+    // get DateTime of latest polling delay refresh
+    merge(
+      /**
+       * as `combineLatest` hangs until it has its first value and we're not likely to reconfigure the delay in normal deployments, we needed some initial value.
+        I've used _now_ (`new Date().toISOString()`) as it made the most sense (it would be the time Kibana started), but it _could_ be confusing in the future.
+       */
+      of(new Date().toISOString()),
+      taskPollingLifecycle.events.pipe(
+        filter(
+          (taskEvent: TaskLifecycleEvent) =>
+            isTaskManagerStatEvent(taskEvent) && taskEvent.id === 'pollingDelay'
+        ),
+        map(() => new Date().toISOString())
+      )
+    ),
+  ]).pipe(
+    map(([{ polling }, pollingDelay]) => ({
+      polling: {
+        last_polling_delay: pollingDelay,
+        ...polling,
+      },
+    }))
   );
 
   return combineLatest([
@@ -234,6 +261,8 @@ export function summarizeTaskRunStat(
     polling: {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       last_successful_poll,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      last_polling_delay,
       duration: pollingDuration,
       result_frequency_percent_as_number: pollingResultFrequency,
       claim_conflicts: claimConflicts,
@@ -249,6 +278,7 @@ export function summarizeTaskRunStat(
     value: {
       polling: {
         ...(last_successful_poll ? { last_successful_poll } : {}),
+        ...(last_polling_delay ? { last_polling_delay } : {}),
         duration: calculateRunningAverage(pollingDuration as number[]),
         claim_conflicts: calculateRunningAverage(claimConflicts as number[]),
         claim_mismatches: calculateRunningAverage(claimMismatches as number[]),
