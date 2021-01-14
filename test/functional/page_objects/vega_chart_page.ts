@@ -93,9 +93,9 @@ export function VegaChartPageProvider({
       const aceGutter = await this.getAceGutterContainer();
 
       await aceGutter.doubleClick();
-      await browser.pressKeys(browser.keys.RIGHT);
-      await browser.pressKeys(browser.keys.LEFT);
-      await browser.pressKeys(browser.keys.LEFT);
+      await browser.pressKeys(browser.keys.ARROW_RIGHT);
+      await browser.pressKeys(browser.keys.ARROW_LEFT);
+      await browser.pressKeys(browser.keys.ARROW_LEFT);
       await browser.pressKeys(text);
     }
 

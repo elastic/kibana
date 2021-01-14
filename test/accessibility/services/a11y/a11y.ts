@@ -106,10 +106,7 @@ export function A11yProvider({ getService }: FtrProviderContext) {
         },
       };
 
-      await (Wd.driver.manage() as any).setTimeouts({
-        ...(await (Wd.driver.manage() as any).getTimeouts()),
-        script: 600000,
-      });
+      await Wd.driver.setTimeout(Object.assign(await Wd.driver.getTimeouts(), { script: 600000 }));
 
       const report = normalizeResult(
         await browser.executeAsync(analyzeWithAxe, context, axeOptions)

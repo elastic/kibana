@@ -22,15 +22,10 @@ import Fs from 'fs';
 
 import * as Rx from 'rxjs';
 import { mergeMap, map, takeUntil, catchError } from 'rxjs/operators';
+import { remote } from 'webdriverio';
 import { Lifecycle } from '@kbn/test/src/functional_test_runner/lib/lifecycle';
 import { ToolingLog } from '@kbn/dev-utils';
-import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
-import geckoDriver from 'geckodriver';
-import { Builder, logging } from 'selenium-webdriver';
-import chrome from 'selenium-webdriver/chrome';
-import firefox from 'selenium-webdriver/firefox';
-import edge from 'selenium-webdriver/edge';
 // @ts-ignore internal modules are not typed
 import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
@@ -97,199 +92,189 @@ async function attemptToCreateCommand(
   const buildDriverInstance = async () => {
     switch (browserType) {
       case 'chrome': {
-        const chromeOptions = new chrome.Options();
-        chromeOptions.addArguments(
+        const args = [
           // Disables the sandbox for all process types that are normally sandboxed.
-          'no-sandbox',
+          '--no-sandbox',
           // Launches URL in new browser window.
-          'new-window',
+          '--new-window',
           // By default, file:// URIs cannot read other file:// URIs. This is an override for developers who need the old behavior for testing.
-          'allow-file-access-from-files',
+          '--allow-file-access-from-files',
           // Use fake device for Media Stream to replace actual camera and microphone.
-          'use-fake-device-for-media-stream',
+          '--use-fake-device-for-media-stream',
           // Bypass the media stream infobar by selecting the default device for media streams (e.g. WebRTC). Works with --use-fake-device-for-media-stream.
-          'use-fake-ui-for-media-stream'
-        );
+          '--use-fake-ui-for-media-stream',
+        ];
 
         if (process.platform === 'linux') {
           // The /dev/shm partition is too small in certain VM environments, causing
           // Chrome to fail or crash. Use this flag to work-around this issue
           // (a temporary directory will always be used to create anonymous shared memory files).
-          chromeOptions.addArguments('disable-dev-shm-usage');
+          args.push('--disable-dev-shm-usage');
         }
 
         if (headlessBrowser === '1') {
           // Use --disable-gpu to avoid an error from a missing Mesa library, as per
           // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-          chromeOptions.headless();
-          chromeOptions.addArguments('disable-gpu');
+          args.push('--headless', '--disable-gpu');
         }
 
         if (certValidation === '0') {
-          chromeOptions.addArguments('ignore-certificate-errors');
+          args.push('--ignore-certificate-errors');
         }
 
         if (remoteDebug === '1') {
           // Visit chrome://inspect in chrome to remotely view/debug
-          chromeOptions.headless();
-          chromeOptions.addArguments('disable-gpu', 'remote-debugging-port=9222');
+          args.push('--headless', '--disable-gpu', '--remote-debugging-port=9222');
         }
+
+        const chromeOptions: any = { args, prefs: chromiumUserPrefs };
 
         if (browserBinaryPath) {
-          chromeOptions.setChromeBinaryPath(browserBinaryPath);
+          chromeOptions.binary = browserBinaryPath;
         }
 
-        const prefs = new logging.Preferences();
-        prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
-        chromeOptions.setUserPreferences(chromiumUserPrefs);
-        chromeOptions.setLoggingPrefs(prefs);
-        chromeOptions.set('unexpectedAlertBehaviour', 'accept');
-        chromeOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
-
-        let session;
-        if (remoteSessionUrl) {
-          session = await new Builder()
-            .forBrowser(browserType)
-            .setChromeOptions(chromeOptions)
-            .usingServer(remoteSessionUrl)
-            .build();
-        } else {
-          session = await new Builder()
-            .forBrowser(browserType)
-            .setChromeOptions(chromeOptions)
-            .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
-            .build();
-        }
-
-        return {
-          session,
-          consoleLog$: pollForLogEntry$(
-            session,
-            logging.Type.BROWSER,
-            config.logPollingMs,
-            lifecycle.cleanup.after$
-          ).pipe(
-            takeUntil(lifecycle.cleanup.after$),
-            map(({ message, level: { name: level } }) => ({
-              message: message.replace(/\\n/g, '\n'),
-              level,
-            }))
-          ),
+        const options = {
+          capabilities: {
+            browserName: 'chrome',
+            // loggingPrefs: { browser: 'ALL' }, // driver: 'ALL' ?
+            // acceptInsecureCerts: config.acceptInsecureCerts,
+            chromeOptions,
+          },
         };
+
+        const browser = await remote(options);
+
+        return { session: browser, consoleLog$: Rx.empty };
+
+        // return {
+        //   session,
+        //   consoleLog$: pollForLogEntry$(
+        //     session,
+        //     logging.Type.BROWSER,
+        //     config.logPollingMs,
+        //     lifecycle.cleanup.after$
+        //   ).pipe(
+        //     takeUntil(lifecycle.cleanup.after$),
+        //     map(({ message, level: { name: level } }) => ({
+        //       message: message.replace(/\\n/g, '\n'),
+        //       level,
+        //     }))
+        //   ),
+        // };
       }
 
-      case 'msedge': {
-        if (edgePaths && edgePaths.browserPath && edgePaths.driverPath) {
-          const edgeOptions = new edge.Options();
-          if (headlessBrowser === '1') {
-            // @ts-ignore internal modules are not typed
-            edgeOptions.headless();
-          }
-          // @ts-ignore internal modules are not typed
-          edgeOptions.setEdgeChromium(true);
-          // @ts-ignore internal modules are not typed
-          edgeOptions.setBinaryPath(edgePaths.browserPath);
-          const options = edgeOptions.get('ms:edgeOptions');
-          // overriding options to include preferences
-          Object.assign(options, { prefs: chromiumUserPrefs });
-          edgeOptions.set('ms:edgeOptions', options);
-          const session = await new Builder()
-            .forBrowser('MicrosoftEdge')
-            .setEdgeOptions(edgeOptions)
-            .setEdgeService(new edge.ServiceBuilder(edgePaths.driverPath))
-            .build();
-          return {
-            session,
-            consoleLog$: pollForLogEntry$(
-              session,
-              logging.Type.BROWSER,
-              config.logPollingMs,
-              lifecycle.cleanup.after$
-            ).pipe(
-              takeUntil(lifecycle.cleanup.after$),
-              map(({ message, level: { name: level } }) => ({
-                message: message.replace(/\\n/g, '\n'),
-                level,
-              }))
-            ),
-          };
-        } else {
-          throw new Error(
-            `Chromium Edge session requires browser or driver path to be defined: ${JSON.stringify(
-              edgePaths
-            )}`
-          );
-        }
-      }
+      // case 'msedge': {
+      //   if (edgePaths && edgePaths.browserPath && edgePaths.driverPath) {
+      //     const edgeOptions = new edge.Options();
+      //     if (headlessBrowser === '1') {
+      //       // @ts-ignore internal modules are not typed
+      //       edgeOptions.headless();
+      //     }
+      //     // @ts-ignore internal modules are not typed
+      //     edgeOptions.setEdgeChromium(true);
+      //     // @ts-ignore internal modules are not typed
+      //     edgeOptions.setBinaryPath(edgePaths.browserPath);
+      //     const options = edgeOptions.get('ms:edgeOptions');
+      //     // overriding options to include preferences
+      //     Object.assign(options, { prefs: chromiumUserPrefs });
+      //     edgeOptions.set('ms:edgeOptions', options);
+      //     const session = await new Builder()
+      //       .forBrowser('MicrosoftEdge')
+      //       .setEdgeOptions(edgeOptions)
+      //       .setEdgeService(new edge.ServiceBuilder(edgePaths.driverPath))
+      //       .build();
+      //     return {
+      //       session,
+      //       consoleLog$: pollForLogEntry$(
+      //         session,
+      //         logging.Type.BROWSER,
+      //         config.logPollingMs,
+      //         lifecycle.cleanup.after$
+      //       ).pipe(
+      //         takeUntil(lifecycle.cleanup.after$),
+      //         map(({ message, level: { name: level } }) => ({
+      //           message: message.replace(/\\n/g, '\n'),
+      //           level,
+      //         }))
+      //       ),
+      //     };
+      //   } else {
+      //     throw new Error(
+      //       `Chromium Edge session requires browser or driver path to be defined: ${JSON.stringify(
+      //         edgePaths
+      //       )}`
+      //     );
+      //   }
+      // }
 
-      case 'firefox': {
-        const firefoxOptions = new firefox.Options();
-        // Firefox 65+ supports logging console output to stdout
-        firefoxOptions.set('moz:firefoxOptions', {
-          prefs: { 'devtools.console.stdout.content': true },
-        });
-        firefoxOptions.setPreference('browser.download.folderList', 2);
-        firefoxOptions.setPreference('browser.download.manager.showWhenStarting', false);
-        firefoxOptions.setPreference('browser.download.dir', downloadDir);
-        firefoxOptions.setPreference(
-          'browser.helperApps.neverAsk.saveToDisk',
-          'application/comma-separated-values, text/csv, text/plain'
-        );
-        firefoxOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
+      // case 'firefox': {
+      //   const firefoxOptions = new firefox.Options();
+      //   // Firefox 65+ supports logging console output to stdout
+      //   firefoxOptions.set('moz:firefoxOptions', {
+      //     prefs: { 'devtools.console.stdout.content': true },
+      //   });
+      //   firefoxOptions.setPreference('browser.download.folderList', 2);
+      //   firefoxOptions.setPreference('browser.download.manager.showWhenStarting', false);
+      //   firefoxOptions.setPreference('browser.download.dir', downloadDir);
+      //   firefoxOptions.setPreference(
+      //     'browser.helperApps.neverAsk.saveToDisk',
+      //     'application/comma-separated-values, text/csv, text/plain'
+      //   );
+      //   firefoxOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
-        if (headlessBrowser === '1') {
-          // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
-          firefoxOptions.headless();
-        }
+      //   if (headlessBrowser === '1') {
+      //     // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
+      //     firefoxOptions.headless();
+      //   }
 
-        // Windows issue with stout socket https://github.com/elastic/kibana/issues/52053
-        if (process.platform === 'win32') {
-          const session = await new Builder()
-            .forBrowser(browserType)
-            .setFirefoxOptions(firefoxOptions)
-            .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path))
-            .build();
-          return {
-            session,
-            consoleLog$: Rx.EMPTY,
-          };
-        }
+      //   // Windows issue with stout socket https://github.com/elastic/kibana/issues/52053
+      //   if (process.platform === 'win32') {
+      //     const session = await new Builder()
+      //       .forBrowser(browserType)
+      //       .setFirefoxOptions(firefoxOptions)
+      //       .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path))
+      //       .build();
+      //     return {
+      //       session,
+      //       consoleLog$: Rx.EMPTY,
+      //     };
+      //   }
 
-        const { input, chunk$, cleanup } = await createStdoutSocket();
-        lifecycle.cleanup.add(cleanup);
+      //   const { input, chunk$, cleanup } = await createStdoutSocket();
+      //   lifecycle.cleanup.add(cleanup);
 
-        const session = await new Builder()
-          .forBrowser(browserType)
-          .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(
-            new firefox.ServiceBuilder(geckoDriver.path).setStdio(['ignore', input, 'ignore'])
-          )
-          .build();
+      //   const session = await new Builder()
+      //     .forBrowser(browserType)
+      //     .setFirefoxOptions(firefoxOptions)
+      //     .setFirefoxService(
+      //       new firefox.ServiceBuilder(geckoDriver.path).setStdio(['ignore', input, 'ignore'])
+      //     )
+      //     .build();
 
-        const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
+      //   const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
 
-        return {
-          session,
-          consoleLog$: chunk$.pipe(
-            map((chunk) => chunk.toString('utf8')),
-            mergeMap((msg) => {
-              const match = msg.match(CONSOLE_LINE_RE);
-              if (!match) {
-                log.debug('Firefox stdout: ' + msg);
-                return [];
-              }
+      //   return {
+      //     session,
+      //     consoleLog$: chunk$.pipe(
+      //       map((chunk) => chunk.toString('utf8')),
+      //       mergeMap((msg) => {
+      //         const match = msg.match(CONSOLE_LINE_RE);
+      //         if (!match) {
+      //           log.debug('Firefox stdout: ' + msg);
+      //           return [];
+      //         }
 
-              const [, level, message] = match;
-              return [
-                {
-                  level,
-                  message: message.trim(),
-                },
-              ];
-            })
-          ),
-        };
-      }
+      //         const [, level, message] = match;
+      //         return [
+      //           {
+      //             level,
+      //             message: message.trim(),
+      //           },
+      //         ];
+      //       })
+      //     ),
+      //   };
+      // }
 
       default:
         throw new Error(`${browserType} is not supported yet`);
@@ -323,16 +308,16 @@ export async function initWebDriver(
   lifecycle: Lifecycle,
   config: BrowserConfig
 ) {
-  const logger = getLogger('webdriver.http.Executor');
-  logger.setLevel(logging.Level.FINEST);
-  logger.addHandler((entry: { message: string }) => {
-    if (entry.message.match(/\/session\/\w+\/log\b/)) {
-      // ignore polling requests for logs
-      return;
-    }
+  // const logger = getLogger('webdriver.http.Executor');
+  // logger.setLevel(logging.Level.FINEST);
+  // logger.addHandler((entry: { message: string }) => {
+  //   if (entry.message.match(/\/session\/\w+\/log\b/)) {
+  //     // ignore polling requests for logs
+  //     return;
+  //   }
 
-    log.verbose(entry.message);
-  });
+  //   log.verbose(entry.message);
+  // });
 
   // create browser download folder
   Fs.mkdirSync(downloadDir, { recursive: true });

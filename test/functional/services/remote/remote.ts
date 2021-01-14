@@ -64,62 +64,60 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   };
 
   const { driver, consoleLog$ } = await initWebDriver(log, browserType, lifecycle, browserConfig);
-  const caps = await driver.getCapabilities();
+  const caps = await driver.capabilities;
 
   log.info(
-    `Remote initialized: ${caps.get('browserName')} ${caps.get(
-      'browserVersion'
-    )}, collectingCoverage=${collectCoverage}`
+    `Remote initialized: ${caps.browserName} ${caps.version}, collectingCoverage=${collectCoverage}`
   );
 
-  if ([Browsers.Chrome, Browsers.ChromiumEdge].includes(browserType)) {
-    log.info(
-      `${browserType}driver version: ${caps.get(browserType)[`${browserType}driverVersion`]}`
-    );
-  }
+  // TODO: check Firefox
+  // if ([Browsers.Chrome, Browsers.ChromiumEdge].includes(browserType)) {
+  //   log.info(`${browserType}driver version: ${caps[browserType][`${browserType}driverVersion`]}`);
+  // }
 
-  consoleLog$
-    .pipe(
-      mergeMap((logEntry) => {
-        if (collectCoverage && logEntry.message.includes(coveragePrefix)) {
-          const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
-          const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
-          writeCoverage(coverageJson);
+  // TODO: Fix code coverage collection
+  // consoleLog$
+  //   .pipe(
+  //     mergeMap((logEntry) => {
+  //       if (collectCoverage && logEntry.message.includes(coveragePrefix)) {
+  //         const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
+  //         const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
+  //         writeCoverage(coverageJson);
 
-          // filter out this message
-          return [];
-        }
+  //         // filter out this message
+  //         return [];
+  //       }
 
-        return [logEntry];
-      })
-    )
-    .subscribe({
-      next({ message, level }) {
-        const msg = message.replace(/\\n/g, '\n');
-        log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
-          `browser[${level}] ${msg}`
-        );
-      },
-    });
+  //       return [logEntry];
+  //     })
+  //   )
+  //   .subscribe({
+  //     next({ message, level }) {
+  //       const msg = message.replace(/\\n/g, '\n');
+  //       log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
+  //         `browser[${level}] ${msg}`
+  //       );
+  //     },
+  //   });
 
   lifecycle.beforeTests.add(async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite
-    await driver.manage().window().setRect({ width: 1600, height: 1000 });
+    await driver.setWindowRect(null, null, 1600, 1000);
   });
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
   lifecycle.beforeTestSuite.add(async () => {
-    windowSizeStack.unshift(await driver.manage().window().getRect());
+    windowSizeStack.unshift(await driver.getWindowRect());
   });
 
   lifecycle.beforeEachTest.add(async () => {
-    await driver.manage().setTimeouts({ implicit: config.get('timeouts.find') });
+    await driver.setTimeout({ implicit: config.get('timeouts.find') });
   });
 
   lifecycle.afterTestSuite.add(async () => {
     const { width, height } = windowSizeStack.shift()!;
-    await driver.manage().window().setRect({ width, height });
+    await driver.setWindowRect(null, null, width, height);
     await clearBrowserStorage('sessionStorage');
     await clearBrowserStorage('localStorage');
   });
@@ -136,7 +134,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       }
     }
 
-    await driver.quit();
+    await driver.deleteSession();
   });
 
   return { driver, browserType, consoleLog$ };

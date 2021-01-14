@@ -589,7 +589,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       for (let i = 0; i < existingText.length; i++) {
         await browser.pressKeys(browser.keys.BACK_SPACE);
       }
-      await browser.pressKeys(...script.split(''));
+      await browser.pressKeys(script.split(''));
     }
 
     async openScriptedFieldHelp(activeTab: string) {
