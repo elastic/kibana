@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../../common/containers/source';
@@ -52,27 +52,38 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
   );
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <Field
-          field={thresholdField}
-          idAria="detectionEngineStepDefineRuleThresholdField"
-          data-test-subj="detectionEngineStepDefineRuleThresholdField"
-          describedByIds={fieldDescribedByIds}
-          type={thresholdField.type}
-          euiFieldProps={fieldEuiFieldProps}
-        />
-      </EuiFlexItem>
-      <OperatorWrapper grow={false}>{'>='}</OperatorWrapper>
-      <EuiFlexItem grow={false}>
-        <Field
-          field={thresholdValue}
-          idAria="detectionEngineStepDefineRuleThresholdValue"
-          data-test-subj="detectionEngineStepDefineRuleThresholdValue"
-          describedByIds={valueDescribedByIds}
-          type={thresholdValue.type}
-        />
-      </EuiFlexItem>
+    <EuiFlexGroup direction="column" style={{ marginLeft: 0 }}>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <Field
+            field={thresholdField}
+            idAria="detectionEngineStepDefineRuleThresholdField"
+            data-test-subj="detectionEngineStepDefineRuleThresholdField"
+            describedByIds={fieldDescribedByIds}
+            type={thresholdField.type}
+            euiFieldProps={fieldEuiFieldProps}
+          />
+        </EuiFlexItem>
+        <OperatorWrapper grow={false}>{'>='}</OperatorWrapper>
+        <EuiFlexItem grow={false}>
+          <Field
+            field={thresholdValue}
+            idAria="detectionEngineStepDefineRuleThresholdValue"
+            data-test-subj="detectionEngineStepDefineRuleThresholdValue"
+            describedByIds={valueDescribedByIds}
+            type={thresholdValue.type}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButton>{'Add Aggregation'}</EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton>{'Specify Cardinality'}</EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
     </EuiFlexGroup>
   );
 };
