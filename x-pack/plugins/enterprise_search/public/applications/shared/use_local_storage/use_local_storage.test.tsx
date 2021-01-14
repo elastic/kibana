@@ -51,16 +51,19 @@ describe('useLocalStorage', () => {
     global.localStorage.setItem(KEY, 'blah blah blah');
     const wrapper = shallow(<TestComponent />);
     expect(wrapper.text()).toBe('foo, bar, baz');
+    expect(global.localStorage.getItem(KEY)).toBe('{"options":["foo","bar","baz"]}');
   });
 
   it('if will use provided default values if state does not already exist in localStorage', () => {
     const wrapper = shallow(<TestComponent />);
     expect(wrapper.text()).toBe('foo, bar, baz');
+    expect(global.localStorage.getItem(KEY)).toBe('{"options":["foo","bar","baz"]}');
   });
 
   it('state can be updated with new values', () => {
     const wrapper = shallow(<TestComponent />);
     wrapper.find('#change').simulate('click');
     expect(wrapper.text()).toBe('big, new, values');
+    expect(global.localStorage.getItem(KEY)).toBe('{"options":["big","new","values"]}');
   });
 });

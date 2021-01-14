@@ -23,32 +23,34 @@ import { useState } from 'react';
  * console.log(foo) // "baz"
  */
 export const useLocalStorage = <Value>(key: string, defaultValue: Value): [Value, Function] => {
-  const getFromStorage = () => {
+  const saveToStorage = (value: Value) => window.localStorage.setItem(key, JSON.stringify(value));
+  const removeFromStorage = () => window.localStorage.removeItem(key);
+  const getFromStorage = (): Value | undefined => {
     const storedItem = window.localStorage.getItem(key);
-    let toStore: Value = defaultValue;
+    if (!storedItem) return;
 
-    if (storedItem !== null) {
-      try {
-        toStore = JSON.parse(storedItem) as Value;
-      } catch (err) {
-        window.localStorage.removeItem(key);
-      }
+    let parsedItem;
+    try {
+      return JSON.parse(storedItem) as Value;
+    } catch (e) {
+      removeFromStorage();
     }
 
-    return toStore;
+    return parsedItem;
   };
 
-  const [item, setItem] = useState<Value>(getFromStorage());
+  const storedItem = getFromStorage();
+  if (!storedItem) {
+    saveToStorage(defaultValue);
+  }
+  const toStore = storedItem || defaultValue;
 
-  const updateFromStorage = () => {
-    const storedItem = getFromStorage();
-    setItem(storedItem);
+  const [item, setItem] = useState<Value>(toStore);
+
+  const saveItem = (value: Value) => {
+    saveToStorage(value);
+    setItem(value);
   };
 
-  const saveToStorage = (value: Value) => {
-    window.localStorage.setItem(key, JSON.stringify(value));
-    updateFromStorage();
-  };
-
-  return [item, saveToStorage];
+  return [item, saveItem];
 };
