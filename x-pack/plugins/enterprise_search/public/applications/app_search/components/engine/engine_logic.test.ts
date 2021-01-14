@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
+import { LogicMounter, mockHttpValues, expectedAsyncError } from '../../../__mocks__';
 
-import { mockHttpValues } from '../../../__mocks__';
 jest.mock('../../../shared/http', () => ({
   HttpLogic: { values: mockHttpValues },
 }));
@@ -193,12 +192,9 @@ describe('EngineLogic', () => {
         const promise = Promise.reject('An error occured');
         http.get.mockReturnValue(promise);
 
-        try {
-          EngineLogic.actions.initializeEngine();
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        EngineLogic.actions.initializeEngine();
+        await expectedAsyncError(promise);
+
         expect(EngineLogic.actions.setEngineNotFound).toHaveBeenCalledWith(true);
       });
     });
