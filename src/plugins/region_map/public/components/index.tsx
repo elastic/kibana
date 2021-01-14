@@ -17,10 +17,13 @@
  * under the License.
  */
 
-/**
- * Use * syntax so that these exports do not break when internal
- * types are stripped.
- */
-export * from './external_basemap_types';
-export * from './map_types';
-export * from './region_map_types';
+import React, { lazy } from 'react';
+import { IServiceSettings } from 'src/plugins/maps_legacy/public';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { RegionMapVisParams } from '../region_map_types';
+
+const RegionMapOptions = lazy(() => import('./region_map_options'));
+
+export const createRegionMapOptions = (getServiceSettings: () => Promise<IServiceSettings>) => (
+  props: VisOptionsProps<RegionMapVisParams>
+) => <RegionMapOptions {...props} getServiceSettings={getServiceSettings} />;
