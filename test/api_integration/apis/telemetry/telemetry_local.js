@@ -77,7 +77,6 @@ export default function ({ getService }) {
       expect(stats.stack_stats.kibana.plugins.ui_counters).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.application_usage).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.kql.defaultQueryLanguage).to.be.a('string');
-      expect(stats.stack_stats.kibana.plugins['tsvb-validation']).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.localization).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.csp.strict).to.be(false);
       expect(stats.stack_stats.kibana.plugins.csp.warnLegacyBrowsers).to.be(true);
