@@ -79,6 +79,7 @@ const EventDetailsComponent: React.FC<Props> = ({
               browserFields={browserFields}
               timelineId={timelineId}
             />
+            <EuiSpacer size="l" />
           </>
         ),
       },
