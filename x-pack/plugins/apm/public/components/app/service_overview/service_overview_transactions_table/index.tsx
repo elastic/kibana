@@ -209,10 +209,8 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     {
       field: 'throughput',
       name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnTroughput',
-        {
-          defaultMessage: 'Traffic',
-        }
+        'xpack.apm.serviceOverview.transactionsTableColumnThroughput',
+        { defaultMessage: 'Throughput' }
       ),
       width: px(unit * 10),
       render: (_, { throughput }) => {
