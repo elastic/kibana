@@ -47,7 +47,9 @@ type DataVisualizerTableItem = FieldVisConfig | FileBasedFieldVisConfig;
 interface DataVisualizerTableProps<T> {
   items: T[];
   pageState: DataVisualizerIndexBasedAppState | DataVisualizerFileBasedAppState;
-  updatePageState: (update: any) => void;
+  updatePageState: (
+    update: Partial<DataVisualizerIndexBasedAppState | DataVisualizerFileBasedAppState>
+  ) => void;
   getItemIdToExpandedRowMap: (itemIds: string[], items: T[]) => ItemIdToExpandedRowMap;
 }
 

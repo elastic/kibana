@@ -93,5 +93,5 @@ export function isFileBasedFieldVisConfig(
 export function isIndexBasedFieldVisConfig(
   field: FieldVisConfig | FileBasedFieldVisConfig
 ): field is FieldVisConfig {
-  return (field as FieldVisConfig).existsInDocs !== undefined;
+  return field.hasOwnProperty('existsInDocs');
 }
