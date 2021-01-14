@@ -133,20 +133,26 @@ export const Timeline: FunctionComponent = () => {
             }
           }}
         >
-          <EuiFlexGroup gutterSize="none" responsive={false}>
+          <EuiFlexGroup gutterSize="none" alignItems="flexStart" responsive={false}>
             <EuiFlexItem>
               <div className="ilmTimeline__phasesContainer">
                 {/* These are the actual color bars for the timeline */}
-                <div className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase">
-                  <div className="ilmTimeline__colorBarCommon ilmTimeline__hotPhase__colorBar" />
+                <div
+                  data-test-subj="ilmTimelineHotPhase"
+                  className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase"
+                >
+                  <div className="ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar" />
                   <TimelinePhaseText
                     phaseName={i18nTexts.hotPhase}
                     durationInPhase={getDurationInPhaseContent('hot')}
                   />
                 </div>
                 {formData._meta?.warm.enabled && (
-                  <div className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase">
-                    <div className="ilmTimeline__colorBarCommon ilmTimeline__warmPhase__colorBar" />
+                  <div
+                    data-test-subj="ilmTimelineWarmPhase"
+                    className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase"
+                  >
+                    <div className="ilmTimeline__colorBar ilmTimeline__warmPhase__colorBar" />
                     <TimelinePhaseText
                       phaseName={i18nTexts.warmPhase}
                       durationInPhase={getDurationInPhaseContent('warm')}
@@ -154,8 +160,11 @@ export const Timeline: FunctionComponent = () => {
                   </div>
                 )}
                 {formData._meta?.cold.enabled && (
-                  <div className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase">
-                    <div className="ilmTimeline__colorBarCommon ilmTimeline__coldPhase__colorBar" />
+                  <div
+                    data-test-subj="ilmTimelineColdPhase"
+                    className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase"
+                  >
+                    <div className="ilmTimeline__colorBar ilmTimeline__coldPhase__colorBar" />
                     <TimelinePhaseText
                       phaseName={i18nTexts.coldPhase}
                       durationInPhase={getDurationInPhaseContent('cold')}
@@ -166,8 +175,11 @@ export const Timeline: FunctionComponent = () => {
             </EuiFlexItem>
             {formData._meta?.delete.enabled && (
               <EuiFlexItem grow={false}>
-                <div className="ilmTimeline__deleteIconContainer">
-                  <EuiIcon type="trash" />
+                <div
+                  data-test-subj="ilmTimelineDeleteIcon"
+                  className="ilmTimeline__deleteIconContainer"
+                >
+                  <EuiIcon size="l" color="danger" type="trash" />
                 </div>
               </EuiFlexItem>
             )}

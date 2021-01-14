@@ -5,6 +5,9 @@ $colorBarHeight: $euiSizeS;
   width: 100%;
 
   &__phasesContainer {
+    /*
+    * Let the delete icon sit on the same line as the phase color bars
+    */
     display: inline-block;
     width: 100%;
 
@@ -24,6 +27,9 @@ $colorBarHeight: $euiSizeS;
     }
 
     &__phase {
+      /*
+      * Let the phase color bars sit horizontally
+      */
       display: inline-block;
 
       padding-left: $euiSizeS;
@@ -32,10 +38,13 @@ $colorBarHeight: $euiSizeS;
   }
 
   &__deleteIconContainer {
-    padding-left: $euiSizeS;
+    /*
+    * Create a bit of space between the timeline and the delete icon
+    */
+    padding-left: $euiSizeM;
   }
 
-  &__colorBarCommon {
+  &__colorBar {
     display: inline-block;
     height: $colorBarHeight;
     border-radius: calc(#{$colorBarHeight}/ 2);
