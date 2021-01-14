@@ -13,10 +13,18 @@ Once you create an index pattern, you're ready to:
 
 [float]
 [[index-patterns-read-only-access]]
+
 === [xpack]#Read-only access#
 If you have insufficient privileges to create or save index patterns, a read-only
 indicator appears in Kibana. The buttons to create new index patterns or save
 existing index patterns are not visible. For more information, see <<xpack-security-authorization>>.
+
+=== Before you begin
+
+* To access the *Index Patterns* view, you must have the {kib} privilege
+`Index Pattern Management`.  To create an index pattern, you must have the {es} privilege
+`view_index_metadata`. To add the privileges, open the main menu, then click *Stack Management > Roles*.
+
 
 [role="screenshot"]
 image::images/management-index-read-only-badge.png[Example of Index Pattern Management's read only access indicator in Kibana's header]
