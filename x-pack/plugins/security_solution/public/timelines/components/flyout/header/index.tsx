@@ -33,6 +33,7 @@ import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import * as commonI18n from '../../timeline/properties/translations';
 import { getTimelineStatusByIdSelector } from './selectors';
+import { focusActiveTimelineButton } from '../../timeline/helpers';
 
 // to hide side borders
 const StyledPanel = styled(EuiPanel)`
@@ -79,10 +80,10 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     [dataProviders, kqlQuery]
   );
 
-  const handleClose = useCallback(
-    () => dispatch(timelineActions.showTimeline({ id: timelineId, show: false })),
-    [dispatch, timelineId]
-  );
+  const handleClose = useCallback(() => {
+    dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
+    focusActiveTimelineButton();
+  }, [dispatch, timelineId]);
 
   return (
     <StyledPanel

@@ -15,7 +15,7 @@ export enum FETCH_STATUS {
   LOADING = 'loading',
   SUCCESS = 'success',
   FAILURE = 'failure',
-  PENDING = 'pending',
+  NOT_INITIATED = 'not_initiated',
 }
 
 export interface FetcherResult<Data> {
@@ -46,7 +46,7 @@ export function useFetcher<TReturn>(
     FetcherResult<InferResponseType<TReturn>>
   >({
     data: undefined,
-    status: FETCH_STATUS.PENDING,
+    status: FETCH_STATUS.NOT_INITIATED,
   });
   const [counter, setCounter] = useState(0);
 

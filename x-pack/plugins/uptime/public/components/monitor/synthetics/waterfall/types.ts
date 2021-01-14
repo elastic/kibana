@@ -11,7 +11,8 @@ interface PlotProperties {
 }
 
 export interface WaterfallDataSeriesConfigProperties {
-  tooltipProps: Record<string, string | number>;
+  tooltipProps?: Record<string, string | number>;
+  showTooltip: boolean;
 }
 
 export type WaterfallDataEntry = PlotProperties & {

@@ -5,6 +5,7 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -24,9 +25,15 @@ import { getUiSettings } from './ui_settings';
 interface SetupDependencies {
   data: DataPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  taskManager: TaskManagerSetupContract;
+}
+export interface StartDependencies {
+  data: DataPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
-export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDependencies> {
+export class EnhancedDataServerPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies> {
   private readonly logger: Logger;
   private sessionService!: SearchSessionService;
 
@@ -65,10 +72,17 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
 
     const router = core.http.createRouter();
     registerSessionRoutes(router);
+
+    this.sessionService.setup(core, {
+      taskManager: deps.taskManager,
+    });
   }
 
-  public start(core: CoreStart) {
-    this.sessionService.start(core, this.initializerContext.config.create());
+  public start(core: CoreStart, { taskManager }: StartDependencies) {
+    this.sessionService.start(core, {
+      taskManager,
+      config$: this.initializerContext.config.create(),
+    });
   }
 
   public stop() {
