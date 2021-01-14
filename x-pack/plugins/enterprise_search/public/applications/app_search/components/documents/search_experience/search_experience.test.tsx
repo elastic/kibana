@@ -53,11 +53,9 @@ describe('SearchExperience', () => {
       expect(wrapper.find(CustomizationModal).exists()).toBe(false);
 
       wrapper.find(CustomizationCallout).simulate('click');
-
       expect(wrapper.find(CustomizationModal).exists()).toBe(true);
 
       wrapper.find(CustomizationModal).prop('onClose')();
-
       expect(wrapper.find(CustomizationModal).exists()).toBe(false);
     });
 
