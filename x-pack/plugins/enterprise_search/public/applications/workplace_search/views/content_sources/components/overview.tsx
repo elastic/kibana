@@ -235,13 +235,9 @@ export const Overview: React.FC = () => {
                 data-test-subj="SourceGroupLink"
                 className="euiPanel--inset"
               >
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem>
-                    <EuiText size="s" className="eui-textTruncate">
-                      <strong>{group.name}</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiText size="s" className="eui-textTruncate">
+                  <strong>{group.name}</strong>
+                </EuiText>
               </EuiPanelTo>
             </EuiFlexItem>
           ))}
