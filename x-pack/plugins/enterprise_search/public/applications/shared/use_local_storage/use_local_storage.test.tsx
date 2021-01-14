@@ -36,26 +36,6 @@ describe('useLocalStorage', () => {
     );
   };
 
-  const triggerStorageEvent = (key: string) => {
-    // Update storage
-    global.localStorage.setItem(
-      key,
-      JSON.stringify({
-        options: ['big', 'new', 'values'],
-      })
-    );
-
-    // We manually invoke handlers here because I couldn't find a great way to trigger a `storage` event.
-    // In the DOM, this is triggered whenever a storage event (like `setItem` above) occurs in another
-    // context (like another page).
-    addEventListener.mock.calls.forEach((call) => {
-      if (call[0] === 'storage') {
-        const handler: any = call[1];
-        handler({ key });
-      }
-    });
-  };
-
   beforeEach(() => {
     global.localStorage.clear();
     jest.clearAllMocks();
@@ -87,41 +67,5 @@ describe('useLocalStorage', () => {
     const wrapper = shallow(<TestComponent />);
     wrapper.find('#change').simulate('click');
     expect(wrapper.text()).toBe('big, new, values');
-  });
-
-  it('state is updated if localStorage is updated outside of this context', () => {
-    const wrapper1 = shallow(<TestComponent />);
-    const wrapper2 = shallow(<TestComponent />);
-
-    act(() => {
-      triggerStorageEvent(KEY);
-    });
-
-    expect(wrapper1.text()).toBe('big, new, values');
-    expect(wrapper2.text()).toBe('big, new, values');
-  });
-
-  it('state is NOT updated if localStorage is updated outside of this context using a different key', () => {
-    const wrapper1 = shallow(<TestComponent />);
-    const wrapper2 = shallow(<TestComponent />);
-
-    act(() => {
-      triggerStorageEvent('bogus');
-    });
-
-    expect(wrapper1.text()).toBe('foo, bar, baz');
-    expect(wrapper2.text()).toBe('foo, bar, baz');
-  });
-
-  it('storage event listeners are removed after unmounting components', () => {
-    shallow(<TestComponent />);
-    const addStorageEventListenerCall: any = addEventListener.mock.calls.find(
-      ([event]) => event === 'storage'
-    );
-    const handler = addStorageEventListenerCall[1];
-
-    unmountHandler();
-
-    expect(removeEventListener).toHaveBeenCalledWith('storage', handler);
   });
 });

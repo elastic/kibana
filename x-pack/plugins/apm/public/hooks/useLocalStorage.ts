@@ -41,14 +41,5 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
     }
   };
 
-  useEffect(() => {
-    window.addEventListener('storage', (event: StorageEvent) => {
-      if (event.key === key) {
-        updateFromStorage();
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return [item, saveToStorage] as const;
 }

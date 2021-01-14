@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export const useLocalStorage = <T>(key: string, defaultValue: T) => {
   const [item, setItem] = useState<T>(getFromStorage());
@@ -33,16 +33,6 @@ export const useLocalStorage = <T>(key: string, defaultValue: T) => {
     window.localStorage.setItem(key, JSON.stringify(value));
     updateFromStorage();
   };
-
-  useEffect(() => {
-    const handler = (event: StorageEvent) => {
-      if (event.key === key) {
-        updateFromStorage();
-      }
-    };
-    window.addEventListener('storage', handler);
-    return () => window.removeEventListener('storage', handler);
-  }, []);
 
   return [item, saveToStorage] as const;
 };
