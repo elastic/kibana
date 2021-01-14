@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
-import { SwimlaneActionParams } from '.././types';
+import { SwimlaneActionParams } from '../types';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
+import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 
 const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneActionParams>> = ({
   actionParams,
@@ -17,54 +18,7 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
   messageVariables,
   errors,
 }) => {
-  const { alertName, severity, tags, comments } = actionParams;
-  const severityOptions = [
-    {
-      value: 'critical',
-      text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.severitySelectCriticalOptionLabel',
-        {
-          defaultMessage: 'Critical',
-        }
-      ),
-    },
-    {
-      value: 'high',
-      text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.severitySelectHighOptionLabel',
-        {
-          defaultMessage: 'High',
-        }
-      ),
-    },
-    {
-      value: 'medium',
-      text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.severitySelectMediumOptionLabel',
-        {
-          defaultMessage: 'Medium',
-        }
-      ),
-    },
-    {
-      value: 'low',
-      text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.severitySelectLowOptionLabel',
-        {
-          defaultMessage: 'Low',
-        }
-      ),
-    },
-    {
-      value: 'informational',
-      text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.severitySelectInformationalOptionLabel',
-        {
-          defaultMessage: 'Informational',
-        }
-      ),
-    },
-  ];
+  const { alertName, severity, caseId, alertSource, caseName, comments } = actionParams;
 
   return (
     <Fragment>
@@ -79,14 +33,14 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
               }
             )}
           >
-            <EuiSelect
-              fullWidth
-              data-test-subj="severitySelect"
-              options={severityOptions}
-              value={severity}
-              onChange={(e) => {
-                editAction('severity', e.target.value, index);
-              }}
+            <TextFieldWithMessageVariables
+              index={index}
+              data-test-subj="severity"
+              editAction={editAction}
+              messageVariables={messageVariables}
+              paramsProperty={'severity'}
+              inputTargetValue={severity}
+              errors={errors.severity as string[]}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -106,6 +60,7 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
       >
         <TextFieldWithMessageVariables
           index={index}
+          data-test-subj="alertName"
           editAction={editAction}
           messageVariables={messageVariables}
           paramsProperty={'alertName'}
@@ -115,48 +70,89 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
       </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormRow
-        id="swimlaneTags"
+        id="swimlaneCaseId"
         fullWidth
-        error={errors.tags}
-        isInvalid={errors.tags.length > 0 && tags !== undefined}
+        error={errors.caseId}
+        isInvalid={errors.caseId.length > 0 && caseId !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.tagsFieldLabel',
+          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.caseIdFieldLabel',
           {
-            defaultMessage: 'Tags',
+            defaultMessage: 'CaseId',
           }
         )}
       >
         <TextFieldWithMessageVariables
           index={index}
+          data-test-subj="caseId"
           editAction={editAction}
           messageVariables={messageVariables}
-          paramsProperty={'tags'}
-          inputTargetValue={tags}
-          // errors={errors.tags as string[]}
+          paramsProperty={'caseId'}
+          inputTargetValue={caseId}
+          errors={errors.caseId as string[]}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormRow
-        id="swimlaneComments"
+        id="swimlaneCaseName"
         fullWidth
-        error={errors.comments}
-        isInvalid={errors.comments.length > 0 && comments !== undefined}
+        error={errors.caseName}
+        isInvalid={errors.caseName.length > 0 && caseName !== undefined}
+        label={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.caseNameFieldLabel',
+          {
+            defaultMessage: 'Case Name',
+          }
+        )}
+      >
+        <TextFieldWithMessageVariables
+          index={index}
+          data-test-subj="caseName"
+          editAction={editAction}
+          messageVariables={messageVariables}
+          paramsProperty={'caseName'}
+          inputTargetValue={caseName}
+          errors={errors.caseName as string[]}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        id="swimlaneAlertSource"
+        fullWidth
+        error={errors.alertSource}
+        isInvalid={errors.alertSource.length > 0 && alertSource !== undefined}
+        label={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertSourceFieldLabel',
+          {
+            defaultMessage: 'Alert Source',
+          }
+        )}
+      >
+        <TextFieldWithMessageVariables
+          index={index}
+          data-test-subj="alertSource"
+          editAction={editAction}
+          messageVariables={messageVariables}
+          paramsProperty={'alertSource'}
+          inputTargetValue={alertSource}
+          errors={errors.alertSource as string[]}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <TextAreaWithMessageVariables
+        index={index}
+        data-test-subj="comments"
+        editAction={editAction}
+        messageVariables={messageVariables}
+        paramsProperty={'comments'}
+        inputTargetValue={comments}
+        errors={errors.comments as string[]}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.commentsFieldLabel',
           {
             defaultMessage: 'Comments',
           }
         )}
-      >
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editAction}
-          messageVariables={messageVariables}
-          paramsProperty={'comments'}
-          inputTargetValue={comments}
-          errors={errors.comments as string[]}
-        />
-      </EuiFormRow>
+      />
     </Fragment>
   );
 };

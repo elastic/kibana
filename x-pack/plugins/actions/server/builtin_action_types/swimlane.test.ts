@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SeverityActionOptions } from '../../../triggers_actions_ui/public/application/components/builtin_action_types/types';
-
 jest.mock('./lib/post_swimlane', () => ({
   postSwimlane: jest.fn(),
 }));
@@ -20,6 +17,7 @@ import {
   ActionTypeConfigType,
   ActionTypeSecretsType,
   getActionType,
+  getBodyForEventAction,
   SwimlaneActionType,
 } from './swimlane';
 
@@ -48,11 +46,28 @@ describe('get()', () => {
 describe('validateConfig()', () => {
   test('should validate and pass when config is valid', () => {
     expect(
-      validateConfig(actionType, { apiUrl: 'bar', appId: '345', username: 'testuser' })
+      validateConfig(actionType, {
+        apiUrl: 'bar',
+        appId: '345',
+        mappings: {
+          alertNameKeyName: 'alert-name',
+          alertSourceKeyName: 'product-source',
+          severityKeyName: 'severity',
+          caseNameKeyName: 'case-name',
+          caseIdKeyName: 'case-id',
+        },
+      })
     ).toEqual({
       apiUrl: 'bar',
       appId: '345',
-      username: 'testuser',
+      mappings: {
+        alertNameKeyName: 'alert-name',
+        alertSourceKeyName: 'product-source',
+        severityKeyName: 'severity',
+        caseNameKeyName: 'case-name',
+        caseIdKeyName: 'case-id',
+        commentsKeyName: null,
+      },
     });
   });
 
@@ -61,7 +76,13 @@ describe('validateConfig()', () => {
       validateConfig(actionType, {
         apiUrl: 'bar',
         appId: '345',
-        username: 'testuser',
+        mappings: {
+          alertNameKeyName: 'alert-name',
+          alertSourceKeyName: 'product-source',
+          severityKeyName: 'severity',
+          caseNameKeyName: 'case-name',
+          caseIdKeyName: 'case-id',
+        },
         shouldNotBeHere: true,
       });
     }).toThrowErrorMatchingInlineSnapshot(
@@ -84,12 +105,25 @@ describe('validateConfig()', () => {
       validateConfig(actionType, {
         apiUrl: 'https://test.swimlane.com',
         appId: '345',
-        username: 'testuser',
+        mappings: {
+          alertNameKeyName: 'alert-name',
+          alertSourceKeyName: 'product-source',
+          severityKeyName: 'severity',
+          caseNameKeyName: 'case-name',
+          caseIdKeyName: 'case-id',
+        },
       })
     ).toEqual({
       apiUrl: 'https://test.swimlane.com',
       appId: '345',
-      username: 'testuser',
+      mappings: {
+        alertNameKeyName: 'alert-name',
+        alertSourceKeyName: 'product-source',
+        severityKeyName: 'severity',
+        caseNameKeyName: 'case-name',
+        caseIdKeyName: 'case-id',
+        commentsKeyName: null,
+      },
     });
   });
 
@@ -108,7 +142,13 @@ describe('validateConfig()', () => {
       validateConfig(actionType, {
         apiUrl: 'https://test.swimlane.com',
         appId: '345',
-        username: 'testuser',
+        mappings: {
+          alertNameKeyName: 'alert-name',
+          alertSourceKeyName: 'product-source',
+          severityKeyName: 'severity',
+          caseNameKeyName: 'case-name',
+          caseIdKeyName: 'case-id',
+        },
       });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: error configuring swimlane action: target url is not added to allowedHosts"`
@@ -120,9 +160,11 @@ describe('validateParams()', () => {
   test('should validate and pass when params is valid', () => {
     const params = {
       alertName: 'alert name',
-      tags: 'tags',
       comments: 'my comments',
-      severity: SeverityActionOptions.CRITICAL,
+      severity: 'critical',
+      alertSource: 'elastic',
+      caseId: null,
+      caseName: null,
     };
 
     expect(validateParams(actionType, params)).toEqual(params);
@@ -149,5 +191,45 @@ describe('validateSecrets()', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [apiToken]: expected value of type [string] but got [undefined]"`
     );
+  });
+});
+
+describe('getBodyForEventAction()', () => {
+  test('should return body when transformation happens', () => {
+    const config = {
+      apiUrl: 'https://test.swimlane.com',
+      appId: '345',
+      mappings: {
+        alertNameKeyName: 'alert-name',
+        alertSourceKeyName: 'product-source',
+        severityKeyName: 'severity',
+        caseNameKeyName: 'case-name',
+        caseIdKeyName: 'case-id',
+        commentsKeyName: 'comments-key',
+      },
+    };
+
+    const params = {
+      alertName: 'alert name',
+      comments: 'my comments',
+      severity: 'critical',
+      alertSource: 'elastic',
+      caseId: '3456',
+      caseName: 'case name',
+    };
+
+    const actual = {
+      applicationId: config.appId,
+      values: {
+        'alert-name': 'alert name',
+        'product-source': 'elastic',
+        severity: 'critical',
+        'case-name': 'case name',
+        'case-id': '3456',
+        'comments-key': 'my comments',
+      },
+    };
+
+    expect(getBodyForEventAction('', config, params)).toEqual(actual);
   });
 });

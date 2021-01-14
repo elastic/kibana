@@ -7,8 +7,8 @@
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/logging';
 import { postSwimlane } from './lib/post_swimlane';
-import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
@@ -28,11 +28,21 @@ export type SwimlaneActionTypeExecutorOptions = ActionTypeExecutorOptions<
 
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
+const configMappingSchema = {
+  alertSourceKeyName: schema.string(),
+  severityKeyName: schema.string(),
+  caseNameKeyName: schema.nullable(schema.string()),
+  caseIdKeyName: schema.string(),
+  alertNameKeyName: schema.string(),
+  commentsKeyName: schema.nullable(schema.string()),
+};
+
 const configSchemaProps = {
   apiUrl: schema.nullable(schema.string()),
   appId: schema.string(),
-  username: schema.string(),
+  mappings: schema.object(configMappingSchema),
 };
+
 const ConfigSchema = schema.object(configSchemaProps);
 // secrets definition
 
@@ -46,17 +56,12 @@ const SecretsSchema = schema.object({
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
-const PayloadSeveritySchema = schema.oneOf([
-  schema.literal('critical'),
-  schema.literal('error'),
-  schema.literal('warning'),
-  schema.literal('info'),
-]);
-
 const ParamsSchema = schema.object({
   alertName: schema.string(),
-  severity: schema.maybe(PayloadSeveritySchema),
-  tags: schema.nullable(schema.string()),
+  severity: schema.string(),
+  alertSource: schema.string(),
+  caseName: schema.nullable(schema.string()),
+  caseId: schema.nullable(schema.string()),
   comments: schema.nullable(schema.string()),
 });
 
@@ -102,7 +107,13 @@ function valdiateActionTypeConfig(
 }
 
 function getSwimlaneApiUrl(config: ActionTypeConfigType): string {
-  return config.apiUrl + '/app/' + config.appId + '/record';
+  let { apiUrl } = config;
+
+  if (!apiUrl?.endsWith('/api')) {
+    apiUrl += '/api';
+  }
+
+  return `${apiUrl}/app/${config.appId}/record`;
 }
 
 // action executor
@@ -141,21 +152,22 @@ async function executor(
     };
   }
 
-  logger.debug(`response posting swimlane event: ${response.status}`);
+  const { status, data: responseData } = response;
+  logger.debug(`response posting swimlane event: ${status}, ${JSON.stringify(responseData)}`);
 
-  if (response.status === 202) {
+  if (status >= 200 && status <= 204) {
     return {
       status: 'ok',
       actionId,
-      data: response.data,
+      data: responseData,
     };
   }
 
-  if (response.status === 429 || response.status >= 500) {
+  if (status === 429 || status >= 500) {
     const message = i18n.translate('xpack.actions.builtin.swimlane.postingRetryErrorMessage', {
       defaultMessage: 'error posting swimlane event: http status {status}, retry later',
       values: {
-        status: response.status,
+        status,
       },
     });
 
@@ -170,7 +182,7 @@ async function executor(
   const message = i18n.translate('xpack.actions.builtin.swimlane.postingUnexpectedErrorMessage', {
     defaultMessage: 'error posting swimlane event: unexpected status {status}',
     values: {
-      status: response.status,
+      status,
     },
   });
 
@@ -184,44 +196,36 @@ async function executor(
 // utilities
 
 interface SwimlanePayload {
-  $type: string;
-  isNew: boolean;
   applicationId: string;
-  comments?: {
-    $type: string;
-    comments?: string | null;
-  };
-  fieldValues?: {
-    $type: string;
-    alertName: string;
-    severity: string;
-    tags?: string | null;
-  };
+  values?: {};
 }
 
-function getBodyForEventAction(
+export function getBodyForEventAction(
   actionId: string,
   config: ActionTypeConfigType,
   params: ActionParamsType
 ): SwimlanePayload {
   const data: SwimlanePayload = {
-    $type: 'Core.Models.Record.Record, Core',
-    isNew: true,
     applicationId: config.appId,
   };
+  const values = {};
 
-  data.fieldValues = {
-    $type:
-      'System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[System.Object, mscorlib]], mscorlib',
-    alertName: params.alertName,
-    severity: params.severity || 'info',
-    tags: params.tags,
-  };
-  data.comments = {
-    $type:
-      'System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[System.Collections.Generic.List`1[[Core.Models.Record.Comments, Core]], mscorlib]], mscorlib',
-    comments: params.comments,
-  };
+  const { mappings } = config;
+
+  for (const mappingsKey in mappings) {
+    if (!mappings.hasOwnProperty(mappingsKey)) {
+      continue;
+    }
+
+    const keyName = mappings[mappingsKey] as string;
+
+    if (!keyName) {
+      continue;
+    }
+    values[keyName] = params[mappingsKey.replace('KeyName', '')];
+  }
+
+  data.values = values;
 
   return data;
 }

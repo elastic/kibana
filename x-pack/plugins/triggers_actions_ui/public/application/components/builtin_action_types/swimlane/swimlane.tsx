@@ -39,7 +39,6 @@ export function getActionType(): ActionTypeModel<
       const errors = {
         apiUrl: new Array<string>(),
         appId: new Array<string>(),
-        username: new Array<string>(),
         apiToken: new Array<string>(),
       };
       validationResult.errors = errors;
@@ -63,23 +62,16 @@ export function getActionType(): ActionTypeModel<
           )
         );
       }
-      if (!action.config.username) {
-        errors.username.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredUsernameText',
-            {
-              defaultMessage: 'Username is required.',
-            }
-          )
-        );
-      }
       return validationResult;
     },
     validateParams: (actionParams: SwimlaneActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         alertName: new Array<string>(),
-        tags: new Array<string>(),
+        caseId: new Array<string>(),
+        severity: new Array<string>(),
+        caseName: new Array<string>(),
+        alertSource: new Array<string>(),
         comments: new Array<string>(),
       };
       validationResult.errors = errors;

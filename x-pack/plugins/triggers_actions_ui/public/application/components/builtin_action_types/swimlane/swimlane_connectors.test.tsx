@@ -8,6 +8,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { SwimlaneActionConnector } from '../types';
 import SwimlaneActionConnectorFields from './swimlane_connectors';
+jest.mock('../../../../common/lib/kibana');
 
 describe('SwimlaneActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {
@@ -21,7 +22,12 @@ describe('SwimlaneActionConnectorFields renders', () => {
       config: {
         apiUrl: 'http:\\test',
         appId: '1234567asbd32',
-        username: 'username',
+        mappings: {
+          alertSourceKeyName: 'product-source',
+          severityKeyName: 'severity',
+          caseNameKeyName: 'case-name',
+          caseIdKeyName: 'case-id',
+        },
       },
     } as SwimlaneActionConnector;
 
@@ -45,7 +51,10 @@ describe('SwimlaneActionConnectorFields renders', () => {
       'http:\\test'
     );
     expect(wrapper.find('[data-test-subj="swimlaneAppIdInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneUsernameInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="swimlanealertSourceKeyNameInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="swimlaneSeverityKeyNameInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="swimlaneCaseIdKeyNameInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="swimlaneCaseNameKeyNameInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="swimlaneApiTokenInput"]').length > 0).toBeTruthy();
   });
 
@@ -80,7 +89,12 @@ describe('SwimlaneActionConnectorFields renders', () => {
       config: {
         apiUrl: 'http:\\test',
         appId: '1234567asbd32',
-        username: 'username',
+        mappings: {
+          alertSourceKeyName: 'product-source',
+          severityKeyName: 'severity',
+          caseNameKeyName: 'case-name',
+          caseIdKeyName: 'case-id',
+        },
       },
     } as SwimlaneActionConnector;
 

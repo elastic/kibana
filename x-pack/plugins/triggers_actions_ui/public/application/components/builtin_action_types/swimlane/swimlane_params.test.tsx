@@ -5,29 +5,39 @@
  */
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { SeverityActionOptions } from '../types';
 import SwimlaneParamsFields from './swimlane_params';
 
 describe('SwimlaneParamsFields renders', () => {
   test('all params fields is rendered', () => {
     const actionParams = {
       alertName: 'alert name',
-      tags: ['tag1'],
+      alertSource: 'alert source',
+      caseId: '3456789',
+      caseName: 'my case name',
       comments: 'my comments',
-      severity: SeverityActionOptions.CRITICAL,
+      severity: 'critical',
     };
 
     const wrapper = mountWithIntl(
       <SwimlaneParamsFields
         actionParams={actionParams}
-        errors={{ alertName: [], tags: [], comments: [] }}
+        errors={{
+          alertName: [],
+          comments: [],
+          severity: [],
+          caseId: [],
+          caseName: [],
+          alertSource: [],
+        }}
         editAction={() => {}}
         index={0}
       />
     );
-    expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
-      'critical'
-    );
+    expect(wrapper.find('[data-test-subj="severity"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="caseId"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="caseName"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="comments"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="alertSource"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="alertName"]').length > 0).toBeTruthy();
   });
 });

@@ -39,24 +39,22 @@ describe('swimlane connector validation', () => {
       config: {
         apiUrl: 'http:\\test',
         appId: '1234567asbd32',
-        username: 'username',
       },
     } as SwimlaneActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        username: [],
         apiToken: [],
         apiUrl: [],
         appId: [],
       },
     });
 
+    // @ts-ignore
     delete actionConnector.config.apiUrl;
     actionConnector.secrets.apiToken = 'test1';
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        username: [],
         apiToken: [],
         apiUrl: [],
         appId: [],
@@ -76,11 +74,11 @@ describe('swimlane connector validation', () => {
         apiUrl: 'http:\\test',
         appId: '1234567asbd32',
       },
-    } as swimlaneActionConnector;
+    } as SwimlaneActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        username: ['Username is required.'],
+        severityKeyName: ['SeverityKeyName is required.'],
         apiToken: [],
         apiUrl: [],
         appId: [],
@@ -88,4 +86,3 @@ describe('swimlane connector validation', () => {
     });
   });
 });
-

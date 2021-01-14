@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 import {
   RequestHandlerContext,
   KibanaRequest,
@@ -20,15 +19,7 @@ export function initPlugin(router: IRouter, path: string) {
       options: {
         authRequired: false,
       },
-      validate: {
-        body: schema.object(
-          {
-            alertName: schema.string(),
-            severity: schema.maybe(PayloadSeveritySchema),
-            comments: schema.nullable(schema.arrayOf(CommentSchema)),
-          },
-        ),
-      },
+      validate: {},
     },
     // Swimlane simulator: create an action pointing here, and you can get
     // different responses based on the message posted. See the README.md for
@@ -39,7 +30,6 @@ export function initPlugin(router: IRouter, path: string) {
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       const { body } = req;
-      const summary = body.alertName;
 
       return jsonResponse(res, 202, {
         status: 'success',
@@ -56,8 +46,4 @@ function jsonResponse(
   object: Record<string, unknown> = {}
 ) {
   return res.custom<Record<string, unknown>>({ body: object, statusCode: code });
-}
-
-function jsonErrorResponse(res: KibanaResponseFactory, code: number, object: Error) {
-  return res.custom<Error>({ body: object, statusCode: code });
 }

@@ -40,9 +40,16 @@ export interface PagerDutyActionParams {
 
 export interface SwimlaneActionParams {
   alertName: string;
-  tags: string;
+  caseId: string;
+  caseName: string;
+  alertSource: string;
   comments: string;
-  severity: SeverityActionOptions;
+  severity: string;
+}
+
+export interface SwimlaneFieldMap {
+  key: string;
+  name: string;
 }
 
 export interface IndexActionParams {
@@ -114,7 +121,16 @@ export type PagerDutyActionConnector = UserConfiguredActionConnector<
 export interface SwimlaneConfig {
   apiUrl: string;
   appId: string;
-  username: string;
+  mappings: SwimlaneMappingConfig;
+}
+
+export interface SwimlaneMappingConfig {
+  alertSourceKeyName: string;
+  severityKeyName: string;
+  caseNameKeyName: string;
+  caseIdKeyName: string;
+  alertNameKeyName: string;
+  commentsKeyName: string;
 }
 
 export interface SwimlaneSecrets {
