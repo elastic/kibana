@@ -12,8 +12,8 @@ import { setMockActions, setMockValues } from '../../../../__mocks__';
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import { LogRetention } from '../../log_retention/types';
 import { LogRetentionPanel } from './log_retention_panel';
-import { LogRetention } from './types';
 
 describe('<LogRetentionPanel />', () => {
   const actions = {
