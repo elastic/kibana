@@ -21,10 +21,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart, Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { KibanaFeature, FeaturesPluginStart } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
-import { Space } from '../../../common/model/space';
 import { SpaceAvatar } from '../../space_avatar';
 import { getSpacesFeatureDescription } from '../../constants';
 import { SpacesManager } from '../..//spaces_manager';
