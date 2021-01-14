@@ -8,6 +8,7 @@ import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import Url from 'url';
 import cypress from 'cypress';
 import { FtrProviderContext } from './ftr_provider_context';
+import archives_metadata from './cypress/fixtures/es_archiver/archives_metadata';
 
 async function APMCypressVisualTestRunner({ getService }: FtrProviderContext) {
   const config = getService('config');
@@ -15,9 +16,14 @@ async function APMCypressVisualTestRunner({ getService }: FtrProviderContext) {
 
   // Load apm data on ES
   await esArchiver.load('apm_8.0.0');
+  const { start, end } = archives_metadata['apm_8.0.0'];
 
   await cypress.open({
     config: { baseUrl: Url.format(config.get('servers.kibana')) },
+    env: {
+      METADATA_START_DATE: start,
+      METADATA_END_DATE: end,
+    },
   });
 }
 
