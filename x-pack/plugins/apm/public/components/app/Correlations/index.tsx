@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
+import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { enableSignificantTerms } from '../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { LatencyCorrelations } from './LatencyCorrelations';
@@ -31,29 +32,28 @@ export function Correlations() {
   const { uiSettings } = useApmPluginContext().core;
   const { urlParams } = useUrlParams();
   const license = useLicenseContext();
-  const hasValidPlatinumLicense =
-    license && license.isActive && license.hasAtLeast('platinum');
   const history = useHistory();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  if (!uiSettings.get(enableSignificantTerms)) {
+  if (
+    !uiSettings.get(enableSignificantTerms) ||
+    !isActivePlatinumLicense(license)
+  ) {
     return null;
   }
 
   return (
     <>
-      {hasValidPlatinumLicense && (
-        <>
-          <EuiButton
-            onClick={() => {
-              setIsFlyoutVisible(true);
-            }}
-          >
-            View significant terms
-          </EuiButton>
+      <>
+        <EuiButton
+          onClick={() => {
+            setIsFlyoutVisible(true);
+          }}
+        >
+          View significant terms
+        </EuiButton>
 
-          <EuiSpacer size="s" />
-        </>
-      )}
+        <EuiSpacer size="s" />
+      </>
 
       {isFlyoutVisible && (
         <EuiPortal>

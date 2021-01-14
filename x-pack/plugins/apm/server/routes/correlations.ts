@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as t from 'io-ts';
-import { i18n } from '@kbn/i18n';
 import Boom from '@hapi/boom';
-import { ILicense } from '../../../licensing/server';
-import { rangeRt } from './default_api_types';
-import { getCorrelationsForSlowTransactions } from '../lib/correlations/get_correlations_for_slow_transactions';
+import { i18n } from '@kbn/i18n';
+import * as t from 'io-ts';
+import { isActivePlatinumLicense } from '../../common/license_check';
 import { getCorrelationsForFailedTransactions } from '../lib/correlations/get_correlations_for_failed_transactions';
-import { createRoute } from './create_route';
+import { getCorrelationsForSlowTransactions } from '../lib/correlations/get_correlations_for_slow_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
-
-function isActivePlatinumLicense(license: ILicense) {
-  return license.isActive && license.hasAtLeast('platinum');
-}
+import { createRoute } from './create_route';
+import { rangeRt } from './default_api_types';
 
 const INVALID_LICENSE = i18n.translate(
   'xpack.apm.significanTerms.license.text',
