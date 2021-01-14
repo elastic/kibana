@@ -10,6 +10,7 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
+import classNames from 'classnames';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { kibanaFieldFormat } from '../../../../formatters/kibana_field_format';
 import { numberAsOrdinal } from '../../../../formatters/number_as_ordinal';
@@ -20,6 +21,7 @@ import {
 } from '../metric_distribution_chart';
 import { TopValues } from '../../../index_based/components/field_data_row/top_values';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
+import { MetaTable } from './meta_content';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 200;
@@ -98,7 +100,9 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
   );
   return (
     <EuiFlexGroup direction={'row'} data-test-subj={'mlNumberSummaryTable'} gutterSize={'xl'}>
-      <EuiFlexItem>
+      <MetaTable config={config} />
+
+      <EuiFlexItem className={classNames('mlFieldDataCard__stats', 'mlFieldDataCard__stats_xs')}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
           className={'mlDataVisualizerSummaryTable'}
@@ -108,8 +112,9 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
           tableCaption={summaryTableTitle}
         />
       </EuiFlexItem>
+
       {stats && (
-        <EuiFlexItem data-test-subj={'mlTopValues'}>
+        <EuiFlexItem data-test-subj={'mlTopValues'} className="mlFieldDataCard__stats">
           <EuiFlexItem grow={false}>
             <ExpandedRowFieldHeader>
               <FormattedMessage
@@ -129,7 +134,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
         </EuiFlexItem>
       )}
       {distribution && (
-        <EuiFlexItem data-test-subj={'mlMetricDistribution'}>
+        <EuiFlexItem data-test-subj={'mlMetricDistribution'} className="mlFieldDataCard__stats">
           <EuiFlexItem grow={false}>
             <ExpandedRowFieldHeader>
               <FormattedMessage

@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useMemo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React, { FC, ReactNode, useMemo } from 'react';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { getTFPercentage } from '../../utils';
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 import { useDataVizChartTheme } from '../../hooks';
+import { MetaTable } from './meta_content';
 
 function getPercentLabel(value: number): string {
   if (value === 0) {
@@ -34,48 +37,105 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   const theme = useDataVizChartTheme();
   if (!formattedPercentages) return null;
 
-  return (
-    <div className="mlFieldDataCard__stats">
-      <ExpandedRowFieldHeader>
+  const summaryTableItems = [
+    {
+      function: 'true',
+      display: (
         <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardBoolean.valuesLabel"
-          defaultMessage="Values"
+          id="xpack.ml.fieldDataCardExpandedRow.booleanContent.trueCountLabel"
+          defaultMessage="true"
         />
-      </ExpandedRowFieldHeader>
-      <EuiSpacer size="xs" />
-      <Chart renderer="canvas" size={{ height: BOOLEAN_DISTRIBUTION_CHART_HEIGHT }}>
-        <Axis id="bottom" position="bottom" showOverlappingTicks />
-        <Axis
-          id="left2"
-          title="Left axis"
-          hide={true}
-          tickFormat={(d: any) => {
-            const percentage = (d / formattedPercentages.count) * 100;
-            return `${d} (${getPercentLabel(percentage)})`;
-          }}
+      ),
+      value: formattedPercentages.trueCount,
+    },
+    {
+      function: 'false',
+      display: (
+        <FormattedMessage
+          id="xpack.ml.fieldDataCardExpandedRow.booleanContent.falseCountLabel"
+          defaultMessage="percentage"
         />
+      ),
+      value: formattedPercentages.falseCount,
+    },
+  ];
+  const summaryTableColumns = [
+    {
+      name: '',
+      render: (summaryItem: { display: ReactNode }) => summaryItem.display,
+      width: '75px',
+    },
+    {
+      field: 'value',
+      name: '',
+      render: (v: string) => <strong>{v}</strong>,
+    },
+  ];
 
-        <Settings showLegend={false} theme={theme} />
-        <BarSeries
-          id={config.fieldName || fieldFormat}
-          data={[
-            {
-              x: 'true',
-              count: formattedPercentages.trueCount,
-            },
-            {
-              x: 'false',
-              count: formattedPercentages.falseCount,
-            },
-          ]}
-          splitSeriesAccessors={['x']}
-          stackAccessors={['x']}
-          xAccessor="x"
-          xScaleType="ordinal"
-          yAccessors={['count']}
-          yScaleType="linear"
+  const summaryTableTitle = i18n.translate(
+    'xpack.ml.fieldDataCardExpandedRow.booleanContent.summaryTableTitle',
+    {
+      defaultMessage: 'Summary',
+    }
+  );
+
+  return (
+    <EuiFlexGroup direction={'row'} data-test-subj={'mlNumberSummaryTable'} gutterSize={'xl'}>
+      <MetaTable config={config} />
+
+      <EuiFlexItem className={classNames('mlFieldDataCard__stats', 'mlFieldDataCard__stats_xs')}>
+        <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
+        <EuiBasicTable
+          className={'mlDataVisualizerSummaryTable'}
+          compressed
+          items={summaryTableItems}
+          columns={summaryTableColumns}
+          tableCaption={summaryTableTitle}
         />
-      </Chart>
-    </div>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <ExpandedRowFieldHeader>
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardBoolean.valuesLabel"
+            defaultMessage="Values"
+          />
+        </ExpandedRowFieldHeader>
+        <EuiSpacer size="xs" />
+        <Chart renderer="canvas" size={{ height: BOOLEAN_DISTRIBUTION_CHART_HEIGHT }}>
+          <Axis id="bottom" position="bottom" showOverlappingTicks />
+          <Axis
+            id="left2"
+            title="Left axis"
+            hide={true}
+            tickFormat={(d: any) => {
+              const percentage = (d / formattedPercentages.count) * 100;
+              return `${d} (${getPercentLabel(percentage)})`;
+            }}
+          />
+
+          <Settings showLegend={false} theme={theme} />
+          <BarSeries
+            id={config.fieldName || fieldFormat}
+            data={[
+              {
+                x: 'true',
+                count: formattedPercentages.trueCount,
+              },
+              {
+                x: 'false',
+                count: formattedPercentages.falseCount,
+              },
+            ]}
+            splitSeriesAccessors={['x']}
+            stackAccessors={['x']}
+            xAccessor="x"
+            xScaleType="ordinal"
+            yAccessors={['count']}
+            yScaleType="linear"
+          />
+        </Chart>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
