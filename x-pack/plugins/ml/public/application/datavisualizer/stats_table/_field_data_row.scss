@@ -63,11 +63,6 @@
   .mlFieldDataCard__stats {
     padding: $euiSizeS $euiSizeS 0px $euiSizeS;
     text-align: center;
-    //max-width: map-get($euiBreakpoints, 's');
-  }
-
-  .mlFieldDataCard__stats_xs {
-    //max-width: map-get($euiBreakpoints, 's')*0.5;
   }
 
   .mlFieldDataCard__valuesTitle {

@@ -100,7 +100,6 @@ export const ResultsView: FC<Props> = ({
             </EuiTitle>
 
             <FieldsStatsGrid results={results} />
-            {/* <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />*/}
           </EuiPanel>
         </div>
       </EuiPageBody>

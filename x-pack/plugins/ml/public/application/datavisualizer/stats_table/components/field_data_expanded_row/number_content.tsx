@@ -21,7 +21,7 @@ import {
 } from '../metric_distribution_chart';
 import { TopValues } from '../../../index_based/components/field_data_row/top_values';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
-import { MetaTable } from './meta_content';
+import { DocumentStatsTable } from './document_stats';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 200;
@@ -100,7 +100,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
   );
   return (
     <EuiFlexGroup direction={'row'} data-test-subj={'mlNumberSummaryTable'} gutterSize={'xl'}>
-      <MetaTable config={config} />
+      <DocumentStatsTable config={config} />
 
       <EuiFlexItem className={classNames('mlFieldDataCard__stats', 'mlFieldDataCard__stats_xs')}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>

@@ -16,7 +16,7 @@ import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { getTFPercentage } from '../../utils';
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 import { useDataVizChartTheme } from '../../hooks';
-import { MetaTable } from './meta_content';
+import { DocumentStatsTable } from './document_stats';
 
 function getPercentLabel(value: number): string {
   if (value === 0) {
@@ -29,6 +29,11 @@ function getPercentLabel(value: number): string {
   }
 }
 
+function getFormattedValue(value: number, totalCount: number): string {
+  const percentage = (value / totalCount) * 100;
+  return `${value} (${getPercentLabel(percentage)})`;
+}
+
 const BOOLEAN_DISTRIBUTION_CHART_HEIGHT = 100;
 
 export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
@@ -37,6 +42,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   const theme = useDataVizChartTheme();
   if (!formattedPercentages) return null;
 
+  const { trueCount, falseCount, count } = formattedPercentages;
   const summaryTableItems = [
     {
       function: 'true',
@@ -46,17 +52,17 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
           defaultMessage="true"
         />
       ),
-      value: formattedPercentages.trueCount,
+      value: getFormattedValue(trueCount, count),
     },
     {
       function: 'false',
       display: (
         <FormattedMessage
           id="xpack.ml.fieldDataCardExpandedRow.booleanContent.falseCountLabel"
-          defaultMessage="percentage"
+          defaultMessage="false"
         />
       ),
-      value: formattedPercentages.falseCount,
+      value: getFormattedValue(falseCount, count),
     },
   ];
   const summaryTableColumns = [
@@ -81,7 +87,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
 
   return (
     <EuiFlexGroup direction={'row'} data-test-subj={'mlNumberSummaryTable'} gutterSize={'xl'}>
-      <MetaTable config={config} />
+      <DocumentStatsTable config={config} />
 
       <EuiFlexItem className={classNames('mlFieldDataCard__stats', 'mlFieldDataCard__stats_xs')}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
@@ -108,10 +114,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
             id="left2"
             title="Left axis"
             hide={true}
-            tickFormat={(d: any) => {
-              const percentage = (d / formattedPercentages.count) * 100;
-              return `${d} (${getPercentLabel(percentage)})`;
-            }}
+            tickFormat={(d: any) => getFormattedValue(d, count)}
           />
 
           <Settings showLegend={false} theme={theme} />

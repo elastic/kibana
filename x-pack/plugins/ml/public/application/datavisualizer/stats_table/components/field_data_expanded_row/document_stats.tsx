@@ -11,7 +11,7 @@ import { EuiBasicTable, EuiFlexItem } from '@elastic/eui';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { FieldDataRowProps } from '../../types';
 
-export const MetaTable: FC<FieldDataRowProps> = ({ config }) => {
+export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
   if (
     config?.stats === undefined ||
     config.stats.cardinality === undefined ||
@@ -25,7 +25,7 @@ export const MetaTable: FC<FieldDataRowProps> = ({ config }) => {
       function: 'count',
       display: (
         <FormattedMessage
-          id="xpack.ml.fieldDataCardExpandedRow.numberContent.countLabel"
+          id="xpack.ml.fieldDataCardExpandedRow.documentStatsTable.countLabel"
           defaultMessage="count"
         />
       ),
@@ -35,7 +35,7 @@ export const MetaTable: FC<FieldDataRowProps> = ({ config }) => {
       function: 'percentage',
       display: (
         <FormattedMessage
-          id="xpack.ml.fieldDataCardExpandedRow.numberContent.percentageLabel"
+          id="xpack.ml.fieldDataCardExpandedRow.documentStatsTable.percentageLabel"
           defaultMessage="percentage"
         />
       ),
@@ -45,7 +45,7 @@ export const MetaTable: FC<FieldDataRowProps> = ({ config }) => {
       function: 'distinctValues',
       display: (
         <FormattedMessage
-          id="xpack.ml.fieldDataCardExpandedRow.numberContent.distinctValueLabel"
+          id="xpack.ml.fieldDataCardExpandedRow.documentStatsTable.distinctValueLabel"
           defaultMessage="distinct values"
         />
       ),
@@ -66,7 +66,7 @@ export const MetaTable: FC<FieldDataRowProps> = ({ config }) => {
   ];
 
   const metaTableTitle = i18n.translate(
-    'xpack.ml.fieldDataCardExpandedRow.numberContent.metaTableTitle',
+    'xpack.ml.fieldDataCardExpandedRow.documentStatsTable.metaTableTitle',
     {
       defaultMessage: 'Documents stats',
     }
