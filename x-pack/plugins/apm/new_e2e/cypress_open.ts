@@ -5,8 +5,21 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import Url from 'url';
+import cypress from 'cypress';
+import { FtrProviderContext } from './ftr_provider_context';
 
-import { APMCypressVisualTestRunner } from './runner';
+async function APMCypressVisualTestRunner({ getService }: FtrProviderContext) {
+  const config = getService('config');
+  const esArchiver = getService('esArchiver');
+
+  // Load apm data on ES
+  await esArchiver.load('apm_8.0.0');
+
+  await cypress.open({
+    config: { baseUrl: Url.format(config.get('servers.kibana')) },
+  });
+}
 
 async function visualConfig({ readConfigFile }: FtrConfigProviderContext) {
   const cypressConfig = await readConfigFile(require.resolve('./config.ts'));
