@@ -18,7 +18,7 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { FieldAttrs, FieldAttrSet } from '../..';
+import { FieldAttrs, FieldAttrSet, PatternListDetail } from '../..';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
@@ -54,7 +54,7 @@ export class IndexPattern implements IIndexPattern {
   public id?: string;
   public title: string = ''; // label, not pattern string
 
-  public patternList: string[];
+  public patternList: PatternListDetail[];
   public patternListActive: string[];
   public fieldFormatMap: Record<string, any>;
   public typeMeta?: TypeMeta;

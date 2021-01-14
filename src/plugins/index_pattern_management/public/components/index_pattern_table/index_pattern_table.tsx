@@ -35,7 +35,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
-import { AliasCollection } from '../alias_collection';
+import { PatternList } from '../pattern_list';
 import { IndexPatternManagmentContext } from '../../types';
 import { CreateButton } from '../create_button';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
@@ -45,6 +45,7 @@ import { EmptyState } from './empty_state';
 import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
 import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { getIndices } from '../create_index_pattern_wizard/lib';
+import { PatternListDetail } from '../../../../data/common/index_patterns';
 
 const pagination = {
   initialPageSize: 10,
@@ -184,11 +185,14 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         patternList,
         patternListActive,
       }: {
-        patternList: string[];
+        patternList: PatternListDetail[];
         patternListActive: string[];
       }) =>
         patternList && patternListActive ? (
-          <AliasCollection patternList={patternList} patternListActive={patternListActive} />
+          <PatternList
+            patternList={patternList.map(({ pattern }) => pattern)}
+            patternListActive={patternListActive}
+          />
         ) : null,
     },
   ];

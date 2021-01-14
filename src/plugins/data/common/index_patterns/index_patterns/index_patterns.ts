@@ -219,8 +219,6 @@ export class IndexPatternsService {
    * @param options
    */
   getFieldsForWildcard = async (options: GetFieldsOptions) => {
-    console.log('getFieldsForWildcard index_patterns', options.patternList);
-
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
     return this.apiClient.getFieldsForWildcard({
       patternList: options.patternList,
@@ -393,7 +391,22 @@ export class IndexPatternsService {
       throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
     }
 
-    const spec = this.savedObjectToSpec(savedObject);
+    const validatedPatternLists = await this.apiClient.validatePatternListActive({
+      id,
+      version: savedObject.version,
+      patternList: savedObject.attributes.patternList,
+      patternListActive: savedObject.attributes.patternListActive,
+    });
+    const savedObjectValidated = {
+      ...savedObject,
+      version: validatedPatternLists.version,
+      attributes: {
+        ...savedObject.attributes,
+        ...validatedPatternLists.patterns,
+      },
+    };
+
+    const spec = this.savedObjectToSpec(savedObjectValidated);
 
     const { patternListActive, title, type, typeMeta } = spec;
     spec.fieldAttrs = savedObject.attributes.fieldAttrs

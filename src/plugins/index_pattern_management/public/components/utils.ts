@@ -27,7 +27,7 @@ export const getIndexPatterns = async (
 ) => {
   const response = await savedObjectsClient.find<IIndexPattern>({
     type: 'index-pattern',
-    fields: ['title', 'label', 'patternListActive', 'patternList'],
+    fields: ['title', 'patternListActive', 'patternList'],
     perPage: 10000,
   });
   return response.savedObjects.length > 0

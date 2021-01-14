@@ -38,7 +38,7 @@ import { useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
-import { AliasCollection } from '../alias_collection';
+import { PatternList } from '../pattern_list';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 
@@ -163,16 +163,16 @@ export const EditIndexPattern = withRouter(
 
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
 
-    const indexPatternCollections = useMemo(
+    const indexPatternList = useMemo(
       () =>
         indexPattern.patternList && indexPattern.patternListActive ? (
           <div>
             <FormattedMessage
-              id="indexPatternManagement.editIndexPattern.indexAliasCollections.patternList"
+              id="indexPatternManagement.editIndexPattern.indexPatternLists.patternList"
               defaultMessage="Index Alias Collection: "
             />
-            <AliasCollection
-              patternList={indexPattern.patternList}
+            <PatternList
+              patternList={indexPattern.patternList.map(({ pattern }) => pattern)}
               patternListActive={indexPattern.patternListActive}
             />
             <EuiSpacer size="m" />
@@ -206,7 +206,7 @@ export const EditIndexPattern = withRouter(
             </EuiFlexGroup>
           )}
           <EuiSpacer size="m" />
-          {indexPatternCollections}
+          {indexPatternList}
           <EuiText>
             <p>
               <FormattedMessage

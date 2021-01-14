@@ -25,12 +25,12 @@ const mockLogstashFields = stubbedLogstashFields();
 export const mockPatternLists = {
   patternListActive: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   patternList: [
-    'apm-*-transaction*',
-    'auditbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'packetbeat-*',
-    'winlogbeat-*',
+    { pattern: 'apm-*-transaction*', matchesIndices: false },
+    { pattern: 'auditbeat-*', matchesIndices: true },
+    { pattern: 'endgame-*', matchesIndices: false },
+    { pattern: 'filebeat-*', matchesIndices: true },
+    { pattern: 'packetbeat-*', matchesIndices: true },
+    { pattern: 'winlogbeat-*', matchesIndices: true },
   ],
 };
 

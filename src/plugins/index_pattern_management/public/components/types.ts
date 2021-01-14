@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { PatternListDetail } from '../../../data/common/index_patterns';
+
 export interface IndexPatternCreationOption {
   text: string;
   description?: string;
@@ -29,6 +31,6 @@ export interface IndexPatternTableItem {
   default: boolean;
   tag?: string[];
   sort: string;
-  patternList: string[];
+  patternList: PatternListDetail[];
   patternListActive: string[];
 }

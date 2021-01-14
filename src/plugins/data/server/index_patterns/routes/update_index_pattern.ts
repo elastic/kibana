@@ -25,6 +25,10 @@ import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin'
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),
+  patternList: schema.arrayOf(
+    schema.object({ pattern: schema.string(), matchesIndices: schema.boolean() })
+  ),
+  patternListActive: schema.maybe(schema.arrayOf(schema.string())),
   type: schema.maybe(schema.string()),
   typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   timeFieldName: schema.maybe(schema.string()),
@@ -68,6 +72,7 @@ export const registerUpdateIndexPatternRoute = (
       handleErrors(async (ctx, req, res) => {
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        console.log('ROUTE update_index_pattern MYSTERY HIT');
         const [, , { indexPatterns }] = await getStartServices();
         const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
           savedObjectsClient,
@@ -81,14 +86,16 @@ export const registerUpdateIndexPatternRoute = (
           // eslint-disable-next-line @typescript-eslint/naming-convention
           refresh_fields = true,
           index_pattern: {
-            title,
-            timeFieldName,
-            intervalName,
-            sourceFilters,
             fieldFormats,
+            fields,
+            intervalName,
+            patternList,
+            patternListActive,
+            sourceFilters,
+            timeFieldName,
+            title,
             type,
             typeMeta,
-            fields,
           },
         } = req.body;
 
@@ -98,6 +105,19 @@ export const registerUpdateIndexPatternRoute = (
         if (title !== undefined && title !== indexPattern.title) {
           changeCount++;
           indexPattern.title = title;
+        }
+
+        if (patternList !== undefined && patternList !== indexPattern.patternList) {
+          changeCount++;
+          indexPattern.patternList = patternList;
+        }
+
+        if (
+          patternListActive !== undefined &&
+          patternListActive !== indexPattern.patternListActive
+        ) {
+          changeCount++;
+          indexPattern.patternListActive = patternListActive;
         }
 
         if (timeFieldName !== undefined && timeFieldName !== indexPattern.timeFieldName) {

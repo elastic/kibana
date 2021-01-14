@@ -32,6 +32,7 @@ import { registerDeleteScriptedFieldRoute } from './routes/scripted_fields/delet
 import { registerUpdateScriptedFieldRoute } from './routes/scripted_fields/update_scripted_field';
 import type { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { combineFields, formatIndexFields } from './utils';
+import { registerValidatePatternListActiveRoute } from './routes/validate_pattern_list_active';
 
 export function registerRoutes(
   http: HttpServiceSetup,
@@ -54,6 +55,7 @@ export function registerRoutes(
   registerGetIndexPatternRoute(router, getStartServices);
   registerDeleteIndexPatternRoute(router, getStartServices);
   registerUpdateIndexPatternRoute(router, getStartServices);
+  registerValidatePatternListActiveRoute(router, getStartServices);
 
   // Fields API
   registerUpdateFieldsRoute(router, getStartServices);
@@ -99,7 +101,6 @@ export function registerRoutes(
       } catch (error) {
         return response.badRequest();
       }
-      console.log('PATTERNHERE:', patternList);
       try {
         const fieldsArr: Array<FieldDescriptor[] | boolean> = await Promise.all(
           patternList

@@ -63,14 +63,15 @@ const addAllowNoIndex: SavedObjectMigrationFn<any, any> = (doc) => ({
 });
 
 const migrateTitleToPatternList: SavedObjectMigrationFn<any, any> = (doc) => {
-  console.log('migrateTitleToPatternList!!!');
   return {
     ...doc,
     attributes: {
       ...doc.attributes,
       patternList:
         doc.attributes.patternList == null
-          ? doc.attributes.title.split(',')
+          ? doc.attributes.title
+              .split(',')
+              .map((pattern: string) => ({ pattern, matchesIndices: true }))
           : doc.attributes.patternList,
       patternListActive:
         doc.attributes.patternListActive == null

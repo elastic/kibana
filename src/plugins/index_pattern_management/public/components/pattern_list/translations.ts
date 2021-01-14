@@ -19,10 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ACTIVE = i18n.translate('indexPatternManagement.indexAliasCollections.active', {
+export const ACTIVE = i18n.translate('indexPatternManagement.indexPatternList.active', {
   defaultMessage: 'Active',
 });
 
-export const INACTIVE = i18n.translate('indexPatternManagement.indexAliasCollections.inactive', {
+export const INACTIVE = i18n.translate('indexPatternManagement.indexPatternList.inactive', {
   defaultMessage: 'Inactive; index alias does not match any indices',
 });

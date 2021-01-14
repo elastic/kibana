@@ -23,6 +23,7 @@ import {
   GetFieldsOptions,
   IIndexPatternsApiClient,
   GetFieldsOptionsTimePattern,
+  ValidatePatternListActive,
 } from '../../../common/index_patterns/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
@@ -34,11 +35,19 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     this.http = http;
   }
 
-  private _request(url: string, query: any) {
+  private _request(url: string, query: any, method: 'GET' | 'POST' = 'GET') {
     return this.http
-      .fetch(url, {
-        query,
-      })
+      .fetch(
+        url,
+        method === 'GET'
+          ? {
+              query,
+            }
+          : {
+              method,
+              body: JSON.stringify(query),
+            }
+      )
       .catch((resp: any) => {
         if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
           throw new IndexPatternMissingIndices(resp.body.message);
@@ -50,6 +59,15 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
 
   private _getUrl(path: string[]) {
     return API_BASE_URL + path.filter(Boolean).map(encodeURIComponent).join('/');
+  }
+
+  validatePatternListActive(options: ValidatePatternListActive) {
+    const { id, patternList, patternListActive, version } = options;
+
+    const url = this._getUrl(['_validate_pattern_list_active']);
+    return this._request(url, { id, patternList, patternListActive, version }, 'POST').then(
+      (resp: any) => resp
+    );
   }
 
   getFieldsForTimePattern(options: GetFieldsOptionsTimePattern) {
@@ -71,7 +89,6 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     rollupIndex,
     allowNoIndex,
   }: GetFieldsOptions) {
-    console.log('index_patterns_api_client', patternList);
     return this._request(this._getUrl(['_fields_for_wildcard']), {
       pattern_list: JSON.stringify(patternList),
       meta_fields: metaFields,

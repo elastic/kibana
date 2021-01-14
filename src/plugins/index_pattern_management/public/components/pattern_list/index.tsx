@@ -21,11 +21,11 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import * as i18n from './translations';
 
-interface AliasCollectionProps {
+interface PatternListProps {
   patternList: string[];
   patternListActive: string[];
 }
-export const AliasCollection = ({ patternList, patternListActive }: AliasCollectionProps) => (
+export const PatternList = ({ patternList, patternListActive }: PatternListProps) => (
   <>
     {patternList.map((label) => {
       const isActive = patternListActive.includes(label);
