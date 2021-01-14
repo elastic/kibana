@@ -77,7 +77,7 @@ export const WaterfallChartSidebarFlexItem = euiStyled(EuiFlexItem)`
 
 interface WaterfallChartChartContainer {
   height: number;
-  chartIndex: boolean;
+  chartIndex: number;
 }
 
 export const WaterfallChartChartContainer = euiStyled.div<WaterfallChartChartContainer>`
