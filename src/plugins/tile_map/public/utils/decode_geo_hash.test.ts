@@ -17,10 +17,11 @@
  * under the License.
  */
 
-/**
- * Use * syntax so that these exports do not break when internal
- * types are stripped.
- */
-export * from './external_basemap_types';
-export * from './map_types';
-export * from './region_map_types';
+import { decodeGeoHash } from './decode_geo_hash';
+
+test('decodeGeoHash', () => {
+  expect(decodeGeoHash('drm3btev3e86')).toEqual({
+    latitude: [41.119999922811985, 41.12000009045005, 41.12000000663102],
+    longitude: [-71.34000029414892, -71.3399999588728, -71.34000012651086],
+  });
+});
