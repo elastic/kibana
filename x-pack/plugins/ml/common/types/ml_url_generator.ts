@@ -55,10 +55,9 @@ export interface DataVisualizerIndexBasedAppState extends Omit<ListingPageUrlSta
 }
 
 export interface DataVisualizerFileBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
-  pageIndex: number;
-  pageSize: number;
-  sortField: string;
-  sortDirection: string;
+  visibleFieldTypes?: string[];
+  visibleFieldNames?: string[];
+  showDistributions?: boolean;
 }
 
 export type MlGenericUrlState = MLPageState<

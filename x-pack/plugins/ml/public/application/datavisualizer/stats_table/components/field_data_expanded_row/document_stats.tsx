@@ -11,6 +11,26 @@ import { EuiBasicTable, EuiFlexItem } from '@elastic/eui';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { FieldDataRowProps } from '../../types';
 
+const metaTableColumns = [
+  {
+    name: '',
+    render: (metaItem: { display: ReactNode }) => metaItem.display,
+    width: '75px',
+  },
+  {
+    field: 'value',
+    name: '',
+    render: (v: string) => <strong>{v}</strong>,
+  },
+];
+
+const metaTableTitle = i18n.translate(
+  'xpack.ml.fieldDataCardExpandedRow.documentStatsTable.metaTableTitle',
+  {
+    defaultMessage: 'Documents stats',
+  }
+);
+
 export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
   if (
     config?.stats === undefined ||
@@ -52,28 +72,12 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
       value: cardinality,
     },
   ];
-  const metaTableColumns = [
-    {
-      name: '',
-      render: (metaItem: { display: ReactNode }) => metaItem.display,
-      width: '75px',
-    },
-    {
-      field: 'value',
-      name: '',
-      render: (v: string) => <strong>{v}</strong>,
-    },
-  ];
-
-  const metaTableTitle = i18n.translate(
-    'xpack.ml.fieldDataCardExpandedRow.documentStatsTable.metaTableTitle',
-    {
-      defaultMessage: 'Documents stats',
-    }
-  );
 
   return (
-    <EuiFlexItem>
+    <EuiFlexItem
+      data-test-subj={'mlDVDocumentStatsContent'}
+      className={'mlDataVisualizerSummaryTableWrapper'}
+    >
       <ExpandedRowFieldHeader>{metaTableTitle}</ExpandedRowFieldHeader>
       <EuiBasicTable
         className={'mlDataVisualizerSummaryTable'}

@@ -5,7 +5,7 @@
  */
 
 import React, { FC, ReactNode } from 'react';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
+import { DocumentStatsTable } from './document_stats';
 const TIME_FORMAT = 'MMM D YYYY, HH:mm:ss.SSS';
 interface SummaryTableItem {
   function: string;
@@ -65,17 +66,20 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
   ];
 
   return (
-    <>
-      <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
-      <EuiBasicTable<SummaryTableItem>
-        className={'mlDataVisualizerSummaryTable'}
-        data-test-subj={'mlDateSummaryTable'}
-        compressed
-        items={summaryTableItems}
-        columns={summaryTableColumns}
-        tableCaption={summaryTableTitle}
-        tableLayout="auto"
-      />
-    </>
+    <EuiFlexGroup data-test-subj={'mlDVDateContent'} gutterSize={'xl'}>
+      <DocumentStatsTable config={config} />
+      <EuiFlexItem className={'mlDataVisualizerSummaryTableWrapper'}>
+        <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
+        <EuiBasicTable<SummaryTableItem>
+          className={'mlDataVisualizerSummaryTable'}
+          data-test-subj={'mlDateSummaryTable'}
+          compressed
+          items={summaryTableItems}
+          columns={summaryTableColumns}
+          tableCaption={summaryTableTitle}
+          tableLayout="auto"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

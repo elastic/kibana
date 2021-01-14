@@ -21,20 +21,11 @@ import {
   MetricFieldsCount,
   TotalFieldsCount,
 } from '../../../stats_table/components/field_count_stats';
+import type { DataVisualizerFileBasedAppState } from '../../../../../../common/types/ml_url_generator';
 
 interface Props {
   results: FindFileStructureResponse;
 }
-export interface DataVisualizerFileBasedAppState {
-  pageIndex: number;
-  pageSize: number;
-  sortField: string;
-  sortDirection: string;
-  visibleFieldTypes?: string[];
-  visibleFieldNames?: string[];
-  showDistributions?: boolean;
-}
-
 export const getDefaultDataVisualizerListState = (): Required<DataVisualizerFileBasedAppState> => ({
   pageIndex: 0,
   pageSize: 10,

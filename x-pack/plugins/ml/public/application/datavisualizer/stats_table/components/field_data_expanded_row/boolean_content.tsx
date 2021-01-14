@@ -85,10 +85,10 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   );
 
   return (
-    <EuiFlexGroup direction={'row'} data-test-subj={'mlNumberSummaryTable'} gutterSize={'xl'}>
+    <EuiFlexGroup data-test-subj={'mlDVBooleanContent'} gutterSize={'xl'}>
       <DocumentStatsTable config={config} />
 
-      <EuiFlexItem>
+      <EuiFlexItem className={'mlDataVisualizerSummaryTableWrapper'}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable
           className={'mlDataVisualizerSummaryTable'}

@@ -97,10 +97,9 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
     }
   );
   return (
-    <EuiFlexGroup direction={'row'} data-test-subj={'mlNumberSummaryTable'} gutterSize={'m'}>
+    <EuiFlexGroup data-test-subj={'mlDVNumberContent'} gutterSize={'xl'}>
       <DocumentStatsTable config={config} />
-
-      <EuiFlexItem>
+      <EuiFlexItem className={'mlDataVisualizerSummaryTableWrapper'}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
           className={'mlDataVisualizerSummaryTable'}
@@ -108,6 +107,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
           items={summaryTableItems}
           columns={summaryTableColumns}
           tableCaption={summaryTableTitle}
+          data-test-subj={'mlNumberSummaryTable'}
         />
       </EuiFlexItem>
 

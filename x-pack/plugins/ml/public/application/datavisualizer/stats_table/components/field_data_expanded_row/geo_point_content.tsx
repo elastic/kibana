@@ -6,8 +6,10 @@
 
 import React, { FC } from 'react';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExamplesList } from '../../../index_based/components/field_data_row/examples_list';
+import { DocumentStatsTable } from './document_stats';
 
 export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
   // TODO - adjust server-side query to get examples using:
@@ -34,8 +36,11 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
   if (stats?.examples === undefined) return null;
 
   return (
-    <div>
-      <ExamplesList examples={stats.examples} />
-    </div>
+    <EuiFlexGroup data-test-subj={'mlDVGeoPointContent'} gutterSize={'xl'}>
+      <DocumentStatsTable config={config} />
+      <EuiFlexItem>
+        <ExamplesList examples={stats.examples} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
