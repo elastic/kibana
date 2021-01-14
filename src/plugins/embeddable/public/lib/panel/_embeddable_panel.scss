@@ -168,5 +168,6 @@
 .embPanel__content[data-loading] {
   pointer-events: none;
   filter: grayscale(100%);
+  /* stylelint-disable-next-line color-named */
   filter: gray;
 }

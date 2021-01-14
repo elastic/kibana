@@ -98,7 +98,7 @@
     .anomaly-description-list {
 
       .euiDescriptionList__title {
-        margin-top: 0px;
+        margin-top: 0;
         flex-basis: 15%;
         font-size: inherit;
         line-height: 1.5rem;
@@ -106,7 +106,7 @@
       }
 
       .euiDescriptionList__description {
-        margin-top: 0px;
+        margin-top: 0;
         flex-basis: 85%;
         font-size: inherit;
         line-height: 1.5rem;
@@ -116,4 +116,3 @@
   }
 
 }
-

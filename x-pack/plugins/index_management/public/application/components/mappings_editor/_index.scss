@@ -73,11 +73,10 @@
 
   .mappingsEditor__createFieldWrapper {
     &--multiField {
-      .mappingsEditor__createFieldContent {
-        padding-left: $euiSize;
-      }
 
       .mappingsEditor__createFieldContent {
+        padding-left: $euiSize;
+
         &::before, &::after {
           content: none;
         }

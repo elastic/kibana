@@ -123,7 +123,7 @@
       opacity: 1;
       fill: transparent;
       stroke: #32A7C2;
-      stroke-width: 0px;
+      stroke-width: 0;
     }
 
     .anomaly-marker {
@@ -256,12 +256,8 @@
     }
 
     .brush .extent {
-      stroke: #AAAAAA;
       fill-opacity: 0;
       shape-rendering: crispEdges;
-    }
-
-    .brush .extent {
       stroke: $euiColorDarkShade;
       stroke-width: 2;
       cursor: move;
@@ -293,11 +289,11 @@
     }
 
     div.brush-handle-inner-left {
-      border-radius: $euiBorderRadius 0px 0px $euiBorderRadius;
+      border-radius: $euiBorderRadius 0 0 $euiBorderRadius;
     }
 
     div.brush-handle-inner-right {
-      border-radius: 0px $euiBorderRadius $euiBorderRadius 0px;
+      border-radius: 0 $euiBorderRadius $euiBorderRadius 0;
     }
 
     rect.brush-handle {

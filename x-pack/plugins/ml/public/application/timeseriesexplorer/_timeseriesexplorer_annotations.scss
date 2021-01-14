@@ -32,7 +32,7 @@ $mlAnnotationRectDefaultFillOpacity: .05;
 }
 
 .mlAnnotationRect-isHighlight {
-  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity * 2;;
+  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity * 2;
   transition: stroke-opacity $euiAnimSpeedFast;
 
   fill-opacity: $mlAnnotationRectDefaultFillOpacity * 2;

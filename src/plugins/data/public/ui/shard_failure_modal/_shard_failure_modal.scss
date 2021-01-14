@@ -5,7 +5,7 @@
 }
 
 .shardFailureModal__desc {
-  // set for IE11, since without it depending on the content the width of the list 
+  // set for IE11, since without it depending on the content the width of the list
   // could be much higher than the available screenspace
   max-width: 686px;
 }
@@ -24,16 +24,16 @@
 }
 
 @include euiBreakpoint('xs','s') {
-  .shardFailureModal__keyValueTitle { 
+  .shardFailureModal__keyValueTitle {
     display: block;
     width: 100%;
   }
-   
+
   .shardFailureModal__descTitle {
     display: block;
     width: 100% !important;
   }
-    
+
   .shardFailureModal__descValue {
     display: block;
     width: 100% !important;
