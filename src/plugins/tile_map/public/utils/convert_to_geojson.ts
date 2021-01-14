@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { Feature } from 'geojson';
 import type { Datatable } from '../../../expressions/public';
-import type { Feature, TileMapVisDimensions, TileMapVisData } from '../types';
+import type { TileMapVisDimensions, TileMapVisData } from '../types';
 import { decodeGeoHash } from './decode_geo_hash';
 import { gridDimensions } from './grid_dimensions';
 
@@ -46,7 +47,7 @@ export function convertToGeoJson(
           if (!geohashValue) return false;
           const geohashLocation = decodeGeoHash(geohashValue);
 
-          let pointCoordinates;
+          let pointCoordinates: number[];
           if (geocentroidColumn) {
             const location = row[geocentroidColumn.id];
             pointCoordinates = [location.lon, location.lat];
@@ -95,7 +96,7 @@ export function convertToGeoJson(
               },
               value,
             },
-          };
+          } as Feature;
         })
         .filter((row): row is Feature => !!row);
     }

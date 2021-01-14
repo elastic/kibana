@@ -42,8 +42,8 @@ export function getTableVisualizationControllerClass(
   context: PluginInitializerContext
 ) {
   return class TableVisualizationController {
-    private tableVisModule: IModule | undefined;
-    private injector: auto.IInjectorService | undefined;
+    tableVisModule: IModule | undefined;
+    injector: auto.IInjectorService | undefined;
     el: JQuery<Element>;
     $rootScope: IRootScopeService | null = null;
     $scope: (IScope & { [key: string]: any }) | undefined;

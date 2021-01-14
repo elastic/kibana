@@ -44,7 +44,6 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly titleInWizard;
   public readonly options: VisTypeOptions;
   public readonly visConfig;
-  public readonly editor;
   public readonly editorConfig;
   public hidden;
   public readonly requiresSearch;
@@ -69,7 +68,6 @@ export class BaseVisType<TVisParams = VisParams> {
     this.icon = opts.icon;
     this.image = opts.image;
     this.visConfig = defaultsDeep({}, opts.visConfig, { defaults: {} });
-    this.editor = opts.editor;
     this.editorConfig = defaultsDeep({}, opts.editorConfig, { collections: {} });
     this.options = defaultsDeep({}, opts.options, defaultOptions);
     this.stage = opts.stage ?? 'production';

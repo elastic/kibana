@@ -21,11 +21,5 @@ export * from './types_service';
 export { Schemas } from './schemas';
 export { VisGroups } from './types';
 export { BaseVisType } from './base_vis_type';
-export type {
-  VisTypeDefinition,
-  ISchemas,
-  Schema,
-  IEditorController,
-  VisEditorConstructor,
-  EditorRenderProps,
-} from './types';
+export type { VisTypeDefinition, ISchemas, Schema } from './types';
+export type { ReactVisTypeOptions } from './react_vis_type';
