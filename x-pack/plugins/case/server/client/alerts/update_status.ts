@@ -9,10 +9,10 @@ import { CaseClientUpdateAlertsStatus, CaseClientFactoryArguments } from '../typ
 export const updateAlertsStatus = ({
   alertsService,
   request,
-  index,
 }: CaseClientFactoryArguments) => async ({
   ids,
   status,
+  indices,
 }: CaseClientUpdateAlertsStatus): Promise<void> => {
-  await alertsService.updateAlertsStatus({ ids, status, index, request });
+  await alertsService.updateAlertsStatus({ ids, status, indices, request });
 };

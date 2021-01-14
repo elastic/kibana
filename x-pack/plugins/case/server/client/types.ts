@@ -41,6 +41,7 @@ export interface CaseClientAddComment {
 export interface CaseClientUpdateAlertsStatus {
   ids: string[];
   status: CaseStatuses;
+  indices: Set<string>;
 }
 
 export interface CaseClientFactoryArguments {
@@ -51,7 +52,6 @@ export interface CaseClientFactoryArguments {
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
-  index: string;
 }
 
 export interface ConfigureFields {

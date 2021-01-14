@@ -44,34 +44,7 @@ describe('update', () => {
         cases: patchCases,
       });
 
-      expect(res).toEqual([
-        {
-          closed_at: '2019-11-25T21:54:48.952Z',
-          closed_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-          comments: [],
-          connector: {
-            id: 'none',
-            name: 'none',
-            type: ConnectorTypes.none,
-            fields: null,
-          },
-          created_at: '2019-11-25T21:54:48.952Z',
-          created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
-          description: 'This is a brand new case of a bad meanie defacing data',
-          id: 'mock-id-1',
-          external_service: null,
-          status: CaseStatuses.closed,
-          tags: ['defacement'],
-          title: 'Super Bad Security Issue',
-          totalComment: 0,
-          updated_at: '2019-11-25T21:54:48.952Z',
-          updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-          version: 'WzE3LDFd',
-          settings: {
-            syncAlerts: true,
-          },
-        },
-      ]);
+      expect(res).toMatchSnapshot();
 
       expect(
         caseClient.services.userActionService.postUserActions.mock.calls[0][0].actions
@@ -127,34 +100,7 @@ describe('update', () => {
         cases: patchCases,
       });
 
-      expect(res).toEqual([
-        {
-          closed_at: null,
-          closed_by: null,
-          comments: [],
-          connector: {
-            id: 'none',
-            name: 'none',
-            type: ConnectorTypes.none,
-            fields: null,
-          },
-          created_at: '2019-11-25T21:54:48.952Z',
-          created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
-          description: 'This is a brand new case of a bad meanie defacing data',
-          id: 'mock-id-1',
-          external_service: null,
-          status: CaseStatuses.open,
-          tags: ['defacement'],
-          title: 'Super Bad Security Issue',
-          totalComment: 0,
-          updated_at: '2019-11-25T21:54:48.952Z',
-          updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-          version: 'WzE3LDFd',
-          settings: {
-            syncAlerts: true,
-          },
-        },
-      ]);
+      expect(res).toMatchSnapshot();
     });
 
     test('it change the status of case to in-progress correctly', async () => {
@@ -178,38 +124,7 @@ describe('update', () => {
         cases: patchCases,
       });
 
-      expect(res).toEqual([
-        {
-          closed_at: null,
-          closed_by: null,
-          comments: [],
-          connector: {
-            id: '123',
-            name: 'My connector',
-            type: ConnectorTypes.jira,
-            fields: {
-              issueType: 'Task',
-              parent: null,
-              priority: 'High',
-            },
-          },
-          created_at: '2019-11-25T22:32:17.947Z',
-          created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
-          description: 'Oh no, a bad meanie going LOLBins all over the place!',
-          id: 'mock-id-4',
-          external_service: null,
-          status: CaseStatuses['in-progress'],
-          tags: ['LOLBins'],
-          title: 'Another bad one',
-          totalComment: 0,
-          updated_at: '2019-11-25T21:54:48.952Z',
-          updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-          version: 'WzE3LDFd',
-          settings: {
-            syncAlerts: true,
-          },
-        },
-      ]);
+      expect(res).toMatchSnapshot();
     });
 
     test('it updates a case without a connector.id', async () => {
@@ -233,34 +148,7 @@ describe('update', () => {
         cases: patchCases,
       });
 
-      expect(res).toEqual([
-        {
-          id: 'mock-no-connector_id',
-          comments: [],
-          totalComment: 0,
-          closed_at: '2019-11-25T21:54:48.952Z',
-          closed_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-          connector: {
-            id: 'none',
-            name: 'none',
-            type: ConnectorTypes.none,
-            fields: null,
-          },
-          created_at: '2019-11-25T21:54:48.952Z',
-          created_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
-          description: 'This is a brand new case of a bad meanie defacing data',
-          external_service: null,
-          title: 'Super Bad Security Issue',
-          status: CaseStatuses.closed,
-          tags: ['defacement'],
-          updated_at: '2019-11-25T21:54:48.952Z',
-          updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-          version: 'WzE3LDFd',
-          settings: {
-            syncAlerts: true,
-          },
-        },
-      ]);
+      expect(res).toMatchSnapshot();
     });
 
     test('it updates the connector correctly', async () => {
@@ -289,42 +177,7 @@ describe('update', () => {
         cases: patchCases,
       });
 
-      expect(res).toEqual([
-        {
-          id: 'mock-id-3',
-          comments: [],
-          totalComment: 0,
-          closed_at: null,
-          closed_by: null,
-          connector: {
-            id: '456',
-            name: 'My connector 2',
-            type: ConnectorTypes.jira,
-            fields: { issueType: 'Bug', priority: 'Low', parent: null },
-          },
-          created_at: '2019-11-25T22:32:17.947Z',
-          created_by: {
-            full_name: 'elastic',
-            email: 'testemail@elastic.co',
-            username: 'elastic',
-          },
-          description: 'Oh no, a bad meanie going LOLBins all over the place!',
-          external_service: null,
-          title: 'Another bad one',
-          status: CaseStatuses.open,
-          tags: ['LOLBins'],
-          updated_at: '2019-11-25T21:54:48.952Z',
-          updated_by: {
-            full_name: 'Awesome D00d',
-            email: 'd00d@awesome.com',
-            username: 'awesome',
-          },
-          version: 'WzE3LDFd',
-          settings: {
-            syncAlerts: true,
-          },
-        },
-      ]);
+      expect(res).toMatchSnapshot();
     });
 
     test('it updates alert status when the status is updated and syncAlerts=true', async () => {
@@ -354,6 +207,7 @@ describe('update', () => {
       expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
         ids: ['test-id'],
         status: 'closed',
+        indices: new Set<string>(['test-index']),
       });
     });
 
@@ -421,6 +275,7 @@ describe('update', () => {
       expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
         ids: ['test-id'],
         status: 'open',
+        indices: new Set<string>(['test-index']),
       });
     });
 
@@ -491,11 +346,13 @@ describe('update', () => {
       expect(caseClient.client.updateAlertsStatus).toHaveBeenNthCalledWith(1, {
         ids: ['test-id', 'test-id-2'],
         status: 'open',
+        indices: new Set<string>(['test-index', 'test-index-2']),
       });
 
       expect(caseClient.client.updateAlertsStatus).toHaveBeenNthCalledWith(2, {
         ids: ['test-id', 'test-id-2'],
         status: 'closed',
+        indices: new Set<string>(['test-index', 'test-index-2']),
       });
     });
 

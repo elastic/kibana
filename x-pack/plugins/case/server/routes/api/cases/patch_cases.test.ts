@@ -16,7 +16,7 @@ import {
 } from '../__fixtures__';
 import { initPatchCasesApi } from './patch_cases';
 import { mockCaseConfigure, mockCaseNoConnectorId } from '../__fixtures__/mock_saved_objects';
-import { ConnectorTypes, CaseStatuses } from '../../../../common/api';
+import { CaseStatuses } from '../../../../common/api';
 
 describe('PATCH cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -51,34 +51,7 @@ describe('PATCH cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload).toEqual([
-      {
-        closed_at: '2019-11-25T21:54:48.952Z',
-        closed_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-        comments: [],
-        connector: {
-          id: 'none',
-          name: 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
-        created_at: '2019-11-25T21:54:48.952Z',
-        created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
-        description: 'This is a brand new case of a bad meanie defacing data',
-        id: 'mock-id-1',
-        external_service: null,
-        status: CaseStatuses.closed,
-        tags: ['defacement'],
-        title: 'Super Bad Security Issue',
-        totalComment: 0,
-        updated_at: '2019-11-25T21:54:48.952Z',
-        updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-        version: 'WzE3LDFd',
-        settings: {
-          syncAlerts: true,
-        },
-      },
-    ]);
+    expect(response.payload).toMatchSnapshot();
   });
 
   it(`Open a case`, async () => {
@@ -105,34 +78,7 @@ describe('PATCH cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload).toEqual([
-      {
-        closed_at: null,
-        closed_by: null,
-        comments: [],
-        connector: {
-          id: '123',
-          name: 'My connector',
-          type: '.jira',
-          fields: { issueType: 'Task', priority: 'High', parent: null },
-        },
-        created_at: '2019-11-25T22:32:17.947Z',
-        created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
-        description: 'Oh no, a bad meanie going LOLBins all over the place!',
-        id: 'mock-id-4',
-        external_service: null,
-        status: CaseStatuses.open,
-        tags: ['LOLBins'],
-        title: 'Another bad one',
-        totalComment: 0,
-        updated_at: '2019-11-25T21:54:48.952Z',
-        updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-        version: 'WzE3LDFd',
-        settings: {
-          syncAlerts: true,
-        },
-      },
-    ]);
+    expect(response.payload).toMatchSnapshot();
   });
 
   it(`Change case to in-progress`, async () => {
@@ -158,34 +104,7 @@ describe('PATCH cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload).toEqual([
-      {
-        closed_at: null,
-        closed_by: null,
-        comments: [],
-        connector: {
-          id: 'none',
-          name: 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
-        created_at: '2019-11-25T21:54:48.952Z',
-        created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
-        description: 'This is a brand new case of a bad meanie defacing data',
-        id: 'mock-id-1',
-        external_service: null,
-        status: CaseStatuses['in-progress'],
-        tags: ['defacement'],
-        title: 'Super Bad Security Issue',
-        totalComment: 0,
-        updated_at: '2019-11-25T21:54:48.952Z',
-        updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-        version: 'WzE3LDFd',
-        settings: {
-          syncAlerts: true,
-        },
-      },
-    ]);
+    expect(response.payload).toMatchSnapshot();
   });
 
   it(`Patches a case without a connector.id`, async () => {

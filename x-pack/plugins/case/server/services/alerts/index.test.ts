@@ -16,7 +16,7 @@ describe('updateAlertsStatus', () => {
     let alertService: AlertServiceContract;
     const args = {
       ids: ['alert-id-1'],
-      index: '.siem-signals',
+      indices: new Set<string>(['.siem-signals']),
       request: {} as KibanaRequest,
       status: CaseStatuses.closed,
     };
@@ -37,7 +37,7 @@ describe('updateAlertsStatus', () => {
         },
         conflicts: 'abort',
         ignore_unavailable: true,
-        index: args.index,
+        index: [...args.indices],
       });
     });
 
@@ -51,6 +51,19 @@ describe('updateAlertsStatus', () => {
 
       test('it throws when service is not initialized and try to update the status', async () => {
         await expect(alertService.updateAlertsStatus(args)).rejects.toThrow();
+      });
+
+      it('throws an error if no valid indices are provided', async () => {
+        alertService.initialize(esClientMock);
+
+        expect(async () => {
+          await alertService.updateAlertsStatus({
+            ids: ['alert-id-1'],
+            status: CaseStatuses.closed,
+            indices: new Set<string>(['']),
+            request: {} as KibanaRequest,
+          });
+        }).rejects.toThrow();
       });
     });
   });

@@ -77,8 +77,6 @@ async function executor(
     connectorMappingsService,
     userActionService,
     alertsService,
-    // TODO: pass in the index
-    index: '.siem-index-todo',
   });
 
   if (!supportedSubActions.includes(subAction)) {

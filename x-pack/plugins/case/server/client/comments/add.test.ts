@@ -187,6 +187,7 @@ describe('addComment', () => {
       expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
         ids: ['test-alert'],
         status: 'open',
+        indices: new Set<string>(['test-index']),
       });
     });
 

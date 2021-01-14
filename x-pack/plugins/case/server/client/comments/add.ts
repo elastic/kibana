@@ -103,6 +103,7 @@ export const addComment = ({
     caseClient.updateAlertsStatus({
       ids,
       status: myCase.attributes.status,
+      indices: new Set([newComment.attributes.index]),
     });
   }
 

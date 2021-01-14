@@ -1,0 +1,277 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Utils flattenCaseSavedObjects flattens correctly 1`] = `
+Array [
+  Object {
+    "closed_at": null,
+    "closed_by": null,
+    "comments": Array [],
+    "connector": Object {
+      "fields": null,
+      "id": "none",
+      "name": "none",
+      "type": ".none",
+    },
+    "created_at": "2019-11-25T21:54:48.952Z",
+    "created_by": Object {
+      "email": "testemail@elastic.co",
+      "full_name": "elastic",
+      "username": "elastic",
+    },
+    "description": "This is a brand new case of a bad meanie defacing data",
+    "external_service": null,
+    "id": "mock-id-1",
+    "settings": Object {
+      "syncAlerts": true,
+    },
+    "status": "open",
+    "tags": Array [
+      "defacement",
+    ],
+    "title": "Super Bad Security Issue",
+    "totalComment": 2,
+    "type": "individual",
+    "updated_at": "2019-11-25T21:54:48.952Z",
+    "updated_by": Object {
+      "email": "testemail@elastic.co",
+      "full_name": "elastic",
+      "username": "elastic",
+    },
+    "version": "WzAsMV0=",
+  },
+]
+`;
+
+exports[`Utils flattenCaseSavedObjects it handles total comments correctly when caseId is not in extraCaseData 1`] = `
+Array [
+  Object {
+    "closed_at": null,
+    "closed_by": null,
+    "comments": Array [],
+    "connector": Object {
+      "fields": null,
+      "id": "none",
+      "name": "none",
+      "type": ".none",
+    },
+    "created_at": "2019-11-25T21:54:48.952Z",
+    "created_by": Object {
+      "email": "testemail@elastic.co",
+      "full_name": "elastic",
+      "username": "elastic",
+    },
+    "description": "This is a brand new case of a bad meanie defacing data",
+    "external_service": null,
+    "id": "mock-id-1",
+    "settings": Object {
+      "syncAlerts": true,
+    },
+    "status": "open",
+    "tags": Array [
+      "defacement",
+    ],
+    "title": "Super Bad Security Issue",
+    "totalComment": 0,
+    "type": "individual",
+    "updated_at": "2019-11-25T21:54:48.952Z",
+    "updated_by": Object {
+      "email": "testemail@elastic.co",
+      "full_name": "elastic",
+      "username": "elastic",
+    },
+    "version": "WzAsMV0=",
+  },
+]
+`;
+
+exports[`Utils transformNewCase transform correctly 1`] = `
+Object {
+  "closed_at": null,
+  "closed_by": null,
+  "connector": Object {
+    "fields": Array [
+      Object {
+        "key": "issueType",
+        "value": "Task",
+      },
+      Object {
+        "key": "priority",
+        "value": "High",
+      },
+      Object {
+        "key": "parent",
+        "value": null,
+      },
+    ],
+    "id": "123",
+    "name": "My connector",
+    "type": ".jira",
+  },
+  "created_at": "2020-04-09T09:43:51.778Z",
+  "created_by": Object {
+    "email": "elastic@elastic.co",
+    "full_name": "Elastic",
+    "username": "elastic",
+  },
+  "description": "A description",
+  "external_service": null,
+  "settings": Object {
+    "syncAlerts": true,
+  },
+  "status": "open",
+  "tags": Array [
+    "new",
+    "case",
+  ],
+  "title": "My new case",
+  "type": "individual",
+  "updated_at": null,
+  "updated_by": null,
+}
+`;
+
+exports[`Utils transformNewCase transform correctly with optional fields as null 1`] = `
+Object {
+  "closed_at": null,
+  "closed_by": null,
+  "connector": Object {
+    "fields": Array [
+      Object {
+        "key": "issueType",
+        "value": "Task",
+      },
+      Object {
+        "key": "priority",
+        "value": "High",
+      },
+      Object {
+        "key": "parent",
+        "value": null,
+      },
+    ],
+    "id": "123",
+    "name": "My connector",
+    "type": ".jira",
+  },
+  "created_at": "2020-04-09T09:43:51.778Z",
+  "created_by": Object {
+    "email": null,
+    "full_name": null,
+    "username": null,
+  },
+  "description": "A description",
+  "external_service": null,
+  "settings": Object {
+    "syncAlerts": true,
+  },
+  "status": "open",
+  "tags": Array [
+    "new",
+    "case",
+  ],
+  "title": "My new case",
+  "type": "individual",
+  "updated_at": null,
+  "updated_by": null,
+}
+`;
+
+exports[`Utils transformNewCase transform correctly without optional fields 1`] = `
+Object {
+  "closed_at": null,
+  "closed_by": null,
+  "connector": Object {
+    "fields": Array [
+      Object {
+        "key": "issueType",
+        "value": "Task",
+      },
+      Object {
+        "key": "priority",
+        "value": "High",
+      },
+      Object {
+        "key": "parent",
+        "value": null,
+      },
+    ],
+    "id": "123",
+    "name": "My connector",
+    "type": ".jira",
+  },
+  "created_at": "2020-04-09T09:43:51.778Z",
+  "created_by": Object {
+    "email": undefined,
+    "full_name": undefined,
+    "username": undefined,
+  },
+  "description": "A description",
+  "external_service": null,
+  "settings": Object {
+    "syncAlerts": true,
+  },
+  "status": "open",
+  "tags": Array [
+    "new",
+    "case",
+  ],
+  "title": "My new case",
+  "type": "individual",
+  "updated_at": null,
+  "updated_by": null,
+}
+`;
+
+exports[`Utils transformNewComment transform correctly with optional fields as null 1`] = `
+Object {
+  "associationType": "case",
+  "comment": "A comment",
+  "created_at": "2020-04-09T09:43:51.778Z",
+  "created_by": Object {
+    "email": null,
+    "full_name": null,
+    "username": null,
+  },
+  "pushed_at": null,
+  "pushed_by": null,
+  "type": "user",
+  "updated_at": null,
+  "updated_by": null,
+}
+`;
+
+exports[`Utils transformNewComment transform correctly without optional fields 1`] = `
+Object {
+  "associationType": "case",
+  "comment": "A comment",
+  "created_at": "2020-04-09T09:43:51.778Z",
+  "created_by": Object {
+    "email": undefined,
+    "full_name": undefined,
+    "username": undefined,
+  },
+  "pushed_at": null,
+  "pushed_by": null,
+  "type": "user",
+  "updated_at": null,
+  "updated_by": null,
+}
+`;
+
+exports[`Utils transformNewComment transforms correctly 1`] = `
+Object {
+  "associationType": "case",
+  "comment": "A comment",
+  "created_at": "2020-04-09T09:43:51.778Z",
+  "created_by": Object {
+    "email": "elastic@elastic.co",
+    "full_name": "Elastic",
+    "username": "elastic",
+  },
+  "pushed_at": null,
+  "pushed_by": null,
+  "type": "user",
+  "updated_at": null,
+  "updated_by": null,
+}
+`;

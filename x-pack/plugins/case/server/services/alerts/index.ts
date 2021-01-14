@@ -15,7 +15,7 @@ interface UpdateAlertsStatusArgs {
   request: KibanaRequest;
   ids: string[];
   status: CaseStatuses;
-  index: string;
+  indices: Set<string>;
 }
 
 export class AlertService {
@@ -33,14 +33,24 @@ export class AlertService {
     this.esClient = esClient;
   }
 
-  public async updateAlertsStatus({ request, ids, status, index }: UpdateAlertsStatusArgs) {
+  public async updateAlertsStatus({ request, ids, status, indices }: UpdateAlertsStatusArgs) {
     if (!this.isInitialized) {
       throw new Error('AlertService not initialized');
     }
 
+    /**
+     * remove empty strings from the indices, I'm not sure how likely this is but in the case that
+     * the document doesn't have _index set the security_solution code sets the value to an empty string
+     * instead
+     */
+    const sanitizedIndices = [...indices].filter((index) => index !== '');
+    if (sanitizedIndices.length <= 0) {
+      throw new Error('No valid indices found to update the alerts status');
+    }
+
     // The above check makes sure that esClient is defined.
     const result = await this.esClient!.asScoped(request).asCurrentUser.updateByQuery({
-      index,
+      index: sanitizedIndices,
       conflicts: 'abort',
       body: {
         script: {

@@ -75,8 +75,6 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     connectorMappingsService,
     userActionService,
     alertsService,
-    // TODO: refactor this to a variable across the tests
-    index: '.siem-signals',
   });
   return {
     client: caseClient,

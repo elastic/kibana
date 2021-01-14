@@ -181,14 +181,26 @@ export const update = ({
           perPage: totalComments.total,
         },
         // The filter guarantees that the comments will be of type alert
-      })) as SavedObjectsFindResponse<{ alertId: string }>;
+      })) as SavedObjectsFindResponse<{ alertId: string | string[]; index: string }>;
 
-      const commentIds = caseComments.saved_objects.map(({ attributes: { alertId } }) => alertId);
-      if (commentIds.length > 0) {
+      // TODO: comment about why we need this (aka alerts might come from different indices? so dedup them)
+      const idsAndIndices = caseComments.saved_objects.reduce(
+        (acc: { ids: string[]; indices: Set<string> }, comment) => {
+          const alertId = comment.attributes.alertId;
+          const ids = Array.isArray(alertId) ? alertId : [alertId];
+          acc.ids.push(...ids);
+          acc.indices.add(comment.attributes.index);
+          return acc;
+        },
+        { ids: [], indices: new Set<string>() }
+      );
+
+      if (idsAndIndices.ids.length > 0) {
         caseClient.updateAlertsStatus({
-          ids: commentIds,
+          ids: idsAndIndices.ids,
           // Either there is a status update or the syncAlerts got turned on.
           status: theCase.status ?? currentCase?.attributes.status ?? CaseStatuses.open,
+          indices: idsAndIndices.indices,
         });
       }
     }

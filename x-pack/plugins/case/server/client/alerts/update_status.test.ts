@@ -9,26 +9,26 @@ import { createMockSavedObjectsRepository } from '../../routes/api/__fixtures__'
 import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
 
 describe('updateAlertsStatus', () => {
-  describe('happy path', () => {
-    test('it update the status of the alert correctly', async () => {
-      const savedObjectsClient = createMockSavedObjectsRepository();
+  it('updates the status of the alert correctly', async () => {
+    const savedObjectsClient = createMockSavedObjectsRepository();
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      await caseClient.client.updateAlertsStatus({
-        ids: ['alert-id-1'],
-        status: CaseStatuses.closed,
-      });
-
-      expect(caseClient.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith({
-        ids: ['alert-id-1'],
-        index: '.siem-signals',
-        request: {},
-        status: CaseStatuses.closed,
-      });
+    const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+    await caseClient.client.updateAlertsStatus({
+      ids: ['alert-id-1'],
+      status: CaseStatuses.closed,
+      indices: new Set<string>(['.siem-signals']),
     });
 
-    // TODO: maybe test the plugin code instead?
-    /* describe('unhappy path', () => {
+    expect(caseClient.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith({
+      ids: ['alert-id-1'],
+      indices: new Set<string>(['.siem-signals']),
+      request: {},
+      status: CaseStatuses.closed,
+    });
+  });
+
+  // TODO: maybe test the plugin code instead?
+  /* describe('unhappy path', () => {
       test('it throws when missing securitySolutionClient', async () => {
         expect.assertions(3);
 
@@ -50,5 +50,4 @@ describe('updateAlertsStatus', () => {
           });
       });
     });*/
-  });
 });
