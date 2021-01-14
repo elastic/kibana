@@ -21,7 +21,7 @@ export const IpContent: FC<FieldDataRowProps> = ({ config }) => {
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
 
   return (
-    <div className="mlFieldDataCard__stats">
+    <div>
       <ExpandedRowFieldHeader>
         <FormattedMessage
           id="xpack.ml.fieldDataCard.cardIp.topValuesLabel"

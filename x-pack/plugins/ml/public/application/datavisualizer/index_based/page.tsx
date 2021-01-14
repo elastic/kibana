@@ -58,6 +58,10 @@ import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
 import { IndexBasedDataVisualizerExpandedRow } from './components/expanded_row';
 import { FieldVisConfig } from '../stats_table/types';
+import type {
+  MetricFieldsStats,
+  TotalFieldsStats,
+} from '../stats_table/components/field_count_stats';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -243,9 +247,7 @@ export const Page: FC = () => {
   const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [metricsLoaded, setMetricsLoaded] = useState(defaults.metricsLoaded);
-  const [metricsStats, setMetricsStats] = useState<
-    undefined | { visibleMetricFields: number; totalMetricFields: number }
-  >();
+  const [metricsStats, setMetricsStats] = useState<undefined | MetricFieldsStats>();
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
@@ -552,8 +554,8 @@ export const Page: FC = () => {
     });
 
     setMetricsStats({
-      totalMetricFields: allMetricFields.length,
-      visibleMetricFields: metricFieldsToShow.length,
+      totalMetricFieldsCount: allMetricFields.length,
+      visibleMetricsCount: metricFieldsToShow.length,
     });
     setMetricConfigs(configs);
   }
@@ -657,7 +659,7 @@ export const Page: FC = () => {
     return combinedConfigs;
   }, [nonMetricConfigs, metricConfigs, visibleFieldTypes, visibleFieldNames]);
 
-  const fieldsCountStats = useMemo(() => {
+  const fieldsCountStats: TotalFieldsStats | undefined = useMemo(() => {
     let _visibleFieldsCount = 0;
     let _totalFieldsCount = 0;
     Object.keys(overallStats).forEach((key) => {

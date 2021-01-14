@@ -34,7 +34,7 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
   if (stats?.examples === undefined) return null;
 
   return (
-    <div className="mlFieldDataCard__stats">
+    <div>
       <ExamplesList examples={stats.examples} />
     </div>
   );

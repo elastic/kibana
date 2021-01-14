@@ -23,7 +23,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
   const numExamples = examples.length;
 
   return (
-    <div className="mlFieldDataCard__stats">
+    <div>
       {numExamples > 0 && <ExamplesList examples={examples} />}
       {numExamples === 0 && (
         <Fragment>

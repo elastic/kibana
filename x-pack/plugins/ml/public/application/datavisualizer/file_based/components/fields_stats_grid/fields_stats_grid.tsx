@@ -5,8 +5,7 @@
  */
 
 import React, { useMemo, FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../../../stats_table';
 import type { FileBasedFieldVisConfig } from '../../../stats_table/types/field_vis_config';
@@ -18,6 +17,10 @@ import { createFields } from './create_fields';
 import { filterFields } from './filter_fields';
 import { usePageUrlState } from '../../../../util/url_state';
 import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
+import {
+  MetricFieldsCount,
+  TotalFieldsCount,
+} from '../../../stats_table/components/field_count_stats';
 
 interface Props {
   results: FindFileStructureResponse;
@@ -98,82 +101,8 @@ export const FieldsStatsGrid: FC<Props> = ({ results }) => {
         style={{ marginLeft: 4 }}
         data-test-subj="mlDataVisualizerFieldCountPanel"
       >
-        {fieldsCountStats && (
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            style={{ maxWidth: 250 }}
-            data-test-subj="mlDataVisualizerFieldsSummary"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <h5>
-                  <FormattedMessage
-                    id="xpack.ml.dataVisualizer.searchPanel.allFieldsLabel"
-                    defaultMessage="All fields"
-                  />
-                </h5>
-              </EuiText>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiNotificationBadge
-                color="subdued"
-                size="m"
-                data-test-subj="mlDataVisualizerVisibleFieldsCount"
-              >
-                <strong>{fieldsCountStats.visibleFieldsCount}</strong>
-              </EuiNotificationBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="s" data-test-subj="mlDataVisualizerTotalFieldsCount">
-                <FormattedMessage
-                  id="xpack.ml.dataVisualizer.searchPanel.ofFieldsTotal"
-                  defaultMessage="of {totalCount} total"
-                  values={{ totalCount: fieldsCountStats.totalFieldsCount }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-
-        {metricsStats && (
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            style={{ maxWidth: 250 }}
-            data-test-subj="mlDataVisualizerMetricFieldsSummary"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <h5>
-                  <FormattedMessage
-                    id="xpack.ml.dataVisualizer.searchPanel.numberFieldsLabel"
-                    defaultMessage="Number fields"
-                  />
-                </h5>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiNotificationBadge
-                color="subdued"
-                size="m"
-                data-test-subj="mlDataVisualizerVisibleMetricFieldsCount"
-              >
-                <strong>{metricsStats.visibleMetricsCount}</strong>
-              </EuiNotificationBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="s" data-test-subj="mlDataVisualizerMetricFieldsCount">
-                <FormattedMessage
-                  id="xpack.ml.dataVisualizer.searchPanel.ofFieldsTotal"
-                  defaultMessage="of {totalCount} total"
-                  values={{ totalCount: metricsStats.totalMetricFieldsCount }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
+        <TotalFieldsCount fieldsCountStats={fieldsCountStats} />
+        <MetricFieldsCount metricsStats={metricsStats} />
 
         <EuiFlexItem style={{ alignItems: 'flex-end' }}>
           <EuiFlexGroup gutterSize="xs" data-test-subj="mlDataVisualizerFieldCountPanel">

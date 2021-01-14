@@ -9,7 +9,6 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eu
 import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
@@ -89,7 +88,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
     <EuiFlexGroup direction={'row'} data-test-subj={'mlNumberSummaryTable'} gutterSize={'xl'}>
       <DocumentStatsTable config={config} />
 
-      <EuiFlexItem className={classNames('mlFieldDataCard__stats', 'mlFieldDataCard__stats_xs')}>
+      <EuiFlexItem>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable
           className={'mlDataVisualizerSummaryTable'}

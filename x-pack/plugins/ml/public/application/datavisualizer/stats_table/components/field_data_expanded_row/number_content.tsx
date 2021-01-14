@@ -9,8 +9,6 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui'
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
-import classNames from 'classnames';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { kibanaFieldFormat } from '../../../../formatters/kibana_field_format';
 import { numberAsOrdinal } from '../../../../formatters/number_as_ordinal';
@@ -99,10 +97,10 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
     }
   );
   return (
-    <EuiFlexGroup direction={'row'} data-test-subj={'mlNumberSummaryTable'} gutterSize={'xl'}>
+    <EuiFlexGroup direction={'row'} data-test-subj={'mlNumberSummaryTable'} gutterSize={'m'}>
       <DocumentStatsTable config={config} />
 
-      <EuiFlexItem className={classNames('mlFieldDataCard__stats', 'mlFieldDataCard__stats_xs')}>
+      <EuiFlexItem>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
           className={'mlDataVisualizerSummaryTable'}
@@ -114,7 +112,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
       </EuiFlexItem>
 
       {stats && (
-        <EuiFlexItem data-test-subj={'mlTopValues'} className="mlFieldDataCard__stats">
+        <EuiFlexItem data-test-subj={'mlTopValues'}>
           <EuiFlexItem grow={false}>
             <ExpandedRowFieldHeader>
               <FormattedMessage
@@ -134,7 +132,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
         </EuiFlexItem>
       )}
       {distribution && (
-        <EuiFlexItem data-test-subj={'mlMetricDistribution'} className="mlFieldDataCard__stats">
+        <EuiFlexItem data-test-subj={'mlMetricDistribution'}>
           <EuiFlexItem grow={false}>
             <ExpandedRowFieldHeader>
               <FormattedMessage

@@ -29,7 +29,7 @@ export const OtherContent: FC<FieldDataRowProps> = ({ config }) => {
   const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
 
   return (
-    <div className="mlFieldDataCard__stats">
+    <div>
       <div>
         <EuiText>
           <FormattedMessage

@@ -73,7 +73,7 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
   );
 
   return (
-    <EuiFlexItem className="mlFieldDataCard__stats">
+    <EuiFlexItem>
       <ExpandedRowFieldHeader>{metaTableTitle}</ExpandedRowFieldHeader>
       <EuiBasicTable
         className={'mlDataVisualizerSummaryTable'}

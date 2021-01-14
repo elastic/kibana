@@ -16,7 +16,7 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
 
   return (
-    <div className="mlFieldDataCard__stats">
+    <div>
       <ExpandedRowFieldHeader>
         <FormattedMessage
           id="xpack.ml.fieldDataCard.cardKeyword.topValuesLabel"

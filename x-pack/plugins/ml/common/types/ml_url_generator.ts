@@ -42,7 +42,7 @@ export interface MlGenericUrlPageState extends MlIndexBasedSearchState {
   [key: string]: any;
 }
 
-export interface DataVisualizerIndexBasedAppState extends ListingPageUrlState {
+export interface DataVisualizerIndexBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
   searchString?: Query['query'];
   searchQuery?: Query['query'];
   searchQueryLanguage?: SearchQueryLanguage;
@@ -54,7 +54,7 @@ export interface DataVisualizerIndexBasedAppState extends ListingPageUrlState {
   showEmptyFields?: boolean;
 }
 
-export interface DataVisualizerFileBasedAppState extends ListingPageUrlState {
+export interface DataVisualizerFileBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
   pageIndex: number;
   pageSize: number;
   sortField: string;
