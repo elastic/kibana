@@ -114,7 +114,6 @@ export function jobIdValidator(jobCreator$: Subject<JobCreator>): Observable<Job
   return jobCreator$.pipe(
     map((jobCreator) => {
       return {
-        jobCreator,
         jobId: jobCreator.jobId,
       };
     }),
@@ -127,17 +126,11 @@ export function jobIdValidator(jobCreator$: Subject<JobCreator>): Observable<Job
     }),
     map((jobExistsResults) => {
       const jobs = Object.values(jobExistsResults);
-      if (jobs[0] && jobs[0].exists === true) {
-        return {
-          jobIdExists: {
-            valid: false,
-            message: jobExistsErrorMessage,
-          },
-        };
-      }
+      const valid = jobs?.[0].exists === false;
       return {
         jobIdExists: {
-          valid: true,
+          valid,
+          ...(valid ? {} : { message: jobExistsErrorMessage }),
         },
       };
     })
@@ -148,7 +141,6 @@ export function groupIdsValidator(jobCreator$: Subject<JobCreator>): Observable<
   return jobCreator$.pipe(
     map((jobCreator) => {
       return {
-        jobCreator,
         groups: jobCreator.groups,
       };
     }),
@@ -163,17 +155,11 @@ export function groupIdsValidator(jobCreator$: Subject<JobCreator>): Observable<
       const groups = Object.values(jobExistsResults);
       // only match jobs that exist but aren't groups.
       // as we should allow existing groups to be reused.
-      if (groups.some((g) => g.exists === true && g.isGroup === false)) {
-        return {
-          groupIdsExist: {
-            valid: false,
-            message: groupExistsErrorMessage,
-          },
-        };
-      }
+      const valid = groups.some((g) => g.exists === true && g.isGroup === false) === false;
       return {
         groupIdsExist: {
-          valid: true,
+          valid,
+          ...(valid ? {} : { message: groupExistsErrorMessage }),
         },
       };
     })

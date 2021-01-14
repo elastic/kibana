@@ -31,9 +31,9 @@ import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 // after every keystroke
 export const VALIDATION_DELAY_MS = 500;
 
-type AsyncValidatorsResult = Partial<CardinalityValidatorResult> &
-  Partial<JobExistsResult> &
-  Partial<GroupsExistResult>;
+type AsyncValidatorsResult = Partial<
+  CardinalityValidatorResult & JobExistsResult & GroupsExistResult
+>;
 
 /**
  * Union of possible validation results.
