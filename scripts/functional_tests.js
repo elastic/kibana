@@ -29,7 +29,6 @@ const alwaysImportedTests = [
 // eslint-disable-next-line no-restricted-syntax
 const onlyNotInCoverageTests = [
   require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/plugin_api_integration/config.ts'),
   require.resolve('../test/interpreter_functional/config.ts'),
   require.resolve('../test/examples/config.js'),
 ];
