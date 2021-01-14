@@ -3,6 +3,6 @@
     "version": "kibana",
     "ui": true,
     "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection"],
-    "requiredBundles": ["visDefaultEditor", "visTypeVislib"]
+    "requiredBundles": ["visDefaultEditor"]
   }
   
