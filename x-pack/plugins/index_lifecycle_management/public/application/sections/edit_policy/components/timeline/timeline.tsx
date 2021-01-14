@@ -5,7 +5,15 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useMemo } from 'react';
-import { EuiText, EuiIcon, EuiIconProps, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiText,
+  EuiIcon,
+  EuiIconProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiIconTip,
+} from '@elastic/eui';
 
 import { PhasesExceptDelete } from '../../../../../../common/types';
 import { useFormData } from '../../../../../shared_imports';
@@ -54,6 +62,11 @@ const i18nTexts = {
   coldPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.coldPhaseSectionTitle', {
     defaultMessage: 'Cold phase',
   }),
+  deleteIcon: {
+    toolTipContent: i18n.translate('xpack.indexLifecycleMgmt.timeline.delteIconToolTipContent', {
+      defaultMessage: 'Data will be deleted at the end of this policy',
+    }),
+  },
 };
 
 const calculateWidths = (inputs: PhaseAgeInMilliseconds) => {
@@ -179,7 +192,12 @@ export const Timeline: FunctionComponent = () => {
                   data-test-subj="ilmTimelineDeleteIcon"
                   className="ilmTimeline__deleteIconContainer"
                 >
-                  <EuiIcon size="l" color="danger" type="trash" />
+                  <EuiIconTip
+                    size="l"
+                    color="danger"
+                    type="trash"
+                    content={i18nTexts.deleteIcon.toolTipContent}
+                  />
                 </div>
               </EuiFlexItem>
             )}
