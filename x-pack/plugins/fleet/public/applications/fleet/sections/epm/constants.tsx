@@ -40,7 +40,7 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   index_pattern: 'indexPatternApp',
   search: 'searchProfilerApp',
   visualization: 'visualizeApp',
-  map: 'mapApp',
+  map: 'emsApp',
 };
 
 export const ServiceIcons: Record<ServiceName, IconType> = {
