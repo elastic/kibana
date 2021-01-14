@@ -25,20 +25,27 @@ export const CloudDeployment = () => {
           <p>
             <FormattedMessage
               id="xpack.monitoring.noData.blurbs.cloudDeploymentDescription"
-              defaultMessage="Please return to your "
+              defaultMessage="Configure your monitoring through "
             />
             <EuiLink href="https://cloud.elastic.co/deployments" target="_blank">
-              cloud dashboard.
+              cloud console.
             </EuiLink>{' '}
             <FormattedMessage
-              id="xpack.monitoring.noData.blurbs.cloudDeploymentDescriptionMore"
-              defaultMessage="For more information on Monitoring in Elastic Cloud, please see "
+              id="xpack.monitoring.noData.blurbs.cloudDeploymentDescription2"
+              defaultMessage="Go to "
+            />
+            <EuiLink href="https://cloud.elastic.co/deployments" target="_blank">
+              Logs and metrics
+            </EuiLink>{' '}
+            <FormattedMessage
+              id="xpack.monitoring.noData.blurbs.cloudDeploymentDescription3"
+              defaultMessage="section for a deployment to configure monitoring. For more information visit "
             />
             <EuiLink
               href="https://www.elastic.co/guide/en/cloud/current/ec-enable-monitoring.html"
               target="_blank"
             >
-              the documentation.
+              the documentation page.
             </EuiLink>
           </p>
         </EuiText>
