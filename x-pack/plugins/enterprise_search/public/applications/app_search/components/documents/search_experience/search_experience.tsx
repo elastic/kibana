@@ -17,13 +17,13 @@ import './search_experience.scss';
 
 import { EngineLogic } from '../../engine';
 import { externalUrl } from '../../../../shared/enterprise_search_url';
+import { useLocalStorage } from '../../../../shared/use_local_storage';
 
 import { SearchBoxView, SortingView } from './views';
 import { SearchExperienceContent } from './search_experience_content';
 import { buildSearchUIConfig } from './build_search_ui_config';
 import { CustomizationCallout } from './customization_callout';
 import { CustomizationModal } from './customization_modal';
-import { useLocalStorage } from '../../../../shared/use_local_storage';
 
 const DEFAULT_SORT_OPTIONS = [
   {
