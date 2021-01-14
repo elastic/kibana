@@ -244,7 +244,7 @@ To reload the logging settings, send a SIGHUP signal to {kib}.
 [cols="2*<"]
 |===
 
-|[[logging-dest]] `logging.dest:`
+| `logging.dest:`
  | Enables you to specify a file where {kib} stores log output.
 *Default: `stdout`*
 
