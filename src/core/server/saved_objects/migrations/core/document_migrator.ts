@@ -110,8 +110,10 @@ interface DocumentMigratorOptions {
 
 interface ActiveMigrations {
   [type: string]: {
-    latestVersion?: string;
-    latestReferenceVersion?: string;
+    /** Derived from `migrate` transforms and `convert` transforms */
+    latestMigrationVersion?: string;
+    /** Derived from `reference` transforms */
+    latestCoreMigrationVersion?: string;
     transforms: Transform[];
   };
 }
@@ -119,6 +121,19 @@ interface ActiveMigrations {
 interface Transform {
   version: string;
   transform: (doc: SavedObjectUnsanitizedDoc) => TransformResult;
+  /**
+   * There are two "migrationVersion" transform types:
+   *   * `migrate` - These transforms are defined and added by consumers using the type registry; each is applied to a single object type
+   *     based on an object's `migrationVersion[type]` field. These are applied during index migrations and document migrations.
+   *   * `convert` - These transforms are defined by core and added by consumers using the type registry; each is applied to a single object
+   *     type based on an object's `migrationVersion[type]` field. These are applied during index migrations, NOT document migrations.
+   *
+   * There is one "coreMigrationVersion" transform type:
+   *   * `reference` - These transforms are defined by core and added by consumers using the type registry; they are applied to all object
+   *     types based on their `coreMigrationVersion` field. These are applied during index migrations, NOT document migrations.
+   *
+   * If any additional transform types are added, the functions below should be updated to account for them.
+   */
   transformType: 'migrate' | 'convert' | 'reference';
 }
 
@@ -165,10 +180,10 @@ export class DocumentMigrator implements VersionedTransformer {
    * @memberof DocumentMigrator
    */
   public get migrationVersion(): SavedObjectsMigrationVersion {
-    return Object.entries(this.migrations).reduce((acc, [prop, { latestVersion }]) => {
-      // some migration objects won't have a latestVersion (they only contain reference transforms that are applied from other types)
-      if (latestVersion) {
-        return { ...acc, [prop]: latestVersion };
+    return Object.entries(this.migrations).reduce((acc, [prop, { latestMigrationVersion }]) => {
+      // some migration objects won't have a latestMigrationVersion (they only contain reference transforms that are applied from other types)
+      if (latestMigrationVersion) {
+        return { ...acc, [prop]: latestMigrationVersion };
       }
       return acc;
     }, {});
@@ -292,7 +307,7 @@ function validateMigrationDefinition(registry: ISavedObjectTypeRegistry, kibanaV
  * Converts migrations from a format that is convenient for callers to a format that
  * is convenient for our internal usage:
  * From: { type: { version: fn } }
- * To:   { type: { latestVersion: string, transforms: [{ version: string, transform: fn }] } }
+ * To:   { type: { latestMigrationVersion?: string; latestCoreMigrationVersion?: string; transforms: [{ version: string, transform: fn }] } }
  */
 function buildActiveMigrations(
   typeRegistry: ISavedObjectTypeRegistry,
@@ -318,12 +333,22 @@ function buildActiveMigrations(
     if (!transforms.length) {
       return migrations;
     }
+
+    const migrationVersionTransforms: Transform[] = [];
+    const coreMigrationVersionTransforms: Transform[] = [];
+    transforms.forEach((x) => {
+      if (x.transformType === 'migrate' || x.transformType === 'convert') {
+        migrationVersionTransforms.push(x);
+      } else {
+        coreMigrationVersionTransforms.push(x);
+      }
+    });
+
     return {
       ...migrations,
       [type.name]: {
-        latestVersion: _.last(transforms.filter((x) => x.transformType !== 'reference'))?.version,
-        latestReferenceVersion: _.last(transforms.filter((x) => x.transformType === 'reference'))
-          ?.version,
+        latestMigrationVersion: _.last(migrationVersionTransforms)?.version,
+        latestCoreMigrationVersion: _.last(coreMigrationVersionTransforms)?.version,
         transforms,
       },
     };
@@ -403,7 +428,7 @@ function props(doc: SavedObjectUnsanitizedDoc) {
  */
 function propVersion(doc: SavedObjectUnsanitizedDoc | ActiveMigrations, prop: string) {
   return (
-    ((doc as any)[prop] && (doc as any)[prop].latestVersion) ||
+    ((doc as any)[prop] && (doc as any)[prop].latestMigrationVersion) ||
     (doc.migrationVersion && (doc as any).migrationVersion[prop])
   );
 }
@@ -575,7 +600,11 @@ function wrapWithTry(
   };
 }
 
-function getHasPendingReferenceTransform(
+/**
+ * Determines whether or not a document has any pending transforms that should be applied based on its coreMigrationVersion field.
+ * Currently, only reference transforms qualify.
+ */
+function getHasPendingCoreMigrationVersionTransform(
   doc: SavedObjectUnsanitizedDoc,
   migrations: ActiveMigrations,
   prop: string
@@ -584,11 +613,11 @@ function getHasPendingReferenceTransform(
     return false;
   }
 
-  const { latestReferenceVersion } = migrations[prop];
+  const { latestCoreMigrationVersion } = migrations[prop];
   const { coreMigrationVersion } = doc;
   return (
-    latestReferenceVersion &&
-    (!coreMigrationVersion || Semver.gt(latestReferenceVersion, coreMigrationVersion))
+    latestCoreMigrationVersion &&
+    (!coreMigrationVersion || Semver.gt(latestCoreMigrationVersion, coreMigrationVersion))
   );
 }
 
@@ -597,25 +626,25 @@ function getHasPendingReferenceTransform(
  */
 function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
   return props(doc).find((p) => {
-    const latestVersion = propVersion(migrations, p);
+    const latestMigrationVersion = propVersion(migrations, p);
     const docVersion = propVersion(doc, p);
 
     // We verify that the version is not greater than the version supported by Kibana.
     // If we didn't, this would cause an infinite loop, as we'd be unable to migrate the property
     // but it would continue to show up as unmigrated.
-    // If we have a docVersion and the latestVersion is smaller than it or does not exist,
+    // If we have a docVersion and the latestMigrationVersion is smaller than it or does not exist,
     // we are dealing with a document that belongs to a future Kibana / plugin version.
-    if (docVersion && (!latestVersion || Semver.gt(docVersion, latestVersion))) {
+    if (docVersion && (!latestMigrationVersion || Semver.gt(docVersion, latestMigrationVersion))) {
       throw Boom.badData(
         `Document "${doc.id}" has property "${p}" which belongs to a more recent` +
-          ` version of Kibana [${docVersion}]. The last known version is [${latestVersion}]`,
+          ` version of Kibana [${docVersion}]. The last known version is [${latestMigrationVersion}]`,
         doc
       );
     }
 
     return (
-      (latestVersion && latestVersion !== docVersion) ||
-      getHasPendingReferenceTransform(doc, migrations, p) // If the object itself is up-to-date, check if its references are up-to-date too
+      (latestMigrationVersion && latestMigrationVersion !== docVersion) ||
+      getHasPendingCoreMigrationVersionTransform(doc, migrations, p) // If the object itself is up-to-date, check if its references are up-to-date too
     );
   });
 }
@@ -640,14 +669,15 @@ function migrateProp(
       break;
     }
 
-    if (transformType === 'migrate' || convertNamespaceTypes) {
-      // migrate transforms are always applied, but conversion transforms and reference transforms are only applied when Kibana is upgraded
+    if (convertNamespaceTypes || (transformType !== 'convert' && transformType !== 'reference')) {
+      // migrate transforms are always applied, but conversion transforms and reference transforms are only applied during index migrations
       const result = transform(doc);
       doc = result.transformedDoc;
       additionalDocs = [...additionalDocs, ...result.additionalDocs];
     }
     if (transformType === 'reference') {
-      // regardless of whether or not the reference transform was applied, increment the version
+      // regardless of whether or not the reference transform was applied, update the object's coreMigrationVersion
+      // this is needed to ensure that we don't have an endless migration loop
       doc.coreMigrationVersion = version;
     } else {
       migrationVersion = updateMigrationVersion(doc, migrationVersion, prop, version);
