@@ -129,7 +129,8 @@ const VisComponent = (props: VisComponentProps) => {
     (
       visData: Datatable,
       xAccessor: Accessor | AccessorFn,
-      splitSeriesAccessors: Array<Accessor | AccessorFn>
+      splitSeriesAccessors: Array<Accessor | AccessorFn>,
+      splitChartAccessor?: Accessor | AccessorFn
     ): ElementClickListener => {
       const splitSeriesAccessorFnMap = getSplitSeriesAccessorFnMap(splitSeriesAccessors);
       return (elements) => {
@@ -137,7 +138,8 @@ const VisComponent = (props: VisComponentProps) => {
           const event = getFilterFromChartClickEventFn(
             visData,
             xAccessor,
-            splitSeriesAccessorFnMap
+            splitSeriesAccessorFnMap,
+            splitChartAccessor
           )(elements as XYChartElementEvent[]);
           props.fireEvent(event);
         }
@@ -166,12 +168,17 @@ const VisComponent = (props: VisComponentProps) => {
     (
       visData: Datatable,
       xAccessor: Accessor | AccessorFn,
-      splitSeriesAccessors: Array<Accessor | AccessorFn>
+      splitSeriesAccessors: Array<Accessor | AccessorFn>,
+      splitChartAccessor?: Accessor | AccessorFn
     ) => {
       const splitSeriesAccessorFnMap = getSplitSeriesAccessorFnMap(splitSeriesAccessors);
       return (series: XYChartSeriesIdentifier): ClickTriggerEvent | null => {
         if (xAccessor !== null) {
-          return getFilterFromSeriesFn(visData)(series, splitSeriesAccessorFnMap);
+          return getFilterFromSeriesFn(visData)(
+            series,
+            splitSeriesAccessorFnMap,
+            splitChartAccessor
+          );
         }
 
         return null;
@@ -337,14 +344,24 @@ const VisComponent = (props: VisComponentProps) => {
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
           legendColorPicker={useColorPicker(legendPosition, setColor, getSeriesName)}
-          onElementClick={handleFilterClick(visData, xAccessor, splitSeriesAccessors)}
+          onElementClick={handleFilterClick(
+            visData,
+            xAccessor,
+            splitSeriesAccessors,
+            splitChartColumnAccessor ?? splitChartRowAccessor
+          )}
           onBrushEnd={handleBrush(visData, xAccessor, 'interval' in config.aspects.x.params)}
           onRenderChange={onRenderChange}
           legendAction={
             config.aspects.series && (config.aspects.series?.length ?? 0) > 0
               ? getLegendActions(
                   canFilter,
-                  getFilterEventData(visData, xAccessor, splitSeriesAccessors),
+                  getFilterEventData(
+                    visData,
+                    xAccessor,
+                    splitSeriesAccessors,
+                    splitChartColumnAccessor ?? splitChartRowAccessor
+                  ),
                   handleFilterAction,
                   getSeriesName
                 )
