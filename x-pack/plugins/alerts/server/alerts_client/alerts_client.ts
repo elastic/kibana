@@ -475,7 +475,6 @@ export class AlertsClient {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
           sort_order: 'desc',
-          status: options.instanceStatus,
         }
       );
       // paging
