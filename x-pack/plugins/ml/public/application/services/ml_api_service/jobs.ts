@@ -140,6 +140,15 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
+  jobsExist(jobIds: string[], allSpaces: boolean = false) {
+    const body = JSON.stringify({ jobIds, allSpaces });
+    return httpService.http<JobsExistResponse>({
+      path: `${basePath()}/jobs/jobs_exist`,
+      method: 'POST',
+      body,
+    });
+  },
+
   jobsExist$(jobIds: string[], allSpaces: boolean = false): Observable<JobsExistResponse> {
     const body = JSON.stringify({ jobIds, allSpaces });
     return httpService.http$({
