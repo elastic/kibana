@@ -294,6 +294,22 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await testSubjects.click('confirmModalConfirmButton');
       await this.waitTableIsLoaded();
     }
+
+    async getImportWarnings() {
+      const elements = await testSubjects.findAll('importSavedObjectsWarning');
+      return Promise.all(
+        elements.map(async (element) => {
+          const message = await element
+            .findByClassName('euiCallOutHeader__title')
+            .then((titleEl) => titleEl.getVisibleText());
+          const buttons = await element.findAllByClassName('euiButton');
+          return {
+            message,
+            type: buttons.length ? 'action_required' : 'simple',
+          };
+        })
+      );
+    }
   }
 
   return new SavedObjectsPage();

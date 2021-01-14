@@ -239,7 +239,7 @@ const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePat
       color="warning"
       size="s"
       iconType="alert"
-      className="savedObjectsManagementImportSummary__warning"
+      data-test-subj="importSavedObjectsWarning"
       title={warning.message}
     >
       {warningContent}
