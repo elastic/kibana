@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { STATE_STORAGE_KEY } from './url_generator';
+const DASHBOARD_STATE_STORAGE_KEY = '_a';
 
 export const DashboardConstants = {
   LANDING_PAGE_PATH: '/list',
@@ -31,7 +31,7 @@ export const DashboardConstants = {
 };
 
 export function createDashboardEditUrl(id?: string, editMode?: boolean) {
-  const edit = editMode ? `?${STATE_STORAGE_KEY}=(viewMode:edit)` : '';
+  const edit = editMode ? `?${DASHBOARD_STATE_STORAGE_KEY}=(viewMode:edit)` : '';
   if (id) {
     return `${DashboardConstants.VIEW_DASHBOARD_URL}/${id}${edit}`;
   }

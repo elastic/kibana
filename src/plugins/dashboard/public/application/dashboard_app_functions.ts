@@ -195,6 +195,7 @@ export const getInputSubscription = ({
         dashboardContainer.getInput().filters
       );
     }
+
     dashboardStateManager.handleDashboardContainerChanges(dashboardContainer);
   });
 
