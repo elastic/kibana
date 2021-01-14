@@ -47,7 +47,7 @@ const defaultHeaders = [
 ];
 
 describe('Fields Browser', () => {
-  context.skip('Fields Browser rendering', () => {
+  context('Fields Browser rendering', () => {
     before(() => {
       cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
