@@ -16,8 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React, { lazy } from 'react';
 
-export * from './create_error';
-export * from './get_by_alias';
-export * from './tables_adapter';
-export * from './expressions_inspector_adapter';
+const ExpressionsInspectorViewComponent = lazy(() => import('./expressions_inspector_view'));
+
+export const getExpressionsInspectorViewComponentWrapper = () => {
+  return (props: any) => {
+    return <ExpressionsInspectorViewComponent adapters={props.adapters} title={props.title} />;
+  };
+};

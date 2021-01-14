@@ -16,8 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { createAction } from '../../../../src/plugins/ui_actions/public';
 
-export * from './create_error';
-export * from './get_by_alias';
-export * from './tables_adapter';
-export * from './expressions_inspector_adapter';
+export const ACTION_NAVIGATE = 'ACTION_NAVIGATE';
+
+export const createNavigateAction = () =>
+  createAction({
+    id: ACTION_NAVIGATE,
+    type: ACTION_NAVIGATE,
+    getDisplayName: () => 'Navigate',
+    execute: async (event: any) => {
+      window.location.href = event.href;
+    },
+  });

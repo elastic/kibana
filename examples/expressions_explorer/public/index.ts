@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export * from './create_error';
-export * from './get_by_alias';
-export * from './tables_adapter';
-export * from './expressions_inspector_adapter';
+import { ExpressionsExplorerPlugin } from './plugin';
+
+export const plugin = () => new ExpressionsExplorerPlugin();

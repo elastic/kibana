@@ -17,7 +17,10 @@
  * under the License.
  */
 
-export * from './create_error';
-export * from './get_by_alias';
-export * from './tables_adapter';
-export * from './expressions_inspector_adapter';
+import { Trigger } from '../../../../src/plugins/ui_actions/public';
+
+export const NAVIGATE_TRIGGER_ID = 'NAVIGATE_TRIGGER_ID';
+
+export const navigateTrigger: Trigger = {
+  id: NAVIGATE_TRIGGER_ID,
+};

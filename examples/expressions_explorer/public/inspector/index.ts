@@ -16,8 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
+import { Adapters, InspectorViewDescription } from '../../../../src/plugins/inspector/public';
+import { getExpressionsInspectorViewComponentWrapper } from './expressions_inspector_view_wrapper';
 
-export * from './create_error';
-export * from './get_by_alias';
-export * from './tables_adapter';
-export * from './expressions_inspector_adapter';
+export const getExpressionsInspectorViewDescription = (): InspectorViewDescription => ({
+  title: i18n.translate('data.inspector.table.dataTitle', {
+    defaultMessage: 'Expression',
+  }),
+  order: 100,
+  help: i18n.translate('data.inspector.table..dataDescriptionTooltip', {
+    defaultMessage: 'View the expression behind the visualization',
+  }),
+  shouldShow(adapters: Adapters) {
+    return Boolean(adapters.expression);
+  },
+  component: getExpressionsInspectorViewComponentWrapper(),
+});

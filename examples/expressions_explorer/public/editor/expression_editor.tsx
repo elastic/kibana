@@ -17,7 +17,30 @@
  * under the License.
  */
 
-export * from './create_error';
-export * from './get_by_alias';
-export * from './tables_adapter';
-export * from './expressions_inspector_adapter';
+import React from 'react';
+import { EuiCodeEditor } from '@elastic/eui';
+
+interface Props {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export function ExpressionEditor({ value, onChange }: Props) {
+  return (
+    <EuiCodeEditor
+      mode="javascript"
+      theme="github"
+      width="100%"
+      value={value}
+      onChange={onChange}
+      setOptions={{
+        fontSize: '14px',
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true,
+      }}
+      onBlur={() => {}}
+      aria-label="Code Editor"
+    />
+  );
+}
