@@ -90,7 +90,7 @@ use a standalone wildcard for your cluster name in your index
 pattern: `*:logstash-*`.
 
 Exclusions can be used too.
-To match indices starting with `logstash-` and exclude those starting with `logstash-old` from 
+To match indices starting with `logstash-`, and exclude those starting with `logstash-old` from 
 all clusters having a name starting with `cluster_`, you can use `cluster_*:logstash-*,cluster*:logstash-old*`.
 To exclude a cluster, use `cluster_*:logstash-*,cluster_one:-*`.
 
