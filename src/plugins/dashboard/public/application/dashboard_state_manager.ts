@@ -245,6 +245,7 @@ export class DashboardStateManager {
     const savedDashboardPanelMap: { [key: string]: SavedDashboardPanel } = {};
 
     const input = dashboardContainer.getInput();
+
     this.getPanels().forEach((savedDashboardPanel) => {
       if (input.panels[savedDashboardPanel.panelIndex] !== undefined) {
         savedDashboardPanelMap[savedDashboardPanel.panelIndex] = savedDashboardPanel;
@@ -256,9 +257,14 @@ export class DashboardStateManager {
 
     const convertedPanelStateMap: { [key: string]: SavedDashboardPanel } = {};
 
+    let expandedPanelValid = false;
     Object.values(input.panels).forEach((panelState) => {
       if (savedDashboardPanelMap[panelState.explicitInput.id] === undefined) {
         dirty = true;
+      }
+
+      if (panelState.explicitInput.id === input.expandedPanelId) {
+        expandedPanelValid = true;
       }
 
       convertedPanelStateMap[panelState.explicitInput.id] = convertPanelStateToSavedDashboardPanel(
@@ -296,8 +302,10 @@ export class DashboardStateManager {
       this.setFullScreenMode(input.isFullScreenMode);
     }
 
-    if (input.expandedPanelId !== this.getExpandedPanelId()) {
+    if (expandedPanelValid && input.expandedPanelId !== this.getExpandedPanelId()) {
       this.setExpandedPanelId(input.expandedPanelId);
+    } else if (!expandedPanelValid && this.getExpandedPanelId()) {
+      this.setExpandedPanelId(undefined);
     }
 
     if (!_.isEqual(input.query, this.getQuery())) {

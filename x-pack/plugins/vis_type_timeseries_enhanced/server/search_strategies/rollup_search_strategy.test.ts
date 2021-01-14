@@ -12,11 +12,11 @@ jest.mock('../../../../../src/plugins/vis_type_timeseries/server', () => {
     getFieldsForWildcard() {
       return [
         {
-          name: 'day_of_week.terms.value',
+          name: 'day_of_week',
           type: 'object',
           esTypes: ['object'],
-          searchable: false,
-          aggregatable: false,
+          searchable: true,
+          aggregatable: true,
         },
       ];
     }
@@ -157,7 +157,6 @@ describe('Rollup Search Strategy', () => {
         {
           aggregatable: true,
           name: 'day_of_week',
-          readFromDocValues: true,
           searchable: true,
           type: 'object',
           esTypes: ['object'],
