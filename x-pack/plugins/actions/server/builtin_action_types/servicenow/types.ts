@@ -8,13 +8,15 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  ExecutorParamsSchema,
+  ExecutorParamsSchemaIM,
   ExecutorSubActionCommonFieldsParamsSchema,
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
-  ExecutorSubActionPushParamsSchema,
+  ExecutorSubActionPushParamsSchemaIM,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
+  ExecutorParamsSchemaSIR,
+  ExecutorSubActionPushParamsSchemaSIR,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
@@ -36,8 +38,16 @@ export interface CreateCommentRequest {
   [key: string]: string;
 }
 
-export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
-export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
+export type ExecutorParams =
+  | TypeOf<typeof ExecutorParamsSchemaIM>
+  | TypeOf<typeof ExecutorParamsSchemaSIR>;
+
+export type ExecutorSubActionPushParamsIM = TypeOf<typeof ExecutorSubActionPushParamsSchemaIM>;
+export type ExecutorSubActionPushParamsSIR = TypeOf<typeof ExecutorSubActionPushParamsSchemaSIR>;
+
+export type ExecutorSubActionPushParams =
+  | ExecutorSubActionPushParamsIM
+  | ExecutorSubActionPushParamsSIR;
 
 export interface ExternalServiceCredentials {
   config: Record<string, unknown>;
@@ -70,6 +80,8 @@ export interface ExternalService {
 }
 
 export type PushToServiceApiParams = ExecutorSubActionPushParams;
+export type PushToServiceApiParamsIM = ExecutorSubActionPushParamsIM;
+export type PushToServiceApiParamsSIR = ExecutorSubActionPushParamsSIR;
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;
@@ -83,7 +95,17 @@ export type ExecutorSubActionHandshakeParams = TypeOf<
   typeof ExecutorSubActionHandshakeParamsSchema
 >;
 
-export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
+export type ServiceNowIMIncident = Omit<
+  TypeOf<typeof ExecutorSubActionPushParamsSchemaIM>['incident'],
+  'externalId'
+>;
+
+export type ServiceNowSIRIncident = Omit<
+  TypeOf<typeof ExecutorSubActionPushParamsSchemaSIR>['incident'],
+  'externalId'
+>;
+
+export type Incident = ServiceNowIMIncident | ServiceNowSIRIncident;
 
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;

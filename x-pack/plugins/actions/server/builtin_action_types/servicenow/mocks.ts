@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
+import { ExternalService, ExecutorSubActionPushParams } from './types';
 
 export const serviceNowCommonFields = [
   {
@@ -89,8 +89,6 @@ const executorParams: ExecutorSubActionPushParams = {
   ],
 };
 
-const apiParams: PushToServiceApiParams = {
-  ...executorParams,
-};
+const apiParams = executorParams;
 
 export { externalServiceMock, executorParams, apiParams };

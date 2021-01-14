@@ -11,7 +11,8 @@ import { validate } from './validators';
 import {
   ExternalIncidentServiceConfiguration,
   ExternalIncidentServiceSecretConfiguration,
-  ExecutorParamsSchema,
+  ExecutorParamsSchemaIM,
+  ExecutorParamsSchemaSIR,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
@@ -29,18 +30,23 @@ import {
   ServiceNowExecutorResultData,
 } from './types';
 
-export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
+export type ActionParamsType =
+  | TypeOf<typeof ExecutorParamsSchemaIM>
+  | TypeOf<typeof ExecutorParamsSchemaSIR>;
 
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const serviceNowIncidentTable = 'incident';
+const serviceNowIMTable = 'incident';
+const serviceNowSIRTable = 'sn_si_incident';
 
-export const ActionTypeId = '.servicenow';
+export const ServiceNowIMActionTypeId = '.servicenow';
+export const ServiceNowSIRActionTypeId = '.servicenow-sir';
+
 // action type definition
-export function getActionType(
+export function getServiceNowIMActionType(
   params: GetActionTypeParams
 ): ActionType<
   ServiceNowPublicConfigurationType,
@@ -50,9 +56,9 @@ export function getActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: ActionTypeId,
+    id: ServiceNowIMActionTypeId,
     minimumLicenseRequired: 'platinum',
-    name: i18n.NAME,
+    name: i18n.SERVICENOW,
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),
@@ -60,9 +66,35 @@ export function getActionType(
       secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
         validate: curry(validate.secrets)(configurationUtilities),
       }),
-      params: ExecutorParamsSchema,
+      params: ExecutorParamsSchemaIM,
     },
-    executor: curry(executor)({ logger, configurationUtilities, table: serviceNowIncidentTable }),
+    executor: curry(executor)({ logger, table: serviceNowIMTable }),
+  };
+}
+
+export function getServiceNowSIRActionType(
+  params: GetActionTypeParams
+): ActionType<
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
+  ExecutorParams,
+  PushToServiceResponse | {}
+> {
+  const { logger, configurationUtilities } = params;
+  return {
+    id: ServiceNowSIRActionTypeId,
+    minimumLicenseRequired: 'platinum',
+    name: i18n.SERVICENOW_SIR,
+    validate: {
+      config: schema.object(ExternalIncidentServiceConfiguration, {
+        validate: curry(validate.config)(configurationUtilities),
+      }),
+      secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
+        validate: curry(validate.secrets)(configurationUtilities),
+      }),
+      params: ExecutorParamsSchemaSIR,
+    },
+    executor: curry(executor)({ logger, configurationUtilities, table: serviceNowSIRTable }),
   };
 }
 

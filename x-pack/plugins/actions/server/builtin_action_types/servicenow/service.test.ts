@@ -28,13 +28,18 @@ jest.mock('../lib/axios_utils', () => {
 axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
 const patchMock = utils.patch as jest.Mock;
+<<<<<<< HEAD
 const configurationUtilities = actionsConfigMock.create();
+=======
+const table = 'incident';
+>>>>>>> Register ServiceNow SIR action
 
 describe('ServiceNow service', () => {
   let service: ExternalService;
 
   beforeAll(() => {
     service = createExternalService(
+      table,
       {
         // The trailing slash at the end of the url is intended.
         // All API calls need to have the trailing slash removed.
@@ -54,6 +59,7 @@ describe('ServiceNow service', () => {
     test('throws without url', () => {
       expect(() =>
         createExternalService(
+          table,
           {
             config: { apiUrl: null },
             secrets: { username: 'admin', password: 'admin' },
@@ -67,6 +73,7 @@ describe('ServiceNow service', () => {
     test('throws without username', () => {
       expect(() =>
         createExternalService(
+          table,
           {
             config: { apiUrl: 'test.com' },
             secrets: { username: '', password: 'admin' },
@@ -80,6 +87,7 @@ describe('ServiceNow service', () => {
     test('throws without password', () => {
       expect(() =>
         createExternalService(
+          table,
           {
             config: { apiUrl: 'test.com' },
             secrets: { username: '', password: undefined },

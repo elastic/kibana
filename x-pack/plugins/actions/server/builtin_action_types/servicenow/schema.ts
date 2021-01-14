@@ -30,23 +30,45 @@ export const ExecutorSubActionSchema = schema.oneOf([
   schema.literal('handshake'),
 ]);
 
-export const ExecutorSubActionPushParamsSchema = schema.object({
+const CommentsSchema = schema.nullable(
+  schema.arrayOf(
+    schema.object({
+      comment: schema.string(),
+      commentId: schema.string(),
+    })
+  )
+);
+
+const CommonAttributes = {
+  short_description: schema.string(),
+  description: schema.nullable(schema.string()),
+  externalId: schema.nullable(schema.string()),
+};
+
+// Schema for ServiceNow Incident Management (IM)
+export const ExecutorSubActionPushParamsSchemaIM = schema.object({
   incident: schema.object({
-    short_description: schema.string(),
-    description: schema.nullable(schema.string()),
-    externalId: schema.nullable(schema.string()),
+    ...CommonAttributes,
     severity: schema.nullable(schema.string()),
     urgency: schema.nullable(schema.string()),
     impact: schema.nullable(schema.string()),
   }),
-  comments: schema.nullable(
-    schema.arrayOf(
-      schema.object({
-        comment: schema.string(),
-        commentId: schema.string(),
-      })
-    )
-  ),
+  comments: CommentsSchema,
+});
+
+// Schema for ServiceNow Security Incident Response (SIR)
+export const ExecutorSubActionPushParamsSchemaSIR = schema.object({
+  incident: schema.object({
+    ...CommonAttributes,
+    category: schema.nullable(schema.string()),
+    dest_ip: schema.nullable(schema.string()),
+    malware_hash: schema.nullable(schema.string()),
+    malware_url: schema.nullable(schema.string()),
+    priority: schema.nullable(schema.string()),
+    source_ip: schema.nullable(schema.string()),
+    subcategory: schema.nullable(schema.string()),
+  }),
+  comments: CommentsSchema,
 });
 
 export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
@@ -57,7 +79,8 @@ export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
 export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
 export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
 
-export const ExecutorParamsSchema = schema.oneOf([
+// Executor parameters for ServiceNow Incident Management (IM)
+export const ExecutorParamsSchemaIM = schema.oneOf([
   schema.object({
     subAction: schema.literal('getFields'),
     subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
@@ -72,6 +95,26 @@ export const ExecutorParamsSchema = schema.oneOf([
   }),
   schema.object({
     subAction: schema.literal('pushToService'),
-    subActionParams: ExecutorSubActionPushParamsSchema,
+    subActionParams: ExecutorSubActionPushParamsSchemaIM,
+  }),
+]);
+
+// Executor parameters for ServiceNow Security Incident Response (SIR)
+export const ExecutorParamsSchemaSIR = schema.oneOf([
+  schema.object({
+    subAction: schema.literal('getFields'),
+    subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('getIncident'),
+    subActionParams: ExecutorSubActionGetIncidentParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('handshake'),
+    subActionParams: ExecutorSubActionHandshakeParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('pushToService'),
+    subActionParams: ExecutorSubActionPushParamsSchemaSIR,
   }),
 ]);

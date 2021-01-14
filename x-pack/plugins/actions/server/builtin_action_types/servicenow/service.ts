@@ -27,7 +27,7 @@ export const createExternalService = (
   const { username, password } = secrets as ServiceNowSecretConfigurationType;
 
   if (!url || !username || !password) {
-    throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
+    throw Error(`[Action]${i18n.SERVICENOW}: Wrong configuration.`);
   }
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
@@ -62,7 +62,10 @@ export const createExternalService = (
       return { ...res.data.result };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}`)
+        getErrorMessage(
+          i18n.SERVICENOW,
+          `Unable to get incident with id ${id}. Error: ${error.message}`
+        )
       );
     }
   };
@@ -80,7 +83,10 @@ export const createExternalService = (
       return res.data.result.length > 0 ? { ...res.data.result } : undefined;
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to find incidents by query. Error: ${error.message}`)
+        getErrorMessage(
+          i18n.SERVICENOW,
+          `Unable to find incidents by query. Error: ${error.message}`
+        )
       );
     }
   };
@@ -104,7 +110,7 @@ export const createExternalService = (
       };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to create incident. Error: ${error.message}`)
+        getErrorMessage(i18n.SERVICENOW, `Unable to create incident. Error: ${error.message}`)
       );
     }
   };
@@ -128,7 +134,7 @@ export const createExternalService = (
     } catch (error) {
       throw new Error(
         getErrorMessage(
-          i18n.NAME,
+          i18n.SERVICENOW,
           `Unable to update incident with id ${incidentId}. Error: ${error.message}`
         )
       );
@@ -146,7 +152,9 @@ export const createExternalService = (
       checkInstance(res);
       return res.data.result.length > 0 ? res.data.result : [];
     } catch (error) {
-      throw new Error(getErrorMessage(i18n.NAME, `Unable to get fields. Error: ${error.message}`));
+      throw new Error(
+        getErrorMessage(i18n.SERVICENOW, `Unable to get fields. Error: ${error.message}`)
+      );
     }
   };
 
