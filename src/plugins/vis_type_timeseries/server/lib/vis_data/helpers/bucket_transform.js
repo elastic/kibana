@@ -128,7 +128,8 @@ export const bucketTransform = {
       },
     };
     if (bucket.order_by) {
-      set(body, 'aggs.docs.top_hits.sort', [{ [bucket.order_by]: { order: bucket.order } }]);
+      const orderField = bucket.order_by;
+      set(body, 'aggs.docs.top_hits.sort', [{ [orderField]: { order: bucket.order } }]);
     }
     return body;
   },
