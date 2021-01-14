@@ -56,6 +56,8 @@ import { ShowShareModal } from './show_share_modal';
 import { PanelToolbar } from './panel_toolbar';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import { OverlayRef } from '../../../../../core/public';
+import { getNewDashboardTitle } from '../../dashboard_strings';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardContainer } from '..';
 
 export interface DashboardTopNavState {
@@ -100,6 +102,8 @@ export function DashboardTopNav({
     setHeaderActionMenu,
     savedObjectsTagging,
     dashboardCapabilities,
+    dashboardPanelStorage,
+    allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
 
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
@@ -108,8 +112,16 @@ export function DashboardTopNav({
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
       setState((s) => ({ ...s, chromeIsVisible }));
     });
+    const { id, title, getFullEditPath } = savedDashboard;
+    if (id || allowByValueEmbeddables) {
+      chrome.recentlyAccessed.add(
+        getFullEditPath(dashboardStateManager.getIsEditMode()),
+        title || getNewDashboardTitle(),
+        id || DASHBOARD_PANELS_UNSAVED_ID
+      );
+    }
     return () => visibleSubscription.unsubscribe();
-  }, [chrome]);
+  }, [chrome, allowByValueEmbeddables, dashboardStateManager, savedDashboard]);
 
   const addFromLibrary = useCallback(() => {
     if (!isErrorEmbeddable(dashboardContainer)) {
@@ -158,6 +170,11 @@ export function DashboardTopNav({
       const isLeavingEditMode = !isPageRefresh && newMode === ViewMode.VIEW;
       const willLoseChanges = isLeavingEditMode && dashboardStateManager.getIsDirty(timefilter);
 
+      if (savedDashboard?.id && allowByValueEmbeddables) {
+        const { getFullEditPath, title, id } = savedDashboard;
+        chrome.recentlyAccessed.add(getFullEditPath(newMode === ViewMode.EDIT), title, id);
+      }
+
       if (!willLoseChanges) {
         dashboardStateManager.switchViewMode(newMode);
         if (newMode === ViewMode.EDIT) {
@@ -184,7 +201,16 @@ export function DashboardTopNav({
 
       confirmDiscardUnsavedChanges(core.overlays, revertChangesAndExitEditMode);
     },
-    [redirectTo, timefilter, core.overlays, savedDashboard.id, dashboardStateManager, clearAddPanel]
+    [
+      redirectTo,
+      timefilter,
+      clearAddPanel,
+      core.overlays,
+      savedDashboard,
+      dashboardStateManager,
+      allowByValueEmbeddables,
+      chrome.recentlyAccessed,
+    ]
   );
 
   /**
@@ -212,7 +238,7 @@ export function DashboardTopNav({
               'data-test-subj': 'saveDashboardSuccess',
             });
 
-            dashboardStateManager.clearUnsavedPanels();
+            dashboardPanelStorage.clearPanels(lastDashboardId);
             if (id !== lastDashboardId) {
               redirectTo({ destination: 'dashboard', id });
             } else {
@@ -239,6 +265,7 @@ export function DashboardTopNav({
     [
       core.notifications.toasts,
       dashboardStateManager,
+      dashboardPanelStorage,
       lastDashboardId,
       chrome.docTitle,
       redirectTo,

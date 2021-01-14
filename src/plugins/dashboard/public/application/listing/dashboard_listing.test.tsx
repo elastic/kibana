@@ -78,6 +78,7 @@ function makeDefaultServices(): DashboardAppServices {
     uiSettings: {} as IUiSettingsClient,
     restorePreviousUrl: () => {},
     onAppLeave: (handler) => {},
+    allowByValueEmbeddables: true,
     savedDashboards,
     core,
   };

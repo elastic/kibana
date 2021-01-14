@@ -39,7 +39,6 @@ import { createSessionRestorationDataProvider } from '../lib/session_restoration
 import { DashboardStateManager } from '../dashboard_state_manager';
 import { getDashboardTitle } from '../../dashboard_strings';
 import { DashboardAppServices } from '../types';
-import { DashboardFeatureFlagConfig } from '../..';
 import { ViewMode } from '../../services/embeddable';
 
 // TS is picky with type guards, we can't just inline `() => false`
@@ -66,6 +65,7 @@ export const useDashboardStateManager = (
     savedObjectsTagging,
     dashboardCapabilities,
     dashboardPanelStorage,
+    allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
 
   // Destructure and rename services; makes the Effect hook more specific, makes later
@@ -95,9 +95,6 @@ export const useDashboardStateManager = (
       useHash: uiSettings.get('state:storeInSessionStorage'),
       ...withNotifyOnErrors(toasts),
     });
-
-    const allowByValueEmbeddables = initializerContext.config.get<DashboardFeatureFlagConfig>()
-      .allowByValueEmbeddables;
 
     const stateManager = new DashboardStateManager({
       hasTaggingCapabilities,
@@ -216,6 +213,7 @@ export const useDashboardStateManager = (
     toasts,
     uiSettings,
     usageCollection,
+    allowByValueEmbeddables,
   ]);
 
   return { dashboardStateManager, viewMode, setViewMode };

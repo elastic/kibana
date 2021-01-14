@@ -30,9 +30,12 @@ export const DashboardConstants = {
   SEARCH_SESSION_ID: 'searchSessionId',
 };
 
-export function createDashboardEditUrl(id: string, editMode?: boolean) {
+export function createDashboardEditUrl(id?: string, editMode?: boolean) {
   const edit = editMode ? `?${STATE_STORAGE_KEY}=(viewMode:edit)` : '';
-  return `${DashboardConstants.VIEW_DASHBOARD_URL}/${id}${edit}`;
+  if (id) {
+    return `${DashboardConstants.VIEW_DASHBOARD_URL}/${id}${edit}`;
+  }
+  return `${DashboardConstants.CREATE_NEW_DASHBOARD_URL}${edit}`;
 }
 
 export function createDashboardListingFilterUrl(filter: string | undefined) {

@@ -31,7 +31,12 @@ import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { getDashboardPageTitle, dashboardReadonlyBadge } from '../dashboard_strings';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from './types';
-import { DashboardSetupDependencies, DashboardStart, DashboardStartDependencies } from '../plugin';
+import {
+  DashboardFeatureFlagConfig,
+  DashboardSetupDependencies,
+  DashboardStart,
+  DashboardStartDependencies,
+} from '../plugin';
 
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
 import { KibanaContextProvider } from '../services/kibana_react';
@@ -108,6 +113,8 @@ export async function mountApp({
     dashboardPanelStorage: new DashboardPanelStorage(),
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+    allowByValueEmbeddables: initializerContext.config.get<DashboardFeatureFlagConfig>()
+      .allowByValueEmbeddables,
     dashboardCapabilities: {
       hideWriteControls: dashboardConfig.getHideWriteControls(),
       show: Boolean(coreStart.application.capabilities.dashboard.show),

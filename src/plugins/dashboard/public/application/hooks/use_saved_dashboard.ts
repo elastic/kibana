@@ -54,12 +54,7 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
 
       try {
         const dashboard = (await savedDashboards.get(savedDashboardId)) as DashboardSavedObject;
-        const { title, getFullPath } = dashboard;
-        if (savedDashboardId) {
-          recentlyAccessedPaths.add(getFullPath(), title, savedDashboardId);
-        }
-
-        docTitle.change(title);
+        docTitle.change(dashboard.title);
         setSavedDashboard(dashboard);
       } catch (error) {
         // E.g. a corrupt or deleted dashboard
