@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { useValues } from 'kea';
+import React, { useEffect } from 'react';
+import { useValues, useActions } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
@@ -17,10 +17,16 @@ interface Props {
   position?: 'top' | 'right' | 'bottom' | 'left';
 }
 export const LogRetentionTooltip: React.FC<Props> = ({ type, position = 'bottom' }) => {
+  const { fetchLogRetention } = useActions(LogRetentionLogic);
   const { logRetention } = useValues(LogRetentionLogic);
-  const hasILM = logRetention !== null;
 
-  return hasILM ? (
+  const hasLogRetention = logRetention !== null;
+
+  useEffect(() => {
+    if (!hasLogRetention) fetchLogRetention();
+  }, []);
+
+  return hasLogRetention ? (
     <EuiIconTip
       aria-label={i18n.translate('xpack.enterpriseSearch.appSearch.logRetention.tooltip', {
         defaultMessage: 'Log retention info',

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setMockValues } from '../../../../__mocks__/kea.mock';
+import '../../../../__mocks__/shallow_useeffect.mock';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
 import { mountWithIntl } from '../../../../__mocks__';
 
 import React from 'react';
@@ -15,9 +16,8 @@ import { LogRetentionOptions } from '../';
 import { LogRetentionCallout } from './';
 
 describe('LogRetentionCallout', () => {
-  const values = {
-    myRole: { canManageLogSettings: true },
-  };
+  const actions = { fetchLogRetention: jest.fn() };
+  const values = { myRole: { canManageLogSettings: true } };
   const DISABLED = {
     disabledAt: '01 Jan 1970 12:00:00 +0000',
     enabled: false,
@@ -25,6 +25,7 @@ describe('LogRetentionCallout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockActions(actions);
   });
 
   it('renders an analytics callout', () => {
@@ -75,10 +76,26 @@ describe('LogRetentionCallout', () => {
     expect(wrapper.isEmptyRender()).toBe(true);
   });
 
-  it('does not render if ILM is not available', () => {
+  it('does not render if log retention is not available', () => {
     setMockValues({ ...values, logRetention: null });
     const wrapper = shallow(<LogRetentionCallout type={LogRetentionOptions.API} />);
 
     expect(wrapper.isEmptyRender()).toBe(true);
+  });
+
+  describe('on mount', () => {
+    it('fetches log retention data when not already loaded', () => {
+      setMockValues({ ...values, logRetention: null });
+      shallow(<LogRetentionCallout type={LogRetentionOptions.API} />);
+
+      expect(actions.fetchLogRetention).toHaveBeenCalled();
+    });
+
+    it('does not fetch log retention data if it has already been loaded', () => {
+      setMockValues({ ...values, logRetention: {} });
+      shallow(<LogRetentionCallout type={LogRetentionOptions.API} />);
+
+      expect(actions.fetchLogRetention).not.toHaveBeenCalled();
+    });
   });
 });

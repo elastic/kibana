@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { useValues } from 'kea';
+import React, { useEffect } from 'react';
+import { useValues, useActions } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -29,18 +29,23 @@ interface Props {
   type: LogRetentionOptions;
 }
 export const LogRetentionCallout: React.FC<Props> = ({ type }) => {
+  const { fetchLogRetention } = useActions(LogRetentionLogic);
   const { logRetention } = useValues(LogRetentionLogic);
   const {
     myRole: { canManageLogSettings },
   } = useValues(AppLogic);
 
+  const hasLogRetention = logRetention !== null;
+
+  useEffect(() => {
+    if (!hasLogRetention) fetchLogRetention();
+  }, []);
+
   const logRetentionSettings = logRetention?.[type];
   const title = TITLE_MAP[type];
+  const hasLogRetentionDisabled = hasLogRetention && !logRetentionSettings?.enabled;
 
-  const hasILM = logRetention !== null;
-  const hasILMDisabled = hasILM && !logRetentionSettings?.enabled;
-
-  return hasILMDisabled ? (
+  return hasLogRetentionDisabled ? (
     <>
       <EuiCallOut
         iconType="alert"
