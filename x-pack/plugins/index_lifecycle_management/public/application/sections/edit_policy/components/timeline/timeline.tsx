@@ -189,7 +189,7 @@ export const Timeline: FunctionComponent = () => {
             {formData._meta?.delete.enabled && (
               <EuiFlexItem grow={false}>
                 <div
-                  data-test-subj="ilmTimelineDeleteIcon"
+                  data-test-subj="ilmTimelineDeletePhase"
                   className="ilmTimeline__deleteIconContainer"
                 >
                   <EuiIconTip

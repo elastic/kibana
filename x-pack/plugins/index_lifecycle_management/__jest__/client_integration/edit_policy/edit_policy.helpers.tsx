@@ -236,6 +236,12 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     actions: {
       setWaitForSnapshotPolicy,
       savePolicy,
+      timeline: {
+        hasHotPhase: () => exists('ilmTimelineHotPhase'),
+        hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
+        hasColdPhase: () => exists('ilmTimelineColdPhase'),
+        hasDeletePhase: () => exists('ilmTimelineDeletePhase'),
+      },
       hot: {
         setMaxSize,
         setMaxDocs,
