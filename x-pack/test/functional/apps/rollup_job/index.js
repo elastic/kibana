@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('rollup app', function () {
-    this.tags('ciGroup1');
+    this.tags('ciGroup12');
 
     loadTestFile(require.resolve('./rollup_jobs'));
     loadTestFile(require.resolve('./hybrid_index_pattern'));
