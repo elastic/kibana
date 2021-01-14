@@ -53,12 +53,23 @@ const DashboardUnsavedItem = ({
       </EuiTitle>
       <EuiFlexGroup gutterSize="s" alignItems="flexStart" className="dshUnsavedListingButtons">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="left" size="xs" color="primary" onClick={onOpenClick}>
+          <EuiButtonEmpty
+            flush="left"
+            size="xs"
+            color="primary"
+            onClick={onOpenClick}
+            data-test-subj={`edit-unsaved-${dashboard?.id ?? DASHBOARD_PANELS_UNSAVED_ID}`}
+          >
             {dashboardUnsavedListingStrings.getEditTitle()}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="xs" color="danger" onClick={onDiscardClick}>
+          <EuiButtonEmpty
+            size="xs"
+            color="danger"
+            onClick={onDiscardClick}
+            data-test-subj={`discard-unsaved-${dashboard?.id ?? DASHBOARD_PANELS_UNSAVED_ID}`}
+          >
             {dashboardUnsavedListingStrings.getDiscardTitle()}
           </EuiButtonEmpty>
         </EuiFlexItem>

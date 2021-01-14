@@ -264,13 +264,14 @@ export const createConfirmStrings = {
     i18n.translate('dashboard.createConfirmModal.unsavedChangesSubtitle', {
       defaultMessage: 'You can continue editing or start with a blank dashboard.',
     }),
-  getConfirmButtonText: () =>
+  getStartOverButtonText: () =>
     i18n.translate('dashboard.createConfirmModal.confirmButtonLabel', {
       defaultMessage: 'Start over',
     }),
+  getContinueButtonText: () => leaveConfirmStrings.getCancelButtonText(),
   getCancelButtonText: () =>
     i18n.translate('dashboard.createConfirmModal.cancelButtonLabel', {
-      defaultMessage: 'Continue editing',
+      defaultMessage: 'Cancel',
     }),
 };
 

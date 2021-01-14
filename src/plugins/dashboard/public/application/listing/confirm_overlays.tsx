@@ -17,9 +17,21 @@
  * under the License.
  */
 
-import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiText,
+  EUI_MODAL_CANCEL_BUTTON,
+} from '@elastic/eui';
+import React from 'react';
 import { OverlayStart } from '../../../../../core/public';
 import { createConfirmStrings, leaveConfirmStrings } from '../../dashboard_strings';
+import { toMountPoint } from '../../services/kibana_react';
 
 export const confirmDiscardUnsavedChanges = (overlays: OverlayStart, discardCallback: () => void) =>
   overlays
@@ -40,17 +52,45 @@ export const confirmCreateWithUnsaved = (
   overlays: OverlayStart,
   startBlankCallback: () => void,
   contineCallback: () => void
-) =>
-  overlays
-    .openConfirm(createConfirmStrings.getCreateSubtitle(), {
-      confirmButtonText: createConfirmStrings.getConfirmButtonText(),
-      cancelButtonText: createConfirmStrings.getCancelButtonText(),
-      defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-      title: createConfirmStrings.getCreateTitle(),
-    })
-    .then((isConfirmed) => {
-      if (isConfirmed) {
-        startBlankCallback();
-      }
-      contineCallback();
-    });
+) => {
+  const session = overlays.openModal(
+    toMountPoint(
+      <EuiModal onClose={() => session.close()}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>{createConfirmStrings.getCreateTitle()}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+
+        <EuiModalBody>
+          <EuiText>{createConfirmStrings.getCreateSubtitle()}</EuiText>
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={() => session.close()}>
+            {createConfirmStrings.getCancelButtonText()}
+          </EuiButtonEmpty>
+          <EuiButtonEmpty
+            color="danger"
+            onClick={() => {
+              startBlankCallback();
+              session.close();
+            }}
+          >
+            {createConfirmStrings.getStartOverButtonText()}
+          </EuiButtonEmpty>
+          <EuiButton
+            fill
+            onClick={() => {
+              contineCallback();
+              session.close();
+            }}
+          >
+            {createConfirmStrings.getContinueButtonText()}
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    ),
+    {
+      'data-test-subj': 'dashboardCreateConfirmModal',
+    }
+  );
+};
