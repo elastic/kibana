@@ -6,7 +6,7 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import moment from 'moment';
+import { Duration } from 'moment';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -41,7 +41,7 @@ function searchSessionRunner(core: CoreSetup, { logger, config$ }: SearchSession
         );
 
         return {
-          runAt: new Date(Date.now() + config.search.sessions.trackingInterval),
+          runAt: new Date(Date.now() + config.search.sessions.trackingInterval.asMilliseconds()),
           state: {},
         };
       },
@@ -61,7 +61,7 @@ export function registerSearchSessionsTask(core: CoreSetup, deps: SearchSessionT
 export async function scheduleSearchSessionsTasks(
   taskManager: TaskManagerStartContract,
   logger: Logger,
-  trackingIntervalMs: number
+  trackingInterval: Duration
 ) {
   await taskManager.removeIfExists(SEARCH_SESSIONS_TASK_ID);
 
@@ -70,7 +70,7 @@ export async function scheduleSearchSessionsTasks(
       id: SEARCH_SESSIONS_TASK_ID,
       taskType: SEARCH_SESSIONS_TASK_TYPE,
       schedule: {
-        interval: `${moment.duration(trackingIntervalMs, 'ms').asSeconds()}s`,
+        interval: `${trackingInterval.asSeconds()}s`,
       },
       state: {},
       params: {},

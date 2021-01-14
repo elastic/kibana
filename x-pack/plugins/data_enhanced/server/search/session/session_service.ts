@@ -74,12 +74,10 @@ export class SearchSessionService implements ISessionService {
   private config!: ConfigSchema['search']['sessions'];
 
   constructor(private readonly logger: Logger, private readonly config$: Observable<ConfigSchema>) {
-    this.fetchConfig();
-  }
-
-  private async fetchConfig() {
-    const config = await this.config$.pipe(first()).toPromise();
-    this.config = config.search.sessions;
+    (async () => {
+      const config = await this.config$.pipe(first()).toPromise();
+      this.config = config.search.sessions;
+    })();
   }
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
@@ -147,7 +145,7 @@ export class SearchSessionService implements ISessionService {
     this.sessionSearchMap.forEach((sessionInfo, sessionId) => {
       if (
         moment.duration(curTime.diff(sessionInfo.insertTime)).asMilliseconds() >
-        this.config.inMemTimeout
+        this.config.inMemTimeout.asMilliseconds()
       ) {
         this.logger.debug(`clearSessions | Deleting expired session ${sessionId}`);
         this.sessionSearchMap.delete(sessionId);
@@ -195,7 +193,7 @@ export class SearchSessionService implements ISessionService {
       } finally {
         this.monitorMappedIds();
       }
-    }, this.config.trackingInterval);
+    }, this.config.trackingInterval.asMilliseconds());
   }
 
   private async updateAllSavedObjects(
@@ -259,7 +257,7 @@ export class SearchSessionService implements ISessionService {
       name,
       appId,
       created = new Date().toISOString(),
-      expires = new Date(Date.now() + this.config.defaultExpiration).toISOString(),
+      expires = new Date(Date.now() + this.config.defaultExpiration.asMilliseconds()).toISOString(),
       status = SearchSessionStatus.IN_PROGRESS,
       urlGeneratorId,
       initialState = {},

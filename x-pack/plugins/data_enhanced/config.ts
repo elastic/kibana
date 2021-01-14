@@ -11,10 +11,10 @@ export const configSchema = schema.object({
     sessions: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
       pageSize: schema.number({ defaultValue: 10000 }),
-      trackingInterval: schema.number({ defaultValue: 10000 }),
-      inMemTimeout: schema.number({ defaultValue: 60000 }),
+      trackingInterval: schema.duration({ defaultValue: '10s' }),
+      inMemTimeout: schema.duration({ defaultValue: '1m' }),
       maxUpdateRetries: schema.number({ defaultValue: 3 }),
-      defaultExpiration: schema.number({ defaultValue: 7 * 24 * 60 * 60 * 1000 }),
+      defaultExpiration: schema.duration({ defaultValue: '7d' }),
     }),
   }),
 });

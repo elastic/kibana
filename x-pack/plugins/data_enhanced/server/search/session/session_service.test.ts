@@ -110,10 +110,10 @@ describe('SearchSessionService', () => {
         sessions: {
           enabled: true,
           pageSize: 10000,
-          inMemTimeout: 60000,
+          inMemTimeout: moment.duration(1, 'm'),
           maxUpdateRetries: 3,
-          defaultExpiration: 7 * 24 * 60 * 60 * 1000,
-          trackingInterval: 10000,
+          defaultExpiration: moment.duration(7, 'd'),
+          trackingInterval: moment.duration(10, 's'),
         },
       },
     });
