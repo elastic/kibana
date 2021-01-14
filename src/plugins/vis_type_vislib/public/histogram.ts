@@ -23,7 +23,7 @@ import { VisTypeDefinition } from '../../visualizations/public';
 import { toExpressionAst } from './to_ast';
 import { BasicVislibParams } from './types';
 
-export const histogramVisTypeDefinition: VisTypeDefinition<BasicVislibParams> = {
-  ...(xyVisTypes.histogram() as VisTypeDefinition<BasicVislibParams>),
+export const histogramVisTypeDefinition = {
+  ...xyVisTypes.histogram(),
   toExpressionAst,
-};
+} as VisTypeDefinition<BasicVislibParams>;

@@ -23,7 +23,7 @@ import { VisTypeDefinition } from '../../visualizations/public';
 import { toExpressionAst } from './to_ast';
 import { BasicVislibParams } from './types';
 
-export const horizontalBarVisTypeDefinition: VisTypeDefinition<BasicVislibParams> = {
-  ...(xyVisTypes.horizontalBar() as VisTypeDefinition<BasicVislibParams>),
+export const horizontalBarVisTypeDefinition = {
+  ...xyVisTypes.horizontalBar(),
   toExpressionAst,
-};
+} as VisTypeDefinition<BasicVislibParams>;

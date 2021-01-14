@@ -23,7 +23,7 @@ import { VisTypeDefinition } from '../../visualizations/public';
 import { toExpressionAst } from './to_ast';
 import { BasicVislibParams } from './types';
 
-export const areaVisTypeDefinition: VisTypeDefinition<BasicVislibParams> = {
-  ...(xyVisTypes.area() as VisTypeDefinition<BasicVislibParams>),
+export const areaVisTypeDefinition = {
+  ...xyVisTypes.area(),
   toExpressionAst,
-};
+} as VisTypeDefinition<BasicVislibParams>;

@@ -23,7 +23,7 @@ import { VisTypeDefinition } from '../../visualizations/public';
 import { toExpressionAst } from './to_ast';
 import { BasicVislibParams } from './types';
 
-export const lineVisTypeDefinition: VisTypeDefinition<BasicVislibParams> = {
-  ...(xyVisTypes.line() as VisTypeDefinition<BasicVislibParams>),
+export const lineVisTypeDefinition = {
+  ...xyVisTypes.line(),
   toExpressionAst,
-};
+} as VisTypeDefinition<BasicVislibParams>;
