@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useUrlParams } from '../../../../../../../context/url_params_context/use_url_params';
-import { getEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
+import { getNextEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
 import {
   SERVICE_NAME,
   SPAN_NAME,
@@ -30,10 +30,10 @@ export function StickySpanProperties({ span, transaction }: Props) {
     urlParams: { environment, latencyAggregationType },
   } = useUrlParams();
 
-  const nextEnvironment = getEnvironmentUrlParam(
-    transaction?.service.environment,
-    environment
-  );
+  const nextEnvironment = getNextEnvironmentUrlParam({
+    requestedEnvironment: transaction?.service.environment,
+    currentEnvironmentUrlParam: environment,
+  });
 
   const spanName = span.span.name;
   const transactionStickyProperties = transaction

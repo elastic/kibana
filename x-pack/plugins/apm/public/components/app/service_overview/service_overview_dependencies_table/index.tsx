@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   ENVIRONMENT_ALL,
-  getEnvironmentUrlParam,
+  getNextEnvironmentUrlParam,
 } from '../../../../../common/environment_filter_values';
 import {
   asDuration,
@@ -73,10 +73,10 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
                   {item.type === 'service' ? (
                     <ServiceOverviewLink
                       serviceName={item.serviceName}
-                      environment={getEnvironmentUrlParam(
-                        item.environment,
-                        environment
-                      )}
+                      environment={getNextEnvironmentUrlParam({
+                        requestedEnvironment: item.environment,
+                        currentEnvironmentUrlParam: environment,
+                      })}
                     >
                       {item.name}
                     </ServiceOverviewLink>
