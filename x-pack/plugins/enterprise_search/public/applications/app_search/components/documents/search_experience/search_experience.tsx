@@ -57,6 +57,8 @@ export const SearchExperience: React.FC = () => {
 
   // TODO const sortFieldsOptions = _flatten(fields.sortFields.map(fieldNameToSortOptions)) // we need to flatten this array since fieldNameToSortOptions returns an array of two sorting options
   const sortingOptions = [...DEFAULT_SORT_OPTIONS /* TODO ...sortFieldsOptions*/];
+  const openCustomizationModal = () => setShowCustomizationModal(true);
+  const closeCustomizationModal = () => setShowCustomizationModal(false);
 
   const connector = new AppSearchAPIConnector({
     cacheResponses: false,
@@ -98,7 +100,7 @@ export const SearchExperience: React.FC = () => {
               view={SortingView}
             />
             <EuiSpacer />
-            <CustomizationCallout onClick={() => setShowCustomizationModal(true)} />
+            <CustomizationCallout onClick={openCustomizationModal} />
           </EuiFlexItem>
           <EuiFlexItem className="documentsSearchExperience__content">
             <SearchExperienceContent />
@@ -109,10 +111,10 @@ export const SearchExperience: React.FC = () => {
         <CustomizationModal
           filterFields={fields.filterFields}
           sortFields={fields.sortFields}
-          onClose={() => setShowCustomizationModal(false)}
+          onClose={closeCustomizationModal}
           onSave={({ filterFields, sortFields }) => {
             setFields({ filterFields, sortFields });
-            setShowCustomizationModal(false);
+            closeCustomizationModal();
           }}
         />
       )}
