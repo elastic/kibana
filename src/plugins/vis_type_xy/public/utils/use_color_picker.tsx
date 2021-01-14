@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import React, { BaseSyntheticEvent, useMemo } from 'react';
+import React, { BaseSyntheticEvent, useCallback, useMemo } from 'react';
 
 import { LegendColorPicker, Position, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
-import { PopoverAnchorPosition, EuiWrappingPopover } from '@elastic/eui';
+import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
 
 import { ColorPicker } from '../../../charts/public';
 
@@ -61,18 +61,26 @@ export const useColorPicker = (
         onClose();
       };
 
+      // rule doesn't know this is inside a functional component
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const handleOutsideClick = useCallback(() => {
+        onClose?.();
+      }, [onClose]);
+
       return (
-        <EuiWrappingPopover
-          isOpen
-          ownFocus
-          display="block"
-          button={anchor}
-          anchorPosition={getAnchorPosition(legendPosition)}
-          closePopover={onClose}
-          panelPaddingSize="s"
-        >
-          <ColorPicker color={color} onChange={handlChange} label={seriesName} />
-        </EuiWrappingPopover>
+        <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
+          <EuiWrappingPopover
+            isOpen
+            ownFocus
+            display="block"
+            button={anchor}
+            anchorPosition={getAnchorPosition(legendPosition)}
+            closePopover={onClose}
+            panelPaddingSize="s"
+          >
+            <ColorPicker color={color} onChange={handlChange} label={seriesName} />
+          </EuiWrappingPopover>
+        </EuiOutsideClickDetector>
       );
     },
     [getSeriesName, legendPosition, setColor]
