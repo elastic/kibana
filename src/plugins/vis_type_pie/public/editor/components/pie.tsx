@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useState, useEffect } from 'react';
-import { UiCounterMetricType, METRIC_TYPE } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,15 +30,11 @@ import {
   PalettePicker,
 } from '../../../../vis_default_editor/public';
 import { TruncateLabelsOption } from './truncate_labels';
-import { PaletteRegistry, ChartsPluginSetup } from '../../../../charts/public';
-import { PieVisParams, LabelPositions, ValueFormats } from '../../types';
+import { PaletteRegistry } from '../../../../charts/public';
+import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../../types';
 import { getLabelPositions, getValuesFormats } from '../collections';
 
-export interface PieOptionsProps extends VisOptionsProps<PieVisParams> {
-  palettes: ChartsPluginSetup['palettes'] | undefined;
-  showElasticChartsOptions: boolean;
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-}
+export interface PieOptionsProps extends VisOptionsProps<PieVisParams>, PieTypeProps {}
 
 const PieOptions = (props: PieOptionsProps) => {
   const { stateParams, setValue } = props;
@@ -51,7 +47,7 @@ const PieOptions = (props: PieOptionsProps) => {
 
   useEffect(() => {
     const fetchPalettes = async () => {
-      const palettes = await props?.palettes?.getPalettes();
+      const palettes = await props.palettes?.getPalettes();
       setPalettesRegistry(palettes);
     };
     fetchPalettes();

@@ -22,6 +22,7 @@ import { chartPluginMock } from '../../charts/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { shallow, mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { act } from 'react-dom/test-utils';
 import PieComponent, { PieComponentProps } from './pie_component';
 import { createMockPieParams, createMockVisData } from './mocks';
 
@@ -35,7 +36,7 @@ jest.mock('@elastic/charts', () => {
 });
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
-const palettes = chartPluginMock.createPaletteRegistry();
+const palettes = chartPluginMock.createSetupContract().palettes;
 const visParams = createMockPieParams();
 const visData = createMockVisData();
 
@@ -59,6 +60,7 @@ describe('PieComponent', function () {
       visParams,
       visData,
       uiState,
+      syncColors: false,
       fireEvent: jest.fn(),
       renderComplete: jest.fn(),
       services: dataPluginMock.createStartContract(),
@@ -70,15 +72,19 @@ describe('PieComponent', function () {
     expect(component.find(Settings).prop('legendPosition')).toEqual('right');
   });
 
-  it('renders the legend toggle component', () => {
+  it('renders the legend toggle component', async () => {
     const component = mount(<PieComponent {...wrapperProps} />);
-    expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(1);
+    await act(async () => {
+      expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(1);
+    });
   });
 
-  it('hides the legend if the legend toggle is clicked', () => {
+  it('hides the legend if the legend toggle is clicked', async () => {
     const component = mount(<PieComponent {...wrapperProps} />);
     findTestSubject(component, 'vislibToggleLegend').simulate('click');
-    expect(component.find(Settings).prop('showLegend')).toEqual(false);
+    await act(async () => {
+      expect(component.find(Settings).prop('showLegend')).toEqual(false);
+    });
   });
 
   it('defaults on showing the legend for the inner cicle', () => {

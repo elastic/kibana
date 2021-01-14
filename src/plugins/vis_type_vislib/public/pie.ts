@@ -34,7 +34,7 @@ export interface PieVisParams extends CommonVislibParams {
 }
 
 export const pieVisTypeDefinition: BaseVisTypeOptions<PieVisParams> = {
-  ...(pieVisType() as BaseVisTypeOptions<PieVisParams>),
+  ...(pieVisType({}) as BaseVisTypeOptions<PieVisParams>),
   toExpressionAst,
   visualization: undefined,
 };

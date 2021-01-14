@@ -19,22 +19,19 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
-import { UiCounterMetricType } from '@kbn/analytics';
 import { AggGroupNames } from '../../../data/public';
-import { ChartsPluginSetup } from '../../../charts/public';
 import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions } from '../../../visualizations/public';
-
-import { PieVisParams, LabelPositions, ValueFormats } from '../types';
+import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getLegendPositions } from '../editor';
 import { getPieOptions } from '../editor/components';
 import { SplitTooltip } from './split_tooltip';
 
-export const getPieVisTypeDefinition = (
+export const getPieVisTypeDefinition = ({
   showElasticChartsOptions = false,
-  palettes: ChartsPluginSetup['palettes'] | undefined,
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void
-): BaseVisTypeOptions<PieVisParams> => ({
+  palettes,
+  trackUiMetric,
+}: PieTypeProps): BaseVisTypeOptions<PieVisParams> => ({
   name: 'pie',
   title: i18n.translate('visTypePie.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
@@ -69,7 +66,11 @@ export const getPieVisTypeDefinition = (
     collections: {
       legendPositions: getLegendPositions(),
     },
-    optionsTemplate: getPieOptions(palettes, showElasticChartsOptions, trackUiMetric),
+    optionsTemplate: getPieOptions({
+      showElasticChartsOptions,
+      palettes,
+      trackUiMetric,
+    }),
     schemas: [
       {
         group: AggGroupNames.Metrics,

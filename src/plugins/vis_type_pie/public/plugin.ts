@@ -66,7 +66,13 @@ export class VisTypePiePlugin {
       expressions.registerRenderer(
         getPieVisRenderer({ theme: charts.theme, palettes: charts.palettes, getStartDeps })
       );
-      visualizations.createBaseVisualization(pieVisType(true, charts.palettes, trackUiMetric));
+      visualizations.createBaseVisualization(
+        pieVisType({
+          showElasticChartsOptions: true,
+          palettes: charts.palettes,
+          trackUiMetric,
+        })
+      );
     }
     return {};
   }

@@ -22,6 +22,7 @@ import { ReactWrapper } from 'enzyme';
 import PieOptions, { PieOptionsProps } from './pie';
 import { chartPluginMock } from '../../../../charts/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../collections', () => ({
   getLabelPositions: jest.fn(() => []),
@@ -34,7 +35,7 @@ describe('PalettePicker', function () {
 
   beforeAll(() => {
     props = ({
-      palettes: chartPluginMock.createPaletteRegistry(),
+      palettes: chartPluginMock.createSetupContract().palettes,
       showElasticChartsOptions: true,
       vis: {
         type: {
@@ -72,53 +73,59 @@ describe('PalettePicker', function () {
     } as unknown) as PieOptionsProps;
   });
 
-  it('renders the nested legend switch for the elastic charts implementation', () => {
+  it('renders the nested legend switch for the elastic charts implementation', async () => {
     component = mountWithIntl(<PieOptions {...props} />);
-    expect(findTestSubject(component, 'visTypePieNestedLegendSwitch').length).toBe(1);
+    await act(async () => {
+      expect(findTestSubject(component, 'visTypePieNestedLegendSwitch').length).toBe(1);
+    });
   });
 
-  it('not renders the nested legend switch for the vislib implementation', () => {
+  it('not renders the nested legend switch for the vislib implementation', async () => {
     component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
-    expect(findTestSubject(component, 'visTypePieNestedLegendSwitch').length).toBe(0);
+    await act(async () => {
+      expect(findTestSubject(component, 'visTypePieNestedLegendSwitch').length).toBe(0);
+    });
   });
 
-  it('renders the palettes picker for the elastic charts implementation', () => {
+  it('renders the label position dropdown for the elastic charts implementation', async () => {
     component = mountWithIntl(<PieOptions {...props} />);
-    expect(findTestSubject(component, 'piePalettePicker').length).toBe(1);
+    await act(async () => {
+      expect(findTestSubject(component, 'visTypePieLabelPositionSelect').length).toBe(1);
+    });
   });
 
-  it('not renders the palettes picker for the vislib implementation', () => {
+  it('not renders the label position dropdown for the vislib implementation', async () => {
     component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
-    expect(findTestSubject(component, 'piePalettePicker').length).toBe(0);
+    await act(async () => {
+      expect(findTestSubject(component, 'visTypePieLabelPositionSelect').length).toBe(0);
+    });
   });
 
-  it('renders the label position dropdown for the elastic charts implementation', () => {
+  it('not renders the top level switch for the elastic charts implementation', async () => {
     component = mountWithIntl(<PieOptions {...props} />);
-    expect(findTestSubject(component, 'visTypePieLabelPositionSelect').length).toBe(1);
+    await act(async () => {
+      expect(findTestSubject(component, 'visTypePieTopLevelSwitch').length).toBe(0);
+    });
   });
 
-  it('not renders the label position dropdown for the vislib implementation', () => {
+  it('renders the top level switch for the vislib implementation', async () => {
     component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
-    expect(findTestSubject(component, 'visTypePieLabelPositionSelect').length).toBe(0);
+    await act(async () => {
+      expect(findTestSubject(component, 'visTypePieTopLevelSwitch').length).toBe(1);
+    });
   });
 
-  it('not renders the top level switch for the elastic charts implementation', () => {
+  it('renders the value format dropdown for the elastic charts implementation', async () => {
     component = mountWithIntl(<PieOptions {...props} />);
-    expect(findTestSubject(component, 'visTypePieTopLevelSwitch').length).toBe(0);
+    await act(async () => {
+      expect(findTestSubject(component, 'visTypePieValueFormatsSelect').length).toBe(1);
+    });
   });
 
-  it('renders the top level switch for the vislib implementation', () => {
+  it('not renders the value format dropdown for the vislib implementation', async () => {
     component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
-    expect(findTestSubject(component, 'visTypePieTopLevelSwitch').length).toBe(1);
-  });
-
-  it('renders the value format dropdown for the elastic charts implementation', () => {
-    component = mountWithIntl(<PieOptions {...props} />);
-    expect(findTestSubject(component, 'visTypePieValueFormatsSelect').length).toBe(1);
-  });
-
-  it('not renders the value format dropdown for the vislib implementation', () => {
-    component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
-    expect(findTestSubject(component, 'visTypePieValueFormatsSelect').length).toBe(0);
+    await act(async () => {
+      expect(findTestSubject(component, 'visTypePieValueFormatsSelect').length).toBe(0);
+    });
   });
 });

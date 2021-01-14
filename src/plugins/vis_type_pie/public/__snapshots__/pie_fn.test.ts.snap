@@ -8,6 +8,7 @@ Object {
     "params": Object {
       "listenOnChange": true,
     },
+    "syncColors": false,
     "visConfig": Object {
       "addLegend": true,
       "addTooltip": true,

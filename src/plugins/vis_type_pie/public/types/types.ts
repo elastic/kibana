@@ -17,8 +17,9 @@
  * under the License.
  */
 import { Position } from '@elastic/charts';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { DatatableColumn, SerializedFieldFormat } from '../../../expressions/public';
-import { PaletteOutput } from '../../../charts/public';
+import { PaletteOutput, ChartsPluginSetup } from '../../../charts/public';
 
 export interface Dimension {
   accessor: number;
@@ -69,4 +70,10 @@ export enum LabelPositions {
 export enum ValueFormats {
   PERCENT = 'percent',
   VALUE = 'value',
+}
+
+export interface PieTypeProps {
+  showElasticChartsOptions?: boolean;
+  palettes?: ChartsPluginSetup['palettes'];
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }

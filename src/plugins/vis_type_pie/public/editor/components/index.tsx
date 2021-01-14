@@ -16,19 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { UiCounterMetricType } from '@kbn/analytics';
 import React, { lazy } from 'react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { PieVisParams } from '../../types';
+import { PieVisParams, PieTypeProps } from '../../types';
 
 const PieOptionsLazy = lazy(() => import('./pie'));
 
-export const getPieOptions = (
-  palettes: ChartsPluginSetup['palettes'] | undefined,
-  showElasticChartsOptions: boolean,
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void
-) => (props: VisOptionsProps<PieVisParams>) => (
+export const getPieOptions = ({
+  showElasticChartsOptions,
+  palettes,
+  trackUiMetric,
+}: PieTypeProps) => (props: VisOptionsProps<PieVisParams>) => (
   <PieOptionsLazy
     {...props}
     palettes={palettes}
