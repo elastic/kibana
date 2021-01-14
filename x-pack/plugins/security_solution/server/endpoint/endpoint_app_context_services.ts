@@ -121,7 +121,8 @@ export class EndpointAppContextService {
           dependencies.appClientFactory,
           dependencies.config.maxTimelineImportExportSize,
           dependencies.security,
-          dependencies.alerts
+          dependencies.alerts,
+          dependencies.licenseService
         )
       );
 
