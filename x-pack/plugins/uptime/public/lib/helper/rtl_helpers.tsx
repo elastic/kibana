@@ -12,6 +12,7 @@ import { CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { coreMock } from 'src/core/public/mocks';
 import { mockState } from '../__mocks__/uptime_store.mock';
+import { EuiThemeProvider } from '../../../../observability/public';
 import {
   KibanaContextProvider,
   KibanaServices,
@@ -68,7 +69,9 @@ export function MockKibanaProvider<ExtraCore>({
   };
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
-      <I18nProvider>{children}</I18nProvider>
+      <EuiThemeProvider darkMode={false}>
+        <I18nProvider>{children}</I18nProvider>
+      </EuiThemeProvider>
     </KibanaContextProvider>
   );
 }
