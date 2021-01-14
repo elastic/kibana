@@ -52,7 +52,6 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
@@ -65,16 +64,15 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe.skip('Detection rules, machine learning', () => {
+describe('Detection rules, machine learning', () => {
   const expectedUrls = machineLearningRule.referenceUrls.join('');
   const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
   const expectedTags = machineLearningRule.tags.join('');
   const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
   const expectedNumberOfRules = 1;
 
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
-    removeSignalsIndex();
   });
 
   it('Creates and activates a new ml rule', () => {
@@ -90,7 +88,7 @@ describe.skip('Detection rules, machine learning', () => {
     fillScheduleRuleAndContinue(machineLearningRule);
     createAndActivateRule();
 
-    cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');
+    cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();

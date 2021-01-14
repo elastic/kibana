@@ -223,6 +223,7 @@ export class DashboardStateManager {
     const savedDashboardPanelMap: { [key: string]: SavedDashboardPanel } = {};
 
     const input = dashboardContainer.getInput();
+
     this.getPanels().forEach((savedDashboardPanel) => {
       if (input.panels[savedDashboardPanel.panelIndex] !== undefined) {
         savedDashboardPanelMap[savedDashboardPanel.panelIndex] = savedDashboardPanel;
@@ -234,9 +235,14 @@ export class DashboardStateManager {
 
     const convertedPanelStateMap: { [key: string]: SavedDashboardPanel } = {};
 
+    let expandedPanelValid = false;
     Object.values(input.panels).forEach((panelState) => {
       if (savedDashboardPanelMap[panelState.explicitInput.id] === undefined) {
         dirty = true;
+      }
+
+      if (panelState.explicitInput.id === input.expandedPanelId) {
+        expandedPanelValid = true;
       }
 
       convertedPanelStateMap[panelState.explicitInput.id] = convertPanelStateToSavedDashboardPanel(
@@ -272,8 +278,10 @@ export class DashboardStateManager {
       this.setFullScreenMode(input.isFullScreenMode);
     }
 
-    if (input.expandedPanelId !== this.getExpandedPanelId()) {
+    if (expandedPanelValid && input.expandedPanelId !== this.getExpandedPanelId()) {
       this.setExpandedPanelId(input.expandedPanelId);
+    } else if (!expandedPanelValid && this.getExpandedPanelId()) {
+      this.setExpandedPanelId(undefined);
     }
 
     if (!_.isEqual(input.query, this.getQuery())) {
@@ -402,6 +410,15 @@ export class DashboardStateManager {
 
   public setUseMargins(useMargins: boolean) {
     this.stateContainer.transitions.setOption('useMargins', useMargins);
+  }
+
+  public getSyncColors() {
+    // Existing dashboards that don't define this should default to true.
+    return this.appState.options.syncColors === undefined ? true : this.appState.options.syncColors;
+  }
+
+  public setSyncColors(syncColors: boolean) {
+    this.stateContainer.transitions.setOption('syncColors', syncColors);
   }
 
   public getHidePanelTitles() {

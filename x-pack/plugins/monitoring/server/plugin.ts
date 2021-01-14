@@ -211,9 +211,11 @@ export class Plugin {
 
       this.registerPluginInUI(plugins);
       requireUIRoutes(this.monitoringCore, {
+        cluster,
         router,
         licenseService: this.licenseService,
         encryptedSavedObjects: plugins.encryptedSavedObjects,
+        logger: this.log,
       });
       initInfraSource(config, plugins.infra);
     }
@@ -335,6 +337,7 @@ export class Plugin {
               }
             },
             server: {
+              route: () => {},
               config: legacyConfigWrapper,
               newPlatform: {
                 setup: {

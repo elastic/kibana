@@ -17,7 +17,7 @@ import { px } from '../../../../style/variables';
 interface IconPopoverProps {
   title: string;
   children: React.ReactChild;
-  onOpen: () => void;
+  onClick: () => void;
   onClose: () => void;
   detailsFetchStatus: FETCH_STATUS;
   isOpen: boolean;
@@ -27,7 +27,7 @@ export function IconPopover({
   icon,
   title,
   children,
-  onOpen,
+  onClick,
   onClose,
   detailsFetchStatus,
   isOpen,
@@ -35,16 +35,13 @@ export function IconPopover({
   if (!icon) {
     return null;
   }
-  const isLoading =
-    detailsFetchStatus === FETCH_STATUS.LOADING ||
-    detailsFetchStatus === FETCH_STATUS.PENDING;
-
+  const isLoading = detailsFetchStatus === FETCH_STATUS.LOADING;
   return (
     <EuiPopover
       anchorPosition="downCenter"
       ownFocus={false}
       button={
-        <EuiButtonEmpty onClick={onOpen} data-test-subj={`popover_${title}`}>
+        <EuiButtonEmpty onClick={onClick} data-test-subj={`popover_${title}`}>
           <EuiIcon type={icon} size="l" color="black" />
         </EuiButtonEmpty>
       }

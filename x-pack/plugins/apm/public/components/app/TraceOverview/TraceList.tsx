@@ -17,7 +17,7 @@ import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
-import { TransactionDetailLink } from '../../shared/Links/apm/TransactionDetailLink';
+import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 type TraceGroup = APIReturnType<'GET /api/apm/traces'>['items'][0];
@@ -44,7 +44,7 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
       _: string,
       { serviceName, transactionName, transactionType }: TraceGroup
     ) => (
-      <EuiToolTip content={transactionName}>
+      <EuiToolTip content={transactionName} anchorClassName="eui-textTruncate">
         <StyledTransactionLink
           serviceName={serviceName}
           transactionName={transactionName}

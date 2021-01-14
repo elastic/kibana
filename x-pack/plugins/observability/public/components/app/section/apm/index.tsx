@@ -92,9 +92,9 @@ export function APMSection({ bucketSize }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <StyledStat
-            title={formatTpm(stats?.transactions.value)}
-            description={i18n.translate('xpack.observability.overview.apm.transactionsPerMinute', {
-              defaultMessage: 'Transactions per minute',
+            title={`${formatTpm(stats?.transactions.value)} tpm`}
+            description={i18n.translate('xpack.observability.overview.apm.throughput', {
+              defaultMessage: 'Throughput',
             })}
             isLoading={isLoading}
             color={transactionsColor}

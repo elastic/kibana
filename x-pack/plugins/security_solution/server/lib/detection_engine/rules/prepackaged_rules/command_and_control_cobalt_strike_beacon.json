@@ -42,13 +42,20 @@
           "reference": "https://attack.mitre.org/techniques/T1071/"
         },
         {
-          "id": "T1483",
-          "name": "Domain Generation Algorithms",
-          "reference": "https://attack.mitre.org/techniques/T1483/"
+          "id": "T1568",
+          "name": "Dynamic Resolution",
+          "reference": "https://attack.mitre.org/techniques/T1568/",
+          "subtechnique": [
+            {
+              "id": "T1568.002",
+              "name": "Domain Generation Algorithms",
+              "reference": "https://attack.mitre.org/techniques/T1568/002/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

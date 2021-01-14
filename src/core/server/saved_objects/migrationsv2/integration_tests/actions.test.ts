@@ -935,6 +935,7 @@ describe('migration actions', () => {
 
       setTimeout(() => {
         client.indices.putSettings({
+          index: 'yellow_then_green_index',
           body: {
             index: {
               number_of_replicas: 0,

@@ -64,7 +64,6 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import { createTimeline } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
 import {
@@ -80,7 +79,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe.skip('Detection rules, threshold', () => {
+describe('Detection rules, threshold', () => {
   const expectedUrls = newThresholdRule.referenceUrls.join('');
   const expectedFalsePositives = newThresholdRule.falsePositivesExamples.join('');
   const expectedTags = newThresholdRule.tags.join('');
@@ -90,7 +89,6 @@ describe.skip('Detection rules, threshold', () => {
 
   beforeEach(() => {
     cleanKibana();
-    removeSignalsIndex();
     createTimeline(newThresholdRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
@@ -171,7 +169,7 @@ describe.skip('Detection rules, threshold', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).invoke('text').then(parseFloat).should('be.below', 100);
+    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text()).to.be.lt(100));
     cy.get(ALERT_RULE_NAME).first().should('have.text', rule.name);
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'threshold');

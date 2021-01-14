@@ -141,6 +141,7 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters,
     getSearchContext: () => ExecutionContextSearch;
     getSearchSessionId: () => string | undefined;
     inspectorAdapters: InspectorAdapters;
+    isSyncColorsEnabled?: () => boolean;
     types: Record<string, ExpressionType>;
     variables: Record<string, unknown>;
 }
@@ -736,6 +737,8 @@ export interface IInterpreterRenderHandlers {
     getRenderMode: () => RenderMode;
     // (undocumented)
     hasCompatibleActions?: (event: any) => Promise<boolean>;
+    // (undocumented)
+    isSyncColorsEnabled: () => boolean;
     // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)

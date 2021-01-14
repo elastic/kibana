@@ -57,9 +57,11 @@ import {
   setIndexPatterns,
   setQueryService,
   setShareService,
+  setVisEditorsRegistry,
 } from './services';
 import { visualizeFieldAction } from './actions/visualize_field_action';
 import { createVisualizeUrlGenerator } from './url_generator';
+import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -81,12 +83,23 @@ export interface VisualizePluginSetupDependencies {
   uiActions: UiActionsSetup;
 }
 
+export interface VisualizePluginSetup {
+  visEditorsRegistry: VisEditorsRegistry;
+}
+
 export class VisualizePlugin
   implements
-    Plugin<void, void, VisualizePluginSetupDependencies, VisualizePluginStartDependencies> {
+    Plugin<
+      VisualizePluginSetup,
+      void,
+      VisualizePluginSetupDependencies,
+      VisualizePluginStartDependencies
+    > {
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
+
+  private readonly visEditorsRegistry = createVisEditorsRegistry();
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -192,6 +205,7 @@ export class VisualizePlugin
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
           embeddable: pluginsStart.embeddable,
+          stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
@@ -231,9 +245,14 @@ export class VisualizePlugin
         category: FeatureCatalogueCategory.DATA,
       });
     }
+
+    return {
+      visEditorsRegistry: this.visEditorsRegistry,
+    } as VisualizePluginSetup;
   }
 
   public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {
+    setVisEditorsRegistry(this.visEditorsRegistry);
     setApplication(core.application);
     setIndexPatterns(plugins.data.indexPatterns);
     setQueryService(plugins.data.query);

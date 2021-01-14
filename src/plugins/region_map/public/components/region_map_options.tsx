@@ -23,8 +23,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
-import { NumberInputOption, SelectOption, SwitchOption } from '../../../charts/public';
-import { RegionMapVisParams, WmsOptions } from '../../../maps_legacy/public';
+import { SelectOption, SwitchOption, NumberInputOption } from '../../../vis_default_editor/public';
+import { WmsOptions } from '../../../maps_legacy/public';
+import { RegionMapVisParams } from '../region_map_types';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,
@@ -212,4 +213,6 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
   );
 }
 
-export { RegionMapOptions };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { RegionMapOptions as default };

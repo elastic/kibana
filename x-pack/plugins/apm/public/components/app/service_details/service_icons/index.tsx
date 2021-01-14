@@ -82,6 +82,7 @@ export function ServiceIcons({ serviceName }: Props) {
     (callApmApi) => {
       if (selectedIconPopover && serviceName && start && end) {
         return callApmApi({
+          isCachable: true,
           endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
           params: {
             path: { serviceName },
@@ -93,10 +94,7 @@ export function ServiceIcons({ serviceName }: Props) {
     [selectedIconPopover, serviceName, start, end, uiFilters]
   );
 
-  const isLoading =
-    !icons &&
-    (iconsFetchStatus === FETCH_STATUS.LOADING ||
-      iconsFetchStatus === FETCH_STATUS.PENDING);
+  const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
 
   if (isLoading) {
     return <EuiLoadingSpinner data-test-subj="loading" />;
@@ -143,8 +141,10 @@ export function ServiceIcons({ serviceName }: Props) {
                 icon={item.icon}
                 detailsFetchStatus={detailsFetchStatus}
                 title={item.title}
-                onOpen={() => {
-                  setSelectedIconPopover(item.key);
+                onClick={() => {
+                  setSelectedIconPopover((prevSelectedIconPopover) =>
+                    item.key === prevSelectedIconPopover ? null : item.key
+                  );
                 }}
                 onClose={() => {
                   setSelectedIconPopover(null);

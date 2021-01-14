@@ -47,11 +47,12 @@ const FieldsBrowserContainer = styled.div<{ width: number }>`
   border: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
     ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-  left: 8px;
+  left: 12px;
   padding: ${({ theme }) => theme.eui.paddingSizes.s} ${({ theme }) => theme.eui.paddingSizes.s}
     ${({ theme }) => theme.eui.paddingSizes.s};
-  position: absolute;
-  top: calc(100% + 4px);
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
   width: ${({ width }) => width}px;
   z-index: 9990;
 `;
@@ -239,7 +240,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             data-test-subj="header"
             filteredBrowserFields={filteredBrowserFields}
             isSearching={isSearching}
-            onOutsideClick={onOutsideClick}
+            onOutsideClick={closeAndRestoreFocus}
             onSearchInputChange={onInputChange}
             onUpdateColumns={onUpdateColumns}
             searchInput={searchInput}

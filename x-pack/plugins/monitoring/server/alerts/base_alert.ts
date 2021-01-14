@@ -13,7 +13,7 @@ import {
   AlertsClient,
   AlertServices,
 } from '../../../alerts/server';
-import { Alert, RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
+import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
@@ -93,7 +93,7 @@ export class BaseAlert {
     this.scopedLogger = Globals.app.getLogger(alertOptions.id!);
   }
 
-  public getAlertType(): AlertType {
+  public getAlertType(): AlertType<never, never, never, never, 'default'> {
     const { id, name, actionVariables } = this.alertOptions;
     return {
       id,
@@ -108,8 +108,11 @@ export class BaseAlert {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
-      executor: (options: AlertExecutorOptions & { state: ExecutedState }): Promise<any> =>
-        this.execute(options),
+      executor: (
+        options: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+          state: ExecutedState;
+        }
+      ): Promise<any> => this.execute(options),
       producer: 'monitoring',
       actionVariables: {
         context: actionVariables,
@@ -135,7 +138,7 @@ export class BaseAlert {
     alertsClient: AlertsClient,
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
-  ): Promise<Alert> {
+  ): Promise<Alert<AlertTypeParams>> {
     const existingAlertData = await alertsClient.find({
       options: {
         search: this.alertOptions.id,
@@ -170,7 +173,7 @@ export class BaseAlert {
       throttle = '1d',
       interval = '1m',
     } = this.alertOptions;
-    return await alertsClient.create({
+    return await alertsClient.create<AlertTypeParams>({
       data: {
         enabled: true,
         tags: [],
@@ -238,7 +241,9 @@ export class BaseAlert {
     services,
     params,
     state,
-  }: AlertExecutorOptions & { state: ExecutedState }): Promise<any> {
+  }: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+    state: ExecutedState;
+  }): Promise<any> {
     this.scopedLogger.debug(
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
@@ -285,7 +290,7 @@ export class BaseAlert {
       ? {
           timestamp: {
             format: 'epoch_millis',
-            gte: limit - this.alertOptions.fetchClustersRange,
+            gte: +new Date() - limit - this.alertOptions.fetchClustersRange,
           },
         }
       : undefined;
@@ -333,7 +338,7 @@ export class BaseAlert {
   protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: AlertServices,
+    services: AlertServices<AlertInstanceState, never, 'default'>,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
@@ -387,7 +392,7 @@ export class BaseAlert {
   protected async processLegacyData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: AlertServices,
+    services: AlertServices<AlertInstanceState, never, 'default'>,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();

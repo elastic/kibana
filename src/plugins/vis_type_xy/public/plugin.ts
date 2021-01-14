@@ -22,16 +22,18 @@ import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
 
 import { createVisTypeXyVisFn } from './xy_vis_fn';
 import {
   setDataActions,
   setFormatService,
   setThemeService,
-  setColorsService,
   setTimefilter,
   setUISettings,
   setDocLinks,
+  setPalettesService,
+  setTrackUiMetric,
 } from './services';
 import { visTypesDefinitions } from './vis_types';
 import { LEGACY_CHARTS_LIBRARY } from '../common';
@@ -47,6 +49,7 @@ export interface VisTypeXyPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 /** @internal */
@@ -69,17 +72,18 @@ export class VisTypeXyPlugin
     > {
   public async setup(
     core: VisTypeXyCoreSetup,
-    { expressions, visualizations, charts }: VisTypeXyPluginSetupDependencies
+    { expressions, visualizations, charts, usageCollection }: VisTypeXyPluginSetupDependencies
   ) {
-    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, true)) {
+    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, false)) {
       setUISettings(core.uiSettings);
       setThemeService(charts.theme);
-      setColorsService(charts.legacyColors);
-
+      setPalettesService(charts.palettes);
       [createVisTypeXyVisFn].forEach(expressions.registerFunction);
       expressions.registerRenderer(xyVisRenderer);
       visTypesDefinitions.forEach(visualizations.createBaseVisualization);
     }
+
+    setTrackUiMetric(usageCollection?.reportUiCounter.bind(usageCollection, 'vis_type_xy'));
 
     return {};
   }

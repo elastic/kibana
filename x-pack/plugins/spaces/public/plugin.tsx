@@ -5,6 +5,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from 'src/core/public';
+import { SpacesOssPluginSetup, SpacesApi } from 'src/plugins/spaces_oss/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
 import { ManagementStart, ManagementSetup } from 'src/plugins/management/public';
@@ -21,6 +22,7 @@ import { ManagementService } from './management';
 import { spaceSelectorApp } from './space_selector';
 
 export interface PluginsSetup {
+  spacesOss: SpacesOssPluginSetup;
   advancedSettings?: AdvancedSettingsSetup;
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
@@ -42,7 +44,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
   private managementService?: ManagementService;
 
-  public setup(core: CoreSetup, plugins: PluginsSetup) {
+  public setup(core: CoreSetup<{}, SpacesPluginStart>, plugins: PluginsSetup) {
     this.spacesManager = new SpacesManager(core.http);
 
     if (plugins.home) {
@@ -89,16 +91,15 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       spacesManager: this.spacesManager,
     });
 
+    plugins.spacesOss.registerSpacesApi(this.createSpacesApi());
+
     return {};
   }
 
-  public start(core: CoreStart, plugins: PluginsStart) {
+  public start(core: CoreStart) {
     initSpacesNavControl(this.spacesManager, core);
 
-    return {
-      activeSpace$: this.spacesManager.onActiveSpaceChange$,
-      getActiveSpace: () => this.spacesManager.getActiveSpace(),
-    };
+    return this.createSpacesApi();
   }
 
   public stop() {
@@ -106,5 +107,12 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       this.managementService.stop();
       this.managementService = undefined;
     }
+  }
+
+  private createSpacesApi(): SpacesApi {
+    return {
+      activeSpace$: this.spacesManager.onActiveSpaceChange$,
+      getActiveSpace: () => this.spacesManager.getActiveSpace(),
+    };
   }
 }

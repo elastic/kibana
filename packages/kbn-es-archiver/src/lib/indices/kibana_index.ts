@@ -73,6 +73,7 @@ export async function migrateKibanaIndex({
     body: {
       dynamic: true,
     },
+    ignore: [404],
   } as any);
 
   await kbnClient.savedObjects.migrate();
