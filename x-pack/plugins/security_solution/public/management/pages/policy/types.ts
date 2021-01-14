@@ -46,7 +46,7 @@ export interface PolicyListState {
   /** Deletion status */
   deleteStatus?: boolean;
   /** A summary of stats for the agents associated with a given Fleet Agent Policy */
-  agentStatusSummary?: GetAgentStatusResponse['results'];
+  agentStatusSummary?: Omit<GetAgentStatusResponse['results'], 'updating'>;
 }
 
 /**
@@ -61,7 +61,7 @@ export interface PolicyDetailsState {
   /** current location of the application */
   location?: Immutable<AppLocation>;
   /** A summary of stats for the agents associated with a given Fleet Agent Policy */
-  agentStatusSummary?: GetAgentStatusResponse['results'];
+  agentStatusSummary?: Omit<GetAgentStatusResponse['results'], 'updating'>;
   /** Status of an update to the policy  */
   updateStatus?: {
     success: boolean;
