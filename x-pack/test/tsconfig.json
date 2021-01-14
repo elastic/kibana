@@ -46,6 +46,8 @@
     { "path": "../plugins/task_manager/tsconfig.json" },
     { "path": "../plugins/telemetry_collection_xpack/tsconfig.json" },
     { "path": "../plugins/ui_actions_enhanced/tsconfig.json" },
-    { "path": "../plugins/spaces/tsconfig.json" }
+    { "path": "../plugins/spaces/tsconfig.json" },
+    { "path": "../plugins/security/tsconfig.json" },
+    { "path": "../plugins/encrypted_saved_objects/tsconfig.json" }
   ]
 }

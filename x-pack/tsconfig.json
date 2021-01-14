@@ -22,6 +22,8 @@
     "plugins/ui_actions_enhanced/**/*",
     "plugins/vis_type_timeseries_enhanced/**/*",
     "plugins/spaces/**/*",
+    "plugins/security/**/*",
+    "plugins/encrypted_saved_objects/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -78,6 +80,8 @@
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "./plugins/vis_type_timeseries_enhanced/tsconfig.json" },
     { "path": "./plugins/translations/tsconfig.json" },
-    { "path": "./plugins/spaces/tsconfig.json" }
+    { "path": "./plugins/spaces/tsconfig.json" },
+    { "path": "./plugins/security/tsconfig.json" },
+    { "path": "./plugins/encrypted_saved_objects/tsconfig.json" }
   ]
 }
