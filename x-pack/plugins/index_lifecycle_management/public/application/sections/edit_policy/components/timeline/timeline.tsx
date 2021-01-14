@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useMemo } from 'react';
-import { EuiText, EuiIcon, EuiIconProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiText, EuiIcon, EuiIconProps, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
 import { PhasesExceptDelete } from '../../../../../../common/types';
 import { useFormData } from '../../../../../shared_imports';
@@ -113,55 +113,68 @@ export const Timeline: FunctionComponent = () => {
     phaseTimingInMs.phases[phase] === Infinity ? <InfinityIcon /> : humanReadableTimings[phase];
 
   return (
-    <div
-      className="ilmTimeline"
-      ref={(el) => {
-        if (el) {
-          el.style.setProperty('--ilm-timeline-hot-phase-width', widths.hot);
-          el.style.setProperty('--ilm-timeline-warm-phase-width', widths.warm ?? null);
-          el.style.setProperty('--ilm-timeline-cold-phase-width', widths.cold ?? null);
-        }
-      }}
-    >
-      <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem>
-          <div className="ilmTimeline__phasesContainer">
-            {/* These are the actual color bars for the timeline */}
-            <div className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase">
-              <div className="ilmTimeline__colorBarCommon ilmTimeline__hotPhase__colorBar" />
-              <TimelinePhaseText
-                phaseName={i18nTexts.hotPhase}
-                durationInPhase={getDurationInPhaseContent('hot')}
-              />
-            </div>
-            {formData._meta?.warm.enabled && (
-              <div className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase">
-                <div className="ilmTimeline__colorBarCommon ilmTimeline__warmPhase__colorBar" />
-                <TimelinePhaseText
-                  phaseName={i18nTexts.warmPhase}
-                  durationInPhase={getDurationInPhaseContent('warm')}
-                />
+    <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
+      <EuiFlexItem>
+        <EuiTitle size="s">
+          <h2>
+            {i18n.translate('xpack.indexLifecycleMgmt.timeline.title', {
+              defaultMessage: 'Policy Timeline',
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <div
+          className="ilmTimeline"
+          ref={(el) => {
+            if (el) {
+              el.style.setProperty('--ilm-timeline-hot-phase-width', widths.hot);
+              el.style.setProperty('--ilm-timeline-warm-phase-width', widths.warm ?? null);
+              el.style.setProperty('--ilm-timeline-cold-phase-width', widths.cold ?? null);
+            }
+          }}
+        >
+          <EuiFlexGroup gutterSize="none" responsive={false}>
+            <EuiFlexItem>
+              <div className="ilmTimeline__phasesContainer">
+                {/* These are the actual color bars for the timeline */}
+                <div className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase">
+                  <div className="ilmTimeline__colorBarCommon ilmTimeline__hotPhase__colorBar" />
+                  <TimelinePhaseText
+                    phaseName={i18nTexts.hotPhase}
+                    durationInPhase={getDurationInPhaseContent('hot')}
+                  />
+                </div>
+                {formData._meta?.warm.enabled && (
+                  <div className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase">
+                    <div className="ilmTimeline__colorBarCommon ilmTimeline__warmPhase__colorBar" />
+                    <TimelinePhaseText
+                      phaseName={i18nTexts.warmPhase}
+                      durationInPhase={getDurationInPhaseContent('warm')}
+                    />
+                  </div>
+                )}
+                {formData._meta?.cold.enabled && (
+                  <div className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase">
+                    <div className="ilmTimeline__colorBarCommon ilmTimeline__coldPhase__colorBar" />
+                    <TimelinePhaseText
+                      phaseName={i18nTexts.coldPhase}
+                      durationInPhase={getDurationInPhaseContent('cold')}
+                    />
+                  </div>
+                )}
               </div>
+            </EuiFlexItem>
+            {formData._meta?.delete.enabled && (
+              <EuiFlexItem grow={false}>
+                <div className="ilmTimeline__deleteIconContainer">
+                  <EuiIcon type="trash" />
+                </div>
+              </EuiFlexItem>
             )}
-            {formData._meta?.cold.enabled && (
-              <div className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase">
-                <div className="ilmTimeline__colorBarCommon ilmTimeline__coldPhase__colorBar" />
-                <TimelinePhaseText
-                  phaseName={i18nTexts.coldPhase}
-                  durationInPhase={getDurationInPhaseContent('cold')}
-                />
-              </div>
-            )}
-          </div>
-        </EuiFlexItem>
-        {formData._meta?.delete.enabled && (
-          <EuiFlexItem grow={false}>
-            <div className="ilmTimeline__deleteIconContainer">
-              <EuiIcon type="trash" />
-            </div>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </div>
+          </EuiFlexGroup>
+        </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

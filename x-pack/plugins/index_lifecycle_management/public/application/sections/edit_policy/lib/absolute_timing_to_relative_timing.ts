@@ -161,13 +161,7 @@ const millisecondsToDays = (milliseconds?: number): string | undefined => {
   const days = milliseconds / 8.64e7;
   return days < 1
     ? i18nTexts.lessThanADay
-    : i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.amountOfDays', {
-        defaultMessage: 'At least {amount} {plurualisedDay}',
-        values: {
-          amount: Math.floor(days),
-          plurualisedDay: days === 1 ? i18nTexts.day : i18nTexts.days,
-        },
-      });
+    : `${days === 1 ? i18nTexts.day : i18nTexts.days} ${Math.floor(days)}`;
 };
 
 export const normalizeTimingsToHumanReadable = ({
