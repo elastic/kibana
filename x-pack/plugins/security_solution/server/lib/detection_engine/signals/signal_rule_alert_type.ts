@@ -7,7 +7,11 @@
 /* eslint-disable complexity */
 
 import { Logger, KibanaRequest } from 'src/core/server';
-import { partition, isEmpty } from 'lodash';
+
+import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
+import { flow } from 'fp-ts/lib/function';
+
+import { toError, toPromise } from '../../../../common/fp_utils';
 
 import {
   SIGNALS_ID,
@@ -43,6 +47,8 @@ import {
   mergeReturns,
   createSearchAfterReturnTypeFromResponse,
   checkPrivileges,
+  hasTimestampFields,
+  hasReadIndexPrivileges,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -173,89 +179,49 @@ export const signalRulesAlertType = ({
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
       logger.debug(buildRuleMessage(`interval: ${interval}`));
-      let wroteStatus = false;
+      let wrotePartialFailureStatus = false;
       await ruleStatusService.goingToRun();
 
       // check if rule has permissions to access given index pattern
       // move this collection of lines into a function in utils
       // so that we can use it in create rules route, bulk, etc.
       try {
-        const inputIndex = await getInputIndex(services, version, index);
-        const privileges = await checkPrivileges(services, inputIndex);
-        const timestampFields: string[] =
-          timestampOverride != null ? ['@timestamp', timestampOverride] : ['@timestamp'];
+        const [privileges, timestampFieldCaps] = await Promise.all([
+          flow(
+            () => tryCatch(() => getInputIndex(services, version, index), toError),
+            chain((indices) => tryCatch(() => checkPrivileges(services, indices), toError)),
+            flow(toPromise)
+          )(),
+          services.scopedClusterClient.fieldCaps({
+            index,
+            fields: timestampOverride != null ? ['@timestamp', timestampOverride] : ['@timestamp'],
+            allow_no_indices: false,
+            include_unmapped: true,
+          }),
+        ]);
 
-        const indexNames = Object.keys(privileges.index);
-        const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
-          indexNames,
-          (indexName) => privileges.index[indexName].read
-        );
-
-        if (indexesWithReadPrivileges.length > 0 && indexesWithNoReadPrivileges.length > 0) {
-          // some indices have read privileges others do not.
-          // set a partial failure status
-          const errorString = `Missing required read permissions on indexes: ${JSON.stringify(
-            indexesWithNoReadPrivileges
-          )}`;
-          logger.debug(buildRuleMessage(errorString));
-          await ruleStatusService.partialFailure(errorString);
-          wroteStatus = true;
-        } else if (
-          indexesWithReadPrivileges.length === 0 &&
-          indexesWithNoReadPrivileges.length === indexNames.length
-        ) {
-          // none of the indices had read privileges so set the status to failed
-          // since we can't search on any indices we do not have read privileges on
-          const errorString = `The rule does not have read privileges to any of the following indices: ${JSON.stringify(
-            indexesWithNoReadPrivileges
-          )}`;
-          logger.debug(buildRuleMessage(errorString));
-          await ruleStatusService.error(errorString);
-          wroteStatus = true;
-        }
-        const timestampFieldCaps = await services.scopedClusterClient.fieldCaps({
-          index,
-          fields: timestampFields,
-          allow_no_indices: false,
-          include_unmapped: true,
-        });
-
-        if (
-          !wroteStatus &&
-          params.timestampOverride != null &&
-          (isEmpty(timestampFieldCaps?.body?.fields) ||
-            timestampFieldCaps?.body?.fields[params.timestampOverride] == null ||
-            timestampFieldCaps?.body?.fields[params.timestampOverride]?.unmapped?.indices != null)
-        ) {
-          // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
-          // partial failure
-          const errorString = `The following indices are missing the timestamp override field "${
-            params.timestampOverride
-          }": ${JSON.stringify(
-            isEmpty(timestampFieldCaps?.body?.fields)
-              ? timestampFieldCaps.body.indices
-              : timestampFieldCaps?.body?.fields[params.timestampOverride]?.unmapped?.indices
-          )}`;
-          logger.error(buildRuleMessage(errorString));
-          await ruleStatusService.partialFailure(errorString);
-          wroteStatus = true;
-        } else if (
-          !wroteStatus &&
-          params.timestampOverride == null &&
-          (isEmpty(timestampFieldCaps?.body?.fields) ||
-            timestampFieldCaps?.body?.fields['@timestamp'].unmapped?.indices != null)
-        ) {
-          // if there is no timestamp override and the unmapped array is not empty,
-          // partial failure
-          const errorString = `The following indices are missing the timestamp field "@timestamp": ${JSON.stringify(
-            isEmpty(timestampFieldCaps?.body?.fields)
-              ? timestampFieldCaps.body.indices
-              : timestampFieldCaps?.body?.fields['@timestamp']?.unmapped?.indices
-          )}`;
-          logger.error(buildRuleMessage(errorString));
-          await ruleStatusService.partialFailure(errorString);
-          wroteStatus = true;
-        }
+        wrotePartialFailureStatus = await flow(
+          () =>
+            tryCatch(
+              () => hasReadIndexPrivileges(privileges, logger, buildRuleMessage, ruleStatusService),
+              toError
+            ),
+          chain((wroteStatus) =>
+            tryCatch(
+              () =>
+                hasTimestampFields(
+                  wroteStatus,
+                  params.timestampOverride != null ? params.timestampOverride : '@timestamp',
+                  timestampFieldCaps,
+                  ruleStatusService,
+                  logger,
+                  buildRuleMessage
+                ),
+              toError
+            )
+          ),
+          flow(toPromise)
+        )();
       } catch (exc) {
         logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
       }
@@ -687,7 +653,7 @@ export const signalRulesAlertType = ({
               `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
             )
           );
-          if (!hasError && !wroteStatus) {
+          if (!hasError && !wrotePartialFailureStatus) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,

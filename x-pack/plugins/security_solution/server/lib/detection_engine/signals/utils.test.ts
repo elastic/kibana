@@ -1031,12 +1031,40 @@ describe('utils', () => {
       expect(success).toEqual(false);
     });
 
+    test('result with error will create success: false within the result set if mixed reasons for shard failures', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 2;
+      searchResult._shards.failures = [
+        { reason: { reason: 'Not a sort failure' } },
+        { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
+      ];
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      expect(success).toEqual(false);
+    });
+
     test('result with error will create success: true within the result set if failed is 0', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 0;
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
+      });
+      expect(success).toEqual(true);
+    });
+
+    test('result with error will create success: true within the result set if shard failure reasons are sorting on timestamp field', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 2;
+      searchResult._shards.failures = [
+        { reason: { reason: 'No mapping found for [event.ingested] in order to sort on' } },
+        { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
+      ];
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: 'event.ingested',
       });
       expect(success).toEqual(true);
     });

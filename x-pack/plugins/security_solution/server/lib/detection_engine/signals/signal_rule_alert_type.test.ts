@@ -128,7 +128,7 @@ describe('rules_notification_alert_type', () => {
       searchAfterTimes: [],
       createdSignalsCount: 10,
     });
-    (checkPrivileges as jest.Mock).mockImplementation((_, indices) => {
+    (checkPrivileges as jest.Mock).mockImplementation(async (_, indices) => {
       return {
         index: indices.reduce(
           (acc: { index: { [x: string]: { read: boolean } } }, index: string) => {
