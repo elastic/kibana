@@ -117,9 +117,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
       field: 'throughputValue',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnThroughput',
-        {
-          defaultMessage: 'Traffic',
-        }
+        { defaultMessage: 'Throughput' }
       ),
       width: px(unit * 10),
       render: (_, { throughput }) => {
@@ -232,8 +230,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
     memoryUsageValue: item.memoryUsage?.value ?? 0,
   }));
 
-  const isLoading =
-    status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING;
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
