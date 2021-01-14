@@ -83,17 +83,13 @@ export const CustomizationModal: React.FC<Props> = ({
                 }
               )}
               fullWidth={true}
-              helpText={
-                <EuiText>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.filterFields',
-                    {
-                      defaultMessage:
-                        'Faceted values rendered as filters and available as query refinement',
-                    }
-                  )}
-                </EuiText>
-              }
+              helpText={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.filterFields',
+                {
+                  defaultMessage:
+                    'Faceted values rendered as filters and available as query refinement',
+                }
+              )}
             >
               <EuiComboBox
                 data-test-subj="filterFieldsDropdown"
@@ -111,17 +107,13 @@ export const CustomizationModal: React.FC<Props> = ({
                 }
               )}
               fullWidth={true}
-              helpText={
-                <EuiText>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.sortFields',
-                    {
-                      defaultMessage:
-                        'Used to display result sorting options, ascending and descending',
-                    }
-                  )}
-                </EuiText>
-              }
+              helpText={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.sortFields',
+                {
+                  defaultMessage:
+                    'Used to display result sorting options, ascending and descending',
+                }
+              )}
             >
               <EuiComboBox
                 data-test-subj="sortFieldsDropdown"
