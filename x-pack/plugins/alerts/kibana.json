@@ -5,14 +5,14 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "alerts"],
-  "requiredBundles": ["kibanaUtils"],
   "requiredPlugins": [
-    "licensing",
-    "taskManager",
-    "encryptedSavedObjects",
     "actions",
+    "encryptedSavedObjects",
     "eventLog",
-    "features"
+    "features",
+    "kibanaUtils",
+    "licensing",
+    "taskManager"
   ],
   "optionalPlugins": ["usageCollection", "spaces", "security"],
   "extraPublicDirs": ["common", "common/parse_duration"]
