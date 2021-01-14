@@ -55,30 +55,29 @@ const DEFAULT_SORT = {
 
 function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
   switch (latencyAggregationType) {
-    case 'avg': {
-      i18n.translate(
+    case 'avg':
+      return i18n.translate(
         'xpack.apm.serviceOverview.transactionsTableColumnLatency.avg',
         {
           defaultMessage: 'Latency (avg.)',
         }
       );
-    }
-    case 'p95': {
+
+    case 'p95':
       return i18n.translate(
         'xpack.apm.serviceOverview.transactionsTableColumnLatency.p95',
         {
           defaultMessage: 'Latency (95th)',
         }
       );
-    }
-    case 'p99': {
+
+    case 'p99':
       return i18n.translate(
         'xpack.apm.serviceOverview.transactionsTableColumnLatency.p99',
         {
           defaultMessage: 'Latency (99th)',
         }
       );
-    }
   }
 }
 
@@ -210,10 +209,8 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     {
       field: 'throughput',
       name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnTroughput',
-        {
-          defaultMessage: 'Traffic',
-        }
+        'xpack.apm.serviceOverview.transactionsTableColumnThroughput',
+        { defaultMessage: 'Throughput' }
       ),
       width: px(unit * 10),
       render: (_, { throughput }) => {

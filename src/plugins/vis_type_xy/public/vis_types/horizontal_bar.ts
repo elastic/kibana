@@ -119,6 +119,10 @@ export const getHorizontalBarVisTypeDefinition = (
       ],
       addTooltip: true,
       detailedTooltip: true,
+      palette: {
+        type: 'palette',
+        name: 'default',
+      },
       addLegend: true,
       legendPosition: Position.Right,
       times: [],

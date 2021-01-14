@@ -44,7 +44,7 @@ export const xyVisRenderer: ExpressionRenderDefinition<RenderValue> = {
   name: visName,
   displayName: 'XY visualization',
   reuseDomNode: true,
-  render: (domNode, { visData, visConfig, visType }, handlers) => {
+  render: async (domNode, { visData, visConfig, visType, syncColors }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData, visType);
 
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
@@ -57,6 +57,7 @@ export const xyVisRenderer: ExpressionRenderDefinition<RenderValue> = {
             renderComplete={handlers.done}
             fireEvent={handlers.event}
             uiState={handlers.uiState as PersistedState}
+            syncColors={syncColors}
           />
         </VisualizationContainer>
       </I18nProvider>,
