@@ -55,10 +55,11 @@ export function decodeGeoHash(geohash: string): DecodedGeoHash {
   });
   lat[2] = (lat[0] + lat[1]) / 2;
   lon[2] = (lon[0] + lon[1]) / 2;
+
   return {
     latitude: lat,
     longitude: lon,
-  } as DecodedGeoHash;
+  };
 }
 
 function refineInterval(interval: number[], cd: number, mask: number) {
@@ -67,26 +68,6 @@ function refineInterval(interval: number[], cd: number, mask: number) {
   } else {
     interval[1] = (interval[0] + interval[1]) / 2;
   }
-}
-
-export function geohashColumns(precision: number): number {
-  return geohashCells(precision, 0);
-}
-
-/**
- * Get the number of geohash cells for a given precision
- *
- * @param {number} precision the geohash precision (1<=precision<=12).
- * @param {number} axis constant for the axis 0=lengthwise (ie. columns, along longitude), 1=heightwise (ie. rows, along latitude).
- * @returns {number} Number of geohash cells (rows or columns) at that precision
- */
-function geohashCells(precision: number, axis: number) {
-  let cells = 1;
-  for (let i = 1; i <= precision; i += 1) {
-    /* On odd precisions, rows divide by 4 and columns by 8. Vice-versa on even precisions */
-    cells *= i % 2 === axis ? 4 : 8;
-  }
-  return cells;
 }
 
 interface GeoBoundingBoxCoordinate {

@@ -17,11 +17,17 @@
  * under the License.
  */
 
+import { Feature } from 'geojson';
+import type { Datatable } from '../../../expressions/public';
+import type { TileMapVisDimensions, TileMapVisData } from '../types';
 import { decodeGeoHash } from './decode_geo_hash';
 import { gridDimensions } from './grid_dimensions';
 
-export function convertToGeoJson(tabifiedResponse, { geohash, geocentroid, metric }) {
-  let features;
+export function convertToGeoJson(
+  tabifiedResponse: Datatable,
+  { geohash, geocentroid, metric }: TileMapVisDimensions
+): TileMapVisData {
+  let features: Feature[];
   let min = Infinity;
   let max = -Infinity;
 
@@ -41,7 +47,7 @@ export function convertToGeoJson(tabifiedResponse, { geohash, geocentroid, metri
           if (!geohashValue) return false;
           const geohashLocation = decodeGeoHash(geohashValue);
 
-          let pointCoordinates;
+          let pointCoordinates: number[];
           if (geocentroidColumn) {
             const location = row[geocentroidColumn.id];
             pointCoordinates = [location.lon, location.lat];
@@ -58,7 +64,7 @@ export function convertToGeoJson(tabifiedResponse, { geohash, geocentroid, metri
 
           const centerLatLng = [geohashLocation.latitude[2], geohashLocation.longitude[2]];
 
-          if (geohash.params.useGeocentroid) {
+          if (geohash?.params.useGeocentroid) {
             // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
             pointCoordinates[0] = clampGrid(
               pointCoordinates[0],
@@ -86,35 +92,41 @@ export function convertToGeoJson(tabifiedResponse, { geohash, geocentroid, metri
               geohash: geohashValue,
               geohash_meta: {
                 center: centerLatLng,
-                rectangle: rectangle,
+                rectangle,
               },
-              value: value,
+              value,
             },
-          };
+          } as Feature;
         })
-        .filter((row) => row);
+        .filter((row): row is Feature => !!row);
     }
   } else {
     features = [];
   }
 
-  const featureCollection = {
-    type: 'FeatureCollection',
-    features: features,
-  };
-
-  return {
-    featureCollection: featureCollection,
+  const convertedData: TileMapVisData = {
+    featureCollection: {
+      type: 'FeatureCollection',
+      features,
+    },
     meta: {
-      min: min,
-      max: max,
-      geohashPrecision: geohash && geohash.params.precision,
-      geohashGridDimensionsAtEquator: geohash && gridDimensions(geohash.params.precision),
+      min,
+      max,
+      geohashPrecision: geohash?.params.precision,
+      geohashGridDimensionsAtEquator: geohash?.params.precision
+        ? gridDimensions(geohash.params.precision)
+        : undefined,
     },
   };
+
+  if (geohash && geohash.accessor) {
+    convertedData.meta.geohash = tabifiedResponse.columns[geohash.accessor].meta;
+  }
+
+  return convertedData;
 }
 
-function clampGrid(val, min, max) {
+function clampGrid(val: number, min: number, max: number) {
   if (val > max) val = max;
   else if (val < min) val = min;
   return val;
