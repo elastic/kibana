@@ -5,23 +5,11 @@
  */
 
 import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { TimeFormatter } from '../../../../../common/utils/formatters';
 import { APMChartSpec, Coordinate } from '../../../../../typings/timeseries';
-import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
+import { TimeFormatter } from '../../../../../common/utils/formatters';
 
 export function getResponseTimeTickFormatter(formatter: TimeFormatter) {
-  return (t: number) => {
-    return formatter(t).formatted;
-  };
-}
-
-export function getResponseTimeTooltipFormatter(formatter: TimeFormatter) {
-  return (coordinate: Coordinate) => {
-    return isValidCoordinateValue(coordinate.y)
-      ? formatter(coordinate.y).formatted
-      : NOT_AVAILABLE_LABEL;
-  };
+  return (t: number) => formatter(t).formatted;
 }
 
 export function getMaxY(specs?: Array<APMChartSpec<Coordinate>>) {

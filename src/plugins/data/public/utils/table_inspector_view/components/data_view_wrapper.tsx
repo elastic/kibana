@@ -41,6 +41,7 @@ export const getDataViewComponentWrapper = (
         fieldFormats={getStartServices().fieldFormats}
         uiActions={getStartServices().uiActions}
         isFilterable={getStartServices().isFilterable}
+        options={props.options}
       />
     );
   };

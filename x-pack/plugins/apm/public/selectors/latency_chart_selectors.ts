@@ -7,7 +7,6 @@ import { Fit } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
 import { EuiTheme } from '../../../observability/public';
-import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import { asDuration } from '../../common/utils/formatters';
 import { APMChartSpec, Coordinate } from '../../typings/timeseries';
 import { APIReturnType } from '../services/rest/createCallApmApi';
@@ -27,7 +26,7 @@ export function getLatencyChartSelector({
 }: {
   latencyChart?: LatencyChartsResponse;
   theme: EuiTheme;
-  latencyAggregationType?: LatencyAggregationType;
+  latencyAggregationType?: string;
 }): LatencyChartData {
   if (!latencyChart?.latencyTimeseries || !latencyAggregationType) {
     return {
@@ -57,7 +56,7 @@ function getLatencyTimeseries({
 }: {
   latencyChart: LatencyChartsResponse;
   theme: EuiTheme;
-  latencyAggregationType: LatencyAggregationType;
+  latencyAggregationType: string;
 }) {
   const { overallAvgDuration } = latencyChart;
   const { latencyTimeseries } = latencyChart;

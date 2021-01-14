@@ -36,7 +36,7 @@ import { useAnnotationsContext } from '../../../context/annotations/use_annotati
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { unit } from '../../../style/variables';
 import { ChartContainer } from './chart_container';
-import { onBrushEnd } from './helper/helper';
+import { onBrushEnd, isTimeseriesEmpty } from './helper/helper';
 import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
 
 interface Props {
@@ -86,13 +86,7 @@ export function TimeseriesChart({
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const isEmpty = timeseries
-    .map((serie) => serie.data)
-    .flat()
-    .every(
-      ({ y }: { x?: number | null; y?: number | null }) =>
-        y === null || y === undefined
-    );
+  const isEmpty = isTimeseriesEmpty(timeseries);
 
   const annotationColor = theme.eui.euiColorSecondary;
 
@@ -111,7 +105,7 @@ export function TimeseriesChart({
           }}
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
-            tooltip: { visible: true, placement: Placement.Bottom },
+            tooltip: { visible: true, placement: Placement.Right },
           }}
           showLegend
           showLegendExtra
