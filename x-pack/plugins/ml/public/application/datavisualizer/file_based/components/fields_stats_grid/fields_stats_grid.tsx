@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo, FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import type { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../../../stats_table';
 import type { FileBasedFieldVisConfig } from '../../../stats_table/types/field_vis_config';
@@ -95,20 +95,22 @@ export const FieldsStatsGrid: FC<Props> = ({ results }) => {
         <TotalFieldsCount fieldsCountStats={fieldsCountStats} />
         <MetricFieldsCount metricsStats={metricsStats} />
 
-        <EuiFlexItem style={{ alignItems: 'flex-end' }}>
-          <EuiFlexGroup gutterSize="xs" data-test-subj="mlDataVisualizerFieldCountPanel">
-            <DataVisualizerFieldNamesFilter
-              fields={fields}
-              setVisibleFieldNames={setVisibleFieldNames}
-              visibleFieldNames={visibleFieldNames}
-            />
-            <DataVisualizerFieldTypesFilter
-              fields={fields}
-              setVisibleFieldTypes={setVisibleFieldTypes}
-              visibleFieldTypes={visibleFieldTypes}
-            />
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="xs"
+          data-test-subj="mlDataVisualizerFieldCountPanel"
+          justifyContent={'flexEnd'}
+        >
+          <DataVisualizerFieldNamesFilter
+            fields={fields}
+            setVisibleFieldNames={setVisibleFieldNames}
+            visibleFieldNames={visibleFieldNames}
+          />
+          <DataVisualizerFieldTypesFilter
+            fields={fields}
+            setVisibleFieldTypes={setVisibleFieldTypes}
+            visibleFieldTypes={visibleFieldTypes}
+          />
+        </EuiFlexGroup>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <DataVisualizerTable<FileBasedFieldVisConfig>
