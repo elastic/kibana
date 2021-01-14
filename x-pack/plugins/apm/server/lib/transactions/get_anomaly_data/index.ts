@@ -5,6 +5,7 @@
  */
 import { compact } from 'lodash';
 import { Logger } from 'src/core/server';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { maybe } from '../../../../common/utils/maybe';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getBucketSize } from '../../helpers/get_bucket_size';
@@ -85,19 +86,17 @@ export async function getAnomalySeries({
         anomalyScore: compact(
           dateBuckets.map((dateBucket) => {
             const metrics = maybe(dateBucket.anomaly_score.top[0])?.metrics;
-            const score = metrics?.record_score ?? null;
+            const score = metrics?.record_score;
 
             if (
               !metrics ||
-              score === null ||
+              !isFiniteNumber(score) ||
               score < ANOMALY_THRESHOLD.CRITICAL
             ) {
               return null;
             }
 
-            const anomalyStart = new Date(
-              metrics.timestamp as string
-            ).getTime();
+            const anomalyStart = Date.parse(metrics.timestamp as string);
             const anomalyEnd =
               anomalyStart + (metrics.bucket_span as number) * 1000;
 
