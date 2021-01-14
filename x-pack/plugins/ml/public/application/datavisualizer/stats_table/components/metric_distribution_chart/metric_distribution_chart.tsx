@@ -19,13 +19,10 @@ import {
   TooltipValueFormatter,
 } from '@elastic/charts';
 
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
-import { useUiSettings } from '../../../../contexts/kibana/use_ui_settings_context';
 import { kibanaFieldFormat } from '../../../../formatters/kibana_field_format';
 import type { ChartTooltipValue } from '../../../../components/chart_tooltip/chart_tooltip_service';
+import { useDataVizChartTheme } from '../../hooks';
 
 export interface MetricDistributionChartData {
   x: number;
@@ -59,9 +56,7 @@ export const MetricDistributionChart: FC<Props> = ({
     defaultMessage: 'distribution',
   });
 
-  const IS_DARK_THEME = useUiSettings().get('theme:darkMode');
-  const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
-  const AREA_SERIES_COLOR = themeName.euiColorVis0;
+  const theme = useDataVizChartTheme();
 
   const headerFormatter: TooltipValueFormatter = (tooltipData: ChartTooltipValue) => {
     const xValue = tooltipData.value;
@@ -81,47 +76,7 @@ export const MetricDistributionChart: FC<Props> = ({
   return (
     <div data-test-subj="mlFieldDataMetricDistributionChart">
       <Chart size={{ width, height }}>
-        <Settings
-          theme={{
-            axes: {
-              tickLabel: {
-                fontSize: parseInt(themeName.euiFontSizeXS, 10),
-                fontFamily: themeName.euiFontFamily,
-                fontStyle: 'italic',
-              },
-            },
-            background: { color: 'transparent' },
-            chartMargins: {
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 0,
-            },
-            chartPaddings: {
-              left: 0,
-              right: 0,
-              top: 4,
-              bottom: 0,
-            },
-            scales: { barsPadding: 0.1 },
-            colors: {
-              vizColors: [AREA_SERIES_COLOR],
-            },
-            areaSeriesStyle: {
-              line: {
-                strokeWidth: 1,
-                visible: true,
-              },
-              point: {
-                visible: false,
-                radius: 0,
-                opacity: 0,
-              },
-              area: { visible: true, opacity: 1 },
-            },
-          }}
-          tooltip={{ headerFormatter }}
-        />
+        <Settings theme={theme} tooltip={{ headerFormatter }} />
         <Axis
           id="bottom"
           position={Position.Bottom}

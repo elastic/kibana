@@ -9,8 +9,8 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import type { PartialTheme } from '@elastic/charts';
 import { useUiSettings } from '../../../contexts/kibana';
 export const useDataVizChartTheme = (): PartialTheme => {
-  const IS_DARK_THEME = useUiSettings().get('theme:darkMode');
-  const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
+  const isDarkTheme = useUiSettings().get('theme:darkMode');
+  const themeName = isDarkTheme ? darkTheme : lightTheme;
   const AREA_SERIES_COLOR = themeName.euiColorVis0;
   return {
     axes: {
