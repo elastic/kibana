@@ -18,6 +18,6 @@ export interface UISession {
   url: string;
 }
 
-export type ActionComplete = (result: UISession[] | null) => void;
+export type ActionComplete = (result: UISession[]) => void;
 
 export * from './constants';

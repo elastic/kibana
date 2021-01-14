@@ -106,7 +106,7 @@ describe('Search Sessions Management API', () => {
         mockConfig
       );
       const data = await api.fetchTableData();
-      expect(data).not.toBe(null);
+      expect(data).not.toHaveLength(0);
 
       expect(
         data &&

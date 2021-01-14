@@ -54,15 +54,13 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
       setTableData(results);
     };
     showLatestResultsHandler.current = renderResults;
+    let results: UISession[] = [];
     try {
-      const results = await api.fetchTableData();
+      results = await api.fetchTableData();
+    } catch (e) {} // eslint-disable-line no-empty
 
-      if (showLatestResultsHandler.current === renderResults) {
-        renderResults(results || []);
-        setIsLoading(false);
-      }
-    } catch (e) {
-      setTableData([]);
+    if (showLatestResultsHandler.current === renderResults) {
+      renderResults(results);
       setIsLoading(false);
     }
   }, [api]);
@@ -76,7 +74,7 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
 
   // When action such as cancel, delete, extend occurs, use the async return
   // value to refresh the table
-  const handleActionCompleted: ActionComplete = (results: UISession[] | null) => {
+  const handleActionCompleted: ActionComplete = (results: UISession[]) => {
     if (results) {
       setTableData(results);
     }

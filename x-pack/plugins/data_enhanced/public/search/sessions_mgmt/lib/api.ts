@@ -72,7 +72,7 @@ export class SearchSessionsMgmtAPI {
     private config: SessionsMgmtConfigSchema
   ) {}
 
-  public async fetchTableData(): Promise<UISession[] | null> {
+  public async fetchTableData(): Promise<UISession[]> {
     interface FetchResult {
       saved_objects: object[];
     }
@@ -116,7 +116,7 @@ export class SearchSessionsMgmtAPI {
       });
     }
 
-    return null;
+    return [];
   }
 
   // Delete
