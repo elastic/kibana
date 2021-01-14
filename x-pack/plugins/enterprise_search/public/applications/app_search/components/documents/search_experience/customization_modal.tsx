@@ -18,7 +18,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useValues } from 'kea';

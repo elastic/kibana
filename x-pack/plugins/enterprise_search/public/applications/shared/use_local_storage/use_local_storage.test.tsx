@@ -3,18 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { unmountHandler } from '../../__mocks__/shallow_useeffect.mock';
-
 import React from 'react';
 
 import { shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 
 import { useLocalStorage } from './use_local_storage';
 
 describe('useLocalStorage', () => {
-  const addEventListener = jest.spyOn(global, 'addEventListener');
-  const removeEventListener = jest.spyOn(global, 'removeEventListener');
   const KEY = 'fields';
 
   const TestComponent = () => {
