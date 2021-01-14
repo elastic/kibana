@@ -101,10 +101,8 @@ export function TransactionList({ items, isLoading }: Props) {
       {
         field: 'transactionsPerMinute',
         name: i18n.translate(
-          'xpack.apm.transactionsTable.transactionsPerMinuteColumnLabel',
-          {
-            defaultMessage: 'Trans. per minute',
-          }
+          'xpack.apm.transactionsTable.throughputColumnLabel',
+          { defaultMessage: 'Throughput' }
         ),
         sortable: true,
         dataType: 'number',

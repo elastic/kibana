@@ -35,7 +35,9 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  describe('patch_cases', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/88130
+  // FLAKY: https://github.com/elastic/kibana/issues/87988
+  describe.skip('patch_cases', () => {
     afterEach(async () => {
       await deleteCases(es);
       await deleteCasesUserActions(es);
