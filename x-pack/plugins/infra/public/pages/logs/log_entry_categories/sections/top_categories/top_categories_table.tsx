@@ -131,7 +131,6 @@ const createColumns = (
     name: i18n.translate('xpack.infra.logs.logEntryCategories.trendColumnTitle', {
       defaultMessage: 'Trend',
     }),
-    sortable: true,
     render: (histograms: LogEntryCategoryHistogram[], item) => {
       return (
         <LogEntryCountSparkline

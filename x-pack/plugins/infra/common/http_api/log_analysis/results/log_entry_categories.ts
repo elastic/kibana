@@ -33,7 +33,6 @@ export type LogEntryCategoriesHistogramParameters = rt.TypeOf<
 const sortOptionsRT = rt.keyof({
   maximumAnomalyScore: null,
   logEntryCount: null,
-  histograms: null,
 });
 
 const sortDirectionsRT = rt.keyof({
