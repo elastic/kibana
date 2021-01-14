@@ -9,10 +9,14 @@ import { AnomalyRecordDoc } from '../../../../../common/types/anomalies';
 const FEATURE = 'Feature';
 const POINT = 'Point';
 
-function getAnomalyFeatures(anomalies: AnomalyRecordDoc[], type: 'actual' | 'typical') {
+function getAnomalyFeatures(anomalies: AnomalyRecordDoc[], type: 'actual_point' | 'typical_point') {
   return anomalies.map((anomaly) => {
     // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
-    const coordinates = anomaly[type]?.reverse();
+    const geoResults = anomaly.source.geo_results || anomaly.source.causes[0].geo_results;
+    const coordinates = geoResults[type]
+      .split(',')
+      .map((point: string) => Number(point))
+      .reverse();
 
     return {
       type: FEATURE,
@@ -37,7 +41,7 @@ export const getMLAnomaliesTypicalLayer = (anomalies: any) => {
       id: 'b7486535-171b-4d3b-bb2e-33c1a0a2854e',
       type: 'GEOJSON_FILE',
       __featureCollection: {
-        features: getAnomalyFeatures(anomalies, 'typical'),
+        features: getAnomalyFeatures(anomalies, 'typical_point'),
         type: 'FeatureCollection',
       },
     },
@@ -84,7 +88,7 @@ export const getMLAnomaliesActualLayer = (anomalies: any) => {
       id: 'b7486535-171b-4d3b-bb2e-33c1a0a2854d',
       type: 'GEOJSON_FILE',
       __featureCollection: {
-        features: getAnomalyFeatures(anomalies, 'actual'),
+        features: getAnomalyFeatures(anomalies, 'actual_point'),
         type: 'FeatureCollection',
       },
     },
