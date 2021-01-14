@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-let mockUmountHandler: () => void;
+let mockUnmountHandler: () => void;
 
 jest.mock('react', () => ({
   ...(jest.requireActual('react') as object),
   useEffect: jest.fn((fn) => {
-    mockUmountHandler = fn();
-    return mockUmountHandler;
+    mockUnmountHandler = fn();
+    return mockUnmountHandler;
   }), // Calls on mount/every update - use mount for more complex behavior
 }));
 
 // Helper for calling the returned useEffect unmount handler
-export const unmountHandler = () => mockUmountHandler();
+export const unmountHandler = () => mockUnmountHandler();
 
 /**
  * Example usage within a component test using shallow():
