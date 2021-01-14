@@ -45,7 +45,7 @@ export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
       bool: {
         filter: {
           terms: {
-            _id: [...eventIds],
+            _id: eventIds,
           },
         },
       },
@@ -274,7 +274,7 @@ export const sendAlertToTimelineAction = async ({
         ...timelineDefaults,
         description: `_id: ${ecsData._id}`,
         filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
-        dataProviders: [...getThresholdAggregationDataProvider(ecsData, nonEcsData)],
+        dataProviders: getThresholdAggregationDataProvider(ecsData, nonEcsData),
         id: TimelineId.active,
         indexNames: [],
         dateRange: {
