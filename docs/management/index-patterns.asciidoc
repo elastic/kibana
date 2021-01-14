@@ -19,7 +19,7 @@ You’ll learn how to:
 [[index-patterns-read-only-access]]
 === Before you begin
 
-* To access *Index Patterns*, you must have the {kib} privilege
+* To access the *Index Patterns* view, you must have the {kib} privilege
 `Index Pattern Management`.  To create an index pattern, you must have the {es} privilege
 `view_index_metadata`. To add the privileges, open the main menu, then click *Stack Management > Roles*.
 
