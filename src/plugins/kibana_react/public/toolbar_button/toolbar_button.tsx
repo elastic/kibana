@@ -29,11 +29,13 @@ const groupPositionToClassMap = {
   right: 'toolbarButton--groupRight',
 };
 
-type ButtonPosition = keyof typeof groupPositionToClassMap;
-export const POSITIONS = Object.keys(groupPositionToClassMap) as ButtonPosition[];
+type ButtonPositions = keyof typeof groupPositionToClassMap;
+export const POSITIONS = Object.keys(groupPositionToClassMap) as ButtonPositions[];
 
 type Weights = 'normal' | 'bold';
 export const WEIGHTS = ['normal', 'bold'] as Weights[];
+
+export const SIZES: Array<EuiButtonProps['size']> = ['s', 'm'];
 
 export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
   /**
@@ -51,7 +53,7 @@ export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
   /**
    * Adjusts the borders for groupings
    */
-  groupPosition?: ButtonPosition;
+  groupPosition?: ButtonPositions;
   dataTestSubj?: string;
 };
 

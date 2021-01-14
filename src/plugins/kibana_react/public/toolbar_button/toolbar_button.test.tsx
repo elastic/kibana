@@ -18,9 +18,18 @@
  */
 import React from 'react';
 import { shallow } from 'enzyme';
-import { ToolbarButton, POSITIONS, WEIGHTS } from './toolbar_button';
+import { ToolbarButton, POSITIONS, WEIGHTS, SIZES } from './toolbar_button';
 
 const noop = () => {};
+
+describe('sizes', () => {
+  SIZES.forEach((size) => {
+    test(`${size} is applied`, () => {
+      const component = shallow(<ToolbarButton onClick={noop} size={size} />);
+      expect(component).toMatchSnapshot();
+    });
+  });
+});
 
 describe('positions', () => {
   POSITIONS.forEach((position) => {
