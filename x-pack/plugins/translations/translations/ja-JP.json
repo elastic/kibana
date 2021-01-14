@@ -4568,6 +4568,7 @@
     "visTypeVega.inspector.vegaAdapter.value": "値",
     "visTypeVega.inspector.vegaDebugLabel": "Vegaデバッグ",
     "visTypeVega.mapView.experimentalMapLayerInfo": "マップレイヤーはまだ実験段階であり、オフィシャルGA機能のサポートSLAが適用されません。フィードバックがある場合は、{githubLink}で問題を報告してください。",
+    "visTypeVega.mapView.mapStyleNotFoundWarningMessage": "{mapStyleParam} が見つかりませんでした",
     "visTypeVega.mapView.minZoomAndMaxZoomHaveBeenSwappedWarningMessage": "{minZoomPropertyName} と {maxZoomPropertyName} が交換されました",
     "visTypeVega.mapView.resettingPropertyToMaxValueWarningMessage": "{name} を {max} にリセットしています",
     "visTypeVega.mapView.resettingPropertyToMinValueWarningMessage": "{name} を {min} にリセットしています",

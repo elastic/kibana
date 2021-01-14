@@ -4573,6 +4573,7 @@
     "visTypeVega.inspector.vegaAdapter.value": "值",
     "visTypeVega.inspector.vegaDebugLabel": "Vega 调试",
     "visTypeVega.mapView.experimentalMapLayerInfo": "地图图层处于试验状态，不受正式发行版功能的支持 SLA 的约束。如欲提供反馈，请在 {githubLink} 中创建问题。",
+    "visTypeVega.mapView.mapStyleNotFoundWarningMessage": "找不到 {mapStyleParam}",
     "visTypeVega.mapView.minZoomAndMaxZoomHaveBeenSwappedWarningMessage": "已互换 {minZoomPropertyName} 和 {maxZoomPropertyName}",
     "visTypeVega.mapView.resettingPropertyToMaxValueWarningMessage": "将 {name} 重置为 {max}",
     "visTypeVega.mapView.resettingPropertyToMinValueWarningMessage": "将 {name} 重置为 {min}",

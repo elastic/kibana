@@ -26,33 +26,45 @@ import { lazyLoadMapsLegacyModules, TMS_IN_YML_ID } from '../../../maps_legacy/p
 
 const isUserConfiguredTmsLayer = ({ tilemap }) => Boolean(tilemap.url);
 
-const getMapStyleOptions = async (serviceSettings, mapConfig, isDarkMode) => {
-  const mapsLegacyConfig = getMapsLegacyConfig();
-  const tmsServices = await serviceSettings.getTMSServices();
-
-  let mapStyle;
-
-  if (mapConfig.mapStyle !== 'default') {
-    mapStyle = mapConfig.mapStyle;
-  } else {
-    if (isUserConfiguredTmsLayer(mapsLegacyConfig)) {
-      mapStyle = TMS_IN_YML_ID;
-    } else {
-      mapStyle = mapsLegacyConfig.emsTileLayerId.bright;
-    }
-  }
-
-  const mapOptions = tmsServices.find((s) => s.id === mapStyle);
-
-  return {
-    ...mapOptions,
-    ...(await serviceSettings.getAttributesForTMSLayer(mapOptions, true, isDarkMode)),
-  };
-};
-
 export class VegaMapView extends VegaBaseView {
   constructor(opts) {
     super(opts);
+  }
+
+  async getMapStyleOptions() {
+    const isDarkMode = getUISettings().get('theme:darkMode');
+    const mapsLegacyConfig = getMapsLegacyConfig();
+    const tmsServices = await this._serviceSettings.getTMSServices();
+    const mapConfig = this._parser.mapConfig;
+
+    let mapStyle;
+
+    if (mapConfig.mapStyle !== 'default') {
+      mapStyle = mapConfig.mapStyle;
+    } else {
+      if (isUserConfiguredTmsLayer(mapsLegacyConfig)) {
+        mapStyle = TMS_IN_YML_ID;
+      } else {
+        mapStyle = mapsLegacyConfig.emsTileLayerId.bright;
+      }
+    }
+
+    const mapOptions = tmsServices.find((s) => s.id === mapStyle);
+
+    if (!mapOptions) {
+      this.onWarn(
+        i18n.translate('visTypeVega.mapView.mapStyleNotFoundWarningMessage', {
+          defaultMessage: '{mapStyleParam} was not found',
+          values: { mapStyleParam: `"mapStyle":${mapStyle}` },
+        })
+      );
+      return null;
+    }
+
+    return {
+      ...mapOptions,
+      ...(await this._serviceSettings.getAttributesForTMSLayer(mapOptions, true, isDarkMode)),
+    };
   }
 
   async _initViewCustomizations() {
@@ -65,11 +77,12 @@ export class VegaMapView extends VegaBaseView {
     if (!this._$container) return;
 
     if (mapConfig.mapStyle !== false) {
-      const isDarkMode = getUISettings().get('theme:darkMode');
-      baseMapOpts = await getMapStyleOptions(this._serviceSettings, mapConfig, isDarkMode);
+      baseMapOpts = await this.getMapStyleOptions();
 
-      limitMinZ = baseMapOpts.minZoom;
-      limitMaxZ = baseMapOpts.maxZoom;
+      if (baseMapOpts) {
+        limitMinZ = baseMapOpts.minZoom;
+        limitMaxZ = baseMapOpts.maxZoom;
+      }
     }
 
     const validate = (name, value, dflt, min, max) => {
