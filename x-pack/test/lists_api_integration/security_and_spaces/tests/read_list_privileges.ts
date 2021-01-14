@@ -17,7 +17,8 @@ export default ({ getService }: FtrProviderContext) => {
   const spacesService = getService('spaces');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('read_list_privileges', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/88302
+  describe.skip('read_list_privileges', () => {
     const space1Id = 'space_1';
 
     const user1 = {
