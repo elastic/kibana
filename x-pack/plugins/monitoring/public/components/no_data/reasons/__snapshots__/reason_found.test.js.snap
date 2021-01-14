@@ -163,9 +163,9 @@ Array [
 exports[`ReasonFound should load ExplainExportersCloud component 1`] = `
 Array [
   <h2
-    class="euiTitle euiTitle--large"
+    class="euiTitle euiTitle--medium"
   >
-    Your monitoring data is not available here.
+    Your monitoring data is configured through Cloud.
   </h2>,
   <span
     class="euiTextColor euiTextColor--subdued"
