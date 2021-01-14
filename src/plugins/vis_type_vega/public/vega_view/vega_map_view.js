@@ -29,15 +29,17 @@ const isUserConfiguredTmsLayer = ({ tilemap }) => Boolean(tilemap.url);
 const getMapStyleOptions = async (serviceSettings, mapConfig, isDarkMode) => {
   const mapsLegacyConfig = getMapsLegacyConfig();
   const tmsServices = await serviceSettings.getTMSServices();
+
   let mapStyle;
 
-  if (isUserConfiguredTmsLayer(mapsLegacyConfig)) {
-    mapStyle = TMS_IN_YML_ID;
+  if (mapConfig.mapStyle !== 'default') {
+    mapStyle = mapConfig.mapStyle;
   } else {
-    mapStyle =
-      mapConfig.mapStyle === 'default'
-        ? mapsLegacyConfig.emsTileLayerId.bright
-        : mapConfig.mapStyle;
+    if (isUserConfiguredTmsLayer(mapsLegacyConfig)) {
+      mapStyle = TMS_IN_YML_ID;
+    } else {
+      mapStyle = mapsLegacyConfig.emsTileLayerId.bright;
+    }
   }
 
   const mapOptions = tmsServices.find((s) => s.id === mapStyle);
