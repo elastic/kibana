@@ -46,7 +46,7 @@ export interface FindFileStructureResponse {
       [fieldName: string]: {
         // including all possible Elasticsearch types
         // since find_file_structure API can be enhanced to include new fields in the future
-        type: Omit<
+        type: Exclude<
           ES_FIELD_TYPES,
           ES_FIELD_TYPES._ID | ES_FIELD_TYPES._INDEX | ES_FIELD_TYPES._SOURCE | ES_FIELD_TYPES._TYPE
         >;
