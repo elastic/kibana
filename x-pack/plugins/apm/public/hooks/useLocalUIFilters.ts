@@ -34,10 +34,12 @@ export function useLocalUIFilters({
   projection,
   filterNames,
   params,
+  shouldFetch,
 }: {
   projection: Projection;
   filterNames: LocalUIFilterName[];
   params?: Record<string, string | number | boolean | undefined>;
+  shouldFetch: boolean;
 }) {
   const history = useHistory();
   const { uiFilters, urlParams } = useUrlParams();
@@ -68,17 +70,19 @@ export function useLocalUIFilters({
   };
 
   const { data = getInitialData(filterNames), status } = useFetcher(() => {
-    return callApi<LocalUIFiltersAPIResponse>({
-      method: 'GET',
-      pathname: `/api/apm/ui_filters/local_filters/${projection}`,
-      query: {
-        uiFilters: JSON.stringify(uiFilters),
-        start: urlParams.start,
-        end: urlParams.end,
-        filterNames: JSON.stringify(filterNames),
-        ...params,
-      },
-    });
+    if (shouldFetch) {
+      return callApi<LocalUIFiltersAPIResponse>({
+        method: 'GET',
+        pathname: `/api/apm/ui_filters/local_filters/${projection}`,
+        query: {
+          uiFilters: JSON.stringify(uiFilters),
+          start: urlParams.start,
+          end: urlParams.end,
+          filterNames: JSON.stringify(filterNames),
+          ...params,
+        },
+      });
+    }
   }, [
     callApi,
     projection,
@@ -87,6 +91,7 @@ export function useLocalUIFilters({
     urlParams.end,
     filterNames,
     params,
+    shouldFetch,
   ]);
 
   const filters = data.map((filter) => ({
