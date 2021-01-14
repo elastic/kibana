@@ -7,9 +7,7 @@
 import { useState } from 'react';
 
 export const useLocalStorage = <Value>(key: string, defaultValue: Value) => {
-  const [item, setItem] = useState<Value>(getFromStorage());
-
-  function getFromStorage() {
+  const getFromStorage = () => {
     const storedItem = window.localStorage.getItem(key);
     let toStore: Value = defaultValue;
 
@@ -22,7 +20,9 @@ export const useLocalStorage = <Value>(key: string, defaultValue: Value) => {
     }
 
     return toStore;
-  }
+  };
+
+  const [item, setItem] = useState<Value>(getFromStorage());
 
   const updateFromStorage = () => {
     const storedItem = getFromStorage();
