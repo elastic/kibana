@@ -4,6 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+interface Query {
+  doc_count: number;
+  key: string;
+  clicks?: { doc_count: number };
+  searches?: { doc_count: number };
+  tags?: string[];
+}
+
+interface QueryClick extends Query {
+  document?: {
+    id: string;
+    engine: string;
+    tags?: string[];
+  };
+}
+
+interface RecentQuery {
+  document_ids: string[];
+  query_string: string;
+  tags: string[];
+  timestamp: string;
+}
+
+/**
+ * API response data
+ */
+
 interface BaseData {
   analyticsUnavailable: boolean;
   allTags: string[];
@@ -31,27 +58,4 @@ export interface QueryDetails extends BaseData {
   totalQueriesForQuery: number;
   queriesPerDayForQuery: number[];
   topClicksForQuery: QueryClick[];
-}
-
-interface Query {
-  doc_count: number;
-  key: string;
-  clicks?: { doc_count: number };
-  searches?: { doc_count: number };
-  tags?: string[];
-}
-
-export interface QueryClick extends Query {
-  document?: {
-    id: string;
-    engine: string;
-    tags?: string[];
-  };
-}
-
-interface RecentQuery {
-  document_ids: string[];
-  query_string: string;
-  tags: string[];
-  timestamp: string;
 }
