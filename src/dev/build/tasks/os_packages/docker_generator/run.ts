@@ -64,8 +64,9 @@ export async function runDockerGenerator(
     'kibana-docker',
     build.isOss() ? `oss` : `default${ubiImageFlavor}`
   );
+  const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
   const dockerTargetFilename = config.resolveFromTarget(
-    `kibana${imageFlavor}${ubiImageFlavor}-${version}-${flags.architecture}-docker-image.tar.gz`
+    `kibana${imageFlavor}${ubiImageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
   );
   const scope: TemplateContext = {
     artifactTarball,
