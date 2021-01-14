@@ -5,9 +5,14 @@
  */
 import moment from 'moment';
 import _ from 'lodash';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
+// @ts-ignore
 import { createQuery } from '../create_query';
+// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
+import { ElasticsearchResponse, ElasticsearchIndexRecoveryShard } from '../../../common/types/es';
+import { LegacyRequest } from '../../types';
 
 /**
  * Filter out shard activity that we do not care about.
@@ -20,8 +25,8 @@ import { ElasticsearchMetric } from '../metrics';
  * @param {Number} startMs Start time in milliseconds of the polling window
  * @returns {boolean} true to keep
  */
-export function filterOldShardActivity(startMs) {
-  return (activity) => {
+export function filterOldShardActivity(startMs: number) {
+  return (activity: ElasticsearchIndexRecoveryShard) => {
     // either it's still going and there is no stop time, or the stop time happened after we started looking for one
     return !_.isNumber(activity.stop_time_in_millis) || activity.stop_time_in_millis >= startMs;
   };
@@ -35,9 +40,9 @@ export function filterOldShardActivity(startMs) {
  * @param {Date} start The start time from the request payload (expected to be of type {@code Date})
  * @returns {Object[]} An array of shards representing active shard activity from {@code _source.index_recovery.shards}.
  */
-export function handleLastRecoveries(resp, start) {
-  if (resp.hits.hits.length === 1) {
-    const data = _.get(resp.hits.hits[0], '_source.index_recovery.shards', []).filter(
+export function handleLastRecoveries(resp: ElasticsearchResponse, start: number) {
+  if (resp.hits?.hits.length === 1) {
+    const data = (resp.hits?.hits[0]._source.index_recovery?.shards ?? []).filter(
       filterOldShardActivity(moment.utc(start).valueOf())
     );
     data.sort((a, b) => b.start_time_in_millis - a.start_time_in_millis);
@@ -47,7 +52,7 @@ export function handleLastRecoveries(resp, start) {
   return [];
 }
 
-export function getLastRecovery(req, esIndexPattern) {
+export function getLastRecovery(req: LegacyRequest, esIndexPattern: string) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getLastRecovery');
 
   const start = req.payload.timeRange.min;

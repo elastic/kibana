@@ -236,6 +236,14 @@ export interface ElasticsearchLegacySource {
   ccr_stats?: {
     leader_index?: string;
   };
+  index_recovery?: {
+    shards?: ElasticsearchIndexRecoveryShard[];
+  };
+}
+
+export interface ElasticsearchIndexRecoveryShard {
+  start_time_in_millis: number;
+  stop_time_in_millis: number;
 }
 
 export interface ElasticsearchMetricbeatNode {
