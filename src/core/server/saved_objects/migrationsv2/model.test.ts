@@ -922,9 +922,19 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('MARK_VERSION_INDEX_READY -> MARK_VERSION_INDEX_CONFLICT if someone else removed the current alias from the source index', () => {
+      test('MARK_VERSION_INDEX_READY -> MARK_VERSION_INDEX_CONFLICT if another removed the current alias from the source index', () => {
         const res: ResponseType<'MARK_VERSION_INDEX_READY'> = Either.left({
           type: 'alias_not_found_exception',
+        });
+        const newState = model(markVersionIndexReadyState, res);
+        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY_CONFLICT');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      test('MARK_VERSION_INDEX_READY -> MARK_VERSION_INDEX_CONFLICT if another node removed the temporary index', () => {
+        const res: ResponseType<'MARK_VERSION_INDEX_READY'> = Either.left({
+          type: 'index_not_found_exception',
+          index: '.kibana_7.11.0_reindex_temp',
         });
         const newState = model(markVersionIndexReadyState, res);
         expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY_CONFLICT');

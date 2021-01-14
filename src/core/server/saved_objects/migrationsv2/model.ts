@@ -648,12 +648,20 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // alias_not_found_exception another instance has completed a
         // migration from the same source.
         return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
-      } else if (
-        left.type === 'remove_index_not_a_concrete_index' ||
-        left.type === 'index_not_found_exception'
-      ) {
-        // We don't handle these errors as the migration algorithm will never
-        // cause them to occur (these are only relevant to the LEGACY_DELETE
+      } else if (left.type === 'index_not_found_exception') {
+        if (left.index === stateP.tempIndex) {
+          // another instance has already completed the migration and deleted
+          // the temporary index
+          return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
+        } else {
+          // The migration algorithm will never cause a
+          // index_not_found_exception for an index other than the temporary
+          // index handled above.
+          throwBadResponse(stateP, left as never);
+        }
+      } else if (left.type === 'remove_index_not_a_concrete_index') {
+        // We don't handle this error as the migration algorithm will never
+        // cause it to occur (this error is only relevant to the LEGACY_DELETE
         // step).
         throwBadResponse(stateP, left as never);
       } else {
