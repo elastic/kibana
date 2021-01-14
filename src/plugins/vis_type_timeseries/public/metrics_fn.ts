@@ -65,7 +65,7 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
       help: '',
     },
   },
-  async fn(input, args) {
+  async fn(input, args, { getSearchSessionId }) {
     const visParams: TimeseriesVisParams = JSON.parse(args.params);
     const uiState = JSON.parse(args.uiState);
 
@@ -73,6 +73,7 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
       input,
       visParams,
       uiState,
+      searchSessionId: getSearchSessionId(),
     });
 
     return {
