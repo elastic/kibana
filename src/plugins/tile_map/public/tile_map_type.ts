@@ -17,17 +17,22 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { convertToGeoJson, MapTypes } from '../../maps_legacy/public';
-import { createTileMapVisualization } from './tile_map_visualization';
-import { TileMapOptions } from './components/tile_map_options';
-import { supportsCssFilters } from './css_filters';
+import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
 import { truncatedColorSchemas } from '../../charts/public';
-import { getDeprecationMessage } from './get_deprecation_message';
 
-export function createTileMapTypeDefinition(dependencies) {
-  const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
+// @ts-expect-error
+import { supportsCssFilters } from './css_filters';
+import { TileMapOptionsLazy } from './components';
+import { getDeprecationMessage } from './get_deprecation_message';
+import { TileMapVisualizationDependencies } from './plugin';
+import { toExpressionAst } from './to_ast';
+import { TileMapVisParams } from './types';
+import { MapTypes } from './utils/map_types';
+
+export function createTileMapTypeDefinition(
+  dependencies: TileMapVisualizationDependencies
+): BaseVisTypeOptions<TileMapVisParams> {
   const { uiSettings, getServiceSettings } = dependencies;
 
   return {
@@ -54,8 +59,7 @@ export function createTileMapTypeDefinition(dependencies) {
         wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
       },
     },
-    visualization: CoordinateMapsVisualization,
-    responseHandler: convertToGeoJson,
+    toExpressionAst,
     editorConfig: {
       collections: {
         colorSchemas: truncatedColorSchemas,
@@ -113,7 +117,7 @@ export function createTileMapTypeDefinition(dependencies) {
         ],
         tmsLayers: [],
       },
-      optionsTemplate: (props) => <TileMapOptions {...props} />,
+      optionsTemplate: TileMapOptionsLazy,
       schemas: [
         {
           group: 'metrics',

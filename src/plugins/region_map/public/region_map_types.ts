@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { VectorLayer, FileLayerField } from '../../index';
-import { WMSOptions } from './external_basemap_types';
+import { SchemaConfig } from 'src/plugins/visualizations/public';
+import { VectorLayer, FileLayerField, WMSOptions } from '../../maps_legacy/public/index';
 
 export interface RegionMapVisParams {
   readonly addTooltip: true;
@@ -33,4 +33,9 @@ export interface RegionMapVisParams {
   selectedLayer?: VectorLayer;
   selectedJoinField?: FileLayerField;
   wms: WMSOptions;
+}
+
+export interface RegionMapVisConfig extends RegionMapVisParams {
+  metric: SchemaConfig;
+  bucket?: SchemaConfig;
 }
