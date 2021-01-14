@@ -11,11 +11,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const CloudDeployment = () => {
   return (
     <Fragment>
-      <EuiTitle size="l">
+      <EuiTitle size="m">
         <h2>
           <FormattedMessage
             id="xpack.monitoring.noData.blurbs.cloudDeploymentTitle"
-            defaultMessage="Your monitoring data is not available here."
+            defaultMessage="Your monitoring data is configured through Cloud."
           />
         </h2>
       </EuiTitle>
