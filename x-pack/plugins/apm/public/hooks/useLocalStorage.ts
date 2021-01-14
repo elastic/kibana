@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function useLocalStorage<T>(key: string, defaultValue: T) {
   const [item, setItem] = useState<T>(getFromStorage());
@@ -40,6 +40,15 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
       updateFromStorage();
     }
   };
+
+  useEffect(() => {
+    window.addEventListener('storage', (event: StorageEvent) => {
+      if (event.key === key) {
+        updateFromStorage();
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return [item, saveToStorage] as const;
 }
