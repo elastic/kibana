@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FileBasedFieldVisConfig } from '../../../stats_table/types';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
+import type {
+  FileBasedFieldVisConfig,
+  FileBasedUnknownFieldVisConfig,
+} from '../../../stats_table/types/field_vis_config';
 
 export function filterFields(
-  fields: Array<
-    | FileBasedFieldVisConfig
-    | {
-        fieldName: string;
-        type: 'text' | 'unknown';
-        stats: { mean: number; count: number; sampleCount: number; cardinality: number };
-      }
-  >,
+  fields: Array<FileBasedFieldVisConfig | FileBasedUnknownFieldVisConfig>,
   visibleFieldNames: string[],
   visibleFieldTypes: string[]
 ) {

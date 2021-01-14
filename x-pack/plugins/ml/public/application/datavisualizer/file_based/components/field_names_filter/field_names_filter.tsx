@@ -6,17 +6,13 @@
 import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { MultiSelectPicker } from '../../../../components/multi_select_picker';
-import { FileBasedFieldVisConfig } from '../../../stats_table/types';
+import type {
+  FileBasedFieldVisConfig,
+  FileBasedUnknownFieldVisConfig,
+} from '../../../stats_table/types/field_vis_config';
 
 interface Props {
-  fields: Array<
-    | FileBasedFieldVisConfig
-    | {
-        fieldName: string;
-        type: 'text' | 'unknown';
-        stats: { mean: number; count: number; sampleCount: number; cardinality: number };
-      }
-  >;
+  fields: Array<FileBasedFieldVisConfig | FileBasedUnknownFieldVisConfig>;
   setVisibleFieldNames(q: string[]): void;
   visibleFieldNames: string[];
 }

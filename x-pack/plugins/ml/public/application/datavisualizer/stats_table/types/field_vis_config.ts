@@ -78,6 +78,12 @@ export interface FileBasedFieldVisConfig {
   format?: string;
 }
 
+export interface FileBasedUnknownFieldVisConfig {
+  fieldName: string;
+  type: 'text' | 'unknown';
+  stats: { mean: number; count: number; sampleCount: number; cardinality: number };
+}
+
 export function isFileBasedFieldVisConfig(
   field: FieldVisConfig | FileBasedFieldVisConfig
 ): field is FileBasedFieldVisConfig {
