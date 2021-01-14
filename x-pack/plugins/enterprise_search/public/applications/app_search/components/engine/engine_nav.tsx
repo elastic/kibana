@@ -103,7 +103,11 @@ export const EngineNav: React.FC = () => {
         {OVERVIEW_TITLE}
       </SideNavLink>
       {canViewEngineAnalytics && (
-        <SideNavLink to={engineRoute + ENGINE_ANALYTICS_PATH} data-test-subj="EngineAnalyticsLink">
+        <SideNavLink
+          to={engineRoute + ENGINE_ANALYTICS_PATH}
+          shouldShowActiveForSubroutes={true}
+          data-test-subj="EngineAnalyticsLink"
+        >
           {ANALYTICS_TITLE}
         </SideNavLink>
       )}
