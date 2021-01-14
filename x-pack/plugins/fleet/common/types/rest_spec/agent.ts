@@ -219,5 +219,6 @@ export interface GetAgentStatusResponse {
     error: number;
     offline: number;
     other: number;
+    updating: number;
   };
 }
