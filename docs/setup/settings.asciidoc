@@ -229,6 +229,16 @@ This value must be a whole number greater than zero. *Default: `"1000"`*
 suggestions. This value must be a whole number greater than zero.
 *Default: `"100000"`*
 
+|===
+
+[NOTE]
+============
+To reload the logging settings, send a SIGHUP signal to {kib}.
+============
+
+[cols="2*<"]
+|===
+
 |[[logging-dest]] `logging.dest:`
  | Enables you to specify a file where {kib} stores log output.
 *Default: `stdout`*
