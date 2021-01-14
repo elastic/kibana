@@ -6,16 +6,16 @@
 
 import { useState } from 'react';
 
-export const useLocalStorage = <T>(key: string, defaultValue: T) => {
-  const [item, setItem] = useState<T>(getFromStorage());
+export const useLocalStorage = <Value>(key: string, defaultValue: Value) => {
+  const [item, setItem] = useState<Value>(getFromStorage());
 
   function getFromStorage() {
     const storedItem = window.localStorage.getItem(key);
-    let toStore: T = defaultValue;
+    let toStore: Value = defaultValue;
 
     if (storedItem !== null) {
       try {
-        toStore = JSON.parse(storedItem) as T;
+        toStore = JSON.parse(storedItem) as Value;
       } catch (err) {
         window.localStorage.removeItem(key);
       }
@@ -29,7 +29,7 @@ export const useLocalStorage = <T>(key: string, defaultValue: T) => {
     setItem(storedItem);
   };
 
-  const saveToStorage = (value: T) => {
+  const saveToStorage = (value: Value) => {
     window.localStorage.setItem(key, JSON.stringify(value));
     updateFromStorage();
   };
