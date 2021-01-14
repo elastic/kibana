@@ -460,7 +460,9 @@ export class Explorer extends React.Component {
                 <EuiSpacer size="m" />
 
                 <div className="euiText explorer-charts">
-                  {showCharts && <ExplorerChartsContainer {...{ ...chartsData, severity }} />}
+                  {showCharts && (
+                    <ExplorerChartsContainer {...{ ...chartsData, severity, showAnomaliesMap }} />
+                  )}
                 </div>
 
                 <AnomaliesTable
