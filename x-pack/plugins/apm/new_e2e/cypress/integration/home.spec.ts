@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-describe('home', () => {
-  it('test', () => {
+describe('Home page', () => {
+  it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
     const now = new Date(Cypress.env('METADATA_END_DATE'));
     cy.clock(now);
 
     cy.visit('/app/apm');
+
+    cy.url().should('include','app/apm/services?rangeFrom=now-15m&rangeTo=now')
+    cy.get('.euiTabs .euiTab-isSelected').contains('Services');
   });
 });
