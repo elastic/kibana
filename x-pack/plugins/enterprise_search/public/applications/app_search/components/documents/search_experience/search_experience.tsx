@@ -47,6 +47,9 @@ export const SearchExperience: React.FC = () => {
   const endpointBase = externalUrl.enterpriseSearchUrl;
 
   const [showCustomizationModal, setShowCustomizationModal] = useState(false);
+  const openCustomizationModal = () => setShowCustomizationModal(true);
+  const closeCustomizationModal = () => setShowCustomizationModal(false);
+
   const [fields, setFields] = useLocalStorage(
     `documents-search-experience-customization--${engine.name}`,
     {
@@ -57,8 +60,6 @@ export const SearchExperience: React.FC = () => {
 
   // TODO const sortFieldsOptions = _flatten(fields.sortFields.map(fieldNameToSortOptions)) // we need to flatten this array since fieldNameToSortOptions returns an array of two sorting options
   const sortingOptions = [...DEFAULT_SORT_OPTIONS /* TODO ...sortFieldsOptions*/];
-  const openCustomizationModal = () => setShowCustomizationModal(true);
-  const closeCustomizationModal = () => setShowCustomizationModal(false);
 
   const connector = new AppSearchAPIConnector({
     cacheResponses: false,
