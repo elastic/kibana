@@ -96,9 +96,9 @@ const getPhaseMinAgeInMilliseconds = (phase: { min_age: string }): number => {
   let milliseconds: number;
   const { units, size } = splitSizeAndUnits(phase.min_age);
   if (units === 'micros') {
-    milliseconds = parseInt(size, 10) * 1e3;
+    milliseconds = parseInt(size, 10) / 1e3;
   } else if (units === 'nanos') {
-    milliseconds = parseInt(size, 10) * 1e6;
+    milliseconds = parseInt(size, 10) / 1e6;
   } else {
     milliseconds = moment.duration(size, units as any).asMilliseconds();
   }
