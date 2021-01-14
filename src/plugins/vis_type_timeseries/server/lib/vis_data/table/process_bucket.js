@@ -34,27 +34,40 @@ function trendSinceLastBucket(data) {
   return Number.isNaN(trend) ? 0 : trend;
 }
 
-export function processBucket(panel) {
-  return (bucket) => {
-    const series = getActiveSeries(panel).map((series) => {
-      const timeseries = get(bucket, `${series.id}.timeseries`);
-      const buckets = get(bucket, `${series.id}.buckets`);
+export function processBucket(panel, req, searchStrategy, capabilities, extractFields) {
+  return async (bucket) => {
+    const series = await Promise.all(
+      getActiveSeries(panel).map(async (series) => {
+        const timeseries = get(bucket, `${series.id}.timeseries`);
+        const buckets = get(bucket, `${series.id}.buckets`);
+        let meta = {};
 
-      if (!timeseries && buckets) {
-        const meta = get(bucket, `${series.id}.meta`);
-        const timeseries = {
-          buckets: get(bucket, `${series.id}.buckets`),
-        };
-        overwrite(bucket, series.id, { meta, timeseries });
-      }
-      const processor = buildProcessorFunction(processors, bucket, panel, series);
-      const result = first(processor([]));
-      if (!result) return null;
-      const data = get(result, 'data', []);
-      result.slope = trendSinceLastBucket(data);
-      result.last = getLastValue(data);
-      return result;
-    });
+        if (!timeseries && buckets) {
+          meta = get(bucket, `${series.id}.meta`);
+          const timeseries = {
+            buckets: get(bucket, `${series.id}.buckets`),
+          };
+          overwrite(bucket, series.id, { meta, timeseries });
+        }
+
+        const processor = buildProcessorFunction(
+          processors,
+          bucket,
+          panel,
+          series,
+          meta,
+          extractFields
+        );
+        const result = first(await processor([]));
+
+        if (!result) return null;
+        const data = get(result, 'data', []);
+        result.slope = trendSinceLastBucket(data);
+        result.last = getLastValue(data);
+        return result;
+      })
+    );
+
     return { key: bucket.key, series };
   };
 }
