@@ -6,6 +6,22 @@
 
 import { useState } from 'react';
 
+/**
+ * A hook that works like `useState`, but persisted to localStorage.
+ *
+ * example:
+ *
+ * const [foo, setFoo] = useLocalStorage("foo", "bar");
+ *
+ * console.log(foo) // "bar"
+ * setFoo("baz")
+ * console.log(foo) // "baz"
+ *
+ * // Navigate away from page and return
+ *
+ * const [foo, setFoo] = useLocalStorage("foo", "bar");
+ * console.log(foo) // "baz"
+ */
 export const useLocalStorage = <Value>(key: string, defaultValue: Value): [Value, Function] => {
   const getFromStorage = () => {
     const storedItem = window.localStorage.getItem(key);
