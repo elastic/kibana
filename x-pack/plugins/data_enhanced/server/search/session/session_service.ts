@@ -63,6 +63,9 @@ interface SetupDependencies {
 interface StartDependencies {
   taskManager: TaskManagerStartContract;
 }
+
+type SearchSessionsConfig = ConfigSchema['search']['sessions'];
+
 export class SearchSessionService implements ISessionService {
   /**
    * Map of sessionId to { [requestHash]: searchId }
@@ -71,14 +74,12 @@ export class SearchSessionService implements ISessionService {
   private sessionSearchMap = new Map<string, SessionInfo>();
   private internalSavedObjectsClient!: SavedObjectsClientContract;
   private monitorTimer!: NodeJS.Timeout;
-  private config!: ConfigSchema['search']['sessions'];
+  private config!: SearchSessionsConfig;
 
-  constructor(private readonly logger: Logger, private readonly config$: Observable<ConfigSchema>) {
-    (async () => {
-      const config = await this.config$.pipe(first()).toPromise();
-      this.config = config.search.sessions;
-    })();
-  }
+  constructor(
+    private readonly logger: Logger,
+    private readonly config$: Observable<ConfigSchema>
+  ) {}
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
     registerSearchSessionsTask(core, {
@@ -89,6 +90,8 @@ export class SearchSessionService implements ISessionService {
   }
 
   public async start(core: CoreStart, deps: StartDependencies) {
+    const configPromise = await this.config$.pipe(first()).toPromise();
+    this.config = (await configPromise).search.sessions;
     return this.setupMonitoring(core, deps);
   }
 
@@ -139,7 +142,7 @@ export class SearchSessionService implements ISessionService {
     return res.saved_objects;
   }
 
-  private clearSessions = () => {
+  private clearSessions = async () => {
     const curTime = moment();
 
     this.sessionSearchMap.forEach((sessionInfo, sessionId) => {
