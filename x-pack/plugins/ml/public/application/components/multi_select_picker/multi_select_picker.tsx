@@ -100,7 +100,6 @@ export const MultiSelectPicker: FC<{
     <EuiFilterGroup data-test-subj={dataTestSubj}>
       <EuiPopover
         data-test-subj={`${dataTestSubj}-popover`}
-        id="popoverExampleMultiSelect"
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
