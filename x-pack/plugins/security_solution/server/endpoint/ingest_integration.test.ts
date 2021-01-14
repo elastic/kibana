@@ -63,7 +63,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
-        endpointAppContextMock.alerts
+        endpointAppContextMock.alerts,
+        licenseService
       );
       const policyConfig = createNewPackagePolicyMock(); // policy config without manifest
       const newPolicyConfig = await callback(policyConfig, ctx, req); // policy config WITH manifest
@@ -140,7 +141,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
-        endpointAppContextMock.alerts
+        endpointAppContextMock.alerts,
+        licenseService
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
@@ -167,7 +169,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
-        endpointAppContextMock.alerts
+        endpointAppContextMock.alerts,
+        licenseService
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
@@ -188,7 +191,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
-        endpointAppContextMock.alerts
+        endpointAppContextMock.alerts,
+        licenseService
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
