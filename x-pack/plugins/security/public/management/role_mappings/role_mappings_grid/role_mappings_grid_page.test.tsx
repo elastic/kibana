@@ -13,6 +13,7 @@ import { EmptyPrompt } from './empty_prompt';
 import { findTestSubject } from '@kbn/test/jest';
 import { EuiLink } from '@elastic/eui';
 import { act } from '@testing-library/react';
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
@@ -21,6 +22,25 @@ import { rolesAPIClientMock } from '../../roles/index.mock';
 describe('RoleMappingsGridPage', () => {
   let history: ScopedHistory;
   let coreStart: CoreStart;
+
+  const renderView = (
+    roleMappingsAPI: ReturnType<typeof roleMappingsAPIClientMock.create>,
+    rolesAPI: ReturnType<typeof rolesAPIClientMock.create> = rolesAPIClientMock.create()
+  ) => {
+    const { application, docLinks, notifications } = coreStart;
+    return mountWithIntl(
+      <KibanaContextProvider services={{ docLinks }}>
+        <RoleMappingsGridPage
+          rolesAPIClient={rolesAPI}
+          roleMappingsAPI={roleMappingsAPI}
+          notifications={notifications}
+          docLinks={docLinks}
+          history={history}
+          navigateToApp={application.navigateToApp}
+        />
+      </KibanaContextProvider>
+    );
+  };
 
   beforeEach(() => {
     history = scopedHistoryMock.create();
@@ -35,17 +55,7 @@ describe('RoleMappingsGridPage', () => {
       hasCompatibleRealms: true,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <RoleMappingsGridPage
-        rolesAPIClient={rolesAPIClientMock.create()}
-        roleMappingsAPI={roleMappingsAPI}
-        notifications={notifications}
-        docLinks={docLinks}
-        history={history}
-        navigateToApp={coreStart.application.navigateToApp}
-      />
-    );
+    const wrapper = renderView(roleMappingsAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(EmptyPrompt)).toHaveLength(0);
 
@@ -64,17 +74,7 @@ describe('RoleMappingsGridPage', () => {
       hasCompatibleRealms: true,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <RoleMappingsGridPage
-        rolesAPIClient={rolesAPIClientMock.create()}
-        roleMappingsAPI={roleMappingsAPI}
-        notifications={notifications}
-        docLinks={docLinks}
-        history={history}
-        navigateToApp={coreStart.application.navigateToApp}
-      />
-    );
+    const wrapper = renderView(roleMappingsAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
 
@@ -101,17 +101,7 @@ describe('RoleMappingsGridPage', () => {
       hasCompatibleRealms: false,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <RoleMappingsGridPage
-        rolesAPIClient={rolesAPIClientMock.create()}
-        roleMappingsAPI={roleMappingsAPI}
-        notifications={notifications}
-        docLinks={docLinks}
-        history={history}
-        navigateToApp={coreStart.application.navigateToApp}
-      />
-    );
+    const wrapper = renderView(roleMappingsAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(NoCompatibleRealms)).toHaveLength(0);
 
@@ -137,17 +127,7 @@ describe('RoleMappingsGridPage', () => {
       hasCompatibleRealms: true,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <RoleMappingsGridPage
-        rolesAPIClient={rolesAPIClientMock.create()}
-        roleMappingsAPI={roleMappingsAPI}
-        notifications={notifications}
-        docLinks={docLinks}
-        history={history}
-        navigateToApp={coreStart.application.navigateToApp}
-      />
-    );
+    const wrapper = renderView(roleMappingsAPI);
     await nextTick();
     wrapper.update();
 
@@ -171,17 +151,7 @@ describe('RoleMappingsGridPage', () => {
       hasCompatibleRealms: true,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <RoleMappingsGridPage
-        rolesAPIClient={rolesAPIClientMock.create()}
-        roleMappingsAPI={roleMappingsAPI}
-        notifications={notifications}
-        docLinks={docLinks}
-        history={history}
-        navigateToApp={coreStart.application.navigateToApp}
-      />
-    );
+    const wrapper = renderView(roleMappingsAPI);
     await nextTick();
     wrapper.update();
 
@@ -211,17 +181,7 @@ describe('RoleMappingsGridPage', () => {
       },
     ]);
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <RoleMappingsGridPage
-        rolesAPIClient={rolesAPIClientMock.create()}
-        roleMappingsAPI={roleMappingsAPI}
-        notifications={notifications}
-        docLinks={docLinks}
-        history={history}
-        navigateToApp={coreStart.application.navigateToApp}
-      />
-    );
+    const wrapper = renderView(roleMappingsAPI);
     await nextTick();
     wrapper.update();
 
@@ -274,17 +234,7 @@ describe('RoleMappingsGridPage', () => {
       },
     ]);
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <RoleMappingsGridPage
-        rolesAPIClient={roleAPIClient}
-        roleMappingsAPI={roleMappingsAPI}
-        notifications={notifications}
-        docLinks={docLinks}
-        history={history}
-        navigateToApp={coreStart.application.navigateToApp}
-      />
-    );
+    const wrapper = renderView(roleMappingsAPI, roleAPIClient);
     await nextTick();
     wrapper.update();
 

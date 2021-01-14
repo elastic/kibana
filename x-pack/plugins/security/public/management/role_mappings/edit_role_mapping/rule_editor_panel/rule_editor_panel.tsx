@@ -215,7 +215,6 @@ export class RuleEditorPanel extends Component<Props, State> {
             rules={this.state.rules}
             onChange={this.onRuleChange}
             onValidityChange={this.onValidityChange}
-            docLinks={this.props.docLinks}
           />
         );
       default:

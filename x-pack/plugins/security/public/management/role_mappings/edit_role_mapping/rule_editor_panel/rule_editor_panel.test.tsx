@@ -17,10 +17,18 @@ import '@kbn/test/target/jest/utils/stub_web_worker';
 
 import { AllRule, FieldRule } from '../../model';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 describe('RuleEditorPanel', () => {
+  const renderView = (props: React.ComponentProps<typeof RuleEditorPanel>) => {
+    return mountWithIntl(
+      <KibanaContextProvider services={{ docLinks: props.docLinks }}>
+        <RuleEditorPanel {...props} />
+      </KibanaContextProvider>
+    );
+  };
   it('renders the visual editor when no rules are defined', () => {
     const props = {
       rawRules: {},
@@ -29,7 +37,7 @@ describe('RuleEditorPanel', () => {
       validateForm: false,
       docLinks: coreMock.createStart().docLinks,
     };
-    const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+    const wrapper = renderView(props);
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
     expect(wrapper.find(JSONRuleEditor)).toHaveLength(0);
   });
@@ -50,7 +58,7 @@ describe('RuleEditorPanel', () => {
       validateForm: false,
       docLinks: coreMock.createStart().docLinks,
     };
-    const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+    const wrapper = renderView(props);
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
     expect(wrapper.find(JSONRuleEditor)).toHaveLength(0);
 
@@ -74,7 +82,7 @@ describe('RuleEditorPanel', () => {
       validateForm: false,
       docLinks: coreMock.createStart().docLinks,
     };
-    const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+    const wrapper = renderView(props);
 
     findTestSubject(wrapper, 'roleMappingsJSONRuleEditorButton').simulate('click');
 
@@ -110,7 +118,7 @@ describe('RuleEditorPanel', () => {
       validateForm: false,
       docLinks: coreMock.createStart().docLinks,
     };
-    const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+    const wrapper = renderView(props);
 
     wrapper.find(VisualRuleEditor).simulateError(new Error('Something awful happened here.'));
 

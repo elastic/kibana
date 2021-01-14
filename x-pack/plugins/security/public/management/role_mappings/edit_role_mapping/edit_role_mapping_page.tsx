@@ -179,7 +179,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
         {!this.state.hasCompatibleRealms && (
           <>
             <EuiSpacer size="s" />
-            <NoCompatibleRealms docLinks={this.props.docLinks} />
+            <NoCompatibleRealms />
           </>
         )}
       </Fragment>

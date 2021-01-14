@@ -5,9 +5,7 @@
  */
 
 jest.mock('./api_keys_grid', () => ({
-  APIKeysGridPage: (props: any) =>
-    // `docLinks` object is too big to include into test snapshot, so we just check its existence.
-    `Page: ${JSON.stringify({ ...props, docLinks: props.docLinks ? {} : undefined })}`,
+  APIKeysGridPage: (props: any) => `Page: ${JSON.stringify(props)}`,
 }));
 import { apiKeysManagementApp } from './api_keys_management_app';
 import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
@@ -45,7 +43,7 @@ describe('apiKeysManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: '/', text: 'API Keys' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Page: {"notifications":{"toasts":{}},"docLinks":{},"apiKeysAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}}}
+        Page: {"notifications":{"toasts":{}},"apiKeysAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}}}
       </div>
     `);
 

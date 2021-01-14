@@ -12,6 +12,7 @@ import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { PluginStartDependencies } from '../../plugin';
 import { tryDecodeURIComponent } from '../url_utils';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
@@ -97,18 +98,20 @@ export const roleMappingsManagementApp = Object.freeze({
         };
 
         render(
-          <i18nStart.Context>
-            <Router history={history}>
-              <Switch>
-                <Route path={['/', '']} exact={true}>
-                  <RoleMappingsGridPageWithBreadcrumbs />
-                </Route>
-                <Route path="/edit/:name?">
-                  <EditRoleMappingsPageWithBreadcrumbs />
-                </Route>
-              </Switch>
-            </Router>
-          </i18nStart.Context>,
+          <KibanaContextProvider services={{ docLinks }}>
+            <i18nStart.Context>
+              <Router history={history}>
+                <Switch>
+                  <Route path={['/', '']} exact={true}>
+                    <RoleMappingsGridPageWithBreadcrumbs />
+                  </Route>
+                  <Route path="/edit/:name?">
+                    <EditRoleMappingsPageWithBreadcrumbs />
+                  </Route>
+                </Switch>
+              </Router>
+            </i18nStart.Context>
+          </KibanaContextProvider>,
           element
         );
 

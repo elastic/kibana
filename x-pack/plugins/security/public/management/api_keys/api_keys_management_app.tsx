@@ -9,6 +9,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { PluginStartDependencies } from '../../plugin';
 
 interface CreateParams {
@@ -45,14 +46,14 @@ export const apiKeysManagementApp = Object.freeze({
         ]);
 
         render(
-          <i18nStart.Context>
-            <APIKeysGridPage
-              navigateToApp={application.navigateToApp}
-              notifications={notifications}
-              docLinks={docLinks}
-              apiKeysAPIClient={new APIKeysAPIClient(http)}
-            />
-          </i18nStart.Context>,
+          <KibanaContextProvider services={{ application, docLinks }}>
+            <i18nStart.Context>
+              <APIKeysGridPage
+                notifications={notifications}
+                apiKeysAPIClient={new APIKeysAPIClient(http)}
+              />
+            </i18nStart.Context>
+          </KibanaContextProvider>,
           element
         );
 

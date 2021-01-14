@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import moment from 'moment-timezone';
-import type { ApplicationStart, DocLinksStart, NotificationsStart } from 'src/core/public';
+import type { NotificationsStart } from 'src/core/public';
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { APIKeysAPIClient } from '../api_keys_api_client';
@@ -39,9 +39,7 @@ import { InvalidateProvider } from './invalidate_provider';
 
 interface Props {
   notifications: NotificationsStart;
-  docLinks: DocLinksStart;
   apiKeysAPIClient: PublicMethodsOf<APIKeysAPIClient>;
-  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 interface State {
@@ -131,7 +129,7 @@ export class APIKeysGridPage extends Component<Props, State> {
     if (!areApiKeysEnabled) {
       return (
         <EuiPageContent>
-          <NotEnabled docLinks={this.props.docLinks} />
+          <NotEnabled />
         </EuiPageContent>
       );
     }
@@ -139,11 +137,7 @@ export class APIKeysGridPage extends Component<Props, State> {
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
       return (
         <EuiPageContent>
-          <EmptyPrompt
-            isAdmin={isAdmin}
-            docLinks={this.props.docLinks}
-            navigateToApp={this.props.navigateToApp}
-          />
+          <EmptyPrompt isAdmin={isAdmin} />
         </EuiPageContent>
       );
     }

@@ -17,19 +17,24 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 import { JSONRuleEditor } from './json_rule_editor';
 import { EuiCodeEditor } from '@elastic/eui';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AllRule, AnyRule, FieldRule, ExceptAnyRule, ExceptAllRule } from '../../model';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 describe('JSONRuleEditor', () => {
+  const renderView = (props: React.ComponentProps<typeof JSONRuleEditor>) => {
+    const { docLinks } = coreMock.createStart();
+    return mountWithIntl(
+      <KibanaContextProvider services={{ docLinks }}>
+        <JSONRuleEditor {...props} />
+      </KibanaContextProvider>
+    );
+  };
+
   it('renders an empty rule set', () => {
-    const props = {
-      rules: null,
-      onChange: jest.fn(),
-      onValidityChange: jest.fn(),
-      docLinks: coreMock.createStart().docLinks,
-    };
-    const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
+    const props = { rules: null, onChange: jest.fn(), onValidityChange: jest.fn() };
+    const wrapper = renderView(props);
 
     expect(props.onChange).not.toHaveBeenCalled();
     expect(props.onValidityChange).not.toHaveBeenCalled();
@@ -49,9 +54,8 @@ describe('JSONRuleEditor', () => {
       ]),
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
-      docLinks: coreMock.createStart().docLinks,
     };
-    const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
+    const wrapper = renderView(props);
 
     const { value } = wrapper.find(EuiCodeEditor).props();
     expect(JSON.parse(value as string)).toEqual({
@@ -79,13 +83,8 @@ describe('JSONRuleEditor', () => {
   });
 
   it('notifies when input contains invalid JSON', () => {
-    const props = {
-      rules: null,
-      onChange: jest.fn(),
-      onValidityChange: jest.fn(),
-      docLinks: coreMock.createStart().docLinks,
-    };
-    const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
+    const props = { rules: null, onChange: jest.fn(), onValidityChange: jest.fn() };
+    const wrapper = renderView(props);
 
     const allRule = JSON.stringify(new AllRule().toRaw());
     act(() => {
@@ -98,13 +97,8 @@ describe('JSONRuleEditor', () => {
   });
 
   it('notifies when input contains an invalid rule set, even if it is valid JSON', () => {
-    const props = {
-      rules: null,
-      onChange: jest.fn(),
-      onValidityChange: jest.fn(),
-      docLinks: coreMock.createStart().docLinks,
-    };
-    const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
+    const props = { rules: null, onChange: jest.fn(), onValidityChange: jest.fn() };
+    const wrapper = renderView(props);
 
     const invalidRule = JSON.stringify({
       all: [
@@ -126,13 +120,8 @@ describe('JSONRuleEditor', () => {
   });
 
   it('fires onChange when a valid rule set is provided after being previously invalidated', () => {
-    const props = {
-      rules: null,
-      onChange: jest.fn(),
-      onValidityChange: jest.fn(),
-      docLinks: coreMock.createStart().docLinks,
-    };
-    const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
+    const props = { rules: null, onChange: jest.fn(), onValidityChange: jest.fn() };
+    const wrapper = renderView(props);
 
     const allRule = JSON.stringify(new AllRule().toRaw());
     act(() => {
