@@ -52,6 +52,7 @@ import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_
 import { IEvent } from '../../../event_log/server';
 import { AuditLogger, EventOutcome } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
+import { AlertInstanceStatusValues } from '../../common/alert_instance_summary';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
@@ -111,6 +112,7 @@ export interface FindOptions extends IndexType {
 export interface FindInstancesOptions extends FindOptions {
   dateStart?: string;
   dateEnd?: string;
+  instanceStatus?: AlertInstanceStatusValues;
 }
 
 export interface AggregateOptions extends IndexType {
@@ -451,11 +453,11 @@ export class AlertsClient {
   public async findAlertsInstancesSummaries<Params extends AlertTypeParams = never>({
     options: { fields, ...options } = {},
   }: { options?: FindInstancesOptions } = {}): Promise<FindInstanceResult<Params>> {
+    const { page, perPage, total, data: findAlertsResult } = await this.find(
+      omit(options, 'dateStart', 'dateEnd', 'instanceStatus')
+    );
     try {
-      // 1. get all alerts by filter options
-      const findAlertsResult = await this.find(omit(options, 'dateStart', 'dateEnd', 'page', 'perPage'));
-      // TODO: fix paging issue
-      const alertIds = findAlertsResult.data.map((alertObject) => alertObject.id);
+      const alertIds = findAlertsResult.map((alertObject) => alertObject.id);
       const dateNow = new Date();
       const parsedDateStart = parseDate(options.dateStart, 'dateStart', dateNow);
       const parsedDateEnd = parseDate(options.dateStart, 'dateEnd', dateNow);
@@ -464,31 +466,50 @@ export class AlertsClient {
 
       this.logger.debug(`getInstances(): search the event log for alerts by ids=[${alertIds}]`);
 
-      const eventsResults = await eventLogClient.findEventsBySavedObjectIds('alert', alertIds, {
-        page: 1,
-        per_page: 10000,
-        start: parsedDateStart.toISOString(),
-        end: parsedDateEnd.toISOString(),
-        sort_order: 'desc',
-      });
-      const events = eventsResults.data;
-      const extendedAlertsSummary = alertsSummaryResults.data.map((alertSummary) => {
-        const alert = findAlertsResult.data.find((alert) => alert.id === alertSummary.id)
+      const alertsSummaryResults = await eventLogClient.findEventsBySavedObjectIds(
+        'alert',
+        alertIds,
+        {
+          page: 1,
+          per_page: 10000,
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          sort_order: 'desc',
+          status: options.instanceStatus,
+        }
+      );
+      // paging
+      const events: IEvent[] = alertsSummaryResults.data;
+      const extendedAlertsSummary = findAlertsResult.map((alert: SanitizedAlert) => {
+        const alertEvents = events.filter(
+          (alertEvent) =>
+            alertEvent?.kibana?.saved_objects?.find((so) => alert.id === so!.id) !== undefined
+        );
         return {
-        ...alertInstanceSummaryFromEventLog({
-          alert,
-          alertSummary.events,
-          dateStart: parsedDateStart.toISOString(),
-          dateEnd: dateNow.toISOString(),
-        }),
-        params:
-      } 
+          ...alertInstanceSummaryFromEventLog({
+            alert,
+            events: alertEvents,
+            dateStart: parsedDateStart.toISOString(),
+            dateEnd: dateNow.toISOString(),
+          }),
+          params: alert.params,
+        };
       });
-      return;
+      return {
+        page,
+        perPage,
+        total,
+        data: extendedAlertsSummary,
+      };
     } catch (err) {
       this.logger.debug(`alertsClient.getInstances(): error: ${err.message}`);
     }
-
+    return {
+      page,
+      perPage,
+      total: 0,
+      data: [],
+    };
   }
 
   public async find<Params extends AlertTypeParams = never>({

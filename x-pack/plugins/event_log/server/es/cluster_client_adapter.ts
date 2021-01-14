@@ -200,7 +200,7 @@ export class ClusterClientAdapter {
     type: string,
     ids: string[],
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    { page, per_page: perPage, start, end, sort_field, sort_order }: FindOptionsType
+    { page, per_page: perPage, start, end, sort_field, sort_order, status }: FindOptionsType
   ): Promise<QueryEventsBySavedObjectResult> {
     const defaultNamespaceQuery = {
       bool: {
@@ -255,6 +255,24 @@ export class ClusterClientAdapter {
                           },
                         },
                         namespaceQuery,
+                      ],
+                    },
+                  },
+                },
+              },
+              status && {
+                nested: {
+                  path: 'kibana.alerting',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.alerting.status': {
+                              value: status,
+                            },
+                          },
+                        },
                       ],
                     },
                   },
