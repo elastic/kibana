@@ -24,6 +24,8 @@ import {
   getContentSourcePath,
 } from '../../../../routes';
 
+import { clearFlashMessages } from '../../../../../shared/flash_messages';
+
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
 
@@ -44,9 +46,7 @@ interface DisplaySettingsProps {
 }
 
 export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
-  const { initializeDisplaySettings, setServerData, resetDisplaySettingsState } = useActions(
-    DisplaySettingsLogic
-  );
+  const { initializeDisplaySettings, setServerData } = useActions(DisplaySettingsLogic);
 
   const {
     dataLoading,
@@ -62,7 +62,7 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
 
   useEffect(() => {
     initializeDisplaySettings();
-    return resetDisplaySettingsState;
+    return clearFlashMessages;
   }, []);
 
   useEffect(() => {
