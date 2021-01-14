@@ -279,6 +279,7 @@ kibana_vars=(
     xpack.task_manager.monitored_aggregated_stats_refresh_rate
     xpack.task_manager.monitored_stats_running_average_window
     xpack.task_manager.monitored_task_execution_thresholds
+    xpack.task_manager.version_conflict_threshold
     telemetry.allowChangingOptInStatus
     telemetry.enabled
     telemetry.optIn
