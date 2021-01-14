@@ -7,9 +7,7 @@
 import { setMockValues, setMockActions } from '../../../../__mocks__';
 
 import React from 'react';
-
 import { shallow } from 'enzyme';
-
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { CustomizationModal } from './customization_modal';
