@@ -169,6 +169,7 @@ export const transactionLatencyChatsRoute = createRoute({
       transactionName,
       setup,
       searchAggregatedTransactions,
+      logger,
     };
 
     const [latencyData, anomalyTimeseries] = await Promise.all([
@@ -176,13 +177,11 @@ export const transactionLatencyChatsRoute = createRoute({
         ...options,
         latencyAggregationType: latencyAggregationType as LatencyAggregationType,
       }),
-      transactionName
-        ? undefined
-        : getAnomalySeries(options).catch((error) => {
-            logger.warn(`Unable to retrieve anomalies for latency charts.`);
-            logger.error(error);
-            return undefined;
-          }),
+      getAnomalySeries(options).catch((error) => {
+        logger.warn(`Unable to retrieve anomalies for latency charts.`);
+        logger.error(error);
+        return undefined;
+      }),
     ]);
 
     const { latencyTimeseries, overallAvgDuration } = latencyData;
