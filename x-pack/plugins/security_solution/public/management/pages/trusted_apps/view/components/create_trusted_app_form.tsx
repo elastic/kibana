@@ -27,6 +27,7 @@ import {
 import { defaultConditionEntry, defaultNewTrustedApp } from '../../store/builders';
 import { OS_TITLES } from '../translations';
 import { LogicalConditionBuilder, LogicalConditionBuilderProps } from './logical_condition';
+import { PolicySelect } from './policy_select';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -396,6 +397,9 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             maxLength={256}
             data-test-subj={getTestId('descriptionField')}
           />
+        </EuiFormRow>
+        <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
+          <PolicySelect />
         </EuiFormRow>
       </EuiForm>
     );
