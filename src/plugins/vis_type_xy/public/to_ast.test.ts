@@ -19,7 +19,7 @@
 
 import { Vis } from '../../visualizations/public';
 import { buildExpression } from '../../expressions/public';
-import { sampleAreaVis } from '../../vis_type_vislib/public/sample_vis.test.mocks';
+import { sampleAreaVis } from './sample_vis.test.mocks';
 
 import { toExpressionAst } from './to_ast';
 import { VisParams } from './types';
