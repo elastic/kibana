@@ -9,13 +9,15 @@ import { getAgentIconKey } from './get_agent_icon';
 const examples = {
   DotNet: 'dotnet', // Test for case sensitivity
   dotnet: 'dotnet',
+  erlang: 'erlang',
   go: 'go',
   java: 'java',
   'js-base': 'rum',
   nodejs: 'nodejs',
+  ocaml: 'ocaml',
   'opentelemetry/cpp': 'opentelemetry',
   'opentelemetry/dotnet': 'dotnet',
-  'opentelemetry/erlang': 'opentelemetry',
+  'opentelemetry/erlang': 'erlang',
   'opentelemetry/go': 'go',
   'opentelemetry/java': 'java',
   'opentelemetry/nodejs': 'nodejs',

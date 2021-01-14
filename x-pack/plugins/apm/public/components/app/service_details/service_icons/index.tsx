@@ -94,10 +94,7 @@ export function ServiceIcons({ serviceName }: Props) {
     [selectedIconPopover, serviceName, start, end, uiFilters]
   );
 
-  const isLoading =
-    !icons &&
-    (iconsFetchStatus === FETCH_STATUS.LOADING ||
-      iconsFetchStatus === FETCH_STATUS.PENDING);
+  const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
 
   if (isLoading) {
     return <EuiLoadingSpinner data-test-subj="loading" />;
