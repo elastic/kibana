@@ -43,17 +43,15 @@ export function Correlations() {
 
   return (
     <>
-      <>
-        <EuiButton
-          onClick={() => {
-            setIsFlyoutVisible(true);
-          }}
-        >
-          View significant terms
-        </EuiButton>
+      <EuiButton
+        onClick={() => {
+          setIsFlyoutVisible(true);
+        }}
+      >
+        View significant terms
+      </EuiButton>
 
-        <EuiSpacer size="s" />
-      </>
+      <EuiSpacer size="s" />
 
       {isFlyoutVisible && (
         <EuiPortal>
