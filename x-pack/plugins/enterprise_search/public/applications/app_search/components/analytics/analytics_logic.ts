@@ -14,11 +14,11 @@ import { EngineLogic } from '../engine';
 
 import { AnalyticsData, QueryDetails } from './types';
 
-export interface AnalyticsValues extends AnalyticsData, QueryDetails {
+interface AnalyticsValues extends AnalyticsData, QueryDetails {
   dataLoading: boolean;
 }
 
-export interface AnalyticsActions {
+interface AnalyticsActions {
   onAnalyticsUnavailable(): void;
   onAnalyticsDataLoad(data: AnalyticsData): AnalyticsData;
   onQueryDataLoad(data: QueryDetails): QueryDetails;
