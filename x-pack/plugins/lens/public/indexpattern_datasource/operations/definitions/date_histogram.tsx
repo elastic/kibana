@@ -356,7 +356,7 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
       button={
         <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
           {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoHelpText', {
-            defaultMessage: 'How does it work?',
+            defaultMessage: 'How date histogram works',
           })}
         </HelpPopoverButton>
       }
@@ -375,7 +375,7 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
-          defaultMessage="**Lens** automatically chooses an interval for you by dividing the specified time range by the 
+          defaultMessage="Lens automatically chooses an interval for you by dividing the specified time range by the 
                   {targetBarSetting} advanced setting. The calculation tries to present “nice” time interval buckets. The maximum 
                   number of bars is set by the {maxBarSetting} value."
           values={{

@@ -34,14 +34,14 @@ const GranularityHelpPopover = () => {
       button={
         <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
           {i18n.translate('xpack.lens.indexPattern.ranges.granularityHelpText', {
-            defaultMessage: 'How does it work?',
+            defaultMessage: 'How interval granularity works',
           })}
         </HelpPopoverButton>
       }
       closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}
       title={i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverTitle', {
-        defaultMessage: 'How does interval granularity work?',
+        defaultMessage: 'How granularity interval works',
       })}
     >
       <p>

@@ -178,7 +178,7 @@ const MovingAveragePopup = () => {
       button={
         <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
           {i18n.translate('xpack.lens.indexPattern.movingAverage.helpText', {
-            defaultMessage: 'How does it work?',
+            defaultMessage: 'How moving average works',
           })}
         </HelpPopoverButton>
       }
@@ -198,7 +198,7 @@ const MovingAveragePopup = () => {
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.longerExplanation"
-          defaultMessage="To calculate the moving average, **Lens** uses the mean of the window and applies a skip policy for gaps.
+          defaultMessage="To calculate the moving average, Lens uses the mean of the window and applies a skip policy for gaps.
             For missing values, the bucket is skipped and the calculation is performed on the next value."
         />
       </p>
@@ -206,7 +206,7 @@ const MovingAveragePopup = () => {
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.tableExplanation"
-          defaultMessage="For example, given the data [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], we can calculate a simple moving average with windows size of 5 as follows:"
+          defaultMessage="For example, given the data [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], we can calculate a simple moving average with a window size of 5 as follows:"
         />
       </p>
 
@@ -223,11 +223,23 @@ const MovingAveragePopup = () => {
           defaultMessage="The window does not include the current value."
         />
       </p>
+      <p>
+        <FormattedMessage
+          id="xpack.lens.indexPattern.movingAverage.windowInitialPartial"
+          defaultMessage="For the initial part of the series the window is partial, until it reaches the requested number of items. For instance with a window size of 5:"
+        />
+      </p>
+      <ul>
+        <li>(1 + 2) / 2 = 1.5</li>
+        <li>(1 + 2 + 3) / 3 = 2</li>
+        <li>(1 + 2 + 3 + 4) / 4 = 2.5</li>
+        <li>(1 + 2 + 3 + 4 + 5) / 5 = 3</li>
+      </ul>
 
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.limitations"
-          defaultMessage=" The moving average is supported only for date histograms."
+          defaultMessage="Note the first moving average value start from the second item onward. The moving average is supported only for date histograms."
         />
       </p>
     </HelpPopover>
