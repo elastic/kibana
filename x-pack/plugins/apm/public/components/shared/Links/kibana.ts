@@ -5,7 +5,14 @@
  */
 
 import { IBasePath } from '../../../../../../../src/core/public';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export function getUpgradeAssistantHref(basePath: IBasePath) {
   return basePath.prepend('/app/management/stack/upgrade_assistant');
+}
+
+export function useUpgradeAssistantHref() {
+  const { core } = useApmPluginContext();
+
+  return getUpgradeAssistantHref(core.http.basePath);
 }

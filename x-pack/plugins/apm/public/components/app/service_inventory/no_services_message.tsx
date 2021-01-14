@@ -11,8 +11,7 @@ import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink'
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ErrorStatePrompt } from '../../shared/ErrorStatePrompt';
-import { getUpgradeAssistantHref } from '../../shared/Links/kibana';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 
 interface Props {
   // any data submitted from APM agents found (not just in the given time range)
@@ -21,7 +20,7 @@ interface Props {
 }
 
 export function NoServicesMessage({ historicalDataFound, status }: Props) {
-  const { core } = useApmPluginContext();
+  const upgradeAssistantHref = useUpgradeAssistantHref();
 
   if (status === 'loading') {
     return <LoadingStatePrompt />;
@@ -69,7 +68,7 @@ export function NoServicesMessage({ historicalDataFound, status }: Props) {
               defaultMessage:
                 'You may also have old data that needs to be migrated.',
             })}{' '}
-            <EuiLink href={getUpgradeAssistantHref(core.http.basePath)}>
+            <EuiLink href={upgradeAssistantHref}>
               {i18n.translate('xpack.apm.servicesTable.UpgradeAssistantLink', {
                 defaultMessage:
                   'Learn more by visiting the Kibana Upgrade Assistant',
