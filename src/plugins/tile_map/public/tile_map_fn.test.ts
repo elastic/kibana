@@ -17,11 +17,10 @@
  * under the License.
  */
 
-// eslint-disable-next-line
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 import { createTileMapFn } from './tile_map_fn';
 
-jest.mock('../../maps_legacy/public', () => ({
+jest.mock('./utils', () => ({
   convertToGeoJson: jest.fn().mockReturnValue({
     featureCollection: {
       type: 'FeatureCollection',
@@ -36,7 +35,7 @@ jest.mock('../../maps_legacy/public', () => ({
   }),
 }));
 
-import { convertToGeoJson } from '../../maps_legacy/public';
+import { convertToGeoJson } from './utils';
 
 describe('interpreter/functions#tilemap', () => {
   const fn = functionWrapper(createTileMapFn());
@@ -79,18 +78,14 @@ describe('interpreter/functions#tilemap', () => {
     jest.clearAllMocks();
   });
 
-  it('returns an object with the correct structure', () => {
-    const actual = fn(
-      context,
-      { visConfig: JSON.stringify(visConfig) },
-      { logDatatable: jest.fn() }
-    );
+  it('returns an object with the correct structure', async () => {
+    const actual = await fn(context, { visConfig: JSON.stringify(visConfig) });
     expect(actual).toMatchSnapshot();
   });
 
-  it('calls response handler with correct values', () => {
+  it('calls response handler with correct values', async () => {
     const { geohash, metric, geocentroid } = visConfig.dimensions;
-    fn(context, { visConfig: JSON.stringify(visConfig) }, { logDatatable: jest.fn() });
+    await fn(context, { visConfig: JSON.stringify(visConfig) });
     expect(convertToGeoJson).toHaveBeenCalledTimes(1);
     expect(convertToGeoJson).toHaveBeenCalledWith(context, {
       geohash,

@@ -17,14 +17,7 @@
  * under the License.
  */
 
-import { geohashColumns, decodeGeoHash } from './decode_geo_hash';
-
-test('geohashColumns', () => {
-  expect(geohashColumns(1)).toBe(8);
-  expect(geohashColumns(2)).toBe(8 * 4);
-  expect(geohashColumns(3)).toBe(8 * 4 * 8);
-  expect(geohashColumns(4)).toBe(8 * 4 * 8 * 4);
-});
+import { decodeGeoHash } from './decode_geo_hash';
 
 test('decodeGeoHash', () => {
   expect(decodeGeoHash('drm3btev3e86')).toEqual({

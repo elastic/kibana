@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from './validation_telemetry_service';
+export { convertToGeoJson } from './convert_to_geojson';
+export { geoContains } from './decode_geo_hash';
