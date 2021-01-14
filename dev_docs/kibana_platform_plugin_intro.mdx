@@ -149,7 +149,7 @@ considerations related to how plugins integrate with core APIs and APIs exposed 
 The various independent domains that make up core are represented by a series of services. Those services expose public interfaces that are provided to all plugins. 
 Services expose different features at different parts of their lifecycle. We describe the lifecycle of core services and plugins with specifically-named functions on the service definition.
 
-Kibana has three lifecycles: setup, start, and stop. Each plugin’s setup functions is called sequentially while Kibana is setting up on the server or when it is being loaded in the browser. The start functions are called sequentially after setup has been completed for all plugins. The stop functions are called sequentially while Kibana is gracefully shutting down the server or when the browser tab or window is being closed.
+Kibana has three lifecycles: setup, start, and stop. Each plugin’s setup function is called sequentially while Kibana is setting up on the server or when it is being loaded in the browser. The start functions are called sequentially after setup has been completed for all plugins. The stop functions are called sequentially while Kibana is gracefully shutting down the server or when the browser tab or window is being closed.
 
 The table below explains how each lifecycle relates to the state of Kibana.
 
@@ -231,4 +231,3 @@ export class AnotherPlugin {
 [2] These manually constructed types should then be used to specify the type of the second argument to the plugin.
 
 [3] Notice that the type for the setup and start lifecycles are different. Plugin lifecycle functions can only access the APIs that are exposed during that lifecycle.
-
