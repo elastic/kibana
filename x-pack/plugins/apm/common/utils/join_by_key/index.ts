@@ -9,11 +9,11 @@ import { isEqual, pull, merge, castArray } from 'lodash';
 /**
  * Joins a list of records by a given key. Key can be any type of value, from
  * strings to plain objects, as long as it is present in all records. `isEqual`
- * is used for comparing keys. 
- * 
+ * is used for comparing keys.
+ *
  * UnionToIntersection is needed to get all keys of union types, see below for
  * example.
- * 
+ *
  const agentNames = [{ serviceName: '', agentName: '' }];
  const transactionRates = [{ serviceName: '', transactionsPerMinute: 1 }];
  const flattened = joinByKey(

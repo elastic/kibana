@@ -4963,13 +4963,6 @@
         }
       }
     },
-    "tsvb-validation": {
-      "properties": {
-        "failed_validations": {
-          "type": "long"
-        }
-      }
-    },
     "vis_type_vega": {
       "properties": {
         "vega_lib_specs_total": {
