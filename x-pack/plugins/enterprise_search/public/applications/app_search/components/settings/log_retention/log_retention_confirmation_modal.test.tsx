@@ -10,9 +10,9 @@ import { setMockActions, setMockValues } from '../../../../__mocks__';
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { LogRetentionConfirmationModal } from './log_retention_confirmation_modal';
-import { LogRetentionOptions } from './types';
+import { LogRetentionOptions } from '../../log_retention';
 import { GenericConfirmationModal } from './generic_confirmation_modal';
+import { LogRetentionConfirmationModal } from './log_retention_confirmation_modal';
 
 describe('<LogRetentionConfirmationModal />', () => {
   const actions = {
