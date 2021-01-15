@@ -42,5 +42,9 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
       loadTestFile(require.resolve('./csm/has_rum_data.ts'));
       loadTestFile(require.resolve('./csm/page_load_dist.ts'));
     });
+
+    describe('Correlations', function () {
+      loadTestFile(require.resolve('./correlations/slow_transactions'));
+    });
   });
 }

@@ -11,9 +11,6 @@
 
 import { IconType, ToolTipPositions } from '@elastic/eui';
 import { CommonProps } from '@elastic/eui/src/components/common';
-import moment from 'moment';
-import { MouseEventHandler, ReactType, Ref } from 'react';
-import { JsonObject } from '../common/typed_json';
 
 declare module '@elastic/eui' {
   interface EuiFormControlLayoutIconProps {
