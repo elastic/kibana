@@ -178,14 +178,14 @@ const MovingAveragePopup = () => {
       button={
         <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
           {i18n.translate('xpack.lens.indexPattern.movingAverage.helpText', {
-            defaultMessage: 'How moving average works',
+            defaultMessage: 'How it works',
           })}
         </HelpPopoverButton>
       }
       closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}
       title={i18n.translate('xpack.lens.indexPattern.movingAverage.titleHelp', {
-        defaultMessage: 'How does moving average work?',
+        defaultMessage: 'How moving average works',
       })}
     >
       <p>

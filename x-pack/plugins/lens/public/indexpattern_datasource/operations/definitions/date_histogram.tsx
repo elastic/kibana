@@ -356,14 +356,14 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
       button={
         <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
           {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoHelpText', {
-            defaultMessage: 'How date histogram works',
+            defaultMessage: 'How it works',
           })}
         </HelpPopoverButton>
       }
       closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}
       title={i18n.translate('xpack.lens.indexPattern.dateHistogram.titleHelp', {
-        defaultMessage: 'How does the auto date histogram work?',
+        defaultMessage: 'How auto date histogram works',
       })}
     >
       <p>
