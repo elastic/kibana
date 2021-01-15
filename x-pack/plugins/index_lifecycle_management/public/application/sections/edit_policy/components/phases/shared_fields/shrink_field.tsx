@@ -7,12 +7,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTextColor } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 
-import { UseField, NumericField } from '../../../../../../shared_imports';
-
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { i18nTexts } from '../../../i18n_texts';
 
 import { LearnMoreLink, DescribedFormRow } from '../../';
+import { StyledFieldNumber } from './styled_field_number';
 
 interface Props {
   phase: 'hot' | 'warm';
@@ -44,7 +43,6 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
       switchProps={{
         'aria-controls': 'shrinkContent',
         'data-test-subj': `${phase}-shrinkSwitch`,
-        label: i18nTexts.editPolicy.shrinkLabel,
         'aria-label': i18nTexts.editPolicy.shrinkLabel,
         initialValue: Boolean(policy.phases[phase]?.actions?.shrink),
       }}
@@ -53,15 +51,11 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
       <div id="shrinkContent" aria-live="polite" role="region">
         <EuiFlexGroup>
           <EuiFlexItem>
-            <UseField
+            <StyledFieldNumber
               path={path}
-              component={NumericField}
-              componentProps={{
-                fullWidth: false,
-                euiFieldProps: {
-                  'data-test-subj': `${phase}-selectedPrimaryShardCount`,
-                  min: 1,
-                },
+              fieldNumberProps={{
+                'data-test-subj': `${phase}-primaryShardCount`,
+                min: 1,
               }}
             />
           </EuiFlexItem>

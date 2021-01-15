@@ -12,9 +12,11 @@ import {
   EuiSwitch,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18nTexts } from '../../i18n_texts';
 
 export interface SwitchProps
-  extends Omit<EuiSwitchProps, 'children' | 'checked' | 'value' | 'onChange'> {
+  extends Omit<EuiSwitchProps, 'children' | 'checked' | 'value' | 'onChange' | 'label'> {
+  label?: string;
   /**
    * use initialValue to specify an uncontrolled component
    */
@@ -63,10 +65,15 @@ export const DescribedFormRow: FunctionComponent<Props> = ({
     if (!switchProps) {
       return null;
     }
-    const { onChange, checked, initialValue, ...restSwitchProps } = switchProps;
+    const { onChange, checked, initialValue, label, ...restSwitchProps } = switchProps;
+
+    const onOffLabel = isContentVisible
+      ? i18nTexts.editPolicy.onLabel
+      : i18nTexts.editPolicy.offLabel;
 
     return (
       <EuiSwitch
+        label={label ? label : onOffLabel}
         {...restSwitchProps}
         checked={isContentVisible}
         onChange={(e) => {

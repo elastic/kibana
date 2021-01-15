@@ -8,13 +8,14 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 
-import { UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
+import { UseField, CheckBoxField } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { LearnMoreLink, DescribedFormRow } from '../../';
+import { StyledFieldNumber } from './styled_field_number';
 
 interface Props {
   phase: 'hot' | 'warm';
@@ -52,28 +53,21 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
         'aria-label': i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
         'data-test-subj': `${phase}-forceMergeSwitch`,
         'aria-controls': 'forcemergeContent',
-        label: i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
         initialValue: initialToggleValue,
       }}
     >
       <EuiSpacer />
       <div id="forcemergeContent" aria-live="polite" role="region">
-        <UseField
-          key={`phases.${phase}.actions.forcemerge.max_num_segments`}
+        <StyledFieldNumber
           path={`phases.${phase}.actions.forcemerge.max_num_segments`}
-          component={NumericField}
-          componentProps={{
-            fullWidth: false,
-            euiFieldProps: {
-              'data-test-subj': `${phase}-selectedForceMergeSegments`,
-              min: 1,
-            },
+          fieldNumberProps={{
+            'data-test-subj': `${phase}-selectedForceMergeSegments`,
+            min: 1,
           }}
         />
         <UseField
-          key={`_meta.${phase}.bestCompression`}
           path={`_meta.${phase}.bestCompression`}
-          component={ToggleField}
+          component={CheckBoxField}
           componentProps={{
             hasEmptyLabelSpace: true,
             euiFieldProps: {

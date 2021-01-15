@@ -23,7 +23,7 @@ const learnMoreLink = (
     text={
       <FormattedMessage
         id="xpack.indexLifecycleMgmt.editPolicy.learnAboutShardAllocationLink"
-        defaultMessage="Learn about shard allocation"
+        defaultMessage="shard allocation"
       />
     }
     docPath="modules-cluster.html#cluster-shard-allocation-settings"
@@ -63,7 +63,7 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes, i
         <p>
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.customOption.description"
-            defaultMessage="Use node attributes to control shard allocation. {learnMoreLink}."
+            defaultMessage="Use node attributes to control {learnMoreLink}."
             values={{ learnMoreLink }}
           />
         </p>

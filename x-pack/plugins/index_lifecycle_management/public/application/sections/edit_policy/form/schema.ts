@@ -54,7 +54,6 @@ export const schema: FormSchema<FormInternal> = {
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
-        helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
       },
       readonlyEnabled: {
         defaultValue: false,
@@ -80,7 +79,6 @@ export const schema: FormSchema<FormInternal> = {
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
-        helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
       },
       dataTierAllocationType: {
         label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
@@ -239,7 +237,7 @@ export const schema: FormSchema<FormInternal> = {
         allocate: {
           number_of_replicas: {
             label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel', {
-              defaultMessage: 'Number of replicas (optional)',
+              defaultMessage: 'Number of replicas',
             }),
             validations: [
               {

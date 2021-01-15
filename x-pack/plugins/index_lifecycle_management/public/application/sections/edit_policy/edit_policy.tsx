@@ -260,15 +260,15 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
 
               <HotPhase />
 
-              <EuiHorizontalRule />
+              <EuiSpacer />
 
               <WarmPhase />
 
-              <EuiHorizontalRule />
+              <EuiSpacer />
 
               <ColdPhase />
 
-              <EuiHorizontalRule />
+              <EuiSpacer />
 
               <DeletePhase />
 

@@ -75,6 +75,12 @@ export const i18nTexts = {
         defaultMessage: 'Searchable snapshot repository',
       }
     ),
+    onLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.onLabel', {
+      defaultMessage: 'On',
+    }),
+    offLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.offLabel', {
+      defaultMessage: 'Off',
+    }),
     errors: {
       numberRequired: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.errors.numberRequiredErrorMessage',
@@ -169,6 +175,42 @@ export const i18nTexts = {
           defaultMessage: 'A snapshot repository name is required.',
         }
       ),
+    },
+    titles: {
+      hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseTitle', {
+        defaultMessage: 'Hot phase',
+      }),
+      warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseTitle', {
+        defaultMessage: 'Warm phase',
+      }),
+      cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseTitle', {
+        defaultMessage: 'Cold phase',
+      }),
+    },
+    descriptions: {
+      hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescription', {
+        defaultMessage:
+          'Ingest and process frequently queried data. But at a slightly higher cost.',
+      }),
+      warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescription', {
+        defaultMessage:
+          'Ingest and process frequently queried data. But at a slightly higher cost.',
+      }),
+      cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescription', {
+        defaultMessage:
+          'Ingest and process frequently queried data. But at a slightly higher cost.',
+      }),
+    },
+    options: {
+      hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseOptionsList', {
+        defaultMessage: 'Rollover, Force Merge, Shrink, Read Only',
+      }),
+      warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseOptionsList', {
+        defaultMessage: 'Replicas, Shrink, Force Merge, Read Only, Data Allocation',
+      }),
+      cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseOptionsList', {
+        defaultMessage: 'Searchable Snapshot, Replicas, Freeze, Data Allocation',
+      }),
     },
   },
 };
