@@ -45,6 +45,11 @@ export class VectorTileLayer extends TileLayer {
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+    const id = this.getSource().getTileLayerId();
+    if (!id) {
+      return;
+    }
+
     const nextMeta = { tileLayerId: this.getSource().getTileLayerId() };
     const canSkipSync = this._canSkipSync({
       prevDataRequest: this.getSourceDataRequest(),
@@ -56,7 +61,7 @@ export class VectorTileLayer extends TileLayer {
 
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     try {
-      startLoading(SOURCE_DATA_REQUEST_ID, requestToken, dataFilters);
+      startLoading(SOURCE_DATA_REQUEST_ID, requestToken, { dataFilters, ...nextMeta });
       const styleAndSprites = await this.getSource().getVectorStyleSheetAndSpriteMeta(isRetina());
       const spriteSheetImageData = await loadSpriteSheetImageData(styleAndSprites.spriteMeta.png);
       const data = {
