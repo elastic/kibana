@@ -86,7 +86,7 @@ import {
 } from '../tasks/alerts_detection_rules';
 import { createCustomRuleActivated } from '../tasks/api_calls/rules';
 import { createTimeline } from '../tasks/api_calls/timelines';
-import { cleanKibana } from '../tasks/common';
+import { cleanKibana, reload } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRule,
@@ -101,7 +101,6 @@ import {
 } from '../tasks/create_new_rule';
 import { saveEditedRule, waitForKibana } from '../tasks/edit_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
@@ -216,7 +215,7 @@ describe('Custom detection rules creation', () => {
   });
 });
 
-describe.skip('Custom detection rules deletion and edition', () => {
+describe('Custom detection rules deletion and edition', () => {
   context('Deletion', () => {
     beforeEach(() => {
       cleanKibana();
@@ -226,8 +225,7 @@ describe.skip('Custom detection rules deletion and edition', () => {
       createCustomRuleActivated(newRule, 'rule1');
       createCustomRuleActivated(newOverrideRule, 'rule2');
       createCustomRuleActivated(existingRule, 'rule3');
-      refreshPage();
-      goToManageAlertsDetectionRules();
+      reload();
     });
 
     it('Deletes one rule', () => {
@@ -301,8 +299,7 @@ describe.skip('Custom detection rules deletion and edition', () => {
       goToManageAlertsDetectionRules();
       waitForAlertsIndexToBeCreated();
       createCustomRuleActivated(existingRule, 'rule1');
-      refreshPage();
-      goToManageAlertsDetectionRules();
+      reload();
     });
 
     it('Allows a rule to be edited', () => {

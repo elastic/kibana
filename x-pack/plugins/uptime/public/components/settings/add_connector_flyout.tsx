@@ -11,6 +11,10 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public';
 import { getConnectorsAction } from '../../state/alerts/alerts';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useFetcher } from '../../../../observability/public';
+import { fetchActionTypes } from '../../state/api/alerts';
+
+import { ActionTypeId } from './types';
 
 interface Props {
   focusInput: () => void;
@@ -19,6 +23,17 @@ interface Props {
 interface KibanaDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
+
+export const ALLOWED_ACTION_TYPES: ActionTypeId[] = [
+  '.slack',
+  '.pagerduty',
+  '.server-log',
+  '.index',
+  '.teams',
+  '.servicenow',
+  '.jira',
+  '.webhook',
+];
 
 export const AddConnectorFlyout = ({ focusInput }: Props) => {
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -30,6 +45,8 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
 
   const dispatch = useDispatch();
 
+  const { data: actionTypes } = useFetcher(() => fetchActionTypes(), []);
+
   const ConnectorAddFlyout = useMemo(
     () =>
       getAddConnectorFlyout({
@@ -39,9 +56,12 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
           setAddFlyoutVisibility(false);
           focusInput();
         },
+        actionTypes: (actionTypes ?? []).filter((actionType) =>
+          ALLOWED_ACTION_TYPES.includes(actionType.id as ActionTypeId)
+        ),
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [actionTypes]
   );
 
   return (
