@@ -8,7 +8,7 @@ import path from 'path';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
 
@@ -59,12 +59,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('with data loaded', function () {
-        const adJobId = 'fq_single_permission';
-        const dfaOutlierJobId = 'iph_outlier_permission';
-        const calendarId = 'calendar_permission';
-        const eventDescription = 'calendar_event_permission';
-        const filterId = 'filter_permission';
-        const filterItems = ['filter_item_permission'];
+        const adJobId = 'fq_single_a11y';
+        const dfaOutlierJobId = 'iph_outlier_a11y';
+        const calendarId = 'calendar_a11y';
+        const eventDescription = 'calendar_event_a11y';
+        const filterId = 'filter_a11y';
+        const filterItems = ['filter_item_a11y'];
         const fqIndexPattern = 'ft_farequote';
         const ecIndexPattern = 'ft_module_sample_ecommerce';
         const ihpIndexPattern = 'ft_ihp_outlier';
@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
-        it('anomaly detection create single metric pick fields step', async () => {
+        it('anomaly detection create single metric job pick fields step', async () => {
           await ml.jobWizardCommon.advanceToPickFieldsSection();
           await ml.testExecution.logTestStep('job creation selects field and aggregation');
           await ml.jobWizardCommon.selectAggAndField(adJobAggAndFieldIdentifier, true);
@@ -192,12 +192,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
-        it('anomaly detection create single metric validation step', async () => {
+        it('anomaly detection create single metric job validation step', async () => {
           await ml.jobWizardCommon.advanceToValidationSection();
           await a11y.testAppSnapshot();
         });
 
-        it('anomaly detection create single metric summary step', async () => {
+        it('anomaly detection create single metric job summary step', async () => {
           await ml.jobWizardCommon.advanceToSummarySection();
           await a11y.testAppSnapshot();
         });
@@ -263,18 +263,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
-        it('data frame analytics create job additional options step', async () => {
+        it('data frame analytics create job additional options step for outlier job', async () => {
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
           await a11y.testAppSnapshot();
         });
 
-        it('data frame analytics create job additional options step', async () => {
+        it('data frame analytics create job additional options step for outlier job', async () => {
           await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
           await ml.dataFrameAnalyticsCreation.setJobId(dfaJobId);
           await a11y.testAppSnapshot();
         });
 
-        it('data frame analytics create job create step', async () => {
+        it('data frame analytics create job create step for outlier job', async () => {
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
           await a11y.testAppSnapshot();
         });
