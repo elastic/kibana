@@ -19,6 +19,7 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../actions/server';
 import { ActionTypeId } from '../../components/settings/types';
+import { Ping } from '../../../common/runtime_types/ping';
 
 export const SLACK_ACTION_ID: ActionTypeId = '.slack';
 export const PAGER_DUTY_ACTION_ID: ActionTypeId = '.pagerduty';
@@ -31,11 +32,20 @@ export const WEBHOOK_ACTION_ID: ActionTypeId = '.webhook';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
+const getRecoveryMessage = (selectedMonitor: Ping) => {
+  return i18n.translate('xpack.uptime.alerts.monitorStatus.recoveryMessage', {
+    defaultMessage: 'Monitor {monitor} with url {url} has recovered with status Up',
+    values: {
+      monitor: selectedMonitor?.monitor?.name || selectedMonitor?.monitor?.id,
+      url: selectedMonitor?.url?.full,
+    },
+  });
+};
+
 export function populateAlertActions({
   defaultActions,
   monitorId,
-  monitorName,
-  monitorUrl,
+  selectedMonitor,
 }: NewAlertParams) {
   const actions: AlertAction[] = [];
   defaultActions.forEach((aId) => {
@@ -51,19 +61,15 @@ export function populateAlertActions({
       actionTypeId: aId.actionTypeId,
       group: 'recovered',
       params: {
-        message: i18n.translate('xpack.uptime.alerts.monitorStatus.recoveryMessage', {
-          defaultMessage: 'Monitor {monitor} with {url} has recovered with status Up',
-          values: {
-            monitor: monitorName || monitorId,
-            url: monitorUrl,
-          },
-        }),
+        message: getRecoveryMessage(selectedMonitor),
       },
     };
 
     switch (aId.actionTypeId) {
       case PAGER_DUTY_ACTION_ID:
-        action.params = getPagerDutyActionParams(monitorId);
+        action.params = getPagerDutyActionParams(selectedMonitor);
+        recoveredAction.params = getPagerDutyActionParams(selectedMonitor, true);
+        actions.push(recoveredAction);
         break;
       case SERVER_LOG_ACTION_ID:
         action.params = getServerLogActionParams();
@@ -126,9 +132,16 @@ function getWebhookActionParams(): WebhookActionParams {
   };
 }
 
-function getPagerDutyActionParams(monitorId: string): PagerDutyActionParams {
+function getPagerDutyActionParams(selectedMonitor: Ping, recover = false): PagerDutyActionParams {
+  if (recover) {
+    return {
+      dedupKey: selectedMonitor.monitor.id + MONITOR_STATUS.id,
+      eventAction: 'resolve',
+      summary: getRecoveryMessage(selectedMonitor),
+    };
+  }
   return {
-    dedupKey: monitorId + MONITOR_STATUS.id,
+    dedupKey: selectedMonitor.monitor.id + MONITOR_STATUS.id,
     eventAction: 'trigger',
     severity: 'error',
     summary: MonitorStatusTranslations.defaultActionMessage,

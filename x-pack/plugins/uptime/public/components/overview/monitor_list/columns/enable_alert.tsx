@@ -20,13 +20,14 @@ import {
 import { MONITOR_ROUTE } from '../../../../../common/constants';
 import { DefineAlertConnectors } from './define_connectors';
 import { DISABLE_STATUS_ALERT, ENABLE_STATUS_ALERT } from './translations';
+import { Ping } from '../../../../../common/runtime_types/ping';
 
 interface Props {
   monitorId: string;
-  monitorName?: string;
+  selectedMonitor?: Ping;
 }
 
-export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
+export const EnableMonitorAlert = ({ monitorId, selectedMonitor }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { settings } = useSelector(selectDynamicSettings);
@@ -65,7 +66,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
       createAlertAction.get({
         defaultActions,
         monitorId,
-        monitorName,
+        selectedMonitor,
       })
     );
     setIsLoading(true);
