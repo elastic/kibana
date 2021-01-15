@@ -9,10 +9,10 @@
   },
   "include": [
     "server/**/*",
-    "public/**/*",
     "scripts/**/*",
-    "generated/**/*",
-    "common/*"
+    "generated/*",
+    "common/*",
+    "../../package.json"
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
