@@ -5,31 +5,8 @@
  */
 
 import { LogicMounter } from '../../../__mocks__/kea.mock';
-import { mockHttpValues } from '../../../__mocks__';
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: {
-    values: { http: mockHttpValues.http },
-  },
-}));
-import { HttpLogic } from '../../../shared/http';
 
-jest.mock('../../../shared/kibana', () => ({
-  KibanaLogic: { values: { navigateToUrl: jest.fn() } },
-}));
-import { KibanaLogic } from '../../../shared/kibana';
-
-jest.mock('../../../shared/flash_messages', () => ({
-  clearFlashMessages: jest.fn(),
-  setQueuedSuccessMessage: jest.fn(),
-  setSuccessMessage: jest.fn(),
-  flashAPIErrors: jest.fn(),
-}));
-import {
-  clearFlashMessages,
-  setQueuedSuccessMessage,
-  setSuccessMessage,
-  flashAPIErrors,
-} from '../../../shared/flash_messages';
+import { mockFlashMessageHelpers, mockHttpValues, mockKibanaValues } from '../../../__mocks__';
 
 import { configuredSources, oauthApplication } from '../../__mocks__/content_sources.mock';
 
@@ -37,6 +14,14 @@ import { ORG_UPDATED_MESSAGE, OAUTH_APP_UPDATED_MESSAGE } from '../../constants'
 import { SettingsLogic } from './settings_logic';
 
 describe('SettingsLogic', () => {
+  const { http } = mockHttpValues;
+  const { navigateToUrl } = mockKibanaValues;
+  const {
+    clearFlashMessages,
+    flashAPIErrors,
+    setSuccessMessage,
+    setQueuedSuccessMessage,
+  } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SettingsLogic);
   const ORG_NAME = 'myOrg';
   const defaultValues = {
@@ -100,19 +85,17 @@ describe('SettingsLogic', () => {
       it('calls API and sets values', async () => {
         const setServerPropsSpy = jest.spyOn(SettingsLogic.actions, 'setServerProps');
         const promise = Promise.resolve(configuredSources);
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(promise);
         SettingsLogic.actions.initializeSettings();
 
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/settings'
-        );
+        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/settings');
         await promise;
         expect(setServerPropsSpy).toHaveBeenCalledWith(configuredSources);
       });
 
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(promise);
 
         SettingsLogic.actions.initializeSettings();
         try {
@@ -130,19 +113,17 @@ describe('SettingsLogic', () => {
           'onInitializeConnectors'
         );
         const promise = Promise.resolve(serverProps);
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(promise);
         SettingsLogic.actions.initializeConnectors();
 
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/settings/connectors'
-        );
+        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/settings/connectors');
         await promise;
         expect(onInitializeConnectorsSpy).toHaveBeenCalledWith(serverProps);
       });
 
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(promise);
 
         SettingsLogic.actions.initializeConnectors();
         try {
@@ -159,16 +140,13 @@ describe('SettingsLogic', () => {
         SettingsLogic.actions.onOrgNameInputChange(NAME);
         const setUpdatedNameSpy = jest.spyOn(SettingsLogic.actions, 'setUpdatedName');
         const promise = Promise.resolve({ organizationName: NAME });
-        (HttpLogic.values.http.put as jest.Mock).mockReturnValue(promise);
+        http.put.mockReturnValue(promise);
 
         SettingsLogic.actions.updateOrgName();
 
-        expect(HttpLogic.values.http.put).toHaveBeenCalledWith(
-          '/api/workplace_search/org/settings/customize',
-          {
-            body: JSON.stringify({ name: NAME }),
-          }
-        );
+        expect(http.put).toHaveBeenCalledWith('/api/workplace_search/org/settings/customize', {
+          body: JSON.stringify({ name: NAME }),
+        });
         await promise;
         expect(setSuccessMessage).toHaveBeenCalledWith(ORG_UPDATED_MESSAGE);
         expect(setUpdatedNameSpy).toHaveBeenCalledWith({ organizationName: NAME });
@@ -176,7 +154,7 @@ describe('SettingsLogic', () => {
 
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
-        (HttpLogic.values.http.put as jest.Mock).mockReturnValue(promise);
+        http.put.mockReturnValue(promise);
 
         SettingsLogic.actions.updateOrgName();
         try {
@@ -195,13 +173,13 @@ describe('SettingsLogic', () => {
           'setUpdatedOauthApplication'
         );
         const promise = Promise.resolve({ oauthApplication });
-        (HttpLogic.values.http.put as jest.Mock).mockReturnValue(promise);
+        http.put.mockReturnValue(promise);
         SettingsLogic.actions.setOauthApplication(oauthApplication);
         SettingsLogic.actions.updateOauthApplication();
 
         expect(clearFlashMessages).toHaveBeenCalled();
 
-        expect(HttpLogic.values.http.put).toHaveBeenCalledWith(
+        expect(http.put).toHaveBeenCalledWith(
           '/api/workplace_search/org/settings/oauth_application',
           {
             body: JSON.stringify({
@@ -216,7 +194,7 @@ describe('SettingsLogic', () => {
 
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
-        (HttpLogic.values.http.put as jest.Mock).mockReturnValue(promise);
+        http.put.mockReturnValue(promise);
 
         SettingsLogic.actions.updateOauthApplication();
         try {
@@ -233,17 +211,17 @@ describe('SettingsLogic', () => {
 
       it('calls API and sets values', async () => {
         const promise = Promise.resolve({});
-        (HttpLogic.values.http.delete as jest.Mock).mockReturnValue({});
+        http.delete.mockReturnValue({});
         SettingsLogic.actions.deleteSourceConfig(SERVICE_TYPE, NAME);
 
         await promise;
-        expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith('/settings/connectors');
+        expect(navigateToUrl).toHaveBeenCalledWith('/settings/connectors');
         expect(setQueuedSuccessMessage).toHaveBeenCalled();
       });
 
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
-        (HttpLogic.values.http.delete as jest.Mock).mockReturnValue(promise);
+        http.delete.mockReturnValue(promise);
 
         SettingsLogic.actions.deleteSourceConfig(SERVICE_TYPE, NAME);
         try {
