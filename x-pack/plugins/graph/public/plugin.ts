@@ -87,6 +87,7 @@ export class GraphPlugin
           pluginInitializerContext: this.initializerContext,
           licensing: pluginsStart.licensing,
           core: coreStart,
+          coreStart,
           navigation: pluginsStart.navigation,
           data: pluginsStart.data,
           kibanaLegacy: pluginsStart.kibanaLegacy,

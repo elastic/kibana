@@ -54,6 +54,7 @@ import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public'
 export interface GraphDependencies {
   pluginInitializerContext: PluginInitializerContext;
   core: CoreStart;
+  coreStart: CoreStart;
   element: HTMLElement;
   appBasePath: string;
   capabilities: Record<string, boolean | Record<string, boolean>>;
