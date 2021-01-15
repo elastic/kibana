@@ -7,10 +7,9 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { getColorStats } from '../color_stats';
-
 export function TransformWizardProvider({ getService }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
+  const canvasElement = getService('canvasElement');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -203,12 +202,10 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
             await testSubjects.existOrFail(`mlDataGridChart-${index}-histogram`);
 
             if (expected.colorStats !== undefined) {
-              const chartWrapper = await testSubjects.find(`mlDataGridChart-${index}-histogram`);
-              const imageData = await chartWrapper.getImageData(
-                `[data-test-subj="mlDataGridChart-${index}-histogram"] .echCanvasRenderer`
+              const actualColorStats = await canvasElement.getColorStats(
+                `[data-test-subj="mlDataGridChart-${index}-histogram"] .echCanvasRenderer`,
+                expected.colorStats
               );
-
-              const actualColorStats = getColorStats(imageData, expected.colorStats);
 
               expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
                 true,
