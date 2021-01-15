@@ -20,27 +20,28 @@ developer tools. The Kibana platform is a blank canvas, just waiting for a devel
 
 ## Plugins vs The Platform
 
-Kibana provides the most basic and fundmental tools neccessary for building a plugin with the "Core" platform. The Core platform is not a plugin itself.
-There is however, a lot of platform functionality provided by plugins that are not a part of Core. For example, the 
-"data" plugin provides basic utilities to search, query, and filter data in Elasticsearch. This code is not part of Core, but is still very fundamental for many plugins,
+The core platform provides the most basic and fundamental tools neccessary for building a plugin. The Core platform is not a plugin itself, although
+there are some plugins that provide platform functionality. For example, the 
+<DocLink id="kibDataPlugin" text="data plugin"/> provides basic utilities to search, query, and filter data in Elasticsearch. 
+This code is not part of Core, but is still fundamental for building a plugin,
  and we strongly encourage using this service over querying Elasticsearch directly.
 
 <DocCallOut title="Three kinds of public services">
 We currently have three kinds of public services:
 
- - platform services built in `core`
- - platform services built in plugins, that are useful for every plugin (e.g. "data").
- - shared services built in plugins, that are only relevant for only a few, specific plugins (e.g. "presentation utils"). 
+ - platform services provided by `core`
+ - platform services provided by plugins, that can, and should, be used by every plugin (e.g. <DocLink id="kibDataPlugin" text="data"/>) .
+ - shared services provided by plugins, that are only relevant for only a few, specific plugins (e.g. "presentation utils"). 
 
-Two common questions we've encountered are:
+Two common questions we encountere are:
 
-1. What services are platform services? 
+1. Which services are platform services? 
 2. What is the difference between platform code supplied by core, and platform code supplied by plugins?
 
-We don't have great answers to those questions today. Currently, the best we can do is:
+We don't have great answers to those questions today. Currently, the best answers we have are:
 
-1. Platform plugins are _usually_ plugins that are managed by the Platform Team, but we are starting to see some exceptions. We should also have an answer that does not involve team structure.
-2. `core` code contains the most fundamental, and stable, services needed for plugin development.
+1. Platform plugins are _usually_ plugins that are managed by the Platform Team, but we are starting to see some exceptions.
+2. `core` code contains the most fundamental and stable services needed for plugin development. Everything else goes in a plugin.
 
 We will continue to focus on adding clarity around these types of services and what developers can expect from each.
 
@@ -52,9 +53,9 @@ When the Kibana platform and plugin infrastructure was built, we thought of two 
 code needed to build plugins inside core.
 
 In reality, we ended up with many platform-like services living outside of core, with no (short term) intention of moving them. We highly encourage plugin developers to use
-them, so we call them part of the platform, but this ends up creating confusion.
+them, so we consider them part of platform services.
 
-When we built our platform system, we also thought we'd end up with a handful of large plugin outside core. Users could turn certain plugins off, to minimize the code
+When we built our platform system, we also thought we'd end up with only a handful of large plugins outside core. Users could turn certain plugins off, to minimize the code
  footprint and speed up Kibana.
 
 In reality, our plugin model ended up being used like micro-services. Plugins are the only form of encapsulation we provide developers, and they liked it! However, we ended
@@ -71,7 +72,7 @@ We recognize the need to better clarify the relationship between core functional
 </DocCallOut>
 </DocAccordion>
 
-The difference between core functionality and functionality supplied by plugins, is how it is accessed. Core is
+The main difference between core functionality and functionality supplied by plugins, is in how it is accessed. Core is
 passed to plugins as the first parameter to their `start` and `setup` lifecycle functions, while plugin supplied functionality is passed as the
 second parameter.  Plugin dependencies must be declared explicitly inside the `kibana.json` file. Core functionality is always provided. Read the 
 section on [how plugins interact with eachother and core](#how-plugins-interact-with-each-other-and-core) for more information.
