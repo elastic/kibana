@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMemo, useEffect } from 'react';
-import useSetState from 'react-use/lib/useSetState';
+import { useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import useSetState from 'react-use/lib/useSetState';
 import { esKuery } from '../../../../../../../src/plugins/data/public';
-import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useSubscription } from '../../../utils/use_observable';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { LogSourceConfigurationProperties } from '../log_source';
+import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
 
 interface LogStreamProps {
   sourceId: string;
@@ -56,6 +58,8 @@ const EMPTY_DATA = {
   bottomCursor: null,
 };
 
+const LOG_ENTRIES_CHUNK_SIZE = 200;
+
 export function useLogStream({
   sourceId,
   startTimestamp,
@@ -84,10 +88,12 @@ export function useLogStream({
   }, [prevEndTimestamp, endTimestamp, setState]);
 
   const parsedQuery = useMemo(() => {
-    return query
-      ? JSON.stringify(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query)))
-      : null;
+    return query ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query)) : undefined;
   }, [query]);
+
+  const serializedQuery = useMemo(() => {
+    return parsedQuery ? JSON.stringify(parsedQuery) : undefined;
+  }, [parsedQuery]);
 
   // Callbacks
   const [entriesPromise, fetchEntries] = useTrackedPromise(
@@ -102,7 +108,7 @@ export function useLogStream({
             sourceId,
             startTimestamp,
             endTimestamp,
-            query: parsedQuery,
+            query: serializedQuery,
             columns,
             ...fetchPosition,
           },
@@ -139,7 +145,7 @@ export function useLogStream({
             sourceId,
             startTimestamp,
             endTimestamp,
-            query: parsedQuery,
+            query: serializedQuery,
             before: state.topCursor,
           },
           services.http.fetch
@@ -173,12 +179,13 @@ export function useLogStream({
           return Promise.resolve({ data: EMPTY_DATA });
         }
 
+        fetchLogEntriesAfter(state.bottomCursor, LOG_ENTRIES_CHUNK_SIZE);
         return fetchLogEntries(
           {
             sourceId,
             startTimestamp,
             endTimestamp,
-            query: parsedQuery,
+            query: serializedQuery,
             after: state.bottomCursor,
           },
           services.http.fetch
@@ -197,6 +204,22 @@ export function useLogStream({
     },
     [sourceId, startTimestamp, endTimestamp, query, state.bottomCursor]
   );
+
+  const { fetchLogEntriesAfter, logEntriesAfterSearchResponse$ } = useFetchLogEntriesAfter({
+    sourceId,
+    startTimestamp,
+    endTimestamp,
+    query: parsedQuery,
+  });
+
+  useSubscription(logEntriesAfterSearchResponse$, {
+    next: ({ response }) => {
+      console.log('next after', response);
+    },
+    error: (err) => {
+      console.error(err);
+    },
+  });
 
   const loadingState = useMemo<LoadingState>(
     () => convertPromiseStateToLoadingState(entriesPromise.state),
