@@ -18,15 +18,13 @@
 #!/bin/bash
 
 #
-# Script to run multiple kibana instances in parallel.
+# Script to run multiple kibana nodes in parallel on the same machine.
 # Make sure to run the script from kibana root directory.
 #
-# NOTE: This is not run during CI but helps with manual testing
-#
-# bash parallel.sh <function> [options]
+# bash test/scripts/run_multiple_kibana_nodes.sh <function> [options]
 # functions:
-#   start [instances] - start multiple kibanas (3 default)
-#   es - run elasticsearch with 7.7.2 snapshot data
+#   start [instances] [args] - start multiple kibanas (3 default)
+#   es [args] - run elasticsearch
 #   tail - show logs of all kibanas
 #   kill - kills all started kibana processes
 #   clean - clean up nohup files
@@ -34,7 +32,6 @@
 #
 
 FN="$1"
-NUM="$2"
 
 if [ "${FN}" == "kill" ]; then
   echo "killing main processes"
@@ -56,7 +53,8 @@ if [ "${FN}" == "clean" ]; then
 fi
 
 if [ "${FN}" == "es" ]; then
-  yarn es snapshot --data-archive=src/core/server/saved_objects/migrationsv2/integration_tests/archives/7.7.2_xpack_100k_obj.zip
+  ARGS="$2"
+  yarn es snapshot $ARGS
   exit 0;
 fi
 
@@ -67,6 +65,8 @@ if [ "${FN}" == "kibana_index" ]; then
 fi
 
 if [ "${FN}" == "start" ]; then
+  NUM="$2"
+  ARGS="$3"
   if test ! "${NUM-}"; then
     NUM=3
   fi
@@ -77,7 +77,7 @@ if [ "${FN}" == "start" ]; then
     PORT="56${i}1"
     PROXY="56${i}3"
     echo "starting kibana on port $PORT"
-    nohup node scripts/kibana.js --dev.basePathProxyTarget=$PROXY --server.port=$PORT --migrations.enableV2=true --dev --no-watch --no-optimizer > nohup_$i.out &
+    nohup node scripts/kibana.js --dev.basePathProxyTarget=$PROXY --server.port=$PORT --dev --no-watch --no-optimizer --no-base-path $ARGS > nohup_$i.out &
     PROCESS_ID=$!
     echo "${PROCESS_ID}" >> processes.out
   done
