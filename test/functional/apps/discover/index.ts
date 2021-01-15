@@ -42,6 +42,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_filter_editor'));
     loadTestFile(require.resolve('./_errors'));
     loadTestFile(require.resolve('./_field_data'));
+    loadTestFile(require.resolve('./_field_data_with_fields_api'));
     loadTestFile(require.resolve('./_shared_links'));
     loadTestFile(require.resolve('./_sidebar'));
     loadTestFile(require.resolve('./_source_filters'));
@@ -51,6 +52,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_date_nanos'));
     loadTestFile(require.resolve('./_date_nanos_mixed'));
     loadTestFile(require.resolve('./_indexpattern_without_timefield'));
+    loadTestFile(require.resolve('./_discover_fields_api'));
     loadTestFile(require.resolve('./_data_grid'));
     loadTestFile(require.resolve('./_data_grid_context'));
     loadTestFile(require.resolve('./_data_grid_field_data'));
