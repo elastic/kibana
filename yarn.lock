@@ -8194,7 +8194,7 @@ bach@^1.0.0:
     async-settle "^1.0.0"
     now-and-later "^2.0.0"
 
-backport@^5.6.1:
+backport@^5.6.4:
   version "5.6.4"
   resolved "https://registry.yarnpkg.com/backport/-/backport-5.6.4.tgz#8cf4bc750b26d27161306858ee9069218ad7cdfd"
   integrity sha512-ZhuZcGxOBHBXFBCwweVf02b+KhWe0tdgg71jPSl583YYxlru+JBRH+TFM8S0J6/6YUuTWO81M9funjehJ18jqg==

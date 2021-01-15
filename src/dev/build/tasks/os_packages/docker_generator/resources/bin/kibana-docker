@@ -138,7 +138,17 @@ kibana_vars=(
     tilemap.url
     timelion.enabled
     vega.enableExternalUrls
+    xpack.actions.allowedHosts
+    xpack.actions.enabled
+    xpack.actions.enabledActionTypes
+    xpack.actions.preconfigured
     xpack.actions.proxyUrl
+    xpack.actions.proxyHeaders
+    xpack.actions.proxyRejectUnauthorizedCertificates
+    xpack.actions.rejectUnauthorized
+    xpack.alerts.healthCheck.interval
+    xpack.alerts.invalidateApiKeysTask.interval
+    xpack.alerts.invalidateApiKeysTask.removalDelay
     xpack.apm.enabled
     xpack.apm.serviceMapEnabled
     xpack.apm.ui.enabled
@@ -166,6 +176,9 @@ kibana_vars=(
     xpack.code.security.gitProtocolWhitelist
     xpack.encryptedSavedObjects.encryptionKey
     xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys
+    xpack.event_log.enabled
+    xpack.event_log.logEntries
+    xpack.event_log.indexEntries
     xpack.fleet.agents.elasticsearch.host
     xpack.fleet.agents.kibana.host
     xpack.fleet.agents.tlsCheckDisabled
@@ -255,6 +268,18 @@ kibana_vars=(
     xpack.security.loginHelp
     xpack.spaces.enabled
     xpack.spaces.maxSpaces
+    xpack.task_manager.enabled
+    xpack.task_manager.max_attempts
+    xpack.task_manager.poll_interval
+    xpack.task_manager.max_poll_inactivity_cycles
+    xpack.task_manager.request_capacity
+    xpack.task_manager.index
+    xpack.task_manager.max_workers
+    xpack.task_manager.monitored_stats_required_freshness
+    xpack.task_manager.monitored_aggregated_stats_refresh_rate
+    xpack.task_manager.monitored_stats_running_average_window
+    xpack.task_manager.monitored_task_execution_thresholds
+    xpack.task_manager.version_conflict_threshold
     telemetry.allowChangingOptInStatus
     telemetry.enabled
     telemetry.optIn
