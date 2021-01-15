@@ -44,12 +44,13 @@ export const toExpressionAst: VisToExpressionAst = async (vis, params) => {
   const ast = buildExpression([kibana, kibanaContext]);
   const expression = ast.toAst();
 
-  const visExpressionAst = await vis.type.toExpressionAst?.(vis, params);
-
-  if (visExpressionAst) {
-    // expand the expression chain with a particular visualization expression chain, if it exists
-    expression.chain.push(...visExpressionAst.chain);
+  if (!vis.type.toExpressionAst) {
+    throw new Error('Visualization type definition should have toExpressionAst function defined');
   }
+
+  const visExpressionAst = await vis.type.toExpressionAst(vis, params);
+  // expand the expression chain with a particular visualization expression chain, if it exists
+  expression.chain.push(...visExpressionAst.chain);
 
   return expression;
 };

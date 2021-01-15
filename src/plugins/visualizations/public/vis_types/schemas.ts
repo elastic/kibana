@@ -48,7 +48,6 @@ export class Schemas implements ISchemas {
           group: AggGroupNames.Buckets,
           title: schema.name,
           aggFilter: '*',
-          editor: false,
           params: [],
         });
 

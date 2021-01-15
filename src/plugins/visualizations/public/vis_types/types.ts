@@ -19,6 +19,7 @@
 import { IconType } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { Adapters } from 'src/plugins/inspector';
+// import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { IndexPattern, AggGroupNames, AggParam, AggGroupName } from '../../../data/public';
 import { Vis, VisParams, VisToExpressionAst } from '../types';
 
@@ -44,7 +45,6 @@ export interface ISchemas {
 
 export interface Schema {
   aggFilter: string[];
-  editor: boolean | string;
   group: AggGroupName;
   max: number;
   min: number;
@@ -57,6 +57,22 @@ export interface Schema {
   aggSettings?: any;
   disabled?: boolean;
   tooltip?: ReactNode;
+}
+
+interface DefaultEditorConfig {
+  // collections should moved directly into default editor in https://github.com/elastic/kibana/issues/84879
+  collections?: {
+    [key: string]: Array<{ text: string; value: string }> | Array<{ id: string; label: string }>;
+  };
+  enableAutoApply?: boolean;
+  defaultSize?: string;
+  optionsTemplate?: React.ComponentType<any>;
+  optionTabs?: Array<{ name: string; title: string; editor: React.ComponentType<any> }>;
+  schemas?: Array<Partial<Schema>>;
+}
+
+interface CustomEditorConfig {
+  editor: string;
 }
 
 /**
@@ -142,11 +158,9 @@ export interface VisTypeDefinition<TVisParams = unknown> {
   readonly setup?: (vis: Vis<TVisParams>) => Promise<Vis<TVisParams>>;
   hidden?: boolean;
 
-  readonly schemas?: ISchemas;
-
   readonly options?: Partial<VisTypeOptions>;
 
   // TODO: The following types still need to be refined properly.
-  readonly editorConfig?: Record<string, any>;
+  readonly editorConfig: DefaultEditorConfig | CustomEditorConfig;
   readonly visConfig: Record<string, any>;
 }

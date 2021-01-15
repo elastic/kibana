@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AggGroupNames } from '../../data/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 import { TagCloudOptions } from './components/tag_cloud_options';
@@ -89,7 +90,7 @@ export const tagCloudVisTypeDefinition = {
     optionsTemplate: TagCloudOptions,
     schemas: [
       {
-        group: 'metrics',
+        group: AggGroupNames.Metrics,
         name: 'metric',
         title: i18n.translate('visTypeTagCloud.vis.schemas.metricTitle', {
           defaultMessage: 'Tag size',
@@ -107,7 +108,7 @@ export const tagCloudVisTypeDefinition = {
         defaults: [{ schema: 'metric', type: 'count' }],
       },
       {
-        group: 'buckets',
+        group: AggGroupNames.Buckets,
         name: 'segment',
         title: i18n.translate('visTypeTagCloud.vis.schemas.segmentTitle', {
           defaultMessage: 'Tags',

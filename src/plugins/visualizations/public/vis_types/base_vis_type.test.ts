@@ -34,6 +34,9 @@ describe('BaseVisType', () => {
             type: 'expression',
             chain: [],
           }),
+          editorConfig: {
+            editor: 'custom',
+          },
         });
       }).toThrow();
     });
