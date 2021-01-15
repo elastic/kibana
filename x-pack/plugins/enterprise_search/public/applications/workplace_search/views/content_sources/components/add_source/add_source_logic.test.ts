@@ -5,7 +5,9 @@
  */
 
 import { resetContext } from 'kea';
-import { mockHttpValues } from '../../../../../__mocks__';
+
+import { mockHttpValues, expectedAsyncError } from '../../../../../__mocks__';
+
 jest.mock('../../../../../shared/http', () => ({
   HttpLogic: {
     values: { http: mockHttpValues.http },
@@ -296,11 +298,8 @@ describe('AddSourceLogic', () => {
           (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
 
           AddSourceLogic.actions.getSourceConfigData('github');
-          try {
-            await promise;
-          } catch {
-            // Do nothing
-          }
+          await expectedAsyncError(promise);
+
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
@@ -345,11 +344,8 @@ describe('AddSourceLogic', () => {
           (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
 
           AddSourceLogic.actions.getSourceConnectData('github', successCallback);
-          try {
-            await promise;
-          } catch {
-            // Do nothing
-          }
+          await expectedAsyncError(promise);
+
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
@@ -377,11 +373,8 @@ describe('AddSourceLogic', () => {
           (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
 
           AddSourceLogic.actions.getSourceReConnectData('github');
-          try {
-            await promise;
-          } catch {
-            // Do nothing
-          }
+          await expectedAsyncError(promise);
+
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
@@ -409,11 +402,8 @@ describe('AddSourceLogic', () => {
           (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
 
           AddSourceLogic.actions.getPreContentSourceConfigData('123');
-          try {
-            await promise;
-          } catch {
-            // Do nothing
-          }
+          await expectedAsyncError(promise);
+
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
@@ -485,11 +475,8 @@ describe('AddSourceLogic', () => {
           (HttpLogic.values.http.put as jest.Mock).mockReturnValue(promise);
 
           AddSourceLogic.actions.saveSourceConfig(true);
-          try {
-            await promise;
-          } catch {
-            // Do nothing
-          }
+          await expectedAsyncError(promise);
+
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
@@ -550,11 +537,8 @@ describe('AddSourceLogic', () => {
           (HttpLogic.values.http.post as jest.Mock).mockReturnValue(promise);
 
           AddSourceLogic.actions.createContentSource(serviceType, successCallback, errorCallback);
-          try {
-            await promise;
-          } catch {
-            // Do nothing
-          }
+          await expectedAsyncError(promise);
+
           expect(errorCallback).toHaveBeenCalled();
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
