@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { HotPhase } from './hot_phase';
-
-export { WarmPhase } from './warm_phase';
-
-export { ColdPhase } from './cold_phase';
-
-export { DeletePhase } from './delete_phase';
-
-export { Phase } from './phase';
+export { ActiveHighlight } from './active_highlight';
