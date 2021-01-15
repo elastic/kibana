@@ -696,7 +696,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        { shouldRemoveDimension: true, shouldReplaceDimension: true }
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
 
@@ -816,7 +816,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        { shouldRemoveDimension: true, shouldReplaceDimension: false }
+        { shouldRemoveDimension: false, shouldReplaceDimension: false }
       );
 
       const comboBox = wrapper
@@ -848,6 +848,46 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
         { shouldRemoveDimension: false, shouldReplaceDimension: true }
+      );
+    });
+
+    it('should clean up when transitioning from incomplete reference-based operations to field operation', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent
+          {...defaultProps}
+          state={getStateWithColumns({
+            ...defaultProps.state.layers.first.columns,
+            col2: {
+              label: 'Counter rate',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'counter_rate',
+              references: ['ref'],
+            },
+          })}
+          columnId={'col2'}
+        />
+      );
+
+      // Transition to a field operation (incompatible)
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimension-avg incompatible"]')
+        .simulate('click');
+
+      // Now check that the dimension gets cleaned up on state update
+      expect(setState).toHaveBeenCalledWith(
+        {
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              incompleteColumns: {
+                col2: { operationType: 'avg' },
+              },
+            },
+          },
+        },
+        { shouldRemoveDimension: true, shouldReplaceDimension: false }
       );
     });
 
@@ -1238,7 +1278,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      { shouldRemoveDimension: true, shouldReplaceDimension: false }
+      { shouldRemoveDimension: false, shouldReplaceDimension: false }
     );
 
     const comboBox = wrapper
