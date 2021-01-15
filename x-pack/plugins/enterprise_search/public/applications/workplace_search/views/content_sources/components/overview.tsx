@@ -9,7 +9,6 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
-  EuiAvatar,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -40,7 +39,6 @@ import {
 } from '../../../routes';
 
 import { AppLogic } from '../../../app_logic';
-import { User } from '../../../types';
 
 import { ComponentLoader } from '../../../components/shared/component_loader';
 import { CredentialItem } from '../../../components/shared/credential_item';
@@ -223,31 +221,6 @@ export const Overview: React.FC = () => {
   };
 
   const GroupsSummary = () => {
-    const GroupAvatars = ({ users }: { users: User[] }) => {
-      const MAX_USERS = 4;
-      return (
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
-          {users.slice(0, MAX_USERS).map((user) => (
-            <EuiFlexItem key={user.id}>
-              <EuiAvatar
-                size="s"
-                initials={user.initials}
-                name={user.name || user.initials}
-                imageUrl={user.pictureUrl || ''}
-              />
-            </EuiFlexItem>
-          ))}
-          {users.slice(MAX_USERS).length > 0 && (
-            <EuiFlexItem>
-              <EuiText color="subdued" size="xs">
-                <strong>+{users.slice(MAX_USERS).length}</strong>
-              </EuiText>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      );
-    };
-
     return !groups.length ? null : (
       <>
         <EuiText>
@@ -262,16 +235,9 @@ export const Overview: React.FC = () => {
                 data-test-subj="SourceGroupLink"
                 className="euiPanel--inset"
               >
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem>
-                    <EuiText size="s" className="eui-textTruncate">
-                      <strong>{group.name}</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <GroupAvatars users={group.users} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiText size="s" className="eui-textTruncate">
+                  <strong>{group.name}</strong>
+                </EuiText>
               </EuiPanelTo>
             </EuiFlexItem>
           ))}
