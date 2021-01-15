@@ -67,8 +67,8 @@ export class SecurityOssPlugin
           const { anonymousAccess } = await appState.getState();
           return anonymousAccess.accessURLParameters;
         },
-        async getCapabilities() {
-          return await core.http.get<Capabilities>(
+        getCapabilities() {
+          return core.http.get<Capabilities>(
             '/internal/security_oss/anonymous_access/capabilities'
           );
         },

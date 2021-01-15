@@ -62,7 +62,7 @@ export const setupAppStateRoute = ({
       const appState: AppState = {
         insecureClusterAlert: { displayAlert },
         anonymousAccess: {
-          isEnabled: !!anonymousAccessService?.isAnonymousAccessEnabled,
+          isEnabled: anonymousAccessService?.isAnonymousAccessEnabled ?? false,
           accessURLParameters: anonymousAccessService?.accessURLParameters
             ? Object.fromEntries(anonymousAccessService.accessURLParameters.entries())
             : null,

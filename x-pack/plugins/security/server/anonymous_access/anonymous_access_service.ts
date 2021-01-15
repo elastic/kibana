@@ -106,7 +106,7 @@ export class AnonymousAccessService {
         }
 
         // We should use credentials of the anonymous service account instead of credentials of the
-        // current user to figure out if the specified Saved Object type can be accessed anonymously.
+        // current user to get capabilities relevant to the anonymous access itself.
         const fakeAnonymousRequest = this.createFakeAnonymousRequest({
           authenticateRequest: !useDefaultCapabilities,
         });
