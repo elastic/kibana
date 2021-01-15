@@ -17,25 +17,25 @@
  * under the License.
  */
 
-import { BaseVisType } from './base_vis_type';
+import { VisToExpressionAst } from 'src/plugins/visualizations/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+} from '../../../../../src/plugins/expressions/public';
+import {
+  SelfChangingVisExpressionFunctionDefinition,
+  SelfChangingVisParams,
+} from './self_changing_vis_fn';
 
-describe('BaseVisType', () => {
-  describe('constructor', () => {
-    test('should throw if image and icon are missing', () => {
-      expect(() => {
-        new BaseVisType({
-          name: 'test',
-          title: 'test',
-          description: 'test',
-          visConfig: {
-            defaults: {},
-          },
-          toExpressionAst: () => ({
-            type: 'expression',
-            chain: [],
-          }),
-        });
-      }).toThrow();
-    });
-  });
-});
+export const toExpressionAst: VisToExpressionAst<SelfChangingVisParams> = (vis) => {
+  const { counter } = vis.params;
+
+  const selfChangingVis = buildExpressionFunction<SelfChangingVisExpressionFunctionDefinition>(
+    'self_changing_vis',
+    { counter }
+  );
+
+  const ast = buildExpression([selfChangingVis]);
+
+  return ast.toAst();
+};

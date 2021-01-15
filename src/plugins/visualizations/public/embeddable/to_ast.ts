@@ -22,6 +22,13 @@ import { buildExpression, buildExpressionFunction } from '../../../expressions/p
 
 import { VisToExpressionAst } from '../types';
 
+/**
+ * Creates an ast expression for a visualization based on kibana context (query, filters, timerange)
+ * including a saved search if the visualization is based on it.
+ * The expression also includes particular visualization expression ast if presented.
+ *
+ * @internal
+ */
 export const toExpressionAst: VisToExpressionAst = async (vis, params) => {
   const { savedSearchId, searchSource } = vis.data;
   const query = searchSource?.getField('query');
@@ -40,6 +47,7 @@ export const toExpressionAst: VisToExpressionAst = async (vis, params) => {
   const visExpressionAst = await vis.type.toExpressionAst?.(vis, params);
 
   if (visExpressionAst) {
+    // expand the expression chain with a particular visualization expression chain, if it exists
     expression.chain.push(...visExpressionAst.chain);
   }
 
