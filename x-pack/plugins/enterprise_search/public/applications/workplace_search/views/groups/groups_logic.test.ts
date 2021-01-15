@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+  expectedAsyncError,
+} from '../../../__mocks__';
 
-import { mockFlashMessageHelpers, mockHttpValues, expectedAsyncError } from '../../../__mocks__';
 import { DEFAULT_META } from '../../../shared/constants';
 import { JSON_HEADER as headers } from '../../../../../common/constants';
 
@@ -21,6 +25,7 @@ const TIMEOUT = 400;
 const delay = () => new Promise((resolve) => setTimeout(resolve, TIMEOUT));
 
 describe('GroupsLogic', () => {
+  const { mount } = new LogicMounter(GroupsLogic);
   const { http } = mockHttpValues;
   const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
 
@@ -31,8 +36,7 @@ describe('GroupsLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetContext({});
-    GroupsLogic.mount();
+    mount();
   });
 
   it('has expected default values', () => {

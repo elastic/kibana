@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
-
 import {
+  LogicMounter,
   mockKibanaValues,
   mockFlashMessageHelpers,
   mockHttpValues,
@@ -20,6 +19,7 @@ import { GroupLogic } from './group_logic';
 import { GROUPS_PATH } from '../../routes';
 
 describe('GroupLogic', () => {
+  const { mount } = new LogicMounter(GroupLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
   const {
@@ -37,8 +37,7 @@ describe('GroupLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetContext({});
-    GroupLogic.mount();
+    mount();
   });
 
   it('has expected default values', () => {

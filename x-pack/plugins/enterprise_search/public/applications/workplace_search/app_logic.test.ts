@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
+import { LogicMounter } from '../__mocks__';
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { AppLogic } from './app_logic';
 
 describe('AppLogic', () => {
+  const { mount } = new LogicMounter(AppLogic);
+
   beforeEach(() => {
-    resetContext({});
-    AppLogic.mount();
+    mount();
   });
 
   const DEFAULT_VALUES = {
