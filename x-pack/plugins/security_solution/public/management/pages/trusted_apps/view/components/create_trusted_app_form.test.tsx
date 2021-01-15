@@ -234,7 +234,10 @@ describe('When showing the Trusted App Create Form', () => {
       expect(formProps.onChange).toHaveBeenCalledWith({
         isValid: false,
         item: {
+          name: '',
           description: '',
+          os: OperatingSystem.WINDOWS,
+          effectScope: { type: 'global' },
           entries: [
             {
               field: ConditionEntryField.HASH,
@@ -243,8 +246,6 @@ describe('When showing the Trusted App Create Form', () => {
               value: '',
             },
           ],
-          name: '',
-          os: OperatingSystem.WINDOWS,
         },
       });
     });
@@ -289,7 +290,10 @@ describe('When showing the Trusted App Create Form', () => {
       expect(formProps.onChange).toHaveBeenLastCalledWith({
         isValid: true,
         item: {
+          name: 'Some Process',
           description: 'some description',
+          os: OperatingSystem.WINDOWS,
+          effectScope: { type: 'global' },
           entries: [
             {
               field: ConditionEntryField.HASH,
@@ -298,8 +302,6 @@ describe('When showing the Trusted App Create Form', () => {
               value: 'someHASH',
             },
           ],
-          name: 'Some Process',
-          os: OperatingSystem.WINDOWS,
         },
       });
     });
