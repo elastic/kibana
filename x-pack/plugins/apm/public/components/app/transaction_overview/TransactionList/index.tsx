@@ -126,7 +126,7 @@ export function TransactionList({ items, isLoading }: Props) {
                 'xpack.apm.transactionsTable.impactColumnDescription',
                 {
                   defaultMessage:
-                    '"Impact" is the latency affecting the service the most. It is calcualted as the product of latency and throughput',
+                    '"Impact" is the latency affecting end-users the most. It is calcualted as the product of latency and throughput',
                 }
               )}
             />
