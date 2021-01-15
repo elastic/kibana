@@ -24,8 +24,11 @@ describe('CalendarListsHeader', () => {
     kibana: {
       services: {
         docLinks: {
-          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-          DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+          links: {
+            ml: {
+              calendars: 'jest-metadata-mock-url',
+            },
+          },
         },
       },
     },

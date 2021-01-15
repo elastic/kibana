@@ -34,9 +34,16 @@
       },
       "technique": [
         {
-          "id": "T1015",
-          "name": "Accessibility Features",
-          "reference": "https://attack.mitre.org/techniques/T1015/"
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.008",
+              "name": "Accessibility Features",
+              "reference": "https://attack.mitre.org/techniques/T1546/008/"
+            }
+          ]
         }
       ]
     },
@@ -49,9 +56,16 @@
       },
       "technique": [
         {
-          "id": "T1015",
-          "name": "Accessibility Features",
-          "reference": "https://attack.mitre.org/techniques/T1015/"
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.008",
+              "name": "Accessibility Features",
+              "reference": "https://attack.mitre.org/techniques/T1546/008/"
+            }
+          ]
         }
       ]
     }
