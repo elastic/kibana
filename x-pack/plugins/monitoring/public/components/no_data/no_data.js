@@ -20,6 +20,7 @@ import {
   EuiTitle,
   EuiTextColor,
   EuiButtonEmpty,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toggleSetupMode } from '../../lib/setup_mode';
