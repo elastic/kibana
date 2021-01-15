@@ -5,7 +5,7 @@ exports[`isFullScreen 1`] = `
   className="mapScaleControl mapScaleControlFullScreen"
   style={
     Object {
-      "width": "57.043113184945184px",
+      "width": "62.7474245034397px",
     }
   }
 >
@@ -18,7 +18,7 @@ exports[`render 1`] = `
   className="mapScaleControl"
   style={
     Object {
-      "width": "57.043113184945184px",
+      "width": "62.7474245034397px",
     }
   }
 >
