@@ -45,6 +45,16 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   version?: string;
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /**
+   * A semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current
+   * Kibana version when the object is created. If this is set to a non-semver value, or it is set to a semver value greater than the
+   * current Kibana version, it will result in an error.
+   *
+   * @remarks
+   * Do not attempt to set this manually. It should only be used if you retrieved an existing object that had the `coreMigrationVersion`
+   * field set and you want to create it again.
+   */
+  coreMigrationVersion?: string;
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
@@ -71,6 +81,16 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   references?: SavedObjectReference[];
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /**
+   * A semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current
+   * Kibana version when the object is created. If this is set to a non-semver value, or it is set to a semver value greater than the
+   * current Kibana version, it will result in an error.
+   *
+   * @remarks
+   * Do not attempt to set this manually. It should only be used if you retrieved an existing object that had the `coreMigrationVersion`
+   * field set and you want to create it again.
+   */
+  coreMigrationVersion?: string;
   /** Optional ID of the original saved object, if this object's `id` was regenerated */
   originId?: string;
   /**

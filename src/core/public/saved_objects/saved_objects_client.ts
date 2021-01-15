@@ -49,6 +49,8 @@ export interface SavedObjectsCreateOptions {
   overwrite?: boolean;
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** A semver value that is used when upgrading objects between Kibana versions. */
+  coreMigrationVersion?: string;
   references?: SavedObjectReference[];
 }
 

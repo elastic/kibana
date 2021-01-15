@@ -2047,6 +2047,7 @@ export type SafeRouteMethod = 'get' | 'options';
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
+    coreMigrationVersion?: string;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectError" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -2130,6 +2131,7 @@ export interface SavedObjectsBaseOptions {
 export interface SavedObjectsBulkCreateObject<T = unknown> {
     // (undocumented)
     attributes: T;
+    coreMigrationVersion?: string;
     // (undocumented)
     id?: string;
     initialNamespaces?: string[];
@@ -2291,6 +2293,7 @@ export interface SavedObjectsCoreFieldMapping {
 
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
+    coreMigrationVersion?: string;
     id?: string;
     initialNamespaces?: string[];
     migrationVersion?: SavedObjectsMigrationVersion;

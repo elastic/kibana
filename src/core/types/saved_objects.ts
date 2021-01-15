@@ -93,6 +93,8 @@ export interface SavedObject<T = unknown> {
   references: SavedObjectReference[];
   /** {@inheritdoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** A semver value that is used when upgrading objects between Kibana versions. */
+  coreMigrationVersion?: string;
   /** Namespace(s) that this saved object exists in. This attribute is only used for multi-namespace saved object types. */
   namespaces?: string[];
   /**

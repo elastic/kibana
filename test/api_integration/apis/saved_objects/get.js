@@ -18,6 +18,7 @@
  */
 
 import expect from '@kbn/expect';
+import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -25,6 +26,12 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('get', () => {
+    let KIBANA_VERSION;
+
+    before(async () => {
+      KIBANA_VERSION = await getKibanaVersion(getService);
+    });
+
     describe('with kibana index', () => {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
@@ -40,6 +47,7 @@ export default function ({ getService }) {
               updated_at: '2017-09-21T18:51:23.794Z',
               version: resp.body.version,
               migrationVersion: resp.body.migrationVersion,
+              coreMigrationVersion: KIBANA_VERSION,
               attributes: {
                 title: 'Count of requests',
                 description: '',

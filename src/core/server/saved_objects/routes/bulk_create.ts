@@ -40,6 +40,7 @@ export const registerBulkCreateRoute = (router: IRouter, { coreUsageData }: Rout
             attributes: schema.recordOf(schema.string(), schema.any()),
             version: schema.maybe(schema.string()),
             migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+            coreMigrationVersion: schema.maybe(schema.string()),
             references: schema.maybe(
               schema.arrayOf(
                 schema.object({

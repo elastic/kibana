@@ -25,8 +25,17 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('find', () => {
+    let KIBANA_VERSION: string;
+
+    before(async () => {
+      KIBANA_VERSION = await kibanaServer.version.get();
+      expect(typeof KIBANA_VERSION).to.eql('string');
+      expect(KIBANA_VERSION.length).to.be.greaterThan(0);
+    });
+
     describe('with kibana index', () => {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
@@ -49,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
                     title: 'Count of requests',
                   },
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                  coreMigrationVersion: KIBANA_VERSION,
                   namespaces: ['default'],
                   references: [
                     {

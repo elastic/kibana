@@ -19,6 +19,7 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -26,6 +27,12 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('resolve', () => {
+    let KIBANA_VERSION: string;
+
+    before(async () => {
+      KIBANA_VERSION = await getKibanaVersion(getService);
+    });
+
     describe('with kibana index', () => {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
@@ -42,6 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
                 updated_at: '2017-09-21T18:51:23.794Z',
                 version: resp.body.saved_object.version,
                 migrationVersion: resp.body.saved_object.migrationVersion,
+                coreMigrationVersion: KIBANA_VERSION,
                 attributes: {
                   title: 'Count of requests',
                   description: '',

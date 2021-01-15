@@ -56,6 +56,7 @@ describe('SavedObjectsRepository', () => {
   const mockVersionProps = { _seq_no: 1, _primary_term: 1 };
   const mockVersion = encodeHitVersion(mockVersionProps);
 
+  const KIBANA_VERSION = '2.0.0';
   const CUSTOM_INDEX_TYPE = 'customIndex';
   const NAMESPACE_AGNOSTIC_TYPE = 'globalType';
   const MULTI_NAMESPACE_TYPE = 'shareableType';
@@ -154,7 +155,7 @@ describe('SavedObjectsRepository', () => {
 
   const documentMigrator = new DocumentMigrator({
     typeRegistry: registry,
-    kibanaVersion: '2.0.0',
+    kibanaVersion: KIBANA_VERSION,
     log: {},
   });
 
@@ -513,6 +514,7 @@ describe('SavedObjectsRepository', () => {
     const expectSuccessResult = (obj) => ({
       ...obj,
       migrationVersion: { [obj.type]: '1.1.1' },
+      coreMigrationVersion: KIBANA_VERSION,
       version: mockVersion,
       namespaces: obj.namespaces ?? [obj.namespace ?? 'default'],
       ...mockTimestampFields,
@@ -2154,6 +2156,7 @@ describe('SavedObjectsRepository', () => {
           references,
           namespaces: [namespace ?? 'default'],
           migrationVersion: { [type]: '1.1.1' },
+          coreMigrationVersion: KIBANA_VERSION,
         });
       });
     });
@@ -2738,6 +2741,7 @@ describe('SavedObjectsRepository', () => {
               'type',
               'references',
               'migrationVersion',
+              'coreMigrationVersion',
               'updated_at',
               'originId',
               'title',

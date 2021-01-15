@@ -1809,7 +1809,7 @@ export class SavedObjectsRepository {
     if (this._registry.isSingleNamespace(type)) {
       savedObject.namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
     }
-    return omit(savedObject, ['namespace', 'coreMigrationVersion']) as SavedObject<T>;
+    return omit(savedObject, ['namespace']) as SavedObject<T>;
   }
 
   /**
@@ -1930,6 +1930,7 @@ export class SavedObjectsRepository {
       attributes: doc._source[type],
       references: doc._source.references || [],
       migrationVersion: doc._source.migrationVersion,
+      coreMigrationVersion: doc._source.coreMigrationVersion,
     };
   }
 

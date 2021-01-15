@@ -18,6 +18,7 @@
  */
 
 import expect from '@kbn/expect';
+import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -25,6 +26,12 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('find', () => {
+    let KIBANA_VERSION;
+
+    before(async () => {
+      KIBANA_VERSION = await getKibanaVersion(getService);
+    });
+
     describe('with kibana index', () => {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
@@ -48,6 +55,7 @@ export default function ({ getService }) {
                   },
                   score: 0,
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                  coreMigrationVersion: KIBANA_VERSION,
                   namespaces: ['default'],
                   references: [
                     {
@@ -143,6 +151,7 @@ export default function ({ getService }) {
                       title: 'Count of requests',
                     },
                     migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                    coreMigrationVersion: KIBANA_VERSION,
                     namespaces: ['default'],
                     score: 0,
                     references: [
@@ -179,6 +188,7 @@ export default function ({ getService }) {
                       title: 'Count of requests',
                     },
                     migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                    coreMigrationVersion: KIBANA_VERSION,
                     namespaces: ['default'],
                     score: 0,
                     references: [
@@ -196,6 +206,7 @@ export default function ({ getService }) {
                     },
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                     migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                    coreMigrationVersion: KIBANA_VERSION,
                     namespaces: ['foo-ns'],
                     references: [
                       {
@@ -211,7 +222,6 @@ export default function ({ getService }) {
                   },
                 ],
               });
-              expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
             }));
       });
 
@@ -253,6 +263,7 @@ export default function ({ getService }) {
                       },
                     ],
                     migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                    coreMigrationVersion: KIBANA_VERSION,
                     updated_at: '2017-09-21T18:51:23.794Z',
                     version: 'WzIsMV0=',
                   },
