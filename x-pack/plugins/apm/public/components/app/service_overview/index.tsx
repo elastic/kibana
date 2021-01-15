@@ -52,6 +52,7 @@ export function ServiceOverview({
     'xpack.apm.serviceOverview.searchBar.transactionTypeLabel',
     { defaultMessage: 'Type: {transactionType}', values: { transactionType } }
   );
+  const isRumAgent = isRumAgentName(agentName);
 
   return (
     <AnnotationsContextProvider>
@@ -59,7 +60,7 @@ export function ServiceOverview({
         <SearchBar prepend={transactionTypeLabel} />
         <EuiPage>
           <EuiFlexGroup direction="column" gutterSize="s">
-            {isRumAgentName(agentName) && (
+            {isRumAgent && (
               <EuiFlexItem>
                 <UserExperienceCallout />
               </EuiFlexItem>
@@ -93,7 +94,7 @@ export function ServiceOverview({
                 gutterSize="s"
                 responsive={false}
               >
-                {!isRumAgentName(agentName) && (
+                {!isRumAgent && (
                   <EuiFlexItem grow={3}>
                     <TransactionErrorRateChart
                       height={chartHeight}
@@ -117,7 +118,7 @@ export function ServiceOverview({
                 <EuiFlexItem grow={3}>
                   <TransactionBreakdownChart showAnnotations={false} />
                 </EuiFlexItem>
-                {!isRumAgentName(agentName) && (
+                {!isRumAgent && (
                   <EuiFlexItem grow={7}>
                     <EuiPanel>
                       <ServiceOverviewDependenciesTable
@@ -128,7 +129,7 @@ export function ServiceOverview({
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {!isRumAgentName(agentName) && (
+            {!isRumAgent && (
               <EuiFlexItem>
                 <EuiPanel>
                   <ServiceOverviewInstancesTable serviceName={serviceName} />
