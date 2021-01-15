@@ -4,22 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../../../__mocks__/kea.mock';
 import '../../../../../__mocks__/shallow_useeffect.mock';
+
+import { mockKibanaValues } from '../../../../../__mocks__';
 
 import { setMockValues, setMockActions } from '../../../../../__mocks__';
 import { unmountHandler } from '../../../../../__mocks__/shallow_useeffect.mock';
 
 import { shallow } from 'enzyme';
-
-jest.mock('../../../../../shared/flash_messages', () => ({
-  FlashMessagesLogic: { actions: { clearFlashMessages: jest.fn() } },
-}));
-
-jest.mock('../../../../../shared/kibana', () => ({
-  KibanaLogic: { values: { navigateToUrl: jest.fn() } },
-}));
-import { KibanaLogic } from '../../../../../shared/kibana';
 
 import React from 'react';
 
@@ -35,6 +27,7 @@ import { FieldEditorModal } from './field_editor_modal';
 import { DisplaySettings } from './display_settings';
 
 describe('DisplaySettings', () => {
+  const { navigateToUrl } = mockKibanaValues;
   const { exampleDocuments, searchResultConfig } = exampleResult;
   const initializeDisplaySettings = jest.fn();
   const setServerData = jest.fn();
@@ -109,9 +102,7 @@ describe('DisplaySettings', () => {
       const tabsEl = wrapper.find(EuiTabbedContent);
       tabsEl.prop('onTabClick')!(tabs[0]);
 
-      expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(
-        '/sources/123/display_settings/'
-      );
+      expect(navigateToUrl).toHaveBeenCalledWith('/sources/123/display_settings/');
     });
 
     it('handles second tab click', () => {
@@ -119,9 +110,7 @@ describe('DisplaySettings', () => {
       const tabsEl = wrapper.find(EuiTabbedContent);
       tabsEl.prop('onTabClick')!(tabs[1]);
 
-      expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(
-        '/sources/123/display_settings/result_detail'
-      );
+      expect(navigateToUrl).toHaveBeenCalledWith('/sources/123/display_settings/result_detail');
     });
   });
 
