@@ -59,26 +59,6 @@ exports[`EnabledFeatures renders as expected 1`] = `
             values={Object {}}
           />
         </p>
-        <p>
-          <FormattedMessage
-            defaultMessage="If you wish to secure access to features, please {manageSecurityRoles}."
-            id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"
-            values={
-              Object {
-                "manageSecurityRoles": <EuiLink
-                  data-test-subj="goToRoles"
-                  href="management"
-                >
-                  <FormattedMessage
-                    defaultMessage="manage security roles"
-                    id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
-                    values={Object {}}
-                  />
-                </EuiLink>,
-              }
-            }
-          />
-        </p>
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem>

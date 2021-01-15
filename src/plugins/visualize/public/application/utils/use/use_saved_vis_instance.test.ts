@@ -26,7 +26,8 @@ import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { VisualizeServices } from '../../types';
 import { VisualizeConstants } from '../../visualize_constants';
-import { setDefaultEditor } from '../../../services';
+import { setVisEditorsRegistry } from '../../../services';
+import { createVisEditorsRegistry } from '../../../vis_editors_registry';
 import { createEmbeddableStateTransferMock } from '../../../../../embeddable/public/mocks';
 
 const mockDefaultEditorControllerDestroy = jest.fn();
@@ -75,9 +76,13 @@ describe('useSavedVisInstance', () => {
   const eventEmitter = new EventEmitter();
 
   beforeEach(() => {
-    setDefaultEditor(
+    const registry = createVisEditorsRegistry();
+
+    registry.registerDefault(
       jest.fn().mockImplementation(() => ({ destroy: mockDefaultEditorControllerDestroy }))
     );
+
+    setVisEditorsRegistry(registry);
 
     mockServices = ({
       ...coreStartMock,

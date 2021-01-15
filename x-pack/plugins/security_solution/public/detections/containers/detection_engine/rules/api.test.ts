@@ -377,7 +377,7 @@ describe('Detections Rules API', () => {
       await deleteRules({ ids: ['mySuperRuleId', 'mySuperRuleId_II'] });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_delete', {
         body: '[{"id":"mySuperRuleId"},{"id":"mySuperRuleId_II"}]',
-        method: 'DELETE',
+        method: 'POST',
       });
     });
 
