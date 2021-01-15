@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+import { services } from '../../services';
+import { pageObjects } from '../../page_objects';
 
-require('../src/setup_node_env');
-require('../src/dev/run_sasslint');
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

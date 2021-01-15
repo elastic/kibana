@@ -19,6 +19,7 @@ import {
   // TIMELINE_FILTER,
   TIMELINE_QUERY,
   TIMELINE_TITLE,
+  OPEN_TIMELINE_MODAL,
 } from '../screens/timeline';
 import {
   TIMELINES_DESCRIPTION,
@@ -79,6 +80,7 @@ describe('Timelines', () => {
       closeTimeline();
       openTimelineFromSettings();
 
+      cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
       cy.contains(timeline.title).should('exist');
       cy.get(TIMELINES_DESCRIPTION).first().should('have.text', timeline.description);
       cy.get(TIMELINES_PINNED_EVENT_COUNT).first().should('have.text', '1');

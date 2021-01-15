@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
 import { IndexPattern } from '../../../../../kibana_services';
 
 export type SortOrder = [string, string];
@@ -62,17 +63,33 @@ export function getDisplayedColumns(
   if (!Array.isArray(columns) || typeof indexPattern !== 'object' || !indexPattern.getFieldByName) {
     return [];
   }
-  const columnProps = columns.map((column, idx) => {
-    const field = indexPattern.getFieldByName(column);
-    return {
-      name: column,
-      displayName: field ? field.displayName : column,
-      isSortable: field && field.sortable ? true : false,
-      isRemoveable: column !== '_source' || columns.length > 1,
-      colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,
-      colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
-    };
-  });
+
+  const columnProps =
+    columns.length === 0
+      ? [
+          {
+            name: '__document__',
+            displayName: i18n.translate('discover.docTable.tableHeader.documentHeader', {
+              defaultMessage: 'Document',
+            }),
+            isSortable: false,
+            isRemoveable: false,
+            colLeftIdx: -1,
+            colRightIdx: -1,
+          },
+        ]
+      : columns.map((column, idx) => {
+          const field = indexPattern.getFieldByName(column);
+          return {
+            name: column,
+            displayName: field?.displayName ?? column,
+            isSortable: !!(field && field.sortable),
+            isRemoveable: column !== '_source' || columns.length > 1,
+            colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,
+            colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
+          };
+        });
+
   return !hideTimeField && indexPattern.timeFieldName
     ? [getTimeColumn(indexPattern.timeFieldName), ...columnProps]
     : columnProps;
