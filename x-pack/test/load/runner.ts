@@ -13,12 +13,14 @@ export async function GatlingTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
   const gatlingProjectRootPath = resolve(REPO_ROOT, '../kibana-load-testing');
 
-  // mvn gatling:test -q -Dgatling.simulationClass=org.kibanaLoadTest.simulation.DemoJourney
-
   await withProcRunner(log, async (procs) => {
     await procs.run('gatling', {
       cmd: 'mvn',
       args: [
+        'clean',
+        '-q',
+        '-Dmaven.test.failure.ignore=true',
+        'compile',
         'gatling:test',
         '-q',
         '-Dgatling.simulationClass=org.kibanaLoadTest.simulation.DemoJourney',
