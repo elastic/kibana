@@ -57,7 +57,8 @@ async function createSetupSideEffects(
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient),
-    setupFleet(soClient, callCluster),
+    // setupFleet(soClient, callCluster),
+    updateFleetRole(callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const defaultSettings = createDefaultSettings();
@@ -124,14 +125,26 @@ async function createSetupSideEffects(
   return { isIntialized: true };
 }
 
-export async function setupFleet(
-  soClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser,
-  options?: { forceRecreate?: boolean }
-) {
-  // Create fleet_enroll role
-  // This should be done directly in ES at some point
-  const res = await callCluster('transport.request', {
+async function updateFleetRole(callCluster: CallESAsCurrentUser) {
+  // First check for the existence of the role, if it doesn't exist, allow setup to initialize.
+  try {
+    await callCluster('transport.request', {
+      method: 'GET',
+      path: `/_security/role/${FLEET_ENROLL_ROLE}`,
+    });
+  } catch (e) {
+    if (e.status === 404) {
+      return;
+    }
+
+    return Promise.reject(e);
+  }
+
+  return putFleetRole(callCluster);
+}
+
+async function putFleetRole(callCluster: CallESAsCurrentUser) {
+  return await callCluster('transport.request', {
     method: 'PUT',
     path: `/_security/role/${FLEET_ENROLL_ROLE}`,
     body: {
@@ -153,6 +166,17 @@ export async function setupFleet(
       ],
     },
   });
+}
+
+export async function setupFleet(
+  soClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser,
+  options?: { forceRecreate?: boolean }
+) {
+  // Create fleet_enroll role
+  // This should be done directly in ES at some point
+  const res = putFleetRole(callCluster);
+
   // If the role is already created skip the rest unless you have forceRecreate set to true
   if (options?.forceRecreate !== true && res.role.created === false) {
     return;
