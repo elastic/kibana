@@ -45,7 +45,7 @@ export function registerApmAlerts(
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionDuration.description',
       {
-        defaultMessage: 'Alert when the latency exceeds a defined threshold.',
+        defaultMessage: 'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
       }
     ),
     iconClass: 'bell',
