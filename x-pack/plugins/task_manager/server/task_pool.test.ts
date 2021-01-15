@@ -210,7 +210,8 @@ describe('TaskPool', () => {
       logger,
     });
 
-    const expired = resolvable();
+    const readyToExpire = resolvable();
+    const taskHasExpired = resolvable();
     const shouldRun = sinon.spy(() => Promise.resolve());
     const shouldNotRun = sinon.spy(() => Promise.resolve());
     const now = new Date();
@@ -218,8 +219,9 @@ describe('TaskPool', () => {
       {
         ...mockTask(),
         async run() {
+          await readyToExpire;
           this.isExpired = true;
-          expired.resolve();
+          taskHasExpired.resolve();
           await sleep(10);
           return asOk({ state: {} });
         },
@@ -246,9 +248,11 @@ describe('TaskPool', () => {
     expect(pool.occupiedWorkers).toEqual(2);
     expect(pool.availableWorkers).toEqual(0);
 
-    await expired;
+    readyToExpire.resolve();
+    await taskHasExpired;
 
     expect(await pool.run([{ ...mockTask() }])).toBeTruthy();
+
     sinon.assert.calledOnce(shouldRun);
     sinon.assert.notCalled(shouldNotRun);
 
@@ -258,6 +262,53 @@ describe('TaskPool', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       `Cancelling task TaskType "shooooo" as it expired at ${now.toISOString()} after running for 05m 30s (with timeout set at 5m).`
     );
+  });
+
+  test('calls to availableWorkers ensures we cancel expired tasks', async () => {
+    const pool = new TaskPool({
+      maxWorkers$: of(1),
+      logger: loggingSystemMock.create().get(),
+    });
+
+    const taskIsRunning = resolvable();
+    const taskHasExpired = resolvable();
+    const cancel = sinon.spy(() => Promise.resolve());
+    const now = new Date();
+    expect(
+      await pool.run([
+        {
+          ...mockTask(),
+          async run() {
+            await sleep(10);
+            this.isExpired = true;
+            taskIsRunning.resolve();
+            await taskHasExpired;
+            return asOk({ state: {} });
+          },
+          get expiration() {
+            return new Date(now.getTime() + 10);
+          },
+          get startedAt() {
+            return now;
+          },
+          cancel,
+        },
+      ])
+    ).toEqual(TaskPoolRunResult.RunningAtCapacity);
+
+    await taskIsRunning;
+
+    sinon.assert.notCalled(cancel);
+    expect(pool.occupiedWorkers).toEqual(1);
+    // The call to `availableWorkers` will clear the expired task so it's 1 instead of 0
+    expect(pool.availableWorkers).toEqual(1);
+    sinon.assert.calledOnce(cancel);
+
+    expect(pool.occupiedWorkers).toEqual(0);
+    expect(pool.availableWorkers).toEqual(1);
+    // ensure cancel isn't called twice
+    sinon.assert.calledOnce(cancel);
+    taskHasExpired.resolve();
   });
 
   test('logs if cancellation errors', async () => {
