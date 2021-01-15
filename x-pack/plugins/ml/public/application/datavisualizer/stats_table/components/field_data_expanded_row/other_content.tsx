@@ -13,12 +13,10 @@ import { DocumentStatsTable } from './document_stats';
 export const OtherContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) return null;
-  if (stats.examples === undefined) return null;
-
   return (
     <EuiFlexGroup gutterSize={'xl'} data-test-subj={'mlDVOtherContent'}>
       <DocumentStatsTable config={config} />
-      {stats.examples && <ExamplesList examples={stats.examples} />}
+      {Array.isArray(stats.examples) && <ExamplesList examples={stats.examples} />}
     </EuiFlexGroup>
   );
 };
