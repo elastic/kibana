@@ -54,6 +54,13 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
         onQueryDataLoad: () => false,
       },
     ],
+    allTags: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { allTags }) => allTags,
+        onQueryDataLoad: (_, { allTags }) => allTags,
+      },
+    ],
   }),
   listeners: ({ actions }) => ({
     loadAnalyticsData: async () => {
