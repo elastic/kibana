@@ -5,13 +5,22 @@
  */
 
 import { useCallback } from 'react';
+import { exhaustMap, switchMap } from 'rxjs/operators';
 import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_sources';
+import { LogEntryCursor } from '../../../../common/log_entry';
+import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
   logEntriesSearchRequestParamsRT,
+  logEntriesSearchResponsePayloadRT,
   LOG_ENTRIES_SEARCH_STRATEGY,
 } from '../../../../common/search_strategies/log_entries/log_entries';
 import { JsonObject } from '../../../../common/typed_json';
-import { useDataSearch } from '../../../utils/data_search';
+import {
+  handleDataSearchResponse,
+  useDataSearch,
+  useFlattenedResponse,
+} from '../../../utils/data_search';
+import { useObservable } from '../../../utils/use_observable';
 
 export const useFetchLogEntriesAfter = ({
   columnOverrides,
@@ -31,11 +40,12 @@ export const useFetchLogEntriesAfter = ({
   const { search: fetchLogEntriesAfter, requests$: logEntriesAfterSearchRequests$ } = useDataSearch(
     {
       getRequest: useCallback(
-        (size: number) => {
+        (cursor: LogEntryCursor, size: number) => {
           return !!sourceId
             ? {
                 request: {
                   params: logEntriesSearchRequestParamsRT.encode({
+                    after: cursor,
                     columns: columnOverrides,
                     endTimestamp,
                     highlightPhrase,
@@ -54,8 +64,18 @@ export const useFetchLogEntriesAfter = ({
     }
   );
 
+  const logEntriesAfterSearchResponse$ = useFlattenedResponse(
+    logEntriesAfterSearchRequests$,
+    exhaustMap(
+      handleDataSearchResponse(
+        { current: null },
+        { current: decodeOrThrow(logEntriesSearchResponsePayloadRT) }
+      )
+    )
+  );
+
   return {
     fetchLogEntriesAfter,
-    logEntriesAfterSearchRequests$,
+    logEntriesAfterSearchResponse$,
   };
 };

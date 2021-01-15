@@ -8,9 +8,10 @@ import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/public';
-import { useLatest, useObservable, useObservableState } from '../use_observable';
+import { useLatest, useObservableState } from '../use_observable';
 import { handleDataSearchResponse, ResponseProjection } from './handle_data_search_response';
 import { DataSearchRequestDescriptor, DataSearchResponseDescriptor } from './types';
+import { useFlattenedResponse } from './use_flattened_response';
 
 export const useLatestPartialDataSearchResponse = <
   Request extends IKibanaSearchRequest,
@@ -27,16 +28,9 @@ export const useLatestPartialDataSearchResponse = <
 
   const latestResponse$: Observable<
     DataSearchResponseDescriptor<Request, Response | InitialResponse>
-  > = useObservable(
-    (inputs$) =>
-      inputs$.pipe(
-        switchMap(([currentRequests$]) =>
-          currentRequests$.pipe(
-            switchMap(handleDataSearchResponse(latestInitialResponse, latestProjectResponse))
-          )
-        )
-      ),
-    [requests$] as const
+  > = useFlattenedResponse(
+    requests$,
+    switchMap(handleDataSearchResponse(latestInitialResponse, latestProjectResponse))
   );
 
   const { latestValue } = useObservableState(latestResponse$, undefined);
