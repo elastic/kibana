@@ -10,3 +10,8 @@ export const mockTelemetryActions = {
   sendAppSearchTelemetry: jest.fn(),
   sendWorkplaceSearchTelemetry: jest.fn(),
 };
+
+jest.mock('../shared/telemetry', () => ({
+  ...(jest.requireActual('../shared/telemetry') as object),
+  TelemetryLogic: { actions: mockTelemetryActions },
+}));
