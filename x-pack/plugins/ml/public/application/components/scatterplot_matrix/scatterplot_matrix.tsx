@@ -57,7 +57,7 @@ const TOGGLE_OFF = i18n.translate('xpack.ml.splom.toggleOff', {
 
 const sampleSizeOptions = [100, 1000, 10000].map((d) => ({ value: d, text: '' + d }));
 
-interface ScatterplotMatrixProps {
+export interface ScatterplotMatrixProps {
   fields: string[];
   index: string;
   resultsField?: string;
