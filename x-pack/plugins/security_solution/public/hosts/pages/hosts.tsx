@@ -6,7 +6,7 @@
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
@@ -40,7 +40,12 @@ import * as i18n from './translations';
 import { filterHostData } from './navigation';
 import { hostsModel } from '../store';
 import { HostsTableType } from '../store/model';
-import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
+import { isTab } from '../../common/components/accessibility/helpers';
+import {
+  onTimelineTabKeyPressed,
+  resetKeyboardFocus,
+  showGlobalFilters,
+} from '../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../common/containers/sourcerer';
@@ -48,6 +53,7 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hook
 
 const HostsComponent = () => {
   const dispatch = useDispatch();
+  const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) =>
@@ -114,10 +120,34 @@ const HostsComponent = () => {
     [indexPattern, query, tabsFilters, uiSettings]
   );
 
+  const onSkipFocusBeforeEventsTable = useCallback(() => {
+    containerElement.current
+      ?.querySelector<HTMLButtonElement>('.inspectButtonComponent:last-of-type')
+      ?.focus();
+  }, [containerElement]);
+
+  const onSkipFocusAfterEventsTable = useCallback(() => {
+    resetKeyboardFocus();
+  }, []);
+
+  const onKeyDown = useCallback(
+    (keyboardEvent: React.KeyboardEvent) => {
+      if (isTab(keyboardEvent)) {
+        onTimelineTabKeyPressed({
+          containerElement: containerElement.current,
+          keyboardEvent,
+          onSkipFocusBeforeEventsTable,
+          onSkipFocusAfterEventsTable,
+        });
+      }
+    },
+    [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
+  );
+
   return (
     <>
       {indicesExist ? (
-        <>
+        <div onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar indexPattern={indexPattern} id="global" />
@@ -167,7 +197,7 @@ const HostsComponent = () => {
               type={hostsModel.HostsType.page}
             />
           </WrapperPage>
-        </>
+        </div>
       ) : (
         <WrapperPage>
           <HeaderPage border title={i18n.PAGE_TITLE} />
