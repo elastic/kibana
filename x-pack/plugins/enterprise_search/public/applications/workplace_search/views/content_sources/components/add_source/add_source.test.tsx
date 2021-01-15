@@ -4,16 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../../../__mocks__/kea.mock';
 import '../../../../../__mocks__/shallow_useeffect.mock';
+import { mockKibanaValues, setMockActions, setMockValues } from '../../../../../__mocks__';
 
-import { setMockActions, setMockValues } from '../../../../../__mocks__';
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
-
-jest.mock('../../../../../shared/kibana', () => ({
-  KibanaLogic: { values: { navigateToUrl: jest.fn() } },
-}));
-import { KibanaLogic } from '../../../../../shared/kibana';
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -32,6 +26,7 @@ import { SaveConfig } from './save_config';
 import { SaveCustom } from './save_custom';
 
 describe('AddSourceList', () => {
+  const { navigateToUrl } = mockKibanaValues;
   const initializeAddSource = jest.fn();
   const setAddSourceStep = jest.fn();
   const saveSourceConfig = jest.fn((_, setConfigCompletedStep) => {
@@ -83,9 +78,7 @@ describe('AddSourceList', () => {
     const wrapper = shallow(<AddSource sourceIndex={1} />);
     wrapper.find(ConfigCompleted).prop('advanceStep')();
 
-    expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(
-      '/sources/add/confluence_cloud/connect'
-    );
+    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/confluence_cloud/connect');
     expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
   });
 
@@ -112,9 +105,7 @@ describe('AddSourceList', () => {
     const wrapper = shallow(<AddSource sourceIndex={1} connect />);
     wrapper.find(ConnectInstance).prop('onFormCreated')('foo');
 
-    expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(
-      '/sources/add/confluence_cloud/connect'
-    );
+    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/confluence_cloud/connect');
   });
 
   it('renders Configure Custom step', () => {
@@ -137,9 +128,7 @@ describe('AddSourceList', () => {
 
     wrapper.find(ConfigureOauth).prop('onFormCreated')('foo');
 
-    expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(
-      '/sources/add/confluence_cloud/connect'
-    );
+    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/confluence_cloud/connect');
   });
 
   it('renders Save Custom step', () => {
