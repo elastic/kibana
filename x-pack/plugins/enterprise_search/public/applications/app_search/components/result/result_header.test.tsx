@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-
 import { shallow } from 'enzyme';
 
 import { ResultHeader } from './result_header';

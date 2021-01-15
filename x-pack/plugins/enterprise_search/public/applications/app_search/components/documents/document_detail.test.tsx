@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
+
 import '../../../__mocks__/react_router_history.mock';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
