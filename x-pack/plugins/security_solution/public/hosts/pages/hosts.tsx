@@ -157,11 +157,7 @@ const HostsComponent = () => {
   return (
     <>
       {indicesExist ? (
-        <StyledFullHeightContainer
-          onKeyDown={onKeyDown}
-          ref={containerElement}
-          style={{ height: '100%' }}
-        >
+        <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar indexPattern={indexPattern} id="global" />
