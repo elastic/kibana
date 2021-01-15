@@ -24,14 +24,36 @@ describe('ActionContext', () => {
       conditions: 'count greater than 4',
     };
     const context = addMessages({ name: '[alert-name]' }, base, params);
-    expect(context.title).toMatchInlineSnapshot(
-      `"alert '[alert-name]' met document count threshold"`
-    );
+    expect(context.title).toMatchInlineSnapshot(`"alert '[alert-name]' matched query"`);
     expect(context.message).toEqual(
       `alert '[alert-name]' is active':
 
 - Value: 42
 - Conditions Met: count greater than 4 over 5m
+- Timestamp: 2020-01-01T00:00:00.000Z`
+    );
+  });
+
+  it('generates expected properties when value is undefined', async () => {
+    const params = EsQueryAlertParamsSchema.validate({
+      index: ['[index]'],
+      timeField: '[timeField]',
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: '>',
+      threshold: [4],
+    });
+    const base: EsQueryAlertActionContext = {
+      date: '2020-01-01T00:00:00.000Z',
+      conditions: `document with id 'ABC' matched query "{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}"`,
+    };
+    const context = addMessages({ name: '[alert-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(`"alert '[alert-name]' matched query"`);
+    expect(context.message).toEqual(
+      `alert '[alert-name]' is active':
+
+- Conditions Met: document with id 'ABC' matched query "{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}" over 5m
 - Timestamp: 2020-01-01T00:00:00.000Z`
     );
   });
@@ -52,9 +74,7 @@ describe('ActionContext', () => {
       conditions: 'count between 4 and 5',
     };
     const context = addMessages({ name: '[alert-name]' }, base, params);
-    expect(context.title).toMatchInlineSnapshot(
-      `"alert '[alert-name]' met document count threshold"`
-    );
+    expect(context.title).toMatchInlineSnapshot(`"alert '[alert-name]' matched query"`);
     expect(context.message).toEqual(
       `alert '[alert-name]' is active':
 

@@ -16,9 +16,7 @@ describe('alertType', () => {
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.es-query');
     expect(alertType.name).toBe('ES query');
-    expect(alertType.actionGroups).toEqual([
-      { id: 'doc count threshold met', name: 'Doc count threshold met' },
-    ]);
+    expect(alertType.actionGroups).toEqual([{ id: 'matched query', name: 'Matched query' }]);
 
     expect(alertType.actionVariables).toMatchInlineSnapshot(`
       Object {

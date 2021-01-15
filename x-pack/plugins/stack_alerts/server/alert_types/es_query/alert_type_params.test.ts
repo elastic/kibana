@@ -14,8 +14,6 @@ const DefaultParams: Writable<Partial<EsQueryAlertParams>> = {
   esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
   timeWindowSize: 5,
   timeWindowUnit: 'm',
-  thresholdComparator: '>',
-  threshold: [0],
 };
 
 describe('alertType Params validate()', () => {
@@ -25,7 +23,13 @@ describe('alertType Params validate()', () => {
     params = { ...DefaultParams };
   });
 
-  it('passes for valid input', async () => {
+  it('passes for minimal valid input', async () => {
+    expect(validate()).toBeTruthy();
+  });
+
+  it('passes for maximal valid input', async () => {
+    params.thresholdComparator = '>';
+    params.threshold = [0];
     expect(validate()).toBeTruthy();
   });
 
@@ -133,11 +137,6 @@ describe('alertType Params validate()', () => {
   });
 
   it('fails for invalid threshold', async () => {
-    delete params.threshold;
-    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[threshold]: expected value of type [array] but got [undefined]"`
-    );
-
     params.threshold = 42;
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
       `"[threshold]: expected value of type [array] but got [number]"`
@@ -165,11 +164,6 @@ describe('alertType Params validate()', () => {
   });
 
   it('fails for invalid thresholdComparator', async () => {
-    delete params.thresholdComparator;
-    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[thresholdComparator]: expected value of type [string] but got [undefined]"`
-    );
-
     params.thresholdComparator = '[invalid-comparator]';
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
       `"[thresholdComparator]: invalid thresholdComparator specified: [invalid-comparator]"`

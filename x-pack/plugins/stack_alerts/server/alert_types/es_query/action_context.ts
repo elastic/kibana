@@ -23,7 +23,7 @@ export interface EsQueryAlertActionContext extends AlertInstanceContext {
   // the date the alert was run as an ISO date
   date: string;
   // the value that met the threshold
-  value: number;
+  value?: number;
   // threshold conditions
   conditions: string;
 }
@@ -34,7 +34,7 @@ export function addMessages(
   params: EsQueryAlertParams
 ): ActionContext {
   const title = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle', {
-    defaultMessage: `alert '{name}' met document count threshold`,
+    defaultMessage: `alert '{name}' matched query`,
     values: {
       name: alertInfo.name,
     },
@@ -42,11 +42,7 @@ export function addMessages(
 
   const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
   const message = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextMessageDescription', {
-    defaultMessage: `alert '{name}' is active':
-
-- Value: {value}
-- Conditions Met: {conditions} over {window}
-- Timestamp: {date}`,
+    defaultMessage: getDefaultMessage(baseContext),
     values: {
       name: alertInfo.name,
       value: baseContext.value,
@@ -57,4 +53,17 @@ export function addMessages(
   });
 
   return { ...baseContext, title, message };
+}
+
+function getDefaultMessage(baseContext: EsQueryAlertActionContext) {
+  return baseContext.value
+    ? `alert '{name}' is active':
+
+- Value: {value}
+- Conditions Met: {conditions} over {window}
+- Timestamp: {date}`
+    : `alert '{name}' is active':
+
+- Conditions Met: {conditions} over {window}
+- Timestamp: {date}`;
 }

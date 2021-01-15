@@ -8,10 +8,13 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ComparatorFnNames, getInvalidComparatorMessage } from '../lib';
 import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
+import { AlertTypeState } from '../../../../alerts/server';
 
 // alert type parameters
-
 export type EsQueryAlertParams = TypeOf<typeof EsQueryAlertParamsSchema>;
+export interface EsQueryAlertState extends AlertTypeState {
+  sortId: string | undefined;
+}
 
 export const EsQueryAlertParamsSchemaProperties = {
   index: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
@@ -19,8 +22,8 @@ export const EsQueryAlertParamsSchemaProperties = {
   esQuery: schema.string({ minLength: 1 }),
   timeWindowSize: schema.number({ min: 1 }),
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
-  threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
-  thresholdComparator: schema.string({ validate: validateComparator }),
+  threshold: schema.maybe(schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 })),
+  thresholdComparator: schema.maybe(schema.string({ validate: validateComparator })),
 };
 
 export const EsQueryAlertParamsSchema = schema.object(EsQueryAlertParamsSchemaProperties, {
@@ -37,14 +40,16 @@ function validateParams(anyParams: unknown): string | undefined {
     threshold,
   }: EsQueryAlertParams = anyParams as EsQueryAlertParams;
 
-  if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
-    return i18n.translate('xpack.stackAlerts.esQuery.invalidThreshold2ErrorMessage', {
-      defaultMessage:
-        '[threshold]: must have two elements for the "{thresholdComparator}" comparator',
-      values: {
-        thresholdComparator,
-      },
-    });
+  if (threshold && thresholdComparator) {
+    if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
+      return i18n.translate('xpack.stackAlerts.esQuery.invalidThreshold2ErrorMessage', {
+        defaultMessage:
+          '[threshold]: must have two elements for the "{thresholdComparator}" comparator',
+        values: {
+          thresholdComparator,
+        },
+      });
+    }
   }
 
   try {
