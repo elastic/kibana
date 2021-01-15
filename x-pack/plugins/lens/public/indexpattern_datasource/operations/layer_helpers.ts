@@ -350,8 +350,10 @@ export function replaceColumn({
   } else if (
     operationDefinition.input === 'field' &&
     field &&
-    'sourceField' in previousColumn &&
-    previousColumn.sourceField !== field.name
+    'sourceField' in previousColumn 
+    // todo: ask if it's safe
+    // &&
+    // previousColumn.sourceField !== field.name
   ) {
     // Same operation, new field
     const newColumn = copyCustomLabel(

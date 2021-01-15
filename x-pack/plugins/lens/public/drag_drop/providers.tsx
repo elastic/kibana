@@ -27,6 +27,14 @@ export interface DragContextState {
   dragging: Dragging;
 
   /**
+   * keyboard mode
+   */
+  keyboardMode: boolean;
+  /**
+   * keyboard mode
+   */
+  setKeyboardMode: (mode: boolean) => void;
+  /**
    * Set the item being dragged.
    */
   setDragging: (dragging: Dragging) => void;
@@ -49,6 +57,8 @@ export interface DragContextState {
 export const DragContext = React.createContext<DragContextState>({
   dragging: undefined,
   setDragging: () => {},
+  keyboardMode: false,
+  setKeyboardMode: () => {},
   activeDropTarget: undefined,
   setActiveDropTarget: () => {},
   registerDropTarget: () => {},
@@ -58,6 +68,17 @@ export const DragContext = React.createContext<DragContextState>({
  * The argument to DragDropProvider.
  */
 export interface ProviderProps {
+  /**
+   * keyboard mode
+   */
+  keyboardMode: boolean;
+  /**
+   * keyboard mode
+   */
+  setKeyboardMode: (mode: boolean) => void;
+  /**
+   * Set the item being dragged.
+   */
   /**
    * The item being dragged. If unspecified, the provider will
    * behave as if it is the root provider.
@@ -103,6 +124,7 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   const [draggingState, setDraggingState] = useState<{ dragging: Dragging }>({
     dragging: undefined,
   });
+  const [keyboardModeState, setKeyboardModeState] = useState(false);
   const [activeDropTargetState, setActiveDropTargetState] = useState<{
     activeDropTarget?: DropTargetIdentifier;
     dropTargetsByOrder: Record<
@@ -116,6 +138,10 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   const setDragging = useMemo(() => (dragging: Dragging) => setDraggingState({ dragging }), [
     setDraggingState,
   ]);
+  const setKeyboardMode = useMemo(
+    () => (keyboardMode: boolean) => setKeyboardModeState(keyboardMode),
+    [setKeyboardModeState]
+  );
   const setActiveDropTarget = useMemo(
     () => (activeDropTarget?: DropTargetIdentifier) =>
       setActiveDropTargetState((s) => ({ ...s, activeDropTarget })),
@@ -141,6 +167,8 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
 
   return (
     <ChildDragDropProvider
+      keyboardMode={keyboardModeState}
+      setKeyboardMode={setKeyboardModeState}
       dragging={draggingState.dragging}
       setDragging={setDragging}
       activeDropTarget={activeDropTargetState}
@@ -154,47 +182,32 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
 
 export function nextValidDropTarget(
   bla: Record<string, { dropTarget: DropTargetIdentifier } | undefined>,
-  dragging: unknown,
-  currentlyActiveDropTargetOrder?: number[],
+  currentlyActiveDraggingElOrder: number[],
   reverse = false
 ) {
   const dropTargetsByOrder = bla.dropTargetsByOrder;
+
   const nextDropTargets = Object.entries(dropTargetsByOrder)
-    .filter(([, target]) => !!target)
+    .filter(([order, target]) => {
+      return !!target || order === currentlyActiveDraggingElOrder.join(',');
+    })
     .sort(([orderA], [orderB]) => {
       const parsedOrderA = orderA.split(',').map((v) => Number(v));
       const parsedOrderB = orderB.split(',').map((v) => Number(v));
 
       const relevantLevel = parsedOrderA.findIndex((v, i) => parsedOrderA[i] !== parsedOrderB[i]);
-      return reverse
-        ? parsedOrderB[relevantLevel] - parsedOrderA[relevantLevel]
-        : parsedOrderA[relevantLevel] - parsedOrderB[relevantLevel];
+      return parsedOrderA[relevantLevel] - parsedOrderB[relevantLevel];
     });
 
-  console.log('nextDropTargets', nextDropTargets, currentlyActiveDropTargetOrder);
+    console.log('hello', nextDropTargets)
 
-  const lastIndex = nextDropTargets.length - 1;
-
-  const nextDropTarget = nextDropTargets.find(([targetOrder, target]) => {
-    const parsedOrder = targetOrder.split(',').map((v) => Number(v));
-
-    const relevantLevel = parsedOrder.findIndex(
-      (v, i) =>
-        parsedOrder[i] !== (currentlyActiveDropTargetOrder ? currentlyActiveDropTargetOrder[i] : 0)
-    );
-    return (
-      parsedOrder[relevantLevel] -
-      (currentlyActiveDropTargetOrder ? currentlyActiveDropTargetOrder[relevantLevel] : 0)
-    );
+  const currentActiveDropIndex = nextDropTargets.findIndex(([, target]) => {
+    return bla.activeDropTarget ? target?.dropTarget === bla.activeDropTarget : !target;
   });
-
-  if (bla.activeDropTarget === nextDropTargets[lastIndex][1].dropTarget) {
-    return undefined;
-  }
-
-  if (nextDropTarget) {
-    return nextDropTarget[1]?.dropTarget;
-  }
+  const previousElement =
+    (nextDropTargets.length + currentActiveDropIndex - 1) % nextDropTargets.length;
+  const nextElement = (currentActiveDropIndex + 1) % nextDropTargets.length;
+  return nextDropTargets[reverse ? previousElement : nextElement][1]?.dropTarget;
 }
 
 /**
@@ -207,14 +220,32 @@ export function nextValidDropTarget(
 export function ChildDragDropProvider({
   dragging,
   setDragging,
+  setKeyboardMode,
+  keyboardMode,
   activeDropTarget,
   setActiveDropTarget,
   registerDropTarget,
   children,
 }: ProviderProps) {
   const value = useMemo(
-    () => ({ dragging, setDragging, activeDropTarget, setActiveDropTarget, registerDropTarget }),
-    [setDragging, dragging, activeDropTarget, setActiveDropTarget, registerDropTarget]
+    () => ({
+      setKeyboardMode,
+      keyboardMode,
+      dragging,
+      setDragging,
+      activeDropTarget,
+      setActiveDropTarget,
+      registerDropTarget,
+    }),
+    [
+      setDragging,
+      dragging,
+      activeDropTarget,
+      setActiveDropTarget,
+      registerDropTarget,
+      setKeyboardMode,
+      keyboardMode,
+    ]
   );
   return <DragContext.Provider value={value}>{children}</DragContext.Provider>;
 }
@@ -293,7 +324,11 @@ export function ReorderProvider({
   ]);
 
   return (
-    <div className={classNames(className, { 'lnsDragDrop-isActiveGroup': state.isReorderOn })}>
+    <div
+      className={classNames(className, {
+        'lnsDragDrop-isActiveGroup': state.isReorderOn && React.Children.count(children) > 1,
+      })}
+    >
       <ReorderContext.Provider value={{ reorderState: state, setReorderState }}>
         {children}
       </ReorderContext.Provider>

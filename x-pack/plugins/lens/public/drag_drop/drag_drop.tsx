@@ -183,12 +183,14 @@ const getKeyboardReorderMessageLifted = (itemLabel: string, position: number) =>
 const lnsLayerPanelDimensionMargin = 8;
 
 export const DragDrop = (props: Props) => {
-  const { dragging, setDragging, registerDropTarget } = useContext(DragContext);
+  const { dragging, setDragging, registerDropTarget, keyboardMode, setKeyboardMode } = useContext(
+    DragContext
+  );
+
   const { value, draggable, droppable, isValueEqual, dropTargetIdentifier, order } = props;
 
   useShallowCompareEffect(() => {
     if (order && droppable && dropTargetIdentifier) {
-      console.log(order);
       registerDropTarget(order, dropTargetIdentifier);
       return () => {
         registerDropTarget(order, undefined);
@@ -199,6 +201,8 @@ export const DragDrop = (props: Props) => {
   return (
     <DragDropInner
       {...props}
+      setKeyboardMode={setKeyboardMode}
+      keyboardMode={keyboardMode}
       dragging={dragging}
       setDragging={setDragging}
       isDragging={
@@ -242,7 +246,10 @@ const DragDropInner = React.memo(function DragDropInner(
     dropTo,
     itemsInGroup,
     dropTargetIdentifier,
+    keyboardMode,
+    setKeyboardMode,
   } = props;
+
   const { reorderState, setReorderState } = useContext(ReorderContext);
   const { activeDropTarget, setActiveDropTarget } = useContext(DragContext);
   const dragInProgress = !!dragging;
@@ -253,33 +260,29 @@ const DragDropInner = React.memo(function DragDropInner(
     isEqual(dropTargetIdentifier, activeDropTarget.activeDropTarget);
 
   const isMoveDragging = isDragging && dragType === 'move';
-  console.log(props.getAdditionalClassesOnEnter?.());
+
   const classes = classNames(
     'lnsDragDrop',
     {
       'lnsDragDrop-isDraggable': draggable,
       'lnsDragDrop-isDragging': isDragging,
-      'lnsDragDrop-isHidden': isMoveDragging && activeDropTarget?.activeDropTarget,
+      'lnsDragDrop-isHidden': isMoveDragging && !keyboardMode,
       'lnsDragDrop-isDroppable': !draggable,
       'lnsDragDrop-isDropTarget':
         // (!activeDropTarget || activeDropTargetMatches) makes sure only the currently active drop target is highlighted, not all of them
         // because this part is not implemented yet
-        droppable &&
-        (!activeDropTarget?.activeDropTarget || activeDropTargetMatches) &&
-        dragType !== 'reorder',
+        // droppable &&
+        // (!activeDropTarget?.activeDropTarget || activeDropTargetMatches) &&
+        // dragType !== 'reorder',
+        droppable && dragType !== 'reorder',
       'lnsDragDrop-isActiveDropTarget':
         droppable && (state.isActive || activeDropTargetMatches) && dragType !== 'reorder',
       'lnsDragDrop-isNotDroppable': !isMoveDragging && isNotDroppable,
       'lnsDragDrop-isReplacing':
-        droppable &&
-        (value?.id === activeDropTarget?.activeDropTarget?.id || state.isActive) &&
-        dropType === 'replace',
+        droppable && (activeDropTargetMatches || state.isActive) && dropType === 'replace',
     },
     state.dragEnterClassNames
   );
-  if (dropType === 'replace') {
-    console.log('replace', droppable, state.isActive, activeDropTarget?.activeDropTarget);
-  }
 
   const dragStart = (e?: DroppableEvent) => {
     // Setting stopPropgagation causes Chrome failures, so
@@ -402,9 +405,13 @@ const DragDropInner = React.memo(function DragDropInner(
               if (dragInProgress) {
                 draggingProps.onDragEnd();
               }
+
+              setKeyboardMode(false);
             }}
             onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
               if (e.key === keys.ENTER || e.key === keys.SPACE) {
+                setKeyboardMode(!keyboardMode);
+                console.log(keyboardMode);
                 // if element is not active, check if it <itemsInGrou>1
                 // if yes, setReorderState
                 // if no, setActiveDropTarget
@@ -432,6 +439,7 @@ const DragDropInner = React.memo(function DragDropInner(
                   draggingProps.onDragStart();
                 }
               } else if (e.key === keys.ESCAPE) {
+                setKeyboardMode(false);
                 setReorderState((s: ReorderState) => ({
                   ...s,
                   isReorderOn: false,
@@ -442,14 +450,18 @@ const DragDropInner = React.memo(function DragDropInner(
                 if (dragInProgress) {
                   draggingProps.onDragEnd();
                 }
-              } else if (keys.ARROW_RIGHT === e.key && activeDropTarget) {
-                const nextTarget = nextValidDropTarget(activeDropTarget, dragging, dropProps.order);
-                console.log('drag_drop##activeDropTarget', activeDropTarget.dropTargetsByOrder);
-                console.log('drag_drop##nextTarget', nextTarget);
+              } else if (keys.ARROW_RIGHT === e.key && activeDropTarget&& keyboardMode) {
+                const nextTarget = nextValidDropTarget(activeDropTarget, dropProps.order);
+
                 // check if activeDropTarget is in the itemsInGroup -
                 // if not, deselect reorder mode visually and functionally
                 setActiveDropTarget(nextTarget);
-                console.log(activeDropTarget);
+
+                setReorderState((s: ReorderState) => ({
+                  ...s,
+                  isReorderOn: !nextTarget,
+                }));
+
                 // const { targetDescription, actionSuccessMessage } = draggingProps.onNextGroup();
 
                 // TODO re-enable announcements
@@ -461,19 +473,22 @@ const DragDropInner = React.memo(function DragDropInner(
                 //   }),
                 //   pendingActionSuccessMessage: actionSuccessMessage,
                 // }));
-              } else if (keys.ARROW_LEFT === e.key && activeDropTarget) {
+              } else if (keys.ARROW_LEFT === e.key && activeDropTarget && keyboardMode) {
                 const previousTarget = nextValidDropTarget(
                   activeDropTarget,
-                  dragging,
                   dropProps.order,
                   true
                 );
-                console.log('drag_drop##activeDropTarget', activeDropTarget.dropTargetsByOrder);
-                console.log('drag_drop##nextTarget', previousTarget);
+
                 // check if activeDropTarget is in the itemsInGroup -
                 // if not, deselect reorder mode visually and functionally
                 setActiveDropTarget(previousTarget);
-                console.log(activeDropTarget);
+
+                setReorderState((s: ReorderState) => ({
+                  ...s,
+                  isReorderOn: !previousTarget,
+                }));
+
                 // const { targetDescription, actionSuccessMessage } = draggingProps.onNextGroup();
 
                 // TODO re-enable announcements
