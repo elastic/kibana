@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { DiscoverLegacy } from './discover_legacy';
+import { Discover } from './discover';
 
 export function createDiscoverLegacyDirective(reactDirective: any) {
-  return reactDirective(DiscoverLegacy, [
+  return reactDirective(Discover, [
     ['fetch', { watchDepth: 'reference' }],
     ['fetchCounter', { watchDepth: 'reference' }],
     ['fetchError', { watchDepth: 'reference' }],

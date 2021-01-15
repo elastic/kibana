@@ -54,7 +54,6 @@ import {
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
 import { createDiscoverLegacyDirective } from './application/components/create_discover_legacy_directive';
-import { createDiscoverDirective } from './application/components/create_discover_directive';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -135,8 +134,7 @@ export function initializeInnerAngularModule(
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
     .directive('renderComplete', createRenderCompleteDirective)
-    .directive('discoverLegacy', createDiscoverLegacyDirective)
-    .directive('discover', createDiscoverDirective);
+    .directive('discoverLegacy', createDiscoverLegacyDirective);
 }
 
 function createLocalPromiseModule() {

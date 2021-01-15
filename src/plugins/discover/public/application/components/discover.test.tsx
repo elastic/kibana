@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test/jest';
-import { DiscoverLegacy } from './discover_legacy';
+import { Discover } from './discover';
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { esHits } from '../../__mocks__/es_hits';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
@@ -30,7 +30,7 @@ import { savedSearchMock } from '../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../data/common/search/search_source/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { createFilterManagerMock } from '../../../../data/public/query/filter_manager/filter_manager.mock';
-import { uiSettingsMock } from '../../__mocks__/ui_settings';
+import { uiSettingsMock as mockUiSettings } from '../../__mocks__/ui_settings';
 import { IndexPattern, IndexPatternAttributes } from '../../../../data/common/index_patterns';
 import { SavedObject } from '../../../../../core/types';
 import { navigationPluginMock } from '../../../../navigation/public/mocks';
@@ -51,6 +51,7 @@ jest.mock('../../kibana_services', () => {
         },
       },
       navigation: mockNavigation,
+      uiSettings: mockUiSettings,
     }),
   };
 });
@@ -64,6 +65,7 @@ function getProps(indexPattern: IndexPattern) {
         save: true,
       },
     },
+    uiSettings: mockUiSettings,
   } as unknown) as DiscoverServices;
 
   return {
@@ -83,7 +85,7 @@ function getProps(indexPattern: IndexPattern) {
     onSkipBottomButtonClick: jest.fn(),
     onSort: jest.fn(),
     opts: {
-      config: uiSettingsMock,
+      config: mockUiSettings,
       data: dataPluginMock.createStartContract(),
       fixedScroll: jest.fn(),
       filterManager: createFilterManagerMock(),
@@ -116,15 +118,13 @@ function getProps(indexPattern: IndexPattern) {
   };
 }
 
-describe('Descover legacy component', () => {
+describe('Discover component', () => {
   test('selected index pattern without time field displays no chart toggle', () => {
-    const component = shallowWithIntl(<DiscoverLegacy {...getProps(indexPatternMock)} />);
+    const component = shallowWithIntl(<Discover {...getProps(indexPatternMock)} />);
     expect(component.find('[data-test-subj="discoverChartToggle"]').length).toBe(0);
   });
   test('selected index pattern with time field displays chart toggle', () => {
-    const component = shallowWithIntl(
-      <DiscoverLegacy {...getProps(indexPatternWithTimefieldMock)} />
-    );
+    const component = shallowWithIntl(<Discover {...getProps(indexPatternWithTimefieldMock)} />);
     expect(component.find('[data-test-subj="discoverChartToggle"]').length).toBe(1);
   });
 });

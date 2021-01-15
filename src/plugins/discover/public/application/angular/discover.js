@@ -34,7 +34,6 @@ import {
 import { getSortArray } from './doc_table';
 import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
-import indexTemplateGrid from './discover_datagrid.html';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
 import {
@@ -124,9 +123,7 @@ app.config(($routeProvider) => {
   };
   const discoverRoute = {
     ...defaults,
-    template: getServices().uiSettings.get('doc_table:legacy', true)
-      ? indexTemplateLegacy
-      : indexTemplateGrid,
+    template: indexTemplateLegacy,
     reloadOnSearch: false,
     resolve: {
       savedObjects: function ($route, Promise) {
