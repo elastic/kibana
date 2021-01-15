@@ -71,11 +71,6 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  */
 `;
 
-const allMochaRulesOff = {};
-Object.keys(require('eslint-plugin-mocha').rules).forEach((k) => {
-  allMochaRulesOff['mocha/' + k] = 'off';
-});
-
 module.exports = {
   root: true,
 
@@ -542,7 +537,6 @@ module.exports = {
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
-        'x-pack/dev-tools/mocha/setup_mocha.js',
         'x-pack/scripts/*.js',
       ],
       excludedFiles: ['**/integration_tests/**/*'],
@@ -574,7 +568,9 @@ module.exports = {
      */
     {
       files: ['test/harden/*.js', 'packages/elastic-safer-lodash-set/test/*.js'],
-      rules: allMochaRulesOff,
+      rules: {
+        'mocha/handle-done-callback': 'off',
+      },
     },
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
@@ -794,7 +790,6 @@ module.exports = {
       files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
-        mocha: true,
         jest: true,
       },
       rules: {
@@ -930,7 +925,6 @@ module.exports = {
       files: ['x-pack/plugins/lists/**/*.{js,mjs,ts,tsx}'],
       plugins: ['eslint-plugin-node'],
       env: {
-        mocha: true,
         jest: true,
       },
       rules: {

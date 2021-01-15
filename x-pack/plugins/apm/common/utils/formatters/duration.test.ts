@@ -46,5 +46,8 @@ describe('duration formatters', () => {
     it('converts to formatted decimal milliseconds', () => {
       expect(asMillisecondDuration(0)).toEqual('0 ms');
     });
+    it('formats correctly with undefined values', () => {
+      expect(asMillisecondDuration(undefined)).toEqual('N/A');
+    });
   });
 });
