@@ -76,6 +76,7 @@ export interface GlobalEffectScope {
 
 export interface PolicyEffectScope {
   type: 'policy';
+  /** An array of Endpoint Integration Policy UUIDs */
   policies: string[];
 }
 

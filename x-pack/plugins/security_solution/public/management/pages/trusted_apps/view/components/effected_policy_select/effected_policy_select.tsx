@@ -5,20 +5,38 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiSelectable, EuiSelectableProps, EuiSwitch } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSelectable,
+  EuiSelectableProps,
+  EuiSwitch,
+  EuiSwitchProps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { PolicyData } from '../../../../../../../common/endpoint/types';
 
-export type PolicySelectProps = EuiSelectableProps;
-export const EffectedPolicySelect = memo<PolicySelectProps>(
-  ({ listProps, ...otherSelectableProps }) => {
+export type EffectedPolicySelectProps = Omit<EuiSelectableProps, 'onChange' | 'options'> & {
+  options: Omit<EuiSelectableProps['options'], 'label'> & { policy: PolicyData };
+  onChange: (selection: { isGlobal: boolean; selectedPolicies: PolicyData[] }) => void;
+  isGlobal: boolean;
+};
+export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
+  ({ isGlobal, onChange, listProps, ...otherSelectableProps }) => {
     const DEFAULT_LIST_PROPS = useMemo(() => ({ bordered: true }), []);
+
     // FIXME: temporary for testing only
-    const options = Array.from({ length: 30 }, (_, i) => ({ label: `policy ${i + 1}` }));
+    const policyOptions = Array.from({ length: 30 }, (_, i) => ({ label: `policy ${i + 1}` }));
 
     const handleOnPolicySelectChange: EuiSelectableProps['onChange'] = useCallback(
-      (changedOptions) => {},
+      (changedOptions) => {
+        debugger;
+      },
       []
     );
+
+    const handleGlobalSwitchChange: EuiSwitchProps['onChange'] = useCallback(() => {
+      debugger;
+    }, []);
 
     return (
       <>
@@ -38,8 +56,8 @@ export const EffectedPolicySelect = memo<PolicySelectProps>(
                 defaultMessage: 'Apply trusted application globally',
               }
             )}
-            checked={true}
-            onChange={(e) => {}}
+            checked={isGlobal}
+            onChange={handleGlobalSwitchChange}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -50,7 +68,7 @@ export const EffectedPolicySelect = memo<PolicySelectProps>(
         >
           <EuiSelectable
             {...otherSelectableProps}
-            options={options}
+            options={policyOptions}
             listProps={listProps || DEFAULT_LIST_PROPS}
             onChange={handleOnPolicySelectChange}
           >
