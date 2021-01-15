@@ -54,7 +54,7 @@ A package using the `.test.js` naming convention will have those tests automatic
 * `yarn test` or `yarn grunt test` runs all unit tests.
 * `yarn jest` runs all Jest tests in Kibana.
 
-In order to Jest found those tests a `jest.config.js` file should be created in the root of the package.
+In order for the plugin or package to use Jest, a jest.config.js file must be present in it's root. However, there are safeguards for this in CI should a test file be added without a corresponding config file.
 
 ----
 Each package can also specify its own `test` script in the package's `package.json`, for cases where you'd prefer to run the tests from the local package directory.
