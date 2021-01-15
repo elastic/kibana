@@ -40,6 +40,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
 
+      await kibanaServer.uiSettings.update({
+        'discover:searchFieldsFromSource': true,
+      });
+
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
 

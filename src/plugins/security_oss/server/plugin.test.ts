@@ -30,6 +30,7 @@ describe('SecurityOss Plugin', () => {
       expect(Object.keys(contract)).toMatchInlineSnapshot(`
         Array [
           "showInsecureClusterWarning$",
+          "setAnonymousAccessServiceProvider",
         ]
       `);
     });
