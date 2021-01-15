@@ -55,6 +55,11 @@ export default function ({ getPageObjects, getService }) {
       return requestTimestamp;
     }
 
+    it('should set "data-title" attribute', async () => {
+      const [{ title }] = await PageObjects.dashboard.getPanelSharedItemData();
+      expect(title).to.be('join example');
+    });
+
     it('should pass index patterns to container', async () => {
       const indexPatterns = await filterBar.getIndexPatterns();
       expect(indexPatterns).to.equal('meta_for_geo_shapes*,logstash-*');
