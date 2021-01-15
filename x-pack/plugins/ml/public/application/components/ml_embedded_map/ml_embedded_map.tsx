@@ -17,18 +17,14 @@ import {
 } from '../../../../../../../src/plugins/embeddable/public';
 import { useMlKibana } from '../../contexts/kibana';
 
-const renderTooltipContent = (params: RenderTooltipContentParams) => {
-  return <div>Test</div>;
-};
-
 export function MlEmbeddedMapComponent({
   layerList,
   mapEmbeddableInput,
-}: // renderTooltipContent,
-{
+  renderTooltipContent,
+}: {
   layerList: LayerDescriptor[];
   mapEmbeddableInput?: MapEmbeddableInput;
-  renderTooltipContent?: (params: RenderTooltipContentParams) => React.ReactNode;
+  renderTooltipContent?: (params: RenderTooltipContentParams) => JSX.Element;
 }) {
   const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
 
@@ -90,21 +86,18 @@ export function MlEmbeddedMapComponent({
         // can use mapSettings to center map on anomalies
         mapSettings: {
           disableInteractive: false,
-          hideToolbarOverlay: true,
+          hideToolbarOverlay: false,
           hideLayerControl: false,
           hideViewControl: false,
           // Doesn't currently work with GEO_JSON. Will uncomment when https://github.com/elastic/kibana/pull/88294 is in
           // initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
-          // autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
+          autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
         },
       };
 
       const embeddableObject: any = await factory.create(input);
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
-        if (renderTooltipContent !== undefined) {
-          embeddableObject.setRenderTooltipContent(renderTooltipContent);
-        }
         const basemapLayerDescriptor = mapsPlugin
           ? await mapsPlugin.createLayerDescriptors.createBasemapLayerDescriptor()
           : null;
@@ -123,13 +116,16 @@ export function MlEmbeddedMapComponent({
   }, []);
 
   useEffect(() => {
-    async function updateInput() {
-      if (embeddable && !isErrorEmbeddable(embeddable) && mapEmbeddableInput !== undefined) {
-        await embeddable.updateInput(mapEmbeddableInput);
-      }
+    if (embeddable && !isErrorEmbeddable(embeddable) && mapEmbeddableInput !== undefined) {
+      embeddable.updateInput(mapEmbeddableInput);
     }
-    updateInput();
   }, [embeddable, mapEmbeddableInput]);
+
+  useEffect(() => {
+    if (embeddable && !isErrorEmbeddable(embeddable) && renderTooltipContent !== undefined) {
+      embeddable.setRenderTooltipContent(renderTooltipContent);
+    }
+  }, [embeddable, renderTooltipContent]);
 
   // We can only render after embeddable has already initialized
   useEffect(() => {
@@ -140,7 +136,7 @@ export function MlEmbeddedMapComponent({
 
   return (
     <div
-      data-test-subj="xpack.ml.datavisualizer.embeddedMapPanel"
+      data-test-subj="xpack.ml.dataVisualizer.embeddedMapPanel"
       className="mlEmbeddedMapContent"
       ref={embeddableRoot}
     />

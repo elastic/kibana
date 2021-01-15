@@ -19,14 +19,6 @@ import { ES_GEO_FIELD_TYPE } from '../../../../../../../maps/common/constants';
 import { LayerDescriptor } from '../../../../../../../maps/common/descriptor_types';
 import { useMlKibana } from '../../../../contexts/kibana';
 import { DocumentStatsTable } from '../../../stats_table/components/field_data_expanded_row/document_stats';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MapEmbeddableInput } from '../../../../../../../maps/public/embeddable';
-import { ViewMode } from '../../../../../../../../../src/plugins/embeddable/public';
-import { RenderTooltipContentParams } from '../../../../../../../maps/public';
-
-const renderTooltipContent = (params: RenderTooltipContentParams) => {
-  return <div>Test</div>;
-};
 
 export const GeoPointContent: FC<{
   config: FieldVisConfig;
@@ -71,13 +63,13 @@ export const GeoPointContent: FC<{
   if (stats?.examples === undefined) return null;
   return (
     <EuiFlexGroup data-test-subj={'mlDVIndexBasedMapContent'} gutterSize={'xl'}>
-      {/* <DocumentStatsTable config={config} />*/}
+      <DocumentStatsTable config={config} />
 
-      {/* <EuiFlexItem>*/}
-      {/*  <ExamplesList examples={stats.examples} />*/}
-      {/* </EuiFlexItem>*/}
+      <EuiFlexItem>
+        <ExamplesList examples={stats.examples} />
+      </EuiFlexItem>
       <EuiFlexItem className={'mlDataVisualizerMapWrapper'}>
-        <MlEmbeddedMapComponent layerList={layerList} renderTooltipContent={renderTooltipContent} />
+        <MlEmbeddedMapComponent layerList={layerList} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
