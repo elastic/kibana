@@ -38,7 +38,7 @@ import {
   IHttpFetchError,
   NotificationsStart,
 } from 'src/core/public';
-import { ScopedHistory } from 'kibana/public';
+import type { DocLinksStart, ScopedHistory } from 'kibana/public';
 import { FeaturesPluginStart } from '../../../../../features/public';
 import { KibanaFeature } from '../../../../../features/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
@@ -61,7 +61,6 @@ import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
 import { SecurityLicense } from '../../../../common/licensing';
 import { UserAPIClient } from '../../users';
-import { DocumentationLinksService } from '../documentation_links';
 import { IndicesAPIClient } from '../indices_api_client';
 import { RolesAPIClient } from '../roles_api_client';
 import { PrivilegesAPIClient } from '../privileges_api_client';
@@ -77,7 +76,7 @@ interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   privilegesAPIClient: PublicMethodsOf<PrivilegesAPIClient>;
   getFeatures: FeaturesPluginStart['getFeatures'];
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
   http: HttpStart;
   license: SecurityLicense;
   uiCapabilities: Capabilities;

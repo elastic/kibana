@@ -20,4 +20,9 @@
   .documentsSearchExperience__pagingInfo {
     flex-grow: 0;
   }
+
+  .customizationCallout {
+    background-color: $euiPageBackgroundColor;
+    padding: $euiSizeL;
+  }
 }
