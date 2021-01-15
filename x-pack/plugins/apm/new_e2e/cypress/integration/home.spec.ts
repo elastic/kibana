@@ -11,7 +11,10 @@ describe('Home page', () => {
 
     cy.visit('/app/apm');
 
-    cy.url().should('include','app/apm/services?rangeFrom=now-15m&rangeTo=now')
+    cy.url().should(
+      'include',
+      'app/apm/services?rangeFrom=now-15m&rangeTo=now'
+    );
     cy.get('.euiTabs .euiTab-isSelected').contains('Services');
   });
 });

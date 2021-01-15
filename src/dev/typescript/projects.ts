@@ -35,6 +35,10 @@ export const PROJECTS = [
     name: 'apm/cypress',
     disableTypeCheck: true,
   }),
+  new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/new_e2e/cypress/tsconfig.json'), {
+    name: 'apm/cypress',
+    disableTypeCheck: true,
+  }),
   new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/scripts/tsconfig.json'), {
     name: 'apm/scripts',
     disableTypeCheck: true,
