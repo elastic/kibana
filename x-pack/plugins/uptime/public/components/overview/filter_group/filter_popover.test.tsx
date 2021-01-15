@@ -32,7 +32,9 @@ describe('FilterPopover component', () => {
     const { getByRole, getByLabelText, getByText, queryByLabelText, queryByText } = render(
       <FilterPopover {...props} />
     );
+
     const screenReaderOnlyText = 'You are in a dialog. To close this dialog, hit escape.';
+
     expect(queryByText(screenReaderOnlyText)).toBeNull();
     expect(queryByLabelText('Filter by bar fourth.')).toBeNull();
 
@@ -45,11 +47,14 @@ describe('FilterPopover component', () => {
   it('does not show item list when loading, and displays placeholder', async () => {
     props.loading = true;
     const { getByRole, queryByText, getByLabelText } = render(<FilterPopover {...props} />);
+
     fireEvent.click(getByRole('button'));
+
     await waitFor(() => {
       const search = getByLabelText('Search for test-title');
       expect(search).toHaveAttribute('placeholder', 'Loading...');
     });
+
     expect(queryByText('Filter by test-title second.')).toBeNull();
   });
 
@@ -66,18 +71,23 @@ describe('FilterPopover component', () => {
       props.selectedItems = selectedPropsItems;
 
       const { getByLabelText, queryByLabelText } = render(<FilterPopover {...props} />);
+
       const uptimeFilterButton = getByLabelText(`expands filter group for ${props.title} filter`);
 
       fireEvent.click(uptimeFilterButton);
 
       const generateLabelText = (item: string) => `Filter by ${props.title} ${item}.`;
+
       itemsToClick.forEach((item) => {
         const optionButtonLabelText = generateLabelText(item);
         const optionButton = getByLabelText(optionButtonLabelText);
         fireEvent.click(optionButton);
       });
+
       fireEvent.click(uptimeFilterButton);
+
       await waitForElementToBeRemoved(() => queryByLabelText(generateLabelText(itemsToClick[0])));
+
       expect(props.onFilterFieldChange).toHaveBeenCalledTimes(1);
       expect(props.onFilterFieldChange).toHaveBeenCalledWith(props.fieldName, expectedSelections);
     }
