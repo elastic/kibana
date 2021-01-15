@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  fireEvent,
-  render,
-  RenderResult,
-  waitFor,
-} from '@testing-library/react';
+import { fireEvent, render, RenderResult } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { CustomLinkOverview } from '.';
