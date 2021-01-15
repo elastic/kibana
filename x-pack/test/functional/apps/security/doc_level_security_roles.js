@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const screenshot = getService('screenshots');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'discover', 'settings']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('dls', function () {
     before('initialize tests', async () => {
@@ -26,6 +27,10 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
+
+      await kibanaServer.uiSettings.update({
+        'discover:searchFieldsFromSource': false,
+      });
     });
 
     it('should add new role myroleEast', async function () {
@@ -77,7 +82,7 @@ export default function ({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.be(
-        'name:ABC Company region:EAST _id:doc1 _type:_doc _index:dlstest _score:0'
+        '_id:doc1 _type:_doc _index:dlstest _score:0 region.keyword:EAST name:ABC Company name.keyword:ABC Company region:EAST'
       );
     });
     after('logout', async () => {
