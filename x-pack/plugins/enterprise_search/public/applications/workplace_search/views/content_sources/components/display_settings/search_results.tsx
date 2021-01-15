@@ -20,7 +20,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { DisplaySettingsLogic, UNASSIGNED_FIELD } from './display_settings_logic';
+import { DisplaySettingsLogic } from './display_settings_logic';
+import { LEAVE_UNASSIGNED_FIELD } from './constants';
 
 import { ExampleSearchResultGroup } from './example_search_result_group';
 import { ExampleStandoutResult } from './example_standout_result';
@@ -104,9 +105,9 @@ export const SearchResults: React.FC = () => {
                 className="field-selector"
                 hasNoInitialSelection={true}
                 data-test-subj="SubtitleFieldSelect"
-                value={subtitleField || UNASSIGNED_FIELD}
+                value={subtitleField || LEAVE_UNASSIGNED_FIELD}
                 onChange={({ target: { value } }) =>
-                  setSubtitleField(value === UNASSIGNED_FIELD ? null : value)
+                  setSubtitleField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
                 }
               />
             </EuiFormRow>
@@ -123,9 +124,9 @@ export const SearchResults: React.FC = () => {
                 className="field-selector"
                 hasNoInitialSelection={true}
                 data-test-subj="DescriptionFieldSelect"
-                value={descriptionField || UNASSIGNED_FIELD}
+                value={descriptionField || LEAVE_UNASSIGNED_FIELD}
                 onChange={({ target: { value } }) =>
-                  setDescriptionField(value === UNASSIGNED_FIELD ? null : value)
+                  setDescriptionField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
                 }
               />
             </EuiFormRow>
