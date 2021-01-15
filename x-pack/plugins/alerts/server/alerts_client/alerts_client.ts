@@ -112,7 +112,10 @@ export interface FindOptions extends IndexType {
 export interface FindInstancesOptions extends FindOptions {
   dateStart?: string;
   dateEnd?: string;
-  instanceStatus?: AlertInstanceStatusValues;
+  instances?: {
+    status?: AlertInstanceStatusValues;
+    muted?: boolean;
+  };
 }
 
 export interface AggregateOptions extends IndexType {
@@ -141,11 +144,17 @@ export interface FindResult<Params extends AlertTypeParams> {
   data: Array<SanitizedAlert<Params>>;
 }
 
+export interface AlertInstanceDataFromEventLog {
+  id: string;
+  summary: AlertInstanceStatus;
+  events: IEvent[];
+}
+
 export interface FindInstanceResult<Params extends AlertTypeParams> {
   page: number;
   perPage: number;
   total: number;
-  data: Array<AlertInstanceSummary & { params: Params }>;
+  data: Array<SanitizedAlert<Params> & { instances: AlertInstanceDataFromEventLog[] }>;
 }
 
 export interface CreateOptions<Params extends AlertTypeParams> {
@@ -167,6 +176,8 @@ export interface CreateOptions<Params extends AlertTypeParams> {
     migrationVersion?: Record<string, string>;
   };
 }
+
+const MAX_PAGINATED_ITEM = 10000;
 
 interface UpdateOptions<Params extends AlertTypeParams> {
   id: string;
@@ -450,48 +461,74 @@ export class AlertsClient {
     });
   }
 
-  public async findAlertsInstancesSummaries<Params extends AlertTypeParams = never>({
+  public async findAlertsInstances<Params extends AlertTypeParams = never>({
     options: { fields, ...options } = {},
   }: { options?: FindInstancesOptions } = {}): Promise<FindInstanceResult<Params>> {
     const { page, perPage, total, data: findAlertsResult } = await this.find(
-      omit(options, 'dateStart', 'dateEnd', 'instanceStatus')
+      omit(options, 'dateStart', 'dateEnd', 'instances')
     );
     try {
       const alertIds = findAlertsResult.map((alertObject) => alertObject.id);
       const dateNow = new Date();
-      const parsedDateStart = parseDate(options.dateStart, 'dateStart', dateNow);
-      const parsedDateEnd = parseDate(options.dateStart, 'dateEnd', dateNow);
+      const durationMillis = findAlertsResult.reduce((maxterval: number, alert) => 
+        parseDuration(alert.schedule.interval) > maxterval ? parseDuration(alert.schedule.interval) : maxterval, 0) * 60;
+      const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
+      const parsedDateStart = parseDate(options.dateStart, 'dateStart', defaultDateStart);
+      const parsedDateEnd = parseDate(options.dateEnd, 'dateEnd', dateNow);
 
       const eventLogClient = await this.getEventLogClient();
 
       this.logger.debug(`getInstances(): search the event log for alerts by ids=[${alertIds}]`);
 
-      const alertsSummaryResults = await eventLogClient.findEventsBySavedObjectIds(
+      const alertsSummaryTotalCount = await eventLogClient.findEventsBySavedObjectIds(
         'alert',
         alertIds,
         {
           page: 1,
-          per_page: 10000,
+          per_page: 0,
           start: parsedDateStart.toISOString(),
-          end: parsedDateEnd.toISOString(),
-          sort_order: 'desc',
+          end: parsedDateEnd.toISOString()
         }
       );
-      // paging
-      const events: IEvent[] = alertsSummaryResults.data;
+      const events: IEvent[] = [];
+      let totalCount = alertsSummaryTotalCount.total;
+      let pageNumber = 1;
+      console.log(options.dateStart);
+      while (totalCount > 0) {
+        const maxPageCount = totalCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalCount;
+        const alertsSummaryResults = await eventLogClient.findEventsBySavedObjectIds(
+          'alert',
+          alertIds,
+          {
+            page: pageNumber,
+            per_page: maxPageCount,
+            start: parsedDateStart.toISOString(),
+            end: parsedDateEnd.toISOString(),
+            sort_order: 'desc',
+          }
+        );
+        events.push(...alertsSummaryResults.data);
+        totalCount -= maxPageCount;
+        pageNumber++;
+      }
       const extendedAlertsSummary = findAlertsResult.map((alert: SanitizedAlert) => {
         const alertEvents = events.filter(
-          (alertEvent) =>
-            alertEvent?.kibana?.saved_objects?.find((so) => alert.id === so!.id) !== undefined
+          (alertEvent) => !!alertEvent && !!alertEvent.kibana && !!alertEvent.kibana.saved_objects &&
+            !!alertEvent.kibana.saved_objects.find((saved_object) => !!saved_object && alert.id === saved_object.id)
         );
+        const summary = alertInstanceSummaryFromEventLog({
+          alert,
+          events: alertEvents,
+          dateStart: parsedDateStart.toISOString(),
+          dateEnd: dateNow.toISOString(),
+        })
         return {
-          ...alertInstanceSummaryFromEventLog({
-            alert,
+          ...alert,
+          instances: Object.entries(summary.instances).map(([id, instance]) => ({
+            id,
+            summary: instance,
             events: alertEvents,
-            dateStart: parsedDateStart.toISOString(),
-            dateEnd: dateNow.toISOString(),
-          }),
-          params: alert.params,
+          }))
         };
       });
       return {

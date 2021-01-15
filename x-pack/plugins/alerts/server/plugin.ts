@@ -85,6 +85,7 @@ import {
 } from './health';
 import { AlertsConfig } from './config';
 import { getHealth } from './health/get_health';
+import { findAlertInstancesRoute } from './routes/find_alerts_instances';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -277,6 +278,7 @@ export class AlertingPlugin {
     muteAlertInstanceRoute(router, this.licenseState);
     unmuteAlertInstanceRoute(router, this.licenseState);
     healthRoute(router, this.licenseState, plugins.encryptedSavedObjects);
+    findAlertInstancesRoute(router, this.licenseState);
 
     return {
       registerType<
