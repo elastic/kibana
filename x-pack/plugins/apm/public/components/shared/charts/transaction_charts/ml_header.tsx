@@ -62,7 +62,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
         'xpack.apm.metrics.transactionChart.machineLearningTooltip',
         {
           defaultMessage:
-            'The shaded area shows the expected latency. An red annotation is shown for anomaly scores ≥ 75.',
+            'The shaded area shows the expected latency. A red annotation is shown for anomaly scores ≥ 75.',
         }
       )}
     />
