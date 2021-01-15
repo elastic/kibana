@@ -231,10 +231,11 @@ export const exampleResult = {
   sourceName: 'source',
   searchResultConfig: {
     titleField: 'otherTitle',
+    subtitleField: 'otherSubtitle',
     urlField: 'myLink',
     color: '#e3e3e3',
     descriptionField: 'about',
-    detailFields: [{ fieldName: 'cats', labal: 'Felines' }],
+    detailFields: [{ fieldName: 'cats', label: 'Felines' }],
   },
   titleFieldHover: false,
   urlFieldHover: false,

@@ -40,6 +40,8 @@ jest.mock('react-beautiful-dnd', () => ({
 
 import React from 'react';
 
+import { EuiTextColor } from '@elastic/eui';
+
 import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import { ExampleResultDetailCard } from './example_result_detail_card';
@@ -107,5 +109,24 @@ describe('ResultDetail', () => {
 
     expect(openEditDetailField).toHaveBeenCalled();
     expect(removeDetailField).toHaveBeenCalled();
+    expect(wrapper.find(EuiTextColor).first().text()).toEqual('“Felines”');
+  });
+
+  it('handles empty label fallback', () => {
+    setMockValues({
+      searchResultConfig: {
+        ...searchResultConfig,
+        detailFields: [
+          {
+            fieldName: 'foo',
+          },
+        ],
+      },
+      availableFieldOptions,
+      exampleDocuments,
+    });
+    const wrapper = mount(<ResultDetail />);
+
+    expect(wrapper.find(EuiTextColor).first().text()).toEqual('“”');
   });
 });

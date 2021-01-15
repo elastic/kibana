@@ -69,9 +69,9 @@ describe('FieldEditorModal', () => {
     const wrapper = shallow(<FieldEditorModal />);
     const input = wrapper.find(EuiFieldText);
 
-    input.simulate('change', { target: { value: '' } });
+    input.simulate('change', { target: { value: 'Felines' } });
 
-    expect(input.prop('value')).toEqual('');
+    expect(input.prop('value')).toEqual('Felines');
   });
 
   it('handles form submission when creating', () => {
