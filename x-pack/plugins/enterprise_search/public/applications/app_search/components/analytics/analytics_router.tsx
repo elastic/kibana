@@ -29,6 +29,16 @@ import {
   RECENT_QUERIES,
 } from './constants';
 
+import {
+  Analytics,
+  TopQueries,
+  TopQueriesNoResults,
+  TopQueriesNoClicks,
+  TopQueriesWithClicks,
+  RecentQueries,
+  QueryDetail,
+} from './views';
+
 interface Props {
   engineBreadcrumb: string[];
 }
@@ -39,30 +49,30 @@ export const AnalyticsRouter: React.FC<Props> = ({ engineBreadcrumb }) => {
     <Switch>
       <Route exact path={ENGINE_PATH + ENGINE_ANALYTICS_PATH}>
         <SetPageChrome trail={ANALYTICS_BREADCRUMB} />
-        TODO: Analytics overview
+        <Analytics />
       </Route>
       <Route exact path={ENGINE_PATH + ENGINE_ANALYTICS_TOP_QUERIES_PATH}>
         <SetPageChrome trail={[...ANALYTICS_BREADCRUMB, TOP_QUERIES]} />
-        TODO: Top queries
+        <TopQueries />
       </Route>
       <Route exact path={ENGINE_PATH + ENGINE_ANALYTICS_TOP_QUERIES_NO_RESULTS_PATH}>
         <SetPageChrome trail={[...ANALYTICS_BREADCRUMB, TOP_QUERIES_NO_RESULTS]} />
-        TODO: Top queries with no results
+        <TopQueriesNoResults />
       </Route>
       <Route exact path={ENGINE_PATH + ENGINE_ANALYTICS_TOP_QUERIES_NO_CLICKS_PATH}>
         <SetPageChrome trail={[...ANALYTICS_BREADCRUMB, TOP_QUERIES_NO_CLICKS]} />
-        TODO: Top queries with no clicks
+        <TopQueriesNoClicks />
       </Route>
       <Route exact path={ENGINE_PATH + ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH}>
         <SetPageChrome trail={[...ANALYTICS_BREADCRUMB, TOP_QUERIES_WITH_CLICKS]} />
-        TODO: Top queries with clicks
+        <TopQueriesWithClicks />
       </Route>
       <Route exact path={ENGINE_PATH + ENGINE_ANALYTICS_RECENT_QUERIES_PATH}>
         <SetPageChrome trail={[...ANALYTICS_BREADCRUMB, RECENT_QUERIES]} />
-        TODO: Recent queries
+        <RecentQueries />
       </Route>
       <Route exact path={ENGINE_PATH + ENGINE_ANALYTICS_QUERY_DETAIL_PATH}>
-        TODO: Query detail page
+        <QueryDetail />
       </Route>
       <Route>
         <NotFound breadcrumbs={ANALYTICS_BREADCRUMB} product={APP_SEARCH_PLUGIN} />
