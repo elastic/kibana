@@ -59,7 +59,7 @@ export const createGetLogEntriesQuery = (
   };
 };
 
-const getSortDirection = (
+export const getSortDirection = (
   cursor: LogEntryBeforeCursor | LogEntryAfterCursor | null | undefined
 ): 'asc' | 'desc' => (logEntryBeforeCursorRT.is(cursor) ? 'desc' : 'asc');
 

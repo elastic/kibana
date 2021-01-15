@@ -6,7 +6,7 @@
 
 import { pick } from '@kbn/std';
 import * as rt from 'io-ts';
-import { concat, defer, forkJoin, of } from 'rxjs';
+import { combineLatest, concat, defer, forkJoin, of } from 'rxjs';
 import { concatMap, filter, map, shareReplay, take } from 'rxjs/operators';
 import type {
   IEsSearchRequest,
@@ -49,6 +49,7 @@ import {
 import {
   createGetLogEntriesQuery,
   getLogEntriesResponseRT,
+  getSortDirection,
   LogEntryHit,
 } from './queries/log_entries';
 
@@ -97,8 +98,8 @@ export const logEntriesSearchStrategyProvider = ({
                       configuration.logAlias,
                       params.startTimestamp,
                       params.endTimestamp,
-                      pickCursor(params),
-                      params.size,
+                      pickRequestCursor(params),
+                      params.size + 1,
                       configuration.fields.timestamp,
                       configuration.fields.tiebreaker,
                       messageFormattingRules.requiredFields,
@@ -112,37 +113,44 @@ export const logEntriesSearchStrategyProvider = ({
           )
         );
 
-        return concat(recoveredRequest$, initialRequest$).pipe(
+        const searchResponse$ = concat(recoveredRequest$, initialRequest$).pipe(
           take(1),
-          concatMap((esRequest) => esSearchStrategy.search(esRequest, options, dependencies)),
-          map((esResponse) => ({
-            ...esResponse,
-            rawResponse: decodeOrThrow(getLogEntriesResponseRT)(esResponse.rawResponse),
-          })),
-          concatMap((esResponse) =>
-            forkJoin([sourceConfiguration$, messageFormattingRules$]).pipe(
-              map(([{ configuration }, messageFormattingRules]) => {
-                const entries = esResponse.rawResponse.hits.hits.map(
-                  getLogEntryFromHit(configuration.logColumns, messageFormattingRules)
-                );
-                const topCursor = null; // TODO: determine cursors
-                const bottomCursor = null;
+          concatMap((esRequest) => esSearchStrategy.search(esRequest, options, dependencies))
+        );
 
-                return {
-                  ...esResponse,
-                  ...(esResponse.id
-                    ? { id: logEntriesSearchRequestStateRT.encode({ esRequestId: esResponse.id }) }
-                    : {}),
-                  rawResponse: logEntriesSearchResponsePayloadRT.encode({
-                    data: { entries, topCursor, bottomCursor },
-                    errors: (esResponse.rawResponse._shards.failures ?? []).map(
-                      createErrorFromShardFailure
-                    ),
-                  }),
-                };
-              })
-            )
-          )
+        return combineLatest([searchResponse$, sourceConfiguration$, messageFormattingRules$]).pipe(
+          map(([esResponse, { configuration }, messageFormattingRules]) => {
+            const rawResponse = decodeOrThrow(getLogEntriesResponseRT)(esResponse.rawResponse);
+
+            const entries = rawResponse.hits.hits
+              .slice(0, request.params.size)
+              .map(getLogEntryFromHit(configuration.logColumns, messageFormattingRules));
+
+            const sortDirection = getSortDirection(pickRequestCursor(request.params));
+
+            if (sortDirection === 'desc') {
+              entries.reverse();
+            }
+
+            const hasMore = rawResponse.hits.hits.length > entries.length;
+            const hasMoreBefore = sortDirection === 'desc' ? hasMore : undefined;
+            const hasMoreAfter = sortDirection === 'asc' ? hasMore : undefined;
+
+            const { topCursor, bottomCursor } = getResponseCursors(entries);
+
+            const errors = (rawResponse._shards.failures ?? []).map(createErrorFromShardFailure);
+
+            return {
+              ...esResponse,
+              ...(esResponse.id
+                ? { id: logEntriesSearchRequestStateRT.encode({ esRequestId: esResponse.id }) }
+                : {}),
+              rawResponse: logEntriesSearchResponsePayloadRT.encode({
+                data: { entries, topCursor, bottomCursor, hasMoreBefore, hasMoreAfter },
+                errors,
+              }),
+            };
+          })
         );
       }),
     cancel: async (id, options, dependencies) => {
@@ -196,11 +204,10 @@ const getLogEntryFromHit = (
       }
     ),
     context: getContextFromHit(hit),
-    // fields: Object.entries(hit.fields).map(([field, value]) => ({ field, value })),
   };
 };
 
-const pickCursor = (
+const pickRequestCursor = (
   params: LogEntriesSearchRequestParams
 ): LogEntryAfterCursor | LogEntryBeforeCursor | null => {
   if (logEntryAfterCursorRT.is(params)) {
@@ -228,3 +235,11 @@ const getContextFromHit = (hit: LogEntryHit): LogEntryContext => {
 
   return {};
 };
+
+function getResponseCursors(entries: LogEntry[]) {
+  const hasEntries = entries.length > 0;
+  const topCursor = hasEntries ? entries[0].cursor : null;
+  const bottomCursor = hasEntries ? entries[entries.length - 1].cursor : null;
+
+  return { topCursor, bottomCursor };
+}
