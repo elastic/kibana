@@ -46,10 +46,10 @@ export const Breadcrumb: FunctionComponent<BreadcrumbProps> = ({ children, ...br
     return component;
   }
 
-  return <Breadcrumbs>{component}</Breadcrumbs>;
+  return <BreadcrumbsProvider>{component}</BreadcrumbsProvider>;
 };
 
-export interface BreadcrumbsProps {
+export interface BreadcrumbsProviderProps {
   onChange?: BreadcrumbsChangeHandler;
 }
 
@@ -67,7 +67,10 @@ export type BreadcrumbsChangeHandler = (breadcrumbs: BreadcrumbProps[]) => void;
  * </Breadcrumbs>
  * ```
  */
-export const Breadcrumbs: FunctionComponent<BreadcrumbsProps> = ({ children, onChange }) => {
+export const BreadcrumbsProvider: FunctionComponent<BreadcrumbsProviderProps> = ({
+  children,
+  onChange,
+}) => {
   const { services } = useKibana();
   const breadcrumbsRef = useRef<BreadcrumbProps[]>([]);
 

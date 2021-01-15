@@ -170,6 +170,45 @@ describe('EditUserPage', () => {
     });
   });
 
+  it('warns when user form submission fails', async () => {
+    const coreStart = coreMock.createStart();
+    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
+    const authc = securityMock.createSetup().authc;
+
+    coreStart.http.get.mockResolvedValueOnce(userMock);
+    coreStart.http.get.mockResolvedValueOnce([]);
+    coreStart.http.post.mockRejectedValueOnce(new Error('Error message'));
+
+    const { findByRole, findByLabelText } = render(
+      <Providers services={coreStart} authc={authc} history={history}>
+        <EditUserPage username={userMock.username} />
+      </Providers>
+    );
+
+    fireEvent.change(await findByLabelText('Full name'), { target: { value: 'John Doe' } });
+    fireEvent.change(await findByLabelText('Email address'), {
+      target: { value: 'jdoe@elastic.co' },
+    });
+    fireEvent.click(await findByRole('button', { name: 'Update user' }));
+
+    await waitFor(() => {
+      expect(coreStart.http.get).toHaveBeenCalledWith('/internal/security/users/jdoe');
+      expect(coreStart.http.get).toHaveBeenCalledWith('/api/security/role');
+      expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe', {
+        body: JSON.stringify({
+          ...userMock,
+          full_name: 'John Doe',
+          email: 'jdoe@elastic.co',
+        }),
+      });
+      expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        text: 'Error message',
+        title: "Could not update user 'jdoe'",
+      });
+      expect(history.location.pathname).toBe('/edit/jdoe');
+    });
+  });
+
   it('changes password of other user when submitting form and closes dialog', async () => {
     const coreStart = coreMock.createStart();
     const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
@@ -244,6 +283,90 @@ describe('EditUserPage', () => {
         password: '123456',
       }),
     });
+  });
+
+  it('warns when change password form submission fails', async () => {
+    const coreStart = coreMock.createStart();
+    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
+    const authc = securityMock.createSetup().authc;
+
+    coreStart.http.get.mockResolvedValueOnce(userMock);
+    coreStart.http.get.mockResolvedValueOnce([]);
+    authc.getCurrentUser.mockResolvedValueOnce(
+      mockAuthenticatedUser({ ...userMock, username: 'elastic' })
+    );
+    coreStart.http.post.mockRejectedValueOnce(new Error('Error message'));
+
+    const { findByRole } = render(
+      <Providers services={coreStart} authc={authc} history={history}>
+        <EditUserPage username={userMock.username} />
+      </Providers>
+    );
+
+    fireEvent.click(await findByRole('button', { name: 'Change password' }));
+
+    const dialog = await findByRole('dialog');
+    fireEvent.change(await within(dialog).findByLabelText('New password'), {
+      target: { value: 'changeme' },
+    });
+    fireEvent.change(await within(dialog).findByLabelText('Confirm password'), {
+      target: { value: 'changeme' },
+    });
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Change password' }));
+
+    await waitFor(() => {
+      expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        text: 'Error message',
+        title: 'Could not change password',
+      });
+    });
+  });
+
+  it('validates change password form', async () => {
+    const coreStart = coreMock.createStart();
+    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
+    const authc = securityMock.createSetup().authc;
+
+    coreStart.http.get.mockResolvedValueOnce(userMock);
+    coreStart.http.get.mockResolvedValueOnce([]);
+    authc.getCurrentUser.mockResolvedValueOnce(mockAuthenticatedUser(userMock));
+    coreStart.http.post.mockResolvedValueOnce({});
+
+    const { findByRole } = render(
+      <Providers services={coreStart} authc={authc} history={history}>
+        <EditUserPage username={userMock.username} />
+      </Providers>
+    );
+
+    fireEvent.click(await findByRole('button', { name: 'Change password' }));
+
+    const dialog = await findByRole('dialog');
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Change password' }));
+
+    await within(dialog).findByText(/Please enter your current password/i);
+    await within(dialog).findByText(/Please enter a new password/i);
+
+    fireEvent.change(await within(dialog).findByLabelText('Current password'), {
+      target: { value: 'changeme' },
+    });
+
+    fireEvent.change(await within(dialog).findByLabelText('New password'), {
+      target: { value: '111' },
+    });
+
+    await within(dialog).findAllByText(/Password must be at least 6 characters/i);
+
+    fireEvent.change(await within(dialog).findByLabelText('New password'), {
+      target: { value: '123456' },
+    });
+
+    await within(dialog).findAllByText(/Please confirm your new password/i);
+
+    fireEvent.change(await within(dialog).findByLabelText('Confirm password'), {
+      target: { value: '111' },
+    });
+
+    await within(dialog).findAllByText(/Passwords do not match/i);
   });
 
   it('deactivates user when confirming and closes dialog', async () => {

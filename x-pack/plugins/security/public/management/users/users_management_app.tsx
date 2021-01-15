@@ -9,13 +9,14 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Route, Switch, Redirect, RouteComponentProps } from 'react-router-dom';
 import { History } from 'history';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 import { StartServicesAccessor, CoreStart } from '../../../../../../src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { AuthenticationServiceSetup } from '../../authentication';
 import { PluginStartDependencies } from '../../plugin';
 import {
-  Breadcrumbs,
+  BreadcrumbsProvider,
   BreadcrumbsChangeHandler,
   Breadcrumb,
   getDocTitle,
@@ -136,11 +137,11 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
 }) => (
   <KibanaContextProvider services={services}>
     <AuthenticationProvider authc={authc}>
-      <services.i18n.Context>
+      <I18nProvider>
         <Router history={history}>
-          <Breadcrumbs onChange={onChange}>{children}</Breadcrumbs>
+          <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
         </Router>
-      </services.i18n.Context>
+      </I18nProvider>
     </AuthenticationProvider>
   </KibanaContextProvider>
 );

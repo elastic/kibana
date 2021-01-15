@@ -49,7 +49,7 @@ export const ConfirmModal: FunctionComponent<ConfirmModalProps> = ({
   ...rest
 }) => {
   const modal = (
-    <EuiModal role="dialog" onClose={onCancel} {...rest}>
+    <EuiModal role="dialog" title={title} onClose={onCancel} {...rest}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>

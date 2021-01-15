@@ -91,7 +91,7 @@ export const RoleComboBox = (props: Props) => {
   return (
     <EuiComboBox
       data-test-subj="rolesDropdown"
-      id="rolesDropdown"
+      id={props.id}
       placeholder={
         props.placeholder ||
         i18n.translate('xpack.security.management.users.roleComboBox.placeholder', {

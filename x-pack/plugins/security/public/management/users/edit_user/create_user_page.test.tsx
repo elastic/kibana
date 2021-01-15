@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { securityMock } from '../../../mocks';
@@ -48,5 +48,64 @@ describe('CreateUserPage', () => {
       });
       expect(history.location.pathname).toBe('/');
     });
+  });
+
+  it('validates form', async () => {
+    const coreStart = coreMock.createStart();
+    const history = createMemoryHistory({ initialEntries: ['/create'] });
+    const authc = securityMock.createSetup().authc;
+
+    coreStart.http.get.mockResolvedValueOnce([]);
+    coreStart.http.get.mockResolvedValueOnce([
+      {
+        username: 'existing_username',
+        full_name: '',
+        email: '',
+        enabled: true,
+        roles: ['superuser'],
+      },
+    ]);
+
+    const { findAllByText, findByRole, findByLabelText } = render(
+      <Providers services={coreStart} authc={authc} history={history}>
+        <CreateUserPage />
+      </Providers>
+    );
+
+    fireEvent.click(await findByRole('button', { name: 'Create user' }));
+
+    const alert = await findByRole('alert');
+    within(alert).getByText(/Please enter a username/i);
+    within(alert).getByText(/Please enter a password/i);
+
+    fireEvent.change(await findByLabelText('Username'), { target: { value: 'existing_username' } });
+
+    await findAllByText(/User 'existing_username' already exists/i);
+
+    fireEvent.change(await findByLabelText('Username'), {
+      target: { value: ' username_with_leading_space' },
+    });
+
+    await findAllByText(/Username must not contain leading or trailing spaces/i);
+
+    fireEvent.change(await findByLabelText('Username'), {
+      target: { value: '€' },
+    });
+
+    await findAllByText(
+      /Username must contain only letters, numbers, spaces, punctuation and printable symbols/i
+    );
+
+    fireEvent.change(await findByLabelText('Password'), { target: { value: '111' } });
+
+    await findAllByText(/Password must be at least 6 characters/i);
+
+    fireEvent.change(await findByLabelText('Password'), { target: { value: '123456' } });
+
+    await findAllByText(/Please confirm your password/i);
+
+    fireEvent.change(await findByLabelText('Confirm password'), { target: { value: '111' } });
+
+    await findAllByText(/Passwords do not match/i);
   });
 });

@@ -6,7 +6,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 import { AuthenticatedUser, Role } from '../../../plugins/security/common/model';
-import { UserFormValues } from '../../../plugins/security/public/management/users/edit_user/user_form';
+import type { UserFormValues } from '../../../plugins/security/public/management/users/edit_user/user_form';
 
 export function SecurityPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');

@@ -55,7 +55,6 @@ describe('RoleComboBox', () => {
         compressed={false}
         data-test-subj="rolesDropdown"
         fullWidth={false}
-        id="rolesDropdown"
         isClearable={true}
         onChange={[Function]}
         options={
