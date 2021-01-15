@@ -4,18 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
+import { APMChartSpec, Coordinate } from '../../../../../typings/timeseries';
 import { TimeFormatter } from '../../../../../common/utils/formatters';
 
 export function getResponseTimeTickFormatter(formatter: TimeFormatter) {
   return (t: number) => formatter(t).formatted;
 }
 
-export function getMaxY(timeSeries?: Array<TimeSeries<Coordinate>>) {
-  if (timeSeries) {
-    const coordinates = timeSeries.flatMap((serie) => serie.data);
-    const numbers = coordinates.map((c) => (c.y ? c.y : 0));
-    return Math.max(...numbers, 0);
+export function getMaxY(specs?: Array<APMChartSpec<Coordinate>>) {
+  const values = specs
+    ?.flatMap((spec) => spec.data)
+    .map((coord) => coord.y)
+    .filter(isFiniteNumber);
+
+  if (values?.length) {
+    return Math.max(...values, 0);
   }
   return 0;
 }
