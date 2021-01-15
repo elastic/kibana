@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import util from 'util';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const TEST_POLICY_NAME = 'ilm-a11y-test';
