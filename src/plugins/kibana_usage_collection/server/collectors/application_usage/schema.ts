@@ -50,7 +50,6 @@ const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
 
 // There is a test in x-pack/test/usage_collection that validates that the keys in here match all the registered apps
 export const applicationUsageSchema = {
-  to_delete: commonSchema, // To be deleted (only to make CI fail)
   // OSS
   dashboards: commonSchema,
   dev_tools: commonSchema,
