@@ -22,7 +22,7 @@ export const IpContent: FC<FieldDataRowProps> = ({ config }) => {
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize={'xl'}>
       <DocumentStatsTable config={config} />
       <EuiFlexItem>
         <ExpandedRowFieldHeader>
