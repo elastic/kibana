@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../__mocks__/kea.mock';
+import { setMockValues } from '../../__mocks__/kea.mock';
 
 import React from 'react';
-import { useValues } from 'kea';
 import { shallow } from 'enzyme';
 
 import { EuiButton as EuiButtonExternal, EuiEmptyPrompt } from '@elastic/eui';
@@ -45,7 +44,7 @@ describe('NotFound', () => {
   });
 
   it('changes the support URL if the user has a gold+ license', () => {
-    (useValues as jest.Mock).mockReturnValueOnce({ hasGoldLicense: true });
+    setMockValues({ hasGoldLicense: true });
     const wrapper = shallow(<NotFound product={APP_SEARCH_PLUGIN} />);
     const prompt = wrapper.find(EuiEmptyPrompt).dive().shallow();
 
