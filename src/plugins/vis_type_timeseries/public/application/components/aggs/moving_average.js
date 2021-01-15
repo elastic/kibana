@@ -53,7 +53,7 @@ const shouldShowHint = ({ model_type: type, window, period }) =>
   type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE && period * 2 > window;
 
 export const MovingAverageAgg = (props) => {
-  const { siblings } = props;
+  const { siblings, fields, indexPattern } = props;
 
   const model = { ...DEFAULTS, ...props.model };
   const modelOptions = [
@@ -153,6 +153,7 @@ export const MovingAverageAgg = (props) => {
               onChange={handleSelectChange('field')}
               metrics={siblings}
               metric={model}
+              fields={fields[indexPattern]}
               value={model.field}
               exclude={[METRIC_TYPES.TOP_HIT]}
             />
@@ -315,6 +316,7 @@ export const MovingAverageAgg = (props) => {
 MovingAverageAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
+  indexPattern: PropTypes.string,
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onChange: PropTypes.func,

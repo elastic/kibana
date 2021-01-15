@@ -50,9 +50,9 @@ import { buildTimeRangeFilter } from './helpers';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
-  canUserCRUD: boolean;
   defaultFilters?: Filter[];
   hasIndexWrite: boolean;
+  hasIndexMaintenance: boolean;
   from: string;
   loading: boolean;
   onRuleChange?: () => void;
@@ -65,7 +65,6 @@ type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   timelineId,
-  canUserCRUD,
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
@@ -74,6 +73,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   globalFilters,
   globalQuery,
   hasIndexWrite,
+  hasIndexMaintenance,
   isSelectAllChecked,
   loading,
   loadingEventIds,
@@ -259,10 +259,10 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     (refetchQuery: inputsModel.Refetch, totalCount: number) => {
       return (
         <AlertsUtilityBar
-          canUserCRUD={canUserCRUD}
           areEventsLoading={loadingEventIds.length > 0}
           clearSelection={clearSelectionCallback}
           hasIndexWrite={hasIndexWrite}
+          hasIndexMaintenance={hasIndexMaintenance}
           currentFilter={filterGroup}
           selectAll={selectAllOnAllPagesCallback}
           selectedEventIds={selectedEventIds}
@@ -275,8 +275,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       );
     },
     [
-      canUserCRUD,
       hasIndexWrite,
+      hasIndexMaintenance,
       clearSelectionCallback,
       filterGroup,
       showBuildingBlockAlerts,

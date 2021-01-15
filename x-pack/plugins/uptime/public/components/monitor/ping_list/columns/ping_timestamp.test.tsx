@@ -5,16 +5,26 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, renderWithIntl } from '@kbn/test/jest';
-import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 import { PingTimestamp } from './ping_timestamp';
 import { mockReduxHooks } from '../../../../lib/helper/test_helpers';
+import { render } from '../../../../lib/helper/rtl_helpers';
 import { Ping } from '../../../../../common/runtime_types/ping';
+import * as observabilityPublic from '../../../../../../observability/public';
 
 mockReduxHooks();
 
+jest.mock('../../../../../../observability/public', () => {
+  const originalModule = jest.requireActual('../../../../../../observability/public');
+
+  return {
+    ...originalModule,
+    useFetcher: jest.fn().mockReturnValue({ data: null, status: 'pending' }),
+  };
+});
+
 describe('Ping Timestamp component', () => {
   let response: Ping;
+  const { FETCH_STATUS } = observabilityPublic;
 
   beforeAll(() => {
     response = {
@@ -49,19 +59,37 @@ describe('Ping Timestamp component', () => {
     };
   });
 
-  it('shallow render without errors', () => {
-    const component = shallowWithIntl(
+  it.each([[FETCH_STATUS.PENDING], [FETCH_STATUS.LOADING]])(
+    'displays spinner when loading step image',
+    (fetchStatus) => {
+      jest
+        .spyOn(observabilityPublic, 'useFetcher')
+        .mockReturnValue({ status: fetchStatus, data: null, refetch: () => null });
+      const { getByTestId } = render(
+        <PingTimestamp ping={response} timestamp={response.timestamp} />
+      );
+      expect(getByTestId('pingTimestampSpinner')).toBeInTheDocument();
+    }
+  );
+
+  it('displays no image available when img src is unavailable and fetch status is successful', () => {
+    jest
+      .spyOn(observabilityPublic, 'useFetcher')
+      .mockReturnValue({ status: FETCH_STATUS.SUCCESS, data: null, refetch: () => null });
+    const { getByTestId } = render(
       <PingTimestamp ping={response} timestamp={response.timestamp} />
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId('pingTimestampNoImageAvailable')).toBeInTheDocument();
   });
 
-  it('render without errors', () => {
-    const component = renderWithIntl(
-      <EuiThemeProvider darkMode={false}>
-        <PingTimestamp ping={response} timestamp={response.timestamp} />
-      </EuiThemeProvider>
-    );
-    expect(component).toMatchSnapshot();
+  it('displays image when img src is available from useFetcher', () => {
+    const src = 'http://sample.com/sampleImageSrc.png';
+    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+      status: FETCH_STATUS.SUCCESS,
+      data: { src },
+      refetch: () => null,
+    });
+    const { container } = render(<PingTimestamp ping={response} timestamp={response.timestamp} />);
+    expect(container.querySelector('img')?.src).toBe(src);
   });
 });
