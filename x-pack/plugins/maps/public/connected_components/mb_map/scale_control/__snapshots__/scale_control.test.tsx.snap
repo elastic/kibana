@@ -9,7 +9,7 @@ exports[`isFullScreen 1`] = `
     }
   }
 >
-  50 km
+  ~50 km
 </div>
 `;
 
@@ -22,6 +22,6 @@ exports[`render 1`] = `
     }
   }
 >
-  50 km
+  ~50 km
 </div>
 `;

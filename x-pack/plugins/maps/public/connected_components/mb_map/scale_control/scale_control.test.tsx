@@ -7,7 +7,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { ScaleControl } from './scale_control';
-import { LngLat, Map as MapboxMap, PointLike } from 'mapbox-gl';
+import { LngLat, LngLatBounds, Map as MapboxMap, PointLike } from 'mapbox-gl';
 
 const CLIENT_HEIGHT_PIXELS = 1200;
 const DISTANCE_METERS = 87653;
@@ -24,6 +24,19 @@ const mockMBMap = ({
     return {
       clientHeight: CLIENT_HEIGHT_PIXELS,
     };
+  },
+  getZoom: () => {
+    return 4;
+  },
+  getBounds: () => {
+    return ({
+      getNorth: () => {
+        return 75;
+      },
+      getSouth: () => {
+        return -60
+      }
+    } as unknown) as LngLatBounds;
   },
   unproject: (point: PointLike) => {
     return ({
