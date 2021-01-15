@@ -204,7 +204,7 @@ describe('SettingsLogic', () => {
 
       it('calls API and sets values', async () => {
         const promise = Promise.resolve({});
-        http.delete.mockReturnValue({});
+        http.delete.mockReturnValue(promise);
         SettingsLogic.actions.deleteSourceConfig(SERVICE_TYPE, NAME);
 
         await promise;
