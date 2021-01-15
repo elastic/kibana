@@ -84,7 +84,7 @@ interface DisplaySettingsValues {
   unsavedChanges: boolean;
 }
 
-const defaultSearchResultConfig = {
+export const defaultSearchResultConfig = {
   titleField: '',
   subtitleField: '',
   descriptionField: '',
