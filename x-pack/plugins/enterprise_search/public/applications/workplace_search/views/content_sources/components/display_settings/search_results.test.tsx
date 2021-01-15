@@ -17,6 +17,7 @@ import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 import { ExampleSearchResultGroup } from './example_search_result_group';
 import { ExampleStandoutResult } from './example_standout_result';
 
+import { LEAVE_UNASSIGNED_FIELD } from './constants';
 import { SearchResults } from './search_results';
 
 describe('SearchResults', () => {
@@ -112,10 +113,10 @@ describe('SearchResults', () => {
     const wrapper = shallow(<SearchResults />);
     wrapper
       .find('[data-test-subj="SubtitleFieldSelect"]')
-      .simulate('change', { target: { value: '' } });
+      .simulate('change', { target: { value: LEAVE_UNASSIGNED_FIELD } });
     wrapper
       .find('[data-test-subj="DescriptionFieldSelect"]')
-      .simulate('change', { target: { value: '' } });
+      .simulate('change', { target: { value: LEAVE_UNASSIGNED_FIELD } });
 
     expect(wrapper.find('[data-test-subj="UrlFieldSelect"]').prop('value')).toEqual('');
     expect(setSubtitleField).toHaveBeenCalledWith(null);
