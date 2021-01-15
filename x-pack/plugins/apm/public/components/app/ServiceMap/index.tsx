@@ -7,10 +7,10 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React, { PropsWithChildren, ReactNode } from 'react';
 import styled from 'styled-components';
+import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { useTrackPageview } from '../../../../../observability/public';
 import {
   invalidLicenseMessage,
-  isActivePlatinumLicense,
   SERVICE_MAP_TIMEOUT_ERROR,
 } from '../../../../common/service_map';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -39,21 +39,34 @@ const ServiceMapDatePickerFlexGroup = styled(EuiFlexGroup)`
   margin: 0;
 `;
 
+function DatePickerSection() {
+  return (
+    <ServiceMapDatePickerFlexGroup justifyContent="flexEnd" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <DatePicker />
+      </EuiFlexItem>
+    </ServiceMapDatePickerFlexGroup>
+  );
+}
+
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      justifyContent="spaceAround"
-      // Set the height to give it some top margin
-      style={{ height: '60vh' }}
-    >
-      <EuiFlexItem
-        grow={false}
-        style={{ width: 600, textAlign: 'center' as const }}
+    <>
+      <DatePickerSection />
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceAround"
+        // Set the height to give it some top margin
+        style={{ height: '60vh' }}
       >
-        {children}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        <EuiFlexItem
+          grow={false}
+          style={{ width: 600, textAlign: 'center' as const }}
+        >
+          {children}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }
 
@@ -137,11 +150,7 @@ export function ServiceMap({
 
   return (
     <>
-      <ServiceMapDatePickerFlexGroup justifyContent="flexEnd" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <DatePicker />
-        </EuiFlexItem>
-      </ServiceMapDatePickerFlexGroup>
+      <DatePickerSection />
       <div data-test-subj="ServiceMap" style={{ height }} ref={ref}>
         <Cytoscape
           elements={data.elements}

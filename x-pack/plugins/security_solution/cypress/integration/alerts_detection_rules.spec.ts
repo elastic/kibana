@@ -31,21 +31,20 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { DEFAULT_RULE_REFRESH_INTERVAL_VALUE } from '../../common/constants';
 
 import { DETECTIONS_URL } from '../urls/navigation';
-import { createCustomRule, removeSignalsIndex } from '../tasks/api_calls/rules';
+import { createCustomRule } from '../tasks/api_calls/rules';
 import { cleanKibana } from '../tasks/common';
 import { existingRule, newOverrideRule, newRule, newThresholdRule } from '../objects/rule';
 
 describe('Alerts detection rules', () => {
   beforeEach(() => {
     cleanKibana();
-    removeSignalsIndex();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule, 'rule1');
-    createCustomRule(existingRule, 'rule2');
-    createCustomRule(newOverrideRule, 'rule3');
-    createCustomRule(newThresholdRule, 'rule4');
+    createCustomRule(newRule, '1');
+    createCustomRule(existingRule, '2');
+    createCustomRule(newOverrideRule, '3');
+    createCustomRule(newThresholdRule, '4');
   });
 
   after(() => {

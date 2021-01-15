@@ -13,7 +13,7 @@ import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
 import { EnhancedSearchInterceptor } from './search/search_interceptor';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
-import { createConnectedBackgroundSessionIndicator } from './search';
+import { createConnectedSearchSessionIndicator } from './search';
 import { ConfigSchema } from '../config';
 
 export interface DataEnhancedSetupDependencies {
@@ -62,11 +62,11 @@ export class DataEnhancedPlugin
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
     setAutocompleteService(plugins.data.autocomplete);
 
-    if (this.initializerContext.config.get().search.sendToBackground.enabled) {
+    if (this.initializerContext.config.get().search.sessions.enabled) {
       core.chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
           React.createElement(
-            createConnectedBackgroundSessionIndicator({
+            createConnectedSearchSessionIndicator({
               sessionService: plugins.data.search.session,
               application: core.application,
               timeFilter: plugins.data.query.timefilter.timefilter,

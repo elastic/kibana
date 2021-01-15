@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
+import { LogicMounter } from '../../../__mocks__/kea.mock';
 
 import { mockHttpValues } from '../../../__mocks__';
 jest.mock('../../../shared/http', () => ({
@@ -28,7 +28,6 @@ describe('EngineOverviewLogic', () => {
     apiLogsUnavailable: true,
     documentCount: 10,
     startDate: '1970-01-30',
-    endDate: '1970-01-31',
     operationsPerDay: [0, 0, 0, 0, 0, 0, 0],
     queriesPerDay: [0, 0, 0, 0, 0, 25, 50],
     totalClicks: 50,
@@ -40,7 +39,6 @@ describe('EngineOverviewLogic', () => {
     apiLogsUnavailable: false,
     documentCount: 0,
     startDate: '',
-    endDate: '',
     operationsPerDay: [],
     queriesPerDay: [],
     totalClicks: 0,
@@ -48,10 +46,7 @@ describe('EngineOverviewLogic', () => {
     timeoutId: null,
   };
 
-  const mount = () => {
-    resetContext({});
-    EngineOverviewLogic.mount();
-  };
+  const { mount, unmount } = new LogicMounter(EngineOverviewLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -141,12 +136,9 @@ describe('EngineOverviewLogic', () => {
   });
 
   describe('unmount', () => {
-    let unmount: Function;
-
     beforeEach(() => {
       jest.useFakeTimers();
-      resetContext({});
-      unmount = EngineOverviewLogic.mount();
+      mount();
     });
 
     it('clears existing polling timeouts on unmount', () => {

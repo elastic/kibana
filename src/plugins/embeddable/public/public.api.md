@@ -216,7 +216,7 @@ export const CONTEXT_MENU_TRIGGER = "CONTEXT_MENU_TRIGGER";
 // Warning: (ae-missing-release-tag) "contextMenuTrigger" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'>;
+export const contextMenuTrigger: Trigger;
 
 // Warning: (ae-missing-release-tag) "defaultEmbeddableFactoryProvider" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -299,10 +299,8 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     static runtimeId: number;
     // (undocumented)
     readonly runtimeId: number;
-    // Warning: (ae-forgotten-export) The symbol "TriggerContextMapping" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    supportedTriggers(): Array<keyof TriggerContextMapping>;
+    supportedTriggers(): string[];
     // (undocumented)
     abstract readonly type: string;
     // (undocumented)
@@ -664,7 +662,7 @@ export interface IEmbeddable<I extends EmbeddableInput = EmbeddableInput, O exte
     reload(): void;
     render(domNode: HTMLElement | Element): void;
     readonly runtimeId?: number;
-    supportedTriggers(): Array<keyof TriggerContextMapping>;
+    supportedTriggers(): string[];
     readonly type: string;
     updateInput(changes: Partial<I>): void;
 }
@@ -742,7 +740,7 @@ export const PANEL_NOTIFICATION_TRIGGER = "PANEL_NOTIFICATION_TRIGGER";
 // Warning: (ae-missing-release-tag) "panelBadgeTrigger" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'>;
+export const panelBadgeTrigger: Trigger;
 
 // Warning: (ae-missing-release-tag) "PanelNotFoundError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -756,7 +754,7 @@ export class PanelNotFoundError extends Error {
 // Warning: (ae-missing-release-tag) "panelNotificationTrigger" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'>;
+export const panelNotificationTrigger: Trigger;
 
 // Warning: (ae-missing-release-tag) "PanelState" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

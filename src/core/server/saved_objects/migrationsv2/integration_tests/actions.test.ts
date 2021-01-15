@@ -940,6 +940,7 @@ describe('migration actions', () => {
 
       setTimeout(() => {
         client.indices.putSettings({
+          index: 'yellow_then_green_index',
           body: {
             // @ts-expect-error
             index: {

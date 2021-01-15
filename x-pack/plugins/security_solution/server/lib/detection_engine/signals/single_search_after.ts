@@ -5,7 +5,11 @@
  */
 
 import { performance } from 'perf_hooks';
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { BuildRuleMessage } from './rule_messages';
@@ -22,7 +26,7 @@ interface SingleSearchAfterParams {
   index: string[];
   from: string;
   to: string;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   pageSize: number;
   sortOrder?: SortOrderOrUndefined;

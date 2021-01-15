@@ -22,10 +22,13 @@ import { InventoryItemType } from '../../../../../../common/inventory_models/typ
 import { NodeContextPopover } from '../node_details/overlay';
 
 import { NodeContextMenu } from './node_context_menu';
+import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
+import { findInventoryFields } from '../../../../../../common/inventory_models';
 
 const initialState = {
   isPopoverOpen: false,
   isOverlayOpen: false,
+  isAlertFlyoutVisible: false,
 };
 
 type State = Readonly<typeof initialState>;
@@ -44,7 +47,7 @@ export const Node = class extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
     const { nodeType, node, options, squareSize, bounds, formatter, currentTime } = this.props;
-    const { isPopoverOpen } = this.state;
+    const { isPopoverOpen, isAlertFlyoutVisible } = this.state;
     const metric = first(node.metrics);
     const valueMode = squareSize > 70;
     const ellipsisMode = squareSize > 30;
@@ -103,6 +106,7 @@ export const Node = class extends React.PureComponent<Props, State> {
           </ConditionalToolTip>
         </NodeContextMenu>
         <NodeContextPopover
+          openAlertFlyout={this.openAlertFlyout}
           node={node}
           nodeType={nodeType}
           isOpen={this.state.isOverlayOpen}
@@ -110,9 +114,33 @@ export const Node = class extends React.PureComponent<Props, State> {
           currentTime={currentTime}
           onClose={this.toggleNewOverlay}
         />
+        <AlertFlyout
+          filter={
+            options.fields
+              ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
+              : ''
+          }
+          options={options}
+          nodeType={nodeType}
+          setVisible={this.setAlertFlyoutVisible}
+          visible={isAlertFlyoutVisible}
+        />
       </>
     );
   }
+
+  private openAlertFlyout = () => {
+    this.setState({
+      isOverlayOpen: false,
+      isAlertFlyoutVisible: true,
+    });
+  };
+
+  private setAlertFlyoutVisible = (isOpen: boolean) => {
+    this.setState({
+      isAlertFlyoutVisible: isOpen,
+    });
+  };
 
   private togglePopover = () => {
     const { nodeType } = this.props;

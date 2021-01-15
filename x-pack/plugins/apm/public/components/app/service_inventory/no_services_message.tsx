@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { KibanaLink } from '../../shared/Links/KibanaLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ErrorStatePrompt } from '../../shared/ErrorStatePrompt';
+import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 
 interface Props {
   // any data submitted from APM agents found (not just in the given time range)
@@ -20,6 +20,8 @@ interface Props {
 }
 
 export function NoServicesMessage({ historicalDataFound, status }: Props) {
+  const upgradeAssistantHref = useUpgradeAssistantHref();
+
   if (status === 'loading') {
     return <LoadingStatePrompt />;
   }
@@ -66,12 +68,12 @@ export function NoServicesMessage({ historicalDataFound, status }: Props) {
               defaultMessage:
                 'You may also have old data that needs to be migrated.',
             })}{' '}
-            <KibanaLink path="/management/stack/upgrade_assistant">
+            <EuiLink href={upgradeAssistantHref}>
               {i18n.translate('xpack.apm.servicesTable.UpgradeAssistantLink', {
                 defaultMessage:
                   'Learn more by visiting the Kibana Upgrade Assistant',
               })}
-            </KibanaLink>
+            </EuiLink>
             .
           </p>
         </React.Fragment>

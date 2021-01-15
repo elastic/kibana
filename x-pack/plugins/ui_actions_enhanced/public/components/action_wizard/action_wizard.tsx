@@ -32,7 +32,7 @@ import {
 } from './i18n';
 import './action_wizard.scss';
 import { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
-import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
+import { Trigger } from '../../../../../../src/plugins/ui_actions/public';
 
 export interface ActionWizardProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
@@ -73,14 +73,14 @@ export interface ActionWizardProps<
    * Trigger selection has changed
    * @param triggers
    */
-  onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
+  onSelectedTriggersChange: (triggers?: string[]) => void;
 
-  getTriggerInfo: (triggerId: TriggerId) => Trigger;
+  getTriggerInfo: (triggerId: string) => Trigger;
 
   /**
    * List of possible triggers in current context
    */
-  triggers: TriggerId[];
+  triggers: string[];
 
   triggerPickerDocsLink?: string;
 }
@@ -148,10 +148,10 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
 };
 
 interface TriggerPickerProps {
-  triggers: TriggerId[];
-  selectedTriggers?: TriggerId[];
-  getTriggerInfo: (triggerId: TriggerId) => Trigger;
-  onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
+  triggers: string[];
+  selectedTriggers?: string[];
+  getTriggerInfo: (triggerId: string) => Trigger;
+  onSelectedTriggersChange: (triggers?: string[]) => void;
   triggerPickerDocsLink?: string;
 }
 
@@ -224,9 +224,9 @@ interface SelectedActionFactoryProps<
   onConfigChange: (config: BaseActionConfig) => void;
   showDeselect: boolean;
   onDeselect: () => void;
-  allTriggers: TriggerId[];
-  getTriggerInfo: (triggerId: TriggerId) => Trigger;
-  onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
+  allTriggers: string[];
+  getTriggerInfo: (triggerId: string) => Trigger;
+  onSelectedTriggersChange: (triggers?: string[]) => void;
   triggerPickerDocsLink?: string;
 }
 
@@ -379,7 +379,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
 
 function getTriggersForActionFactory(
   actionFactory: ActionFactory,
-  allTriggers: TriggerId[]
-): TriggerId[] {
+  allTriggers: string[]
+): string[] {
   return actionFactory.supportedTriggers().filter((trigger) => allTriggers.includes(trigger));
 }

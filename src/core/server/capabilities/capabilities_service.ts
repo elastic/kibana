@@ -76,7 +76,19 @@ export interface CapabilitiesSetup {
    * ```ts
    * // my-plugin/server/plugin.ts
    * public setup(core: CoreSetup, deps: {}) {
-   *    core.capabilities.registerSwitcher((request, capabilities) => {
+   *    core.capabilities.registerSwitcher((request, capabilities, useDefaultCapabilities) => {
+   *      // useDefaultCapabilities is a special case that switchers typically don't have to concern themselves with.
+   *      // The default capabilities are typically the ones you provide in your CapabilitiesProvider, but this flag
+   *      // gives each switcher an opportunity to change the default capabilities of other plugins' capabilities.
+   *      // For example, you may decide to flip another plugin's capability to false if today is Tuesday,
+   *      // but you wouldn't want to do this when we are requesting the default set of capabilities.
+   *      if (useDefaultCapabilities) {
+   *        return {
+   *          somePlugin: {
+   *            featureEnabledByDefault: true
+   *          }
+   *        }
+   *      }
    *      if(myPluginApi.shouldRestrictSomePluginBecauseOf(request)) {
    *        return {
    *          somePlugin: {
@@ -93,6 +105,18 @@ export interface CapabilitiesSetup {
 }
 
 /**
+ * Defines a set of additional options for the `resolveCapabilities` method of {@link CapabilitiesStart}.
+ *
+ * @public
+ */
+export interface ResolveCapabilitiesOptions {
+  /**
+   * Indicates if capability switchers are supposed to return a default set of capabilities.
+   */
+  useDefaultCapabilities: boolean;
+}
+
+/**
  * APIs to access the application {@link Capabilities}.
  *
  * @public
@@ -101,7 +125,10 @@ export interface CapabilitiesStart {
   /**
    * Resolve the {@link Capabilities} to be used for given request
    */
-  resolveCapabilities(request: KibanaRequest): Promise<Capabilities>;
+  resolveCapabilities(
+    request: KibanaRequest,
+    options?: ResolveCapabilitiesOptions
+  ): Promise<Capabilities>;
 }
 
 interface SetupDeps {
@@ -150,7 +177,8 @@ export class CapabilitiesService {
 
   public start(): CapabilitiesStart {
     return {
-      resolveCapabilities: (request) => this.resolveCapabilities(request, []),
+      resolveCapabilities: (request, options) =>
+        this.resolveCapabilities(request, [], options?.useDefaultCapabilities ?? false),
     };
   }
 }
