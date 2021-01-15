@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(isInstalled).to.be(false);
     });
 
-    it.only('Saves and restores a session with relative time ranges', async () => {
+    it('Saves and restores a session with relative time ranges', async () => {
       await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
       await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.timePicker.pauseAutoRefresh(); // sample data has auto-refresh on
