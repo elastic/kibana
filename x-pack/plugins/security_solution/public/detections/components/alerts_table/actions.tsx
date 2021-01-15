@@ -272,23 +272,9 @@ export const sendAlertToTimelineAction = async ({
       notes: null,
       timeline: {
         ...timelineDefaults,
+        description: `_id: ${ecsData._id}`,
         filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
-        dataProviders: [
-          {
-            and: [],
-            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${ecsData._id}`,
-            name: ecsData._id,
-            enabled: true,
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field: '_id',
-              value: ecsData._id,
-              operator: ':',
-            },
-          },
-          ...getThresholdAggregationDataProvider(ecsData, nonEcsData),
-        ],
+        dataProviders: [...getThresholdAggregationDataProvider(ecsData, nonEcsData)],
         id: TimelineId.active,
         indexNames: [],
         dateRange: {

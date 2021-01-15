@@ -50,6 +50,7 @@ import { DiscoverProps } from './types';
 import { getDisplayedColumns } from '../helpers/columns';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid/discover_grid';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 
 export const DocTableLegacyMemoized = React.memo((props: DocTableLegacyProps) => (
   <DocTableLegacy {...props} />
@@ -112,7 +113,7 @@ export function Discover({
       : undefined;
   const contentCentered = resultState === 'uninitialized';
   const isLegacy = services.uiSettings.get('doc_table:legacy');
-
+  const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
@@ -150,6 +151,7 @@ export function Discover({
                 setIndexPattern={setIndexPattern}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
+                useNewFieldsApi={useNewFieldsApi}
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
@@ -311,6 +313,7 @@ export function Discover({
                             onRemoveColumn={onRemoveColumn}
                             onSort={onSort}
                             sampleSize={opts.sampleSize}
+                            useNewFieldsApi={useNewFieldsApi}
                           />
                         )}
                         {!isLegacy && rows && rows.length && (
