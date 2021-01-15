@@ -74,7 +74,7 @@ describe('PingList component', () => {
       failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
     });
     const { getByText } = render(<PingList />);
-    expect(getByText('Loading ping history')).toBeInTheDocument();
+    expect(getByText('Loading history...')).toBeInTheDocument();
   });
 
   it('renders no pings state when pings are not found', () => {
@@ -86,7 +86,7 @@ describe('PingList component', () => {
       failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
     });
     const { getByText } = render(<PingList />);
-    expect(getByText('No pings found')).toBeInTheDocument();
+    expect(getByText('No history found')).toBeInTheDocument();
   });
 
   it('renders list without errors', () => {

@@ -210,10 +210,10 @@ export const PingList = () => {
         noItemsMessage={
           loading
             ? i18n.translate('xpack.uptime.pingList.pingsLoadingMesssage', {
-                defaultMessage: 'Loading ping history',
+                defaultMessage: 'Loading history...',
               })
             : i18n.translate('xpack.uptime.pingList.pingsUnavailableMessage', {
-                defaultMessage: 'No pings found',
+                defaultMessage: 'No history found',
               })
         }
         onChange={(criteria: any) => {
