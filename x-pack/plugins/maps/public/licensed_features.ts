@@ -37,30 +37,28 @@ export const LICENCED_FEATURES_DETAILS: Record<LICENSED_FEATURES, LicensedFeatur
 let licenseId: string | undefined;
 let isGoldPlus: boolean = false;
 let isEnterprisePlus: boolean = false;
-
 export const getLicenseId = () => licenseId;
 export const getIsGoldPlus = () => isGoldPlus;
+export const getIsEnterprisePlus = () => isEnterprisePlus;
 
+let licensingPluginStart: LicensingPluginStart;
 let initializeLicense: (value: unknown) => void;
 const licenseInitialized = new Promise((resolve) => {
   initializeLicense = resolve;
 });
-
-export const getIsEnterprisePlus = () => isEnterprisePlus;
 export const whenLicenseInitialized = async (): Promise<void> => {
   await licenseInitialized;
 };
 
-export function registerLicensedFeatures(licensingPlugin: LicensingPluginSetup) {
-  for (const licensedFeature of Object.values(LICENSED_FEATURES)) {
-    licensingPlugin.featureUsage.register(
-      LICENCED_FEATURES_DETAILS[licensedFeature].name,
-      LICENCED_FEATURES_DETAILS[licensedFeature].license
-    );
-  }
-}
+export async function setLicensingPluginStart(licensingPlugin: LicensingPluginStart) {
+  const license = await licensingPlugin.refresh();
+  updateLicenseState(license);
 
-let licensingPluginStart: LicensingPluginStart;
+  licensingPluginStart = licensingPlugin;
+  licensingPluginStart.license$.subscribe(updateLicenseState);
+
+  initializeLicense(undefined);
+}
 
 function updateLicenseState(license: ILicense) {
   const gold = license.check(APP_ID, 'gold');
@@ -72,14 +70,13 @@ function updateLicenseState(license: ILicense) {
   licenseId = license.uid;
 }
 
-export async function setLicensingPluginStart(licensingPlugin: LicensingPluginStart) {
-  const license = await licensingPlugin.refresh();
-  updateLicenseState(license);
-
-  licensingPluginStart = licensingPlugin;
-  licensingPluginStart.license$.subscribe(updateLicenseState);
-
-  initializeLicense(undefined);
+export function registerLicensedFeatures(licensingPlugin: LicensingPluginSetup) {
+  for (const licensedFeature of Object.values(LICENSED_FEATURES)) {
+    licensingPlugin.featureUsage.register(
+      LICENCED_FEATURES_DETAILS[licensedFeature].name,
+      LICENCED_FEATURES_DETAILS[licensedFeature].license
+    );
+  }
 }
 
 export function notifyLicensedFeatureUsage(licensedFeature: LICENSED_FEATURES) {
