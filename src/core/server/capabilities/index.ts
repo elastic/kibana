@@ -17,5 +17,10 @@
  * under the License.
  */
 
-export { CapabilitiesService, CapabilitiesSetup, CapabilitiesStart } from './capabilities_service';
+export {
+  CapabilitiesService,
+  CapabilitiesSetup,
+  CapabilitiesStart,
+  ResolveCapabilitiesOptions,
+} from './capabilities_service';
 export { Capabilities, CapabilitiesSwitcher, CapabilitiesProvider } from './types';

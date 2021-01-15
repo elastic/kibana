@@ -183,9 +183,9 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
 
   cy.get(ID_FIELD).then((field) => drag(field));
 
-  cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then((headersDropArea) =>
-    drop(headersDropArea)
-  );
+  cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`)
+    .first()
+    .then((headersDropArea) => drop(headersDropArea));
 };
 
 export const removeColumn = (column: number) => {
