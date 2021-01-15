@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { History, Location, Action } from 'history';
+import { Action, History, Location } from 'history';
 import { Observable } from 'rxjs';
 import { ParsedQuery } from 'query-string';
 import deepEqual from 'fast-deep-equal';
@@ -37,7 +37,8 @@ export function createHistoryObservable(
 
 export function createQueryParamsObservable(history: History): Observable<ParsedQuery> {
   return createHistoryObservable(history).pipe(
-    map(({ location }) => getQueryParams(location), distinctUntilChanged(deepEqual))
+    map(({ location }) => ({ ...getQueryParams(location) })),
+    distinctUntilChanged(deepEqual)
   );
 }
 
@@ -46,6 +47,7 @@ export function createQueryParamObservable<Param = unknown>(
   paramKey: string
 ): Observable<Param | null> {
   return createQueryParamsObservable(history).pipe(
-    map((params) => (params[paramKey] ?? null) as Param | null)
+    map((params) => (params[paramKey] ?? null) as Param | null),
+    distinctUntilChanged(deepEqual)
   );
 }
