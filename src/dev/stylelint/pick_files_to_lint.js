@@ -17,5 +17,20 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('../src/dev/run_sasslint');
+import { makeRe } from 'minimatch';
+
+const includeGlobs = ['**/*.s+(a|c)ss'];
+const includeRegex = includeGlobs.map((glob) => makeRe(glob));
+
+function matchesInclude(file) {
+  for (let i = 0; i < includeRegex.length; i++) {
+    if (includeRegex[i].test(file.relativePath)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function pickFilesToLint(log, files) {
+  return files.filter((file) => file.isSass()).filter(matchesInclude);
+}
