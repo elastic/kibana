@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem, EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
