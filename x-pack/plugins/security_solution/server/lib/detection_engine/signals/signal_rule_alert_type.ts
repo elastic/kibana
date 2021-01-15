@@ -7,7 +7,7 @@
 /* eslint-disable complexity */
 
 import { Logger, KibanaRequest } from 'src/core/server';
-
+import isEmpty from 'lodash/isEmpty';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
@@ -194,7 +194,10 @@ export const signalRulesAlertType = ({
           )(),
           services.scopedClusterClient.fieldCaps({
             index,
-            fields: timestampOverride != null ? ['@timestamp', timestampOverride] : ['@timestamp'],
+            fields:
+              timestampOverride != null && !isEmpty(timestampOverride) // timestampOverride != null silences typescript complaining that timestampOverride might be undefined
+                ? ['@timestamp', timestampOverride]
+                : ['@timestamp'],
             allow_no_indices: false,
             include_unmapped: true,
           }),
@@ -211,7 +214,9 @@ export const signalRulesAlertType = ({
               () =>
                 hasTimestampFields(
                   wroteStatus,
-                  params.timestampOverride != null ? params.timestampOverride : '@timestamp',
+                  timestampOverride != null && !isEmpty(timestampOverride) // timestampOverride != null silences typescript complaining that timestampOverride might be undefined
+                    ? timestampOverride
+                    : '@timestamp',
                   timestampFieldCaps,
                   ruleStatusService,
                   logger,
