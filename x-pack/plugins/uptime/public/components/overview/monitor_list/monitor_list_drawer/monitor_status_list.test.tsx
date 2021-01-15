@@ -70,7 +70,7 @@ describe('MonitorStatusList component', () => {
   });
 
   it.each(['up', 'down'])(
-    'renders call out for monitor naming if monitors are unnamed',
+    'renders call out for monitor location if monitors have no location',
     (status) => {
       const { getByRole, getByText } = render(
         <MonitorStatusList
@@ -91,7 +91,7 @@ describe('MonitorStatusList component', () => {
     }
   );
 
-  it('does not render call out for monitor naming if all monitors are named', () => {
+  it('does not render call out for monitor location if all monitors have location', () => {
     const { queryByRole, queryByText } = render(
       <MonitorStatusList
         summaryPings={pings.map((ping) => ({
