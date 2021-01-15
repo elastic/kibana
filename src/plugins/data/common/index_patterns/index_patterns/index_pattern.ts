@@ -19,6 +19,7 @@
 
 import _, { each, reject } from 'lodash';
 import { FieldAttrs, FieldAttrSet } from '../..';
+import type { RuntimeField } from '../types';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
@@ -28,6 +29,7 @@ import { flattenHitWrapper } from './flatten_hit';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
 import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
+import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
 
 interface IndexPatternDeps {
   spec?: IndexPatternSpec;
@@ -74,6 +76,7 @@ export class IndexPattern implements IIndexPattern {
   private fieldFormats: FieldFormatsStartCommon;
   // make private once manual field refresh is removed
   public fieldAttrs: FieldAttrs;
+  private runtimeFieldMap: Record<string, RuntimeField>;
   /**
    * prevents errors when index pattern exists before indices
    */
@@ -115,6 +118,7 @@ export class IndexPattern implements IIndexPattern {
     this.fieldAttrs = spec.fieldAttrs || {};
     this.intervalName = spec.intervalName;
     this.allowNoIndex = spec.allowNoIndex || false;
+    this.runtimeFieldMap = spec.runtimeFieldMap || {};
   }
 
   /**
@@ -128,6 +132,14 @@ export class IndexPattern implements IIndexPattern {
   resetOriginalSavedObjectBody = () => {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
   };
+
+  getRuntimeFieldMap = () =>
+    this.fields.reduce((col, field) => {
+      if (field.runtimeField) {
+        col[field.name] = field.runtimeField;
+      }
+      return col;
+    }, {} as Record<string, RuntimeField>);
 
   getFieldAttrs = () => {
     const newFieldAttrs = { ...this.fieldAttrs };
@@ -160,7 +172,7 @@ export class IndexPattern implements IIndexPattern {
       return {
         storedFields: ['*'],
         scriptFields,
-        docvalueFields: [],
+        docvalueFields: [] as Array<{ field: any; format: string }>,
       };
     }
 
@@ -188,10 +200,18 @@ export class IndexPattern implements IIndexPattern {
       };
     });
 
+    const runtimeFields = this.fields.reduce((col, field) => {
+      if (field.runtimeField) {
+        col[field.name] = field.runtimeField;
+      }
+      return col;
+    }, {} as Record<string, RuntimeField>);
+
     return {
       storedFields: ['*'],
       scriptFields,
       docvalueFields,
+      runtimeFields,
     };
   }
 
@@ -207,6 +227,7 @@ export class IndexPattern implements IIndexPattern {
       typeMeta: this.typeMeta,
       type: this.type,
       fieldFormats: this.fieldFormatMap,
+      runtimeFieldMap: this.getRuntimeFieldMap(),
       fieldAttrs: this.fieldAttrs,
       intervalName: this.intervalName,
       allowNoIndex: this.allowNoIndex,
@@ -302,6 +323,7 @@ export class IndexPattern implements IIndexPattern {
       ? undefined
       : JSON.stringify(this.fieldFormatMap);
     const fieldAttrs = this.getFieldAttrs();
+    const runtimeFieldMap = this.getRuntimeFieldMap();
 
     return {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
@@ -316,6 +338,7 @@ export class IndexPattern implements IIndexPattern {
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
+      runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
     };
   }
 
@@ -335,6 +358,38 @@ export class IndexPattern implements IIndexPattern {
       field.type as KBN_FIELD_TYPES,
       field.esTypes as ES_FIELD_TYPES[]
     );
+  }
+
+  saveRuntimeField(name: string, runtimeField: RuntimeField) {
+    const existingField = this.getFieldByName(name);
+    if (existingField) {
+      existingField.runtimeField = runtimeField;
+    } else {
+      this.fields.add({
+        name,
+        runtimeField,
+        type: castEsToKbnFieldTypeName(runtimeField.type),
+        aggregatable: true,
+        searchable: true,
+        count: 0,
+        readFromDocValues: false,
+      });
+    }
+  }
+
+  deleteRuntimeField(name: string) {
+    const existingField = this.getFieldByName(name);
+    if (existingField) {
+      if (existingField.isMapped) {
+        // mapped field, remove runtimeField def
+        delete existingField.runtimeField;
+      } else {
+        // runtimeField only
+        this.fields.remove(existingField);
+      }
+    } else {
+      delete this.runtimeFieldMap[name];
+    }
   }
 
   /**

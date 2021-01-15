@@ -74,7 +74,7 @@ import { uniqueId, keyBy, pick, difference, omit, isObject, isFunction } from 'l
 import { map } from 'rxjs/operators';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern, IndexPatternField } from '../../index_patterns';
 import { ISearchGeneric, ISearchOptions } from '../..';
 import type {
   ISearchSource,
@@ -493,6 +493,24 @@ export class SearchSource {
     };
     body.stored_fields = storedFields;
 
+    body.runtime_mappings = index.fields
+      .filter((field: IndexPatternField) => field.runtimeField)
+      .reduce(
+        (
+          col: Record<string, { type: string; script: { source: string } }>,
+          field: IndexPatternField
+        ) => {
+          col[field.name] = {
+            type: field.runtimeField!.type,
+            script: {
+              source: field.runtimeField!.script.source,
+            },
+          };
+          return col;
+        },
+        {}
+      );
+
     // apply source filters from index pattern if specified by the user
     let filteredDocvalueFields = docvalueFields;
     if (index) {
@@ -528,6 +546,11 @@ export class SearchSource {
         body.script_fields = pick(
           body.script_fields,
           Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
+        );
+        // TODO verify this works
+        body.runtime_mappings = pick(
+          body.runtime_mappings,
+          Object.keys(body.runtime_mappings).filter((f) => uniqFieldNames.includes(f))
         );
       }
 
