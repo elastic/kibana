@@ -31,6 +31,6 @@ export interface IndexPatternTableItem {
   default: boolean;
   tag?: string[];
   sort: string;
-  patternList: PatternListDetail[];
+  patternList: string[];
   patternListActive: string[];
 }

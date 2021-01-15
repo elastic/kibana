@@ -116,4 +116,6 @@ export class IndexPatternsFetcher {
     }
     return await getFieldCapabilities(this.elasticsearchClient, indices, metaFields);
   }
+
+  async validatePatternListActive(patternList: string[]) {}
 }

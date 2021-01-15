@@ -62,12 +62,10 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
   }
 
   validatePatternListActive(options: ValidatePatternListActive) {
-    const { id, patternList, patternListActive, version } = options;
+    const { patternList } = options;
 
     const url = this._getUrl(['_validate_pattern_list_active']);
-    return this._request(url, { id, patternList, patternListActive, version }, 'POST').then(
-      (resp: any) => resp
-    );
+    return this._request(url, { patternList }, 'POST').then((resp: any) => resp);
   }
 
   getFieldsForTimePattern(options: GetFieldsOptionsTimePattern) {

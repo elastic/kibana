@@ -337,7 +337,9 @@ export class IndexPatternsService {
    * @param savedObject
    */
 
-  savedObjectToSpec = (savedObject: SavedObject<IndexPatternAttributes>): IndexPatternSpec => {
+  savedObjectToSpec = async (
+    savedObject: SavedObject<IndexPatternAttributes>
+  ): Promise<IndexPatternSpec> => {
     const {
       id,
       version,
@@ -348,7 +350,6 @@ export class IndexPatternsService {
         fields,
         intervalName,
         patternList,
-        patternListActive,
         sourceFilters,
         timeFieldName,
         title,
@@ -362,6 +363,13 @@ export class IndexPatternsService {
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
     const parsedFieldAttrs: FieldAttrs = fieldAttrs ? JSON.parse(fieldAttrs) : {};
+
+    const doesIt = this.doSomething();
+    console.log('does it client side??', doesIt);
+    const patternListActive = await this.apiClient.validatePatternListActive({
+      patternList: savedObject.attributes.patternList,
+    });
+    console.log('patternListActive', patternListActive);
 
     return {
       allowNoIndex,
@@ -391,22 +399,7 @@ export class IndexPatternsService {
       throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
     }
 
-    const validatedPatternLists = await this.apiClient.validatePatternListActive({
-      id,
-      version: savedObject.version,
-      patternList: savedObject.attributes.patternList,
-      patternListActive: savedObject.attributes.patternListActive,
-    });
-    const savedObjectValidated = {
-      ...savedObject,
-      version: validatedPatternLists.version,
-      attributes: {
-        ...savedObject.attributes,
-        ...validatedPatternLists.patterns,
-      },
-    };
-
-    const spec = this.savedObjectToSpec(savedObjectValidated);
+    const spec = await this.savedObjectToSpec(savedObject);
 
     const { patternListActive, title, type, typeMeta } = spec;
     spec.fieldAttrs = savedObject.attributes.fieldAttrs
@@ -627,6 +620,11 @@ export class IndexPatternsService {
   async delete(indexPatternId: string) {
     this.indexPatternCache.clear(indexPatternId);
     return this.savedObjectsClient.delete('index-pattern', indexPatternId);
+  }
+
+  doSomething() {
+    console.log('DOES SOMETHING!!!!');
+    return true;
   }
 }
 

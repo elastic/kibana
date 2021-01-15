@@ -25,9 +25,7 @@ import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin'
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),
-  patternList: schema.arrayOf(
-    schema.object({ pattern: schema.string(), matchesIndices: schema.boolean() })
-  ),
+  patternList: schema.arrayOf(schema.string()),
   patternListActive: schema.maybe(schema.arrayOf(schema.string())),
   type: schema.maybe(schema.string()),
   typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),

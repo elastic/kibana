@@ -45,7 +45,6 @@ import { EmptyState } from './empty_state';
 import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
 import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { getIndices } from '../create_index_pattern_wizard/lib';
-import { PatternListDetail } from '../../../../data/common/index_patterns';
 
 const pagination = {
   initialPageSize: 10,
@@ -121,6 +120,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     uiSettings,
     savedObjects.client,
   ]);
+  console.log('indexPatterns', indexPatterns);
 
   const removeAliases = (item: MatchedItem) =>
     !((item as unknown) as ResolveIndexResponseItemAlias).indices;
@@ -185,14 +185,11 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         patternList,
         patternListActive,
       }: {
-        patternList: PatternListDetail[];
+        patternList: string[];
         patternListActive: string[];
       }) =>
         patternList && patternListActive ? (
-          <PatternList
-            patternList={patternList.map(({ pattern }) => pattern)}
-            patternListActive={patternListActive}
-          />
+          <PatternList patternList={patternList} patternListActive={patternListActive} />
         ) : null,
     },
   ];

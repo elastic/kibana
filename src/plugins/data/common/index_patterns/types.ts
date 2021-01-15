@@ -55,7 +55,7 @@ export interface IndexPatternAttributes {
   allowNoIndex?: boolean;
 
   patternListActive: string[];
-  patternList: PatternListDetail[];
+  patternList: string[];
 }
 
 export interface FieldAttrs {
@@ -124,16 +124,9 @@ export interface GetFieldsOptionsTimePattern {
   interval: string;
 }
 
-export interface PatternListDetail {
-  pattern: string;
-  matchesIndices: boolean;
-}
 export interface ValidatePatternListActive {
   allowNoIndex?: boolean;
-  id: string;
-  patternList: PatternListDetail[];
-  patternListActive: string[];
-  version: string;
+  patternList: string[];
 }
 
 export interface IIndexPatternsApiClient {
@@ -215,7 +208,7 @@ export interface IndexPatternSpec {
   fields?: IndexPatternFieldMap;
   id?: string;
   intervalName?: string;
-  patternList: PatternListDetail[];
+  patternList: string[];
   patternListActive: string[];
   sourceFilters?: SourceFilter[];
   timeFieldName?: string;

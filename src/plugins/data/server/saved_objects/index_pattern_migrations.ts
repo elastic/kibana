@@ -69,9 +69,7 @@ const migrateTitleToPatternList: SavedObjectMigrationFn<any, any> = (doc) => {
       ...doc.attributes,
       patternList:
         doc.attributes.patternList == null
-          ? doc.attributes.title
-              .split(',')
-              .map((pattern: string) => ({ pattern, matchesIndices: true }))
+          ? doc.attributes.title.split(',')
           : doc.attributes.patternList,
       patternListActive:
         doc.attributes.patternListActive == null

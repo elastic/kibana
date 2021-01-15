@@ -32,9 +32,7 @@ export const registerValidatePatternListActiveRoute = (
       validate: {
         body: schema.object({
           id: schema.string(),
-          patternList: schema.arrayOf(
-            schema.object({ pattern: schema.string(), matchesIndices: schema.boolean() })
-          ),
+          patternList: schema.arrayOf(schema.string()),
           patternListActive: schema.arrayOf(schema.string()),
           version: schema.string(),
         }),
@@ -42,87 +40,25 @@ export const registerValidatePatternListActiveRoute = (
     },
     router.handleLegacyErrors(
       handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-
-        const { id, patternList, patternListActive, version: currentVersion } = req.body;
-        let patterns = { patternList, patternListActive };
-        let version = currentVersion;
+        const { patternList } = req.body;
         const result = await Promise.all(
-          patternList.map(({ pattern }) =>
+          patternList.map((pattern) =>
             elasticsearchClient.transport.request({
               method: 'GET',
               path: `/_resolve/index/${encodeURIComponent(pattern)}`,
             })
           )
         );
-        let doesPatternNeedUpdate: number[] = [];
-        const patternListNew = result.map(({ body: indexLookup }, i) => {
-          const matchesIndices = indexLookup.indices && indexLookup.indices.length > 0;
-          if (patternList[i].matchesIndices !== matchesIndices) {
-            doesPatternNeedUpdate = [...doesPatternNeedUpdate, i];
-          }
-          return {
-            ...patternList[i],
-            matchesIndices,
-          };
-        });
-        if (doesPatternNeedUpdate.length > 0) {
-          const patternListActiveNew = doesPatternNeedUpdate
-            .reduce((acc, iVal) => {
-              if (patternList[iVal].matchesIndices && acc.includes(patternList[iVal].pattern)) {
-                return acc.filter((pat) => pat !== patternList[iVal].pattern);
-              }
-              if (!patternList[iVal].matchesIndices && !acc.includes(patternList[iVal].pattern)) {
-                return [...acc, patternList[iVal].pattern];
-              }
-              return acc;
-            }, patternListActive)
-            .sort();
-          patterns = {
-            patternListActive: patternListActiveNew,
-            patternList: patternListNew,
-          };
-          const updatedPattern = await savedObjectsClient.update('index-pattern', id, patterns);
-          version = updatedPattern.version ?? version;
-        }
+        const patternListActive = result.reduce(
+          (acc: string[], { body: indexLookup }, patternListIndex) =>
+            indexLookup.indices && indexLookup.indices.length > 0
+              ? [...acc, patternList[patternListIndex]]
+              : acc,
+          []
+        );
 
-        return res.ok({ body: { patterns, version } });
-        //
-        // let changeCount = 0;
-        // const doRefreshFields = false;
-        //
-        // if (patternList !== undefined && patternList !== indexPattern.patternList) {
-        //   changeCount++;
-        //   indexPattern.patternList = patternList;
-        // }
-        //
-        // if (
-        //   patternListActive !== undefined &&
-        //   patternListActive !== indexPattern.patternListActive
-        // ) {
-        //   changeCount++;
-        //   indexPattern.patternListActive = patternListActive;
-        // }
-        //
-        // if (changeCount < 1) {
-        //   throw new Error('Index pattern change set is empty.');
-        // }
-        //
-        // await indexPatternsService.updateSavedObject(indexPattern);
-        //
-        // if (doRefreshFields && refresh_fields) {
-        //   await indexPatternsService.refreshFields(indexPattern);
-        // }
-
-        return res.ok({
-          headers: {
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({
-            index_pattern: [],
-          }),
-        });
+        return res.ok({ body: patternListActive });
       })
     )
   );

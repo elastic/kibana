@@ -23,6 +23,7 @@ import {
   IIndexPatternsApiClient,
   GetFieldsOptionsTimePattern,
   FieldDescriptor,
+  ValidatePatternListActive,
 } from '../../common/index_patterns/types';
 import { IndexPatternsFetcher } from './fetcher';
 import { combineFields, formatIndexFields } from './utils';
@@ -32,7 +33,7 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
   constructor(elasticsearchClient: ElasticsearchClient) {
     this.esClient = elasticsearchClient;
   }
-  async validatePatternListActive({ patternList, patternListActive, allowNoIndex }) {
+  async validatePatternListActive({ patternList, allowNoIndex }: ValidatePatternListActive) {
     console.log('IndexPatternsApiServer validatePatternListActive MYSTERY HIT');
   }
   async getFieldsForWildcard({
