@@ -19,6 +19,7 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import { ColumnHeadersComponent } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { timelineActions } from '../../../../store/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -38,6 +39,7 @@ describe('ColumnHeaders', () => {
     const sort: Sort[] = [
       {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: Direction.desc,
       },
     ];
@@ -54,6 +56,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -73,6 +76,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -93,6 +97,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -108,10 +113,12 @@ describe('ColumnHeaders', () => {
     let mockSort: Sort[] = [
       {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: Direction.desc,
       },
       {
         columnId: 'host.name',
+        columnType: 'text',
         sortDirection: Direction.asc,
       },
     ];
@@ -126,10 +133,12 @@ describe('ColumnHeaders', () => {
       mockSort = [
         {
           columnId: '@timestamp',
+          columnType: 'number',
           sortDirection: Direction.desc,
         },
         {
           columnId: 'host.name',
+          columnType: 'text',
           sortDirection: Direction.asc,
         },
       ];
@@ -147,6 +156,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={mockSort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -162,13 +172,15 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
+              columnType: 'number',
               sortDirection: Direction.desc,
             },
             {
               columnId: 'host.name',
+              columnType: 'text',
               sortDirection: Direction.asc,
             },
-            { columnId: 'event.category', sortDirection: Direction.desc },
+            { columnId: 'event.category', columnType: 'text', sortDirection: Direction.desc },
           ],
         })
       );
@@ -186,6 +198,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={mockSort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -201,9 +214,10 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
+              columnType: 'number',
               sortDirection: Direction.asc,
             },
-            { columnId: 'host.name', sortDirection: Direction.asc },
+            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.asc },
           ],
         })
       );
@@ -221,6 +235,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={mockSort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -236,9 +251,10 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
+              columnType: 'number',
               sortDirection: Direction.desc,
             },
-            { columnId: 'host.name', sortDirection: Direction.desc },
+            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.desc },
           ],
         })
       );

@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
 export const aggStdDeviationFnName = 'aggStdDeviation';
 
@@ -92,7 +91,6 @@ export const aggStdDeviation = (): FunctionDefinition => ({
         type: METRIC_TYPES.STD_DEV,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

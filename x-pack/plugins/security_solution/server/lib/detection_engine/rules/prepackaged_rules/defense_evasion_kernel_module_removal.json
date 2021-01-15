@@ -38,9 +38,16 @@
       },
       "technique": [
         {
-          "id": "T1089",
-          "name": "Disabling Security Tools",
-          "reference": "https://attack.mitre.org/techniques/T1089/"
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
         }
       ]
     },
@@ -53,13 +60,20 @@
       },
       "technique": [
         {
-          "id": "T1215",
-          "name": "Kernel Modules and Extensions",
-          "reference": "https://attack.mitre.org/techniques/T1215/"
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.006",
+              "name": "Kernel Modules and Extensions",
+              "reference": "https://attack.mitre.org/techniques/T1547/006/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }
