@@ -27,6 +27,7 @@ export const CopySource: Task = {
       dot: false,
       select: [
         'yarn.lock',
+        '.npmrc',
         'src/**',
         '!src/**/*.{test,test.mocks,mock}.{js,ts,tsx}',
         '!src/**/mocks.ts', // special file who imports .mock files
