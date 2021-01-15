@@ -26,8 +26,8 @@ import {
 
 export const ES_QUERY_ID = '.es-query';
 
-const ActionGroupId = 'matched query';
-const ConditionMetAlertInstanceId = 'matched query';
+const ActionGroupId = 'query matched';
+const ConditionMetAlertInstanceId = 'query matched';
 
 export function getAlertType(
   logger: Logger
@@ -37,7 +37,7 @@ export function getAlertType(
   });
 
   const actionGroupName = i18n.translate('xpack.stackAlerts.esQuery.actionGroupThresholdMetTitle', {
-    defaultMessage: 'Matched query',
+    defaultMessage: 'Query matched',
   });
 
   const actionVariableContextDateLabel = i18n.translate(

@@ -13,7 +13,7 @@ export function getAlertType(): AlertTypeModel<EsQueryAlertParams> {
   return {
     id: '.es-query',
     description: i18n.translate('xpack.stackAlerts.esQuery.ui.alertType.descriptionText', {
-      defaultMessage: 'Alert when the number of matches for an ES query meets a defined threshold.',
+      defaultMessage: 'Alert on matches against an ES query.',
     }),
     iconClass: 'logoElastic',
     documentationUrl(docLinks) {

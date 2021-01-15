@@ -10,8 +10,20 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import 'brace/theme/github';
 import { XJsonMode } from '@kbn/ace';
+import { isEmpty } from 'lodash';
 
-import { EuiCodeEditor, EuiSpacer, EuiFormRow, EuiCallOut, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCodeEditor,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiSpacer,
+  EuiFormRow,
+  EuiCallOut,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { HttpSetup } from 'kibana/public';
 import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -78,6 +90,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     }>
   >([]);
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
+  const [hasThresholdExpression, setHasThresholdExpression] = useState(true);
 
   const hasExpressionErrors = !!Object.keys(errors).find(
     (errorKey) =>
@@ -97,11 +110,14 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     setAlertProperty('params', {
       ...alertParams,
       esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
-      thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
       timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
       timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
-      threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     });
+
+    setXJson(esQuery ?? DEFAULT_VALUES.QUERY);
+    if (!isEmpty(alertParams)) {
+      setHasThresholdExpression(!!threshold && !!thresholdComparator);
+    }
 
     if (index && index.length > 0) {
       await refreshEsFields();
@@ -211,42 +227,101 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         />
       </EuiFormRow>
       <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
-            defaultMessage="When number of matches"
+      {hasThresholdExpression ? (
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
+                    defaultMessage="When number of matches"
+                  />
+                </h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                aria-label={i18n.translate('xpack.infra.logs.alertFlyout.removeCondition', {
+                  defaultMessage: 'Remove condition',
+                })}
+                color={'danger'}
+                iconType={'trash'}
+                onClick={() => {
+                  setAlertParams('threshold', undefined);
+                  setAlertParams('thresholdComparator', undefined);
+                  setHasThresholdExpression(false);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiText color="subdued" size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.conditionDescription"
+                defaultMessage="Get a single alert when the number of matches meets the defined conditions. Remove
+                    this condition to receive an alert for every document that matches the query."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <ThresholdExpression
+            thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
+            threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
+            errors={errors}
+            display="fullWidth"
+            popupPosition={'upLeft'}
+            onChangeSelectedThreshold={(selectedThresholds) =>
+              setAlertParams('threshold', selectedThresholds)
+            }
+            onChangeSelectedThresholdComparator={(selectedThresholdComparator) =>
+              setAlertParams('thresholdComparator', selectedThresholdComparator)
+            }
           />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <ThresholdExpression
-        thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
-        threshold={threshold}
-        errors={errors}
-        display="fullWidth"
-        popupPosition={'upLeft'}
-        onChangeSelectedThreshold={(selectedThresholds) =>
-          setAlertParams('threshold', selectedThresholds)
-        }
-        onChangeSelectedThresholdComparator={(selectedThresholdComparator) =>
-          setAlertParams('thresholdComparator', selectedThresholdComparator)
-        }
-      />
-      <ForLastExpression
-        popupPosition={'upLeft'}
-        timeWindowSize={timeWindowSize}
-        timeWindowUnit={timeWindowUnit}
-        display="fullWidth"
-        errors={errors}
-        onChangeWindowSize={(selectedWindowSize: number | undefined) =>
-          setAlertParams('timeWindowSize', selectedWindowSize)
-        }
-        onChangeWindowUnit={(selectedWindowUnit: string) =>
-          setAlertParams('timeWindowUnit', selectedWindowUnit)
-        }
-      />
-      <EuiSpacer />
+          <ForLastExpression
+            popupPosition={'upLeft'}
+            timeWindowSize={timeWindowSize}
+            timeWindowUnit={timeWindowUnit}
+            display="fullWidth"
+            errors={errors}
+            onChangeWindowSize={(selectedWindowSize: number | undefined) =>
+              setAlertParams('timeWindowSize', selectedWindowSize)
+            }
+            onChangeWindowUnit={(selectedWindowUnit: string) =>
+              setAlertParams('timeWindowUnit', selectedWindowUnit)
+            }
+          />
+          <EuiSpacer />
+        </>
+      ) : (
+        <>
+          <EuiButtonEmpty
+            color={'primary'}
+            iconSide={'left'}
+            flush={'left'}
+            iconType={'plusInCircleFilled'}
+            onClick={() => {
+              setAlertParams('threshold', DEFAULT_VALUES.THRESHOLD);
+              setAlertParams('thresholdComparator', DEFAULT_VALUES.THRESHOLD_COMPARATOR);
+              setHasThresholdExpression(true);
+            }}
+          >
+            <FormattedMessage
+              id="xpack.stackAlerts.esQuery.ui.addConditionButton"
+              defaultMessage="Add condition"
+            />
+          </EuiButtonEmpty>
+          <EuiText color="subdued" size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.addConditionDescription"
+                defaultMessage="By adding a condition, you will get a single alert when the number of query matches meets the condition. Otherwise, you will get an alert for every document that matches your query."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer />
+        </>
+      )}
     </Fragment>
   );
 };

@@ -77,8 +77,8 @@ describe('AlertingBuiltins Plugin', () => {
         Object {
           "actionGroups": Array [
             Object {
-              "id": "matched query",
-              "name": "Matched query",
+              "id": "query matched",
+              "name": "Query matched",
             },
           ],
           "id": ".es-query",

@@ -57,13 +57,6 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
       );
     }
   }
-  if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
-    errors.threshold0.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold0Text', {
-        defaultMessage: 'Threshold0 is required.',
-      })
-    );
-  }
   if (
     thresholdComparator &&
     builtInComparators[thresholdComparator].requiredValues > 1 &&
