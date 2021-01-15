@@ -15,13 +15,31 @@ export type ResponseProjection<RawResponse, Response> = (
   rawResponse: RawResponse
 ) => { data: Response; errors?: SearchStrategyError[] };
 
+/**
+ * Turns the {@link DataSearchRequestDescriptor} into a {@link
+ * DataSearchResponseDescriptor} by decoding or validating and unrolling the
+ * partial and final responses emitted.
+ *
+ * Since the parameters are refs they will be used immediately for the next
+ * response without the need to recreate the pipeline.
+ *
+ *
+ * @param initialResponseRef - A ref object containing the initial value to
+ * emit when a new request is handled. *
+ * @param projectResponseRef - A ref object containing the projection function
+ * to apply to each response payload. It should validate that the response
+ * payload is of the type {@link RawResponse} and decode it to a {@link
+ * Response}.
+ *
+ * @return A function that decodes and validates each response payload using
+ * the arguments given above.
+ */
 export const handleDataSearchResponse = <
   Request extends IKibanaSearchRequest,
   RawResponse,
   Response,
   InitialResponse
 >(
-  // these are ref objects so they can be changed without having to recreate a new pipeline
   initialResponseRef: { current: InitialResponse },
   projectResponseRef: { current: ResponseProjection<RawResponse, Response> }
 ) => ({
