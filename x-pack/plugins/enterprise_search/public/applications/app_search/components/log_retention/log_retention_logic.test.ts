@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
+import { LogicMounter, mockHttpValues, expectedAsyncError } from '../../../__mocks__';
 
-import { mockHttpValues } from '../../../__mocks__';
 jest.mock('../../../shared/http', () => ({
   HttpLogic: { values: mockHttpValues },
 }));
@@ -232,12 +231,8 @@ describe('LogRetentionLogic', () => {
         http.put.mockReturnValue(promise);
 
         LogRetentionLogic.actions.saveLogRetention(LogRetentionOptions.Analytics, true);
+        await expectedAsyncError(promise);
 
-        try {
-          await promise;
-        } catch {
-          // Do nothing
-        }
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
         expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
       });
@@ -305,12 +300,8 @@ describe('LogRetentionLogic', () => {
         http.get.mockReturnValue(promise);
 
         LogRetentionLogic.actions.fetchLogRetention();
+        await expectedAsyncError(promise);
 
-        try {
-          await promise;
-        } catch {
-          // Do nothing
-        }
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
         expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
       });
