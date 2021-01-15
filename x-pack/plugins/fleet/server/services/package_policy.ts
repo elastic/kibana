@@ -437,7 +437,7 @@ async function _compilePackagePolicyInput(
   pkgInfo: PackageInfo,
   input: PackagePolicyInput
 ) {
-  if (!input.enabled || !pkgInfo.policy_templates?.[0].inputs) {
+  if ((!input.enabled || !pkgInfo.policy_templates?.[0]?.inputs?.length) ?? 0 > 0) {
     return undefined;
   }
 

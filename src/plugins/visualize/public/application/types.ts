@@ -18,14 +18,14 @@
  */
 
 import { History } from 'history';
-import { TimeRange, Query, Filter, DataPublicPluginStart } from 'src/plugins/data/public';
+import { Query, Filter, DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
 import {
-  PersistedState,
   SavedVisState,
   VisualizationsStart,
   Vis,
   VisualizeEmbeddableContract,
   VisSavedObject,
+  PersistedState,
 } from 'src/plugins/visualizations/public';
 import {
   CoreStart,
@@ -80,20 +80,6 @@ export type VisualizeAppStateContainer = ReduxLikeStateContainer<
   VisualizeAppStateTransitions
 >;
 
-export interface EditorRenderProps {
-  core: CoreStart;
-  data: DataPublicPluginStart;
-  filters: Filter[];
-  timeRange: TimeRange;
-  query?: Query;
-  savedSearch?: SavedObject;
-  uiState: PersistedState;
-  /**
-   * Flag to determine if visualiztion is linked to the saved search
-   */
-  linked: boolean;
-}
-
 export interface VisualizeServices extends CoreStart {
   stateTransferService: EmbeddableStateTransfer;
   embeddable: EmbeddableStart;
@@ -146,4 +132,18 @@ export type VisEditorConstructor = new (
 export interface IEditorController {
   render(props: EditorRenderProps): Promise<void> | void;
   destroy(): void;
+}
+
+export interface EditorRenderProps {
+  core: CoreStart;
+  data: DataPublicPluginStart;
+  filters: Filter[];
+  timeRange: TimeRange;
+  query?: Query;
+  savedSearch?: SavedObject;
+  uiState: PersistedState;
+  /**
+   * Flag to determine if visualiztion is linked to the saved search
+   */
+  linked: boolean;
 }

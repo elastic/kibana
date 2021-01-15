@@ -8,13 +8,15 @@
  * This module contains the logic that ensures we don't run too many
  * tasks at once in a given Kibana instance.
  */
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import moment, { Duration } from 'moment';
 import { performance } from 'perf_hooks';
 import { padStart } from 'lodash';
 import { Logger } from '../../../../src/core/server';
 import { TaskRunner } from './task_running';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
+import { TaskManagerStat, asTaskManagerStatEvent } from './task_events';
+import { asOk } from './lib/result_type';
 
 interface Opts {
   maxWorkers$: Observable<number>;
@@ -39,6 +41,7 @@ export class TaskPool {
   private maxWorkers: number = 0;
   private running = new Set<TaskRunner>();
   private logger: Logger;
+  private load$ = new Subject<TaskManagerStat>();
 
   /**
    * Creates an instance of TaskPool.
@@ -56,6 +59,10 @@ export class TaskPool {
     });
   }
 
+  public get load(): Observable<TaskManagerStat> {
+    return this.load$;
+  }
+
   /**
    * Gets how many workers are currently in use.
    */
@@ -64,17 +71,21 @@ export class TaskPool {
   }
 
   /**
-   * Gets how many workers are currently available.
+   * Gets % of workers in use
    */
-  public get availableWorkers() {
-    return this.maxWorkers - this.occupiedWorkers;
+  public get workerLoad() {
+    return this.maxWorkers ? Math.round((this.occupiedWorkers * 100) / this.maxWorkers) : 100;
   }
 
   /**
    * Gets how many workers are currently available.
    */
-  public get hasAvailableWorkers() {
-    return this.availableWorkers > 0;
+  public get availableWorkers() {
+    // emit load whenever we check how many available workers there are
+    // this should happen less often than the actual changes to the worker queue
+    // so is lighter than emitting the load every time we add/remove a task from the queue
+    this.load$.next(asTaskManagerStatEvent('load', asOk(this.workerLoad)));
+    return this.maxWorkers - this.occupiedWorkers;
   }
 
   /**

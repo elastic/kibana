@@ -53,8 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('alertsTab');
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/87105
-  describe.skip('alerts list', function () {
+  describe('alerts list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
@@ -407,6 +406,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ).to.equal('Error found in 1 alert.');
       });
 
+      await refreshAlertsList();
       expect(await testSubjects.getVisibleText('totalAlertsCount')).to.be(
         'Showing: 2 of 2 alerts.'
       );
