@@ -67,7 +67,6 @@ export async function getSavedObjectsCounts(
       },
     },
   };
-  // @ts-expect-error AggregationContainer should not require every property
   const { body } = await esClient.search(savedObjectCountSearchParams);
   const buckets: Array<{ key: string; doc_count: number }> =
     // @ts-expect-error Aggregate does not include `buckets`

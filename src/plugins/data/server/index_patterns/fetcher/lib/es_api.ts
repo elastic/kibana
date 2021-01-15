@@ -69,7 +69,6 @@ export async function callFieldCapsApi(
   try {
     return await callCluster.fieldCaps({
       index: indices,
-      // @ts-expect-error
       fields: '*',
       ignore_unavailable: true,
       ...fieldCapsOptions,

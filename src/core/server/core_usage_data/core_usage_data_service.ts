@@ -113,17 +113,13 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             bytes: 'b',
           })
           .then(({ body }) => {
-            const stats = body.records[0];
+            const stats = body[0];
             return {
               alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
-              // @ts-expect-error
-              docsCount: stats['docs.count'] as number,
-              // @ts-expect-error
-              docsDeleted: stats['docs.deleted'] as number,
-              // @ts-expect-error
-              storeSizeBytes: stats['store.size'] as number,
-              // @ts-expect-error
-              primaryStoreSizeBytes: stats['pri.store.size'] as number,
+              docsCount: stats['docs.count'],
+              docsDeleted: stats['docs.deleted'],
+              storeSizeBytes: stats['store.size'],
+              primaryStoreSizeBytes: stats['pri.store.size'],
             };
           });
       })

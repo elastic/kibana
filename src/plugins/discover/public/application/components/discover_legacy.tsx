@@ -448,7 +448,7 @@ export function DiscoverLegacy({
                               columns={state.columns || []}
                               indexPattern={indexPattern}
                               minimumVisibleRows={minimumVisibleRows}
-                              rows={rows}
+                              rows={(rows as unknown) as Array<Record<string, unknown>>}
                               sort={state.sort || []}
                               searchDescription={opts.savedSearch.description}
                               searchTitle={opts.savedSearch.lastSavedTitle}

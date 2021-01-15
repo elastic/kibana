@@ -412,10 +412,10 @@ export class SavedObjectsRepository {
       } = expectedBulkGetResult.value;
       if (esRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
-        // @ts-expect-error
         const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-        const docFound = indexFound && actualResult.found === true;
-        if (docFound && !this.rawDocExistsInNamespace(actualResult, namespace)) {
+        const docFound = indexFound && actualResult?.found === true;
+        // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+        if (docFound && !this.rawDocExistsInNamespace(actualResult!, namespace)) {
           const { id, type } = object;
           return {
             tag: 'Left' as 'Left',
@@ -430,7 +430,10 @@ export class SavedObjectsRepository {
           };
         }
         savedObjectNamespaces =
-          initialNamespaces || getSavedObjectNamespaces(namespace, docFound && actualResult);
+          initialNamespaces ||
+          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+          getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
+        // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
@@ -574,15 +577,15 @@ export class SavedObjectsRepository {
       }
 
       const { type, id, esRequestIndex } = expectedResult.value;
-      // @ts-expect-error
       const doc = bulkGetResponse?.body.docs[esRequestIndex];
-      if (doc.found) {
+      if (doc?.found) {
         errors.push({
           id,
           type,
           error: {
             ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-            ...(!this.rawDocExistsInNamespace(doc, namespace) && {
+            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+            ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
               metadata: { isNotOverwritable: true },
             }),
           },
@@ -842,7 +845,7 @@ export class SavedObjectsRepository {
       saved_objects: body.hits.hits.map(
         (hit): SavedObjectsFindResult => ({
           ...this._rawToSavedObject(hit as SavedObjectsRawDoc),
-          score: hit._score,
+          score: hit._score!,
         })
       ),
     } as SavedObjectsFindResponse<T>;
@@ -924,10 +927,10 @@ export class SavedObjectsRepository {
         }
 
         const { type, id, esRequestIndex } = expectedResult.value;
-        // @ts-expect-error
         const doc = bulkGetResponse?.body.docs[esRequestIndex];
 
-        if (!doc.found || !this.rawDocExistsInNamespace(doc, namespace)) {
+        // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+        if (!doc?.found || !this.rawDocExistsInNamespace(doc, namespace)) {
           return ({
             id,
             type,
@@ -935,10 +938,13 @@ export class SavedObjectsRepository {
           } as any) as SavedObject<T>;
         }
 
+        // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
         const { originId, updated_at: updatedAt } = doc._source;
         let namespaces = [];
         if (!this._registry.isNamespaceAgnostic(type)) {
+          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
           namespaces = doc._source.namespaces ?? [
+            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
             SavedObjectsUtils.namespaceIdToString(doc._source.namespace),
           ];
         }
@@ -949,9 +955,13 @@ export class SavedObjectsRepository {
           namespaces,
           ...(originId && { originId }),
           ...(updatedAt && { updated_at: updatedAt }),
+          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
           version: encodeHitVersion(doc),
+          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
           attributes: doc._source[type],
+          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
           references: doc._source.references || [],
+          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
           migrationVersion: doc._source.migrationVersion,
         };
       }),
@@ -1062,7 +1072,6 @@ export class SavedObjectsRepository {
         body: {
           doc,
         },
-        // @ts-expect-error
         _source_includes: ['namespace', 'namespaces', 'originId'],
       },
       { ignore: [404] }
@@ -1073,11 +1082,11 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId } = body.get._source;
+    const { originId } = body.get?._source ?? {};
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
-      namespaces = body.get._source.namespaces ?? [
-        SavedObjectsUtils.namespaceIdToString(body.get._source.namespace),
+      namespaces = body.get?._source.namespaces ?? [
+        SavedObjectsUtils.namespaceIdToString(body.get?._source.namespace),
       ];
     }
 
@@ -1377,11 +1386,11 @@ export class SavedObjectsRepository {
         let versionProperties;
         if (esRequestIndex !== undefined) {
           const indexFound = bulkGetResponse?.statusCode !== 404;
-          // @ts-expect-error
           const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-          const docFound = indexFound && actualResult.found === true;
+          const docFound = indexFound && actualResult?.found === true;
           if (
             !docFound ||
+            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
             !this.rawDocExistsInNamespace(actualResult, getNamespaceId(objectNamespace))
           ) {
             return {
@@ -1393,10 +1402,13 @@ export class SavedObjectsRepository {
               },
             };
           }
-          namespaces = actualResult._source.namespaces ?? [
-            SavedObjectsUtils.namespaceIdToString(actualResult._source.namespace),
+          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+          namespaces = actualResult!._source.namespaces ?? [
+            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+            SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
           ];
-          versionProperties = getExpectedVersionProperties(version, actualResult);
+          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+          versionProperties = getExpectedVersionProperties(version, actualResult!);
         } else {
           if (this._registry.isSingleNamespace(type)) {
             // if `objectNamespace` is undefined, fall back to `options.namespace`
@@ -1684,16 +1696,16 @@ export class SavedObjectsRepository {
       },
     });
 
-    const { originId } = body.get._source;
+    const { originId } = body.get?._source ?? {};
     return {
       id,
       type,
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
       ...(originId && { originId }),
       updated_at: time,
-      references: body.get._source.references ?? [],
+      references: body.get?._source.references ?? [],
       version: encodeHitVersion(body),
-      attributes: body.get._source[type],
+      attributes: body.get?._source[type],
     };
   }
 

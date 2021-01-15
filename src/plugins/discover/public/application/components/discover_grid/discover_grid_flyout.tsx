@@ -107,7 +107,12 @@ export function DiscoverGridFlyout({
                 <EuiButtonEmpty
                   size="xs"
                   iconType="documents"
-                  href={getContextUrl(hit._id, indexPattern.id, columns, services.filterManager)}
+                  href={getContextUrl(
+                    hit._id as string,
+                    indexPattern.id,
+                    columns,
+                    services.filterManager
+                  )}
                   data-test-subj="docTableRowAction"
                 >
                   {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple', {

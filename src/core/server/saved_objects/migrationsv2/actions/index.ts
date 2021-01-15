@@ -68,22 +68,20 @@ export type FetchIndexResponse = Record<
 export const fetchIndices = (
   client: ElasticsearchClient,
   indicesToFetch: string[]
-): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> =>
-  // @ts-expect-error - GetIndicesResponse needs index signature
-  () => {
-    return client.indices
-      .get(
-        {
-          index: indicesToFetch,
-          ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
-        },
-        { ignore: [404], maxRetries: 0 }
-      )
-      .then(({ body }) => {
-        return Either.right(body);
-      })
-      .catch(catchRetryableEsClientErrors);
-  };
+): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> => () => {
+  return client.indices
+    .get(
+      {
+        index: indicesToFetch,
+        ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
+      },
+      { ignore: [404], maxRetries: 0 }
+    )
+    .then(({ body }) => {
+      return Either.right(body);
+    })
+    .catch(catchRetryableEsClientErrors);
+};
 
 /**
  * Sets a write block in place for the given index. If the response includes
@@ -396,23 +394,21 @@ export const reindex = (
     .reindex({
       // Require targetIndex to be an alias. Prevents a new index from being
       // created if targetIndex doesn't exist.
+      // @ts-expect-error `ReindexRequest` does not allow the `require_alias` property
       require_alias: requireAlias,
       body: {
         // Ignore version conflicts from existing documents
         conflicts: 'proceed',
-        // @ts-expect-error
         source: {
           index: sourceIndex,
           // Set reindex batch size
           size: BATCH_SIZE,
         },
-        // @ts-expect-error
         dest: {
           index: targetIndex,
           // Don't override existing documents, only create if missing
           op_type: 'create',
         },
-        // @ts-expect-error
         script: Option.fold<string, undefined | { source: string; lang: 'painless' }>(
           () => undefined,
           (script) => ({
@@ -633,7 +629,6 @@ export const createIndex = (
     AcknowledgeResponse
   > = () => {
     const aliasesObject = (aliases ?? []).reduce((acc, alias) => {
-      // @ts-expect-error
       acc[alias] = {};
       return acc;
     }, {} as Record<string, estypes.Alias>);
@@ -891,7 +886,7 @@ export const bulkOverwriteTransformedDocuments = (
       // Filter out version_conflict_engine_exception since these just mean
       // that another instance already updated these documents
       const errors = (res.body.items ?? []).filter(
-        (item) => item.index.error.type !== 'version_conflict_engine_exception'
+        (item) => item.index?.error?.type !== 'version_conflict_engine_exception'
       );
       if (errors.length === 0) {
         return Either.right('bulk_index_succeeded' as const);

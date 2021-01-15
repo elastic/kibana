@@ -143,9 +143,7 @@ async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern 
     return;
   }
 
-  const {
-    body: { records: templates },
-  } = await client.cat.templates<Array<{ name: string }>>({
+  const { body: templates } = await client.cat.templates<Array<{ name: string }>>({
     format: 'json',
     name: obsoleteIndexTemplatePattern,
   });
@@ -191,13 +189,18 @@ async function migrateSourceToDest(context: Context) {
       return;
     }
 
-    // @ts-expect-error until `scroll` API is fixed in types, docs will be `any`
     log.debug(`Migrating saved objects ${docs.map((d) => d._id).join(', ')}`);
 
     await Index.write(
       client,
       dest.indexName,
-      await migrateRawDocs(serializer, documentMigrator.migrate, docs, log)
+      await migrateRawDocs(
+        serializer,
+        documentMigrator.migrate,
+        // @ts-expect-error `_id` may be a string | number in ES, but we always expect strings in the SO index.
+        docs,
+        log
+      )
     );
   }
 }

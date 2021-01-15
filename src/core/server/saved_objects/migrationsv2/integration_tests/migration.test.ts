@@ -150,7 +150,6 @@ describe('migration v2', () => {
         { ignore: [404] }
       );
 
-      // @ts-expect-error
       const response = body[migratedIndex];
 
       expect(response).toBeDefined();
@@ -208,7 +207,6 @@ describe('migration v2', () => {
         { ignore: [404] }
       );
 
-      // @ts-expect-error
       const response = body[migratedIndex];
 
       expect(response).toBeDefined();

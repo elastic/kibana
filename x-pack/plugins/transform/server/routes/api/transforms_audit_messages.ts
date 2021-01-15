@@ -85,9 +85,7 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
           size: SIZE,
           body: {
             sort: [
-              // @ts-expect-error Sort should not require all fields
               { timestamp: { order: 'desc' as const } },
-              // @ts-expect-error Sort should not require all fields
               { transform_id: { order: 'asc' as const } },
             ],
             query,
@@ -100,7 +98,7 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
           (typeof resp.hits.total === 'number' && resp.hits.total > 0) ||
           (typeof resp.hits.total === 'object' && resp.hits.total.value > 0)
         ) {
-          messages = resp.hits.hits.map((hit) => hit._source);
+          messages = resp.hits.hits.map((hit) => hit._source!);
           messages.reverse();
         }
         return res.ok({ body: messages });

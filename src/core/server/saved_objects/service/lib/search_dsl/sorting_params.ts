@@ -38,7 +38,7 @@ export function getSortingParams(
   if (TOP_LEVEL_FIELDS.includes(sortField)) {
     return {
       sort: [
-        // @ts-expect-error
+        // @ts-expect-error Unsure if there should be a default sort order or the type is wrong?
         {
           [sortField]: {
             order: sortOrder,
@@ -58,10 +58,10 @@ export function getSortingParams(
 
     return {
       sort: [
+        // @ts-expect-error Unsure if there should be a default sort order or the type is wrong?
         {
           [sortField]: {
             order: sortOrder,
-            // @ts-expect-error
             unmapped_type: rootField.type,
           },
         },
@@ -83,10 +83,10 @@ export function getSortingParams(
 
   return {
     sort: [
+      // @ts-expect-error Unsure if there should be a default sort order or the type is wrong?
       {
         [key]: {
           order: sortOrder,
-          // @ts-expect-error
           unmapped_type: field.type,
         },
       },

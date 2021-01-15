@@ -32,7 +32,6 @@ import {
   getIgnoreThrottled,
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { AsyncSearchResponse } from './types';
 import { KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
 
 export const enhancedEsSearchStrategyProvider = (
@@ -55,10 +54,9 @@ export const enhancedEsSearchStrategyProvider = (
       const params = id
         ? getDefaultAsyncGetParams()
         : { ...(await getDefaultAsyncSubmitParams(uiSettingsClient, options)), ...request.params };
-      const promise = id
-        ? client.get<AsyncSearchResponse>({ ...params, id })
-        : client.submit<AsyncSearchResponse>(params);
+      const promise = id ? client.get({ ...params, id }) : client.submit({ body: params });
       const { body } = await shimAbortSignal(promise, options.abortSignal);
+      // @ts-expect-error return type currently missing all properties
       return toAsyncKibanaSearchResponse(body);
     };
 
@@ -123,7 +121,7 @@ export const enhancedEsSearchStrategyProvider = (
     },
     extend: async (id, keepAlive, options, { esClient }) => {
       logger.debug(`extend ${id} by ${keepAlive}`);
-      await esClient.asCurrentUser.asyncSearch.get({ id, keep_alive: keepAlive });
+      await esClient.asCurrentUser.asyncSearch.get({ id, body: { keep_alive: keepAlive } });
     },
   };
 };

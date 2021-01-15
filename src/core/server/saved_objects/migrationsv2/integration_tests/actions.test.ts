@@ -250,7 +250,6 @@ describe('migration actions', () => {
           mappings: { properties: {} },
           settings: {
             // Allocate 1 replica so that this index stays yellow
-            // @ts-expect-error
             number_of_replicas: '1',
           },
         },
@@ -267,7 +266,6 @@ describe('migration actions', () => {
       setTimeout(() => {
         client.indices.putSettings({
           body: {
-            // @ts-expect-error
             index: {
               number_of_replicas: 0,
             },
@@ -926,7 +924,6 @@ describe('migration actions', () => {
             mappings: { properties: {} },
             settings: {
               // Allocate 1 replica so that this index stays yellow
-              // @ts-expect-error
               number_of_replicas: '1',
             },
           },
@@ -942,7 +939,6 @@ describe('migration actions', () => {
         client.indices.putSettings({
           index: 'yellow_then_green_index',
           body: {
-            // @ts-expect-error
             index: {
               number_of_replicas: 0,
             },

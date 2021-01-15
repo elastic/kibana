@@ -23,11 +23,12 @@
  */
 
 import _ from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { MigrationEsClient } from './migration_es_client';
 import { CountResponse, SearchResponse } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';
-import { AliasAction, RawDoc, ShardsInfo } from './call_cluster';
+import { AliasAction, RawDoc } from './call_cluster';
 import { SavedObjectsRawDocSource } from '../../serialization';
 
 const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
@@ -80,8 +81,8 @@ export function reader(
 
   const nextBatch = () =>
     scrollId !== undefined
-      ? // @ts-expect-error
-        client.scroll<SearchResponse<SavedObjectsRawDocSource>>({
+      ? client.scroll<SearchResponse<SavedObjectsRawDocSource>>({
+          // @ts-expect-error `ScrollRequest` does not allow the `scroll` parameter
           scroll,
           scroll_id: scrollId,
         })
@@ -137,7 +138,7 @@ export async function write(client: MigrationEsClient, index: string, docs: RawD
     return;
   }
 
-  const exception: any = new Error(err.index.error!.reason);
+  const exception: any = new Error(err.index!.error!.reason);
   exception.detail = err;
   throw exception;
 }
@@ -311,7 +312,7 @@ function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
  * Object indices should only ever have a single shard. This is more to handle
  * instances where customers manually expand the shards of an index.
  */
-function assertResponseIncludeAllShards({ _shards }: { _shards: ShardsInfo }) {
+function assertResponseIncludeAllShards({ _shards }: { _shards: estypes.ShardStatistics }) {
   if (!_.has(_shards, 'total') || !_.has(_shards, 'successful')) {
     return;
   }
@@ -343,11 +344,8 @@ async function reindex(
   const pollInterval = 250;
   const { body: reindexBody } = await client.reindex({
     body: {
-      // @ts-expect-error
       dest: { index: dest },
-      // @ts-expect-error
       source: { index: source, size: batchSize },
-      // @ts-expect-error
       script: script
         ? {
             source: script,

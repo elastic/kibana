@@ -234,6 +234,7 @@ describe('KibanaMigrator', () => {
       it('rejects when the migration state machine terminates in a FATAL state', () => {
         const options = mockV2MigrationOptions();
         options.client.indices.get.mockReturnValue(
+          // @ts-expect-error `TypeMapping` requires several properties that should be optional
           elasticsearchClientMock.createSuccessTransportRequestPromise(
             {
               '.my-index_8.2.4_001': {
@@ -288,6 +289,7 @@ const mockV2MigrationOptions = () => {
   const options = mockOptions({ enableV2: true });
 
   options.client.indices.get.mockReturnValue(
+    // @ts-expect-error `TypeMapping` requires several properties that should be optional
     elasticsearchClientMock.createSuccessTransportRequestPromise(
       {
         '.my-index': {
@@ -307,7 +309,7 @@ const mockV2MigrationOptions = () => {
     // @ts-expect-error
     elasticsearchClientMock.createSuccessTransportRequestPromise({
       taskId: 'reindex_task_id',
-    } as estypes.ReindexOnServerResponse)
+    } as estypes.ReindexResponse)
   );
   options.client.tasks.get.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise({

@@ -47,6 +47,7 @@ export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
         averageDuration: null,
       };
     }
-    return esResponse.hits.hits[0]._source['search-telemetry'];
+    // Safe to use ! since we checked the hits.length above
+    return esResponse.hits.hits[0]._source?.['search-telemetry']!;
   };
 }

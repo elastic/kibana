@@ -16,6 +16,7 @@ export async function getSearchStatus(
   asyncId: string
 ): Promise<Pick<SearchSessionRequestInfo, 'status' | 'error'>> {
   // TODO: Handle strategies other than the default one
+  // @ts-expect-error async search status API missing from types
   const apiResponse: ApiResponse<AsyncSearchStatusResponse> = await client.asyncSearch.status({
     id: asyncId,
   });

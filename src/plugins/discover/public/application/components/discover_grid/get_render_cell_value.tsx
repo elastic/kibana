@@ -36,7 +36,7 @@ export const getRenderCellValueFn = (
   rows: ElasticSearchHit[] | undefined,
   rowsFlattened: Array<Record<string, unknown>>
 ) => ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
-  const row = rows ? (rows[rowIndex] as Record<string, unknown>) : undefined;
+  const row = rows ? ((rows[rowIndex] as unknown) as Record<string, unknown>) : undefined;
   const rowFlattened = rowsFlattened
     ? (rowsFlattened[rowIndex] as Record<string, unknown>)
     : undefined;

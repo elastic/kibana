@@ -29,13 +29,13 @@ export const createClusterDataCheck = () => {
           Array<{ index: string; ['docs.count']: string }>
         >({
           format: 'json',
-          // @ts-expect-error
           h: ['index', 'docs.count'],
         });
-        clusterHasUserData = indices.body.records.some((indexCount) => {
+        clusterHasUserData = indices.body.some((indexCount) => {
           const isInternalIndex =
             indexCount.index.startsWith('.') || indexCount.index.startsWith('kibana_sample_');
 
+          // @ts-expect-error docs.count should be typed as a string
           return !isInternalIndex && parseInt(indexCount['docs.count'], 10) > 0;
         });
       } catch (e) {

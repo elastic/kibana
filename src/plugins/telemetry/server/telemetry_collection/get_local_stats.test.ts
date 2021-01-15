@@ -36,50 +36,45 @@ function mockUsageCollection(kibanaUsage = {}) {
 // set up successful call mocks for info, cluster stats, nodes usage and data telemetry
 function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.info
-    // @ts-ignore we only care about the response body
-    .mockResolvedValue(
-      // @ts-ignore we only care about the response body
-      {
-        body: { ...clusterInfo },
-      }
-    );
-  esClient.cluster.stats
-    // @ts-ignore we only care about the response body
-    .mockResolvedValue({ body: { ...clusterStats } });
-  esClient.nodes.usage.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+  esClient.info.mockResolvedValue(
+    // @ts-expect-error we only care about the response body
     {
-      body: {
-        cluster_name: 'testCluster',
-        nodes: {
-          some_node_id: {
-            timestamp: 1588617023177,
-            since: 1588616945163,
-            rest_actions: {
-              nodes_usage_action: 1,
-              create_index_action: 1,
-              document_get_action: 1,
-              search_action: 19,
-              nodes_info_action: 36,
+      body: { ...clusterInfo },
+    }
+  );
+  esClient.cluster.stats
+    // @ts-expect-error we only care about the response body
+    .mockResolvedValue({ body: { ...clusterStats } });
+  esClient.nodes.usage.mockResolvedValue({
+    // @ts-expect-error we only care about the response body
+    body: {
+      cluster_name: 'testCluster',
+      nodes: {
+        some_node_id: {
+          timestamp: 1588617023177,
+          since: 1588616945163,
+          rest_actions: {
+            nodes_usage_action: 1,
+            create_index_action: 1,
+            document_get_action: 1,
+            search_action: 19,
+            nodes_info_action: 36,
+          },
+          aggregations: {
+            terms: {
+              bytes: 2,
             },
-            // @ts-expect-error NodeUsageInformation is missing `aggregations`
-            aggregations: {
-              terms: {
-                bytes: 2,
-              },
-              scripted_metric: {
-                other: 7,
-              },
+            scripted_metric: {
+              other: 7,
             },
           },
         },
       },
-    }
-  );
-  // @ts-ignore we only care about the response body
+    },
+  });
+  // @ts-expect-error we only care about the response body
   esClient.indices.getMapping.mockResolvedValue({ body: { mappings: {} } });
-  // @ts-ignore we only care about the response body
+  // @ts-expect-error we only care about the response body
   esClient.indices.stats.mockResolvedValue({ body: { indices: {} } });
   return esClient;
 }

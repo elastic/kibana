@@ -263,7 +263,6 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
     };
     const [{ body: indexMappings }, { body: indexStats }] = await Promise.all([
       esClient.indices.getMapping<IndexMappings>(indexMappingsParams),
-      // @ts-expect-error `metrics` should allow string[]
       esClient.indices.stats<IndexStats>(indicesStatsParams),
     ]);
 
@@ -272,19 +271,16 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
     const indices = indexNames.map((name) => {
       const baseIndexInfo = {
         name,
-        // @ts-expect-error DictionaryResponseBase needs an index signature
+        // @ts-expect-error `IProperty` should allow nested properties
         isECS: !!indexMappings[name]?.mappings?.properties.ecs?.properties.version?.type,
-        // @ts-expect-error DictionaryResponseBase needs an index signature
         shipper: indexMappings[name]?.mappings?._meta?.beat,
-        // @ts-expect-error DictionaryResponseBase needs an index signature
         packageName: indexMappings[name]?.mappings?._meta?.package?.name,
-        // @ts-expect-error DictionaryResponseBase needs an index signature
         managedBy: indexMappings[name]?.mappings?._meta?.managed_by,
         dataStreamDataset:
-          // @ts-expect-error DictionaryResponseBase needs an index signature
+          // @ts-expect-error `IProperty` should allow nested properties
           indexMappings[name]?.mappings?.properties.data_stream?.properties.dataset?.value,
         dataStreamType:
-          // @ts-expect-error DictionaryResponseBase needs an index signature
+          // @ts-expect-error `IProperty` should allow nested properties
           indexMappings[name]?.mappings?.properties.data_stream?.properties.type?.value,
       };
 

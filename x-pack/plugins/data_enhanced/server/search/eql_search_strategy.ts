@@ -34,6 +34,7 @@ export const eqlSearchStrategyProvider = (
     search: ({ id, ...request }, options: IAsyncSearchOptions, { esClient, uiSettingsClient }) => {
       logger.debug(`_eql/search ${JSON.stringify(request.params) || id}`);
 
+      // @ts-expect-error eql API missing from types
       const client = esClient.asCurrentUser.eql;
 
       const search = async () => {
@@ -55,6 +56,7 @@ export const eqlSearchStrategyProvider = (
               request.options
             );
         const response = await shimAbortSignal(promise, options.abortSignal);
+        // @ts-expect-error eql API missing from types
         return toEqlKibanaSearchResponse(response);
       };
 
@@ -69,6 +71,7 @@ export const eqlSearchStrategyProvider = (
 
     extend: async (id, keepAlive, options, { esClient }) => {
       logger.debug(`_eql/extend ${id} by ${keepAlive}`);
+      // @ts-expect-error eql API missing from types
       await esClient.asCurrentUser.eql.get({ id, keep_alive: keepAlive });
     },
   };

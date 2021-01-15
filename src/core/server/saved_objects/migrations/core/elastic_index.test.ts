@@ -34,7 +34,6 @@ describe('ElasticIndex', () => {
         elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
-      // @ts-expect-error
       const info = await Index.fetchInfo(client, '.kibana-test');
       expect(info).toEqual({
         aliases: {},
@@ -46,55 +45,19 @@ describe('ElasticIndex', () => {
       expect(client.indices.get).toHaveBeenCalledWith({ index: '.kibana-test' }, { ignore: [404] });
     });
 
-    test('fails if the index doc type is unsupported', async () => {
-      client.indices.get.mockImplementation((params) => {
-        const index = params!.index as string;
-        return elasticsearchClientMock.createSuccessTransportRequestPromise({
-          [index]: {
-            aliases: { foo: index },
-            mappings: { spock: { dynamic: 'strict', properties: { a: 'b' } } },
-          },
-        });
-      });
-
-      // @ts-expect-error
-      await expect(Index.fetchInfo(client, '.baz')).rejects.toThrow(
-        /cannot be automatically migrated/
-      );
-    });
-
-    test('fails if there are multiple root types', async () => {
-      client.indices.get.mockImplementation((params) => {
-        const index = params!.index as string;
-        return elasticsearchClientMock.createSuccessTransportRequestPromise({
-          [index]: {
-            aliases: { foo: index },
-            mappings: {
-              doc: { dynamic: 'strict', properties: { a: 'b' } },
-              doctor: { dynamic: 'strict', properties: { a: 'b' } },
-            },
-          },
-        });
-      });
-
-      // @ts-expect-error
-      await expect(Index.fetchInfo(client, '.baz')).rejects.toThrow(
-        /cannot be automatically migrated/
-      );
-    });
-
     test('decorates index info with exists and indexName', async () => {
       client.indices.get.mockImplementation((params) => {
         const index = params!.index as string;
+        // @ts-expect-error some properties of `TypeMapping` are incorrectly marked as required
         return elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
             mappings: { dynamic: 'strict', properties: { a: 'b' } },
+            settings: {},
           },
-        });
+        } as estypes.GetIndexResponse);
       });
 
-      // @ts-expect-error
       const info = await Index.fetchInfo(client, '.baz');
       expect(info).toEqual({
         aliases: { foo: '.baz' },
@@ -107,7 +70,6 @@ describe('ElasticIndex', () => {
 
   describe('createIndex', () => {
     test('calls indices.create', async () => {
-      // @ts-expect-error
       await Index.createIndex(client, '.abcd', { foo: 'bar' } as any);
 
       expect(client.indices.create).toHaveBeenCalledTimes(1);
@@ -126,7 +88,6 @@ describe('ElasticIndex', () => {
 
   describe('deleteIndex', () => {
     test('calls indices.delete', async () => {
-      // @ts-expect-error
       await Index.deleteIndex(client, '.lotr');
 
       expect(client.indices.delete).toHaveBeenCalledTimes(1);
@@ -142,7 +103,6 @@ describe('ElasticIndex', () => {
         elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
-      // @ts-expect-error
       await Index.claimAlias(client, '.hola-42', '.hola');
 
       expect(client.indices.getAlias).toHaveBeenCalledWith(
@@ -163,12 +123,12 @@ describe('ElasticIndex', () => {
 
     test('removes existing alias', async () => {
       client.indices.getAlias.mockResolvedValue(
+        // @ts-expect-error `AliasDefinition` requires properties that should be optional
         elasticsearchClientMock.createSuccessTransportRequestPromise({
-          '.my-fanci-index': '.muchacha',
+          '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
 
-      // @ts-expect-error
       await Index.claimAlias(client, '.ze-index', '.muchacha');
 
       expect(client.indices.getAlias).toHaveBeenCalledTimes(1);
@@ -187,12 +147,12 @@ describe('ElasticIndex', () => {
 
     test('allows custom alias actions', async () => {
       client.indices.getAlias.mockResolvedValue(
+        // @ts-expect-error `AliasDefinition` requires properties that should be optional
         elasticsearchClientMock.createSuccessTransportRequestPromise({
-          '.my-fanci-index': '.muchacha',
+          '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
 
-      // @ts-expect-error
       await Index.claimAlias(client, '.ze-index', '.muchacha', [
         { remove_index: { index: 'awww-snap!' } },
       ]);
@@ -216,14 +176,15 @@ describe('ElasticIndex', () => {
   describe('convertToAlias', () => {
     test('it creates the destination index, then reindexes to it', async () => {
       client.indices.getAlias.mockResolvedValue(
+        // @ts-expect-error `AliasDefinition` requires properties that should be optional
         elasticsearchClientMock.createSuccessTransportRequestPromise({
-          '.my-fanci-index': '.muchacha',
+          '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
       client.reindex.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           task: 'abc',
-        } as estypes.ReindexOnServerResponse)
+        } as estypes.ReindexResponse)
       );
       client.tasks.get.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -236,13 +197,12 @@ describe('ElasticIndex', () => {
         exists: true,
         indexName: '.ze-index',
         mappings: {
-          dynamic: 'strict',
+          dynamic: 'strict' as const,
           properties: { foo: { type: 'keyword' } },
         },
       };
 
       await Index.convertToAlias(
-        // @ts-expect-error
         client,
         info,
         '.muchacha',
@@ -295,17 +255,18 @@ describe('ElasticIndex', () => {
 
     test('throws error if re-index task fails', async () => {
       client.indices.getAlias.mockResolvedValue(
+        // @ts-expect-error `AliasDefinition` requires properties that should be optional
         elasticsearchClientMock.createSuccessTransportRequestPromise({
-          '.my-fanci-index': '.muchacha',
+          '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
       client.reindex.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           task: 'abc',
-        } as estypes.ReindexOnServerResponse)
+        } as estypes.ReindexResponse)
       );
       client.tasks.get.mockResolvedValue(
-        // @ts-expect-error
+        // @ts-expect-error GetTaskResponse requires a `task` property even on errors
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           completed: true,
           error: {
@@ -389,7 +350,6 @@ describe('ElasticIndex', () => {
         },
       ];
 
-      // @ts-expect-error
       await Index.write(client, index, docs);
 
       expect(client.bulk).toHaveBeenCalled();
@@ -452,7 +412,6 @@ describe('ElasticIndex', () => {
           hits: { hits: _.cloneDeep(batch1) },
         })
       );
-      // @ts-expect-error
       client.scroll = jest
         .fn()
         .mockReturnValueOnce(
@@ -470,7 +429,6 @@ describe('ElasticIndex', () => {
           })
         );
 
-      // @ts-expect-error
       const read = Index.reader(client, index, { batchSize: 100, scrollDuration: '5m' });
 
       expect(await read()).toEqual(batch1);
@@ -482,12 +440,10 @@ describe('ElasticIndex', () => {
         index,
         scroll: '5m',
       });
-      // @ts-expect-error
       expect(client.scroll).toHaveBeenCalledWith({
         scroll: '5m',
         scroll_id: 'x',
       });
-      // @ts-expect-error
       expect(client.scroll).toHaveBeenCalledWith({
         scroll: '5m',
         scroll_id: 'y',
@@ -518,7 +474,6 @@ describe('ElasticIndex', () => {
           hits: { hits: _.cloneDeep(batch) },
         })
       );
-      // @ts-expect-error
       client.scroll = jest.fn().mockReturnValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           _scroll_id: 'z',
@@ -527,7 +482,6 @@ describe('ElasticIndex', () => {
         })
       );
 
-      // @ts-expect-error
       const read = Index.reader(client, index, {
         batchSize: 100,
         scrollDuration: '5m',
@@ -545,7 +499,6 @@ describe('ElasticIndex', () => {
         })
       );
 
-      // @ts-expect-error
       const read = Index.reader(client, index, {
         batchSize: 100,
         scrollDuration: '5m',
@@ -574,7 +527,6 @@ describe('ElasticIndex', () => {
           hits: { hits: _.cloneDeep(batch) },
         })
       );
-      // @ts-expect-error
       client.scroll = jest.fn().mockReturnValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           _scroll_id: 'z',
@@ -582,7 +534,6 @@ describe('ElasticIndex', () => {
         })
       );
 
-      // @ts-expect-error
       const read = Index.reader(client, index, {
         batchSize: 100,
         scrollDuration: '5m',
@@ -612,7 +563,6 @@ describe('ElasticIndex', () => {
         })
       );
 
-      // @ts-expect-error
       const hasMigrations = await Index.migrationsUpToDate(client, index, migrations);
       return { hasMigrations };
     }
