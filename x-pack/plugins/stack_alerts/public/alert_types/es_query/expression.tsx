@@ -34,6 +34,9 @@ import {
   ForLastExpression,
   AlertTypeParamsExpressionProps,
 } from '../../../../triggers_actions_ui/public';
+import { validateExpression } from './validation';
+import { parseDuration } from '../../../../alerts/common';
+import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
 import { EsQueryAlertParams } from './types';
 import { IndexSelectPopover } from '../components/index_select_popover';
 
@@ -58,16 +61,16 @@ const expressionFieldsWithValidation = [
   'timeWindowSize',
 ];
 
+const { useXJsonMode } = XJson;
+const xJsonMode = new XJsonMode();
+
 interface KibanaDeps {
   http: HttpSetup;
 }
 
-const { useXJsonMode } = XJson;
-const xJsonMode = new XJsonMode();
-
 export const EsQueryAlertTypeExpression: React.FunctionComponent<
   AlertTypeParamsExpressionProps<EsQueryAlertParams>
-> = ({ alertParams, setAlertParams, setAlertProperty, errors }) => {
+> = ({ alertParams, setAlertParams, setAlertProperty, errors, data }) => {
   const {
     index,
     timeField,
@@ -77,6 +80,13 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     timeWindowSize,
     timeWindowUnit,
   } = alertParams;
+
+  const getDefaultParams = () => ({
+    ...alertParams,
+    esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
+    timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+    timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+  });
 
   const { http } = useKibana<KibanaDeps>().services;
 
@@ -90,7 +100,11 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     }>
   >([]);
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
+  const [currentAlertParams, setCurrentAlertParams] = useState<EsQueryAlertParams>(
+    getDefaultParams()
+  );
   const [hasThresholdExpression, setHasThresholdExpression] = useState(true);
+  const [runResult, setRunResult] = useState<string | null>(null);
 
   const hasExpressionErrors = !!Object.keys(errors).find(
     (errorKey) =>
@@ -107,12 +121,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
   );
 
   const setDefaultExpressionValues = async () => {
-    setAlertProperty('params', {
-      ...alertParams,
-      esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
-      timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
-      timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
-    });
+    setAlertProperty('params', getDefaultParams());
 
     setXJson(esQuery ?? DEFAULT_VALUES.QUERY);
     if (!isEmpty(alertParams)) {
@@ -124,6 +133,19 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     }
   };
 
+  const setParam = (paramField: string, paramValue: unknown) => {
+    setCurrentAlertParams({
+      ...currentAlertParams,
+      [paramField]: paramValue,
+    });
+    setAlertParams(paramField, paramValue);
+  };
+
+  useEffect(() => {
+    setDefaultExpressionValues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const refreshEsFields = async () => {
     if (index) {
       const currentEsFields = await getFields(http, index);
@@ -131,10 +153,43 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     }
   };
 
-  useEffect(() => {
-    setDefaultExpressionValues();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const onRunQuery = async () => {
+    const { errors: validationErrors } = validateExpression(currentAlertParams);
+    if (
+      Object.keys(validationErrors).every(
+        (key) => !validationErrors[key] || !validationErrors[key].length
+      )
+    ) {
+      const window = `${timeWindowSize}${timeWindowUnit}`;
+      const timeWindow = parseDuration(window);
+      const parsedQuery = JSON.parse(esQuery);
+      const now = Date.now();
+      const { rawResponse } = await data.search
+        .search({
+          params: buildSortedEventsQuery({
+            index,
+            from: new Date(now - timeWindow).toISOString(),
+            to: new Date(now).toISOString(),
+            filter: parsedQuery.query,
+            size: 0,
+            searchAfterSortId: undefined,
+            timeField: timeField ? timeField : '',
+          }),
+        })
+        .toPromise();
+
+      const hits = rawResponse.hits;
+      setRunResult(
+        i18n.translate(
+          'xpack.triggersActionsUI.components.deleteSelectedIdsSuccessNotification.descriptionText',
+          {
+            defaultMessage: 'Query matched {count} documents in the last {window}',
+            values: { count: hits.total, window },
+          }
+        )
+      );
+    }
+  };
 
   return (
     <Fragment>
@@ -160,7 +215,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         timeField={timeField}
         errors={errors}
         onIndexChange={async (indices: string[]) => {
-          setAlertParams('index', indices);
+          setParam('index', indices);
 
           // reset expression fields if indices are deleted
           if (indices.length === 0) {
@@ -178,9 +233,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
             await refreshEsFields();
           }
         }}
-        onTimeFieldChange={(updatedTimeField: string) =>
-          setAlertParams('timeField', updatedTimeField)
-        }
+        onTimeFieldChange={(updatedTimeField: string) => setParam('timeField', updatedTimeField)}
       />
       <EuiSpacer />
       <EuiTitle size="xs">
@@ -222,10 +275,43 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           value={xJson}
           onChange={(xjson: string) => {
             setXJson(xjson);
-            setAlertParams('esQuery', convertToJson(xjson));
+            setParam('esQuery', convertToJson(xjson));
           }}
         />
       </EuiFormRow>
+      <EuiFormRow>
+        <EuiButtonEmpty
+          color={'primary'}
+          iconSide={'left'}
+          flush={'left'}
+          iconType={'play'}
+          onClick={onRunQuery}
+        >
+          <FormattedMessage id="xpack.stackAlerts.esQuery.ui.runQuery" defaultMessage="Run query" />
+        </EuiButtonEmpty>
+      </EuiFormRow>
+      {runResult && (
+        <EuiFormRow>
+          <EuiText color="subdued" size="s">
+            <p>{runResult}</p>
+          </EuiText>
+        </EuiFormRow>
+      )}
+
+      <EuiSpacer />
+      <ForLastExpression
+        popupPosition={'upLeft'}
+        timeWindowSize={timeWindowSize}
+        timeWindowUnit={timeWindowUnit}
+        display="fullWidth"
+        errors={errors}
+        onChangeWindowSize={(selectedWindowSize: number | undefined) =>
+          setParam('timeWindowSize', selectedWindowSize)
+        }
+        onChangeWindowUnit={(selectedWindowUnit: string) =>
+          setParam('timeWindowUnit', selectedWindowUnit)
+        }
+      />
       <EuiSpacer />
       {hasThresholdExpression ? (
         <>
@@ -248,8 +334,8 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
                 color={'danger'}
                 iconType={'trash'}
                 onClick={() => {
-                  setAlertParams('threshold', undefined);
-                  setAlertParams('thresholdComparator', undefined);
+                  setParam('threshold', undefined);
+                  setParam('thresholdComparator', undefined);
                   setHasThresholdExpression(false);
                 }}
               />
@@ -272,23 +358,10 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
             display="fullWidth"
             popupPosition={'upLeft'}
             onChangeSelectedThreshold={(selectedThresholds) =>
-              setAlertParams('threshold', selectedThresholds)
+              setParam('threshold', selectedThresholds)
             }
             onChangeSelectedThresholdComparator={(selectedThresholdComparator) =>
-              setAlertParams('thresholdComparator', selectedThresholdComparator)
-            }
-          />
-          <ForLastExpression
-            popupPosition={'upLeft'}
-            timeWindowSize={timeWindowSize}
-            timeWindowUnit={timeWindowUnit}
-            display="fullWidth"
-            errors={errors}
-            onChangeWindowSize={(selectedWindowSize: number | undefined) =>
-              setAlertParams('timeWindowSize', selectedWindowSize)
-            }
-            onChangeWindowUnit={(selectedWindowUnit: string) =>
-              setAlertParams('timeWindowUnit', selectedWindowUnit)
+              setParam('thresholdComparator', selectedThresholdComparator)
             }
           />
           <EuiSpacer />
@@ -301,8 +374,8 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
             flush={'left'}
             iconType={'plusInCircleFilled'}
             onClick={() => {
-              setAlertParams('threshold', DEFAULT_VALUES.THRESHOLD);
-              setAlertParams('thresholdComparator', DEFAULT_VALUES.THRESHOLD_COMPARATOR);
+              setParam('threshold', DEFAULT_VALUES.THRESHOLD);
+              setParam('thresholdComparator', DEFAULT_VALUES.THRESHOLD_COMPARATOR);
               setHasThresholdExpression(true);
             }}
           >

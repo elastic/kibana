@@ -51,7 +51,6 @@ export const buildSortedEventsQuery = ({
     index,
     size,
     ignoreUnavailable: true,
-    ignore: [404],
     track_total_hits: true,
     body: {
       docvalue_fields: docFields,

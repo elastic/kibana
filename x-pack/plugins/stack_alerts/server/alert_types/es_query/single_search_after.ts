@@ -7,7 +7,7 @@
 import { performance } from 'perf_hooks';
 import { SearchResponse } from 'elasticsearch';
 import { Logger, LegacyScopedClusterClient } from 'src/core/server';
-import { buildSortedEventsQuery } from './build_sorted_events_query';
+import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
 import { shimHitsTotal } from '../../../../../../src/plugins/data/server';
 
 interface SingleSearchAfterParams {
