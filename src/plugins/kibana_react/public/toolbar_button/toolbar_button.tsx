@@ -68,9 +68,9 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   ...rest
 }) => {
   const classes = classNames(
-    'toolbarButton',
+    'kbnToolbarButton',
     groupPositionToClassMap[groupPosition],
-    [`toolbarButton--${fontWeight}`, `toolbarButton--${size}`],
+    [`kbnToolbarButton--${fontWeight}`, `kbnToolbarButton--${size}`],
     className
   );
   return (
@@ -81,10 +81,10 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
       iconType={hasArrow ? 'arrowDown' : ''}
       color="text"
       contentProps={{
-        className: 'toolbarButton__content',
+        className: 'kbnToolbarButton__content',
       }}
       textProps={{
-        className: 'toolbarButton__text',
+        className: 'kbnToolbarButton__text',
       }}
       {...rest}
       size={size}
