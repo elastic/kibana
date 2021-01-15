@@ -18,6 +18,7 @@
  */
 
 import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -27,16 +28,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
-  const defaultSettings = { defaultIndex: 'logstash-*', 'doc_table:legacy': false };
-  const dataGrid = getService('dataGrid');
 
-  describe('discover data grid field data tests', function describeIndexTests() {
+  describe('discover tab with new fields API', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
-      await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('discover');
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+        'discover:searchFieldsFromSource': false,
+      });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.uiSettings.update(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
     });
     describe('field data', function () {
@@ -53,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('the search term should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
         const marks = await PageObjects.discover.getMarks();
-        expect(marks.length).to.be(50);
+        expect(marks.length).to.be(100);
         expect(marks.indexOf('php')).to.be(0);
       });
 
@@ -67,20 +69,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('doc view should show Time and _source columns', async function () {
-        const expectedHeader = 'Time (@timestamp) _source';
-        const DocHeader = await dataGrid.getHeaderFields();
-        expect(DocHeader.join(' ')).to.be(expectedHeader);
+      it('doc view should show Time and Document columns', async function () {
+        const expectedHeader = 'Time Document';
+        const Docheader = await PageObjects.discover.getDocHeader();
+        expect(Docheader).to.be(expectedHeader);
       });
 
       it('doc view should sort ascending', async function () {
         const expectedTimeStamp = 'Sep 20, 2015 @ 00:00:00.000';
-        await dataGrid.clickDocSortAsc();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.clickDocSortDown();
 
+        // we don't technically need this sleep here because the tryForTime will retry and the
+        // results will match on the 2nd or 3rd attempt, but that debug output is huge in this
+        // case and it can be avoided with just a few seconds sleep.
+        await PageObjects.common.sleep(2000);
         await retry.try(async function tryingForTime() {
-          const rowData = await dataGrid.getFields();
-          expect(rowData[0][0].startsWith(expectedTimeStamp)).to.be.ok();
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
+
+          expect(rowData.startsWith(expectedTimeStamp)).to.be.ok();
         });
       });
 

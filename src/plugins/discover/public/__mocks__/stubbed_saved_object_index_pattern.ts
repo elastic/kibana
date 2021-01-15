@@ -17,22 +17,21 @@
  * under the License.
  */
 
-export interface IndexPatternRef {
-  id: string;
-  title: string;
-}
+// @ts-expect-error
+import stubbedLogstashFields from '../../../../fixtures/logstash_fields';
 
-export interface FieldDetails {
-  error: string;
-  exists: number;
-  total: number;
-  buckets: Bucket[];
-  columns: string[];
-}
+const mockLogstashFields = stubbedLogstashFields();
 
-export interface Bucket {
-  display: string;
-  value: string;
-  percent: number;
-  count: number;
+export function stubbedSavedObjectIndexPattern(id: string | null = null) {
+  return {
+    id,
+    type: 'index-pattern',
+    attributes: {
+      timeFieldName: 'timestamp',
+      customFormats: {},
+      fields: mockLogstashFields,
+      title: 'title',
+    },
+    version: '2',
+  };
 }
