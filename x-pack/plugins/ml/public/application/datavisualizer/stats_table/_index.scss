@@ -1,5 +1,6 @@
-@import "components/field_data_expanded_row/number_content";
-@import "components/field_count_stats/index";
+@import 'components/field_data_expanded_row/number_content';
+@import 'components/field_count_stats/index';
+
 .mlDataVisualizerFieldExpandedRow {
   padding-left: $euiSize * 4;
   width: 100%;
@@ -19,15 +20,15 @@
 
 .mlDataVisualizer {
   .euiTableRow > .euiTableRowCell {
-    border-bottom: 0px;
+    border-bottom: 0;
     border-top: $euiBorderThin;
 
   }
   .euiTableRow-isExpandedRow {
 
-    .euiTableRowCell{
+    .euiTableRowCell {
       background-color: $euiColorEmptyShade !important;
-      border-top: 0px;
+      border-top: 0;
       border-bottom: $euiBorderThin;
       &:hover {
         background-color: $euiColorEmptyShade !important;
@@ -35,16 +36,15 @@
     }
   }
   .mlDataVisualizerSummaryTable {
-    max-width: 350px;
-    .euiTableRow > .euiTableRowCell{
-      border-bottom: 0px;
+    max-width: 350;
+    .euiTableRow > .euiTableRowCell {
+      border-bottom: 0;
     }
     .euiTableHeaderCell {
       display: none;
     }
   }
   .mlDataVisualizerSummaryTableWrapper {
-    max-width: 350px;
+    max-width: 350;
   }
 }
-
