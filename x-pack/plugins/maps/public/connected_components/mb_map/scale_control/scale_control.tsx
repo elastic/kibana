@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { Map as MapboxMap } from 'mapbox-gl';
-
 const MAX_WIDTH = 110;
 
 interface Props {
@@ -94,9 +93,11 @@ export class ScaleControl extends Component<Props, State> {
     const zoom = this.props.mbMap.getZoom();
     const bounds = this.props.mbMap.getBounds();
     let label = `${scaleDistance} ${unit}`;
-    if (zoom <= 4
-      || (zoom <= 6 && (bounds.getNorth() > 23.5 || bounds.getSouth() < -23.5))
-      || (zoom <= 8 && (bounds.getNorth() > 45 || bounds.getSouth() < -45)) ) {
+    if (
+      zoom <= 4 ||
+      (zoom <= 6 && (bounds.getNorth() > 23.5 || bounds.getSouth() < -23.5)) ||
+      (zoom <= 8 && (bounds.getNorth() > 45 || bounds.getSouth() < -45))
+    ) {
       label = '~' + label;
     }
     this.setState({
