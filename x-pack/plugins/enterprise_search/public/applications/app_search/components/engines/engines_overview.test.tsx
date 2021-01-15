@@ -5,8 +5,7 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import { rerender } from '../../../__mocks__';
-import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions, rerender } from '../../../__mocks__';
 
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
