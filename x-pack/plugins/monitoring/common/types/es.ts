@@ -100,8 +100,35 @@ export interface ElasticsearchNodeStats {
 export interface ElasticsearchLegacySource {
   timestamp: string;
   cluster_uuid: string;
-  cluster_stats?: {};
+  cluster_stats?: {
+    nodes?: {
+      count?: {
+        total?: number;
+      };
+      jvm?: {
+        max_uptime_in_millis?: number;
+        mem?: {
+          heap_used_in_bytes?: number;
+          heap_max_in_bytes?: number;
+        };
+      };
+      versions?: string[];
+    };
+    indices?: {
+      count?: number;
+      docs?: {
+        count?: number;
+      };
+      shards?: {
+        total?: number;
+      };
+      store?: {
+        size_in_bytes?: number;
+      };
+    };
+  };
   cluster_state?: {
+    status?: string;
     nodes?: {
       [nodeUuid: string]: {};
     };
@@ -199,7 +226,23 @@ export interface ElasticsearchLegacySource {
       };
     };
   };
-  job_stats?: {};
+  job_stats?: {
+    job_id?: number;
+    state?: string;
+    data_counts?: {
+      processed_record_count?: number;
+    };
+    model_size_stats?: {
+      model_bytes?: number;
+    };
+    forecasts_stats?: {
+      total?: number;
+    };
+    node?: {
+      id?: number;
+      name?: string;
+    };
+  };
   index_stats?: {
     index?: string;
     primaries?: {
