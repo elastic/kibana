@@ -21,6 +21,8 @@ import { ISearchSetup, ISearchStart } from './types';
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
 import { searchSourceMock } from './search_source/mocks';
 
+export { createSearchSessionsClientMock } from './session/mocks';
+
 export function createSearchSetupMock(): jest.Mocked<ISearchSetup> {
   return {
     aggs: searchAggsSetupMock(),
@@ -36,6 +38,13 @@ export function createSearchStartMock(): jest.Mocked<ISearchStart> {
     asScoped: jest.fn().mockReturnValue({
       search: jest.fn(),
       cancel: jest.fn(),
+      extend: jest.fn(),
+      saveSession: jest.fn(),
+      getSession: jest.fn(),
+      findSessions: jest.fn(),
+      updateSession: jest.fn(),
+      extendSession: jest.fn(),
+      deleteSession: jest.fn(),
     }),
     searchSource: searchSourceMock.createStartContract(),
   };
