@@ -125,7 +125,7 @@ export const logEntriesSearchStrategyProvider = ({
                 const entries = esResponse.rawResponse.hits.hits.map(
                   getLogEntryFromHit(configuration.logColumns, messageFormattingRules)
                 );
-                const topCursor = null;
+                const topCursor = null; // TODO: determine cursors
                 const bottomCursor = null;
 
                 return {
