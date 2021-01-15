@@ -74,7 +74,7 @@ const NoPermissions = memo(() => {
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.securitySolution.endpointManagement.noPermissionsSubText"
-              defaultMessage="It looks like Ingest Manager is disabled. Ingest Manager must be enabled to use this feature. If you do not have permissions to enable Ingest Manager, contact your Kibana administrator."
+              defaultMessage="It looks like Fleet is disabled. Fleet must be enabled to use this feature. If you do not have permissions to enable Fleet, contact your Kibana administrator."
             />
           </EuiText>
         }

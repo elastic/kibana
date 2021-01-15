@@ -55,7 +55,7 @@ interface Props {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
-  anomalySeries?: ReturnType<
+  anomalyTimeseries?: ReturnType<
     typeof getLatencyChartSelector
   >['anomalyTimeseries'];
 }
@@ -70,7 +70,7 @@ export function TimeseriesChart({
   yTickFormat,
   showAnnotations = true,
   yDomain,
-  anomalySeries,
+  anomalyTimeseries,
 }: Props) {
   const history = useHistory();
   const { annotations } = useAnnotationsContext();
@@ -89,6 +89,8 @@ export function TimeseriesChart({
   const isEmpty = isTimeseriesEmpty(timeseries);
 
   const annotationColor = theme.eui.euiColorSecondary;
+
+  const allSeries = [...timeseries, ...(anomalyTimeseries?.boundaries ?? [])];
 
   return (
     <ChartContainer hasData={!isEmpty} height={height} status={fetchStatus}>
@@ -150,7 +152,7 @@ export function TimeseriesChart({
           />
         )}
 
-        {timeseries.map((serie) => {
+        {allSeries.map((serie) => {
           const Series = serie.type === 'area' ? AreaSeries : LineSeries;
 
           return (
@@ -164,37 +166,28 @@ export function TimeseriesChart({
               data={isEmpty ? [] : serie.data}
               color={serie.color}
               curve={CurveType.CURVE_MONOTONE_X}
+              hideInLegend={serie.hideLegend}
+              fit={serie.fit ?? undefined}
+              filterSeriesInTooltip={
+                serie.hideTooltipValue ? () => false : undefined
+              }
+              stackAccessors={serie.stackAccessors ?? undefined}
+              areaSeriesStyle={serie.areaSeriesStyle}
+              lineSeriesStyle={serie.lineSeriesStyle}
             />
           );
         })}
 
-        {anomalySeries?.bounderies && (
-          <AreaSeries
-            key={anomalySeries.bounderies.title}
-            id={anomalySeries.bounderies.title}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={['y']}
-            y0Accessors={['y0']}
-            data={anomalySeries.bounderies.data}
-            color={anomalySeries.bounderies.color}
-            curve={CurveType.CURVE_MONOTONE_X}
-            hideInLegend
-            filterSeriesInTooltip={() => false}
-          />
-        )}
-
-        {anomalySeries?.scores && (
+        {anomalyTimeseries?.scores && (
           <RectAnnotation
-            key={anomalySeries.scores.title}
+            key={anomalyTimeseries.scores.title}
             id="score_anomalies"
-            dataValues={(anomalySeries.scores.data as RectCoordinate[]).map(
+            dataValues={(anomalyTimeseries.scores.data as RectCoordinate[]).map(
               ({ x0, x: x1 }) => ({
                 coordinates: { x0, x1 },
               })
             )}
-            style={{ fill: anomalySeries.scores.color }}
+            style={{ fill: anomalyTimeseries.scores.color }}
           />
         )}
       </Chart>
