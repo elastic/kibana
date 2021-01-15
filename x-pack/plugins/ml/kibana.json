@@ -17,7 +17,8 @@
     "uiActions",
     "kibanaLegacy",
     "indexPatternManagement",
-    "discover"
+    "discover",
+    "maps"
   ],
   "optionalPlugins": [
     "home",

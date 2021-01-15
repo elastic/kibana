@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { TopValues } from '../../../index_based/components/field_data_row/top_values';
@@ -27,7 +27,6 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
             defaultMessage="Top values"
           />
         </ExpandedRowFieldHeader>
-        <EuiSpacer size="xs" />
         <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
       </EuiFlexItem>
     </EuiFlexGroup>
