@@ -19,7 +19,7 @@ import { SearchBar } from '../../shared/search_bar';
 import { UserExperienceCallout } from '../transaction_overview/user_experience_callout';
 import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
-import { ServiceOverviewInstancesTable } from './service_overview_instances_table';
+import { ServiceOverviewInstancesRow } from './service_overview_instances_row';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
 import { useShouldUseMobileLayout } from './use_should_use_mobile_layout';
@@ -131,9 +131,16 @@ export function ServiceOverview({
             </EuiFlexItem>
             {!isRumAgent && (
               <EuiFlexItem>
-                <EuiPanel>
-                  <ServiceOverviewInstancesTable serviceName={serviceName} />
-                </EuiPanel>
+                <EuiFlexGroup
+                  direction={rowDirection}
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  <ServiceOverviewInstancesRow
+                    chartHeight={chartHeight}
+                    serviceName={serviceName}
+                  />
+                </EuiFlexGroup>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
