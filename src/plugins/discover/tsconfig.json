@@ -1,0 +1,28 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../charts/tsconfig.json" },
+    { "path": "../data/tsconfig.json" },
+    { "path": "../embeddable/tsconfig.json" },
+    { "path": "../inspector/tsconfig.json" },
+    { "path": "../url_forwarding/tsconfig.json" },
+    { "path": "../saved_objects/tsconfig.json" },
+    { "path": "../navigation/tsconfig.json" },
+    { "path": "../ui_actions/tsconfig.json" },
+    { "path": "../home/tsconfig.json" },
+    { "path": "../share/tsconfig.json" },
+    { "path": "../usage_collection/tsconfig.json" },
+    { "path": "../kibana_utils/tsconfig.json" },
+    { "path": "../kibana_react/tsconfig.json" },
+    { "path": "../kibana_legacy/tsconfig.json" }
+  ]
+}

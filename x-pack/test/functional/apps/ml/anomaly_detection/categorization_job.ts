@@ -343,6 +343,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('job deletion confirms the delete modal');
       await ml.jobTable.confirmDeleteJobModal();
+      await ml.api.waitForAnomalyDetectionJobNotToExist(jobIdClone, 30 * 1000);
 
       await ml.testExecution.logTestStep(
         'job deletion does not display the deleted job in the job list any more'

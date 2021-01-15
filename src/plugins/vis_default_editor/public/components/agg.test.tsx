@@ -22,11 +22,11 @@ import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
 import { IndexPattern, IAggType, AggGroupNames } from 'src/plugins/data/public';
+import type { Schema } from '../../../visualizations/public';
 
 import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
 import { DefaultEditorAggParams } from './agg_params';
 import { AGGS_ACTION_KEYS } from './agg_group_state';
-import { Schema } from '../schemas';
 import { EditorVisState } from './sidebar/state/reducers';
 
 jest.mock('./agg_params', () => ({

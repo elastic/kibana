@@ -6,6 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const API_LOGS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.apiLogs.title',
+  { defaultMessage: 'API Logs' }
+);
+
 export const RECENT_API_EVENTS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.apiLogs.recent',
   { defaultMessage: 'Recent API events' }

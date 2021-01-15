@@ -77,6 +77,7 @@ const services = getServices();
 
 const {
   core,
+  capabilities,
   chrome,
   data,
   history: getHistory,
@@ -106,8 +107,8 @@ app.config(($routeProvider) => {
     requireUICapability: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
       $injector.invoke($route.current.params.id ? getSavedSearchBreadcrumbs : getRootBreadcrumbs),
-    badge: (uiCapabilities) => {
-      if (uiCapabilities.discover.save) {
+    badge: () => {
+      if (capabilities.discover.save) {
         return undefined;
       }
 
@@ -184,7 +185,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($element, $route, $scope, $timeout, Promise, uiCapabilities) {
+function discoverController($element, $route, $scope, $timeout, Promise) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
@@ -295,7 +296,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     createSearchSessionRestorationDataProvider({
       appStateContainer,
       data,
-      getSavedSearchId: () => savedSearch.id,
+      getSavedSearch: () => savedSearch,
     })
   );
 
@@ -341,7 +342,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
-  $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
+  $scope.showSaveQuery = capabilities.discover.saveQuery;
   $scope.showTimeCol =
     !config.get('doc_table:hideTimeColumn', false) && $scope.indexPattern.timeFieldName;
 
@@ -769,7 +770,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
 
   $scope.addColumn = function addColumn(columnName) {
-    if (uiCapabilities.discover.save) {
+    if (capabilities.discover.save) {
       const { indexPattern } = $scope;
       popularizeField(indexPattern, columnName, indexPatterns);
     }
@@ -778,7 +779,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
 
   $scope.removeColumn = function removeColumn(columnName) {
-    if (uiCapabilities.discover.save) {
+    if (capabilities.discover.save) {
       const { indexPattern } = $scope;
       popularizeField(indexPattern, columnName, indexPatterns);
     }

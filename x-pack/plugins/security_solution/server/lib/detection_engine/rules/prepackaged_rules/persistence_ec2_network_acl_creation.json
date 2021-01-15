@@ -44,13 +44,13 @@
       },
       "technique": [
         {
-          "id": "T1108",
-          "name": "Redundant Access",
-          "reference": "https://attack.mitre.org/techniques/T1108/"
+          "id": "T1133",
+          "name": "External Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1133/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }
