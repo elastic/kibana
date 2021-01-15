@@ -22,9 +22,7 @@ import MarkdownIt from 'markdown-it';
 import { EMSClient } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
 import { getKibanaVersion } from '../kibana_services';
-import { ORIGIN } from '../common/constants/origin';
-
-const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
+import { ORIGIN, TMS_IN_YML_ID } from '../common/constants';
 
 export class ServiceSettings {
   constructor(mapConfig, tilemapsConfig) {

@@ -219,7 +219,8 @@ describe('CustomLink', () => {
       expect(saveCustomLinkSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('deletes a custom link', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/75106
+    it.skip('deletes a custom link', async () => {
       const mockContext = getMockAPMContext({ canSave: true });
       const component = render(
         <LicenseContext.Provider value={goldLicense}>
