@@ -37,7 +37,7 @@ export const DropdownFilter: FunctionComponent<Props> = ({
   let options = [
     { value: '%%CANVAS_MATCH_ALL%%', text: `-- ${strings.getMatchAllOptionLabel()} --` },
   ];
-  options = options.concat(choices.map((choice) => ({ value: choice, text: choice })));
+  options = options.concat(choices.map((choice) => ({ value: choice[0], text: choice[1] })));
 
   const changeHandler = (e: FocusEvent<HTMLSelectElement> | ChangeEvent<HTMLSelectElement>) => {
     if (e && e.target) {
