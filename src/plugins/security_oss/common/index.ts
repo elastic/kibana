@@ -17,22 +17,4 @@
  * under the License.
  */
 
-import { coreMock } from '../../../core/server/mocks';
-import { SecurityOssPlugin } from './plugin';
-
-describe('SecurityOss Plugin', () => {
-  describe('#setup', () => {
-    it('exposes the proper contract', async () => {
-      const context = coreMock.createPluginInitializerContext();
-      const plugin = new SecurityOssPlugin(context);
-      const core = coreMock.createSetup();
-      const contract = plugin.setup(core);
-      expect(Object.keys(contract)).toMatchInlineSnapshot(`
-        Array [
-          "showInsecureClusterWarning$",
-          "setAnonymousAccessServiceProvider",
-        ]
-      `);
-    });
-  });
-});
+export type { AppState } from './app_state';
