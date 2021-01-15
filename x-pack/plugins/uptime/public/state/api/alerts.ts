@@ -11,7 +11,6 @@ import { ActionConnector } from '../alerts/alerts';
 import { AlertsResult, MonitorIdParam } from '../actions/types';
 import { Alert, AlertAction, ActionType } from '../../../../triggers_actions_ui/public';
 import { API_URLS } from '../../../common/constants';
-import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
 
 import { populateAlertActions } from './alert_actions';
 
@@ -28,7 +27,7 @@ export interface NewAlertParams {
 }
 
 type NewMonitorStatusAlert = Omit<
-  Alert<AtomicStatusCheckParams>,
+  Alert,
   | 'id'
   | 'createdBy'
   | 'updatedBy'
