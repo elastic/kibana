@@ -6,6 +6,8 @@
 
 import { resetContext } from 'kea';
 
+import { expectedAsyncError } from '../../../__mocks__';
+
 jest.mock('../../../shared/http', () => ({
   HttpLogic: {
     values: { http: { get: jest.fn(), post: jest.fn() } },
@@ -240,11 +242,9 @@ describe('GroupsLogic', () => {
         (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
 
         GroupsLogic.actions.initializeGroups();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -304,13 +304,10 @@ describe('GroupsLogic', () => {
         (HttpLogic.values.http.post as jest.Mock).mockReturnValue(promise);
 
         GroupsLogic.actions.getSearchResults();
-        try {
-          await promise;
-        } catch {
-          // Account for `breakpoint` that debounces filter value.
-          await delay();
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
+        await expectedAsyncError(promise);
+        await delay();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -333,11 +330,9 @@ describe('GroupsLogic', () => {
         (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
 
         GroupsLogic.actions.fetchGroupUsers('123');
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -363,11 +358,9 @@ describe('GroupsLogic', () => {
         (HttpLogic.values.http.post as jest.Mock).mockReturnValue(promise);
 
         GroupsLogic.actions.saveNewGroup();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
