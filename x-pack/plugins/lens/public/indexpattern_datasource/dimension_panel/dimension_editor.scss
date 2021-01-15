@@ -15,6 +15,10 @@
   column-gap: $euiSizeXL;
 }
 
+.lnsIndexPatternDimensionEditor__operation {
+  position: static;
+}
+
 .lnsIndexPatternDimensionEditor__operation .euiListGroupItem__label {
   width: 100%;
 }
