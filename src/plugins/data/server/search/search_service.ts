@@ -351,7 +351,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return strategy.extend(id, keepAlive, options, deps);
   };
 
-  private deleteSession = async (deps: SearchStrategyDependencies, sessionId: string) => {
+  private cancelSession = async (deps: SearchStrategyDependencies, sessionId: string) => {
     const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
 
     for (const [searchId, strategyName] of searchIdMapping.entries()) {
@@ -363,7 +363,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       await this.cancel(deps, searchId, searchOptions);
     }
 
-    return deps.searchSessionsClient.delete(sessionId);
+    return deps.searchSessionsClient.cancel(sessionId);
   };
 
   private extendSession = async (
@@ -413,7 +413,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         findSessions: searchSessionsClient.find,
         updateSession: searchSessionsClient.update,
         extendSession: this.extendSession.bind(this, deps),
-        deleteSession: this.deleteSession.bind(this, deps),
+        cancelSession: this.cancelSession.bind(this, deps),
       };
     };
   };

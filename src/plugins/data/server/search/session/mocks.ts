@@ -30,7 +30,7 @@ export function createSearchSessionsClientMock<T = unknown>(): jest.Mocked<
     get: jest.fn(),
     find: jest.fn(),
     update: jest.fn(),
-    delete: jest.fn(),
+    cancel: jest.fn(),
     extend: jest.fn(),
   };
 }

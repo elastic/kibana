@@ -198,95 +198,13 @@ describe('SearchSessionService', () => {
     );
   });
 
-  it('delete calls saved objects client', async () => {
-    savedObjectsClient.delete.mockResolvedValue({});
+  it('cancel updates object status', async () => {
+    await service.cancel({ savedObjectsClient }, sessionId);
 
-    const response = await service.delete({ savedObjectsClient }, sessionId);
-
-    expect(response).toEqual({});
-    expect(savedObjectsClient.delete).toHaveBeenCalledWith(SEARCH_SESSION_TYPE, sessionId);
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(SEARCH_SESSION_TYPE, sessionId, {
+      status: SearchSessionStatus.CANCELLED,
+    });
   });
-
-  // describe('search', () => {
-  //   const mockSearch = jest.fn().mockReturnValue(of({}));
-  //   const mockStrategy = { search: mockSearch };
-  //   const mockSearchDeps = {} as SearchStrategyDependencies;
-  //   const mockDeps = {} as SearchSessionDependencies;
-  //
-  //   beforeEach(() => {
-  //     mockSearch.mockClear();
-  //   });
-  //
-  //   it('searches using the original request if not restoring', async () => {
-  //     const searchRequest = { params: {} };
-  //     const options = { sessionId, isStored: false, isRestore: false };
-  //
-  //     await service
-  //       .search(mockStrategy, searchRequest, options, mockSearchDeps, mockDeps)
-  //       .toPromise();
-  //
-  //     expect(mockSearch).toBeCalledWith(searchRequest, options, mockSearchDeps);
-  //   });
-  //
-  //   it('searches using the original request if `id` is provided', async () => {
-  //     const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
-  //     const searchRequest = { id: searchId, params: {} };
-  //     const options = { sessionId, isStored: true, isRestore: true };
-  //
-  //     await service
-  //       .search(mockStrategy, searchRequest, options, mockSearchDeps, mockDeps)
-  //       .toPromise();
-  //
-  //     expect(mockSearch).toBeCalledWith(searchRequest, options, mockSearchDeps);
-  //   });
-  //
-  //   it('searches by looking up an `id` if restoring and `id` is not provided', async () => {
-  //     const searchRequest = { params: {} };
-  //     const options = { sessionId, isStored: true, isRestore: true };
-  //     const spyGetId = jest.spyOn(service, 'getId').mockResolvedValueOnce('my_id');
-  //
-  //     await service
-  //       .search(mockStrategy, searchRequest, options, mockSearchDeps, mockDeps)
-  //       .toPromise();
-  //
-  //     expect(mockSearch).toBeCalledWith({ ...searchRequest, id: 'my_id' }, options, mockSearchDeps);
-  //
-  //     spyGetId.mockRestore();
-  //   });
-  //
-  //   it('calls `trackId` once if the response contains an `id` and not restoring', async () => {
-  //     const searchRequest = { params: {} };
-  //     const options = { sessionId, isStored: false, isRestore: false };
-  //     const spyTrackId = jest.spyOn(service, 'trackId').mockResolvedValue();
-  //     mockSearch.mockReturnValueOnce(of({ id: 'my_id' }, { id: 'my_id' }));
-  //
-  //     await service
-  //       .search(mockStrategy, searchRequest, options, mockSearchDeps, mockDeps)
-  //       .toPromise();
-  //
-  //     expect(spyTrackId).toBeCalledTimes(1);
-  //     expect(spyTrackId).toBeCalledWith(searchRequest, 'my_id', options, {});
-  //
-  //     spyTrackId.mockRestore();
-  //   });
-  //
-  //   it('does not call `trackId` if restoring', async () => {
-  //     const searchRequest = { params: {} };
-  //     const options = { sessionId, isStored: true, isRestore: true };
-  //     const spyGetId = jest.spyOn(service, 'getId').mockResolvedValueOnce('my_id');
-  //     const spyTrackId = jest.spyOn(service, 'trackId').mockResolvedValue();
-  //     mockSearch.mockReturnValueOnce(of({ id: 'my_id' }));
-  //
-  //     await service
-  //       .search(mockStrategy, searchRequest, options, mockSearchDeps, mockDeps)
-  //       .toPromise();
-  //
-  //     expect(spyTrackId).not.toBeCalled();
-  //
-  //     spyGetId.mockRestore();
-  //     spyTrackId.mockRestore();
-  //   });
-  // });
 
   describe('trackId', () => {
     it('stores hash in memory when `isStored` is `false` for when `save` is called', async () => {
@@ -432,6 +350,37 @@ describe('SearchSessionService', () => {
       });
 
       expect(id).toBe(searchId);
+    });
+  });
+
+  describe('getSearchIdMapping', () => {
+    it('retrieves the search IDs and strategies from the saved object', async () => {
+      const mockSession = {
+        id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
+        type: SEARCH_SESSION_TYPE,
+        attributes: {
+          name: 'my_name',
+          appId: 'my_app_id',
+          urlGeneratorId: 'my_url_generator_id',
+          idMapping: {
+            foo: {
+              id: 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0',
+              strategy: MOCK_STRATEGY,
+            },
+          },
+        },
+        references: [],
+      };
+      savedObjectsClient.get.mockResolvedValue(mockSession);
+      const searchIdMapping = await service.getSearchIdMapping(
+        { savedObjectsClient },
+        mockSession.id
+      );
+      expect(searchIdMapping).toMatchInlineSnapshot(`
+        Map {
+          "FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0" => "ese",
+        }
+      `);
     });
   });
 

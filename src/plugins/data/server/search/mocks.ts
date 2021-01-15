@@ -44,7 +44,7 @@ export function createSearchStartMock(): jest.Mocked<ISearchStart> {
       findSessions: jest.fn(),
       updateSession: jest.fn(),
       extendSession: jest.fn(),
-      deleteSession: jest.fn(),
+      cancelSession: jest.fn(),
     }),
     searchSource: searchSourceMock.createStartContract(),
   };

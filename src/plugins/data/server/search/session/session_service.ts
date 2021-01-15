@@ -48,8 +48,8 @@ export class SearchSessionService implements ISearchSessionService {
       extend: async () => {
         throw new Error('extend not implemented in OSS search session service');
       },
-      delete: async () => {
-        throw new Error('delete not implemented in OSS search session service');
+      cancel: async () => {
+        throw new Error('cancel not implemented in OSS search session service');
       },
     });
   }

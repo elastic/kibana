@@ -89,7 +89,7 @@ describe('registerSessionRoutes', () => {
     expect(mockContext.search!.updateSession).toHaveBeenCalledWith(id, body);
   });
 
-  it('delete calls deleteSession with id', async () => {
+  it('delete calls cancelSession with id', async () => {
     const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
     const params = { id };
 
@@ -101,6 +101,6 @@ describe('registerSessionRoutes', () => {
 
     deleteHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.deleteSession).toHaveBeenCalledWith(id);
+    expect(mockContext.search!.cancelSession).toHaveBeenCalledWith(id);
   });
 });

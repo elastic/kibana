@@ -123,7 +123,7 @@ export function registerSessionRoutes(router: IRouter): void {
     async (context, request, res) => {
       const { id } = request.params;
       try {
-        await context.search!.deleteSession(id);
+        await context.search!.cancelSession(id);
 
         return res.ok();
       } catch (e) {

@@ -315,8 +315,10 @@ export class SearchSessionService
   }
 
   // TODO: Throw an error if this session doesn't belong to this user
-  public delete = ({ savedObjectsClient }: SearchSessionDependencies, sessionId: string) => {
-    return savedObjectsClient.delete(SEARCH_SESSION_TYPE, sessionId);
+  public cancel = (deps: SearchSessionDependencies, sessionId: string) => {
+    return this.update(deps, sessionId, {
+      status: SearchSessionStatus.CANCELLED,
+    });
   };
 
   /**
@@ -408,7 +410,7 @@ export class SearchSessionService
         find: this.find.bind(this, deps),
         update: this.update.bind(this, deps),
         extend: this.extend.bind(this, deps),
-        delete: this.delete.bind(this, deps),
+        cancel: this.cancel.bind(this, deps),
       };
     };
   };
