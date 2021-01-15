@@ -96,9 +96,9 @@ const getPhaseMinAgeInMilliseconds = (phase: { min_age: string }): number => {
   let milliseconds: number;
   const { units, size } = splitSizeAndUnits(phase.min_age);
   if (units === 'micros') {
-    milliseconds = parseInt(size, 10) * 1e3;
+    milliseconds = parseInt(size, 10) / 1e3;
   } else if (units === 'nanos') {
-    milliseconds = parseInt(size, 10) * 1e6;
+    milliseconds = parseInt(size, 10) / 1e6;
   } else {
     milliseconds = moment.duration(size, units as any).asMilliseconds();
   }
@@ -161,13 +161,7 @@ const millisecondsToDays = (milliseconds?: number): string | undefined => {
   const days = milliseconds / 8.64e7;
   return days < 1
     ? i18nTexts.lessThanADay
-    : i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.amountOfDays', {
-        defaultMessage: 'At least {amount} {plurualisedDay}',
-        values: {
-          amount: Math.floor(days),
-          plurualisedDay: days === 1 ? i18nTexts.day : i18nTexts.days,
-        },
-      });
+    : `${Math.floor(days)} ${days === 1 ? i18nTexts.day : i18nTexts.days}`;
 };
 
 export const normalizeTimingsToHumanReadable = ({
