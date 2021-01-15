@@ -5,6 +5,7 @@
  */
 
 import uuid from 'uuid';
+import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../../../../src/core/server';
 
@@ -26,9 +27,14 @@ export function defineRoutes(router: IRouter) {
   router.post(
     {
       path: '/api/osquery/queries',
-      validate: false,
+      validate: {
+        params: schema.object({}, { unknowns: 'allow' }),
+        body: schema.object({}, { unknowns: 'allow' }),
+      },
     },
     async (context, request, response) => {
+      console.log(request);
+      console.log(JSON.stringify(request.body, null, 2));
       const esClient = context.core.elasticsearch.client.asInternalUser;
       const query = await esClient.index<{}, {}>({
         index: '.fleet-actions',
@@ -38,12 +44,12 @@ export function defineRoutes(router: IRouter) {
           expiration: '2021-01-15T13:36:30Z',
           type: 'APP_ACTION',
           input_id: 'osquery',
-          agents: ['8981bfa9-092e-4fa3-8c2d-d3a5a2fbaf5f'],
+          agents: request.body.agents,
           data: {
             commands: [
               {
                 id: uuid.v4(),
-                query: 'select * from users',
+                query: request.body.command.query,
               },
             ],
           },

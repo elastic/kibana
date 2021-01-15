@@ -93,7 +93,7 @@ export const AgentsTable = ({ selectedAgents, onChange }) => {
   };
 
   useEffect(() => {
-    if (selectedAgents?.length && agents.length && selectedItems.length !== selectedItems.length) {
+    if (selectedAgents?.length && agents.length && selectedItems.length !== selectedAgents.length) {
       tableRef?.current.setSelection(
         selectedAgents.map((agentId) => find({ _id: agentId }, agents))
       );
