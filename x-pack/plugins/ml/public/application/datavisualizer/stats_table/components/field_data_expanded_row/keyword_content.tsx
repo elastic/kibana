@@ -17,7 +17,7 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
 
   return (
-    <EuiFlexGroup data-test-subj={'mlDVKeywordContent'}>
+    <EuiFlexGroup data-test-subj={'mlDVKeywordContent'} gutterSize={'xl'}>
       <DocumentStatsTable config={config} />
 
       <EuiFlexItem>
