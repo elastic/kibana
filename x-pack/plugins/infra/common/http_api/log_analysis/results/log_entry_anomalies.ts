@@ -38,14 +38,19 @@ const logEntryAnomalyCommonFieldsRT = rt.type({
   jobId: rt.string,
 });
 const logEntrylogRateAnomalyRT = logEntryAnomalyCommonFieldsRT;
-const logEntrylogCategoryAnomalyRT = rt.partial({
-  categoryId: rt.string,
-});
-const logEntryAnomalyRT = rt.intersection([
+export type RateAnomaly = rt.TypeOf<typeof logEntrylogRateAnomalyRT>;
+
+const logEntrylogCategoryAnomalyRT = rt.intersection([
   logEntryAnomalyCommonFieldsRT,
-  logEntrylogRateAnomalyRT,
-  logEntrylogCategoryAnomalyRT,
+  rt.type({
+    categoryId: rt.string,
+    categoryRegex: rt.string,
+    categoryTerms: rt.string,
+  }),
 ]);
+export type CategoryAnomaly = rt.TypeOf<typeof logEntrylogCategoryAnomalyRT>;
+
+const logEntryAnomalyRT = rt.union([logEntrylogRateAnomalyRT, logEntrylogCategoryAnomalyRT]);
 
 export type LogEntryAnomaly = rt.TypeOf<typeof logEntryAnomalyRT>;
 

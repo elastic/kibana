@@ -19,6 +19,7 @@ import {
   Pagination,
   GetLogEntryAnomaliesRequestPayload,
 } from '../../../common/http_api/log_analysis';
+import { isCategoryAnomaly } from '../../../common/log_analysis/log_entry_anomalies';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
 import { createLogEntryAnomaliesQuery, logEntryAnomaliesResponseRT } from './queries';
 import {
@@ -132,7 +133,7 @@ export async function getLogEntryAnomalies(
     datasets
   );
 
-  const data = anomalies.map((anomaly) => {
+  const parsedAnomalies = anomalies.map((anomaly) => {
     const { jobId } = anomaly;
 
     if (!anomaly.categoryId) {
@@ -142,10 +143,41 @@ export async function getLogEntryAnomalies(
     }
   });
 
+  const categoryIds = parsedAnomalies
+    .filter((anomaly) => {
+      return isCategoryAnomaly(anomaly);
+    })
+    .map((categoryAnomaly) => {
+      return parseInt(categoryAnomaly.categoryId!, 10);
+    });
+
+  const logEntryCategoriesCountJobId = getJobId(
+    context.infra.spaceId,
+    sourceId,
+    logEntryCategoriesJobTypes[0]
+  );
+
+  const { logEntryCategoriesById } = await fetchLogEntryCategories(
+    context,
+    logEntryCategoriesCountJobId,
+    categoryIds
+  );
+
+  const parsedAnomaliesWithExpandedCategoryInformation = parsedAnomalies.map((anomaly) => {
+    if (anomaly.type === 'logCategory') {
+      const {
+        _source: { regex, terms },
+      } = logEntryCategoriesById[parseInt(anomaly.categoryId!, 10)];
+      return { ...anomaly, ...{ categoryRegex: regex, categoryTerms: terms } };
+    } else {
+      return anomaly;
+    }
+  });
+
   const logEntryAnomaliesSpan = finalizeLogEntryAnomaliesSpan();
 
   return {
-    data,
+    data: parsedAnomaliesWithExpandedCategoryInformation,
     paginationCursors,
     hasMoreEntries,
     timing: {
