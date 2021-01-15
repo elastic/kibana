@@ -36,7 +36,8 @@ import { WaterfallData } from '../types';
 import { BAR_HEIGHT, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
 import { Sidebar } from './sidebar';
 import { Legend } from './legend';
-import { CANVAS_MAX_ITEMS, useTimingsCharts } from './use_timings_charts';
+import { CANVAS_MAX_ITEMS } from './use_bar_charts';
+import { useBarCharts } from './use_bar_charts';
 
 const Tooltip = (tooltipInfo: TooltipInfo) => {
   const { data, renderTooltipItem } = useWaterfallContext();
@@ -106,7 +107,7 @@ export const WaterfallChart = ({
     }
   }, [chartWrapperDivRef, fullHeight]);
 
-  const chartsToDisplay = useTimingsCharts({ data });
+  const chartsToDisplay = useBarCharts({ data });
 
   return (
     <WaterfallChartOuterContainer height={height}>
