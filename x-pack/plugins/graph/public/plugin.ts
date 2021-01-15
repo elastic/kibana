@@ -97,7 +97,6 @@ export class GraphPlugin
           graphSavePolicy: config.savePolicy,
           storage: new Storage(window.localStorage),
           capabilities: coreStart.application.capabilities.graph,
-          coreStart,
           chrome: coreStart.chrome,
           toastNotifications: coreStart.notifications.toasts,
           indexPatterns: pluginsStart.data!.indexPatterns,
