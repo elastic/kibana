@@ -247,7 +247,6 @@ export function EditorFrame(props: EditorFrameProps) {
       state.visualization,
       state.activeData,
       props.query,
-      props.dateRange,
       props.filters,
       props.savedQuery,
       state.title,

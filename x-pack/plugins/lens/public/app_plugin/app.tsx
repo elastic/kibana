@@ -107,9 +107,43 @@ export function App({
     state.searchSessionId,
   ]);
 
+  const timefilter = data.query.timefilter.timefilter;
+  const currentNow = data.nowProvider.get();
+
   // Need a stable reference for the frame component of the dateRange
   const { from: fromDate, to: toDate } = data.query.timefilter.timefilter.getTime();
-  const currentDateRange = useMemo(() => ({ fromDate, toDate }), [fromDate, toDate]);
+  const currentDateRange = useMemo(() => {
+    const { min, max } = timefilter.calculateBounds({
+      from: fromDate,
+      to: toDate,
+    });
+    return { fromDate: min?.toISOString() || fromDate, toDate: max?.toISOString() || toDate };
+    // recalculate current date range if current "now" value changes because calculateBounds
+    // depends on it internally
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromDate, toDate, timefilter, currentNow]);
+
+  useEffect(() => {
+    // TODO check whether dynamic dates are even used - if not, all of this is irrelevant
+    // calculate length of currently configured range in ms
+    const timeRangeLength =
+      new Date(currentDateRange.toDate!).valueOf() - new Date(currentDateRange.fromDate!).valueOf();
+    // calculate lag of managed "now" for date math
+    const nowDiff = Date.now() - data.nowProvider.get().valueOf();
+    // if the lag is signifcant, start a new session to clear the cache
+    if (nowDiff > timeRangeLength * 0.02) {
+      setState((s) => ({
+        ...s,
+        searchSessionId: data.search.session.start(),
+      }));
+    }
+  }, [
+    currentDateRange.fromDate,
+    currentDateRange.toDate,
+    data.nowProvider,
+    data.search.session,
+    state.lastKnownDoc,
+  ]);
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -670,7 +704,7 @@ export function App({
                 if (isSaveable !== state.isSaveable) {
                   setState((s) => ({ ...s, isSaveable }));
                 }
-                if (!_.isEqual(state.persistedDoc, doc)) {
+                if (!_.isEqual(state.persistedDoc, doc) && !_.isEqual(state.lastKnownDoc, doc)) {
                   setState((s) => ({ ...s, lastKnownDoc: doc }));
                 }
                 if (!_.isEqual(state.activeData, activeData)) {
