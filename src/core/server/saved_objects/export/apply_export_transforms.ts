@@ -21,12 +21,13 @@ import { SavedObject } from '../../../types';
 import { KibanaRequest } from '../../http';
 import { SavedObjectsExportError } from './errors';
 import { SavedObjectsExportTransform, SavedObjectsExportTransformContext } from './types';
+import { getObjKey, SavedObjectComparator } from './utils';
 
 interface ApplyExportTransformsOptions {
   objects: SavedObject[];
   request: KibanaRequest;
   transforms: Record<string, SavedObjectsExportTransform>;
-  sortFunction?: (obj1: SavedObject, obj2: SavedObject) => number;
+  sortFunction?: SavedObjectComparator;
 }
 
 export const applyExportTransforms = async ({
@@ -86,8 +87,6 @@ const splitByType = (objects: SavedObject[]): Record<string, SavedObject[]> => {
     return memo;
   }, {} as Record<string, SavedObject[]>);
 };
-
-const getObjKey = (obj: SavedObject) => `${obj.type}|${obj.id}`;
 
 const assertValidTransform = (transformedObjects: SavedObject[], initialKeys: string[]) => {
   const transformedKeys = transformedObjects.map(getObjKey);

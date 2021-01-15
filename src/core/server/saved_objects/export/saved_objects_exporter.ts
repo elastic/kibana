@@ -32,6 +32,7 @@ import {
 } from './types';
 import { SavedObjectsExportError } from './errors';
 import { applyExportTransforms } from './apply_export_transforms';
+import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
 
 /**
  * @public
@@ -77,7 +78,7 @@ export class SavedObjectsExporter {
    */
   public async exportByTypes(options: SavedObjectsExportByTypeOptions) {
     const objects = await this.fetchByTypes(options);
-    return this.processObjects(objects, {
+    return this.processObjects(objects, byIdAscComparator, {
       request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
       excludeExportDetails: options.excludeExportDetails,
@@ -97,7 +98,8 @@ export class SavedObjectsExporter {
       throw SavedObjectsExportError.exportSizeExceeded(this.#exportSizeLimit);
     }
     const objects = await this.fetchByObjects(options);
-    return this.processObjects(objects, {
+    const comparator = getPreservedOrderComparator(objects);
+    return this.processObjects(objects, comparator, {
       request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
       excludeExportDetails: options.excludeExportDetails,
@@ -107,6 +109,7 @@ export class SavedObjectsExporter {
 
   private async processObjects(
     savedObjects: SavedObject[],
+    sortFunction: SavedObjectComparator,
     {
       request,
       excludeExportDetails = false,
@@ -121,6 +124,7 @@ export class SavedObjectsExporter {
       request,
       objects: savedObjects,
       transforms: this.#exportTransforms,
+      sortFunction,
     });
 
     if (includeReferencesDeep) {
@@ -180,7 +184,7 @@ export class SavedObjectsExporter {
       findResponse.saved_objects
         // exclude the find-specific `score` property from the exported objects
         .map(({ score, ...obj }) => obj)
-        .sort((a: SavedObject, b: SavedObject) => (a.id > b.id ? 1 : -1))
+        .sort(byIdAscComparator)
     );
   }
 }
