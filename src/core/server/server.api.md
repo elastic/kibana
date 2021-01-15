@@ -2801,7 +2801,6 @@ export interface SavedObjectsType {
     migrations?: SavedObjectMigrationMap;
     name: string;
     namespaceType: SavedObjectsNamespaceType;
-    onImport?: SavedObjectsImportHook;
 }
 
 // @public
@@ -2815,6 +2814,7 @@ export interface SavedObjectsTypeManagementDefinition {
     getTitle?: (savedObject: SavedObject<any>) => string;
     icon?: string;
     importableAndExportable?: boolean;
+    onImport?: SavedObjectsImportHook;
 }
 
 // @public

@@ -34,11 +34,11 @@ export class SavedObjectHooksPlugin implements Plugin {
         defaultSearchField: 'title',
         importableAndExportable: true,
         getTitle: (obj) => obj.attributes.title,
-      },
-      onImport: (objects) => {
-        return {
-          warnings: [{ type: 'simple', message: 'warning for test_import_warning_1' }],
-        };
+        onImport: (objects) => {
+          return {
+            warnings: [{ type: 'simple', message: 'warning for test_import_warning_1' }],
+          };
+        },
       },
     });
 
@@ -55,17 +55,17 @@ export class SavedObjectHooksPlugin implements Plugin {
         defaultSearchField: 'title',
         importableAndExportable: true,
         getTitle: (obj) => obj.attributes.title,
-      },
-      onImport: (objects) => {
-        return {
-          warnings: [
-            {
-              type: 'action_required',
-              message: 'warning for test_import_warning_2',
-              actionUrl: '/some/url',
-            },
-          ],
-        };
+        onImport: (objects) => {
+          return {
+            warnings: [
+              {
+                type: 'action_required',
+                message: 'warning for test_import_warning_2',
+                actionUrl: '/some/url',
+              },
+            ],
+          };
+        },
       },
     });
   }

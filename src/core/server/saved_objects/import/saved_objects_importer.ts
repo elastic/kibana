@@ -56,10 +56,10 @@ export class SavedObjectsImporter {
     this.#typeRegistry = typeRegistry;
     this.#importSizeLimit = importSizeLimit;
     this.#importHooks = typeRegistry.getAllTypes().reduce((hooks, type) => {
-      if (type.onImport) {
+      if (type.management?.onImport) {
         return {
           ...hooks,
-          [type.name]: [type.onImport],
+          [type.name]: [type.management.onImport],
         };
       }
       return hooks;
