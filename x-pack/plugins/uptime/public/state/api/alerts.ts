@@ -9,12 +9,9 @@ import { apiService } from './utils';
 import { ActionConnector } from '../alerts/alerts';
 
 import { AlertsResult, MonitorIdParam } from '../actions/types';
-import { ActionType, AlertAction } from '../../../../triggers_actions_ui/public';
-import { Alert, AlertAction } from '../../../../triggers_actions_ui/public';
+import { Alert, AlertAction, ActionType } from '../../../../triggers_actions_ui/public';
 import { API_URLS } from '../../../common/constants';
-import { Alert, AlertTypeParams } from '../../../../alerts/common';
 import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
-import { MonitorStatusTranslations } from '../../../common/translations';
 
 import { populateAlertActions } from './alert_actions';
 
