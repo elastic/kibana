@@ -12,5 +12,6 @@ export const mockTelemetryActions = {
 };
 
 jest.mock('../shared/telemetry', () => ({
+  ...(jest.requireActual('../shared/telemetry') as object),
   TelemetryLogic: { actions: mockTelemetryActions },
 }));
