@@ -56,16 +56,23 @@ export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: s
     countByType: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
       // ES DSL aggregations are returned as `any` by callCluster
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (obj: any, key: string) => ({
-        ...obj,
-        [key.replace('.', '__')]: searchResult.aggregations.byActionTypeId.value.types[key],
-      }),
+      (obj: any, key: string) => {
+        const hasFirstSymbolDot = key.startsWith('.');
+        const actionTypeId = hasFirstSymbolDot ? key.replace('.', '__') : key;
+        return {
+          ...obj,
+          [actionTypeId]: searchResult.aggregations.byActionTypeId.value.types[key],
+        };
+      },
       {}
     ),
   };
 }
 
-export async function getInUseTotalCount(callCluster: LegacyAPICaller, kibanaIndex: string) {
+export async function getInUseTotalCount(
+  callCluster: LegacyAPICaller,
+  kibanaIndex: string
+): Promise<{ total: number; connectorIds: Record<string, number> }> {
   const scriptedMetric = {
     scripted_metric: {
       init_script: 'state.connectorIds = new HashMap(); state.total = 0;',
@@ -145,7 +152,7 @@ export async function getInUseTotalCount(callCluster: LegacyAPICaller, kibanaInd
     },
   });
 
-  return actionResults.aggregations.refs.actionRefIds.value.total;
+  return actionResults.aggregations.refs.actionRefIds.value;
 }
 
 // TODO: Implement executions count telemetry with eventLog, when it will write to index

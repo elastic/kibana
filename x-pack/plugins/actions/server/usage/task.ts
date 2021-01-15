@@ -39,7 +39,7 @@ function registerActionsTelemetryTask(
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
-      timeout: '5m',
+      timeout: '10s',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
     },
   });
@@ -72,13 +72,14 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
           getTotalCount(callCluster, kibanaIndex),
           getInUseTotalCount(callCluster, kibanaIndex),
         ])
-          .then(([totalAggegations, countActiveTotal]) => {
+          .then(([totalAggegations, totalInUse]) => {
             return {
               state: {
                 runs: (state.runs || 0) + 1,
                 count_total: totalAggegations.countTotal,
                 count_by_type: totalAggegations.countByType,
-                count_active_total: countActiveTotal,
+                count_active_total: totalInUse.total,
+                count_active_by_type: totalInUse.connectorIds,
               },
               runAt: getNextMidnight(),
             };
@@ -96,5 +97,5 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
 }
 
 function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
+  return moment().add(10, 's').startOf('s').toDate();
 }

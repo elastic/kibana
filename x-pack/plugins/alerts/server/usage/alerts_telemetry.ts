@@ -308,10 +308,14 @@ export async function getTotalCountInUse(callCluster: LegacyAPICaller, kibanaIne
     countByType: Object.keys(searchResult.aggregations.byAlertTypeId.value.types).reduce(
       // ES DSL aggregations are returned as `any` by callCluster
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (obj: any, key: string) => ({
-        ...obj,
-        [key.replace('.', '__')]: searchResult.aggregations.byAlertTypeId.value.types[key],
-      }),
+      (obj: any, key: string) => {
+        const hasFirstSymbolDot = key.startsWith('.');
+        const alertTypeId = hasFirstSymbolDot ? key.replace('.', '__') : key;
+        return {
+          ...obj,
+          [alertTypeId]: searchResult.aggregations.byAlertTypeId.value.types[key],
+        };
+      },
       {}
     ),
   };
