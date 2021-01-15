@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
+import { LogicMounter, mockHttpValues, expectedAsyncError } from '../../../__mocks__';
 
-import { mockHttpValues } from '../../../__mocks__';
 jest.mock('../../../shared/http', () => ({
   HttpLogic: { values: mockHttpValues },
 }));
@@ -1093,11 +1092,9 @@ describe('CredentialsLogic', () => {
         http.get.mockReturnValue(promise);
 
         CredentialsLogic.actions.fetchCredentials();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1124,11 +1121,9 @@ describe('CredentialsLogic', () => {
         http.get.mockReturnValue(promise);
 
         CredentialsLogic.actions.fetchDetails();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1154,11 +1149,9 @@ describe('CredentialsLogic', () => {
         http.delete.mockReturnValue(promise);
 
         CredentialsLogic.actions.deleteApiKey(tokenName);
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1218,11 +1211,9 @@ describe('CredentialsLogic', () => {
         http.post.mockReturnValue(promise);
 
         CredentialsLogic.actions.onApiTokenChange();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
 
       describe('token type data', () => {
