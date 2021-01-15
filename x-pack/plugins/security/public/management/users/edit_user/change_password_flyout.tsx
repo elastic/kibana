@@ -174,7 +174,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
       {isLoading ? (
         <EuiLoadingContent />
       ) : (
-        <EuiForm component="form" {...eventHandlers}>
+        <EuiForm component="form" noValidate {...eventHandlers}>
           {isSystemUser ? (
             <>
               <EuiCallOut
@@ -234,9 +234,9 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
               <EuiFieldPassword
                 name="current_password"
                 type="dual"
-                value={form.values.current_password}
+                defaultValue={form.values.current_password}
                 isInvalid={form.touched.current_password && !!form.errors.current_password}
-                autoComplete="password"
+                autoComplete="current-password"
               />
             </EuiFormRow>
           ) : null}
@@ -255,7 +255,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
             <EuiFieldPassword
               name="password"
               type="dual"
-              value={form.values.password}
+              defaultValue={form.values.password}
               isInvalid={form.touched.password && !!form.errors.password}
               autoComplete="new-password"
             />
@@ -271,7 +271,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
             <EuiFieldPassword
               name="confirm_password"
               type="dual"
-              value={form.values.confirm_password}
+              defaultValue={form.values.confirm_password}
               isInvalid={form.touched.confirm_password && !!form.errors.confirm_password}
               autoComplete="new-password"
             />

@@ -224,7 +224,8 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
       error={Object.values(form.errors)}
       isInvalid={form.isInvalid}
       invalidCallout={form.isSubmitted ? 'above' : 'none'}
-      {...eventHandlers}
+      onSubmit={eventHandlers.onSubmit}
+      noValidate
     >
       <EuiDescribedFormGroup
         title={
@@ -261,6 +262,8 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             isLoading={form.isValidating}
             isInvalid={form.touched.username && !!form.errors.username}
             disabled={!isNewUser}
+            onChange={eventHandlers.onChange}
+            onBlur={eventHandlers.onBlur}
           />
         </EuiFormRow>
 
@@ -277,6 +280,8 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                 name="full_name"
                 value={form.values.full_name}
                 isInvalid={form.touched.full_name && !!form.errors.full_name}
+                onChange={eventHandlers.onChange}
+                onBlur={eventHandlers.onBlur}
               />
             </EuiFormRow>
             <EuiFormRow
@@ -290,6 +295,8 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                 name="email"
                 value={form.values.email}
                 isInvalid={form.touched.email && !!form.errors.email}
+                onChange={eventHandlers.onChange}
+                onBlur={eventHandlers.onBlur}
               />
             </EuiFormRow>
           </>
@@ -329,6 +336,8 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
               value={form.values.password}
               isInvalid={form.touched.password && !!form.errors.password}
               autoComplete="new-password"
+              onChange={eventHandlers.onChange}
+              onBlur={eventHandlers.onBlur}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -344,6 +353,8 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
               value={form.values.confirm_password}
               isInvalid={form.touched.confirm_password && !!form.errors.confirm_password}
               autoComplete="new-password"
+              onChange={eventHandlers.onChange}
+              onBlur={eventHandlers.onBlur}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>

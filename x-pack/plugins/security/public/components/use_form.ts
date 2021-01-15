@@ -12,9 +12,8 @@ export type FormReturnTuple<Values, Result> = [FormState<Values, Result>, FormPr
 
 export interface FormProps {
   onSubmit: ReactEventHandler;
-  onChange: ChangeEventHandler<HTMLFormElement>;
-  onBlur: FocusEventHandler<HTMLFormElement>;
-  noValidate: boolean;
+  onChange: ChangeEventHandler<HTMLFormElement & HTMLInputElement>;
+  onBlur: FocusEventHandler<HTMLFormElement & HTMLInputElement>;
 }
 
 export interface FormOptions<Values, Result> {
@@ -64,7 +63,6 @@ export function useForm<Values extends FormValues, Result>(
         form.setTouched(event.target.name);
       }
     },
-    noValidate: true, // Native browser validation gets in the way of EUI
   };
 
   return [form, eventHandlers];
