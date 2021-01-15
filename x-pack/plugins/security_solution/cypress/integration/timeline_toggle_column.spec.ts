@@ -26,7 +26,7 @@ import {
 
 import { HOSTS_URL } from '../urls/navigation';
 
-describe.skip('toggle column in timeline', () => {
+describe('toggle column in timeline', () => {
   before(() => {
     cleanKibana();
     cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
@@ -67,7 +67,7 @@ describe.skip('toggle column in timeline', () => {
     cy.get(ID_HEADER_FIELD).should('exist');
   });
 
-  it.skip('adds the _id field to the timeline via drag and drop', () => {
+  it('adds the _id field to the timeline via drag and drop', () => {
     expandFirstTimelineEventDetails();
     dragAndDropIdToggleFieldToTimeline();
 
