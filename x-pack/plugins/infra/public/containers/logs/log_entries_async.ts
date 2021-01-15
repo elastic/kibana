@@ -4,53 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback } from 'react';
-import { decodeOrThrow } from '../../../common/runtime_types';
-import {
-  logEntriesSearchRequestParamsRT,
-  logEntriesSearchResponsePayloadRT,
-  LOG_ENTRIES_SEARCH_STRATEGY,
-} from '../../../common/search_strategies/log_entries/log_entries';
-import { useDataSearch, useLatestPartialDataSearchResponse } from '../../utils/data_search';
+// import { useCallback } from 'react';
+// import { decodeOrThrow } from '../../../common/runtime_types';
+// import {
+//   logEntriesSearchRequestParamsRT,
+//   logEntriesSearchResponsePayloadRT,
+//   LOG_ENTRIES_SEARCH_STRATEGY,
+// } from '../../../common/search_strategies/log_entries/log_entries';
+// import { useDataSearch, useLatestPartialDataSearchResponse } from '../../utils/data_search';
 
-export const useLogEntries = ({ sourceId }: { sourceId: string | null | undefined }) => {
-  const { search: fetchLogEntry, requests$: logEntrySearchRequests$ } = useDataSearch({
-    getRequest: useCallback(() => {
-      return !!logEntryId && !!sourceId
-        ? {
-            request: {
-              params: logEntrySearchRequestParamsRT.encode({ sourceId, logEntryId }),
-            },
-            options: { strategy: LOG_ENTRY_SEARCH_STRATEGY },
-          }
-        : null;
-    }, [sourceId, logEntryId]),
-  });
+// export const useLogEntries = ({ sourceId }: { sourceId: string | null | undefined }) => {
+//   const { search: fetchLogEntry, requests$: logEntrySearchRequests$ } = useDataSearch({
+//     getRequest: useCallback(() => {
+//       return !!logEntryId && !!sourceId
+//         ? {
+//             request: {
+//               params: logEntrySearchRequestParamsRT.encode({ sourceId, logEntryId }),
+//             },
+//             options: { strategy: LOG_ENTRY_SEARCH_STRATEGY },
+//           }
+//         : null;
+//     }, [sourceId, logEntryId]),
+//   });
 
-  const {
-    cancelRequest,
-    isRequestRunning,
-    isResponsePartial,
-    latestResponseData,
-    latestResponseErrors,
-    loaded,
-    total,
-  } = useLatestPartialDataSearchResponse(
-    logEntrySearchRequests$,
-    null,
-    decodeLogEntrySearchResponse
-  );
+//   const {
+//     cancelRequest,
+//     isRequestRunning,
+//     isResponsePartial,
+//     latestResponseData,
+//     latestResponseErrors,
+//     loaded,
+//     total,
+//   } = useLatestPartialDataSearchResponse(
+//     logEntrySearchRequests$,
+//     null,
+//     decodeLogEntrySearchResponse
+//   );
 
-  return {
-    cancelRequest,
-    errors: latestResponseErrors,
-    fetchLogEntry,
-    isRequestRunning,
-    isResponsePartial,
-    loaded,
-    logEntry: latestResponseData ?? null,
-    total,
-  };
-};
+//   return {
+//     cancelRequest,
+//     errors: latestResponseErrors,
+//     fetchLogEntry,
+//     isRequestRunning,
+//     isResponsePartial,
+//     loaded,
+//     logEntry: latestResponseData ?? null,
+//     total,
+//   };
+// };
 
-const decodeLogEntrySearchResponse = decodeOrThrow(logEntrySearchResponsePayloadRT);
+// const decodeLogEntrySearchResponse = decodeOrThrow(logEntrySearchResponsePayloadRT);
