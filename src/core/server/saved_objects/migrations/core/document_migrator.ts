@@ -369,6 +369,8 @@ function buildDocumentTransform({
     doc: SavedObjectUnsanitizedDoc,
     options: TransformOptions = {}
   ) {
+    validateCoreMigrationVersion(doc, kibanaVersion);
+
     const { convertNamespaceTypes = false } = options;
     let transformedDoc: SavedObjectUnsanitizedDoc;
     let additionalDocs: SavedObjectUnsanitizedDoc[] = [];
@@ -391,6 +393,31 @@ function buildDocumentTransform({
 
     return { transformedDoc, additionalDocs };
   };
+}
+
+function validateCoreMigrationVersion(doc: SavedObjectUnsanitizedDoc, kibanaVersion: string) {
+  const { id, coreMigrationVersion: docVersion } = doc;
+  if (!docVersion) {
+    return;
+  }
+
+  // We verify that the object's coreMigrationVersion is valid, and that it is not greater than the version supported by Kibana.
+  // If we have a coreMigrationVersion and the kibanaVersion is smaller than it or does not exist, we are dealing with a document that
+  // belongs to a future Kibana / plugin version.
+  if (!Semver.valid(docVersion)) {
+    throw Boom.badData(
+      `Document "${id}" has an invalid "coreMigrationVersion" [${docVersion}]. This must be a semver value.`,
+      doc
+    );
+  }
+
+  if (doc.coreMigrationVersion && Semver.gt(docVersion, kibanaVersion)) {
+    throw Boom.badData(
+      `Document "${id}" has a "coreMigrationVersion" which belongs to a more recent version` +
+        ` of Kibana [${docVersion}]. The current version is [${kibanaVersion}].`,
+      doc
+    );
+  }
 }
 
 function applyMigrations(

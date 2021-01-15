@@ -368,10 +368,9 @@ describe('DocumentMigrator', () => {
       });
     });
 
-    it('rejects docs that belong to a newer Kibana instance', () => {
+    it('rejects docs with a migrationVersion[type] for a type that does not have any migrations defined', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
-        kibanaVersion: '8.0.1',
       });
       expect(() =>
         migrator.migrate({
@@ -385,7 +384,7 @@ describe('DocumentMigrator', () => {
       );
     });
 
-    it('rejects docs that belong to a newer plugin', () => {
+    it('rejects docs with a migrationVersion[type] for a type that does not have a migration >= that version defined', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry({
@@ -404,6 +403,40 @@ describe('DocumentMigrator', () => {
         })
       ).toThrow(
         /Document "fleabag" has property "dawg" which belongs to a more recent version of Kibana \[1\.2\.4\]\. The last known version is \[1\.2\.3\]/i
+      );
+    });
+
+    it('rejects docs that have an invalid coreMigrationVersion', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        kibanaVersion: '8.0.1',
+      });
+      expect(() =>
+        migrator.migrate({
+          id: 'happy',
+          type: 'dog',
+          attributes: { name: 'Callie' },
+          coreMigrationVersion: 'not-a-semver',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Document \\"happy\\" has an invalid \\"coreMigrationVersion\\" [not-a-semver]. This must be a semver value."`
+      );
+    });
+
+    it('rejects docs that have a coreMigrationVersion higher than the current Kibana version', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        kibanaVersion: '8.0.1',
+      });
+      expect(() =>
+        migrator.migrate({
+          id: 'wet',
+          type: 'dog',
+          attributes: { name: 'Callie' },
+          coreMigrationVersion: '8.0.2',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Document \\"wet\\" has a \\"coreMigrationVersion\\" which belongs to a more recent version of Kibana [8.0.2]. The current version is [8.0.1]."`
       );
     });
 
