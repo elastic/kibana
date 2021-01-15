@@ -91,7 +91,7 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
           'xpack.apm.tracesTable.impactColumnDescription',
           {
             defaultMessage:
-              '"Impact" is the latency affecting end-users the most. It is calcualted as the product of latency and throughput',
+              'The most used and slowest endpoints in your service. It is the result of multiplying latency and throughput',
           }
         )}
       >

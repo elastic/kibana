@@ -126,7 +126,7 @@ export function TransactionList({ items, isLoading }: Props) {
                 'xpack.apm.transactionsTable.impactColumnDescription',
                 {
                   defaultMessage:
-                    '"Impact" is the latency affecting end-users the most. It is calcualted as the product of latency and throughput',
+                    'The most used and slowest endpoints in your service. It is the result of multiplying latency and throughput',
                 }
               )}
             />
