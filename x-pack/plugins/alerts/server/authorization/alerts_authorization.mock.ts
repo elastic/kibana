@@ -14,7 +14,6 @@ const createAlertsAuthorizationMock = () => {
     ensureAuthorized: jest.fn(),
     filterByAlertTypeAuthorization: jest.fn(),
     getFindAuthorizationFilter: jest.fn(),
-    shouldUseLegacyAuthorization: jest.fn(),
   };
   return mocked;
 };
