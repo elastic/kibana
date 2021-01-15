@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../../__mocks__/kea.mock';
-
 import { setMockValues } from '../../../../__mocks__';
 
 import React from 'react';

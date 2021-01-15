@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../../__mocks__/kea.mock';
-
 import { users } from '../../../__mocks__/users.mock';
 
 import React from 'react';
