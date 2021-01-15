@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
+import { LogicMounter, expectedAsyncError } from '../../../__mocks__';
 
 jest.mock('../../../shared/kibana', () => ({
   KibanaLogic: { values: { history: { location: { search: '' } } } },
@@ -215,12 +215,8 @@ describe('AnalyticsLogic', () => {
         mount();
         jest.spyOn(AnalyticsLogic.actions, 'onAnalyticsUnavailable');
 
-        try {
-          AnalyticsLogic.actions.loadAnalyticsData();
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        AnalyticsLogic.actions.loadAnalyticsData();
+        await expectedAsyncError(promise);
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
         expect(AnalyticsLogic.actions.onAnalyticsUnavailable).toHaveBeenCalled();
@@ -293,12 +289,8 @@ describe('AnalyticsLogic', () => {
         mount();
         jest.spyOn(AnalyticsLogic.actions, 'onAnalyticsUnavailable');
 
-        try {
-          AnalyticsLogic.actions.loadQueryData('some-query');
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        AnalyticsLogic.actions.loadQueryData('some-query');
+        await expectedAsyncError(promise);
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
         expect(AnalyticsLogic.actions.onAnalyticsUnavailable).toHaveBeenCalled();
