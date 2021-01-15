@@ -45,11 +45,6 @@ export class VectorTileLayer extends TileLayer {
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
-    const id = this.getSource().getTileLayerId();
-    if (!id) {
-      return;
-    }
-
     const nextMeta = { tileLayerId: this.getSource().getTileLayerId() };
     const canSkipSync = this._canSkipSync({
       prevDataRequest: this.getSourceDataRequest(),
