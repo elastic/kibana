@@ -54,9 +54,13 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { RequestAdapter } from 'src/plugins/inspector/common';
 import { RequestStatistics } from 'src/plugins/inspector/common';
-import { SavedObject } from 'src/core/server';
+import { SavedObject } from 'kibana/server';
+import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { SavedObjectsClientContract as SavedObjectsClientContract_2 } from 'kibana/server';
+import { SavedObjectsFindOptions } from 'kibana/server';
+import { SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
@@ -909,6 +913,16 @@ export interface ISearchOptions {
     strategy?: string;
 }
 
+// Warning: (ae-missing-release-tag) "ISearchSessionService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface ISearchSessionService<T = unknown> {
+    // Warning: (ae-forgotten-export) The symbol "IScopedSearchSessionsClient" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSearchSessionsClient<T>;
+}
+
 // Warning: (ae-missing-release-tag) "ISearchSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -933,10 +947,10 @@ export interface ISearchStart<SearchStrategyRequest extends IKibanaSearchRequest
     //
     // (undocumented)
     aggs: AggsStart;
-    // Warning: (ae-forgotten-export) The symbol "ISearchClient" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IScopedSearchClient" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    asScoped: (request: KibanaRequest_2) => ISearchClient;
+    asScoped: (request: KibanaRequest_2) => IScopedSearchClient;
     getSearchStrategy: (name?: string) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
     // (undocumented)
     searchSource: {
@@ -954,16 +968,6 @@ export interface ISearchStrategy<SearchStrategyRequest extends IKibanaSearchRequ
     extend?: (id: string, keepAlive: string, options: ISearchOptions, deps: SearchStrategyDependencies) => Promise<void>;
     // (undocumented)
     search: (request: SearchStrategyRequest, options: ISearchOptions, deps: SearchStrategyDependencies) => Observable<SearchStrategyResponse>;
-}
-
-// Warning: (ae-missing-release-tag) "ISessionService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface ISessionService {
-    // Warning: (ae-forgotten-export) The symbol "IScopedSessionService" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSessionService;
 }
 
 // @public (undocumented)
@@ -1227,6 +1231,25 @@ export const search: {
     tabifyGetColumns: typeof tabifyGetColumns;
 };
 
+// Warning: (ae-missing-release-tag) "SearchSessionService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export class SearchSessionService implements ISearchSessionService {
+    constructor();
+    // (undocumented)
+    asScopedProvider(): () => {
+        getId: () => never;
+        trackId: () => Promise<void>;
+        getSearchIdMapping: () => Promise<Map<string, string>>;
+        save: () => Promise<never>;
+        get: () => Promise<never>;
+        find: () => Promise<never>;
+        update: () => Promise<never>;
+        extend: () => Promise<never>;
+        cancel: () => Promise<never>;
+    };
+}
+
 // Warning: (ae-missing-release-tag) "SearchStrategyDependencies" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1235,6 +1258,8 @@ export interface SearchStrategyDependencies {
     esClient: IScopedClusterClient;
     // (undocumented)
     savedObjectsClient: SavedObjectsClientContract;
+    // (undocumented)
+    searchSessionsClient: IScopedSearchSessionsClient;
     // (undocumented)
     uiSettingsClient: IUiSettingsClient;
 }
@@ -1256,19 +1281,6 @@ export function searchUsageObserver(logger: Logger_2, usage?: SearchUsage): {
     next(response: IEsSearchResponse): void;
     error(): void;
 };
-
-// Warning: (ae-missing-release-tag) "SessionService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public
-export class SessionService implements ISessionService {
-    constructor();
-    // (undocumented)
-    asScopedProvider(core: CoreStart): (request: KibanaRequest) => {
-        search: <Request_1 extends IKibanaSearchRequest<any>, Response_1 extends IKibanaSearchResponse<any>>(strategy: ISearchStrategy<Request_1, Response_1>, request: Request_1, options: import("../../../common").ISearchOptions, deps: import("../types").SearchStrategyDependencies) => import("rxjs").Observable<Response_1>;
-    };
-    // (undocumented)
-    search<Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(strategy: ISearchStrategy<Request, Response>, ...args: Parameters<ISearchStrategy<Request, Response>['search']>): import("rxjs").Observable<Response>;
-}
 
 // @internal
 export const shimAbortSignal: <T>(promise: TransportRequestPromise<T>, signal?: AbortSignal | undefined) => TransportRequestPromise<T>;
@@ -1431,7 +1443,7 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/server/index.ts:279:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index_patterns/index_patterns_service.ts:70:14 - (ae-forgotten-export) The symbol "IndexPatternsService" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:90:74 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/search/types.ts:112:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/search/types.ts:122:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

@@ -14,7 +14,7 @@
 |  [IndexPatternsService](./kibana-plugin-plugins-data-server.indexpatternsservice.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-server.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-server.plugin.md) |  |
-|  [SessionService](./kibana-plugin-plugins-data-server.sessionservice.md) | The OSS session service. See data\_enhanced in X-Pack for the background session service. |
+|  [SearchSessionService](./kibana-plugin-plugins-data-server.searchsessionservice.md) | The OSS session service, which leaves most search session-related logic unimplemented.  x-pack/plugins/data\_enhanced/server/search/session/session\_service.ts |
 
 ## Enumerations
 
@@ -53,10 +53,10 @@
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
 |  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) |  |
 |  [ISearchOptions](./kibana-plugin-plugins-data-server.isearchoptions.md) |  |
+|  [ISearchSessionService](./kibana-plugin-plugins-data-server.isearchsessionservice.md) |  |
 |  [ISearchSetup](./kibana-plugin-plugins-data-server.isearchsetup.md) |  |
 |  [ISearchStart](./kibana-plugin-plugins-data-server.isearchstart.md) |  |
 |  [ISearchStrategy](./kibana-plugin-plugins-data-server.isearchstrategy.md) | Search strategy interface contains a search method that takes in a request and returns a promise that resolves to a response. |
-|  [ISessionService](./kibana-plugin-plugins-data-server.isessionservice.md) |  |
 |  [KueryNode](./kibana-plugin-plugins-data-server.kuerynode.md) |  |
 |  [OptionedValueProp](./kibana-plugin-plugins-data-server.optionedvalueprop.md) |  |
 |  [PluginSetup](./kibana-plugin-plugins-data-server.pluginsetup.md) |  |
