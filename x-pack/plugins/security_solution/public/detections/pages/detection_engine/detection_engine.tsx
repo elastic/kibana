@@ -75,9 +75,9 @@ const DetectionEnginePageComponent = () => {
       isSignalIndexExists,
       isAuthenticated: isUserAuthenticated,
       hasEncryptionKey,
-      canUserCRUD,
       signalIndexName,
       hasIndexWrite,
+      hasIndexMaintenance,
     },
   ] = useUserData();
   const {
@@ -232,7 +232,7 @@ const DetectionEnginePageComponent = () => {
               timelineId={TimelineId.detectionsPage}
               loading={loading}
               hasIndexWrite={hasIndexWrite ?? false}
-              canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
+              hasIndexMaintenance={hasIndexMaintenance ?? false}
               from={from}
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}
