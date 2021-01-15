@@ -5,3 +5,4 @@
  */
 
 export { AnalyticsChart } from './analytics_chart';
+export { AnalyticsUnavailable } from './analytics_unavailable';
