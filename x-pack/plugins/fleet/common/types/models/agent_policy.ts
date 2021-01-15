@@ -15,6 +15,7 @@ export interface NewAgentPolicy {
   namespace: string;
   description?: string;
   is_default?: boolean;
+  is_managed?: boolean;
   monitoring_enabled?: Array<ValueOf<DataType>>;
 }
 
