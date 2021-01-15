@@ -18,11 +18,19 @@
  */
 
 import { resolve } from 'path';
+import { buildCLI } from 'stylelint/lib/cli';
 
-process.argv.push('--no-exit'); // don't exit after encountering a rule error
-process.argv.push('--verbose'); // print results
+const options = buildCLI(process.argv.slice(2));
+
+const stylelintConfigPath = resolve(__dirname, '..', '..', '.stylelintrc');
+const stylelintIgnorePath = resolve(__dirname, '..', '..', '.stylelintignore');
+
+if (!options.input.length) {
+  process.argv.push('**/*.s+(a|c)ss');
+}
 process.argv.push('--max-warnings', '0'); // return nonzero exit code on any warnings
-process.argv.push('--config', resolve(__dirname, '..', '..', '.sass-lint.yml')); // configuration file
+process.argv.push('--config', stylelintConfigPath); // configuration file
+process.argv.push('--ignore-path', stylelintIgnorePath); // ignore file
 
 // common-js is required so that logic before this executes before loading sass-lint
-require('sass-lint/bin/sass-lint');
+require('stylelint/bin/stylelint');

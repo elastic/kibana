@@ -4,7 +4,7 @@ source test/scripts/jenkins_test_setup.sh
 
 # Lint
 ./test/scripts/lint/eslint.sh
-./test/scripts/lint/sasslint.sh
+./test/scripts/lint/stylelint.sh
 
 # Test
 ./test/scripts/test/jest_integration.sh

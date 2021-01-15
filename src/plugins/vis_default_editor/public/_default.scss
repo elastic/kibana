@@ -13,7 +13,7 @@
 
 .visEditor__collapsibleSidebar {
   background: $euiColorLightestShade;
-  min-width: $vis-editor-sidebar-min-width;
+  min-width: $visEditorSidebarMinWidth;
   max-width: 100%;
   position: relative;
   flex-shrink: 0;
