@@ -27,7 +27,6 @@ interface CommonBaseVisTypeOptions<TVisParams>
   extends Pick<
       VisType<TVisParams>,
       | 'description'
-      | 'editor'
       | 'getInfoMessage'
       | 'getSupportedTriggers'
       | 'hierarchicalData'
@@ -91,7 +90,6 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly options;
   public readonly visualization;
   public readonly visConfig;
-  public readonly editor;
   public readonly editorConfig;
   public hidden;
   public readonly requestHandler;
@@ -119,7 +117,6 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.image = opts.image;
     this.visualization = opts.visualization;
     this.visConfig = defaultsDeep({}, opts.visConfig, { defaults: {} });
-    this.editor = opts.editor;
     this.editorConfig = defaultsDeep({}, opts.editorConfig, { collections: {} });
     this.options = defaultsDeep({}, opts.options, defaultOptions);
     this.stage = opts.stage ?? 'production';

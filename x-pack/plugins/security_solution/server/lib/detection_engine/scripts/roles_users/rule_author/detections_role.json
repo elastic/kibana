@@ -18,7 +18,7 @@
       },
       {
         "names": [".siem-signals-*"],
-        "privileges": ["read", "write", "view_index_metadata"]
+        "privileges": ["read", "write", "maintenance", "view_index_metadata"]
       }
     ]
   },

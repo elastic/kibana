@@ -156,6 +156,7 @@ const RuleDetailsPageComponent = () => {
       hasEncryptionKey,
       canUserCRUD,
       hasIndexWrite,
+      hasIndexMaintenance,
       signalIndexName,
     },
   ] = useUserData();
@@ -591,9 +592,9 @@ const RuleDetailsPageComponent = () => {
                 {ruleId != null && (
                   <AlertsTable
                     timelineId={TimelineId.detectionsRulesDetailsPage}
-                    canUserCRUD={canUserCRUD ?? false}
                     defaultFilters={alertDefaultFilters}
                     hasIndexWrite={hasIndexWrite ?? false}
+                    hasIndexMaintenance={hasIndexMaintenance ?? false}
                     from={from}
                     loading={loading}
                     showBuildingBlockAlerts={showBuildingBlockAlerts}
