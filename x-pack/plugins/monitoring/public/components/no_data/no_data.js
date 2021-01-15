@@ -27,7 +27,7 @@ import { toggleSetupMode } from '../../lib/setup_mode';
 import { CheckingSettings } from './checking_settings';
 import { ReasonFound, WeTried } from './reasons';
 import { CheckerErrors } from './checker_errors';
-import { WhatIs, CloudDeployment } from './blurbs';
+import { CloudDeployment } from './blurbs';
 import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 
 function NoDataMessage(props) {
@@ -74,7 +74,24 @@ export function NoData(props) {
           >
             <EuiIcon type="monitoringApp" size="xxl" />
             <EuiSpacer size="m" />
-            <WhatIs />
+            <EuiTitle size="l">
+              <h2>
+                <FormattedMessage
+                  id="xpack.monitoring.noData.cloud.title"
+                  defaultMessage="Monitoring data not available"
+                />
+              </h2>
+            </EuiTitle>
+            <EuiTextColor color="subdued">
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.monitoring.noData.cloud.description"
+                    defaultMessage="Monitoring provides insight to your hardware performance and load."
+                  />
+                </p>
+              </EuiText>
+            </EuiTextColor>
             <EuiHorizontalRule size="half" />
             <CloudDeployment />
           </EuiPageContent>
