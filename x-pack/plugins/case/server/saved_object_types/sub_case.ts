@@ -7,10 +7,10 @@
 import { SavedObjectsType } from 'src/core/server';
 import { caseMigrations } from './migrations';
 
-export const CHILD_CASE_SAVED_OBJECT = 'child_case';
+export const SUB_CASE_SAVED_OBJECT = 'sub_case';
 
-export const caseSavedObjectType: SavedObjectsType = {
-  name: CHILD_CASE_SAVED_OBJECT,
+export const subCaseSavedObjectType: SavedObjectsType = {
+  name: SUB_CASE_SAVED_OBJECT,
   hidden: false,
   namespaceType: 'single',
   mappings: {
@@ -34,19 +34,6 @@ export const caseSavedObjectType: SavedObjectsType = {
       created_at: {
         type: 'date',
       },
-      created_by: {
-        properties: {
-          username: {
-            type: 'keyword',
-          },
-          full_name: {
-            type: 'keyword',
-          },
-          email: {
-            type: 'keyword',
-          },
-        },
-      },
       status: {
         type: 'keyword',
       },
@@ -63,14 +50,6 @@ export const caseSavedObjectType: SavedObjectsType = {
           },
           email: {
             type: 'keyword',
-          },
-        },
-      },
-      settings: {
-        properties: {
-          // TODO do we need this?
-          syncAlerts: {
-            type: 'boolean',
           },
         },
       },

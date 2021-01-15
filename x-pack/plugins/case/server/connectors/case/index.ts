@@ -6,7 +6,7 @@
 
 import { curry } from 'lodash';
 
-import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import { KibanaRequest } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import { CasePatchRequest, CasePostRequest, CaseType } from '../../../common/api';
 import { createCaseClient } from '../../client';
@@ -71,6 +71,7 @@ async function executor(
   const { savedObjectsClient } = services;
   const caseClient = createCaseClient({
     savedObjectsClient,
+    // TODO: refactor this
     request: {} as KibanaRequest,
     caseService,
     caseConfigureService,
@@ -88,6 +89,7 @@ async function executor(
   if (subAction === 'create') {
     data = await caseClient.create({
       // TODO: is it possible for the action framework to create an individual case that is not associated with sub cases?
+      // TODO: I think this should be an individual case...
       theCase: { ...(subActionParams as CasePostRequest), type: CaseType.parent },
     });
   }

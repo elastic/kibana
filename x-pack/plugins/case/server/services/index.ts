@@ -24,8 +24,14 @@ import {
   SavedObjectFindOptions,
   User,
   CommentPatchAttributes,
+  SubCaseAttributes,
 } from '../../common/api';
-import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../saved_object_types';
+import { transformNewSubCase } from '../routes/api/utils';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+} from '../saved_object_types';
 import { readReporters } from './reporters/read_reporters';
 import { readTags } from './tags/read_tags';
 
@@ -102,6 +108,8 @@ interface GetUserArgs {
 interface CaseServiceDeps {
   authentication: SecurityPluginSetup['authc'] | null;
 }
+
+// TODO: split this up into comments, case, sub case, possibly more?
 export interface CaseServiceSetup {
   deleteCase(args: GetCaseArgs): Promise<{}>;
   deleteComment(args: GetCommentArgs): Promise<{}>;
@@ -119,11 +127,61 @@ export interface CaseServiceSetup {
   patchCases(args: PatchCasesArgs): Promise<SavedObjectsBulkUpdateResponse<ESCaseAttributes>>;
   patchComment(args: UpdateCommentArgs): Promise<SavedObjectsUpdateResponse<CommentAttributes>>;
   patchComments(args: PatchComments): Promise<SavedObjectsBulkUpdateResponse<CommentAttributes>>;
+  getMostRecentSubCase(
+    client: SavedObjectsClientContract,
+    caseId: string
+  ): Promise<SavedObject<SubCaseAttributes> | undefined>;
+  createSubCase(
+    client: SavedObjectsClientContract,
+    createdAt: string,
+    caseId: string
+  ): Promise<SavedObject<SubCaseAttributes>>;
 }
 
 export class CaseService {
   constructor(private readonly log: Logger) {}
   public setup = async ({ authentication }: CaseServiceDeps): Promise<CaseServiceSetup> => ({
+    createSubCase: async (
+      client: SavedObjectsClientContract,
+      createdAt: string,
+      caseId: string
+    ): Promise<SavedObject<SubCaseAttributes>> => {
+      try {
+        this.log.debug(`Attempting to POST a new sub case`);
+        return await client.create(SUB_CASE_SAVED_OBJECT, transformNewSubCase(createdAt), {
+          references: [
+            {
+              type: CASE_SAVED_OBJECT,
+              name: `associated-${CASE_SAVED_OBJECT}`,
+              id: caseId,
+            },
+          ],
+        });
+      } catch (error) {
+        this.log.debug(`Error on POST a new sub case: ${error}`);
+        throw error;
+      }
+    },
+    getMostRecentSubCase: async (client: SavedObjectsClientContract, caseId: string) => {
+      try {
+        this.log.debug(`Attempting to find most recent sub case for caseID: ${caseId}`);
+        const subCases: SavedObjectsFindResponse<SubCaseAttributes> = await client.find({
+          perPage: 1,
+          sortField: 'created_at',
+          sortOrder: 'desc',
+          type: SUB_CASE_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        });
+        if (subCases.saved_objects.length <= 0) {
+          return;
+        }
+
+        return subCases.saved_objects[0];
+      } catch (error) {
+        this.log.debug(`Error finding the most recent sub case for case: ${caseId}`);
+        throw error;
+      }
+    },
     deleteCase: async ({ client, caseId }: GetCaseArgs) => {
       try {
         this.log.debug(`Attempting to GET case ${caseId}`);

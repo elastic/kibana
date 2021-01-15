@@ -9,6 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import { decodeComment, flattenCaseSavedObject, transformNewComment } from '../../routes/api/utils';
 
 import {
@@ -19,11 +20,34 @@ import {
   CommentType,
   CaseStatuses,
   AssociationType,
+  CaseType,
+  SubCaseAttributes,
 } from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
 import { CaseClientAddComment, CaseClientFactoryArguments } from '../types';
 import { CASE_SAVED_OBJECT } from '../../saved_object_types';
+import { CaseServiceSetup } from '../../services';
+
+async function getSubCase({
+  caseService,
+  savedObjectsClient,
+  caseId,
+  createdAt,
+}: {
+  caseService: CaseServiceSetup;
+  savedObjectsClient: SavedObjectsClientContract;
+  caseId: string;
+  createdAt: string;
+}): Promise<SavedObject<SubCaseAttributes>> {
+  const mostRecentSubCase = await caseService.getMostRecentSubCase(savedObjectsClient, caseId);
+  if (mostRecentSubCase && mostRecentSubCase.attributes.status !== CaseStatuses.closed) {
+    return mostRecentSubCase;
+  }
+
+  // else need to create a new sub case
+  return caseService.createSubCase(savedObjectsClient, createdAt, caseId);
+}
 
 export const addComment = ({
   savedObjectsClient,
@@ -41,12 +65,16 @@ export const addComment = ({
   );
 
   decodeComment(comment);
+  const createdDate = new Date().toISOString();
 
   const myCase = await caseService.getCase({
     client: savedObjectsClient,
     caseId,
   });
 
+  if (myCase.attributes.type === CaseType.parent) {
+    // get or create a sub case
+  }
   /**
    * TODO: check if myCase is a 'case' or a 'subCase'
    * if case then the association type should be 'case'
@@ -63,7 +91,6 @@ export const addComment = ({
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { username, full_name, email } = await caseService.getUser({ request });
-  const createdDate = new Date().toISOString();
 
   const [newComment, updatedCase] = await Promise.all([
     caseService.postNewComment({
@@ -95,6 +122,7 @@ export const addComment = ({
     }),
   ]);
 
+  // TODO: need to figure out what we do in this case for alerts that are attached to sub cases
   // If the case is synced with alerts the newly attached alert must match the status of the case.
   if (newComment.attributes.type === CommentType.alert && myCase.attributes.settings.syncAlerts) {
     const ids = Array.isArray(newComment.attributes.alertId)

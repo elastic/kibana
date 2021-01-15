@@ -64,8 +64,6 @@ export const createRouteContext = async (client: any, badAuth = false) => {
       getUserActions: jest.fn(),
     },
     alertsService,
-    // TODO: move this to a variable shared across tests
-    index: '.siem-signals',
   });
 
   return context;

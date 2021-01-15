@@ -18,7 +18,7 @@ export enum CaseStatuses {
   closed = 'closed',
 }
 
-const CaseStatusRt = rt.union([
+export const CaseStatusRt = rt.union([
   rt.literal(CaseStatuses.open),
   rt.literal(CaseStatuses['in-progress']),
   rt.literal(CaseStatuses.closed),
