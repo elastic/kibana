@@ -24,6 +24,7 @@ export const fetchConnectors = async () => {
 
 export interface NewAlertParams extends AlertTypeParams {
   monitorId: string;
+  monitorUrl: string;
   monitorName?: string;
   defaultActions: ActionConnector[];
 }
@@ -46,8 +47,14 @@ export const createAlert = async ({
   defaultActions,
   monitorId,
   monitorName,
+  monitorUrl,
 }: NewAlertParams): Promise<Alert> => {
-  const actions: AlertAction[] = populateAlertActions({ defaultActions, monitorId, monitorName });
+  const actions: AlertAction[] = populateAlertActions({
+    defaultActions,
+    monitorId,
+    monitorName,
+    monitorUrl,
+  });
 
   const data: NewMonitorStatusAlert = {
     actions,

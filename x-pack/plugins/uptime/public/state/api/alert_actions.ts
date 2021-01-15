@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { NewAlertParams } from './alerts';
 import { AlertAction } from '../../../../triggers_actions_ui/public';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
@@ -30,7 +31,12 @@ export const WEBHOOK_ACTION_ID: ActionTypeId = '.webhook';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
-export function populateAlertActions({ defaultActions, monitorId, monitorName }: NewAlertParams) {
+export function populateAlertActions({
+  defaultActions,
+  monitorId,
+  monitorName,
+  monitorUrl,
+}: NewAlertParams) {
   const actions: AlertAction[] = [];
   defaultActions.forEach((aId) => {
     const action: AlertAction = {
@@ -39,6 +45,22 @@ export function populateAlertActions({ defaultActions, monitorId, monitorName }:
       group: MONITOR_STATUS.id,
       params: {},
     };
+
+    const recoveredAction: AlertAction = {
+      id: aId.id,
+      actionTypeId: aId.actionTypeId,
+      group: 'recovered',
+      params: {
+        message: i18n.translate('xpack.uptime.alerts.monitorStatus.recoveryMessage', {
+          defaultMessage: 'Monitor {monitor} with {url} has recovered with status Up',
+          values: {
+            monitor: monitorName || monitorId,
+            url: monitorUrl,
+          },
+        }),
+      },
+    };
+
     switch (aId.actionTypeId) {
       case PAGER_DUTY_ACTION_ID:
         action.params = getPagerDutyActionParams(monitorId);
@@ -60,6 +82,11 @@ export function populateAlertActions({ defaultActions, monitorId, monitorName }:
         break;
       case SLACK_ACTION_ID:
       case TEAMS_ACTION_ID:
+        action.params = {
+          message: MonitorStatusTranslations.defaultActionMessage,
+        };
+        actions.push(recoveredAction);
+        break;
       default:
         action.params = {
           message: MonitorStatusTranslations.defaultActionMessage,

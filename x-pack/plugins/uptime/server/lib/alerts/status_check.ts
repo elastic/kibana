@@ -264,7 +264,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         state,
         services: { alertInstanceFactory },
       },
-      dynamicSettings,
       uptimeEsClient,
     }) {
       const {
