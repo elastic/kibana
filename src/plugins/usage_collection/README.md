@@ -1,39 +1,132 @@
 # Kibana Usage Collection Service
 
-Usage Collection allows collecting usage data for other services to consume (telemetry and monitoring).
-To integrate with the telemetry services for usage collection of your feature, there are 2 steps:
+The Usage Collection Service defines a set of APIs for other plugins to report the usage of their features. At the same time, it provides necessary the APIs for other services (i.e.: telemetry, monitoring, ...) to consume that usage data.
 
-1. Create a usage collector.
+## How to report my plugin's usage?
+
+The way to report the usage of any feature depends on whether the actions to track occur in the UI, or the usage depends on any server-side data. For that reason, the set of APIs exposed in the `public` and `server` contexts are different.
+
+In any case, to use any of these APIs, the plugin must optionally require the plugin `usageCollection`:
+
+```json
+// plugin/kibana.json
+{
+  "id": "...",
+  "optionalPlugins": ["usageCollection"]
+}
+```
+
+Please, be aware that plugins listing `usageCollection` in the `optionalPlugins` list are allowed to run even when `usageCollection` is disabled. However, this also means that it may not be available. Make sure the plugin defines the types of its contract interfaces with `usageCollection` being optional as well.
+
+### `public` APIs
+
+The APIs exposed in the `public` context aim to collect the _aggregate_ number of events that occur in a period of time. They are **not** intended for user-behavioural tracking. The APIs available can be categorized in 2: Application Usage and UI Counters.
+
+#### Application Usage
+
+Kibana automatically tracks the number of minutes the users spend on each application, as well as the number of general clicks in the same app. There is no need for plugins to opt-in. However, if a plugin needs to collect the same metric for specific sections of the app (i.e.: tabs, flyouts, or any component that may be shown in specific situations), it can use the React component `TrackApplicationView`. For more info about the app-level and sub-views tracking, please read [this collector's README](../kibana_usage_collection/server/collectors/application_usage/README.md).
+
+#### UI Counters
+
+Formerly known as UI Metrics, UI Counters provides instrumentation in the UI to count triggered events such as "component loaded", "button clicked", or counting when an event occurs. It's useful for gathering _aggregate_ information, e.g. "How many times has Button X been clicked" or "How many times has Page Y been viewed".
+
+The events have a per day granularity.
+
+##### How to use it
+
+To track a user interaction, use the API `usageCollection.reportUiCounter` as follows:
+
+```ts
+// public/plugin.ts
+import { METRIC_TYPE } from '@kbn/analytics';
+import { Plugin, CoreStart } from '../../../core/public';
+
+export class MyPlugin implements Plugin {
+  public start(
+    core: CoreStart, 
+    { usageCollection }: { usageCollection?: UsageCollectionSetup }
+  ) {
+    // Call the following method as many times as you want to report an increase in the count for this event
+    usageCollection?.reportUiCounter(`<AppName>`, METRIC_TYPE.CLICK, `<EventName>`);
+  }
+}
+```
+
+##### Metric Types
+
+- `METRIC_TYPE.CLICK` for tracking clicks.
+- `METRIC_TYPE.LOADED` for a component load, a page load, or a request load.
+- `METRIC_TYPE.COUNT` is the generic counter for miscellaneous events.
+
+Call this function whenever you would like to track a user interaction within your app. The function
+accepts three arguments, `AppName`, `metricType` and `eventNames`. These should be underscore-delimited strings.
+
+That's all you need to do!
+
+##### Reporting multiple events at once
+
+To track multiple metrics within a single request, provide an array of events
+
+```
+usageCollection.reportUiCounter(`<AppName>`, METRIC_TYPE.CLICK, [`<EventName1>`, `<EventName2>`]);
+```
+
+##### Incrementing counter by more than 1
+
+To track an event occurrence more than once in the same call, provide a 4th argument to the `reportUiCounter` function:
+
+```
+usageCollection.reportUiCounter(`<AppName>`, METRIC_TYPE.CLICK, `<EventName>`, 3);
+```
+
+##### Disallowed characters
+
+The colon character (`:`) should not be used in the app name. Colons play a special role for `appName` in how metrics are stored as saved objects.
+
+##### Special use-case: Tracking timed interactions
+
+This API is not intended for tracking user-behavioural analytics. However, if you want to track how long it takes a user to do something, you'll need to implement the timing
+logic yourself. You'll also need to predefine some buckets into which the UI metric can fall.
+For example, if you're timing how long it takes to create a visualization, you may decide to
+measure interactions that take less than 1 minute, 1-5 minutes, 5-20 minutes, and longer than 20 minutes.
+To track these interactions, you'd use the timed length of the interaction to determine whether to
+use a `eventName` of  `create_vis_1m`, `create_vis_5m`, `create_vis_20m`, or `create_vis_infinity`.
+
+### `server` APIs
+
+#### Data Telemetry
+
+Not an API as such. However, Data Telemetry collects the usage of known patterns of indices, either via well-known index names (check the list [here](../telemetry/server/telemetry_collection/get_data_telemetry/constants.ts)) or by identifying Elastic internal `_meta` keys in the index definitions: Beats indices or `ingest-manager`'s maintained Data Streams.
+
+This collector does not report the name of the indices nor any content. It only provides stats about usage of known shippers/ingest tools.
+
+#### Custom collector
+
+In many cases, plugins need to report the custom usage of a feature. In this cases, the plugins must complete the following 2 steps in the `setup` lifecycle step:
+
+1. Create the usage collector.
 2. Register the usage collector.
 
-## Creating and Registering Usage Collector
+##### Creating and Registering Usage Collector
 
-Your usage collector needs to provide 
-- a `type` for organizing your fields, 
-- `schema` field to define the expected types of usage fields reported, 
-- a `fetch` method for returning your usage data, and
-- an `isReady` method (that returns true or false) for letting the telemetry service know if it needs to wait for any asynchronous action (initialization of clients or other services) before calling the `fetch` method. 
+1. To create the usage collector, the API `usageCollection.makeUsageCollector` expects: 
+    - `type`: the key under which to nest all the usage reported by the `fetch` method.  
+    - `schema`: field to define the expected output of the `fetch` method. 
+   - `isReady`: async method (that returns true or false) for letting the usage collection consumers know if they need to wait for any asynchronous action (initialization of clients or other services) before calling the `fetch` method.
+    - `fetch`: async method for returning the usage collector's data.
 
-Then you need to make the Telemetry service aware of the collector by registering it.
+2. Once the usage collector is created, it has to be registered to the usage collection set. Otherwise, it won't be used when consumers retrieve the usage collection.
 
-1. Make sure `usageCollection` is in your optional Plugins:
+###### Code example
 
-    ```json
-    // plugin/kibana.json
-    {
-      "id": "...",
-      "optionalPlugins": ["usageCollection"]
-    }
-    ```
-
-2. Register Usage collector in the `setup` function:
+1. Register Usage collector in the `setup` function:
 
     ```ts
     // server/plugin.ts
     import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-    import { CoreSetup, CoreStart } from 'src/core/server';
+    import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
 
-    class Plugin {
+    class MyPlugin implements Plugin {
       public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
         registerMyPluginUsageCollector(plugins.usageCollection);
       }
@@ -42,11 +135,10 @@ Then you need to make the Telemetry service aware of the collector by registerin
     }
     ```
 
-3. Creating and registering a Usage Collector. Ideally collectors would be defined in a separate directory `server/collectors/register.ts`.
+2. Creating and registering a Usage Collector. Ideally collectors would be defined in a separate directory `server/collectors/register.ts`.
     ```ts
     // server/collectors/register.ts
     import { UsageCollectionSetup, CollectorFetchContext } from 'src/plugins/usage_collection/server';
-    import { APICluster } from 'src/core/server';
 
     interface Usage {
       my_objects: {
@@ -100,47 +192,71 @@ In some scenarios, your collector might need to maintain its own client. An exam
 
 Note: there will be many cases where you won't need to use the `esClient` or `soClient` function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS.
 
-In the case of using a custom SavedObjects client, it is up to the plugin to initialize the client to save the data and it is strongly recommended to scope that client to the `kibana_system` user.
+In the case of using a custom ES or SavedObjects client, it is up to the plugin to initialize the client to save the data, and it is strongly recommended scoping that client to the `kibana_system` user.
 
-```ts
-// server/plugin.ts
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CoreSetup, CoreStart } from 'src/core/server';
+##### Schema Field
 
-class Plugin {
-  private savedObjectsRepository?: ISavedObjectsRepository;
+The `schema` field is a proscribed data model assists with detecting changes in usage collector payloads. To define the collector schema add a schema field that specifies every possible field reported (including optional fields) when registering the collector. Whenever the `schema` field is set or changed please run `node scripts/telemetry_check.js --fix` to update the stored schema json files.
 
-  public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
-    registerMyPluginUsageCollector(plugins.usageCollection);
-  }
+###### Allowed Schema Types
 
-  public start(core: CoreStart) {
-    this.savedObjectsRepository = core.savedObjects.createInternalRepository();
-  }
-}
+The `AllowedSchemaTypes` is the list of allowed schema types for the usage fields getting reported:
+
+```
+'long', 'integer', 'short', 'byte', 'double', 'float', 'keyword', 'text', 'boolean', 'date'
 ```
 
-```ts
-// server/collectors/register.ts
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+###### Arrays
 
-export function registerMyPluginUsageCollector(
-  usageCollection?: UsageCollectionSetup
-  ): void {
-  // usageCollection is an optional dependency, so make sure to return if it is not registered.
-  if (!usageCollection) {
-    return;
-  }
+If any of your properties is an array, the schema definition must follow the convention below:
 
-  // create usage collector
-  const myCollector = usageCollection.makeUsageCollector<Usage>(...)
-
-  // register usage collector
-  usageCollection.registerCollector(myCollector);
-}
+```
+{ type: 'array', items: {...mySchemaDefinitionOfTheEntriesInTheArray} }
 ```
 
-## Tracking interactions with incrementCounter
+###### Example
+
+```ts
+export const myCollector = makeUsageCollector<Usage>({
+  type: 'my_working_collector',
+  isReady: () => true, // `fetch` doesn't require any validation for dependencies to be met
+  fetch() {
+    return {
+      my_greeting: 'hello',
+      some_obj: {
+        total: 123,
+      },
+      some_array: ['value1', 'value2'],
+      some_array_of_obj: [{total: 123}],
+    };
+  },
+  schema: {
+    my_greeting: {
+      type: 'keyword',
+    },
+    some_obj: {
+      total: {
+        type: 'long',
+      },
+    },
+    some_array: {
+      type: 'array',
+      items: { type: 'keyword' }    
+    },
+    some_array_of_obj: {
+      type: 'array',
+      items: { 
+        total: {
+          type: 'long',
+        },
+      },   
+    },
+  },
+});
+```
+
+##### Tracking interactions with incrementCounter
+
 There are several ways to collect data that can provide insight into how users
 use your plugin or specific features. For tracking user interactions the
 `SavedObjectsRepository` provided by Core provides a useful `incrementCounter`
@@ -233,73 +349,7 @@ export class DashboardPlugin implements Plugin {
 }
 ```
 
-## Schema Field
-
-The `schema` field is a proscribed data model assists with detecting changes in usage collector payloads. To define the collector schema add a schema field that specifies every possible field reported when registering the collector. Whenever the `schema` field is set or changed please run `node scripts/telemetry_check.js --fix` to update the stored schema json files.
-
-### Allowed Schema Types
-
-The `AllowedSchemaTypes` is the list of allowed schema types for the usage fields getting reported:
-
-```
-'long', 'integer', 'short', 'byte', 'double', 'float', 'keyword', 'text', 'boolean', 'date'
-```
-
-### Arrays
-
-If any of your properties is an array, the schema definition must follow the convention below:
-
-```
-{ type: 'array', items: {...mySchemaDefinitionOfTheEntriesInTheArray} }
-```
-
-### Example
-
-```ts
-export const myCollector = makeUsageCollector<Usage>({
-  type: 'my_working_collector',
-  isReady: () => true, // `fetch` doesn't require any validation for dependencies to be met
-  fetch() {
-    return {
-      my_greeting: 'hello',
-      some_obj: {
-        total: 123,
-      },
-      some_array: ['value1', 'value2'],
-      some_array_of_obj: [{total: 123}],
-    };
-  },
-  schema: {
-    my_greeting: {
-      type: 'keyword',
-    },
-    some_obj: {
-      total: {
-        type: 'long',
-      },
-    },
-    some_array: {
-      type: 'array',
-      items: { type: 'keyword' }    
-    },
-    some_array_of_obj: {
-      type: 'array',
-      items: { 
-        total: {
-          type: 'long',
-        },
-      },   
-    },
-  },
-});
-```
-## Update the telemetry payload and telemetry cluster field mappings
-
-There is a module in the telemetry service that creates the payload of data that gets sent up to the telemetry cluster.
-
-New fields added to the telemetry payload currently mean that telemetry cluster field mappings have to be updated, so they can be searched and aggregated in Kibana visualizations. This is also a short-term obligation. In the next refactoring phase, collectors will need to use a proscribed data model that eliminates maintenance of mappings in the telemetry cluster.
-
-## Testing
+##### Testing
 
 There are a few ways you can test that your usage collector is working properly.
 
@@ -317,101 +367,13 @@ There are a few ways you can test that your usage collector is working properly.
       Where `http://localhost:5601` is a Kibana server running in dev mode. If needed, authentication and basePath info can be provided in the command as well.
     - Automatic inclusion of all the stats fetched by collectors is added in [#22336](https://github.com/elastic/kibana/pull/22336) / 6.5.0
 3. In Dev mode, Kibana will send telemetry data to a staging telemetry cluster. Assuming you have access to the staging cluster, you can log in and check the latest documents for your new fields.
-4. If you catch the network traffic coming from your browser when a telemetry payload is sent, you can examine the request payload body to see the data. This can be tricky as telemetry payloads are sent only once per day per browser. Use incognito mode or clear your localStorage data to force a telemetry payload.
 
 ## FAQ
 
 1. **How should I design my data model?**  
-   Keep it simple, and keep it to a model that Kibana will be able to understand. In short, that means don't rely on nested fields (arrays with objects). Flat arrays, such as arrays of strings are fine.
+   Keep it simple, and keep it to a model that Kibana will be able to understand. Bear in mind the number of keys you are reporting as it may result in fields mapping explosion. Flat arrays, such as arrays of strings are fine.
 2. **If I accumulate an event counter in server memory, which my fetch method returns, won't it reset when the Kibana server restarts?**  
    Yes, but that is not a major concern. A visualization on such info might be a date histogram that gets events-per-second or something, which would be impacted by server restarts, so we'll have to offset the beginning of the time range when we detect that the latest metric is smaller than the earliest metric. That would be a pretty custom visualization, but perhaps future Kibana enhancements will be able to support that.
-
-
-# UI Metric app
-
-UI_metric is deprecated in favor of UI Counters.
-
-# UI Counters
-
-## Purpose
-
-UI Counters provides instrumentation in the UI to count triggered events such as component loaded, button clicked, or counting when an event occurs. It's useful for gathering _aggregate_ information, e.g. "How many times has Button X been clicked" or "How many times has Page Y been viewed".
-
-With some finagling, it's even possible to add more meaning to the info you gather, such as "How many
-visualizations were created in less than 5 minutes".
-
-The events have a per day granularity.
-
-## How to use it
-
-To track a user interaction, use the `usageCollection.reportUiCounter` method exposed by the plugin `usageCollection` in the public side:
-
-1. Similarly to the server-side usage collection, make sure `usageCollection` is in your optional Plugins:
-
-    ```json
-    // plugin/kibana.json
-    {
-      "id": "...",
-      "optionalPlugins": ["usageCollection"]
-    }
-    ```
-
-2. Register Usage collector in the `setup` function:
-
-    ```ts
-    // public/plugin.ts
-    import { METRIC_TYPE } from '@kbn/analytics';
-
-    class Plugin {
-      setup(core, { usageCollection }) {
-        if (usageCollection) {
-          // Call the following method as many times as you want to report an increase in the count for this event
-          usageCollection.reportUiCounter(`<AppName>`, METRIC_TYPE.CLICK, `<EventName>`);
-        }
-      }
-    }
-    ```
-
-### Metric Types:
-
-- `METRIC_TYPE.CLICK` for tracking clicks.
-- `METRIC_TYPE.LOADED` for a component load, a page load, or a request load.
-- `METRIC_TYPE.COUNT` is the generic counter for miscellaneous events.
-
-Call this function whenever you would like to track a user interaction within your app. The function
-accepts three arguments, `AppName`, `metricType` and `eventNames`. These should be underscore-delimited strings.
-
-That's all you need to do!
-
-### Reporting multiple events at once
-
-To track multiple metrics within a single request, provide an array of events
-
-```
-usageCollection.reportUiCounter(`<AppName>`, METRIC_TYPE.CLICK, [`<EventName1>`, `<EventName2>`]);
-```
-
-### Incrementing counter by more than 1
-
-To track an event occurance more than once in the same call, provide a 4th argument to the `reportUiCounter` function:
-
-```
-usageCollection.reportUiCounter(`<AppName>`, METRIC_TYPE.CLICK, `<EventName>`, 3);
-```
-
-### Disallowed characters
-
-The colon character (`:`) should not be used in the app name. Colons play
-a special role for `appName` in how metrics are stored as saved objects.
-
-### Tracking timed interactions
-
-If you want to track how long it takes a user to do something, you'll need to implement the timing
-logic yourself. You'll also need to predefine some buckets into which the UI metric can fall.
-For example, if you're timing how long it takes to create a visualization, you may decide to
-measure interactions that take less than 1 minute, 1-5 minutes, 5-20 minutes, and longer than 20 minutes.
-To track these interactions, you'd use the timed length of the interaction to determine whether to
-use a `eventName` of  `create_vis_1m`, `create_vis_5m`, `create_vis_20m`, or `create_vis_infinity`.
 
 # Routes registered by this plugin
 
