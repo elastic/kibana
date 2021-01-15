@@ -219,31 +219,6 @@ describe('CustomLink', () => {
       expect(saveCustomLinkSpy).toHaveBeenCalledTimes(1);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/75106
-    it.skip('deletes a custom link', async () => {
-      const mockContext = getMockAPMContext({ canSave: true });
-      const component = render(
-        <LicenseContext.Provider value={goldLicense}>
-          <MockApmPluginContextWrapper value={mockContext}>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
-      expect(component.queryByText('Create link')).not.toBeInTheDocument();
-      const editButtons = component.getAllByLabelText('Edit');
-      expect(editButtons.length).toEqual(2);
-      act(() => {
-        fireEvent.click(editButtons[0]);
-      });
-      await waitFor(() =>
-        expect(component.queryByText('Create link')).toBeInTheDocument()
-      );
-      await act(async () => {
-        fireEvent.click(component.getByText('Delete'));
-      });
-      expect(refetch).toHaveBeenCalled();
-    });
-
     describe('Filters', () => {
       const addFilterField = (component: RenderResult, amount: number) => {
         for (let i = 1; i <= amount; i++) {
