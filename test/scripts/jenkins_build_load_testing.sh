@@ -21,6 +21,10 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 mkdir -p "$WORKSPACE/kibana-build-xpack"
 cp -pR install/kibana/. $WORKSPACE/kibana-build-xpack/
 
-echo " -> Run gatling load testing via ftr"
-cd x-pack
-node scripts/functional_tests.js --config test/load/config.ts
+echo " -> test setup"
+source test/scripts/jenkins_test_setup_xpack.sh
+
+echo " -> run gatling load testing"
+node scripts/functional_tests \
+    --kibana-install-dir "$KIBANA_INSTALL_DIR" \
+    --config test/load/config.ts
