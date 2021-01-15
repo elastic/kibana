@@ -100,19 +100,7 @@ export class TaskPool {
    * @param {TaskRunner[]} tasks
    * @returns {Promise<boolean>}
    */
-  public run = (tasks: TaskRunner[]) => {
-    this.cancelExpiredTasks();
-    return this.attemptToRun(tasks);
-  };
-
-  public cancelRunningTasks() {
-    this.logger.debug('Cancelling running tasks.');
-    for (const task of this.running) {
-      this.cancelTask(task);
-    }
-  }
-
-  private async attemptToRun(tasks: TaskRunner[]): Promise<TaskPoolRunResult> {
+  public run = async (tasks: TaskRunner[]): Promise<TaskPoolRunResult> => {
     const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
     if (tasksToRun.length) {
       performance.mark('attemptToRun_start');
@@ -139,13 +127,20 @@ export class TaskPool {
 
     if (leftOverTasks.length) {
       if (this.availableWorkers) {
-        return this.attemptToRun(leftOverTasks);
+        return this.run(leftOverTasks);
       }
       return TaskPoolRunResult.RanOutOfCapacity;
     } else if (!this.availableWorkers) {
       return TaskPoolRunResult.RunningAtCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
+  };
+
+  public cancelRunningTasks() {
+    this.logger.debug('Cancelling running tasks.');
+    for (const task of this.running) {
+      this.cancelTask(task);
+    }
   }
 
   private handleMarkAsRunning(taskRunner: TaskRunner) {
@@ -172,23 +167,21 @@ export class TaskPool {
     this.logger.error(`Failed to mark Task ${task.toString()} as running: ${err.message}`);
   }
 
-  public async cancelExpiredTasks() {
-    return Promise.all(
-      Array.from(this.running)
-        .filter((task) => task.isExpired)
-        .map((task) => {
-          this.logger.warn(
-            `Cancelling task ${task.toString()} as it expired at ${task.expiration.toISOString()}${
-              task.startedAt
-                ? ` after running for ${durationAsString(
-                    moment.duration(moment(new Date()).utc().diff(task.startedAt))
-                  )}`
-                : ``
-            }${task.definition.timeout ? ` (with timeout set at ${task.definition.timeout})` : ``}.`
-          );
-          return this.cancelTask(task);
-        })
-    );
+  private cancelExpiredTasks() {
+    for (const task of this.running) {
+      if (task.isExpired) {
+        this.logger.warn(
+          `Cancelling task ${task.toString()} as it expired at ${task.expiration.toISOString()}${
+            task.startedAt
+              ? ` after running for ${durationAsString(
+                  moment.duration(moment(new Date()).utc().diff(task.startedAt))
+                )}`
+              : ``
+          }${task.definition.timeout ? ` (with timeout set at ${task.definition.timeout})` : ``}.`
+        );
+        this.cancelTask(task);
+      }
+    }
   }
 
   private async cancelTask(task: TaskRunner) {
