@@ -17,6 +17,7 @@ import {
   ExternalIncidentServiceSecretConfigurationSchema,
   ExecutorParamsSchemaSIR,
   ExecutorSubActionPushParamsSchemaSIR,
+  ExecutorSubActionGetChoicesParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
@@ -32,7 +33,14 @@ export type ExecutorSubActionCommonFieldsParams = TypeOf<
   typeof ExecutorSubActionCommonFieldsParamsSchema
 >;
 
-export type ServiceNowExecutorResultData = PushToServiceResponse | GetCommonFieldsResponse;
+export type ExecutorSubActionGetChoicesParams = TypeOf<
+  typeof ExecutorSubActionGetChoicesParamsSchema
+>;
+
+export type ServiceNowExecutorResultData =
+  | PushToServiceResponse
+  | GetCommonFieldsResponse
+  | GetChoicesResponse;
 
 export interface CreateCommentRequest {
   [key: string]: string;
@@ -72,8 +80,9 @@ export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
 export type ExternalServiceParams = Record<string, unknown>;
 
 export interface ExternalService {
-  getFields: () => Promise<GetCommonFieldsResponse>;
+  getChoices: (field: string) => Promise<GetChoicesResponse>;
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
+  getFields: () => Promise<GetCommonFieldsResponse>;
   createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
   findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
@@ -126,13 +135,28 @@ export interface ExternalServiceFields {
   max_length: string;
   element: string;
 }
+
+export interface ExternalServiceChoices {
+  value: string;
+  label: string;
+  dependent_value: string;
+}
+
 export type GetCommonFieldsResponse = ExternalServiceFields[];
+export type GetChoicesResponse = ExternalServiceChoices[];
+
 export interface GetCommonFieldsHandlerArgs {
   externalService: ExternalService;
   params: ExecutorSubActionCommonFieldsParams;
 }
 
+export interface GetChoicesHandlerArgs {
+  externalService: ExternalService;
+  params: ExecutorSubActionGetChoicesParams;
+}
+
 export interface ExternalServiceApi {
+  getChoices: (args: GetChoicesHandlerArgs) => Promise<GetChoicesResponse>;
   getFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;

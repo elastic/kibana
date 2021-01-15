@@ -28,6 +28,7 @@ export const ExecutorSubActionSchema = schema.oneOf([
   schema.literal('getIncident'),
   schema.literal('pushToService'),
   schema.literal('handshake'),
+  schema.literal('getChoices'),
 ]);
 
 const CommentsSchema = schema.nullable(
@@ -78,6 +79,9 @@ export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
 // Reserved for future implementation
 export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
 export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
+export const ExecutorSubActionGetChoicesParamsSchema = schema.object({
+  field: schema.string(),
+});
 
 // Executor parameters for ServiceNow Incident Management (IM)
 export const ExecutorParamsSchemaIM = schema.oneOf([
@@ -96,6 +100,10 @@ export const ExecutorParamsSchemaIM = schema.oneOf([
   schema.object({
     subAction: schema.literal('pushToService'),
     subActionParams: ExecutorSubActionPushParamsSchemaIM,
+  }),
+  schema.object({
+    subAction: schema.literal('getChoices'),
+    subActionParams: ExecutorSubActionGetChoicesParamsSchema,
   }),
 ]);
 
@@ -116,5 +124,9 @@ export const ExecutorParamsSchemaSIR = schema.oneOf([
   schema.object({
     subAction: schema.literal('pushToService'),
     subActionParams: ExecutorSubActionPushParamsSchemaSIR,
+  }),
+  schema.object({
+    subAction: schema.literal('getChoices'),
+    subActionParams: ExecutorSubActionGetChoicesParamsSchema,
   }),
 ]);

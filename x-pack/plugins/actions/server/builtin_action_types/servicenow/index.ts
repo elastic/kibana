@@ -28,6 +28,7 @@ import {
   PushToServiceResponse,
   ExecutorSubActionCommonFieldsParams,
   ServiceNowExecutorResultData,
+  ExecutorSubActionGetChoicesParams,
 } from './types';
 
 export type ActionParamsType =
@@ -99,7 +100,7 @@ export function getServiceNowSIRActionType(
 }
 
 // action executor
-const supportedSubActions: string[] = ['getFields', 'pushToService'];
+const supportedSubActions: string[] = ['getFields', 'pushToService', 'getChoices'];
 async function executor(
   {
     logger,
@@ -154,6 +155,14 @@ async function executor(
     data = await api.getFields({
       externalService,
       params: getFieldsParams,
+    });
+  }
+
+  if (subAction === 'getChoices') {
+    const getChoicesParams = subActionParams as ExecutorSubActionGetChoicesParams;
+    data = await api.getChoices({
+      externalService,
+      params: getChoicesParams,
     });
   }
 

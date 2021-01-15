@@ -33,6 +33,7 @@ export const createExternalService = (
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
   const incidentUrl = `${urlWithoutTrailingSlash}/api/now/${API_VERSION}/table/${table}`;
   const fieldsUrl = `${urlWithoutTrailingSlash}/${SYS_DICTIONARY}?sysparm_query=name=task^ORname=${table}^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
+  const choicesUrl = `${urlWithoutTrailingSlash}/api/now/${API_VERSION}/table/sys_choice`;
   const axiosInstance = axios.create({
     auth: { username, password },
   });
@@ -41,6 +42,9 @@ export const createExternalService = (
     // Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
     return `${urlWithoutTrailingSlash}/nav_to.do?uri=${table}.do?sys_id=${id}`;
   };
+
+  const getChoicesURL = (field: string) =>
+    `${choicesUrl}?sysparm_query=name=task^ORname=${table}^element=${field}&sysparm_fields=label,value,dependent_value`;
 
   const checkInstance = (res: AxiosResponse) => {
     if (res.status === 200 && res.data.result == null) {
@@ -158,11 +162,29 @@ export const createExternalService = (
     }
   };
 
+  const getChoices = async (field: string) => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        url: getChoicesURL(field),
+        logger,
+        proxySettings,
+      });
+      checkInstance(res);
+      return res.data.result;
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(i18n.SERVICENOW, `Unable to get choices. Error: ${error.message}`)
+      );
+    }
+  };
+
   return {
     createIncident,
     findIncidents,
     getFields,
     getIncident,
     updateIncident,
+    getChoices,
   };
 };
