@@ -83,6 +83,7 @@ export const hasReadIndexPrivileges = async (
     errorString = `Missing required read permissions on indexes: ${JSON.stringify(
       indexesWithNoReadPrivileges
     )}`;
+    await ruleStatusService.partialFailure(errorString);
   } else if (
     indexesWithReadPrivileges.length === 0 &&
     indexesWithNoReadPrivileges.length === indexNames.length
@@ -92,10 +93,10 @@ export const hasReadIndexPrivileges = async (
     errorString = `The rule does not have read privileges to any of the following indices: ${JSON.stringify(
       indexesWithNoReadPrivileges
     )}`;
+    await ruleStatusService.error(errorString);
   }
   if (errorString != null) {
     logger.debug(buildRuleMessage(errorString));
-    await ruleStatusService.partialFailure(errorString);
     return true;
   }
   return false;
