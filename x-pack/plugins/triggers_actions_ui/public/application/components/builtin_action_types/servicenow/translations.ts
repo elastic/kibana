@@ -174,3 +174,26 @@ export const MALWARE_HASH_LABEL = i18n.translate(
     defaultMessage: 'Malware hash',
   }
 );
+
+export const CHOICES_API_ERROR = (field: string) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.builtinActionTypes.jira.unableToGetChoicesMessage',
+    {
+      values: { field },
+      defaultMessage: 'Unable to get choices for field {field}',
+    }
+  );
+
+export const CATEGORY_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.categoryTitle',
+  {
+    defaultMessage: 'Category',
+  }
+);
+
+export const SUBCATEGORY_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.subcategoryTitle',
+  {
+    defaultMessage: 'Subcategory',
+  }
+);

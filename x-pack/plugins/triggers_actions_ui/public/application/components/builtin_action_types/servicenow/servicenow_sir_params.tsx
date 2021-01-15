@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFormRow,
   EuiSelect,
@@ -12,17 +12,25 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiSelectOption,
 } from '@elastic/eui';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
 import { ServiceNowSIRActionParams } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 
 import * as i18n from './translations';
+import { useGetChoices, Choice } from './use_get_choices';
 
 const ServiceNowParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowSIRActionParams>
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
     () =>
@@ -33,6 +41,9 @@ const ServiceNowParamsFields: React.FunctionComponent<
       } as unknown) as ServiceNowSIRActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
+
+  const [categories, setCategories] = useState<EuiSelectOption[]>([]);
+  const [subcategories, setSubcategories] = useState<Choice[]>([]);
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -55,6 +66,34 @@ const ServiceNowParamsFields: React.FunctionComponent<
       }
     },
     [editSubActionProperty]
+  );
+
+  const onCategorySuccess = (choices: Choice[]) =>
+    setCategories(choices.map((choice) => ({ value: choice.value, text: choice.label })));
+  const onSubcategorySuccess = (choices: Choice[]) => setSubcategories(choices);
+
+  const { isLoading: isLoadingCategories } = useGetChoices({
+    http,
+    toastNotifications: toasts,
+    actionConnector,
+    field: 'category',
+    onSuccess: onCategorySuccess,
+  });
+
+  const { isLoading: isLoadingSubCategories } = useGetChoices({
+    http,
+    toastNotifications: toasts,
+    actionConnector,
+    field: 'subcategory',
+    onSuccess: onSubcategorySuccess,
+  });
+
+  const subcategoriesOptions = useMemo(
+    () =>
+      subcategories
+        .filter((subcategory) => subcategory.dependent_value === incident.category)
+        .map((subcategory) => ({ value: subcategory.value, text: subcategory.label })),
+    [incident.category, subcategories]
   );
 
   useEffect(() => {
@@ -153,6 +192,48 @@ const ServiceNowParamsFields: React.FunctionComponent<
           inputTargetValue={incident?.malware_hash ?? undefined}
         />
       </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth label={i18n.CATEGORY_LABEL}>
+            <EuiSelect
+              fullWidth
+              data-test-subj="categorySelect"
+              hasNoInitialSelection
+              isLoading={isLoadingCategories}
+              disabled={isLoadingCategories}
+              options={categories}
+              value={incident.category ?? undefined}
+              onChange={(e) => {
+                editAction(
+                  'subActionParams',
+                  {
+                    incident: { ...incident, category: e.target.value, subcategory: null },
+                    comments,
+                  },
+                  index
+                );
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth label={i18n.SUBCATEGORY_LABEL}>
+            <EuiSelect
+              fullWidth
+              data-test-subj="subcategorySelect"
+              hasNoInitialSelection
+              isLoading={isLoadingCategories || isLoadingSubCategories}
+              disabled={isLoadingCategories || isLoadingSubCategories}
+              options={subcategoriesOptions}
+              // Needs an empty string instead of undefined to select the blank option when changing categories
+              value={incident.subcategory ?? ''}
+              onChange={(e) => editSubActionProperty('subcategory', e.target.value)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <TextAreaWithMessageVariables
         index={index}
         editAction={editSubActionProperty}
