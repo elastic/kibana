@@ -19,10 +19,10 @@
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
+    { "path": "../security/tsconfig.json" },
+    { "path": "../spaces/tsconfig.json" },
     //
     // The following are dependencies that have not been typed yet.
     // { "path": "../cloud/tsconfig.json" },
-    // { "path": "../security/tsconfig.json" },
-    // { "path": "../spaces/tsconfig.json" },
   ]
 }
