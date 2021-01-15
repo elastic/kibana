@@ -108,7 +108,7 @@ export const ColdPhase: FunctionComponent = () => {
             <SearchableSnapshotField phase="cold" />
 
             <EuiAccordion
-              id="ilmWarmPhaseAdvancedSettings"
+              id="ilmColdPhaseAdvancedSettings"
               buttonContent={i18n.translate(
                 'xpack.indexLifecycleMgmt.warmPhase.advancedSettingsButton',
                 {
