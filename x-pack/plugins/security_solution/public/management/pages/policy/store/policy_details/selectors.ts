@@ -111,6 +111,11 @@ export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) => {
   );
 };
 
+/** Returns the license info fetched from the license service */
+export const license = (state: Immutable<PolicyDetailsState>) => {
+  return state.license;
+};
+
 /** Returns the policyId from the url */
 export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => string = createSelector(
   (state) => state.location,

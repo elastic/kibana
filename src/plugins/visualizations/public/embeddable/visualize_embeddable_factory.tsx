@@ -197,6 +197,7 @@ export class VisualizeEmbeddableFactory
       const saveOptions = {
         confirmOverwrite: false,
         returnToOrigin: true,
+        isTitleDuplicateConfirmed: true,
       };
       savedVis.title = title;
       savedVis.copyOnSave = false;
