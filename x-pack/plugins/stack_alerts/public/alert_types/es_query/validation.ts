@@ -16,6 +16,7 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
     esQuery: new Array<string>(),
     threshold0: new Array<string>(),
     threshold1: new Array<string>(),
+    thresholdComparator: new Array<string>(),
     timeWindowSize: new Array<string>(),
   };
   validationResult.errors = errors;
@@ -45,7 +46,7 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
       if (!parsedQuery.query) {
         errors.esQuery.push(
           i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredEsQueryText', {
-            defaultMessage: 'ES Query is required.',
+            defaultMessage: `ES Query with "query" field is required.`,
           })
         );
       }
@@ -56,6 +57,23 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
         })
       );
     }
+  }
+  if (thresholdComparator && (!threshold || threshold.length === 0 || threshold[0] === undefined)) {
+    errors.threshold0.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold0Text', {
+        defaultMessage: 'Threshold0 is required.',
+      })
+    );
+  }
+  if (threshold && threshold.length > 0 && threshold[0] != null && !thresholdComparator) {
+    errors.thresholdComparator.push(
+      i18n.translate(
+        'xpack.stackAlerts.esQuery.ui.validation.error.requiredThresholdComparatorText',
+        {
+          defaultMessage: 'Threshold Comparator is required.',
+        }
+      )
+    );
   }
   if (
     thresholdComparator &&
