@@ -6,6 +6,7 @@
 
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
+import moment from 'moment';
 
 import { IRouter } from '../../../../../src/core/server';
 
@@ -37,11 +38,11 @@ export function defineRoutes(router: IRouter) {
       console.log(JSON.stringify(request.body, null, 2));
       const esClient = context.core.elasticsearch.client.asInternalUser;
       const query = await esClient.index<{}, {}>({
-        index: '.fleet-actions',
+        index: '.fleet-actions-new',
         body: {
           action_id: uuid.v4(),
-          '@timestamp': '2021-01-13T13:36:30Z',
-          expiration: '2021-01-15T13:36:30Z',
+          '@timestamp': moment().toISOString(),
+          expiration: moment().add(2, 'days').toISOString(),
           type: 'APP_ACTION',
           input_id: 'osquery',
           agents: request.body.agents,
