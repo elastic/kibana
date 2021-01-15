@@ -16,7 +16,7 @@ export interface Props {
    * A collection of choices to display in the dropdown
    * @default []
    */
-  choices?: string[];
+  choices?: Array<[string, string]>;
   /**
    * Optional value for the component. If the value is not present in the
    * choices collection, it will be discarded.

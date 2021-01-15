@@ -9,7 +9,11 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { DropdownFilter } from '../dropdown_filter';
 
-const choices = ['Item One', 'Item Two', 'Item Three'];
+const choices = [
+  ['1', 'Item One'],
+  ['2', 'Item Two'],
+  ['3', 'Item Three'],
+];
 
 storiesOf('renderers/DropdownFilter', module)
   .add('default', () => <DropdownFilter onChange={action('onChange')} commit={action('commit')} />)
