@@ -113,17 +113,11 @@ export function cardinalityValidator(
 export function jobIdValidator(jobCreator$: Subject<JobCreator>): Observable<JobExistsResult> {
   return jobCreator$.pipe(
     map((jobCreator) => {
-      return {
-        jobId: jobCreator.jobId,
-      };
+      return jobCreator.jobId;
     }),
     // No need to perform an API call if the analysis configuration hasn't been changed
-    distinctUntilChanged((prev, curr) => {
-      return prev.jobId === curr.jobId;
-    }),
-    switchMap(({ jobId }) => {
-      return ml.jobs.jobsExist$([jobId], true);
-    }),
+    distinctUntilChanged((prevJobId, currJobId) => prevJobId === currJobId),
+    switchMap((jobId) => ml.jobs.jobsExist$([jobId], true)),
     map((jobExistsResults) => {
       const jobs = Object.values(jobExistsResults);
       const valid = jobs?.[0].exists === false;
@@ -139,16 +133,12 @@ export function jobIdValidator(jobCreator$: Subject<JobCreator>): Observable<Job
 
 export function groupIdsValidator(jobCreator$: Subject<JobCreator>): Observable<GroupsExistResult> {
   return jobCreator$.pipe(
-    map((jobCreator) => {
-      return {
-        groups: jobCreator.groups,
-      };
-    }),
+    map((jobCreator) => jobCreator.groups),
     // No need to perform an API call if the analysis configuration hasn't been changed
-    distinctUntilChanged((prev, curr) => {
-      return JSON.stringify(prev.groups) === JSON.stringify(curr.groups);
-    }),
-    switchMap(({ groups }) => {
+    distinctUntilChanged(
+      (prevGroups, currGroups) => JSON.stringify(prevGroups) === JSON.stringify(currGroups)
+    ),
+    switchMap((groups) => {
       return ml.jobs.jobsExist$(groups, true);
     }),
     map((jobExistsResults) => {

@@ -198,7 +198,7 @@ export class EditJobFlyoutUI extends Component {
     if (jobDetails.jobGroups !== undefined) {
       jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
       if (jobGroupsValidationError === '') {
-        ml.jobs.jobsExist(jobDetails.jobGroups).then((resp) => {
+        ml.jobs.jobsExist(jobDetails.jobGroups, true).then((resp) => {
           const groups = Object.values(resp);
           const valid = groups.some((g) => g.exists === true && g.isGroup === false) === false;
           if (valid === false) {
