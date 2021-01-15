@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isFinite } from 'lodash';
-import { Maybe } from '../../typings/common';
 
 // _.isNumber() returns true for NaN, _.isFinite() does not refine
-export function isFiniteNumber(value: Maybe<number>): value is number {
+export function isFiniteNumber(value: any): value is number {
   return isFinite(value);
 }

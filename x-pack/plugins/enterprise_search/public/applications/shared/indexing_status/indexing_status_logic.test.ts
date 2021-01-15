@@ -6,6 +6,8 @@
 
 import { resetContext } from 'kea';
 
+import { expectedAsyncError } from '../../__mocks__';
+
 jest.mock('../http', () => ({
   HttpLogic: {
     values: { http: { get: jest.fn() } },
@@ -82,11 +84,8 @@ describe('IndexingStatusLogic', () => {
       IndexingStatusLogic.actions.fetchIndexingStatus({ statusPath, onComplete });
       jest.advanceTimersByTime(TIMEOUT);
 
-      try {
-        await promise;
-      } catch {
-        // Do nothing
-      }
+      await expectedAsyncError(promise);
+
       expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
     });
 
