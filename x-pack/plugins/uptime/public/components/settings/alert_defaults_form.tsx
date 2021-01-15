@@ -19,12 +19,13 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { SettingsFormProps } from '../../pages/settings';
 import { connectorsSelector } from '../../state/alerts/alerts';
-import { AddConnectorFlyout } from './add_connector_flyout';
+import { AddConnectorFlyout, ALLOWED_ACTION_TYPES } from './add_connector_flyout';
 import { useGetUrlParams, useUrlParams } from '../../hooks';
 import { alertFormI18n } from './translations';
 import { useInitApp } from '../../hooks/use_init_app';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public/';
+import { ActionTypeId } from './types';
 
 type ConnectorOption = EuiComboBoxOptionOption<string>;
 
@@ -88,11 +89,13 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
     );
   };
 
-  const options = (data ?? []).map((connectorAction) => ({
-    value: connectorAction.id,
-    label: connectorAction.name,
-    'data-test-subj': connectorAction.name,
-  }));
+  const options = (data ?? [])
+    .filter((action) => ALLOWED_ACTION_TYPES.includes(action.actionTypeId as ActionTypeId))
+    .map((connectorAction) => ({
+      value: connectorAction.id,
+      label: connectorAction.name,
+      'data-test-subj': connectorAction.name,
+    }));
 
   const renderOption = (option: ConnectorOption) => {
     const { label, value } = option;
