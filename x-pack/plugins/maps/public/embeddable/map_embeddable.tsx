@@ -117,14 +117,20 @@ export class MapEmbeddable
       return;
     }
     this._initializeStore();
-    this._initializeOutput();
+    try {
+      await this._initializeOutput();
+    } catch (e) {
+      this.onFatalError(e);
+      return;
+    }
+
     this._isInitialized = true;
     if (this._domNode) {
       this.render(this._domNode);
     }
   }
 
-  private async _initializeStore() {
+  private _initializeStore() {
     this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
 
     const store = this._savedMap.getStore();

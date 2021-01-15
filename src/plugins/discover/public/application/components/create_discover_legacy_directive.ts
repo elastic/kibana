@@ -51,5 +51,6 @@ export function createDiscoverLegacyDirective(reactDirective: any) {
     ['topNavMenu', { watchDepth: 'reference' }],
     ['updateQuery', { watchDepth: 'reference' }],
     ['updateSavedQueryId', { watchDepth: 'reference' }],
+    ['useNewFieldsApi', { watchDepth: 'reference' }],
   ]);
 }

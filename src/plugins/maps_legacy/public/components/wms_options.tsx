@@ -23,20 +23,19 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TmsLayer } from '../index';
 import { Vis } from '../../../visualizations/public';
-import { RegionMapVisParams } from '../common/types/region_map_types';
 import { SelectOption, SwitchOption } from '../../../vis_default_editor/public';
 import { WmsInternalOptions } from './wms_internal_options';
-import { WMSOptions, TileMapVisParams } from '../common/types/external_basemap_types';
+import { WMSOptions } from '../common/types';
 
-interface Props {
-  stateParams: TileMapVisParams | RegionMapVisParams;
+interface Props<K> {
+  stateParams: K;
   setValue: (title: 'wms', options: WMSOptions) => void;
   vis: Vis;
 }
 
 const mapLayerForOption = ({ id }: TmsLayer) => ({ text: id, value: id });
 
-function WmsOptions({ stateParams, setValue, vis }: Props) {
+function WmsOptions<K extends { wms: WMSOptions }>({ stateParams, setValue, vis }: Props<K>) {
   const { wms } = stateParams;
   const { tmsLayers } = vis.type.editorConfig.collections;
   const tmsLayerOptions = useMemo(() => tmsLayers.map(mapLayerForOption), [tmsLayers]);

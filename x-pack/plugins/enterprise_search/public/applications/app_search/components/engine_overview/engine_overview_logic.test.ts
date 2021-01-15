@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
+import { LogicMounter, mockHttpValues, expectedAsyncError } from '../../../__mocks__';
 
-import { mockHttpValues } from '../../../__mocks__';
 jest.mock('../../../shared/http', () => ({
   HttpLogic: { values: mockHttpValues },
 }));
@@ -28,7 +27,6 @@ describe('EngineOverviewLogic', () => {
     apiLogsUnavailable: true,
     documentCount: 10,
     startDate: '1970-01-30',
-    endDate: '1970-01-31',
     operationsPerDay: [0, 0, 0, 0, 0, 0, 0],
     queriesPerDay: [0, 0, 0, 0, 0, 25, 50],
     totalClicks: 50,
@@ -40,7 +38,6 @@ describe('EngineOverviewLogic', () => {
     apiLogsUnavailable: false,
     documentCount: 0,
     startDate: '',
-    endDate: '',
     operationsPerDay: [],
     queriesPerDay: [],
     totalClicks: 0,
@@ -108,12 +105,9 @@ describe('EngineOverviewLogic', () => {
         const promise = Promise.reject('An error occurred');
         http.get.mockReturnValue(promise);
 
-        try {
-          EngineOverviewLogic.actions.pollForOverviewMetrics();
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        EngineOverviewLogic.actions.pollForOverviewMetrics();
+        await expectedAsyncError(promise);
+
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occurred');
       });
     });

@@ -25,6 +25,7 @@ import {
   TaskPollingCycle,
   asTaskPollingCycleEvent,
   TaskManagerStat,
+  asTaskManagerStatEvent,
 } from './task_events';
 import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
@@ -42,6 +43,7 @@ import { TaskStore, OwnershipClaimingOpts, ClaimOwnershipResult } from './task_s
 import { identifyEsError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { delayOnClaimConflicts } from './polling';
 
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
@@ -121,6 +123,17 @@ export class TaskPollingLifecycle {
       poll_interval: pollInterval,
     } = config;
 
+    const pollIntervalDelay$ = delayOnClaimConflicts(
+      maxWorkersConfiguration$,
+      pollIntervalConfiguration$,
+      this.events$,
+      config.version_conflict_threshold,
+      config.monitored_stats_running_average_window
+    );
+    pollIntervalDelay$.subscribe((delay) => {
+      emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)));
+    });
+
     // the task poller that polls for work on fixed intervals and on demand
     const poller$: Observable<
       Result<TimedFillPoolResult, PollingError<string>>
@@ -129,6 +142,7 @@ export class TaskPollingLifecycle {
         createTaskPoller<string, TimedFillPoolResult>({
           logger,
           pollInterval$: pollIntervalConfiguration$,
+          pollIntervalDelay$,
           bufferCapacity: config.request_capacity,
           getCapacity: () => this.pool.availableWorkers,
           pollRequests$: this.claimRequests$,
