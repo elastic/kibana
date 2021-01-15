@@ -64,66 +64,65 @@ describe('Security Plugin', () => {
   });
 
   describe('setup()', () => {
-    it('exposes proper contract', async () => {
-      await expect(plugin.setup(mockCoreSetup, mockSetupDependencies)).resolves
-        .toMatchInlineSnapshot(`
-              Object {
-                "audit": Object {
-                  "asScoped": [Function],
-                  "getLogger": [Function],
-                },
-                "authc": Object {
-                  "getCurrentUser": [Function],
-                },
-                "authz": Object {
-                  "actions": Actions {
-                    "alerting": AlertingActions {
-                      "prefix": "alerting:version:",
-                    },
-                    "api": ApiActions {
-                      "prefix": "api:version:",
-                    },
-                    "app": AppActions {
-                      "prefix": "app:version:",
-                    },
-                    "login": "login:",
-                    "savedObject": SavedObjectActions {
-                      "prefix": "saved_object:version:",
-                    },
-                    "space": SpaceActions {
-                      "prefix": "space:version:",
-                    },
-                    "ui": UIActions {
-                      "prefix": "ui:version:",
-                    },
-                    "version": "version:version",
-                    "versionNumber": "version",
-                  },
-                  "checkPrivilegesDynamicallyWithRequest": [Function],
-                  "checkPrivilegesWithRequest": [Function],
-                  "mode": Object {
-                    "useRbacForRequest": [Function],
-                  },
-                },
-                "license": Object {
-                  "features$": Observable {
-                    "_isScalar": false,
-                    "operator": MapOperator {
-                      "project": [Function],
-                      "thisArg": undefined,
-                    },
-                    "source": Observable {
-                      "_isScalar": false,
-                      "_subscribe": [Function],
-                    },
-                  },
-                  "getFeatures": [Function],
-                  "getType": [Function],
-                  "isEnabled": [Function],
-                  "isLicenseAvailable": [Function],
-                },
-              }
-            `);
+    it('exposes proper contract', () => {
+      expect(plugin.setup(mockCoreSetup, mockSetupDependencies)).toMatchInlineSnapshot(`
+        Object {
+          "audit": Object {
+            "asScoped": [Function],
+            "getLogger": [Function],
+          },
+          "authc": Object {
+            "getCurrentUser": [Function],
+          },
+          "authz": Object {
+            "actions": Actions {
+              "alerting": AlertingActions {
+                "prefix": "alerting:version:",
+              },
+              "api": ApiActions {
+                "prefix": "api:version:",
+              },
+              "app": AppActions {
+                "prefix": "app:version:",
+              },
+              "login": "login:",
+              "savedObject": SavedObjectActions {
+                "prefix": "saved_object:version:",
+              },
+              "space": SpaceActions {
+                "prefix": "space:version:",
+              },
+              "ui": UIActions {
+                "prefix": "ui:version:",
+              },
+              "version": "version:version",
+              "versionNumber": "version",
+            },
+            "checkPrivilegesDynamicallyWithRequest": [Function],
+            "checkPrivilegesWithRequest": [Function],
+            "mode": Object {
+              "useRbacForRequest": [Function],
+            },
+          },
+          "license": Object {
+            "features$": Observable {
+              "_isScalar": false,
+              "operator": MapOperator {
+                "project": [Function],
+                "thisArg": undefined,
+              },
+              "source": Observable {
+                "_isScalar": false,
+                "_subscribe": [Function],
+              },
+            },
+            "getFeatures": [Function],
+            "getType": [Function],
+            "isEnabled": [Function],
+            "isLicenseAvailable": [Function],
+          },
+        }
+      `);
     });
   });
 

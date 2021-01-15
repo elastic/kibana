@@ -34,7 +34,6 @@ import { ViewMode, EmbeddableChildPanel } from '../../../services/embeddable';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import { withKibana } from '../../../services/kibana_react';
-import { DashboardContainerInput } from '../dashboard_container';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 
 let lastValidGridSize = 0;
@@ -177,18 +176,17 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       isLayoutInvalid,
     });
 
-    this.subscription = this.props.container
-      .getInput$()
-      .subscribe((input: DashboardContainerInput) => {
-        if (this.mounted) {
-          this.setState({
-            panels: input.panels,
-            viewMode: input.viewMode,
-            useMargins: input.useMargins,
-            expandedPanelId: input.expandedPanelId,
-          });
-        }
-      });
+    this.subscription = this.props.container.getInput$().subscribe(() => {
+      const { panels, viewMode, useMargins, expandedPanelId } = this.props.container.getInput();
+      if (this.mounted) {
+        this.setState({
+          panels,
+          viewMode,
+          useMargins,
+          expandedPanelId,
+        });
+      }
+    });
   }
 
   public componentWillUnmount() {

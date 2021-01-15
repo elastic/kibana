@@ -214,7 +214,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveAndTestButtonLabel"
-                defaultMessage="Save & Test"
+                defaultMessage="Save & test"
               />
             </EuiButton>
           </EuiFlexItem>

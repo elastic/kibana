@@ -28,7 +28,7 @@ import { populateTimeline } from '../tasks/timeline';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { cleanKibana } from '../tasks/common';
 
-describe.skip('Sourcerer', () => {
+describe('Sourcerer', () => {
   before(() => {
     cleanKibana();
   });

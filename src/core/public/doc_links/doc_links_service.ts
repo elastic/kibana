@@ -220,7 +220,7 @@ export class DocLinksService {
         },
         apis: {
           createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
-          createSnapshotLifecylePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
+          createSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           createRoleMapping: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html`,
           createRoleMappingTemplates: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html#_role_templates`,
           createApiKey: `${ELASTICSEARCH_DOCS}security-api-create-api-key.html`,
@@ -344,12 +344,38 @@ export interface DocLinksStart {
     readonly ml: Record<string, string>;
     readonly transforms: Record<string, string>;
     readonly visualize: Record<string, string>;
-    readonly apis: Record<string, string>;
+    readonly apis: Readonly<{
+      createIndex: string;
+      createSnapshotLifecyclePolicy: string;
+      createRoleMapping: string;
+      createRoleMappingTemplates: string;
+      createApiKey: string;
+      createPipeline: string;
+      createTransformRequest: string;
+      executeWatchActionModes: string;
+      openIndex: string;
+      putComponentTemplate: string;
+      painlessExecute: string;
+      putComponentTemplateMetadata: string;
+      putWatch: string;
+      updateTransform: string;
+    }>;
     readonly observability: Record<string, string>;
     readonly alerting: Record<string, string>;
     readonly maps: Record<string, string>;
     readonly monitoring: Record<string, string>;
-    readonly security: Record<string, string>;
+    readonly security: Readonly<{
+      apiKeyServiceSettings: string;
+      clusterPrivileges: string;
+      elasticsearchSettings: string;
+      elasticsearchEnableSecurity: string;
+      indicesPrivileges: string;
+      kibanaTLS: string;
+      kibanaPrivileges: string;
+      mappingRoles: string;
+      mappingRolesFieldRules: string;
+      runAsPrivilege: string;
+    }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;
   };
