@@ -321,10 +321,6 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
         disabled: isDisabled,
         onChange: setIsFieldToggleChecked,
         'data-test-subj': 'searchableSnapshotToggle',
-        label: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
-          { defaultMessage: 'Create searchable snapshot' }
-        ),
       }}
       title={
         <h3>
