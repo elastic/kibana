@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
 
 describe('OptInDetailsComponent', () => {

@@ -20,6 +20,19 @@ describe('#canUserChangePassword', () => {
         } as AuthenticatedUser)
       ).toEqual(true);
     });
+
+    it(`returns false for users in the ${realm} realm if used for anonymous access`, () => {
+      expect(
+        canUserChangePassword({
+          username: 'foo',
+          authentication_provider: { type: 'anonymous', name: 'does not matter' },
+          authentication_realm: {
+            name: 'the realm name',
+            type: realm,
+          },
+        } as AuthenticatedUser)
+      ).toEqual(false);
+    });
   });
 
   it(`returns false for all other realms`, () => {

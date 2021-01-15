@@ -23,6 +23,7 @@ import { UrlGeneratorsService } from '../../../../../../../src/plugins/share/pub
 import { StartDependencies } from '../../../plugin';
 import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_objects/public';
 import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public/core';
+import { EnhancedEmbeddableContext } from '../../../../../embeddable_enhanced/public';
 
 describe('.isConfigValid()', () => {
   const drilldown = new EmbeddableToDashboardDrilldown({} as any);
@@ -63,6 +64,12 @@ test('initial config: switches are ON', () => {
 test('getHref is defined', () => {
   const drilldown = new EmbeddableToDashboardDrilldown({} as any);
   expect(drilldown.getHref).toBeDefined();
+});
+
+test('inject/extract are defined', () => {
+  const drilldown = new EmbeddableToDashboardDrilldown({} as any);
+  expect(drilldown.extract).toBeDefined();
+  expect(drilldown.inject).toBeDefined();
 });
 
 describe('.execute() & getHref', () => {
@@ -134,7 +141,7 @@ describe('.execute() & getHref', () => {
         }),
       },
       timeFieldName,
-    } as unknown) as ApplyGlobalFilterActionContext;
+    } as unknown) as ApplyGlobalFilterActionContext & EnhancedEmbeddableContext;
 
     await drilldown.execute(completeConfig, context);
 

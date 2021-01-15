@@ -8,6 +8,7 @@ import { SavedObjectsClientContract, KibanaRequest, IScopedClusterClient } from 
 import { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
 import type { MlClient } from '../../lib/ml_client';
+import { JobSavedObjectService } from '../../saved_objects';
 
 const callAs = () => Promise.resolve({ body: {} });
 
@@ -26,6 +27,7 @@ describe('ML - data recognizer', () => {
       find: jest.fn(),
       bulkCreate: jest.fn(),
     } as unknown) as SavedObjectsClientContract,
+    {} as JobSavedObjectService,
     { headers: { authorization: '' } } as KibanaRequest
   );
 

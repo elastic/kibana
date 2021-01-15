@@ -22,10 +22,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink } from '@elastic/eui';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
+import { useKibana } from '../../../../common/lib/kibana';
 
-export const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
-  EmailActionConnector
->> = ({ action, editActionConfig, editActionSecrets, errors, readOnly, docLinks }) => {
+export const EmailActionConnectorFields: React.FunctionComponent<
+  ActionConnectorFieldsProps<EmailActionConnector>
+> = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
+  const { docLinks } = useKibana().services;
   const { from, host, port, secure, hasAuth } = action.config;
   const { user, password } = action.secrets;
   useEffect(() => {
@@ -190,7 +192,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
               }
             )}
             disabled={readOnly}
-            checked={hasAuth}
+            checked={hasAuth || false}
             onChange={(e) => {
               editActionConfig('hasAuth', e.target.checked);
               if (!e.target.checked) {

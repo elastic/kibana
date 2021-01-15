@@ -20,13 +20,19 @@ import {
   ItemsPerSearch,
 } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { PartialFilter, RuleTypeParams } from '../../types';
-import { AlertServices } from '../../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../../alerts/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
+
+export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
 export interface CreateThreatSignalsOptions {
   threatMapping: ThreatMapping;
@@ -36,7 +42,7 @@ export interface CreateThreatSignalsOptions {
   filters: PartialFilter[];
   language: LanguageOrUndefined;
   savedId: string | undefined;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
   gap: Duration | null;
   previousStartedAt: Date | null;
@@ -75,7 +81,7 @@ export interface CreateThreatSignalOptions {
   filters: PartialFilter[];
   language: LanguageOrUndefined;
   savedId: string | undefined;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
   gap: Duration | null;
   previousStartedAt: Date | null;
@@ -146,7 +152,7 @@ export interface GetThreatListOptions {
   perPage?: number;
   searchAfter: string[] | undefined;
   sortField: string | undefined;
-  sortOrder: 'asc' | 'desc' | undefined;
+  sortOrder: SortOrderOrUndefined;
   threatFilters: PartialFilter[];
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
@@ -165,7 +171,7 @@ export interface ThreatListCountOptions {
 
 export interface GetSortWithTieBreakerOptions {
   sortField: string | undefined;
-  sortOrder: 'asc' | 'desc' | undefined;
+  sortOrder: SortOrderOrUndefined;
   index: string[];
   listItemIndex: string;
 }

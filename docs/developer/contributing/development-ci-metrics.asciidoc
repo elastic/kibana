@@ -75,7 +75,7 @@ In order to prevent the page load bundles from growing unexpectedly large we lim
 
 In most cases the limit should be high enough that PRs shouldn't trigger overages, but when they do make sure it's clear what is cuasing the overage by trying the following:
 
-1. Run the optimizer locally with the `--profile` flag to produce webpack `stats.json` files for bundles which can be inspected using a number of different online tools. Focus on the chunk named `{pluginId}.plugin.js`; the `*.chunk.js` chunks make up the `async chunks size` metric which is currently unlimited and is the main way that we {kib-repo}blob/{branch}/src/core/MIGRATION.md#keep-kibana-fast[reduce the size of page load chunks].
+1. Run the optimizer locally with the `--profile` flag to produce webpack `stats.json` files for bundles which can be inspected using a number of different online tools. Focus on the chunk named `{pluginId}.plugin.js`; the `*.chunk.js` chunks make up the `async chunks size` metric which is currently unlimited and is the main way that we <<plugin-performance, reduce the size of page load chunks>>.
 +
 [source,shell]
 -----------
@@ -111,7 +111,7 @@ prettier -w {pluginDir}/target/public/{pluginId}.plugin.js
 
 6. If all else fails reach out to Operations for help.
 
-Once you've identified the files which were added to the build you likely just need to stick them behind an async import as described in {kib-repo}blob/{branch}/src/core/MIGRATION.md#keep-kibana-fast[the MIGRATION.md docs].
+Once you've identified the files which were added to the build you likely just need to stick them behind an async import as described in <<plugin-performance, Plugin performance>>.
 
 In the case that the bundle size is not being bloated by anything obvious, but it's still larger than the limit, you can raise the limit in your PR. Do this either by editting the {kib-repo}blob/{branch}/packages/kbn-optimizer/limits.yml[`limits.yml` file] manually or by running the following to have the limit updated to the current size + 15kb
 

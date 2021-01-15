@@ -40,6 +40,10 @@ import {
 } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
 
+export function isSearchSourceAbortError(error: Error) {
+  return error.name === 'AbortError';
+}
+
 export interface IESSource extends IVectorSource {
   isESSource(): true;
   getId(): string;
@@ -134,7 +138,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   destroy() {
     const inspectorAdapters = this.getInspectorAdapters();
-    if (inspectorAdapters) {
+    if (inspectorAdapters?.requests) {
       inspectorAdapters.requests.resetRequest(this.getId());
     }
   }
@@ -164,7 +168,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
     const inspectorAdapters = this.getInspectorAdapters();
     let inspectorRequest: RequestResponder | undefined;
-    if (inspectorAdapters) {
+    if (inspectorAdapters?.requests) {
       inspectorRequest = inspectorAdapters.requests.start(requestName, {
         id: requestId,
         description: requestDescription,
@@ -191,7 +195,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       if (inspectorRequest) {
         inspectorRequest.error(error);
       }
-      if (error.name === 'AbortError') {
+      if (isSearchSourceAbortError(error)) {
         throw new DataRequestAbortError();
       }
 

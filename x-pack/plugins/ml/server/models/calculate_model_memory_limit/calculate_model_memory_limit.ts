@@ -7,7 +7,7 @@
 import numeral from '@elastic/numeral';
 import { IScopedClusterClient } from 'kibana/server';
 import { MLCATEGORY } from '../../../common/constants/field_types';
-import { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs';
+import { AnalysisConfig, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import type { MlClient } from '../../lib/ml_client';
@@ -46,7 +46,8 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
     query: any,
     timeFieldName: string,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    datafeedConfig?: Datafeed
   ): Promise<{
     overallCardinality: { [key: string]: number };
     maxBucketCardinality: { [key: string]: number };
@@ -101,7 +102,8 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
         query,
         timeFieldName,
         earliestMs,
-        latestMs
+        latestMs,
+        datafeedConfig
       );
     }
 
@@ -142,7 +144,8 @@ export function calculateModelMemoryLimitProvider(
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    allowMMLGreaterThanMax = false
+    allowMMLGreaterThanMax = false,
+    datafeedConfig?: Datafeed
   ): Promise<ModelMemoryEstimationResult> {
     const { body: info } = await mlClient.info<MlInfoResponse>();
     const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
@@ -154,7 +157,8 @@ export function calculateModelMemoryLimitProvider(
       query,
       timeFieldName,
       earliestMs,
-      latestMs
+      latestMs,
+      datafeedConfig
     );
 
     const { body } = await mlClient.estimateModelMemory<ModelMemoryEstimateResponse>({

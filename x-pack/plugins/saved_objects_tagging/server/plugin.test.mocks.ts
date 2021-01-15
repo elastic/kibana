@@ -8,3 +8,8 @@ export const registerRoutesMock = jest.fn();
 jest.doMock('./routes', () => ({
   registerRoutes: registerRoutesMock,
 }));
+
+export const createTagUsageCollectorMock = jest.fn();
+jest.doMock('./usage', () => ({
+  createTagUsageCollector: createTagUsageCollectorMock,
+}));

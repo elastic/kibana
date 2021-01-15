@@ -14,14 +14,12 @@ import {
   Embeddable,
   IContainer,
   ReferenceOrValueEmbeddable,
+  VALUE_CLICK_TRIGGER,
 } from '../../../../../src/plugins/embeddable/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
+import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
 import {
+  ACTION_GLOBAL_APPLY_FILTER,
   APPLY_FILTER_TRIGGER,
-  ActionExecutionContext,
-  TriggerContextMapping,
-} from '../../../../../src/plugins/ui_actions/public';
-import {
   esFilters,
   TimeRange,
   Filter,
@@ -33,11 +31,6 @@ import {
   setQuery,
   setRefreshConfig,
   disableScrollZoom,
-  disableInteractive,
-  disableTooltipControl,
-  hideToolbarOverlay,
-  hideLayerControl,
-  hideViewControl,
   setReadOnly,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
@@ -57,6 +50,7 @@ import {
   getExistingMapPath,
   MAP_SAVED_OBJECT_TYPE,
   MAP_PATH,
+  RawValue,
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { getUiActions, getCoreI18n, getHttp } from '../kibana_services';
@@ -65,6 +59,7 @@ import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_page';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
+import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 
 import {
   MapByValueInput,
@@ -104,7 +99,9 @@ export class MapEmbeddable
 
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
-    this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+    this._subscription = this.getUpdated$().subscribe(() =>
+      this.onContainerStateChanged(this.input)
+    );
   }
 
   private async _initializeSaveMap() {
@@ -115,36 +112,23 @@ export class MapEmbeddable
       return;
     }
     this._initializeStore();
-    this._initializeOutput();
+    try {
+      await this._initializeOutput();
+    } catch (e) {
+      this.onFatalError(e);
+      return;
+    }
+
     this._isInitialized = true;
     if (this._domNode) {
       this.render(this._domNode);
     }
   }
 
-  private async _initializeStore() {
+  private _initializeStore() {
     const store = this._savedMap.getStore();
     store.dispatch(setReadOnly(true));
     store.dispatch(disableScrollZoom());
-
-    if (_.has(this.input, 'disableInteractive') && this.input.disableInteractive) {
-      store.dispatch(disableInteractive());
-    }
-
-    if (_.has(this.input, 'disableTooltipControl') && this.input.disableTooltipControl) {
-      store.dispatch(disableTooltipControl());
-    }
-    if (_.has(this.input, 'hideToolbarOverlay') && this.input.hideToolbarOverlay) {
-      store.dispatch(hideToolbarOverlay());
-    }
-
-    if (_.has(this.input, 'hideLayerControl') && this.input.hideLayerControl) {
-      store.dispatch(hideLayerControl());
-    }
-
-    if (_.has(this.input, 'hideViewControl') && this.input.hideViewControl) {
-      store.dispatch(hideViewControl());
-    }
 
     this._dispatchSetQuery({
       query: this.input.query,
@@ -201,8 +185,8 @@ export class MapEmbeddable
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
   }
 
-  public supportedTriggers(): Array<keyof TriggerContextMapping> {
-    return [APPLY_FILTER_TRIGGER];
+  public supportedTriggers(): string[] {
+    return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
   }
 
   setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
@@ -290,6 +274,7 @@ export class MapEmbeddable
       <Provider store={this._savedMap.getStore()}>
         <I18nContext>
           <MapContainer
+            onSingleValueTrigger={this.onSingleValueTrigger}
             addFilters={this.input.hideFilterActions ? null : this.addFilters}
             getFilterActions={this.getFilterActions}
             getActionContext={this.getActionContext}
@@ -320,6 +305,20 @@ export class MapEmbeddable
     return await getIndexPatternsFromIds(queryableIndexPatternIds);
   }
 
+  onSingleValueTrigger = (actionId: string, key: string, value: RawValue) => {
+    const action = getUiActions().getAction(actionId);
+    if (!action) {
+      throw new Error('Unable to apply action, could not locate action');
+    }
+    const executeContext = {
+      ...this.getActionContext(),
+      data: {
+        data: toValueClickDataFormat(key, value),
+      },
+    };
+    action.execute(executeContext);
+  };
+
   addFilters = async (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
     const executeContext = {
       ...this.getActionContext(),
@@ -333,10 +332,24 @@ export class MapEmbeddable
   };
 
   getFilterActions = async () => {
-    return await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
+    const filterActions = await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
       filters: [],
     });
+    const valueClickActions = await getUiActions().getTriggerCompatibleActions(
+      VALUE_CLICK_TRIGGER,
+      {
+        embeddable: this,
+        data: {
+          // uiActions.getTriggerCompatibleActions validates action with provided context
+          // so if event.key and event.value are used in the URL template but can not be parsed from context
+          // then the action is filtered out.
+          // To prevent filtering out actions, provide dummy context when initially fetching actions.
+          data: toValueClickDataFormat('anyfield', 'anyvalue'),
+        },
+      }
+    );
+    return [...filterActions, ...valueClickActions.filter(isUrlDrilldown)];
   };
 
   getActionContext = () => {

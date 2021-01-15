@@ -18,7 +18,13 @@ import {
   Fit,
 } from '@elastic/charts';
 import { PaletteOutput } from 'src/plugins/charts/public';
-import { xyChart, XYChart } from './expression';
+import {
+  calculateMinInterval,
+  xyChart,
+  XYChart,
+  XYChartProps,
+  XYChartRenderProps,
+} from './expression';
 import { LensMultiTable } from '../types';
 import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
@@ -34,7 +40,7 @@ import {
   gridlinesConfig,
 } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
 
@@ -287,6 +293,10 @@ function sampleArgs() {
         { a: 1, b: 5, c: 'J', d: 'Bar' },
       ]),
     },
+    dateRange: {
+      fromDate: new Date('2019-01-02T05:00:00.000Z'),
+      toDate: new Date('2019-01-03T05:00:00.000Z'),
+    },
   };
 
   const args: XYArgs = createArgsWithLayers();
@@ -378,6 +388,7 @@ describe('xy_expression', () => {
   describe('XYChart component', () => {
     let getFormatSpy: jest.Mock;
     let convertSpy: jest.Mock;
+    let defaultProps: Omit<XYChartRenderProps, 'data' | 'args'>;
 
     const dataWithoutFormats: LensMultiTable = {
       type: 'lens_multitable',
@@ -417,25 +428,25 @@ describe('xy_expression', () => {
     };
 
     const getRenderedComponent = (data: LensMultiTable, args: XYArgs) => {
-      return shallow(
-        <XYChart
-          data={data}
-          args={args}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
-      );
+      return shallow(<XYChart {...defaultProps} data={data} args={args} />);
     };
 
     beforeEach(() => {
       convertSpy = jest.fn((x) => x);
       getFormatSpy = jest.fn();
       getFormatSpy.mockReturnValue({ convert: convertSpy });
+
+      defaultProps = {
+        formatFactory: getFormatSpy,
+        timeZone: 'UTC',
+        renderMode: 'display',
+        chartsThemeService,
+        paletteService,
+        minInterval: 50,
+        onClickValue,
+        onSelectRange,
+        syncColors: false,
+      };
     });
 
     test('it renders line', () => {
@@ -443,15 +454,9 @@ describe('xy_expression', () => {
 
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'line' }] }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -487,6 +492,7 @@ describe('xy_expression', () => {
 
         const component = shallow(
           <XYChart
+            {...defaultProps}
             data={{
               ...data,
               dateRange: {
@@ -498,13 +504,7 @@ describe('xy_expression', () => {
               ...args,
               layers: [{ ...args.layers[0], seriesType: 'line', xScaleType: 'time' }],
             }}
-            formatFactory={getFormatSpy}
-            timeZone="UTC"
-            chartsThemeService={chartsThemeService}
-            paletteService={paletteService}
-            histogramBarTarget={50}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
+            minInterval={undefined}
           />
         );
         expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
@@ -516,7 +516,7 @@ describe('xy_expression', () => {
         `);
       });
 
-      test('it generates correct xDomain for a layer with single value and a layer with no data (1-0) ', () => {
+      test('it uses passed in minInterval', () => {
         const data: LensMultiTable = {
           type: 'lens_multitable',
           tables: {
@@ -527,6 +527,7 @@ describe('xy_expression', () => {
 
         const component = shallow(
           <XYChart
+            {...defaultProps}
             data={{
               ...data,
               dateRange: {
@@ -535,13 +536,6 @@ describe('xy_expression', () => {
               },
             }}
             args={multiLayerArgs}
-            formatFactory={getFormatSpy}
-            timeZone="UTC"
-            chartsThemeService={chartsThemeService}
-            paletteService={paletteService}
-            histogramBarTarget={50}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
           />
         );
 
@@ -550,131 +544,9 @@ describe('xy_expression', () => {
           Object {
             "max": 1546491600000,
             "min": 1546405200000,
-            "minInterval": 1728000,
+            "minInterval": 50,
           }
         `);
-      });
-
-      test('it generates correct xDomain for two layers with single value(1-1)', () => {
-        const data: LensMultiTable = {
-          type: 'lens_multitable',
-          tables: {
-            first: createSampleDatatableWithRows([{ a: 1, b: 2, c: 'I', d: 'Foo' }]),
-            second: createSampleDatatableWithRows([{ a: 10, b: 5, c: 'J', d: 'Bar' }]),
-          },
-        };
-        const component = shallow(
-          <XYChart
-            data={{
-              ...data,
-              dateRange: {
-                fromDate: new Date('2019-01-02T05:00:00.000Z'),
-                toDate: new Date('2019-01-03T05:00:00.000Z'),
-              },
-            }}
-            args={multiLayerArgs}
-            formatFactory={getFormatSpy}
-            timeZone="UTC"
-            chartsThemeService={chartsThemeService}
-            paletteService={paletteService}
-            histogramBarTarget={50}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-          />
-        );
-
-        expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
-                  Object {
-                    "max": 1546491600000,
-                    "min": 1546405200000,
-                    "minInterval": undefined,
-                  }
-              `);
-      });
-      test('it generates correct xDomain for a layer with single value and layer with multiple value data (1-n)', () => {
-        const data: LensMultiTable = {
-          type: 'lens_multitable',
-          tables: {
-            first: createSampleDatatableWithRows([{ a: 1, b: 2, c: 'I', d: 'Foo' }]),
-            second: createSampleDatatableWithRows([
-              { a: 10, b: 5, c: 'J', d: 'Bar' },
-              { a: 8, b: 5, c: 'K', d: 'Buzz' },
-            ]),
-          },
-        };
-        const component = shallow(
-          <XYChart
-            data={{
-              ...data,
-              dateRange: {
-                fromDate: new Date('2019-01-02T05:00:00.000Z'),
-                toDate: new Date('2019-01-03T05:00:00.000Z'),
-              },
-            }}
-            args={multiLayerArgs}
-            formatFactory={getFormatSpy}
-            timeZone="UTC"
-            chartsThemeService={chartsThemeService}
-            paletteService={paletteService}
-            histogramBarTarget={50}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-          />
-        );
-
-        expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
-          Object {
-            "max": 1546491600000,
-            "min": 1546405200000,
-            "minInterval": undefined,
-          }
-        `);
-      });
-
-      test('it generates correct xDomain for 2 layers with multiple value data (n-n)', () => {
-        const data: LensMultiTable = {
-          type: 'lens_multitable',
-          tables: {
-            first: createSampleDatatableWithRows([
-              { a: 1, b: 2, c: 'I', d: 'Foo' },
-              { a: 8, b: 5, c: 'K', d: 'Buzz' },
-              { a: 9, b: 7, c: 'L', d: 'Bar' },
-              { a: 10, b: 2, c: 'G', d: 'Bear' },
-            ]),
-            second: createSampleDatatableWithRows([
-              { a: 10, b: 5, c: 'J', d: 'Bar' },
-              { a: 8, b: 4, c: 'K', d: 'Fi' },
-              { a: 1, b: 8, c: 'O', d: 'Pi' },
-            ]),
-          },
-        };
-        const component = shallow(
-          <XYChart
-            data={{
-              ...data,
-              dateRange: {
-                fromDate: new Date('2019-01-02T05:00:00.000Z'),
-                toDate: new Date('2019-01-03T05:00:00.000Z'),
-              },
-            }}
-            args={multiLayerArgs}
-            formatFactory={getFormatSpy}
-            timeZone="UTC"
-            chartsThemeService={chartsThemeService}
-            paletteService={paletteService}
-            histogramBarTarget={50}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-          />
-        );
-
-        expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
-                  Object {
-                    "max": 1546491600000,
-                    "min": 1546405200000,
-                    "minInterval": undefined,
-                  }
-              `);
       });
     });
 
@@ -683,6 +555,7 @@ describe('xy_expression', () => {
 
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={{
             ...data,
             dateRange: {
@@ -694,13 +567,6 @@ describe('xy_expression', () => {
             ...args,
             layers: [{ ...args.layers[0], seriesType: 'line', xScaleType: 'linear' }],
           }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(component.find(Settings).prop('xDomain')).toBeUndefined();
@@ -710,15 +576,9 @@ describe('xy_expression', () => {
       const { data, args } = sampleArgs();
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -731,15 +591,9 @@ describe('xy_expression', () => {
       const { data, args } = sampleArgs();
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area' }] }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -752,15 +606,9 @@ describe('xy_expression', () => {
       const { data, args } = sampleArgs();
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_horizontal' }] }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -776,19 +624,7 @@ describe('xy_expression', () => {
       // send empty data to the chart
       data.tables.first.rows = [];
 
-      const component = shallow(
-        <XYChart
-          data={data}
-          args={args}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
-      );
+      const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
 
       expect(component.find(BarSeries)).toHaveLength(0);
       expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
@@ -799,18 +635,12 @@ describe('xy_expression', () => {
 
       const wrapper = mountWithIntl(
         <XYChart
+          {...defaultProps}
           data={dateHistogramData}
           args={{
             ...args,
             layers: [dateHistogramLayer],
           }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
 
@@ -884,18 +714,12 @@ describe('xy_expression', () => {
 
       const wrapper = mountWithIntl(
         <XYChart
+          {...defaultProps}
           data={numberHistogramData}
           args={{
             ...args,
             layers: [numberLayer],
           }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
 
@@ -907,6 +731,16 @@ describe('xy_expression', () => {
         range: [5, 8],
         timeFieldName: undefined,
       });
+    });
+
+    test('onBrushEnd is not set on noInteractivity mode', () => {
+      const { args, data } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <XYChart {...defaultProps} data={data} args={args} renderMode="noInteractivity" />
+      );
+
+      expect(wrapper.find(Settings).first().prop('onBrushEnd')).toBeUndefined();
     });
 
     test('onElementClick returns correct context data', () => {
@@ -923,6 +757,7 @@ describe('xy_expression', () => {
 
       const wrapper = mountWithIntl(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{
             ...args,
@@ -941,13 +776,6 @@ describe('xy_expression', () => {
               },
             ],
           }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
 
@@ -973,19 +801,23 @@ describe('xy_expression', () => {
       });
     });
 
+    test('onElementClick is not triggering event on noInteractivity mode', () => {
+      const { args, data } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <XYChart {...defaultProps} data={data} args={args} renderMode="noInteractivity" />
+      );
+
+      expect(wrapper.find(Settings).first().prop('onElementClick')).toBeUndefined();
+    });
+
     test('it renders stacked bar', () => {
       const { data, args } = sampleArgs();
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_stacked' }] }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -998,15 +830,9 @@ describe('xy_expression', () => {
       const { data, args } = sampleArgs();
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area_stacked' }] }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -1019,18 +845,12 @@ describe('xy_expression', () => {
       const { data, args } = sampleArgs();
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{
             ...args,
             layers: [{ ...args.layers[0], seriesType: 'bar_horizontal_stacked' }],
           }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
@@ -1045,6 +865,7 @@ describe('xy_expression', () => {
 
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{
             ...args,
@@ -1057,13 +878,6 @@ describe('xy_expression', () => {
               },
             ],
           }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
 
@@ -1074,17 +888,7 @@ describe('xy_expression', () => {
     test('it passes time zone to the series', () => {
       const { data, args } = sampleArgs();
       const component = shallow(
-        <XYChart
-          data={data}
-          args={args}
-          formatFactory={getFormatSpy}
-          timeZone="CEST"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
+        <XYChart {...defaultProps} data={data} args={args} timeZone="CEST" />
       );
       expect(component.find(LineSeries).at(0).prop('timeZone')).toEqual('CEST');
       expect(component.find(LineSeries).at(1).prop('timeZone')).toEqual('CEST');
@@ -1100,17 +904,7 @@ describe('xy_expression', () => {
       };
       delete firstLayer.splitAccessor;
       const component = shallow(
-        <XYChart
-          data={data}
-          args={{ ...args, layers: [firstLayer] }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
+        <XYChart {...defaultProps} data={data} args={{ ...args, layers: [firstLayer] }} />
       );
       expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(true);
     });
@@ -1120,17 +914,7 @@ describe('xy_expression', () => {
       const firstLayer: LayerArgs = { ...args.layers[0], seriesType: 'bar', isHistogram: true };
       delete firstLayer.splitAccessor;
       const component = shallow(
-        <XYChart
-          data={data}
-          args={{ ...args, layers: [firstLayer] }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
+        <XYChart {...defaultProps} data={data} args={{ ...args, layers: [firstLayer] }} />
       );
       expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(false);
       expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(false);
@@ -1144,15 +928,9 @@ describe('xy_expression', () => {
       delete secondLayer.splitAccessor;
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{ ...args, layers: [firstLayer, secondLayer] }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(component.find(LineSeries).at(0).prop('enableHistogramMode')).toEqual(true);
@@ -1163,6 +941,7 @@ describe('xy_expression', () => {
       const { data, args } = sampleArgs();
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{
             ...args,
@@ -1174,13 +953,6 @@ describe('xy_expression', () => {
               },
             ],
           }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(true);
@@ -1191,18 +963,12 @@ describe('xy_expression', () => {
       const { data, args } = sampleArgs();
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{
             ...args,
             layers: [{ ...args.layers[0], seriesType: 'bar', isHistogram: true }],
           }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(false);
@@ -1386,13 +1152,13 @@ describe('xy_expression', () => {
             yAccessor: 'a',
             seriesKeys: ['a'],
           })
-        ).toEqual('black');
+        ).toEqual('blue');
         expect(
           (component.find(LineSeries).at(1).prop('color') as Function)!({
             yAccessor: 'c',
             seriesKeys: ['c'],
           })
-        ).toEqual('black');
+        ).toEqual('blue');
       });
     });
 
@@ -1595,15 +1361,9 @@ describe('xy_expression', () => {
 
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{ ...args, layers: [{ ...args.layers[0], xScaleType: 'ordinal' }] }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(component.find(LineSeries).at(0).prop('xScaleType')).toEqual(ScaleType.Ordinal);
@@ -1615,15 +1375,9 @@ describe('xy_expression', () => {
 
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={data}
           args={{ ...args, layers: [{ ...args.layers[0], yScaleType: 'sqrt' }] }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(component.find(LineSeries).at(0).prop('yScaleType')).toEqual(ScaleType.Sqrt);
@@ -1633,19 +1387,7 @@ describe('xy_expression', () => {
     test('it gets the formatter for the x axis', () => {
       const { data, args } = sampleArgs();
 
-      shallow(
-        <XYChart
-          data={{ ...data }}
-          args={{ ...args }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
-      );
+      shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
 
       expect(getFormatSpy).toHaveBeenCalledWith({ id: 'string' });
     });
@@ -1655,15 +1397,9 @@ describe('xy_expression', () => {
 
       shallow(
         <XYChart
+          {...defaultProps}
           data={{ ...data }}
           args={{ ...args, layers: [{ ...args.layers[0], accessors: ['a'] }] }}
-          formatFactory={getFormatSpy}
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          timeZone="UTC"
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
       expect(getFormatSpy).toHaveBeenCalledWith({
@@ -1675,19 +1411,7 @@ describe('xy_expression', () => {
     test('it should pass the formatter function to the axis', () => {
       const { data, args } = sampleArgs();
 
-      const instance = shallow(
-        <XYChart
-          data={{ ...data }}
-          args={{ ...args }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
-      );
+      const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
 
       const tickFormatter = instance.find(Axis).first().prop('tickFormat');
 
@@ -1710,19 +1434,7 @@ describe('xy_expression', () => {
         type: 'lens_xy_tickLabelsConfig',
       };
 
-      const instance = shallow(
-        <XYChart
-          data={{ ...data }}
-          args={{ ...args }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
-      );
+      const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
 
       const axisStyle = instance.find(Axis).first().prop('style');
 
@@ -1743,19 +1455,7 @@ describe('xy_expression', () => {
         type: 'lens_xy_tickLabelsConfig',
       };
 
-      const instance = shallow(
-        <XYChart
-          data={{ ...data }}
-          args={{ ...args }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
-      );
+      const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
 
       const axisStyle = instance.find(Axis).at(1).prop('style');
 
@@ -1776,19 +1476,7 @@ describe('xy_expression', () => {
         type: 'lens_xy_tickLabelsConfig',
       };
 
-      const instance = shallow(
-        <XYChart
-          data={{ ...data }}
-          args={{ ...args }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
-      );
+      const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
 
       const axisStyle = instance.find(Axis).first().prop('style');
 
@@ -1809,19 +1497,7 @@ describe('xy_expression', () => {
         type: 'lens_xy_tickLabelsConfig',
       };
 
-      const instance = shallow(
-        <XYChart
-          data={{ ...data }}
-          args={{ ...args }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
-      );
+      const instance = shallow(<XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />);
 
       const axisStyle = instance.find(Axis).at(1).prop('style');
 
@@ -1909,19 +1585,7 @@ describe('xy_expression', () => {
         ],
       };
 
-      const component = shallow(
-        <XYChart
-          data={data}
-          args={args}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
-      );
+      const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
 
       const series = component.find(LineSeries);
 
@@ -1983,19 +1647,7 @@ describe('xy_expression', () => {
         ],
       };
 
-      const component = shallow(
-        <XYChart
-          data={data}
-          args={args}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
-      );
+      const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
 
       const series = component.find(LineSeries);
 
@@ -2055,19 +1707,7 @@ describe('xy_expression', () => {
         ],
       };
 
-      const component = shallow(
-        <XYChart
-          data={data}
-          args={args}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
-      );
+      const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
 
       expect(component.find(Settings).prop('showLegend')).toEqual(true);
     });
@@ -2077,19 +1717,13 @@ describe('xy_expression', () => {
 
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={{ ...data }}
           args={{
             ...args,
             layers: [{ ...args.layers[0], accessors: ['a'], splitAccessor: undefined }],
             legend: { ...args.legend, isVisible: true, showSingleSeries: true },
           }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
 
@@ -2101,18 +1735,12 @@ describe('xy_expression', () => {
 
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={{ ...data }}
           args={{
             ...args,
             legend: { ...args.legend, isVisible: false },
           }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
 
@@ -2124,18 +1752,12 @@ describe('xy_expression', () => {
 
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={{ ...data }}
           args={{
             ...args,
             legend: { ...args.legend, position: 'top' },
           }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
 
@@ -2162,15 +1784,9 @@ describe('xy_expression', () => {
 
       const component = shallow(
         <XYChart
+          {...defaultProps}
           data={{ ...data }}
           args={{ ...args, fittingFunction: 'Carry' }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
         />
       );
 
@@ -2188,17 +1804,7 @@ describe('xy_expression', () => {
       args.layers[0].accessors = ['a'];
 
       const component = shallow(
-        <XYChart
-          data={{ ...data }}
-          args={{ ...args }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
+        <XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />
       );
 
       expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.None });
@@ -2210,17 +1816,7 @@ describe('xy_expression', () => {
       args.xTitle = 'My custom x-axis title';
 
       const component = shallow(
-        <XYChart
-          data={{ ...data }}
-          args={{ ...args }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
+        <XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />
       );
 
       expect(component.find(Axis).at(0).prop('title')).toEqual('My custom x-axis title');
@@ -2237,17 +1833,7 @@ describe('xy_expression', () => {
       };
 
       const component = shallow(
-        <XYChart
-          data={{ ...data }}
-          args={{ ...args }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
+        <XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />
       );
 
       const axisStyle = component.find(Axis).first().prop('style');
@@ -2270,22 +1856,55 @@ describe('xy_expression', () => {
       };
 
       const component = shallow(
-        <XYChart
-          data={{ ...data }}
-          args={{ ...args }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartsThemeService={chartsThemeService}
-          paletteService={paletteService}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
+        <XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />
       );
 
       expect(component.find(Axis).at(0).prop('gridLine')).toMatchObject({
         visible: true,
       });
+    });
+  });
+
+  describe('calculateMinInterval', () => {
+    let xyProps: XYChartProps;
+
+    beforeEach(() => {
+      xyProps = sampleArgs();
+      xyProps.args.layers[0].xScaleType = 'time';
+    });
+    it('should use first valid layer and determine interval', async () => {
+      const result = await calculateMinInterval(
+        xyProps,
+        jest.fn().mockResolvedValue({ interval: '5m' })
+      );
+      expect(result).toEqual(5 * 60 * 1000);
+    });
+
+    it('should return undefined if data table is empty', async () => {
+      xyProps.data.tables.first.rows = [];
+      const result = await calculateMinInterval(
+        xyProps,
+        jest.fn().mockResolvedValue({ interval: '5m' })
+      );
+      expect(result).toEqual(undefined);
+    });
+
+    it('should return undefined if interval can not be checked', async () => {
+      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      expect(result).toEqual(undefined);
+    });
+
+    it('should return undefined if date column is not found', async () => {
+      xyProps.data.tables.first.columns.splice(2, 1);
+      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      expect(result).toEqual(undefined);
+    });
+
+    it('should return undefined if x axis is not a date', async () => {
+      xyProps.args.layers[0].xScaleType = 'ordinal';
+      xyProps.data.tables.first.columns.splice(2, 1);
+      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      expect(result).toEqual(undefined);
     });
   });
 });

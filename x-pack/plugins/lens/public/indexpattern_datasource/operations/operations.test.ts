@@ -248,13 +248,29 @@ describe('getOperationTypesForField', () => {
                 "type": "field",
               },
               Object {
-                "field": "bytes",
-                "operationType": "max",
-                "type": "field",
+                "operationType": "cumulative_sum",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "counter_rate",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "derivative",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "moving_average",
+                "type": "fullReference",
               },
               Object {
                 "field": "bytes",
                 "operationType": "min",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "max",
                 "type": "field",
               },
               Object {
@@ -275,6 +291,30 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "bytes",
                 "operationType": "median",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "percentile",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "last_value",
+                "type": "field",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "string",
+              "isBucketed": false,
+              "scale": "ordinal",
+            },
+            "operations": Array [
+              Object {
+                "field": "source",
+                "operationType": "last_value",
                 "type": "field",
               },
             ],

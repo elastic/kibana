@@ -21,6 +21,7 @@ import { Loading } from '../../../components';
 import { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../hooks';
 import { PackageCard } from './package_card';
+import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
 interface ListProps {
   isLoading?: boolean;
@@ -37,7 +38,7 @@ export function PackageListGrid({ isLoading, controls, title, list }: ListProps)
   const localSearchRef = useLocalSearch(list);
 
   const onQueryChange = ({
-    // eslint-disable-next-line no-shadow
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     query,
     queryText: userInput,
     error,
@@ -118,7 +119,7 @@ function GridColumn({ list }: GridColumnProps) {
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
         list.map((item) => (
-          <EuiFlexItem key={`${item.name}-${item.version}`}>
+          <EuiFlexItem key={pkgKeyFromPackageInfo(item)}>
             <PackageCard {...item} />
           </EuiFlexItem>
         ))

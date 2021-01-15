@@ -5,7 +5,7 @@
  */
 
 import { curry } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { validate } from './validators';
 import {
@@ -27,13 +27,12 @@ import {
   ExecutorSubActionGetIssueTypesParams,
   ExecutorSubActionGetIssuesParams,
   ExecutorSubActionGetIssueParams,
+  ExecutorSubActionGetIncidentParams,
 } from './types';
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
 
-// TODO: to remove, need to support Case
-import { buildMap, mapParams } from '../case/utils';
-
+export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -41,6 +40,7 @@ interface GetActionTypeParams {
 
 const supportedSubActions: string[] = [
   'getFields',
+  'getIncident',
   'pushToService',
   'issueTypes',
   'fieldsByIssueType',
@@ -48,6 +48,7 @@ const supportedSubActions: string[] = [
   'issue',
 ];
 
+export const ActionTypeId = '.jira';
 // action type definition
 export function getActionType(
   params: GetActionTypeParams
@@ -59,7 +60,7 @@ export function getActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: '.jira',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.NAME,
     validate: {
@@ -109,21 +110,22 @@ async function executor(
     throw new Error(errorMessage);
   }
 
+  if (subAction === 'getIncident') {
+    const getIncidentParams = subActionParams as ExecutorSubActionGetIncidentParams;
+    const res = await api.getIncident({
+      externalService,
+      params: getIncidentParams,
+    });
+    if (res != null) {
+      data = res;
+    }
+  }
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
 
-    const { comments, externalId, ...restParams } = pushToServiceParams;
-    const incidentConfiguration = config.incidentConfiguration;
-    const mapping = incidentConfiguration ? buildMap(incidentConfiguration.mapping) : null;
-    const externalObject =
-      config.incidentConfiguration && mapping
-        ? mapParams<ExecutorSubActionPushParams>(restParams as ExecutorSubActionPushParams, mapping)
-        : {};
-
     data = await api.pushToService({
       externalService,
-      mapping,
-      params: { ...pushToServiceParams, externalObject },
+      params: pushToServiceParams,
       logger,
     });
 

@@ -4,27 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import { PAGE_ROUTING_PATHS } from '../../constants';
-import { Loading } from '../../components';
-import { useConfig, useCore, useFleetStatus, useBreadcrumbs } from '../../hooks';
+import { Loading, Error } from '../../components';
+import { useConfig, useFleetStatus, useBreadcrumbs, useCapabilities } from '../../hooks';
 import { AgentListPage } from './agent_list_page';
 import { SetupPage } from './setup_page';
 import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
 import { EnrollmentTokenListPage } from './enrollment_token_list_page';
 import { ListLayout } from './components/list_layout';
+import { WithoutHeaderLayout } from '../../layouts';
 
 export const FleetApp: React.FunctionComponent = () => {
   useBreadcrumbs('fleet');
-  const core = useCore();
   const { agents } = useConfig();
+  const capabilities = useCapabilities();
 
   const fleetStatus = useFleetStatus();
 
   if (!agents.enabled) return null;
   if (fleetStatus.isLoading) {
     return <Loading />;
+  }
+
+  if (fleetStatus.error) {
+    return (
+      <WithoutHeaderLayout>
+        <Error
+          title={
+            <FormattedMessage
+              id="xpack.fleet.agentsInitializationErrorMessageTitle"
+              defaultMessage="Unable to initialize central management for Elastic Agents"
+            />
+          }
+          error={fleetStatus.error}
+        />
+      </WithoutHeaderLayout>
+    );
   }
 
   if (fleetStatus.isReady === false) {
@@ -35,7 +53,7 @@ export const FleetApp: React.FunctionComponent = () => {
       />
     );
   }
-  if (!core.application.capabilities.ingestManager.read) {
+  if (!capabilities.read) {
     return <NoAccessPage />;
   }
 

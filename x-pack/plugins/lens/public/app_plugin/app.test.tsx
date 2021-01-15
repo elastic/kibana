@@ -37,14 +37,18 @@ import {
   LensByReferenceInput,
 } from '../editor_frame_service/embeddable/embeddable';
 import { SavedObjectReference } from '../../../../../src/core/types';
-import { mockAttributeService } from '../../../../../src/plugins/embeddable/public/mocks';
+import {
+  mockAttributeService,
+  createEmbeddableStateTransferMock,
+} from '../../../../../src/plugins/embeddable/public/mocks';
 import { LensAttributeService } from '../lens_attribute_service';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { EmbeddableStateTransfer } from '../../../../../src/plugins/embeddable/public';
 
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
 jest.mock('../../../../../src/plugins/saved_objects/public', () => {
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   const { SavedObjectSaveModal, SavedObjectSaveModalOrigin } = jest.requireActual(
     '../../../../../src/plugins/saved_objects/public'
   );
@@ -67,6 +71,16 @@ function createMockFrame(): jest.Mocked<EditorFrameInstance> {
   return {
     mount: jest.fn((el, props) => {}),
     unmount: jest.fn(() => {}),
+  };
+}
+
+function createMockSearchService() {
+  let sessionIdCounter = 1;
+  return {
+    session: {
+      start: jest.fn(() => `sessionId-${sessionIdCounter++}`),
+      clear: jest.fn(),
+    },
   };
 }
 
@@ -114,16 +128,29 @@ function createMockQueryString() {
 function createMockTimefilter() {
   const unsubscribe = jest.fn();
 
+  let timeFilter = { from: 'now-7d', to: 'now' };
+  let subscriber: () => void;
   return {
-    getTime: jest.fn(() => ({ from: 'now-7d', to: 'now' })),
-    setTime: jest.fn(),
+    getTime: jest.fn(() => timeFilter),
+    setTime: jest.fn((newTimeFilter) => {
+      timeFilter = newTimeFilter;
+      if (subscriber) {
+        subscriber();
+      }
+    }),
     getTimeUpdate$: () => ({
       subscribe: ({ next }: { next: () => void }) => {
+        subscriber = next;
         return unsubscribe;
       },
     }),
     getRefreshInterval: () => {},
     getRefreshIntervalDefaults: () => {},
+    getAutoRefreshFetch$: () => ({
+      subscribe: ({ next }: { next: () => void }) => {
+        return next;
+      },
+    }),
   };
 }
 
@@ -181,6 +208,7 @@ describe('Lens App', () => {
       attributeService: makeAttributeService(),
       savedObjectsClient: core.savedObjects.client,
       dashboardFeatureFlag: { allowByValueEmbeddables: false },
+      stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,
       getOriginatingAppName: jest.fn(() => 'defaultOriginatingApp'),
       application: {
         ...core.application,
@@ -204,6 +232,7 @@ describe('Lens App', () => {
             return new Promise((resolve) => resolve({ id }));
           }),
         },
+        search: createMockSearchService(),
       } as unknown) as DataPublicPluginStart,
       storage: {
         get: jest.fn(),
@@ -290,6 +319,7 @@ describe('Lens App', () => {
               "query": "",
             },
             "savedQuery": undefined,
+            "searchSessionId": "sessionId-1",
             "showNoDataPopover": [Function],
           },
         ],
@@ -308,6 +338,9 @@ describe('Lens App', () => {
     const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
     const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
     services.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
+      return [];
+    });
+    services.data.query.filterManager.getGlobalFilters = jest.fn().mockImplementation(() => {
       return [pinnedFilter];
     });
     const { component, frame } = mountWith({ services });
@@ -322,6 +355,7 @@ describe('Lens App', () => {
         filters: [pinnedFilter],
       })
     );
+    expect(services.data.query.filterManager.getFilters).not.toHaveBeenCalled();
   });
 
   it('displays errors from the frame in a toast', () => {
@@ -626,7 +660,7 @@ describe('Lens App', () => {
         });
       });
 
-      it('Shows Save and Return and Save As buttons in create by value mode', async () => {
+      it('Shows Save and Return and Save As buttons in create by value mode with originating app', async () => {
         const props = makeDefaultProps();
         const services = makeDefaultServices();
         services.dashboardFeatureFlag = { allowByValueEmbeddables: true };
@@ -895,6 +929,71 @@ describe('Lens App', () => {
     });
   });
 
+  describe('download button', () => {
+    function getButton(inst: ReactWrapper): TopNavMenuData {
+      return (inst
+        .find('[data-test-subj="lnsApp_topNav"]')
+        .prop('config') as TopNavMenuData[]).find(
+        (button) => button.testId === 'lnsApp_downloadCSVButton'
+      )!;
+    }
+
+    it('should be disabled when no data is available', async () => {
+      const { component, frame } = mountWith({});
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      await act(async () =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({} as unknown) as Document,
+          isSaveable: true,
+        })
+      );
+      component.update();
+      expect(getButton(component).disableButton).toEqual(true);
+    });
+
+    it('should disable download when not saveable', async () => {
+      const { component, frame } = mountWith({});
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+
+      await act(async () =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({} as unknown) as Document,
+          isSaveable: false,
+          activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
+        })
+      );
+
+      component.update();
+      expect(getButton(component).disableButton).toEqual(true);
+    });
+
+    it('should still be enabled even if the user is missing save permissions', async () => {
+      const services = makeDefaultServices();
+      services.application = {
+        ...services.application,
+        capabilities: {
+          ...services.application.capabilities,
+          visualize: { save: false, saveQuery: false, show: true },
+        },
+      };
+
+      const { component, frame } = mountWith({ services });
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      await act(async () =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({} as unknown) as Document,
+          isSaveable: true,
+          activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
+        })
+      );
+      component.update();
+      expect(getButton(component).disableButton).toEqual(false);
+    });
+  });
+
   describe('query bar state management', () => {
     it('uses the default time and query language settings', () => {
       const { frame } = mountWith({});
@@ -998,6 +1097,53 @@ describe('Lens App', () => {
         })
       );
     });
+
+    it('updates the searchSessionId when the user changes query or time in the search bar', () => {
+      const { component, frame, services } = mountWith({});
+      act(() =>
+        component.find(TopNavMenu).prop('onQuerySubmit')!({
+          dateRange: { from: 'now-14d', to: 'now-7d' },
+          query: { query: '', language: 'lucene' },
+        })
+      );
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-1`,
+        })
+      );
+
+      // trigger again, this time changing just the query
+      act(() =>
+        component.find(TopNavMenu).prop('onQuerySubmit')!({
+          dateRange: { from: 'now-14d', to: 'now-7d' },
+          query: { query: 'new', language: 'lucene' },
+        })
+      );
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-2`,
+        })
+      );
+
+      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+      const field = ({ name: 'myfield' } as unknown) as IFieldType;
+      act(() =>
+        services.data.query.filterManager.setFilters([
+          esFilters.buildExistsFilter(field, indexPattern),
+        ])
+      );
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-3`,
+        })
+      );
+    });
   });
 
   describe('saved query handling', () => {
@@ -1091,6 +1237,37 @@ describe('Lens App', () => {
       );
     });
 
+    it('updates the searchSessionId when the query is updated', () => {
+      const { component, frame } = mountWith({});
+      act(() => {
+        component.find(TopNavMenu).prop('onSaved')!({
+          id: '1',
+          attributes: {
+            title: '',
+            description: '',
+            query: { query: '', language: 'lucene' },
+          },
+        });
+      });
+      act(() => {
+        component.find(TopNavMenu).prop('onSavedQueryUpdated')!({
+          id: '2',
+          attributes: {
+            title: 'new title',
+            description: '',
+            query: { query: '', language: 'lucene' },
+          },
+        });
+      });
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-1`,
+        })
+      );
+    });
+
     it('clears all existing unpinned filters when the active saved query is cleared', () => {
       const { component, frame, services } = mountWith({});
       act(() =>
@@ -1113,6 +1290,32 @@ describe('Lens App', () => {
         expect.any(Element),
         expect.objectContaining({
           filters: [pinned],
+        })
+      );
+    });
+
+    it('updates the searchSessionId when the active saved query is cleared', () => {
+      const { component, frame, services } = mountWith({});
+      act(() =>
+        component.find(TopNavMenu).prop('onQuerySubmit')!({
+          dateRange: { from: 'now-14d', to: 'now-7d' },
+          query: { query: 'new', language: 'lucene' },
+        })
+      );
+      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+      const field = ({ name: 'myfield' } as unknown) as IFieldType;
+      const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
+      const unpinned = esFilters.buildExistsFilter(field, indexPattern);
+      const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
+      FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+      act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
+      component.update();
+      act(() => component.find(TopNavMenu).prop('onClearSavedQuery')!());
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-2`,
         })
       );
     });

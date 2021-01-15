@@ -9,14 +9,16 @@ import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_obje
 
 it('correctly determines attribute properties', () => {
   const attributes = ['attr#1', 'attr#2', 'attr#3', 'attr#4'];
-  const cases: Array<[
-    EncryptedSavedObjectTypeRegistration,
-    {
-      shouldBeEncrypted: boolean[];
-      shouldBeExcludedFromAAD: boolean[];
-      shouldBeStripped: boolean[];
-    }
-  ]> = [
+  const cases: Array<
+    [
+      EncryptedSavedObjectTypeRegistration,
+      {
+        shouldBeEncrypted: boolean[];
+        shouldBeExcludedFromAAD: boolean[];
+        shouldBeStripped: boolean[];
+      }
+    ]
+  > = [
     [
       {
         type: 'so-type',

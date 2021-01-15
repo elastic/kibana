@@ -21,9 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggBucketAvg';
+export const aggBucketAvgFnName = 'aggBucketAvg';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.AVG_BUCKET>;
@@ -32,10 +31,15 @@ type Arguments = Assign<
   { customBucket?: AggExpressionType; customMetric?: AggExpressionType }
 >;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggBucketAvgFnName,
+  Input,
+  Arguments,
+  Output
+>;
 
 export const aggBucketAvg = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggBucketAvgFnName,
   help: i18n.translate('data.search.aggs.function.metrics.bucket_avg.help', {
     defaultMessage: 'Generates a serialized agg config for a Avg Bucket agg',
   }),
@@ -99,7 +103,6 @@ export const aggBucketAvg = (): FunctionDefinition => ({
           ...rest,
           customBucket: args.customBucket?.value,
           customMetric: args.customMetric?.value,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const PageObjects = getPageObjects(['dashboard', 'tagManagement', 'common']);
+  const PageObjects = getPageObjects(['dashboard', 'tagManagement', 'common', 'header']);
 
   /**
    * Select tags in the searchbar's tag filter.
@@ -31,6 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     // click elsewhere to close the filter dropdown
     const searchFilter = await find.byCssSelector('main .euiFieldSearch');
     await searchFilter.click();
+    // wait until the table refreshes
+    await listingTable.waitUntilTableIsLoaded();
   };
 
   describe('dashboard integration', () => {
@@ -47,6 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
       });
 
       it('allows to manually type tag filter query', async () => {
@@ -96,6 +99,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
+
         await selectFilterTags('tag-1');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('my-new-dashboard');
@@ -128,8 +133,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await tagModal.isOpened()).to.be(false);
 
         await PageObjects.dashboard.clickSave();
+        await PageObjects.common.waitForSaveModalToClose();
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
+
         await selectFilterTags('my-new-tag');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('dashboard-with-new-tag');
@@ -140,6 +148,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
       });
 
       it('allows to select tags for an existing dashboard', async () => {
@@ -152,6 +161,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
+
         await selectFilterTags('tag-3');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('dashboard 4 with real data (tag-1)');

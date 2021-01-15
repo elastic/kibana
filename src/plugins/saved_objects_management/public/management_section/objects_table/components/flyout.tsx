@@ -758,10 +758,14 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         <EuiFormRow
           fullWidth
           label={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
-              defaultMessage="Select a file to import"
-            />
+            <EuiTitle size="xs">
+              <span>
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
+                  defaultMessage="Select a file to import"
+                />
+              </span>
+            </EuiTitle>
           }
         >
           <EuiFilePicker

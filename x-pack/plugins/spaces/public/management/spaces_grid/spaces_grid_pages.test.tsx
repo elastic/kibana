@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test/jest';
 import { SpaceAvatar } from '../../space_avatar';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
@@ -65,7 +65,6 @@ describe('SpacesGridPage', () => {
           spacesManager={(spacesManager as unknown) as SpacesManager}
           getFeatures={featuresStart.getFeatures}
           notifications={notificationServiceMock.createStartContract()}
-          securityEnabled={true}
           getUrlForApp={getUrlForApp}
           history={history}
           capabilities={{
@@ -88,7 +87,6 @@ describe('SpacesGridPage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -122,7 +120,6 @@ describe('SpacesGridPage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notifications}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -157,7 +154,6 @@ describe('SpacesGridPage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{

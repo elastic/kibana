@@ -206,6 +206,7 @@ export interface UpdateAgentRequest {
 
 export interface GetAgentStatusRequest {
   query: {
+    kuery?: string;
     policyId?: string;
   };
 }
@@ -218,5 +219,6 @@ export interface GetAgentStatusResponse {
     error: number;
     offline: number;
     other: number;
+    updating: number;
   };
 }

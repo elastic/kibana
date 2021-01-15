@@ -36,6 +36,7 @@ export interface HeaderProps {
   rightColumn?: JSX.Element;
   rightColumnGrow?: EuiFlexItemProps['grow'];
   tabs?: EuiTabProps[];
+  tabsClassName?: string;
   'data-test-subj'?: string;
 }
 
@@ -54,6 +55,7 @@ export const Header: React.FC<HeaderProps> = ({
   rightColumnGrow,
   tabs,
   maxWidth,
+  tabsClassName,
   'data-test-subj': dataTestSubj,
 }) => (
   <Container data-test-subj={dataTestSubj}>
@@ -67,7 +69,7 @@ export const Header: React.FC<HeaderProps> = ({
         {tabs ? (
           <EuiFlexItem>
             <EuiSpacer size="s" />
-            <Tabs>
+            <Tabs className={tabsClassName}>
               {tabs.map((props) => (
                 <EuiTab {...props} key={props.id}>
                   {props.name}

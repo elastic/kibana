@@ -49,6 +49,8 @@ interface State {
  * React component for displaying the example data associated with the Telemetry opt-in banner.
  */
 export class OptInExampleFlyout extends React.PureComponent<Props, State> {
+  _isMounted = false;
+
   public readonly state: State = {
     data: null,
     isLoading: true,
@@ -56,20 +58,28 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
   };
 
   async componentDidMount() {
+    this._isMounted = true;
+
     try {
       const { fetchExample } = this.props;
       const clusters = await fetchExample();
-      this.setState({
-        data: Array.isArray(clusters) ? clusters : null,
-        isLoading: false,
-        hasPrivilegeToRead: true,
-      });
+      if (this._isMounted) {
+        this.setState({
+          data: Array.isArray(clusters) ? clusters : null,
+          isLoading: false,
+          hasPrivilegeToRead: true,
+        });
+      }
     } catch (err) {
       this.setState({
         isLoading: false,
         hasPrivilegeToRead: err.status !== 403,
       });
     }
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   renderBody({ data, isLoading, hasPrivilegeToRead }: State) {

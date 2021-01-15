@@ -27,7 +27,6 @@ import {
   setStartServices,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
-// @ts-ignore
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import {
@@ -49,7 +48,7 @@ import { MapsXPackConfig, MapsConfigType } from '../config';
 import { getAppTitle } from '../common/i18n_getters';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
-import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
+import { createLayerDescriptors, registerLayerWizard, registerSource } from './api';
 import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
@@ -63,6 +62,7 @@ import {
   setLicensingPluginStart,
 } from './licensed_features';
 import { EMSSettings } from '../common/ems_settings';
+import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -86,6 +86,7 @@ export interface MapsPluginStartDependencies {
   visualizations: VisualizationsStart;
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }
 
 /**
@@ -165,7 +166,7 @@ export class MapsPlugin
     plugins.visualizations.unRegisterAlias(PLUGIN_ID_OSS);
 
     return {
-      createSecurityLayerDescriptors,
+      createLayerDescriptors,
       registerLayerWizard,
       registerSource,
     };

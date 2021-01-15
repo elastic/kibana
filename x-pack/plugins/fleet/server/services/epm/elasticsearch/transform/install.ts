@@ -7,7 +7,7 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 
 import { saveInstalledEsRefs } from '../../packages/install';
-import * as Registry from '../../registry';
+import { getPathParts } from '../../archive';
 import {
   ElasticsearchAssetType,
   EsAssetReference,
@@ -104,7 +104,7 @@ export const installTransform = async (
 };
 
 const isTransform = (path: string) => {
-  const pathParts = Registry.pathParts(path);
+  const pathParts = getPathParts(path);
   return !path.endsWith('/') && pathParts.type === ElasticsearchAssetType.transform;
 };
 

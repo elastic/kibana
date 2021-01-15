@@ -69,6 +69,11 @@ export const setupModuleBodySchema = schema.object({
    * should be made by checking the cardinality of fields in the job configurations (optional).
    */
   estimateModelMemory: schema.maybe(schema.boolean()),
+
+  /**
+   * Add each job created to the * space (optional)
+   */
+  applyToAllSpaces: schema.maybe(schema.boolean()),
 });
 
 export const optionalModuleIdParamSchema = schema.object({

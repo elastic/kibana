@@ -10,7 +10,7 @@ import uuid from 'uuid';
 
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
+import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { PartialAlert, FindResult } from '../../../../../../alerts/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
@@ -31,6 +31,7 @@ import {
   OutputError,
 } from '../utils';
 import { RuleActions } from '../../rule_actions/types';
+import { RuleTypeParams } from '../../types';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -172,7 +173,7 @@ export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<R
 };
 
 export const transformFindAlerts = (
-  findResults: FindResult,
+  findResults: FindResult<RuleTypeParams>,
   ruleActions: Array<RuleActions | null>,
   ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
 ): {
@@ -203,7 +204,7 @@ export const transformFindAlerts = (
 };
 
 export const transform = (
-  alert: PartialAlert,
+  alert: PartialAlert<RuleTypeParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<RulesSchema> | null => {
@@ -220,7 +221,7 @@ export const transform = (
 
 export const transformOrBulkError = (
   ruleId: string,
-  alert: PartialAlert,
+  alert: PartialAlert<RuleTypeParams>,
   ruleActions: RuleActions,
   ruleStatus?: unknown
 ): Partial<RulesSchema> | BulkError => {
@@ -241,7 +242,7 @@ export const transformOrBulkError = (
 
 export const transformOrImportError = (
   ruleId: string,
-  alert: PartialAlert,
+  alert: PartialAlert<RuleTypeParams>,
   existingImportSuccessError: ImportSuccessError
 ): ImportSuccessError => {
   if (isAlertType(alert)) {
@@ -256,10 +257,7 @@ export const transformOrImportError = (
   }
 };
 
-export const getDuplicates = (
-  ruleDefinitions: CreateRulesBulkSchemaDecoded,
-  by: 'rule_id'
-): string[] => {
+export const getDuplicates = (ruleDefinitions: CreateRulesBulkSchema, by: 'rule_id'): string[] => {
   const mappedDuplicates = countBy(
     by,
     ruleDefinitions.filter((r) => r[by] != null)

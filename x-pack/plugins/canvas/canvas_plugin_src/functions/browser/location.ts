@@ -28,7 +28,7 @@ export function location(): ExpressionFunctionDefinition<'location', null, {}, P
     help,
     fn: () => {
       return new Promise((resolve) => {
-        function createLocation(geoposition: Position) {
+        function createLocation(geoposition: GeolocationPosition) {
           const { latitude, longitude } = geoposition.coords;
           return resolve({
             type: 'datatable',

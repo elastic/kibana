@@ -25,7 +25,7 @@ export const VerifyExistingNodeBuilds: GlobalTask = {
   global: true,
   description: 'Verifying previously downloaded node.js build for all platforms',
   async run(config, log) {
-    const shasums = await getNodeShasums(config.getNodeVersion());
+    const shasums = await getNodeShasums(log, config.getNodeVersion());
 
     await Promise.all(
       config.getNodePlatforms().map(async (platform) => {

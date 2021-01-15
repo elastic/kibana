@@ -16,13 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './loading_spinner.scss';
+
 import React from 'react';
 import { EuiLoadingSpinner, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function LoadingSpinner() {
   return (
-    <div className="dscOverlay">
+    <div className="dscLoading">
       <EuiTitle size="s" data-test-subj="loadingSpinnerText">
         <h2>
           <FormattedMessage id="discover.searchingTitle" defaultMessage="Searching" />

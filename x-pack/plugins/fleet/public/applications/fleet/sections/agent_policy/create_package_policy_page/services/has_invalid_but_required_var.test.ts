@@ -5,7 +5,7 @@
  */
 import { hasInvalidButRequiredVar } from './has_invalid_but_required_var';
 
-describe('Ingest Manager - hasInvalidButRequiredVar', () => {
+describe('Fleet - hasInvalidButRequiredVar', () => {
   it('returns true for invalid & required vars', () => {
     expect(
       hasInvalidButRequiredVar(

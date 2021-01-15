@@ -68,7 +68,7 @@ describe('PreviewThresholdQueryHistogram', () => {
 
     expect(wrapper.find('[data-test-subj="queryPreviewLoading"]').exists()).toBeFalsy();
     expect(
-      wrapper.find('[data-test-subj="thresholdQueryPreviewHistogram"]').at(0).props().data
+      wrapper.find('[dataTestSubj="thresholdQueryPreviewHistogram"]').at(0).props().data
     ).toEqual([
       {
         key: 'hits',

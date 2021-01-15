@@ -70,6 +70,11 @@ export const searchAggsSetupMock = (): AggsSetup => ({
 const commonStartMock = (): AggsCommonStart => ({
   calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
   getDateMetaByDatatableColumn: jest.fn(),
+  datatableUtilities: {
+    getIndexPattern: jest.fn(),
+    getAggConfig: jest.fn(),
+    isFilterable: jest.fn(),
+  },
   createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
     return new AggConfigs(indexPattern, configStates, {
       typesRegistry: mockAggTypesRegistry(),

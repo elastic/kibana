@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { esKuery } from '../../../../../src/plugins/data/server';
+import { RecoveredActionGroup } from '../../common';
 import {
   asFiltersByAlertTypeAndConsumer,
   ensureFieldIsSafeForQuery,
@@ -17,12 +18,15 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
             producer: 'myApp',
+            minimumLicenseRequired: 'basic',
             authorizedConsumers: {
               myApp: { read: true, all: true },
             },
+            enabledInLicense: true,
           },
         ])
       )
@@ -40,6 +44,8 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
             producer: 'myApp',
@@ -48,6 +54,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
               myApp: { read: true, all: true },
               myOtherApp: { read: true, all: true },
             },
+            enabledInLicense: true,
           },
         ])
       )
@@ -65,6 +72,8 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
             producer: 'myApp',
@@ -74,10 +83,13 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
               myOtherApp: { read: true, all: true },
               myAppWithSubFeature: { read: true, all: true },
             },
+            enabledInLicense: true,
           },
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: RecoveredActionGroup,
             id: 'myOtherAppAlertType',
             name: 'myOtherAppAlertType',
             producer: 'alerts',
@@ -87,10 +99,13 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
               myOtherApp: { read: true, all: true },
               myAppWithSubFeature: { read: true, all: true },
             },
+            enabledInLicense: true,
           },
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: RecoveredActionGroup,
             id: 'mySecondAppAlertType',
             name: 'mySecondAppAlertType',
             producer: 'myApp',
@@ -100,6 +115,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
               myOtherApp: { read: true, all: true },
               myAppWithSubFeature: { read: true, all: true },
             },
+            enabledInLicense: true,
           },
         ])
       )

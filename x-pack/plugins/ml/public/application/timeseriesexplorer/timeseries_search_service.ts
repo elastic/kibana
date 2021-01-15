@@ -91,10 +91,12 @@ function getMetricData(
         chartConfig.datafeedConfig.query,
         esMetricFunction ?? chartConfig.metricFunction,
         chartConfig.metricFieldName,
+        chartConfig.summaryCountFieldName,
         chartConfig.timeField,
         earliestMs,
         latestMs,
-        intervalMs
+        intervalMs,
+        chartConfig?.datafeedConfig
       )
       .pipe(
         map((resp) => {

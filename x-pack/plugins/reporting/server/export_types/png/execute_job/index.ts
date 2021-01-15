@@ -19,9 +19,9 @@ import {
 import { generatePngObservableFactory } from '../lib/generate_png';
 import { TaskPayloadPNG } from '../types';
 
-export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<
-  TaskPayloadPNG
->> = function executeJobFactoryFn(reporting, parentLogger) {
+export const runTaskFnFactory: RunTaskFnFactory<
+  RunTaskFn<TaskPayloadPNG>
+> = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
   const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);

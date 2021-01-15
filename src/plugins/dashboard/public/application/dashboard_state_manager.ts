@@ -17,21 +17,18 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { Observable, Subscription } from 'rxjs';
 import { Moment } from 'moment';
+import { i18n } from '@kbn/i18n';
 import { History } from 'history';
+import { Observable, Subscription } from 'rxjs';
 
-import { Filter, Query, TimefilterContract as Timefilter } from 'src/plugins/data/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import type { SavedObjectTagDecoratorTypeGuard } from 'src/plugins/saved_objects_tagging_oss/public';
-import { migrateLegacyQuery } from './lib/migrate_legacy_query';
-
-import { ViewMode } from '../embeddable_plugin';
-import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
-import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';
 import { FilterUtils } from './lib/filter_utils';
+import { DashboardContainer } from './embeddable';
+import { DashboardSavedObject } from '../saved_dashboards';
+import { migrateLegacyQuery } from './lib/migrate_legacy_query';
+import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
+import { convertPanelStateToSavedDashboardPanel } from '../../common/embeddable/embeddable_saved_object_converters';
 import {
   DashboardAppState,
   DashboardAppStateDefaults,
@@ -39,15 +36,18 @@ import {
   DashboardAppStateTransitions,
   SavedDashboardPanel,
 } from '../types';
+
+import { ViewMode } from '../services/embeddable';
+import { UsageCollectionSetup } from '../services/usage_collection';
+import { Filter, Query, TimefilterContract as Timefilter } from '../services/data';
+import type { SavedObjectTagDecoratorTypeGuard } from '../services/saved_objects_tagging_oss';
 import {
   createStateContainer,
   IKbnUrlStateStorage,
   ISyncStateRef,
   ReduxLikeStateContainer,
   syncState,
-} from '../../../kibana_utils/public';
-import { SavedObjectDashboard } from '../saved_dashboards';
-import { DashboardContainer } from './embeddable';
+} from '../services/kibana_utils';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -56,7 +56,7 @@ import { DashboardContainer } from './embeddable';
  * versa. They should be as decoupled as possible so updating the store won't affect bwc of urls.
  */
 export class DashboardStateManager {
-  public savedDashboard: SavedObjectDashboard;
+  public savedDashboard: DashboardSavedObject;
   public lastSavedDashboardFilters: {
     timeTo?: string | Moment;
     timeFrom?: string | Moment;
@@ -105,7 +105,7 @@ export class DashboardStateManager {
     usageCollection,
     hasTaggingCapabilities,
   }: {
-    savedDashboard: SavedObjectDashboard;
+    savedDashboard: DashboardSavedObject;
     hideWriteControls: boolean;
     kibanaVersion: string;
     kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -223,6 +223,7 @@ export class DashboardStateManager {
     const savedDashboardPanelMap: { [key: string]: SavedDashboardPanel } = {};
 
     const input = dashboardContainer.getInput();
+
     this.getPanels().forEach((savedDashboardPanel) => {
       if (input.panels[savedDashboardPanel.panelIndex] !== undefined) {
         savedDashboardPanelMap[savedDashboardPanel.panelIndex] = savedDashboardPanel;
@@ -234,9 +235,14 @@ export class DashboardStateManager {
 
     const convertedPanelStateMap: { [key: string]: SavedDashboardPanel } = {};
 
+    let expandedPanelValid = false;
     Object.values(input.panels).forEach((panelState) => {
       if (savedDashboardPanelMap[panelState.explicitInput.id] === undefined) {
         dirty = true;
+      }
+
+      if (panelState.explicitInput.id === input.expandedPanelId) {
+        expandedPanelValid = true;
       }
 
       convertedPanelStateMap[panelState.explicitInput.id] = convertPanelStateToSavedDashboardPanel(
@@ -272,8 +278,10 @@ export class DashboardStateManager {
       this.setFullScreenMode(input.isFullScreenMode);
     }
 
-    if (input.expandedPanelId !== this.getExpandedPanelId()) {
+    if (expandedPanelValid && input.expandedPanelId !== this.getExpandedPanelId()) {
       this.setExpandedPanelId(input.expandedPanelId);
+    } else if (!expandedPanelValid && this.getExpandedPanelId()) {
+      this.setExpandedPanelId(undefined);
     }
 
     if (!_.isEqual(input.query, this.getQuery())) {
@@ -402,6 +410,15 @@ export class DashboardStateManager {
 
   public setUseMargins(useMargins: boolean) {
     this.stateContainer.transitions.setOption('useMargins', useMargins);
+  }
+
+  public getSyncColors() {
+    // Existing dashboards that don't define this should default to true.
+    return this.appState.options.syncColors === undefined ? true : this.appState.options.syncColors;
+  }
+
+  public setSyncColors(syncColors: boolean) {
+    this.stateContainer.transitions.setOption('syncColors', syncColors);
   }
 
   public getHidePanelTitles() {

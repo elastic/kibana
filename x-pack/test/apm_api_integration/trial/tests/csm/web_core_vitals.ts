@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function rumServicesApiTests({ getService }: FtrProviderContext) {
@@ -50,7 +49,7 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
 
         expectSnapshot(response.body).toMatchInline(`
           Object {
-            "cls": "0.000",
+            "cls": 0,
             "clsRanks": Array [
               100,
               0,

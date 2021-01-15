@@ -6,16 +6,18 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { shallowWithIntl, nextTick, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, nextTick, mountWithIntl } from '@kbn/test/jest';
 import { SecurityNavControl } from './nav_control_component';
-import { AuthenticatedUser } from '../../common/model';
+import type { AuthenticatedUser } from '../../common/model';
 import { EuiPopover, EuiHeaderSectionItemButton } from '@elastic/eui';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
+
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 
 describe('SecurityNavControl', () => {
   it(`renders a loading spinner when the user promise hasn't resolved yet.`, async () => {
     const props = {
-      user: new Promise(() => {}) as Promise<AuthenticatedUser>,
+      user: new Promise<AuthenticatedUser>(() => mockAuthenticatedUser()),
       editProfileUrl: '',
       logoutUrl: '',
       userMenuLinks$: new BehaviorSubject([]),
@@ -41,7 +43,7 @@ describe('SecurityNavControl', () => {
 
   it(`renders an avatar after the user promise resolves.`, async () => {
     const props = {
-      user: Promise.resolve({ full_name: 'foo' }) as Promise<AuthenticatedUser>,
+      user: Promise.resolve(mockAuthenticatedUser({ full_name: 'foo' })),
       editProfileUrl: '',
       logoutUrl: '',
       userMenuLinks$: new BehaviorSubject([]),
@@ -70,7 +72,7 @@ describe('SecurityNavControl', () => {
 
   it(`doesn't render the popover when the user hasn't been loaded yet`, async () => {
     const props = {
-      user: Promise.resolve({ full_name: 'foo' }) as Promise<AuthenticatedUser>,
+      user: Promise.resolve(mockAuthenticatedUser({ full_name: 'foo' })),
       editProfileUrl: '',
       logoutUrl: '',
       userMenuLinks$: new BehaviorSubject([]),
@@ -92,7 +94,7 @@ describe('SecurityNavControl', () => {
 
   it('renders a popover when the avatar is clicked.', async () => {
     const props = {
-      user: Promise.resolve({ full_name: 'foo' }) as Promise<AuthenticatedUser>,
+      user: Promise.resolve(mockAuthenticatedUser({ full_name: 'foo' })),
       editProfileUrl: '',
       logoutUrl: '',
       userMenuLinks$: new BehaviorSubject([]),
@@ -115,7 +117,7 @@ describe('SecurityNavControl', () => {
 
   it('renders a popover with additional user menu links registered by other plugins', async () => {
     const props = {
-      user: Promise.resolve({ full_name: 'foo' }) as Promise<AuthenticatedUser>,
+      user: Promise.resolve(mockAuthenticatedUser({ full_name: 'foo' })),
       editProfileUrl: '',
       logoutUrl: '',
       userMenuLinks$: new BehaviorSubject([
@@ -144,5 +146,38 @@ describe('SecurityNavControl', () => {
     expect(findTestSubject(wrapper, 'userMenuLink__link2')).toHaveLength(1);
     expect(findTestSubject(wrapper, 'userMenuLink__link3')).toHaveLength(1);
     expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(1);
+  });
+
+  it('properly renders a popover for anonymous user.', async () => {
+    const props = {
+      user: Promise.resolve(
+        mockAuthenticatedUser({
+          authentication_provider: { type: 'anonymous', name: 'does no matter' },
+        })
+      ),
+      editProfileUrl: '',
+      logoutUrl: '',
+      userMenuLinks$: new BehaviorSubject([
+        { label: 'link1', href: 'path-to-link-1', iconType: 'empty', order: 1 },
+        { label: 'link2', href: 'path-to-link-2', iconType: 'empty', order: 2 },
+        { label: 'link3', href: 'path-to-link-3', iconType: 'empty', order: 3 },
+      ]),
+    };
+
+    const wrapper = mountWithIntl(<SecurityNavControl {...props} />);
+    await nextTick();
+    wrapper.update();
+
+    expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(0);
+
+    wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+
+    expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(1);
+
+    expect(findTestSubject(wrapper, 'logoutLink').text()).toBe('Log in');
   });
 });

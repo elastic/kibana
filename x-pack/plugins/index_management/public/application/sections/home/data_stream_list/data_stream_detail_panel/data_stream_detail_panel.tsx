@@ -29,9 +29,10 @@ import { useLoadDataStream } from '../../../../services/api';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { useUrlGenerator } from '../../../../services/use_url_generator';
+import { getIndexListUri, getTemplateDetailsLink } from '../../../../services/routing';
 import { ILM_PAGES_POLICY_EDIT, ILM_URL_GENERATOR_ID } from '../../../../constants';
 import { useAppContext } from '../../../../app_context';
-import { getIndexListUri } from '../../../../..';
+import { DataStreamsBadges } from '../data_stream_badges';
 
 interface DetailsListProps {
   details: Array<{
@@ -207,7 +208,14 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage:
             'The index template that configured the data stream and configures its backing indices',
         }),
-        content: indexTemplateName,
+        content: (
+          <EuiLink
+            data-test-subj={'indexTemplateLink'}
+            {...reactRouterNavigate(history, getTemplateDetailsLink(indexTemplateName))}
+          >
+            {indexTemplateName}
+          </EuiLink>
+        ),
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyTitle', {
@@ -218,10 +226,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         }),
         content:
           ilmPolicyName && ilmPolicyLink ? (
-            <EuiLink
-              data-test-subj={'ilmPolicyLink'}
-              {...reactRouterNavigate(history, ilmPolicyLink)}
-            >
+            <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
               {ilmPolicyName}
             </EuiLink>
           ) : (
@@ -265,6 +270,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           <EuiTitle size="m">
             <h2 id="dataStreamDetailPanelTitle" data-test-subj="dataStreamDetailPanelTitle">
               {dataStreamName}
+              {dataStream && <DataStreamsBadges dataStream={dataStream} />}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
@@ -286,7 +292,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
 
-            {!isLoading && !error ? (
+            {!isLoading && !error && dataStream?.privileges.delete_index ? (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="danger"

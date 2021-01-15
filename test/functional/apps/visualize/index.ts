@@ -20,12 +20,12 @@
 import { FtrProviderContext } from '../../ftr_provider_context.d';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 
-export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common']);
+  const deployment = getService('deployment');
   let isOss = true;
 
   describe('visualize app', () => {
@@ -39,7 +39,38 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         defaultIndex: 'logstash-*',
         [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       });
-      isOss = await PageObjects.common.isOss();
+      isOss = await deployment.isOss();
+    });
+
+    // TODO: Remove when vislib is removed
+    describe('new charts library', function () {
+      this.tags('ciGroup7');
+
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          'visualization:visualize:legacyChartsLibrary': false,
+        });
+        await browser.refresh();
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.update({
+          'visualization:visualize:legacyChartsLibrary': true,
+        });
+        await browser.refresh();
+      });
+
+      // Test replaced vislib chart types
+      loadTestFile(require.resolve('./_area_chart'));
+      loadTestFile(require.resolve('./_line_chart_split_series'));
+      loadTestFile(require.resolve('./_point_series_options'));
+      loadTestFile(require.resolve('./_vertical_bar_chart'));
+      loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
+
+      // Test non-replaced vislib chart types
+      loadTestFile(require.resolve('./_gauge_chart'));
+      loadTestFile(require.resolve('./_heatmap_chart'));
+      loadTestFile(require.resolve('./_pie_chart'));
     });
 
     describe('', function () {
@@ -68,7 +99,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     describe('', function () {
       this.tags('ciGroup11');
 
-      loadTestFile(require.resolve('./_line_chart'));
+      loadTestFile(require.resolve('./_line_chart_split_series'));
+      loadTestFile(require.resolve('./_line_chart_split_chart'));
       loadTestFile(require.resolve('./_pie_chart'));
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_markdown_vis'));
@@ -76,6 +108,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       loadTestFile(require.resolve('./_lab_mode'));
       loadTestFile(require.resolve('./_linked_saved_searches'));
       loadTestFile(require.resolve('./_visualize_listing'));
+
       if (isOss) {
         loadTestFile(require.resolve('./_tile_map'));
         loadTestFile(require.resolve('./_region_map'));

@@ -20,10 +20,11 @@
 // @ts-ignore
 import { fieldCalculator } from './field_calculator';
 import { IndexPattern, IndexPatternField } from '../../../../../../data/public';
+import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 
 export function getDetails(
   field: IndexPatternField,
-  hits: Array<Record<string, unknown>>,
+  hits: ElasticSearchHit[],
   columns: string[],
   indexPattern?: IndexPattern
 ) {

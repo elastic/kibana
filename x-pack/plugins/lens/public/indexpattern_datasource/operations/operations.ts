@@ -87,6 +87,10 @@ type OperationFieldTuple =
   | {
       type: 'none';
       operationType: OperationType;
+    }
+  | {
+      type: 'fullReference';
+      operationType: OperationType;
     };
 
 /**
@@ -162,6 +166,14 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
         },
         operationDefinition.getPossibleOperation()
       );
+    } else if (operationDefinition.input === 'fullReference') {
+      const validOperation = operationDefinition.getPossibleOperation(indexPattern);
+      if (validOperation) {
+        addToMap(
+          { type: 'fullReference', operationType: operationDefinition.type },
+          validOperation
+        );
+      }
     }
   });
 

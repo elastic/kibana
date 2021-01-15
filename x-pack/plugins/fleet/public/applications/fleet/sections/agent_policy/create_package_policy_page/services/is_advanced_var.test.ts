@@ -5,7 +5,7 @@
  */
 import { isAdvancedVar } from './is_advanced_var';
 
-describe('Ingest Manager - isAdvancedVar', () => {
+describe('Fleet - isAdvancedVar', () => {
   it('returns true for vars that should be show under advanced options', () => {
     expect(
       isAdvancedVar({

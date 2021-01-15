@@ -33,4 +33,4 @@ export const SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE = 250;
  * A distance in px to display suggestions list right under the query input without a gap
  * @public
  */
-export const SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET = 1;
+export const SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET = 0;

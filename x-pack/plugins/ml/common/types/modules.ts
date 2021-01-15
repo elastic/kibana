@@ -5,6 +5,7 @@
  */
 import { SavedObjectAttributes } from 'kibana/public';
 import { Datafeed, Job } from './anomaly_detection_jobs';
+import { ErrorType } from '../util/errors';
 
 export interface ModuleJob {
   id: string;
@@ -63,22 +64,13 @@ export interface KibanaObjectResponse extends ResultItem {
   error?: any;
 }
 
-export interface SetupError {
-  body: string;
-  msg: string;
-  path: string;
-  query: {};
-  response: string;
-  statusCode: number;
-}
-
 export interface DatafeedResponse extends ResultItem {
   started: boolean;
-  error?: SetupError;
+  error?: ErrorType;
 }
 
 export interface JobResponse extends ResultItem {
-  error?: SetupError;
+  error?: ErrorType;
 }
 
 export interface DataRecognizerConfigResponse {

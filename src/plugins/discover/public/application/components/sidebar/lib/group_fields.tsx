@@ -33,7 +33,8 @@ export function groupFields(
   columns: string[],
   popularLimit: number,
   fieldCounts: Record<string, number>,
-  fieldFilterState: FieldFilterState
+  fieldFilterState: FieldFilterState,
+  useNewFieldsApi: boolean
 ): GroupedFields {
   const result: GroupedFields = {
     selected: [],
@@ -62,14 +63,28 @@ export function groupFields(
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts)) {
       continue;
     }
+    const isSubfield = useNewFieldsApi && field.spec?.subType?.multi?.parent;
     if (columns.includes(field.name)) {
       result.selected.push(field);
     } else if (popular.includes(field.name) && field.type !== '_source') {
-      result.popular.push(field);
+      if (!isSubfield) {
+        result.popular.push(field);
+      }
     } else if (field.type !== '_source') {
-      result.unpopular.push(field);
+      if (!isSubfield) {
+        result.unpopular.push(field);
+      }
     }
   }
+  // add columns, that are not part of the index pattern, to be removeable
+  for (const column of columns) {
+    if (!result.selected.find((field) => field.name === column)) {
+      result.selected.push({ name: column, displayName: column } as IndexPatternField);
+    }
+  }
+  result.selected.sort((a, b) => {
+    return columns.indexOf(a.name) - columns.indexOf(b.name);
+  });
 
   return result;
 }

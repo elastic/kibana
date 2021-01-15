@@ -12,7 +12,11 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { singleSearchAfter } from './single_search_after';
 
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { BuildRuleMessage } from './rule_messages';
@@ -21,7 +25,7 @@ interface FindThresholdSignalsParams {
   from: string;
   to: string;
   inputIndexPattern: string[];
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   filter: unknown;
   threshold: Threshold;
@@ -51,6 +55,22 @@ export const findThresholdSignals = async ({
             terms: {
               field: threshold.field,
               min_doc_count: threshold.value,
+              size: 10000, // max 10k buckets
+            },
+            aggs: {
+              // Get the most recent hit per bucket
+              top_threshold_hits: {
+                top_hits: {
+                  sort: [
+                    {
+                      [timestampOverride ?? '@timestamp']: {
+                        order: 'desc',
+                      },
+                    },
+                  ],
+                  size: 1,
+                },
+              },
             },
           },
         }
@@ -66,7 +86,9 @@ export const findThresholdSignals = async ({
     services,
     logger,
     filter,
-    pageSize: 0,
+    pageSize: 1,
+    sortOrder: 'desc',
     buildRuleMessage,
+    excludeDocsWithTimestampOverride: false,
   });
 };

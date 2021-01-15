@@ -13,7 +13,7 @@ import { NoFieldsCallout } from './no_fields_callout';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPrivateState } from './types';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
@@ -716,6 +716,25 @@ describe('IndexPattern Data Panel', () => {
         'memory',
         'timestamp',
       ]);
+    });
+
+    it('should announce filter in live region', () => {
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
+      act(() => {
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
+          target: { value: 'me' },
+        } as ChangeEvent<HTMLInputElement>);
+      });
+
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+        .find('button')
+        .first()
+        .simulate('click');
+
+      expect(wrapper.find('[aria-live="polite"]').text()).toEqual(
+        '1 available field. 1 empty field. 0 meta fields.'
+      );
     });
 
     it('should filter down by type', () => {

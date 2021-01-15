@@ -63,6 +63,9 @@ export class ExpressionLoader {
 
     this.renderHandler = new ExpressionRenderHandler(element, {
       onRenderError: params && params.onRenderError,
+      renderMode: params?.renderMode,
+      syncColors: params?.syncColors,
+      hasCompatibleActions: params?.hasCompatibleActions,
     });
     this.render$ = this.renderHandler.render$;
     this.update$ = this.renderHandler.update$;
@@ -151,6 +154,7 @@ export class ExpressionLoader {
       inspectorAdapters: params.inspectorAdapters,
       searchSessionId: params.searchSessionId,
       debug: params.debug,
+      syncColors: params.syncColors,
     });
 
     const prevDataHandler = this.execution;
@@ -186,6 +190,7 @@ export class ExpressionLoader {
     if (params.searchSessionId && this.params) {
       this.params.searchSessionId = params.searchSessionId;
     }
+    this.params.syncColors = params.syncColors;
     this.params.debug = Boolean(params.debug);
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||

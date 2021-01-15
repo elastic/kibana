@@ -5,7 +5,7 @@
  */
 import { EuiButtonIcon, EuiTextArea } from '@elastic/eui';
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { RoleValidator } from '../../validate_role';
 import { IndexPrivilegeForm } from './index_privilege_form';
 
@@ -34,6 +34,40 @@ test('it renders without crashing', () => {
 
   const wrapper = shallowWithIntl(<IndexPrivilegeForm {...props} />);
   expect(wrapper).toMatchSnapshot();
+});
+
+test('it allows for custom index privileges', () => {
+  const props = {
+    indexPrivilege: {
+      names: ['foo'],
+      privileges: ['existing-custom', 'read'],
+      query: '',
+      field_security: {
+        grant: [],
+      },
+    },
+    formIndex: 0,
+    indexPatterns: [],
+    availableFields: [],
+    availableIndexPrivileges: ['all', 'read', 'write', 'index'],
+    isRoleReadOnly: false,
+    allowDocumentLevelSecurity: true,
+    allowFieldLevelSecurity: true,
+    validator: new RoleValidator(),
+    onChange: jest.fn(),
+    onDelete: jest.fn(),
+    intl: {} as any,
+  };
+
+  const wrapper = mountWithIntl(<IndexPrivilegeForm {...props} />);
+
+  const indexPrivsSelect = wrapper.find('EuiComboBox[data-test-subj="privilegesInput0"]');
+
+  (indexPrivsSelect.props() as any).onCreateOption('custom-index-privilege');
+
+  expect(props.onChange).toHaveBeenCalledWith(
+    expect.objectContaining({ privileges: ['existing-custom', 'read', 'custom-index-privilege'] })
+  );
 });
 
 describe('delete button', () => {

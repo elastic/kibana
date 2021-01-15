@@ -13,7 +13,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton as EuiButtonExternal,
+  EuiButton,
 } from '@elastic/eui';
 
 import {
@@ -22,7 +22,8 @@ import {
   LICENSED_SUPPORT_URL,
 } from '../../../../common/constants';
 
-import { EuiButton } from '../react_router_helpers';
+import { EuiButtonTo } from '../react_router_helpers';
+import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { SetAppSearchChrome, SetWorkplaceSearchChrome } from '../kibana_chrome';
 import { SendAppSearchTelemetry, SendWorkplaceSearchTelemetry } from '../telemetry';
 import { LicensingLogic } from '../licensing';
@@ -37,9 +38,11 @@ interface NotFoundProps {
     ID: string;
     SUPPORT_URL: string;
   };
+  // Optional breadcrumbs
+  breadcrumbs?: BreadcrumbTrail;
 }
 
-export const NotFound: React.FC<NotFoundProps> = ({ product = {} }) => {
+export const NotFound: React.FC<NotFoundProps> = ({ product = {}, breadcrumbs }) => {
   const { hasGoldLicense } = useValues(LicensingLogic);
   const supportUrl = hasGoldLicense ? LICENSED_SUPPORT_URL : product.SUPPORT_URL;
 
@@ -64,7 +67,7 @@ export const NotFound: React.FC<NotFoundProps> = ({ product = {} }) => {
 
   return (
     <>
-      <SetPageChrome />
+      <SetPageChrome trail={breadcrumbs} />
       <SendTelemetry action="error" metric="not_found" />
 
       <EuiPageContent>
@@ -89,18 +92,18 @@ export const NotFound: React.FC<NotFoundProps> = ({ product = {} }) => {
           actions={
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiButton to="/" color="primary" fill>
+                <EuiButtonTo to="/" color="primary" fill>
                   {i18n.translate('xpack.enterpriseSearch.notFound.action1', {
                     defaultMessage: 'Back to your dashboard',
                   })}
-                </EuiButton>
+                </EuiButtonTo>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButtonExternal href={supportUrl} target="_blank">
+                <EuiButton href={supportUrl} target="_blank">
                   {i18n.translate('xpack.enterpriseSearch.notFound.action2', {
                     defaultMessage: 'Contact support',
                   })}
-                </EuiButtonExternal>
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           }

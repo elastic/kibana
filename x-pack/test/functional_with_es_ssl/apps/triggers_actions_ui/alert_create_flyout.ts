@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-function generateUniqueKey() {
-  return uuid.v4().replace(/-/g, '');
-}
+import { generateUniqueKey } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -71,6 +67,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await defineAlert(alertName);
 
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
+      await testSubjects.setValue('throttleInput', '10');
+
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
@@ -81,19 +81,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        'alert {{alertName}} group {{context.group}} value {{context.value}} exceeded threshold {{context.function}} over {{params.timeWindowSize}}{{params.timeWindowUnit}} on {{context.date}}'
+        `alert '{{alertName}}' is active for group '{{context.group}}':
+
+- Value: {{context.value}}
+- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+- Timestamp: {{context.date}}`
       );
       await testSubjects.setValue('messageTextArea', 'test message ');
       await testSubjects.click('messageAddVariableButton');
-      await testSubjects.click('variableMenuButton-0');
-      expect(await messageTextArea.getAttribute('value')).to.eql('test message {{alertId}}');
+      await testSubjects.click('variableMenuButton-alertActionGroup');
+      expect(await messageTextArea.getAttribute('value')).to.eql(
+        'test message {{alertActionGroup}}'
+      );
       await messageTextArea.type(' some additional text ');
 
       await testSubjects.click('messageAddVariableButton');
-      await testSubjects.click('variableMenuButton-1');
+      await testSubjects.click('variableMenuButton-alertId');
 
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        'test message {{alertId}} some additional text {{alertInstanceId}}'
+        'test message {{alertActionGroup}} some additional text {{alertId}}'
       );
 
       await testSubjects.click('saveAlertButton');
@@ -168,7 +174,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should show save confirmation before creating alert with no actions', async () => {
       const alertName = generateUniqueKey();
-      await defineAlert(alertName);
+      await defineAlwaysFiringAlert(alertName);
 
       await testSubjects.click('saveAlertButton');
       await testSubjects.existOrFail('confirmAlertSaveModal');
@@ -189,7 +195,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: alertName,
           tagsText: '',
-          alertType: 'Index threshold',
+          alertType: 'Always Firing',
           interval: '1m',
         },
       ]);
@@ -197,6 +203,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
       await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
+    });
+
+    it('should show discard confirmation before closing flyout without saving', async () => {
+      await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.click('cancelSaveAlertButton');
+      await testSubjects.missingOrFail('confirmAlertCloseModal');
+
+      await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.setValue('intervalInput', '10');
+      await testSubjects.click('cancelSaveAlertButton');
+      await testSubjects.existOrFail('confirmAlertCloseModal');
+      await testSubjects.click('confirmAlertCloseModal > confirmModalCancelButton');
+      await testSubjects.missingOrFail('confirmAlertCloseModal');
     });
   });
 };

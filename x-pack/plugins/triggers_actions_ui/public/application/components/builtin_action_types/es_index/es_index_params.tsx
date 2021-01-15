@@ -10,15 +10,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionParamsProps } from '../../../../types';
 import { IndexActionParams } from '.././types';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export const IndexParamsFields = ({
   actionParams,
   index,
   editAction,
   messageVariables,
-  docLinks,
   errors,
 }: ActionParamsProps<IndexActionParams>) => {
+  const { docLinks } = useKibana().services;
   const { documents } = actionParams;
 
   const onDocumentsChange = (updatedDocuments: string) => {
@@ -37,7 +38,11 @@ export const IndexParamsFields = ({
       paramsProperty={'documents'}
       data-test-subj="documentToIndex"
       inputTargetValue={
-        documents && documents.length > 0 ? ((documents[0] as unknown) as string) : undefined
+        documents === null
+          ? '{}' // need this to trigger validation
+          : documents && documents.length > 0
+          ? ((documents[0] as unknown) as string)
+          : undefined
       }
       label={i18n.translate(
         'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.documentsFieldLabel',

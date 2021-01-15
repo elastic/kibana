@@ -22,6 +22,8 @@ import './application/index.scss';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizePluginSetup } from '../../visualize/public';
+import { EditorController, TSVB_EDITOR_NAME } from './application';
 
 import { createMetricsFn } from './metrics_fn';
 import { metricsVisDefinition } from './metrics_type';
@@ -36,12 +38,14 @@ import {
 } from './services';
 import { DataPublicPluginStart } from '../../data/public';
 import { ChartsPluginSetup } from '../../charts/public';
+import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
 
 /** @internal */
 export interface MetricsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
+  visualize: VisualizePluginSetup;
 }
 
 /** @internal */
@@ -59,12 +63,18 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, charts }: MetricsPluginSetupDependencies
+    { expressions, visualizations, charts, visualize }: MetricsPluginSetupDependencies
   ) {
+    visualize.visEditorsRegistry.register(TSVB_EDITOR_NAME, EditorController);
     expressions.registerFunction(createMetricsFn);
+    expressions.registerRenderer(
+      getTimeseriesVisRenderer({
+        uiSettings: core.uiSettings,
+      })
+    );
     setUISettings(core.uiSettings);
     setChartsSetup(charts);
-    visualizations.createReactVisualization(metricsVisDefinition);
+    visualizations.createBaseVisualization(metricsVisDefinition);
   }
 
   public start(core: CoreStart, { data }: MetricsPluginStartDependencies) {

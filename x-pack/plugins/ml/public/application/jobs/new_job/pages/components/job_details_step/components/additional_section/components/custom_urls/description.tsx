@@ -14,8 +14,7 @@ export const Description: FC = memo(({ children }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
-  const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-url.html`;
+  const docsUrl = docLinks.links.ml.customUrls;
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrls.title',
     {

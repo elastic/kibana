@@ -54,7 +54,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   const {
     services: { docLinks },
   } = useMlKibana();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+  const docLink = docLinks.links.ml.featureImportance;
 
   if (featureImportance.length < 2) {
     return <DecisionPathJSONViewer featureImportance={featureImportance} />;
@@ -82,11 +82,12 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   ];
 
   return (
-    <>
+    <div data-test-subj="mlDFADecisionPathPopover">
       <div style={{ display: 'flex', width: 300 }}>
         <EuiTabs size={'s'}>
           {tabs.map((tab) => (
             <EuiTab
+              data-test-subj={`mlDFADecisionPathPopoverTab-${tab.id}`}
               isSelected={tab.id === selectedTabId}
               onClick={() => setSelectedTabId(tab.id)}
               key={tab.id}
@@ -105,10 +106,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
               values={{
                 predictionFieldName,
                 linkedFeatureImportanceValues: (
-                  <EuiLink
-                    href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-feature-importance.html`}
-                    target="_blank"
-                  >
+                  <EuiLink href={docLink} target="_blank">
                     <FormattedMessage
                       id="xpack.ml.dataframe.analytics.explorationResults.linkedFeatureImportanceValues"
                       defaultMessage="feature importance values"
@@ -146,6 +144,6 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
       {selectedTabId === DECISION_PATH_TABS.JSON && (
         <DecisionPathJSONViewer featureImportance={featureImportance} />
       )}
-    </>
+    </div>
   );
 };

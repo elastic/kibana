@@ -17,16 +17,19 @@
  * under the License.
  */
 
-import {
+import type {
   RequestHandlerContext,
   FakeRequest,
   IUiSettingsClient,
   SavedObjectsClientContract,
 } from 'kibana/server';
 
-import { Framework } from '../../../plugin';
-import { IndexPatternsFetcher } from '../../../../../data/server';
-import { VisPayload } from '../../../../common/types';
+import type { Framework } from '../../../plugin';
+import type { IndexPatternsFetcher, IFieldType } from '../../../../../data/server';
+import type { VisPayload } from '../../../../common/types';
+import type { IndexPatternsService } from '../../../../../data/common';
+import { indexPatterns } from '../../../../../data/server';
+import { SanitizedFieldType } from '../../../../common/types';
 
 /**
  * ReqFacade is a regular KibanaRequest object extended with additional service
@@ -39,41 +42,42 @@ export interface ReqFacade<T = unknown> extends FakeRequest {
   framework: Framework;
   payload: T;
   pre: {
-    indexPatternsService?: IndexPatternsFetcher;
+    indexPatternsFetcher?: IndexPatternsFetcher;
   };
   getUiSettingsService: () => IUiSettingsClient;
   getSavedObjectsClient: () => SavedObjectsClientContract;
   getEsShardTimeout: () => Promise<number>;
+  getIndexPatternsService: () => Promise<IndexPatternsService>;
 }
 
-export class AbstractSearchStrategy {
-  public indexType?: string;
-  public additionalParams: any;
+const toSanitizedFieldType = (fields: IFieldType[]) => {
+  return fields
+    .filter((field) => field.aggregatable && !indexPatterns.isNestedField(field))
+    .map(
+      (field: IFieldType) =>
+        ({
+          name: field.name,
+          label: field.customLabel ?? field.name,
+          type: field.type,
+        } as SanitizedFieldType)
+    );
+};
 
-  constructor(type?: string, additionalParams: any = {}) {
-    this.indexType = type;
-    this.additionalParams = additionalParams;
-  }
-
-  async search(req: ReqFacade<VisPayload>, bodies: any[], options = {}) {
+export abstract class AbstractSearchStrategy {
+  async search(req: ReqFacade<VisPayload>, bodies: any[], indexType?: string) {
     const requests: any[] = [];
-    const { sessionId } = req.payload;
 
     bodies.forEach((body) => {
       requests.push(
         req.requestContext
           .search!.search(
             {
+              indexType,
               params: {
                 ...body,
-                ...this.additionalParams,
               },
-              indexType: this.indexType,
             },
-            {
-              sessionId,
-              ...options,
-            }
+            req.payload.searchSession
           )
           .toPromise()
       );
@@ -81,19 +85,37 @@ export class AbstractSearchStrategy {
     return Promise.all(requests);
   }
 
-  async getFieldsForWildcard(req: ReqFacade, indexPattern: string, capabilities: any) {
-    const { indexPatternsService } = req.pre;
-
-    return await indexPatternsService!.getFieldsForWildcard({
-      pattern: indexPattern,
-      fieldCapsOptions: { allow_no_indices: true },
-    });
+  checkForViability(
+    req: ReqFacade<VisPayload>,
+    indexPattern: string
+  ): Promise<{ isViable: boolean; capabilities: unknown }> {
+    throw new TypeError('Must override method');
   }
 
-  checkForViability(
-    req: ReqFacade,
-    indexPattern: string
-  ): { isViable: boolean; capabilities: any } {
-    throw new TypeError('Must override method');
+  async getFieldsForWildcard<TPayload = unknown>(
+    req: ReqFacade<TPayload>,
+    indexPattern: string,
+    capabilities?: unknown,
+    options?: Partial<{
+      type: string;
+      rollupIndex: string;
+    }>
+  ) {
+    const { indexPatternsFetcher } = req.pre;
+    const indexPatternsService = await req.getIndexPatternsService();
+    const kibanaIndexPattern = (await indexPatternsService.find(indexPattern)).find(
+      (index) => index.title === indexPattern
+    );
+
+    return toSanitizedFieldType(
+      kibanaIndexPattern
+        ? kibanaIndexPattern.fields.getAll()
+        : await indexPatternsFetcher!.getFieldsForWildcard({
+            pattern: indexPattern,
+            fieldCapsOptions: { allow_no_indices: true },
+            metaFields: [],
+            ...options,
+          })
+    );
   }
 }

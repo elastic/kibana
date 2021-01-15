@@ -18,8 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { Schemas } from '../../vis_default_editor/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 import { TagCloudOptions } from './components/tag_cloud_options';
@@ -27,13 +25,13 @@ import { toExpressionAst } from './to_ast';
 
 export const tagCloudVisTypeDefinition = {
   name: 'tagcloud',
-  title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag Cloud' }),
+  title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag cloud' }),
   icon: 'visTagCloud',
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter];
   },
   description: i18n.translate('visTypeTagCloud.vis.tagCloudDescription', {
-    defaultMessage: 'A group of words, sized according to their importance',
+    defaultMessage: 'Display word frequency with font size.',
   }),
   visConfig: {
     defaults: {
@@ -89,7 +87,7 @@ export const tagCloudVisTypeDefinition = {
       ],
     },
     optionsTemplate: TagCloudOptions,
-    schemas: new Schemas([
+    schemas: [
       {
         group: 'metrics',
         name: 'metric',
@@ -118,6 +116,6 @@ export const tagCloudVisTypeDefinition = {
         max: 1,
         aggFilter: ['terms', 'significant_terms'],
       },
-    ]),
+    ],
   },
 };

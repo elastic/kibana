@@ -393,6 +393,102 @@ describe('TaskManagerRunner', () => {
     );
   });
 
+  test('calculates retryAt by schedule when running a recurring task', async () => {
+    const intervalMinutes = 10;
+    const id = _.random(1, 20).toString();
+    const initialAttempts = _.random(0, 2);
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        schedule: {
+          interval: `${intervalMinutes}m`,
+        },
+      },
+      definitions: {
+        bar: {
+          title: 'Bar!',
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
+      },
+    });
+
+    await runner.markTaskAsRunning();
+
+    sinon.assert.calledOnce(store.update);
+    const instance = store.update.args[0][0];
+
+    expect(instance.retryAt.getTime()).toEqual(
+      instance.startedAt.getTime() + intervalMinutes * 60 * 1000
+    );
+  });
+
+  test('calculates retryAt by default timout when it exceeds the schedule of a recurring task', async () => {
+    const intervalSeconds = 20;
+    const id = _.random(1, 20).toString();
+    const initialAttempts = _.random(0, 2);
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        schedule: {
+          interval: `${intervalSeconds}s`,
+        },
+      },
+      definitions: {
+        bar: {
+          title: 'Bar!',
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
+      },
+    });
+
+    await runner.markTaskAsRunning();
+
+    sinon.assert.calledOnce(store.update);
+    const instance = store.update.args[0][0];
+
+    expect(instance.retryAt.getTime()).toEqual(instance.startedAt.getTime() + 5 * 60 * 1000);
+  });
+
+  test('calculates retryAt by timeout if it exceeds the schedule when running a recurring task', async () => {
+    const timeoutMinutes = 1;
+    const intervalSeconds = 20;
+    const id = _.random(1, 20).toString();
+    const initialAttempts = _.random(0, 2);
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        schedule: {
+          interval: `${intervalSeconds}s`,
+        },
+      },
+      definitions: {
+        bar: {
+          title: 'Bar!',
+          timeout: `${timeoutMinutes}m`,
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
+      },
+    });
+
+    await runner.markTaskAsRunning();
+
+    sinon.assert.calledOnce(store.update);
+    const instance = store.update.args[0][0];
+
+    expect(instance.retryAt.getTime()).toEqual(
+      instance.startedAt.getTime() + timeoutMinutes * 60 * 1000
+    );
+  });
+
   test('uses getRetry function (returning date) on error when defined', async () => {
     const initialAttempts = _.random(1, 3);
     const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);

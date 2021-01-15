@@ -33,8 +33,8 @@ import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { IngestManagerStartContract, ExternalCallback } from '../../fleet/server';
+import { ILicense, LicensingPluginStart } from '../../licensing/server';
+import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -74,13 +74,14 @@ import {
   TelemetryPluginStart,
   TelemetryPluginSetup,
 } from '../../../../src/plugins/telemetry/server';
+import { licenseService } from './lib/license/license';
+import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
   data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
-  licensing: LicensingPluginSetup;
   lists?: ListPluginSetup;
   ml?: MlSetup;
   security?: SecuritySetup;
@@ -93,7 +94,8 @@ export interface SetupPlugins {
 export interface StartPlugins {
   alerts: AlertPluginStartContract;
   data: DataPluginStart;
-  ingestManager?: IngestManagerStartContract;
+  fleet?: FleetStartContract;
+  licensing: LicensingPluginStart;
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
 }
@@ -125,13 +127,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
+  private licensing$!: Observable<ILicense>;
+  private policyWatcher?: PolicyWatcher;
 
   private manifestTask: ManifestTask | undefined;
   private exceptionsCache: LRU<string, Buffer>;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
-    this.logger = context.logger.get('plugins', APP_ID);
+    this.logger = context.logger.get();
     this.config$ = createConfig$(context);
     this.appClientFactory = new AppClientFactory();
     // Cache up to three artifacts with a max retention of 5 mins each
@@ -288,7 +292,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    const libs = compose(core, plugins, this.context.env.mode.prod, endpointContext);
+    const libs = compose(core, plugins, endpointContext);
     initServer(libs);
 
     core.getStartServices().then(([_, depsStart]) => {
@@ -312,39 +316,55 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     });
 
-    this.telemetryEventsSender.setup(plugins.telemetry);
+    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);
 
     return {};
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
-
+    const registerIngestCallback = plugins.fleet?.registerExternalCallback;
     let manifestManager: ManifestManager | undefined;
-    let registerIngestCallback: ((...args: ExternalCallback) => void) | undefined;
 
-    const exceptionListsStartEnabled = () => {
-      return this.lists && plugins.taskManager && plugins.ingestManager;
-    };
+    this.licensing$ = plugins.licensing.license$;
 
-    if (exceptionListsStartEnabled()) {
-      const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
+    if (this.lists && plugins.taskManager && plugins.fleet) {
+      // Exceptions, Artifacts and Manifests start
+      const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
       const artifactClient = new ArtifactClient(savedObjectsClient);
 
-      registerIngestCallback = plugins.ingestManager!.registerExternalCallback;
       manifestManager = new ManifestManager({
         savedObjectsClient,
         artifactClient,
         exceptionListClient,
-        packagePolicyService: plugins.ingestManager!.packagePolicyService,
+        packagePolicyService: plugins.fleet.packagePolicyService,
         logger: this.logger,
         cache: this.exceptionsCache,
       });
+
+      if (this.manifestTask) {
+        this.manifestTask.start({
+          taskManager: plugins.taskManager,
+        });
+      } else {
+        this.logger.debug('User artifacts task not available.');
+      }
+
+      // License related start
+      licenseService.start(this.licensing$);
+      this.policyWatcher = new PolicyWatcher(
+        plugins.fleet!.packagePolicyService,
+        core.savedObjects,
+        this.logger
+      );
+      this.policyWatcher.start(licenseService);
     }
 
     this.endpointAppContextService.start({
-      agentService: plugins.ingestManager?.agentService,
-      packageService: plugins.ingestManager?.packageService,
+      agentService: plugins.fleet?.agentService,
+      packageService: plugins.fleet?.packageService,
+      packagePolicyService: plugins.fleet?.packagePolicyService,
+      agentPolicyService: plugins.fleet?.agentPolicyService,
       appClientFactory: this.appClientFactory,
       security: this.setupPlugins!.security!,
       alerts: plugins.alerts,
@@ -353,18 +373,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       manifestManager,
       registerIngestCallback,
       savedObjectsStart: core.savedObjects,
+      licenseService,
     });
 
-    if (exceptionListsStartEnabled() && this.manifestTask) {
-      this.manifestTask.start({
-        taskManager: plugins.taskManager!,
-      });
-    } else {
-      this.logger.debug('User artifacts task not available.');
-    }
-
-    this.telemetryEventsSender.start(core, plugins.telemetry);
-
+    this.telemetryEventsSender.start(core, plugins.telemetry, plugins.taskManager);
     return {};
   }
 
@@ -372,5 +384,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger.debug('Stopping plugin');
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
+    this.policyWatcher?.stop();
+    licenseService.stop();
   }
 }

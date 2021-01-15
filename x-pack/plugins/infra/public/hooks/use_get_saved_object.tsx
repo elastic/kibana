@@ -33,7 +33,6 @@ export const useGetSavedObject = <SavedObjectType extends SavedObjectAttributes>
       };
       fetchData();
     },
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [type, kibana.services.savedObjects]
   );
 

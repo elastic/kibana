@@ -29,10 +29,22 @@ export type ISearchGeneric = <
 ) => Observable<SearchStrategyResponse>;
 
 export type ISearchCancelGeneric = (id: string, options?: ISearchOptions) => Promise<void>;
+export type ISearchExtendGeneric = (
+  id: string,
+  keepAlive: string,
+  options?: ISearchOptions
+) => Promise<void>;
 
 export interface ISearchClient {
   search: ISearchGeneric;
+  /**
+   * Used to cancel an in-progress search request.
+   */
   cancel: ISearchCancelGeneric;
+  /**
+   * Used to extend the TTL of an in-progress search request.
+   */
+  extend: ISearchExtendGeneric;
 }
 
 export interface IKibanaSearchResponse<RawResponse = any> {
@@ -92,4 +104,15 @@ export interface ISearchOptions {
    * A session ID, grouping multiple search requests into a single session.
    */
   sessionId?: string;
+
+  /**
+   * Whether the session is already saved (i.e. sent to background)
+   */
+  isStored?: boolean;
+
+  /**
+   * Whether the session is restored (i.e. search requests should re-use the stored search IDs,
+   * rather than starting from scratch)
+   */
+  isRestore?: boolean;
 }

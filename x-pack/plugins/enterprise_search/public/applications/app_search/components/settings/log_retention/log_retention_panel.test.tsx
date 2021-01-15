@@ -12,8 +12,8 @@ import { setMockActions, setMockValues } from '../../../../__mocks__';
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import { LogRetention } from '../../log_retention/types';
 import { LogRetentionPanel } from './log_retention_panel';
-import { ILogRetention } from './types';
 
 describe('<LogRetentionPanel />', () => {
   const actions = {
@@ -160,7 +160,7 @@ describe('<LogRetentionPanel />', () => {
   });
 });
 
-const mockLogRetention = (logRetention: Partial<ILogRetention>) => {
+const mockLogRetention = (logRetention: Partial<LogRetention>) => {
   const baseLogRetention = {
     analytics: {
       disabledAt: null,

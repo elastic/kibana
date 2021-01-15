@@ -24,23 +24,31 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Option, none, some } from 'fp-ts/lib/Option';
-import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
+import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
 import { TestConnectorForm } from './test_connector_form';
-import { ActionConnector, IErrorObject } from '../../../types';
-import { connectorReducer } from './connector_reducer';
+import {
+  ActionConnector,
+  ActionTypeRegistryContract,
+  UserConfiguredActionConnector,
+} from '../../../types';
+import { ConnectorReducer, createConnectorReducer } from './connector_reducer';
 import { updateActionConnector, executeAction } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import {
   ActionTypeExecutorResult,
   isActionTypeExecutorResult,
 } from '../../../../../actions/common';
 import './connector_edit_flyout.scss';
+import { useKibana } from '../../../common/lib/kibana';
+import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
 
-export interface ConnectorEditProps {
+export interface ConnectorEditFlyoutProps {
   initialConnector: ActionConnector;
   onClose: () => void;
   tab?: EditConectorTabs;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export enum EditConectorTabs {
@@ -52,27 +60,39 @@ export const ConnectorEditFlyout = ({
   initialConnector,
   onClose,
   tab = EditConectorTabs.Configuration,
-}: ConnectorEditProps) => {
+  reloadConnectors,
+  consumer,
+  actionTypeRegistry,
+}: ConnectorEditFlyoutProps) => {
   const {
     http,
-    toastNotifications,
-    capabilities,
-    actionTypeRegistry,
-    reloadConnectors,
+    notifications: { toasts },
     docLinks,
-    consumer,
-  } = useActionsConnectorsContext();
+    application: { capabilities },
+  } = useKibana().services;
+  const getConnectorWithoutSecrets = () => ({
+    ...(initialConnector as UserConfiguredActionConnector<
+      Record<string, unknown>,
+      Record<string, unknown>
+    >),
+    secrets: {},
+  });
   const canSave = hasSaveActionsCapability(capabilities);
 
-  const [{ connector }, dispatch] = useReducer(connectorReducer, {
-    connector: { ...initialConnector, secrets: {} },
+  const reducer: ConnectorReducer<
+    Record<string, unknown>,
+    Record<string, unknown>
+  > = createConnectorReducer<Record<string, unknown>, Record<string, unknown>>();
+  const [{ connector }, dispatch] = useReducer(reducer, {
+    connector: getConnectorWithoutSecrets(),
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [selectedTab, setTab] = useState<EditConectorTabs>(tab);
 
   const [hasChanges, setHasChanges] = useState<boolean>(false);
-  const setConnector = (key: string, value: any) => {
-    dispatch({ command: { type: 'setConnector' }, payload: { key, value } });
+
+  const setConnector = (value: any) => {
+    dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
   };
 
   const [testExecutionActionParams, setTestExecutionActionParams] = useState<
@@ -82,9 +102,22 @@ export const ConnectorEditFlyout = ({
     Option<ActionTypeExecutorResult<unknown>>
   >(none);
   const [isExecutingAction, setIsExecutinAction] = useState<boolean>(false);
+  const handleSetTab = useCallback(
+    () =>
+      setTab((prevTab) => {
+        if (prevTab === EditConectorTabs.Configuration) {
+          return EditConectorTabs.Test;
+        }
+        if (testExecutionResult !== none) {
+          setTestExecutionResult(none);
+        }
+        return EditConectorTabs.Configuration;
+      }),
+    [testExecutionResult]
+  );
 
   const closeFlyout = useCallback(() => {
-    setConnector('connector', { ...initialConnector, secrets: {} });
+    setConnector(getConnectorWithoutSecrets());
     setHasChanges(false);
     setTestExecutionResult(none);
     onClose();
@@ -92,20 +125,28 @@ export const ConnectorEditFlyout = ({
   }, [onClose]);
 
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
-  const errorsInConnectorConfig = (!connector.isPreconfigured
-    ? {
-        ...actionTypeModel?.validateConnector(connector).errors,
-        ...validateBaseProperties(connector).errors,
-      }
-    : {}) as IErrorObject;
-  const hasErrorsInConnectorConfig = !!Object.keys(errorsInConnectorConfig).find(
-    (errorKey) => errorsInConnectorConfig[errorKey].length >= 1
+  const {
+    configErrors,
+    connectorBaseErrors,
+    connectorErrors,
+    secretsErrors,
+  } = !connector.isPreconfigured
+    ? getConnectorErrors(connector, actionTypeModel)
+    : {
+        configErrors: {},
+        connectorBaseErrors: {},
+        connectorErrors: {},
+        secretsErrors: {},
+      };
+
+  const hasErrors = !!Object.keys(connectorErrors).find(
+    (errorKey) => connectorErrors[errorKey].length >= 1
   );
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await updateActionConnector({ http, connector, id: connector.id })
       .then((savedConnector) => {
-        toastNotifications.addSuccess(
+        toasts.addSuccess(
           i18n.translate(
             'xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText',
             {
@@ -119,7 +160,7 @@ export const ConnectorEditFlyout = ({
         return savedConnector;
       })
       .catch((errorRes) => {
-        toastNotifications.addDanger(
+        toasts.addDanger(
           errorRes.body?.message ??
             i18n.translate(
               'xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText',
@@ -193,6 +234,17 @@ export const ConnectorEditFlyout = ({
   };
 
   const onSaveClicked = async (closeAfterSave: boolean = true) => {
+    if (hasErrors) {
+      setConnector(
+        getConnectorWithInvalidatedFields(
+          connector,
+          configErrors,
+          secretsErrors,
+          connectorBaseErrors
+        )
+      );
+      return;
+    }
     setIsSaving(true);
     const savedAction = await onActionConnectorSave();
     setIsSaving(false);
@@ -220,7 +272,7 @@ export const ConnectorEditFlyout = ({
         </EuiFlexGroup>
         <EuiTabs className="connectorEditFlyoutTabs">
           <EuiTab
-            onClick={() => setTab(EditConectorTabs.Configuration)}
+            onClick={handleSetTab}
             data-test-subj="configureConnectorTab"
             isSelected={EditConectorTabs.Configuration === selectedTab}
           >
@@ -229,7 +281,7 @@ export const ConnectorEditFlyout = ({
             })}
           </EuiTab>
           <EuiTab
-            onClick={() => setTab(EditConectorTabs.Test)}
+            onClick={handleSetTab}
             data-test-subj="testConnectorTab"
             isSelected={EditConectorTabs.Test === selectedTab}
           >
@@ -244,8 +296,7 @@ export const ConnectorEditFlyout = ({
           !connector.isPreconfigured ? (
             <ActionConnectorForm
               connector={connector}
-              errors={errorsInConnectorConfig}
-              actionTypeName={connector.actionType}
+              errors={connectorErrors}
               dispatch={(changes) => {
                 setHasChanges(true);
                 // if the user changes the connector, "forget" the last execution
@@ -254,9 +305,6 @@ export const ConnectorEditFlyout = ({
                 dispatch(changes);
               }}
               actionTypeRegistry={actionTypeRegistry}
-              http={http}
-              docLinks={docLinks}
-              capabilities={capabilities}
               consumer={consumer}
             />
           ) : (
@@ -289,6 +337,7 @@ export const ConnectorEditFlyout = ({
             onExecutAction={onExecutAction}
             isExecutingAction={isExecutingAction}
             executionResult={testExecutionResult}
+            actionTypeRegistry={actionTypeRegistry}
           />
         )}
       </EuiFlyoutBody>
@@ -312,7 +361,6 @@ export const ConnectorEditFlyout = ({
                     <EuiButton
                       color="secondary"
                       data-test-subj="saveEditedActionButton"
-                      isDisabled={hasErrorsInConnectorConfig || !hasChanges}
                       isLoading={isSaving || isExecutingAction}
                       onClick={async () => {
                         await onSaveClicked(false);
@@ -330,7 +378,6 @@ export const ConnectorEditFlyout = ({
                       color="secondary"
                       data-test-subj="saveAndCloseEditedActionButton"
                       type="submit"
-                      isDisabled={hasErrorsInConnectorConfig || !hasChanges}
                       isLoading={isSaving || isExecutingAction}
                       onClick={async () => {
                         await onSaveClicked();
@@ -338,7 +385,7 @@ export const ConnectorEditFlyout = ({
                     >
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.editConnectorForm.saveAndCloseButtonLabel"
-                        defaultMessage="Save & Close"
+                        defaultMessage="Save & close"
                       />
                     </EuiButton>
                   </EuiFlexItem>

@@ -56,7 +56,7 @@ import {
 } from './queries/mark_available_tasks_as_claimed';
 import { TaskTypeDictionary } from './task_type_dictionary';
 
-import { ESSearchResponse, ESSearchBody } from '../../apm/typings/elasticsearch';
+import { ESSearchResponse, ESSearchBody } from '../../../typings/elasticsearch';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -98,7 +98,11 @@ export interface FetchResult {
 }
 
 export interface ClaimOwnershipResult {
-  claimedTasks: number;
+  stats: {
+    tasksUpdated: number;
+    tasksConflicted: number;
+    tasksClaimed: number;
+  };
   docs: ConcreteTaskInstance[];
 }
 
@@ -186,9 +190,10 @@ export class TaskStore {
    *
    * @param opts - The query options used to filter tasks
    */
-  public async fetch({ sort = [{ 'task.runAt': 'asc' }], ...opts }: SearchOpts = {}): Promise<
-    FetchResult
-  > {
+  public async fetch({
+    sort = [{ 'task.runAt': 'asc' }],
+    ...opts
+  }: SearchOpts = {}): Promise<FetchResult> {
     return this.search({
       ...opts,
       sort,
@@ -213,16 +218,13 @@ export class TaskStore {
       this.serializer.generateRawId(undefined, 'task', id)
     );
 
-    const numberOfTasksClaimed = await this.markAvailableTasksAsClaimed(
-      claimOwnershipUntil,
-      claimTasksByIdWithRawIds,
-      size
-    );
+    const {
+      updated: tasksUpdated,
+      version_conflicts: tasksConflicted,
+    } = await this.markAvailableTasksAsClaimed(claimOwnershipUntil, claimTasksByIdWithRawIds, size);
 
     const docs =
-      numberOfTasksClaimed > 0
-        ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, size)
-        : [];
+      tasksUpdated > 0 ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, size) : [];
 
     const [documentsReturnedById, documentsClaimedBySchedule] = partition(docs, (doc) =>
       claimTasksById.includes(doc.id)
@@ -249,7 +251,11 @@ export class TaskStore {
     ]);
 
     return {
-      claimedTasks: documentsClaimedById.length + documentsClaimedBySchedule.length,
+      stats: {
+        tasksUpdated,
+        tasksConflicted,
+        tasksClaimed: documentsClaimedById.length + documentsClaimedBySchedule.length,
+      },
       docs: docs.filter((doc) => doc.status === TaskStatus.Claiming),
     };
   };
@@ -258,7 +264,8 @@ export class TaskStore {
     claimOwnershipUntil: OwnershipClaimingOpts['claimOwnershipUntil'],
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
     size: OwnershipClaimingOpts['size']
-  ): Promise<number> {
+  ): Promise<UpdateByQueryResult> {
+    const registeredTaskTypes = this.definitions.getAllTypes();
     const taskMaxAttempts = [...this.definitions].reduce((accumulator, [type, { maxAttempts }]) => {
       return { ...accumulator, [type]: maxAttempts || this.maxAttempts };
     }, {});
@@ -280,7 +287,7 @@ export class TaskStore {
     }
 
     const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
-    const { updated } = await this.updateByQuery(
+    const result = await this.updateByQuery(
       asUpdateByQuery({
         query: matchesClauses(
           mustBeAllOf(
@@ -296,6 +303,7 @@ export class TaskStore {
             retryAt: claimOwnershipUntil,
           },
           claimTasksById || [],
+          registeredTaskTypes,
           taskMaxAttempts
         ),
         sort,
@@ -306,7 +314,7 @@ export class TaskStore {
     );
 
     if (apmTrans) apmTrans.end();
-    return updated;
+    return result;
   }
 
   /**
@@ -380,9 +388,9 @@ export class TaskStore {
 
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error>;
     try {
-      ({ saved_objects: updatedSavedObjects } = await this.savedObjectsRepository.bulkUpdate<
-        SerializedConcreteTaskInstance
-      >(
+      ({
+        saved_objects: updatedSavedObjects,
+      } = await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
         docs.map((doc) => ({
           type: 'task',
           id: doc.id,

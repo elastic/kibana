@@ -37,7 +37,6 @@ export const PanelRouter = memo(function () {
     return (
       <EventDetail
         nodeID={params.panelParameters.nodeID}
-        eventID={params.panelParameters.eventID}
         eventCategory={params.panelParameters.eventCategory}
       />
     );

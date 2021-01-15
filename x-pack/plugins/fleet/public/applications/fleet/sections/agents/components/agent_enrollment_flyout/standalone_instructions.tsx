@@ -21,7 +21,7 @@ import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentPolicy } from '../../../../types';
-import { useCore, useLink, sendGetOneAgentPolicyFull } from '../../../../hooks';
+import { useStartServices, useLink, sendGetOneAgentPolicyFull } from '../../../../hooks';
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../../services';
 
@@ -33,7 +33,7 @@ const RUN_INSTRUCTIONS = './elastic-agent install';
 
 export const StandaloneInstructions = React.memo<Props>(({ agentPolicies }) => {
   const { getHref } = useLink();
-  const core = useCore();
+  const core = useStartServices();
   const { notifications } = core;
 
   const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>();

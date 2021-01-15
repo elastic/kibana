@@ -33,13 +33,18 @@ import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_sele
 import { getMapAttributeService } from '../../../map_attribute_service';
 import { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/public';
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
-import { getCoreChrome, getToasts, getIsAllowByValueEmbeddables } from '../../../kibana_services';
+import {
+  getCoreChrome,
+  getToasts,
+  getIsAllowByValueEmbeddables,
+  getSavedObjectsTagging,
+} from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
-import { getInitialLayers } from './get_initial_layers';
 import { copyPersistentState } from '../../../reducers/util';
 import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
+import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
@@ -51,6 +56,7 @@ export class SavedMap {
   private _originatingApp?: string;
   private readonly _stateTransfer?: EmbeddableStateTransfer;
   private readonly _store: MapStore;
+  private _tags: string[] = [];
 
   constructor({
     defaultLayers = [],
@@ -87,10 +93,18 @@ export class SavedMap {
         description: '',
       };
     } else {
-      this._attributes = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
+      const doc = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
+      const { references, ...savedObjectAttributes } = doc;
+      this._attributes = savedObjectAttributes;
+      const savedObjectsTagging = getSavedObjectsTagging();
+      if (savedObjectsTagging && references && references.length) {
+        this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
+      }
     }
 
-    if (this._attributes?.mapStateJSON) {
+    if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapSettings !== undefined) {
+      this._store.dispatch(setMapSettings(this._mapEmbeddableInput.mapSettings));
+    } else if (this._attributes?.mapStateJSON) {
       const mapState = JSON.parse(this._attributes.mapStateJSON);
       if (mapState.settings) {
         this._store.dispatch(setMapSettings(mapState.settings));
@@ -138,7 +152,18 @@ export class SavedMap {
       );
     }
 
-    const layerList = getInitialLayers(this._attributes.layerListJSON, this._defaultLayers);
+    let layerList: LayerDescriptor[] = [];
+    if (this._attributes.layerListJSON) {
+      layerList = JSON.parse(this._attributes.layerListJSON);
+    } else {
+      const basemapLayerDescriptor = createBasemapLayerDescriptor();
+      if (basemapLayerDescriptor) {
+        layerList.push(basemapLayerDescriptor);
+      }
+      if (this._defaultLayers.length) {
+        layerList.push(...this._defaultLayers);
+      }
+    }
     this._store.dispatch<any>(replaceLayerList(layerList));
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.hiddenLayers !== undefined) {
       this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableInput.hiddenLayers));
@@ -216,6 +241,10 @@ export class SavedMap {
     return this._getStateTransfer().getAppNameFromId(appId);
   };
 
+  public getTags(): string[] {
+    return this._tags;
+  }
+
   public hasSaveAndReturnConfig() {
     const hasOriginatingApp = !!this._originatingApp;
     const isNewMap = !this.getSavedObjectId();
@@ -247,9 +276,11 @@ export class SavedMap {
     newTitle,
     newCopyOnSave,
     returnToOrigin,
+    newTags,
     saveByReference,
   }: OnSaveProps & {
     returnToOrigin: boolean;
+    newTags?: string[];
     saveByReference: boolean;
   }) {
     if (!this._attributes) {
@@ -264,8 +295,17 @@ export class SavedMap {
 
     let updatedMapEmbeddableInput: MapEmbeddableInput;
     try {
+      const savedObjectsTagging = getSavedObjectsTagging();
+      // Attribute service deviates from Saved Object client by including references as a child to attributes in stead of a sibling
+      const attributes =
+        savedObjectsTagging && newTags
+          ? {
+              ...this._attributes,
+              references: savedObjectsTagging.ui.updateTagsReferences([], newTags),
+            }
+          : this._attributes;
       updatedMapEmbeddableInput = (await getMapAttributeService().wrapAttributes(
-        this._attributes,
+        attributes,
         saveByReference,
         newCopyOnSave ? undefined : this._mapEmbeddableInput
       )) as MapEmbeddableInput;
@@ -302,6 +342,10 @@ export class SavedMap {
     this._mapEmbeddableInput = updatedMapEmbeddableInput;
     // break connection to originating application
     this._originatingApp = undefined;
+
+    // remove editor state so the connection is still broken after reload
+    this._getStateTransfer().clearEditorState();
+
     getToasts().addSuccess({
       title: i18n.translate('xpack.maps.topNav.saveSuccessMessage', {
         defaultMessage: `Saved '{title}'`,

@@ -25,6 +25,8 @@ export {
   GlobalSearchProviderResult,
   GlobalSearchProviderResultUrl,
   GlobalSearchResult,
+  GlobalSearchFindParams,
+  GlobalSearchProviderFindParams,
 } from '../common/types';
 export {
   GlobalSearchPluginSetup,

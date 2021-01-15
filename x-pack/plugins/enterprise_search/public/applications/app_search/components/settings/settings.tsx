@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -15,8 +16,8 @@ import {
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
-import { LogRetentionPanel } from './log_retention/log_retention_panel';
 
+import { LogRetentionPanel, LogRetentionConfirmationModal } from './log_retention';
 import { SETTINGS_TITLE } from './';
 
 export const Settings: React.FC = () => {
@@ -33,6 +34,7 @@ export const Settings: React.FC = () => {
       <EuiPageContent>
         <EuiPageContentBody>
           <FlashMessages />
+          <LogRetentionConfirmationModal />
           <LogRetentionPanel />
         </EuiPageContentBody>
       </EuiPageContent>

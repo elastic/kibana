@@ -294,7 +294,22 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         />
       </SearchBarContainer>
     );
-  }
+  },
+  (prevProps, nextProps) =>
+    prevProps.end === nextProps.end &&
+    prevProps.filterQuery === nextProps.filterQuery &&
+    prevProps.fromStr === nextProps.fromStr &&
+    prevProps.id === nextProps.id &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.savedQuery === nextProps.savedQuery &&
+    prevProps.setSavedQuery === nextProps.setSavedQuery &&
+    prevProps.setSearchBarFilter === nextProps.setSearchBarFilter &&
+    prevProps.start === nextProps.start &&
+    prevProps.toStr === nextProps.toStr &&
+    prevProps.updateSearch === nextProps.updateSearch &&
+    prevProps.dataTestSubj === nextProps.dataTestSubj &&
+    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+    deepEqual(prevProps.queries, nextProps.queries)
 );
 
 const makeMapStateToProps = () => {

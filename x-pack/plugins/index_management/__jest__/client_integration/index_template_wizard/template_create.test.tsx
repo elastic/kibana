@@ -266,9 +266,7 @@ describe('<TemplateCreate />', () => {
       it('should not allow invalid json', async () => {
         const { form, actions } = testBed;
 
-        await act(async () => {
-          actions.completeStepThree('{ invalidJsonString ');
-        });
+        await actions.completeStepThree('{ invalidJsonString ');
 
         expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
       });

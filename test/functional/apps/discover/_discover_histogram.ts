@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dateFormat:tz': 'Europe/Berlin',
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/81576
-  describe.skip('discover histogram', function describeIndexTests() {
+  describe('discover histogram', function describeIndexTests() {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('long_window_logstash');

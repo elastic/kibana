@@ -76,6 +76,11 @@ describe('process options for run tests CLI', () => {
     expect(options).toMatchSnapshot();
   });
 
+  it('accepts boolean value for updateSnapshots', () => {
+    const options = processOptions({ updateSnapshots: true }, ['foo']);
+    expect(options).toMatchSnapshot();
+  });
+
   it('accepts source value for esFrom', () => {
     const options = processOptions({ esFrom: 'source' }, ['foo']);
     expect(options).toMatchSnapshot();

@@ -22,6 +22,7 @@ import {
 import { AlertAction, ActionTypeIndex } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
+import { useKibana } from '../../../common/lib/kibana';
 
 type AddConnectorInFormProps = {
   actionTypesIndex: ActionTypeIndex;
@@ -30,7 +31,7 @@ type AddConnectorInFormProps = {
   onAddConnector: () => void;
   onDeleteConnector: () => void;
   emptyActionsIds: string[];
-} & Pick<ActionAccordionFormProps, 'actionTypeRegistry' | 'defaultActionGroupId' | 'capabilities'>;
+} & Pick<ActionAccordionFormProps, 'actionTypeRegistry'>;
 
 export const AddConnectorInline = ({
   actionTypesIndex,
@@ -40,16 +41,16 @@ export const AddConnectorInline = ({
   onDeleteConnector,
   actionTypeRegistry,
   emptyActionsIds,
-  defaultActionGroupId,
-  capabilities,
 }: AddConnectorInFormProps) => {
+  const {
+    application: { capabilities },
+  } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
 
   const actionTypeName = actionTypesIndex
     ? actionTypesIndex[actionItem.actionTypeId].name
     : actionItem.actionTypeId;
   const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
-  if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
 
   const noConnectorsLabel = (
     <FormattedMessage
@@ -111,6 +112,7 @@ export const AddConnectorInline = ({
                 noConnectorsLabel
               ) : (
                 <EuiCallOut
+                  data-test-subj="alertActionAccordionCallout"
                   title={i18n.translate(
                     'xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle',
                     {
@@ -126,7 +128,7 @@ export const AddConnectorInline = ({
                 color="primary"
                 fill
                 size="s"
-                data-test-subj="createActionConnectorButton"
+                data-test-subj={`createActionConnectorButton-${index}`}
                 onClick={onAddConnector}
               >
                 <FormattedMessage

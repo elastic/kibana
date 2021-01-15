@@ -12,6 +12,18 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { SavedObjectActions } from '../authorization/actions/saved_object';
 import { AuditEvent, EventOutcome } from '../audit';
 
+jest.mock('../../../../../src/core/server/saved_objects/service/lib/utils', () => {
+  const { SavedObjectsUtils } = jest.requireActual(
+    '../../../../../src/core/server/saved_objects/service/lib/utils'
+  );
+  return {
+    SavedObjectsUtils: {
+      createEmptyFindResponse: SavedObjectsUtils.createEmptyFindResponse,
+      generateId: () => 'mock-saved-object-id',
+    },
+  };
+});
+
 let clientOpts: ReturnType<typeof createSecureSavedObjectsClientWrapperOptions>;
 let client: SecureSavedObjectsClientWrapper;
 const USERNAME = Symbol();
@@ -551,7 +563,7 @@ describe('#bulkGet', () => {
   });
 
   test(`adds audit event when successful`, async () => {
-    const apiCallReturnValue = { saved_objects: [], foo: 'bar' };
+    const apiCallReturnValue = { saved_objects: [obj1, obj2], foo: 'bar' };
     clientOpts.baseClient.bulkGet.mockReturnValue(apiCallReturnValue as any);
     const objects = [obj1, obj2];
     const options = { namespace };
@@ -686,7 +698,7 @@ describe('#create', () => {
   });
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
-    const options = { namespace };
+    const options = { id: 'mock-saved-object-id', namespace };
     await expectForbiddenError(client.create, { type, attributes, options });
   });
 
@@ -694,8 +706,12 @@ describe('#create', () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.create.mockResolvedValue(apiCallReturnValue as any);
 
-    const options = { namespace };
-    const result = await expectSuccess(client.create, { type, attributes, options });
+    const options = { id: 'mock-saved-object-id', namespace };
+    const result = await expectSuccess(client.create, {
+      type,
+      attributes,
+      options,
+    });
     expect(result).toBe(apiCallReturnValue);
   });
 
@@ -721,17 +737,17 @@ describe('#create', () => {
   test(`adds audit event when successful`, async () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.create.mockResolvedValue(apiCallReturnValue as any);
-    const options = { namespace };
+    const options = { id: 'mock-saved-object-id', namespace };
     await expectSuccess(client.create, { type, attributes, options });
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
-    expectAuditEvent('saved_object_create', EventOutcome.UNKNOWN, { type });
+    expectAuditEvent('saved_object_create', EventOutcome.UNKNOWN, { type, id: expect.any(String) });
   });
 
   test(`adds audit event when not successful`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
     await expect(() => client.create(type, attributes, { namespace })).rejects.toThrow();
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
-    expectAuditEvent('saved_object_create', EventOutcome.FAILURE, { type });
+    expectAuditEvent('saved_object_create', EventOutcome.FAILURE, { type, id: expect.any(String) });
   });
 });
 

@@ -35,33 +35,19 @@ export function createConfig$(
           i18n.translate('xpack.reporting.serverConfig.randomEncryptionKey', {
             defaultMessage:
               'Generating a random key for xpack.reporting.encryptionKey. To prevent sessions from being invalidated on ' +
-              'restart, please set xpack.reporting.encryptionKey in kibana.yml',
+              'restart, please set xpack.reporting.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.',
           })
         );
         encryptionKey = crypto.randomBytes(16).toString('hex');
       }
       const { kibanaServer: reportingServer } = config;
       const serverInfo = core.http.getServerInfo();
-      // kibanaServer.hostname, default to server.host, don't allow "0"
-      let kibanaServerHostname = reportingServer.hostname
+      // kibanaServer.hostname, default to server.host
+      const kibanaServerHostname = reportingServer.hostname
         ? reportingServer.hostname
         : serverInfo.hostname;
-      if (kibanaServerHostname === '0') {
-        logger.warn(
-          i18n.translate('xpack.reporting.serverConfig.invalidServerHostname', {
-            defaultMessage:
-              `Found 'server.host: "0"' in Kibana configuration. This is incompatible with Reporting. ` +
-              `To enable Reporting to work, '{configKey}: 0.0.0.0' is being automatically to the configuration. ` +
-              `You can change the setting to 'server.host: 0.0.0.0' or add '{configKey}: 0.0.0.0' in kibana.yml to prevent this message.`,
-            values: { configKey: 'xpack.reporting.kibanaServer.hostname' },
-          })
-        );
-        kibanaServerHostname = '0.0.0.0';
-      }
       // kibanaServer.port, default to server.port
-      const kibanaServerPort = reportingServer.port
-      ? reportingServer.port
-      : serverInfo.port; // prettier-ignore
+      const kibanaServerPort = reportingServer.port ? reportingServer.port : serverInfo.port;
       // kibanaServer.protocol, default to server.protocol
       const kibanaServerProtocol = reportingServer.protocol
         ? reportingServer.protocol

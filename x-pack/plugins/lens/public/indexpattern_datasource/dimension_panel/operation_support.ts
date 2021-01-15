@@ -21,6 +21,8 @@ type Props = Pick<
   'layerId' | 'columnId' | 'state' | 'filterOperations'
 >;
 
+// TODO: the support matrix should be available outside of the dimension panel
+
 // TODO: This code has historically been memoized, as a potentially performance
 // sensitive task. If we can add memoization without breaking the behavior, we should.
 export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix => {
@@ -47,7 +49,7 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
           supportedFieldsByOperation[operation.operationType] = new Set();
         }
         supportedFieldsByOperation[operation.operationType]?.add(operation.field);
-      } else if (operation.type === 'none') {
+      } else {
         supportedOperationsWithoutField.add(operation.operationType);
       }
     });

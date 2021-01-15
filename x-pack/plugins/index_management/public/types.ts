@@ -5,19 +5,17 @@
  */
 
 import { ExtensionsSetup } from './services';
-import { IngestManagerSetup } from '../../fleet/public';
+import { FleetSetup } from '../../fleet/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginStart } from '../../../../src/plugins/share/public';
-
-export type IndexMgmtMetricsType = 'loaded' | 'click' | 'count';
 
 export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
 }
 
 export interface SetupDependencies {
-  ingestManager?: IngestManagerSetup;
+  fleet?: FleetSetup;
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
 }

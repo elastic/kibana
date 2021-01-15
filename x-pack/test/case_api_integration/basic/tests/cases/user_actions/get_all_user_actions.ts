@@ -8,7 +8,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../../plugins/case/common/constants';
-import { defaultUser, postCaseReq, postCommentReq } from '../../../../common/lib/mock';
+import { CommentType } from '../../../../../../plugins/case/common/api';
+import { defaultUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   deleteCases,
   deleteCasesUserActions,
@@ -19,14 +20,25 @@ import {
 } from '../../../../common/lib/utils';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import {
+  ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
+} from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const actionsRemover = new ActionsRemover(supertest);
+  const kibanaServer = getService('kibanaServer');
 
   describe('get_all_user_actions', () => {
+    let servicenowSimulatorURL: string = '<could not determine kibana url>';
+    before(() => {
+      servicenowSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+      );
+    });
     afterEach(async () => {
       await deleteCases(es);
       await deleteComments(es);
@@ -35,7 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
-    it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title', 'connector']`, async () => {
+    it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title', 'connector', 'settings]`, async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -50,7 +62,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.length).to.eql(1);
 
-      expect(body[0].action_field).to.eql(['description', 'status', 'tags', 'title', 'connector']);
+      expect(body[0].action_field).to.eql([
+        'description',
+        'status',
+        'tags',
+        'title',
+        'connector',
+        'settings',
+      ]);
       expect(body[0].action).to.eql('create');
       expect(body[0].old_value).to.eql(null);
       expect(body[0].new_value).to.eql(JSON.stringify(postCaseReq));
@@ -251,7 +270,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq)
+        .send(postCommentUserReq)
         .expect(200);
 
       const { body } = await supertest
@@ -264,7 +283,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body[1].action_field).to.eql(['comment']);
       expect(body[1].action).to.eql('create');
       expect(body[1].old_value).to.eql(null);
-      expect(body[1].new_value).to.eql(postCommentReq.comment);
+      expect(body[1].new_value).to.eql(JSON.stringify(postCommentUserReq));
     });
 
     it(`on update comment, user action: 'update' should be called with actionFields: ['comments']`, async () => {
@@ -277,7 +296,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq)
+        .send(postCommentUserReq)
         .expect(200);
 
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
@@ -285,6 +304,7 @@ export default ({ getService }: FtrProviderContext): void => {
         id: patchedCase.comments[0].id,
         version: patchedCase.comments[0].version,
         comment: newComment,
+        type: CommentType.user,
       });
 
       const { body } = await supertest
@@ -296,15 +316,23 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.length).to.eql(3);
       expect(body[2].action_field).to.eql(['comment']);
       expect(body[2].action).to.eql('update');
-      expect(body[2].old_value).to.eql(postCommentReq.comment);
-      expect(body[2].new_value).to.eql(newComment);
+      expect(body[2].old_value).to.eql(JSON.stringify(postCommentUserReq));
+      expect(body[2].new_value).to.eql(
+        JSON.stringify({
+          comment: newComment,
+          type: CommentType.user,
+        })
+      );
     });
 
     it(`on new push to service, user action: 'push-to-service' should be called with actionFields: ['pushed']`, async () => {
       const { body: connector } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
-        .send(getServiceNowConnector())
+        .send({
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        })
         .expect(200);
 
       actionsRemover.add('default', connector.id, 'action', 'actions');

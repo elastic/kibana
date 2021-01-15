@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PanelState, EmbeddableInput } from '../../../embeddable_plugin';
+import { PanelState, EmbeddableInput } from '../../../services/embeddable';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import {

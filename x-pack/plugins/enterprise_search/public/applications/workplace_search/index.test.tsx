@@ -46,31 +46,29 @@ describe('WorkplaceSearchUnconfigured', () => {
 });
 
 describe('WorkplaceSearchConfigured', () => {
+  const initializeAppData = jest.fn();
+  const setContext = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockActions({ initializeAppData: () => {} });
+    setMockActions({ initializeAppData, setContext });
   });
 
   it('renders layout and header actions', () => {
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
-    expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
+    expect(wrapper.find(Layout).first().prop('readOnlyMode')).toBeFalsy();
     expect(wrapper.find(Overview)).toHaveLength(1);
     expect(mockKibanaValues.renderHeaderActions).toHaveBeenCalledWith(WorkplaceSearchHeaderActions);
   });
 
   it('initializes app data with passed props', () => {
-    const initializeAppData = jest.fn();
-    setMockActions({ initializeAppData });
-
     shallow(<WorkplaceSearchConfigured isFederatedAuth={true} />);
 
     expect(initializeAppData).toHaveBeenCalledWith({ isFederatedAuth: true });
   });
 
   it('does not re-initialize app data or re-render header actions', () => {
-    const initializeAppData = jest.fn();
-    setMockActions({ initializeAppData });
     setMockValues({ hasInitialized: true });
 
     shallow(<WorkplaceSearchConfigured />);
@@ -92,6 +90,6 @@ describe('WorkplaceSearchConfigured', () => {
 
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
-    expect(wrapper.find(Layout).prop('readOnlyMode')).toEqual(true);
+    expect(wrapper.find(Layout).first().prop('readOnlyMode')).toEqual(true);
   });
 });

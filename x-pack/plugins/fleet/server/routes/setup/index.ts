@@ -6,15 +6,11 @@
 import { IRouter } from 'src/core/server';
 
 import { PLUGIN_ID, AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
-import { IngestManagerConfigType } from '../../../common';
-import {
-  getFleetStatusHandler,
-  createFleetSetupHandler,
-  ingestManagerSetupHandler,
-} from './handlers';
+import { FleetConfigType } from '../../../common';
+import { getFleetStatusHandler, createFleetSetupHandler, FleetSetupHandler } from './handlers';
 import { PostFleetSetupRequestSchema } from '../../types';
 
-export const registerIngestManagerSetupRoute = (router: IRouter) => {
+export const registerFleetSetupRoute = (router: IRouter) => {
   router.post(
     {
       path: SETUP_API_ROUTE,
@@ -23,7 +19,7 @@ export const registerIngestManagerSetupRoute = (router: IRouter) => {
       // and will see `Unable to initialize Ingest Manager` in the UI
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    ingestManagerSetupHandler
+    FleetSetupHandler
   );
 };
 
@@ -49,9 +45,9 @@ export const registerGetFleetStatusRoute = (router: IRouter) => {
   );
 };
 
-export const registerRoutes = (router: IRouter, config: IngestManagerConfigType) => {
+export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
   // Ingest manager setup
-  registerIngestManagerSetupRoute(router);
+  registerFleetSetupRoute(router);
 
   if (!config.agents.enabled) {
     return;

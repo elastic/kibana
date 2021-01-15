@@ -30,6 +30,7 @@
 import { isFunction, defaults, cloneDeep } from 'lodash';
 import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
+
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
 import { VisType } from './vis_types';
@@ -97,13 +98,13 @@ export class Vis<TVisParams = VisParams> {
   public readonly uiState: PersistedState;
 
   constructor(visType: string, visState: SerializedVis = {} as any) {
-    this.type = this.getType<TVisParams>(visType);
+    this.type = this.getType(visType);
     this.params = this.getParams(visState.params);
     this.uiState = new PersistedState(visState.uiState);
     this.id = visState.id;
   }
 
-  private getType<TVisParams>(visType: string) {
+  private getType(visType: string) {
     const type = getTypes().get<TVisParams>(visType);
     if (!type) {
       const errorMessage = i18n.translate('visualizations.visualizationTypeInvalidMessage', {
@@ -137,7 +138,6 @@ export class Vis<TVisParams = VisParams> {
     if (state.params || typeChanged) {
       this.params = this.getParams(state.params);
     }
-
     if (state.data && state.data.searchSource) {
       this.data.searchSource = await getSearch().searchSource.create(state.data.searchSource!);
       this.data.indexPattern = this.data.searchSource.getField('index');

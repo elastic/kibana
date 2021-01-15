@@ -21,6 +21,7 @@ describe('createMonitoringStatsStream', () => {
     index: 'foo',
     max_attempts: 9,
     poll_interval: 6000000,
+    version_conflict_threshold: 80,
     monitored_stats_required_freshness: 6000000,
     max_poll_inactivity_cycles: 10,
     request_capacity: 1000,
@@ -36,7 +37,7 @@ describe('createMonitoringStatsStream', () => {
   };
 
   it('returns the initial config used to configure Task Manager', async () => {
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       createMonitoringStatsStream(of(), configuration)
         .pipe(take(1))
         .subscribe((firstValue) => {
@@ -49,7 +50,7 @@ describe('createMonitoringStatsStream', () => {
   it('incrementally updates the stats returned by the endpoint', async () => {
     const aggregatedStats$ = new Subject<AggregatedStat>();
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       createMonitoringStatsStream(aggregatedStats$, configuration)
         .pipe(take(3), bufferCount(3))
         .subscribe(([initialValue, secondValue, thirdValue]) => {

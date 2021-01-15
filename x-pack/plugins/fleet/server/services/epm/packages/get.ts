@@ -5,14 +5,23 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
-import { isPackageLimited, installationStatuses } from '../../../../common';
+import {
+  isPackageLimited,
+  installationStatuses,
+  PackageUsageStats,
+  PackagePolicySOAttributes,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { ValueOf } from '../../../../common/types';
-import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
+import { ArchivePackage, RegistryPackage, EpmPackageAdditions } from '../../../../common/types';
+import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
+import { getEsPackage } from '../archive/storage';
+import { getArchivePackage } from '../archive';
+import { normalizeKuery } from '../../saved_object';
 
-export { fetchFile as getFile, SearchParams } from '../registry';
+export { getFile, SearchParams } from '../registry';
 
 function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
@@ -83,51 +92,125 @@ export async function getPackageSavedObjects(
   });
 }
 
-export async function getPackageKeysByStatus(
-  savedObjectsClient: SavedObjectsClientContract,
-  status: ValueOf<InstallationStatus>
-) {
-  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
-  return allPackages.reduce<Array<{ pkgName: string; pkgVersion: string }>>((acc, pkg) => {
-    if (pkg.status === status) {
-      if (pkg.status === installationStatuses.Installed) {
-        // if we're looking for installed packages grab the version from the saved object because `getPackages` will
-        // return the latest package information from the registry
-        acc.push({ pkgName: pkg.name, pkgVersion: pkg.savedObject.attributes.version });
-      } else {
-        acc.push({ pkgName: pkg.name, pkgVersion: pkg.version });
-      }
-    }
-
-    return acc;
-  }, []);
-}
-
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const [
-    savedObject,
-    latestPackage,
-    { paths: assets, registryPackageInfo: item },
-  ] = await Promise.all([
+  const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackage(pkgName),
-    Registry.getRegistryPackage(pkgName, pkgVersion),
   ]);
 
-  // add properties that aren't (or aren't yet) on Registry response
-  const updated = {
-    ...item,
+  const getPackageRes = await getPackageFromSource({
+    pkgName,
+    pkgVersion,
+    savedObjectsClient,
+    installedPkg: savedObject?.attributes,
+  });
+  const { paths, packageInfo } = getPackageRes;
+
+  // add properties that aren't (or aren't yet) on the package
+  const additions: EpmPackageAdditions = {
     latestVersion: latestPackage.version,
-    title: item.title || nameAsTitle(item.name),
-    assets: Registry.groupPathsByService(assets || []),
+    title: packageInfo.title || nameAsTitle(packageInfo.name),
+    assets: Registry.groupPathsByService(paths || []),
     removable: !isRequiredPackage(pkgName),
   };
+  const updated = { ...packageInfo, ...additions };
+
   return createInstallableFrom(updated, savedObject);
+}
+
+export const getPackageUsageStats = async ({
+  savedObjectsClient,
+  pkgName,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+}): Promise<PackageUsageStats> => {
+  const filter = normalizeKuery(
+    PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${pkgName}`
+  );
+  const agentPolicyCount = new Set<string>();
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    // using saved Objects client directly, instead of the `list()` method of `package_policy` service
+    // in order to not cause a circular dependency (package policy service imports from this module)
+    const packagePolicies = await savedObjectsClient.find<PackagePolicySOAttributes>({
+      type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      perPage: 1000,
+      page: page++,
+      filter,
+    });
+
+    for (let index = 0, total = packagePolicies.saved_objects.length; index < total; index++) {
+      agentPolicyCount.add(packagePolicies.saved_objects[index].attributes.policy_id);
+    }
+
+    hasMore = packagePolicies.saved_objects.length > 0;
+  }
+
+  return {
+    agent_policy_count: agentPolicyCount.size,
+  };
+};
+
+interface PackageResponse {
+  paths: string[];
+  packageInfo: ArchivePackage | RegistryPackage;
+}
+type GetPackageResponse = PackageResponse | undefined;
+
+// gets package from install_source if it exists otherwise gets from registry
+export async function getPackageFromSource(options: {
+  pkgName: string;
+  pkgVersion: string;
+  installedPkg?: Installation;
+  savedObjectsClient: SavedObjectsClientContract;
+}): Promise<PackageResponse> {
+  const { pkgName, pkgVersion, installedPkg, savedObjectsClient } = options;
+  let res: GetPackageResponse;
+  // if the package is installed
+
+  if (installedPkg && installedPkg.version === pkgVersion) {
+    const { install_source: pkgInstallSource } = installedPkg;
+    // check cache
+    res = getArchivePackage({
+      name: pkgName,
+      version: pkgVersion,
+    });
+    if (!res) {
+      res = await getEsPackage(
+        pkgName,
+        pkgVersion,
+        installedPkg.package_assets,
+        savedObjectsClient
+      );
+    }
+    // for packages not in cache or package storage and installed from registry, check registry
+    if (!res && pkgInstallSource === 'registry') {
+      try {
+        res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+        // TODO: add to cache and storage here?
+      } catch (error) {
+        // treating this is a 404 as no status code returned
+        // in the unlikely event its missing from cache, storage, and never installed from registry
+      }
+    }
+  } else {
+    // else package is not installed or installed and missing from cache and storage and installed from registry
+    res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+  }
+  if (!res) throw new Error(`package info for ${pkgName}-${pkgVersion} does not exist`);
+  return {
+    paths: res.paths,
+    packageInfo: res.packageInfo,
+  };
 }
 
 export async function getInstallationObject(options: {

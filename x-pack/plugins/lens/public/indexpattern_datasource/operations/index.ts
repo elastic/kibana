@@ -6,4 +6,13 @@
 
 export * from './operations';
 export * from './layer_helpers';
-export { OperationType, IndexPatternColumn, FieldBasedIndexPatternColumn } from './definitions';
+export * from './time_scale_utils';
+export {
+  OperationType,
+  IndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  IncompleteColumn,
+  RequiredReference,
+} from './definitions';
+
+export { createMockedReferenceOperation } from './mocks';

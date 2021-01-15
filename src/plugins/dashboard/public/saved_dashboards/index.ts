@@ -16,6 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export * from './saved_dashboard_references';
+export * from '../../common/saved_dashboard_references';
 export * from './saved_dashboard';
 export * from './saved_dashboards';

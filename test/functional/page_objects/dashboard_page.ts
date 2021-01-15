@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { DashboardConstants } from '../../../src/plugins/dashboard/public/dashboard_constants';
-
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
@@ -35,10 +33,14 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const dashboardAddPanel = getService('dashboardAddPanel');
   const renderable = getService('renderable');
   const listingTable = getService('listingTable');
+  const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
   interface SaveDashboardOptions {
-    waitDialogIsClosed: boolean;
+    /**
+     * @default true
+     */
+    waitDialogIsClosed?: boolean;
     needsConfirm?: boolean;
     storeTimeWithDashboard?: boolean;
     saveAsNew?: boolean;
@@ -126,9 +128,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      */
     public async onDashboardLandingPage() {
       log.debug(`onDashboardLandingPage`);
-      return await testSubjects.exists('dashboardLandingPage', {
-        timeout: 5000,
-      });
+      return await listingTable.onListingPage('dashboard');
     }
 
     public async expectExistsDashboardLandingPage() {
@@ -138,15 +138,23 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
-      await find.clickByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`);
-      await this.expectExistsDashboardLandingPage();
+      await testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
     }
 
-    public async gotoDashboardLandingPage() {
+    public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
       log.debug('gotoDashboardLandingPage');
       const onPage = await this.onDashboardLandingPage();
       if (!onPage) {
         await this.clickDashboardBreadcrumbLink();
+        await retry.try(async () => {
+          const warning = await testSubjects.exists('confirmModalTitleText');
+          if (warning) {
+            await testSubjects.click(
+              ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+            );
+          }
+        });
+        await this.expectExistsDashboardLandingPage();
       }
     }
 
@@ -265,6 +273,20 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       const isMarginsOn = await this.isMarginsOn();
       if (isMarginsOn !== 'on') {
         return await testSubjects.click('dashboardMarginsCheckbox');
+      }
+    }
+
+    public async isColorSyncOn() {
+      log.debug('isColorSyncOn');
+      await this.openOptions();
+      return await testSubjects.getAttribute('dashboardSyncColorsCheckbox', 'checked');
+    }
+
+    public async useColorSync(on = true) {
+      await this.openOptions();
+      const isColorSyncOn = await this.isColorSyncOn();
+      if (isColorSyncOn !== 'on') {
+        return await testSubjects.click('dashboardSyncColorsCheckbox');
       }
     }
 
@@ -546,6 +568,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         // if not found then this is 0 (we don't show badge with 0)
         return 0;
       }
+    }
+
+    public async getPanelChartDebugState(panelIndex: number) {
+      return await elasticChart.getChartDebugData(undefined, panelIndex);
     }
   }
 

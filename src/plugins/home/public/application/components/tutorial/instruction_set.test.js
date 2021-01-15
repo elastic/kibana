@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 
 import { InstructionSet } from './instruction_set';
 import * as StatusCheckStates from './status_check_states';

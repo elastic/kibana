@@ -61,6 +61,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       let isPresent = false;
       await retry.try(async () => {
         isPresent = await testSubjects.exists(testSubj, { timeout: 20000 });
+        if (!isPresent) {
+          isPresent = await testSubjects.exists('visNoResult', { timeout: 1000 });
+        }
       });
       if (!isPresent) {
         throw new Error(`TSVB ${name} tab is not loaded`);
@@ -131,8 +134,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async enterMarkdown(markdown: string) {
-      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
+      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await input.type(markdown);
       await PageObjects.common.sleep(3000);
     }
@@ -147,12 +150,18 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
         const value = $('.ace_line').text();
         if (value.length > 0) {
           log.debug('Clearing text area input');
-          const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-          await input.clearValueWithKeyboard();
+          this.waitForMarkdownTextAreaCleaned();
         }
 
         return value.length === 0;
       });
+    }
+
+    public async waitForMarkdownTextAreaCleaned() {
+      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
+      await input.clearValueWithKeyboard();
+      const text = await this.getMarkdownText();
+      return text.length === 0;
     }
 
     public async getMarkdownText(): Promise<string> {
@@ -549,7 +558,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async checkPreviewIsDisabled(): Promise<void> {
       log.debug(`Check no data message is present`);
-      await testSubjects.existOrFail('noTSVBDataMessage', { timeout: 5000 });
+      await testSubjects.existOrFail('timeseriesVis > visNoResult', { timeout: 5000 });
     }
 
     public async cloneSeries(nth: number = 0): Promise<void> {

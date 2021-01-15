@@ -46,7 +46,7 @@ const lessC = less(window, { env: 'production' });
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-import { VisDataContext } from './../../contexts/vis_data_context';
+import { VisDataContext } from '../../contexts/vis_data_context';
 
 class MarkdownPanelConfigUi extends Component {
   constructor(props) {
@@ -334,7 +334,6 @@ MarkdownPanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  dateFormat: PropTypes.string,
 };
 
 export const MarkdownPanelConfig = injectI18n(MarkdownPanelConfigUi);

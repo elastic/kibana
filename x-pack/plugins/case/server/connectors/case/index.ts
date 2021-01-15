@@ -6,7 +6,7 @@
 
 import { curry } from 'lodash';
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import { CasePatchRequest, CasePostRequest } from '../../../common/api';
 import { createCaseClient } from '../../client';
@@ -23,28 +23,45 @@ import { GetActionTypeParams } from '..';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
+export const CASE_ACTION_TYPE_ID = '.case';
 // action type definition
 export function getActionType({
   logger,
   caseService,
   caseConfigureService,
+  connectorMappingsService,
   userActionService,
+  alertsService,
 }: GetActionTypeParams): CaseActionType {
   return {
-    id: '.case',
-    minimumLicenseRequired: 'gold',
+    id: CASE_ACTION_TYPE_ID,
+    minimumLicenseRequired: 'basic',
     name: i18n.NAME,
     validate: {
       config: CaseConfigurationSchema,
       params: CaseExecutorParamsSchema,
     },
-    executor: curry(executor)({ logger, caseService, caseConfigureService, userActionService }),
+    executor: curry(executor)({
+      alertsService,
+      caseConfigureService,
+      caseService,
+      connectorMappingsService,
+      logger,
+      userActionService,
+    }),
   };
 }
 
 // action executor
 async function executor(
-  { logger, caseService, caseConfigureService, userActionService }: GetActionTypeParams,
+  {
+    alertsService,
+    caseConfigureService,
+    caseService,
+    connectorMappingsService,
+    logger,
+    userActionService,
+  }: GetActionTypeParams,
   execOptions: CaseActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<CaseExecutorResponse | {}>> {
   const { actionId, params, services } = execOptions;
@@ -57,7 +74,11 @@ async function executor(
     request: {} as KibanaRequest,
     caseService,
     caseConfigureService,
+    connectorMappingsService,
     userActionService,
+    alertsService,
+    // TODO: When case connector is enabled we should figure out how to pass the context.
+    context: {} as RequestHandlerContext,
   });
 
   if (!supportedSubActions.includes(subAction)) {
@@ -79,12 +100,15 @@ async function executor(
       {} as CasePatchRequest
     );
 
-    data = await caseClient.update({ cases: { cases: [updateParamsWithoutNullValues] } });
+    data = await caseClient.update({
+      caseClient,
+      cases: { cases: [updateParamsWithoutNullValues] },
+    });
   }
 
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    data = await caseClient.addComment({ caseId, comment });
+    data = await caseClient.addComment({ caseClient, caseId, comment });
   }
 
   return { status: 'ok', data: data ?? {}, actionId };

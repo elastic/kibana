@@ -7,9 +7,8 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { ToastInput } from 'src/core/public';
-import { JobSummary } from '../';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { JobId } from '../../common/types';
+import { JobId, JobSummary } from '../../common/types';
 import { DownloadButton } from './job_download_button';
 import { ReportLink } from './report_link';
 

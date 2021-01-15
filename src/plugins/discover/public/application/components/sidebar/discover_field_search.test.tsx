@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { EventHandler, MouseEvent as ReactMouseEvent } from 'react';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DiscoverFieldSearch, Props } from './discover_field_search';
 import { EuiButtonGroupProps, EuiPopover } from '@elastic/eui';
@@ -50,17 +50,18 @@ describe('DiscoverFieldSearch', () => {
   test('change in active filters should change facet selection and call onChange', () => {
     const onChange = jest.fn();
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
-    let btn = findTestSubject(component, 'toggleFieldFilterButton');
-    expect(btn.hasClass('euiFacetButton--isSelected')).toBeFalsy();
+    const btn = findTestSubject(component, 'toggleFieldFilterButton');
+    const badge = btn.find('.euiNotificationBadge');
+    expect(badge.text()).toEqual('0');
     btn.simulate('click');
     const aggregatableButtonGroup = findButtonGroup(component, 'aggregatable');
+
     act(() => {
       // @ts-ignore
       (aggregatableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
     });
     component.update();
-    btn = findTestSubject(component, 'toggleFieldFilterButton');
-    expect(btn.hasClass('euiFacetButton--isSelected')).toBe(true);
+    expect(badge.text()).toEqual('1');
     expect(onChange).toBeCalledWith('aggregatable', true);
   });
 
@@ -142,35 +143,6 @@ describe('DiscoverFieldSearch', () => {
     let popover = component.find(EuiPopover);
     expect(popover.prop('isOpen')).toBe(true);
     btn.simulate('click');
-    popover = component.find(EuiPopover);
-    expect(popover.prop('isOpen')).toBe(false);
-  });
-
-  test('click outside popover should close popover', () => {
-    const triggerDocumentMouseDown: EventHandler<any> = (e: ReactMouseEvent<any>) => {
-      const event = new Event('mousedown');
-      // @ts-ignore
-      event.euiGeneratedBy = e.nativeEvent.euiGeneratedBy;
-      document.dispatchEvent(event);
-    };
-    const triggerDocumentMouseUp: EventHandler<any> = (e: ReactMouseEvent<any>) => {
-      const event = new Event('mouseup');
-      // @ts-ignore
-      event.euiGeneratedBy = e.nativeEvent.euiGeneratedBy;
-      document.dispatchEvent(event);
-    };
-    const component = mountWithIntl(
-      <div onMouseDown={triggerDocumentMouseDown} onMouseUp={triggerDocumentMouseUp} id="wrapperId">
-        <DiscoverFieldSearch {...defaultProps} />
-      </div>
-    );
-    const btn = findTestSubject(component, 'toggleFieldFilterButton');
-    btn.simulate('click');
-    let popover = component.find(EuiPopover);
-    expect(popover.length).toBe(1);
-    expect(popover.prop('isOpen')).toBe(true);
-    component.find('#wrapperId').simulate('mousedown');
-    component.find('#wrapperId').simulate('mouseup');
     popover = component.find(EuiPopover);
     expect(popover.prop('isOpen')).toBe(false);
   });

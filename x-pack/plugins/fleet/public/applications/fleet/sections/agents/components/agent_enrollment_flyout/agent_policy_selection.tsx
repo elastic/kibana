@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSelect, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 import { AgentPolicy, GetEnrollmentAPIKeysResponse } from '../../../../types';
-import { sendGetEnrollmentAPIKeys, useCore } from '../../../../hooks';
+import { sendGetEnrollmentAPIKeys, useStartServices } from '../../../../hooks';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 
 type Props = {
@@ -27,7 +27,7 @@ type Props = {
 );
 
 export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const { withKeySelection, agentPolicies, onAgentPolicyChange } = props;
   const onKeyChange = props.withKeySelection && props.onKeyChange;
 
@@ -110,7 +110,9 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
           }
 
           setEnrollmentAPIKeys(
-            res.data.list.filter((key) => key.policy_id === selectedState.agentPolicyId)
+            res.data.list.filter(
+              (key) => key.policy_id === selectedState.agentPolicyId && key.active === true
+            )
           );
         } catch (error) {
           notifications.toasts.addError(error, {

@@ -5,8 +5,8 @@
  */
 
 import { AssetParts } from '../../../types';
-import { getBufferExtractor, pathParts, splitPkgKey } from './index';
-import { untarBuffer, unzipBuffer } from './extract';
+import { getBufferExtractor, getPathParts, untarBuffer, unzipBuffer } from '../archive';
+import { splitPkgKey } from './index';
 
 const testPaths = [
   {
@@ -46,7 +46,7 @@ const testPaths = [
 
 test('testPathParts', () => {
   for (const value of testPaths) {
-    expect(pathParts(value.path)).toStrictEqual(value.assetParts as AssetParts);
+    expect(getPathParts(value.path)).toStrictEqual(value.assetParts as AssetParts);
   }
 });
 

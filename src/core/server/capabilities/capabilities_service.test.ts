@@ -184,5 +184,46 @@ describe('CapabilitiesService', () => {
         }
       `);
     });
+
+    it('allows to indicate that default capabilities should be returned', async () => {
+      setup.registerProvider(() => ({ customSection: { isDefault: true } }));
+      setup.registerSwitcher((req, capabilities, useDefaultCapabilities) =>
+        useDefaultCapabilities ? capabilities : { customSection: { isDefault: false } }
+      );
+
+      const start = service.start();
+      expect(await start.resolveCapabilities({} as any)).toMatchInlineSnapshot(`
+        Object {
+          "catalogue": Object {},
+          "customSection": Object {
+            "isDefault": false,
+          },
+          "management": Object {},
+          "navLinks": Object {},
+        }
+      `);
+      expect(await start.resolveCapabilities({} as any, { useDefaultCapabilities: false }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "catalogue": Object {},
+          "customSection": Object {
+            "isDefault": false,
+          },
+          "management": Object {},
+          "navLinks": Object {},
+        }
+      `);
+      expect(await start.resolveCapabilities({} as any, { useDefaultCapabilities: true }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "catalogue": Object {},
+          "customSection": Object {
+            "isDefault": true,
+          },
+          "management": Object {},
+          "navLinks": Object {},
+        }
+      `);
+    });
   });
 });

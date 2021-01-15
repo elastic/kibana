@@ -10,6 +10,8 @@ auditing. For more information, see
 {ref}/secure-cluster.html[Secure a cluster] and
 <<using-kibana-with-security,Configuring Security in {kib}>>.
 
+NOTE: There are security limitations that affect {kib}. For more information, refer to {ref}/security-limitations.html[Security].
+
 [float]
 === Required permissions
 
@@ -43,5 +45,6 @@ cause Kibana's authorization to behave unexpectedly.
 include::authorization/index.asciidoc[]
 include::authorization/kibana-privileges.asciidoc[]
 include::api-keys/index.asciidoc[]
+include::encryption-keys/index.asciidoc[]
 include::role-mappings/index.asciidoc[]
 include::rbac_tutorial.asciidoc[]

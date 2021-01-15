@@ -175,7 +175,7 @@ export const SelectableSpacesControl = (props: Props) => {
             'data-test-subj': 'sts-form-space-selector',
           }}
           height={ROW_HEIGHT * 3.5}
-          searchable
+          searchable={options.length > 6}
         >
           {(list, search) => {
             return (

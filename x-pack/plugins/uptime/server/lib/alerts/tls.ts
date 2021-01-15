@@ -14,8 +14,10 @@ import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 import { uptimeAlertWrapper } from './uptime_alert_wrapper';
+import { ActionGroupIdsOf } from '../../../../alerts/common';
 
 const { TLS } = ACTION_GROUP_DEFINITIONS;
+export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
 
 const DEFAULT_SIZE = 20;
 
@@ -82,8 +84,8 @@ export const getCertSummary = (
   };
 };
 
-export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) =>
-  uptimeAlertWrapper({
+export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) =>
+  uptimeAlertWrapper<ActionGroupIds>({
     id: 'xpack.uptime.alerts.tls',
     name: tlsTranslations.alertFactoryName,
     validate: {
@@ -100,15 +102,15 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) =>
       context: [],
       state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
     },
-    async executor({ options, dynamicSettings, esClient }) {
+    minimumLicenseRequired: 'basic',
+    async executor({ options, dynamicSettings, uptimeEsClient }) {
       const {
         services: { alertInstanceFactory },
         state,
       } = options;
 
       const { certs, total }: CertResult = await libs.requests.getCerts({
-        callES: esClient,
-        dynamicSettings,
+        uptimeEsClient,
         from: DEFAULT_FROM,
         to: DEFAULT_TO,
         index: 0,

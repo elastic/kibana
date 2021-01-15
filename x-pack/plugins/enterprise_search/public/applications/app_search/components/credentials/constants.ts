@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DOCS_PREFIX } from '../../routes';
 
 export const CREDENTIALS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.credentials.title',
@@ -100,4 +101,4 @@ export const TOKEN_TYPE_INFO = [
 
 export const FLYOUT_ARIA_LABEL_ID = 'credentialsFlyoutTitle';
 
-export const DOCS_HREF = 'https://www.elastic.co/guide/en/app-search/current/authentication.html';
+export const DOCS_HREF = `${DOCS_PREFIX}/authentication.html`;

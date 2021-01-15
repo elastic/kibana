@@ -26,3 +26,14 @@ export const setQueuedSuccessMessage = (message: string) => {
     message,
   });
 };
+
+export const setQueuedErrorMessage = (message: string) => {
+  FlashMessagesLogic.actions.setQueuedMessages({
+    type: 'error',
+    message,
+  });
+};
+
+export const clearFlashMessages = () => {
+  FlashMessagesLogic.actions.clearFlashMessages();
+};

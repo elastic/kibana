@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AdvancedUiActionsPublicPlugin } from './plugin';
+import { AdvancedUiActionsServerPlugin } from './plugin';
 
 export function plugin() {
-  return new AdvancedUiActionsPublicPlugin();
+  return new AdvancedUiActionsServerPlugin();
 }
 
-export { AdvancedUiActionsPublicPlugin as Plugin };
+export { AdvancedUiActionsServerPlugin as Plugin };
 export {
   SetupContract as AdvancedUiActionsSetup,
   StartContract as AdvancedUiActionsStart,

@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/82445
-  describe.skip('discover doc table', function describeIndexTests() {
+  describe('discover doc table', function describeIndexTests() {
     const defaultRowsLimit = 50;
     const rowsHardLimit = 500;
 
@@ -43,12 +42,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('discover doc table');
       await PageObjects.common.navigateToApp('discover');
-    });
-
-    beforeEach(async function () {
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     it('should show the first 50 rows by default', async function () {
@@ -68,6 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const finalRows = await PageObjects.discover.getDocTableRows();
       expect(finalRows.length).to.be.below(initialRows.length);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     it(`should load up to ${rowsHardLimit} rows when scrolling at the end of the table`, async function () {
@@ -89,8 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await footer.getVisibleText()).to.have.string(rowsHardLimit);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/81632
-    describe.skip('expand a document row', function () {
+    describe('expand a document row', function () {
       const rowToInspect = 1;
       beforeEach(async function () {
         // close the toggle if open
@@ -135,13 +131,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should add more columns to the table', async function () {
-        const [column] = extraColumns;
-        await PageObjects.discover.findFieldByName(column);
-        log.debug(`add a ${column} column`);
-        await PageObjects.discover.clickFieldListItemAdd(column);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        // test the header now
-        expect(await PageObjects.discover.getDocHeader()).to.have.string(column);
+        for (const column of extraColumns) {
+          await PageObjects.discover.clearFieldSearchInput();
+          await PageObjects.discover.findFieldByName(column);
+          await PageObjects.discover.clickFieldListItemAdd(column);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          // test the header now
+          expect(await PageObjects.discover.getDocHeader()).to.have.string(column);
+        }
       });
 
       it('should remove columns from the table', async function () {

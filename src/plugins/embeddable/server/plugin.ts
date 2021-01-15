@@ -32,23 +32,32 @@ import {
   getMigrateFunction,
   getTelemetryFunction,
 } from '../common/lib';
-import { SerializableState } from '../../kibana_utils/common';
+import { PersistableStateService, SerializableState } from '../../kibana_utils/common';
 import { EmbeddableStateWithType } from '../common/types';
 
-export interface EmbeddableSetup {
-  getAttributeService: any;
+export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
 }
 
-export class EmbeddableServerPlugin implements Plugin<object, object> {
+export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
+
+export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private readonly enhancements: EnhancementsRegistry = new Map();
 
   public setup(core: CoreSetup) {
+    const commonContract = {
+      getEmbeddableFactory: this.getEmbeddableFactory,
+      getEnhancement: this.getEnhancement,
+    };
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerEnhancement: this.registerEnhancement,
+      telemetry: getTelemetryFunction(commonContract),
+      extract: getExtractFunction(commonContract),
+      inject: getInjectFunction(commonContract),
+      migrate: getMigrateFunction(commonContract),
     };
   }
 

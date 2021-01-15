@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { Overrides } from './overrides';
@@ -26,8 +26,11 @@ function getProps() {
     kibana: {
       services: {
         docLinks: {
-          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-          DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+          links: {
+            aggs: {
+              date_format_pattern: 'jest-metadata-mock-url',
+            },
+          },
         },
       },
     },

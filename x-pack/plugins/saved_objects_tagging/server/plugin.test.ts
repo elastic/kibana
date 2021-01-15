@@ -4,20 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerRoutesMock } from './plugin.test.mocks';
+import { registerRoutesMock, createTagUsageCollectorMock } from './plugin.test.mocks';
 
 import { coreMock } from '../../../../src/core/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
+import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
 import { SavedObjectTaggingPlugin } from './plugin';
 import { savedObjectsTaggingFeature } from './features';
 
 describe('SavedObjectTaggingPlugin', () => {
   let plugin: SavedObjectTaggingPlugin;
   let featuresPluginSetup: ReturnType<typeof featuresPluginMock.createSetup>;
+  let usageCollectionSetup: ReturnType<typeof usageCollectionPluginMock.createSetupContract>;
 
   beforeEach(() => {
     plugin = new SavedObjectTaggingPlugin(coreMock.createPluginInitializerContext());
     featuresPluginSetup = featuresPluginMock.createSetup();
+    usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
+    // `usageCollection` 'mocked' implementation use the real `CollectorSet` implementation
+    // that throws when registering things that are not collectors.
+    // We just want to assert that it was called here, so jest.fn is fine.
+    usageCollectionSetup.registerCollector = jest.fn();
+  });
+
+  afterEach(() => {
+    registerRoutesMock.mockReset();
+    createTagUsageCollectorMock.mockReset();
   });
 
   describe('#setup', () => {
@@ -42,6 +54,19 @@ describe('SavedObjectTaggingPlugin', () => {
       expect(featuresPluginSetup.registerKibanaFeature).toHaveBeenCalledWith(
         savedObjectsTaggingFeature
       );
+    });
+
+    it('registers the usage collector if `usageCollection` is present', async () => {
+      const tagUsageCollector = Symbol('saved_objects_tagging');
+      createTagUsageCollectorMock.mockReturnValue(tagUsageCollector);
+
+      await plugin.setup(coreMock.createSetup(), {
+        features: featuresPluginSetup,
+        usageCollection: usageCollectionSetup,
+      });
+
+      expect(usageCollectionSetup.registerCollector).toHaveBeenCalledTimes(1);
+      expect(usageCollectionSetup.registerCollector).toHaveBeenCalledWith(tagUsageCollector);
     });
   });
 });

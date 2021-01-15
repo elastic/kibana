@@ -52,6 +52,14 @@ export class BasePathProxyServer {
     return this.devConfig.basePathProxyTargetPort;
   }
 
+  public get host() {
+    return this.httpConfig.host;
+  }
+
+  public get port() {
+    return this.httpConfig.port;
+  }
+
   constructor(
     private readonly log: Logger,
     private readonly httpConfig: HttpConfig,
@@ -92,7 +100,10 @@ export class BasePathProxyServer {
     await this.server.start();
 
     this.log.info(
-      `basepath proxy server running at ${this.server.info.uri}${this.httpConfig.basePath}`
+      `basepath proxy server running at ${Url.format({
+        host: this.server.info.uri,
+        pathname: this.httpConfig.basePath,
+      })}`
     );
   }
 
@@ -132,12 +143,25 @@ export class BasePathProxyServer {
       handler: {
         proxy: {
           agent: this.httpsAgent,
-          host: this.server.info.host,
           passThrough: true,
-          port: this.devConfig.basePathProxyTargetPort,
-          // typings mismatch. h2o2 doesn't support "socket"
-          protocol: this.server.info.protocol as HapiProxy.ProxyHandlerOptions['protocol'],
           xforward: true,
+          mapUri: async (request) => {
+            return {
+              // Passing in this header to merge it is a workaround until this is fixed:
+              // https://github.com/hapijs/h2o2/issues/124
+              headers:
+                request.headers['content-length'] != null
+                  ? { 'content-length': request.headers['content-length'] }
+                  : undefined,
+              uri: Url.format({
+                hostname: request.server.info.host,
+                port: this.devConfig.basePathProxyTargetPort,
+                protocol: request.server.info.protocol,
+                pathname: request.path,
+                query: request.query,
+              }),
+            };
+          },
         },
       },
       method: '*',
@@ -199,8 +223,13 @@ export class BasePathProxyServer {
         const isGet = request.method === 'get';
         const isBasepathLike = oldBasePath.length === 3;
 
+        const newUrl = Url.format({
+          pathname: `${this.httpConfig.basePath}/${kbnPath}`,
+          query: request.query,
+        });
+
         return isGet && isBasepathLike && shouldRedirectFromOldBasePath(kbnPath)
-          ? responseToolkit.redirect(`${this.httpConfig.basePath}/${kbnPath}`)
+          ? responseToolkit.redirect(newUrl)
           : responseToolkit.response('Not Found').code(404);
       },
       method: '*',

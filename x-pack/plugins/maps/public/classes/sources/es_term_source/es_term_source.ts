@@ -25,6 +25,7 @@ import {
 import {
   ESTermSourceDescriptor,
   VectorJoinSourceRequestMeta,
+  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
@@ -56,6 +57,9 @@ export class ESTermSource extends AbstractESAggSource {
     }
     return {
       ...normalizedDescriptor,
+      indexPatternTitle: descriptor.indexPatternTitle
+        ? descriptor.indexPatternTitle
+        : descriptor.indexPatternId,
       term: descriptor.term!,
       type: SOURCE_TYPES.ES_TERM_SOURCE,
     };
@@ -64,7 +68,7 @@ export class ESTermSource extends AbstractESAggSource {
   private readonly _termField: ESDocField;
   readonly _descriptor: ESTermSourceDescriptor;
 
-  constructor(descriptor: ESTermSourceDescriptor, inspectorAdapters: Adapters) {
+  constructor(descriptor: ESTermSourceDescriptor, inspectorAdapters?: Adapters) {
     const sourceDescriptor = ESTermSource.createDescriptor(descriptor);
     super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
@@ -99,13 +103,13 @@ export class ESTermSource extends AbstractESAggSource {
     });
   }
 
-  getAggLabel(aggType: AGG_TYPE, fieldName: string) {
+  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string {
     return aggType === AGG_TYPE.COUNT
       ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
           defaultMessage: `Count of {indexPatternTitle}`,
           values: { indexPatternTitle: this._descriptor.indexPatternTitle },
         })
-      : super.getAggLabel(aggType, fieldName);
+      : super.getAggLabel(aggType, fieldLabel);
   }
 
   async getPropertiesMap(
@@ -121,7 +125,9 @@ export class ESTermSource extends AbstractESAggSource {
     const indexPattern = await this.getIndexPattern();
     const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
     const termsField = getField(indexPattern, this._termField.getName());
-    const termsAgg = { size: DEFAULT_MAX_BUCKETS_LIMIT };
+    const termsAgg = {
+      size: this._descriptor.size !== undefined ? this._descriptor.size : DEFAULT_MAX_BUCKETS_LIMIT,
+    };
     searchSource.setField('aggs', {
       [TERMS_AGG_NAME]: {
         terms: addFieldToDSL(termsAgg, termsField),
@@ -158,5 +164,13 @@ export class ESTermSource extends AbstractESAggSource {
 
   getFieldNames(): string[] {
     return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
+  }
+
+  getSyncMeta(): VectorSourceSyncMeta | null {
+    return this._descriptor.size !== undefined
+      ? {
+          size: this._descriptor.size,
+        }
+      : null;
   }
 }

@@ -10,6 +10,7 @@ import React from 'react';
 import { Annotation } from '../../../../../common/types/annotations';
 import { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
 import { ChartTooltipService } from '../../../components/chart_tooltip';
+import { AnnotationState, AnnotationUpdatesService } from '../../../services/annotations_service';
 
 interface Props {
   selectedJob: CombinedJob;
@@ -47,6 +48,11 @@ interface TimeseriesChartProps {
   tooltipService: object;
 }
 
-declare class TimeseriesChart extends React.Component<Props, any> {
+interface TimeseriesChartIntProps {
+  annotationUpdatesService: AnnotationUpdatesService;
+  annotationProps: AnnotationState;
+}
+
+declare class TimeseriesChart extends React.Component<Props & TimeseriesChartIntProps, any> {
   focusXScale: d3.scale.Ordinal<{}, number>;
 }

@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb } from 'src/core/public';
 import { BASE_PATH, Page, DynamicPagePathValues, pagePathGetters } from '../constants';
-import { useCore } from './use_core';
+import { useStartServices } from './use_core';
 
 const BASE_BREADCRUMB: ChromeBreadcrumb = {
   href: pagePathGetters.overview(),
@@ -72,6 +72,20 @@ const breadcrumbGetters: {
       }),
     },
     { text: pkgTitle },
+  ],
+  integration_policy_edit: ({ pkgTitle, pkgkey, policyName }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.integrations(),
+      text: i18n.translate('xpack.fleet.breadcrumbs.integrationPageTitle', {
+        defaultMessage: 'Integration',
+      }),
+    },
+    {
+      href: pagePathGetters.integration_details({ pkgkey, panel: 'policies' }),
+      text: pkgTitle,
+    },
+    { text: policyName },
   ],
   policies: () => [
     BASE_BREADCRUMB,
@@ -204,7 +218,7 @@ const breadcrumbGetters: {
 };
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
-  const { chrome, http } = useCore();
+  const { chrome, http } = useStartServices();
   const breadcrumbs: ChromeBreadcrumb[] = breadcrumbGetters[page](values).map((breadcrumb) => ({
     ...breadcrumb,
     href: breadcrumb.href ? http.basePath.prepend(`${BASE_PATH}#${breadcrumb.href}`) : undefined,

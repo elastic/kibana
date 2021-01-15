@@ -284,7 +284,7 @@ describe('Datatable Visualization', () => {
           state: { layers: [layer] },
           frame,
         }).groups[1].accessors
-      ).toEqual(['c', 'b']);
+      ).toEqual([{ columnId: 'c' }, { columnId: 'b' }]);
     });
   });
 
@@ -298,6 +298,41 @@ describe('Datatable Visualization', () => {
           columnId: 'b',
         })
       ).toEqual({
+        layers: [
+          {
+            layerId: 'layer1',
+            columns: ['c'],
+          },
+        ],
+      });
+    });
+
+    it('should handle correctly the sorting state on removing dimension', () => {
+      const layer = { layerId: 'layer1', columns: ['b', 'c'] };
+      expect(
+        datatableVisualization.removeDimension({
+          prevState: { layers: [layer], sorting: { columnId: 'b', direction: 'asc' } },
+          layerId: 'layer1',
+          columnId: 'b',
+        })
+      ).toEqual({
+        sorting: undefined,
+        layers: [
+          {
+            layerId: 'layer1',
+            columns: ['c'],
+          },
+        ],
+      });
+
+      expect(
+        datatableVisualization.removeDimension({
+          prevState: { layers: [layer], sorting: { columnId: 'c', direction: 'asc' } },
+          layerId: 'layer1',
+          columnId: 'b',
+        })
+      ).toEqual({
+        sorting: { columnId: 'c', direction: 'asc' },
         layers: [
           {
             layerId: 'layer1',
@@ -371,6 +406,8 @@ describe('Datatable Visualization', () => {
       expect(tableArgs).toHaveLength(1);
       expect(tableArgs[0].arguments).toEqual({
         columnIds: ['c', 'b'],
+        sortBy: [''],
+        sortDirection: ['none'],
       });
     });
 
@@ -410,7 +447,7 @@ describe('Datatable Visualization', () => {
 
       const error = datatableVisualization.getErrorMessages({ layers: [layer] }, frame);
 
-      expect(error).not.toBeDefined();
+      expect(error).toBeUndefined();
     });
 
     it('returns undefined if the metric dimension is defined', () => {
@@ -427,7 +464,7 @@ describe('Datatable Visualization', () => {
 
       const error = datatableVisualization.getErrorMessages({ layers: [layer] }, frame);
 
-      expect(error).not.toBeDefined();
+      expect(error).toBeUndefined();
     });
   });
 });

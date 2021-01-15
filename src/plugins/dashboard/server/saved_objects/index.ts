@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { dashboardSavedObjectType } from './dashboard';
+export { createDashboardSavedObjectType } from './dashboard';

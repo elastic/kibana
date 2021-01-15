@@ -611,10 +611,10 @@ describe('OIDCAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(provider.logout(request, null)).resolves.toEqual(
-        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
       );
       await expect(provider.logout(request, { nonce: 'x', realm: 'oidc1' })).resolves.toEqual(
-        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
       );
 
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
@@ -647,7 +647,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       await expect(
         provider.logout(request, { accessToken, refreshToken, realm: 'oidc1' })
-      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut));
+      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request)));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcLogout', {

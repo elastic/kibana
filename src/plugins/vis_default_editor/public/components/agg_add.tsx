@@ -30,7 +30,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { IAggConfig, AggGroupNames } from '../../../data/public';
-import { Schema } from '../schemas';
+import type { Schema } from '../../../visualizations/public';
 
 interface DefaultEditorAggAddProps {
   group?: IAggConfig[];
@@ -76,10 +76,17 @@ function DefaultEditorAggAdd({
     </EuiButtonEmpty>
   );
 
-  const isSchemaDisabled = (schema: Schema): boolean => {
+  const isMaxedCount = (schema: Schema): boolean => {
     const count = group.filter((agg) => agg.schema === schema.name).length;
     return count >= schema.max;
   };
+  const isSchemaDisabled = (schema: Schema, maxedCount: boolean): boolean => {
+    return schema.disabled ?? maxedCount;
+  };
+  const maxTooltipText = i18n.translate('visDefaultEditor.aggAdd.maxBuckets', {
+    defaultMessage: 'Max {groupNameLabel} count reached',
+    values: { groupNameLabel },
+  });
 
   return (
     <EuiFlexGroup justifyContent="center" responsive={false}>
@@ -109,16 +116,21 @@ function DefaultEditorAggAdd({
             )}
           </EuiPopoverTitle>
           <EuiContextMenuPanel
-            items={schemas.map((schema) => (
-              <EuiContextMenuItem
-                key={`${schema.name}_${schema.title}`}
-                data-test-subj={`visEditorAdd_${groupName}_${schema.title}`}
-                disabled={isPopoverOpen && isSchemaDisabled(schema)}
-                onClick={() => onSelectSchema(schema)}
-              >
-                {schema.title}
-              </EuiContextMenuItem>
-            ))}
+            items={schemas.map((schema) => {
+              const maxedCount = isMaxedCount(schema);
+
+              return (
+                <EuiContextMenuItem
+                  key={`${schema.name}_${schema.title}`}
+                  data-test-subj={`visEditorAdd_${groupName}_${schema.title}`}
+                  disabled={isPopoverOpen && isSchemaDisabled(schema, maxedCount)}
+                  onClick={() => onSelectSchema(schema)}
+                  toolTipContent={schema.tooltip ?? (maxedCount ? maxTooltipText : undefined)}
+                >
+                  {schema.title}
+                </EuiContextMenuItem>
+              );
+            })}
           />
         </EuiPopover>
       </EuiFlexItem>

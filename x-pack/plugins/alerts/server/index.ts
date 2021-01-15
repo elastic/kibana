@@ -16,6 +16,7 @@ export {
   ActionVariable,
   AlertType,
   ActionGroup,
+  ActionGroupIdsOf,
   AlertingPlugin,
   AlertExecutorOptions,
   AlertActionParams,
@@ -28,7 +29,7 @@ export {
 } from './types';
 export { PluginSetupContract, PluginStartContract } from './plugin';
 export { FindResult } from './alerts_client';
-export { AlertInstance } from './alert_instance';
+export { PublicAlertInstance as AlertInstance } from './alert_instance';
 export { parseDuration } from './lib';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);

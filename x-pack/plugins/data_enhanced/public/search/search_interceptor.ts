@@ -4,24 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { throwError, from, Subscription } from 'rxjs';
-import { tap, takeUntil, finalize, catchError } from 'rxjs/operators';
+import { once } from 'lodash';
+import { throwError, Subscription } from 'rxjs';
+import { tap, finalize, catchError, filter, take, skip } from 'rxjs/operators';
 import {
   TimeoutErrorMode,
-  IEsSearchResponse,
   SearchInterceptor,
   SearchInterceptorDeps,
   UI_SETTINGS,
+  IKibanaSearchRequest,
+  SearchSessionState,
 } from '../../../../../src/plugins/data/public';
-import { AbortError, abortSignalToPromise } from '../../../../../src/plugins/kibana_utils/public';
-
-import {
-  IAsyncSearchRequest,
-  ENHANCED_ES_SEARCH_STRATEGY,
-  IAsyncSearchOptions,
-  doPartialSearch,
-  throwOnEsError,
-} from '../../common';
+import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   private uiSettingsSub: Subscription;
@@ -60,45 +54,60 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     if (this.deps.usageCollector) this.deps.usageCollector.trackQueriesCancelled();
   };
 
-  public search(
-    request: IAsyncSearchRequest,
-    { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
-  ) {
-    let { id } = request;
-
-    const { combinedSignal, timeoutSignal, cleanup } = this.setupAbortSignal({
+  public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
+    const { combinedSignal, timeoutSignal, cleanup, abort } = this.setupAbortSignal({
       abortSignal: options.abortSignal,
       timeout: this.searchTimeout,
     });
-    const abortedPromise = abortSignalToPromise(combinedSignal);
     const strategy = options?.strategy ?? ENHANCED_ES_SEARCH_STRATEGY;
+    const searchOptions = { ...options, strategy, abortSignal: combinedSignal };
+    const search = () => this.runSearch({ id, ...request }, searchOptions);
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
-    return doPartialSearch<IEsSearchResponse>(
-      () => this.runSearch(request, combinedSignal, strategy),
-      (requestId) => this.runSearch({ ...request, id: requestId }, combinedSignal, strategy),
-      (r) => !r.isRunning,
-      (response) => response.id,
-      id,
-      { pollInterval }
-    ).pipe(
-      tap((r) => {
-        id = r.id ?? id;
-      }),
-      throwOnEsError(),
-      takeUntil(from(abortedPromise.promise)),
-      catchError((e: AbortError) => {
-        if (id) {
-          this.deps.http.delete(`/internal/search/${strategy}/${id}`);
-        }
+    const untrackSearch =
+      this.deps.session.isCurrentSession(options.sessionId) &&
+      this.deps.session.trackSearch({ abort });
 
-        return throwError(this.handleSearchError(e, request, timeoutSignal, options));
+    // track if this search's session will be send to background
+    // if yes, then we don't need to cancel this search when it is aborted
+    let isSavedToBackground = false;
+    const savedToBackgroundSub =
+      this.deps.session.isCurrentSession(options.sessionId) &&
+      this.deps.session.state$
+        .pipe(
+          skip(1), // ignore any state, we are only interested in transition x -> BackgroundLoading
+          filter(
+            (state) =>
+              this.deps.session.isCurrentSession(options.sessionId) &&
+              state === SearchSessionState.BackgroundLoading
+          ),
+          take(1)
+        )
+        .subscribe(() => {
+          isSavedToBackground = true;
+        });
+
+    const cancel = once(() => {
+      if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+    });
+
+    return pollSearch(search, cancel, { ...options, abortSignal: combinedSignal }).pipe(
+      tap((response) => (id = response.id)),
+      catchError((e: Error) => {
+        cancel();
+        return throwError(this.handleSearchError(e, timeoutSignal, options));
       }),
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);
         cleanup();
-        abortedPromise.cleanup();
+        if (untrackSearch && this.deps.session.isCurrentSession(options.sessionId)) {
+          // untrack if this search still belongs to current session
+          untrackSearch();
+        }
+        if (savedToBackgroundSub) {
+          savedToBackgroundSub.unsubscribe();
+        }
       })
     );
   }

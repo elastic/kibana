@@ -20,7 +20,6 @@ export const initialState: MonitorList = {
     nextPagePagination: null,
     prevPagePagination: null,
     summaries: [],
-    totalSummaryCount: 0,
   },
   loading: false,
 };

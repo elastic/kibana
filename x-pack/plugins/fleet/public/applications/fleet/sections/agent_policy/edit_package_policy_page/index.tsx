@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -19,7 +19,7 @@ import { AgentPolicy, PackageInfo, UpdatePackagePolicy } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
-  useCore,
+  useStartServices,
   useConfig,
   sendUpdatePackagePolicy,
   sendGetAgentStatus,
@@ -41,15 +41,28 @@ import {
 } from '../create_package_policy_page/types';
 import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_configure_package';
 import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
+import { useUIExtension } from '../../../hooks/use_ui_extension';
+import { ExtensionWrapper } from '../../../components/extension_wrapper';
+import { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
+import { PackagePolicyEditExtensionComponentProps } from '../../../types';
+import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
-export const EditPackagePolicyPage: React.FunctionComponent = () => {
-  const { notifications } = useCore();
+export const EditPackagePolicyPage = memo(() => {
+  const {
+    params: { packagePolicyId },
+  } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
+
+  return <EditPackagePolicyForm packagePolicyId={packagePolicyId} />;
+});
+
+export const EditPackagePolicyForm = memo<{
+  packagePolicyId: string;
+  from?: CreatePackagePolicyFrom;
+}>(({ packagePolicyId, from = 'edit' }) => {
+  const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
-  const {
-    params: { policyId, packagePolicyId },
-  } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
   const history = useHistory();
   const { getHref, getPath } = useLink();
 
@@ -68,6 +81,11 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
     inputs: [],
     version: '',
   });
+  const [originalPackagePolicy, setOriginalPackagePolicy] = useState<
+    GetOnePackagePolicyResponse['item']
+  >();
+
+  const policyId = agentPolicy?.id ?? '';
 
   // Retrieve agent policy, package, and package policy info
   useEffect(() => {
@@ -75,14 +93,29 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
       setIsLoadingData(true);
       setLoadingError(undefined);
       try {
-        const [{ data: agentPolicyData }, { data: packagePolicyData }] = await Promise.all([
-          sendGetOneAgentPolicy(policyId),
-          sendGetOnePackagePolicy(packagePolicyId),
-        ]);
+        const {
+          data: packagePolicyData,
+          error: packagePolicyError,
+        } = await sendGetOnePackagePolicy(packagePolicyId);
+
+        if (packagePolicyError) {
+          throw packagePolicyError;
+        }
+
+        const { data: agentPolicyData, error: agentPolicyError } = await sendGetOneAgentPolicy(
+          packagePolicyData!.item.policy_id
+        );
+
+        if (agentPolicyError) {
+          throw agentPolicyError;
+        }
+
         if (agentPolicyData?.item) {
           setAgentPolicy(agentPolicyData.item);
         }
         if (packagePolicyData?.item) {
+          setOriginalPackagePolicy(packagePolicyData.item);
+
           const {
             id,
             revision,
@@ -99,7 +132,8 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
           const newPackagePolicy = {
             ...restOfPackagePolicy,
             inputs: inputs.map((input) => {
-              const { streams, ...restOfInput } = input;
+              // Remove `compiled_input` from all input info, we assign this after saving
+              const { streams, compiled_input: compiledInput, ...restOfInput } = input;
               return {
                 ...restOfInput,
                 streams: streams.map((stream) => {
@@ -113,7 +147,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
           setPackagePolicy(newPackagePolicy);
           if (packagePolicyData.item.package) {
             const { data: packageData } = await sendGetPackageInfoByKey(
-              `${packagePolicyData.item.package.name}-${packagePolicyData.item.package.version}`
+              pkgKeyFromPackageInfo(packagePolicyData.item.package)
             );
             if (packageData?.response) {
               setPackageInfo(packageData.response);
@@ -140,7 +174,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
       }
     };
 
-    if (isFleetEnabled) {
+    if (isFleetEnabled && policyId) {
       getAgentCount();
     }
   }, [policyId, isFleetEnabled]);
@@ -189,8 +223,47 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
     [packagePolicy, updatePackagePolicyValidation]
   );
 
-  // Cancel url
-  const cancelUrl = getHref('policy_details', { policyId });
+  const handleExtensionViewOnChange = useCallback<
+    PackagePolicyEditExtensionComponentProps['onChange']
+  >(
+    ({ isValid, updatedPolicy }) => {
+      updatePackagePolicy(updatedPolicy);
+      setFormState((prevState) => {
+        if (prevState === 'VALID' && !isValid) {
+          return 'INVALID';
+        }
+        return prevState;
+      });
+    },
+    [updatePackagePolicy]
+  );
+
+  // Cancel url + Success redirect Path:
+  //  if `from === 'edit'` then it links back to Policy Details
+  //  if `from === 'package-edit'` then it links back to the Integration Policy List
+  const cancelUrl = useMemo((): string => {
+    if (packageInfo && policyId) {
+      return from === 'package-edit'
+        ? getHref('integration_details', {
+            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+            panel: 'policies',
+          })
+        : getHref('policy_details', { policyId });
+    }
+    return '/';
+  }, [from, getHref, packageInfo, policyId]);
+
+  const successRedirectPath = useMemo(() => {
+    if (packageInfo && policyId) {
+      return from === 'package-edit'
+        ? getPath('integration_details', {
+            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+            panel: 'policies',
+          })
+        : getPath('policy_details', { policyId });
+    }
+    return '/';
+  }, [from, getPath, packageInfo, policyId]);
 
   // Save package policy
   const [formState, setFormState] = useState<PackagePolicyFormState>('INVALID');
@@ -212,7 +285,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
     }
     const { error } = await savePackagePolicy();
     if (!error) {
-      history.push(getPath('policy_details', { policyId }));
+      history.push(successRedirectPath);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationTitle', {
           defaultMessage: `Successfully updated '{packagePolicyName}'`,
@@ -220,6 +293,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
             packagePolicyName: packagePolicy.name,
           },
         }),
+        'data-test-subj': 'policyUpdateSuccessToast',
         text:
           agentCount && agentPolicy
             ? i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationMessage', {
@@ -261,11 +335,13 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
   };
 
   const layoutProps = {
-    from: 'edit' as CreatePackagePolicyFrom,
+    from,
     cancelUrl,
     agentPolicy,
     packageInfo,
   };
+
+  const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
 
   const configurePackage = useMemo(
     () =>
@@ -279,25 +355,44 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
             validationResults={validationResults!}
           />
 
-          <StepConfigurePackagePolicy
-            from={'edit'}
-            packageInfo={packageInfo}
-            packagePolicy={packagePolicy}
-            packagePolicyId={packagePolicyId}
-            updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
-            submitAttempted={formState === 'INVALID'}
-          />
+          {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
+          {!ExtensionView && (
+            <StepConfigurePackagePolicy
+              from={'edit'}
+              packageInfo={packageInfo}
+              packagePolicy={packagePolicy}
+              packagePolicyId={packagePolicyId}
+              updatePackagePolicy={updatePackagePolicy}
+              validationResults={validationResults!}
+              submitAttempted={formState === 'INVALID'}
+            />
+          )}
+
+          {ExtensionView &&
+            packagePolicy.policy_id &&
+            packagePolicy.package?.name &&
+            originalPackagePolicy && (
+              <ExtensionWrapper>
+                <ExtensionView
+                  policy={originalPackagePolicy}
+                  newPolicy={packagePolicy}
+                  onChange={handleExtensionViewOnChange}
+                />
+              </ExtensionWrapper>
+            )}
         </>
       ) : null,
     [
       agentPolicy,
-      formState,
-      packagePolicy,
-      packagePolicyId,
       packageInfo,
+      packagePolicy,
       updatePackagePolicy,
       validationResults,
+      packagePolicyId,
+      formState,
+      originalPackagePolicy,
+      ExtensionView,
+      handleExtensionViewOnChange,
     ]
   );
 
@@ -316,13 +411,21 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
           error={
             loadingError ||
             i18n.translate('xpack.fleet.editPackagePolicy.errorLoadingDataMessage', {
-              defaultMessage: 'There was an error loading this intergration information',
+              defaultMessage: 'There was an error loading this integration information',
             })
           }
         />
       ) : (
         <>
-          <Breadcrumb policyName={agentPolicy.name} policyId={policyId} />
+          {from === 'package' || from === 'package-edit' ? (
+            <IntegrationsBreadcrumb
+              pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+              pkgTitle={packageInfo.title}
+              policyName={packagePolicy.name}
+            />
+          ) : (
+            <PoliciesBreadcrumb policyName={agentPolicy.name} policyId={policyId} />
+          )}
           {formState === 'CONFIRM' && (
             <ConfirmDeployAgentPolicyModal
               agentCount={agentCount}
@@ -361,6 +464,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
                       iconType="save"
                       color="primary"
                       fill
+                      data-test-subj="saveIntegration"
                     >
                       <FormattedMessage
                         id="xpack.fleet.editPackagePolicy.saveButton"
@@ -376,12 +480,21 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
       )}
     </CreatePackagePolicyPageLayout>
   );
-};
+});
 
-const Breadcrumb: React.FunctionComponent<{ policyName: string; policyId: string }> = ({
+const PoliciesBreadcrumb: React.FunctionComponent<{ policyName: string; policyId: string }> = ({
   policyName,
   policyId,
 }) => {
   useBreadcrumbs('edit_integration', { policyName, policyId });
   return null;
 };
+
+const IntegrationsBreadcrumb = memo<{
+  pkgTitle: string;
+  policyName: string;
+  pkgkey: string;
+}>(({ pkgTitle, policyName, pkgkey }) => {
+  useBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
+  return null;
+});

@@ -5,8 +5,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-import { Request } from '@hapi/hapi';
 import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../lib/log';
@@ -19,7 +17,7 @@ import { RouteInitialization, SystemRouteDeps } from '../types';
  */
 export function systemRoutes(
   { router, mlLicense, routeGuard }: RouteInitialization,
-  { spaces, cloud, resolveMlCapabilities }: SystemRouteDeps
+  { getSpaces, cloud, resolveMlCapabilities }: SystemRouteDeps
 ) {
   async function getNodeCount(client: IScopedClusterClient) {
     const { body } = await client.asInternalUser.nodes.info({
@@ -117,7 +115,7 @@ export function systemRoutes(
     },
     routeGuard.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { isMlEnabledInSpace } = spacesUtilsProvider(spaces, (request as unknown) as Request);
+        const { isMlEnabledInSpace } = spacesUtilsProvider(getSpaces, request);
 
         const mlCapabilities = await resolveMlCapabilities(request);
         if (mlCapabilities === null) {

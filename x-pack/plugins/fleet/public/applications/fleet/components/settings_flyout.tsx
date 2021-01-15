@@ -25,7 +25,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 import { safeLoad } from 'js-yaml';
-import { useComboInput, useCore, useGetSettings, useInput, sendPutSettings } from '../hooks';
+import {
+  useComboInput,
+  useStartServices,
+  useGetSettings,
+  useInput,
+  sendPutSettings,
+} from '../hooks';
 import { useGetOutputs, sendPutOutput } from '../hooks/use_request/outputs';
 import { isDiffPathProtocol } from '../../../../common/';
 
@@ -37,7 +43,7 @@ interface Props {
 
 function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   const [isLoading, setIsloading] = React.useState(false);
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const kibanaUrlsInput = useComboInput([], (value) => {
     if (value.length === 0) {
       return [

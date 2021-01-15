@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EngineRouter, EngineNav } from './engine_nav';
+export { EngineRouter } from './engine_router';
+export { EngineNav } from './engine_nav';
+export { EngineLogic } from './engine_logic';

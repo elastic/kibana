@@ -29,8 +29,8 @@ import { UpdateAlertsStatus } from '../types';
 import { FILTER_CLOSED, FILTER_IN_PROGRESS, FILTER_OPEN } from '../alerts_filter_group';
 
 export interface AlertsUtilityBarProps {
-  canUserCRUD: boolean;
   hasIndexWrite: boolean;
+  hasIndexMaintenance: boolean;
   areEventsLoading: boolean;
   clearSelection: () => void;
   currentFilter: Status;
@@ -59,8 +59,8 @@ const BuildingBlockContainer = styled(EuiFlexItem)`
 `;
 
 const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
-  canUserCRUD,
   hasIndexWrite,
+  hasIndexMaintenance,
   areEventsLoading,
   clearSelection,
   totalCount,
@@ -161,6 +161,14 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
     </UtilityBarFlexGroup>
   );
 
+  const handleSelectAllAlertsClick = useCallback(() => {
+    if (!showClearSelection) {
+      selectAll();
+    } else {
+      clearSelection();
+    }
+  }, [clearSelection, selectAll, showClearSelection]);
+
   return (
     <>
       <UtilityBar>
@@ -172,7 +180,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
           </UtilityBarGroup>
 
           <UtilityBarGroup grow={true}>
-            {canUserCRUD && hasIndexWrite && (
+            {hasIndexWrite && hasIndexMaintenance && (
               <>
                 <UtilityBarText dataTestSubj="selectedAlerts">
                   {i18n.SELECTED_ALERTS(
@@ -198,13 +206,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
                   aria-label="selectAllAlerts"
                   dataTestSubj="selectAllAlertsButton"
                   iconType={showClearSelection ? 'cross' : 'pagesSelect'}
-                  onClick={() => {
-                    if (!showClearSelection) {
-                      selectAll();
-                    } else {
-                      clearSelection();
-                    }
-                  }}
+                  onClick={handleSelectAllAlertsClick}
                 >
                   {showClearSelection
                     ? i18n.CLEAR_SELECTION
@@ -218,7 +220,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
               disabled={areEventsLoading}
               iconType="arrowDown"
               iconSide="right"
-              ownFocus={false}
+              ownFocus={true}
               popoverContent={UtilityBarAdditionalFiltersContent}
             >
               {i18n.ADDITIONAL_FILTERS_ACTIONS}

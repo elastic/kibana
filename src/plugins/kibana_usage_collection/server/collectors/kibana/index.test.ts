@@ -17,20 +17,26 @@
  * under the License.
  */
 
-import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
 import {
-  CollectorOptions,
+  loggingSystemMock,
+  pluginInitializerContextConfigMock,
+  elasticsearchServiceMock,
+} from '../../../../../core/server/mocks';
+import {
+  Collector,
+  createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
-import { createCollectorFetchContextMock } from '../../../../usage_collection/server/mocks';
 import { registerKibanaUsageCollector } from './';
 
+const logger = loggingSystemMock.createLogger();
+
 describe('telemetry_kibana', () => {
-  let collector: CollectorOptions;
+  let collector: Collector<unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
-    collector = config;
+    collector = new Collector(logger, config);
     return createUsageCollectionSetupMock().makeUsageCollector(config);
   });
 
@@ -38,7 +44,9 @@ describe('telemetry_kibana', () => {
 
   const getMockFetchClients = (hits?: unknown[]) => {
     const fetchParamsMock = createCollectorFetchContextMock();
-    fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.search.mockResolvedValue({ body: { hits: { hits } } } as any);
+    fetchParamsMock.esClient = esClient;
     return fetchParamsMock;
   };
 
@@ -59,25 +67,6 @@ describe('telemetry_kibana', () => {
       index_pattern: { total: 0 },
       graph_workspace: { total: 0 },
       timelion_sheet: { total: 0 },
-    });
-  });
-
-  test('formatForBulkUpload', async () => {
-    const resultFromFetch = {
-      index: '.kibana-tests',
-      dashboard: { total: 0 },
-      visualization: { total: 0 },
-      search: { total: 0 },
-      index_pattern: { total: 0 },
-      graph_workspace: { total: 0 },
-      timelion_sheet: { total: 0 },
-    };
-
-    expect(collector.formatForBulkUpload!(resultFromFetch)).toStrictEqual({
-      type: 'kibana_stats',
-      payload: {
-        usage: resultFromFetch,
-      },
     });
   });
 });

@@ -43,5 +43,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...getRegistryUrlAsArray(),
       ],
     },
+    layout: {
+      fixedHeaderHeight: 200,
+    },
   };
 }

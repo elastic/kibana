@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import './context_app_legacy.scss';
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { EuiPanel, EuiText, EuiPageContent, EuiPage } from '@elastic/eui';
+import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage } from '@elastic/eui';
 import { ContextErrorMessage } from '../context_error_message';
 import {
   DocTableLegacy,
@@ -28,8 +27,10 @@ import {
 import { IIndexPattern, IndexPatternField } from '../../../../../data/common/index_patterns';
 import { LOADING_STATUS } from './constants';
 import { ActionBar, ActionBarProps } from '../../angular/context/components/action_bar/action_bar';
+import { TopNavMenuProps } from '../../../../../navigation/public';
 
 export interface ContextAppProps {
+  topNavMenu: React.ComponentType<TopNavMenuProps>;
   columns: string[];
   hits: Array<Record<string, unknown>>;
   indexPattern: IIndexPattern;
@@ -47,6 +48,7 @@ export interface ContextAppProps {
   onChangeSuccessorCount: (count: number) => void;
   predecessorStatus: string;
   successorStatus: string;
+  useNewFieldsApi?: boolean;
 }
 
 const PREDECESSOR_TYPE = 'predecessors';
@@ -86,7 +88,15 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   };
 
   const docTableProps = () => {
-    const { hits, filter, sorting, columns, indexPattern, minimumVisibleRows } = renderProps;
+    const {
+      hits,
+      filter,
+      sorting,
+      columns,
+      indexPattern,
+      minimumVisibleRows,
+      useNewFieldsApi,
+    } = renderProps;
     return {
       columns,
       indexPattern,
@@ -94,20 +104,30 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       rows: hits,
       onFilter: filter,
       sort: sorting.map((el) => [el]),
+      useNewFieldsApi,
     } as DocTableLegacyProps;
+  };
+
+  const TopNavMenu = renderProps.topNavMenu;
+  const getNavBarProps = () => {
+    return {
+      appName: 'context',
+      showSearchBar: true,
+      showQueryBar: false,
+      showFilterBar: true,
+      showSaveQuery: false,
+      showDatePicker: false,
+      indexPatterns: [renderProps.indexPattern],
+      useDefaultBehaviors: true,
+    };
   };
 
   const loadingFeedback = () => {
     if (status === LOADING_STATUS.UNINITIALIZED || status === LOADING_STATUS.LOADING) {
       return (
-        <EuiPanel paddingSize="l" data-test-subj="contextApp_loadingIndicator">
-          <EuiText textAlign="center">
-            <FormattedMessage
-              id="discover.context.loadingDescription"
-              defaultMessage="Loading..."
-            />
-          </EuiText>
-        </EuiPanel>
+        <EuiText textAlign="center" data-test-subj="contextApp_loadingIndicator">
+          <FormattedMessage id="discover.context.loadingDescription" defaultMessage="Loading..." />
+        </EuiText>
       );
     }
     return null;
@@ -118,20 +138,23 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       {isFailed ? (
         <ContextErrorMessage status={status} reason={renderProps.reason} />
       ) : (
-        <EuiPage>
-          <EuiPageContent paddingSize="s" className="dscCxtAppContent">
-            <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
-            {loadingFeedback()}
-            {isLoaded ? (
-              <EuiPanel paddingSize="none">
+        <div>
+          <TopNavMenu {...getNavBarProps()} />
+          <EuiPage>
+            <EuiPageContent paddingSize="s" className="dscCxtAppContent">
+              <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
+              {loadingFeedback()}
+              <EuiHorizontalRule margin="xs" />
+              {isLoaded ? (
                 <div className="discover-table">
                   <DocTableLegacy {...docTableProps()} />
                 </div>
-              </EuiPanel>
-            ) : null}
-            <ActionBar {...actionBarProps(SUCCESSOR_TYPE)} />
-          </EuiPageContent>
-        </EuiPage>
+              ) : null}
+              <EuiHorizontalRule margin="xs" />
+              <ActionBar {...actionBarProps(SUCCESSOR_TYPE)} />
+            </EuiPageContent>
+          </EuiPage>
+        </div>
       )}
     </I18nProvider>
   );

@@ -62,6 +62,9 @@
       "createdAt": {
         "type": "date"
       },
+      "updatedAt": {
+        "type": "date"
+      },
       "apiKey": {
         "type": "binary"
       },
@@ -69,6 +72,9 @@
         "type": "keyword"
       },
       "throttle": {
+        "type": "keyword"
+      },
+      "notifyWhen": {
         "type": "keyword"
       },
       "muteAll": {

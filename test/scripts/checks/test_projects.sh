@@ -2,4 +2,5 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-yarn run grunt run:test_projects
+checks-reporter-with-killswitch "Test Projects" \
+  yarn kbn run test --exclude kibana --oss --skip-kibana-plugins

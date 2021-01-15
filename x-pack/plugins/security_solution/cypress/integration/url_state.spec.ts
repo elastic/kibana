@@ -31,18 +31,14 @@ import { openAllHosts } from '../tasks/hosts/main';
 import { waitForIpsTableToBeLoaded } from '../tasks/network/flows';
 import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../tasks/security_header';
 import { openTimelineUsingToggle } from '../tasks/security_main';
-import {
-  addNameToTimeline,
-  closeTimeline,
-  populateTimeline,
-  waitForTimelineChanges,
-} from '../tasks/timeline';
+import { addNameToTimeline, closeTimeline, populateTimeline } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
 import { ABSOLUTE_DATE_RANGE } from '../urls/state';
 
 import { timeline } from '../objects/timeline';
 import { TIMELINE } from '../screens/create_new_case';
+import { cleanKibana } from '../tasks/common';
 
 const ABSOLUTE_DATE = {
   endTime: '2019-08-01T20:33:29.186Z',
@@ -54,6 +50,10 @@ const ABSOLUTE_DATE = {
 };
 
 describe('url state', () => {
+  beforeEach(() => {
+    cleanKibana();
+  });
+
   it('sets the global start and end dates from the url', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
@@ -141,12 +141,12 @@ describe('url state', () => {
 
   it('sets kql on network page', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
-    cy.get(KQL_INPUT).invoke('text').should('eq', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets kql on hosts page', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
-    cy.get(KQL_INPUT).invoke('text').should('eq', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets the url state when kql is set', () => {
@@ -187,7 +187,7 @@ describe('url state', () => {
       'href',
       `/app/security/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&sourcerer=(default:!(\'auditbeat-*\'))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))`
     );
-    cy.get(HOSTS_NAMES).first().invoke('text').should('eq', 'siem-kibana');
+    cy.get(HOSTS_NAMES).first().should('have.text', 'siem-kibana');
 
     openFirstHostDetails();
     clearSearchBar();
@@ -217,7 +217,7 @@ describe('url state', () => {
   it('Do not clears kql when navigating to a new page', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     navigateFromHeaderTo(NETWORK);
-    cy.get(KQL_INPUT).invoke('text').should('eq', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets and reads the url state for timeline by id', () => {
@@ -225,24 +225,21 @@ describe('url state', () => {
     openTimelineUsingToggle();
     populateTimeline();
 
-    cy.server();
-    cy.route('PATCH', '**/api/timeline').as('timeline');
+    cy.intercept('PATCH', '/api/timeline').as('timeline');
 
     addNameToTimeline(timeline.title);
-    waitForTimelineChanges();
 
-    cy.wait('@timeline').then((response) => {
+    cy.wait('@timeline').then(({ response }) => {
       closeTimeline();
-      cy.wrap(response.status).should('eql', 200);
-      const JsonResponse = JSON.parse(response.xhr.responseText);
-      const timelineId = JsonResponse.data.persistTimeline.timeline.savedObjectId;
+      cy.wrap(response!.statusCode).should('eql', 200);
+      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
       cy.visit('/app/home');
       cy.visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
       cy.get(TIMELINE).should('be.visible');
       cy.get(TIMELINE_TITLE).should('be.visible');
-      cy.get(TIMELINE_TITLE).should('have.attr', 'value', timeline.title);
+      cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
     });
   });
 });

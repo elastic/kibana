@@ -94,4 +94,55 @@ Object {
       expect(migrationFn(input, savedObjectMigrationContext)).toEqual(expected);
     });
   });
+
+  describe('7.11.0', () => {
+    const migrationFn = indexPatternSavedObjectTypeMigrations['7.11.0'];
+
+    test('should set allowNoIndex', () => {
+      const input = {
+        type: 'index-pattern',
+        id: 'logs-*',
+        attributes: {},
+      };
+      const expected = {
+        type: 'index-pattern',
+        id: 'logs-*',
+        attributes: {
+          allowNoIndex: true,
+        },
+      };
+
+      expect(migrationFn(input, savedObjectMigrationContext)).toEqual(expected);
+
+      const input2 = {
+        type: 'index-pattern',
+        id: 'metrics-*',
+        attributes: {},
+      };
+      const expected2 = {
+        type: 'index-pattern',
+        id: 'metrics-*',
+        attributes: {
+          allowNoIndex: true,
+        },
+      };
+
+      expect(migrationFn(input2, savedObjectMigrationContext)).toEqual(expected2);
+
+      const input3 = {
+        type: 'index-pattern',
+        id: 'xxx',
+        attributes: {},
+      };
+      const expected3 = {
+        type: 'index-pattern',
+        id: 'xxx',
+        attributes: {
+          allowNoIndex: undefined,
+        },
+      };
+
+      expect(migrationFn(input3, savedObjectMigrationContext)).toEqual(expected3);
+    });
+  });
 });

@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "SSH (Secure Shell) to the Internet",
-  "query": "event.category:(network or network_traffic) and network.transport:tcp and (destination.port:22 or event.dataset:zeek.ssh) and source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and not destination.ip:(10.0.0.0/8 or 127.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or \"::1\")",
+  "query": "event.category:(network or network_traffic) and network.transport:tcp and (destination.port:22 or event.dataset:zeek.ssh) and source.ip:( 10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 ) and not destination.ip:( 10.0.0.0/8 or 127.0.0.0/8 or 169.254.0.0/16 or 172.16.0.0/12 or 192.168.0.0/16 or 224.0.0.0/4 or \"::1\" or \"FE80::/10\" or \"FF00::/8\" )",
   "risk_score": 21,
   "rule_id": "6f1500bc-62d7-4eb9-8601-7485e87da2f4",
   "severity": "low",
@@ -33,15 +33,9 @@
         "name": "Command and Control",
         "reference": "https://attack.mitre.org/tactics/TA0011/"
       },
-      "technique": [
-        {
-          "id": "T1043",
-          "name": "Commonly Used Port",
-          "reference": "https://attack.mitre.org/techniques/T1043/"
-        }
-      ]
+      "technique": []
     }
   ],
   "type": "query",
-  "version": 5
+  "version": 6
 }

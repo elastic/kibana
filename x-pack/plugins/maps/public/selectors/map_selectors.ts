@@ -20,7 +20,6 @@ import { getTimeFilter } from '../kibana_services';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
-import { IJoin } from '../classes/joins/join';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeojsonFileSource } from '../classes/sources/geojson_file_source';
@@ -63,11 +62,11 @@ export function createLayerInstance(
     case TileLayer.type:
       return new TileLayer({ layerDescriptor, source: source as ITMSSource });
     case VectorLayer.type:
-      const joins: IJoin[] = [];
+      const joins: InnerJoin[] = [];
       const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;
       if (vectorLayerDescriptor.joins) {
         vectorLayerDescriptor.joins.forEach((joinDescriptor) => {
-          const join = new InnerJoin(joinDescriptor, source);
+          const join = new InnerJoin(joinDescriptor, source as IVectorSource);
           joins.push(join);
         });
       }
@@ -150,21 +149,6 @@ export const getWaitingForMapReadyLayerListRaw = ({ map }: MapStoreState): Layer
   map.waitingForMapReadyLayerList ? map.waitingForMapReadyLayerList : [];
 
 export const getScrollZoom = ({ map }: MapStoreState): boolean => map.mapState.scrollZoom;
-
-export const isInteractiveDisabled = ({ map }: MapStoreState): boolean =>
-  map.mapState.disableInteractive;
-
-export const isTooltipControlDisabled = ({ map }: MapStoreState): boolean =>
-  map.mapState.disableTooltipControl;
-
-export const isToolbarOverlayHidden = ({ map }: MapStoreState): boolean =>
-  map.mapState.hideToolbarOverlay;
-
-export const isLayerControlHidden = ({ map }: MapStoreState): boolean =>
-  map.mapState.hideLayerControl;
-
-export const isViewControlHidden = ({ map }: MapStoreState): boolean =>
-  map.mapState.hideViewControl;
 
 export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.extent;
 
@@ -357,7 +341,7 @@ export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, 
     return [];
   }
 
-  return (selectedLayer as IVectorLayer).getJoins().map((join: IJoin) => {
+  return (selectedLayer as IVectorLayer).getJoins().map((join: InnerJoin) => {
     return join.toDescriptor();
   });
 });

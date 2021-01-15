@@ -22,6 +22,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter } from 'src/core/server';
 import { getRequestAbortedSignal } from '../../lib';
 import { shimHitsTotal } from './shim_hits_total';
+import { reportServerError } from '../../../../kibana_utils/server';
 
 export function registerSearchRoute(router: IRouter): void {
   router.post(
@@ -35,11 +36,18 @@ export function registerSearchRoute(router: IRouter): void {
 
         query: schema.object({}, { unknowns: 'allow' }),
 
-        body: schema.object({}, { unknowns: 'allow' }),
+        body: schema.object(
+          {
+            sessionId: schema.maybe(schema.string()),
+            isStored: schema.maybe(schema.boolean()),
+            isRestore: schema.maybe(schema.boolean()),
+          },
+          { unknowns: 'allow' }
+        ),
       },
     },
     async (context, request, res) => {
-      const searchRequest = request.body;
+      const { sessionId, isStored, isRestore, ...searchRequest } = request.body;
       const { strategy, id } = request.params;
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
@@ -50,6 +58,9 @@ export function registerSearchRoute(router: IRouter): void {
             {
               abortSignal,
               strategy,
+              sessionId,
+              isStored,
+              isRestore,
             }
           )
           .pipe(first())
@@ -64,15 +75,7 @@ export function registerSearchRoute(router: IRouter): void {
           },
         });
       } catch (err) {
-        return res.customError({
-          statusCode: err.statusCode || 500,
-          body: {
-            message: err.message,
-            attributes: {
-              error: err.body?.error || err.message,
-            },
-          },
-        });
+        return reportServerError(res, err);
       }
     }
   );
@@ -96,15 +99,7 @@ export function registerSearchRoute(router: IRouter): void {
         await context.search!.cancel(id, { strategy });
         return res.ok();
       } catch (err) {
-        return res.customError({
-          statusCode: err.statusCode,
-          body: {
-            message: err.message,
-            attributes: {
-              error: err.body.error,
-            },
-          },
-        });
+        return reportServerError(res, err);
       }
     }
   );

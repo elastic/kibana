@@ -1,4 +1,4 @@
-# Ingest Manager
+# Fleet
 
 ## Plugin
 
@@ -46,6 +46,8 @@ One common development workflow is:
 This plugin follows the `common`, `server`, `public` structure from the [Architecture Style Guide
 ](https://github.com/elastic/kibana/blob/master/style_guides/architecture_style_guide.md#file-and-folder-structure). We also follow the pattern of developing feature branches under your personal fork of Kibana.
 
+Note: The plugin was previously named Ingest Manager it's possible that some variables are still named with that old plugin name.
+
 ### Tests
 
 #### API integration tests
@@ -55,17 +57,17 @@ You need to have `docker` to run ingest manager api integration tests
 1. In one terminal, run the tests from the Kibana root directory with
 
    ```
-   INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/ingest_manager_api_integration/config.ts
+   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/fleet_api_integration/config.ts
    ```
 
 1. in a second terminal, run the tests from the Kibana root directory with
 
    ```
-   INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/ingest_manager_api_integration/config.ts
+   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/config.ts
    ```
 
    Optionally you can filter which tests you want to run using `--grep`
 
    ```
-   INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/ingest_manager_api_integration/config.ts --grep='fleet'
+   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/config.ts --grep='fleet'
    ```

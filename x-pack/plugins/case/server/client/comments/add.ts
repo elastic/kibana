@@ -9,14 +9,15 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { flattenCaseSavedObject, transformNewComment } from '../../routes/api/utils';
+import { decodeComment, flattenCaseSavedObject, transformNewComment } from '../../routes/api/utils';
 
 import {
   throwErrors,
-  excess,
   CaseResponseRt,
   CommentRequestRt,
   CaseResponse,
+  CommentType,
+  CaseStatuses,
 } from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
@@ -29,18 +30,26 @@ export const addComment = ({
   userActionService,
   request,
 }: CaseClientFactoryArguments) => async ({
+  caseClient,
   caseId,
   comment,
 }: CaseClientAddComment): Promise<CaseResponse> => {
   const query = pipe(
-    excess(CommentRequestRt).decode(comment),
+    CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
+
+  decodeComment(comment);
 
   const myCase = await caseService.getCase({
     client: savedObjectsClient,
     caseId,
   });
+
+  // An alert cannot be attach to a closed case.
+  if (query.type === CommentType.alert && myCase.attributes.status === CaseStatuses.closed) {
+    throw Boom.badRequest('Alert cannot be attached to a closed case');
+  }
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { username, full_name, email } = await caseService.getUser({ request });
@@ -75,6 +84,14 @@ export const addComment = ({
     }),
   ]);
 
+  // If the case is synced with alerts the newly attached alert must match the status of the case.
+  if (newComment.attributes.type === CommentType.alert && myCase.attributes.settings.syncAlerts) {
+    caseClient.updateAlertsStatus({
+      ids: [newComment.attributes.alertId],
+      status: myCase.attributes.status,
+    });
+  }
+
   const totalCommentsFindByCases = await caseService.getAllCaseComments({
     client: savedObjectsClient,
     caseId,
@@ -105,7 +122,7 @@ export const addComment = ({
           caseId: myCase.id,
           commentId: newComment.id,
           fields: ['comment'],
-          newValue: query.comment,
+          newValue: JSON.stringify(query),
         }),
       ],
     }),

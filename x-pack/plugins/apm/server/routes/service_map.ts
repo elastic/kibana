@@ -6,10 +6,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import {
-  invalidLicenseMessage,
-  isActivePlatinumLicense,
-} from '../../common/service_map';
+import { invalidLicenseMessage } from '../../common/service_map';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceMap } from '../lib/service_map/get_service_map';
 import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
@@ -17,10 +14,11 @@ import { createRoute } from './create_route';
 import { rangeRt, uiFiltersRt } from './default_api_types';
 import { notifyFeatureUsage } from '../feature';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { isActivePlatinumLicense } from '../../common/license_check';
 
-export const serviceMapRoute = createRoute(() => ({
-  path: '/api/apm/service-map',
-  params: {
+export const serviceMapRoute = createRoute({
+  endpoint: 'GET /api/apm/service-map',
+  params: t.type({
     query: t.intersection([
       t.partial({
         environment: t.string,
@@ -28,7 +26,8 @@ export const serviceMapRoute = createRoute(() => ({
       }),
       rangeRt,
     ]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     if (!context.config['xpack.apm.serviceMapEnabled']) {
       throw Boom.notFound();
@@ -59,16 +58,17 @@ export const serviceMapRoute = createRoute(() => ({
       logger,
     });
   },
-}));
+});
 
-export const serviceMapServiceNodeRoute = createRoute(() => ({
-  path: `/api/apm/service-map/service/{serviceName}`,
-  params: {
+export const serviceMapServiceNodeRoute = createRoute({
+  endpoint: `GET /api/apm/service-map/service/{serviceName}`,
+  params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
     query: t.intersection([rangeRt, uiFiltersRt]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     if (!context.config['xpack.apm.serviceMapEnabled']) {
       throw Boom.notFound();
@@ -92,4 +92,4 @@ export const serviceMapServiceNodeRoute = createRoute(() => ({
       searchAggregatedTransactions,
     });
   },
-}));
+});

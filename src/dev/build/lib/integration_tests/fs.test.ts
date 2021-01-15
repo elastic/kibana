@@ -177,6 +177,16 @@ describe('copyAll()', () => {
   });
 
   it('copies files and directories from source to dest, creating dest if necessary, respecting mode', async () => {
+    const path777 = resolve(FIXTURES, 'bin/world_executable');
+    const path644 = resolve(FIXTURES, 'foo_dir/bar.txt');
+
+    // we're seeing flaky failures because the resulting files sometimes have
+    // 755 permissions. Unless there's a bug in vinyl-fs I can't figure out
+    // where the issue might be, so trying to validate the mode first to narrow
+    // down where the issue might be
+    expect(getCommonMode(path777)).toBe(isWindows ? '666' : '777');
+    expect(getCommonMode(path644)).toBe(isWindows ? '666' : '644');
+
     const destination = resolve(TMP, 'a/b/c');
     await copyAll(FIXTURES, destination);
 
@@ -185,10 +195,8 @@ describe('copyAll()', () => {
       resolve(destination, 'foo_dir/foo'),
     ]);
 
-    expect(getCommonMode(resolve(destination, 'bin/world_executable'))).toBe(
-      isWindows ? '666' : '777'
-    );
-    expect(getCommonMode(resolve(destination, 'foo_dir/bar.txt'))).toBe(isWindows ? '666' : '644');
+    expect(getCommonMode(path777)).toBe(isWindows ? '666' : '777');
+    expect(getCommonMode(path644)).toBe(isWindows ? '666' : '644');
   });
 
   it('applies select globs if specified, ignores dot files', async () => {

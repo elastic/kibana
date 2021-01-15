@@ -53,7 +53,7 @@ export default function ({ getService }) {
               type: 'visualization',
               migrationVersion: resp.body.migrationVersion,
               updated_at: resp.body.updated_at,
-              version: 'WzgsMV0=',
+              version: resp.body.version,
               attributes: {
                 title: 'My favorite vis',
               },
@@ -100,7 +100,7 @@ export default function ({ getService }) {
               type: 'visualization',
               migrationVersion: resp.body.migrationVersion,
               updated_at: resp.body.updated_at,
-              version: 'WzAsMV0=',
+              version: resp.body.version,
               attributes: {
                 title: 'My favorite vis',
               },

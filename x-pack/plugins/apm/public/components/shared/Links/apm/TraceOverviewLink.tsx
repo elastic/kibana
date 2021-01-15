@@ -9,23 +9,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { APMLink, APMLinkExtendProps } from './APMLink';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { pickKeys } from '../../../../../common/utils/pick_keys';
+import { APMQueryParams } from '../url_helpers';
+import { useAPMHref } from './APMLink';
 
-function TraceOverviewLink(props: APMLinkExtendProps) {
-  const { urlParams } = useUrlParams();
+const persistedFilters: Array<keyof APMQueryParams> = [
+  'transactionResult',
+  'host',
+  'containerId',
+  'podName',
+];
 
-  const persistedFilters = pickKeys(
-    urlParams,
-    'transactionResult',
-    'host',
-    'containerId',
-    'podName'
-  );
-
-  return <APMLink path="/traces" query={persistedFilters} {...props} />;
+export function useTraceOverviewHref() {
+  return useAPMHref('/traces', persistedFilters);
 }
-
-export { TraceOverviewLink };

@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { expect } from 'chai';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import sinon from 'sinon';
 import { YesNo } from './yes_no';
 

@@ -29,7 +29,7 @@ interface Props {
   [key: string]: any;
 }
 
-export const TextField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
+export const TextField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
@@ -39,7 +39,7 @@ export const TextField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      describedByIds={idAria ? [idAria] : undefined}
       {...rest}
     >
       <EuiFieldText

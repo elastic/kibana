@@ -42,16 +42,8 @@ export default function ({ getService, getPageObjects }) {
         expect(time).to.be.a('string').match(/ ago$/);
       }
 
-      const expectedRows = [
-        {
-          selected: false,
-          id: 'tweets_and_beats',
-          description: 'ingest tweets and beats',
-          username: 'elastic',
-        },
-      ];
-
-      for (let emptyPipelineId = 1; emptyPipelineId <= 19; ++emptyPipelineId) {
+      let expectedRows = [];
+      for (let emptyPipelineId = 1; emptyPipelineId <= 21; ++emptyPipelineId) {
         expectedRows.push({
           selected: false,
           id: `empty_pipeline_${emptyPipelineId}`,
@@ -59,6 +51,10 @@ export default function ({ getService, getPageObjects }) {
           username: 'elastic',
         });
       }
+      expectedRows = expectedRows.sort((a, b) => {
+        return a.id.localeCompare(b.id);
+      });
+      expectedRows.pop();
 
       expect(rowsWithoutTime).to.eql(expectedRows);
     });
@@ -145,14 +141,14 @@ export default function ({ getService, getPageObjects }) {
         expect(rowsWithoutTime).to.eql([
           {
             selected: false,
-            id: 'empty_pipeline_20',
+            id: 'empty_pipeline_9',
             description: 'an empty pipeline',
             username: 'elastic',
           },
           {
             selected: false,
-            id: 'empty_pipeline_21',
-            description: 'an empty pipeline',
+            id: 'tweets_and_beats',
+            description: 'ingest tweets and beats',
             username: 'elastic',
           },
         ]);

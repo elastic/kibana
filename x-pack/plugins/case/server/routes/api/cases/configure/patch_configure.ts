@@ -13,6 +13,7 @@ import {
   CasesConfigurePatchRt,
   CaseConfigureResponseRt,
   throwErrors,
+  ConnectorMappingsAttributes,
 } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
@@ -32,6 +33,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
     },
     async (context, request, response) => {
       try {
+        let error = null;
         const client = context.core.savedObjects.client;
         const query = pipe(
           CasesConfigurePatchRt.decode(request.body),
@@ -56,6 +58,30 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
         const { username, full_name, email } = await caseService.getUser({ request, response });
 
         const updateDate = new Date().toISOString();
+
+        let mappings: ConnectorMappingsAttributes[] = [];
+        if (connector != null) {
+          if (!context.case) {
+            throw Boom.badRequest('RouteHandlerContext is not registered for cases');
+          }
+          const caseClient = context.case.getCaseClient();
+          const actionsClient = await context.actions?.getActionsClient();
+          if (actionsClient == null) {
+            throw Boom.notFound('Action client have not been found');
+          }
+          try {
+            mappings = await caseClient.getMappings({
+              actionsClient,
+              caseClient,
+              connectorId: connector.id,
+              connectorType: connector.type,
+            });
+          } catch (e) {
+            error = e.isBoom
+              ? e.output.payload.message
+              : `Error connecting to ${connector.name} instance`;
+          }
+        }
         const patch = await caseConfigureService.patch({
           client,
           caseConfigureId: myCaseConfigure.saved_objects[0].id,
@@ -68,7 +94,6 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
             updated_by: { email, full_name, username },
           },
         });
-
         return response.ok({
           body: CaseConfigureResponseRt.encode({
             ...myCaseConfigure.saved_objects[0].attributes,
@@ -76,7 +101,9 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
             connector: transformESConnectorToCaseConnector(
               patch.attributes.connector ?? myCaseConfigure.saved_objects[0].attributes.connector
             ),
+            mappings,
             version: patch.version ?? '',
+            error,
           }),
         });
       } catch (error) {

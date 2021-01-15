@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { aggGeoHashFnName } from './geo_hash_fn';
 import { GeoBoundingBox } from './lib/geo_point';
 import { BaseAggParams } from '../types';
 
@@ -47,6 +48,7 @@ export interface AggParamsGeoHash extends BaseAggParams {
 export const getGeoHashBucketAgg = () =>
   new BucketAggType<IBucketAggConfig>({
     name: BUCKET_TYPES.GEOHASH_GRID,
+    expressionName: aggGeoHashFnName,
     title: geohashGridTitle,
     makeLabel: () => geohashGridTitle,
     params: [

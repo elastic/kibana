@@ -257,8 +257,9 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
+    const esArgs = ['indices.query.bool.max_nested_depth=100'].concat(options.esArgs || []);
+
     // Add to esArgs if ssl is enabled
-    const esArgs = [].concat(options.esArgs || []);
     if (this._ssl) {
       esArgs.push('xpack.security.http.ssl.enabled=true');
       esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
@@ -274,6 +275,15 @@ exports.Cluster = class Cluster {
     );
 
     this._log.debug('%s %s', ES_BIN, args.join(' '));
+
+    options.esEnvVars = options.esEnvVars || {};
+
+    // ES now automatically sets heap size to 50% of the machine's available memory
+    // so we need to set it to a smaller size for local dev and CI
+    // especially because we currently run many instances of ES on the same machine during CI
+    options.esEnvVars.ES_JAVA_OPTS =
+      (options.esEnvVars.ES_JAVA_OPTS ? `${options.esEnvVars.ES_JAVA_OPTS} ` : '') +
+      '-Xms1g -Xmx1g';
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,

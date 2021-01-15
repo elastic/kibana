@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useLinks } from '../../hooks';
-import { useCore } from '../../../../hooks';
+import { useStartServices } from '../../../../hooks';
 
 export const HeroCopy = memo(() => {
   return (
@@ -43,7 +43,7 @@ const Illustration = styled(EuiImage)`
 
 export const HeroImage = memo(() => {
   const { toAssets } = useLinks();
-  const { uiSettings } = useCore();
+  const { uiSettings } = useStartServices();
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
   return (

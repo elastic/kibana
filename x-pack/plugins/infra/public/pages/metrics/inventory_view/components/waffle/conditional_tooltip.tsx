@@ -12,6 +12,7 @@ import { findInventoryModel } from '../../../../../../common/inventory_models';
 import {
   InventoryItemType,
   SnapshotMetricType,
+  SnapshotMetricTypeRT,
 } from '../../../../../../common/inventory_models/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { useSnapshot } from '../../hooks/use_snaphot';
@@ -88,8 +89,9 @@ export const ConditionalToolTip = withTheme(
           {node.name}
         </div>
         {metrics.map((metric) => {
-          const name = SNAPSHOT_METRIC_TRANSLATIONS[metric.name] || metric.name;
-          const formatter = createInventoryMetricFormatter({ type: metric.name });
+          const metricName = SnapshotMetricTypeRT.is(metric.name) ? metric.name : 'custom';
+          const name = SNAPSHOT_METRIC_TRANSLATIONS[metricName] || metricName;
+          const formatter = createInventoryMetricFormatter({ type: metricName });
           return (
             <EuiFlexGroup gutterSize="none" key={metric.name}>
               <EuiFlexItem grow={1}>{name}</EuiFlexItem>

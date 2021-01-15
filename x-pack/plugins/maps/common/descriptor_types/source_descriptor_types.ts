@@ -40,11 +40,33 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   applyGlobalTime: boolean;
 };
 
-export type AggDescriptor = {
-  field?: string; // count aggregation does not require field. All other aggregation types do
-  label?: string;
+type AbstractAggDescriptor = {
   type: AGG_TYPE;
+  label?: string;
 };
+
+export type CountAggDescriptor = AbstractAggDescriptor & {
+  type: AGG_TYPE.COUNT;
+};
+
+export type FieldedAggDescriptor = AbstractAggDescriptor & {
+  type:
+    | AGG_TYPE.UNIQUE_COUNT
+    | AGG_TYPE.MAX
+    | AGG_TYPE.MIN
+    | AGG_TYPE.SUM
+    | AGG_TYPE.AVG
+    | AGG_TYPE.TERMS;
+  field?: string;
+};
+
+export type PercentileAggDescriptor = AbstractAggDescriptor & {
+  type: AGG_TYPE.PERCENTILE;
+  field?: string;
+  percentile?: number;
+};
+
+export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | PercentileAggDescriptor;
 
 export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];
@@ -54,6 +76,12 @@ export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
   geoField: string;
   requestType: RENDER_AS;
   resolution: GRID_RESOLUTION;
+};
+
+export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
+  geoField: string;
+  splitField: string;
+  sortField: string;
 };
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
@@ -76,6 +104,7 @@ export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   indexPatternTitle?: string;
   term: string; // term field name
   whereQuery?: Query;
+  size?: number;
 };
 
 export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {

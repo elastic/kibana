@@ -26,4 +26,4 @@ if [ -f "${CONFIG_DIR}/node.options" ]; then
   KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
 fi
 
-NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/dist" ${@}
+NODE_OPTIONS="--no-warnings --max-http-header-size=65536 --tls-min-v1.0 $KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/dist" ${@}

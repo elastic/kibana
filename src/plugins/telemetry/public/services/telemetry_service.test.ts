@@ -17,31 +17,20 @@
  * under the License.
  */
 
+// ESLint disabled dot-notation we can access the private key telemetryService['http']
 /* eslint-disable dot-notation */
-const mockMomentValueOf = jest.fn();
-
-jest.mock('moment', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      valueOf: mockMomentValueOf,
-    };
-  });
-});
 
 import { mockTelemetryService } from '../mocks';
 
 describe('TelemetryService', () => {
   describe('fetchTelemetry', () => {
     it('calls expected URL with 20 minutes - now', async () => {
-      const timestamp = Date.now();
-      mockMomentValueOf.mockReturnValueOnce(timestamp);
       const telemetryService = mockTelemetryService();
 
       await telemetryService.fetchTelemetry();
       expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/clusters/_stats', {
-        body: JSON.stringify({ unencrypted: false, timestamp }),
+        body: JSON.stringify({ unencrypted: false }),
       });
-      expect(mockMomentValueOf).toBeCalled();
     });
   });
 

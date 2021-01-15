@@ -176,6 +176,19 @@ describe('threat_mapping', () => {
     expect(message.schema).toEqual({});
   });
 
+  test('it should fail validate with empty array', () => {
+    const payload: string[] = [];
+
+    const decoded = threat_mapping.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "[]" supplied to "NonEmptyArray<ThreatMap>"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
   test('it should fail validation when concurrent_searches is < 0', () => {
     const payload = -1;
     const decoded = concurrent_searches.decode(payload);

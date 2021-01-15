@@ -68,7 +68,7 @@ describe('Authentication Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(AuthenticationTableComponent)')).toMatchSnapshot();
+      expect(wrapper.find('Memo(AuthenticationTableComponent)')).toMatchSnapshot();
     });
   });
 

@@ -47,19 +47,19 @@ describe('Search Usage Collector', () => {
 
   test('tracks query timeouts', async () => {
     await usageCollector.trackQueryTimedOut();
-    expect(mockUsageCollectionSetup.reportUiStats).toHaveBeenCalled();
-    expect(mockUsageCollectionSetup.reportUiStats.mock.calls[0][0]).toBe('foo/bar');
-    expect(mockUsageCollectionSetup.reportUiStats.mock.calls[0][1]).toBe(METRIC_TYPE.LOADED);
-    expect(mockUsageCollectionSetup.reportUiStats.mock.calls[0][2]).toBe(
+    expect(mockUsageCollectionSetup.reportUiCounter).toHaveBeenCalled();
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][0]).toBe('foo/bar');
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][1]).toBe(METRIC_TYPE.LOADED);
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][2]).toBe(
       SEARCH_EVENT_TYPE.QUERY_TIMED_OUT
     );
   });
 
   test('tracks query cancellation', async () => {
     await usageCollector.trackQueriesCancelled();
-    expect(mockUsageCollectionSetup.reportUiStats).toHaveBeenCalled();
-    expect(mockUsageCollectionSetup.reportUiStats.mock.calls[0][1]).toBe(METRIC_TYPE.LOADED);
-    expect(mockUsageCollectionSetup.reportUiStats.mock.calls[0][2]).toBe(
+    expect(mockUsageCollectionSetup.reportUiCounter).toHaveBeenCalled();
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][1]).toBe(METRIC_TYPE.LOADED);
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][2]).toBe(
       SEARCH_EVENT_TYPE.QUERIES_CANCELLED
     );
   });

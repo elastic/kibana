@@ -171,7 +171,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               value: bucket.key,
             }))
           : NO_LEGEND_DATA,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       [alertsData, selectedStackByOption.value, timelineId]
     );
 

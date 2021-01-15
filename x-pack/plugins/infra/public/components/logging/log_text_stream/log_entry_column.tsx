@@ -9,10 +9,11 @@ import { useMemo } from 'react';
 import { euiStyled } from '../../../../../observability/public';
 import { TextScale } from '../../../../common/log_text_scale';
 import {
-  isMessageLogColumnConfiguration,
-  isTimestampLogColumnConfiguration,
-  LogColumnConfiguration,
-} from '../../../utils/source_configuration';
+  LogColumnRenderConfiguration,
+  isTimestampColumnRenderConfiguration,
+  isMessageColumnRenderConfiguration,
+  columnWidthToCSS,
+} from '../../../utils/log_column_render_configuration';
 import { useFormattedTime, TimeFormat } from '../../formatted_time';
 import { useMeasuredCharacterDimensions } from './text_styles';
 
@@ -59,42 +60,58 @@ export interface LogEntryColumnWidths {
 }
 
 export const getColumnWidths = (
-  columns: LogColumnConfiguration[],
+  columns: LogColumnRenderConfiguration[],
   characterWidth: number,
   formattedDateWidth: number
 ): LogEntryColumnWidths =>
   columns.reduce<LogEntryColumnWidths>(
     (columnWidths, column) => {
-      if (isTimestampLogColumnConfiguration(column)) {
+      if (isTimestampColumnRenderConfiguration(column)) {
+        const customWidth = column.timestampColumn.width
+          ? columnWidthToCSS(column.timestampColumn.width)
+          : undefined;
+
         return {
           ...columnWidths,
           [column.timestampColumn.id]: {
             growWeight: 0,
             shrinkWeight: 0,
-            baseWidth: `${
-              Math.ceil(characterWidth * formattedDateWidth * DATE_COLUMN_SLACK_FACTOR) +
-              2 * COLUMN_PADDING
-            }px`,
+            baseWidth:
+              customWidth ??
+              `${
+                Math.ceil(characterWidth * formattedDateWidth * DATE_COLUMN_SLACK_FACTOR) +
+                2 * COLUMN_PADDING
+              }px`,
           },
         };
-      } else if (isMessageLogColumnConfiguration(column)) {
+      } else if (isMessageColumnRenderConfiguration(column)) {
+        const customWidth = column.messageColumn.width
+          ? columnWidthToCSS(column.messageColumn.width)
+          : undefined;
+
         return {
           ...columnWidths,
           [column.messageColumn.id]: {
             growWeight: 5,
             shrinkWeight: 0,
-            baseWidth: '0%',
+            baseWidth: customWidth ?? '0%',
           },
         };
       } else {
+        const customWidth = column.fieldColumn.width
+          ? columnWidthToCSS(column.fieldColumn.width)
+          : undefined;
+
         return {
           ...columnWidths,
           [column.fieldColumn.id]: {
-            growWeight: 1,
+            growWeight: customWidth ? 0 : 1,
             shrinkWeight: 0,
-            baseWidth: `${
-              Math.ceil(characterWidth * FIELD_COLUMN_MIN_WIDTH_CHARACTERS) + 2 * COLUMN_PADDING
-            }px`,
+            baseWidth:
+              customWidth ??
+              `${
+                Math.ceil(characterWidth * FIELD_COLUMN_MIN_WIDTH_CHARACTERS) + 2 * COLUMN_PADDING
+              }px`,
           },
         };
       }
@@ -119,7 +136,7 @@ export const useColumnWidths = ({
   scale,
   timeFormat = 'time',
 }: {
-  columnConfigurations: LogColumnConfiguration[];
+  columnConfigurations: LogColumnRenderConfiguration[];
   scale: TextScale;
   timeFormat?: TimeFormat;
 }) => {

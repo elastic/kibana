@@ -26,7 +26,7 @@ import {
   startTaskTimer,
   TaskTiming,
 } from '../task_events';
-import { intervalFromDate, intervalFromNow } from '../lib/intervals';
+import { intervalFromDate, maxIntervalFromDate } from '../lib/intervals';
 import {
   CancelFunction,
   CancellableTask,
@@ -76,10 +76,6 @@ export enum TaskRunResult {
   Success = 'Success',
   // Recurring Task completed successfully
   SuccessRescheduled = 'Success',
-  // // Task completed successfully after a retry
-  // SuccessfulRetry = 'SuccessfulRetry',
-  // // Recurring Task completed successfully after a retry
-  // SuccessfulRetryRescheduled = 'SuccessfulRetry',
   // Task has failed and a retry has been scheduled
   RetryScheduled = 'RetryScheduled',
   // Task has failed
@@ -259,15 +255,16 @@ export class TaskManagerRunner implements TaskRunner {
         status: TaskStatus.Running,
         startedAt: now,
         attempts,
-        retryAt: this.instance.schedule
-          ? intervalFromNow(this.definition.timeout)!
-          : this.getRetryDelay({
-              attempts,
-              // Fake an error. This allows retry logic when tasks keep timing out
-              // and lets us set a proper "retryAt" value each time.
-              error: new Error('Task timeout'),
-              addDuration: this.definition.timeout,
-            }) ?? null,
+        retryAt:
+          (this.instance.schedule
+            ? maxIntervalFromDate(now, this.instance.schedule!.interval, this.definition.timeout)
+            : this.getRetryDelay({
+                attempts,
+                // Fake an error. This allows retry logic when tasks keep timing out
+                // and lets us set a proper "retryAt" value each time.
+                error: new Error('Task timeout'),
+                addDuration: this.definition.timeout,
+              })) ?? null,
       });
 
       const timeUntilClaimExpiresAfterUpdate = howManyMsUntilOwnershipClaimExpires(

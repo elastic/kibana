@@ -26,7 +26,7 @@ describe('agg_expression_functions', () => {
 
     test('correctly serializes', () => {
       const actual = fn({
-        delay: 1000,
+        delay: '1000ms',
       });
       expect(actual).toMatchInlineSnapshot(`
         Object {
@@ -36,7 +36,7 @@ describe('agg_expression_functions', () => {
             "id": undefined,
             "params": Object {
               "customLabel": undefined,
-              "delay": 1000,
+              "delay": "1000ms",
               "json": undefined,
             },
             "schema": undefined,
@@ -48,18 +48,11 @@ describe('agg_expression_functions', () => {
 
     test('correctly parses json string argument', () => {
       const actual = fn({
-        delay: 1000,
+        delay: '1000ms',
         json: '{ "foo": true }',
       });
 
-      expect(actual.value.params.json).toEqual({ foo: true });
-
-      expect(() => {
-        fn({
-          delay: 1000,
-          json: '/// intentionally malformed json ///',
-        });
-      }).toThrowErrorMatchingInlineSnapshot(`"Unable to parse json argument string"`);
+      expect(actual.value.params.json).toEqual('{ "foo": true }');
     });
   });
 });

@@ -16,26 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  isErrorEmbeddable,
-  IContainer,
-  ReferenceOrValueEmbeddable,
-  EmbeddableInput,
-} from '../../embeddable_plugin';
+
+import { AddToLibraryAction } from '.';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
+
+import { CoreStart } from 'kibana/public';
+
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+
 import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
+  EmbeddableInput,
+  ErrorEmbeddable,
+  IContainer,
+  isErrorEmbeddable,
+  ReferenceOrValueEmbeddable,
+  ViewMode,
+} from '../../services/embeddable';
+import {
   ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
-import { coreMock } from '../../../../../core/public/mocks';
-import { CoreStart } from 'kibana/public';
-import { AddToLibraryAction } from '.';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { ErrorEmbeddable, ViewMode } from '../../../../embeddable/public';
+  CONTACT_CARD_EMBEDDABLE,
+} from '../../services/embeddable_test_samples';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -60,6 +65,8 @@ beforeEach(async () => {
     overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    http: coreStart.http,
   };
 
   container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
@@ -137,12 +144,17 @@ test('Add to library is not compatible when embeddable is not in a dashboard con
 test('Add to library replaces embeddableId and retains panel count', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
+  const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
 
   const action = new AddToLibraryAction({ toasts: coreStart.notifications.toasts });
   await action.execute({ embeddable });
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount);
-  expect(Object.keys(container.getInput().panels)).toContain(embeddable.id);
-  const newPanel = container.getInput().panels[embeddable.id!];
+
+  const newPanelId = Object.keys(container.getInput().panels).find(
+    (key) => !originalPanelKeySet.has(key)
+  );
+  expect(newPanelId).toBeDefined();
+  const newPanel = container.getInput().panels[newPanelId!];
   expect(newPanel.type).toEqual(embeddable.type);
 });
 
@@ -158,10 +170,15 @@ test('Add to library returns reference type input', async () => {
     mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: embeddable.id },
     mockedByValueInput: { attributes: complicatedAttributes, id: embeddable.id } as EmbeddableInput,
   });
+  const dashboard = embeddable.getRoot() as IContainer;
+  const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
   const action = new AddToLibraryAction({ toasts: coreStart.notifications.toasts });
   await action.execute({ embeddable });
-  expect(Object.keys(container.getInput().panels)).toContain(embeddable.id);
-  const newPanel = container.getInput().panels[embeddable.id!];
+  const newPanelId = Object.keys(container.getInput().panels).find(
+    (key) => !originalPanelKeySet.has(key)
+  );
+  expect(newPanelId).toBeDefined();
+  const newPanel = container.getInput().panels[newPanelId!];
   expect(newPanel.type).toEqual(embeddable.type);
   expect(newPanel.explicitInput.attributes).toBeUndefined();
   expect(newPanel.explicitInput.savedObjectId).toBe('testSavedObjectId');

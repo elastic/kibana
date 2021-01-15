@@ -5,7 +5,7 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-import * as t from 'io-ts';
+import { Errors, identity } from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
@@ -48,9 +48,9 @@ export async function loadAlertState({
     .then((state: AlertTaskState) => {
       return pipe(
         alertStateSchema.decode(state),
-        fold((e: t.Errors) => {
+        fold((e: Errors) => {
           throw new Error(`Alert "${alertId}" has invalid state`);
-        }, t.identity)
+        }, identity)
       );
     });
 }
@@ -195,12 +195,15 @@ export async function updateAlert({
   id,
 }: {
   http: HttpSetup;
-  alert: Pick<AlertUpdates, 'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
+  alert: Pick<
+    AlertUpdates,
+    'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'notifyWhen'
+  >;
   id: string;
 }): Promise<Alert> {
   return await http.put(`${BASE_ALERT_API_PATH}/alert/${id}`, {
     body: JSON.stringify(
-      pick(alert, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions'])
+      pick(alert, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions', 'notifyWhen'])
     ),
   });
 }

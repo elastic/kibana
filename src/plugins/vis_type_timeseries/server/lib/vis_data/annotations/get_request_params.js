@@ -27,16 +27,18 @@ export async function getAnnotationRequestParams(
   esQueryConfig,
   capabilities
 ) {
+  const uiSettings = req.getUiSettingsService();
   const esShardTimeout = await getEsShardTimeout(req);
   const indexPattern = annotation.index_pattern;
   const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
-  const request = buildAnnotationRequest(
+  const request = await buildAnnotationRequest(
     req,
     panel,
     annotation,
     esQueryConfig,
     indexPatternObject,
-    capabilities
+    capabilities,
+    uiSettings
   );
 
   return {

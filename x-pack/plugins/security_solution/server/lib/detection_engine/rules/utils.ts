@@ -28,7 +28,7 @@ import {
   SeverityOrUndefined,
   TagsOrUndefined,
   ToOrUndefined,
-  ThreatOrUndefined,
+  ThreatsOrUndefined,
   ThresholdOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
@@ -93,7 +93,7 @@ export interface UpdateProperties {
   severity: SeverityOrUndefined;
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
-  threat: ThreatOrUndefined;
+  threat: ThreatsOrUndefined;
   threshold: ThresholdOrUndefined;
   threatFilters: ThreatFiltersOrUndefined;
   threatIndex: ThreatIndexOrUndefined;
@@ -136,15 +136,16 @@ export const calculateVersion = (
   // the version number if only the enabled/disabled flag is being set. Likewise if we get other
   // properties we are not expecting such as updatedAt we do not to cause a version number bump
   // on that either.
-  const removedNullValues = pickBy<UpdateProperties>(
-    (value: unknown) => value != null,
-    updateProperties
-  );
+  const removedNullValues = removeUndefined(updateProperties);
   if (isEmpty(removedNullValues)) {
     return currentVersion;
   } else {
     return currentVersion + 1;
   }
+};
+
+export const removeUndefined = (obj: object) => {
+  return pickBy((value: unknown) => value != null, obj);
 };
 
 export const calculateName = ({

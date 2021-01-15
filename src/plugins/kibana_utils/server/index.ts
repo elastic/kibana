@@ -28,3 +28,5 @@ export {
   Set,
   url,
 } from '../common';
+
+export { KbnServerError, reportServerError } from './report_server_error';
