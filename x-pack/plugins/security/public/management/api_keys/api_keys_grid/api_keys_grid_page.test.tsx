@@ -67,10 +67,9 @@ describe('APIKeysGridPage', () => {
 
   const coreStart = coreMock.createStart();
   const renderView = () => {
-    const { docLinks, notifications, application } = coreStart;
     return mountWithIntl(
-      <KibanaContextProvider services={{ application, docLinks }}>
-        <APIKeysGridPage apiKeysAPIClient={apiClientMock} notifications={notifications} />
+      <KibanaContextProvider services={coreStart}>
+        <APIKeysGridPage apiKeysAPIClient={apiClientMock} notifications={coreStart.notifications} />
       </KibanaContextProvider>
     );
   };

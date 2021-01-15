@@ -35,15 +35,15 @@ describe('EditRoleMappingPage', () => {
     roleMappingsAPI: ReturnType<typeof roleMappingsAPIClientMock.create>,
     name?: string
   ) => {
-    const { docLinks, notifications } = coreMock.createStart();
+    const coreStart = coreMock.createStart();
     return mountWithIntl(
-      <KibanaContextProvider services={{ docLinks }}>
+      <KibanaContextProvider services={coreStart}>
         <EditRoleMappingPage
           name={name}
           roleMappingsAPI={roleMappingsAPI}
           rolesAPIClient={rolesAPI}
-          notifications={notifications}
-          docLinks={docLinks}
+          notifications={coreStart.notifications}
+          docLinks={coreStart.docLinks}
           history={history}
         />
       </KibanaContextProvider>

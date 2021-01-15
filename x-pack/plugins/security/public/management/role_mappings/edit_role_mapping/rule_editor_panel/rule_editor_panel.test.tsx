@@ -22,10 +22,12 @@ import { KibanaContextProvider } from '../../../../../../../../src/plugins/kiban
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 describe('RuleEditorPanel', () => {
-  const renderView = (props: React.ComponentProps<typeof RuleEditorPanel>) => {
+  const renderView = (props: Omit<React.ComponentProps<typeof RuleEditorPanel>, 'docLinks'>) => {
+    const coreStart = coreMock.createStart();
+    const viewProps = { ...props, docLinks: coreStart.docLinks };
     return mountWithIntl(
-      <KibanaContextProvider services={{ docLinks: props.docLinks }}>
-        <RuleEditorPanel {...props} />
+      <KibanaContextProvider services={coreStart}>
+        <RuleEditorPanel {...viewProps} />
       </KibanaContextProvider>
     );
   };
@@ -35,7 +37,6 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: coreMock.createStart().docLinks,
     };
     const wrapper = renderView(props);
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
@@ -80,7 +81,6 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: coreMock.createStart().docLinks,
     };
     const wrapper = renderView(props);
 
@@ -116,7 +116,6 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: coreMock.createStart().docLinks,
     };
     const wrapper = renderView(props);
 

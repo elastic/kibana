@@ -44,7 +44,7 @@ export const EmptyPrompt: React.FunctionComponent<Props> = ({ isAdmin }) => {
               defaultMessage="You can create an {link} from Console."
               values={{
                 link: (
-                  <EuiLink href={`${docLinks.links.apis.createApiKey}`} target="_blank">
+                  <EuiLink href={docLinks.links.apis.createApiKey} target="_blank">
                     <FormattedMessage
                       id="xpack.security.management.apiKeys.table.emptyPromptDocsLinkMessage"
                       defaultMessage="API key"

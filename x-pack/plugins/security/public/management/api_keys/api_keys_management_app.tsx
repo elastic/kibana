@@ -35,24 +35,20 @@ export const apiKeysManagementApp = Object.freeze({
           },
         ]);
 
-        const [
-          [{ docLinks, http, notifications, i18n: i18nStart, application }],
-          { APIKeysGridPage },
-          { APIKeysAPIClient },
-        ] = await Promise.all([
+        const [[core], { APIKeysGridPage }, { APIKeysAPIClient }] = await Promise.all([
           getStartServices(),
           import('./api_keys_grid'),
           import('./api_keys_api_client'),
         ]);
 
         render(
-          <KibanaContextProvider services={{ application, docLinks }}>
-            <i18nStart.Context>
+          <KibanaContextProvider services={core}>
+            <core.i18n.Context>
               <APIKeysGridPage
-                notifications={notifications}
-                apiKeysAPIClient={new APIKeysAPIClient(http)}
+                notifications={core.notifications}
+                apiKeysAPIClient={new APIKeysAPIClient(core.http)}
               />
-            </i18nStart.Context>
+            </core.i18n.Context>
           </KibanaContextProvider>,
           element
         );

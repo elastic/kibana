@@ -108,7 +108,7 @@ readonly links: {
         readonly ml: Record<string, string>;
         readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
-        readonly apis: {
+        readonly apis: Readonly<{
             createIndex: string;
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
@@ -123,12 +123,12 @@ readonly links: {
             putComponentTemplateMetadata: string;
             putWatch: string;
             updateTransform: string;
-        };
+        }>;
         readonly observability: Record<string, string>;
         readonly alerting: Record<string, string>;
         readonly maps: Record<string, string>;
         readonly monitoring: Record<string, string>;
-        readonly security: {
+        readonly security: Readonly<{
             apiKeyServiceSettings: string;
             clusterPrivileges: string;
             elasticsearchSettings: string;
@@ -139,7 +139,7 @@ readonly links: {
             mappingRoles: string;
             mappingRolesFieldRules: string;
             runAsPrivilege: string;
-        };
+        }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
     };

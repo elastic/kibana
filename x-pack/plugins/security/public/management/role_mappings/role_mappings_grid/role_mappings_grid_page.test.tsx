@@ -27,16 +27,15 @@ describe('RoleMappingsGridPage', () => {
     roleMappingsAPI: ReturnType<typeof roleMappingsAPIClientMock.create>,
     rolesAPI: ReturnType<typeof rolesAPIClientMock.create> = rolesAPIClientMock.create()
   ) => {
-    const { application, docLinks, notifications } = coreStart;
     return mountWithIntl(
-      <KibanaContextProvider services={{ docLinks }}>
+      <KibanaContextProvider services={coreStart}>
         <RoleMappingsGridPage
           rolesAPIClient={rolesAPI}
           roleMappingsAPI={roleMappingsAPI}
-          notifications={notifications}
-          docLinks={docLinks}
+          notifications={coreStart.notifications}
+          docLinks={coreStart.docLinks}
           history={history}
-          navigateToApp={application.navigateToApp}
+          navigateToApp={coreStart.application.navigateToApp}
         />
       </KibanaContextProvider>
     );

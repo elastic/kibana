@@ -24,9 +24,9 @@ import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 describe('JSONRuleEditor', () => {
   const renderView = (props: React.ComponentProps<typeof JSONRuleEditor>) => {
-    const { docLinks } = coreMock.createStart();
+    const coreStart = coreMock.createStart();
     return mountWithIntl(
-      <KibanaContextProvider services={{ docLinks }}>
+      <KibanaContextProvider services={coreStart}>
         <JSONRuleEditor {...props} />
       </KibanaContextProvider>
     );

@@ -39,7 +39,7 @@ export const roleMappingsManagementApp = Object.freeze({
         ];
 
         const [
-          [{ docLinks, http, notifications, i18n: i18nStart }],
+          [core],
           { RoleMappingsGridPage },
           { EditRoleMappingPage },
           { RoleMappingsAPIClient },
@@ -52,15 +52,15 @@ export const roleMappingsManagementApp = Object.freeze({
           import('../roles'),
         ]);
 
-        const roleMappingsAPIClient = new RoleMappingsAPIClient(http);
+        const roleMappingsAPIClient = new RoleMappingsAPIClient(core.http);
         const RoleMappingsGridPageWithBreadcrumbs = () => {
           setBreadcrumbs(roleMappingsBreadcrumbs);
           return (
             <RoleMappingsGridPage
-              notifications={notifications}
-              rolesAPIClient={new RolesAPIClient(http)}
+              notifications={core.notifications}
+              rolesAPIClient={new RolesAPIClient(core.http)}
               roleMappingsAPI={roleMappingsAPIClient}
-              docLinks={docLinks}
+              docLinks={core.docLinks}
               history={history}
               navigateToApp={coreStart.application.navigateToApp}
             />
@@ -89,17 +89,17 @@ export const roleMappingsManagementApp = Object.freeze({
             <EditRoleMappingPage
               name={decodedName}
               roleMappingsAPI={roleMappingsAPIClient}
-              rolesAPIClient={new RolesAPIClient(http)}
-              notifications={notifications}
-              docLinks={docLinks}
+              rolesAPIClient={new RolesAPIClient(core.http)}
+              notifications={core.notifications}
+              docLinks={core.docLinks}
               history={history}
             />
           );
         };
 
         render(
-          <KibanaContextProvider services={{ docLinks }}>
-            <i18nStart.Context>
+          <KibanaContextProvider services={core}>
+            <core.i18n.Context>
               <Router history={history}>
                 <Switch>
                   <Route path={['/', '']} exact={true}>
@@ -110,7 +110,7 @@ export const roleMappingsManagementApp = Object.freeze({
                   </Route>
                 </Switch>
               </Router>
-            </i18nStart.Context>
+            </core.i18n.Context>
           </KibanaContextProvider>,
           element
         );

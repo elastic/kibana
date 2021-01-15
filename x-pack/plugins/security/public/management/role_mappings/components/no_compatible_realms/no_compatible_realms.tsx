@@ -27,7 +27,7 @@ export const NoCompatibleRealms: React.FunctionComponent = () => {
         defaultMessage="Role mappings will not be applied to any users. Contact your system administrator and refer to the {link} for more information."
         values={{
           link: (
-            <EuiLink href={docLinks.links.security.mappingRoles} external={true} target="_blank">
+            <EuiLink href={docLinks.links.security.mappingRoles} external target="_blank">
               <FormattedMessage
                 id="xpack.security.management.roleMappings.noCompatibleRealmsErrorLinkText"
                 defaultMessage="docs"
