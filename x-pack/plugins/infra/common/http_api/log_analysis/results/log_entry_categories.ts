@@ -58,6 +58,7 @@ export const getLogEntryCategoriesRequestPayloadRT = rt.type({
       timeRange: timeRangeRT,
       // a list of histograms to create
       histograms: rt.array(logEntryCategoriesHistogramParametersRT),
+      // the criteria to the categories by
       sort: categorySortRT,
     }),
     rt.partial({
