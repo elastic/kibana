@@ -37,6 +37,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...xpackFunctionalTestsConfig.get('kbnTestServer'),
+      sourceArgs: [
+        ...xpackFunctionalTestsConfig.get('kbnTestServer.sourceArgs'),
+        '--no-base-path',
+        '--env.name=development',
+      ],
     },
   };
 }
