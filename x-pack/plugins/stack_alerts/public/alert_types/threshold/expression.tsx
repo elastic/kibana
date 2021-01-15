@@ -7,23 +7,10 @@
 import React, { useState, Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiExpression,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSpacer,
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiEmptyPrompt, EuiText, EuiTitle } from '@elastic/eui';
 import { HttpSetup } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
-  firstFieldOption,
   getFields,
   COMPARATORS,
   builtInComparators,
@@ -38,7 +25,7 @@ import {
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdAlertParams } from './types';
 import './expression.scss';
-import { IndexPopover } from '../components/index_popover';
+import { IndexSelectPopover } from '../components/index_select_popover';
 
 const DEFAULT_VALUES = {
   AGGREGATION_TYPE: 'count',
@@ -84,7 +71,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
 
   const { http } = useKibana<KibanaDeps>().services;
 
-  const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
   const [esFields, setEsFields] = useState<
     Array<{
       name: string;
@@ -131,14 +117,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
   };
 
   const refreshEsFields = async () => {
-    const currentEsFields = await getFields(http, index);
-    setEsFields(currentEsFields);
-  };
-
-  const closeIndexPopover = () => {
-    setIndexPopoverOpen(false);
-    if (timeField === undefined) {
-      setAlertParams('timeField', '');
+    if (index) {
+      const currentEsFields = await getFields(http, index);
+      setEsFields(currentEsFields);
     }
   };
 
@@ -146,18 +127,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     setDefaultExpressionValues();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const renderIndices = (indices: string[]) => {
-    const rows = indices.map((s: string, i: number) => {
-      return (
-        <p key={i}>
-          {s}
-          {i < indices.length - 1 ? ',' : null}
-        </p>
-      );
-    });
-    return <div>{rows}</div>;
-  };
 
   return (
     <Fragment>
@@ -177,86 +146,36 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiPopover
-        id="indexPopover"
-        button={
-          <EuiExpression
-            display="columns"
-            data-test-subj="selectIndexExpression"
-            description={i18n.translate('xpack.stackAlerts.threshold.ui.alertParams.indexLabel', {
-              defaultMessage: 'index',
-            })}
-            value={index && index.length > 0 ? renderIndices(index) : firstFieldOption.text}
-            isActive={indexPopoverOpen}
-            onClick={() => {
-              setIndexPopoverOpen(true);
-            }}
-            isInvalid={!(index && index.length > 0 && timeField !== '')}
-          />
-        }
-        isOpen={indexPopoverOpen}
-        closePopover={closeIndexPopover}
-        ownFocus
-        anchorPosition="downLeft"
-        zIndex={8000}
-        display="block"
-      >
-        <div style={{ width: '450px' }}>
-          <EuiPopoverTitle>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem>
-                {i18n.translate('xpack.stackAlerts.threshold.ui.alertParams.indexButtonLabel', {
-                  defaultMessage: 'index',
-                })}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  data-test-subj="closePopover"
-                  iconType="cross"
-                  color="danger"
-                  aria-label={i18n.translate(
-                    'xpack.stackAlerts.threshold.ui.alertParams.closeIndexPopoverLabel',
-                    {
-                      defaultMessage: 'Close',
-                    }
-                  )}
-                  onClick={closeIndexPopover}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPopoverTitle>
-          <IndexPopover
-            index={index}
-            esFields={esFields}
-            timeField={timeField}
-            errors={errors}
-            onIndexChange={async (indices: string[]) => {
-              setAlertParams('index', indices);
+      <IndexSelectPopover
+        index={index}
+        esFields={esFields}
+        timeField={timeField}
+        errors={errors}
+        onIndexChange={async (indices: string[]) => {
+          setAlertParams('index', indices);
 
-              // reset expression fields if indices are deleted
-              if (indices.length === 0) {
-                setAlertProperty('params', {
-                  ...alertParams,
-                  index: indices,
-                  aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-                  termSize: DEFAULT_VALUES.TERM_SIZE,
-                  thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-                  timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-                  timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-                  groupBy: DEFAULT_VALUES.GROUP_BY,
-                  threshold: DEFAULT_VALUES.THRESHOLD,
-                  timeField: '',
-                });
-              } else {
-                await refreshEsFields();
-              }
-            }}
-            onTimeFieldChange={(updatedTimeField: string) =>
-              setAlertParams('timeField', updatedTimeField)
-            }
-          />
-        </div>
-      </EuiPopover>
+          // reset expression fields if indices are deleted
+          if (indices.length === 0) {
+            setAlertProperty('params', {
+              ...alertParams,
+              index: indices,
+              aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
+              termSize: DEFAULT_VALUES.TERM_SIZE,
+              thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+              timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
+              timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
+              groupBy: DEFAULT_VALUES.GROUP_BY,
+              threshold: DEFAULT_VALUES.THRESHOLD,
+              timeField: '',
+            });
+          } else {
+            await refreshEsFields();
+          }
+        }}
+        onTimeFieldChange={(updatedTimeField: string) =>
+          setAlertParams('timeField', updatedTimeField)
+        }
+      />
       <WhenExpression
         display="fullWidth"
         aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
