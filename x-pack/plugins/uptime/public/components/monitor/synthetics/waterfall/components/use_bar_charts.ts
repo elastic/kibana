@@ -6,12 +6,11 @@
 
 import { useEffect, useState } from 'react';
 import { IWaterfallContext } from '../context/waterfall_chart';
+import { CANVAS_MAX_ITEMS } from './constants';
 
 export interface UseBarHookProps {
   data: IWaterfallContext['data'];
 }
-
-export const CANVAS_MAX_ITEMS = 200;
 
 export const useBarCharts = ({ data = [] }: UseBarHookProps) => {
   const [charts, setCharts] = useState<Array<IWaterfallContext['data']>>([]);

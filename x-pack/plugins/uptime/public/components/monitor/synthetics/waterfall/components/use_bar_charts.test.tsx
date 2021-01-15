@@ -7,6 +7,7 @@
 import { useBarCharts } from './use_bar_charts';
 import { renderHook } from '@testing-library/react-hooks';
 import { IWaterfallContext } from '../context/waterfall_chart';
+import { CANVAS_MAX_ITEMS } from './constants';
 
 const generateTestData = (): IWaterfallContext['data'] => {
   const numberOfItems = 1000;
@@ -52,16 +53,17 @@ describe('useBarChartsHooks', () => {
 
     rerender({ data: newData });
 
-    expect(result.current.length).toBe(5);
+    // Thousands items will result in 7 Canvas
+    expect(result.current.length).toBe(7);
 
     const firstChartItems = result.current[0];
     const lastChartItems = result.current[4];
 
-    // first chart items last item should be x 199, since we only display 200 items
-    expect(firstChartItems[firstChartItems.length - 1].x).toBe(199);
+    // first chart items last item should be x 199, since we only display 150 items
+    expect(firstChartItems[firstChartItems.length - 1].x).toBe(CANVAS_MAX_ITEMS - 1);
 
     // since here are 5 charts, last chart first item should be x 800
-    expect(lastChartItems[0].x).toBe(800);
-    expect(lastChartItems[lastChartItems.length - 1].x).toBe(999);
+    expect(lastChartItems[0].x).toBe(CANVAS_MAX_ITEMS * 4);
+    expect(lastChartItems[lastChartItems.length - 1].x).toBe(CANVAS_MAX_ITEMS * 5 - 1);
   });
 });

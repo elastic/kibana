@@ -33,10 +33,9 @@ import {
   WaterfallChartTooltip,
 } from './styles';
 import { WaterfallData } from '../types';
-import { BAR_HEIGHT, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
+import { BAR_HEIGHT, CANVAS_MAX_ITEMS, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
 import { Sidebar } from './sidebar';
 import { Legend } from './legend';
-import { CANVAS_MAX_ITEMS } from './use_bar_charts';
 import { useBarCharts } from './use_bar_charts';
 
 const Tooltip = (tooltipInfo: TooltipInfo) => {
