@@ -120,7 +120,6 @@ describe('Change password', () => {
       expect(response.payload).toEqual(changePasswordFailure);
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
@@ -142,7 +141,6 @@ describe('Change password', () => {
       expect(response.payload).toEqual(loginFailureReason);
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
@@ -159,7 +157,6 @@ describe('Change password', () => {
       expect(response.payload).toEqual(failureReason);
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
@@ -171,7 +168,6 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 
@@ -199,7 +195,6 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 
@@ -218,7 +213,6 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 
