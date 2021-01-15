@@ -2,11 +2,11 @@
 
 exports[`font weights bold is applied 1`] = `
 <EuiButton
-  className="toolbarButton toolbarButton--bold toolbarButton--m"
+  className="kbnToolbarButton kbnToolbarButton--bold kbnToolbarButton--m"
   color="text"
   contentProps={
     Object {
-      "className": "toolbarButton__content",
+      "className": "kbnToolbarButton__content",
     }
   }
   data-test-subj=""
@@ -16,7 +16,7 @@ exports[`font weights bold is applied 1`] = `
   size="m"
   textProps={
     Object {
-      "className": "toolbarButton__text",
+      "className": "kbnToolbarButton__text",
     }
   }
 />
@@ -24,11 +24,11 @@ exports[`font weights bold is applied 1`] = `
 
 exports[`font weights normal is applied 1`] = `
 <EuiButton
-  className="toolbarButton toolbarButton--normal toolbarButton--m"
+  className="kbnToolbarButton kbnToolbarButton--normal kbnToolbarButton--m"
   color="text"
   contentProps={
     Object {
-      "className": "toolbarButton__content",
+      "className": "kbnToolbarButton__content",
     }
   }
   data-test-subj=""
@@ -38,7 +38,7 @@ exports[`font weights normal is applied 1`] = `
   size="m"
   textProps={
     Object {
-      "className": "toolbarButton__text",
+      "className": "kbnToolbarButton__text",
     }
   }
 />
@@ -46,11 +46,11 @@ exports[`font weights normal is applied 1`] = `
 
 exports[`hasArrow is rendered 1`] = `
 <EuiButton
-  className="toolbarButton toolbarButton--normal toolbarButton--m"
+  className="kbnToolbarButton kbnToolbarButton--normal kbnToolbarButton--m"
   color="text"
   contentProps={
     Object {
-      "className": "toolbarButton__content",
+      "className": "kbnToolbarButton__content",
     }
   }
   data-test-subj=""
@@ -60,7 +60,7 @@ exports[`hasArrow is rendered 1`] = `
   size="m"
   textProps={
     Object {
-      "className": "toolbarButton__text",
+      "className": "kbnToolbarButton__text",
     }
   }
 />
@@ -68,11 +68,11 @@ exports[`hasArrow is rendered 1`] = `
 
 exports[`positions center is applied 1`] = `
 <EuiButton
-  className="toolbarButton toolbarButton--groupCenter toolbarButton--normal toolbarButton--m"
+  className="kbnToolbarButton toolbarButton--groupCenter kbnToolbarButton--normal kbnToolbarButton--m"
   color="text"
   contentProps={
     Object {
-      "className": "toolbarButton__content",
+      "className": "kbnToolbarButton__content",
     }
   }
   data-test-subj=""
@@ -82,7 +82,7 @@ exports[`positions center is applied 1`] = `
   size="m"
   textProps={
     Object {
-      "className": "toolbarButton__text",
+      "className": "kbnToolbarButton__text",
     }
   }
 />
@@ -90,11 +90,11 @@ exports[`positions center is applied 1`] = `
 
 exports[`positions left is applied 1`] = `
 <EuiButton
-  className="toolbarButton toolbarButton--groupLeft toolbarButton--normal toolbarButton--m"
+  className="kbnToolbarButton toolbarButton--groupLeft kbnToolbarButton--normal kbnToolbarButton--m"
   color="text"
   contentProps={
     Object {
-      "className": "toolbarButton__content",
+      "className": "kbnToolbarButton__content",
     }
   }
   data-test-subj=""
@@ -104,7 +104,7 @@ exports[`positions left is applied 1`] = `
   size="m"
   textProps={
     Object {
-      "className": "toolbarButton__text",
+      "className": "kbnToolbarButton__text",
     }
   }
 />
@@ -112,11 +112,11 @@ exports[`positions left is applied 1`] = `
 
 exports[`positions none is applied 1`] = `
 <EuiButton
-  className="toolbarButton toolbarButton--normal toolbarButton--m"
+  className="kbnToolbarButton kbnToolbarButton--normal kbnToolbarButton--m"
   color="text"
   contentProps={
     Object {
-      "className": "toolbarButton__content",
+      "className": "kbnToolbarButton__content",
     }
   }
   data-test-subj=""
@@ -126,7 +126,7 @@ exports[`positions none is applied 1`] = `
   size="m"
   textProps={
     Object {
-      "className": "toolbarButton__text",
+      "className": "kbnToolbarButton__text",
     }
   }
 />
@@ -134,11 +134,11 @@ exports[`positions none is applied 1`] = `
 
 exports[`positions right is applied 1`] = `
 <EuiButton
-  className="toolbarButton toolbarButton--groupRight toolbarButton--normal toolbarButton--m"
+  className="kbnToolbarButton toolbarButton--groupRight kbnToolbarButton--normal kbnToolbarButton--m"
   color="text"
   contentProps={
     Object {
-      "className": "toolbarButton__content",
+      "className": "kbnToolbarButton__content",
     }
   }
   data-test-subj=""
@@ -148,7 +148,7 @@ exports[`positions right is applied 1`] = `
   size="m"
   textProps={
     Object {
-      "className": "toolbarButton__text",
+      "className": "kbnToolbarButton__text",
     }
   }
 />
@@ -156,11 +156,11 @@ exports[`positions right is applied 1`] = `
 
 exports[`sizes m is applied 1`] = `
 <EuiButton
-  className="toolbarButton toolbarButton--normal toolbarButton--m"
+  className="kbnToolbarButton kbnToolbarButton--normal kbnToolbarButton--m"
   color="text"
   contentProps={
     Object {
-      "className": "toolbarButton__content",
+      "className": "kbnToolbarButton__content",
     }
   }
   data-test-subj=""
@@ -170,7 +170,7 @@ exports[`sizes m is applied 1`] = `
   size="m"
   textProps={
     Object {
-      "className": "toolbarButton__text",
+      "className": "kbnToolbarButton__text",
     }
   }
 />
@@ -178,11 +178,11 @@ exports[`sizes m is applied 1`] = `
 
 exports[`sizes s is applied 1`] = `
 <EuiButton
-  className="toolbarButton toolbarButton--normal toolbarButton--s"
+  className="kbnToolbarButton kbnToolbarButton--normal kbnToolbarButton--s"
   color="text"
   contentProps={
     Object {
-      "className": "toolbarButton__content",
+      "className": "kbnToolbarButton__content",
     }
   }
   data-test-subj=""
@@ -192,7 +192,7 @@ exports[`sizes s is applied 1`] = `
   size="s"
   textProps={
     Object {
-      "className": "toolbarButton__text",
+      "className": "kbnToolbarButton__text",
     }
   }
 />
