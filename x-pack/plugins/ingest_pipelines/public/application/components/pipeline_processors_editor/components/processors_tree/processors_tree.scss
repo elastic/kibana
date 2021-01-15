@@ -31,7 +31,7 @@
     }
   }
   $dropZoneButtonHeight: 60px;
-  $dropZoneButtonOffsetY: $dropZoneButtonHeight * 0.5;
+  $dropZoneButtonOffsetY: $dropZoneButtonHeight * .5;
 
   &__dropZoneButton {
     position: absolute;

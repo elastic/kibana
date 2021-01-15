@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
+import { LogicMounter, mockHttpValues, expectedAsyncError } from '../../../__mocks__';
 
-import { mockHttpValues } from '../../../__mocks__';
 jest.mock('../../../shared/http', () => ({
   HttpLogic: { values: mockHttpValues },
 }));
@@ -81,12 +80,9 @@ describe('DocumentDetailLogic', () => {
         const promise = Promise.reject('An error occurred');
         http.get.mockReturnValue(promise);
 
-        try {
-          DocumentDetailLogic.actions.getDocumentDetails('1');
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        DocumentDetailLogic.actions.getDocumentDetails('1');
+        await expectedAsyncError(promise);
+
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occurred', { isQueued: true });
         expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith('/engines/engine1/documents');
       });
@@ -134,12 +130,9 @@ describe('DocumentDetailLogic', () => {
         promise = Promise.reject('An error occured');
         http.delete.mockReturnValue(promise);
 
-        try {
-          DocumentDetailLogic.actions.deleteDocument('1');
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        DocumentDetailLogic.actions.deleteDocument('1');
+        await expectedAsyncError(promise);
+
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
