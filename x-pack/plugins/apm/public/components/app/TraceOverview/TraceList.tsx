@@ -68,7 +68,7 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
   {
     field: 'averageResponseTime',
     name: i18n.translate('xpack.apm.tracesTable.avgResponseTimeColumnLabel', {
-      defaultMessage: 'Avg. response time',
+      defaultMessage: 'Latency (avg.)',
     }),
     sortable: true,
     dataType: 'number',
@@ -91,7 +91,7 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
           'xpack.apm.tracesTable.impactColumnDescription',
           {
             defaultMessage:
-              "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute.",
+              'The most used and slowest endpoints in your service. It is the result of multiplying latency and throughput',
           }
         )}
       >
