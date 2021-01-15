@@ -6,7 +6,12 @@
 
 import { LogicMounter } from '../../../__mocks__/kea.mock';
 
-import { mockFlashMessageHelpers, mockHttpValues, mockKibanaValues } from '../../../__mocks__';
+import {
+  mockFlashMessageHelpers,
+  mockHttpValues,
+  expectedAsyncError,
+  mockKibanaValues,
+} from '../../../__mocks__';
 
 import { configuredSources, oauthApplication } from '../../__mocks__/content_sources.mock';
 
@@ -96,13 +101,10 @@ describe('SettingsLogic', () => {
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
         http.get.mockReturnValue(promise);
-
         SettingsLogic.actions.initializeSettings();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -124,13 +126,10 @@ describe('SettingsLogic', () => {
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
         http.get.mockReturnValue(promise);
-
         SettingsLogic.actions.initializeConnectors();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -155,13 +154,10 @@ describe('SettingsLogic', () => {
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
         http.put.mockReturnValue(promise);
-
         SettingsLogic.actions.updateOrgName();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
+
+        await expectedAsyncError(promise);
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -195,13 +191,10 @@ describe('SettingsLogic', () => {
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
         http.put.mockReturnValue(promise);
-
         SettingsLogic.actions.updateOauthApplication();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -222,13 +215,10 @@ describe('SettingsLogic', () => {
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
         http.delete.mockReturnValue(promise);
-
         SettingsLogic.actions.deleteSourceConfig(SERVICE_TYPE, NAME);
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
