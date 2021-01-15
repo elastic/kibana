@@ -106,7 +106,7 @@ export const staticSourceData = [
       }
     ),
     connectStepDescription: connectStepDescription.files,
-    objTypes: [SOURCE_OBJ_TYPES.ALL_FILES],
+    objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.ALL_FILES],
     features: {
       basicOrgContext: [
         FeatureIds.SyncFrequency,
