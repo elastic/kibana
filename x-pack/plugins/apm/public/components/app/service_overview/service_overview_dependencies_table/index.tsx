@@ -18,7 +18,7 @@ import {
   getNextEnvironmentUrlParam,
 } from '../../../../../common/environment_filter_values';
 import {
-  asDuration,
+  asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
@@ -105,7 +105,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           <SparkPlot
             color="euiColorVis1"
             series={latency.timeseries}
-            valueLabel={asDuration(latency.value)}
+            valueLabel={asMillisecondDuration(latency.value)}
           />
         );
       },

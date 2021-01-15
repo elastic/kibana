@@ -30,7 +30,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--telemetry.optIn=true',
         '--xpack.fleet.enabled=true',
         '--xpack.fleet.agents.pollingRequestTimeout=5000', // 5 seconds
-        '--xpack.data_enhanced.search.sendToBackground.enabled=true', // enable WIP send to background UI
+        '--xpack.data_enhanced.search.sessions.enabled=true', // enable WIP send to background UI
       ],
     },
     esTestCluster: {
