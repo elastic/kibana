@@ -37,7 +37,7 @@ const units: Record<Unit, number> = {
 
 const sortedUnits = sortBy(Object.keys(units), (key: Unit) => units[key]);
 
-interface ParsedInterval {
+export interface ParsedInterval {
   value: number;
   unit: Unit;
 }

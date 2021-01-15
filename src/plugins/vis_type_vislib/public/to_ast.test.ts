@@ -22,7 +22,7 @@ import { buildExpression } from '../../expressions/public';
 
 import { BasicVislibParams } from './types';
 import { toExpressionAst } from './to_ast';
-import { sampleAreaVis } from './sample_vis.test.mocks';
+import { sampleAreaVis } from '../../vis_type_xy/public/sample_vis.test.mocks';
 
 jest.mock('../../expressions/public', () => ({
   ...(jest.requireActual('../../expressions/public') as any),

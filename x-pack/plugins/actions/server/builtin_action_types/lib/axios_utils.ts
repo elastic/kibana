@@ -15,11 +15,8 @@ export const request = async <T = unknown>({
   logger,
   method = 'get',
   data,
-  params,
   proxySettings,
-  headers,
-  validateStatus,
-  auth,
+  ...rest
 }: {
   axios: AxiosInstance;
   url: string;
@@ -35,16 +32,13 @@ export const request = async <T = unknown>({
   const { httpAgent, httpsAgent } = getProxyAgents(proxySettings, logger);
 
   return await axios(url, {
+    ...rest,
     method,
     data: data ?? {},
-    params,
-    auth,
     // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
     httpAgent,
     httpsAgent,
     proxy: false,
-    headers,
-    validateStatus,
   });
 };
 
