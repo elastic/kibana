@@ -197,3 +197,24 @@ export const SUBCATEGORY_LABEL = i18n.translate(
     defaultMessage: 'Subcategory',
   }
 );
+
+export const URGENCY_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.urgencySelectFieldLabel',
+  {
+    defaultMessage: 'Urgency',
+  }
+);
+
+export const SEVERITY_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severitySelectFieldLabel',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const IMPACT_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.impactSelectFieldLabel',
+  {
+    defaultMessage: 'Impact',
+  }
+);
