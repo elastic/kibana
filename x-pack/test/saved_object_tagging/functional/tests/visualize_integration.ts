@@ -94,13 +94,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
 
         await PageObjects.visualize.ensureSavePanelOpen();
-        await testSubjects.setValue('savedObjectTitle', 'My new markdown viz');
-
-        const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
-        const label = await dashboardSelector.findByCssSelector(
-          `label[for="add-to-library-option"]`
-        );
-        await label.click();
+        await PageObjects.visualize.setSaveModalValues('My new markdown viz');
 
         await selectSavedObjectTags('tag-1');
 
@@ -125,13 +119,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
 
         await PageObjects.visualize.ensureSavePanelOpen();
-        await testSubjects.setValue('savedObjectTitle', 'vis-with-new-tag');
-
-        const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
-        const label = await dashboardSelector.findByCssSelector(
-          `label[for="add-to-library-option"]`
-        );
-        await label.click();
+        await PageObjects.visualize.setSaveModalValues('vis-with-new-tag');
 
         await testSubjects.click('savedObjectTagSelector');
         await testSubjects.click(`tagSelectorOption-action__create`);

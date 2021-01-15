@@ -16,7 +16,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['header', 'timePicker', 'common']);
+  const PageObjects = getPageObjects(['header', 'timePicker', 'common', 'visualize']);
 
   return logWrapper('lensPage', log, {
     /**
@@ -275,39 +275,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       saveAsNew?: boolean,
       redirectToOrigin?: boolean,
       addToDashboard?: boolean,
-      dashboardId?: boolean
+      dashboardId?: string
     ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
-      await testSubjects.setValue('savedObjectTitle', title);
 
-      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
-      if (saveAsNewCheckboxExists) {
-        const state = saveAsNew ? 'check' : 'uncheck';
-        await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
-      }
-
-      const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
-      if (redirectToOriginCheckboxExists) {
-        const state = redirectToOrigin ? 'check' : 'uncheck';
-        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
-      }
-
-      const dashboardSelectorExists = await testSubjects.exists('add-to-dashboard-options');
-      if (dashboardSelectorExists) {
-        const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
-        let optionSelector = 'add-to-library-option';
-        if (addToDashboard) {
-          optionSelector = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
-        }
-        log.debug('dashboard selector exists, choosing option:', optionSelector);
-        const label = await dashboardSelector.findByCssSelector(`label[for="${optionSelector}"]`);
-        await label.click();
-
-        if (dashboardId) {
-          // TODO - selecting an existing dashboard
-        }
-      }
+      await PageObjects.visualize.setSaveModalValues(title, {
+        saveAsNew,
+        redirectToOrigin,
+        addToDashboard,
+        dashboardId,
+      });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
       await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>

@@ -27,6 +27,11 @@ interface VisualizeSaveModalArgs {
   dashboardId?: string;
 }
 
+type DashboardPickerOption =
+  | 'add-to-library-option'
+  | 'existing-dashboard-option'
+  | 'new-dashboard-option';
+
 export function VisualizePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -353,11 +358,27 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    public async saveVisualization(
+    public async saveVisualization(vizName: string, saveModalArgs: VisualizeSaveModalArgs = {}) {
+      await this.ensureSavePanelOpen();
+
+      await this.setSaveModalValues(vizName, saveModalArgs);
+      log.debug('Click Save Visualization button');
+
+      await testSubjects.click('confirmSaveSavedObjectButton');
+
+      // Confirm that the Visualization has actually been saved
+      await testSubjects.existOrFail('saveVisualizationSuccess');
+      const message = await common.closeToast();
+      await header.waitUntilLoadingHasFinished();
+      await common.waitForSaveModalToClose();
+
+      return message;
+    }
+
+    public async setSaveModalValues(
       vizName: string,
       { saveAsNew, redirectToOrigin, addToDashboard, dashboardId }: VisualizeSaveModalArgs = {}
     ) {
-      await this.ensureSavePanelOpen();
       await testSubjects.setValue('savedObjectTitle', vizName);
 
       const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
@@ -376,30 +397,19 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
       const dashboardSelectorExists = await testSubjects.exists('add-to-dashboard-options');
       if (dashboardSelectorExists) {
-        const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
-        let optionSelector = 'add-to-library-option';
+        let option: DashboardPickerOption = 'add-to-library-option';
         if (addToDashboard) {
-          optionSelector = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
+          option = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
         }
-        log.debug('dashboard selector exists, choosing option:', optionSelector);
-        const label = await dashboardSelector.findByCssSelector(`label[for="${optionSelector}"]`);
+        log.debug('save modal dashboard selector, choosing option:', option);
+        const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
+        const label = await dashboardSelector.findByCssSelector(`label[for="${option}"]`);
         await label.click();
 
         if (dashboardId) {
           // TODO - selecting an existing dashboard
         }
       }
-      log.debug('Click Save Visualization button');
-
-      await testSubjects.click('confirmSaveSavedObjectButton');
-
-      // Confirm that the Visualization has actually been saved
-      await testSubjects.existOrFail('saveVisualizationSuccess');
-      const message = await common.closeToast();
-      await header.waitUntilLoadingHasFinished();
-      await common.waitForSaveModalToClose();
-
-      return message;
     }
 
     public async saveVisualizationExpectSuccess(
