@@ -45,6 +45,7 @@ describe('When on the Trusted Apps Page', () => {
     created_at: '2021-01-04T13:55:00.561Z',
     created_by: 'me',
     description: 'a good one',
+    effectScope: { type: 'global' },
     entries: [
       {
         field: ConditionEntryField.PATH,

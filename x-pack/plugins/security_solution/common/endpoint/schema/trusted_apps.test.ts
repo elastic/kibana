@@ -6,7 +6,7 @@
  */
 
 import { GetTrustedAppsRequestSchema, PostTrustedAppCreateRequestSchema } from './trusted_apps';
-import { ConditionEntryField, OperatingSystem } from '../types';
+import { ConditionEntry, ConditionEntryField, NewTrustedApp, OperatingSystem } from '../types';
 
 describe('When invoking Trusted Apps Schema', () => {
   describe('for GET List', () => {
@@ -72,17 +72,18 @@ describe('When invoking Trusted Apps Schema', () => {
   });
 
   describe('for POST Create', () => {
-    const createConditionEntry = <T>(data?: T) => ({
+    const createConditionEntry = <T>(data?: T): ConditionEntry => ({
       field: ConditionEntryField.PATH,
       type: 'match',
       operator: 'included',
       value: 'c:/programs files/Anti-Virus',
       ...(data || {}),
     });
-    const createNewTrustedApp = <T>(data?: T) => ({
+    const createNewTrustedApp = <T>(data?: T): NewTrustedApp => ({
       name: 'Some Anti-Virus App',
       description: 'this one is ok',
-      os: 'windows',
+      os: OperatingSystem.WINDOWS,
+      effectScope: { type: 'global' },
       entries: [createConditionEntry()],
       ...(data || {}),
     });

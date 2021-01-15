@@ -76,10 +76,22 @@ export interface WindowsConditionEntries {
   entries: WindowsConditionEntry[];
 }
 
+export interface GlobalEffectScope {
+  type: 'global';
+}
+
+export interface PolicyEffectScope {
+  type: 'policy';
+  policies: string[];
+}
+
+export type EffectScope = GlobalEffectScope | PolicyEffectScope;
+
 /** Type for a new Trusted App Entry */
 export type NewTrustedApp = {
   name: string;
   description?: string;
+  effectScope: EffectScope;
 } & (MacosLinuxConditionEntries | WindowsConditionEntries);
 
 /** A trusted app entry */

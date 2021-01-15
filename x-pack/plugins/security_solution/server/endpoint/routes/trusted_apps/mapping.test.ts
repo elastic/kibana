@@ -75,6 +75,7 @@ describe('mapping', () => {
         {
           name: 'linux trusted app',
           description: 'Linux Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.LINUX,
           entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
         },
@@ -92,6 +93,7 @@ describe('mapping', () => {
         {
           name: 'macos trusted app',
           description: 'MacOS Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.MAC,
           entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
         },
@@ -109,6 +111,7 @@ describe('mapping', () => {
         {
           name: 'windows trusted app',
           description: 'Windows Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.WINDOWS,
           entries: [createConditionEntry(ConditionEntryField.PATH, 'C:\\Program Files\\Malware')],
         },
@@ -126,6 +129,7 @@ describe('mapping', () => {
         {
           name: 'Signed trusted app',
           description: 'Signed Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.WINDOWS,
           entries: [createConditionEntry(ConditionEntryField.SIGNER, 'Microsoft Windows')],
         },
@@ -148,6 +152,7 @@ describe('mapping', () => {
         {
           name: 'MD5 trusted app',
           description: 'MD5 Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
@@ -167,6 +172,7 @@ describe('mapping', () => {
         {
           name: 'SHA1 trusted app',
           description: 'SHA1 Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(
@@ -191,6 +197,7 @@ describe('mapping', () => {
         {
           name: 'SHA256 trusted app',
           description: 'SHA256 Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(
@@ -218,6 +225,7 @@ describe('mapping', () => {
         {
           name: 'MD5 trusted app',
           description: 'MD5 Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(ConditionEntryField.HASH, '1234234659Af249ddf3e40864E9FB241'),
@@ -253,6 +261,7 @@ describe('mapping', () => {
           id: '123',
           name: 'linux trusted app',
           description: 'Linux Trusted App',
+          effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
           os: OperatingSystem.LINUX,
@@ -276,6 +285,7 @@ describe('mapping', () => {
           id: '123',
           name: 'macos trusted app',
           description: 'MacOS Trusted App',
+          effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
           os: OperatingSystem.MAC,
@@ -297,10 +307,11 @@ describe('mapping', () => {
         }),
         {
           id: '123',
-          created_at: '11/11/2011T11:11:11.111',
-          created_by: 'admin',
           name: 'windows trusted app',
           description: 'Windows Trusted App',
+          effectScope: { type: 'global' },
+          created_at: '11/11/2011T11:11:11.111',
+          created_by: 'admin',
           os: OperatingSystem.WINDOWS,
           entries: [createConditionEntry(ConditionEntryField.PATH, 'C:\\Program Files\\Malware')],
         }
@@ -327,6 +338,7 @@ describe('mapping', () => {
           id: '123',
           name: 'signed trusted app',
           description: 'Signed trusted app',
+          effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
           os: OperatingSystem.WINDOWS,
@@ -350,6 +362,7 @@ describe('mapping', () => {
           id: '123',
           name: 'MD5 trusted app',
           description: 'MD5 Trusted App',
+          effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
           os: OperatingSystem.LINUX,
@@ -377,6 +390,7 @@ describe('mapping', () => {
           id: '123',
           name: 'SHA1 trusted app',
           description: 'SHA1 Trusted App',
+          effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
           os: OperatingSystem.LINUX,
@@ -410,6 +424,7 @@ describe('mapping', () => {
           id: '123',
           name: 'SHA256 trusted app',
           description: 'SHA256 Trusted App',
+          effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
           os: OperatingSystem.LINUX,

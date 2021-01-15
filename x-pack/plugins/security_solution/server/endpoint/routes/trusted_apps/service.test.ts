@@ -8,7 +8,11 @@
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
 import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListClient } from '../../../../../lists/server';
-import { ConditionEntryField, OperatingSystem } from '../../../../common/endpoint/types';
+import {
+  ConditionEntryField,
+  OperatingSystem,
+  TrustedApp,
+} from '../../../../common/endpoint/types';
 import { createConditionEntry, createEntryMatch } from './mapping';
 import {
   createTrustedApp,
@@ -37,20 +41,21 @@ const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
   name: 'linux trusted app 1',
   namespace_type: 'agnostic',
   os_types: ['linux'],
-  tags: [],
+  tags: ['policy:all'],
   type: 'simple',
   tie_breaker_id: '123',
   updated_at: '11/11/2011T11:11:11.111',
   updated_by: 'admin',
 };
 
-const TRUSTED_APP = {
+const TRUSTED_APP: TrustedApp = {
   id: '123',
   created_at: '11/11/2011T11:11:11.111',
   created_by: 'admin',
   name: 'linux trusted app 1',
   description: 'Linux trusted app 1',
   os: OperatingSystem.LINUX,
+  effectScope: { type: 'global' },
   entries: [
     createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
     createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
@@ -93,6 +98,7 @@ describe('service', () => {
       const result = await createTrustedApp(exceptionsListClient, {
         name: 'linux trusted app 1',
         description: 'Linux trusted app 1',
+        effectScope: { type: 'global' },
         os: OperatingSystem.LINUX,
         entries: [
           createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),

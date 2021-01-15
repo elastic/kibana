@@ -28,6 +28,7 @@ export const defaultNewTrustedApp = (): NewTrustedApp => ({
   os: OperatingSystem.WINDOWS,
   entries: [defaultConditionEntry()],
   description: '',
+  effectScope: { type: 'global' },
 });
 
 export const initialDeletionDialogState = (): TrustedAppsListPageState['deletionDialog'] => ({

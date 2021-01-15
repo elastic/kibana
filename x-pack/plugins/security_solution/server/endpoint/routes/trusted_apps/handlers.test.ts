@@ -14,7 +14,12 @@ import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 
-import { ConditionEntryField, OperatingSystem } from '../../../../common/endpoint/types';
+import {
+  ConditionEntryField,
+  NewTrustedApp,
+  OperatingSystem,
+  TrustedApp,
+} from '../../../../common/endpoint/types';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createConditionEntry, createEntryMatch } from './mapping';
 import {
@@ -68,30 +73,32 @@ const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
   name: 'linux trusted app 1',
   namespace_type: 'agnostic',
   os_types: ['linux'],
-  tags: [],
+  tags: ['policy:all'],
   type: 'simple',
   tie_breaker_id: '123',
   updated_at: '11/11/2011T11:11:11.111',
   updated_by: 'admin',
 };
 
-const NEW_TRUSTED_APP = {
+const NEW_TRUSTED_APP: NewTrustedApp = {
   name: 'linux trusted app 1',
   description: 'Linux trusted app 1',
   os: OperatingSystem.LINUX,
+  effectScope: { type: 'global' },
   entries: [
     createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
     createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
   ],
 };
 
-const TRUSTED_APP = {
+const TRUSTED_APP: TrustedApp = {
   id: '123',
   created_at: '11/11/2011T11:11:11.111',
   created_by: 'admin',
   name: 'linux trusted app 1',
   description: 'Linux trusted app 1',
   os: OperatingSystem.LINUX,
+  effectScope: { type: 'global' },
   entries: [
     createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
     createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),

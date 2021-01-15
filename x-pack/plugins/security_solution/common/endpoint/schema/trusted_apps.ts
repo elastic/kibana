@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { ConditionEntryField, OperatingSystem } from '../types';
+import { schema, Type } from '@kbn/config-schema';
+import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
 import { getDuplicateFields, isValidHash } from '../validation/trusted_apps';
 
 export const DeleteTrustedAppsRequestSchema = {
@@ -107,6 +107,34 @@ const EntriesSchema = schema.arrayOf(EntrySchemaDependingOnOS, {
     );
   },
 });
+const createNewTrustedAppForOsScheme = <O extends OperatingSystem, E extends ConditionEntry>(
+  osSchema: Type<O>,
+  entriesSchema: Type<E>
+) =>
+  schema.object({
+    name: schema.string({ minLength: 1, maxLength: 256 }),
+    description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
+    effectScope: schema.oneOf([
+      schema.object({
+        type: schema.literal('global'),
+      }),
+      schema.object({
+        type: schema.literal('policy'),
+        policies: schema.arrayOf(schema.string({ minLength: 1 })), // TODO: validate policies
+      }),
+    ]),
+    os: osSchema,
+    entries: schema.arrayOf(entriesSchema, {
+      minSize: 1,
+      validate(entries) {
+        return (
+          getDuplicateFields(entries)
+            .map((field) => `[${entryFieldLabels[field]}] field can only be used once`)
+            .join(', ') || undefined
+        );
+      },
+    }),
+  });
 
 export const PostTrustedAppCreateRequestSchema = {
   body: schema.object({

@@ -76,6 +76,9 @@ export const PROPERTY_TITLES: Readonly<
   description: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.description', {
     defaultMessage: 'Description',
   }),
+  effectScope: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.effectScope', {
+    defaultMessage: 'Effect scope',
+  }),
 };
 
 export const ENTRY_PROPERTY_TITLES: Readonly<
