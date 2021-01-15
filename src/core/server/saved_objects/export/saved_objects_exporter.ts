@@ -20,6 +20,7 @@
 import { createListStream } from '@kbn/utils';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObject, SavedObjectsClientContract } from '../types';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { fetchNestedDependencies } from './fetch_nested_dependencies';
 import { sortObjects } from './sort_objects';
 import {
@@ -27,10 +28,10 @@ import {
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
-  SavedObjectsTypeExportHook,
+  SavedObjectsExportTransform,
 } from './types';
 import { SavedObjectsExportError } from './errors';
-import { applyExportHooks } from './apply_export_hooks';
+import { applyExportTransforms } from './apply_export_transforms';
 
 /**
  * @public
@@ -42,21 +43,29 @@ export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
  */
 export class SavedObjectsExporter {
   readonly #savedObjectsClient: SavedObjectsClientContract;
-  readonly #exportHooks: Record<string, SavedObjectsTypeExportHook>;
+  readonly #exportTransforms: Record<string, SavedObjectsExportTransform>;
   readonly #exportSizeLimit: number;
 
   constructor({
     savedObjectsClient,
-    exportHooks,
+    typeRegistry,
     exportSizeLimit,
   }: {
     savedObjectsClient: SavedObjectsClientContract;
-    exportHooks: Record<string, SavedObjectsTypeExportHook>;
+    typeRegistry: ISavedObjectTypeRegistry;
     exportSizeLimit: number;
   }) {
     this.#savedObjectsClient = savedObjectsClient;
-    this.#exportHooks = exportHooks;
     this.#exportSizeLimit = exportSizeLimit;
+    this.#exportTransforms = typeRegistry.getAllTypes().reduce((transforms, type) => {
+      if (type.management?.onExport) {
+        return {
+          ...transforms,
+          [type.name]: type.management.onExport,
+        };
+      }
+      return transforms;
+    }, {} as Record<string, SavedObjectsExportTransform>);
   }
 
   /**
@@ -108,10 +117,10 @@ export class SavedObjectsExporter {
     let exportedObjects: Array<SavedObject<unknown>>;
     let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
 
-    savedObjects = await applyExportHooks({
-      objects: savedObjects,
+    savedObjects = await applyExportTransforms({
       request,
-      exportHooks: this.#exportHooks,
+      objects: savedObjects,
+      transforms: this.#exportTransforms,
     });
 
     if (includeReferencesDeep) {

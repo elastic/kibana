@@ -44,8 +44,8 @@ export {
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportResultDetails,
   SavedObjectsExportError,
-  SavedObjectsExportContext,
-  SavedObjectsTypeExportHook,
+  SavedObjectsExportTransformContext,
+  SavedObjectsExportTransform,
 } from './export';
 
 export {

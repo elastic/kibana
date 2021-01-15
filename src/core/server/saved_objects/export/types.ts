@@ -80,16 +80,20 @@ export interface SavedObjectsExportResultDetails {
 }
 
 /**
+ * Context passed down to a {@link SavedObjectsExportTransform | export transform function}
+ *
  * @public
  */
-export interface SavedObjectsExportContext {
+export interface SavedObjectsExportTransformContext {
   request: KibanaRequest;
 }
 
 /**
+ * TODO: doc + examples
+ *
  * @public
  */
-export type SavedObjectsTypeExportHook = <T = unknown>(
-  objects: Array<SavedObject<T>>,
-  context: SavedObjectsExportContext
+export type SavedObjectsExportTransform = <T = unknown>(
+  context: SavedObjectsExportTransformContext,
+  objects: Array<SavedObject<T>>
 ) => SavedObject[] | Promise<SavedObject[]>;

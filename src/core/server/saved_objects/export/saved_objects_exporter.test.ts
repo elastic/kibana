@@ -19,6 +19,7 @@
 
 import { SavedObjectsExporter } from './saved_objects_exporter';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
+import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { httpServerMock } from '../../http/http_server.mocks';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
@@ -29,15 +30,16 @@ async function readStreamToCompletion(stream: Readable) {
 
 const exportSizeLimit = 500;
 const request = httpServerMock.createKibanaRequest();
-const exportHooks = {};
 
 describe('getSortedObjectsForExport()', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let typeRegistry: SavedObjectTypeRegistry;
   let exporter: SavedObjectsExporter;
 
   beforeEach(() => {
+    typeRegistry = new SavedObjectTypeRegistry();
     savedObjectsClient = savedObjectsClientMock.create();
-    exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit, exportHooks });
+    exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit, typeRegistry });
   });
 
   describe('#exportByTypes', () => {
@@ -551,7 +553,7 @@ describe('getSortedObjectsForExport()', () => {
     });
 
     test('export selected types throws error when exceeding exportSizeLimit', async () => {
-      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit: 1, exportHooks });
+      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit: 1, typeRegistry });
 
       savedObjectsClient.find.mockResolvedValueOnce({
         total: 2,
@@ -798,7 +800,7 @@ describe('getSortedObjectsForExport()', () => {
     });
 
     test('export selected objects throws error when exceeding exportSizeLimit', async () => {
-      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit: 1, exportHooks });
+      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit: 1, typeRegistry });
 
       const exportOpts = {
         request,

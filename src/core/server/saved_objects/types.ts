@@ -20,6 +20,7 @@
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
+import { SavedObjectsExportTransform } from './export';
 
 export {
   SavedObjectsImportResponse,
@@ -292,4 +293,10 @@ export interface SavedObjectsTypeManagementDefinition {
    *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
    */
   getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
+  /**
+   * An optional export transform function that can be used transform the objects of the registered type during
+   * the export process. This can be used to either mutates the exported objects, or add new objects
+   * to the export list. See {@link SavedObjectsExportTransform | the transform type documentation} for more info and examples.
+   */
+  onExport?: SavedObjectsExportTransform;
 }
