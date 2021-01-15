@@ -62,7 +62,7 @@ export function ServiceOverview({
           <EuiFlexGroup direction="column" gutterSize="s">
             {isRumAgent && (
               <EuiFlexItem>
-                <UserExperienceCallout />
+                <UserExperienceCallout serviceName={serviceName} />
               </EuiFlexItem>
             )}
             <EuiFlexItem>
