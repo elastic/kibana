@@ -17,21 +17,16 @@
  * under the License.
  */
 
-// @ts-expect-error
-import stubbedLogstashFields from './logstash_fields';
+import type { AppState } from '../../common';
+import type { AppStateServiceStart } from './app_state_service';
 
-const mockLogstashFields = stubbedLogstashFields();
-
-export function stubbedSavedObjectIndexPattern(id: string | null = null) {
-  return {
-    id,
-    type: 'index-pattern',
-    attributes: {
-      timeFieldName: 'timestamp',
-      customFormats: {},
-      fields: mockLogstashFields,
-      title: 'title',
-    },
-    version: '2',
-  };
-}
+export const mockAppStateService = {
+  createStart: (): jest.Mocked<AppStateServiceStart> => {
+    return { getState: jest.fn() };
+  },
+  createAppState: (appState: Partial<AppState> = {}) => ({
+    insecureClusterAlert: { displayAlert: false },
+    anonymousAccess: { isEnabled: false, accessURLParameters: null },
+    ...appState,
+  }),
+};
