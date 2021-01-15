@@ -30,7 +30,7 @@ export function getAlertType(
   const actionGroupName = i18n.translate(
     'xpack.stackAlerts.indexThreshold.actionGroupThresholdMetTitle',
     {
-      defaultMessage: 'Threshold Met',
+      defaultMessage: 'Threshold met',
     }
   );
 
