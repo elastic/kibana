@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const LEAVE_UNASSIGNED_FIELD = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettingsLogic.leaveUnassignedField',
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.leaveUnassignedField',
   {
     defaultMessage: 'Leave unassigned',
   }
 );
 
 export const SUCCESS_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettingsLogic.successMessage',
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.successMessage',
   {
     defaultMessage: 'Display Settings have been successfuly updated.',
   }
