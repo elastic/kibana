@@ -35,7 +35,7 @@ export const POSITIONS = Object.keys(groupPositionToClassMap) as ButtonPositions
 type Weights = 'normal' | 'bold';
 export const WEIGHTS = ['normal', 'bold'] as Weights[];
 
-export const SIZES: Array<EuiButtonProps['size']> = ['s', 'm'];
+export const TOOLBAR_BUTTON_SIZES: Array<EuiButtonProps['size']> = ['s', 'm'];
 
 export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
   /**
