@@ -15844,8 +15844,6 @@
     "xpack.monitoring.noData.blurbs.changesNeededDescription": "監視を実行するには、次の手順に従います",
     "xpack.monitoring.noData.blurbs.changesNeededTitle": "調整が必要です",
     "xpack.monitoring.noData.blurbs.cloudDeploymentDescription": "次の場所に戻ってください: ",
-    "xpack.monitoring.noData.blurbs.cloudDeploymentDescriptionMore": "Elastic Cloud での監視の詳細は、 ",
-    "xpack.monitoring.noData.blurbs.cloudDeploymentTitle": "監視データはこちらに表示されません。",
     "xpack.monitoring.noData.blurbs.lookingForMonitoringDataDescription": "監視は、ハードウェアパフォーマンスと負荷の情報を提供します。",
     "xpack.monitoring.noData.blurbs.lookingForMonitoringDataTitle": "監視データを検索中です",
     "xpack.monitoring.noData.blurbs.monitoringIsOffDescription": "監視は、ハードウェアパフォーマンスと負荷の情報を提供します。",
