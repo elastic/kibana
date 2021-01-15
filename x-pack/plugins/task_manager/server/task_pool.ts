@@ -85,6 +85,10 @@ export class TaskPool {
     // this should happen less often than the actual changes to the worker queue
     // so is lighter than emitting the load every time we add/remove a task from the queue
     this.load$.next(asTaskManagerStatEvent('load', asOk(this.workerLoad)));
+    // cancel expired task whenever a call is made to check for capacity
+    // this ensures that we don't end up with a queue of hung tasks causing both
+    // the poller and the pool from hanging due to lack of capacity
+    this.cancelExpiredTasks();
     return this.maxWorkers - this.occupiedWorkers;
   }
 
@@ -168,21 +172,23 @@ export class TaskPool {
     this.logger.error(`Failed to mark Task ${task.toString()} as running: ${err.message}`);
   }
 
-  private cancelExpiredTasks() {
-    for (const task of this.running) {
-      if (task.isExpired) {
-        this.logger.warn(
-          `Cancelling task ${task.toString()} as it expired at ${task.expiration.toISOString()}${
-            task.startedAt
-              ? ` after running for ${durationAsString(
-                  moment.duration(moment(new Date()).utc().diff(task.startedAt))
-                )}`
-              : ``
-          }${task.definition.timeout ? ` (with timeout set at ${task.definition.timeout})` : ``}.`
-        );
-        this.cancelTask(task);
-      }
-    }
+  public async cancelExpiredTasks() {
+    return Promise.all(
+      Array.from(this.running)
+        .filter((task) => task.isExpired)
+        .map((task) => {
+          this.logger.warn(
+            `Cancelling task ${task.toString()} as it expired at ${task.expiration.toISOString()}${
+              task.startedAt
+                ? ` after running for ${durationAsString(
+                    moment.duration(moment(new Date()).utc().diff(task.startedAt))
+                  )}`
+                : ``
+            }${task.definition.timeout ? ` (with timeout set at ${task.definition.timeout})` : ``}.`
+          );
+          return this.cancelTask(task);
+        })
+    );
   }
 
   private async cancelTask(task: TaskRunner) {
