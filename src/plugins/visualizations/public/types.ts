@@ -20,12 +20,14 @@
 import { SavedObject } from '../../../plugins/saved_objects/public';
 import {
   AggConfigOptions,
+  IAggConfigs,
   SearchSourceFields,
   TimefilterContract,
 } from '../../../plugins/data/public';
 import { ExpressionAstExpression } from '../../expressions/public';
 
 import { SerializedVis, Vis, VisParams } from './vis';
+import { PersistedState } from './persisted_state';
 
 export { Vis, SerializedVis, VisParams };
 
@@ -59,3 +61,15 @@ export type VisToExpressionAst<TVisParams = VisParams> = (
   vis: Vis<TVisParams>,
   params: VisToExpressionAstParams
 ) => Promise<ExpressionAstExpression> | ExpressionAstExpression;
+
+export interface VisEditorOptionsProps<VisParamType = unknown> {
+  aggs: IAggConfigs;
+  hasHistogramAgg: boolean;
+  isTabSelected: boolean;
+  stateParams: VisParamType;
+  vis: Vis;
+  uiState: PersistedState;
+  setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
+  setValidity(isValid: boolean): void;
+  setTouched(isTouched: boolean): void;
+}

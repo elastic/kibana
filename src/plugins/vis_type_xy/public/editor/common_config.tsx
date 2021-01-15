@@ -20,7 +20,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps } from '../../../vis_default_editor/public';
+import { VisEditorOptionsProps } from '../../../visualizations/public';
 
 import { VisParams } from '../types';
 import { MetricsAxisOptions, PointSeriesOptions } from './components/options';
@@ -33,7 +33,7 @@ export function getOptionTabs(showElasticChartsOptions = false) {
       title: i18n.translate('visTypeXy.area.tabs.metricsAxesTitle', {
         defaultMessage: 'Metrics & axes',
       }),
-      editor: (props: VisOptionsProps<VisParams>) => (
+      editor: (props: VisEditorOptionsProps<VisParams>) => (
         <ValidationWrapper {...props} component={MetricsAxisOptions} />
       ),
     },
@@ -42,7 +42,7 @@ export function getOptionTabs(showElasticChartsOptions = false) {
       title: i18n.translate('visTypeXy.area.tabs.panelSettingsTitle', {
         defaultMessage: 'Panel settings',
       }),
-      editor: (props: VisOptionsProps<VisParams>) => (
+      editor: (props: VisEditorOptionsProps<VisParams>) => (
         <ValidationWrapper
           {...props}
           extraProps={{

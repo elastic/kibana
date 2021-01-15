@@ -28,7 +28,7 @@ import { ValueAxis, ScaleType, AxisType } from '../../vis_type_xy/public';
 
 import { HeatmapOptions, getHeatmapCollections } from './editor';
 import { TimeMarker } from './vislib/visualizations/time_marker';
-import { CommonVislibParams, BasicVislibParams, VislibChartType } from './types';
+import { CommonVislibParams, VislibChartType } from './types';
 import { toExpressionAst } from './to_ast';
 
 export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams {
@@ -43,7 +43,7 @@ export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams 
   times: TimeMarker[];
 }
 
-export const heatmapVisTypeDefinition: VisTypeDefinition<BasicVislibParams> = {
+export const heatmapVisTypeDefinition: VisTypeDefinition<HeatmapVisParams> = {
   name: 'heatmap',
   title: i18n.translate('visTypeVislib.heatmap.heatmapTitle', { defaultMessage: 'Heat map' }),
   icon: 'heatmap',

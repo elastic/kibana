@@ -44,6 +44,13 @@ export { VisualizeInput } from './embeddable';
 export { SchemaConfig } from './vis_schemas';
 export { updateOldState } from './legacy/vis_update_state';
 export { PersistedState } from './persisted_state';
-export { SavedVisState, ISavedVis, VisSavedObject, VisToExpressionAst } from './types';
+export {
+  SavedVisState,
+  ISavedVis,
+  VisSavedObject,
+  VisToExpressionAst,
+  VisToExpressionAstParams,
+  VisEditorOptionsProps,
+} from './types';
 export { VisualizationListItem, VisualizationStage } from './vis_types/vis_type_alias_registry';
 export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';

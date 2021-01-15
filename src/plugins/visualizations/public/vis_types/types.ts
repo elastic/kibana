@@ -17,11 +17,10 @@
  * under the License.
  */
 import { IconType } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Adapters } from 'src/plugins/inspector';
-// import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { IndexPattern, AggGroupNames, AggParam, AggGroupName } from '../../../data/public';
-import { Vis, VisParams, VisToExpressionAst } from '../types';
+import { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 
 export interface VisTypeOptions {
   showTimePicker: boolean;
@@ -59,15 +58,23 @@ export interface Schema {
   tooltip?: ReactNode;
 }
 
-interface DefaultEditorConfig {
+type DefaultEditorOptionsComponent<TVisParams> = React.ComponentType<
+  VisEditorOptionsProps<TVisParams>
+>;
+
+interface DefaultEditorConfig<TVisParams> {
   // collections should moved directly into default editor in https://github.com/elastic/kibana/issues/84879
   collections?: {
     [key: string]: Array<{ text: string; value: string }> | Array<{ id: string; label: string }>;
   };
   enableAutoApply?: boolean;
   defaultSize?: string;
-  optionsTemplate?: React.ComponentType<any>;
-  optionTabs?: Array<{ name: string; title: string; editor: React.ComponentType<any> }>;
+  optionsTemplate?: DefaultEditorOptionsComponent<TVisParams>;
+  optionTabs?: Array<{
+    name: string;
+    title: string;
+    editor: DefaultEditorOptionsComponent<TVisParams>;
+  }>;
   schemas?: Array<Partial<Schema>>;
 }
 
@@ -79,7 +86,7 @@ interface CustomEditorConfig {
  * A visualization type definition representing a spec of one specific type of "classical"
  * visualizations (i.e. not Lens visualizations).
  */
-export interface VisTypeDefinition<TVisParams = unknown> {
+export interface VisTypeDefinition<TVisParams> {
   /**
    * Visualization unique name
    */
@@ -161,6 +168,6 @@ export interface VisTypeDefinition<TVisParams = unknown> {
   readonly options?: Partial<VisTypeOptions>;
 
   // TODO: The following types still need to be refined properly.
-  readonly editorConfig: DefaultEditorConfig | CustomEditorConfig;
+  readonly editorConfig: DefaultEditorConfig<TVisParams> | CustomEditorConfig;
   readonly visConfig: Record<string, any>;
 }
