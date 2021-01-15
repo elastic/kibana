@@ -112,6 +112,21 @@ describe('LogRetentionLogic', () => {
       });
     });
 
+    describe('setLogRetentionUpdating', () => {
+      describe('isLogRetentionUpdating', () => {
+        it('sets isLogRetentionUpdating to true', () => {
+          mount();
+
+          LogRetentionLogic.actions.setLogRetentionUpdating();
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            isLogRetentionUpdating: true,
+          });
+        });
+      });
+    });
+
     describe('clearLogRetentionUpdating', () => {
       describe('isLogRetentionUpdating', () => {
         it('resets isLogRetentionUpdating to false', () => {
@@ -263,24 +278,8 @@ describe('LogRetentionLogic', () => {
     });
 
     describe('fetchLogRetention', () => {
-      describe('isLogRetentionUpdating', () => {
-        it('sets isLogRetentionUpdating to true', () => {
-          mount({
-            isLogRetentionUpdating: false,
-          });
-
-          LogRetentionLogic.actions.fetchLogRetention();
-
-          expect(LogRetentionLogic.values).toEqual({
-            ...DEFAULT_VALUES,
-            isLogRetentionUpdating: true,
-          });
-        });
-      });
-
       it('will call an API endpoint and update log retention', async () => {
         mount();
-        jest.spyOn(LogRetentionLogic.actions, 'clearLogRetentionUpdating');
         jest
           .spyOn(LogRetentionLogic.actions, 'updateLogRetention')
           .mockImplementationOnce(() => {});
@@ -289,14 +288,14 @@ describe('LogRetentionLogic', () => {
         http.get.mockReturnValue(promise);
 
         LogRetentionLogic.actions.fetchLogRetention();
+        expect(LogRetentionLogic.values.isLogRetentionUpdating).toBe(true);
 
         expect(http.get).toHaveBeenCalledWith('/api/app_search/log_settings');
         await promise;
         expect(LogRetentionLogic.actions.updateLogRetention).toHaveBeenCalledWith(
           TYPICAL_CLIENT_LOG_RETENTION
         );
-
-        expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
+        expect(LogRetentionLogic.values.isLogRetentionUpdating).toBe(false);
       });
 
       it('handles errors', async () => {
@@ -314,6 +313,14 @@ describe('LogRetentionLogic', () => {
         }
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
         expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
+      });
+
+      it('does not run if isLogRetentionUpdating is true, preventing duplicate fetches', async () => {
+        mount({ isLogRetentionUpdating: true });
+
+        LogRetentionLogic.actions.fetchLogRetention();
+
+        expect(http.get).not.toHaveBeenCalled();
       });
     });
 

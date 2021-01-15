@@ -4,7 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LogRetentionLogic } from './log_retention_logic';
-export * from './types';
-export * from './messaging';
-export * from './components';
+export { LogRetentionCallout } from './log_retention_callout';
+export { LogRetentionTooltip } from './log_retention_tooltip';
