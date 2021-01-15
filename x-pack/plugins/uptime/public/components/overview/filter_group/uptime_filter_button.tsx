@@ -26,7 +26,6 @@ export const UptimeFilterButton = ({
   title,
 }: UptimeFilterButtonProps) => (
   <EuiFilterButton
-    // move to labels folder
     aria-label={i18n.translate('xpack.uptime.overview.filterButton.label', {
       defaultMessage: 'expands filter group for {title} filter',
       values: { title },
