@@ -344,7 +344,7 @@ export const CONFIDENTIAL_HELP_TEXT = i18n.translate(
 );
 
 export const CREDENTIALS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.credentials.desctitleription',
+  'xpack.enterpriseSearch.workplaceSearch.credentials.title',
   {
     defaultMessage: 'Credentials',
   }
