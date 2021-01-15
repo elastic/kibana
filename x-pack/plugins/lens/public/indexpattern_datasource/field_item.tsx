@@ -617,24 +617,28 @@ const DragToWorkspaceButton = ({
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   isEnabled: boolean;
 }) => {
-  const buttonTitle = i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
-    defaultMessage: 'Add field to workspace',
-  });
+  const buttonTitle = isEnabled
+    ? i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
+        defaultMessage: 'Add field to workspace',
+      })
+    : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceDisabled', {
+        defaultMessage:
+          "This field can't be added to the workspace automatically. You can still use it directly in the configuration panel.",
+      });
 
-  if (isEnabled) {
-    return (
-      <EuiFlexItem grow={false}>
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiToolTip content={buttonTitle}>
         <EuiButtonIcon
           aria-label={buttonTitle}
+          isDisabled={!isEnabled}
           iconType="plusInCircle"
           onClick={() => {
             dropOntoWorkspace(field);
           }}
           title={buttonTitle}
         />
-      </EuiFlexItem>
-    );
-  } else {
-    return null;
-  }
+      </EuiToolTip>
+    </EuiFlexItem>
+  );
 };
