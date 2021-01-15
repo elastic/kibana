@@ -270,7 +270,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Save the current Lens visualization.
      */
-    async save(title: string, saveAsNew?: boolean, redirectToOrigin?: boolean) {
+    async save(
+      title: string,
+      saveAsNew?: boolean,
+      redirectToOrigin?: boolean,
+      addToDashboard?: boolean,
+      dashboardId?: boolean
+    ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
       await testSubjects.setValue('savedObjectTitle', title);
@@ -285,6 +291,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (redirectToOriginCheckboxExists) {
         const state = redirectToOrigin ? 'check' : 'uncheck';
         await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
+      }
+
+      const dashboardSelectorExists = await testSubjects.exists('add-to-dashboard-options');
+      if (dashboardSelectorExists) {
+        const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
+        let optionSelector = 'add-to-library-option';
+        if (addToDashboard) {
+          optionSelector = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
+        }
+        log.debug('dashboard selector exists, choosing option:', optionSelector);
+        const label = await dashboardSelector.findByCssSelector(`label[for="${optionSelector}"]`);
+        await label.click();
+
+        if (dashboardId) {
+          // TODO - selecting an existing dashboard
+        }
       }
 
       await testSubjects.click('confirmSaveSavedObjectButton');
