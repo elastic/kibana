@@ -9,6 +9,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { BreadcrumbTrail } from '../../../shared/kibana_chrome/generate_breadcrumbs';
 import { NotFound } from '../../../shared/not_found';
 import {
   ENGINE_PATH,
@@ -40,7 +41,7 @@ import {
 } from './views';
 
 interface Props {
-  engineBreadcrumb: string[];
+  engineBreadcrumb: BreadcrumbTrail;
 }
 export const AnalyticsRouter: React.FC<Props> = ({ engineBreadcrumb }) => {
   const ANALYTICS_BREADCRUMB = [...engineBreadcrumb, ANALYTICS_TITLE];
@@ -72,7 +73,7 @@ export const AnalyticsRouter: React.FC<Props> = ({ engineBreadcrumb }) => {
         <RecentQueries />
       </Route>
       <Route exact path={ENGINE_PATH + ENGINE_ANALYTICS_QUERY_DETAIL_PATH}>
-        <QueryDetail />
+        <QueryDetail breadcrumbs={ANALYTICS_BREADCRUMB} />
       </Route>
       <Route>
         <NotFound breadcrumbs={ANALYTICS_BREADCRUMB} product={APP_SEARCH_PLUGIN} />
