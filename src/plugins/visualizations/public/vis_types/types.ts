@@ -167,7 +167,15 @@ export interface VisTypeDefinition<TVisParams> {
 
   readonly options?: Partial<VisTypeOptions>;
 
-  // TODO: The following types still need to be refined properly.
+  /**
+   * Config for the default editor.
+   * Custom editor can be specified.
+   */
   readonly editorConfig: DefaultEditorConfig<TVisParams> | CustomEditorConfig;
+  /**
+   * Have the "defaults" prop with default params for a visualization.
+   * TODO: ideally should have next type: { defaults: TVisParams } , but currently
+   * have incosistencies in legacy visLib visualizations
+   */
   readonly visConfig: Record<string, any>;
 }

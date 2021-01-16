@@ -134,7 +134,6 @@ export const samplePieVis = {
       truncate: 100,
     },
   },
-  sessionState: {},
   data: {
     searchSource: {
       id: 'data_source1',
@@ -1767,7 +1766,6 @@ export const sampleAreaVis = {
       ],
     },
   },
-  sessionState: {},
   data: {
     searchSource: {
       id: 'data_source1',

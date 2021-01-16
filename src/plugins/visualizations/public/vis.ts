@@ -90,9 +90,6 @@ export class Vis<TVisParams = VisParams> {
   public title: string = '';
   public description: string = '';
   public params: TVisParams;
-  // Session state is for storing information that is transitory, and will not be saved with the visualization.
-  // For instance, map bounds, which depends on the view port, browser window size, etc.
-  public sessionState: Record<string, any> = {};
   public data: VisData = {};
 
   public readonly uiState: PersistedState;
