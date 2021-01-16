@@ -55,12 +55,13 @@ export class IndexPattern implements IIndexPattern {
   public title: string = '';
   public fieldFormatMap: Record<string, any>;
   /**
-   * Only used by rollup indices. Info required to create field list
+   * Only used by rollup indices, used by rollup specific endpoint to load field list
    */
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
   public timeFieldName: string | undefined;
   /**
+   * @deprecated
    * Deprecated. used by time range index patterns
    */
   public intervalName: string | undefined;

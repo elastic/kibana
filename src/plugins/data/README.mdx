@@ -71,7 +71,7 @@ SearchSource for composing queries.
 - Modify index pattern and save it
 - Delete index pattern
 
-#### Get list of index patterns
+#### Get list of index pattern titles and ids
 
 ```
 const idsAndTitles = await data.indexPatterns.getIdsWithTitle();
@@ -105,10 +105,18 @@ const [indexPattern] = await data.indexPatterns.find(title);
 const indexPattern = await data.indexPatterns.create({ title: 'kibana-*' });
 ```
 
-#### Create index pattern and save it
+#### Create index pattern and save it immediately
 
 ```
 const indexPattern = await data.indexPatterns.createAndSave({ title: 'kibana-*' });
+```
+
+#### Create index pattern, modify, and save
+
+```
+const indexPattern = await data.indexPatterns.create({ title: 'kibana-*' });
+indexPattern.setFieldCustomLabel('customer_name', 'Customer Name');
+data.indexPatterns.createSavedObject(indexPattern);
 ```
 
 #### Modify index pattern and save it

@@ -69,6 +69,7 @@ export interface IndexPatternAttributes {
 }
 
 /**
+ * @intenal
  * Storage of field attributes. Necessary since the field list isn't saved.
  */
 export interface FieldAttrs {
@@ -217,6 +218,7 @@ export type IndexPatternFieldMap = Record<string, FieldSpec>;
 
 /**
  * Static index pattern format
+ * Serialized data object, representing index pattern attributes and state
  */
 export interface IndexPatternSpec {
   /**
@@ -229,6 +231,7 @@ export interface IndexPatternSpec {
   version?: string;
   title?: string;
   /**
+   * @deprecated
    * Deprecated. Was used by time range based index patterns
    */
   intervalName?: string;
