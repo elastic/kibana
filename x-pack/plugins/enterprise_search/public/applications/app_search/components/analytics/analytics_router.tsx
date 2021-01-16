@@ -5,13 +5,14 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, Redirect } from 'react-router-dom';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { BreadcrumbTrail } from '../../../shared/kibana_chrome/generate_breadcrumbs';
 import { NotFound } from '../../../shared/not_found';
 import {
+  getEngineRoute,
   ENGINE_PATH,
   ENGINE_ANALYTICS_PATH,
   ENGINE_ANALYTICS_TOP_QUERIES_PATH,
@@ -19,6 +20,7 @@ import {
   ENGINE_ANALYTICS_TOP_QUERIES_NO_CLICKS_PATH,
   ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH,
   ENGINE_ANALYTICS_RECENT_QUERIES_PATH,
+  ENGINE_ANALYTICS_QUERY_DETAILS_PATH,
   ENGINE_ANALYTICS_QUERY_DETAIL_PATH,
 } from '../../routes';
 import {
@@ -45,6 +47,7 @@ interface Props {
 }
 export const AnalyticsRouter: React.FC<Props> = ({ engineBreadcrumb }) => {
   const ANALYTICS_BREADCRUMB = [...engineBreadcrumb, ANALYTICS_TITLE];
+  const engineName = engineBreadcrumb[1];
 
   return (
     <Switch>
@@ -74,6 +77,9 @@ export const AnalyticsRouter: React.FC<Props> = ({ engineBreadcrumb }) => {
       </Route>
       <Route exact path={ENGINE_PATH + ENGINE_ANALYTICS_QUERY_DETAIL_PATH}>
         <QueryDetail breadcrumbs={ANALYTICS_BREADCRUMB} />
+      </Route>
+      <Route exact path={ENGINE_PATH + ENGINE_ANALYTICS_QUERY_DETAILS_PATH}>
+        <Redirect to={getEngineRoute(engineName) + ENGINE_ANALYTICS_PATH} />
       </Route>
       <Route>
         <NotFound breadcrumbs={ANALYTICS_BREADCRUMB} product={APP_SEARCH_PLUGIN} />

@@ -16,6 +16,6 @@ describe('AnalyticsRouter', () => {
     const wrapper = shallow(<AnalyticsRouter engineBreadcrumb={['Engines', 'some-engine']} />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(8);
+    expect(wrapper.find(Route)).toHaveLength(9);
   });
 });
