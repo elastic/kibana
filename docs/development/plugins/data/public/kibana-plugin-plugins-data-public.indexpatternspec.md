@@ -4,7 +4,7 @@
 
 ## IndexPatternSpec interface
 
-Static index pattern format
+Static index pattern format Serialized data object, representing index pattern attributes and state
 
 <b>Signature:</b>
 
@@ -21,7 +21,7 @@ export interface IndexPatternSpec
 |  [fieldFormats](./kibana-plugin-plugins-data-public.indexpatternspec.fieldformats.md) | <code>Record&lt;string, SerializedFieldFormat&gt;</code> |  |
 |  [fields](./kibana-plugin-plugins-data-public.indexpatternspec.fields.md) | <code>IndexPatternFieldMap</code> |  |
 |  [id](./kibana-plugin-plugins-data-public.indexpatternspec.id.md) | <code>string</code> | saved object id |
-|  [intervalName](./kibana-plugin-plugins-data-public.indexpatternspec.intervalname.md) | <code>string</code> | Deprecated. Was used by time range based index patterns |
+|  [intervalName](./kibana-plugin-plugins-data-public.indexpatternspec.intervalname.md) | <code>string</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-public.indexpatternspec.sourcefilters.md) | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpatternspec.timefieldname.md) | <code>string</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpatternspec.title.md) | <code>string</code> |  |

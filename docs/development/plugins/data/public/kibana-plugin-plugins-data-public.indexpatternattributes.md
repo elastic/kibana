@@ -4,7 +4,7 @@
 
 ## IndexPatternAttributes interface
 
-Used for index pattern saved object
+Interface for an index pattern saved object
 
 <b>Signature:</b>
 

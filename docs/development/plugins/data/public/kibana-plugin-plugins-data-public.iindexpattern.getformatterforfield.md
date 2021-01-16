@@ -4,7 +4,7 @@
 
 ## IIndexPattern.getFormatterForField property
 
-Look up formatter for a given field
+Look up a formatter for a given field
 
 <b>Signature:</b>
 
