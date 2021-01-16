@@ -9,6 +9,7 @@
   },
   "include": [
     "server/**/*",
+    "server/**/*.json",
     "public/**/*",
     "common/*"
   ],
