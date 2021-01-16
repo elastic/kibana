@@ -113,7 +113,6 @@ export const hasTimestampFields = async (
 ): Promise<boolean> => {
   if (
     !wroteStatus &&
-    timestampField != null &&
     (isEmpty(timestampFieldCapsResponse.body.fields) ||
       timestampFieldCapsResponse.body.fields[timestampField] == null ||
       timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null)

@@ -9,12 +9,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { SavedObjectsClientContract, SavedObjectsUpdateResponse } from 'src/core/server';
 import { validateTaskEither } from '../../../../common/validate';
+import { toError, toPromise } from '../../../../common/fp_utils';
 import { signalsMigrationSOClient } from './saved_objects_client';
 import {
   SignalsMigrationSOUpdateAttributes,
   signalsMigrationSOUpdateAttributes,
 } from './saved_objects_schema';
-import { getIsoDateString, toError, toPromise } from './helpers';
+import { getIsoDateString } from './helpers';
 
 export const updateMigrationSavedObject = async ({
   attributes,

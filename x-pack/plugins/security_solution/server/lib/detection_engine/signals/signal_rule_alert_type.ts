@@ -186,18 +186,18 @@ export const signalRulesAlertType = ({
       // move this collection of lines into a function in utils
       // so that we can use it in create rules route, bulk, etc.
       try {
+        const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
         const [privileges, timestampFieldCaps] = await Promise.all([
           flow(
             () => tryCatch(() => getInputIndex(services, version, index), toError),
             chain((indices) => tryCatch(() => checkPrivileges(services, indices), toError)),
-            flow(toPromise)
+            toPromise
           )(),
           services.scopedClusterClient.fieldCaps({
             index,
-            fields:
-              timestampOverride != null && !isEmpty(timestampOverride) // timestampOverride != null silences typescript complaining that timestampOverride might be undefined
-                ? ['@timestamp', timestampOverride]
-                : ['@timestamp'],
+            fields: hasTimestampOverride
+              ? ['@timestamp', timestampOverride as string]
+              : ['@timestamp'],
             allow_no_indices: false,
             include_unmapped: true,
           }),
@@ -214,9 +214,7 @@ export const signalRulesAlertType = ({
               () =>
                 hasTimestampFields(
                   wroteStatus,
-                  timestampOverride != null && !isEmpty(timestampOverride) // timestampOverride != null silences typescript complaining that timestampOverride might be undefined
-                    ? timestampOverride
-                    : '@timestamp',
+                  hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
                   timestampFieldCaps,
                   ruleStatusService,
                   logger,
@@ -225,7 +223,7 @@ export const signalRulesAlertType = ({
               toError
             )
           ),
-          flow(toPromise)
+          toPromise
         )();
       } catch (exc) {
         logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
