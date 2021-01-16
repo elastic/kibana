@@ -1,0 +1,25 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "server/**/*",
+    "common/*"
+  ],
+  "references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../spaces/tsconfig.json" },
+    { "path": "../security/tsconfig.json" },
+    { "path": "../licensing/tsconfig.json" },
+    { "path": "../task_manager/tsconfig.json" },
+    { "path": "../event_log/tsconfig.json" },
+    { "path": "../encrypted_saved_objects/tsconfig.json" },
+    { "path": "../features/tsconfig.json" },
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" }
+  ]
+}

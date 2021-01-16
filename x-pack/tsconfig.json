@@ -66,6 +66,7 @@
     { "path": "../src/plugins/url_forwarding/tsconfig.json" },
     { "path": "../src/plugins/usage_collection/tsconfig.json" },
 
+    { "path": "./plugins/actions/tsconfig.json"},
     { "path": "./plugins/console_extensions/tsconfig.json" },
     { "path": "./plugins/data_enhanced/tsconfig.json" },
     { "path": "./plugins/discover_enhanced/tsconfig.json" },
