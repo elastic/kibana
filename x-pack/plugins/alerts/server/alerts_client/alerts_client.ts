@@ -467,84 +467,72 @@ export class AlertsClient {
     const { page, perPage, total, data: findAlertsResult } = await this.find(
       omit(options, 'dateStart', 'dateEnd', 'instances')
     );
+    this.logger.debug(
+      `alertsClient.findAlertsInstances(): find alerts by options=${options} total=${total}`
+    );
+
+    const alertIds = findAlertsResult.map((alertObject) => alertObject.id);
+    const maxAlertScheduleInterval = findAlertsResult.reduce(
+      (maxterval: number, alert) =>
+        parseDuration(alert.schedule.interval) > maxterval
+          ? parseDuration(alert.schedule.interval)
+          : maxterval,
+      0
+    );
+    const dateNow = new Date();
+    const durationMillis = (maxAlertScheduleInterval ?? 0) * 60;
+    const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
+    const parsedDateStart = parseDate(options.dateStart, 'dateStart', defaultDateStart);
+    const parsedDateEnd = parseDate(options.dateEnd, 'dateEnd', dateNow);
+
+    const events: IEvent[] = [];
     try {
-      const alertIds = findAlertsResult.map((alertObject) => alertObject.id);
-      const dateNow = new Date();
-      const durationMillis = findAlertsResult.reduce((maxterval: number, alert) => 
-        parseDuration(alert.schedule.interval) > maxterval ? parseDuration(alert.schedule.interval) : maxterval, 0) * 60;
-      const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
-      const parsedDateStart = parseDate(options.dateStart, 'dateStart', defaultDateStart);
-      const parsedDateEnd = parseDate(options.dateEnd, 'dateEnd', dateNow);
-
-      const eventLogClient = await this.getEventLogClient();
-
-      this.logger.debug(`getInstances(): search the event log for alerts by ids=[${alertIds}]`);
-
-      const alertsSummaryTotalCount = await eventLogClient.findEventsBySavedObjectIds(
-        'alert',
-        alertIds,
-        {
-          page: 1,
-          per_page: 0,
-          start: parsedDateStart.toISOString(),
-          end: parsedDateEnd.toISOString()
-        }
-      );
-      const events: IEvent[] = [];
-      let totalCount = alertsSummaryTotalCount.total;
-      let pageNumber = 1;
-      console.log(options.dateStart);
-      while (totalCount > 0) {
-        const maxPageCount = totalCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalCount;
-        const alertsSummaryResults = await eventLogClient.findEventsBySavedObjectIds(
-          'alert',
+      events.push(
+        ...(await this.getAllEventsByAlertsIdsForTimerange(
           alertIds,
-          {
-            page: pageNumber,
-            per_page: maxPageCount,
-            start: parsedDateStart.toISOString(),
-            end: parsedDateEnd.toISOString(),
-            sort_order: 'desc',
-          }
-        );
-        events.push(...alertsSummaryResults.data);
-        totalCount -= maxPageCount;
-        pageNumber++;
-      }
-      const extendedAlertsSummary = findAlertsResult.map((alert: SanitizedAlert) => {
-        const alertEvents = events.filter(
-          (alertEvent) => !!alertEvent && !!alertEvent.kibana && !!alertEvent.kibana.saved_objects &&
-            !!alertEvent.kibana.saved_objects.find((saved_object) => !!saved_object && alert.id === saved_object.id)
-        );
-        const summary = alertInstanceSummaryFromEventLog({
-          alert,
-          events: alertEvents,
-          dateStart: parsedDateStart.toISOString(),
-          dateEnd: dateNow.toISOString(),
-        })
-        return {
-          ...alert,
-          instances: Object.entries(summary.instances).map(([id, instance]) => ({
-            id,
-            summary: instance,
-            events: alertEvents,
-          }))
-        };
-      });
+          parsedDateStart,
+          parsedDateEnd
+        ))
+      );
+    } catch (err) {
+      this.logger.debug(`alertsClient.findAlertsInstances(): error: ${err.message}`);
       return {
         page,
         perPage,
-        total,
-        data: extendedAlertsSummary,
+        total: 0,
+        data: [],
       };
-    } catch (err) {
-      this.logger.debug(`alertsClient.getInstances(): error: ${err.message}`);
     }
+    const extendedAlertsSummary = findAlertsResult.map((alert: SanitizedAlert) => {
+      const alertEvents = events.filter(
+        (alertEvent) =>
+          !!alertEvent &&
+          !!alertEvent.kibana &&
+          !!alertEvent.kibana.saved_objects &&
+          !!alertEvent.kibana.saved_objects.find(
+            (savedObject) => !!savedObject && alert.id === savedObject.id
+          )
+      );
+      const summary = alertInstanceSummaryFromEventLog({
+        alert,
+        events: alertEvents,
+        dateStart: parsedDateStart.toISOString(),
+        dateEnd: dateNow.toISOString(),
+      });
+      return {
+        ...alert,
+        instances: Object.entries(summary.instances).map(([id, instanceStatus]) => ({
+          id,
+          summary: instanceStatus,
+          events: alertEvents,
+        })),
+      };
+    });
     return {
       page,
       perPage,
-      total: 0,
-      data: [],
+      total,
+      data: extendedAlertsSummary,
     };
   }
 
@@ -1596,6 +1584,47 @@ export class AlertsClient {
       alertAttributes.meta.versionApiKeyLastmodified = this.kibanaVersion;
     }
     return alertAttributes;
+  }
+
+  private async getAllEventsByAlertsIdsForTimerange(
+    alertIds: string[],
+    dateStart: Date,
+    dateEnd: Date
+  ): Promise<IEvent[]> {
+    const events: IEvent[] = [];
+
+    const eventLogClient = await this.getEventLogClient();
+
+    const alertsSummaryTotalCount = await eventLogClient.findEventsBySavedObjectIds(
+      'alert',
+      alertIds,
+      {
+        page: 1,
+        per_page: 0,
+        start: dateStart.toISOString(),
+        end: dateEnd.toISOString(),
+      }
+    );
+    let totalCount = alertsSummaryTotalCount.total;
+    let pageNumber = 1;
+    while (totalCount > 0) {
+      const maxPageCount = totalCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalCount;
+      const alertsSummaryResults = await eventLogClient.findEventsBySavedObjectIds(
+        'alert',
+        alertIds,
+        {
+          page: pageNumber,
+          per_page: maxPageCount,
+          start: dateStart.toISOString(),
+          end: dateEnd.toISOString(),
+          sort_order: 'desc',
+        }
+      );
+      events.push(...alertsSummaryResults.data);
+      totalCount -= maxPageCount;
+      pageNumber++;
+    }
+    return events;
   }
 }
 

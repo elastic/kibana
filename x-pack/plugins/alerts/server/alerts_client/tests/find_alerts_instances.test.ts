@@ -47,6 +47,10 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
+  authorization.getFindAuthorizationFilter.mockResolvedValue({
+    ensureAlertTypeIsAuthorized() {},
+    logSuccessfulAuthorization() {},
+  });
   getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry, eventLogClient);
 });
 
@@ -101,10 +105,16 @@ function getAlertInstanceSummarySavedObject(
   };
 }
 
-describe('getAlertInstanceSummary()', () => {
+describe('findAlertsInstances()', () => {
   let alertsClient: AlertsClient;
 
   beforeEach(() => {
+    const ensureAlertTypeIsAuthorized = jest.fn();
+    const logSuccessfulAuthorization = jest.fn();
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      ensureAlertTypeIsAuthorized,
+      logSuccessfulAuthorization,
+    });
     alertsClient = new AlertsClient(alertsClientParams);
   });
 
@@ -135,7 +145,9 @@ describe('getAlertInstanceSummary()', () => {
 
     const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
 
-    const result = await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
+    const result = await alertsClient.findAlertsInstances({
+      options: { searchFields: ['consumer'], search: 'alert-consumer', dateStart },
+    });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "alertTypeId": "123",
@@ -181,18 +193,13 @@ describe('getAlertInstanceSummary()', () => {
     `);
   });
 
-  // Further tests don't check the result of `getAlertInstanceSummary()`, as the result
-  // is just the result from the `alertInstanceSummaryFromEventLog()`, which itself
-  // has a complete set of tests.  These tests just make sure the data gets
-  // sent into `getAlertInstanceSummary()` as appropriate.
-
   test('calls saved objects and event log client with default params', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
     eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
       AlertInstanceSummaryFindEventsResult
     );
 
-    await alertsClient.getAlertInstanceSummary({ id: '1' });
+    await alertsClient.findAlertsInstances({ options: {} });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
@@ -231,7 +238,7 @@ describe('getAlertInstanceSummary()', () => {
     const dateStart = new Date(
       Date.now() - 60 * AlertInstanceSummaryIntervalSeconds * 1000
     ).toISOString();
-    await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
+    await alertsClient.findAlertsInstances({ options: { dateStart } });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
@@ -252,7 +259,7 @@ describe('getAlertInstanceSummary()', () => {
     );
 
     const dateStart = '2m';
-    await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
+    await alertsClient.findAlertsInstances({ options: { dateStart } });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
@@ -274,7 +281,7 @@ describe('getAlertInstanceSummary()', () => {
 
     const dateStart = 'ain"t no way this will get parsed as a date';
     expect(
-      alertsClient.getAlertInstanceSummary({ id: '1', dateStart })
+      alertsClient.findAlertsInstances({ options: { dateStart } })
     ).rejects.toMatchInlineSnapshot(
       `[Error: Invalid date for parameter dateStart: "ain"t no way this will get parsed as a date"]`
     );
@@ -286,7 +293,7 @@ describe('getAlertInstanceSummary()', () => {
       AlertInstanceSummaryFindEventsResult
     );
 
-    expect(alertsClient.getAlertInstanceSummary({ id: '1' })).rejects.toMatchInlineSnapshot(
+    expect(alertsClient.findAlertsInstances({ options: {} })).rejects.toMatchInlineSnapshot(
       `[Error: OMG!]`
     );
   });
@@ -296,6 +303,6 @@ describe('getAlertInstanceSummary()', () => {
     eventLogClient.findEventsBySavedObjectIds.mockRejectedValueOnce(new Error('OMG 2!'));
 
     // error eaten but logged
-    await alertsClient.getAlertInstanceSummary({ id: '1' });
+    await alertsClient.findAlertsInstances({ options: {} });
   });
 });
