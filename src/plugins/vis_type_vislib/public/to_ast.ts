@@ -33,10 +33,6 @@ import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_
 import { BasicVislibParams, VislibChartType } from './types';
 import { getEsaggsFn } from './to_ast_esaggs';
 
-function isBasicVislibParams(params: any): params is BasicVislibParams {
-  return 'seriesParams' in params;
-}
-
 export const toExpressionAst = async <TVisParams extends VisParams>(
   vis: Vis<TVisParams>,
   params: VisToExpressionAstParams
@@ -79,23 +75,23 @@ export const toExpressionAst = async <TVisParams extends VisParams>(
 
   const visConfig = { ...vis.params };
 
-  if (isBasicVislibParams(visConfig)) {
-    (dimensions.y || []).forEach((yDimension) => {
-      const yAgg = responseAggs.filter(({ enabled }) => enabled)[yDimension.accessor];
-      const seriesParam = (visConfig.seriesParams || []).find((param) => param.data.id === yAgg.id);
-      if (seriesParam) {
-        const usedValueAxis = (visConfig.valueAxes || []).find(
-          (valueAxis) => valueAxis.id === seriesParam.valueAxis
-        );
-        if (usedValueAxis?.scale.mode === 'percentage') {
-          yDimension.format = { id: 'percent' };
-        }
-      }
-      if (visConfig?.gauge?.percentageMode === true) {
+  (dimensions.y || []).forEach((yDimension) => {
+    const yAgg = responseAggs.filter(({ enabled }) => enabled)[yDimension.accessor];
+    const seriesParam = ((visConfig.seriesParams as BasicVislibParams['seriesParams']) || []).find(
+      (param) => param.data.id === yAgg.id
+    );
+    if (seriesParam) {
+      const usedValueAxis = ((visConfig.valueAxes as BasicVislibParams['valueAxes']) || []).find(
+        (valueAxis) => valueAxis.id === seriesParam.valueAxis
+      );
+      if (usedValueAxis?.scale.mode === 'percentage') {
         yDimension.format = { id: 'percent' };
       }
-    });
-  }
+    }
+    if (visConfig?.gauge?.percentageMode === true) {
+      yDimension.format = { id: 'percent' };
+    }
+  });
 
   const visTypeVislib = buildExpressionFunction<VisTypeVislibExpressionFunctionDefinition>(
     vislibVisName,
