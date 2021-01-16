@@ -2,6 +2,8 @@
   "extends": "../tsconfig.base.json",
   "include": ["mocks.ts", "typings/**/*", "plugins/**/*", "tasks/**/*"],
   "exclude": [
+    "plugins/actions/**/*",
+    "plugins/alerts/**/*",
     "plugins/apm/e2e/cypress/**/*",
     "plugins/apm/scripts/**/*",
     "plugins/console_extensions/**/*",
@@ -67,6 +69,7 @@
     { "path": "../src/plugins/usage_collection/tsconfig.json" },
 
     { "path": "./plugins/actions/tsconfig.json"},
+    { "path": "./plugins/alerts/tsconfig.json"},
     { "path": "./plugins/console_extensions/tsconfig.json" },
     { "path": "./plugins/data_enhanced/tsconfig.json" },
     { "path": "./plugins/discover_enhanced/tsconfig.json" },

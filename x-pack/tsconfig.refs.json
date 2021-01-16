@@ -2,6 +2,7 @@
   "include": [],
   "references": [
     { "path": "./plugins/actions/tsconfig.json"},
+    { "path": "./plugins/alerts/tsconfig.json"},
     { "path": "./plugins/dashboard_enhanced/tsconfig.json" },
     { "path": "./plugins/licensing/tsconfig.json" },
     { "path": "./plugins/console_extensions/tsconfig.json" },
