@@ -17,7 +17,7 @@ export interface EsNames {
 }
 
 export function getEsNames(baseName: string, kibanaVersion: string): EsNames {
-  const EVENT_LOG_VERSION_SUFFIX = `-${kibanaVersion}`;
+  const EVENT_LOG_VERSION_SUFFIX = `-${kibanaVersion.toLocaleLowerCase()}`;
   const eventLogName = `${baseName}${EVENT_LOG_NAME_SUFFIX}`;
   const eventLogNameWithVersion = `${eventLogName}${EVENT_LOG_VERSION_SUFFIX}`;
   const eventLogPolicyName = `${
