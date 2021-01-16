@@ -20,10 +20,8 @@ import {
 import { AppLogic } from '../../../../app_logic';
 import { SourceLogic } from '../../source_logic';
 
-const SUCCESS_MESSAGE = 'Display Settings have been successfuly updated.';
-
 import { DetailField, SearchResultConfig, OptionValue, Result } from '../../../../types';
-
+import { LEAVE_UNASSIGNED_FIELD, SUCCESS_MESSAGE } from './constants';
 export interface DisplaySettingsResponseProps {
   sourceName: string;
   searchResultConfig: SearchResultConfig;
@@ -271,7 +269,10 @@ export const DisplaySettingsLogic = kea<
       () => [selectors.fieldOptions],
       (fieldOptions) => {
         const optionalFieldOptions = cloneDeep(fieldOptions);
-        optionalFieldOptions.unshift({ value: '', text: '' });
+        optionalFieldOptions.unshift({
+          value: LEAVE_UNASSIGNED_FIELD,
+          text: LEAVE_UNASSIGNED_FIELD,
+        });
         return optionalFieldOptions;
       },
     ],

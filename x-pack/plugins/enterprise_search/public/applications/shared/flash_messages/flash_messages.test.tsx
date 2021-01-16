@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../__mocks__/kea.mock';
+import { setMockValues } from '../../__mocks__/kea.mock';
 
-import { useValues } from 'kea';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiCallOut } from '@elastic/eui';
 
-import { FlashMessages } from './';
+import { FlashMessages } from './flash_messages';
 
 describe('FlashMessages', () => {
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('FlashMessages', () => {
   });
 
   it('does not render if no messages exist', () => {
-    (useValues as jest.Mock).mockImplementationOnce(() => ({ messages: [] }));
+    setMockValues({ messages: [] });
 
     const wrapper = shallow(<FlashMessages />);
 
@@ -38,7 +37,7 @@ describe('FlashMessages', () => {
       { type: 'warning', message: 'Uh oh' },
       { type: 'info', message: 'Testing multiples of same type' },
     ];
-    (useValues as jest.Mock).mockImplementationOnce(() => ({ messages: mockMessages }));
+    setMockValues({ messages: mockMessages });
 
     const wrapper = shallow(<FlashMessages />);
 
@@ -49,7 +48,7 @@ describe('FlashMessages', () => {
   });
 
   it('renders any children', () => {
-    (useValues as jest.Mock).mockImplementationOnce(() => ({ messages: [{ type: 'success' }] }));
+    setMockValues({ messages: [{ type: 'success' }] });
 
     const wrapper = shallow(
       <FlashMessages>

@@ -219,6 +219,7 @@ export interface DiscoverProps {
    * Function to update the actual savedQuery id
    */
   updateSavedQueryId: (savedQueryId?: string) => void;
+  useNewFieldsApi?: boolean;
 }
 
 export const DocTableLegacyMemoized = React.memo((props: DocTableLegacyProps) => (
@@ -257,6 +258,7 @@ export function DiscoverLegacy({
   topNavMenu,
   updateQuery,
   updateSavedQueryId,
+  useNewFieldsApi,
 }: DiscoverProps) {
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
@@ -277,6 +279,17 @@ export function DiscoverLegacy({
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
   const contentCentered = resultState === 'uninitialized';
+
+  const getDisplayColumns = () => {
+    if (!state.columns) {
+      return [];
+    }
+    const columns = [...state.columns];
+    if (useNewFieldsApi) {
+      return columns.filter((column) => column !== '_source');
+    }
+    return columns.length === 0 ? ['_source'] : columns;
+  };
 
   return (
     <I18nProvider>
@@ -315,6 +328,7 @@ export function DiscoverLegacy({
                 setIndexPattern={setIndexPattern}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
+                useNewFieldsApi={useNewFieldsApi}
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
@@ -445,7 +459,7 @@ export function DiscoverLegacy({
                         {rows && rows.length && (
                           <div>
                             <DocTableLegacyMemoized
-                              columns={state.columns || []}
+                              columns={getDisplayColumns()}
                               indexPattern={indexPattern}
                               minimumVisibleRows={minimumVisibleRows}
                               rows={rows}
@@ -457,6 +471,7 @@ export function DiscoverLegacy({
                               onMoveColumn={onMoveColumn}
                               onRemoveColumn={onRemoveColumn}
                               onSort={onSort}
+                              useNewFieldsApi={useNewFieldsApi}
                             />
                             {rows.length === opts.sampleSize ? (
                               <div
