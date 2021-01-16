@@ -519,9 +519,22 @@ export class AlertsClient {
         dateStart: parsedDateStart.toISOString(),
         dateEnd: dateNow.toISOString(),
       });
+      // apply options.instances filter to the summary instances result
+      const instancesStatuses = !!options.instances
+        ? Object.entries(summary.instances).filter(
+            ([id, instanceStatus]) =>
+              (options.instances!.muted !== undefined
+                ? instanceStatus.muted === options.instances!.muted
+                : true) &&
+              (!!options.instances!.status
+                ? instanceStatus.status === options.instances!.status
+                : true)
+          )
+        : Object.entries(summary.instances);
+
       return {
         ...alert,
-        instances: Object.entries(summary.instances).map(([id, instanceStatus]) => ({
+        instances: instancesStatuses.map(([id, instanceStatus]) => ({
           id,
           summary: instanceStatus,
           events: alertEvents,
