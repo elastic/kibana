@@ -672,14 +672,13 @@ export class KibanaMap extends EventEmitter {
     }
   }
 
-  persistUiStateForVisualization(visualization) {
+  persistUiStateForVisualization(uiState) {
     function persistMapStateInUiState() {
-      const uiState = visualization.getUiState();
       const centerFromUIState = uiState.get('mapCenter');
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
 
       if (isNaN(zoomFromUiState) || this.getZoomLevel() !== zoomFromUiState) {
-        visualization.uiStateVal('mapZoom', this.getZoomLevel());
+        uiState.set('mapZoom', this.getZoomLevel());
       }
       const centerFromMap = this.getCenter();
       if (
@@ -687,24 +686,17 @@ export class KibanaMap extends EventEmitter {
         centerFromMap.lon !== centerFromUIState[1] ||
         centerFromMap.lat !== centerFromUIState[0]
       ) {
-        visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
+        uiState.set('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
     }
 
-    this._leafletMap.on('resize', () => {
-      visualization.sessionState.mapBounds = this.getBounds();
-    });
-    this._leafletMap.on('load', () => {
-      visualization.sessionState.mapBounds = this.getBounds();
-    });
     this.on('dragend', persistMapStateInUiState);
     this.on('zoomend', persistMapStateInUiState);
   }
 
-  useUiStateFromVisualization(visualization) {
-    const uiState = visualization.getUiState();
-    const zoomFromUiState = parseInt(uiState.get('mapZoom'));
-    const centerFromUIState = uiState.get('mapCenter');
+  useUiStateFromVisualization(uiState) {
+    const zoomFromUiState = parseInt(uiState?.get('mapZoom'));
+    const centerFromUIState = uiState?.get('mapCenter');
     if (!isNaN(zoomFromUiState)) {
       this.setZoomLevel(zoomFromUiState);
     }
