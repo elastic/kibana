@@ -21,12 +21,50 @@ import { i18n } from '@kbn/i18n';
 import { vega } from '../lib/vega';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
-import { getEmsTileLayerId, getUISettings } from '../services';
-import { lazyLoadMapsLegacyModules } from '../../../maps_legacy/public';
+import { getMapsLegacyConfig, getUISettings } from '../services';
+import { lazyLoadMapsLegacyModules, TMS_IN_YML_ID } from '../../../maps_legacy/public';
+
+const isUserConfiguredTmsLayer = ({ tilemap }) => Boolean(tilemap.url);
 
 export class VegaMapView extends VegaBaseView {
   constructor(opts) {
     super(opts);
+  }
+
+  async getMapStyleOptions() {
+    const isDarkMode = getUISettings().get('theme:darkMode');
+    const mapsLegacyConfig = getMapsLegacyConfig();
+    const tmsServices = await this._serviceSettings.getTMSServices();
+    const mapConfig = this._parser.mapConfig;
+
+    let mapStyle;
+
+    if (mapConfig.mapStyle !== 'default') {
+      mapStyle = mapConfig.mapStyle;
+    } else {
+      if (isUserConfiguredTmsLayer(mapsLegacyConfig)) {
+        mapStyle = TMS_IN_YML_ID;
+      } else {
+        mapStyle = mapsLegacyConfig.emsTileLayerId.bright;
+      }
+    }
+
+    const mapOptions = tmsServices.find((s) => s.id === mapStyle);
+
+    if (!mapOptions) {
+      this.onWarn(
+        i18n.translate('visTypeVega.mapView.mapStyleNotFoundWarningMessage', {
+          defaultMessage: '{mapStyleParam} was not found',
+          values: { mapStyleParam: `"mapStyle":${mapStyle}` },
+        })
+      );
+      return null;
+    }
+
+    return {
+      ...mapOptions,
+      ...(await this._serviceSettings.getAttributesForTMSLayer(mapOptions, true, isDarkMode)),
+    };
   }
 
   async _initViewCustomizations() {
@@ -35,27 +73,13 @@ export class VegaMapView extends VegaBaseView {
     let limitMinZ = 0;
     let limitMaxZ = 25;
 
+    // In some cases, Vega may be initialized twice, e.g. after awaiting...
+    if (!this._$container) return;
+
     if (mapConfig.mapStyle !== false) {
-      const tmsServices = await this._serviceSettings.getTMSServices();
-      // In some cases, Vega may be initialized twice, e.g. after awaiting...
-      if (!this._$container) return;
-      const emsTileLayerId = getEmsTileLayerId();
-      const mapStyle =
-        mapConfig.mapStyle === 'default' ? emsTileLayerId.bright : mapConfig.mapStyle;
-      const isDarkMode = getUISettings().get('theme:darkMode');
-      baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
-      baseMapOpts = {
-        ...baseMapOpts,
-        ...(await this._serviceSettings.getAttributesForTMSLayer(baseMapOpts, true, isDarkMode)),
-      };
-      if (!baseMapOpts) {
-        this.onWarn(
-          i18n.translate('visTypeVega.mapView.mapStyleNotFoundWarningMessage', {
-            defaultMessage: '{mapStyleParam} was not found',
-            values: { mapStyleParam: `"mapStyle": ${JSON.stringify(mapStyle)}` },
-          })
-        );
-      } else {
+      baseMapOpts = await this.getMapStyleOptions();
+
+      if (baseMapOpts) {
         limitMinZ = baseMapOpts.minZoom;
         limitMaxZ = baseMapOpts.maxZoom;
       }

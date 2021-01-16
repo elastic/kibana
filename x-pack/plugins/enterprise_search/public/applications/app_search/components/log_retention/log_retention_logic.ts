@@ -13,9 +13,10 @@ import { LogRetentionOptions, LogRetention, LogRetentionServer } from './types';
 import { convertLogRetentionFromServerToClient } from './utils/convert_log_retention';
 
 interface LogRetentionActions {
-  clearLogRetentionUpdating(): { value: boolean };
-  closeModals(): { value: boolean };
-  fetchLogRetention(): { value: boolean };
+  setLogRetentionUpdating(): void;
+  clearLogRetentionUpdating(): void;
+  closeModals(): void;
+  fetchLogRetention(): void;
   saveLogRetention(
     option: LogRetentionOptions,
     enabled: boolean
@@ -34,6 +35,7 @@ interface LogRetentionValues {
 export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetentionActions>>({
   path: ['enterprise_search', 'app_search', 'log_retention_logic'],
   actions: () => ({
+    setLogRetentionUpdating: true,
     clearLogRetentionUpdating: true,
     closeModals: true,
     fetchLogRetention: true,
@@ -54,7 +56,7 @@ export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetent
       {
         clearLogRetentionUpdating: () => false,
         closeModals: () => false,
-        fetchLogRetention: () => true,
+        setLogRetentionUpdating: () => true,
         toggleLogRetention: () => true,
       },
     ],
@@ -69,9 +71,14 @@ export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetent
   }),
   listeners: ({ actions, values }) => ({
     fetchLogRetention: async () => {
+      if (values.isLogRetentionUpdating) return; // Prevent duplicate calls to the API
+
       try {
+        actions.setLogRetentionUpdating();
+
         const { http } = HttpLogic.values;
         const response = await http.get('/api/app_search/log_settings');
+
         actions.updateLogRetention(
           convertLogRetentionFromServerToClient(response as LogRetentionServer)
         );

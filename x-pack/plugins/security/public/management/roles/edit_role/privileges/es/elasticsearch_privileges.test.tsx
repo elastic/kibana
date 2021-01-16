@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
-import { DocumentationLinksService } from '../../../documentation_links';
 import { RoleValidator } from '../../validate_role';
 import { ClusterPrivileges } from './cluster_privileges';
 import { ElasticsearchPrivileges } from './elasticsearch_privileges';
@@ -45,7 +44,7 @@ function getProps() {
       index: ['all', 'read', 'write', 'index'],
     },
     indicesAPIClient: indicesAPIClientMock.create(),
-    docLinks: new DocumentationLinksService(docLinks),
+    docLinks,
     license,
   };
 }

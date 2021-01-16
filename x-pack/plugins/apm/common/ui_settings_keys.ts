@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const enableCorrelations = 'apm:enableCorrelations';
+export const enableSignificantTerms = 'apm:enableSignificantTerms';
 export const enableServiceOverview = 'apm:enableServiceOverview';
