@@ -43,8 +43,8 @@ export const getActions = (
   dispatch: React.Dispatch<Action>,
   dispatchToaster: Dispatch<ActionToaster>,
   history: H.History,
-  reFetchRules: () => void,
-  refetchPrePackagedRulesStatus: () => void,
+  reFetchRules: () => Promise<void>,
+  refetchPrePackagedRulesStatus: () => Promise<void>,
   actionsPrivileges:
     | boolean
     | Readonly<{
@@ -78,8 +78,8 @@ export const getActions = (
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
     onClick: async (rowItem: Rule) => {
       await duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
-      reFetchRules();
-      refetchPrePackagedRulesStatus();
+      await reFetchRules();
+      await refetchPrePackagedRulesStatus();
     },
   },
   {
@@ -97,8 +97,8 @@ export const getActions = (
     name: i18n.DELETE_RULE,
     onClick: async (rowItem: Rule) => {
       await deleteRulesAction([rowItem.id], dispatch, dispatchToaster);
-      reFetchRules();
-      refetchPrePackagedRulesStatus();
+      await reFetchRules();
+      await refetchPrePackagedRulesStatus();
     },
   },
 ];
@@ -118,8 +118,8 @@ interface GetColumns {
   hasMlPermissions: boolean;
   hasNoPermissions: boolean;
   loadingRuleIds: string[];
-  reFetchRules: () => void;
-  refetchPrePackagedRulesStatus: () => void;
+  reFetchRules: () => Promise<void>;
+  refetchPrePackagedRulesStatus: () => Promise<void>;
   hasReadActionsPrivileges:
     | boolean
     | Readonly<{

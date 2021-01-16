@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
 import { useEffect, useState, useRef } from 'react';
 
 import { FetchRulesResponse, FilterOptions, PaginationOptions, Rule } from './types';
@@ -12,7 +11,7 @@ import { errorToToaster, useStateToaster } from '../../../../common/components/t
 import { fetchRules } from './api';
 import * as i18n from './translations';
 
-export type ReturnRules = [boolean, FetchRulesResponse | null, () => void];
+export type ReturnRules = [boolean, FetchRulesResponse | null, () => Promise<void>];
 
 export interface UseRules {
   pagination: PaginationOptions;
@@ -32,7 +31,7 @@ export const useRules = ({
   dispatchRulesInReducer,
 }: UseRules): ReturnRules => {
   const [rules, setRules] = useState<FetchRulesResponse | null>(null);
-  const reFetchRules = useRef<(refreshPrePackagedRule?: boolean) => void>(noop);
+  const reFetchRules = useRef<() => Promise<void>>(() => Promise.resolve());
   const [loading, setLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
 
@@ -74,9 +73,7 @@ export const useRules = ({
     };
 
     fetchData();
-    reFetchRules.current = () => {
-      fetchData();
-    };
+    reFetchRules.current = (): Promise<void> => fetchData();
     return () => {
       isSubscribed = false;
       abortCtrl.abort();

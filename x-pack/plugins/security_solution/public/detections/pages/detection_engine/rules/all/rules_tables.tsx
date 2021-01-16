@@ -85,12 +85,12 @@ interface RulesTableProps {
   hasNoPermissions: boolean;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
-  refetchPrePackagedRulesStatus: () => void;
+  refetchPrePackagedRulesStatus: () => Promise<void>;
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
-  setRefreshRulesData: (refreshRule: (refreshPrePackagedRule?: boolean) => void) => void;
+  setRefreshRulesData: (refreshRule: () => Promise<void>) => void;
   selectedTab: AllRulesTabs;
 }
 
@@ -281,11 +281,13 @@ export const RulesTables = React.memo<RulesTableProps>(
         refetchPrePackagedRulesStatus,
         hasReadActionsPrivileges: hasActionsPrivileges,
       });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       dispatch,
       dispatchToaster,
       formatUrl,
+      refetchPrePackagedRulesStatus,
+      hasActionsPrivileges,
+      hasNoPermissions,
       hasMlPermissions,
       history,
       loadingRuleIds,
@@ -311,9 +313,10 @@ export const RulesTables = React.memo<RulesTableProps>(
     const handleCreatePrePackagedRules = useCallback(async () => {
       if (createPrePackagedRules != null) {
         await createPrePackagedRules();
-        reFetchRules();
+        await reFetchRules();
+        await refetchPrePackagedRulesStatus();
       }
-    }, [createPrePackagedRules, reFetchRules]);
+    }, [createPrePackagedRules, reFetchRules, refetchPrePackagedRulesStatus]);
 
     const euiBasicTableSelectionProps = useMemo(
       () => ({
@@ -346,12 +349,13 @@ export const RulesTables = React.memo<RulesTableProps>(
       return false;
     }, [loadingRuleIds, loadingRulesAction]);
 
-    const handleRefreshData = useCallback((): void => {
+    const handleRefreshData = useCallback(async (): Promise<void> => {
       if (!isLoadingAnActionOnRule) {
-        reFetchRules();
+        await reFetchRules();
+        await refetchPrePackagedRulesStatus();
         setLastRefreshDate();
       }
-    }, [reFetchRules, isLoadingAnActionOnRule, setLastRefreshDate]);
+    }, [reFetchRules, isLoadingAnActionOnRule, setLastRefreshDate, refetchPrePackagedRulesStatus]);
 
     const handleResetIdleTimer = useCallback((): void => {
       if (isRefreshOn) {
