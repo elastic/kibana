@@ -1,21 +1,21 @@
-  // SASSTODO: proper calcs all through this. Replace shadows
+// SASSTODO: proper calcs all through this. Replace shadows
 .group-list {
   max-height: 350px;
   overflow: auto;
 
   .group-item {
     line-height: 18px;
-    padding: 6px 0px;
+    padding: 6px 0;
     border-bottom: $euiBorderThin;
     cursor: pointer;
 
     &:focus {
-      background-color: #eef6f9;
+      background-color: #EEF6F9;
       box-shadow: none;
     }
 
     .check {
-    // SASSTODO: proper calc
+      // SASSTODO: proper calc
       width: 20px;
       display: inline-block;
     }
@@ -28,13 +28,13 @@
   .group-item:hover {
     .inline-group {
       border: 1px solid $euiColorDarkShade;
-    // SASSTODO: Replace with eui shadow mixin
-      box-shadow: 0px 1px 2px $euiColorMediumShade;
+      // SASSTODO: Replace with eui shadow mixin
+      box-shadow: 0 1px 2px $euiColorMediumShade;
     }
   }
 
   .group-item:last-child {
-    margin-bottom: 0px;
+    margin-bottom: 0;
     border-bottom: none;
   }
 }

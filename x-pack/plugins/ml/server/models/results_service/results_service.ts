@@ -17,7 +17,7 @@ import {
 } from '../../../common/types/anomalies';
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
 import { GetStoppedPartitionResult } from '../../../common/types/results';
-import { MlJobsResponse } from '../job_service/jobs';
+import { MlJobsResponse } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
