@@ -35,12 +35,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'kibana_large_strings']);
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('hamlet');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'testlargestring' });
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'testlargestring',
+        'discover:searchFieldsFromSource': false,
+      });
     });
 
     it('verify the large string book present', async function () {
       const ExpectedDoc =
-        '_id:1 _type: - _index:testlargestring _score:0' +
+        '_id:1 _type:_doc _index:testlargestring _score:0' +
         ' mybook:Project Gutenberg EBook of Hamlet, by William Shakespeare' +
         ' This eBook is for the use of anyone anywhere in the United States' +
         ' and most other parts of the world at no cost and with almost no restrictions whatsoever.' +
