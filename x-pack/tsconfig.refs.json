@@ -20,8 +20,10 @@
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "./plugins/vis_type_timeseries_enhanced/tsconfig.json" },
     { "path": "./plugins/translations/tsconfig.json" },
+    { "path": "./plugins/triggers_actions_ui/tsconfig.json"},
     { "path": "./plugins/spaces/tsconfig.json" },
     { "path": "./plugins/security/tsconfig.json" },
+    { "path": "./plugins/stack_alerts/tsconfig.json"},
     { "path": "./plugins/encrypted_saved_objects/tsconfig.json" }
   ]
 }
