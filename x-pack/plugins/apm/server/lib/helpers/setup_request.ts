@@ -6,11 +6,11 @@
 
 import { Logger } from 'kibana/server';
 import moment from 'moment';
+import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMConfig } from '../..';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { ESFilter } from '../../../../../typings/elasticsearch';
-import { isActivePlatinumLicense } from '../../../common/service_map';
 import { UIFilters } from '../../../typings/ui_filters';
 import { APMRequestHandlerContext } from '../../routes/typings';
 import {

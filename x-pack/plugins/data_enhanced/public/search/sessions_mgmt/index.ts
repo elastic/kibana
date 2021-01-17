@@ -44,7 +44,7 @@ export const APP = {
     }),
 };
 
-export type SessionsMgmtConfigSchema = ConfigSchema['search']['sendToBackground']['sessionsManagement'];
+export type SessionsMgmtConfigSchema = ConfigSchema['search']['sessions']['management'];
 
 export function registerSearchSessionsMgmt(
   coreSetup: CoreSetup<DataEnhancedStartDependencies>,

@@ -65,8 +65,8 @@ export class DataEnhancedPlugin
     });
 
     this.config = this.initializerContext.config.get<ConfigSchema>();
-    if (this.config.search.sendToBackground.enabled) {
-      const { sessionsManagement: sessionsMgmtConfig } = this.config.search.sendToBackground;
+    if (this.config.search.sessions.enabled) {
+      const { management: sessionsMgmtConfig } = this.config.search.sessions;
       registerSearchSessionsMgmt(core, sessionsMgmtConfig, { management });
     }
   }
@@ -74,7 +74,7 @@ export class DataEnhancedPlugin
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
     setAutocompleteService(plugins.data.autocomplete);
 
-    if (this.config.search.sendToBackground.enabled) {
+    if (this.config.search.sessions.enabled) {
       core.chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
           React.createElement(
