@@ -156,7 +156,8 @@ export const getColumns = (
       render: (expires: UISession['expires'], { id, status }) => {
         if (
           expires &&
-          status !== SearchSessionStatus.IN_PROGRESS &&
+          status !== SearchSessionStatus.EXPIRED &&
+          status !== SearchSessionStatus.CANCELLED &&
           status !== SearchSessionStatus.ERROR
         ) {
           try {

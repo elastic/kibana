@@ -130,15 +130,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(searchSessionList.map((ss) => ss.expires)).to.eql([
           '--',
-          '25 Dec, 2020, 00:00:00',
-          '24 Dec, 2020, 00:00:00',
+          '--',
+          '--',
           '23 Dec, 2020, 00:00:00',
+          '22 Dec, 2020, 00:00:00',
           '--',
           '--',
-          '20 Dec, 2020, 00:00:00',
-          '19 Dec, 2020, 00:00:00',
+          '--',
           '18 Dec, 2020, 00:00:00',
-          '--',
+          '17 Dec, 2020, 00:00:00',
         ]);
 
         await esArchiver.unload('data/search_sessions');
