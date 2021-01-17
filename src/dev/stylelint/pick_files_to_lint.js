@@ -17,12 +17,20 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { makeRe } from 'minimatch';
 
-process.argv.push('--no-exit'); // don't exit after encountering a rule error
-process.argv.push('--verbose'); // print results
-process.argv.push('--max-warnings', '0'); // return nonzero exit code on any warnings
-process.argv.push('--config', resolve(__dirname, '..', '..', '.sass-lint.yml')); // configuration file
+const includeGlobs = ['**/*.s+(a|c)ss'];
+const includeRegex = includeGlobs.map((glob) => makeRe(glob));
 
-// common-js is required so that logic before this executes before loading sass-lint
-require('sass-lint/bin/sass-lint');
+function matchesInclude(file) {
+  for (let i = 0; i < includeRegex.length; i++) {
+    if (includeRegex[i].test(file.relativePath)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function pickFilesToLint(log, files) {
+  return files.filter((file) => file.isSass()).filter(matchesInclude);
+}
