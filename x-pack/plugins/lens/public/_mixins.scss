@@ -5,10 +5,10 @@
   $hideHeight: $euiScrollBarCorner * 1.25;
   mask-image: linear-gradient(
     to right,
-    transparentize(red, .9) 0%,
-    transparentize(red, 0) $hideHeight,
-    transparentize(red, 0) calc(100% - #{$hideHeight}),
-    transparentize(red, .9) 100%
+    transparentize($euiColorDanger, .9) 0%,
+    transparentize($euiColorDanger, 0) $hideHeight,
+    transparentize($euiColorDanger, 0) calc(100% - #{$hideHeight}),
+    transparentize($euiColorDanger, .9) 100%
   );
 }
 
