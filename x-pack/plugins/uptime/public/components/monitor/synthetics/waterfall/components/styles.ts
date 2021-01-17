@@ -82,8 +82,8 @@ interface WaterfallChartChartContainer {
 
 export const WaterfallChartChartContainer = euiStyled.div<WaterfallChartChartContainer>`
   width: 100%;
-  height: ${(props) => `${props.height + FIXED_AXIS_HEIGHT}px`};
-  margin-top: -${FIXED_AXIS_HEIGHT}px;
+  height: ${(props) => `${props.height + FIXED_AXIS_HEIGHT - 4}px`};
+  margin-top: -${FIXED_AXIS_HEIGHT - 4}px;
   z-index: ${(props) => Math.round(props.theme.eui.euiZLevel3 / (props.chartIndex + 1))};
 `;
 
