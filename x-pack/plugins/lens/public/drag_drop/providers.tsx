@@ -204,12 +204,15 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
 export function nextValidDropTarget(
   activeDropTarget: ActiveDropTarget,
   currentlyActiveDraggingElOrder: number[],
+  filterElements: (el?: DragDropIdentifier) => void,
   reverse = false
 ) {
   const nextDropTargets = Object.entries(activeDropTarget.dropTargetsByOrder)
-    .filter(([order, target]) => {
-      return !!target || order === currentlyActiveDraggingElOrder.join(',');
-    })
+    .filter(
+      ([order, target]) =>
+        (!!target || order === currentlyActiveDraggingElOrder.join(',')) &&
+        filterElements(target?.dropTarget)
+    )
     .sort(([orderA], [orderB]) => {
       const parsedOrderA = orderA.split(',').map((v) => Number(v));
       const parsedOrderB = orderB.split(',').map((v) => Number(v));

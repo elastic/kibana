@@ -331,6 +331,7 @@ export function WorkspacePanel({
         draggable={false}
         droppable={Boolean(suggestionForDraggedField)}
         onDrop={onDrop}
+        value={{ id: 'lnsWorkspace' }}
       >
         <div>
           {renderVisualization()}
