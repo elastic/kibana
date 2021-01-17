@@ -13,6 +13,8 @@ import {
 } from '../../../common/runtime_types';
 import { createAsyncAction } from './utils';
 
+export const clearPings = createAction('CLEAR PINGS');
+
 export const getPingHistogram = createAsyncAction<GetPingHistogramParams, HistogramResult>(
   'GET_PING_HISTOGRAM'
 );

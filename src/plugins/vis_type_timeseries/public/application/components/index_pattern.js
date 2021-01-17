@@ -78,10 +78,6 @@ export const IndexPattern = ({
   allowLevelofDetail,
 }) => {
   const config = getUISettings();
-
-  const handleSelectChange = createSelectHandler(onChange);
-  const handleTextChange = createTextHandler(onChange);
-
   const timeFieldName = `${prefix}time_field`;
   const indexPatternName = `${prefix}index_pattern`;
   const intervalName = `${prefix}interval`;
@@ -99,6 +95,9 @@ export const IndexPattern = ({
     },
     [onChange, maxBarsName]
   );
+
+  const handleSelectChange = createSelectHandler(onChange);
+  const handleTextChange = createTextHandler(onChange);
 
   const timeRangeOptions = [
     {
@@ -119,7 +118,7 @@ export const IndexPattern = ({
 
   const defaults = {
     default_index_pattern: '',
-    [indexPatternName]: '*',
+    [indexPatternName]: '',
     [intervalName]: AUTO_INTERVAL,
     [dropBucketName]: 1,
     [maxBarsName]: config.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
@@ -191,7 +190,7 @@ export const IndexPattern = ({
               data-test-subj="metricsIndexPatternInput"
               disabled={disabled}
               placeholder={model.default_index_pattern}
-              onChange={handleTextChange(indexPatternName, '*')}
+              onChange={handleTextChange(indexPatternName)}
               value={model[indexPatternName]}
             />
           </EuiFormRow>
@@ -204,7 +203,6 @@ export const IndexPattern = ({
             })}
           >
             <FieldSelect
-              data-test-subj="metricsIndexPatternFieldsSelect"
               restrict={RESTRICT_FIELDS}
               value={model[timeFieldName]}
               disabled={disabled}

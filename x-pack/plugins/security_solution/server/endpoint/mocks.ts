@@ -93,7 +93,7 @@ export const createMockPackageService = (): jest.Mocked<PackageService> => {
 };
 
 /**
- * Creates a mock IndexPatternService for use in tests that need to interact with the Ingest Manager's
+ * Creates a mock IndexPatternService for use in tests that need to interact with the Fleet's
  * ESIndexPatternService.
  *
  * @param indexPattern a string index pattern to return when called by a test
