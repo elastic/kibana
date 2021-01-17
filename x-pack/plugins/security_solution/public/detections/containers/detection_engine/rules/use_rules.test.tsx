@@ -28,6 +28,9 @@ describe('useRules', () => {
             filter: '',
             sortField: 'created_at',
             sortOrder: 'desc',
+            tags: [],
+            showCustomRules: false,
+            showElasticRules: false,
           },
         })
       );
@@ -49,6 +52,9 @@ describe('useRules', () => {
             filter: '',
             sortField: 'created_at',
             sortOrder: 'desc',
+            tags: [],
+            showCustomRules: false,
+            showElasticRules: false,
           },
         })
       );
@@ -154,6 +160,9 @@ describe('useRules', () => {
             filter: '',
             sortField: 'created_at',
             sortOrder: 'desc',
+            tags: [],
+            showCustomRules: false,
+            showElasticRules: false,
           },
         })
       );
@@ -183,6 +192,9 @@ describe('useRules', () => {
               filter: '',
               sortField: 'created_at',
               sortOrder: 'desc',
+              tags: [],
+              showCustomRules: false,
+              showElasticRules: false,
             },
           },
         }
@@ -199,6 +211,9 @@ describe('useRules', () => {
           filter: 'hello world',
           sortField: 'created_at',
           sortOrder: 'desc',
+          tags: [],
+          showCustomRules: false,
+          showElasticRules: false,
         },
       });
       await waitForNextUpdate();

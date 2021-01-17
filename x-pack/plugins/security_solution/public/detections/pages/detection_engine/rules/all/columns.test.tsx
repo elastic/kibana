@@ -28,6 +28,7 @@ describe('AllRulesTable Columns', () => {
     const dispatch = jest.fn();
     const dispatchToaster = jest.fn();
     const reFetchRules = jest.fn();
+    const refetchPrePackagedRulesStatus = jest.fn();
 
     beforeEach(() => {
       results = [];
@@ -54,6 +55,7 @@ describe('AllRulesTable Columns', () => {
         dispatchToaster,
         history,
         reFetchRules,
+        refetchPrePackagedRulesStatus,
         true
       )[1];
       await duplicateRulesActionObject.onClick(rule);
@@ -76,6 +78,7 @@ describe('AllRulesTable Columns', () => {
         dispatchToaster,
         history,
         reFetchRules,
+        refetchPrePackagedRulesStatus,
         true
       )[3];
       await deleteRulesActionObject.onClick(rule);

@@ -61,6 +61,9 @@ const initialState: State = {
     filter: '',
     sortField: INITIAL_SORT_FIELD,
     sortOrder: 'desc',
+    tags: [],
+    showCustomRules: false,
+    showElasticRules: false,
   },
   loadingRuleIds: [],
   loadingRulesAction: null,
@@ -83,12 +86,12 @@ interface RulesTableProps {
   hasNoPermissions: boolean;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
-  refetchPrePackagedRulesStatus: () => void;
+  refetchPrePackagedRulesStatus: () => Promise<void>;
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
-  setRefreshRulesData: (refreshRule: (refreshPrePackagedRule?: boolean) => void) => void;
+  setRefreshRulesData: (refreshRule: () => Promise<void>) => void;
   selectedTab: AllRulesTabs;
 }
 
@@ -184,10 +187,9 @@ export const RulesTables = React.memo<RulesTableProps>(
       });
     }, []);
 
-    const [isLoadingRules, , reFetchRulesData] = useRules({
+    const [isLoadingRules, , reFetchRules] = useRules({
       pagination,
       filterOptions,
-      refetchPrePackagedRulesStatus,
       dispatchRulesInReducer: setRules,
     });
 
@@ -221,7 +223,8 @@ export const RulesTables = React.memo<RulesTableProps>(
           hasActionsPrivileges,
           loadingRuleIds,
           selectedRuleIds,
-          reFetchRules: reFetchRulesData,
+          reFetchRules,
+          refetchPrePackagedRulesStatus,
           rules,
         });
       },
@@ -230,7 +233,8 @@ export const RulesTables = React.memo<RulesTableProps>(
         dispatchToaster,
         hasMlPermissions,
         loadingRuleIds,
-        reFetchRulesData,
+        reFetchRules,
+        refetchPrePackagedRulesStatus,
         rules,
         selectedRuleIds,
         hasActionsPrivileges,
@@ -274,19 +278,22 @@ export const RulesTables = React.memo<RulesTableProps>(
           (loadingRulesAction === 'enable' || loadingRulesAction === 'disable')
             ? loadingRuleIds
             : [],
-        reFetchRules: reFetchRulesData,
+        reFetchRules,
+        refetchPrePackagedRulesStatus,
         hasReadActionsPrivileges: hasActionsPrivileges,
       });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       dispatch,
       dispatchToaster,
       formatUrl,
+      refetchPrePackagedRulesStatus,
+      hasActionsPrivileges,
+      hasNoPermissions,
       hasMlPermissions,
       history,
       loadingRuleIds,
       loadingRulesAction,
-      reFetchRulesData,
+      reFetchRules,
     ]);
 
     const monitoringColumns = useMemo(() => getMonitoringColumns(history, formatUrl), [
@@ -295,10 +302,8 @@ export const RulesTables = React.memo<RulesTableProps>(
     ]);
 
     useEffect(() => {
-      if (reFetchRulesData != null) {
-        setRefreshRulesData(reFetchRulesData);
-      }
-    }, [reFetchRulesData, setRefreshRulesData]);
+      setRefreshRulesData(reFetchRules);
+    }, [reFetchRules, setRefreshRulesData]);
 
     useEffect(() => {
       if (initLoading && !loading && !isLoadingRules && !isLoadingRulesStatuses) {
@@ -307,11 +312,12 @@ export const RulesTables = React.memo<RulesTableProps>(
     }, [initLoading, loading, isLoadingRules, isLoadingRulesStatuses]);
 
     const handleCreatePrePackagedRules = useCallback(async () => {
-      if (createPrePackagedRules != null && reFetchRulesData != null) {
+      if (createPrePackagedRules != null) {
         await createPrePackagedRules();
-        reFetchRulesData(true);
+        await reFetchRules();
+        await refetchPrePackagedRulesStatus();
       }
-    }, [createPrePackagedRules, reFetchRulesData]);
+    }, [createPrePackagedRules, reFetchRules, refetchPrePackagedRulesStatus]);
 
     const euiBasicTableSelectionProps = useMemo(
       () => ({
@@ -344,12 +350,13 @@ export const RulesTables = React.memo<RulesTableProps>(
       return false;
     }, [loadingRuleIds, loadingRulesAction]);
 
-    const handleRefreshData = useCallback((): void => {
-      if (reFetchRulesData != null && !isLoadingAnActionOnRule) {
-        reFetchRulesData(true);
+    const handleRefreshData = useCallback(async (): Promise<void> => {
+      if (!isLoadingAnActionOnRule) {
+        await reFetchRules();
+        await refetchPrePackagedRulesStatus();
         setLastRefreshDate();
       }
-    }, [reFetchRulesData, isLoadingAnActionOnRule, setLastRefreshDate]);
+    }, [reFetchRules, isLoadingAnActionOnRule, setLastRefreshDate, refetchPrePackagedRulesStatus]);
 
     const handleResetIdleTimer = useCallback((): void => {
       if (isRefreshOn) {
@@ -459,12 +466,14 @@ export const RulesTables = React.memo<RulesTableProps>(
                 />
               }
             >
-              <RulesTableFilters
-                onFilterChanged={onFilterChangedCallback}
-                rulesCustomInstalled={rulesCustomInstalled}
-                rulesInstalled={rulesInstalled}
-                currentFilterTags={filterOptions.tags ?? []}
-              />
+              {shouldShowRulesTable && (
+                <RulesTableFilters
+                  onFilterChanged={onFilterChangedCallback}
+                  rulesCustomInstalled={rulesCustomInstalled}
+                  rulesInstalled={rulesInstalled}
+                  currentFilterTags={filterOptions.tags}
+                />
+              )}
             </HeaderSection>
 
             {isLoadingAnActionOnRule && !initLoading && (

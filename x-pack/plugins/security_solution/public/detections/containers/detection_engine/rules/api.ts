@@ -122,9 +122,9 @@ export const fetchRules = async ({
     ...showElasticRuleFilter,
   ].join(' AND ');
 
-  const tags = [
-    ...(filterOptions.tags?.map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`) ?? []),
-  ].join(' AND ');
+  const tags = filterOptions.tags
+    .map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`)
+    .join(' AND ');
 
   const filterString =
     filtersWithoutTags !== '' && tags !== ''

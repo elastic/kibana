@@ -21,7 +21,7 @@ import {
   getPrePackagedTimelineStatus,
 } from '../../../pages/detection_engine/rules/helpers';
 
-type Func = () => void;
+type Func = () => Promise<void>;
 export type CreatePreBuiltRules = () => Promise<boolean>;
 
 interface ReturnPrePackagedTimelines {
