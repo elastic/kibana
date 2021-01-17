@@ -9,9 +9,16 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
-  const sendToBackground = getService('sendToBackground');
+  const PageObjects = getPageObjects([
+    'common',
+    'header',
+    'dashboard',
+    'visChart',
+    'searchSessionsManagement',
+  ]);
+  const searchSessions = getService('searchSessions');
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
 
   describe('Search search sessions Management UI', () => {
     describe('New search sessions', () => {
@@ -20,113 +27,119 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await sendToBackground.deleteAllSearchSessions();
+        await searchSessions.deleteAllSearchSessions();
       });
 
       it('Saves a session and verifies it in the Management app', async () => {
         await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
         await PageObjects.dashboard.waitForRenderComplete();
-        await sendToBackground.expectState('completed');
-        await sendToBackground.save();
-        await sendToBackground.expectState('backgroundCompleted');
+        await searchSessions.expectState('completed');
+        await searchSessions.save();
+        await searchSessions.expectState('backgroundCompleted');
 
-        await sendToBackground.openPopover();
-        await sendToBackground.viewSearchSessions();
+        await searchSessions.openPopover();
+        await searchSessions.viewSearchSessions();
 
-        // wait until completed
-        await testSubjects.existOrFail('session-mgmt-view-status-label-complete');
-        await testSubjects.existOrFail('session-mgmt-view-status-tooltip-complete');
-        await testSubjects.existOrFail('session-mgmt-table-col-created');
+        await retry.waitFor(`wait for first item to complete`, async function () {
+          const s = await PageObjects.searchSessionsManagement.getList();
+          return s[0] && s[0].status === 'complete';
+        });
 
         // find there is only one item in the table which is the newly saved session
-        const names = await testSubjects.findAll('session-mgmt-table-col-name');
-        expect(names.length).to.be(1);
-        expect(await Promise.all(names.map((n) => n.getVisibleText()))).to.eql(['Not Delayed']);
+        const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+        expect(searchSessionList.length).to.be(1);
+        expect(searchSessionList[0].expires).not.to.eql('--');
+        expect(searchSessionList[0].name).to.eql('Not Delayed');
 
         // navigate to dashboard
-        await testSubjects.click('session-mgmt-table-col-name');
+        await searchSessionList[0].view();
 
         // embeddable has loaded
         await testSubjects.existOrFail('embeddablePanelHeading-SumofBytesbyExtension');
         await PageObjects.dashboard.waitForRenderComplete();
 
-        // background session was restored
-        await sendToBackground.expectState('restored');
+        // search session was restored
+        await searchSessions.expectState('restored');
+      });
+
+      it('Reloads as new session from management', async () => {
+        await PageObjects.searchSessionsManagement.goTo();
+
+        const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+
+        expect(searchSessionList.length).to.be(1);
+        await searchSessionList[0].reload();
+
+        // embeddable has loaded
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        // new search session was completed
+        await searchSessions.expectState('completed');
+      });
+
+      it('Cancels a session from management', async () => {
+        await PageObjects.searchSessionsManagement.goTo();
+
+        const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+
+        expect(searchSessionList.length).to.be(1);
+        await searchSessionList[0].cancel();
+
+        // TODO: update this once canceling doesn't delete the object!
+        await retry.waitFor(`wait for list to be empty`, async function () {
+          const s = await PageObjects.searchSessionsManagement.getList();
+
+          return s.length === 0;
+        });
       });
     });
 
     describe('Archived search sessions', () => {
       before(async () => {
-        await PageObjects.common.navigateToApp('management/kibana/search_sessions');
+        await PageObjects.searchSessionsManagement.goTo();
       });
 
       after(async () => {
-        await sendToBackground.deleteAllSearchSessions();
+        await searchSessions.deleteAllSearchSessions();
       });
 
       it('shows no items found', async () => {
-        expectSnapshot(
-          await testSubjects.find('searchSessionsMgmtTable').then((n) => n.getVisibleText())
-        ).toMatchInline(`
-          "App
-          Name
-          Status
-          Created
-          Expiration
-          No items found"
-        `);
+        const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+        expect(searchSessionList.length).to.be(0);
       });
 
       it('autorefreshes and shows items on the server', async () => {
         await esArchiver.load('data/search_sessions');
 
-        const nameColumnText = await testSubjects
-          .findAll('session-mgmt-table-col-name')
-          .then((nCol) => Promise.all(nCol.map((n) => n.getVisibleText())));
+        const searchSessionList = await PageObjects.searchSessionsManagement.getList();
 
-        expect(nameColumnText.length).to.be(10);
+        expect(searchSessionList.length).to.be(10);
 
-        const createdColText = await testSubjects
-          .findAll('session-mgmt-table-col-created')
-          .then((nCol) => Promise.all(nCol.map((n) => n.getVisibleText())));
+        expect(searchSessionList.map((ss) => ss.created)).to.eql([
+          '25 Dec, 2020, 00:00:00',
+          '24 Dec, 2020, 00:00:00',
+          '23 Dec, 2020, 00:00:00',
+          '22 Dec, 2020, 00:00:00',
+          '21 Dec, 2020, 00:00:00',
+          '20 Dec, 2020, 00:00:00',
+          '19 Dec, 2020, 00:00:00',
+          '18 Dec, 2020, 00:00:00',
+          '17 Dec, 2020, 00:00:00',
+          '16 Dec, 2020, 00:00:00',
+        ]);
 
-        expect(createdColText.length).to.be(10);
-
-        expectSnapshot(createdColText).toMatchInline(`
-          Array [
-            "25 Dec, 2020, 00:00:00",
-            "24 Dec, 2020, 00:00:00",
-            "23 Dec, 2020, 00:00:00",
-            "22 Dec, 2020, 00:00:00",
-            "21 Dec, 2020, 00:00:00",
-            "20 Dec, 2020, 00:00:00",
-            "19 Dec, 2020, 00:00:00",
-            "18 Dec, 2020, 00:00:00",
-            "17 Dec, 2020, 00:00:00",
-            "16 Dec, 2020, 00:00:00",
-          ]
-        `);
-
-        const expiresColText = await testSubjects
-          .findAll('session-mgmt-table-col-expires')
-          .then((nCol) => Promise.all(nCol.map((n) => n.getVisibleText())));
-
-        expect(expiresColText.length).to.be(10);
-
-        expectSnapshot(expiresColText).toMatchInline(`
-          Array [
-            "--",
-            "25 Dec, 2020, 00:00:00",
-            "24 Dec, 2020, 00:00:00",
-            "23 Dec, 2020, 00:00:00",
-            "--",
-            "--",
-            "20 Dec, 2020, 00:00:00",
-            "19 Dec, 2020, 00:00:00",
-            "18 Dec, 2020, 00:00:00",
-            "--",
-          ]
-        `);
+        expect(searchSessionList.map((ss) => ss.expires)).to.eql([
+          '--',
+          '25 Dec, 2020, 00:00:00',
+          '24 Dec, 2020, 00:00:00',
+          '23 Dec, 2020, 00:00:00',
+          '--',
+          '--',
+          '20 Dec, 2020, 00:00:00',
+          '19 Dec, 2020, 00:00:00',
+          '18 Dec, 2020, 00:00:00',
+          '--',
+        ]);
 
         await esArchiver.unload('data/search_sessions');
       });

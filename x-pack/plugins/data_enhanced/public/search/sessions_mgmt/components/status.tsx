@@ -170,7 +170,7 @@ export const StatusIndicator = (props: StatusIndicatorProps) => {
       if (toolTipContent) {
         label = (
           <EuiToolTip content={toolTipContent}>
-            <TableText data-test-subj={`session-mgmt-view-status-tooltip-${session.status}`}>
+            <TableText data-test-subj={`sessionManagementStatusTooltip`}>
               {statusDef.label}
             </TableText>
           </EuiToolTip>
@@ -183,7 +183,8 @@ export const StatusIndicator = (props: StatusIndicatorProps) => {
           <EuiFlexItem grow={false}>
             <TableText
               color={statusDef.textColor}
-              data-test-subj={`session-mgmt-view-status-label-${session.status}`}
+              data-test-subj={`sessionManagementStatusLabel`}
+              data-test-status={session.status}
             >
               {label}
             </TableText>

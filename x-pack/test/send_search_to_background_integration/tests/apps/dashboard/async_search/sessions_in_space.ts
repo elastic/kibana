@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const browser = getService('browser');
-  const sendToBackground = getService('sendToBackground');
+  const searchSessions = getService('searchSessions');
 
   describe('dashboard in space', () => {
     describe('Send to background in space', () => {
@@ -73,9 +73,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await sendToBackground.expectState('completed');
-        await sendToBackground.save();
-        await sendToBackground.expectState('backgroundCompleted');
+        await searchSessions.expectState('completed');
+        await searchSessions.save();
+        await searchSessions.expectState('backgroundCompleted');
         const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
           'A Pie in another space'
         );
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.waitForRenderComplete();
 
         // Check that session is restored
-        await sendToBackground.expectState('restored');
+        await searchSessions.expectState('restored');
         await testSubjects.missingOrFail('embeddableErrorLabel');
       });
     });

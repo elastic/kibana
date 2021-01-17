@@ -91,7 +91,7 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
           onClick={doRefresh}
           disabled={debouncedIsLoading}
           isLoading={debouncedIsLoading}
-          data-test-subj="session-mgmt-table-btn-refresh"
+          data-test-subj="sessionManagementRefreshBtn"
         >
           <FormattedMessage
             id="xpack.data.mgmt.searchSessions.search.tools.refresh"
@@ -107,6 +107,9 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
       {...props}
       id={TABLE_ID}
       data-test-subj={TABLE_ID}
+      rowProps={() => ({
+        'data-test-subj': 'searchSessionsRow',
+      })}
       columns={getColumns(core, api, config, timezone, onActionComplete)}
       items={tableData}
       pagination={pagination}

@@ -177,7 +177,7 @@ describe('Background Search Session Management Table', () => {
           </LocaleWrapper>
         );
 
-        const buttonSelector = `[data-test-subj="session-mgmt-table-btn-refresh"] button`;
+        const buttonSelector = `[data-test-subj="sessionManagementRefreshBtn"] button`;
 
         await waitFor(() => {
           table.find(buttonSelector).first().simulate('click');

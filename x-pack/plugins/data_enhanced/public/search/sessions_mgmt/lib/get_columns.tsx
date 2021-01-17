@@ -62,7 +62,7 @@ export const getColumns = (
         return (
           <EuiToolTip content={capitalize(app)}>
             <EuiIcon
-              data-test-subj="session-mgmt-table-col-app-icon"
+              data-test-subj="sessionManagementAppIcon"
               data-test-app-id={app}
               type={`${app}App`}
             />
@@ -99,7 +99,7 @@ export const getColumns = (
           <RedirectAppLinks application={core.application}>
             <EuiLink
               href={isRestorable ? restoreUrl : reloadUrl}
-              data-test-subj="session-mgmt-table-col-name"
+              data-test-subj="sessionManagementNameCol"
             >
               <TableText>
                 {name}
@@ -134,7 +134,7 @@ export const getColumns = (
         try {
           const startedOn = dateString(created, timezone);
           return (
-            <TableText color="subdued" data-test-subj="session-mgmt-table-col-created">
+            <TableText color="subdued" data-test-subj="sessionManagementCreatedCol">
               {startedOn}
             </TableText>
           );
@@ -164,7 +164,7 @@ export const getColumns = (
 
             // return
             return (
-              <TableText color="subdued" data-test-subj="session-mgmt-table-col-expires">
+              <TableText color="subdued" data-test-subj="sessionManagementExpiresCol">
                 {expiresOn}
               </TableText>
             );
@@ -175,7 +175,7 @@ export const getColumns = (
           }
         }
         return (
-          <TableText color="subdued" data-test-subj="session-mgmt-table-col-expires">
+          <TableText color="subdued" data-test-subj="sessionManagementExpiresCol">
             --
           </TableText>
         );
@@ -194,7 +194,7 @@ export const getColumns = (
 
           return (
             <EuiToolTip content={toolTipContent}>
-              <EuiBadge color="warning" data-test-subj="session-mgmt-table-col-expires">
+              <EuiBadge color="warning" data-test-subj="sessionManagementStatusCol">
                 {statusContent}
               </EuiBadge>
             </EuiToolTip>
@@ -214,7 +214,7 @@ export const getColumns = (
         if (actions && actions.length) {
           return (
             <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" alignItems="flexEnd">
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} data-test-subj="sessionManagementActionsCol">
                 <PopoverActionsMenu
                   api={api}
                   key={`popkey-${session.id}`}

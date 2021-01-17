@@ -8,8 +8,8 @@ import { SavedObjectsFindResponse } from 'src/core/server';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-const SEND_TO_BACKGROUND_TEST_SUBJ = 'searchSessionIndicator';
-const SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ = 'searchSessionIndicatorPopoverContainer';
+const SEARCH_SESSION_INDICATOR_TEST_SUBJ = 'searchSessionIndicator';
+const SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ = 'searchSessionIndicatorPopoverContainer';
 
 type SessionStateType =
   | 'none'
@@ -29,17 +29,17 @@ export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
 
   return new (class SendToBackgroundService {
     public async find(): Promise<WebElementWrapper> {
-      return testSubjects.find(SEND_TO_BACKGROUND_TEST_SUBJ);
+      return testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
     }
 
     public async exists(): Promise<boolean> {
-      return testSubjects.exists(SEND_TO_BACKGROUND_TEST_SUBJ);
+      return testSubjects.exists(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
     }
 
     public async expectState(state: SessionStateType) {
-      return retry.waitFor(`sendToBackground indicator to get into state = ${state}`, async () => {
+      return retry.waitFor(`searchSessions indicator to get into state = ${state}`, async () => {
         const currentState = await (
-          await testSubjects.find(SEND_TO_BACKGROUND_TEST_SUBJ)
+          await testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ)
         ).getAttribute('data-state');
         return currentState === state;
       });
@@ -73,22 +73,22 @@ export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
     }
 
     private async ensurePopoverOpened() {
-      const isAlreadyOpen = await testSubjects.exists(SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ);
+      const isAlreadyOpen = await testSubjects.exists(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ);
       if (isAlreadyOpen) return;
-      return retry.waitFor(`sendToBackground popover opened`, async () => {
-        await testSubjects.click(SEND_TO_BACKGROUND_TEST_SUBJ);
-        return await testSubjects.exists(SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ);
+      return retry.waitFor(`searchSessions popover opened`, async () => {
+        await testSubjects.click(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
+        return await testSubjects.exists(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ);
       });
     }
 
     private async ensurePopoverClosed() {
       const isAlreadyClosed = !(await testSubjects.exists(
-        SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ
+        SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ
       ));
       if (isAlreadyClosed) return;
-      return retry.waitFor(`sendToBackground popover closed`, async () => {
+      return retry.waitFor(`searchSessions popover closed`, async () => {
         await browser.pressKeys(browser.keys.ESCAPE);
-        return !(await testSubjects.exists(SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ));
+        return !(await testSubjects.exists(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ));
       });
     }
 

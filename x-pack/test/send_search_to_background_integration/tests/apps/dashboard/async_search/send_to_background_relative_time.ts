@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const queryBar = getService('queryBar');
   const browser = getService('browser');
-  const sendToBackground = getService('sendToBackground');
+  const searchSessions = getService('searchSessions');
 
   describe('send to background with relative time', () => {
     before(async () => {
@@ -63,9 +63,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
       await checkSampleDashboardLoaded();
 
-      await sendToBackground.expectState('completed');
-      await sendToBackground.save();
-      await sendToBackground.expectState('backgroundCompleted');
+      await searchSessions.expectState('completed');
+      await searchSessions.save();
+      await searchSessions.expectState('backgroundCompleted');
       const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
         '[Flights] Airline Carrier'
       );
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkSampleDashboardLoaded();
 
       // Check that session is restored
-      await sendToBackground.expectState('restored');
+      await searchSessions.expectState('restored');
     });
   });
 

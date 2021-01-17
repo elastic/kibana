@@ -59,7 +59,7 @@ describe('Background Search Session management status labels', () => {
       );
 
       const label = statusIndicator.find(
-        `.euiText[data-test-subj="session-mgmt-view-status-label-in_progress"]`
+        `.euiText[data-test-subj="sessionManagementStatusLabel"][data-status="in_progress"]`
       );
       expect(label.text()).toMatchInlineSnapshot(`"In progress"`);
     });
@@ -74,7 +74,7 @@ describe('Background Search Session management status labels', () => {
       );
 
       const label = statusIndicator
-        .find(`[data-test-subj="session-mgmt-view-status-label-complete"]`)
+        .find(`[data-test-subj="sessionManagementStatusLabel"][data-status="complete"]`)
         .first();
       expect((label.props() as EuiTextProps).color).toBe('secondary');
       expect(label.text()).toBe('Complete');
@@ -105,7 +105,7 @@ describe('Background Search Session management status labels', () => {
       );
 
       const label = statusIndicator
-        .find(`[data-test-subj="session-mgmt-view-status-label-expired"]`)
+        .find(`[data-test-subj="sessionManagementStatusLabel"][data-status="expired"]`)
         .first();
       expect(label.text()).toBe('Expired');
     });
