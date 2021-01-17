@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import {
+  DragDropIdentifier,
   DragContext,
   DragContextState,
-  DropTargetIdentifier,
   nextValidDropTarget,
   ReorderContext,
   ReorderState,
@@ -26,12 +26,7 @@ export type DroppableEvent = React.DragEvent<HTMLElement>;
 /**
  * A function that handles a drop event.
  */
-export type DropHandler = (item: unknown) => void;
-
-/**
- * A function that handles a dropTo event.
- */
-export type DropToHandler = (dropTarget: string | DropTargetIdentifier) => void;
+export type DropHandler = (dropped: unknown, dropTarget?: unknown) => void;
 
 export interface GroupMoveResult {
   targetDescription: string;
@@ -47,12 +42,6 @@ interface BaseProps {
    */
   className?: string;
 
-  /**
-   * The event handler that fires when this item
-   * is dropped to the one with passed id
-   *
-   */
-  dropTo?: DropToHandler;
   /**
    * The event handler that fires when an item
    * is dropped onto this DragDrop component.
@@ -99,7 +88,7 @@ interface BaseProps {
   /**
    * items belonging to the same group that can be reordered
    */
-  itemsInGroup?: string[];
+  itemsInGroup?: DragDropIdentifier[];
 
   /**
    * Indicates to the user whether the currently dragged item
@@ -112,11 +101,6 @@ interface BaseProps {
    * replace something that is existing or add a new one
    */
   dropType?: 'add' | 'replace' | 'reorder';
-  /**
-   * identifier for this drop target - if it matches the current active drop target context,
-   * it will behave as drop is active right now
-   */
-  dropTargetIdentifier?: DropTargetIdentifier;
   /**
    * Order for keyboard dragging. This takes an array of numbers which will be used to order hierarchically
    */
@@ -187,16 +171,16 @@ export const DragDrop = (props: Props) => {
     DragContext
   );
 
-  const { value, draggable, droppable, isValueEqual, dropTargetIdentifier, order } = props;
+  const { value, draggable, droppable, isValueEqual, order } = props;
 
   useShallowCompareEffect(() => {
-    if (order && droppable && dropTargetIdentifier) {
-      registerDropTarget(order, dropTargetIdentifier);
+    if (order && droppable && value) {
+      registerDropTarget(order, value);
       return () => {
         registerDropTarget(order, undefined);
       };
     }
-  }, [order, dropTargetIdentifier, registerDropTarget, droppable]);
+  }, [order, value, registerDropTarget, droppable]);
 
   return (
     <DragDropInner
@@ -243,23 +227,27 @@ const DragDropInner = React.memo(function DragDropInner(
     isNotDroppable,
     dragType = 'copy',
     dropType = 'add',
-    dropTo,
     itemsInGroup,
-    dropTargetIdentifier,
     keyboardMode,
     setKeyboardMode,
   } = props;
 
   const { reorderState, setReorderState } = useContext(ReorderContext);
-  const { activeDropTarget, setActiveDropTarget } = useContext(DragContext);
+  const {
+    activeDropTarget,
+    setActiveDropTarget,
+    activeDropTarget2,
+    setActiveDropTarget2,
+  } = useContext(DragContext);
   const dragInProgress = !!dragging;
 
   const activeDropTargetMatches =
     activeDropTarget &&
     activeDropTarget.activeDropTarget &&
-    isEqual(dropTargetIdentifier, activeDropTarget.activeDropTarget);
+    isEqual(value, activeDropTarget.activeDropTarget);
 
   const isMoveDragging = isDragging && dragType === 'move';
+  const isActive = activeDropTarget2 === value;
 
   const classes = classNames(
     'lnsDragDrop',
@@ -276,13 +264,25 @@ const DragDropInner = React.memo(function DragDropInner(
         // dragType !== 'reorder',
         droppable && dragType !== 'reorder',
       'lnsDragDrop-isActiveDropTarget':
-        droppable && (state.isActive || activeDropTargetMatches) && dragType !== 'reorder',
+        droppable && (isActive || activeDropTargetMatches) && dragType !== 'reorder',
       'lnsDragDrop-isNotDroppable': !isMoveDragging && isNotDroppable,
       'lnsDragDrop-isReplacing':
-        droppable && (activeDropTargetMatches || state.isActive) && dropType === 'replace',
+        droppable && (activeDropTargetMatches || isActive) && dropType === 'replace',
     },
     state.dragEnterClassNames
   );
+
+  // if (state.isActive) {
+  //   console.log(dropType, droppable, activeDropTargetMatches, state.isActive);
+
+  //   console.log(
+  //     activeDropTarget,
+  //     setActiveDropTarget,
+  //     activeDropTarget2,
+  //     setActiveDropTarget2,
+  //     state.isActive
+  //   );
+  // }
 
   const dragStart = (e?: DroppableEvent) => {
     // Setting stopPropgagation causes Chrome failures, so
@@ -314,6 +314,17 @@ const DragDropInner = React.memo(function DragDropInner(
     }
 
     e.preventDefault();
+    // todo
+    // An optimization to prevent a bunch of React churn.
+    if (activeDropTarget2 !== value) {
+      setActiveDropTarget2(value);
+      setState({
+        ...state,
+        dragEnterClassNames: props.getAdditionalClassesOnEnter
+          ? props.getAdditionalClassesOnEnter()
+          : '',
+      });
+    }
 
     // An optimization to prevent a bunch of React churn.
     if (!state.isActive) {
@@ -328,6 +339,9 @@ const DragDropInner = React.memo(function DragDropInner(
   };
 
   const dragLeave = () => {
+    setActiveDropTarget2(undefined);
+    setState({ ...state, dragEnterClassNames: '' });
+
     setState({ ...state, isActive: false, dragEnterClassNames: '' });
   };
 
@@ -335,16 +349,19 @@ const DragDropInner = React.memo(function DragDropInner(
     e.preventDefault();
     e.stopPropagation();
 
+    setActiveDropTarget2(undefined);
+    setState({ ...state, dragEnterClassNames: '' });
+
     setState({ ...state, isActive: false, dragEnterClassNames: '' });
     setDragging(undefined);
 
     if (onDrop && droppable) {
       trackUiEvent('drop_total');
-      onDrop(dragging);
+      onDrop(dragging, value);
     }
   };
 
-  const isReorderDragging = !!(dragging && itemsInGroup?.includes(dragging.id));
+  const isReorderDragging = !!(dragging && itemsInGroup?.some((i) => i.id === dragging.id));
 
   useEffect(
     () =>
@@ -355,7 +372,7 @@ const DragDropInner = React.memo(function DragDropInner(
     [isReorderDragging, setReorderState]
   );
 
-  if (draggable && dropTo) {
+  if (draggable && onDrop) {
     const { label } = props as DraggableProps;
 
     const draggingProps = {
@@ -374,6 +391,8 @@ const DragDropInner = React.memo(function DragDropInner(
       droppable,
       itemsInGroup: itemsInGroup || [],
       id: value?.id || '',
+
+      // todo:
       isActive: state.isActive,
       order: order,
     };
@@ -381,7 +400,7 @@ const DragDropInner = React.memo(function DragDropInner(
     const { id } = dropProps;
 
     const { isReorderOn, reorderedItems, draggingHeight, direction, groupId } = reorderState;
-    const currentIndex = (itemsInGroup || []).indexOf(id);
+    const currentIndex = (itemsInGroup || []).findIndex((i) => i.id === id);
 
     return (
       <div
@@ -411,11 +430,11 @@ const DragDropInner = React.memo(function DragDropInner(
             onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
               if (e.key === keys.ENTER || e.key === keys.SPACE) {
                 setKeyboardMode(!keyboardMode);
-                console.log(keyboardMode);
+                // console.log(keyboardMode);
                 // if element is not active, check if it <itemsInGrou>1
                 // if yes, setReorderState
                 // if no, setActiveDropTarget
-                if (itemsInGroup.length > 1) {
+                if (itemsInGroup && itemsInGroup.length > 1) {
                   setReorderState((s: ReorderState) => ({
                     ...s,
                     isReorderOn: !isReorderOn,
@@ -425,7 +444,7 @@ const DragDropInner = React.memo(function DragDropInner(
                   }));
                 }
                 if (dragInProgress && activeDropTarget?.activeDropTarget) {
-                  dropTo(activeDropTarget.activeDropTarget);
+                  onDrop(value, activeDropTarget.activeDropTarget);
                   // TODO re-enable announcements
                   // setReorderState((s: ReorderState) => ({
                   //   ...s,
@@ -450,7 +469,10 @@ const DragDropInner = React.memo(function DragDropInner(
                 if (dragInProgress) {
                   draggingProps.onDragEnd();
                 }
-              } else if (keys.ARROW_RIGHT === e.key && activeDropTarget&& keyboardMode) {
+              } else if (keys.ARROW_RIGHT === e.key && activeDropTarget && keyboardMode) {
+                if (!dropProps.order) {
+                  return;
+                }
                 const nextTarget = nextValidDropTarget(activeDropTarget, dropProps.order);
 
                 // check if activeDropTarget is in the itemsInGroup -
@@ -474,11 +496,10 @@ const DragDropInner = React.memo(function DragDropInner(
                 //   pendingActionSuccessMessage: actionSuccessMessage,
                 // }));
               } else if (keys.ARROW_LEFT === e.key && activeDropTarget && keyboardMode) {
-                const previousTarget = nextValidDropTarget(
-                  activeDropTarget,
-                  dropProps.order,
-                  true
-                );
+                if (!dropProps.order) {
+                  return;
+                }
+                const previousTarget = nextValidDropTarget(activeDropTarget, dropProps.order, true);
 
                 // check if activeDropTarget is in the itemsInGroup -
                 // if not, deselect reorder mode visually and functionally
@@ -515,7 +536,7 @@ const DragDropInner = React.memo(function DragDropInner(
                         currentIndex + 1
                       ),
                     }));
-                    dropTo(itemsInGroup[currentIndex + 1]);
+                    onDrop(value, itemsInGroup[currentIndex + 1]);
                   }
                 } else if (keys.ARROW_UP === e.key) {
                   if (currentIndex > 0) {
@@ -527,7 +548,7 @@ const DragDropInner = React.memo(function DragDropInner(
                         currentIndex + 1
                       ),
                     }));
-                    dropTo(itemsInGroup[currentIndex - 1]);
+                    onDrop(value, itemsInGroup[currentIndex - 1]);
                   }
                 }
               }
@@ -556,7 +577,7 @@ const DragDropInner = React.memo(function DragDropInner(
             draggingProps.onDragStart(e);
           },
 
-          style: reorderedItems.includes(id)
+          style: reorderedItems.some((i) => i.id === id)
             ? {
                 transform: `translateY(${direction}${draggingHeight}px)`,
               }
@@ -580,11 +601,12 @@ const DragDropInner = React.memo(function DragDropInner(
               return;
             }
             dropProps.onDragOver(e);
-            if (!dropProps.isActive) {
-              if (!dragging || itemsInGroup.indexOf(dragging.id) === -1) {
+            // todo
+            if (!dropProps.isActive && activeDropTarget2 !== value) {
+              if (!dragging || itemsInGroup.findIndex((i) => i.id === dragging.id) === -1) {
                 return;
               }
-              const draggingIndex = itemsInGroup.indexOf(dragging.id);
+              const draggingIndex = itemsInGroup.findIndex((i) => i.id === dragging.id);
               const droppingIndex = currentIndex;
               if (draggingIndex === droppingIndex) {
                 setReorderState((s: ReorderState) => ({
@@ -627,6 +649,90 @@ const DragDropInner = React.memo(function DragDropInner(
         onDragOver: dragOver,
         onDragLeave: dragLeave,
         onDrop: drop,
+        draggable,
+        onDragEnd: dragEnd,
+        onDragStart: dragStart,
+      })}
+    </>
+  );
+});
+
+export const Drag = (props: Props) => {
+  const { dragging, setDragging } = useContext(DragContext);
+
+  const { value, draggable, isValueEqual } = props;
+
+  return (
+    <DragInner
+      {...props}
+      dragging={dragging}
+      setDragging={setDragging}
+      isDragging={
+        !!(draggable && ((isValueEqual && isValueEqual(value, dragging)) || value === dragging))
+      }
+    />
+  );
+};
+
+const DragInner = React.memo(function DragInner(
+  props: Props &
+    DragContextState & {
+      isDragging: boolean;
+      isNotDroppable: boolean;
+    }
+) {
+  const {
+    className,
+    value,
+    children,
+    draggable,
+    dragging,
+    setDragging,
+    isDragging,
+  } = props;
+
+  const classes = classNames('lnsDragDrop', {
+    'lnsDragDrop-isDraggable': draggable,
+    'lnsDragDrop-isDragging': isDragging,
+  });
+
+  const dragStart = (e?: DroppableEvent) => {
+    // Setting stopPropgagation causes Chrome failures, so
+    // we are manually checking if we've already handled this
+    // in a nested child, and doing nothing if so...
+    if (e?.dataTransfer.getData('text')) {
+      return;
+    }
+
+    // We only can reach the dragStart method if the element is draggable,
+    // so we know we have DraggableProps if we reach this code.
+    e?.dataTransfer.setData('text', (props as DraggableProps).label);
+
+    // Chrome causes issues if you try to render from within a
+    // dragStart event, so we drop a setTimeout to avoid that.
+    // setState({ ...state });
+    setTimeout(() => setDragging(value));
+  };
+
+  const dragEnd = (e?: DroppableEvent) => {
+    e?.stopPropagation();
+    setDragging(undefined);
+    // setActiveDropTarget(undefined);
+  };
+
+  // const dragLeave = () => {
+  //   setActiveDropTarget2(undefined);
+  //   setState({ ...state, dragEnterClassNames: '' });
+
+  //   setState({ ...state, isActive: false, dragEnterClassNames: '' });
+  // };
+
+  return (
+    <>
+      {React.cloneElement(children, {
+        'data-test-subj': props['data-test-subj'] || 'lnsDragDrop',
+        className: classNames(children.props.className, classes, className),
+        // onDragLeave: dragLeave,
         draggable,
         onDragEnd: dragEnd,
         onDragStart: dragStart,
