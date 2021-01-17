@@ -4,44 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { IClickActionDescriptor } from '../';
-import { ACTION, ActionComplete, UISession } from '../../../../../common/search/sessions_mgmt';
+import { ACTION, UISession } from '../../../../../common/search';
 import extendSessionIcon from '../../icons/extend_session.svg';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { DeleteButton } from '../delete_button';
+import { CancelButton } from './cancel_button';
+import { ExtendButton } from './extend_button';
+import { ReloadButton } from './reload_button';
+import { OnActionComplete } from './types';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
   actionType: string,
-  { id }: UISession,
-  actionComplete: ActionComplete
+  { id, name, reloadUrl }: UISession,
+  onActionComplete: OnActionComplete
 ): IClickActionDescriptor | null => {
   switch (actionType) {
     case ACTION.CANCEL:
       return {
         iconType: 'crossInACircleFilled',
         textColor: 'default',
-        label: i18n.translate('xpack.data.mgmt.searchSessions.actionCancel', {
-          defaultMessage: 'Cancel',
-        }),
+        label: <CancelButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
       };
 
-    case ACTION.DELETE:
+    case ACTION.RELOAD:
       return {
-        iconType: 'trash',
-        textColor: 'danger',
-        label: <DeleteButton api={api} id={id} actionComplete={actionComplete} />,
+        iconType: 'refresh',
+        textColor: 'default',
+        label: <ReloadButton api={api} reloadUrl={reloadUrl} />,
       };
 
     case ACTION.EXTEND:
       return {
         iconType: extendSessionIcon,
         textColor: 'default',
-        label: i18n.translate('xpack.data.mgmt.searchSessions.actionExtend', {
-          defaultMessage: 'Extend',
-        }),
+        label: <ExtendButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
       };
 
     default:

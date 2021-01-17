@@ -36,6 +36,7 @@ export class SearchSessionsMgmtApp {
       i18n,
       notifications,
       uiSettings,
+      application,
     } = coreStart;
     const { data, share } = pluginsStart;
 
@@ -44,12 +45,11 @@ export class SearchSessionsMgmtApp {
     params.setBreadcrumbs([{ text: pluginName }]);
 
     const { sessionsClient } = data.search;
-    const api = new SearchSessionsMgmtAPI(
-      sessionsClient,
-      share.urlGenerators,
+    const api = new SearchSessionsMgmtAPI(sessionsClient, this.config, {
       notifications,
-      this.config
-    );
+      urls: share.urlGenerators,
+      application,
+    });
 
     const documentation = new AsyncSearchIntroDocumentation(docLinks);
 

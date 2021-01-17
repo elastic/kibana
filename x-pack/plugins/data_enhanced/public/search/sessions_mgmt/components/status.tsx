@@ -7,30 +7,30 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
-import { STATUS, UISession } from '../../../../common/search/sessions_mgmt';
+import { SearchSessionStatus, UISession } from '../../../../common/search';
 import { dateString } from '../lib/date_string';
 import { StatusDef as StatusAttributes, TableText } from './';
 
 // Shared helper function
 export const getStatusText = (statusType: string): string => {
   switch (statusType) {
-    case STATUS.IN_PROGRESS:
+    case SearchSessionStatus.IN_PROGRESS:
       return i18n.translate('xpack.data.mgmt.searchSessions.status.label.inProgress', {
         defaultMessage: 'In progress',
       });
-    case STATUS.EXPIRED:
+    case SearchSessionStatus.EXPIRED:
       return i18n.translate('xpack.data.mgmt.searchSessions.status.label.expired', {
         defaultMessage: 'Expired',
       });
-    case STATUS.CANCELLED:
+    case SearchSessionStatus.CANCELLED:
       return i18n.translate('xpack.data.mgmt.searchSessions.status.label.cancelled', {
         defaultMessage: 'Cancelled',
       });
-    case STATUS.COMPLETE:
+    case SearchSessionStatus.COMPLETE:
       return i18n.translate('xpack.data.mgmt.searchSessions.status.label.complete', {
         defaultMessage: 'Complete',
       });
-    case STATUS.ERROR:
+    case SearchSessionStatus.ERROR:
       return i18n.translate('xpack.data.mgmt.searchSessions.status.label.error', {
         defaultMessage: 'Error',
       });
@@ -64,7 +64,7 @@ const getStatusAttributes = ({
   }
 
   switch (session.status) {
-    case STATUS.IN_PROGRESS:
+    case SearchSessionStatus.IN_PROGRESS:
       try {
         return {
           textColor: 'default',
@@ -84,7 +84,7 @@ const getStatusAttributes = ({
         throw new Error(`Could not instantiate a createdDate object from: ${session.created}`);
       }
 
-    case STATUS.EXPIRED:
+    case SearchSessionStatus.EXPIRED:
       try {
         const toolTipContent = i18n.translate(
           'xpack.data.mgmt.searchSessions.status.message.expiredOn',
@@ -105,7 +105,7 @@ const getStatusAttributes = ({
         throw new Error(`Could not instantiate an expiration Date object from: ${session.expires}`);
       }
 
-    case STATUS.CANCELLED:
+    case SearchSessionStatus.CANCELLED:
       return {
         icon: <EuiIcon color="#9AA" type="crossInACircleFilled" />,
         label: <TableText>{getStatusText(session.status)}</TableText>,
@@ -114,7 +114,7 @@ const getStatusAttributes = ({
         }),
       };
 
-    case STATUS.ERROR:
+    case SearchSessionStatus.ERROR:
       return {
         textColor: 'danger',
         icon: <EuiIcon color="danger" type="crossInACircleFilled" />,
@@ -125,7 +125,7 @@ const getStatusAttributes = ({
         }),
       };
 
-    case STATUS.COMPLETE:
+    case SearchSessionStatus.COMPLETE:
       try {
         const toolTipContent = i18n.translate('xpack.data.mgmt.searchSessions.status.expiresOn', {
           defaultMessage: 'Expires on {expireDate}',

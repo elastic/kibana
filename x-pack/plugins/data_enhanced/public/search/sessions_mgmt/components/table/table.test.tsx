@@ -12,8 +12,8 @@ import moment from 'moment';
 import React from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
+import { SearchSessionStatus } from '../../../../../common/search';
 import { SessionsMgmtConfigSchema } from '../../';
-import { STATUS } from '../../../../../common/search/sessions_mgmt';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { LocaleWrapper, mockUrls } from '../../__mocks__';
 import { SearchSessionsMgmtTable } from './table';
@@ -27,6 +27,7 @@ let api: SearchSessionsMgmtAPI;
 describe('Background Search Session Management Table', () => {
   beforeEach(async () => {
     mockCoreSetup = coreMock.createSetup();
+    mockCoreStart = coreMock.createStart();
     mockConfig = {
       expiresSoonWarning: moment.duration(1, 'days'),
       maxSessions: 2000,
@@ -35,14 +36,11 @@ describe('Background Search Session Management Table', () => {
     };
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
-    api = new SearchSessionsMgmtAPI(
-      sessionsClient,
-      mockUrls,
-      mockCoreSetup.notifications,
-      mockConfig
-    );
-
-    [mockCoreStart] = await mockCoreSetup.getStartServices();
+    api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+      urls: mockUrls,
+      notifications: mockCoreStart.notifications,
+      application: mockCoreStart.application,
+    });
   });
 
   describe('renders', () => {
@@ -58,10 +56,9 @@ describe('Background Search Session Management Table', () => {
               id: 'wtywp9u2802hahgp-flps',
               url: '/app/great-app-url/#48',
               appId: 'canvas',
-              status: STATUS.IN_PROGRESS,
+              status: SearchSessionStatus.IN_PROGRESS,
               created: '2020-12-02T00:19:32Z',
               expires: '2020-12-07T00:19:32Z',
-              isViewable: true,
             },
           },
         ],

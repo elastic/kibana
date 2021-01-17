@@ -21,9 +21,9 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { SessionsMgmtConfigSchema } from '../';
-import { ActionComplete, STATUS, UISession } from '../../../../common/search/sessions_mgmt';
+import { SearchSessionStatus, UISession } from '../../../../common/search';
 import { TableText } from '../components';
-import { PopoverActionsMenu } from '../components/actions';
+import { OnActionComplete, PopoverActionsMenu } from '../components';
 import { StatusIndicator } from '../components/status';
 import { dateString } from '../lib/date_string';
 import { SearchSessionsMgmtAPI } from './api';
@@ -37,12 +37,16 @@ const appToIcon = (app: string) => {
   return app;
 };
 
+function isSessionRestorable(status: SearchSessionStatus) {
+  return status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE;
+}
+
 export const getColumns = (
   core: CoreStart,
   api: SearchSessionsMgmtAPI,
   config: SessionsMgmtConfigSchema,
   timezone: string,
-  handleAction: ActionComplete
+  onActionComplete: OnActionComplete
 ): Array<EuiBasicTableColumn<UISession>> => {
   // Use a literal array of table column definitions to detail a UISession object
   return [
@@ -75,7 +79,8 @@ export const getColumns = (
       }),
       sortable: true,
       width: '20%',
-      render: (name: UISession['name'], { isRestorable, url }) => {
+      render: (name: UISession['name'], { restoreUrl, reloadUrl, status }) => {
+        const isRestorable = isSessionRestorable(status);
         const notRestorableWarning = isRestorable ? null : (
           <>
             {' '}
@@ -92,7 +97,10 @@ export const getColumns = (
         );
         return (
           <RedirectAppLinks application={core.application}>
-            <EuiLink href={url} data-test-subj="session-mgmt-table-col-name">
+            <EuiLink
+              href={isRestorable ? restoreUrl : reloadUrl}
+              data-test-subj="session-mgmt-table-col-name"
+            >
               <TableText>
                 {name}
                 {notRestorableWarning}
@@ -146,7 +154,11 @@ export const getColumns = (
       }),
       sortable: true,
       render: (expires: UISession['expires'], { id, status }) => {
-        if (expires && status !== STATUS.IN_PROGRESS && status !== STATUS.ERROR) {
+        if (
+          expires &&
+          status !== SearchSessionStatus.IN_PROGRESS &&
+          status !== SearchSessionStatus.ERROR
+        ) {
           try {
             const expiresOn = dateString(expires, timezone);
 
@@ -207,7 +219,7 @@ export const getColumns = (
                   api={api}
                   key={`popkey-${session.id}`}
                   session={session}
-                  handleAction={handleAction}
+                  onActionComplete={onActionComplete}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -28,9 +28,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement, useState } from 'react';
 import { TableText } from '../';
-import { ACTION, ActionComplete, UISession } from '../../../../../common/search/sessions_mgmt';
+import { ACTION, UISession } from '../../../../../common/search';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getAction } from './get_action';
+import { OnActionComplete } from './types';
 
 // interfaces
 interface PopoverActionProps {
@@ -42,7 +43,7 @@ interface PopoverActionProps {
 interface PopoverActionItemsProps {
   session: UISession;
   api: SearchSessionsMgmtAPI;
-  handleAction: ActionComplete;
+  onActionComplete: OnActionComplete;
 }
 
 // helper
@@ -57,7 +58,7 @@ const PopoverAction = ({ textColor, iconType, children, ...props }: PopoverActio
   </EuiFlexGroup>
 );
 
-export const PopoverActionsMenu = ({ api, handleAction, session }: PopoverActionItemsProps) => {
+export const PopoverActionsMenu = ({ api, onActionComplete, session }: PopoverActionItemsProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onPopoverClick = () => {
@@ -88,13 +89,13 @@ export const PopoverActionsMenu = ({ api, handleAction, session }: PopoverAction
   const actions = session.actions || [];
   // Generic set of actions - up to the API to return what is available
   const items = actions.reduce((itemSet, actionType) => {
-    const actionDef = getAction(api, actionType, session, handleAction);
+    const actionDef = getAction(api, actionType, session, onActionComplete);
     if (actionDef) {
       const { label, textColor, iconType } = actionDef;
 
       // add a line above the delete action (when there are multiple)
       // NOTE: Delete action MUST be the final action[] item
-      if (actions.length > 1 && actionType === ACTION.DELETE) {
+      if (actions.length > 1 && actionType === ACTION.CANCEL) {
         itemSet.push({ isSeparator: true, key: 'separadorable' });
       }
 
@@ -119,7 +120,7 @@ export const PopoverActionsMenu = ({ api, handleAction, session }: PopoverAction
 
   const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, items }];
 
-  return (
+  return actions.length ? (
     <EuiPopover
       id={`popover-${session.id}`}
       button={renderPopoverButton()}
@@ -130,5 +131,5 @@ export const PopoverActionsMenu = ({ api, handleAction, session }: PopoverAction
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
-  );
+  ) : null;
 };

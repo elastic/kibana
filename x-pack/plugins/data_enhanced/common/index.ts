@@ -12,7 +12,6 @@ export {
   EqlSearchStrategyResponse,
   IAsyncSearchOptions,
   pollSearch,
-  SearchSessionSavedObject,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
   SearchSessionRequestInfo,

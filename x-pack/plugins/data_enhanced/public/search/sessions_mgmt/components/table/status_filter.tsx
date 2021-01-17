@@ -8,7 +8,7 @@ import { FieldValueOptionType, SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { TableText } from '../';
-import { UISession } from '../../../../../common/search/sessions_mgmt';
+import { UISession } from '../../../../../common/search';
 import { getStatusText } from '../status';
 
 export const getStatusFilter: (tableData: UISession[]) => SearchFilterConfig = (tableData) => ({

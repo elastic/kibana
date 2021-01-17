@@ -5,3 +5,4 @@
  */
 
 export { PopoverActionsMenu } from './popover_actions';
+export { OnActionComplete } from './types';

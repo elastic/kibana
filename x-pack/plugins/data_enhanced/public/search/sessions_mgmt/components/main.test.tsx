@@ -37,12 +37,11 @@ describe('Background Search Session Management Main', () => {
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
 
-    api = new SearchSessionsMgmtAPI(
-      sessionsClient,
-      mockUrls,
-      mockCoreSetup.notifications,
-      mockConfig
-    );
+    api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+      urls: mockUrls,
+      notifications: mockCoreStart.notifications,
+      application: mockCoreStart.application,
+    });
   });
 
   describe('renders', () => {

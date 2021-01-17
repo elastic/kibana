@@ -13,7 +13,8 @@ import { ReactElement } from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
 import { SessionsMgmtConfigSchema } from '../';
-import { ActionComplete, STATUS, UISession } from '../../../../common/search/sessions_mgmt';
+import { SearchSessionStatus, UISession } from '../../../../common/search';
+import { OnActionComplete } from '../components';
 import { mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtAPI } from './api';
 import { getColumns } from './get_columns';
@@ -23,7 +24,7 @@ let mockCoreStart: CoreStart;
 let mockConfig: SessionsMgmtConfigSchema;
 let api: SearchSessionsMgmtAPI;
 let sessionsClient: SessionsClient;
-let handleAction: ActionComplete;
+let handleAction: OnActionComplete;
 let mockSession: UISession;
 
 let tz = 'UTC';
@@ -31,21 +32,20 @@ let tz = 'UTC';
 describe('Search Sessions Management table column factory', () => {
   beforeEach(async () => {
     mockCoreSetup = coreMock.createSetup();
+    mockCoreStart = coreMock.createStart();
     mockConfig = {
       expiresSoonWarning: moment.duration(1, 'days'),
       maxSessions: 2000,
       refreshInterval: moment.duration(1, 'seconds'),
       refreshTimeout: moment.duration(10, 'minutes'),
     };
-
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
 
-    api = new SearchSessionsMgmtAPI(
-      sessionsClient,
-      mockUrls,
-      mockCoreSetup.notifications,
-      mockConfig
-    );
+    api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+      urls: mockUrls,
+      notifications: mockCoreStart.notifications,
+      application: mockCoreStart.application,
+    });
     tz = 'UTC';
 
     handleAction = () => {
@@ -55,15 +55,13 @@ describe('Search Sessions Management table column factory', () => {
     mockSession = {
       name: 'Cool mock session',
       id: 'wtywp9u2802hahgp-thao',
-      url: '/app/great-app-url/#42',
+      reloadUrl: '/app/great-app-url',
+      restoreUrl: '/app/great-app-url/#42',
       appId: 'discovery',
-      status: STATUS.IN_PROGRESS,
+      status: SearchSessionStatus.IN_PROGRESS,
       created: '2020-12-02T00:19:32Z',
       expires: '2020-12-07T00:19:32Z',
-      isRestorable: true,
     };
-
-    [mockCoreStart] = await mockCoreSetup.getStartServices();
   });
 
   test('returns columns', () => {
@@ -149,7 +147,7 @@ describe('Search Sessions Management table column factory', () => {
         EuiTableFieldDataColumnType<UISession>
       >;
 
-      mockSession.status = 'INVALID' as STATUS;
+      mockSession.status = 'INVALID' as SearchSessionStatus;
       const statusLine = mount(status.render!(mockSession.status, mockSession) as ReactElement);
 
       // no unhandled error

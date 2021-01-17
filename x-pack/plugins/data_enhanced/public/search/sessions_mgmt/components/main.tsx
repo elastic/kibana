@@ -65,7 +65,7 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
           <p>
             <FormattedMessage
               id="xpack.data.mgmt.searchSessions.main.sectionDescription"
-              defaultMessage="Manage the sessions that you have sent to the background."
+              defaultMessage="Manage your saved search sessions."
             />
           </p>
         </TableText>

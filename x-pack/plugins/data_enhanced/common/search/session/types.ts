@@ -46,11 +46,6 @@ export interface SearchSessionSavedObjectAttributes {
    */
   idMapping: Record<string, SearchSessionRequestInfo>;
 }
-
-export interface SearchSessionSavedObject {
-  id: string;
-  attributes: SearchSessionSavedObjectAttributes;
-}
 export interface SearchSessionRequestInfo {
   /**
    * ID of the async search request

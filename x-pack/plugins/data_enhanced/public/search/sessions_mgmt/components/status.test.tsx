@@ -7,7 +7,7 @@
 import { EuiTextProps, EuiToolTipProps } from '@elastic/eui';
 import { mount } from 'enzyme';
 import React from 'react';
-import { STATUS, UISession } from '../../../../common/search/sessions_mgmt';
+import { SearchSessionStatus, UISession } from '../../../../common/search';
 import { LocaleWrapper } from '../__mocks__';
 import { getStatusText, StatusIndicator } from './status';
 
@@ -23,27 +23,27 @@ describe('Background Search Session management status labels', () => {
     session = {
       name: 'amazing test',
       id: 'wtywp9u2802hahgp-gsla',
-      url: '/app/great-app-url/#45',
+      restoreUrl: '/app/great-app-url/#45',
+      reloadUrl: '/app/great-app-url/#45',
       appId: 'security',
-      status: STATUS.IN_PROGRESS,
+      status: SearchSessionStatus.IN_PROGRESS,
       created: '2020-12-02T00:19:32Z',
       expires: '2020-12-07T00:19:32Z',
-      isRestorable: true,
     };
   });
 
   describe('getStatusText', () => {
     test('in progress', () => {
-      expect(getStatusText(STATUS.IN_PROGRESS)).toBe('In progress');
+      expect(getStatusText(SearchSessionStatus.IN_PROGRESS)).toBe('In progress');
     });
     test('expired', () => {
-      expect(getStatusText(STATUS.EXPIRED)).toBe('Expired');
+      expect(getStatusText(SearchSessionStatus.EXPIRED)).toBe('Expired');
     });
     test('cancelled', () => {
-      expect(getStatusText(STATUS.CANCELLED)).toBe('Cancelled');
+      expect(getStatusText(SearchSessionStatus.CANCELLED)).toBe('Cancelled');
     });
     test('complete', () => {
-      expect(getStatusText(STATUS.COMPLETE)).toBe('Complete');
+      expect(getStatusText(SearchSessionStatus.COMPLETE)).toBe('Complete');
     });
     test('error', () => {
       expect(getStatusText('error')).toBe('Error');
@@ -65,7 +65,7 @@ describe('Background Search Session management status labels', () => {
     });
 
     test('complete', () => {
-      session.status = STATUS.COMPLETE;
+      session.status = SearchSessionStatus.COMPLETE;
 
       const statusIndicator = mount(
         <LocaleWrapper>
@@ -81,7 +81,7 @@ describe('Background Search Session management status labels', () => {
     });
 
     test('complete - expires soon', () => {
-      session.status = STATUS.COMPLETE;
+      session.status = SearchSessionStatus.COMPLETE;
 
       const statusIndicator = mount(
         <LocaleWrapper>
@@ -96,7 +96,7 @@ describe('Background Search Session management status labels', () => {
     });
 
     test('expired', () => {
-      session.status = STATUS.EXPIRED;
+      session.status = SearchSessionStatus.EXPIRED;
 
       const statusIndicator = mount(
         <LocaleWrapper>
@@ -111,7 +111,7 @@ describe('Background Search Session management status labels', () => {
     });
 
     test('error handling', () => {
-      session.status = STATUS.COMPLETE;
+      session.status = SearchSessionStatus.COMPLETE;
       (session as any).created = null;
       (session as any).expires = null;
 

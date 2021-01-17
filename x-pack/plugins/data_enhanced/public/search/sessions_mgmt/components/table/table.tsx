@@ -13,9 +13,10 @@ import useDebounce from 'react-use/lib/useDebounce';
 import useInterval from 'react-use/lib/useInterval';
 import { TableText } from '../';
 import { SessionsMgmtConfigSchema } from '../..';
-import { ActionComplete, UISession } from '../../../../../common/search/sessions_mgmt';
+import { UISession } from '../../../../../common/search';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
+import { OnActionComplete } from '../actions';
 import { getAppFilter } from './app_filter';
 import { getStatusFilter } from './status_filter';
 
@@ -74,10 +75,8 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
 
   // When action such as cancel, delete, extend occurs, use the async return
   // value to refresh the table
-  const handleActionCompleted: ActionComplete = (results: UISession[]) => {
-    if (results) {
-      setTableData(results);
-    }
+  const onActionComplete: OnActionComplete = () => {
+    doRefresh();
   };
 
   // table config: search / filters
@@ -108,7 +107,7 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
       {...props}
       id={TABLE_ID}
       data-test-subj={TABLE_ID}
-      columns={getColumns(core, api, config, timezone, handleActionCompleted)}
+      columns={getColumns(core, api, config, timezone, onActionComplete)}
       items={tableData}
       pagination={pagination}
       search={search}

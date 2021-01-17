@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ACTION, STATUS } from './constants';
+import { ACTION } from './constants';
+import { SearchSessionStatus } from '..';
 
 export interface UISession {
   id: string;
@@ -12,12 +13,10 @@ export interface UISession {
   appId: string;
   created: string;
   expires: string | null;
-  status: STATUS;
+  status: SearchSessionStatus;
   actions?: ACTION[];
-  isRestorable: boolean;
-  url: string;
+  reloadUrl: string;
+  restoreUrl: string;
 }
-
-export type ActionComplete = (result: UISession[]) => void;
 
 export * from './constants';
