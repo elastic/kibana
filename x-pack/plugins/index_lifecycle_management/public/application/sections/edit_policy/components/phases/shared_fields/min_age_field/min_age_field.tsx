@@ -69,91 +69,90 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
   );
 
   return (
-    <EuiFormRow fullWidth>
-      <EuiFlexGroup gutterSize={'xs'} alignItems={'center'} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiText size={'xs'}>Move data into phase when:</EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <UseField path={`phases.${phase}.min_age`}>
-            {(field) => {
-              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-              return (
-                <>
-                  <EuiFieldNumber
-                    compressed
-                    style={{ maxWidth: 40 }}
-                    aria-label={getTimingLabelForPhase(phase)}
-                    isInvalid={isInvalid}
-                    value={field.value as EuiFieldNumberProps['value']}
-                    onChange={field.onChange}
-                    isLoading={field.isValidating}
-                    data-test-subj={`${phase}-selectedMinimumAge`}
-                    min={0}
-                  />
-                  {isInvalid && errorMessage && (
-                    <EuiText size={'xs'} color={'danger'}>
-                      {errorMessage}
-                    </EuiText>
-                  )}
-                </>
-              );
-            }}
-          </UseField>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <UseField path={`_meta.${phase}.minAgeUnit`}>
-            {(field) => {
-              const { isInvalid } = getFieldValidityAndErrorMessage(field);
-              return (
-                <EuiSelect
-                  compressed
-                  style={{ maxWidth: 80 }}
-                  value={field.value as string}
-                  onChange={(e) => {
-                    field.setValue(e.target.value);
-                  }}
-                  hasNoInitialSelection={true}
-                  isInvalid={isInvalid}
-                  append={'old'}
-                  data-test-subj={`${phase}-selectedMinimumAgeUnits`}
-                  aria-label={getUnitsAriaLabelForPhase(phase)}
-                  options={[
-                    {
-                      value: 'd',
-                      text: daysOptionLabel,
-                    },
-                    {
-                      value: 'h',
-                      text: hoursOptionLabel,
-                    },
-                    {
-                      value: 'm',
-                      text: minutesOptionLabel,
-                    },
-                    {
-                      value: 's',
-                      text: secondsOptionLabel,
-                    },
-                    {
-                      value: 'ms',
-                      text: millisecondsOptionLabel,
-                    },
-                    {
-                      value: 'micros',
-                      text: microsecondsOptionLabel,
-                    },
-                    {
-                      value: 'nanos',
-                      text: nanosecondsOptionLabel,
-                    },
-                  ]}
-                />
-              );
-            }}
-          </UseField>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
+    <UseField path={`phases.${phase}.min_age`}>
+      {(field) => {
+        const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+        return (
+          <EuiFormRow fullWidth isInvalid={isInvalid} error={errorMessage}>
+            <EuiFlexGroup gutterSize={'xs'} alignItems={'center'} wrap>
+              <EuiFlexItem grow={false}>
+                <EuiText size={'xs'}>Move data into phase when:</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
+                  <EuiFlexItem grow={false}>
+                    <EuiFieldNumber
+                      compressed
+                      style={{ maxWidth: 50 }}
+                      aria-label={getTimingLabelForPhase(phase)}
+                      isInvalid={isInvalid}
+                      value={field.value as EuiFieldNumberProps['value']}
+                      onChange={field.onChange}
+                      isLoading={field.isValidating}
+                      data-test-subj={`${phase}-selectedMinimumAge`}
+                      min={0}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <UseField path={`_meta.${phase}.minAgeUnit`}>
+                      {(unitField) => {
+                        const { isInvalid: isUnitFieldInvalid } = getFieldValidityAndErrorMessage(
+                          unitField
+                        );
+                        return (
+                          <EuiSelect
+                            compressed
+                            style={{ maxWidth: 80 }}
+                            value={unitField.value as string}
+                            onChange={(e) => {
+                              unitField.setValue(e.target.value);
+                            }}
+                            hasNoInitialSelection={true}
+                            isInvalid={isUnitFieldInvalid}
+                            append={'old'}
+                            data-test-subj={`${phase}-selectedMinimumAgeUnits`}
+                            aria-label={getUnitsAriaLabelForPhase(phase)}
+                            options={[
+                              {
+                                value: 'd',
+                                text: daysOptionLabel,
+                              },
+                              {
+                                value: 'h',
+                                text: hoursOptionLabel,
+                              },
+                              {
+                                value: 'm',
+                                text: minutesOptionLabel,
+                              },
+                              {
+                                value: 's',
+                                text: secondsOptionLabel,
+                              },
+                              {
+                                value: 'ms',
+                                text: millisecondsOptionLabel,
+                              },
+                              {
+                                value: 'micros',
+                                text: microsecondsOptionLabel,
+                              },
+                              {
+                                value: 'nanos',
+                                text: nanosecondsOptionLabel,
+                              },
+                            ]}
+                          />
+                        );
+                      }}
+                    </UseField>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        );
+      }}
+    </UseField>
   );
 };
