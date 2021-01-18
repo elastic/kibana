@@ -8,6 +8,7 @@ import React, { useState, useMemo } from 'react';
 import classNames from 'classnames';
 import { EuiScreenReaderOnly, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { leftTask } from 'fp-ts/lib/TaskEither';
 
 export type DragDropIdentifier = Record<string, unknown> & {
   id: string;
@@ -45,10 +46,6 @@ export interface DragContextState {
 
   setActiveDropTarget: (newTarget?: DragDropIdentifier) => void;
 
-  activeDropTarget2?: DragDropIdentifier;
-
-  setActiveDropTarget2: (newTarget?: DragDropIdentifier) => void;
-
   registerDropTarget: (order: number[], dropTarget?: DragDropIdentifier) => void;
 }
 
@@ -64,8 +61,6 @@ export const DragContext = React.createContext<DragContextState>({
   setKeyboardMode: () => {},
   activeDropTarget: undefined,
   setActiveDropTarget: () => {},
-  activeDropTarget2: undefined,
-  setActiveDropTarget2: () => {},
   registerDropTarget: () => {},
 });
 
@@ -106,10 +101,6 @@ export interface ProviderProps {
 
   setActiveDropTarget: (newTarget?: DragDropIdentifier) => void;
 
-  activeDropTarget2: DragDropIdentifier | undefined;
-
-  setActiveDropTarget2: (newTarget?: DragDropIdentifier) => void;
-
   registerDropTarget: (
     order: number[],
     dropTarget?: DragDropIdentifier,
@@ -145,10 +136,6 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
     dropTargetsByOrder: {},
   });
 
-  const [activeDropTargetState2, setActiveDropTargetState2] = useState<
-    DragDropIdentifier | undefined
-  >(undefined);
-
   const setDragging = useMemo(() => (dragging: Dragging) => setDraggingState({ dragging }), [
     setDraggingState,
   ]);
@@ -162,24 +149,21 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
     [setActiveDropTargetState]
   );
 
-  const setActiveDropTarget2 = useMemo(
-    () => (activeDrop?: DragDropIdentifier) => setActiveDropTargetState2(activeDrop),
-    [activeDropTargetState2]
-  );
-
   const registerDropTarget = useMemo(
     () => (
       order: number[],
       dropTarget?: DragDropIdentifier,
       canDrop?: (dragging: unknown) => boolean
     ) => {
-      return setActiveDropTargetState((s) => ({
-        ...s,
-        dropTargetsByOrder: {
-          ...s.dropTargetsByOrder,
-          [order.join(',')]: dropTarget ? { dropTarget, canDrop } : undefined,
-        },
-      }));
+      return setActiveDropTargetState((s) => {
+        return {
+          ...s,
+          dropTargetsByOrder: {
+            ...s.dropTargetsByOrder,
+            [order.join(',')]: dropTarget ? { dropTarget, canDrop } : undefined,
+          },
+        };
+      });
     },
     [setActiveDropTargetState]
   );
@@ -191,9 +175,7 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
       dragging={draggingState.dragging}
       setDragging={setDragging}
       activeDropTarget={activeDropTargetState}
-      activeDropTarget2={activeDropTargetState2}
       setActiveDropTarget={setActiveDropTarget}
-      setActiveDropTarget2={setActiveDropTarget2}
       registerDropTarget={registerDropTarget}
     >
       {children}
@@ -221,11 +203,12 @@ export function nextValidDropTarget(
       return parsedOrderA[relevantLevel] - parsedOrderB[relevantLevel];
     });
 
-  const currentActiveDropIndex = nextDropTargets.findIndex(([, target]) => {
+  let currentActiveDropIndex = nextDropTargets.findIndex(([targetOrder, target]) => {
     return activeDropTarget.activeDropTarget
       ? target?.dropTarget === activeDropTarget.activeDropTarget
-      : !target;
+      : targetOrder === currentlyActiveDraggingElOrder.join(',');
   });
+
   const previousElement =
     (nextDropTargets.length + currentActiveDropIndex - 1) % nextDropTargets.length;
   const nextElement = (currentActiveDropIndex + 1) % nextDropTargets.length;
@@ -246,8 +229,6 @@ export function ChildDragDropProvider({
   keyboardMode,
   activeDropTarget,
   setActiveDropTarget,
-  activeDropTarget2,
-  setActiveDropTarget2,
   registerDropTarget,
   children,
 }: ProviderProps) {
@@ -259,8 +240,6 @@ export function ChildDragDropProvider({
       setDragging,
       activeDropTarget,
       setActiveDropTarget,
-      activeDropTarget2,
-      setActiveDropTarget2,
       registerDropTarget,
     }),
     [
@@ -268,8 +247,6 @@ export function ChildDragDropProvider({
       dragging,
       activeDropTarget,
       setActiveDropTarget,
-      activeDropTarget2,
-      setActiveDropTarget2,
       registerDropTarget,
       setKeyboardMode,
       keyboardMode,
