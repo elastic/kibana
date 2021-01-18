@@ -109,12 +109,14 @@ export function RunExpressionsExample({ expressions, inspector }: Props) {
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiPanel
-                data-test-subj="helloWorldEmbeddableFromFactory"
-                paddingSize="none"
-                role="figure"
-              >
-                <EuiCodeBlock language="json" fontSize="m" paddingSize="m" isCopyable>
+              <EuiPanel paddingSize="none" role="figure">
+                <EuiCodeBlock
+                  language="json"
+                  fontSize="m"
+                  paddingSize="m"
+                  isCopyable
+                  data-test-subj="expressionResult"
+                >
                   {JSON.stringify(result, null, '\t')}
                 </EuiCodeBlock>
               </EuiPanel>

@@ -38,7 +38,9 @@ export const buttonRenderer: ExpressionRenderDefinition<any> = {
 
     const renderDebug = () => (
       <div style={{ width: domNode.offsetWidth, height: domNode.offsetHeight }}>
-        <EuiButton onClick={buttonClick}>{config.name}</EuiButton>
+        <EuiButton data-test-subj="testExpressionButton" onClick={buttonClick}>
+          {config.name}
+        </EuiButton>
       </div>
     );
 

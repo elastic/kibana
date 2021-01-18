@@ -91,11 +91,7 @@ export function RenderExpressionsExample({ expressions, inspector }: Props) {
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiPanel
-                data-test-subj="helloWorldEmbeddableFromFactory"
-                paddingSize="none"
-                role="figure"
-              >
+              <EuiPanel data-test-subj="expressionRender" paddingSize="none" role="figure">
                 <ReactExpressionRenderer
                   expression={expression}
                   debug={true}
