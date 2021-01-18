@@ -20,3 +20,7 @@ export const mockKibanaValues = {
   setDocTitle: jest.fn(),
   renderHeaderActions: jest.fn(),
 };
+
+jest.mock('../shared/kibana', () => ({
+  KibanaLogic: { values: mockKibanaValues },
+}));
