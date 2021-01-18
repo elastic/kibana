@@ -52,50 +52,84 @@ describe('DocumentMigrator', () => {
     };
   }
 
-  it('validates individual migration definitions', () => {
-    const invalidDefinition = {
-      kibanaVersion: '3.2.3',
-      typeRegistry: createRegistry({
-        name: 'foo',
-        migrations: _.noop as any,
-      }),
-      log: mockLogger,
-    };
-    expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-      /Migration for type foo should be an object/i
+  const createDefinition = (migrations: any) => ({
+    kibanaVersion: '3.2.3',
+    typeRegistry: createRegistry({
+      name: 'foo',
+      migrations: migrations as any,
+    }),
+    log: mockLogger,
+  });
+
+  it('validates migration definition', () => {
+    expect(() => new DocumentMigrator(createDefinition(() => {}))).not.toThrow();
+    expect(() => new DocumentMigrator(createDefinition({}))).not.toThrow();
+    expect(() => new DocumentMigrator(createDefinition(123))).toThrow(
+      /Migration for type foo should be an object or a function/i
     );
   });
 
-  it('validates individual migration semvers', () => {
-    const invalidDefinition = {
-      kibanaVersion: '3.2.3',
-      typeRegistry: createRegistry({
-        name: 'foo',
-        migrations: {
-          bar: (doc) => doc,
-        },
-      }),
-      log: mockLogger,
-    };
-    expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-      /Expected all properties to be semvers/i
-    );
+  describe('#prepareMigrations', () => {
+    it('validates individual migration definitions', () => {
+      const invalidMigrator = new DocumentMigrator(createDefinition(() => 123));
+      const voidMigrator = new DocumentMigrator(createDefinition(() => {}));
+      const emptyObjectMigrator = new DocumentMigrator(createDefinition(() => ({})));
+
+      expect(invalidMigrator.prepareMigrations).toThrow(
+        /Migrations map for type foo should be an object/i
+      );
+      expect(voidMigrator.prepareMigrations).not.toThrow();
+      expect(emptyObjectMigrator.prepareMigrations).not.toThrow();
+    });
+
+    it('validates individual migration semvers', () => {
+      const withInvalidVersion = {
+        bar: (doc: any) => doc,
+        '1.2.3': (doc: any) => doc,
+      };
+      const migrationFn = new DocumentMigrator(createDefinition(() => withInvalidVersion));
+      const migrationObj = new DocumentMigrator(createDefinition(withInvalidVersion));
+
+      expect(migrationFn.prepareMigrations).toThrow(/Expected all properties to be semvers/i);
+      expect(migrationObj.prepareMigrations).toThrow(/Expected all properties to be semvers/i);
+    });
+
+    it('validates the migration function', () => {
+      const invalidVersionFunction = { '1.2.3': 23 as any };
+      const migrationFn = new DocumentMigrator(createDefinition(() => invalidVersionFunction));
+      const migrationObj = new DocumentMigrator(createDefinition(invalidVersionFunction));
+
+      expect(migrationFn.prepareMigrations).toThrow(/expected a function, but got 23/i);
+      expect(migrationObj.prepareMigrations).toThrow(/expected a function, but got 23/i);
+    });
+    it('validates definitions with migrations: Function | Objects', () => {
+      const validMigrationMap = { '1.2.3': () => {} };
+      const migrationFn = new DocumentMigrator(createDefinition(() => validMigrationMap));
+      const migrationObj = new DocumentMigrator(createDefinition(validMigrationMap));
+      expect(migrationFn.prepareMigrations).not.toThrow();
+      expect(migrationObj.prepareMigrations).not.toThrow();
+    });
   });
 
-  it('validates the migration function', () => {
-    const invalidDefinition = {
-      kibanaVersion: '3.2.3',
+  it('throws if #prepareMigrations is not called before #migrate is called', () => {
+    const migrator = new DocumentMigrator({
+      ...testOpts(),
       typeRegistry: createRegistry({
-        name: 'foo',
+        name: 'user',
         migrations: {
-          '1.2.3': 23 as any,
+          '1.2.3': setAttr('attributes.name', 'Chris'),
         },
       }),
-      log: mockLogger,
-    };
-    expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-      /expected a function, but got 23/i
-    );
+    });
+
+    expect(() =>
+      migrator.migrate({
+        id: 'me',
+        type: 'user',
+        attributes: { name: 'Christopher' },
+        migrationVersion: {},
+      })
+    ).toThrow(/Migrations are not ready. Make sure prepareMigrations is called first./i);
   });
 
   it('migrates type and attributes', () => {
@@ -108,6 +142,8 @@ describe('DocumentMigrator', () => {
         },
       }),
     });
+    migrator.prepareMigrations();
+
     const actual = migrator.migrate({
       id: 'me',
       type: 'user',
@@ -141,6 +177,7 @@ describe('DocumentMigrator', () => {
       attributes: {},
       migrationVersion: {},
     };
+    migrator.prepareMigrations();
     const migratedDoc = migrator.migrate(originalDoc);
     expect(_.get(originalDoc, 'attributes.name')).toBeUndefined();
     expect(_.get(migratedDoc, 'attributes.name')).toBe('Mike');
@@ -156,6 +193,7 @@ describe('DocumentMigrator', () => {
         },
       }),
     });
+    migrator.prepareMigrations();
     const actual = migrator.migrate({
       id: 'me',
       type: 'user',
@@ -196,6 +234,7 @@ describe('DocumentMigrator', () => {
         }
       ),
     });
+    migrator.prepareMigrations();
     const actual = migrator.migrate({
       id: 'me',
       type: 'user',
@@ -233,6 +272,7 @@ describe('DocumentMigrator', () => {
         }
       ),
     });
+    migrator.prepareMigrations();
     const actual = migrator.migrate({
       id: 'me',
       type: 'user',
@@ -263,6 +303,7 @@ describe('DocumentMigrator', () => {
         },
       }),
     });
+    migrator.prepareMigrations();
     const actual = migrator.migrate({
       id: 'smelly',
       type: 'dog',
@@ -282,6 +323,7 @@ describe('DocumentMigrator', () => {
       ...testOpts(),
       kibanaVersion: '8.0.1',
     });
+    migrator.prepareMigrations();
     expect(() =>
       migrator.migrate({
         id: 'smelly',
@@ -304,6 +346,7 @@ describe('DocumentMigrator', () => {
         },
       }),
     });
+    migrator.prepareMigrations();
     expect(() =>
       migrator.migrate({
         id: 'fleabag',
@@ -329,6 +372,7 @@ describe('DocumentMigrator', () => {
         },
       }),
     });
+    migrator.prepareMigrations();
     const actual = migrator.migrate({
       id: 'smelly',
       type: 'dog',
@@ -361,6 +405,7 @@ describe('DocumentMigrator', () => {
         }
       ),
     });
+    migrator.prepareMigrations();
     const actual = migrator.migrate({
       id: 'smelly',
       type: 'dog',
@@ -396,6 +441,7 @@ describe('DocumentMigrator', () => {
         }
       ),
     });
+    migrator.prepareMigrations();
     const actual = migrator.migrate({
       id: 'smelly',
       type: 'foo',
@@ -430,6 +476,7 @@ describe('DocumentMigrator', () => {
         }
       ),
     });
+    migrator.prepareMigrations();
     const actual = migrator.migrate({
       id: 'smelly',
       type: 'dog',
@@ -454,6 +501,7 @@ describe('DocumentMigrator', () => {
         },
       }),
     });
+    migrator.prepareMigrations();
 
     expect(() =>
       migrator.migrate({
@@ -477,6 +525,7 @@ describe('DocumentMigrator', () => {
         },
       }),
     });
+    migrator.prepareMigrations();
     expect(() =>
       migrator.migrate({
         id: 'smelly',
@@ -506,6 +555,7 @@ describe('DocumentMigrator', () => {
         },
       }),
     });
+    migrator.prepareMigrations();
     const actual = migrator.migrate({
       id: 'smelly',
       type: 'cat',
@@ -530,6 +580,7 @@ describe('DocumentMigrator', () => {
         },
       }),
     });
+    migrator.prepareMigrations();
     const actual = migrator.migrate({
       id: 'smelly',
       type: 'cat',
@@ -565,6 +616,7 @@ describe('DocumentMigrator', () => {
       migrationVersion: {},
     };
     try {
+      migrator.prepareMigrations();
       migrator.migrate(_.cloneDeep(failedDoc));
       expect('Did not throw').toEqual('But it should have!');
     } catch (error) {
@@ -597,13 +649,14 @@ describe('DocumentMigrator', () => {
       attributes: {},
       migrationVersion: {},
     };
+    migrator.prepareMigrations();
     migrator.migrate(doc);
     expect(loggingSystemMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
     expect(loggingSystemMock.collect(mockLoggerFactory).warn[1][0]).toEqual(logTestMsg);
   });
 
   test('extracts the latest migration version info', () => {
-    const { migrationVersion } = new DocumentMigrator({
+    const migrator = new DocumentMigrator({
       ...testOpts(),
       typeRegistry: createRegistry(
         {
@@ -624,7 +677,8 @@ describe('DocumentMigrator', () => {
       ),
     });
 
-    expect(migrationVersion).toEqual({
+    migrator.prepareMigrations();
+    expect(migrator.migrationVersion).toEqual({
       aaa: '10.4.0',
       bbb: '3.2.3',
     });

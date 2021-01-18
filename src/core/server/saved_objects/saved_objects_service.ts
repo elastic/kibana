@@ -133,10 +133,10 @@ export interface SavedObjectsServiceSetup {
    *       },
    *     },
    *   },
-   *   migrations: {
+   *   migrations: () => ({
    *     '2.0.0': migrations.migrateToV2,
    *     '2.1.0': migrations.migrateToV2_1
-   *   },
+   *   }),
    * };
    *
    * // src/plugins/my_plugin/server/plugin.ts
@@ -387,6 +387,12 @@ export class SavedObjectsService
      * not plugin migrations won't be registered.
      */
     const skipMigrations = this.config.migration.skip || !pluginsInitialized;
+
+    /**
+     * Note: Prepares all migrations Maps. This will execute the migrations functions
+     * needed for both Individual documents migration and Saved Object migrations on startup.
+     */
+    migrator.prepareMigrations();
 
     if (skipMigrations) {
       this.logger.warn(

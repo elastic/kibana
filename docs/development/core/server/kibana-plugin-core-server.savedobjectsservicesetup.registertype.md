@@ -36,10 +36,10 @@ export const myType: SavedObjectsType = {
       },
     },
   },
-  migrations: {
+  migrations: () => ({
     '2.0.0': migrations.migrateToV2,
     '2.1.0': migrations.migrateToV2_1
-  },
+  }),
 };
 
 // src/plugins/my_plugin/server/plugin.ts

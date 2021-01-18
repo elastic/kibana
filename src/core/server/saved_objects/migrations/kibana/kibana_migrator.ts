@@ -158,6 +158,10 @@ export class KibanaMigrator {
     return this.migrationResult;
   }
 
+  public prepareMigrations() {
+    this.documentMigrator.prepareMigrations();
+  }
+
   public getStatus$() {
     return this.status$.asObservable();
   }
@@ -230,6 +234,7 @@ export class KibanaMigrator {
    * @returns `doc` with all registered migrations applied.
    */
   public migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
+    this.documentMigrator.prepareMigrations();
     return this.documentMigrator.migrate(doc);
   }
 }

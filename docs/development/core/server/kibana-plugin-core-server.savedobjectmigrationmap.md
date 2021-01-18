@@ -18,7 +18,7 @@ export interface SavedObjectMigrationMap
 
 
 ```typescript
-const migrations: SavedObjectMigrationMap = {
+const migrationsMap: SavedObjectMigrationMap = {
   '1.0.0': migrateToV1,
   '2.1.0': migrateToV21
 }
