@@ -12,7 +12,9 @@ import {
   ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   TRANSACTION_ID,
+  TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
 export async function getJSErrors({
   setup,
@@ -60,13 +62,13 @@ export async function getJSErrors({
             impactedPages: {
               filter: {
                 term: {
-                  'transaction.type': 'page-load',
+                  [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
                 },
               },
               aggs: {
                 pageCount: {
                   cardinality: {
-                    field: 'transaction.id',
+                    field: TRANSACTION_ID,
                   },
                 },
               },
