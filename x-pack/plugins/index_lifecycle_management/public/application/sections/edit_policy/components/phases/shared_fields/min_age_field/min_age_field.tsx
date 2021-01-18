@@ -79,17 +79,24 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
             {(field) => {
               const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
               return (
-                <EuiFieldNumber
-                  compressed
-                  style={{ maxWidth: 40 }}
-                  aria-label={getTimingLabelForPhase(phase)}
-                  isInvalid={isInvalid}
-                  value={field.value as EuiFieldNumberProps['value']}
-                  onChange={field.onChange}
-                  isLoading={field.isValidating}
-                  data-test-subj={`${phase}-selectedMinimumAge`}
-                  min={0}
-                />
+                <>
+                  <EuiFieldNumber
+                    compressed
+                    style={{ maxWidth: 40 }}
+                    aria-label={getTimingLabelForPhase(phase)}
+                    isInvalid={isInvalid}
+                    value={field.value as EuiFieldNumberProps['value']}
+                    onChange={field.onChange}
+                    isLoading={field.isValidating}
+                    data-test-subj={`${phase}-selectedMinimumAge`}
+                    min={0}
+                  />
+                  {isInvalid && errorMessage && (
+                    <EuiText size={'xs'} color={'danger'}>
+                      {errorMessage}
+                    </EuiText>
+                  )}
+                </>
               );
             }}
           </UseField>
@@ -97,7 +104,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
         <EuiFlexItem grow={false}>
           <UseField path={`_meta.${phase}.minAgeUnit`}>
             {(field) => {
-              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+              const { isInvalid } = getFieldValidityAndErrorMessage(field);
               return (
                 <EuiSelect
                   compressed

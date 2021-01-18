@@ -11,9 +11,11 @@ import {
   RolloverAction,
 } from '../../../common/types';
 
-export const defaultSetPriority: string = '100';
-
-export const defaultPhaseIndexPriority: string = '50';
+export const defaultIndexPriority = {
+  hot: '100',
+  warm: '50',
+  cold: '0',
+};
 
 export const defaultRolloverAction: RolloverAction = {
   max_age: '30d',

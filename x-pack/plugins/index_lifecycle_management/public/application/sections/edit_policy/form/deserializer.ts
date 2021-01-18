@@ -33,11 +33,13 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
       warmPhaseOnRollover: warm === undefined ? true : Boolean(warm.min_age === '0ms'),
       bestCompression: warm?.actions?.forcemerge?.index_codec === 'best_compression',
       dataTierAllocationType: determineDataTierAllocationType(warm?.actions),
+      dataTierAllocationEnabled: warm?.actions.migrate?.enabled !== false,
       readonlyEnabled: Boolean(warm?.actions?.readonly),
     },
     cold: {
       enabled: Boolean(cold),
       dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
+      dataTierAllocationEnabled: cold?.actions.migrate?.enabled !== false,
       freezeEnabled: Boolean(cold?.actions?.freeze),
     },
     delete: {

@@ -26,13 +26,12 @@ import { ActiveHighlight, MinAgeField } from './shared_fields';
 
 interface Props {
   phase: 'hot' | 'warm' | 'cold';
-  watchPaths?: string[];
 }
 
-export const Phase: FunctionComponent<Props> = ({ children, phase, watchPaths = [] }) => {
+export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
   const enabledPath = `_meta.${phase}.enabled`;
   const [formData] = useFormData({
-    watch: [...watchPaths, enabledPath],
+    watch: [enabledPath],
   });
 
   // hot phase is always enabled
@@ -95,9 +94,9 @@ export const Phase: FunctionComponent<Props> = ({ children, phase, watchPaths = 
             )}
           </EuiFlexGroup>
           <EuiSpacer />
-          {isShowingSettings && enabled ? (
-            children
-          ) : (
+          <div style={isShowingSettings && enabled ? {} : { display: 'none' }}>{children}</div>
+
+          <div style={isShowingSettings && enabled ? { display: 'none' } : {}}>
             <EuiText color="subdued" size={'s'}>
               {i18nTexts.editPolicy.descriptions[phase]}
               <br />
@@ -113,7 +112,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase, watchPaths = 
                 }}
               />
             </EuiText>
-          )}
+          </div>
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

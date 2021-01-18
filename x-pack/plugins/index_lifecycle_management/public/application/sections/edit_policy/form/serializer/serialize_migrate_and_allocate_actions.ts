@@ -15,7 +15,11 @@ export const serializeMigrateAndAllocateActions = (
    * Form metadata about what tier allocation strategy to use and custom node
    * allocation information.
    */
-  { dataTierAllocationType, allocationNodeAttribute }: DataAllocationMetaFields,
+  {
+    dataTierAllocationEnabled,
+    dataTierAllocationType,
+    allocationNodeAttribute,
+  }: DataAllocationMetaFields,
   /**
    * The new configuration merged with old configuration to ensure we don't lose
    * any fields.
@@ -76,13 +80,14 @@ export const serializeMigrateAndAllocateActions = (
         };
       }
       break;
-    case 'none':
-      actions.migrate = {
-        ...originalActions?.migrate,
-        enabled: false,
-      };
-      break;
     default:
+  }
+
+  if (!dataTierAllocationEnabled) {
+    actions.migrate = {
+      ...originalActions?.migrate,
+      enabled: false,
+    };
   }
 
   if (numberOfReplicas != null) {

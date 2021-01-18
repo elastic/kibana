@@ -7,12 +7,12 @@
 import { i18n } from '@kbn/i18n';
 
 import { FormSchema, fieldValidators } from '../../../../shared_imports';
-import { defaultSetPriority, defaultPhaseIndexPriority } from '../../../constants';
+import { defaultIndexPriority } from '../../../constants';
 import { ROLLOVER_FORM_PATHS } from '../constants';
 
-const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
-
 import { FormInternal } from '../types';
+
+const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
 
 import {
   ifExistsNumberGreaterThanZero,
@@ -56,7 +56,6 @@ export const schema: FormSchema<FormInternal> = {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
       },
       readonlyEnabled: {
-        defaultValue: false,
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
     },
@@ -68,17 +67,14 @@ export const schema: FormSchema<FormInternal> = {
           { defaultMessage: 'Activate warm phase' }
         ),
       },
-      warmPhaseOnRollover: {
-        defaultValue: true,
-        label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel', {
-          defaultMessage: 'Move to warm phase on rollover',
-        }),
-      },
       minAgeUnit: {
         defaultValue: 'ms',
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
+      },
+      dataTierAllocationEnabled: {
+        label: i18nTexts.editPolicy.allocationLabel,
       },
       dataTierAllocationType: {
         label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
@@ -87,7 +83,6 @@ export const schema: FormSchema<FormInternal> = {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
       },
       readonlyEnabled: {
-        defaultValue: false,
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
     },
@@ -100,13 +95,15 @@ export const schema: FormSchema<FormInternal> = {
         ),
       },
       freezeEnabled: {
-        defaultValue: false,
         label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
           defaultMessage: 'Freeze index',
         }),
       },
       minAgeUnit: {
         defaultValue: 'd',
+      },
+      dataTierAllocationEnabled: {
+        label: i18nTexts.editPolicy.allocationLabel,
       },
       dataTierAllocationType: {
         label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
@@ -216,8 +213,8 @@ export const schema: FormSchema<FormInternal> = {
         },
         set_priority: {
           priority: {
-            defaultValue: defaultSetPriority as any,
-            label: i18nTexts.editPolicy.setPriorityFieldLabel,
+            defaultValue: defaultIndexPriority.hot as any,
+            label: i18nTexts.editPolicy.indexPriorityFieldLabel,
             validations: [{ validator: ifExistsNumberNonNegative }],
             serializer: serializers.stringToNumber,
           },
@@ -287,8 +284,8 @@ export const schema: FormSchema<FormInternal> = {
         },
         set_priority: {
           priority: {
-            defaultValue: defaultPhaseIndexPriority as any,
-            label: i18nTexts.editPolicy.setPriorityFieldLabel,
+            defaultValue: defaultIndexPriority.warm as any,
+            label: i18nTexts.editPolicy.indexPriorityFieldLabel,
             validations: [{ validator: ifExistsNumberNonNegative }],
             serializer: serializers.stringToNumber,
           },
@@ -320,8 +317,8 @@ export const schema: FormSchema<FormInternal> = {
         },
         set_priority: {
           priority: {
-            defaultValue: '0' as any,
-            label: i18nTexts.editPolicy.setPriorityFieldLabel,
+            defaultValue: defaultIndexPriority.cold as any,
+            label: i18nTexts.editPolicy.indexPriorityFieldLabel,
             validations: [{ validator: ifExistsNumberNonNegative }],
             serializer: serializers.stringToNumber,
           },

@@ -34,16 +34,6 @@ const i18nTexts = {
           { defaultMessage: 'Move data to nodes in the warm tier.' }
         ),
       },
-      none: {
-        inputDisplay: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.warm.noneOption.input',
-          { defaultMessage: 'Off' }
-        ),
-        helpText: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.warm.noneOption.helpText',
-          { defaultMessage: 'Do not move data in the warm phase.' }
-        ),
-      },
       custom: {
         inputDisplay: i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.warm.customOption.input',
@@ -64,16 +54,6 @@ const i18nTexts = {
         helpText: i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.defaultOption.helpText',
           { defaultMessage: 'Move data to nodes in the cold tier.' }
-        ),
-      },
-      none: {
-        inputDisplay: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.noneOption.input',
-          { defaultMessage: 'Off' }
-        ),
-        helpText: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.noneOption.helpText',
-          { defaultMessage: 'Do not move data in the cold phase.' }
         ),
       },
       custom: {
@@ -119,21 +99,6 @@ const getSelectOptions = (phase: PhaseWithAllocation, disableDataTierOption: boo
           <EuiText size="s" color="subdued">
             <p className="euiTextColor--subdued">
               {i18nTexts.allocationOptions[phase].custom.helpText}
-            </p>
-          </EuiText>
-        </>
-      ),
-    },
-    {
-      'data-test-subj': 'noneDataAllocationOption',
-      value: 'none',
-      inputDisplay: i18nTexts.allocationOptions[phase].none.inputDisplay,
-      dropdownDisplay: (
-        <>
-          <strong>{i18nTexts.allocationOptions[phase].none.inputDisplay}</strong>
-          <EuiText size="s" color="subdued">
-            <p className="euiTextColor--subdued">
-              {i18nTexts.allocationOptions[phase].none.helpText}
             </p>
           </EuiText>
         </>

@@ -11,6 +11,7 @@ export type DataTierAllocationType = 'node_roles' | 'node_attrs' | 'none';
 export interface DataAllocationMetaFields {
   dataTierAllocationType: DataTierAllocationType;
   allocationNodeAttribute?: string;
+  dataTierAllocationEnabled: boolean;
 }
 
 export interface MinAgeField {

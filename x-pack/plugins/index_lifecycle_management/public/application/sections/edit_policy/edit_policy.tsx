@@ -23,8 +23,8 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiPageHeader,
-  EuiPageHeaderSection,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -110,7 +110,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
       );
     } else {
       const success = await savePolicy(
-        { ...policy, name: saveAsNew ? currentPolicyName : originalPolicyName },
+        { ...policy, name: saveAsNew || isNewPolicy ? currentPolicyName : originalPolicyName },
         isNewPolicy || saveAsNew
       );
       if (success) {
@@ -126,35 +126,35 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="l" data-test-subj="policyTitle">
-              <h1>
-                {isNewPolicy
-                  ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
-                      defaultMessage: 'Create Policy',
-                    })
-                  : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
-                      defaultMessage: 'Edit Policy {originalPolicyName}',
-                      values: { originalPolicyName },
-                    })}
-              </h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-          <EuiPageHeaderSection>
-            <EuiButtonEmpty
-              href={createDocLink('index-lifecycle-management.html')}
-              target="_blank"
-              iconType="help"
-            >
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"
-                defaultMessage="Documentation"
-              />
-            </EuiButtonEmpty>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
         <EuiPageContent>
+          <EuiPageContentHeader>
+            <EuiPageContentHeaderSection>
+              <EuiTitle size="l" data-test-subj="policyTitle">
+                <h1>
+                  {isNewPolicy
+                    ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
+                        defaultMessage: 'Create Policy',
+                      })
+                    : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
+                        defaultMessage: 'Edit Policy {originalPolicyName}',
+                        values: { originalPolicyName },
+                      })}
+                </h1>
+              </EuiTitle>
+            </EuiPageContentHeaderSection>
+            <EuiPageContentHeaderSection>
+              <EuiButtonEmpty
+                href={createDocLink('index-lifecycle-management.html')}
+                target="_blank"
+                iconType="help"
+              >
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"
+                  defaultMessage="Documentation"
+                />
+              </EuiButtonEmpty>
+            </EuiPageContentHeaderSection>
+          </EuiPageContentHeader>
           <Form form={form}>
             {isNewPolicy ? null : (
               <Fragment>

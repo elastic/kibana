@@ -7,20 +7,19 @@
 import { get } from 'lodash';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDescribedFormGroup, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import { useKibana, useFormData } from '../../../../../../../shared_imports';
 
 import { PhaseWithAllocation } from '../../../../../../../../common/types';
 
-import { getAvailableNodeRoleForPhase } from '../../../../../../lib/data_tiers';
-
-import { isNodeRoleFirstPreference } from '../../../../../../lib';
+import { isNodeRoleFirstPreference, getAvailableNodeRoleForPhase } from '../../../../../../lib';
 
 import { useLoadNodes } from '../../../../../../services/api';
 
 import { DataTierAllocationType } from '../../../../types';
 
+import { ToggleFieldWithDescribedFormRow } from '../../../described_form_row';
 import {
   DataTierAllocation,
   DefaultAllocationNotice,
@@ -31,11 +30,9 @@ import {
 
 import './_data_tier_allocation.scss';
 
-const i18nTexts = {
-  title: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.title', {
-    defaultMessage: 'Data allocation',
-  }),
-};
+const title = i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.title', {
+  defaultMessage: 'Data allocation',
+});
 
 interface Props {
   phase: PhaseWithAllocation;
@@ -112,8 +109,8 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
   };
 
   return (
-    <EuiDescribedFormGroup
-      title={<h3>{i18nTexts.title}</h3>}
+    <ToggleFieldWithDescribedFormRow
+      title={<h3>{title}</h3>}
       description={
         <>
           {description}
@@ -133,7 +130,13 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
           )}
         </>
       }
+      titleSize="xs"
       fullWidth
+      switchProps={{
+        path: `_meta.${phase}.dataTierAllocationEnabled`,
+        'data-test-subj': `${phase}-dataAllocationSwitch`,
+        'aria-controls': 'ilmDataTierAllocationField',
+      }}
     >
       <div className="ilmDataTierAllocationField">
         <DataTierAllocation
@@ -149,6 +152,6 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
         {/* Data tier related warnings and call-to-action notices */}
         {!isLoading && renderNotice()}
       </div>
-    </EuiDescribedFormGroup>
+    </ToggleFieldWithDescribedFormRow>
   );
 };
