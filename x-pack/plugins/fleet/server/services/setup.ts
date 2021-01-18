@@ -57,7 +57,7 @@ async function createSetupSideEffects(
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient),
-    updateFleetRole(callCluster),
+    updateFleetRoleIfExists(callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const defaultSettings = createDefaultSettings();
@@ -124,8 +124,7 @@ async function createSetupSideEffects(
   return { isIntialized: true };
 }
 
-async function updateFleetRole(callCluster: CallESAsCurrentUser) {
-  // First check for the existence of the role, if it doesn't exist, allow setup to initialize.
+async function updateFleetRoleIfExists(callCluster: CallESAsCurrentUser) {
   try {
     await callCluster('transport.request', {
       method: 'GET',
