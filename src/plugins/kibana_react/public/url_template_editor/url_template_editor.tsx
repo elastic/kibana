@@ -28,6 +28,7 @@ monaco.languages.register({
 });
 monaco.languages.setMonarchTokensProvider(LANG, language);
 monaco.languages.setLanguageConfiguration(LANG, conf);
+
 export interface UrlTemplateEditorProps {
   value: string;
   height?: CodeEditorProps['height'];
@@ -52,10 +53,17 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
         return {
           suggestions: [
             {
-              label: 'LABEL',
-              kind: monaco.languages.CompletionItemKind.Text,
-              documentation: 'DOCUMENTATION TEXT',
-              insertText: 'INSERT_TEXT',
+              label: 'event.value',
+              kind: monaco.languages.CompletionItemKind.Variable,
+              documentation: 'Value of the click event',
+              insertText: '{{event.value}}',
+              range,
+            },
+            {
+              label: 'event.key',
+              kind: monaco.languages.CompletionItemKind.Variable,
+              documentation: 'Field name.',
+              insertText: '{{event.key}}',
               range,
             },
           ],

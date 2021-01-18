@@ -24,25 +24,6 @@
 
 import { monaco } from '@kbn/monaco';
 
-const EMPTY_ELEMENTS: string[] = [
-  'area',
-  'base',
-  'br',
-  'col',
-  'embed',
-  'hr',
-  'img',
-  'input',
-  'keygen',
-  'link',
-  'menuitem',
-  'meta',
-  'param',
-  'source',
-  'track',
-  'wbr',
-];
-
 export const conf: monaco.languages.LanguageConfiguration = {
   wordPattern: /(-?\d*\.\d\w*)|([^\`\~\!\@\$\^\&\*\(\)\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\s]+)/g,
 
@@ -51,7 +32,6 @@ export const conf: monaco.languages.LanguageConfiguration = {
   },
 
   brackets: [
-    ['<!--', '-->'],
     ['<', '>'],
     ['{{', '}}'],
     ['{', '}'],
@@ -71,381 +51,181 @@ export const conf: monaco.languages.LanguageConfiguration = {
     { open: '"', close: '"' },
     { open: "'", close: "'" },
   ],
-
-  onEnterRules: [
-    {
-      beforeText: new RegExp(
-        `<(?!(?:${EMPTY_ELEMENTS.join('|')}))(\\w[\\w\\d]*)([^/>]*(?!/)>)[^<]*$`,
-        'i'
-      ),
-      afterText: /^<\/(\w[\w\d]*)\s*>$/i,
-      action: {
-        indentAction: monaco.languages.IndentAction.IndentOutdent,
-      },
-    },
-    {
-      beforeText: new RegExp(
-        `<(?!(?:${EMPTY_ELEMENTS.join('|')}))(\\w[\\w\\d]*)([^/>]*(?!/)>)[^<]*$`,
-        'i'
-      ),
-      action: { indentAction: monaco.languages.IndentAction.Indent },
-    },
-  ],
 };
 
-export const language = {
-  defaultToken: '',
+export const language: monaco.languages.IMonarchLanguage = {
+  // Set defaultToken to invalid to see what you do not tokenize yet.
+  defaultToken: 'invalid',
   tokenPostfix: '',
-  // ignoreCase: true,
+  brackets: [
+    {
+      token: 'delimiter.double',
+      open: '{{',
+      close: '}}',
+    },
+    {
+      token: 'delimiter.triple',
+      open: '{{{',
+      close: '}}}',
+    },
+  ],
 
-  // The main tokenizer for our languages
   tokenizer: {
     root: [
-      [/\{\{!--/, 'comment.block.start.handlebars', '@commentBlock'],
-      [/\{\{!/, 'comment.start.handlebars', '@comment'],
-      [/\{\{/, { token: '@rematch', switchTo: '@handlebarsInSimpleState.root' }],
-      [/<!DOCTYPE/, 'metatag.html', '@doctype'],
-      [/<!--/, 'comment.html', '@commentHtml'],
-      [/(<)(\w+)(\/>)/, ['delimiter.html', 'tag.html', 'delimiter.html']],
-      [/(<)(script)/, ['delimiter.html', { token: 'tag.html', next: '@script' }]],
-      [/(<)(style)/, ['delimiter.html', { token: 'tag.html', next: '@style' }]],
-      [/(<)([:\w]+)/, ['delimiter.html', { token: 'tag.html', next: '@otherTag' }]],
-      [/(<\/)(\w+)/, ['delimiter.html', { token: 'tag.html', next: '@otherTag' }]],
-      [/</, 'delimiter.html'],
-      [/\{/, 'delimiter.html'],
-      [/[^<{]+/], // text
+      { include: '@urlScheme' },
+      { include: '@maybeHandlebars' },
+      { include: '@whitespace' },
+      { include: '@text' },
     ],
 
-    doctype: [
+    maybeHandlebars: [
       [
         /\{\{/,
         {
           token: '@rematch',
-          switchTo: '@handlebarsInSimpleState.comment',
+          switchTo: '@handlebars.root',
         },
       ],
-      [/[^>]+/, 'metatag.content.html'],
-      [/>/, 'metatag.html', '@pop'],
     ],
 
-    comment: [
-      [/\}\}/, 'comment.end.handlebars', '@pop'],
-      [/./, 'comment.content.handlebars'],
-    ],
+    whitespace: [[/[ \t\r\n]+/, '']],
 
-    commentBlock: [
-      [/--\}\}/, 'comment.block.end.handlebars', '@pop'],
-      [/./, 'comment.content.handlebars'],
-    ],
-
-    commentHtml: [
+    text: [
       [
-        /\{\{/,
+        /[^<{]+/,
+        {
+          token: 'text',
+          next: '@popall',
+        },
+      ],
+    ],
+
+    rematchAsRoot: [
+      [
+        /.+/,
         {
           token: '@rematch',
-          switchTo: '@handlebarsInSimpleState.comment',
+          switchTo: '@root',
         },
       ],
-      [/-->/, 'comment.html', '@pop'],
-      [/[^-]+/, 'comment.content.html'],
-      [/./, 'comment.content.html'],
     ],
 
-    otherTag: [
+    urlScheme: [
       [
-        /\{\{/,
+        /([a-zA-Z0-9\+\.\-]{1,10})(:)/,
+        [
+          {
+            token: 'keyword.scheme.url',
+          },
+          {
+            token: 'delimiter.scheme.url',
+            next: '@tryUrlAuthority',
+          },
+        ],
+      ],
+    ],
+
+    tryUrlAuthority: [{ include: '@urlAuthority' }, { include: '@text' }],
+
+    urlAuthority: [
+      [
+        /(\/\/)([a-zA-Z0-9\.\-_]+)/,
+        [
+          {
+            token: 'delimiter.authority.url',
+          },
+          {
+            token: 'keyword.authority.url',
+            next: '@urlPath',
+          },
+        ],
+      ],
+    ],
+
+    urlPath: [
+      [
+        /((\/)([^\/\?]+))+/,
         {
           token: '@rematch',
-          switchTo: '@handlebarsInSimpleState.otherTag',
+          switchTo: '@urlPathSegmentSlash',
         },
       ],
-      [/\/?>/, 'delimiter.html', '@pop'],
-      [/"([^"]*)"/, 'attribute.value'],
-      [/'([^']*)'/, 'attribute.value'],
-      [/[\w\-]+/, 'attribute.name'],
-      [/=/, 'delimiter'],
-      [/[ \t\r\n]+/], // whitespace
+      { include: '@urlQuery' },
     ],
 
-    // -- BEGIN <script> tags handling
-
-    // After <script
-    script: [
+    urlPathSegmentSlash: [
       [
-        /\{\{/,
+        /\/+/,
         {
-          token: '@rematch',
-          switchTo: '@handlebarsInSimpleState.script',
+          token: 'delimiter.path.url',
+          next: '@urlPathSegment',
         },
-      ],
-      [/type/, 'attribute.name', '@scriptAfterType'],
-      [/"([^"]*)"/, 'attribute.value'],
-      [/'([^']*)'/, 'attribute.value'],
-      [/[\w\-]+/, 'attribute.name'],
-      [/=/, 'delimiter'],
-      [
-        />/,
-        {
-          token: 'delimiter.html',
-          next: '@scriptEmbedded.text/javascript',
-          nextEmbedded: 'text/javascript',
-        },
-      ],
-      [/[ \t\r\n]+/], // whitespace
-      [
-        /(<\/)(script\s*)(>)/,
-        ['delimiter.html', 'tag.html', { token: 'delimiter.html', next: '@pop' }],
       ],
     ],
 
-    // After <script ... type
-    scriptAfterType: [
+    urlPathSegment: [
       [
-        /\{\{/,
+        /[^\/\?]+/,
         {
-          token: '@rematch',
-          switchTo: '@handlebarsInSimpleState.scriptAfterType',
+          token: 'keyword.segment.path.url',
+          next: '@urlPath',
         },
-      ],
-      [/=/, 'delimiter', '@scriptAfterTypeEquals'],
-      [
-        />/,
-        {
-          token: 'delimiter.html',
-          next: '@scriptEmbedded.text/javascript',
-          nextEmbedded: 'text/javascript',
-        },
-      ], // cover invalid e.g. <script type>
-      [/[ \t\r\n]+/], // whitespace
-      [/<\/script\s*>/, { token: '@rematch', next: '@pop' }],
-    ],
-
-    // After <script ... type =
-    scriptAfterTypeEquals: [
-      [
-        /\{\{/,
-        {
-          token: '@rematch',
-          switchTo: '@handlebarsInSimpleState.scriptAfterTypeEquals',
-        },
-      ],
-      [
-        /"([^"]*)"/,
-        {
-          token: 'attribute.value',
-          switchTo: '@scriptWithCustomType.$1',
-        },
-      ],
-      [
-        /'([^']*)'/,
-        {
-          token: 'attribute.value',
-          switchTo: '@scriptWithCustomType.$1',
-        },
-      ],
-      [
-        />/,
-        {
-          token: 'delimiter.html',
-          next: '@scriptEmbedded.text/javascript',
-          nextEmbedded: 'text/javascript',
-        },
-      ], // cover invalid e.g. <script type=>
-      [/[ \t\r\n]+/], // whitespace
-      [/<\/script\s*>/, { token: '@rematch', next: '@pop' }],
-    ],
-
-    // After <script ... type = $S2
-    scriptWithCustomType: [
-      [
-        /\{\{/,
-        {
-          token: '@rematch',
-          switchTo: '@handlebarsInSimpleState.scriptWithCustomType.$S2',
-        },
-      ],
-      [
-        />/,
-        {
-          token: 'delimiter.html',
-          next: '@scriptEmbedded.$S2',
-          nextEmbedded: '$S2',
-        },
-      ],
-      [/"([^"]*)"/, 'attribute.value'],
-      [/'([^']*)'/, 'attribute.value'],
-      [/[\w\-]+/, 'attribute.name'],
-      [/=/, 'delimiter'],
-      [/[ \t\r\n]+/], // whitespace
-      [/<\/script\s*>/, { token: '@rematch', next: '@pop' }],
-    ],
-
-    scriptEmbedded: [
-      [
-        /\{\{/,
-        {
-          token: '@rematch',
-          switchTo: '@handlebarsInEmbeddedState.scriptEmbedded.$S2',
-          nextEmbedded: '@pop',
-        },
-      ],
-      [/<\/script/, { token: '@rematch', next: '@pop', nextEmbedded: '@pop' }],
-    ],
-
-    // -- END <script> tags handling
-
-    // -- BEGIN <style> tags handling
-
-    // After <style
-    style: [
-      [
-        /\{\{/,
-        {
-          token: '@rematch',
-          switchTo: '@handlebarsInSimpleState.style',
-        },
-      ],
-      [/type/, 'attribute.name', '@styleAfterType'],
-      [/"([^"]*)"/, 'attribute.value'],
-      [/'([^']*)'/, 'attribute.value'],
-      [/[\w\-]+/, 'attribute.name'],
-      [/=/, 'delimiter'],
-      [
-        />/,
-        {
-          token: 'delimiter.html',
-          next: '@styleEmbedded.text/css',
-          nextEmbedded: 'text/css',
-        },
-      ],
-      [/[ \t\r\n]+/], // whitespace
-      [
-        /(<\/)(style\s*)(>)/,
-        ['delimiter.html', 'tag.html', { token: 'delimiter.html', next: '@pop' }],
       ],
     ],
 
-    // After <style ... type
-    styleAfterType: [
+    urlQuery: [
       [
-        /\{\{/,
+        /[\?\#]/,
         {
-          token: '@rematch',
-          switchTo: '@handlebarsInSimpleState.styleAfterType',
+          token: 'delimiter.query.url',
         },
       ],
-      [/=/, 'delimiter', '@styleAfterTypeEquals'],
       [
-        />/,
+        /[^#]+/,
         {
-          token: 'delimiter.html',
-          next: '@styleEmbedded.text/css',
-          nextEmbedded: 'text/css',
+          token: 'keyword.query.url',
         },
-      ], // cover invalid e.g. <style type>
-      [/[ \t\r\n]+/], // whitespace
-      [/<\/style\s*>/, { token: '@rematch', next: '@pop' }],
+      ],
     ],
 
-    // After <style ... type =
-    styleAfterTypeEquals: [
+    handlebars: [
       [
-        /\{\{/,
+        /\{\{\{?/,
         {
-          token: '@rematch',
-          switchTo: '@handlebarsInSimpleState.styleAfterTypeEquals',
+          token: '@brackets',
+          bracket: '@open',
         },
       ],
-      [
-        /"([^"]*)"/,
-        {
-          token: 'attribute.value',
-          switchTo: '@styleWithCustomType.$1',
-        },
-      ],
-      [
-        /'([^']*)'/,
-        {
-          token: 'attribute.value',
-          switchTo: '@styleWithCustomType.$1',
-        },
-      ],
-      [
-        />/,
-        {
-          token: 'delimiter.html',
-          next: '@styleEmbedded.text/css',
-          nextEmbedded: 'text/css',
-        },
-      ], // cover invalid e.g. <style type=>
-      [/[ \t\r\n]+/], // whitespace
-      [/<\/style\s*>/, { token: '@rematch', next: '@pop' }],
-    ],
-
-    // After <style ... type = $S2
-    styleWithCustomType: [
-      [
-        /\{\{/,
-        {
-          token: '@rematch',
-          switchTo: '@handlebarsInSimpleState.styleWithCustomType.$S2',
-        },
-      ],
-      [
-        />/,
-        {
-          token: 'delimiter.html',
-          next: '@styleEmbedded.$S2',
-          nextEmbedded: '$S2',
-        },
-      ],
-      [/"([^"]*)"/, 'attribute.value'],
-      [/'([^']*)'/, 'attribute.value'],
-      [/[\w\-]+/, 'attribute.name'],
-      [/=/, 'delimiter'],
-      [/[ \t\r\n]+/], // whitespace
-      [/<\/style\s*>/, { token: '@rematch', next: '@pop' }],
-    ],
-
-    styleEmbedded: [
-      [
-        /\{\{/,
-        {
-          token: '@rematch',
-          switchTo: '@handlebarsInEmbeddedState.styleEmbedded.$S2',
-          nextEmbedded: '@pop',
-        },
-      ],
-      [/<\/style/, { token: '@rematch', next: '@pop', nextEmbedded: '@pop' }],
-    ],
-
-    // -- END <style> tags handling
-
-    handlebarsInSimpleState: [
-      [/\{\{\{?/, 'delimiter.handlebars'],
-      [/\}\}\}?/, { token: 'delimiter.handlebars', switchTo: '@$S2.$S3' }],
-      { include: 'handlebarsRoot' },
-    ],
-
-    handlebarsInEmbeddedState: [
-      [/\{\{\{?/, 'delimiter.handlebars'],
       [
         /\}\}\}?/,
         {
-          token: 'delimiter.handlebars',
+          token: '@brackets',
+          bracket: '@close',
           switchTo: '@$S2.$S3',
-          nextEmbedded: '$S3',
         },
       ],
-      { include: 'handlebarsRoot' },
+      { include: 'handlebarsExpression' },
     ],
 
-    handlebarsRoot: [
+    handlebarsExpression: [
       [/"[^"]*"/, 'string.handlebars'],
       [/[#/][^\s}]+/, 'keyword.helper.handlebars'],
       [/else\b/, 'keyword.helper.handlebars'],
       [/[\s]+/],
       [/[^}]/, 'variable.parameter.handlebars'],
     ],
+
+    // root: [
+    //   [/<style\s*>/,   { token: 'keyword', bracket: '@open'
+    //                   , next: '@css_block', nextEmbedded: 'text/css' }],
+    //   [/<\/style\s*>/, { token: 'keyword', bracket: '@close' }],
+    // ],
+
+    // css_block: [
+    //   [/[^"<]+/, ''],
+    //   [/<\/style\s*>/, { token: '@rematch', next: '@pop', nextEmbedded: '@pop' }],
+    //   [/"/, 'string', '@string' ],
+    //   [/</, '']
+    // ],
   },
 } as monaco.languages.IMonarchLanguage;
