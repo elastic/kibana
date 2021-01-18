@@ -12,7 +12,8 @@ export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
 
-  describe('ml', () => {
+  // flaky tests, see https://github.com/elastic/kibana/issues/88592
+  describe.skip('ml', () => {
     const esArchiver = getService('esArchiver');
 
     before(async () => {
