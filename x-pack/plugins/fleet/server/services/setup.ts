@@ -135,7 +135,7 @@ async function updateFleetRoleIfExists(callCluster: CallESAsCurrentUser) {
       return;
     }
 
-    return Promise.reject(e);
+    throw e;
   }
 
   return putFleetRole(callCluster);
