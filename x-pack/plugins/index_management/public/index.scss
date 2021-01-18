@@ -11,7 +11,7 @@
 
 .indTable {
   // The index table is a bespoke table and can't make use of EuiBasicTable's width settings
-  thead th.indTable__header--name {
+  thead th.indTable__header--name { // stylelint-disable-line selector-no-qualifying-type
     width: 25%;
   }
 
