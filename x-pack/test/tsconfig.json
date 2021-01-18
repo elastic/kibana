@@ -3,7 +3,7 @@
   "compilerOptions": {
     // overhead is too significant
     "incremental": false,
-    "types": ["mocha", "node", "flot"]
+    "types": ["node", "flot"]
   },
   "include": ["**/*", "../typings/**/*", "../../packages/kbn-test/types/ftr_globals/**/*"],
   "exclude": ["../typings/jest.d.ts"],
@@ -42,9 +42,13 @@
     { "path": "../plugins/global_search_providers/tsconfig.json" },
     { "path": "../plugins/features/tsconfig.json" },
     { "path": "../plugins/embeddable_enhanced/tsconfig.json" },
+    { "path": "../plugins/event_log/tsconfig.json"},
     { "path": "../plugins/licensing/tsconfig.json" },
     { "path": "../plugins/task_manager/tsconfig.json" },
     { "path": "../plugins/telemetry_collection_xpack/tsconfig.json" },
     { "path": "../plugins/ui_actions_enhanced/tsconfig.json" },
+    { "path": "../plugins/spaces/tsconfig.json" },
+    { "path": "../plugins/security/tsconfig.json" },
+    { "path": "../plugins/encrypted_saved_objects/tsconfig.json" }
   ]
 }

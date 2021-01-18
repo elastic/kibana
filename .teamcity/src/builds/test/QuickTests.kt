@@ -14,7 +14,6 @@ object QuickTests : BuildType({
   val testScripts = mapOf(
     "Test Hardening" to ".ci/teamcity/checks/test_hardening.sh",
     "Test Projects" to ".ci/teamcity/tests/test_projects.sh",
-    "Mocha Tests" to ".ci/teamcity/tests/mocha.sh"
   )
 
   steps {

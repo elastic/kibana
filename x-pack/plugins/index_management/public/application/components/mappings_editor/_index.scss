@@ -49,67 +49,67 @@
 .mappingsEditor__fieldsList {
   .mappingsEditor__fieldsList .mappingsEditor__fieldsListItem__content,
   .mappingsEditor__createFieldContent {
-      &::before {
-        border-bottom: 1px solid $euiColorMediumShade;
-        content: '';
-        left: $euiSize;
-        position: absolute;
-        top: 50%;
-        width: $euiSizeS;
-      }
-      &::after {
-        border-left: 1px solid $euiColorMediumShade;
-        content: '';
-        left: $euiSize;
-        position: absolute;
-        top: calc(50% - #{$euiSizeS});
-        height: $euiSizeS;
-      }
+    &::before {
+      border-bottom: 1px solid $euiColorMediumShade;
+      content: '';
+      left: $euiSize;
+      position: absolute;
+      top: 50%;
+      width: $euiSizeS;
     }
-
-    .mappingsEditor__createFieldContent {
-      padding-left: $euiSizeXXL - $euiSizeXS; // [1]
+    &::after {
+      border-left: 1px solid $euiColorMediumShade;
+      content: '';
+      left: $euiSize;
+      position: absolute;
+      top: calc(50% - #{$euiSizeS});
+      height: $euiSizeS;
     }
+  }
 
-    .mappingsEditor__createFieldWrapper {
-      &--multiField {
-        .mappingsEditor__createFieldContent {
-          padding-left: $euiSize;
-        }
+  .mappingsEditor__createFieldContent {
+    padding-left: $euiSizeXXL - $euiSizeXS; // [1]
+  }
 
-        .mappingsEditor__createFieldContent {
-          &::before, &::after {
-            content: none;
-          }
-        }
-      }
+  .mappingsEditor__createFieldWrapper {
+    &--multiField {
 
-      &--toggle {
-        .mappingsEditor__createFieldContent {
-          padding-left: $euiSizeXXL - $euiSizeXS; // [1]
-        }
-      }
-    }
+      .mappingsEditor__createFieldContent {
+        padding-left: $euiSize;
 
-    .mappingsEditor__fieldsList .mappingsEditor__fieldsListItem__content {
-      padding-left: $euiSizeXL; // [2]
-
-      &--toggle, &--multiField {
         &::before, &::after {
           content: none;
         }
       }
+    }
 
-      &--toggle {
-        padding-left: 0;
-      }
-
-      &--multiField {
-        padding-left: $euiSizeS;
+    &--toggle {
+      .mappingsEditor__createFieldContent {
+        padding-left: $euiSizeXXL - $euiSizeXS; // [1]
       }
     }
+  }
+
+  .mappingsEditor__fieldsList .mappingsEditor__fieldsListItem__content {
+    padding-left: $euiSizeXL; // [2]
+
+    &--toggle, &--multiField {
+      &::before, &::after {
+        content: none;
+      }
+    }
+
+    &--toggle {
+      padding-left: 0;
+    }
+
+    &--multiField {
+      padding-left: $euiSizeS;
+    }
+  }
 }
 
+// stylelint-disable selector-no-qualifying-type
 ul.esUiTree {
   padding: 0;
   margin: 0;

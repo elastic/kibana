@@ -17,21 +17,21 @@
  * under the License.
  */
 
-import mocha from 'mocha';
-import { setupJUnitReportGeneration } from './junit_report_generation';
+// @ts-expect-error
+import stubbedLogstashFields from '../../../../fixtures/logstash_fields';
 
-const MochaSpecReporter = mocha.reporters.spec;
+const mockLogstashFields = stubbedLogstashFields();
 
-export function createAutoJUnitReporter(junitReportOptions) {
-  return class AutoJUnitReporter {
-    constructor(runner, options) {
-      // setup a spec reporter for console output
-      new MochaSpecReporter(runner, options);
-
-      // in CI we also setup the JUnit reporter
-      if (process.env.CI && !process.env.DISABLE_JUNIT_REPORTER) {
-        setupJUnitReportGeneration(runner, junitReportOptions);
-      }
-    }
+export function stubbedSavedObjectIndexPattern(id: string | null = null) {
+  return {
+    id,
+    type: 'index-pattern',
+    attributes: {
+      timeFieldName: 'timestamp',
+      customFormats: {},
+      fields: mockLogstashFields,
+      title: 'title',
+    },
+    version: '2',
   };
 }
