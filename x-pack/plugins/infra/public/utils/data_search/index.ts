@@ -7,5 +7,6 @@
 export * from './handle_data_search_response';
 export * from './types';
 export * from './use_data_search_request';
+export * from './use_data_search_response_state';
 export * from './use_flattened_response';
 export * from './use_latest_partial_data_search_response';

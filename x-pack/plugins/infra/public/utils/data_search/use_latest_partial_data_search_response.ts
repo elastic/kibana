@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/public';
-import { useLatest, useObservableState } from '../use_observable';
+import { useLatest } from '../use_observable';
 import { handleDataSearchResponse, ResponseProjection } from './handle_data_search_response';
 import { DataSearchRequestDescriptor, DataSearchResponseDescriptor } from './types';
+import { useDataSearchResponseState } from './use_data_search_response_state';
 import { useFlattenedResponse } from './use_flattened_response';
 
 export const useLatestPartialDataSearchResponse = <
@@ -33,19 +33,23 @@ export const useLatestPartialDataSearchResponse = <
     switchMap(handleDataSearchResponse(latestInitialResponse, latestProjectResponse))
   );
 
-  const { latestValue } = useObservableState(latestResponse$, undefined);
-
-  const cancelRequest = useCallback(() => {
-    latestValue?.abortController.abort();
-  }, [latestValue]);
+  const {
+    cancelRequest,
+    isRequestRunning,
+    isResponsePartial,
+    latestResponseData,
+    latestResponseErrors,
+    loaded,
+    total,
+  } = useDataSearchResponseState(latestResponse$);
 
   return {
     cancelRequest,
-    isRequestRunning: latestValue?.response.isRunning ?? false,
-    isResponsePartial: latestValue?.response.isPartial ?? false,
-    latestResponseData: latestValue?.response.data,
-    latestResponseErrors: latestValue?.response.errors,
-    loaded: latestValue?.response.loaded,
-    total: latestValue?.response.total,
+    isRequestRunning,
+    isResponsePartial,
+    latestResponseData,
+    latestResponseErrors,
+    loaded,
+    total,
   };
 };
