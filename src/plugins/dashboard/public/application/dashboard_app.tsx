@@ -124,7 +124,7 @@ export function DashboardApp({
           if (searchSessionIdFromURL) {
             if (
               data.search.session.isRestore() &&
-              data.search.session.getSessionId() === searchSessionIdFromURL
+              data.search.session.isCurrentSession(searchSessionIdFromURL)
             ) {
               // navigating away from a restored session
               dashboardStateManager.kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
