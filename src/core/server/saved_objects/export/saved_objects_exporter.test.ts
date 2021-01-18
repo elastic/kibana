@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import type { SavedObject } from '../../../types';
 import { SavedObjectsExporter } from './saved_objects_exporter';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
@@ -24,7 +25,7 @@ import { httpServerMock } from '../../http/http_server.mocks';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 
-async function readStreamToCompletion(stream: Readable) {
+async function readStreamToCompletion(stream: Readable): Promise<Array<SavedObject<any>>> {
   return createPromiseFromStreams([stream, createConcatStream([])]);
 }
 
@@ -130,6 +131,52 @@ describe('getSortedObjectsForExport()', () => {
                 ],
               }
           `);
+    });
+
+    test('applies the export transforms', async () => {
+      typeRegistry.registerType({
+        name: 'foo',
+        mappings: { properties: {} },
+        namespaceType: 'single',
+        hidden: false,
+        management: {
+          importableAndExportable: true,
+          onExport: (ctx, objects) => {
+            objects.forEach((obj: SavedObject<any>) => {
+              obj.attributes.foo = 'modified';
+            });
+            return objects;
+          },
+        },
+      });
+      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit, typeRegistry });
+
+      savedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'foo',
+            attributes: {
+              foo: 'initial',
+            },
+            score: 0,
+            references: [],
+          },
+        ],
+        per_page: 1,
+        page: 0,
+      });
+      const exportStream = await exporter.exportByTypes({
+        request,
+        types: ['foo'],
+        excludeExportDetails: true,
+      });
+
+      const response = await readStreamToCompletion(exportStream);
+
+      expect(response).toHaveLength(1);
+      expect(response[0].attributes.foo).toEqual('modified');
     });
 
     test('omits the `namespaces` property from the export', async () => {
