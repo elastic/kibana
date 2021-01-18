@@ -227,6 +227,15 @@ export const sourceConfigData = {
   },
 };
 
+export const oauthApplication = {
+  name: 'app',
+  uid: '123uid123',
+  secret: 'shhhhhhhhh',
+  redirectUri: 'https://foo',
+  confidential: false,
+  nativeRedirectUri: 'https://bar',
+};
+
 export const exampleResult = {
   sourceName: 'source',
   searchResultConfig: {
