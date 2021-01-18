@@ -18,18 +18,28 @@
  */
 
 import type {
-  RequestHandlerContext,
   FakeRequest,
   IUiSettingsClient,
+  RequestHandlerContext,
   SavedObjectsClientContract,
 } from 'kibana/server';
 
 import type { Framework } from '../../../plugin';
-import type { IndexPatternsFetcher, IFieldType } from '../../../../../data/server';
+import type {
+  IndexPatternsFetcher,
+  IFieldType,
+  IScopedSessionService,
+} from '../../../../../data/server';
 import type { VisPayload } from '../../../../common/types';
-import type { IndexPatternsService } from '../../../../../data/common';
+import type { IndexPatternsService, ISearchClient } from '../../../../../data/common';
 import { indexPatterns } from '../../../../../data/server';
 import { SanitizedFieldType } from '../../../../common/types';
+
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    search?: ISearchClient & { session: IScopedSessionService };
+  }
+}
 
 /**
  * ReqFacade is a regular KibanaRequest object extended with additional service
