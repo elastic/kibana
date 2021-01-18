@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { isErr, tryAsResult } from './lib/result_type';
@@ -86,17 +85,8 @@ export interface FailedTaskResult {
   status: TaskStatus.Failed;
 }
 
-export const validateRunResult = Joi.object({
-  runAt: Joi.date().optional(),
-  schedule: Joi.object().optional(),
-  error: Joi.object().optional(),
-  state: Joi.object().optional(),
-}).optional();
-
 export type RunFunction = () => Promise<RunResult | undefined | void>;
-
 export type CancelFunction = () => Promise<RunResult | undefined | void>;
-
 export interface CancellableTask {
   run: RunFunction;
   cancel?: CancelFunction;
@@ -180,7 +170,6 @@ export enum TaskLifecycleResult {
 }
 
 export type TaskLifecycle = TaskStatus | TaskLifecycleResult;
-
 export interface IntervalSchedule {
   /**
    * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
