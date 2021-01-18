@@ -36,7 +36,7 @@ paginate {
           text-decoration: underline;
         }
 
-        &.active a {
+        &.active a { // stylelint-disable-line selector-no-qualifying-type
           text-decoration: none !important;
           font-weight: $euiFontWeightBold;
           color: $euiColorDarkShade;
@@ -54,4 +54,3 @@ paginate {
     }
   }
 }
-

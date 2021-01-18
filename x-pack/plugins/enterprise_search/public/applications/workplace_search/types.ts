@@ -130,7 +130,6 @@ export interface ContentSourceFullData extends ContentSourceDetails {
   groups: Group[];
   custom: boolean;
   accessToken: string;
-  key: string;
   urlField: string;
   titleField: string;
   licenseSupportsPermissions: boolean;
@@ -177,7 +176,6 @@ export enum FeatureIds {
 
 export interface CustomSource {
   accessToken: string;
-  key: string;
   name: string;
   id: string;
 }

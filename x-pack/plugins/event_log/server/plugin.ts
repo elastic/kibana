@@ -55,12 +55,14 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
   private globalConfig$: Observable<SharedGlobalConfig>;
   private eventLogClientService?: EventLogClientService;
   private savedObjectProviderRegistry: SavedObjectProviderRegistry;
+  private kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(private readonly context: PluginInitializerContext) {
     this.systemLogger = this.context.logger.get();
     this.config$ = this.context.config.create<IEventLogConfig>();
     this.globalConfig$ = this.context.config.legacy.globalConfig$;
     this.savedObjectProviderRegistry = new SavedObjectProviderRegistry();
+    this.kibanaVersion = this.context.env.packageInfo.version;
   }
 
   async setup(core: CoreSetup): Promise<IEventLogService> {
@@ -78,6 +80,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       clusterClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.legacy.client),
+      kibanaVersion: this.kibanaVersion,
     });
 
     this.eventLogService = new EventLogService({
