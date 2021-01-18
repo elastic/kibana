@@ -1,0 +1,8 @@
+{
+  "id": "savedObjectExportHooks",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["saved_object_export_hooks"],
+  "server": true,
+  "ui": false
+}
