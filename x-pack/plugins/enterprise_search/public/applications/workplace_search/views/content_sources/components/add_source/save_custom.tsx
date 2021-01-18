@@ -43,7 +43,7 @@ import {
   SAVE_CUSTOM_API_KEYS_TITLE,
   SAVE_CUSTOM_API_KEYS_BODY,
   SAVE_CUSTOM_ACCESS_TOKEN_LABEL,
-  SAVE_CUSTOM_API_KEY_LABEL,
+  SAVE_CUSTOM_ID_LABEL,
   SAVE_CUSTOM_VISUAL_WALKTHROUGH_TITLE,
   SAVE_CUSTOM_STYLING_RESULTS_TITLE,
   SAVE_CUSTOM_DOC_PERMISSIONS_TITLE,
@@ -59,7 +59,7 @@ interface SaveCustomProps {
 
 export const SaveCustom: React.FC<SaveCustomProps> = ({
   documentationUrl,
-  newCustomSource: { key, id, accessToken, name },
+  newCustomSource: { id, accessToken, name },
   isOrganization,
   header,
 }) => (
@@ -109,16 +109,12 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                 <p>{SAVE_CUSTOM_API_KEYS_BODY}</p>
               </EuiText>
               <EuiSpacer />
+              <CredentialItem label={SAVE_CUSTOM_ID_LABEL} value={id} testSubj="ContentSourceId" />
+              <EuiSpacer />
               <CredentialItem
                 label={SAVE_CUSTOM_ACCESS_TOKEN_LABEL}
                 value={accessToken}
                 testSubj="AccessToken"
-              />
-              <EuiSpacer />
-              <CredentialItem
-                label={SAVE_CUSTOM_API_KEY_LABEL}
-                value={key}
-                testSubj="ContentSourceKey"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

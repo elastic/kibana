@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JsonValue } from '../../../../common/typed_json';
+import { JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
 
 export interface LogMessageFormattingRule {
   when: LogMessageFormattingCondition;
