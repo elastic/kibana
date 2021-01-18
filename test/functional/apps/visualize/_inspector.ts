@@ -17,12 +17,15 @@
  * under the License.
  */
 
+import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('inspector', function describeIndexTests() {
@@ -32,6 +35,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickNewSearch();
 
       await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    describe('advanced input JSON', () => {
+      it('should match JSON string', async () => {
+        log.debug('Add Max Metric on memory field');
+        await PageObjects.visEditor.clickBucket('Y-axis', 'metrics');
+        await PageObjects.visEditor.selectAggregation('Max', 'metrics');
+        await PageObjects.visEditor.selectField('memory', 'metrics');
+
+        log.debug('Add value to advanced JSON input');
+        await PageObjects.visEditor.toggleAdvancedParams('2');
+        await testSubjects.setValue('codeEditorContainer', '{ "missing": 10 }');
+        await PageObjects.visEditor.clickGo();
+
+        await inspector.open();
+        await inspector.openInspectorRequestsView();
+        const requestTab = await inspector.getOpenRequestDetailRequestButton();
+        await requestTab.click();
+        const requestJSON = await inspector.getCodeEditorValue();
+
+        expect(requestJSON).to.be(
+          '{\n  "aggs": {\n    "2": {\n      "max": {\n        "field": "memory",\n        "missing": 10\n      }\n' +
+            '    }\n  },\n  "size": 0,\n  "fields": [\n    {\n      "field": "@timestamp",\n      "format": "date_time"\n' +
+            '    },\n    {\n      "field": "relatedContent.article:modified_time",\n      "format": "date_time"\n    },\n' +
+            '    {\n      "field": "relatedContent.article:published_time",\n      "format": "date_time"\n    },\n    {\n' +
+            '      "field": "utc_time",\n      "format": "date_time"\n    }\n  ],\n  "script_fields": {},\n  "stored_fields": ' +
+            '[\n    "*"\n  ],\n  "_source": {\n    "excludes": []\n  },\n  "query": {\n    "bool": {\n      "must": [],\n      ' +
+            '"filter": [\n        {\n          "match_all": {}\n        },\n        {\n          "range": {\n            ' +
+            '"@timestamp": {\n              "gte": "2015-09-19T06:31:44.000Z",\n              "lte": "2015-09-23T18:31:44.000Z",\n' +
+            '              "format": "strict_date_optional_time"\n            }\n          }\n        }\n      ],\n      ' +
+            '"should": [],\n      "must_not": []\n    }\n  }\n}'
+        );
+      });
+
+      after(async () => {
+        await inspector.close();
+        await PageObjects.visEditor.removeDimension(2);
+        await PageObjects.visEditor.clickGo();
+      });
     });
 
     describe('inspector table', function indexPatternCreation() {
