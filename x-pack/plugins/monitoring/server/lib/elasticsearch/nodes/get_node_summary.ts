@@ -39,15 +39,15 @@ export function handleResponse(
     > = nodeStatsHits.map((hit) => hit._source.elasticsearch?.node || hit._source.source_node); // using [0] value because query results are sorted desc per timestamp
     const node = nodes[0] || getDefaultNodeFromId(nodeUuid);
     const sourceStats =
-      response.hits?.hits[0]._source.elasticsearch?.node?.stats ||
-      response.hits?.hits[0]._source.node_stats;
+      response.hits?.hits[0]?._source.elasticsearch?.node?.stats ||
+      response.hits?.hits[0]?._source.node_stats;
     const clusterNode =
       clusterState && clusterState.nodes ? clusterState.nodes[nodeUuid] : undefined;
     const stats = {
       resolver: nodeUuid,
       node_ids: nodes.map((_node) => node.id || node.uuid),
       attributes: node.attributes,
-      transport_address: response.hits?.hits[0]._source.service?.address || node.transport_address,
+      transport_address: response.hits?.hits[0]?._source.service?.address || node.transport_address,
       name: node.name,
       type: node.type,
     };

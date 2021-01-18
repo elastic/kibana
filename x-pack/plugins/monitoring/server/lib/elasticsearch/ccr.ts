@@ -15,8 +15,9 @@ import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
 
 export function handleResponse(response: ElasticsearchResponse) {
-  const isEnabled = response.hits?.hits[0]._source.stack_stats?.xpack?.ccr?.enabled ?? false;
-  const isAvailable = response.hits?.hits[0]._source.stack_stats?.xpack?.ccr?.available ?? false;
+  const isEnabled = response.hits?.hits[0]?._source.stack_stats?.xpack?.ccr?.enabled ?? undefined;
+  const isAvailable =
+    response.hits?.hits[0]?._source.stack_stats?.xpack?.ccr?.available ?? undefined;
   return isEnabled && isAvailable;
 }
 

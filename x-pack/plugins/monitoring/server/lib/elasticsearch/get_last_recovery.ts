@@ -42,7 +42,7 @@ export function filterOldShardActivity(startMs: number) {
  */
 export function handleLastRecoveries(resp: ElasticsearchResponse, start: number) {
   if (resp.hits?.hits.length === 1) {
-    const data = (resp.hits?.hits[0]._source.index_recovery?.shards ?? []).filter(
+    const data = (resp.hits?.hits[0]?._source.index_recovery?.shards ?? []).filter(
       filterOldShardActivity(moment.utc(start).valueOf())
     );
     data.sort((a, b) => b.start_time_in_millis - a.start_time_in_millis);

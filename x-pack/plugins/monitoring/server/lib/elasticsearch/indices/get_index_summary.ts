@@ -17,7 +17,7 @@ import { LegacyRequest } from '../../../types';
 
 export function handleResponse(shardStats: any, indexUuid: string) {
   return (response: ElasticsearchResponse) => {
-    const indexStats = response.hits?.hits[0]._source.index_stats;
+    const indexStats = response.hits?.hits[0]?._source.index_stats;
     const primaries = indexStats?.primaries;
     const total = indexStats?.total;
 

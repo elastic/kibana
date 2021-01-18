@@ -50,7 +50,7 @@ export function mapNodesInfo(
         isOnline,
         nodeTypeLabel,
         nodeTypeClass,
-        shardCount: nodesShardCount.nodes[uuid].shardCount ?? 0,
+        shardCount: nodesShardCount.nodes[uuid]?.shardCount ?? 0,
       },
     };
   }, {});

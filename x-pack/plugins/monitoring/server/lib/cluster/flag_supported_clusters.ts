@@ -44,7 +44,7 @@ async function findSupportedBasicLicenseCluster(
       },
     },
   })) as ElasticsearchResponse;
-  const supportedClusterUuid = kibanaDataResult.hits?.hits[0]._source.cluster_uuid ?? undefined;
+  const supportedClusterUuid = kibanaDataResult.hits?.hits[0]?._source.cluster_uuid ?? undefined;
   for (const cluster of clusters) {
     if (cluster.cluster_uuid === supportedClusterUuid) {
       cluster.isSupported = true;

@@ -29,11 +29,11 @@ export function handleResponse(
   const hits = resp.hits?.hits ?? [];
   return hits.map((hit) => {
     const stats = hit._source.index_stats;
-    const earliestStats = hit.inner_hits?.earliest?.hits?.hits[0]._source.index_stats;
+    const earliestStats = hit.inner_hits?.earliest?.hits?.hits[0]?._source.index_stats;
 
     const rateOptions = {
       hitTimestamp: hit._source.timestamp,
-      earliestHitTimestamp: hit.inner_hits?.earliest?.hits?.hits[0]._source.timestamp,
+      earliestHitTimestamp: hit.inner_hits?.earliest?.hits?.hits[0]?._source.timestamp,
       timeWindowMin: min,
       timeWindowMax: max,
     };

@@ -33,6 +33,6 @@ export function getClusterLicense(req: LegacyRequest, esIndexPattern: string, cl
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then((response: ElasticsearchResponse) => {
-    return response.hits?.hits[0]._source.license;
+    return response.hits?.hits[0]?._source.license;
   });
 }

@@ -137,15 +137,15 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
           getCcrStat(req, esIndexPattern, filters),
         ]);
 
-        const stat = ccrResponse.hits?.hits[0]._source.ccr_stats ?? {};
+        const stat = ccrResponse.hits?.hits[0]?._source.ccr_stats ?? {};
         const oldestStat =
-          ccrResponse.hits?.hits[0].inner_hits?.oldest.hits?.hits[0]._source.ccr_stats ?? {};
+          ccrResponse.hits?.hits[0].inner_hits?.oldest.hits?.hits[0]?._source.ccr_stats ?? {};
 
         return {
           metrics,
           stat,
           formattedLeader: getFormattedLeaderIndex(stat.leader_index ?? ''),
-          timestamp: ccrResponse.hits?.hits[0]._source.timestamp,
+          timestamp: ccrResponse.hits?.hits[0]?._source.timestamp,
           oldestStat,
         };
       } catch (err) {

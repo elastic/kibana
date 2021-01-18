@@ -12,7 +12,7 @@ import { handleError } from '../../../../lib/errors/handle_error';
 // @ts-ignore
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
-import { ElasticsearchResponse } from '../../../../../common/types/es';
+import { ElasticsearchResponse, ElasticsearchSource } from '../../../../../common/types/es';
 import { LegacyRequest } from '../../../../types';
 
 function getBucketScript(max: string, min: string) {
@@ -218,19 +218,25 @@ export function ccrRoute(server: {
           return { data: [] };
         }
 
-        const fullStats = response.hits?.hits.reduce((accum, hit) => {
-          const innerHits = hit.inner_hits?.by_shard.hits?.hits ?? [];
-          const innerHitsSource = innerHits.map((innerHit) => get(innerHit, '_source.ccr_stats'));
-          const grouped = groupBy(
-            innerHitsSource,
-            (stat) => `${stat.follower_index}:${stat.shard_id}`
-          );
+        const fullStats: {
+          [key: string]: Array<NonNullable<ElasticsearchSource['ccr_stats']>>;
+        } =
+          response.hits?.hits.reduce((accum, hit) => {
+            const innerHits = hit.inner_hits?.by_shard.hits?.hits ?? [];
+            const innerHitsSource = innerHits.map(
+              (innerHit) =>
+                innerHit._source.ccr_stats as NonNullable<ElasticsearchSource['ccr_stats']>
+            );
+            const grouped = groupBy(
+              innerHitsSource,
+              (stat) => `${stat.follower_index}:${stat.shard_id}`
+            );
 
-          return {
-            ...accum,
-            ...grouped,
-          };
-        }, {});
+            return {
+              ...accum,
+              ...grouped,
+            };
+          }, {}) ?? {};
 
         const buckets = response.aggregations.by_follower_index.buckets;
         const data = buckets.reduce((accum: any, bucket: any) => {
@@ -261,11 +267,11 @@ export function ccrRoute(server: {
 
           stat.shards = get(bucket, 'by_shard_id.buckets').reduce(
             (accum2: any, shardBucket: any) => {
-              const fullStat = get(fullStats, [`${bucket.key}:${shardBucket.key}`, '[0]'], {});
+              const fullStat = fullStats[`${bucket.key}:${shardBucket.key}`][0] ?? {};
               const shardStat = {
                 shardId: shardBucket.key,
-                error: fullStat.read_exceptions.length
-                  ? fullStat.read_exceptions[0].exception.type
+                error: fullStat.read_exceptions?.length
+                  ? fullStat.read_exceptions[0].exception?.type
                   : null,
                 opsSynced: get(shardBucket, 'ops_synced.value'),
                 syncLagTime: fullStat.time_since_last_read_millis,

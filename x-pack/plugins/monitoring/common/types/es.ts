@@ -278,6 +278,14 @@ export interface ElasticsearchLegacySource {
   };
   ccr_stats?: {
     leader_index?: string;
+    follower_index?: string;
+    shard_id?: number;
+    read_exceptions?: Array<{
+      exception?: {
+        type?: string;
+      };
+    }>;
+    time_since_last_read_millis?: number;
   };
   index_recovery?: {
     shards?: ElasticsearchIndexRecoveryShard[];
