@@ -295,8 +295,11 @@ export interface SavedObjectsTypeManagementDefinition {
   getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
   /**
    * An optional export transform function that can be used transform the objects of the registered type during
-   * the export process. This can be used to either mutates the exported objects, or add new objects
-   * to the export list. See {@link SavedObjectsExportTransform | the transform type documentation} for more info and examples.
+   * the export process.
+   *
+   * It can be used to either mutates the exported objects, or add new objects to the export list.
+   *
+   * See {@link SavedObjectsExportTransform | the transform type documentation} for more info and examples.
    */
   onExport?: SavedObjectsExportTransform;
 }
