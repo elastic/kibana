@@ -18,7 +18,7 @@ export const FIELDS_BROWSER_FIELDS_COUNT = `${FIELDS_BROWSER_CONTAINER} [data-te
 
 export const FIELDS_BROWSER_FILTER_INPUT = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="field-search"]`;
 
-export const FIELDS_BROWSER_HEADER_DROP_AREA = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="headers-group"]`;
+export const FIELDS_BROWSER_HEADER_DROP_AREA = '[data-test-subj="headers-group"]';
 
 export const FIELDS_BROWSER_HOST_CATEGORIES_COUNT = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="host-category-count"]`;
 
