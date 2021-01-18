@@ -1,0 +1,33 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { CoreStart } from 'kibana/public';
+import {
+  EmbeddableFactoryDefinition,
+  EmbeddableInput,
+  IContainer,
+} from '../../../../../../src/plugins/embeddable/public';
+import { LogStreamEmbeddable, LOG_STREAM_EMBEDDABLE } from './log_stream_embeddable';
+
+export class LogStreamEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
+  public readonly type = LOG_STREAM_EMBEDDABLE;
+
+  constructor(private getCoreServices: () => Promise<CoreStart>) {}
+
+  // TODO
+  public async isEditable() {
+    return true;
+  }
+
+  public async create(initialInput: EmbeddableInput, parent?: IContainer) {
+    const services = await this.getCoreServices();
+    return new LogStreamEmbeddable(services, initialInput, parent);
+  }
+
+  public getDisplayName() {
+    return 'Log stream';
+  }
+}
