@@ -20,7 +20,7 @@ export interface LensSortActionData {
 
 export interface LensResizeActionData {
   columnId: string;
-  width: number;
+  width: number | undefined;
 }
 
 export type LensSortAction = LensEditEvent<typeof LENS_EDIT_SORT_ACTION>;

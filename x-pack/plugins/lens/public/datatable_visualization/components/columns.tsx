@@ -21,10 +21,11 @@ export const createGridColumns = (
     rowIndex: number,
     negate?: boolean
   ) => void,
-  isReadOnlySorted: boolean,
+  isReadOnly: boolean,
   columnConfig: DatatableColumns & { type: 'lens_datatable_columns' },
   visibleColumns: string[],
-  formatFactory: FormatFactory
+  formatFactory: FormatFactory,
+  onColumnResize: (eventData: { columnId: string; width: number | undefined }) => void
 ) => {
   const columnsReverseLookup = table.columns.reduce<
     Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
@@ -132,6 +133,9 @@ export const createGridColumns = (
         ]
       : undefined;
 
+    const initialWidth = columnConfig.columnWidth?.find(({ columnId }) => columnId === field)
+      ?.width;
+
     const columnDefinition: EuiDataGridColumn = {
       id: field,
       cellActions,
@@ -141,25 +145,38 @@ export const createGridColumns = (
         showHide: false,
         showMoveLeft: false,
         showMoveRight: false,
-        showSortAsc: isReadOnlySorted
+        showSortAsc: isReadOnly
           ? false
           : {
               label: i18n.translate('xpack.lens.table.sort.ascLabel', {
                 defaultMessage: 'Sort asc',
               }),
             },
-        showSortDesc: isReadOnlySorted
+        showSortDesc: isReadOnly
           ? false
           : {
               label: i18n.translate('xpack.lens.table.sort.descLabel', {
                 defaultMessage: 'Sort desc',
               }),
             },
+        additional: isReadOnly
+          ? undefined
+          : [
+              {
+                color: 'text',
+                size: 'xs',
+                onClick: () => onColumnResize({ columnId: field, width: undefined }),
+                iconType: 'empty',
+                label: i18n.translate('xpack.lens.table.resize.reset', {
+                  defaultMessage: 'Reset width',
+                }),
+                'data-test-subj': 'lensDatatableResetWidth',
+                isDisabled: initialWidth == null,
+              },
+            ],
       },
     };
 
-    const initialWidth = columnConfig.columnWidth?.find(({ columnId }) => columnId === field)
-      ?.width;
     if (initialWidth) {
       columnDefinition.initialWidth = initialWidth;
     }

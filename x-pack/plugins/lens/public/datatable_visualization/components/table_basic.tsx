@@ -128,6 +128,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const isReadOnlySorted = renderMode !== 'edit';
 
+  const onColumnResize = useMemo(
+    () => createGridResizeHandler(columnConfig, setColumnConfig, onEditAction),
+    [onEditAction, setColumnConfig, columnConfig]
+  );
+
   const columns: EuiDataGridColumn[] = useMemo(
     () =>
       createGridColumns(
@@ -137,7 +142,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         isReadOnlySorted,
         columnConfig,
         visibleColumns,
-        formatFactory
+        formatFactory,
+        onColumnResize
       ),
     [
       bucketColumns,
@@ -147,6 +153,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       columnConfig,
       visibleColumns,
       formatFactory,
+      onColumnResize,
     ]
   );
 
@@ -187,11 +194,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [firstTableRef, onRowContextMenuClick, columnConfig, hasAtLeastOneRowClickAction]);
 
   const renderCellValue = useMemo(() => createGridCell(formatters, DataContext), [formatters]);
-
-  const onColumnResize = useMemo(
-    () => createGridResizeHandler(columnConfig, setColumnConfig, onEditAction),
-    [onEditAction, setColumnConfig, columnConfig]
-  );
 
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns: () => {} }), [
     visibleColumns,

@@ -468,4 +468,80 @@ describe('Datatable Visualization', () => {
       expect(error).toBeUndefined();
     });
   });
+
+  describe('#onEditAction', () => {
+    it('should add a sort column to the state', () => {
+      const currentState: DatatableVisualizationState = {
+        layers: [
+          {
+            layerId: 'foo',
+            columns: ['saved'],
+          },
+        ],
+      };
+      expect(
+        datatableVisualization.onEditAction!(currentState, {
+          name: 'edit',
+          data: { action: 'sort', columnId: 'saved', direction: 'none' },
+        })
+      ).toEqual({
+        ...currentState,
+        sorting: {
+          columnId: 'saved',
+          direction: 'none',
+        },
+      });
+    });
+
+    it('should add a custom width to a column in the state', () => {
+      const currentState: DatatableVisualizationState = {
+        layers: [
+          {
+            layerId: 'foo',
+            columns: ['saved'],
+          },
+        ],
+      };
+      expect(
+        datatableVisualization.onEditAction!(currentState, {
+          name: 'edit',
+          data: { action: 'resize', columnId: 'saved', width: 500 },
+        })
+      ).toEqual({
+        ...currentState,
+        columnWidth: [
+          {
+            columnId: 'saved',
+            width: 500,
+          },
+        ],
+      });
+    });
+
+    it('should clear custom width value for the column from the state', () => {
+      const currentState: DatatableVisualizationState = {
+        layers: [
+          {
+            layerId: 'foo',
+            columns: ['saved'],
+          },
+        ],
+        columnWidth: [
+          {
+            columnId: 'saved',
+            width: 500,
+          },
+        ],
+      };
+      expect(
+        datatableVisualization.onEditAction!(currentState, {
+          name: 'edit',
+          data: { action: 'resize', columnId: 'saved', width: undefined },
+        })
+      ).toEqual({
+        ...currentState,
+        columnWidth: [],
+      });
+    });
+  });
 });

@@ -8,7 +8,6 @@ import type { Datatable } from 'src/plugins/expressions';
 import type { LensFilterEvent } from '../../types';
 import type {
   DatatableColumns,
-  DatatableColumnWidth,
   LensGridDirection,
   LensResizeAction,
   LensSortAction,
@@ -28,27 +27,29 @@ export const createGridResizeHandler = (
     >
   >,
   onEditAction: (data: LensResizeAction['data']) => void
-) => (eventData: DatatableColumnWidth) => {
+) => (eventData: { columnId: string; width: number | undefined }) => {
   // directly set the local state of the component to make sure the visualization re-renders immediately,
   // re-layouting and taking up all of the available space.
   setColumnConfig({
     ...columnConfig,
     columnWidth: [
       ...(columnConfig.columnWidth || []).filter(({ columnId }) => columnId !== eventData.columnId),
-      {
-        columnId: eventData.columnId,
-        width: eventData.width,
-        type: 'lens_datatable_column_width',
-      },
+      ...(eventData.width !== undefined
+        ? [
+            {
+              columnId: eventData.columnId,
+              width: eventData.width,
+              type: 'lens_datatable_column_width' as const,
+            },
+          ]
+        : []),
     ],
   });
-  if (onEditAction) {
-    return onEditAction({
-      action: 'resize',
-      columnId: eventData.columnId,
-      width: eventData.width,
-    });
-  }
+  return onEditAction({
+    action: 'resize',
+    columnId: eventData.columnId,
+    width: eventData.width,
+  });
 };
 
 export const createGridFilterHandler = (
@@ -77,6 +78,7 @@ export const createGridFilterHandler = (
     ],
     timeFieldName,
   };
+
   onClickValue(desanitizeFilterContext(data));
 };
 
@@ -95,20 +97,19 @@ export const createGridSortingConfig = (
           },
         ],
   onSort: (sortingCols) => {
-    if (onEditAction) {
-      const newSortValue:
-        | {
-            id: string;
-            direction: Exclude<LensGridDirection, 'none'>;
-          }
-        | undefined = sortingCols.length <= 1 ? sortingCols[0] : sortingCols[1];
-      const isNewColumn = sortBy !== (newSortValue?.id || '');
-      const nextDirection = newSortValue ? newSortValue.direction : 'none';
-      return onEditAction({
-        action: 'sort',
-        columnId: nextDirection !== 'none' || isNewColumn ? newSortValue?.id : undefined,
-        direction: nextDirection,
-      });
-    }
+    const newSortValue:
+      | {
+          id: string;
+          direction: Exclude<LensGridDirection, 'none'>;
+        }
+      | undefined = sortingCols.length <= 1 ? sortingCols[0] : sortingCols[1];
+    const isNewColumn = sortBy !== (newSortValue?.id || '');
+    const nextDirection = newSortValue ? newSortValue.direction : 'none';
+
+    return onEditAction({
+      action: 'sort',
+      columnId: nextDirection !== 'none' || isNewColumn ? newSortValue?.id : undefined,
+      direction: nextDirection,
+    });
   },
 });

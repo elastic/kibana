@@ -284,7 +284,9 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           ...state,
           columnWidth: [
             ...(state.columnWidth || []).filter(({ columnId }) => columnId !== event.data.columnId),
-            { columnId: event.data.columnId, width: event.data.width },
+            ...(event.data.width !== undefined
+              ? [{ columnId: event.data.columnId, width: event.data.width }]
+              : []),
           ],
         };
       default:

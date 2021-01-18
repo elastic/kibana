@@ -121,6 +121,24 @@ describe('DatatableComponent', () => {
     ).toMatchSnapshot();
   });
 
+  test('it should not render actions on header when it is in read only mode', () => {
+    const { data, args } = sampleArgs();
+
+    expect(
+      shallow(
+        <DatatableComponent
+          data={data}
+          args={args}
+          formatFactory={(x) => x as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          rowHasRowClickTriggerActions={[false, false, false]}
+          renderMode="display"
+        />
+      )
+    ).toMatchSnapshot();
+  });
+
   test('it invokes executeTriggerActions with correct context on click on top value', () => {
     const { args, data } = sampleArgs();
 
