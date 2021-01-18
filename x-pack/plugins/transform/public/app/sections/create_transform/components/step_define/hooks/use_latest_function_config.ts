@@ -56,7 +56,8 @@ function getOptions(
     }));
 
   const sortFieldOptions: Array<EuiComboBoxOptionOption<string>> = indexPattern.fields
-    .filter((v) => !ignoreFieldNames.has(v.name) && v.sortable)
+    // The backend API for `latest` allows all field types for sort but the UI will be limited to `date`.
+    .filter((v) => !ignoreFieldNames.has(v.name) && v.sortable && v.type === 'date')
     .map((v) => ({
       label: v.displayName,
       value: v.name,
