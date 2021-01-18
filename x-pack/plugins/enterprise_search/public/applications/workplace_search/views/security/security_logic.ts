@@ -12,9 +12,11 @@ import { kea, MakeLogicType } from 'kea';
 import http from 'shared/http';
 import routes from 'workplace_search/routes';
 
-import { handleAPIError } from 'app_search/utils/handleAPIError';
-import { IFlashMessagesProps } from 'shared/types';
-
+import {
+  clearFlashMessages,
+  setSuccessMessage,
+  flashAPIErrors,
+} from '../../../shared/flash_messages';
 import { AppLogic } from '../../app_logic';
 
 export interface PrivateSource {
@@ -37,7 +39,6 @@ export interface SecurityServerProps {
 
 interface SecurityValues extends SecurityServerProps {
   dataLoading: boolean;
-  flashMessages: IFlashMessagesProps;
   unsavedChanges: boolean;
   cachedServerState: SecurityServerProps;
 }
@@ -45,7 +46,6 @@ interface SecurityValues extends SecurityServerProps {
 interface SecurityActions {
   setServerProps(serverProps: SecurityServerProps): SecurityServerProps;
   setSourceRestrictionsUpdated(serverProps: SecurityServerProps): SecurityServerProps;
-  setFlashMessages(flashMessages: IFlashMessagesProps): { flashMessages: IFlashMessagesProps };
   initializeSourceRestrictions(): void;
   saveSourceRestrictions(): void;
   updatePrivateSourcesEnabled(isEnabled: boolean): { isEnabled: boolean };
@@ -69,7 +69,6 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
   actions: {
     setServerProps: (serverProps: SecurityServerProps) => serverProps,
     setSourceRestrictionsUpdated: (serverProps: SecurityServerProps) => serverProps,
-    setFlashMessages: (flashMessages: IFlashMessagesProps) => ({ flashMessages }),
     initializeSourceRestrictions: () => true,
     saveSourceRestrictions: () => null,
     updatePrivateSourcesEnabled: (isEnabled: boolean) => ({ isEnabled }),
@@ -128,15 +127,6 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
           updateSourceEnabled(state, sourceId, isEnabled),
       },
     ],
-    flashMessages: [
-      {},
-      {
-        setFlashMessages: (_, { flashMessages }) => flashMessages,
-        setSourceRestrictionsUpdated: () => ({
-          success: ['Successfully updated source restrictions.'],
-        }),
-      },
-    ],
   },
   selectors: ({ selectors }) => ({
     unsavedChanges: [
@@ -156,7 +146,7 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
     initializeSourceRestrictions: () => {
       http(route)
         .then(({ data }) => actions.setServerProps(data))
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .catch((e) => flashAPIErrors(e));
     },
     saveSourceRestrictions: () => {
       const { isEnabled, remote, standard } = values;
@@ -166,13 +156,14 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
         .patch(route, serverData)
         .then(({ data }) => {
           actions.setSourceRestrictionsUpdated(data);
+          setSuccessMessage('Successfully updated source restrictions.');
           AppLogic.actions.setSourceRestriction(isEnabled);
         })
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .catch((e) => flashAPIErrors(e));
     },
     resetState: () => {
       actions.setServerProps(cloneDeep(values.cachedServerState));
-      actions.setFlashMessages({});
+      clearFlashMessages();
     },
   }),
 });
