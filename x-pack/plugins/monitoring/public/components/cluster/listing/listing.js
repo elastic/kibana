@@ -112,7 +112,7 @@ const getColumns = (
     },
     {
       name: i18n.translate('xpack.monitoring.cluster.listing.statusColumnTitle', {
-        defaultMessage: 'Status',
+        defaultMessage: 'Alerts Status',
       }),
       field: 'status',
       'data-test-subj': 'alertsStatus',

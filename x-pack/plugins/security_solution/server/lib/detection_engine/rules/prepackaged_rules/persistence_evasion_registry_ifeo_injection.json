@@ -34,9 +34,16 @@
       },
       "technique": [
         {
-          "id": "T1183",
-          "name": "Image File Execution Options Injection",
-          "reference": "https://attack.mitre.org/techniques/T1183/"
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.012",
+              "name": "Image File Execution Options Injection",
+              "reference": "https://attack.mitre.org/techniques/T1546/012/"
+            }
+          ]
         }
       ]
     }

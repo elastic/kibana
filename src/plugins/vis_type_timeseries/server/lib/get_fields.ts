@@ -16,24 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uniqBy, get } from 'lodash';
+import { uniqBy } from 'lodash';
 import { first, map } from 'rxjs/operators';
 import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 
 import { Framework } from '../plugin';
-import {
-  indexPatterns,
-  IndexPatternFieldDescriptor,
-  IndexPatternsFetcher,
-} from '../../../data/server';
+import { IndexPatternsFetcher } from '../../../data/server';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
 
 export async function getFields(
   requestContext: RequestHandlerContext,
   request: KibanaRequest,
   framework: Framework,
-  indexPattern: string
+  indexPatternString: string
 ) {
+  const getIndexPatternsService = async () => {
+    const [, { data }] = await framework.core.getStartServices();
+
+    return await data.indexPatterns.indexPatternsServiceFactory(
+      requestContext.core.savedObjects.client,
+      requestContext.core.elasticsearch.client.asCurrentUser
+    );
+  };
+
+  const indexPatternsService = await getIndexPatternsService();
+
   // NOTE / TODO: This facade has been put in place to make migrating to the New Platform easier. It
   // removes the need to refactor many layers of dependencies on "req", and instead just augments the top
   // level object passed from here. The layers should be refactored fully at some point, but for now
@@ -44,7 +51,7 @@ export async function getFields(
     framework,
     payload: {},
     pre: {
-      indexPatternsService: new IndexPatternsFetcher(
+      indexPatternsFetcher: new IndexPatternsFetcher(
         requestContext.core.elasticsearch.client.asCurrentUser
       ),
     },
@@ -58,19 +65,13 @@ export async function getFields(
         )
         .toPromise();
     },
+    getIndexPatternsService: async () => indexPatternsService,
   };
-  let indexPatternString = indexPattern;
 
   if (!indexPatternString) {
-    const [{ savedObjects, elasticsearch }, { data }] = await framework.core.getStartServices();
-    const savedObjectsClient = savedObjects.getScopedClient(request);
-    const clusterClient = elasticsearch.client.asScoped(request).asCurrentUser;
-    const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
-      savedObjectsClient,
-      clusterClient
-    );
     const defaultIndexPattern = await indexPatternsService.getDefault();
-    indexPatternString = get(defaultIndexPattern, 'title', '');
+
+    indexPatternString = defaultIndexPattern?.title ?? '';
   }
 
   const {
@@ -78,12 +79,10 @@ export async function getFields(
     capabilities,
   } = (await framework.searchStrategyRegistry.getViableStrategy(reqFacade, indexPatternString))!;
 
-  const fields = ((await searchStrategy.getFieldsForWildcard(
+  const fields = await searchStrategy.getFieldsForWildcard(
     reqFacade,
     indexPatternString,
     capabilities
-  )) as IndexPatternFieldDescriptor[]).filter(
-    (field) => field.aggregatable && !indexPatterns.isNestedField(field)
   );
 
   return uniqBy(fields, (field) => field.name);

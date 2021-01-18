@@ -31,7 +31,6 @@ interface Options {
 type CircularDepList = Set<string>;
 
 const allowedList: CircularDepList = new Set([
-  'src/plugins/visualizations -> src/plugins/visualize',
   'x-pack/plugins/actions -> x-pack/plugins/case',
   'x-pack/plugins/case -> x-pack/plugins/security_solution',
   'x-pack/plugins/apm -> x-pack/plugins/infra',
