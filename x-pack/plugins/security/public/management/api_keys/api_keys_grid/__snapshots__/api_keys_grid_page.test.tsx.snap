@@ -1,132 +1,123 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`APIKeysGridPage renders a callout when API keys are not enabled 1`] = `
-<NotEnabled
-  docLinks={
-    DocumentationLinksService {
-      "apiKeySettings": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings",
-      "createApiKey": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-api-create-api-key.html",
-    }
+<EuiCallOut
+  color="danger"
+  iconType="alert"
+  title={
+    <FormattedMessage
+      defaultMessage="API keys not enabled in Elasticsearch"
+      id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorTitle"
+      values={Object {}}
+    />
   }
 >
-  <EuiCallOut
-    color="danger"
-    iconType="alert"
-    title={
-      <FormattedMessage
-        defaultMessage="API keys not enabled in Elasticsearch"
-        id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorTitle"
-        values={Object {}}
-      />
-    }
+  <div
+    className="euiCallOut euiCallOut--danger"
   >
     <div
-      className="euiCallOut euiCallOut--danger"
+      className="euiCallOutHeader"
     >
-      <div
-        className="euiCallOutHeader"
+      <EuiIcon
+        aria-hidden="true"
+        className="euiCallOutHeader__icon"
+        size="m"
+        type="alert"
       >
-        <EuiIcon
+        <span
           aria-hidden="true"
           className="euiCallOutHeader__icon"
+          data-euiicon-type="alert"
           size="m"
-          type="alert"
-        >
-          <span
-            aria-hidden="true"
-            className="euiCallOutHeader__icon"
-            data-euiicon-type="alert"
-            size="m"
-          />
-        </EuiIcon>
-        <span
-          className="euiCallOutHeader__title"
-        >
-          <FormattedMessage
-            defaultMessage="API keys not enabled in Elasticsearch"
-            id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorTitle"
-            values={Object {}}
-          >
-            API keys not enabled in Elasticsearch
-          </FormattedMessage>
-        </span>
-      </div>
-      <EuiText
-        size="s"
+        />
+      </EuiIcon>
+      <span
+        className="euiCallOutHeader__title"
       >
-        <div
-          className="euiText euiText--small"
+        <FormattedMessage
+          defaultMessage="API keys not enabled in Elasticsearch"
+          id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorTitle"
+          values={Object {}}
         >
-          <FormattedMessage
-            defaultMessage="Contact your system administrator and refer to the {link} to enable API keys."
-            id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorDescription"
-            values={
-              Object {
-                "link": <EuiLink
-                  href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    defaultMessage="docs"
-                    id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorLinkText"
-                    values={Object {}}
-                  />
-                </EuiLink>,
-              }
-            }
-          >
-            Contact your system administrator and refer to the 
-            <EuiLink
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
-              target="_blank"
-            >
-              <a
-                className="euiLink euiLink--primary"
+          API keys not enabled in Elasticsearch
+        </FormattedMessage>
+      </span>
+    </div>
+    <EuiText
+      size="s"
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <FormattedMessage
+          defaultMessage="Contact your system administrator and refer to the {link} to enable API keys."
+          id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorDescription"
+          values={
+            Object {
+              "link": <EuiLink
                 href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
-                rel="noopener"
                 target="_blank"
               >
                 <FormattedMessage
                   defaultMessage="docs"
                   id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorLinkText"
                   values={Object {}}
-                >
-                  docs
-                </FormattedMessage>
-                <EuiIcon
+                />
+              </EuiLink>,
+            }
+          }
+        >
+          Contact your system administrator and refer to the 
+          <EuiLink
+            href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
+            target="_blank"
+          >
+            <a
+              className="euiLink euiLink--primary"
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
+              rel="noopener"
+              target="_blank"
+            >
+              <FormattedMessage
+                defaultMessage="docs"
+                id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorLinkText"
+                values={Object {}}
+              >
+                docs
+              </FormattedMessage>
+              <EuiIcon
+                aria-label="External link"
+                className="euiLink__externalIcon"
+                size="s"
+                type="popout"
+              >
+                <span
                   aria-label="External link"
                   className="euiLink__externalIcon"
+                  data-euiicon-type="popout"
                   size="s"
-                  type="popout"
+                />
+              </EuiIcon>
+              <EuiScreenReaderOnly>
+                <span
+                  className="euiScreenReaderOnly"
                 >
-                  <span
-                    aria-label="External link"
-                    className="euiLink__externalIcon"
-                    data-euiicon-type="popout"
-                    size="s"
-                  />
-                </EuiIcon>
-                <EuiScreenReaderOnly>
-                  <span
-                    className="euiScreenReaderOnly"
+                  <EuiI18n
+                    default="(opens in a new tab or window)"
+                    token="euiLink.newTarget.screenReaderOnlyText"
                   >
-                    <EuiI18n
-                      default="(opens in a new tab or window)"
-                      token="euiLink.newTarget.screenReaderOnlyText"
-                    >
-                      (opens in a new tab or window)
-                    </EuiI18n>
-                  </span>
-                </EuiScreenReaderOnly>
-              </a>
-            </EuiLink>
-             to enable API keys.
-          </FormattedMessage>
-        </div>
-      </EuiText>
-    </div>
-  </EuiCallOut>
-</NotEnabled>
+                    (opens in a new tab or window)
+                  </EuiI18n>
+                </span>
+              </EuiScreenReaderOnly>
+            </a>
+          </EuiLink>
+           to enable API keys.
+        </FormattedMessage>
+      </div>
+    </EuiText>
+  </div>
+</EuiCallOut>
 `;
 
 exports[`APIKeysGridPage renders permission denied if user does not have required permissions 1`] = `

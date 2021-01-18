@@ -60,8 +60,7 @@ describe('watch_status', () => {
       });
     });
 
-    // TODO: the test was not running before and is not up to date
-    describe.skip('lastFired getter method', () => {
+    describe('lastFired getter method', () => {
       let upstreamJson;
       beforeEach(() => {
         upstreamJson = {
