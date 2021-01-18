@@ -116,7 +116,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const copyToClipboardPivotDescription = i18n.translate(
     'xpack.transform.pivotPreview.copyClipboardTooltip',
     {
-      defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
+      defaultMessage: 'Copy Dev Console statement of the transform preview to the clipboard.',
     }
   );
 
@@ -129,14 +129,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     toastNotifications,
     ...(stepDefineForm.transformFunction === TRANSFORM_FUNCTION.LATEST
       ? {
-          copyToClipboard: getPivotPreviewDevConsoleStatement(previewRequest),
-          copyToClipboardDescription: i18n.translate(
-            'xpack.transform.pivotPreview.copyClipboardTooltip',
-            {
-              defaultMessage:
-                'Copy Dev Console statement of the transform preview to the clipboard.',
-            }
-          ),
+          copyToClipboard: copyToClipboardPivot,
+          copyToClipboardDescription: copyToClipboardPivotDescription,
         }
       : {}),
   };
