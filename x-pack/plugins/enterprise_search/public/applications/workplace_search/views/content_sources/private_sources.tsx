@@ -107,16 +107,7 @@ export const PrivateSources: React.FC = () => {
     <ContentSection className="zero-state__private-sources">
       <EuiPanel className="euiPanel--inset">
         <EuiSpacer size="xxl" />
-        <EuiEmptyPrompt
-          iconType="lock"
-          title={<h2>You have no private sources</h2>}
-          body={
-            <p>
-              Select from the content sources below to create a private source, available only to
-              you
-            </p>
-          }
-        />
+        <EuiEmptyPrompt iconType="lock" title={<h2>You have no private sources</h2>} />
         <EuiSpacer size="xxl" />
       </EuiPanel>
     </ContentSection>
