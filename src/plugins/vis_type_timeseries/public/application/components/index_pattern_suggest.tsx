@@ -29,7 +29,7 @@ interface IndexPatternSuggestProps {
   disabled?: boolean;
 }
 
-const toSuggesOptions = (options: string[]) =>
+const toSuggestOptions = (options: string[]) =>
   options.map((label) => ({ type: { iconType: 'indexPatternApp', color: 'tint5' }, label }));
 
 export const IndexPatternSuggest = ({
@@ -47,9 +47,7 @@ export const IndexPatternSuggest = ({
 
   const suggestions = availableIndexes.filter(
     (index) =>
-      index !== prefix &&
-      index.startsWith(prefix) &&
-      !inputValue.includes(index + INDEXES_SEPARATOR)
+      index !== prefix && index.includes(prefix) && !inputValue.includes(index + INDEXES_SEPARATOR)
   );
 
   useEffect(() => {
@@ -87,7 +85,7 @@ export const IndexPatternSuggest = ({
       value={inputValue}
       placeholder={defaultIndexPattern}
       disabled={disabled}
-      suggestions={toSuggesOptions(suggestions)}
+      suggestions={toSuggestOptions(suggestions)}
       data-test-subj="metricsIndexPatternInput"
     />
   );
