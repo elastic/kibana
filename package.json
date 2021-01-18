@@ -19,9 +19,6 @@
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
   },
-  "config": {
-    "puppeteer_skip_chromium_download": true
-  },
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
@@ -45,7 +42,6 @@
     "es": "node scripts/es",
     "test:jest": "node scripts/jest",
     "test:jest_integration": "node scripts/jest_integration",
-    "test:mocha": "node scripts/mocha",
     "test:ftr": "node scripts/functional_tests",
     "test:ftr:server": "node scripts/functional_tests_server",
     "test:ftr:runner": "node scripts/functional_test_runner",
@@ -54,9 +50,9 @@
     "start": "node scripts/kibana --dev",
     "debug": "node --nolazy --inspect scripts/kibana --dev",
     "debug-break": "node --nolazy --inspect-brk scripts/kibana --dev",
-    "lint": "yarn run lint:es && yarn run lint:sass",
+    "lint": "yarn run lint:es && yarn run lint:style",
     "lint:es": "node scripts/eslint",
-    "lint:sass": "node scripts/sasslint",
+    "lint:style": "node scripts/stylelint",
     "makelogs": "node scripts/makelogs",
     "kbn:watch": "node scripts/kibana --dev --logging.json=false",
     "build:types": "rm -rf ./target/types && tsc --p tsconfig.types.json",
@@ -592,7 +588,7 @@
     "babel-plugin-require-context-hook": "^1.0.0",
     "babel-plugin-styled-components": "^1.10.7",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
-    "backport": "^5.6.1",
+    "backport": "^5.6.4",
     "base64-js": "^1.3.1",
     "base64url": "^3.0.1",
     "broadcast-channel": "^3.0.3",
@@ -796,7 +792,6 @@
     "resize-observer-polyfill": "^1.5.0",
     "resolve": "^1.7.1",
     "rxjs-marbles": "^5.0.6",
-    "sass-lint": "^1.12.1",
     "sass-loader": "^8.0.2",
     "sass-resources-loader": "^2.0.1",
     "selenium-webdriver": "^4.0.0-alpha.7",
@@ -808,6 +803,8 @@
     "string-replace-loader": "^2.2.0",
     "strong-log-transformer": "^2.1.0",
     "style-loader": "^1.1.3",
+    "stylelint": "13.8.0",
+    "stylelint-scss": "^3.18.0",
     "superagent": "^3.8.2",
     "supertest": "^3.1.0",
     "supertest-as-promised": "^4.0.2",

@@ -5,7 +5,7 @@
  */
 
 import { LogMessagePart } from '../../../../common/http_api/log_entries';
-import { JsonArray, JsonValue } from '../../../../common/typed_json';
+import { JsonArray, JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
 import {
   LogMessageFormattingCondition,
   LogMessageFormattingFieldValueConditionValue,
