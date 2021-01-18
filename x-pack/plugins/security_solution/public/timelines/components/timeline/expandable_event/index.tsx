@@ -58,7 +58,10 @@ const StyledFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const StyledEuiFlexItem = styled(EuiFlexItem)`
-  overflow: hidden;
+  &.euiFlexItem {
+    flex: 1 0 0;
+    overflow: hidden;
+  }
 `;
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
