@@ -32,10 +32,9 @@ import {
 import { ColorVariant } from '@elastic/charts/dist/utils/commons';
 
 import { DatatableRow } from '../../../expressions/public';
-import { METRIC_TYPES } from '../../../data/common';
 
 import { ChartType } from '../../common';
-import { SeriesParam, VisConfig, Aspect } from '../types';
+import { SeriesParam, VisConfig } from '../types';
 
 /**
  * Matches vislib curve to elastic charts
@@ -51,26 +50,6 @@ const getCurveType = (type?: 'linear' | 'cardinal' | 'step-after'): CurveType =>
     default:
       return CurveType.LINEAR;
   }
-};
-
-const getYAspectors = (yAspects: Aspect[]) => {
-  let yAccessors: string[] = [];
-
-  const isPercentile = yAspects.find(
-    ({ aggType }) =>
-      aggType === METRIC_TYPES.PERCENTILES || aggType === METRIC_TYPES.PERCENTILE_RANKS
-  );
-  if (isPercentile) {
-    yAspects.forEach((aspect) => {
-      if (aspect.accessor) {
-        yAccessors.push(aspect.accessor);
-      }
-    });
-  } else if (yAspects[0].accessor) {
-    yAccessors = [yAspects[0].accessor];
-  }
-
-  return yAccessors;
 };
 
 /**
@@ -103,11 +82,13 @@ export const renderAllSeries = (
       interpolate,
       type,
     }) => {
-      const yAspects = aspects.y.filter(({ aggId }) => aggId?.includes(paramId));
+      const yAspects = aspects.y.filter(
+        ({ aggId, accessor }) => aggId?.includes(paramId) && accessor !== null
+      );
       if (!show || !yAspects.length) {
         return null;
       }
-      const yAccessors = getYAspectors(yAspects);
+      const yAccessors = yAspects.map((aspect) => aspect.accessor) as string[];
 
       const id = `${type}-${yAccessors[0]}`;
       const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
