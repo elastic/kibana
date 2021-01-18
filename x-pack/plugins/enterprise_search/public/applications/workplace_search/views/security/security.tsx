@@ -52,15 +52,9 @@ export const Security: React.FC = () => {
     resetState,
   } = useActions(SecurityLogic);
 
-  const {
-    isEnabled,
-    isLocked,
-    remote,
-    standard,
-    dataLoading,
-    flashMessages,
-    unsavedChanges,
-  } = useValues(SecurityLogic);
+  const { isEnabled, isLocked, remote, standard, dataLoading, unsavedChanges } = useValues(
+    SecurityLogic
+  );
 
   useEffect(() => {
     initializeSourceRestrictions();
@@ -185,7 +179,7 @@ export const Security: React.FC = () => {
   return (
     <AppView sidebar={sidebar}>
       <Prompt when={unsavedChanges} message={UNSAVED_MESSAGE} />
-      {flashMessages && <FlashMessages {...flashMessages} />}
+      <FlashMessages />
       {header}
       {allSourcesToggle}
       {isLocked && platinumLicenseCallout}
