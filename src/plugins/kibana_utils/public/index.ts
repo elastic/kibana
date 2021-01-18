@@ -62,8 +62,8 @@ export {
   getStatesFromKbnUrl,
   setStateToKbnUrl,
   withNotifyOnErrors,
-  replaceUrlHashQuery,
   replaceUrlQuery,
+  replaceUrlHashQuery,
 } from './state_management/url';
 export {
   syncState,
