@@ -16,7 +16,7 @@ export interface Choice {
   dependent_value: string;
 }
 
-interface Props {
+export interface UseGetChoicesProps {
   http: HttpSetup;
   toastNotifications: Pick<
     ToastsApi,
@@ -38,7 +38,7 @@ export const useGetChoices = ({
   toastNotifications,
   field,
   onSuccess,
-}: Props): UseGetChoices => {
+}: UseGetChoicesProps): UseGetChoices => {
   const [isLoading, setIsLoading] = useState(false);
   const [choices, setChoices] = useState<Choice[]>([]);
   const abortCtrl = useRef(new AbortController());

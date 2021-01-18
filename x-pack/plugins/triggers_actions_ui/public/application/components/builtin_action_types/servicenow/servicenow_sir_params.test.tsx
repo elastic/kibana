@@ -9,7 +9,7 @@ import { act } from '@testing-library/react';
 
 import { ActionConnector } from '../../../../types';
 import { useGetChoices, Choice } from './use_get_choices';
-import ServiceNowParamsFields from './servicenow_params';
+import ServiceNowParamsFields from './servicenow_sir_params';
 
 jest.mock('./use_get_choices');
 jest.mock('../../../../common/lib/kibana');
@@ -22,9 +22,13 @@ const actionParams = {
     incident: {
       short_description: 'sn title',
       description: 'some description',
-      severity: '1',
-      urgency: '2',
-      impact: '3',
+      category: 'Denial of Service',
+      dest_ip: '192.168.1.1',
+      source_ip: '192.168.1.2',
+      malware_hash: '098f6bcd4621d373cade4e832627b4f6',
+      malware_url: 'https://attack.com',
+      priority: '1',
+      subcategory: '20',
       externalId: null,
     },
     comments: [],
@@ -50,57 +54,74 @@ const defaultProps = {
   messageVariables: [],
 };
 
-const useGetChoicesResponse = {
+const categoriesResponse = {
   isLoading: false,
   choices: [
     {
       dependent_value: '',
-      label: '1 - Critical',
-      value: '1',
+      label: 'Priviledge Escalation',
+      value: 'Priviledge Escalation',
     },
     {
       dependent_value: '',
-      label: '2 - High',
-      value: '2',
+      label: 'Criminal activity/investigation',
+      value: 'Criminal activity/investigation',
     },
     {
       dependent_value: '',
-      label: '3 - Moderate',
-      value: '3',
+      label: 'Denial of Service',
+      value: 'Denial of Service',
+    },
+  ],
+};
+
+const subcategoriesResponse = {
+  isLoading: false,
+  choices: [
+    {
+      dependent_value: 'Denial of Service',
+      label: 'Inbound or outbound',
+      value: '12',
     },
     {
-      dependent_value: '',
-      label: '4 - Low',
-      value: '4',
+      dependent_value: 'Denial of Service',
+      label: 'Single or distributed (DoS or DDoS)',
+      value: '26',
+    },
+    {
+      dependent_value: 'Denial of Service',
+      label: 'Inbound DDos',
+      value: 'inbound_ddos',
     },
   ],
 };
 
 describe('ServiceNowParamsFields renders', () => {
-  let onSuccessUrgency = (choices: Choice[]) => {};
-  let onSuccessSeverity = (choices: Choice[]) => {};
-  let onSuccessImpact = (choices: Choice[]) => {};
+  let onSuccessCategories = (choices: Choice[]) => {};
+  let onSuccessSubcategories = (choices: Choice[]) => {};
 
   beforeEach(() => {
     jest.clearAllMocks();
     useGetChoicesMock.mockImplementation((args) => {
-      if (args.field === 'urgency') {
-        onSuccessUrgency = args.onSuccess;
-      } else if (args.field === 'severity') {
-        onSuccessSeverity = args.onSuccess;
-      } else if (args.field === 'impact') {
-        onSuccessImpact = args.onSuccess;
+      if (args.field === 'category') {
+        onSuccessCategories = args.onSuccess;
+        return categoriesResponse;
+      } else {
+        onSuccessSubcategories = args.onSuccess;
+        return subcategoriesResponse;
       }
-      return useGetChoicesResponse;
     });
   });
 
   test('all params fields is rendered', () => {
     const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
-    expect(wrapper.find('[data-test-subj="urgencySelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="severitySelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="impactSelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="short_descriptionInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="source_ipInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="dest_ipInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="malware_urlInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="malware_hashInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="categorySelect"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').exists()).toBeTruthy();
   });
@@ -152,54 +173,51 @@ describe('ServiceNowParamsFields renders', () => {
     });
   });
 
-  test('it transforms the urgencies to options correctly', async () => {
+  test('it transforms the categories to options correctly', async () => {
     const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
     act(() => {
-      onSuccessUrgency(useGetChoicesResponse.choices);
-      onSuccessSeverity(useGetChoicesResponse.choices);
-      onSuccessImpact(useGetChoicesResponse.choices);
+      onSuccessCategories(categoriesResponse.choices);
+    });
+
+    act(() => {
+      onSuccessSubcategories(subcategoriesResponse.choices);
     });
 
     wrapper.update();
-    expect(wrapper.find('[data-test-subj="urgencySelect"]').first().prop('options')).toEqual([
-      { value: '1', text: '1 - Critical' },
-      { value: '2', text: '2 - High' },
-      { value: '3', text: '3 - Moderate' },
-      { value: '4', text: '4 - Low' },
+    expect(wrapper.find('[data-test-subj="categorySelect"]').first().prop('options')).toEqual([
+      { value: 'Priviledge Escalation', text: 'Priviledge Escalation' },
+      {
+        value: 'Criminal activity/investigation',
+        text: 'Criminal activity/investigation',
+      },
+      { value: 'Denial of Service', text: 'Denial of Service' },
     ]);
   });
 
-  test('it transforms the severities to options correctly', async () => {
+  test('it transforms the subcategories to options correctly', async () => {
     const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
     act(() => {
-      onSuccessUrgency(useGetChoicesResponse.choices);
-      onSuccessSeverity(useGetChoicesResponse.choices);
-      onSuccessImpact(useGetChoicesResponse.choices);
+      onSuccessCategories(categoriesResponse.choices);
+    });
+
+    act(() => {
+      onSuccessSubcategories(subcategoriesResponse.choices);
     });
 
     wrapper.update();
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('options')).toEqual([
-      { value: '1', text: '1 - Critical' },
-      { value: '2', text: '2 - High' },
-      { value: '3', text: '3 - Moderate' },
-      { value: '4', text: '4 - Low' },
-    ]);
-  });
-
-  test('it transforms the impacts to options correctly', async () => {
-    const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
-    act(() => {
-      onSuccessUrgency(useGetChoicesResponse.choices);
-      onSuccessSeverity(useGetChoicesResponse.choices);
-      onSuccessImpact(useGetChoicesResponse.choices);
-    });
-
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="impactSelect"]').first().prop('options')).toEqual([
-      { value: '1', text: '1 - Critical' },
-      { value: '2', text: '2 - High' },
-      { value: '3', text: '3 - Moderate' },
-      { value: '4', text: '4 - Low' },
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').first().prop('options')).toEqual([
+      {
+        text: 'Inbound or outbound',
+        value: '12',
+      },
+      {
+        text: 'Single or distributed (DoS or DDoS)',
+        value: '26',
+      },
+      {
+        text: 'Inbound DDos',
+        value: 'inbound_ddos',
+      },
     ]);
   });
 
@@ -208,9 +226,12 @@ describe('ServiceNowParamsFields renders', () => {
     const simpleFields = [
       { dataTestSubj: 'input[data-test-subj="short_descriptionInput"]', key: 'short_description' },
       { dataTestSubj: 'textarea[data-test-subj="descriptionTextArea"]', key: 'description' },
-      { dataTestSubj: '[data-test-subj="urgencySelect"]', key: 'urgency' },
-      { dataTestSubj: '[data-test-subj="severitySelect"]', key: 'severity' },
-      { dataTestSubj: '[data-test-subj="impactSelect"]', key: 'impact' },
+      { dataTestSubj: '[data-test-subj="source_ipInput"]', key: 'source_ip' },
+      { dataTestSubj: '[data-test-subj="dest_ipInput"]', key: 'dest_ip' },
+      { dataTestSubj: '[data-test-subj="malware_urlInput"]', key: 'malware_url' },
+      { dataTestSubj: '[data-test-subj="malware_hashInput"]', key: 'malware_hash' },
+      { dataTestSubj: '[data-test-subj="categorySelect"]', key: 'category' },
+      { dataTestSubj: '[data-test-subj="subcategorySelect"]', key: 'subcategory' },
     ];
 
     simpleFields.forEach((field) =>
