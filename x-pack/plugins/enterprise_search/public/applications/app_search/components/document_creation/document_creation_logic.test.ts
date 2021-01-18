@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__';
 
 import dedent from 'dedent';
 
@@ -12,11 +12,6 @@ jest.mock('./utils', () => ({
   readUploadedFileAsText: jest.fn(),
 }));
 import { readUploadedFileAsText } from './utils';
-
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: { http: { post: jest.fn() } } },
-}));
-import { HttpLogic } from '../../../shared/http';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'test-engine' } },
@@ -27,6 +22,9 @@ import { DocumentCreationStep } from './types';
 import { DocumentCreationLogic } from './';
 
 describe('DocumentCreationLogic', () => {
+  const { mount } = new LogicMounter(DocumentCreationLogic);
+  const { http } = mockHttpValues;
+
   const DEFAULT_VALUES = {
     isDocumentCreationOpen: false,
     creationMode: 'text',
@@ -39,8 +37,6 @@ describe('DocumentCreationLogic', () => {
     summary: {},
   };
   const mockFile = new File(['mockFile'], 'mockFile.json');
-
-  const { mount } = new LogicMounter(DocumentCreationLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -447,10 +443,7 @@ describe('DocumentCreationLogic', () => {
         });
 
         it('should set and show summary from the returned response', async () => {
-          const { http } = HttpLogic.values;
-          const promise = (http.post as jest.Mock).mockReturnValueOnce(
-            Promise.resolve(mockValidResponse)
-          );
+          const promise = http.post.mockReturnValueOnce(Promise.resolve(mockValidResponse));
 
           await DocumentCreationLogic.actions.uploadDocuments({ documents: mockValidDocuments });
           await promise;
@@ -469,8 +462,7 @@ describe('DocumentCreationLogic', () => {
         });
 
         it('handles API errors', async () => {
-          const { http } = HttpLogic.values;
-          const promise = (http.post as jest.Mock).mockReturnValueOnce(
+          const promise = http.post.mockReturnValueOnce(
             Promise.reject({
               body: {
                 statusCode: 400,
@@ -489,7 +481,6 @@ describe('DocumentCreationLogic', () => {
         });
 
         it('handles client-side errors', async () => {
-          const { http } = HttpLogic.values;
           const promise = (http.post as jest.Mock).mockReturnValueOnce(new Error());
 
           await DocumentCreationLogic.actions.uploadDocuments({ documents: [{}] });
@@ -502,8 +493,7 @@ describe('DocumentCreationLogic', () => {
 
         // NOTE: I can't seem to reproduce this in a production setting.
         it('handles errors returned from the API', async () => {
-          const { http } = HttpLogic.values;
-          const promise = (http.post as jest.Mock).mockReturnValueOnce(
+          const promise = http.post.mockReturnValueOnce(
             Promise.resolve({
               errors: ['JSON cannot be empty'],
             })
@@ -546,7 +536,6 @@ describe('DocumentCreationLogic', () => {
         });
 
         it('should correctly merge multiple API calls into a single summary obj', async () => {
-          const { http } = HttpLogic.values;
           const promise = (http.post as jest.Mock)
             .mockReturnValueOnce(mockFirstResponse)
             .mockReturnValueOnce(mockSecondResponse);
@@ -573,7 +562,6 @@ describe('DocumentCreationLogic', () => {
         });
 
         it('should correctly merge response errors', async () => {
-          const { http } = HttpLogic.values;
           const promise = (http.post as jest.Mock)
             .mockReturnValueOnce({ ...mockFirstResponse, errors: ['JSON cannot be empty'] })
             .mockReturnValueOnce({ ...mockSecondResponse, errors: ['Too large to render'] });
