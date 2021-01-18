@@ -485,7 +485,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
             <EuiSwitch
               name="transformCreateIndexPattern"
               label={i18n.translate('xpack.transform.stepCreateForm.createIndexPatternLabel', {
-                defaultMessage: 'Create index pattern',
+                defaultMessage: 'Create Kibana index pattern',
               })}
               checked={createIndexPattern === true}
               onChange={() => setCreateIndexPattern(!createIndexPattern)}
@@ -528,7 +528,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 label={i18n.translate(
                   'xpack.transform.stepDetailsForm.continuousModeDateFieldLabel',
                   {
-                    defaultMessage: 'Date field',
+                    defaultMessage: 'Date field for continuous mode',
                   }
                 )}
                 helpText={i18n.translate(
