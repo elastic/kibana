@@ -6,4 +6,3 @@
 
 export { ConfirmDeleteModal } from './confirm_delete_modal';
 export { UnauthorizedPrompt } from './unauthorized_prompt';
-export { SecureSpaceMessage } from './secure_space_message';

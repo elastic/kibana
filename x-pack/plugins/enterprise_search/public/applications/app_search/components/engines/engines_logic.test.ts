@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
-
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: { http: { get: jest.fn() } } },
-}));
-import { HttpLogic } from '../../../shared/http';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__';
 
 import { EngineDetails } from '../engine/types';
 import { EnginesLogic } from './';
 
 describe('EnginesLogic', () => {
+  const { mount } = new LogicMounter(EnginesLogic);
+  const { http } = mockHttpValues;
+
   const DEFAULT_VALUES = {
     dataLoading: true,
     engines: [],
@@ -42,8 +40,6 @@ describe('EnginesLogic', () => {
       },
     },
   };
-
-  const { mount } = new LogicMounter(EnginesLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -129,14 +125,14 @@ describe('EnginesLogic', () => {
     describe('loadEngines', () => {
       it('should call the engines API endpoint and set state based on the results', async () => {
         const promise = Promise.resolve(MOCK_ENGINES_API_RESPONSE);
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(promise);
         mount({ enginesPage: 10 });
         jest.spyOn(EnginesLogic.actions, 'onEnginesLoad');
 
         EnginesLogic.actions.loadEngines();
         await promise;
 
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/app_search/engines', {
+        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines', {
           query: { type: 'indexed', pageIndex: 10 },
         });
         expect(EnginesLogic.actions.onEnginesLoad).toHaveBeenCalledWith({
@@ -149,14 +145,14 @@ describe('EnginesLogic', () => {
     describe('loadMetaEngines', () => {
       it('should call the engines API endpoint and set state based on the results', async () => {
         const promise = Promise.resolve(MOCK_ENGINES_API_RESPONSE);
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(promise);
         mount({ metaEnginesPage: 99 });
         jest.spyOn(EnginesLogic.actions, 'onMetaEnginesLoad');
 
         EnginesLogic.actions.loadMetaEngines();
         await promise;
 
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/app_search/engines', {
+        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines', {
           query: { type: 'meta', pageIndex: 99 },
         });
         expect(EnginesLogic.actions.onMetaEnginesLoad).toHaveBeenCalledWith({
