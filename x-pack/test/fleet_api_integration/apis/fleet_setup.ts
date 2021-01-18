@@ -45,7 +45,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(apiResponse.isInitialized).to.be(true);
 
       try {
-        const { body: userResponse } = await es.security.getUser({
+        await es.security.getUser({
           username: 'fleet_enroll',
         });
       } catch (e) {
