@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
+import { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { configSchema, ConfigSchema } from '../config';
+import { registerVisTypeTableUsageCollector } from './usage_collector';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
@@ -31,7 +33,14 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   ],
 };
 
-export const plugin = () => ({
-  setup() {},
+export const plugin = (initializerContext: PluginInitializerContext) => ({
+  setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
+    if (plugins.usageCollection) {
+      registerVisTypeTableUsageCollector(
+        plugins.usageCollection,
+        initializerContext.config.legacy.globalConfig$
+      );
+    }
+  },
   start() {},
 });

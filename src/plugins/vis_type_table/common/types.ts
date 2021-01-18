@@ -17,8 +17,23 @@
  * under the License.
  */
 
-import { SavedVisState } from '../../common';
+export const VIS_TYPE_TABLE = 'table';
 
-declare function updateOldState(oldState: unknown): SavedVisState;
+export enum AggTypes {
+  SUM = 'sum',
+  AVG = 'avg',
+  MIN = 'min',
+  MAX = 'max',
+  COUNT = 'count',
+}
 
-export { updateOldState };
+export interface TableVisParams {
+  perPage: number | '';
+  showPartialRows: boolean;
+  showMetricsAtAllLevels: boolean;
+  showToolbar: boolean;
+  showTotal: boolean;
+  totalFunc: AggTypes;
+  percentageCol: string;
+  row?: boolean;
+}

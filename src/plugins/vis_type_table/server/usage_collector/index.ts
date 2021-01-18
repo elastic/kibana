@@ -16,9 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { SavedVisState } from '../../common';
-
-declare function updateOldState(oldState: unknown): SavedVisState;
-
-export { updateOldState };
+export { registerVisTypeTableUsageCollector } from './register_usage_collector';

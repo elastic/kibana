@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable, Render } from 'src/plugins/expressions/public';
 import { tableVisLegacyResponseHandler, TableContext } from './table_vis_legacy_response_handler';
 import { TableVisConfig } from '../types';
+import { VIS_TYPE_TABLE } from '../../common';
 
 export type Input = Datatable;
 
@@ -30,7 +31,7 @@ interface Arguments {
 
 export interface TableVisRenderValue {
   visData: TableContext;
-  visType: 'table';
+  visType: typeof VIS_TYPE_TABLE;
   visConfig: TableVisConfig;
 }
 
@@ -64,7 +65,7 @@ export const createTableVisLegacyFn = (): TableExpressionFunctionDefinition => (
       as: 'table_vis',
       value: {
         visData: convertedData,
-        visType: 'table',
+        visType: VIS_TYPE_TABLE,
         visConfig,
       },
     };

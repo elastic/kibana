@@ -17,8 +17,15 @@
  * under the License.
  */
 
-import { SavedVisState } from '../../common';
+import { AggConfigOptions } from 'src/plugins/data/common';
 
-declare function updateOldState(oldState: unknown): SavedVisState;
+export interface VisParams {
+  [key: string]: any;
+}
 
-export { updateOldState };
+export interface SavedVisState<TVisParams = VisParams> {
+  title: string;
+  type: string;
+  params: TVisParams;
+  aggs: AggConfigOptions[];
+}
