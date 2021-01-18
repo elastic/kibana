@@ -6,7 +6,12 @@
 
 import React, { useMemo, useState } from 'react';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
+import {
+  getSeriesAndDomain,
+  getSidebarItems,
+  getLegendItems,
+  SAFE_PALETTE,
+} from './data_formatting';
 import { SidebarItem, LegendItem, NetworkItems } from './types';
 import {
   WaterfallProvider,
@@ -77,6 +82,14 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
         tickFormat={(d: number) => `${Number(d).toFixed(0)} ms`}
         domain={domain}
         barStyleAccessor={(datum) => {
+          if (SAFE_PALETTE[6] === datum.datum.config.colour) {
+            return {
+              rect: {
+                fill: datum.datum.config.colour,
+                opacity: '0.15',
+              },
+            };
+          }
           return datum.datum.config.colour;
         }}
         renderSidebarItem={renderSidebarItem}
