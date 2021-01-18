@@ -175,7 +175,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       const actualCheckState =
         (await testSubjects.getAttribute(
           'transformIndexPreviewHistogramButton',
-          'aria-checked'
+          'aria-pressed'
         )) === 'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,

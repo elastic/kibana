@@ -113,9 +113,11 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
         setLoading(false);
       }
     };
-    if (rules != null && rules.length > 0) {
+
+    if (rules.length > 0) {
       fetchData(rules.map((r) => r.id));
     }
+
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
