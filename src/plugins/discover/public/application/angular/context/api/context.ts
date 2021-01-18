@@ -40,7 +40,7 @@ const DAY_MILLIS = 24 * 60 * 60 * 1000;
 // look from 1 day up to 10000 days into the past and future
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS);
 
-function fetchContextProvider(indexPatterns: IndexPatternsContract) {
+function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFieldsApi?: boolean) {
   return {
     fetchSurroundingDocs,
   };
@@ -89,7 +89,14 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract) {
         break;
       }
 
-      const searchAfter = getEsQuerySearchAfter(type, documents, timeField, anchor, nanos);
+      const searchAfter = getEsQuerySearchAfter(
+        type,
+        documents,
+        timeField,
+        anchor,
+        nanos,
+        useNewFieldsApi
+      );
 
       const sort = getEsQuerySort(timeField, tieBreakerField, sortDirToApply);
 
@@ -116,6 +123,10 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract) {
     const { data } = getServices();
 
     const searchSource = await data.search.searchSource.create();
+    if (useNewFieldsApi) {
+      searchSource.removeField('fieldsFromSource');
+      searchSource.setField('fields', ['*']);
+    }
     return searchSource
       .setParent(undefined)
       .setField('index', indexPattern)

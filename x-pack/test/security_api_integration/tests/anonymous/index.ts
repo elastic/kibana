@@ -10,5 +10,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security APIs - Anonymous access', function () {
     this.tags('ciGroup6');
     loadTestFile(require.resolve('./login'));
+    loadTestFile(require.resolve('./capabilities'));
   });
 }

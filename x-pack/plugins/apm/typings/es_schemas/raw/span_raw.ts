@@ -18,6 +18,7 @@ export interface SpanRaw extends APMBaseDoc {
   trace: { id: string }; // trace is required
   service: {
     name: string;
+    environment?: string;
   };
   span: {
     destination?: {

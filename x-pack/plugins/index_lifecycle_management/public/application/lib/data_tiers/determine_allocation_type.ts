@@ -4,39 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataTierAllocationType, AllocateAction, MigrateAction } from '../../../../common/types';
-
-/**
- * Determine what deserialized state the policy config represents.
- *
- * See {@DataTierAllocationType} for more information.
- */
-export const determineDataTierAllocationTypeLegacy = (
-  actions: {
-    allocate?: AllocateAction;
-    migrate?: MigrateAction;
-  } = {}
-): DataTierAllocationType => {
-  const { allocate, migrate } = actions;
-
-  if (migrate?.enabled === false) {
-    return 'none';
-  }
-
-  if (!allocate) {
-    return 'default';
-  }
-
-  if (
-    (allocate.require && Object.keys(allocate.require).length) ||
-    (allocate.include && Object.keys(allocate.include).length) ||
-    (allocate.exclude && Object.keys(allocate.exclude).length)
-  ) {
-    return 'custom';
-  }
-
-  return 'default';
-};
+import { AllocateAction, MigrateAction } from '../../../../common/types';
 
 export const determineDataTierAllocationType = (
   actions: {
