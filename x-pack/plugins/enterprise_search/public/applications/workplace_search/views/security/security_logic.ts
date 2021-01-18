@@ -15,7 +15,7 @@ import routes from 'workplace_search/routes';
 import { handleAPIError } from 'app_search/utils/handleAPIError';
 import { IFlashMessagesProps } from 'shared/types';
 
-import { AppLogic } from 'workplace_search/App';
+import { AppLogic } from '../../app_logic';
 
 export interface PrivateSource {
   id: string;

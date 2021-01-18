@@ -24,7 +24,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { SecurityLogic, PrivateSourceSection } from '../SecurityLogic';
+import { SecurityLogic, PrivateSourceSection } from '../security_logic';
 
 interface PrivateSourcesTableProps {
   sourceType: 'remote' | 'standard';

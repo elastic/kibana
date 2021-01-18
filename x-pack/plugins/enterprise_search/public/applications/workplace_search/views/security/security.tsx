@@ -23,18 +23,14 @@ import {
 } from '@elastic/eui';
 
 import ConfirmModal from 'shared/components/ConfirmModal';
-import FlashMessages from 'shared/components/FlashMessages';
+import { AppView, SidebarNavigation } from 'workplace_search/components';
+import { FlashMessages } from '../../../shared/flash_messages';
+import { LicenseCallout } from '../../components/shared/license_callout';
+import { Loading } from '../../../shared/loading';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { SecurityLogic } from './security_logic';
 
-import {
-  AppView,
-  LicenseCallout,
-  Loading,
-  SidebarNavigation,
-  ViewContentHeader,
-} from 'workplace_search/components';
-import { SecurityLogic } from './SecurityLogic';
-
-import { PrivateSourcesTable } from './components/PrivateSourcesTable';
+import { PrivateSourcesTable } from './components/private_sources_table';
 
 const UNSAVED_MESSAGE =
   'Your private sources settings have not been saved. Are you sure you want to leave?';
