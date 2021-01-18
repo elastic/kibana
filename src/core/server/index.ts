@@ -58,6 +58,8 @@ import {
   ISavedObjectTypeRegistry,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
+  ISavedObjectsExporter,
+  ISavedObjectsImporter,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
@@ -85,7 +87,12 @@ export {
 };
 
 export { bootstrap } from './bootstrap';
-export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
+export {
+  Capabilities,
+  CapabilitiesProvider,
+  CapabilitiesSwitcher,
+  ResolveCapabilitiesOptions,
+} from './capabilities';
 export {
   ConfigPath,
   ConfigService,
@@ -265,13 +272,12 @@ export {
   SavedObjectsClientFactoryProvider,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
-  SavedObjectsExportOptions,
   SavedObjectsExportResultDetails,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
   SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportOptions,
   SavedObjectsImportResponse,
@@ -317,9 +323,15 @@ export {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectsUtils,
-  exportSavedObjectsToStream,
-  importSavedObjectsFromStream,
-  resolveSavedObjectsImportErrors,
+  SavedObjectsExporter,
+  ISavedObjectsExporter,
+  SavedObjectExportBaseOptions,
+  SavedObjectsExportByObjectOptions,
+  SavedObjectsExportByTypeOptions,
+  SavedObjectsExportError,
+  SavedObjectsImporter,
+  ISavedObjectsImporter,
+  SavedObjectsImportError,
 } from './saved_objects';
 
 export {
@@ -399,6 +411,8 @@ export interface RequestHandlerContext {
     savedObjects: {
       client: SavedObjectsClientContract;
       typeRegistry: ISavedObjectTypeRegistry;
+      exporter: ISavedObjectsExporter;
+      importer: ISavedObjectsImporter;
     };
     elasticsearch: {
       client: IScopedClusterClient;

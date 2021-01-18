@@ -13,31 +13,27 @@ import { TABLE_COLUMN_EVENTS_MESSAGE } from '../screens/hosts/external_events';
 import { waitsForEventsToBeLoaded } from '../tasks/hosts/events';
 import { removeColumn } from '../tasks/timeline';
 
-// Failing: See https://github.com/elastic/kibana/issues/75794
-describe.skip('persistent timeline', () => {
+describe('persistent timeline', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
     openEvents();
     waitsForEventsToBeLoaded();
+    cy.get(DRAGGABLE_HEADER).then((header) =>
+      cy.wrap(header.length - 1).as('expectedNumberOfTimelineColumns')
+    );
   });
 
-  it('persist the deletion of a column', () => {
-    cy.get(DRAGGABLE_HEADER).then((header) => {
-      const currentNumberOfTimelineColumns = header.length;
-      const expectedNumberOfTimelineColumns = currentNumberOfTimelineColumns - 1;
+  it('persist the deletion of a column', function () {
+    cy.get(DRAGGABLE_HEADER).eq(TABLE_COLUMN_EVENTS_MESSAGE).should('have.text', 'message');
+    removeColumn(TABLE_COLUMN_EVENTS_MESSAGE);
 
-      cy.wrap(header).eq(TABLE_COLUMN_EVENTS_MESSAGE).invoke('text').should('equal', 'message');
-      removeColumn(TABLE_COLUMN_EVENTS_MESSAGE);
+    cy.get(DRAGGABLE_HEADER).should('have.length', this.expectedNumberOfTimelineColumns);
 
-      cy.get(DRAGGABLE_HEADER).should('have.length', expectedNumberOfTimelineColumns);
+    reload();
+    waitsForEventsToBeLoaded();
 
-      reload(waitsForEventsToBeLoaded);
-
-      cy.get(DRAGGABLE_HEADER).should('have.length', expectedNumberOfTimelineColumns);
-      cy.get(DRAGGABLE_HEADER).each(($el) => {
-        expect($el.text()).not.equal('message');
-      });
-    });
+    cy.get(DRAGGABLE_HEADER).should('have.length', this.expectedNumberOfTimelineColumns);
+    cy.get(DRAGGABLE_HEADER).each(($el) => expect($el.text()).not.equal('message'));
   });
 });

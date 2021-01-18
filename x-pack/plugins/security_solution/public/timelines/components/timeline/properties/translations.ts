@@ -13,10 +13,6 @@ export const TIMELINE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const TITLE = i18n.translate('xpack.securitySolution.timeline.properties.titleTitle', {
-  defaultMessage: 'Title',
-});
-
 export const ADD_TO_FAVORITES = i18n.translate(
   'xpack.securitySolution.timeline.properties.addToFavoriteButtonLabel',
   {
@@ -28,20 +24,6 @@ export const REMOVE_FROM_FAVORITES = i18n.translate(
   'xpack.securitySolution.timeline.properties.removeFromFavoritesButtonLabel',
   {
     defaultMessage: 'Remove from favorites',
-  }
-);
-
-export const TIMELINE_TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.timelineTitleAriaLabel',
-  {
-    defaultMessage: 'Title',
-  }
-);
-
-export const INSPECT_TIMELINE_TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.inspectTimelineTitle',
-  {
-    defaultMessage: 'Timeline',
   }
 );
 
@@ -66,48 +48,9 @@ export const DESCRIPTION = i18n.translate(
   }
 );
 
-export const DESCRIPTION_TOOL_TIP = i18n.translate(
-  'xpack.securitySolution.timeline.properties.descriptionTooltip',
-  {
-    defaultMessage: 'A summary of the events and notes in this Timeline',
-  }
-);
-
-export const HISTORY = i18n.translate('xpack.securitySolution.timeline.properties.historyLabel', {
-  defaultMessage: 'History',
-});
-
-export const IS_VIEWING = i18n.translate(
-  'xpack.securitySolution.timeline.properties.isViewingTooltip',
-  {
-    defaultMessage: 'is viewing this Timeline',
-  }
-);
-
 export const NOTES = i18n.translate('xpack.securitySolution.timeline.properties.notesButtonLabel', {
   defaultMessage: 'Notes',
 });
-
-export const NOTES_TOOL_TIP = i18n.translate(
-  'xpack.securitySolution.timeline.properties.notesToolTip',
-  {
-    defaultMessage: 'Add and review notes about this Timeline. Notes may also be added to events.',
-  }
-);
-
-export const HISTORY_TOOL_TIP = i18n.translate(
-  'xpack.securitySolution.timeline.properties.historyToolTip',
-  {
-    defaultMessage: 'The chronological history of actions related to this timeline',
-  }
-);
-
-export const STREAM_LIVE_TOOL_TIP = i18n.translate(
-  'xpack.securitySolution.timeline.properties.streamLiveToolTip',
-  {
-    defaultMessage: 'Update the Timeline as new data arrives',
-  }
-);
 
 export const NEW_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.newTimelineButtonLabel',
@@ -169,19 +112,5 @@ export const ATTACH_TIMELINE_TO_CASE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.timeline.properties.attachTimelineToCaseTooltip',
   {
     defaultMessage: 'Please provide a title for your timeline in order to attach it to a case',
-  }
-);
-
-export const STREAM_LIVE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.streamLiveButtonLabel',
-  {
-    defaultMessage: 'Stream Live',
-  }
-);
-
-export const OPTIONAL = i18n.translate(
-  'xpack.securitySolution.timeline.properties.timelineDescriptionOptional',
-  {
-    defaultMessage: 'Optional',
   }
 );

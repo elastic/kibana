@@ -55,7 +55,7 @@ export const GenericConfirmationModal: React.FC<GenericConfirmationModalProps> =
           <p>
             <strong>{subheading}</strong>
           </p>
-          <p>{description}</p>
+          {description}
         </EuiText>
         <EuiSpacer />
         <EuiFormRow

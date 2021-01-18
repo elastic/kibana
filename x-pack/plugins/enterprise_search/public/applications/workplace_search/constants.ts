@@ -52,6 +52,9 @@ export const NAV = {
       defaultMessage: 'View my personal dashboard',
     }
   ),
+  SEARCH: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.searchApplication', {
+    defaultMessage: 'Go to search application',
+  }),
 };
 
 export const MAX_TABLE_ROW_ICONS = 3;
@@ -133,6 +136,9 @@ export const SOURCE_NAMES = {
 };
 
 export const SOURCE_OBJ_TYPES = {
+  FOLDERS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.folders', {
+    defaultMessage: 'Folders',
+  }),
   PAGES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.pages', {
     defaultMessage: 'Pages',
   }),
