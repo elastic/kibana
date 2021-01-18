@@ -17,7 +17,7 @@ export const toStringArray = <T = string>(value: T | T[] | null): string[] => {
             return [...acc, v.toString()];
           case 'object':
             try {
-              return [...acc, JSON.stringify(value)];
+              return [...acc, JSON.stringify(v)];
             } catch {
               return [...acc, 'Invalid Object'];
             }

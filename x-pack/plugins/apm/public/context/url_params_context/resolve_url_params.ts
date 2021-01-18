@@ -11,8 +11,7 @@ import { pickKeys } from '../../../common/utils/pick_keys';
 import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
 import { toQuery } from '../../components/shared/Links/url_helpers';
 import {
-  getEnd,
-  getStart,
+  getDateRange,
   removeUndefinedProps,
   toBoolean,
   toNumber,
@@ -56,8 +55,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
 
   return removeUndefinedProps({
     // date params
-    start: getStart(state, rangeFrom),
-    end: getEnd(state, rangeTo),
+    ...getDateRange({ state, rangeFrom, rangeTo }),
     rangeFrom,
     rangeTo,
     refreshPaused: refreshPaused ? toBoolean(refreshPaused) : undefined,
