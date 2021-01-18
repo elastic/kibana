@@ -39,15 +39,16 @@ const javaService = {
 
 const anomalies = {
   mlJobIds: ['apm-test-1234-ml-module-name'],
-  serviceAnomalies: {
-    'opbeans-test': {
+  serviceAnomalies: [
+    {
+      serviceName: 'opbeans-test',
       transactionType: 'request',
       actualValue: 10000,
       anomalyScore: 50,
       jobId: 'apm-test-1234-ml-module-name',
       healthStatus: ServiceHealthStatus.warning,
     },
-  },
+  ],
 };
 
 describe('transformServiceMapResponses', () => {

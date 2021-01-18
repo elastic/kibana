@@ -817,10 +817,7 @@ export class AlertsClient {
         attributes.consumer,
         WriteOperations.UpdateApiKey
       );
-      if (
-        attributes.actions.length &&
-        !this.authorization.shouldUseLegacyAuthorization(attributes)
-      ) {
+      if (attributes.actions.length) {
         await this.actionsAuthorization.ensureAuthorized('execute');
       }
     } catch (error) {
