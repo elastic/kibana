@@ -68,6 +68,7 @@ interface UrlParams {
 interface State {
   exportUrlAs: ExportUrlAsType;
   useShortUrl: boolean;
+  usePublicUrl: boolean;
   isCreatingShortUrl: boolean;
   url?: string;
   shortUrlErrorMsg?: string;
@@ -86,6 +87,7 @@ export class UrlPanelContent extends Component<Props, State> {
     this.state = {
       exportUrlAs: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
       useShortUrl: false,
+      usePublicUrl: false,
       isCreatingShortUrl: false,
       url: '',
     };
@@ -115,6 +117,7 @@ export class UrlPanelContent extends Component<Props, State> {
             label={<FormattedMessage id="share.urlPanel.urlGroupTitle" defaultMessage="URL" />}
           >
             <>
+              <EuiSpacer size={'s'} />
               {this.renderShortUrlSwitch()}
               {this.renderPublicUrlSwitch()}
             </>
@@ -288,6 +291,14 @@ export class UrlPanelContent extends Component<Props, State> {
     this.createShortUrl();
   };
 
+  private handlePublicUrlChange = async (evt: EuiSwitchEvent) => {
+    this.setState(({ usePublicUrl }) => {
+      return {
+        usePublicUrl: !usePublicUrl,
+      };
+    }, this.setUrl);
+  };
+
   private createShortUrl = async () => {
     this.setState({
       isCreatingShortUrl: true,
@@ -447,15 +458,15 @@ export class UrlPanelContent extends Component<Props, State> {
     const switchComponent = (
       <EuiSwitch
         label={switchLabel}
-        checked={true}
-        onChange={() => {}}
+        checked={this.state.usePublicUrl}
+        onChange={this.handlePublicUrlChange}
         data-test-subj="usePublicUrl"
       />
     );
     const tipContent = (
       <FormattedMessage
         id="share.urlPanel.publicUrlHelpText"
-        defaultMessage="Public URL is allows anonymous access to the dashboard to any user without needing to log in."
+        defaultMessage="Public URL allows anonymous access to the dashboard to any user without needing to log in."
       />
     );
 
