@@ -5,6 +5,7 @@
  */
 import { uniq } from 'lodash';
 import { safeLoad } from 'js-yaml';
+import uuid from 'uuid/v4';
 import {
   ElasticsearchClient,
   SavedObjectsClientContract,
@@ -30,6 +31,8 @@ import {
   agentPolicyStatuses,
   storedPackagePoliciesToAgentInputs,
   dataTypes,
+  FleetServerPolicy,
+  AGENT_POLICY_INDEX,
 } from '../../common';
 import { AgentPolicyNameExistsError } from '../errors';
 import { createAgentPolicyAction, listAgents } from './agents';
@@ -40,6 +43,7 @@ import { getSettings } from './settings';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
 import { isAgentsSetup } from './agents/setup';
+import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -481,6 +485,19 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     agentPolicyId: string
   ) {
+    return appContextService.getConfig()?.agents.fleetServerEnabled
+      ? this.createFleetPolicyChangeFleetServer(
+          soClient,
+          appContextService.getInternalUserESClient(),
+          agentPolicyId
+        )
+      : this.createFleetPolicyChangeActionSO(soClient, agentPolicyId);
+  }
+
+  public async createFleetPolicyChangeActionSO(
+    soClient: SavedObjectsClientContract,
+    agentPolicyId: string
+  ) {
     // If Agents is not setup skip the creation of POLICY_CHANGE agent actions
     // the action will be created during the fleet setup
     if (!(await isAgentsSetup(soClient))) {
@@ -505,6 +522,38 @@ class AgentPolicyService {
       created_at: new Date().toISOString(),
       policy_id: policy.id,
       policy_revision: policy.revision,
+    });
+  }
+
+  public async createFleetPolicyChangeFleetServer(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    agentPolicyId: string
+  ) {
+    // If Agents is not setup skip the creation of POLICY_CHANGE agent actions
+    // the action will be created during the fleet setup
+    if (!(await isAgentsSetup(soClient))) {
+      return;
+    }
+    const policy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
+    if (!policy || !policy.revision) {
+      return;
+    }
+
+    const fleetServerPolicy: FleetServerPolicy = {
+      '@timestamp': new Date().toISOString(),
+      revision_idx: policy.revision,
+      coordinator_idx: 0,
+      data: (policy as unknown) as FleetServerPolicy['data'],
+      policy_id: policy.id,
+      default_fleet_server: false,
+    };
+
+    await esClient.create({
+      index: AGENT_POLICY_INDEX,
+      body: fleetServerPolicy,
+      id: uuid(),
+      refresh: 'wait_for',
     });
   }
 
