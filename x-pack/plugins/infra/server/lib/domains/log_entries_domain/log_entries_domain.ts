@@ -9,10 +9,9 @@ import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/common
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
-  LogEntry,
-  LogColumn,
   LogEntriesRequest,
 } from '../../../../common/http_api';
+import { LogEntry, LogColumn } from '../../../../common/log_entry';
 import {
   InfraSourceConfiguration,
   InfraSources,

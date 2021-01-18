@@ -18,14 +18,14 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import useSet from 'react-use/lib/useSet';
-import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { TimeRange } from '../../../../../../common/time/time_range';
 import {
   formatAnomalyScore,
   getFriendlyNameForPartitionId,
   formatOneDecimalPlace,
   isCategoryAnomaly,
 } from '../../../../../../common/log_analysis';
-import { AnomalyType } from '../../../../../../common/http_api/log_analysis';
+import { AnomalyType } from '../../../../../../common/log_analysis';
 import { RowExpansionButton } from '../../../../../components/basic_table';
 import { AnomaliesTableExpandedRow } from './expanded_row';
 import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';

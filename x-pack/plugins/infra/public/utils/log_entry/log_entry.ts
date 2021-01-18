@@ -17,7 +17,7 @@ import {
   LogMessagePart,
   LogMessageFieldPart,
   LogMessageConstantPart,
-} from '../../../common/http_api';
+} from '../../../common/log_entry';
 
 export type LogEntryMessageSegment = InfraLogEntryFields.Message;
 export type LogEntryConstantMessageSegment = InfraLogEntryFields.InfraLogMessageConstantSegmentInlineFragment;

@@ -15,8 +15,8 @@ import {
   LogEntryCategory,
   LogEntryCategoryDataset,
   LogEntryCategoryHistogram,
-} from '../../../../../../common/http_api/log_analysis';
-import { TimeRange } from '../../../../../../common/http_api/shared';
+} from '../../../../../../common/log_analysis';
+import { TimeRange } from '../../../../../../common/time';
 import { RowExpansionButton } from '../../../../../components/basic_table';
 import { AnomalySeverityIndicatorList } from './anomaly_severity_indicator_list';
 import { CategoryDetailsRow } from './category_details_row';

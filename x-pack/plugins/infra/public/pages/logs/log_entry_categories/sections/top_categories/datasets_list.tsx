@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { euiStyled } from '../../../../../../../observability/public';
-import { LogEntryCategoryDataset } from '../../../../../../common/http_api/log_analysis';
+import { LogEntryCategoryDataset } from '../../../../../../common/log_analysis';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 
 export const DatasetsList: React.FunctionComponent<{

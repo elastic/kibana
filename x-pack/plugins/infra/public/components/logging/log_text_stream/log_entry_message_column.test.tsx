@@ -7,7 +7,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { EuiThemeProvider } from '../../../../../observability/public';
-import { LogMessageColumn } from '../../../../common/http_api';
+import { LogMessageColumn } from '../../../../common/log_entry';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 
 describe('LogEntryMessageColumn', () => {

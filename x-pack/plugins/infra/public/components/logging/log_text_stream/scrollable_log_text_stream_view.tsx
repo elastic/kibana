@@ -25,7 +25,7 @@ import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
 import { useColumnWidths, LogEntryColumnWidths } from './log_entry_column';
 import { LogDateRow } from './log_date_row';
-import { LogEntry } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/log_entry';
 import { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 
 interface ScrollableLogTextStreamViewProps {

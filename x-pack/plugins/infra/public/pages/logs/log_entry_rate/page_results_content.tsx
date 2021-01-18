@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { encode, RisonValue } from 'rison-node';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { euiStyled, useTrackPageview } from '../../../../../observability/public';
-import { TimeRange } from '../../../../common/http_api/shared/time_range';
+import { TimeRange } from '../../../../common/time/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { TimeKey } from '../../../../common/time';
 import {

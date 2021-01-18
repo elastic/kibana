@@ -13,13 +13,11 @@ import {
   logEntryCategoriesJobTypes,
   logEntryRateJobTypes,
   jobCustomSettingsRT,
-} from '../../../common/log_analysis';
-import {
-  Sort,
+  LogEntryAnomalyDatasets,
+  AnomaliesSort,
   Pagination,
-  GetLogEntryAnomaliesRequestPayload,
-} from '../../../common/http_api/log_analysis';
-import { isCategoryAnomaly } from '../../../common/log_analysis/log_entry_anomalies';
+  isCategoryAnomaly,
+} from '../../../common/log_analysis';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
 import { createLogEntryAnomaliesQuery, logEntryAnomaliesResponseRT } from './queries';
 import {
@@ -97,9 +95,9 @@ export async function getLogEntryAnomalies(
   sourceId: string,
   startTime: number,
   endTime: number,
-  sort: Sort,
+  sort: AnomaliesSort,
   pagination: Pagination,
-  datasets: GetLogEntryAnomaliesRequestPayload['data']['datasets']
+  datasets?: LogEntryAnomalyDatasets
 ) {
   const finalizeLogEntryAnomaliesSpan = startTracingSpan('get log entry anomalies');
 
@@ -143,13 +141,9 @@ export async function getLogEntryAnomalies(
     }
   });
 
-  const categoryIds = parsedAnomalies
-    .filter((anomaly) => {
-      return isCategoryAnomaly(anomaly);
-    })
-    .map((categoryAnomaly) => {
-      return parseInt(categoryAnomaly.categoryId!, 10);
-    });
+  const categoryIds = parsedAnomalies.reduce<number[]>((acc, anomaly) => {
+    return isCategoryAnomaly(anomaly) ? [...acc, parseInt(anomaly.categoryId, 10)] : acc;
+  }, []);
 
   const logEntryCategoriesCountJobId = getJobId(
     context.infra.spaceId,
@@ -164,10 +158,10 @@ export async function getLogEntryAnomalies(
   );
 
   const parsedAnomaliesWithExpandedCategoryInformation = parsedAnomalies.map((anomaly) => {
-    if (anomaly.type === 'logCategory') {
+    if (isCategoryAnomaly(anomaly)) {
       const {
         _source: { regex, terms },
-      } = logEntryCategoriesById[parseInt(anomaly.categoryId!, 10)];
+      } = logEntryCategoriesById[parseInt(anomaly.categoryId, 10)];
       return { ...anomaly, ...{ categoryRegex: regex, categoryTerms: terms } };
     } else {
       return anomaly;
@@ -241,9 +235,9 @@ async function fetchLogEntryAnomalies(
   jobIds: string[],
   startTime: number,
   endTime: number,
-  sort: Sort,
+  sort: AnomaliesSort,
   pagination: Pagination,
-  datasets: GetLogEntryAnomaliesRequestPayload['data']['datasets']
+  datasets?: LogEntryAnomalyDatasets
 ) {
   // We'll request 1 extra entry on top of our pageSize to determine if there are
   // more entries to be fetched. This avoids scenarios where the client side can't
