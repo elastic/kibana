@@ -245,7 +245,7 @@ export interface SavedObjectsType {
    */
   mappings: SavedObjectsTypeMappingDefinition;
   /**
-   * An optional object of {@link SavedObjectMigrationFn | migrations} or a function returning a map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
+   * An optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
    */
   migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
   /**

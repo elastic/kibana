@@ -389,8 +389,8 @@ export class SavedObjectsService
     const skipMigrations = this.config.migration.skip || !pluginsInitialized;
 
     /**
-     * Note: Prepares all migrations Maps. This will execute the migrations functions
-     * needed for both Individual documents migration and Saved Object migrations on startup.
+     * Note: Prepares all migrations maps. If a saved object type was registered with a `migrations` function, 
+     *  this function will be called to get the type's SavedObjectMigrationMap.
      */
     migrator.prepareMigrations();
 
