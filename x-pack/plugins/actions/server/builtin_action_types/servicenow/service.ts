@@ -49,7 +49,9 @@ export const createExternalService = (
   const checkInstance = (res: AxiosResponse) => {
     if (res.status === 200 && res.data.result == null) {
       throw new Error(
-        `There is an issue with your Service Now Instance. Please check ${res.request.connection.servername}`
+        `There is an issue with your Service Now Instance. Please check ${
+          res.request?.connection?.servername ?? ''
+        }.`
       );
     }
   };

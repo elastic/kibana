@@ -33,8 +33,38 @@ export const serviceNowCommonFields = [
     element: 'sys_updated_by',
   },
 ];
+
+export const serviceNowChoices = [
+  {
+    dependent_value: '',
+    label: '1 - Critical',
+    value: '1',
+  },
+  {
+    dependent_value: '',
+    label: '2 - High',
+    value: '2',
+  },
+  {
+    dependent_value: '',
+    label: '3 - Moderate',
+    value: '3',
+  },
+  {
+    dependent_value: '',
+    label: '4 - Low',
+    value: '4',
+  },
+  {
+    dependent_value: '',
+    label: '5 - Planning',
+    value: '5',
+  },
+];
+
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {
+    getChoices: jest.fn().mockImplementation(() => Promise.resolve(serviceNowChoices)),
     getFields: jest.fn().mockImplementation(() => Promise.resolve(serviceNowCommonFields)),
     getIncident: jest.fn().mockImplementation(() =>
       Promise.resolve({

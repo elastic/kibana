@@ -9,7 +9,7 @@ import {
   JiraActionTypeId,
   PagerDutyActionTypeId,
   ServerLogActionTypeId,
-  ServiceNowActionTypeId,
+  ServiceNowIMActionTypeId as ServiceNowActionTypeId,
   SlackActionTypeId,
   TeamsActionTypeId,
   WebhookActionTypeId,
