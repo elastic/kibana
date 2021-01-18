@@ -196,7 +196,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
       await testSubjects.click('confirmSaveSavedObjectButton');
 
       // Confirm that the Graph has been saved.
-      return await testSubjects.exists('saveGraphSuccess');
+      return await testSubjects.exists('saveGraphSuccess', { timeout: 10000 });
     }
 
     async getSearchFilter() {
