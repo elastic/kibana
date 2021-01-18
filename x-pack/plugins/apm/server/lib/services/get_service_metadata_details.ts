@@ -81,7 +81,6 @@ export async function getServiceMetadataDetails({
           searchAggregatedTransactions
         ),
         ProcessorEvent.error,
-        ProcessorEvent.span,
         ProcessorEvent.metric,
       ],
     },

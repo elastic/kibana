@@ -62,11 +62,9 @@ export async function getServiceMetadataIcons({
           searchAggregatedTransactions
         ),
         ProcessorEvent.error,
-        ProcessorEvent.span,
         ProcessorEvent.metric,
       ],
     },
-    terminateAfter: 1,
     body: {
       size: 1,
       _source: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME],
