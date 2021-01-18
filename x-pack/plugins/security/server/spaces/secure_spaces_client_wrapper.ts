@@ -6,8 +6,13 @@
 
 import Boom from '@hapi/boom';
 import { KibanaRequest } from 'src/core/server';
-import { GetAllSpacesPurpose, GetSpaceResult } from '../../../spaces/common/model/types';
-import { Space, ISpacesClient } from '../../../spaces/server';
+import {
+  Space,
+  ISpacesClient,
+  GetAllSpacesOptions,
+  GetAllSpacesPurpose,
+  GetSpaceResult,
+} from '../../../spaces/server';
 import { LegacySpacesAuditLogger } from './legacy_audit_logger';
 import { AuthorizationServiceSetup } from '../authorization';
 import { AuditLogger, EventOutcome, SpaceAuditAction, spaceAuditEvent } from '../audit';
@@ -28,11 +33,6 @@ const PURPOSE_PRIVILEGE_MAP: Record<
     authorization.actions.ui.get('savedObjectsManagement', 'shareIntoSpace'),
   ],
 };
-
-interface GetAllSpacesOptions {
-  purpose?: GetAllSpacesPurpose;
-  includeAuthorizedPurposes?: boolean;
-}
 
 export class SecureSpacesClientWrapper implements ISpacesClient {
   private readonly useRbac = this.authorization.mode.useRbacForRequest(this.request);
