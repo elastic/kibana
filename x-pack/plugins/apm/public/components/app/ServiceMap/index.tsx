@@ -7,10 +7,10 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React, { PropsWithChildren, ReactNode } from 'react';
 import styled from 'styled-components';
+import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { useTrackPageview } from '../../../../../observability/public';
 import {
   invalidLicenseMessage,
-  isActivePlatinumLicense,
   SERVICE_MAP_TIMEOUT_ERROR,
 } from '../../../../common/service_map';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';

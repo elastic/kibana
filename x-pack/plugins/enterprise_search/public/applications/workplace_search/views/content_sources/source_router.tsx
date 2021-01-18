@@ -84,12 +84,13 @@ export const SourceRouter: React.FC = () => {
     <>
       <EuiCallOut title="Content source is disabled" color="warning" iconType="alert">
         <p>
-          Your organization&apos;s license level changed and no longer supports document-level
-          permissions.{' '}
+          Your organization’s license level has changed. Your data is safe, but document-level
+          permissions are no longer supported and searching of this source has been disabled.
+          Upgrade to a Platinum license to re-enable this source.
         </p>
-        <p>Don&apos;t worry: your data is safe. Search has been disabled.</p>
-        <p>Upgrade to a Platinum license to re-enable this source.</p>
-        <EuiButton href={ENT_SEARCH_LICENSE_MANAGEMENT}>Explore Platinum license</EuiButton>
+        <EuiButton color="warning" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+          Explore Platinum license
+        </EuiButton>
       </EuiCallOut>
       <EuiSpacer />
     </>
