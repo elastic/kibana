@@ -9,13 +9,12 @@ import { isEqual } from 'lodash';
 
 import { kea, MakeLogicType } from 'kea';
 
-import http from 'shared/http';
-
 import {
   clearFlashMessages,
   setSuccessMessage,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
+import { HttpLogic } from '../../../shared/http';
 import { AppLogic } from '../../app_logic';
 
 export interface PrivateSource {
@@ -142,23 +141,30 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
     ],
   }),
   listeners: ({ actions, values }) => ({
-    initializeSourceRestrictions: () => {
-      http(route)
-        .then(({ data }) => actions.setServerProps(data))
-        .catch((e) => flashAPIErrors(e));
+    initializeSourceRestrictions: async () => {
+      const { http } = HttpLogic.values;
+
+      try {
+        const response = await http.get(route);
+        actions.setServerProps(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    saveSourceRestrictions: () => {
+    saveSourceRestrictions: async () => {
       const { isEnabled, remote, standard } = values;
       const serverData = { isEnabled, remote, standard };
+      const body = JSON.stringify(serverData);
+      const { http } = HttpLogic.values;
 
-      http
-        .patch(route, serverData)
-        .then(({ data }) => {
-          actions.setSourceRestrictionsUpdated(data);
-          setSuccessMessage('Successfully updated source restrictions.');
-          AppLogic.actions.setSourceRestriction(isEnabled);
-        })
-        .catch((e) => flashAPIErrors(e));
+      try {
+        const response = await http.patch(route, { body });
+        actions.setSourceRestrictionsUpdated(response);
+        setSuccessMessage('Successfully updated source restrictions.');
+        AppLogic.actions.setSourceRestriction(isEnabled);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
     resetState: () => {
       actions.setServerProps(cloneDeep(values.cachedServerState));
