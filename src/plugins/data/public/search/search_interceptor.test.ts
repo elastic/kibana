@@ -254,6 +254,7 @@ describe('SearchInterceptor', () => {
           body: {
             attributes: {
               error: {
+                root_cause: 'this is the problem',
                 failed_shards: [
                   {
                     reason: {

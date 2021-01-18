@@ -342,7 +342,9 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            error: 'oh no',
+            error: {
+              message: 'oh no',
+            },
             id: 1,
           },
           isError: true,
@@ -364,7 +366,8 @@ describe('EnhancedSearchInterceptor', () => {
       await timeTravel(10);
 
       expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBe(responses[1].value);
+      expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
+      expect((error.mock.calls[0][0] as Error).message).toBe('oh no');
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
     });

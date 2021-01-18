@@ -98,8 +98,15 @@ export class SearchInterceptor {
    * @returns `Error` a search service specific error or the original error, if a specific error can't be recognized.
    * @internal
    */
-  protected handleSearchError(e: any, timeoutSignal: AbortSignal, options?: ISearchOptions): Error {
-    if (timeoutSignal.aborted || get(e, 'body.message') === 'Request timed out') {
+  protected handleSearchError(
+    e: Record<string, any> | AbortError,
+    timeoutSignal: AbortSignal,
+    options?: ISearchOptions
+  ): Error {
+    if (e instanceof AbortError) {
+      // In the case an application initiated abort, throw the existing AbortError.
+      return e;
+    } else if (timeoutSignal.aborted || get(e, 'body.message') === 'Request timed out') {
       // Handle a client or a server side timeout
       const err = new SearchTimeoutError(e, this.getTimeoutMode());
 
@@ -107,9 +114,6 @@ export class SearchInterceptor {
       // The timeout error is shown any time a request times out, or once per session, if the request is part of a session.
       this.showTimeoutError(err, options?.sessionId);
       return err;
-    } else if (options?.abortSignal?.aborted) {
-      // In the case an application initiated abort, throw the existing AbortError.
-      return e;
     } else if (isEsError(e)) {
       if (isPainlessError(e)) {
         return new PainlessError(e);
@@ -117,7 +121,7 @@ export class SearchInterceptor {
         return new EsError(e);
       }
     } else {
-      return e instanceof Error ? e : new Error(e?.message || e);
+      return new Error(e?.error?.message ?? e);
     }
   }
 
@@ -245,7 +249,7 @@ export class SearchInterceptor {
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
       return from(this.runSearch(request, { ...options, abortSignal: combinedSignal })).pipe(
-        catchError((e: Error) => {
+        catchError((e: any) => {
           return throwError(this.handleSearchError(e, timeoutSignal, options));
         }),
         finalize(() => {
