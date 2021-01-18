@@ -64,6 +64,7 @@ import {
   DEFAULT_COLUMNS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
   SEARCH_ON_PAGE_LOAD_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
@@ -197,6 +198,8 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     $scope.searchSource,
     toastNotifications
   );
+  $scope.useNewFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
+
   //used for functional testing
   $scope.fetchCounter = 0;
 
@@ -306,7 +309,8 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
         nextIndexPattern,
         $scope.state.columns,
         $scope.state.sort,
-        config.get(MODIFY_COLUMNS_ON_SWITCH)
+        config.get(MODIFY_COLUMNS_ON_SWITCH),
+        $scope.useNewFieldsApi
       );
       await setAppState(nextAppState);
     }
@@ -413,19 +417,33 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
 
   setBreadcrumbsTitle(savedSearch, chrome);
 
+  function removeSourceFromColumns(columns) {
+    return columns.filter((col) => col !== '_source');
+  }
+
+  function getDefaultColumns() {
+    const columns = [...savedSearch.columns];
+
+    if ($scope.useNewFieldsApi) {
+      return removeSourceFromColumns(columns);
+    }
+    if (columns.length > 0) {
+      return columns;
+    }
+    return [...config.get(DEFAULT_COLUMNS_SETTING)];
+  }
+
   function getStateDefaults() {
     const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
     const sort = getSortArray(savedSearch.sort, $scope.indexPattern);
+    const columns = getDefaultColumns();
 
     const defaultState = {
       query,
       sort: !sort.length
         ? getDefaultSort($scope.indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
         : sort,
-      columns:
-        savedSearch.columns.length > 0
-          ? savedSearch.columns
-          : config.get(DEFAULT_COLUMNS_SETTING).slice(),
+      columns,
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
@@ -740,10 +758,14 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
   };
 
   $scope.updateDataSource = () => {
-    updateSearchSource($scope.searchSource, {
-      indexPattern: $scope.indexPattern,
+    const { indexPattern, searchSource, useNewFieldsApi } = $scope;
+    const { columns, sort } = $scope.state;
+    updateSearchSource(searchSource, {
+      indexPattern,
       services,
-      sort: $scope.state.sort,
+      sort,
+      columns,
+      useNewFieldsApi,
     });
     return Promise.resolve();
   };
@@ -771,20 +793,20 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
   };
 
   $scope.addColumn = function addColumn(columnName) {
+    const { indexPattern, useNewFieldsApi } = $scope;
     if (capabilities.discover.save) {
-      const { indexPattern } = $scope;
       popularizeField(indexPattern, columnName, indexPatterns);
     }
-    const columns = columnActions.addColumn($scope.state.columns, columnName);
+    const columns = columnActions.addColumn($scope.state.columns, columnName, useNewFieldsApi);
     setAppState({ columns });
   };
 
   $scope.removeColumn = function removeColumn(columnName) {
+    const { indexPattern, useNewFieldsApi } = $scope;
     if (capabilities.discover.save) {
-      const { indexPattern } = $scope;
       popularizeField(indexPattern, columnName, indexPatterns);
     }
-    const columns = columnActions.removeColumn($scope.state.columns, columnName);
+    const columns = columnActions.removeColumn($scope.state.columns, columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const sort = $scope.state.sort.length
       ? $scope.state.sort.filter((subArr) => subArr[0] !== columnName)

@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useState, useEffect } from 'react';
-import { EuiLink, EuiIconTip, EuiText, EuiPopoverFooter, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiIconTip, EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { DiscoverFieldBucket } from './discover_field_bucket';
@@ -30,6 +30,7 @@ import {
 import { Bucket, FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import './discover_field_details.scss';
+import { DiscoverFieldDetailsFooter } from './discover_field_details_footer';
 
 interface DiscoverFieldDetailsProps {
   field: IndexPatternField;
@@ -37,6 +38,7 @@ interface DiscoverFieldDetailsProps {
   details: FieldDetails;
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  showFooter?: boolean;
 }
 
 export function DiscoverFieldDetails({
@@ -45,6 +47,7 @@ export function DiscoverFieldDetails({
   details,
   onAddFilter,
   trackUiMetric,
+  showFooter = true,
 }: DiscoverFieldDetailsProps) {
   const warnings = getWarnings(field);
   const [showVisualizeLink, setShowVisualizeLink] = useState<boolean>(false);
@@ -118,27 +121,13 @@ export function DiscoverFieldDetails({
           </>
         )}
       </div>
-      {!details.error && (
-        <EuiPopoverFooter>
-          <EuiText size="xs" textAlign="center">
-            {!indexPattern.metaFields.includes(field.name) && !field.scripted ? (
-              <EuiLink onClick={() => onAddFilter('_exists_', field.name, '+')}>
-                <FormattedMessage
-                  id="discover.fieldChooser.detailViews.existsText"
-                  defaultMessage="Exists in"
-                />{' '}
-                {details.exists}
-              </EuiLink>
-            ) : (
-              <span>{details.exists}</span>
-            )}{' '}
-            / {details.total}{' '}
-            <FormattedMessage
-              id="discover.fieldChooser.detailViews.recordsText"
-              defaultMessage="records"
-            />
-          </EuiText>
-        </EuiPopoverFooter>
+      {!details.error && showFooter && (
+        <DiscoverFieldDetailsFooter
+          field={field}
+          indexPattern={indexPattern}
+          details={details}
+          onAddFilter={onAddFilter}
+        />
       )}
     </>
   );
