@@ -5,7 +5,7 @@
  */
 
 import { useCallback } from 'react';
-import { exhaustMap, switchMap } from 'rxjs/operators';
+import { exhaustMap } from 'rxjs/operators';
 import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_sources';
 import { LogEntryCursor } from '../../../../common/log_entry';
 import { decodeOrThrow } from '../../../../common/runtime_types';
@@ -18,9 +18,9 @@ import { JsonObject } from '../../../../common/typed_json';
 import {
   handleDataSearchResponse,
   useDataSearch,
+  useDataSearchResponseState,
   useFlattenedResponse,
 } from '../../../utils/data_search';
-import { useObservable } from '../../../utils/use_observable';
 
 export const useFetchLogEntriesAfter = ({
   columnOverrides,
@@ -66,16 +66,32 @@ export const useFetchLogEntriesAfter = ({
 
   const logEntriesAfterSearchResponse$ = useFlattenedResponse(
     logEntriesAfterSearchRequests$,
-    exhaustMap(
-      handleDataSearchResponse(
-        { current: null },
-        { current: decodeOrThrow(logEntriesSearchResponsePayloadRT) }
-      )
-    )
+    exhaustMap(handleDataSearchResponse(initialResponseRef, initialProjectResponseRef))
   );
 
+  const {
+    cancelRequest,
+    isRequestRunning,
+    isResponsePartial,
+    loaded,
+    total,
+  } = useDataSearchResponseState(logEntriesAfterSearchResponse$);
+
   return {
+    cancelRequest,
     fetchLogEntriesAfter,
+    isRequestRunning,
+    isResponsePartial,
+    loaded,
     logEntriesAfterSearchResponse$,
+    total,
   };
+};
+
+const initialResponseRef = {
+  current: null,
+};
+
+const initialProjectResponseRef = {
+  current: decodeOrThrow(logEntriesSearchResponsePayloadRT),
 };

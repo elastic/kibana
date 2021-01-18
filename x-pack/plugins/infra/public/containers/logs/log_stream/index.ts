@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
 import { esKuery } from '../../../../../../../src/plugins/data/public';
@@ -165,47 +165,12 @@ export function useLogStream({
     [sourceId, startTimestamp, endTimestamp, query, state.topCursor]
   );
 
-  const [nextEntriesPromise, fetchNextEntries] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'creation',
-      createPromise: () => {
-        if (state.bottomCursor === null) {
-          throw new Error(
-            'useLogState: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
-          );
-        }
-
-        if (!state.hasMoreAfter) {
-          return Promise.resolve({ data: EMPTY_DATA });
-        }
-
-        fetchLogEntriesAfter(state.bottomCursor, LOG_ENTRIES_CHUNK_SIZE);
-        return fetchLogEntries(
-          {
-            sourceId,
-            startTimestamp,
-            endTimestamp,
-            query: serializedQuery,
-            after: state.bottomCursor,
-          },
-          services.http.fetch
-        );
-      },
-      onResolve: ({ data }) => {
-        if (!data.entries.length) {
-          return;
-        }
-        setState((prevState) => ({
-          entries: [...prevState.entries, ...data.entries],
-          hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
-          bottomCursor: data.bottomCursor ?? prevState.bottomCursor,
-        }));
-      },
-    },
-    [sourceId, startTimestamp, endTimestamp, query, state.bottomCursor]
-  );
-
-  const { fetchLogEntriesAfter, logEntriesAfterSearchResponse$ } = useFetchLogEntriesAfter({
+  const {
+    fetchLogEntriesAfter,
+    isRequestRunning: isLogEntriesAfterRequestRunning,
+    isResponsePartial: isLogEntriesAfterResponsePartial,
+    logEntriesAfterSearchResponse$,
+  } = useFetchLogEntriesAfter({
     sourceId,
     startTimestamp,
     endTimestamp,
@@ -213,13 +178,34 @@ export function useLogStream({
   });
 
   useSubscription(logEntriesAfterSearchResponse$, {
-    next: ({ response }) => {
-      console.log('next after', response);
+    next: ({ response: { data, isPartial } }) => {
+      if (data != null && !isPartial) {
+        setState((prevState) => ({
+          ...prevState,
+          entries: [...prevState.entries, ...data.entries],
+          hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
+          bottomCursor: data.bottomCursor ?? prevState.bottomCursor,
+        }));
+      }
     },
     error: (err) => {
       console.error(err);
     },
   });
+
+  const fetchNextEntries = useCallback(() => {
+    if (state.bottomCursor === null) {
+      throw new Error(
+        'useLogState: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+      );
+    }
+
+    if (!state.hasMoreAfter) {
+      return;
+    }
+
+    fetchLogEntriesAfter(state.bottomCursor, LOG_ENTRIES_CHUNK_SIZE);
+  }, [fetchLogEntriesAfter, state.bottomCursor, state.hasMoreAfter]);
 
   const loadingState = useMemo<LoadingState>(
     () => convertPromiseStateToLoadingState(entriesPromise.state),
@@ -227,22 +213,30 @@ export function useLogStream({
   );
 
   const pageLoadingState = useMemo<LoadingState>(() => {
-    const states = [previousEntriesPromise.state, nextEntriesPromise.state];
-
-    if (states.includes('pending')) {
+    if (previousEntriesPromise.state === 'pending' || isLogEntriesAfterRequestRunning) {
       return 'loading';
     }
 
-    if (states.includes('rejected')) {
+    if (
+      previousEntriesPromise.state === 'rejected' ||
+      (!isLogEntriesAfterRequestRunning && isLogEntriesAfterResponsePartial)
+    ) {
       return 'error';
     }
 
-    if (states.includes('resolved')) {
+    if (
+      previousEntriesPromise.state === 'resolved' ||
+      (!isLogEntriesAfterRequestRunning && !isLogEntriesAfterResponsePartial)
+    ) {
       return 'success';
     }
 
     return 'uninitialized';
-  }, [previousEntriesPromise.state, nextEntriesPromise.state]);
+  }, [
+    isLogEntriesAfterRequestRunning,
+    isLogEntriesAfterResponsePartial,
+    previousEntriesPromise.state,
+  ]);
 
   return {
     ...state,
