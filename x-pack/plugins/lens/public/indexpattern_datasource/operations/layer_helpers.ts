@@ -316,6 +316,10 @@ export function replaceColumn({
     }
 
     if (!field) {
+      // if no field is available perform a full clean of the column from the layer
+      if (previousDefinition.input === 'fullReference') {
+        tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
+      }
       return {
         ...tempLayer,
         incompleteColumns: {
@@ -862,9 +866,12 @@ export function updateLayerIndexPattern(
  */
 export function getErrorMessages(layer: IndexPatternLayer): string[] | undefined {
   const errors: string[] = [];
-
   Object.entries(layer.columns).forEach(([columnId, column]) => {
-    const def = operationDefinitionMap[column.operationType];
+    // If we're transitioning to another operation, check for "new" incompleteColumns rather
+    // than "old" saved operation on the layer
+    const columnFinalRef =
+      layer.incompleteColumns?.[columnId]?.operationType || column.operationType;
+    const def = operationDefinitionMap[columnFinalRef];
     if (def.getErrorMessage) {
       errors.push(...(def.getErrorMessage(layer, columnId) ?? []));
     }
