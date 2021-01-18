@@ -9,7 +9,7 @@ import React, { SetStateAction, useEffect, useState } from 'react';
 import { fetchQueryAlerts } from './api';
 import { AlertSearchResponse } from './types';
 
-type Func = () => void;
+type Func = () => Promise<void>;
 
 export interface ReturnQueryAlerts<Hit, Aggs> {
   loading: boolean;
