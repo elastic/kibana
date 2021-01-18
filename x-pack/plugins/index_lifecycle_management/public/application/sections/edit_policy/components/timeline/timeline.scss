@@ -1,4 +1,4 @@
-$colorBarHeight: $euiSizeS;
+$ilmTimelineBarHeight: $euiSizeS;
 
 .ilmTimeline {
   overflow: hidden;
@@ -46,8 +46,8 @@ $colorBarHeight: $euiSizeS;
 
   &__colorBar {
     display: inline-block;
-    height: $colorBarHeight;
-    border-radius: calc(#{$colorBarHeight}/ 2);
+    height: $ilmTimelineBarHeight;
+    border-radius: calc(#{$ilmTimelineBarHeight} / 2);
     width: 100%;
   }
 
@@ -55,7 +55,7 @@ $colorBarHeight: $euiSizeS;
     width: var(--ilm-timeline-hot-phase-width);
 
     &__colorBar {
-      background-color: $euiColorVis9_behindText;
+      background-color: $euiColorVis9;
     }
   }
 
@@ -63,7 +63,7 @@ $colorBarHeight: $euiSizeS;
     width: var(--ilm-timeline-warm-phase-width);
 
     &__colorBar {
-      background-color: $euiColorVis5_behindText;
+      background-color: $euiColorVis5;
     }
   }
 
@@ -71,7 +71,7 @@ $colorBarHeight: $euiSizeS;
     width: var(--ilm-timeline-cold-phase-width);
 
     &__colorBar {
-      background-color: $euiColorVis1_behindText;
+      background-color: $euiColorVis1;
     }
   }
 }

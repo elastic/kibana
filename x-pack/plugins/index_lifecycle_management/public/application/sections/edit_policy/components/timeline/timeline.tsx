@@ -26,8 +26,8 @@ import {
   PhaseAgeInMilliseconds,
 } from '../../lib';
 
-import './_timeline.scss';
-import InfinityIconSvg from './infinity_icon.svg';
+import './timeline.scss';
+import { InfinityIconSvg } from './infinity_icon.svg';
 
 const InfinityIcon: FunctionComponent<Omit<EuiIconProps, 'type'>> = (props) => (
   <EuiIcon type={InfinityIconSvg} {...props} />
