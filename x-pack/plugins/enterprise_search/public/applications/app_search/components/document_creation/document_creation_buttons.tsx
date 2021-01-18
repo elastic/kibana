@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { EuiCardTo } from '../../../shared/react_router_helpers';
-import { DOCS_PREFIX, getEngineRoute, ENGINE_CRAWLER_PATH } from '../../routes';
+import { DOCS_PREFIX, ENGINE_CRAWLER_PATH } from '../../routes';
 import { EngineLogic } from '../engine';
 
 import { DocumentCreationLogic } from './';
@@ -33,8 +33,8 @@ interface Props {
 export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) => {
   const { openDocumentCreation } = useActions(DocumentCreationLogic);
 
-  const { engineName } = useValues(EngineLogic);
-  const crawlerLink = getEngineRoute(engineName) + ENGINE_CRAWLER_PATH;
+  const { generatePath } = useValues(EngineLogic);
+  const crawlerLink = generatePath(ENGINE_CRAWLER_PATH);
 
   return (
     <>

@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { setMockValues } from '../../../__mocks__';
+import { mockEngineValues } from '../../__mocks__';
+
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiPanel } from '@elastic/eui';
@@ -44,6 +47,10 @@ describe('Result', () => {
     description: 'text' as SchemaTypes,
     length: 'number' as SchemaTypes,
   };
+
+  beforeEach(() => {
+    setMockValues(mockEngineValues);
+  });
 
   it('renders', () => {
     const wrapper = shallow(<Result {...props} />);
