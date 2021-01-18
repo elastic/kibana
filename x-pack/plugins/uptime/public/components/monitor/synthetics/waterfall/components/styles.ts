@@ -47,7 +47,7 @@ export const WaterfallChartFixedTopContainerSidebarCover = euiStyled(EuiPanel)`
 
 export const WaterfallChartFixedAxisContainer = euiStyled.div`
   height: ${FIXED_AXIS_HEIGHT}px;
-  z-index: ${(props) => props.theme.eui.euiZLevel5};
+  z-index: ${(props) => props.theme.eui.euiZLevel4};
 `;
 
 interface WaterfallChartSidebarContainer {
