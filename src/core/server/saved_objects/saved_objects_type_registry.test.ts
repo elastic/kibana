@@ -36,25 +36,66 @@ describe('SavedObjectTypeRegistry', () => {
     registry = new SavedObjectTypeRegistry();
   });
 
-  it('allows to register types', () => {
-    registry.registerType(createType({ name: 'typeA' }));
-    registry.registerType(createType({ name: 'typeB' }));
-    registry.registerType(createType({ name: 'typeC' }));
-
-    expect(
-      registry
-        .getAllTypes()
-        .map((type) => type.name)
-        .sort()
-    ).toEqual(['typeA', 'typeB', 'typeC']);
-  });
-
-  it('throws when trying to register the same type twice', () => {
-    registry.registerType(createType({ name: 'typeA' }));
-    registry.registerType(createType({ name: 'typeB' }));
-    expect(() => {
+  describe('#registerType', () => {
+    it('allows to register types', () => {
       registry.registerType(createType({ name: 'typeA' }));
-    }).toThrowErrorMatchingInlineSnapshot(`"Type 'typeA' is already registered"`);
+      registry.registerType(createType({ name: 'typeB' }));
+      registry.registerType(createType({ name: 'typeC' }));
+
+      expect(
+        registry
+          .getAllTypes()
+          .map((type) => type.name)
+          .sort()
+      ).toEqual(['typeA', 'typeB', 'typeC']);
+    });
+
+    it('throws when trying to register the same type twice', () => {
+      registry.registerType(createType({ name: 'typeA' }));
+      registry.registerType(createType({ name: 'typeB' }));
+      expect(() => {
+        registry.registerType(createType({ name: 'typeA' }));
+      }).toThrowErrorMatchingInlineSnapshot(`"Type 'typeA' is already registered"`);
+    });
+
+    it('throws when `management.onExport` is specified but `management.importableAndExportable` is not or false', () => {
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeA',
+            management: {
+              onExport: (ctx, objs) => objs,
+            },
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.onExport'"`
+      );
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeA',
+            management: {
+              importableAndExportable: false,
+              onExport: (ctx, objs) => objs,
+            },
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.onExport'"`
+      );
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeA',
+            management: {
+              importableAndExportable: true,
+              onExport: (ctx, objs) => objs,
+            },
+          })
+        );
+      }).not.toThrow();
+    });
   });
 
   describe('#getType', () => {
