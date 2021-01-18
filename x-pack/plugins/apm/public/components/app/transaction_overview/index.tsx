@@ -123,7 +123,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
           <EuiFlexItem grow={7}>
             {transactionType === TRANSACTION_PAGE_LOAD && (
               <>
-                <UserExperienceCallout />
+                <UserExperienceCallout serviceName={serviceName} />
                 <EuiSpacer size="s" />
               </>
             )}
