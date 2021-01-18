@@ -43,20 +43,16 @@ const querySchema = schema.object({
   filter: schema.maybe(schema.string()),
   date_start: schema.maybe(schema.string()),
   date_end: schema.maybe(schema.string()),
-  instances: schema.maybe(
-    schema.nullable(
-      schema.object({
-        status: schema.maybe(schema.oneOf([schema.literal('OK'), schema.literal('Active')])),
-        muted: schema.maybe(schema.boolean()),
-      })
-    )
-  ),
+  instances_status: schema.maybe(schema.oneOf([schema.literal('OK'), schema.literal('Active')])),
 });
 
-export const findAlertInstancesRoute = (router: IRouter, licenseState: ILicenseState) => {
+export const findAlertsWithInstancesTimelineRoute = (
+  router: IRouter,
+  licenseState: ILicenseState
+) => {
   router.get(
     {
-      path: `${BASE_ALERT_API_PATH}/_find_alert_instances`,
+      path: `${BASE_ALERT_API_PATH}/_find_alerts_with_instances_timeline`,
       validate: {
         query: querySchema,
       },
@@ -85,7 +81,7 @@ export const findAlertInstancesRoute = (router: IRouter, licenseState: ILicenseS
         filter: 'filter',
         date_start: 'dateStart',
         date_end: 'dateEnd',
-        instances: 'instances',
+        instances_status: 'instancesStatus',
       };
 
       const options = renameKeys<FindOptions, Record<string, unknown>>(renameMap, query);
@@ -96,7 +92,7 @@ export const findAlertInstancesRoute = (router: IRouter, licenseState: ILicenseS
           : [query.search_fields];
       }
 
-      const findResult = await alertsClient.findAlertsInstances({ options });
+      const findResult = await alertsClient.findAlertsWithInstancesSummary({ options });
       return res.ok({
         body: findResult,
       });

@@ -4,19 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SanitizedAlert, AlertInstanceSummary, AlertInstanceStatus } from '../types';
+import {
+  SanitizedAlert,
+  AlertInstanceSummary,
+  AlertInstanceStatus,
+  AlertInstanceStatusValues,
+} from '../types';
 import { IEvent } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 
-export interface AlertInstanceSummaryFromEventLogParams {
-  alert: SanitizedAlert<{ bar: boolean }>;
+export interface AlertInstanceSummaryFromEventLogParams<
+  Params extends Record<string, unknown> = { bar: string }
+> {
+  alert: SanitizedAlert<Params>;
   events: IEvent[];
   dateStart: string;
   dateEnd: string;
+  status?: AlertInstanceStatusValues;
+  muted?: boolean;
 }
 
-export function alertInstanceSummaryFromEventLog(
-  params: AlertInstanceSummaryFromEventLogParams
+export function alertInstanceSummaryFromEventLog<Params extends Record<string, unknown> = never>(
+  params: AlertInstanceSummaryFromEventLogParams<Params>
 ): AlertInstanceSummary {
   // initialize the  result
   const { alert, events, dateStart, dateEnd } = params;
@@ -98,7 +107,14 @@ export function alertInstanceSummaryFromEventLog(
   // convert the instances map to object form
   const instanceIds = Array.from(instances.keys()).sort();
   for (const instanceId of instanceIds) {
-    alertInstanceSummary.instances[instanceId] = instances.get(instanceId)!;
+    const alertInstanceStatus = instances.get(instanceId)!;
+    if (params.muted === false && alertInstanceStatus.muted) {
+      continue; // filter instances by the params muted
+    }
+    if (params.status !== undefined && params.status !== alertInstanceStatus.status) {
+      continue; // filter instances by the params status
+    }
+    alertInstanceSummary.instances[instanceId] = alertInstanceStatus;
   }
 
   // set the overall alert status to Active if appropriate
@@ -111,6 +127,60 @@ export function alertInstanceSummaryFromEventLog(
   alertInstanceSummary.errorMessages.sort((a, b) => a.date.localeCompare(b.date));
 
   return alertInstanceSummary;
+}
+
+export function alertInstancesStatusTimelineFromEventLog<
+  Params extends Record<string, unknown> = never
+>(
+  params: AlertInstanceSummaryFromEventLogParams<Params>
+): SanitizedAlert<Params> & {
+  instances: Record<string, Array<{ status: AlertInstanceStatusValues; timeStamp: string }>>;
+} {
+  // initialize the  result
+  const { alert, events } = params;
+  const alertResult = {
+    ...alert,
+    instances: {},
+  };
+
+  const instances = new Map<
+    string,
+    Array<{ timeStamp: string; status: AlertInstanceStatusValues }>
+  >();
+
+  // loop through the events
+  for (const event of events) {
+    const timeStamp = event?.['@timestamp'];
+    if (timeStamp === undefined) continue;
+
+    const provider = event?.event?.provider;
+    if (provider !== EVENT_LOG_PROVIDER) continue;
+
+    const action = event?.event?.action;
+    if (action === undefined) continue;
+
+    const instanceId = event?.kibana?.alerting?.instance_id;
+    if (instanceId === undefined) continue;
+
+    const statuses = instances.has(instanceId) ? instances.get(instanceId)! : [];
+    const currentStatus: { timeStamp: string; status: AlertInstanceStatusValues } = {
+      status: 'OK',
+      timeStamp: '',
+    };
+    switch (action) {
+      case EVENT_LOG_ACTIONS.newInstance:
+        currentStatus.timeStamp = timeStamp;
+      // intentionally no break here
+      case EVENT_LOG_ACTIONS.activeInstance:
+        currentStatus.status = 'Active';
+        break;
+      case LEGACY_EVENT_LOG_ACTIONS.resolvedInstance:
+      case EVENT_LOG_ACTIONS.recoveredInstance:
+        currentStatus.status = 'OK';
+    }
+    statuses.push(currentStatus);
+  }
+  return alertResult;
 }
 
 // return an instance status object, creating and adding to the map if needed

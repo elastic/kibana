@@ -105,7 +105,7 @@ function getAlertInstanceSummarySavedObject(
   };
 }
 
-describe('findAlertsInstances()', () => {
+describe('findAlertsWithInstancesTimeline()', () => {
   let alertsClient: AlertsClient;
 
   beforeEach(() => {
@@ -145,51 +145,53 @@ describe('findAlertsInstances()', () => {
 
     const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
 
-    const result = await alertsClient.findAlertsInstances({
+    const result = await alertsClient.findAlertsWithInstancesTimeline({
       options: { searchFields: ['consumer'], search: 'alert-consumer', dateStart },
     });
     expect(result).toMatchInlineSnapshot(`
-      Object {
-        "alertTypeId": "123",
-        "consumer": "alert-consumer",
-        "enabled": true,
-        "errorMessages": Array [],
-        "id": "1",
-        "instances": Object {
-          "instance-currently-active": Object {
-            "actionGroupId": "action group A",
-            "actionSubgroup": undefined,
-            "activeStartDate": "2019-02-12T21:01:22.479Z",
-            "muted": false,
-            "status": "Active",
+      Array [
+        Object {
+          "alertTypeId": "123",
+          "consumer": "alert-consumer",
+          "enabled": true,
+          "errorMessages": Array [],
+          "id": "1",
+          "instances": Object {
+            "instance-currently-active": Object {
+              "actionGroupId": "action group A",
+              "actionSubgroup": undefined,
+              "activeStartDate": "2019-02-12T21:01:22.479Z",
+              "muted": false,
+              "status": "Active",
+            },
+            "instance-muted-no-activity": Object {
+              "actionGroupId": undefined,
+              "actionSubgroup": undefined,
+              "activeStartDate": undefined,
+              "muted": true,
+              "status": "OK",
+            },
+            "instance-previously-active": Object {
+              "actionGroupId": undefined,
+              "actionSubgroup": undefined,
+              "activeStartDate": undefined,
+              "muted": false,
+              "status": "OK",
+            },
           },
-          "instance-muted-no-activity": Object {
-            "actionGroupId": undefined,
-            "actionSubgroup": undefined,
-            "activeStartDate": undefined,
-            "muted": true,
-            "status": "OK",
-          },
-          "instance-previously-active": Object {
-            "actionGroupId": undefined,
-            "actionSubgroup": undefined,
-            "activeStartDate": undefined,
-            "muted": false,
-            "status": "OK",
-          },
-        },
-        "lastRun": "2019-02-12T21:01:32.479Z",
-        "muteAll": false,
-        "name": "alert-name",
-        "status": "Active",
-        "statusEndDate": "2019-02-12T21:01:22.479Z",
-        "statusStartDate": "2019-02-12T21:00:22.479Z",
-        "tags": Array [
-          "tag-1",
-          "tag-2",
-        ],
-        "throttle": null,
-      }
+          "lastRun": "2019-02-12T21:01:32.479Z",
+          "muteAll": false,
+          "name": "alert-name",
+          "status": "Active",
+          "statusEndDate": "2019-02-12T21:01:22.479Z",
+          "statusStartDate": "2019-02-12T21:00:22.479Z",
+          "tags": Array [
+            "tag-1",
+            "tag-2",
+          ],
+          "throttle": null,
+        }
+      ] 
     `);
   });
 
@@ -199,7 +201,7 @@ describe('findAlertsInstances()', () => {
       AlertInstanceSummaryFindEventsResult
     );
 
-    await alertsClient.findAlertsInstances({ options: {} });
+    await alertsClient.findAlertsWithInstancesTimeline({ options: {} });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
@@ -238,7 +240,7 @@ describe('findAlertsInstances()', () => {
     const dateStart = new Date(
       Date.now() - 60 * AlertInstanceSummaryIntervalSeconds * 1000
     ).toISOString();
-    await alertsClient.findAlertsInstances({ options: { dateStart } });
+    await alertsClient.findAlertsWithInstancesTimeline({ options: { dateStart } });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
@@ -259,7 +261,7 @@ describe('findAlertsInstances()', () => {
     );
 
     const dateStart = '2m';
-    await alertsClient.findAlertsInstances({ options: { dateStart } });
+    await alertsClient.findAlertsWithInstancesTimeline({ options: { dateStart } });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
@@ -281,7 +283,7 @@ describe('findAlertsInstances()', () => {
 
     const dateStart = 'ain"t no way this will get parsed as a date';
     expect(
-      alertsClient.findAlertsInstances({ options: { dateStart } })
+      alertsClient.findAlertsWithInstancesTimeline({ options: { dateStart } })
     ).rejects.toMatchInlineSnapshot(
       `[Error: Invalid date for parameter dateStart: "ain"t no way this will get parsed as a date"]`
     );
@@ -293,9 +295,9 @@ describe('findAlertsInstances()', () => {
       AlertInstanceSummaryFindEventsResult
     );
 
-    expect(alertsClient.findAlertsInstances({ options: {} })).rejects.toMatchInlineSnapshot(
-      `[Error: OMG!]`
-    );
+    expect(
+      alertsClient.findAlertsWithInstancesTimeline({ options: {} })
+    ).rejects.toMatchInlineSnapshot(`[Error: OMG!]`);
   });
 
   test('findEvents throws an error', async () => {
@@ -303,6 +305,6 @@ describe('findAlertsInstances()', () => {
     eventLogClient.findEventsBySavedObjectIds.mockRejectedValueOnce(new Error('OMG 2!'));
 
     // error eaten but logged
-    await alertsClient.findAlertsInstances({ options: {} });
+    await alertsClient.findAlertsWithInstancesTimeline({ options: {} });
   });
 });

@@ -9,7 +9,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
-import { findAlertInstancesRoute } from './find_alerts_instances';
+import { findAlertsWithInstancesSummaryRoute } from './find_alerts_with_instances_summary';
 
 const alertsClient = alertsClientMock.create();
 
@@ -26,11 +26,11 @@ describe('findAlertInstancesRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    findAlertInstancesRoute(router, licenseState);
+    findAlertsWithInstancesSummaryRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_find_alert_instances"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_find_alerts_with_instances_summary"`);
 
     const findResult = {
       page: 1,
@@ -38,7 +38,7 @@ describe('findAlertInstancesRoute', () => {
       total: 0,
       data: [],
     };
-    alertsClient.findAlertsInstances.mockResolvedValueOnce(findResult);
+    alertsClient.findAlertsWithInstancesSummary.mockResolvedValueOnce(findResult);
 
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },
@@ -63,8 +63,8 @@ describe('findAlertInstancesRoute', () => {
       }
     `);
 
-    expect(alertsClient.findAlertsInstances).toHaveBeenCalledTimes(1);
-    expect(alertsClient.findAlertsInstances.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.findAlertsWithInstancesSummary).toHaveBeenCalledTimes(1);
+    expect(alertsClient.findAlertsWithInstancesSummary.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "options": Object {
@@ -85,11 +85,11 @@ describe('findAlertInstancesRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    findAlertInstancesRoute(router, licenseState);
+    findAlertsWithInstancesSummaryRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
 
-    alertsClient.findAlertsInstances.mockResolvedValueOnce({
+    alertsClient.findAlertsWithInstancesSummary.mockResolvedValueOnce({
       page: 1,
       perPage: 1,
       total: 0,
@@ -120,7 +120,7 @@ describe('findAlertInstancesRoute', () => {
       throw new Error('OMG');
     });
 
-    findAlertInstancesRoute(router, licenseState);
+    findAlertsWithInstancesSummaryRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
 

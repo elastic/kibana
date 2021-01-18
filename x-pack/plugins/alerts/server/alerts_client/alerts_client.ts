@@ -48,7 +48,10 @@ import { RegistryAlertType, UntypedNormalizedAlertType } from '../alert_type_reg
 import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authorization';
 import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
-import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
+import {
+  alertInstancesStatusTimelineFromEventLog,
+  alertInstanceSummaryFromEventLog,
+} from '../lib/alert_instance_summary_from_event_log';
 import { IEvent } from '../../../event_log/server';
 import { AuditLogger, EventOutcome } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
@@ -112,10 +115,11 @@ export interface FindOptions extends IndexType {
 export interface FindInstancesOptions extends FindOptions {
   dateStart?: string;
   dateEnd?: string;
-  instances?: {
-    status?: AlertInstanceStatusValues;
-    muted?: boolean;
-  };
+  // filter can be applied to the instances of the each alert summary object
+  // like return only only active instances
+  instancesStatus?: AlertInstanceStatusValues;
+  // like return only not muted instances summary
+  instancesMuted?: boolean;
 }
 
 export interface AggregateOptions extends IndexType {
@@ -144,17 +148,22 @@ export interface FindResult<Params extends AlertTypeParams> {
   data: Array<SanitizedAlert<Params>>;
 }
 
-export interface AlertInstanceDataFromEventLog {
-  id: string;
-  summary: AlertInstanceStatus;
-  events: IEvent[];
-}
-
-export interface FindInstanceResult<Params extends AlertTypeParams> {
+export interface FindAlertsInstancesSummaryResult<Params extends AlertTypeParams> {
   page: number;
   perPage: number;
   total: number;
-  data: Array<SanitizedAlert<Params> & { instances: AlertInstanceDataFromEventLog[] }>;
+  data: AlertInstanceSummary[];
+}
+
+export interface FindAlertsInstancesTimelineResult<Params extends AlertTypeParams> {
+  page: number;
+  perPage: number;
+  total: number;
+  data: Array<
+    SanitizedAlert<Params> & {
+      instances: Record<string, Array<{ status: AlertInstanceStatusValues; timeStamp: string }>>;
+    }
+  >;
 }
 
 export interface CreateOptions<Params extends AlertTypeParams> {
@@ -461,14 +470,14 @@ export class AlertsClient {
     });
   }
 
-  public async findAlertsInstances<Params extends AlertTypeParams = never>({
+  public async findAlertsWithInstancesSummary<Params extends AlertTypeParams = never>({
     options: { fields, ...options } = {},
-  }: { options?: FindInstancesOptions } = {}): Promise<FindInstanceResult<Params>> {
+  }: { options?: FindInstancesOptions } = {}): Promise<FindAlertsInstancesSummaryResult<Params>> {
     const { page, perPage, total, data: findAlertsResult } = await this.find(
-      omit(options, 'dateStart', 'dateEnd', 'instances')
+      omit(options, 'dateStart', 'dateEnd', 'instancesStatus', 'instancesMuted')
     );
     this.logger.debug(
-      `alertsClient.findAlertsInstances(): find alerts by options=${options} total=${total}`
+      `alertsClient.findAlertsWithInstancesSummary(): find alerts by options=${options} total=${total}`
     );
 
     const alertIds = findAlertsResult.map((alertObject) => alertObject.id);
@@ -503,7 +512,7 @@ export class AlertsClient {
         data: [],
       };
     }
-    const extendedAlertsSummary = findAlertsResult.map((alert: SanitizedAlert) => {
+    const extendedAlertsWithInstancesSummary = findAlertsResult.map((alert: SanitizedAlert) => {
       const alertEvents = events.filter(
         (alertEvent) =>
           !!alertEvent &&
@@ -513,39 +522,88 @@ export class AlertsClient {
             (savedObject) => !!savedObject && alert.id === savedObject.id
           )
       );
-      const summary = alertInstanceSummaryFromEventLog({
+      return alertInstanceSummaryFromEventLog({
         alert,
         events: alertEvents,
         dateStart: parsedDateStart.toISOString(),
         dateEnd: dateNow.toISOString(),
+        status: options.instancesStatus,
+        muted: options.instancesMuted,
       });
-      // apply options.instances filter to the summary instances result
-      const instancesStatuses = !!options.instances
-        ? Object.entries(summary.instances).filter(
-            ([id, instanceStatus]) =>
-              (options.instances!.muted !== undefined
-                ? instanceStatus.muted === options.instances!.muted
-                : true) &&
-              (!!options.instances!.status
-                ? instanceStatus.status === options.instances!.status
-                : true)
-          )
-        : Object.entries(summary.instances);
-
-      return {
-        ...alert,
-        instances: instancesStatuses.map(([id, instanceStatus]) => ({
-          id,
-          summary: instanceStatus,
-          events: alertEvents,
-        })),
-      };
     });
     return {
       page,
       perPage,
       total,
-      data: extendedAlertsSummary,
+      data: extendedAlertsWithInstancesSummary,
+    };
+  }
+
+  public async findAlertsWithInstancesTimeline<Params extends AlertTypeParams = never>({
+    options: { fields, ...options } = {},
+  }: { options?: FindInstancesOptions } = {}): Promise<FindAlertsInstancesTimelineResult<Params>> {
+    const { page, perPage, total, data: findAlertsResult } = await this.find(
+      omit(options, 'dateStart', 'dateEnd', 'instancesStatus')
+    );
+    this.logger.debug(
+      `alertsClient.findAlertsWithInstancesTimeline(): find alerts by options=${options} total=${total}`
+    );
+
+    const alertIds = findAlertsResult.map((alertObject) => alertObject.id);
+    const maxAlertScheduleInterval = findAlertsResult.reduce(
+      (maxterval: number, alert) =>
+        parseDuration(alert.schedule.interval) > maxterval
+          ? parseDuration(alert.schedule.interval)
+          : maxterval,
+      0
+    );
+    const dateNow = new Date();
+    const durationMillis = (maxAlertScheduleInterval ?? 0) * 60;
+    const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
+    const parsedDateStart = parseDate(options.dateStart, 'dateStart', defaultDateStart);
+    const parsedDateEnd = parseDate(options.dateEnd, 'dateEnd', dateNow);
+
+    const events: IEvent[] = [];
+    try {
+      events.push(
+        ...(await this.getAllEventsByAlertsIdsForTimerange(
+          alertIds,
+          parsedDateStart,
+          parsedDateEnd
+        ))
+      );
+    } catch (err) {
+      this.logger.debug(`alertsClient.findAlertsInstances(): error: ${err.message}`);
+      return {
+        page,
+        perPage,
+        total: 0,
+        data: [],
+      };
+    }
+    const extendedAlertsWithInstancesTimeline = findAlertsResult.map((alert: SanitizedAlert) => {
+      const alertEvents = events.filter(
+        (alertEvent) =>
+          !!alertEvent &&
+          !!alertEvent.kibana &&
+          !!alertEvent.kibana.saved_objects &&
+          !!alertEvent.kibana.saved_objects.find(
+            (savedObject) => !!savedObject && alert.id === savedObject.id
+          )
+      );
+      return alertInstancesStatusTimelineFromEventLog({
+        alert,
+        events: alertEvents,
+        dateStart: parsedDateStart.toISOString(),
+        dateEnd: dateNow.toISOString(),
+        status: options.instancesStatus,
+      });
+    });
+    return {
+      page,
+      perPage,
+      total,
+      data: extendedAlertsWithInstancesTimeline,
     };
   }
 
