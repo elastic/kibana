@@ -32,11 +32,11 @@ export default function rumJsErrorsApiTests({ getService }: FtrProviderContext) 
     describe('when there is data', () => {
       before(async () => {
         await esArchiver.load('8.0.0');
-        await esArchiver.load('elastic_co_rum_data');
+        await esArchiver.load('rum_test_data');
       });
       after(async () => {
         await esArchiver.unload('8.0.0');
-        await esArchiver.unload('elastic_co_rum_data');
+        await esArchiver.unload('rum_test_data');
       });
 
       it('returns js errors', async () => {
