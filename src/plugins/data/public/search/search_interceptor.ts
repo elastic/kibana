@@ -249,7 +249,7 @@ export class SearchInterceptor {
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
       return from(this.runSearch(request, { ...options, abortSignal: combinedSignal })).pipe(
-        catchError((e: any) => {
+        catchError((e: Record<string, any> | AbortError) => {
           return throwError(this.handleSearchError(e, timeoutSignal, options));
         }),
         finalize(() => {
