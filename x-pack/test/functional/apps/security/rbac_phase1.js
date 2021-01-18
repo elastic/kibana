@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.createUser({
         username: 'kibanauser',
         password: 'changeme',
-        confirmPassword: 'changeme',
+        confirm_password: 'changeme',
         full_name: 'kibanafirst kibanalast',
         email: 'kibanauser@myEmail.com',
         save: true,
@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.createUser({
         username: 'kibanareadonly',
         password: 'changeme',
-        confirmPassword: 'changeme',
+        confirm_password: 'changeme',
         full_name: 'kibanareadonlyFirst kibanareadonlyLast',
         email: 'kibanareadonly@myEmail.com',
         save: true,

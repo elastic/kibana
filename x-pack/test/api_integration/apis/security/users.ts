@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect';
+import expect from '@kbn/expect';
 import { Cookie, cookie } from 'request';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(204);
 
       const { body } = await es.security.getUser({ username: mockUserName });
-      expect(body[mockUserName]).toEqual(expect.objectContaining({ enabled: false }));
+      expect(body[mockUserName].enabled).to.be(false);
     });
 
     it('should enable user', async () => {
@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(204);
 
       const { body } = await es.security.getUser({ username: mockUserName });
-      expect(body[mockUserName]).toEqual(expect.objectContaining({ enabled: true }));
+      expect(body[mockUserName].enabled).to.be(true);
     });
   });
 }
