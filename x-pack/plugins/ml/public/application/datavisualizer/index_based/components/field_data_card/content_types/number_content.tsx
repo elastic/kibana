@@ -29,10 +29,12 @@ import {
 } from '../metric_distribution_chart';
 import { TopValues } from '../top_values';
 
-enum DETAILS_MODE {
-  DISTRIBUTION = 'distribution',
-  TOP_VALUES = 'top_values',
-}
+const DETAILS_MODE = {
+  DISTRIBUTION: 'distribution',
+  TOP_VALUES: 'top_values',
+} as const;
+
+type DetailsModeType = typeof DETAILS_MODE[keyof typeof DETAILS_MODE];
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 210;
@@ -45,18 +47,19 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
     const chartData = buildChartDataFromStats(stats, METRIC_DISTRIBUTION_CHART_WIDTH);
     setDistributionChartData(chartData);
   }, []);
-
-  const { count, sampleCount, cardinality, min, median, max, distribution } = stats;
-  const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
-
   const [detailsMode, setDetailsMode] = useState(
-    cardinality <= DEFAULT_TOP_VALUES_THRESHOLD
+    stats?.cardinality ?? 0 <= DEFAULT_TOP_VALUES_THRESHOLD
       ? DETAILS_MODE.TOP_VALUES
       : DETAILS_MODE.DISTRIBUTION
   );
-
   const defaultChartData: MetricDistributionChartData[] = [];
   const [distributionChartData, setDistributionChartData] = useState(defaultChartData);
+
+  if (stats === undefined) return null;
+  const { count, sampleCount, cardinality, min, median, max, distribution } = stats;
+  if (count === undefined || sampleCount === undefined) return null;
+
+  const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
 
   const detailsOptions = [
     {
@@ -76,7 +79,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
   return (
     <div className="mlFieldDataCard__stats">
       <div>
-        <EuiText size="xs" color="subdued">
+        <EuiText size="xs" color="subdued" data-test-subj="mlFieldDataCardDocCount">
           <EuiIcon type="document" />
           &nbsp;
           <FormattedMessage
@@ -91,7 +94,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       </div>
       <EuiSpacer size="xs" />
       <div>
-        <EuiText size="xs" color="subdued">
+        <EuiText size="xs" color="subdued" data-test-subj="mlFieldDataCardCardinality">
           <EuiIcon type="database" />
           &nbsp;
           <FormattedMessage
@@ -131,13 +134,13 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup gutterSize="xs" justifyContent="center">
-        <EuiFlexItem grow={1} className="eui-textTruncate">
+        <EuiFlexItem grow={1} className="eui-textTruncate" data-test-subj="mlFieldDataCardMin">
           <DisplayValue value={kibanaFieldFormat(min, fieldFormat)} />
         </EuiFlexItem>
-        <EuiFlexItem grow={1} className="eui-textTruncate">
+        <EuiFlexItem grow={1} className="eui-textTruncate" data-test-subj="mlFieldDataCardMedian">
           <DisplayValue value={kibanaFieldFormat(median, fieldFormat)} />
         </EuiFlexItem>
-        <EuiFlexItem grow={1} className="eui-textTruncate">
+        <EuiFlexItem grow={1} className="eui-textTruncate" data-test-subj="mlFieldDataCardMax">
           <DisplayValue value={kibanaFieldFormat(max, fieldFormat)} />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -145,14 +148,14 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       <EuiButtonGroup
         options={detailsOptions}
         idSelected={detailsMode}
-        onChange={(optionId) => setDetailsMode(optionId as DETAILS_MODE)}
-        aria-label={i18n.translate(
+        onChange={(optionId) => setDetailsMode(optionId as DetailsModeType)}
+        legend={i18n.translate(
           'xpack.ml.fieldDataCard.cardNumber.selectMetricDetailsDisplayAriaLabel',
           {
             defaultMessage: 'Select display option for metric details',
           }
         )}
-        data-test-subj="mlFieldDataCardNumberDetailsSelect"
+        data-test-subj="mlFieldDataCardDetailsSelect"
         isFullWidth={true}
         buttonSize="compressed"
       />
@@ -174,7 +177,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup justifyContent="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={true}>
               <MetricDistributionChart
                 width={METRIC_DISTRIBUTION_CHART_WIDTH}
                 height={METRIC_DISTRIBUTION_CHART_HEIGHT}
@@ -188,7 +191,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       {detailsMode === DETAILS_MODE.TOP_VALUES && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <TopValues stats={stats} fieldFormat={fieldFormat} barColor="primary" />
+            <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

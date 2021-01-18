@@ -29,7 +29,7 @@ export interface AppContextTestRender {
   store: Store<State>;
   history: ReturnType<typeof createMemoryHistory>;
   coreStart: ReturnType<typeof coreMock.createStart>;
-  depsStart: Pick<StartPlugins, 'data' | 'ingestManager'>;
+  depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
   middlewareSpy: MiddlewareActionSpyHelper;
   /**
    * A wrapper around `AppRootContext` component. Uses the mocked modules as input to the

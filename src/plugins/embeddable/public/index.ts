@@ -54,6 +54,7 @@ export {
   ErrorEmbeddable,
   IContainer,
   IEmbeddable,
+  isEmbeddable,
   isErrorEmbeddable,
   openAddPanelFlyout,
   OutputSpec,
@@ -64,18 +65,24 @@ export {
   PanelNotFoundError,
   PanelState,
   PropertySpec,
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
   ViewMode,
   withEmbeddableSubscription,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  isRowClickTriggerContext,
+  isContextMenuTriggerContext,
   EmbeddableStateTransfer,
   EmbeddableEditorState,
   EmbeddablePackageState,
   EmbeddableRenderer,
   EmbeddableRendererProps,
 } from './lib';
+
+export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
 
 export { EnhancementRegistryDefinition } from './types';
 

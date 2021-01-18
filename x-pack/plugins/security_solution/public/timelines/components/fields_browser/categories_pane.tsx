@@ -5,14 +5,19 @@
  */
 
 import { EuiInMemoryTable, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import { noop } from 'lodash/fp';
+import React, { useCallback, useRef } from 'react';
 import styled from 'styled-components';
 
+import {
+  DATA_COLINDEX_ATTRIBUTE,
+  DATA_ROWINDEX_ATTRIBUTE,
+  onKeyDownFocusHandler,
+} from '../../../common/components/accessibility/helpers';
 import { BrowserFields } from '../../../common/containers/source';
 
-import { FieldBrowserProps } from './types';
 import { getCategoryColumns } from './category_columns';
-import { TABLE_HEIGHT } from './helpers';
+import { CATEGORIES_PANE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 
 import * as i18n from './translations';
 
@@ -32,13 +37,13 @@ const Title = styled(EuiTitle)`
   padding-left: 5px;
 `;
 
-const H5 = styled.h5`
+const H3 = styled.h3`
   text-align: left;
 `;
 
 Title.displayName = 'Title';
 
-type Props = Pick<FieldBrowserProps, 'browserFields' | 'timelineId' | 'onUpdateColumns'> & {
+interface Props {
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -52,50 +57,62 @@ type Props = Pick<FieldBrowserProps, 'browserFields' | 'timelineId' | 'onUpdateC
   onCategorySelected: (categoryId: string) => void;
   /** The category selected on the left-hand side of the field browser */
   selectedCategoryId: string;
+  timelineId: string;
   /** The width of the categories pane */
   width: number;
-};
+}
 
 export const CategoriesPane = React.memo<Props>(
-  ({
-    browserFields,
-    filteredBrowserFields,
-    onCategorySelected,
-    onUpdateColumns,
-    selectedCategoryId,
-    timelineId,
-    width,
-  }) => (
-    <>
-      <Title size="xxs">
-        <H5 data-test-subj="categories-pane-title">{i18n.CATEGORIES}</H5>
-      </Title>
+  ({ filteredBrowserFields, onCategorySelected, selectedCategoryId, timelineId, width }) => {
+    const containerElement = useRef<HTMLDivElement | null>(null);
+    const onKeyDown = useCallback(
+      (e: React.KeyboardEvent) => {
+        onKeyDownFocusHandler({
+          colindexAttribute: DATA_COLINDEX_ATTRIBUTE,
+          containerElement: containerElement?.current,
+          event: e,
+          maxAriaColindex: 1,
+          maxAriaRowindex: Object.keys(filteredBrowserFields).length,
+          onColumnFocused: noop,
+          rowindexAttribute: DATA_ROWINDEX_ATTRIBUTE,
+        });
+      },
+      [containerElement, filteredBrowserFields]
+    );
 
-      <CategoryNames
-        className="euiTable--compressed"
-        data-test-subj="categories-container"
-        height={TABLE_HEIGHT}
-        width={width}
-      >
-        <EuiInMemoryTable
-          columns={getCategoryColumns({
-            browserFields,
-            filteredBrowserFields,
-            onCategorySelected,
-            onUpdateColumns,
-            selectedCategoryId,
-            timelineId,
-          })}
-          items={Object.keys(filteredBrowserFields)
-            .sort()
-            .map((categoryId) => ({ categoryId }))}
-          message={i18n.NO_FIELDS_MATCH}
-          pagination={false}
-          sorting={false}
-        />
-      </CategoryNames>
-    </>
-  )
+    return (
+      <>
+        <Title size="xxs">
+          <H3 data-test-subj="categories-pane-title">{i18n.CATEGORIES}</H3>
+        </Title>
+
+        <CategoryNames
+          className={`${CATEGORIES_PANE_CLASS_NAME} euiTable--compressed`}
+          data-test-subj="categories-container"
+          height={TABLE_HEIGHT}
+          onKeyDown={onKeyDown}
+          ref={containerElement}
+          width={width}
+        >
+          <EuiInMemoryTable
+            columns={getCategoryColumns({
+              filteredBrowserFields,
+              onCategorySelected,
+              selectedCategoryId,
+              timelineId,
+            })}
+            items={Object.keys(filteredBrowserFields)
+              .sort()
+              .map((categoryId, i) => ({ categoryId, ariaRowindex: i + 1 }))}
+            message={i18n.NO_FIELDS_MATCH}
+            pagination={false}
+            sorting={false}
+            tableCaption={i18n.CATEGORIES}
+          />
+        </CategoryNames>
+      </>
+    );
+  }
 );
 
 CategoriesPane.displayName = 'CategoriesPane';

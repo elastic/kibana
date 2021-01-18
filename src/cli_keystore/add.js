@@ -19,7 +19,8 @@
 
 import { Logger } from '../cli_plugin/lib/logger';
 import { confirm, question } from './utils';
-import { createPromiseFromStreams, createConcatStream } from '../core/server/utils';
+// import from path since add.test.js mocks 'fs' required for @kbn/utils
+import { createPromiseFromStreams, createConcatStream } from '@kbn/utils/target/streams';
 
 /**
  * @param {Keystore} keystore
@@ -59,7 +60,15 @@ export async function add(keystore, key, options = {}) {
     value = await question(`Enter value for ${key}`, { mask: '*' });
   }
 
-  keystore.add(key, value.trim());
+  const parsedValue = value.trim();
+  let parsedJsonValue;
+  try {
+    parsedJsonValue = JSON.parse(parsedValue);
+  } catch {
+    // noop, only treat value as json if it parses as JSON
+  }
+
+  keystore.add(key, parsedJsonValue ?? parsedValue);
   keystore.save();
 }
 

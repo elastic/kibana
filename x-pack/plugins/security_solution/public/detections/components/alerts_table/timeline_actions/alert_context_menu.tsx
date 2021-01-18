@@ -7,11 +7,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import {
-  EuiText,
   EuiButtonIcon,
+  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
-  EuiContextMenuItem,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { getOr } from 'lodash/fp';
@@ -19,17 +20,15 @@ import { getOr } from 'lodash/fp';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
-import { Status, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { isThresholdRule } from '../../../../../common/detection_engine/utils';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { timelineActions } from '../../../../timelines/store/timeline';
-import { EventsTd, EventsTdContent } from '../../../../timelines/components/timeline/styles';
+import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
 import { FILTER_OPEN, FILTER_CLOSED, FILTER_IN_PROGRESS } from '../alerts_filter_group';
 import { updateAlertStatusAction } from '../actions';
 import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 import { Ecs } from '../../../../../common/ecs';
-import { AddExceptionModal as AddExceptionModalComponent } from '../../../../common/components/exceptions/add_exception_modal';
+import { AddExceptionModal } from '../../../../common/components/exceptions/add_exception_modal';
 import * as i18nCommon from '../../../../common/translations';
 import * as i18n from '../translations';
 import {
@@ -42,24 +41,25 @@ import { useUserData } from '../../user_info';
 import { ExceptionListType } from '../../../../../common/shared_imports';
 
 interface AlertContextMenuProps {
+  ariaLabel?: string;
   disabled: boolean;
   ecsRowData: Ecs;
   refetch: inputsModel.Refetch;
+  onRuleChange?: () => void;
   timelineId: string;
 }
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
+  ariaLabel = i18n.MORE_ACTIONS,
   disabled,
   ecsRowData,
   refetch,
+  onRuleChange,
   timelineId,
 }) => {
   const dispatch = useDispatch();
   const [, dispatchToaster] = useStateToaster();
   const [isPopoverOpen, setPopover] = useState(false);
-  const [alertStatus, setAlertStatus] = useState<Status | undefined>(
-    (ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status)) ?? undefined
-  );
   const eventId = ecsRowData._id;
   const ruleId = useMemo(
     (): string | null =>
@@ -73,13 +73,23 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       '',
     [ecsRowData]
   );
-  const ruleIndices = useMemo(
-    (): string[] =>
-      (ecsRowData.signal?.rule && ecsRowData.signal.rule.index) ?? DEFAULT_INDEX_PATTERN,
-    [ecsRowData]
-  );
+  const ruleIndices = useMemo((): string[] => {
+    if (
+      ecsRowData.signal?.rule &&
+      ecsRowData.signal.rule.index &&
+      ecsRowData.signal.rule.index.length > 0
+    ) {
+      return ecsRowData.signal.rule.index;
+    } else {
+      return DEFAULT_INDEX_PATTERN;
+    }
+  }, [ecsRowData]);
 
   const { addWarning } = useAppToasts();
+
+  const alertStatus = useMemo(() => {
+    return ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status);
+  }, [ecsRowData]);
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -89,7 +99,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setPopover(false);
   }, []);
   const [exceptionModalType, setOpenAddExceptionModal] = useState<ExceptionListType | null>(null);
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+  const [{ canUserCRUD, hasIndexWrite, hasIndexMaintenance, hasIndexUpdateDelete }] = useUserData();
 
   const isEndpointAlert = useMemo((): boolean => {
     if (ecsRowData == null) {
@@ -113,9 +123,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const onAddExceptionConfirm = useCallback(
     (didCloseAlert: boolean, didBulkCloseAlert) => {
       closeAddExceptionModal();
-      if (didCloseAlert) {
-        setAlertStatus('closed');
-      }
       if (timelineId !== TimelineId.active || didBulkCloseAlert) {
         refetch();
       }
@@ -145,7 +152,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         }
         displaySuccessToast(title, dispatchToaster);
       }
-      setAlertStatus(newStatus);
     },
     [dispatchToaster, addWarning]
   );
@@ -201,6 +207,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const openAlertActionComponent = (
     <EuiContextMenuItem
       key="open-alert"
@@ -208,7 +215,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="open-alert-status"
       id={FILTER_OPEN}
       onClick={openAlertActionOnClick}
-      disabled={!canUserCRUD || !hasIndexWrite}
+      disabled={!hasIndexUpdateDelete && !hasIndexMaintenance}
     >
       <EuiText size="m">{i18n.ACTION_OPEN_ALERT}</EuiText>
     </EuiContextMenuItem>
@@ -233,6 +240,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const closeAlertActionComponent = (
     <EuiContextMenuItem
       key="close-alert"
@@ -240,7 +248,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="close-alert-status"
       id={FILTER_CLOSED}
       onClick={closeAlertActionClick}
-      disabled={!canUserCRUD || !hasIndexWrite}
+      disabled={!hasIndexUpdateDelete && !hasIndexMaintenance}
     >
       <EuiText size="m">{i18n.ACTION_CLOSE_ALERT}</EuiText>
     </EuiContextMenuItem>
@@ -265,6 +273,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const inProgressAlertActionComponent = (
     <EuiContextMenuItem
       key="in-progress-alert"
@@ -272,21 +281,23 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="in-progress-alert-status"
       id={FILTER_IN_PROGRESS}
       onClick={inProgressAlertActionClick}
-      disabled={!canUserCRUD || !hasIndexWrite}
+      disabled={!canUserCRUD || !hasIndexUpdateDelete}
     >
       <EuiText size="m">{i18n.ACTION_IN_PROGRESS_ALERT}</EuiText>
     </EuiContextMenuItem>
   );
 
   const button = (
-    <EuiButtonIcon
-      aria-label="context menu"
-      data-test-subj="timeline-context-menu-button"
-      size="s"
-      iconType="boxesHorizontal"
-      onClick={onButtonClick}
-      disabled={disabled}
-    />
+    <EuiToolTip position="top" content={i18n.MORE_ACTIONS}>
+      <EuiButtonIcon
+        aria-label={ariaLabel}
+        data-test-subj="timeline-context-menu-button"
+        size="s"
+        iconType="boxesHorizontal"
+        onClick={onButtonClick}
+        disabled={disabled}
+      />
+    </EuiToolTip>
   );
 
   const handleAddEndpointExceptionClick = useCallback((): void => {
@@ -294,6 +305,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setOpenAddExceptionModal('endpoint');
   }, [closePopover]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const addEndpointExceptionComponent = (
     <EuiContextMenuItem
       key="add-endpoint-exception-menu-item"
@@ -312,12 +324,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setOpenAddExceptionModal('detection');
   }, [closePopover]);
 
-  const areExceptionsAllowed = useMemo((): boolean => {
-    const ruleTypes = getOr([], 'signal.rule.type', ecsRowData);
-    const [ruleType] = ruleTypes as Type[];
-    return !isMlRule(ruleType) && !isThresholdRule(ruleType);
-  }, [ecsRowData]);
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const addExceptionComponent = (
     <EuiContextMenuItem
       key="add-exception-menu-item"
@@ -325,9 +332,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="add-exception-menu-item"
       id="addException"
       onClick={handleAddExceptionClick}
-      disabled={!canUserCRUD || !hasIndexWrite || !areExceptionsAllowed}
+      disabled={!canUserCRUD || !hasIndexWrite}
     >
-      <EuiText size="m">{i18n.ACTION_ADD_EXCEPTION}</EuiText>
+      <EuiText data-test-subj="addExceptionButton" size="m">
+        {i18n.ACTION_ADD_EXCEPTION}
+      </EuiText>
     </EuiContextMenuItem>
   );
 
@@ -347,10 +356,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         return [];
     }
   }, [
-    alertStatus,
     closeAlertActionComponent,
     inProgressAlertActionComponent,
     openAlertActionComponent,
+    alertStatus,
   ]);
 
   const items = useMemo(
@@ -360,7 +369,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   return (
     <>
-      <EventsTd key="actions-context-menu">
+      <div key="actions-context-menu">
         <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
           <EuiPopover
             id="singlePanel"
@@ -374,9 +383,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             <ContextMenuPanel items={items} />
           </EuiPopover>
         </EventsTdContent>
-      </EventsTd>
+      </div>
       {exceptionModalType != null && ruleId != null && ecsRowData != null && (
-        <AddExceptionModalComponent
+        <AddExceptionModal
           ruleName={ruleName}
           ruleId={ruleId}
           ruleIndices={ruleIndices}
@@ -385,6 +394,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           onCancel={onAddExceptionCancel}
           onConfirm={onAddExceptionConfirm}
           alertStatus={alertStatus}
+          onRuleChange={onRuleChange}
         />
       )}
     </>

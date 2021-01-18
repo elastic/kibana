@@ -17,12 +17,17 @@ import { RouteSpyState } from '../../utils/route/types';
 import { SecurityPageName } from '../../../../common/constants';
 import { createStore, State } from '../../store';
 import {
+  useUserInfo,
+  initialState as userInfoState,
+} from '../../../detections/components/user_info';
+import {
   apolloClientObservable,
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../mock';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 const mockSourceDefaults = mockSource;
 
 const mockRouteSpy: RouteSpyState = {
@@ -33,6 +38,8 @@ const mockRouteSpy: RouteSpyState = {
   pathName: '/',
 };
 const mockDispatch = jest.fn();
+const mockUseUserInfo = useUserInfo as jest.Mock;
+jest.mock('../../../detections/components/user_info');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
@@ -79,13 +86,29 @@ jest.mock('../../utils/apollo_context', () => ({
 }));
 
 describe('Sourcerer Hooks', () => {
-  // const testId = SourcererScopeName.default;
-  // const uninitializedId = SourcererScopeName.detections;
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
-  });
-  const state: State = mockGlobalState;
+  const state: State = {
+    ...mockGlobalState,
+    sourcerer: {
+      ...mockGlobalState.sourcerer,
+      sourcererScopes: {
+        ...mockGlobalState.sourcerer.sourcererScopes,
+        [SourcererScopeName.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          indexPattern: {
+            fields: [],
+            title: '',
+          },
+        },
+        [SourcererScopeName.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          indexPattern: {
+            fields: [],
+            title: '',
+          },
+        },
+      },
+    },
+  };
   const { storage } = createSecuritySolutionStorageMock();
   let store = createStore(
     state,
@@ -96,6 +119,8 @@ describe('Sourcerer Hooks', () => {
   );
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
     store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
@@ -103,169 +128,67 @@ describe('Sourcerer Hooks', () => {
       kibanaObservable,
       storage
     );
+    mockUseUserInfo.mockImplementation(() => userInfoState);
   });
-  describe('Initialization', () => {
-    it('initializes loading default and timeline index patterns', async () => {
-      await act(async () => {
-        const { waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        expect(mockDispatch).toBeCalledTimes(2);
-        expect(mockDispatch.mock.calls[0][0]).toEqual({
-          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-          payload: { id: 'default', loading: true },
-        });
-        expect(mockDispatch.mock.calls[1][0]).toEqual({
-          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-          payload: { id: 'timeline', loading: true },
-        });
-        // expect(mockDispatch.mock.calls[1][0]).toEqual({
-        //   type: 'x-pack/security_solution/local/sourcerer/SET_INDEX_PATTERNS_LIST',
-        //   payload: { allIndexPatterns: mockPatterns, kibanaIndexPatterns: [] },
-        // });
+  it('initializes loading default and timeline index patterns', async () => {
+    await act(async () => {
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      await waitForNextUpdate();
+      rerender();
+      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch.mock.calls[0][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+        payload: { id: 'default', loading: true },
+      });
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+        payload: { id: 'timeline', loading: true },
       });
     });
-    // TO DO sourcerer @S
-    // it('initializes loading default source group', async () => {
-    //   await act(async () => {
-    //     const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
-    //       () => useInitSourcerer(),
-    //       {
-    //         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-    //       }
-    //     );
-    //     await waitForNextUpdate();
-    //     await waitForNextUpdate();
-    //     expect(result.current).toEqual({
-    //       activeSourcererScopeId: 'default',
-    //       kibanaIndexPatterns: mockPatterns,
-    //       isIndexPatternsLoading: false,
-    //       getSourcererScopeById: result.current.getSourcererScopeById,
-    //       setActiveSourcererScopeId: result.current.setActiveSourcererScopeId,
-    //       updateSourcererScopeIndices: result.current.updateSourcererScopeIndices,
-    //     });
-    //   });
-    // });
-    // it('initialize completes with formatted source group data', async () => {
-    //   await act(async () => {
-    //     const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
-    //       () => useInitSourcerer(),
-    //       {
-    //         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-    //       }
-    //     );
-    //     await waitForNextUpdate();
-    //     await waitForNextUpdate();
-    //     await waitForNextUpdate();
-    //     expect(result.current).toEqual({
-    //       activeSourcererScopeId: testId,
-    //       kibanaIndexPatterns: mockPatterns,
-    //       isIndexPatternsLoading: false,
-    //       getSourcererScopeById: result.current.getSourcererScopeById,
-    //       setActiveSourcererScopeId: result.current.setActiveSourcererScopeId,
-    //       updateSourcererScopeIndices: result.current.updateSourcererScopeIndices,
-    //     });
-    //   });
-    // });
   });
-  // describe('Methods', () => {
-  //   it('getSourcererScopeById: initialized source group returns defaults', async () => {
-  //     await act(async () => {
-  //       const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
-  //         () => useInitSourcerer(),
-  //         {
-  //           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  //         }
-  //       );
-  //       await waitForNextUpdate();
-  //       await waitForNextUpdate();
-  //       await waitForNextUpdate();
-  //       const initializedSourcererScope = result.current.getSourcererScopeById(testId);
-  //       expect(initializedSourcererScope).toEqual(mockSourcererScope(testId));
-  //     });
-  //   });
-  //   it('getSourcererScopeById: uninitialized source group returns defaults', async () => {
-  //     await act(async () => {
-  //       const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
-  //         () => useInitSourcerer(),
-  //         {
-  //           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  //         }
-  //       );
-  //       await waitForNextUpdate();
-  //       await waitForNextUpdate();
-  //       await waitForNextUpdate();
-  //       const uninitializedSourcererScope = result.current.getSourcererScopeById(uninitializedId);
-  //       expect(uninitializedSourcererScope).toEqual(
-  //         getSourceDefaults(uninitializedId, mockPatterns)
-  //       );
-  //     });
-  //   });
-  //   // it('initializeSourcererScope: initializes source group', async () => {
-  //   //   await act(async () => {
-  //   //     const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
-  //   //       () => useSourcerer(),
-  //   //       {
-  //   //         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  //   //       }
-  //   //     );
-  //   //     await waitForNextUpdate();
-  //   //     await waitForNextUpdate();
-  //   //     await waitForNextUpdate();
-  //   //     result.current.initializeSourcererScope(
-  //   //       uninitializedId,
-  //   //       mockSourcererScopes[uninitializedId],
-  //   //       true
-  //   //     );
-  //   //     await waitForNextUpdate();
-  //   //     const initializedSourcererScope = result.current.getSourcererScopeById(uninitializedId);
-  //   //     expect(initializedSourcererScope.selectedPatterns).toEqual(
-  //   //       mockSourcererScopes[uninitializedId]
-  //   //     );
-  //   //   });
-  //   // });
-  //   it('setActiveSourcererScopeId: active source group id gets set only if it gets initialized first', async () => {
-  //     await act(async () => {
-  //       const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
-  //         () => useInitSourcerer(),
-  //         {
-  //           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  //         }
-  //       );
-  //       await waitForNextUpdate();
-  //       expect(result.current.activeSourcererScopeId).toEqual(testId);
-  //       result.current.setActiveSourcererScopeId(uninitializedId);
-  //       expect(result.current.activeSourcererScopeId).toEqual(testId);
-  //       // result.current.initializeSourcererScope(uninitializedId);
-  //       result.current.setActiveSourcererScopeId(uninitializedId);
-  //       expect(result.current.activeSourcererScopeId).toEqual(uninitializedId);
-  //     });
-  //   });
-  //   it('updateSourcererScopeIndices: updates source group indices', async () => {
-  //     await act(async () => {
-  //       const { result, waitForNextUpdate } = renderHook<string, UseSourcerer>(
-  //         () => useInitSourcerer(),
-  //         {
-  //           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  //         }
-  //       );
-  //       await waitForNextUpdate();
-  //       await waitForNextUpdate();
-  //       await waitForNextUpdate();
-  //       let sourceGroup = result.current.getSourcererScopeById(testId);
-  //       expect(sourceGroup.selectedPatterns).toEqual(mockSourcererScopes[testId]);
-  //       expect(sourceGroup.scopePatterns).toEqual(mockSourcererScopes[testId]);
-  //       result.current.updateSourcererScopeIndices({
-  //         id: testId,
-  //         selectedPatterns: ['endgame-*', 'filebeat-*'],
-  //       });
-  //       await waitForNextUpdate();
-  //       sourceGroup = result.current.getSourcererScopeById(testId);
-  //       expect(sourceGroup.scopePatterns).toEqual(mockSourcererScopes[testId]);
-  //       expect(sourceGroup.selectedPatterns).toEqual(['endgame-*', 'filebeat-*']);
-  //     });
-  //   });
-  // });
+  it('sets signal index name', async () => {
+    await act(async () => {
+      mockUseUserInfo.mockImplementation(() => ({
+        ...userInfoState,
+        loading: false,
+        signalIndexName: 'signals-*',
+      }));
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      await waitForNextUpdate();
+      rerender();
+      expect(mockDispatch.mock.calls[2][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SIGNAL_INDEX_NAME',
+        payload: { signalIndexName: 'signals-*' },
+      });
+      expect(mockDispatch.mock.calls[3][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_INDEX_PATTERNS',
+        payload: { id: 'timeline', selectedPatterns: ['signals-*'] },
+      });
+    });
+  });
+  it('handles detections page', async () => {
+    await act(async () => {
+      mockUseUserInfo.mockImplementation(() => ({
+        ...userInfoState,
+        signalIndexName: 'signals-*',
+        isSignalIndexExists: true,
+      }));
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(
+        () => useInitSourcerer(SourcererScopeName.detections),
+        {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        }
+      );
+      await waitForNextUpdate();
+      rerender();
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_INDEX_PATTERNS',
+        payload: { id: 'detections', selectedPatterns: ['signals-*'] },
+      });
+    });
+  });
 });

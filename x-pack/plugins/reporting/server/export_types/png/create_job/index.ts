@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PNG_JOB_TYPE } from '../../../../common/constants';
 import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPNG, TaskPayloadPNG } from '../types';
 
-export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
-  JobParamsPNG,
-  TaskPayloadPNG
->> = function createJobFactoryFn(reporting) {
+export const createJobFnFactory: CreateJobFnFactory<
+  CreateJobFn<JobParamsPNG, TaskPayloadPNG>
+> = function createJobFactoryFn(reporting, parentLogger) {
+  const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute-job']);
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
@@ -27,7 +28,7 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
 
     return {
       headers: serializedEncryptedHeaders,
-      spaceId: reporting.getSpaceId(req),
+      spaceId: reporting.getSpaceId(req, logger),
       objectType,
       title,
       relativeUrl,

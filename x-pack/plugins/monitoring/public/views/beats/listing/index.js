@@ -11,14 +11,11 @@ import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Listing } from '../../../components/beats/listing/listing';
 import { SetupModeRenderer } from '../../../components/renderers';
-import {
-  CODE_PATH_BEATS,
-  BEATS_SYSTEM_ID,
-  ALERT_MISSING_MONITORING_DATA,
-} from '../../../../common/constants';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import { CODE_PATH_BEATS, BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 uiRoutes.when('/beats/beats', {
   template,
@@ -50,22 +47,12 @@ uiRoutes.when('/beats/beats', {
         reactNodeId: 'monitoringBeatsInstancesApp',
         $scope,
         $injector,
-        alerts: {
-          shouldFetch: true,
-          options: {
-            alertTypeIds: [ALERT_MISSING_MONITORING_DATA],
-            filters: [
-              {
-                stackProduct: BEATS_SYSTEM_ID,
-              },
-            ],
-          },
-        },
       });
 
       this.data = $route.current.locals.pageData;
       this.scope = $scope;
       this.injector = $injector;
+      this.onTableChangeRender = this.renderComponent;
 
       $scope.$watch(
         () => this.data,
@@ -81,19 +68,18 @@ uiRoutes.when('/beats/beats', {
           injector={this.injector}
           productName={BEATS_SYSTEM_ID}
           render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-            <Fragment>
+            <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
               <Listing
                 stats={this.data.stats}
                 data={this.data.listing}
-                alerts={this.alerts}
                 setupMode={setupMode}
                 sorting={this.sorting || sorting}
                 pagination={this.pagination || pagination}
                 onTableChange={this.onTableChange || onTableChange}
               />
               {bottomBarComponent}
-            </Fragment>
+            </SetupModeContext.Provider>
           )}
         />
       );

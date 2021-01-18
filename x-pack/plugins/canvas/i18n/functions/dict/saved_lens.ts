@@ -23,5 +23,8 @@ export const help: FunctionHelp<FunctionFactory<typeof savedLens>> = {
     title: i18n.translate('xpack.canvas.functions.savedLens.args.titleHelpText', {
       defaultMessage: `The title for the Lens visualization object`,
     }),
+    palette: i18n.translate('xpack.canvas.functions.savedLens.args.paletteHelpText', {
+      defaultMessage: `The palette used for the Lens visualization`,
+    }),
   },
 };

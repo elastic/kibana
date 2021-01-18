@@ -24,7 +24,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NotificationsStart, ApplicationStart, ScopedHistory } from 'src/core/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  NotificationsStart,
+  ApplicationStart,
+  DocLinksStart,
+  ScopedHistory,
+} from 'src/core/public';
 import { RoleMapping, Role } from '../../../../common/model';
 import { EmptyPrompt } from './empty_prompt';
 import {
@@ -34,7 +40,6 @@ import {
   SectionLoading,
 } from '../components';
 import { EDIT_ROLE_MAPPING_PATH, getEditRoleMappingHref } from '../../management_urls';
-import { DocumentationLinksService } from '../documentation_links';
 import { RoleMappingsAPIClient } from '../role_mappings_api_client';
 import { RoleTableDisplay } from '../../role_table_display';
 import { RolesAPIClient } from '../../roles';
@@ -45,7 +50,7 @@ interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
   notifications: NotificationsStart;
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
   history: ScopedHistory;
   navigateToApp: ApplicationStart['navigateToApp'];
 }
@@ -147,7 +152,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                   values={{
                     learnMoreLink: (
                       <EuiLink
-                        href={this.props.docLinks.getRoleMappingDocUrl()}
+                        href={this.props.docLinks.links.security.mappingRoles}
                         external={true}
                         target="_blank"
                       >
@@ -178,7 +183,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           <Fragment>
             {!this.state.hasCompatibleRealms && (
               <>
-                <NoCompatibleRealms docLinks={this.props.docLinks} />
+                <NoCompatibleRealms />
                 <EuiSpacer />
               </>
             )}
@@ -330,14 +335,16 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               this.state.roles?.find((r) => r.name === rolename) ?? rolename;
 
             return (
-              <RoleTableDisplay
-                role={role}
-                key={rolename}
-                navigateToApp={this.props.navigateToApp}
-              />
+              <EuiFlexItem grow={false} key={rolename}>
+                <RoleTableDisplay role={role} navigateToApp={this.props.navigateToApp} />
+              </EuiFlexItem>
             );
           });
-          return <div data-test-subj="roleMappingRoles">{roleLinks}</div>;
+          return (
+            <EuiFlexGroup gutterSize="s" data-test-subj="roleMappingRoles" wrap>
+              {roleLinks}
+            </EuiFlexGroup>
+          );
         },
       },
       {
@@ -410,7 +417,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                                 'xpack.security.management.roleMappings.actionDeleteAriaLabel',
                                 {
                                   defaultMessage: `Delete '{name}'`,
-                                  values: { name },
+                                  values: { name: record.name },
                                 }
                               )}
                               iconType="trash"

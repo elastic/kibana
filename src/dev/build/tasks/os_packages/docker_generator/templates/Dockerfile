@@ -33,7 +33,6 @@ RUN tar --strip-components=1 -zxf /opt/{{artifactTarball}}
 # OpenShift does this, for example.
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
-RUN find /usr/share/kibana -type d -exec chmod g+s {} \;
 
 ################################################################################
 # Build stage 1 (the actual Kibana image):
@@ -43,6 +42,11 @@ RUN find /usr/share/kibana -type d -exec chmod g+s {} \;
 ################################################################################
 FROM {{{baseOSImage}}}
 EXPOSE 5601
+
+{{#ubi}}
+  # https://github.com/rpm-software-management/microdnf/issues/50
+  RUN mkdir -p /run/user/$(id -u)
+{{/ubi}}
 
 RUN for iter in {1..10}; do \
       {{packageManager}} update --setopt=tsflags=nodocs -y && \
@@ -54,9 +58,15 @@ RUN for iter in {1..10}; do \
     (exit $exit_code)
 
 # Add an init process, check the checksum to make sure it's a match
-RUN curl -L -o /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64
-RUN echo "37f2c1f0372a45554f1b89924fbb134fc24c3756efaedf11e07f599494e0eff9  /usr/local/bin/dumb-init" | sha256sum -c -
-RUN chmod +x /usr/local/bin/dumb-init
+RUN set -e ; \
+  TINI_VERSION='v0.19.0' ; \
+  TINI_BIN='tini-amd64' ; \
+  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
+  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
+  sha256sum -c "${TINI_BIN}.sha256sum" ; \
+  rm "${TINI_BIN}.sha256sum" ; \
+  mv "${TINI_BIN}" /bin/tini ; \
+  chmod +x /bin/tini
 
 RUN mkdir /usr/share/fonts/local
 RUN curl -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
@@ -126,6 +136,6 @@ RUN mkdir /licenses && \
 
 USER kibana
 
-ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
+ENTRYPOINT ["/bin/tini", "--"]
 
 CMD ["/usr/local/bin/kibana-docker"]

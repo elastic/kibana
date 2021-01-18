@@ -19,12 +19,9 @@
 
 import { get, round } from 'lodash';
 import { getFormatService, getQueryService, getKibanaLegacy } from './services';
-import {
-  geoContains,
-  mapTooltipProvider,
-  lazyLoadMapsLegacyModules,
-} from '../../maps_legacy/public';
+import { mapTooltipProvider, lazyLoadMapsLegacyModules } from '../../maps_legacy/public';
 import { tooltipFormatter } from './tooltip_formatter';
+import { geoContains } from './utils';
 
 function scaleBounds(bounds) {
   const scale = 0.5; // scale bounds by 50%
@@ -57,8 +54,8 @@ export const createTileMapVisualization = (dependencies) => {
   const { getZoomPrecision, getPrecision, BaseMapsVisualization } = dependencies;
 
   return class CoordinateMapsVisualization extends BaseMapsVisualization {
-    constructor(element, vis) {
-      super(element, vis);
+    constructor(element, handlers, initialVisParams) {
+      super(element, handlers, initialVisParams);
 
       this._geohashLayer = null;
       this._tooltipFormatter = mapTooltipProvider(element, tooltipFormatter);
@@ -73,21 +70,21 @@ export const createTileMapVisualization = (dependencies) => {
       };
       const bounds = this._kibanaMap.getBounds();
       const mapCollar = scaleBounds(bounds);
-      if (!geoContains(geohashAgg.aggConfigParams.boundingBox, mapCollar)) {
+      if (!geoContains(geohashAgg.sourceParams.params.boundingBox, mapCollar)) {
         updateVarsObject.data.boundingBox = {
           top_left: mapCollar.top_left,
           bottom_right: mapCollar.bottom_right,
         };
       } else {
-        updateVarsObject.data.boundingBox = geohashAgg.aggConfigParams.boundingBox;
+        updateVarsObject.data.boundingBox = geohashAgg.sourceParams.params.boundingBox;
       }
       // todo: autoPrecision should be vis parameter, not aggConfig one
       const zoomPrecision = getZoomPrecision();
-      updateVarsObject.data.precision = geohashAgg.aggConfigParams.autoPrecision
-        ? zoomPrecision[this.vis.getUiState().get('mapZoom')]
-        : getPrecision(geohashAgg.aggConfigParams.precision);
+      updateVarsObject.data.precision = geohashAgg.sourceParams.params.autoPrecision
+        ? zoomPrecision[this.handlers.uiState.get('mapZoom')]
+        : getPrecision(geohashAgg.sourceParams.params.precision);
 
-      this.vis.eventsSubject.next(updateVarsObject);
+      this.handlers.event(updateVarsObject);
     };
 
     async render(esResponse, visParams) {
@@ -96,13 +93,12 @@ export const createTileMapVisualization = (dependencies) => {
     }
 
     async _makeKibanaMap() {
-      await super._makeKibanaMap();
+      await super._makeKibanaMap(this._params);
 
       let previousPrecision = this._kibanaMap.getGeohashPrecision();
       let precisionChange = false;
 
-      const uiState = this.vis.getUiState();
-      uiState.on('change', (prop) => {
+      this.handlers.uiState.on('change', (prop) => {
         if (prop === 'mapZoom' || prop === 'mapCenter') {
           this.updateGeohashAgg();
         }
@@ -118,8 +114,8 @@ export const createTileMapVisualization = (dependencies) => {
           return;
         }
         const isAutoPrecision =
-          typeof geohashAgg.aggConfigParams.autoPrecision === 'boolean'
-            ? geohashAgg.aggConfigParams.autoPrecision
+          typeof geohashAgg.sourceParams.params.autoPrecision === 'boolean'
+            ? geohashAgg.sourceParams.params.autoPrecision
             : true;
         if (!isAutoPrecision) {
           return;
@@ -243,15 +239,13 @@ export const createTileMapVisualization = (dependencies) => {
       }
 
       const indexPatternName = agg.indexPatternId;
-      const field = agg.aggConfigParams.field;
+      const field = agg.field;
       const filter = { meta: { negate: false, index: indexPatternName } };
       filter[filterName] = { ignore_unmapped: true };
       filter[filterName][field] = filterData;
 
       const { filterManager } = getQueryService();
       filterManager.addFilters([filter]);
-
-      this.vis.updateState();
     }
 
     _getGeoHashAgg() {
@@ -264,7 +258,7 @@ export const createTileMapVisualization = (dependencies) => {
       const DEFAULT = false;
       const agg = this._getGeoHashAgg();
       if (agg) {
-        return get(agg, 'aggConfigParams.isFilteredByCollar', DEFAULT);
+        return get(agg, 'sourceParams.params.isFilteredByCollar', DEFAULT);
       } else {
         return DEFAULT;
       }

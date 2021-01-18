@@ -9,5 +9,5 @@ Starts expression execution and immediately returns `ExecutionContract` instance
 <b>Signature:</b>
 
 ```typescript
-execute: <Input = unknown, Output = unknown, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext) => ExecutionContract<ExtraContext, Input, Output>;
+execute: <Input = unknown, Output = unknown>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams) => ExecutionContract<Input, Output>;
 ```

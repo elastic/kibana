@@ -16,14 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'kibana/public';
-import { VegaAdapter } from './vega_adapter';
-import { VegaDataInspector, VegaDataInspectorProps } from './vega_data_inspector';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 import { Adapters, RequestAdapter, InspectorViewDescription } from '../../../inspector/public';
+import { VegaAdapter } from './vega_adapter';
+import type { VegaDataInspectorProps } from './vega_data_inspector';
+
+const VegaDataInspector = lazy(() => import('./vega_data_inspector'));
 
 export interface VegaInspectorAdapters extends Adapters {
   requests: RequestAdapter;
@@ -46,7 +49,9 @@ export const getVegaInspectorView = (dependencies: VegaInspectorViewDependencies
     },
     component: (props) => (
       <KibanaContextProvider services={dependencies}>
-        <VegaDataInspector {...(props as VegaDataInspectorProps)}> </VegaDataInspector>
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <VegaDataInspector {...(props as VegaDataInspectorProps)} />
+        </Suspense>
       </KibanaContextProvider>
     ),
   } as InspectorViewDescription);

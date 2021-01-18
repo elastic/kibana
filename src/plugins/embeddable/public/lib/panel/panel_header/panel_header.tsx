@@ -24,6 +24,7 @@ import {
   EuiToolTip,
   EuiScreenReaderOnly,
   EuiNotificationBadge,
+  EuiLink,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
@@ -32,6 +33,7 @@ import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
 import { uiToReactComponent } from '../../../../../kibana_react/public';
+import { CustomizePanelTitleAction } from '.';
 
 export interface PanelHeaderProps {
   title?: string;
@@ -44,6 +46,7 @@ export interface PanelHeaderProps {
   embeddable: IEmbeddable;
   headerId?: string;
   showPlaceholderTitle?: boolean;
+  customizeTitle: CustomizePanelTitleAction;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
@@ -68,7 +71,13 @@ function renderNotifications(
     const context = { embeddable };
 
     let badge = notification.MenuItem ? (
-      React.createElement(uiToReactComponent(notification.MenuItem))
+      React.createElement(uiToReactComponent(notification.MenuItem), {
+        key: notification.id,
+        context: {
+          embeddable,
+          trigger: panelNotificationTrigger,
+        },
+      })
     ) : (
       <EuiNotificationBadge
         data-test-subj={`embeddablePanelNotification-${notification.id}`}
@@ -123,6 +132,7 @@ export function PanelHeader({
   notifications,
   embeddable,
   headerId,
+  customizeTitle,
 }: PanelHeaderProps) {
   const description = getViewDescription(embeddable);
   const showTitle = !hidePanelTitle && (!isViewMode || title);
@@ -166,11 +176,35 @@ export function PanelHeader({
   }
 
   const renderTitle = () => {
-    const titleComponent = showTitle ? (
-      <span className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}>
-        {title || placeholderTitle}
-      </span>
-    ) : undefined;
+    let titleComponent;
+    if (showTitle) {
+      titleComponent = isViewMode ? (
+        <span
+          className={classNames('embPanel__titleText', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            embPanel__placeholderTitleText: !title,
+          })}
+        >
+          {title || placeholderTitle}
+        </span>
+      ) : (
+        <EuiLink
+          color="text"
+          data-test-subj={'embeddablePanelTitleLink'}
+          className={classNames('embPanel__titleText', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            embPanel__placeholderTitleText: !title,
+          })}
+          aria-label={i18n.translate('embeddableApi.panel.editTitleAriaLabel', {
+            defaultMessage: 'Click to edit title: {title}',
+            values: { title: title || placeholderTitle },
+          })}
+          onClick={() => customizeTitle.execute({ embeddable })}
+        >
+          {title || placeholderTitle}
+        </EuiLink>
+      );
+    }
     return description ? (
       <EuiToolTip
         content={description}

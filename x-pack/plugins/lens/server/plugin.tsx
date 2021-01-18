@@ -7,6 +7,7 @@
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
+import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { setupRoutes } from './routes';
 import {
@@ -23,19 +24,20 @@ export interface PluginSetupContract {
 
 export interface PluginStartContract {
   taskManager?: TaskManagerStartContract;
+  data: DataPluginStart;
 }
 
 export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
   private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
   private readonly telemetryLogger: Logger;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private initializerContext: PluginInitializerContext) {
     this.kibanaIndexConfig = initializerContext.config.legacy.globalConfig$;
     this.telemetryLogger = initializerContext.logger.get('usage');
   }
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
     setupSavedObjects(core);
-    setupRoutes(core);
+    setupRoutes(core, this.initializerContext.logger.get());
     if (plugins.usageCollection && plugins.taskManager) {
       registerLensUsageCollector(
         plugins.usageCollection,

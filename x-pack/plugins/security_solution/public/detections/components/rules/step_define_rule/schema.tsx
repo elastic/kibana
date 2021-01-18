@@ -13,7 +13,7 @@ import {
   singleEntryThreat,
   containsInvalidItems,
 } from '../../../../common/components/threat_match/helpers';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import { isThreatMatchRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { esKuery } from '../../../../../../../../src/plugins/data/public';
 import { FieldValueQueryBar } from '../query_bar';
@@ -216,16 +216,25 @@ export const schema: FormSchema<DefineStepRule> = {
       ),
       validations: [
         {
-          validator: fieldValidators.numberGreaterThanField({
-            than: 1,
-            message: i18n.translate(
-              'xpack.securitySolution.detectionEngine.validations.thresholdValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
-              {
-                defaultMessage: 'Value must be greater than or equal one.',
-              }
-            ),
-            allowEquality: true,
-          }),
+          validator: (
+            ...args: Parameters<ValidationFunc>
+          ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+            const [{ formData }] = args;
+            const needsValidation = isThresholdRule(formData.ruleType);
+            if (!needsValidation) {
+              return;
+            }
+            return fieldValidators.numberGreaterThanField({
+              than: 1,
+              message: i18n.translate(
+                'xpack.securitySolution.detectionEngine.validations.thresholdValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
+                {
+                  defaultMessage: 'Value must be greater than or equal to one.',
+                }
+              ),
+              allowEquality: true,
+            })(...args);
+          },
         },
       ],
     },
@@ -235,7 +244,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatIndexPatternsLabel',
       {
-        defaultMessage: 'Threat index patterns',
+        defaultMessage: 'Indicator index patterns',
       }
     ),
     helpText: <EuiText size="xs">{THREAT_MATCH_INDEX_HELPER_TEXT}</EuiText>,
@@ -265,7 +274,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatMappingLabel',
       {
-        defaultMessage: 'Threat Mapping',
+        defaultMessage: 'Indicator mapping',
       }
     ),
     validations: [
@@ -301,7 +310,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatQueryBarLabel',
       {
-        defaultMessage: 'Threat index query',
+        defaultMessage: 'Indicator index query',
       }
     ),
     validations: [

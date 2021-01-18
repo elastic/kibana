@@ -21,13 +21,17 @@
 import { InternalCoreStart } from './internal_types';
 import { KibanaRequest } from './http/router';
 import { SavedObjectsClientContract } from './saved_objects/types';
-import { InternalSavedObjectsServiceStart, ISavedObjectTypeRegistry } from './saved_objects';
+import {
+  InternalSavedObjectsServiceStart,
+  ISavedObjectTypeRegistry,
+  ISavedObjectsExporter,
+  ISavedObjectsImporter,
+} from './saved_objects';
 import {
   InternalElasticsearchServiceStart,
   IScopedClusterClient,
   LegacyScopedClusterClient,
 } from './elasticsearch';
-import { Auditor } from './audit_trail';
 import { InternalUiSettingsServiceStart, IUiSettingsClient } from './ui_settings';
 
 class CoreElasticsearchRouteHandlerContext {
@@ -65,6 +69,8 @@ class CoreSavedObjectsRouteHandlerContext {
   ) {}
   #scopedSavedObjectsClient?: SavedObjectsClientContract;
   #typeRegistry?: ISavedObjectTypeRegistry;
+  #exporter?: ISavedObjectsExporter;
+  #importer?: ISavedObjectsImporter;
 
   public get client() {
     if (this.#scopedSavedObjectsClient == null) {
@@ -78,6 +84,20 @@ class CoreSavedObjectsRouteHandlerContext {
       this.#typeRegistry = this.savedObjectsStart.getTypeRegistry();
     }
     return this.#typeRegistry;
+  }
+
+  public get exporter() {
+    if (this.#exporter == null) {
+      this.#exporter = this.savedObjectsStart.createExporter(this.client);
+    }
+    return this.#exporter;
+  }
+
+  public get importer() {
+    if (this.#importer == null) {
+      this.#importer = this.savedObjectsStart.createImporter(this.client);
+    }
+    return this.#importer;
   }
 }
 
@@ -99,8 +119,6 @@ class CoreUiSettingsRouteHandlerContext {
 }
 
 export class CoreRouteHandlerContext {
-  #auditor?: Auditor;
-
   readonly elasticsearch: CoreElasticsearchRouteHandlerContext;
   readonly savedObjects: CoreSavedObjectsRouteHandlerContext;
   readonly uiSettings: CoreUiSettingsRouteHandlerContext;
@@ -121,12 +139,5 @@ export class CoreRouteHandlerContext {
       this.coreStart.uiSettings,
       this.savedObjects
     );
-  }
-
-  public get auditor() {
-    if (this.#auditor == null) {
-      this.#auditor = this.coreStart.auditTrail.asScoped(this.request);
-    }
-    return this.#auditor;
   }
 }

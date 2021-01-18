@@ -11,3 +11,10 @@ export const connector = {
   config: {},
   isPreconfigured: false,
 };
+export const issues = [
+  { id: 'personId', title: 'Person Task', key: 'personKey' },
+  { id: 'womanId', title: 'Woman Task', key: 'womanKey' },
+  { id: 'manId', title: 'Man Task', key: 'manKey' },
+  { id: 'cameraId', title: 'Camera Task', key: 'cameraKey' },
+  { id: 'tvId', title: 'TV Task', key: 'tvKey' },
+];

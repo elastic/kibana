@@ -21,9 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { search } from '../../../../../../plugins/data/public';
 const { parseEsInterval } = search.aggs;
-import { GTE_INTERVAL_RE } from '../../../../../../plugins/vis_type_timeseries/common/interval_regexp';
-
-export const AUTO_INTERVAL = 'auto';
+import { GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
+import { AUTO_INTERVAL } from '../../../../common/constants';
 
 export const unitLookup = {
   s: i18n.translate('visTypeTimeseries.getInterval.secondsLabel', { defaultMessage: 'seconds' }),

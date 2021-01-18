@@ -14,7 +14,7 @@ import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kiban
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
 import { GROUP_PATH, GROUPS_PATH } from '../../routes';
-import { NAV } from './constants';
+import { NAV } from '../../constants';
 
 import { GroupsLogic } from './groups_logic';
 
@@ -37,7 +37,9 @@ export const GroupsRouter: React.FC = () => {
         <SendTelemetry action="viewed" metric="groups" />
         <Groups />
       </Route>
-      <Route path={GROUP_PATH} component={GroupRouter} />
+      <Route path={GROUP_PATH}>
+        <GroupRouter />
+      </Route>
     </Switch>
   );
 };

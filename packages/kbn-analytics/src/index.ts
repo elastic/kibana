@@ -18,6 +18,7 @@
  */
 
 export { ReportHTTP, Reporter, ReporterConfig } from './reporter';
-export { UiStatsMetricType, METRIC_TYPE } from './metrics';
+export { UiCounterMetricType, METRIC_TYPE } from './metrics';
 export { Report, ReportManager } from './report';
+export { ApplicationUsageTracker } from './application_usage_tracker';
 export { Storage } from './storage';

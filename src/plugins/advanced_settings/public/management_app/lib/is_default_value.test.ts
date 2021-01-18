@@ -50,9 +50,9 @@ describe('Settings', function () {
         });
 
         describe('without a value', function () {
-          it('should return true', function () {
+          it('should return false for empty string but true for undefined', function () {
             expect(isDefaultValue({ ...setting, value: undefined })).to.be(true);
-            expect(isDefaultValue({ ...setting, value: '' })).to.be(true);
+            expect(isDefaultValue({ ...setting, value: '' })).to.be(false);
           });
         });
 

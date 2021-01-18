@@ -10,7 +10,6 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
-import { useSelector } from 'react-redux';
 import {
   ErrorEmbeddable,
   isErrorEmbeddable,
@@ -30,6 +29,7 @@ import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../common/lib/kibana';
 import { getDefaultSourcererSelector } from './selector';
 import { getLayerList } from './map_config';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -95,9 +95,8 @@ export const EmbeddedMapComponent = ({
 
   const [, dispatchToaster] = useStateToaster();
   const defaultSourcererScopeSelector = useMemo(getDefaultSourcererSelector, []);
-  const { kibanaIndexPatterns, sourcererScope } = useSelector(
-    defaultSourcererScopeSelector,
-    deepEqual
+  const { kibanaIndexPatterns, sourcererScope } = useDeepEqualSelector(
+    defaultSourcererScopeSelector
   );
 
   const [mapIndexPatterns, setMapIndexPatterns] = useState(
@@ -198,15 +197,13 @@ export const EmbeddedMapComponent = ({
     if (embeddable != null) {
       embeddable.updateInput({ query });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
+  }, [embeddable, query]);
 
   useEffect(() => {
     if (embeddable != null) {
       embeddable.updateInput({ filters });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [embeddable, filters]);
 
   // DateRange updated useEffect
   useEffect(() => {
@@ -217,8 +214,7 @@ export const EmbeddedMapComponent = ({
       };
       embeddable.updateInput({ timeRange });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startDate, endDate]);
+  }, [embeddable, startDate, endDate]);
 
   return isError ? null : (
     <Embeddable>

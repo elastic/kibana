@@ -18,10 +18,10 @@ import {
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
 import { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
-import { DOC_TYPE } from '../../persistence';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { Document } from '../../persistence/saved_object_store';
 import { LensAttributeService } from '../../lens_attribute_service';
+import { DOC_TYPE } from '../../../common';
 
 export interface LensEmbeddableStartServices {
   timefilter: TimefilterContract;
@@ -94,6 +94,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         editable: await this.isEditable(),
         basePath: coreHttp.basePath,
         getTrigger: uiActions?.getTrigger,
+        getTriggerCompatibleActions: uiActions?.getTriggerCompatibleActions,
         documentToExpression,
       },
       input,

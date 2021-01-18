@@ -2,9 +2,12 @@
   extends: [
     'config:base',
   ],
-  includePaths: [
-    'package.json',
-    'x-pack/package.json',
+  ignorePaths: [
+    '**/__fixtures__/**',
+    '**/fixtures/**',
+  ],
+  enabledManagers: [
+    'npm',
   ],
   baseBranches: [
     'master',
@@ -14,7 +17,7 @@
     'Team:Operations',
     'renovate',
     'v8.0.0',
-    'v7.10.0',
+    'v7.11.0',
   ],
   major: {
     labels: [
@@ -22,7 +25,7 @@
       'Team:Operations',
       'renovate',
       'v8.0.0',
-      'v7.10.0',
+      'v7.11.0',
       'renovate:major',
     ],
   },

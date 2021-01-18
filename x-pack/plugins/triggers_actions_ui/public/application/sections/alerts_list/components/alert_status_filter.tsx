@@ -54,6 +54,7 @@ export const AlertStatusFilter: React.FunctionComponent<AlertStatusFilterProps> 
             numActiveFilters={selectedValues.length}
             numFilters={selectedValues.length}
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            data-test-subj="alertStatusFilterButton"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.alertStatusFilterLabel"
@@ -78,6 +79,7 @@ export const AlertStatusFilter: React.FunctionComponent<AlertStatusFilterProps> 
                   }
                 }}
                 checked={selectedValues.includes(item) ? 'on' : undefined}
+                data-test-subj={`alertStatus${item}FilerOption`}
               >
                 <EuiHealth color={healthColor}>{alertsStatusesTranslationsMapping[item]}</EuiHealth>
               </EuiFilterSelectItem>

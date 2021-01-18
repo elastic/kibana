@@ -7,17 +7,17 @@ import { ConnectorTypeFields, ConnectorTypes } from '../../../../../case/common/
 import {
   CaseField,
   ActionType,
-  CasesConfigurationMapping,
   ThirdPartyField,
   ActionConnector,
   CaseConnector,
+  CaseConnectorMapping,
 } from '../../containers/configure/types';
 
 export const setActionTypeToMapping = (
   caseField: CaseField,
   newActionType: ActionType,
-  mapping: CasesConfigurationMapping[]
-): CasesConfigurationMapping[] => {
+  mapping: CaseConnectorMapping[]
+): CaseConnectorMapping[] => {
   const findItemIndex = mapping.findIndex((item) => item.source === caseField);
 
   if (findItemIndex >= 0) {
@@ -34,8 +34,8 @@ export const setActionTypeToMapping = (
 export const setThirdPartyToMapping = (
   caseField: CaseField,
   newThirdPartyField: ThirdPartyField,
-  mapping: CasesConfigurationMapping[]
-): CasesConfigurationMapping[] =>
+  mapping: CaseConnectorMapping[]
+): CaseConnectorMapping[] =>
   mapping.map((item) => {
     if (item.source !== caseField && item.target === newThirdPartyField) {
       return { ...item, target: 'not_mapped' };

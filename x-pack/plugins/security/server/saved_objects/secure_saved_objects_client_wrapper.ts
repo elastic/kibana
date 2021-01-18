@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
+  SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -12,21 +13,28 @@ import {
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsUpdateOptions,
-  SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsUpdateOptions,
   SavedObjectsUtils,
 } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import { SecurityAuditLogger } from '../audit';
+import {
+  AuditLogger,
+  EventOutcome,
+  SavedObjectAction,
+  savedObjectEvent,
+  SecurityAuditLogger,
+} from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
 import { CheckPrivilegesResponse } from '../authorization/types';
 import { SpacesService } from '../plugin';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
-  auditLogger: SecurityAuditLogger;
+  legacyAuditLogger: SecurityAuditLogger;
+  auditLogger: AuditLogger;
   baseClient: SavedObjectsClientContract;
   errors: SavedObjectsClientContract['errors'];
   checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
@@ -58,7 +66,8 @@ interface EnsureAuthorizedTypeResult {
 
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
   private readonly actions: Actions;
-  private readonly auditLogger: PublicMethodsOf<SecurityAuditLogger>;
+  private readonly legacyAuditLogger: PublicMethodsOf<SecurityAuditLogger>;
+  private readonly auditLogger: AuditLogger;
   private readonly baseClient: SavedObjectsClientContract;
   private readonly checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
   private getSpacesService: () => SpacesService | undefined;
@@ -66,6 +75,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   constructor({
     actions,
+    legacyAuditLogger,
     auditLogger,
     baseClient,
     checkSavedObjectsPrivilegesAsCurrentUser,
@@ -74,6 +84,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }: SecureSavedObjectsClientWrapperOptions) {
     this.errors = errors;
     this.actions = actions;
+    this.legacyAuditLogger = legacyAuditLogger;
     this.auditLogger = auditLogger;
     this.baseClient = baseClient;
     this.checkSavedObjectsPrivilegesAsCurrentUser = checkSavedObjectsPrivilegesAsCurrentUser;
@@ -85,12 +96,31 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
   ) {
-    const args = { type, attributes, options };
-    const namespaces = [options.namespace, ...(options.initialNamespaces || [])];
-    await this.ensureAuthorized(type, 'create', namespaces, { args });
+    const optionsWithId = { ...options, id: options.id ?? SavedObjectsUtils.generateId() };
+    const namespaces = [optionsWithId.namespace, ...(optionsWithId.initialNamespaces || [])];
+    try {
+      const args = { type, attributes, options: optionsWithId };
+      await this.ensureAuthorized(type, 'create', namespaces, { args });
+    } catch (error) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.CREATE,
+          savedObject: { type, id: optionsWithId.id },
+          error,
+        })
+      );
+      throw error;
+    }
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.CREATE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type, id: optionsWithId.id },
+      })
+    );
 
-    const savedObject = await this.baseClient.create(type, attributes, options);
-    return await this.redactSavedObjectNamespaces(savedObject);
+    const savedObject = await this.baseClient.create(type, attributes, optionsWithId);
+    return await this.redactSavedObjectNamespaces(savedObject, namespaces);
   }
 
   public async checkConflicts(
@@ -112,25 +142,71 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsBaseOptions = {}
   ) {
-    const args = { objects, options };
-    const namespaces = objects.reduce(
-      (acc, { initialNamespaces = [] }) => {
-        return acc.concat(initialNamespaces);
-      },
+    const objectsWithId = objects.map((obj) => ({
+      ...obj,
+      id: obj.id ?? SavedObjectsUtils.generateId(),
+    }));
+    const namespaces = objectsWithId.reduce(
+      (acc, { initialNamespaces = [] }) => acc.concat(initialNamespaces),
       [options.namespace]
     );
+    try {
+      const args = { objects: objectsWithId, options };
+      await this.ensureAuthorized(
+        this.getUniqueObjectTypes(objectsWithId),
+        'bulk_create',
+        namespaces,
+        {
+          args,
+        }
+      );
+    } catch (error) {
+      objectsWithId.forEach(({ type, id }) =>
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.CREATE,
+            savedObject: { type, id },
+            error,
+          })
+        )
+      );
+      throw error;
+    }
+    objectsWithId.forEach(({ type, id }) =>
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.CREATE,
+          outcome: EventOutcome.UNKNOWN,
+          savedObject: { type, id },
+        })
+      )
+    );
 
-    await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_create', namespaces, {
-      args,
-    });
-
-    const response = await this.baseClient.bulkCreate(objects, options);
-    return await this.redactSavedObjectsNamespaces(response);
+    const response = await this.baseClient.bulkCreate(objectsWithId, options);
+    return await this.redactSavedObjectsNamespaces(response, namespaces);
   }
 
   public async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
-    const args = { type, id, options };
-    await this.ensureAuthorized(type, 'delete', options.namespace, { args });
+    try {
+      const args = { type, id, options };
+      await this.ensureAuthorized(type, 'delete', options.namespace, { args });
+    } catch (error) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.DELETE,
+          savedObject: { type, id },
+          error,
+        })
+      );
+      throw error;
+    }
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.DELETE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type, id },
+      })
+    );
 
     return await this.baseClient.delete(type, id, options);
   }
@@ -145,6 +221,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         `_find across namespaces is not permitted when the Spaces plugin is disabled.`
       );
     }
+
     const args = { options };
     const { status, typeMap } = await this.ensureAuthorized(
       options.type,
@@ -155,6 +232,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     if (status === 'unauthorized') {
       // return empty response
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.FIND,
+          error: new Error(status),
+        })
+      );
       return SavedObjectsUtils.createEmptyFindResponse<T>(options);
     }
 
@@ -163,33 +246,93 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         isGloballyAuthorized ? acc.set(type, options.namespaces) : acc.set(type, authorizedSpaces),
       new Map()
     );
+
     const response = await this.baseClient.find<T>({
       ...options,
       typeToNamespacesMap: undefined, // if the user is fully authorized, use `undefined` as the typeToNamespacesMap to prevent privilege escalation
       ...(status === 'partially_authorized' && { typeToNamespacesMap, type: '', namespaces: [] }), // the repository requires that `type` and `namespaces` must be empty if `typeToNamespacesMap` is defined
     });
-    return await this.redactSavedObjectsNamespaces(response);
+
+    response.saved_objects.forEach(({ type, id }) =>
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.FIND,
+          savedObject: { type, id },
+        })
+      )
+    );
+
+    return await this.redactSavedObjectsNamespaces(response, options.namespaces ?? [undefined]);
   }
 
   public async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ) {
-    const args = { objects, options };
-    await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_get', options.namespace, {
-      args,
-    });
+    try {
+      const args = { objects, options };
+      await this.ensureAuthorized(
+        this.getUniqueObjectTypes(objects),
+        'bulk_get',
+        options.namespace,
+        {
+          args,
+        }
+      );
+    } catch (error) {
+      objects.forEach(({ type, id }) =>
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.GET,
+            savedObject: { type, id },
+            error,
+          })
+        )
+      );
+      throw error;
+    }
 
     const response = await this.baseClient.bulkGet<T>(objects, options);
-    return await this.redactSavedObjectsNamespaces(response);
+
+    response.saved_objects.forEach(({ error, type, id }) => {
+      if (!error) {
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.GET,
+            savedObject: { type, id },
+          })
+        );
+      }
+    });
+
+    return await this.redactSavedObjectsNamespaces(response, [options.namespace]);
   }
 
   public async get<T = unknown>(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
-    const args = { type, id, options };
-    await this.ensureAuthorized(type, 'get', options.namespace, { args });
+    try {
+      const args = { type, id, options };
+      await this.ensureAuthorized(type, 'get', options.namespace, { args });
+    } catch (error) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.GET,
+          savedObject: { type, id },
+          error,
+        })
+      );
+      throw error;
+    }
 
     const savedObject = await this.baseClient.get<T>(type, id, options);
-    return await this.redactSavedObjectNamespaces(savedObject);
+
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.GET,
+        savedObject: { type, id },
+      })
+    );
+
+    return await this.redactSavedObjectNamespaces(savedObject, [options.namespace]);
   }
 
   public async update<T = unknown>(
@@ -198,11 +341,29 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions = {}
   ) {
-    const args = { type, id, attributes, options };
-    await this.ensureAuthorized(type, 'update', options.namespace, { args });
+    try {
+      const args = { type, id, attributes, options };
+      await this.ensureAuthorized(type, 'update', options.namespace, { args });
+    } catch (error) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.UPDATE,
+          savedObject: { type, id },
+          error,
+        })
+      );
+      throw error;
+    }
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.UPDATE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type, id },
+      })
+    );
 
     const savedObject = await this.baseClient.update(type, id, attributes, options);
-    return await this.redactSavedObjectNamespaces(savedObject);
+    return await this.redactSavedObjectNamespaces(savedObject, [options.namespace]);
   }
 
   public async addToNamespaces(
@@ -211,25 +372,45 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     namespaces: string[],
     options: SavedObjectsAddToNamespacesOptions = {}
   ) {
-    const args = { type, id, namespaces, options };
     const { namespace } = options;
-    // To share an object, the user must have the "share_to_space" permission in each of the destination namespaces.
-    await this.ensureAuthorized(type, 'share_to_space', namespaces, {
-      args,
-      auditAction: 'addToNamespacesCreate',
-    });
+    try {
+      const args = { type, id, namespaces, options };
+      // To share an object, the user must have the "share_to_space" permission in each of the destination namespaces.
+      await this.ensureAuthorized(type, 'share_to_space', namespaces, {
+        args,
+        auditAction: 'addToNamespacesCreate',
+      });
 
-    // To share an object, the user must also have the "share_to_space" permission in one or more of the source namespaces. Because the
-    // `addToNamespaces` operation is scoped to the current namespace, we can just check if the user has the "share_to_space" permission in
-    // the current namespace. If the user has permission, but the saved object doesn't exist in this namespace, the base client operation
-    // will result in a 404 error.
-    await this.ensureAuthorized(type, 'share_to_space', namespace, {
-      args,
-      auditAction: 'addToNamespacesUpdate',
-    });
+      // To share an object, the user must also have the "share_to_space" permission in one or more of the source namespaces. Because the
+      // `addToNamespaces` operation is scoped to the current namespace, we can just check if the user has the "share_to_space" permission in
+      // the current namespace. If the user has permission, but the saved object doesn't exist in this namespace, the base client operation
+      // will result in a 404 error.
+      await this.ensureAuthorized(type, 'share_to_space', namespace, {
+        args,
+        auditAction: 'addToNamespacesUpdate',
+      });
+    } catch (error) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.ADD_TO_SPACES,
+          savedObject: { type, id },
+          addToSpaces: namespaces,
+          error,
+        })
+      );
+      throw error;
+    }
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.ADD_TO_SPACES,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type, id },
+        addToSpaces: namespaces,
+      })
+    );
 
-    const result = await this.baseClient.addToNamespaces(type, id, namespaces, options);
-    return await this.redactSavedObjectNamespaces(result);
+    const response = await this.baseClient.addToNamespaces(type, id, namespaces, options);
+    return await this.redactSavedObjectNamespaces(response, [namespace, ...namespaces]);
   }
 
   public async deleteFromNamespaces(
@@ -238,15 +419,35 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     namespaces: string[],
     options: SavedObjectsDeleteFromNamespacesOptions = {}
   ) {
-    const args = { type, id, namespaces, options };
-    // To un-share an object, the user must have the "share_to_space" permission in each of the target namespaces.
-    await this.ensureAuthorized(type, 'share_to_space', namespaces, {
-      args,
-      auditAction: 'deleteFromNamespaces',
-    });
+    try {
+      const args = { type, id, namespaces, options };
+      // To un-share an object, the user must have the "share_to_space" permission in each of the target namespaces.
+      await this.ensureAuthorized(type, 'share_to_space', namespaces, {
+        args,
+        auditAction: 'deleteFromNamespaces',
+      });
+    } catch (error) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.DELETE_FROM_SPACES,
+          savedObject: { type, id },
+          deleteFromSpaces: namespaces,
+          error,
+        })
+      );
+      throw error;
+    }
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.DELETE_FROM_SPACES,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type, id },
+        deleteFromSpaces: namespaces,
+      })
+    );
 
-    const result = await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
-    return await this.redactSavedObjectNamespaces(result);
+    const response = await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
+    return await this.redactSavedObjectNamespaces(response, namespaces);
   }
 
   public async bulkUpdate<T = unknown>(
@@ -259,13 +460,68 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       .filter(({ namespace }) => namespace !== undefined)
       .map(({ namespace }) => namespace!);
     const namespaces = [options?.namespace, ...objectNamespaces];
-    const args = { objects, options };
-    await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_update', namespaces, {
-      args,
-    });
+    try {
+      const args = { objects, options };
+      await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_update', namespaces, {
+        args,
+      });
+    } catch (error) {
+      objects.forEach(({ type, id }) =>
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.UPDATE,
+            savedObject: { type, id },
+            error,
+          })
+        )
+      );
+      throw error;
+    }
+    objects.forEach(({ type, id }) =>
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.UPDATE,
+          outcome: EventOutcome.UNKNOWN,
+          savedObject: { type, id },
+        })
+      )
+    );
 
     const response = await this.baseClient.bulkUpdate<T>(objects, options);
-    return await this.redactSavedObjectsNamespaces(response);
+    return await this.redactSavedObjectsNamespaces(response, namespaces);
+  }
+
+  public async removeReferencesTo(
+    type: string,
+    id: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ) {
+    try {
+      const args = { type, id, options };
+      await this.ensureAuthorized(type, 'delete', options.namespace, {
+        args,
+        auditAction: 'removeReferences',
+      });
+    } catch (error) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.REMOVE_REFERENCES,
+          savedObject: { type, id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.REMOVE_REFERENCES,
+        savedObject: { type, id },
+        outcome: EventOutcome.UNKNOWN,
+      })
+    );
+
+    return await this.baseClient.removeReferencesTo(type, id, options);
   }
 
   private async checkPrivileges(
@@ -316,7 +572,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     );
 
     const logAuthorizationFailure = () => {
-      this.auditLogger.savedObjectsAuthorizationFailure(
+      this.legacyAuditLogger.savedObjectsAuthorizationFailure(
         username,
         auditAction,
         types,
@@ -326,7 +582,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       );
     };
     const logAuthorizationSuccess = (typeArray: string[], spaceIdArray: string[]) => {
-      this.auditLogger.savedObjectsAuthorizationSuccess(
+      this.legacyAuditLogger.savedObjectsAuthorizationSuccess(
         username,
         auditAction,
         typeArray,
@@ -370,32 +626,43 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return uniq(objects.map((o) => o.type));
   }
 
-  private async getNamespacesPrivilegeMap(namespaces: string[]) {
-    const action = this.actions.login;
-    const checkPrivilegesResult = await this.checkPrivileges(action, namespaces);
-    // check if the user can log into each namespace
-    const map = checkPrivilegesResult.privileges.kibana.reduce(
-      (acc: Record<string, boolean>, { resource, authorized }) => {
-        // there should never be a case where more than one privilege is returned for a given space
-        // if there is, fail-safe (authorized + unauthorized = unauthorized)
-        if (resource && (!authorized || !acc.hasOwnProperty(resource))) {
-          acc[resource] = authorized;
-        }
-        return acc;
-      },
-      {}
+  private async getNamespacesPrivilegeMap(
+    namespaces: string[],
+    previouslyAuthorizedSpaceIds: string[]
+  ) {
+    const namespacesToCheck = namespaces.filter(
+      (namespace) => !previouslyAuthorizedSpaceIds.includes(namespace)
     );
+    const initialPrivilegeMap = previouslyAuthorizedSpaceIds.reduce(
+      (acc, spaceId) => acc.set(spaceId, true),
+      new Map<string, boolean>()
+    );
+    if (namespacesToCheck.length === 0) {
+      return initialPrivilegeMap;
+    }
+    const action = this.actions.login;
+    const checkPrivilegesResult = await this.checkPrivileges(action, namespacesToCheck);
+    // check if the user can log into each namespace
+    const map = checkPrivilegesResult.privileges.kibana.reduce((acc, { resource, authorized }) => {
+      // there should never be a case where more than one privilege is returned for a given space
+      // if there is, fail-safe (authorized + unauthorized = unauthorized)
+      if (resource && (!authorized || !acc.has(resource))) {
+        acc.set(resource, authorized);
+      }
+      return acc;
+    }, initialPrivilegeMap);
     return map;
   }
 
-  private redactAndSortNamespaces(spaceIds: string[], privilegeMap: Record<string, boolean>) {
+  private redactAndSortNamespaces(spaceIds: string[], privilegeMap: Map<string, boolean>) {
     return spaceIds
-      .map((x) => (x === ALL_SPACES_ID || privilegeMap[x] ? x : UNKNOWN_SPACE))
+      .map((x) => (x === ALL_SPACES_ID || privilegeMap.get(x) ? x : UNKNOWN_SPACE))
       .sort(namespaceComparator);
   }
 
   private async redactSavedObjectNamespaces<T extends SavedObjectNamespaces>(
-    savedObject: T
+    savedObject: T,
+    previouslyAuthorizedNamespaces: Array<string | undefined>
   ): Promise<T> {
     if (
       this.getSpacesService() === undefined ||
@@ -405,12 +672,18 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       return savedObject;
     }
 
-    const namespaces = savedObject.namespaces.filter((x) => x !== ALL_SPACES_ID); // all users can see the "all spaces" ID
-    if (namespaces.length === 0) {
-      return savedObject;
-    }
+    const previouslyAuthorizedSpaceIds = previouslyAuthorizedNamespaces.map((x) =>
+      this.getSpacesService()!.namespaceToSpaceId(x)
+    );
+    // all users can see the "all spaces" ID, and we don't need to recheck authorization for any namespaces that we just checked earlier
+    const namespaces = savedObject.namespaces.filter(
+      (x) => x !== ALL_SPACES_ID && !previouslyAuthorizedSpaceIds.includes(x)
+    );
 
-    const privilegeMap = await this.getNamespacesPrivilegeMap(namespaces);
+    const privilegeMap = await this.getNamespacesPrivilegeMap(
+      namespaces,
+      previouslyAuthorizedSpaceIds
+    );
 
     return {
       ...savedObject,
@@ -419,20 +692,26 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   private async redactSavedObjectsNamespaces<T extends SavedObjectsNamespaces>(
-    response: T
+    response: T,
+    previouslyAuthorizedNamespaces: Array<string | undefined>
   ): Promise<T> {
     if (this.getSpacesService() === undefined) {
       return response;
     }
+
+    const previouslyAuthorizedSpaceIds = previouslyAuthorizedNamespaces.map((x) =>
+      this.getSpacesService()!.namespaceToSpaceId(x)
+    );
     const { saved_objects: savedObjects } = response;
+    // all users can see the "all spaces" ID, and we don't need to recheck authorization for any namespaces that we just checked earlier
     const namespaces = uniq(
       savedObjects.flatMap((savedObject) => savedObject.namespaces || [])
-    ).filter((x) => x !== ALL_SPACES_ID); // all users can see the "all spaces" ID
-    if (namespaces.length === 0) {
-      return response;
-    }
+    ).filter((x) => x !== ALL_SPACES_ID && !previouslyAuthorizedSpaceIds.includes(x));
 
-    const privilegeMap = await this.getNamespacesPrivilegeMap(namespaces);
+    const privilegeMap = await this.getNamespacesPrivilegeMap(
+      namespaces,
+      previouslyAuthorizedSpaceIds
+    );
 
     return {
       ...response,

@@ -11,12 +11,13 @@ import {
   createMockSavedObjectsRepository,
   createRoute,
   createRouteContext,
+  mockCaseConfigure,
+  mockCaseMappings,
 } from '../../__fixtures__';
 
-import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initCaseConfigureGetActionConnector } from './get_connectors';
-import { getActions } from '../../__mocks__/request_responses';
 import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../common/constants';
+import { getActions } from '../../__mocks__/request_responses';
 
 describe('GET connectors', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -24,23 +25,25 @@ describe('GET connectors', () => {
     routeHandler = await createRoute(initCaseConfigureGetActionConnector, 'get');
   });
 
-  it('returns the connectors', async () => {
+  it('returns case owned connectors', async () => {
     const req = httpServerMock.createKibanaRequest({
       path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
       method: 'get',
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 
     const res = await routeHandler(context, req, kibanaResponseFactory);
     expect(res.status).toEqual(200);
-    expect(res.payload).toEqual(
-      getActions().filter((action) => action.actionTypeId === '.servicenow')
-    );
+
+    const expected = getActions();
+    expected.shift();
+    expect(res.payload).toEqual(expected);
   });
 
   it('it throws an error when actions client is null', async () => {
@@ -49,9 +52,10 @@ describe('GET connectors', () => {
       method: 'get',
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 

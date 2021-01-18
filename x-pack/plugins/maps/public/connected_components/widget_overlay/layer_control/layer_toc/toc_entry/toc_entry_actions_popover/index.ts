@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyAction, Dispatch } from 'redux';
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { MapStoreState } from '../../../../../../reducers/store';
 import {
@@ -13,37 +14,31 @@ import {
   cloneLayer,
   removeLayer,
 } from '../../../../../../actions';
-import { getMapZoom, isUsingSearch } from '../../../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../../../selectors/ui_selectors';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     isReadOnly: getIsReadOnly(state),
-    isUsingSearch: isUsingSearch(state),
-    zoom: getMapZoom(state),
   };
 }
 
-function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
     cloneLayer: (layerId: string) => {
-      dispatch<any>(cloneLayer(layerId));
+      dispatch(cloneLayer(layerId));
     },
     fitToBounds: (layerId: string) => {
-      dispatch<any>(fitToLayerExtent(layerId));
+      dispatch(fitToLayerExtent(layerId));
     },
     removeLayer: (layerId: string) => {
-      dispatch<any>(removeLayer(layerId));
+      dispatch(removeLayer(layerId));
     },
     toggleVisible: (layerId: string) => {
-      dispatch<any>(toggleLayerVisible(layerId));
+      dispatch(toggleLayerVisible(layerId));
     },
   };
 }
 
-const connectedTOCEntryActionsPopover = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TOCEntryActionsPopover);
-export { connectedTOCEntryActionsPopover as TOCEntryActionsPopover };
+const connected = connect(mapStateToProps, mapDispatchToProps)(TOCEntryActionsPopover);
+export { connected as TOCEntryActionsPopover };

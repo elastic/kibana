@@ -2,7 +2,7 @@
 == Contributing
 
 Whether you want to fix a bug, implement a feature, or add some other improvements or apis, the following sections will 
-guide you on the process.
+guide you on the process. After committing your code, check out the link:https://www.elastic.co/community/contributor[Elastic Contributor Program] where you can earn points and rewards for your contributions.
 
 Read <<development-getting-started>> to get your environment up and running, then read <<development-best-practices>>.
 
@@ -49,7 +49,7 @@ The Release Notes summarize what the PRs accomplish in language that is meaningf
 
 The text that appears in the Release Notes is pulled directly from your PR title, or a single paragraph of text that you specify in the PR description.
 
-To use a single paragraph of text, enter `Release note:` or a `## Release note` header in the PR description, followed by your text. For example, refer to this https://github.com/elastic/kibana/pull/65796[PR] that uses the `## Release note` header.
+To use a single paragraph of text, enter a `Release note:` or `## Release note` header in the PR description ("dev docs" works too), followed by your text. For example, refer to this https://github.com/elastic/kibana/pull/65796[PR] that uses the `## Release note` header.
 
 When you create the Release Notes text, use the following best practices:
 

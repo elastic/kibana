@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLink, EuiIcon } from '@elastic/eui';
 
 import { Index, Operation, Shard } from '../../../types';
-import { msToPretty } from '../../../utils';
+import { msToPretty } from '../../../lib';
 import { ShardDetailTree } from './shard_details_tree';
 import { PercentageBadge } from '../../percentage_badge';
 

@@ -23,18 +23,32 @@ import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { getTimerange } from '../../helpers/get_timerange';
 import { calculateAggRoot } from './calculate_agg_root';
-import { search } from '../../../../../../../plugins/data/server';
+import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
 const { dateHistogramInterval } = search.aggs;
 
-export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, capabilities) {
-  return (next) => (doc) => {
+export function dateHistogram(
+  req,
+  panel,
+  esQueryConfig,
+  indexPatternObject,
+  capabilities,
+  uiSettings
+) {
+  return (next) => async (doc) => {
+    const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
     const { timeField, interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const meta = {
       timeField,
+      index: indexPatternObject?.title,
     };
 
     const getDateHistogramForLastBucketMode = () => {
-      const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
+      const { bucketSize, intervalString } = getBucketSize(
+        req,
+        interval,
+        capabilities,
+        barTargetUiSettings
+      );
       const { from, to } = getTimerange(req);
       const timezone = capabilities.searchTimezone;
 
@@ -53,7 +67,7 @@ export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, cap
         });
 
         overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
-          timeField,
+          ...meta,
           intervalString,
           bucketSize,
         });

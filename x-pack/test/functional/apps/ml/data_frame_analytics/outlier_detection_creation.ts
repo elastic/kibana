@@ -11,8 +11,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  // https://github.com/elastic/kibana/issues/79777
-  describe.skip('outlier detection creation', function () {
+  describe('outlier detection creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
@@ -222,6 +221,14 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+        });
+
+        it('displays the analytics job in the map view', async () => {
+          await ml.testExecution.logTestStep('should open the map view for created job');
+          await ml.navigation.navigateToDataFrameAnalytics();
+          await ml.dataFrameAnalyticsTable.openMapView(testData.jobId);
+          await ml.dataFrameAnalyticsMap.assertMapElementsExists();
+          await ml.dataFrameAnalyticsMap.assertJobMapTitle(testData.jobId);
         });
       });
     }

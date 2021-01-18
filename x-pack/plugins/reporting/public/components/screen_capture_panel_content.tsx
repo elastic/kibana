@@ -12,15 +12,14 @@ import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ReportingPanelContent } from './reporting_panel_content';
 
-interface Props {
+export interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   reportType: string;
   objectId?: string;
-  objectType: string;
   getJobParams: () => BaseParams;
-  isDirty: boolean;
-  onClose: () => void;
+  isDirty?: boolean;
+  onClose?: () => void;
 }
 
 interface State {
@@ -32,8 +31,8 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const isPreserveLayoutSupported =
-      props.reportType !== 'png' && props.objectType !== 'visualization';
+    const { objectType } = props.getJobParams();
+    const isPreserveLayoutSupported = props.reportType !== 'png' && objectType !== 'visualization';
     this.state = {
       isPreserveLayoutSupported,
       usePrintLayout: false,
@@ -47,7 +46,6 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
         toasts={this.props.toasts}
         reportType={this.props.reportType}
         layoutId={this.getLayout().id}
-        objectType={this.props.objectType}
         objectId={this.props.objectId}
         getJobParams={this.getJobParams}
         options={this.renderOptions()}

@@ -21,7 +21,8 @@ export async function getServiceNames({
   setup: Setup;
   searchAggregatedTransactions: boolean;
 }) {
-  const { apmEventClient } = setup;
+  const { apmEventClient, config } = setup;
+  const maxServiceSelection = config['xpack.apm.maxServiceSelection'];
 
   const params = {
     apm: {
@@ -40,7 +41,7 @@ export async function getServiceNames({
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: 50,
+            size: maxServiceSelection,
             min_doc_count: 0,
           },
         },

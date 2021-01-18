@@ -12,6 +12,7 @@ import {
   jobCustomSettingsRT,
   logEntryCategoriesJobTypes,
 } from '../../../common/log_analysis';
+import { CategorySort } from '../../../common/http_api/log_analysis';
 import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
@@ -49,7 +50,8 @@ export async function getTopLogEntryCategories(
   endTime: number,
   categoryCount: number,
   datasets: string[],
-  histograms: HistogramParameters[]
+  histograms: HistogramParameters[],
+  sort: CategorySort
 ) {
   const finalizeTopLogEntryCategoriesSpan = startTracingSpan('get top categories');
 
@@ -68,7 +70,8 @@ export async function getTopLogEntryCategories(
     startTime,
     endTime,
     categoryCount,
-    datasets
+    datasets,
+    sort
   );
 
   const categoryIds = topLogEntryCategories.map(({ categoryId }) => categoryId);
@@ -214,7 +217,8 @@ async function fetchTopLogEntryCategories(
   startTime: number,
   endTime: number,
   categoryCount: number,
-  datasets: string[]
+  datasets: string[],
+  sort: CategorySort
 ) {
   const finalizeEsSearchSpan = startTracingSpan('Fetch top categories from ES');
 
@@ -225,8 +229,10 @@ async function fetchTopLogEntryCategories(
         startTime,
         endTime,
         categoryCount,
-        datasets
-      )
+        datasets,
+        sort
+      ),
+      [logEntryCategoriesCountJobId]
     )
   );
 
@@ -284,7 +290,8 @@ export async function fetchLogEntryCategories(
 
   const logEntryCategoriesResponse = decodeOrThrow(logEntryCategoriesResponseRT)(
     await context.infra.mlSystem.mlAnomalySearch(
-      createLogEntryCategoriesQuery(logEntryCategoriesCountJobId, categoryIds)
+      createLogEntryCategoriesQuery(logEntryCategoriesCountJobId, categoryIds),
+      [logEntryCategoriesCountJobId]
     )
   );
 
@@ -333,7 +340,8 @@ async function fetchTopLogEntryCategoryHistograms(
             startTime,
             endTime,
             bucketCount
-          )
+          ),
+          [logEntryCategoriesCountJobId]
         )
         .then(decodeOrThrow(logEntryCategoryHistogramsResponseRT))
         .then((response) => ({

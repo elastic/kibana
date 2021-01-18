@@ -49,7 +49,6 @@ export async function createApmTelemetry({
   taskManager.registerTaskDefinitions({
     [APM_TELEMETRY_TASK_NAME]: {
       title: 'Collect APM usage',
-      type: APM_TELEMETRY_TASK_NAME,
       createTaskRunner: () => {
         return {
           run: async () => {
@@ -160,7 +159,7 @@ export async function createApmTelemetry({
         logger.debug(
           `Stored telemetry is out of date. Task will run immediately. Stored: ${currentData.kibanaVersion}, expected: ${kibanaVersion}`
         );
-        taskManagerStart.runNow(APM_TELEMETRY_TASK_NAME);
+        await taskManagerStart.runNow(APM_TELEMETRY_TASK_NAME);
       }
     } catch (err) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {

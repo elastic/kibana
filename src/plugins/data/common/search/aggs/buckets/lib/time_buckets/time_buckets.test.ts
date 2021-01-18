@@ -69,12 +69,30 @@ describe('TimeBuckets', () => {
   test('setInterval/getInterval - intreval is a string', () => {
     const timeBuckets = new TimeBuckets(timeBucketConfig);
     timeBuckets.setInterval('20m');
+
     const interval = timeBuckets.getInterval();
 
     expect(interval.description).toEqual('20 minutes');
     expect(interval.esValue).toEqual(20);
     expect(interval.esUnit).toEqual('m');
     expect(interval.expression).toEqual('20m');
+  });
+
+  test('getInterval - should scale interval', () => {
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
+    const bounds = {
+      min: moment('2020-03-25'),
+      max: moment('2020-03-31'),
+    };
+    timeBuckets.setBounds(bounds);
+    timeBuckets.setInterval('1m');
+
+    const interval = timeBuckets.getInterval();
+
+    expect(interval.description).toEqual('day');
+    expect(interval.esValue).toEqual(1);
+    expect(interval.esUnit).toEqual('d');
+    expect(interval.expression).toEqual('1d');
   });
 
   test('setInterval/getInterval - intreval is a string and bounds is defined', () => {

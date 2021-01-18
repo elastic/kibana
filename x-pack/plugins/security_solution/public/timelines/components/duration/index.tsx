@@ -23,6 +23,7 @@ export const Duration = React.memo<{
 }>(({ contextId, eventId, fieldName, value }) => (
   <DefaultDraggable
     id={`duration-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+    // @ts-expect-error
     name={name}
     field={fieldName}
     tooltipContent={null}

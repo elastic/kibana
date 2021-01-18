@@ -11,6 +11,7 @@ import { get, getOr, isEmpty, find } from 'lodash/fp';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
+import type { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
 import { SendAlertToTimelineActionProps, UpdateAlertStatusActionProps } from './types';
@@ -77,7 +78,6 @@ export const updateAlertStatusAction = async ({
     setEventsLoading({ eventIds: alertIds, isLoading: true });
 
     const queryObject = query ? { query: JSON.parse(query) } : getUpdateAlertsQuery(alertIds);
-
     const response = await updateAlertStatus({ query: queryObject, status: selectedStatus });
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
@@ -116,6 +116,16 @@ export const determineToAndFrom = ({ ecsData }: { ecsData: Ecs }) => {
   return { to, from };
 };
 
+const getFiltersFromRule = (filters: string[]): Filter[] =>
+  filters.reduce((acc, filterString) => {
+    try {
+      const objFilter: Filter = JSON.parse(filterString);
+      return [...acc, objFilter];
+    } catch (e) {
+      return acc;
+    }
+  }, [] as Filter[]);
+
 export const getThresholdAggregationDataProvider = (
   ecsData: Ecs,
   nonEcsData: TimelineNonEcsData[]
@@ -150,8 +160,10 @@ export const getThresholdAggregationDataProvider = (
   ];
 };
 
-export const isEqlRule = (ecsData: Ecs) =>
-  ecsData.signal?.rule?.type?.length && ecsData.signal?.rule?.type[0] === 'eql';
+export const isEqlRuleWithGroupId = (ecsData: Ecs) =>
+  ecsData.signal?.rule?.type?.length &&
+  ecsData.signal?.rule?.type[0] === 'eql' &&
+  ecsData.signal?.group?.id?.length;
 
 export const isThresholdRule = (ecsData: Ecs) =>
   ecsData.signal?.rule?.type?.length && ecsData.signal?.rule?.type[0] === 'threshold';
@@ -181,24 +193,23 @@ export const sendAlertToTimelineAction = async ({
             timelineType: TimelineType.template,
           },
         }),
-        searchStrategyClient.search<
-          TimelineEventsDetailsRequestOptions,
-          TimelineEventsDetailsStrategyResponse
-        >(
-          {
-            defaultIndex: [],
-            docValueFields: [],
-            indexName: ecsData._index ?? '',
-            eventId: ecsData._id,
-            factoryQueryType: TimelineEventsQueries.details,
-          },
-          {
-            strategy: 'securitySolutionTimelineSearchStrategy',
-          }
-        ),
+        searchStrategyClient
+          .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
+            {
+              defaultIndex: [],
+              docValueFields: [],
+              indexName: ecsData._index ?? '',
+              eventId: ecsData._id,
+              factoryQueryType: TimelineEventsQueries.details,
+            },
+            {
+              strategy: 'securitySolutionTimelineSearchStrategy',
+            }
+          )
+          .toPromise(),
       ]);
       const resultingTimeline: TimelineResult = getOr({}, 'data.getOneTimeline', responseTimeline);
-      const eventData: TimelineEventsDetailsItem[] = getOr([], 'data', eventDataResp);
+      const eventData: TimelineEventsDetailsItem[] = eventDataResp.data ?? [];
       if (!isEmpty(resultingTimeline)) {
         const timelineTemplate: TimelineResult = omitTypenameInTimeline(resultingTimeline);
         const { timeline, notes } = formatTimelineResultToModel(
@@ -241,10 +252,6 @@ export const sendAlertToTimelineAction = async ({
                 },
                 serializedQuery: convertKueryToElasticSearchQuery(query),
               },
-              filterQueryDraft: {
-                kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
-                expression: query,
-              },
             },
             noteIds: notes?.map((n) => n.noteId) ?? [],
             show: true,
@@ -265,22 +272,9 @@ export const sendAlertToTimelineAction = async ({
       notes: null,
       timeline: {
         ...timelineDefaults,
-        dataProviders: [
-          {
-            and: [],
-            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${ecsData._id}`,
-            name: ecsData._id,
-            enabled: true,
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field: '_id',
-              value: ecsData._id,
-              operator: ':',
-            },
-          },
-          ...getThresholdAggregationDataProvider(ecsData, nonEcsData),
-        ],
+        description: `_id: ${ecsData._id}`,
+        filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
+        dataProviders: [...getThresholdAggregationDataProvider(ecsData, nonEcsData)],
         id: TimelineId.active,
         indexNames: [],
         dateRange: {
@@ -299,12 +293,6 @@ export const sendAlertToTimelineAction = async ({
             serializedQuery: ecsData.signal?.rule?.query?.length
               ? ecsData.signal?.rule?.query[0]
               : '',
-          },
-          filterQueryDraft: {
-            kind: ecsData.signal?.rule?.language?.length
-              ? (ecsData.signal?.rule?.language[0] as KueryFilterQueryKind)
-              : 'kuery',
-            expression: ecsData.signal?.rule?.query?.length ? ecsData.signal?.rule?.query[0] : '',
           },
         },
       },
@@ -327,7 +315,7 @@ export const sendAlertToTimelineAction = async ({
         },
       },
     ];
-    if (isEqlRule(ecsData)) {
+    if (isEqlRuleWithGroupId(ecsData)) {
       const signalGroupId = ecsData.signal?.group?.id?.length
         ? ecsData.signal?.group?.id[0]
         : 'unknown-signal-group-id';
@@ -364,10 +352,6 @@ export const sendAlertToTimelineAction = async ({
               expression: '',
             },
             serializedQuery: '',
-          },
-          filterQueryDraft: {
-            kind: 'kuery',
-            expression: '',
           },
         },
       },

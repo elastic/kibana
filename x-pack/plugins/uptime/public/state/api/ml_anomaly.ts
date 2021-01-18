@@ -13,6 +13,7 @@ import {
   JobExistResult,
   MlCapabilitiesResponse,
 } from '../../../../../plugins/ml/public';
+import { extractErrorMessage } from '../../../../../plugins/ml/common';
 import {
   CreateMLJobSuccess,
   DeleteJobResults,
@@ -41,6 +42,7 @@ export const createMLJob = async ({
     startDatafeed: true,
     start: moment().subtract(2, 'w').valueOf(),
     indexPatternName: heartbeatIndices,
+    applyToAllSpaces: true,
     query: {
       bool: {
         filter: [
@@ -61,7 +63,7 @@ export const createMLJob = async ({
       };
     } else {
       const { error } = jobResponse;
-      throw new Error(error?.msg);
+      throw new Error(extractErrorMessage(error));
     }
   } else {
     return null;

@@ -980,6 +980,7 @@ export const mockStatusAlertQuery: object = {
 
 export const mockSignalIndex: AlertsIndex = {
   name: 'mock-signal-index',
+  index_mapping_outdated: false,
 };
 
 export const mockUserPrivilege: Privilege = {
@@ -1014,6 +1015,7 @@ export const mockUserPrivilege: Privilege = {
   index: {
     '.siem-signals-default': {
       all: true,
+      maintenance: true,
       manage_ilm: true,
       read: true,
       create_index: true,

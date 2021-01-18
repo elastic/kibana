@@ -21,6 +21,7 @@ import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
+import { UI_SETTINGS } from '../../../../../../data/common';
 
 export function siblingBuckets(
   req,
@@ -28,11 +29,14 @@ export function siblingBuckets(
   series,
   esQueryConfig,
   indexPatternObject,
-  capabilities
+  capabilities,
+  uiSettings
 ) {
-  return (next) => (doc) => {
+  return (next) => async (doc) => {
+    const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
     const { interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
-    const { bucketSize } = getBucketSize(req, interval, capabilities);
+    const { bucketSize } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
+
     series.metrics
       .filter((row) => /_bucket$/.test(row.type))
       .forEach((metric) => {

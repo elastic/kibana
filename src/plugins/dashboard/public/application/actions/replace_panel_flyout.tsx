@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { NotificationsStart, Toast } from 'src/core/public';
@@ -29,7 +28,8 @@ import {
   IContainer,
   IEmbeddable,
   SavedObjectEmbeddableInput,
-} from '../../embeddable_plugin';
+} from '../../services/embeddable';
+import { dashboardReplacePanelAction } from '../../dashboard_strings';
 
 interface Props {
   container: IContainer;
@@ -57,12 +57,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     }
 
     this.lastToast = this.props.notifications.toasts.addSuccess({
-      title: i18n.translate('dashboard.addPanel.savedObjectAddedToContainerSuccessMessageTitle', {
-        defaultMessage: '{savedObjectName} was added',
-        values: {
-          savedObjectName: name,
-        },
-      }),
+      title: dashboardReplacePanelAction.getSuccessMessage(name),
       'data-test-subj': 'addObjectToContainerSuccess',
     });
   };
@@ -104,9 +99,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     const SavedObjectFinder = this.props.savedObjectsFinder;
     const savedObjectsFinder = (
       <SavedObjectFinder
-        noItemsMessage={i18n.translate('dashboard.addPanel.noMatchingObjectsMessage', {
-          defaultMessage: 'No matching objects found.',
-        })}
+        noItemsMessage={dashboardReplacePanelAction.getNoMatchingObjectsMessage()}
         savedObjectMetaData={[...this.props.getEmbeddableFactories()]
           .filter(
             (embeddableFactory) =>

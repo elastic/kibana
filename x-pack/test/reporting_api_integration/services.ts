@@ -5,8 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import * as Rx from 'rxjs';
-import { filter, first, mapTo, switchMap, timeout } from 'rxjs/operators';
 import { indexTimestamp } from '../../plugins/reporting/server/lib/store/index_timestamp';
 import { services as xpackServices } from '../functional/services';
 import { services as apiIntegrationServices } from '../api_integration/services';
@@ -47,6 +45,7 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
+  const retry = getService('retry');
 
   return {
     async waitForJobToFinish(downloadReportPath: string) {
@@ -139,21 +138,12 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
       log.debug('ReportingAPI.deleteAllReports');
 
       // ignores 409 errs and keeps retrying
-      const deleted$ = Rx.interval(100).pipe(
-        switchMap(() =>
-          esSupertest
-            .post('/.reporting*/_delete_by_query')
-            .send({ query: { match_all: {} } })
-            .then(({ status }) => status)
-        ),
-        filter((status) => status === 200),
-        mapTo(true),
-        first(),
-        timeout(5000)
-      );
-
-      const reportsDeleted = await deleted$.toPromise();
-      expect(reportsDeleted).to.be(true);
+      await retry.tryForTime(5000, async () => {
+        await esSupertest
+          .post('/.reporting*/_delete_by_query')
+          .send({ query: { match_all: {} } })
+          .expect(200);
+      });
     },
 
     expectRecentPdfAppStats(stats: UsageStats, app: string, count: number) {

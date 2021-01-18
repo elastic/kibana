@@ -17,15 +17,21 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpStart, SavedObjectsFindOptionsReference } from 'src/core/public';
 
-export async function getSavedObjectCounts(
-  http: HttpStart,
-  typesToInclude: string[],
-  searchString?: string
-): Promise<Record<string, number>> {
+export async function getSavedObjectCounts({
+  http,
+  searchString,
+  typesToInclude,
+  references,
+}: {
+  http: HttpStart;
+  typesToInclude: string[];
+  searchString?: string;
+  references?: SavedObjectsFindOptionsReference[];
+}): Promise<Record<string, number>> {
   return await http.post<Record<string, number>>(
     `/api/kibana/management/saved_objects/scroll/counts`,
-    { body: JSON.stringify({ typesToInclude, searchString }) }
+    { body: JSON.stringify({ typesToInclude, searchString, references }) }
   );
 }

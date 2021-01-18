@@ -35,10 +35,9 @@ export function prependDatasourceExpression(
   if (datasourceExpressions.length === 0 || visualizationExpression === null) {
     return null;
   }
-  const parsedDatasourceExpressions: Array<[
-    string,
-    Ast
-  ]> = datasourceExpressions.map(([layerId, expr]) => [
+  const parsedDatasourceExpressions: Array<
+    [string, Ast]
+  > = datasourceExpressions.map(([layerId, expr]) => [
     layerId,
     typeof expr === 'string' ? fromExpression(expr) : expr,
   ]);

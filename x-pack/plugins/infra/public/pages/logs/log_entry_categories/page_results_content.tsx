@@ -77,7 +77,6 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
         title: loadDataErrorTitle,
       });
     },
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [services.notifications]
   );
 
@@ -88,6 +87,8 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
     isLoadingTopLogEntryCategories,
     logEntryCategoryDatasets,
     topLogEntryCategories,
+    sortOptions,
+    changeSortOptions,
   } = useLogEntryCategoriesResults({
     categoriesCount: 25,
     endTime: categoryQueryTimeRange.timeRange.endTime,
@@ -146,7 +147,12 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
 
   useEffect(() => {
     getTopLogEntryCategories();
-  }, [getTopLogEntryCategories, categoryQueryDatasets, categoryQueryTimeRange.lastChangedTime]);
+  }, [
+    getTopLogEntryCategories,
+    categoryQueryDatasets,
+    categoryQueryTimeRange.lastChangedTime,
+    sortOptions,
+  ]);
 
   useEffect(() => {
     getLogEntryCategoryDatasets();
@@ -179,21 +185,19 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
       <ResultsContentPage>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiPanel paddingSize="m">
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                <EuiFlexItem />
-                <EuiFlexItem grow={false}>
-                  <EuiSuperDatePicker
-                    start={selectedTimeRange.startTime}
-                    end={selectedTimeRange.endTime}
-                    onTimeChange={handleSelectedTimeRangeChange}
-                    isPaused={autoRefresh.isPaused}
-                    refreshInterval={autoRefresh.interval}
-                    onRefreshChange={handleAutoRefreshChange}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem />
+              <EuiFlexItem grow={false}>
+                <EuiSuperDatePicker
+                  start={selectedTimeRange.startTime}
+                  end={selectedTimeRange.endTime}
+                  onTimeChange={handleSelectedTimeRangeChange}
+                  isPaused={autoRefresh.isPaused}
+                  refreshInterval={autoRefresh.interval}
+                  onRefreshChange={handleAutoRefreshChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <CategoryJobNoticesSection
@@ -222,6 +226,8 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
                 sourceId={sourceId}
                 timeRange={categoryQueryTimeRange.timeRange}
                 topCategories={topLogEntryCategories}
+                sortOptions={sortOptions}
+                changeSortOptions={changeSortOptions}
               />
             </EuiPanel>
           </EuiFlexItem>

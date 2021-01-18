@@ -103,7 +103,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('finds page title', async () => {
         const title = await testSubjects.getVisibleText('header-page-title');
-        expect(title).to.equal('Endpoints BETA');
+        expect(title).to.equal('Endpoints');
       });
 
       it('displays table data', async () => {
@@ -162,7 +162,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe.skip("has a url with an endpoint host's id", () => {
         before(async () => {
           await pageObjects.endpoint.navigateToEndpointList(
-            'selected_host=fc0ff548-feba-41b6-8367-65e8790d0eaf'
+            'selected_endpoint=3838df35-a095-4af4-8fce-0b6d78793f2e'
           );
         });
 

@@ -9,10 +9,13 @@ import {
   RUM_AGENT_NAMES,
 } from '../../../../common/agent_name';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import defaultIcon from '../span_icon/icons/default.svg';
 import dotNetIcon from './icons/dot-net.svg';
+import erlangIcon from './icons/erlang.svg';
 import goIcon from './icons/go.svg';
 import javaIcon from './icons/java.svg';
 import nodeJsIcon from './icons/nodejs.svg';
+import ocamlIcon from './icons/ocaml.svg';
 import openTelemetryIcon from './icons/opentelemetry.svg';
 import phpIcon from './icons/php.svg';
 import pythonIcon from './icons/python.svg';
@@ -21,9 +24,11 @@ import rumJsIcon from './icons/rumjs.svg';
 
 const agentIcons: { [key: string]: string } = {
   dotnet: dotNetIcon,
+  erlang: erlangIcon,
   go: goIcon,
   java: javaIcon,
   nodejs: nodeJsIcon,
+  ocaml: ocamlIcon,
   opentelemetry: openTelemetryIcon,
   php: phpIcon,
   python: pythonIcon,
@@ -60,5 +65,5 @@ export function getAgentIconKey(agentName: string) {
 
 export function getAgentIcon(agentName?: string) {
   const key = agentName && getAgentIconKey(agentName);
-  return key && agentIcons[key];
+  return (key && agentIcons[key]) ?? defaultIcon;
 }

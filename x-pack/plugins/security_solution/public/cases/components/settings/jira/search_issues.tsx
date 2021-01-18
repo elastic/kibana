@@ -80,7 +80,7 @@ const SearchIssuesComponent: React.FC<Props> = ({ selectedValue, actionConnector
       singleSelection
       fullWidth
       placeholder={inputPlaceholder}
-      data-test-sub={'search-parent-issues'}
+      data-test-subj={'search-parent-issues'}
       aria-label={i18n.SEARCH_ISSUES_COMBO_BOX_ARIA_LABEL}
       options={options}
       isLoading={isLoadingIssues || isLoadingSingleIssue}

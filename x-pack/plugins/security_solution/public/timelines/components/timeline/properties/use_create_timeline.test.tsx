@@ -63,6 +63,46 @@ describe('useCreateTimelineButton', () => {
     });
   });
 
+  test('getButton renders correct iconType - EuiButton', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(
+        () => useCreateTimelineButton({ timelineId: mockId, timelineType }),
+        { wrapper: wrapperContainer }
+      );
+      await waitForNextUpdate();
+
+      const button = result.current.getButton({
+        outline: true,
+        title: 'mock title',
+        iconType: 'pencil',
+      });
+      const wrapper = shallow(button);
+      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('iconType')).toEqual(
+        'pencil'
+      );
+    });
+  });
+
+  test('getButton renders correct filling - EuiButton', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(
+        () => useCreateTimelineButton({ timelineId: mockId, timelineType }),
+        { wrapper: wrapperContainer }
+      );
+      await waitForNextUpdate();
+
+      const button = result.current.getButton({
+        outline: true,
+        title: 'mock title',
+        fill: false,
+      });
+      const wrapper = shallow(button);
+      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('fill')).toEqual(
+        false
+      );
+    });
+  });
+
   test('getButton renders correct outline - EuiButtonEmpty', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(
@@ -105,6 +145,9 @@ describe('useCreateTimelineButton', () => {
           'x-pack/security_solution/local/inputs/ADD_TIMELINE_LINK_TO'
         );
         expect(mockDispatch.mock.calls[4][0].type).toEqual(
+          'x-pack/security_solution/local/app/ADD_NOTE'
+        );
+        expect(mockDispatch.mock.calls[5][0].type).toEqual(
           'x-pack/security_solution/local/inputs/SET_RELATIVE_RANGE_DATE_PICKER'
         );
       });

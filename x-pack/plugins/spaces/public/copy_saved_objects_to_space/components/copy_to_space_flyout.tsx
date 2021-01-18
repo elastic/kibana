@@ -27,7 +27,7 @@ import {
   processImportResponse,
   SavedObjectsManagementRecord,
 } from '../../../../../../src/plugins/saved_objects_management/public';
-import { Space } from '../../../common/model/space';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { SpacesManager } from '../../spaces_manager';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
@@ -42,7 +42,7 @@ interface Props {
 }
 
 const INCLUDE_RELATED_DEFAULT = true;
-const CREATE_NEW_COPIES_DEFAULT = false;
+const CREATE_NEW_COPIES_DEFAULT = true;
 const OVERWRITE_ALL_DEFAULT = true;
 
 export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
@@ -61,13 +61,16 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     }
   );
   useEffect(() => {
-    const getSpaces = spacesManager.getSpaces('copySavedObjectsIntoSpace');
+    const getSpaces = spacesManager.getSpaces({ includeAuthorizedPurposes: true });
     const getActiveSpace = spacesManager.getActiveSpace();
     Promise.all([getSpaces, getActiveSpace])
       .then(([allSpaces, activeSpace]) => {
         setSpacesState({
           isLoading: false,
-          spaces: allSpaces.filter((space) => space.id !== activeSpace.id),
+          spaces: allSpaces.filter(
+            ({ id, authorizedPurposes }) =>
+              id !== activeSpace.id && authorizedPurposes?.copySavedObjectsIntoSpace !== false
+          ),
         });
       })
       .catch((e) => {

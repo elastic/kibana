@@ -409,6 +409,17 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       );
     }
 
+    if (result.textTruncate === undefined) {
+      result.textTruncate = false;
+    } else if (typeof result.textTruncate !== 'boolean') {
+      throw new Error(
+        i18n.translate('visTypeVega.vegaParser.textTruncateConfigValueTypeErrorMessage', {
+          defaultMessage: '{configName} is expected to be a boolean',
+          values: { configName: 'textTruncate' },
+        })
+      );
+    }
+
     if (result.centerOnMark === undefined) {
       // if mark's width & height is less than this value, center on it
       result.centerOnMark = 50;

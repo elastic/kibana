@@ -24,7 +24,7 @@ import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../../test_utils/public';
+} from '@kbn/test/jest';
 
 // Data
 import series from '../../../fixtures/mock_data/date_histogram/_series';
@@ -62,7 +62,7 @@ dataTypesArray.forEach(function (dataType) {
   describe('Vislib Column Chart Test Suite for ' + name + ' Data', function () {
     let vis;
     let mockUiState;
-    const visLibParams = {
+    const vislibParams = {
       type: 'histogram',
       addLegend: true,
       addTooltip: true,
@@ -81,7 +81,7 @@ dataTypesArray.forEach(function (dataType) {
     });
 
     beforeEach(() => {
-      vis = getVis(visLibParams);
+      vis = getVis(vislibParams);
       mockUiState = getMockUiState();
       vis.on('brush', _.noop);
       vis.render(data, mockUiState);
@@ -261,7 +261,7 @@ dataTypesArray.forEach(function (dataType) {
 describe('stackData method - data set with zeros in percentage mode', function () {
   let vis;
   let mockUiState;
-  const visLibParams = {
+  const vislibParams = {
     type: 'histogram',
     addLegend: true,
     addTooltip: true,
@@ -276,7 +276,7 @@ describe('stackData method - data set with zeros in percentage mode', function (
   });
 
   beforeEach(() => {
-    vis = getVis(visLibParams);
+    vis = getVis(vislibParams);
     mockUiState = getMockUiState();
     vis.on('brush', _.noop);
   });
@@ -320,7 +320,7 @@ describe('stackData method - data set with zeros in percentage mode', function (
 describe('datumWidth - split chart data set with holes', function () {
   let vis;
   let mockUiState;
-  const visLibParams = {
+  const vislibParams = {
     type: 'histogram',
     addLegend: true,
     addTooltip: true,
@@ -335,7 +335,7 @@ describe('datumWidth - split chart data set with holes', function () {
   });
 
   beforeEach(() => {
-    vis = getVis(visLibParams);
+    vis = getVis(vislibParams);
     mockUiState = getMockUiState();
     vis.on('brush', _.noop);
     vis.render(rowsSeriesWithHoles, mockUiState);
@@ -366,7 +366,7 @@ describe('datumWidth - split chart data set with holes', function () {
 describe('datumWidth - monthly interval', function () {
   let vis;
   let mockUiState;
-  const visLibParams = {
+  const vislibParams = {
     type: 'histogram',
     addLegend: true,
     addTooltip: true,
@@ -384,7 +384,7 @@ describe('datumWidth - monthly interval', function () {
   });
 
   beforeEach(() => {
-    vis = getVis(visLibParams);
+    vis = getVis(vislibParams);
     mockUiState = getMockUiState();
     vis.on('brush', _.noop);
     vis.render(seriesMonthlyInterval, mockUiState);

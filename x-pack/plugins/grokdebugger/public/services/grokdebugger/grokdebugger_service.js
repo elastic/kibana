@@ -21,7 +21,7 @@ export class GrokdebuggerService {
         return GrokdebuggerResponse.fromUpstreamJSON(response);
       })
       .catch((e) => {
-        throw e.body.message;
+        throw new Error(e.body.message);
       });
   }
 }

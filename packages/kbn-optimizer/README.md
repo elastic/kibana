@@ -84,9 +84,9 @@ const config = OptimizerConfig.create({
   dist: true
 });
 
-await runOptimizer(config)
-  .pipe(logOptimizerState(log, config))
-  .toPromise();
+await lastValueFrom(
+  runOptimizer(config).pipe(logOptimizerState(log, config))
+);
 ```
 
 This is essentially what we're doing in [`script/build_kibana_platform_plugins`][Cli] and the new [build system task][BuildTask].

@@ -26,6 +26,7 @@ import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
 import { CalculationVars, newVariable } from './vars';
+import { METRIC_TYPES } from '../../../../common/metric_types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -43,7 +44,7 @@ const checkModel = (model) => Array.isArray(model.variables) && model.script !==
 
 export function CalculationAgg(props) {
   const htmlId = htmlIdGenerator();
-  const { siblings, model } = props;
+  const { siblings, model, indexPattern, fields } = props;
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
@@ -96,9 +97,12 @@ export function CalculationAgg(props) {
           <CalculationVars
             id={htmlId('variables')}
             metrics={siblings}
+            indexPattern={indexPattern}
+            fields={fields}
             onChange={handleChange}
             name="variables"
             model={model}
+            exclude={[METRIC_TYPES.TOP_HIT]}
           />
         </EuiFlexItem>
 
@@ -138,6 +142,7 @@ export function CalculationAgg(props) {
 CalculationAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
+  indexPattern: PropTypes.string,
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onChange: PropTypes.func,

@@ -27,6 +27,10 @@ import {
   DEFAULT_REFRESH_RATE_INTERVAL,
   DEFAULT_TIME_RANGE,
   DEFAULT_TO,
+  DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  DEFAULT_RULE_REFRESH_INTERVAL_ON,
+  DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
+  DEFAULT_RULE_REFRESH_IDLE_VALUE,
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
@@ -48,6 +52,11 @@ const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
   [DEFAULT_DATE_FORMAT]: 'MMM D, YYYY @ HH:mm:ss.SSS',
   [DEFAULT_DARK_MODE]: false,
+  [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
+    on: DEFAULT_RULE_REFRESH_INTERVAL_ON,
+    value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
+    idleTimeout: DEFAULT_RULE_REFRESH_IDLE_VALUE,
+  },
 };
 
 export const createUseUiSettingMock = () => (key: string, defaultValue?: unknown): unknown => {

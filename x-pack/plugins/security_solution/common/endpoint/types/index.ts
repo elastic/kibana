@@ -5,9 +5,10 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { NewPackagePolicy, PackagePolicy } from '../../../../ingest_manager/common';
+import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
+export * from './os';
 export * from './trusted_apps';
 
 /**
@@ -28,7 +29,6 @@ export interface PolicyDetailsRouteState {
  * Object that allows you to maintain stateful information in the location object across navigation events
  *
  */
-
 export interface AppLocation {
   pathname: string;
   search: string;
@@ -61,6 +61,9 @@ type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
+/**
+ * Stats for related events for a particular node in a resolver graph.
+ */
 export interface EventStats {
   /**
    * The total number of related events (all events except process and alerts) that exist for a node.
@@ -78,199 +81,70 @@ export interface EventStats {
 }
 
 /**
- * Statistical information for a node in a resolver tree.
+ * Represents the object structure of a returned document when using doc value fields to filter the fields
+ * returned in a document from an Elasticsearch query.
+ *
+ * Here is an example:
+ *
+ * {
+ *  "_index": ".ds-logs-endpoint.events.process-default-000001",
+ *  "_id": "bc7brnUBxO0aE7QcCVHo",
+ *  "_score": null,
+ *  "fields": { <----------- The FieldsObject represents this portion
+ *    "@timestamp": [
+ *      "2020-11-09T21:13:25.246Z"
+ *    ],
+ *    "process.name": "explorer.exe",
+ *    "process.parent.entity_id": [
+ *      "0i17c2m22c"
+ *    ],
+ *    "process.Ext.ancestry": [ <------------ Notice that the keys are flattened
+ *      "0i17c2m22c",
+ *      "2z9j8dlx72",
+ *      "oj61pr6g62",
+ *      "x0leonbrc9"
+ *    ],
+ *    "process.entity_id": [
+ *      "6k8waczi22"
+ *    ]
+ *  },
+ *  "sort": [
+ *    0,
+ *    1604956405246
+ *  ]
+ * }
  */
-export interface ResolverNodeStats {
-  /**
-   * The stats for related events (excludes alerts and process events) for a particular node in the resolver tree.
-   */
-  events: EventStats;
-  /**
-   * The total number of alerts that exist for a node.
-   */
-  totalAlerts: number;
+export interface FieldsObject {
+  [key: string]: ECSField<number | string>;
 }
 
 /**
- * A child node can also have additional children so we need to provide a pagination cursor.
+ * A node in a resolver graph.
  */
-export interface ResolverChildNode extends ResolverLifecycleNode {
-  /**
-   * nextChild can have 3 different states:
-   *
-   * undefined: This indicates that you should not use this node for additional queries. It does not mean that node does
-   * not have any more direct children. The node could have more direct children but to determine that, use the
-   * ResolverChildren node's nextChild.
-   *
-   * null: Indicates that we have received all the children of the node. There may be more descendants though.
-   *
-   * string: Indicates this is a leaf node and it can be used to continue querying for additional descendants
-   * using this node's entity_id
-   *
-   * For more information see the resolver docs on pagination [here](../../server/endpoint/routes/resolver/docs/README.md#L129)
-   */
-  nextChild?: string | null;
+export interface ResolverNode {
+  data: FieldsObject;
+  id: string | number;
+  // the very root node might not have the parent field defined
+  parent?: string | number;
+  name?: string;
+  stats: EventStats;
 }
 
 /**
- * Safe version of `ResolverChildNode`.
+ * The structure for a resolver graph that is generic and data type agnostic. The nodes in the graph do not conform
+ * to a specific document type. The format of the nodes is defined by the schema used to query for the graph.
  */
-export interface SafeResolverChildNode extends SafeResolverLifecycleNode {
-  /**
-   * nextChild can have 3 different states:
-   *
-   * undefined: This indicates that you should not use this node for additional queries. It does not mean that node does
-   * not have any more direct children. The node could have more direct children but to determine that, use the
-   * ResolverChildren node's nextChild.
-   *
-   * null: Indicates that we have received all the children of the node. There may be more descendants though.
-   *
-   * string: Indicates this is a leaf node and it can be used to continue querying for additional descendants
-   * using this node's entity_id
-   *
-   * For more information see the resolver docs on pagination [here](../../server/endpoint/routes/resolver/docs/README.md#L129)
-   */
-  nextChild?: string | null;
-}
-
-/**
- * The response structure for the children route. The structure is an array of nodes where each node
- * has an array of lifecycle events.
- */
-export interface ResolverChildren {
-  childNodes: ResolverChildNode[];
-  /**
-   * nextChild can have 2 different states:
-   *
-   * null: Indicates that we have received all the descendants that can be retrieved using this node. To retrieve more
-   * nodes in the tree use a cursor provided in one of the returned children. If no other cursor exists then the tree
-   * is complete.
-   *
-   * string: Indicates this node has more descendants that can be retrieved, pass this cursor in while using this node's
-   * entity_id for the request.
-   */
-  nextChild: string | null;
-}
-
-/**
- * Safe version of `ResolverChildren`.
- */
-export interface SafeResolverChildren {
-  childNodes: SafeResolverChildNode[];
-  /**
-   * nextChild can have 2 different states:
-   *
-   * null: Indicates that we have received all the descendants that can be retrieved using this node. To retrieve more
-   * nodes in the tree use a cursor provided in one of the returned children. If no other cursor exists then the tree
-   * is complete.
-   *
-   * string: Indicates this node has more descendants that can be retrieved, pass this cursor in while using this node's
-   * entity_id for the request.
-   */
-  nextChild: string | null;
-}
-
-/**
- * A flattened tree representing the nodes in a resolver graph.
- */
-export interface ResolverTree {
-  /**
-   * Origin of the tree. This is in the middle of the tree. Typically this would be the same
-   * process node that generated an alert.
-   */
-  entityID: string;
-  children: ResolverChildren;
-  relatedEvents: Omit<ResolverRelatedEvents, 'entityID'>;
-  relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
-  ancestry: ResolverAncestry;
-  lifecycle: SafeResolverEvent[];
-  stats: ResolverNodeStats;
-}
-
-/**
- * Safe version of `ResolverTree`.
- */
-export interface SafeResolverTree {
-  /**
-   * Origin of the tree. This is in the middle of the tree. Typically this would be the same
-   * process node that generated an alert.
-   */
-  entityID: string;
-  children: SafeResolverChildren;
-  relatedEvents: Omit<SafeResolverRelatedEvents, 'entityID'>;
-  relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
-  ancestry: SafeResolverAncestry;
-  lifecycle: SafeResolverEvent[];
-  stats: ResolverNodeStats;
-}
-
-/**
- * The lifecycle events (start, end etc) for a node.
- */
-export interface ResolverLifecycleNode {
-  entityID: string;
-  lifecycle: SafeResolverEvent[];
-  /**
-   * stats are only set when the entire tree is being fetched
-   */
-  stats?: ResolverNodeStats;
-}
-
-/**
- * Safe version of `ResolverLifecycleNode`.
- */
-export interface SafeResolverLifecycleNode {
-  entityID: string;
-  lifecycle: SafeResolverEvent[];
-  /**
-   * stats are only set when the entire tree is being fetched
-   */
-  stats?: ResolverNodeStats;
-}
-
-/**
- * The response structure when searching for ancestors of a node.
- */
-export interface ResolverAncestry {
-  /**
-   * An array of ancestors with the lifecycle events grouped together
-   */
-  ancestors: ResolverLifecycleNode[];
-  /**
-   * A cursor for retrieving additional ancestors for a particular node. `null` indicates that there were no additional
-   * ancestors when the request returned. More could have been ingested by ES after the fact though.
-   */
-  nextAncestor: string | null;
-}
-
-/**
- * Safe version of `ResolverAncestry`.
- */
-export interface SafeResolverAncestry {
-  /**
-   * An array of ancestors with the lifecycle events grouped together
-   */
-  ancestors: SafeResolverLifecycleNode[];
-  /**
-   * A cursor for retrieving additional ancestors for a particular node. `null` indicates that there were no additional
-   * ancestors when the request returned. More could have been ingested by ES after the fact though.
-   */
-  nextAncestor: string | null;
+export interface NewResolverTree {
+  originID: string;
+  nodes: ResolverNode[];
 }
 
 /**
  * Response structure for the related events route.
+ *
+ * @deprecated use {@link ResolverNode} instead
  */
 export interface ResolverRelatedEvents {
-  entityID: string;
-  events: SafeResolverEvent[];
-  nextEvent: string | null;
-}
-
-/**
- * Safe version of `ResolverRelatedEvents`
- */
-export interface SafeResolverRelatedEvents {
   entityID: string;
   events: SafeResolverEvent[];
   nextEvent: string | null;
@@ -283,15 +157,6 @@ export interface SafeResolverRelatedEvents {
 export interface ResolverPaginatedEvents {
   events: SafeResolverEvent[];
   nextEvent: string | null;
-}
-
-/**
- * Response structure for the alerts route.
- */
-export interface ResolverRelatedAlerts {
-  entityID: string;
-  alerts: SafeResolverEvent[];
-  nextAlert: string | null;
 }
 
 /**
@@ -308,6 +173,17 @@ export interface HostResultList {
   request_page_index: number;
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
+  /* policy IDs and versions */
+  policy_info?: HostInfo['policy_info'];
+}
+
+/**
+ * The data_stream fields in an elasticsearch document.
+ */
+export interface DataStream {
+  dataset: string;
+  namespace: string;
+  type: string;
 }
 
 /**
@@ -401,6 +277,7 @@ type DllFields = Partial<{
 export type AlertEvent = Partial<{
   event: Partial<{
     action: ECSField<string>;
+    code: ECSField<string>;
     dataset: ECSField<string>;
     module: ECSField<string>;
   }>;
@@ -520,9 +397,30 @@ export enum MetadataQueryStrategyVersions {
   VERSION_2 = 'v2',
 }
 
+export type PolicyInfo = Immutable<{
+  revision: number;
+  id: string;
+}>;
+
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
   host_status: HostStatus;
+  policy_info?: {
+    agent: {
+      /**
+       * As set in Kibana
+       */
+      configured: PolicyInfo;
+      /**
+       * Last reported running in agent (may lag behind configured)
+       */
+      applied: PolicyInfo;
+    };
+    /**
+     * Current intended 'endpoint' package policy
+     */
+    endpoint: PolicyInfo;
+  };
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
 }>;
@@ -558,6 +456,8 @@ export type HostMetadata = Immutable<{
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
+        endpoint_policy_version: number;
+        version: number;
       };
     };
   };
@@ -566,6 +466,7 @@ export type HostMetadata = Immutable<{
     version: string;
   };
   host: Host;
+  data_stream: DataStream;
 }>;
 
 export interface LegacyEndpointEvent {
@@ -673,7 +574,17 @@ export type ECSField<T> = T | null | undefined | Array<T | null>;
  * A more conservative version of `ResolverEvent` that treats fields as optional and use `ECSField` to type all ECS fields.
  * Prefer this over `ResolverEvent`.
  */
-export type SafeResolverEvent = SafeEndpointEvent | SafeLegacyEndpointEvent;
+export type SafeResolverEvent = SafeEndpointEvent | SafeLegacyEndpointEvent | WinlogEvent;
+
+/**
+ * A type for describing a winlog event until we can leverage runtime fields.
+ */
+export type WinlogEvent = Partial<{
+  winlog: Partial<{
+    record_id: ECSField<string>;
+  }>;
+}> &
+  SafeEndpointEvent;
 
 /**
  * Safer version of ResolverEvent. Please use this going forward.
@@ -684,6 +595,11 @@ export type SafeEndpointEvent = Partial<{
     id: ECSField<string>;
     version: ECSField<string>;
     type: ECSField<string>;
+  }>;
+  data_stream: Partial<{
+    type: ECSField<string>;
+    dataset: ECSField<string>;
+    namespace: ECSField<string>;
   }>;
   ecs: Partial<{
     version: ECSField<string>;
@@ -790,9 +706,46 @@ export interface SafeLegacyEndpointEvent {
 }
 
 /**
+ * The fields to use to identify nodes within a resolver tree.
+ */
+export interface ResolverSchema {
+  /**
+   * the ancestry field should be set to a field that contains an order array representing
+   * the ancestors of a node.
+   */
+  ancestry?: string;
+  /**
+   * id represents the field to use as the unique ID for a node.
+   */
+  id: string;
+  /**
+   * field to use for the name of the node
+   */
+  name?: string;
+  /**
+   * parent represents the field that is the edge between two nodes.
+   */
+  parent: string;
+}
+
+/**
  * The response body for the resolver '/entity' index API
  */
-export type ResolverEntityIndex = Array<{ entity_id: string }>;
+export type ResolverEntityIndex = Array<{
+  /**
+   * A name for the schema that is being used (e.g. endpoint, winlogbeat, etc)
+   */
+  name: string;
+  /**
+   * The schema to pass to the /tree api and other backend requests, based on the contents of the document found using
+   * the _id
+   */
+  schema: ResolverSchema;
+  /**
+   * Unique ID value for the requested document using the `_id` field passed to the /entity route
+   */
+  id: string;
+}>;
 
 /**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
@@ -810,9 +763,7 @@ export type ResolverEntityIndex = Array<{ entity_id: string }>;
  * `Type` types, we process the result of `TypeOf` instead, as this will be consistent.
  */
 export type KbnConfigSchemaInputTypeOf<T> = T extends Record<string, unknown>
-  ? KbnConfigSchemaInputObjectTypeOf<
-      T
-    > /** `schema.number()` accepts strings, so this type should accept them as well. */
+  ? KbnConfigSchemaInputObjectTypeOf<T> /** `schema.number()` accepts strings, so this type should accept them as well. */
   : number extends T
   ? T | string
   : T;
@@ -855,6 +806,7 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  */
 export interface PolicyConfig {
   windows: {
+    advanced?: {};
     events: {
       dll_and_driver_load: boolean;
       dns: boolean;
@@ -868,19 +820,36 @@ export interface PolicyConfig {
     logging: {
       file: string;
     };
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
+    antivirus_registration: {
+      enabled: boolean;
+    };
   };
   mac: {
+    advanced?: {};
     events: {
       file: boolean;
       process: boolean;
       network: boolean;
     };
     malware: MalwareFields;
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
     logging: {
       file: string;
     };
   };
   linux: {
+    advanced?: {};
     events: {
       file: boolean;
       process: boolean;
@@ -899,15 +868,18 @@ export interface UIPolicyConfig {
   /**
    * Windows-specific policy configuration that is supported via the UI
    */
-  windows: Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+  windows: Pick<
+    PolicyConfig['windows'],
+    'events' | 'malware' | 'popup' | 'antivirus_registration' | 'advanced'
+  >;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup' | 'advanced'>;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'events'>;
+  linux: Pick<PolicyConfig['linux'], 'events' | 'advanced'>;
 }
 
 /** Policy: Malware protection fields */
@@ -1012,6 +984,7 @@ interface HostPolicyResponseAppliedArtifact {
  */
 export interface HostPolicyResponse {
   '@timestamp': number;
+  data_stream: DataStream;
   elastic: {
     agent: {
       id: string;
@@ -1040,7 +1013,8 @@ export interface HostPolicyResponse {
   Endpoint: {
     policy: {
       applied: {
-        version: string;
+        version: number;
+        endpoint_policy_version: number;
         id: string;
         name: string;
         status: HostPolicyResponseActionStatus;
@@ -1073,4 +1047,15 @@ export interface HostPolicyResponse {
  */
 export interface GetHostPolicyResponse {
   policy_response: HostPolicyResponse;
+}
+
+/**
+ * REST API response for retrieving agent summary
+ */
+export interface GetAgentSummaryResponse {
+  summary_response: {
+    package: string;
+    policy_id?: string;
+    versions_count: { [key: string]: number };
+  };
 }

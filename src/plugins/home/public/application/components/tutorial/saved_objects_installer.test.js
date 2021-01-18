@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 
 import { SavedObjectsInstaller } from './saved_objects_installer';
 

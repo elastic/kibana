@@ -62,7 +62,7 @@ describe('Discover url generator', () => {
     const url = await generator.createUrl({ savedSearchId });
     const { _a, _g } = getStatesFromKbnUrl(url, ['_a', '_g']);
 
-    expect(url.startsWith(`${appBasePath}#/${savedSearchId}`)).toBe(true);
+    expect(url.startsWith(`${appBasePath}#/view/${savedSearchId}`)).toBe(true);
     expect(_a).toEqual({});
     expect(_g).toEqual({});
   });
@@ -210,6 +210,28 @@ describe('Discover url generator', () => {
         to: 'now',
       },
     });
+  });
+
+  test('can specify a search session id', async () => {
+    const { generator } = await setup();
+    const url = await generator.createUrl({
+      searchSessionId: '__test__',
+    });
+    expect(url).toMatchInlineSnapshot(`"xyz/app/discover#/?_g=()&_a=()&searchSessionId=__test__"`);
+    expect(url).toContain('__test__');
+  });
+
+  test('can specify columns, interval, sort and savedQuery', async () => {
+    const { generator } = await setup();
+    const url = await generator.createUrl({
+      columns: ['_source'],
+      interval: 'auto',
+      sort: [['timestamp, asc']],
+      savedQuery: '__savedQueryId__',
+    });
+    expect(url).toMatchInlineSnapshot(
+      `"xyz/app/discover#/?_g=()&_a=(columns:!(_source),interval:auto,savedQuery:__savedQueryId__,sort:!(!('timestamp,%20asc')))"`
+    );
   });
 
   describe('useHash property', () => {

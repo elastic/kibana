@@ -17,10 +17,10 @@ import {
 import * as i18n from './translations';
 import { DocValueFields } from '../../../../../common/search_strategy';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 const ID = 'firstLastSeenHostQuery';
 
@@ -44,9 +44,10 @@ export const useFirstLastSeenHost = ({
   const { data, notifications } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [firstLastSeenHostRequest, setFirstLastSeenHostRequest] = useState<
-    HostFirstLastSeenRequestOptions
-  >({
+  const [
+    firstLastSeenHostRequest,
+    setFirstLastSeenHostRequest,
+  ] = useState<HostFirstLastSeenRequestOptions>({
     defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
     factoryQueryType: HostsQueries.firstLastSeen,

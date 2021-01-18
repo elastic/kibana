@@ -20,17 +20,21 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggTopHit';
+export const aggTopHitFnName = 'aggTopHit';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.TOP_HITS>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggTopHitFnName,
+  Input,
+  AggArgs,
+  Output
+>;
 
 export const aggTopHit = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggTopHitFnName,
   help: i18n.translate('data.search.aggs.function.metrics.top_hit.help', {
     defaultMessage: 'Generates a serialized agg config for a Top Hit agg',
   }),
@@ -114,7 +118,6 @@ export const aggTopHit = (): FunctionDefinition => ({
         type: METRIC_TYPES.TOP_HITS,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

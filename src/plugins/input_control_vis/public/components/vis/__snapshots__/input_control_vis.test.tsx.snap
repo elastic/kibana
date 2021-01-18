@@ -2,355 +2,371 @@
 
 exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 <div
-  className="icvContainer"
+  className="icvContainer__wrapper"
 >
-  <EuiFlexGroup
-    wrap={true}
+  <div
+    className="icvContainer"
   >
-    <EuiFlexItem
-      data-test-subj="inputControlItem"
-      key="mock-list-control"
-      style={
-        Object {
-          "minWidth": "250px",
+    <EuiFlexGroup
+      wrap={true}
+    >
+      <EuiFlexItem
+        data-test-subj="inputControlItem"
+        key="mock-list-control"
+        style={
+          Object {
+            "minWidth": "250px",
+          }
         }
-      }
-    >
-      <InjectIntl(ListControlUi)
-        controlIndex={0}
-        fetchOptions={[Function]}
-        formatOptionLabel={[Function]}
-        id="mock-list-control"
-        label="list control"
-        multiselect={true}
-        options={
-          Array [
-            "choice1",
-            "choice2",
-          ]
-        }
-        selectedOptions={Array []}
-        stageFilter={[Function]}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    wrap={true}
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiButton
-        data-test-subj="inputControlSubmitBtn"
-        disabled={false}
-        fill={true}
-        onClick={[Function]}
       >
-        <FormattedMessage
-          defaultMessage="Apply changes"
-          id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
-          values={Object {}}
+        <InjectIntl(ListControlUi)
+          controlIndex={0}
+          fetchOptions={[Function]}
+          formatOptionLabel={[Function]}
+          id="mock-list-control"
+          label="list control"
+          multiselect={true}
+          options={
+            Array [
+              "choice1",
+              "choice2",
+            ]
+          }
+          selectedOptions={Array []}
+          stageFilter={[Function]}
         />
-      </EuiButton>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiFlexGroup
+      wrap={true}
     >
-      <EuiButtonEmpty
-        data-test-subj="inputControlCancelBtn"
-        disabled={false}
-        onClick={[Function]}
+      <EuiFlexItem
+        grow={false}
       >
-        <FormattedMessage
-          defaultMessage="Cancel changes"
-          id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
-          values={Object {}}
-        />
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiButtonEmpty
-        data-test-subj="inputControlClearBtn"
-        disabled={true}
-        onClick={[Function]}
+        <EuiButton
+          data-test-subj="inputControlSubmitBtn"
+          disabled={false}
+          fill={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Apply changes"
+            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
       >
-        <FormattedMessage
-          defaultMessage="Clear form"
-          id="inputControl.vis.inputControlVis.clearFormButtonLabel"
-          values={Object {}}
-        />
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+        <EuiButtonEmpty
+          data-test-subj="inputControlCancelBtn"
+          disabled={false}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel changes"
+            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          data-test-subj="inputControlClearBtn"
+          disabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Clear form"
+            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
 </div>
 `;
 
 exports[`Clear btns enabled when there are values 1`] = `
 <div
-  className="icvContainer"
+  className="icvContainer__wrapper"
 >
-  <EuiFlexGroup
-    wrap={true}
+  <div
+    className="icvContainer"
   >
-    <EuiFlexItem
-      data-test-subj="inputControlItem"
-      key="mock-list-control"
-      style={
-        Object {
-          "minWidth": "250px",
+    <EuiFlexGroup
+      wrap={true}
+    >
+      <EuiFlexItem
+        data-test-subj="inputControlItem"
+        key="mock-list-control"
+        style={
+          Object {
+            "minWidth": "250px",
+          }
         }
-      }
-    >
-      <InjectIntl(ListControlUi)
-        controlIndex={0}
-        fetchOptions={[Function]}
-        formatOptionLabel={[Function]}
-        id="mock-list-control"
-        label="list control"
-        multiselect={true}
-        options={
-          Array [
-            "choice1",
-            "choice2",
-          ]
-        }
-        selectedOptions={Array []}
-        stageFilter={[Function]}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    wrap={true}
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiButton
-        data-test-subj="inputControlSubmitBtn"
-        disabled={true}
-        fill={true}
-        onClick={[Function]}
       >
-        <FormattedMessage
-          defaultMessage="Apply changes"
-          id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
-          values={Object {}}
+        <InjectIntl(ListControlUi)
+          controlIndex={0}
+          fetchOptions={[Function]}
+          formatOptionLabel={[Function]}
+          id="mock-list-control"
+          label="list control"
+          multiselect={true}
+          options={
+            Array [
+              "choice1",
+              "choice2",
+            ]
+          }
+          selectedOptions={Array []}
+          stageFilter={[Function]}
         />
-      </EuiButton>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiFlexGroup
+      wrap={true}
     >
-      <EuiButtonEmpty
-        data-test-subj="inputControlCancelBtn"
-        disabled={true}
-        onClick={[Function]}
+      <EuiFlexItem
+        grow={false}
       >
-        <FormattedMessage
-          defaultMessage="Cancel changes"
-          id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
-          values={Object {}}
-        />
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiButtonEmpty
-        data-test-subj="inputControlClearBtn"
-        disabled={false}
-        onClick={[Function]}
+        <EuiButton
+          data-test-subj="inputControlSubmitBtn"
+          disabled={true}
+          fill={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Apply changes"
+            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
       >
-        <FormattedMessage
-          defaultMessage="Clear form"
-          id="inputControl.vis.inputControlVis.clearFormButtonLabel"
-          values={Object {}}
-        />
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+        <EuiButtonEmpty
+          data-test-subj="inputControlCancelBtn"
+          disabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel changes"
+            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          data-test-subj="inputControlClearBtn"
+          disabled={false}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Clear form"
+            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
 </div>
 `;
 
 exports[`Renders list control 1`] = `
 <div
-  className="icvContainer"
+  className="icvContainer__wrapper"
 >
-  <EuiFlexGroup
-    wrap={true}
+  <div
+    className="icvContainer"
   >
-    <EuiFlexItem
-      data-test-subj="inputControlItem"
-      key="mock-list-control"
-      style={
-        Object {
-          "minWidth": "250px",
+    <EuiFlexGroup
+      wrap={true}
+    >
+      <EuiFlexItem
+        data-test-subj="inputControlItem"
+        key="mock-list-control"
+        style={
+          Object {
+            "minWidth": "250px",
+          }
         }
-      }
-    >
-      <InjectIntl(ListControlUi)
-        controlIndex={0}
-        fetchOptions={[Function]}
-        formatOptionLabel={[Function]}
-        id="mock-list-control"
-        label="list control"
-        multiselect={true}
-        options={
-          Array [
-            "choice1",
-            "choice2",
-          ]
-        }
-        selectedOptions={Array []}
-        stageFilter={[Function]}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    wrap={true}
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiButton
-        data-test-subj="inputControlSubmitBtn"
-        disabled={true}
-        fill={true}
-        onClick={[Function]}
       >
-        <FormattedMessage
-          defaultMessage="Apply changes"
-          id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
-          values={Object {}}
+        <InjectIntl(ListControlUi)
+          controlIndex={0}
+          fetchOptions={[Function]}
+          formatOptionLabel={[Function]}
+          id="mock-list-control"
+          label="list control"
+          multiselect={true}
+          options={
+            Array [
+              "choice1",
+              "choice2",
+            ]
+          }
+          selectedOptions={Array []}
+          stageFilter={[Function]}
         />
-      </EuiButton>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiFlexGroup
+      wrap={true}
     >
-      <EuiButtonEmpty
-        data-test-subj="inputControlCancelBtn"
-        disabled={true}
-        onClick={[Function]}
+      <EuiFlexItem
+        grow={false}
       >
-        <FormattedMessage
-          defaultMessage="Cancel changes"
-          id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
-          values={Object {}}
-        />
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiButtonEmpty
-        data-test-subj="inputControlClearBtn"
-        disabled={true}
-        onClick={[Function]}
+        <EuiButton
+          data-test-subj="inputControlSubmitBtn"
+          disabled={true}
+          fill={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Apply changes"
+            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
       >
-        <FormattedMessage
-          defaultMessage="Clear form"
-          id="inputControl.vis.inputControlVis.clearFormButtonLabel"
-          values={Object {}}
-        />
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+        <EuiButtonEmpty
+          data-test-subj="inputControlCancelBtn"
+          disabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel changes"
+            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          data-test-subj="inputControlClearBtn"
+          disabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Clear form"
+            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
 </div>
 `;
 
 exports[`Renders range control 1`] = `
 <div
-  className="icvContainer"
+  className="icvContainer__wrapper"
 >
-  <EuiFlexGroup
-    wrap={true}
+  <div
+    className="icvContainer"
   >
-    <EuiFlexItem
-      data-test-subj="inputControlItem"
-      key="mock-range-control"
-      style={
-        Object {
-          "minWidth": "250px",
-        }
-      }
+    <EuiFlexGroup
+      wrap={true}
     >
-      <RangeControl
-        control={
+      <EuiFlexItem
+        data-test-subj="inputControlItem"
+        key="mock-range-control"
+        style={
           Object {
-            "format": [Function],
-            "id": "mock-range-control",
-            "isEnabled": [Function],
-            "label": "range control",
-            "max": 100,
-            "min": 0,
-            "options": Object {
-              "decimalPlaces": 0,
-              "step": 1,
-            },
-            "type": "range",
-            "value": Object {
-              "max": 0,
-              "min": 0,
-            },
+            "minWidth": "250px",
           }
         }
-        controlIndex={0}
-        stageFilter={[Function]}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    wrap={true}
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiButton
-        data-test-subj="inputControlSubmitBtn"
-        disabled={true}
-        fill={true}
-        onClick={[Function]}
       >
-        <FormattedMessage
-          defaultMessage="Apply changes"
-          id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
-          values={Object {}}
+        <RangeControl
+          control={
+            Object {
+              "format": [Function],
+              "id": "mock-range-control",
+              "isEnabled": [Function],
+              "label": "range control",
+              "max": 100,
+              "min": 0,
+              "options": Object {
+                "decimalPlaces": 0,
+                "step": 1,
+              },
+              "type": "range",
+              "value": Object {
+                "max": 0,
+                "min": 0,
+              },
+            }
+          }
+          controlIndex={0}
+          stageFilter={[Function]}
         />
-      </EuiButton>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiFlexGroup
+      wrap={true}
     >
-      <EuiButtonEmpty
-        data-test-subj="inputControlCancelBtn"
-        disabled={true}
-        onClick={[Function]}
+      <EuiFlexItem
+        grow={false}
       >
-        <FormattedMessage
-          defaultMessage="Cancel changes"
-          id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
-          values={Object {}}
-        />
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiButtonEmpty
-        data-test-subj="inputControlClearBtn"
-        disabled={true}
-        onClick={[Function]}
+        <EuiButton
+          data-test-subj="inputControlSubmitBtn"
+          disabled={true}
+          fill={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Apply changes"
+            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
       >
-        <FormattedMessage
-          defaultMessage="Clear form"
-          id="inputControl.vis.inputControlVis.clearFormButtonLabel"
-          values={Object {}}
-        />
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+        <EuiButtonEmpty
+          data-test-subj="inputControlCancelBtn"
+          disabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel changes"
+            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          data-test-subj="inputControlClearBtn"
+          disabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Clear form"
+            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
 </div>
 `;

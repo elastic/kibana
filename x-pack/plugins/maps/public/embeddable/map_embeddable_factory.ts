@@ -4,23 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IIndexPattern } from 'src/plugins/data/public';
 import {
   EmbeddableFactoryDefinition,
   IContainer,
 } from '../../../../../src/plugins/embeddable/public';
 import '../index.scss';
-import {
-  getExistingMapPath,
-  MAP_SAVED_OBJECT_TYPE,
-  APP_ICON,
-  APP_ID,
-  MAP_PATH,
-} from '../../common/constants';
-import { LayerDescriptor } from '../../common/descriptor_types';
-import { MapEmbeddableInput } from './types';
+import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
+import { getMapEmbeddableDisplayName } from '../../common/i18n_getters';
+import { MapByReferenceInput, MapEmbeddableInput } from './types';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -44,42 +36,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   }
 
   getDisplayName() {
-    return i18n.translate('xpack.maps.embeddableDisplayName', {
-      defaultMessage: 'map',
-    });
-  }
-
-  async _getIndexPatterns(layerList: LayerDescriptor[]): Promise<IIndexPattern[]> {
-    // Need to extract layerList from store to get queryable index pattern ids
-    const {
-      addLayerWithoutDataSync,
-      createMapStore,
-      getIndexPatternsFromIds,
-      getQueryableUniqueIndexPatternIds,
-    } = await lazyLoadMapModules();
-    const store = createMapStore();
-    let queryableIndexPatternIds: string[];
-    try {
-      layerList.forEach((layerDescriptor: LayerDescriptor) => {
-        store.dispatch(addLayerWithoutDataSync(layerDescriptor));
-      });
-      queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
-    } catch (error) {
-      throw new Error(
-        i18n.translate('xpack.maps.mapEmbeddableFactory.invalidLayerList', {
-          defaultMessage: 'Unable to load map, malformed layer list',
-        })
-      );
-    }
-
-    const indexPatterns = await getIndexPatternsFromIds(queryableIndexPatternIds);
-    return _.compact(indexPatterns) as IIndexPattern[];
-  }
-
-  async _fetchSavedMap(savedObjectId: string) {
-    const { getMapsSavedObjectLoader } = await lazyLoadMapModules();
-    const savedObjectLoader = getMapsSavedObjectLoader();
-    return await savedObjectLoader.get(savedObjectId);
+    return getMapEmbeddableDisplayName();
   }
 
   createFromSavedObject = async (
@@ -87,64 +44,17 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     input: MapEmbeddableInput,
     parent?: IContainer
   ) => {
-    const {
-      getInitialLayers,
-      getHttp,
-      MapEmbeddable,
-      mergeInputWithSavedMap,
-    } = await lazyLoadMapModules();
-    const savedMap = await this._fetchSavedMap(savedObjectId);
-    const layerList = getInitialLayers(savedMap.layerListJSON);
-    const indexPatterns = await this._getIndexPatterns(layerList);
-
-    let settings;
-    if (savedMap.mapStateJSON) {
-      const mapState = JSON.parse(savedMap.mapStateJSON);
-      if (mapState.settings) {
-        settings = mapState.settings;
-      }
+    if (!(input as MapByReferenceInput).savedObjectId) {
+      (input as MapByReferenceInput).savedObjectId = savedObjectId;
     }
-
-    const embeddable = new MapEmbeddable(
-      {
-        layerList,
-        title: savedMap.title,
-        description: savedMap.description,
-        editUrl: getHttp().basePath.prepend(getExistingMapPath(savedObjectId)),
-        editApp: APP_ID,
-        editPath: `/${MAP_PATH}/${savedObjectId}`,
-        indexPatterns,
-        editable: await this.isEditable(),
-        settings,
-      },
-      input,
-      parent
-    );
-
-    try {
-      embeddable.updateInput(mergeInputWithSavedMap(input, savedMap));
-    } catch (error) {
-      throw new Error(
-        i18n.translate('xpack.maps.mapEmbeddableFactory.invalidSavedObject', {
-          defaultMessage: 'Unable to load map, malformed saved object',
-        })
-      );
-    }
-
-    return embeddable;
+    return this.create(input, parent);
   };
 
   create = async (input: MapEmbeddableInput, parent?: IContainer) => {
-    const { getInitialLayers, MapEmbeddable } = await lazyLoadMapModules();
-    const layerList = getInitialLayers();
-    const indexPatterns = await this._getIndexPatterns(layerList);
-
+    const { MapEmbeddable } = await lazyLoadMapModules();
     return new MapEmbeddable(
       {
-        layerList,
-        title: input.title ?? '',
-        indexPatterns,
-        editable: false,
+        editable: await this.isEditable(),
       },
       input,
       parent

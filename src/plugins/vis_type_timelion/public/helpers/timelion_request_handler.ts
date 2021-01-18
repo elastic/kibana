@@ -18,11 +18,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
-import { TimeRange, Filter, esQuery, Query } from '../../../data/public';
+import { KibanaContext, TimeRange, Filter, esQuery, Query } from '../../../data/public';
 import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 import { TimelionVisParams } from '../timelion_vis_fn';
+import { getDataSearch } from '../helpers/plugin_services';
 
 interface Stats {
   cacheCount: number;
@@ -58,7 +58,7 @@ export interface TimelionSuccessResponse {
   sheet: Sheet[];
   stats: Stats;
   visType: string;
-  type: KIBANA_CONTEXT_NAME;
+  type: KibanaContext['type'];
 }
 
 export function getTimelionRequestHandler({
@@ -73,12 +73,15 @@ export function getTimelionRequestHandler({
     filters,
     query,
     visParams,
+    searchSessionId,
   }: {
     timeRange: TimeRange;
     filters: Filter[];
     query: Query;
     visParams: TimelionVisParams;
+    searchSessionId?: string;
   }): Promise<TimelionSuccessResponse> {
+    const dataSearch = getDataSearch();
     const expression = visParams.expression;
 
     if (!expression) {
@@ -93,6 +96,13 @@ export function getTimelionRequestHandler({
 
     // parse the time range client side to make sure it behaves like other charts
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
+    const untrackSearch =
+      dataSearch.session.isCurrentSession(searchSessionId) &&
+      dataSearch.session.trackSearch({
+        abort: () => {
+          // TODO: support search cancellations
+        },
+      });
 
     try {
       return await http.post('/api/timelion/run', {
@@ -109,6 +119,9 @@ export function getTimelionRequestHandler({
             interval: visParams.interval,
             timezone,
           },
+          ...(searchSessionId && {
+            searchSession: dataSearch.session.getSearchOptions(searchSessionId),
+          }),
         }),
       });
     } catch (e) {
@@ -122,6 +135,11 @@ export function getTimelionRequestHandler({
         throw err;
       } else {
         throw e;
+      }
+    } finally {
+      if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
+        // call `untrack` if this search still belongs to current session
+        untrackSearch();
       }
     }
   };

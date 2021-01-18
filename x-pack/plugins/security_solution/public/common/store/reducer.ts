@@ -34,7 +34,12 @@ export const createInitialState = (
   {
     kibanaIndexPatterns,
     configIndexPatterns,
-  }: { kibanaIndexPatterns: KibanaIndexPatterns; configIndexPatterns: string[] }
+    signalIndexName,
+  }: {
+    kibanaIndexPatterns: KibanaIndexPatterns;
+    configIndexPatterns: string[];
+    signalIndexName: string | null;
+  }
 ): PreloadedState<State> => {
   const preloadedState: PreloadedState<State> = {
     app: initialAppState,
@@ -43,8 +48,16 @@ export const createInitialState = (
     inputs: createInitialInputsState(),
     sourcerer: {
       ...sourcererModel.initialSourcererState,
+      sourcererScopes: {
+        ...sourcererModel.initialSourcererState.sourcererScopes,
+        default: {
+          ...sourcererModel.initialSourcererState.sourcererScopes.default,
+          indicesExist: configIndexPatterns.length > 0,
+        },
+      },
       kibanaIndexPatterns,
       configIndexPatterns,
+      signalIndexName,
     },
   };
   return preloadedState;

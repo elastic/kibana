@@ -27,10 +27,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const { header } = getPageObjects(['header']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
-  const config = getService('config');
-  const defaultFindTimeout = config.get('timeouts.find');
   const elasticChart = getService('elasticChart');
   const docTable = getService('docTable');
+  const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
 
   class DiscoverPage {
     public async getChartTimespan() {
@@ -84,8 +84,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async waitUntilSearchingHasFinished() {
-      const spinner = await testSubjects.find('loadingSpinner');
-      await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
+      await testSubjects.missingOrFail('loadingSpinner', { timeout: defaultFindTimeout * 10 });
     }
 
     public async getColumnHeaders() {
@@ -247,14 +246,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async getAllFieldNames() {
       const sidebar = await testSubjects.find('discover-sidebar');
       const $ = await sidebar.parseDomContent();
-      return $('.dscSidebar__item[attr-field]')
+      return $('.dscSidebarField__name')
         .toArray()
-        .map((field) => $(field).find('span.eui-textTruncate').text());
-    }
-
-    public async getSidebarWidth() {
-      const sidebar = await testSubjects.find('discover-sidebar');
-      return await sidebar.getAttribute('clientWidth');
+        .map((field) => $(field).text());
     }
 
     public async hasNoResults() {
@@ -285,6 +279,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickFieldListItemRemove(field: string) {
+      if (!(await testSubjects.exists('fieldList-selected'))) {
+        return;
+      }
       const selectedList = await testSubjects.find('fieldList-selected');
       if (await testSubjects.descendantExists(`field-${field}`, selectedList)) {
         await this.clickFieldListItemToggle(field);
@@ -350,11 +347,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async closeSidebarFieldFilter() {
       await testSubjects.click('toggleFieldFilterButton');
-      await testSubjects.missingOrFail('filterSelectionPanel', { allowHidden: true });
+      await testSubjects.missingOrFail('filterSelectionPanel');
     }
 
     public async waitForChartLoadingComplete(renderCount: number) {
-      await elasticChart.waitForRenderingCount('discoverChart', renderCount);
+      await elasticChart.waitForRenderingCount(renderCount, 'discoverChart');
     }
 
     public async waitForDocTableLoadingComplete() {

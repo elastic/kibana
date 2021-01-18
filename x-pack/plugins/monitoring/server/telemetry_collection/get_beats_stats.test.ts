@@ -20,8 +20,8 @@ const getBaseOptions = () => ({
 describe('Get Beats Stats', () => {
   describe('fetchBeatsStats', () => {
     const clusterUuids = ['aCluster', 'bCluster', 'cCluster'];
-    const start = 100;
-    const end = 200;
+    const start = new Date().toISOString();
+    const end = new Date().toISOString();
     let callCluster = sinon.stub();
 
     beforeEach(() => {

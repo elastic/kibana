@@ -10,11 +10,13 @@ import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPatternColumn } from '../indexpattern';
 import { IndexPatternField } from '../types';
 
-const fieldMap = {
+const fieldMap: Record<string, IndexPatternField> = {
   a: { displayName: 'a' } as IndexPatternField,
   b: { displayName: 'b' } as IndexPatternField,
   c: { displayName: 'c' } as IndexPatternField,
 };
+
+const getFieldByName = (name: string): IndexPatternField | undefined => fieldMap[name];
 
 describe('BucketNestingEditor', () => {
   function mockCol(col: Partial<IndexPatternColumn> = {}): IndexPatternColumn {
@@ -29,7 +31,6 @@ describe('BucketNestingEditor', () => {
         orderDirection: 'asc',
       },
       sourceField: 'a',
-      suggestedPriority: 0,
       ...col,
     };
 
@@ -39,14 +40,14 @@ describe('BucketNestingEditor', () => {
   it('should display the top level grouping when at the root', () => {
     const component = mount(
       <BucketNestingEditor
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         columnId="a"
         layer={{
           columnOrder: ['a', 'b', 'c'],
           columns: {
-            a: mockCol({ suggestedPriority: 0 }),
-            b: mockCol({ suggestedPriority: 1 }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
+            a: mockCol(),
+            b: mockCol(),
+            c: mockCol({ operationType: 'min', isBucketed: false }),
           },
           indexPatternId: 'foo',
         }}
@@ -61,13 +62,13 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['b', 'a', 'c'],
           columns: {
-            a: mockCol({ suggestedPriority: 0 }),
-            b: mockCol({ suggestedPriority: 1 }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
+            a: mockCol(),
+            b: mockCol(),
+            c: mockCol({ operationType: 'min', isBucketed: false }),
           },
           indexPatternId: 'foo',
         }}
@@ -83,13 +84,13 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['b', 'a', 'c'],
           columns: {
-            a: mockCol({ suggestedPriority: 0 }),
-            b: mockCol({ suggestedPriority: 1 }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
+            a: mockCol(),
+            b: mockCol(),
+            c: mockCol({ operationType: 'min', isBucketed: false }),
           },
           indexPatternId: 'foo',
         }}
@@ -107,9 +108,9 @@ describe('BucketNestingEditor', () => {
       layer: {
         columnOrder: ['a', 'b', 'c'],
         columns: {
-          a: mockCol({ suggestedPriority: 0 }),
-          b: mockCol({ suggestedPriority: 1 }),
-          c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
+          a: mockCol(),
+          b: mockCol(),
+          c: mockCol({ operationType: 'min', isBucketed: false }),
         },
         indexPatternId: 'foo',
       },
@@ -128,13 +129,13 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['a', 'b', 'c'],
           columns: {
-            a: mockCol({ suggestedPriority: 0, operationType: 'avg', isBucketed: false }),
-            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: false }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
+            a: mockCol({ operationType: 'avg', isBucketed: false }),
+            b: mockCol({ operationType: 'max', isBucketed: false }),
+            c: mockCol({ operationType: 'min', isBucketed: false }),
           },
           indexPatternId: 'foo',
         }}
@@ -149,13 +150,13 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['a', 'b', 'c'],
           columns: {
-            a: mockCol({ suggestedPriority: 0 }),
-            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: false }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
+            a: mockCol(),
+            b: mockCol({ operationType: 'max', isBucketed: false }),
+            c: mockCol({ operationType: 'min', isBucketed: false }),
           },
           indexPatternId: 'foo',
         }}
@@ -170,13 +171,13 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['c', 'a', 'b'],
           columns: {
-            a: mockCol({ suggestedPriority: 0, operationType: 'count', isBucketed: true }),
-            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: true }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: true }),
+            a: mockCol({ operationType: 'count', isBucketed: true }),
+            b: mockCol({ operationType: 'max', isBucketed: true }),
+            c: mockCol({ operationType: 'min', isBucketed: true }),
           },
           indexPatternId: 'foo',
         }}
@@ -194,13 +195,13 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['c', 'a', 'b'],
           columns: {
-            a: mockCol({ suggestedPriority: 0, operationType: 'count', isBucketed: true }),
-            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: true }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: true }),
+            a: mockCol({ operationType: 'count', isBucketed: true }),
+            b: mockCol({ operationType: 'max', isBucketed: true }),
+            c: mockCol({ operationType: 'min', isBucketed: true }),
           },
           indexPatternId: 'foo',
         }}
@@ -221,13 +222,13 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['c', 'a', 'b'],
           columns: {
-            a: mockCol({ suggestedPriority: 0, operationType: 'count', isBucketed: true }),
-            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: true }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: true }),
+            a: mockCol({ operationType: 'count', isBucketed: true }),
+            b: mockCol({ operationType: 'max', isBucketed: true }),
+            c: mockCol({ operationType: 'min', isBucketed: true }),
           },
           indexPatternId: 'foo',
         }}
@@ -247,14 +248,14 @@ describe('BucketNestingEditor', () => {
     const setColumns = jest.fn();
     const component = mount(
       <BucketNestingEditor
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         columnId="b"
         layer={{
           columnOrder: ['c', 'a', 'b'],
           columns: {
-            a: mockCol({ suggestedPriority: 0, operationType: 'count', isBucketed: true }),
-            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: true }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: true }),
+            a: mockCol({ operationType: 'count', isBucketed: true }),
+            b: mockCol({ operationType: 'max', isBucketed: true }),
+            c: mockCol({ operationType: 'min', isBucketed: true }),
           },
           indexPatternId: 'foo',
         }}

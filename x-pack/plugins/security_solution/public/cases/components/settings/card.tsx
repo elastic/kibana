@@ -8,7 +8,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiCard, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { connectorsConfiguration } from '../../../common/lib/connectors/config';
+import { connectorsConfiguration } from '../connectors';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 interface ConnectorCardProps {
@@ -35,7 +35,7 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
       <StyledText>
         {listItems.length > 0 &&
           listItems.map((item, i) => (
-            <span key={`${item.title}-${i}`}>
+            <span data-test-subj="card-list-item" key={`${item.title}-${i}`}>
               <strong>{`${item.title}: `}</strong>
               {item.description}
             </span>

@@ -4,41 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-function generateUniqueKey() {
-  return uuid.v4().replace(/-/g, '');
-}
+import { ObjectRemover } from '../../lib/object_remover';
+import { generateUniqueKey, getTestActionData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const alerting = getService('alerting');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
+  const supertest = getService('supertest');
 
   describe('Connectors', function () {
-    before(async () => {
-      await alerting.actions.createAction({
-        name: `slack-${Date.now()}`,
-        actionTypeId: '.slack',
-        config: {},
-        secrets: {
-          webhookUrl: 'https://test',
-        },
-      });
+    const objectRemover = new ObjectRemover(supertest);
 
+    before(async () => {
+      const { body: createdAction } = await supertest
+        .post(`/api/actions/action`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestActionData())
+        .expect(200);
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('connectorsTab');
+      objectRemover.add(createdAction.id, 'action', 'actions');
+    });
+
+    after(async () => {
+      await objectRemover.removeAll();
     });
 
     it('should create a connector', async () => {
       const connectorName = generateUniqueKey();
 
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+
+      await testSubjects.click('.index-card');
+
+      await find.clickByCssSelector('[data-test-subj="backButton"]');
 
       await testSubjects.click('.slack-card');
 
@@ -252,6 +256,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
       expect(searchResultsBeforeEdit.length).to.eql(1);
 
+      expect(await testSubjects.exists('preConfiguredTitleMessage')).to.be(true);
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
       expect(await testSubjects.exists('preconfiguredBadge')).to.be(true);

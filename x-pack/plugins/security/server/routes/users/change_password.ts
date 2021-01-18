@@ -15,10 +15,9 @@ import {
 import { RouteDefinitionParams } from '..';
 
 export function defineChangeUserPasswordRoutes({
-  authc,
+  getAuthenticationService,
   session,
   router,
-  clusterClient,
 }: RouteDefinitionParams) {
   router.post(
     {
@@ -35,7 +34,7 @@ export function defineChangeUserPasswordRoutes({
       const { username } = request.params;
       const { password: currentPassword, newPassword } = request.body;
 
-      const currentUser = authc.getCurrentUser(request);
+      const currentUser = getAuthenticationService().getCurrentUser(request);
       const isUserChangingOwnPassword =
         currentUser && currentUser.username === username && canUserChangePassword(currentUser);
       const currentSession = isUserChangingOwnPassword ? await session.get(request) : null;
@@ -43,28 +42,26 @@ export function defineChangeUserPasswordRoutes({
       // If user is changing their own password they should provide a proof of knowledge their
       // current password via sending it in `Authorization: Basic base64(username:current password)`
       // HTTP header no matter how they logged in to Kibana.
-      const scopedClusterClient = clusterClient.asScoped(
-        isUserChangingOwnPassword
-          ? {
-              headers: {
-                ...request.headers,
-                authorization: new HTTPAuthorizationHeader(
-                  'Basic',
-                  new BasicHTTPAuthorizationHeaderCredentials(
-                    username,
-                    currentPassword || ''
-                  ).toString()
-                ).toString(),
-              },
-            }
-          : request
-      );
+      const options = isUserChangingOwnPassword
+        ? {
+            headers: {
+              ...request.headers,
+              authorization: new HTTPAuthorizationHeader(
+                'Basic',
+                new BasicHTTPAuthorizationHeaderCredentials(
+                  username,
+                  currentPassword || ''
+                ).toString()
+              ).toString(),
+            },
+          }
+        : undefined;
 
       try {
-        await scopedClusterClient.callAsCurrentUser('shield.changePassword', {
-          username,
-          body: { password: newPassword },
-        });
+        await context.core.elasticsearch.client.asCurrentUser.security.changePassword(
+          { username, body: { password: newPassword } },
+          options
+        );
       } catch (error) {
         // This may happen only if user's credentials are rejected meaning that current password
         // isn't correct.
@@ -81,7 +78,7 @@ export function defineChangeUserPasswordRoutes({
       // session and in such cases we shouldn't create a new one.
       if (isUserChangingOwnPassword && currentSession) {
         try {
-          const authenticationResult = await authc.login(request, {
+          const authenticationResult = await getAuthenticationService().login(request, {
             provider: { name: currentSession.provider.name },
             value: { username, password: newPassword },
           });

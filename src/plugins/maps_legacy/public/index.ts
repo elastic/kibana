@@ -17,17 +17,12 @@
  * under the License.
  */
 
-// @ts-ignore
 import { PluginInitializerContext } from 'kibana/public';
 import { MapsLegacyPlugin } from './plugin';
 // @ts-ignore
 import * as colorUtil from './map/color_util';
 // @ts-ignore
 import { KibanaMapLayer } from './map/kibana_map_layer';
-// @ts-ignore
-import { convertToGeoJson } from './map/convert_to_geojson';
-// @ts-ignore
-import { getPrecision, geoContains } from './map/decode_geo_hash';
 import {
   VectorLayer,
   FileLayerField,
@@ -46,10 +41,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 /** @public */
 export {
-  getPrecision,
-  geoContains,
   colorUtil,
-  convertToGeoJson,
   IServiceSettings,
   KibanaMapLayer,
   VectorLayer,
@@ -59,8 +51,9 @@ export {
   mapTooltipProvider,
 };
 
+export * from '../common';
 export * from './common/types';
-export { ORIGIN } from './common/constants/origin';
+export { ORIGIN, TMS_IN_YML_ID } from './common/constants';
 
 export { WmsOptions } from './components/wms_options';
 export { LegacyMapDeprecationMessage } from './components/legacy_map_deprecation_message';

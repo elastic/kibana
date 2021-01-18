@@ -6,10 +6,7 @@
 
 import { resetContext } from 'kea';
 
-import { mockKibanaValues, mockHttpValues } from '../../__mocks__';
-jest.mock('../http', () => ({
-  HttpLogic: { values: { http: mockHttpValues.http } },
-}));
+import { mockKibanaValues } from '../../__mocks__';
 
 import { KibanaLogic, mountKibanaLogic } from './kibana_logic';
 
@@ -33,6 +30,12 @@ describe('KibanaLogic', () => {
       mountKibanaLogic({ ...mockKibanaValues, config: undefined } as any);
 
       expect(KibanaLogic.values.config).toEqual({});
+    });
+
+    it('gracefully handles non-cloud installs', () => {
+      mountKibanaLogic({ ...mockKibanaValues, cloud: undefined } as any);
+
+      expect(KibanaLogic.values.cloud).toEqual({});
     });
   });
 

@@ -9,7 +9,9 @@ import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/publ
 import { APP_ID } from '../common/constants';
 
 export enum LICENSED_FEATURES {
+  GEO_LINE_AGG = 'GEO_LINE_AGG',
   GEO_SHAPE_AGGS_GEO_TILE = 'GEO_SHAPE_AGGS_GEO_TILE',
+  ON_PREM_EMS = 'ON_PREM_EMS',
 }
 
 export interface LicensedFeatureDetail {
@@ -18,17 +20,29 @@ export interface LicensedFeatureDetail {
 }
 
 export const LICENCED_FEATURES_DETAILS: Record<LICENSED_FEATURES, LicensedFeatureDetail> = {
+  [LICENSED_FEATURES.GEO_LINE_AGG]: {
+    name: 'geo_line aggregation',
+    license: 'gold',
+  },
   [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE]: {
     name: 'geo_tile aggregation on geo_shape field-type',
     license: 'gold',
+  },
+  [LICENSED_FEATURES.ON_PREM_EMS]: {
+    name: 'layer from local Elastic Maps Server',
+    license: 'enterprise',
   },
 };
 
 let licenseId: string | undefined;
 let isGoldPlus: boolean = false;
 
+let isEnterprisePlus: boolean = false;
+
 export const getLicenseId = () => licenseId;
 export const getIsGoldPlus = () => isGoldPlus;
+
+export const getIsEnterprisePlus = () => isEnterprisePlus;
 
 export function registerLicensedFeatures(licensingPlugin: LicensingPluginSetup) {
   for (const licensedFeature of Object.values(LICENSED_FEATURES)) {
@@ -45,6 +59,10 @@ export function setLicensingPluginStart(licensingPlugin: LicensingPluginStart) {
   licensingPluginStart.license$.subscribe((license: ILicense) => {
     const gold = license.check(APP_ID, 'gold');
     isGoldPlus = gold.state === 'valid';
+
+    const enterprise = license.check(APP_ID, 'enterprise');
+    isEnterprisePlus = enterprise.state === 'valid';
+
     licenseId = license.uid;
   });
 }

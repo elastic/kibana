@@ -19,7 +19,8 @@ import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_an
 export const getIndexData = async (
   jobConfig: DataFrameAnalyticsConfig | undefined,
   dataGrid: UseDataGridReturnType,
-  searchQuery: SavedSearchQuery
+  searchQuery: SavedSearchQuery,
+  options: { didCancel: boolean }
 ) => {
   if (jobConfig !== undefined) {
     const {
@@ -52,7 +53,7 @@ export const getIndexData = async (
         index: jobConfig.dest.index,
         body: {
           fields: ['*'],
-          _source: jobConfig.dest.results_field,
+          _source: false,
           query: searchQuery,
           from: pageIndex * pageSize,
           size: pageSize,
@@ -60,14 +61,17 @@ export const getIndexData = async (
         },
       });
 
-      setRowCount(resp.hits.total.value);
-      const docs = resp.hits.hits.map((d) => ({
-        ...getProcessedFields(d.fields),
-        [jobConfig.dest.results_field]: d._source[jobConfig.dest.results_field],
-      }));
-
-      setTableItems(docs);
-      setStatus(INDEX_STATUS.LOADED);
+      if (!options.didCancel) {
+        setRowCount(resp.hits.total.value);
+        setTableItems(
+          resp.hits.hits.map((d) =>
+            getProcessedFields(d.fields, (key: string) =>
+              key.startsWith(`${jobConfig.dest.results_field}.feature_importance`)
+            )
+          )
+        );
+        setStatus(INDEX_STATUS.LOADED);
+      }
     } catch (e) {
       setErrorMessage(extractErrorMessage(e));
       setStatus(INDEX_STATUS.ERROR);

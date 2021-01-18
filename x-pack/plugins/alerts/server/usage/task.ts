@@ -42,7 +42,6 @@ function registerAlertingTelemetryTask(
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Alerting usage fetch task',
-      type: TELEMETRY_TASK_TYPE,
       timeout: '5m',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
     },
@@ -54,7 +53,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
     await taskManager.ensureScheduled({
       id: TASK_ID,
       taskType: TELEMETRY_TASK_TYPE,
-      state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },
+      state: {},
       params: {},
     });
   } catch (e) {

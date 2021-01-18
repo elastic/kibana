@@ -40,6 +40,8 @@ export const JobDetailsStep: FC<Props> = ({
       jobValidator.jobId.valid &&
       jobValidator.modelMemoryLimit.valid &&
       jobValidator.groupIds.valid &&
+      jobValidator.latestValidationResult.jobIdExists?.valid === true &&
+      jobValidator.latestValidationResult.groupIdsExist?.valid === true &&
       jobValidator.validating === false;
     setNextActive(active);
   }, [jobValidatorUpdated]);

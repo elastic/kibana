@@ -27,7 +27,7 @@ import { EuiIcon } from '@elastic/eui';
 import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
-import { Color } from '../../../../../../common/color_palette';
+import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { useSourceContext } from '../../../../../containers/source';
 import { useTimeline } from '../../hooks/use_timeline';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
@@ -102,11 +102,12 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   }, [nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
 
   const metricLabel = toMetricOpt(metric.type)?.textLC;
+  const metricPopoverLabel = toMetricOpt(metric.type)?.text;
 
   const chartMetric = {
     color: Color.color0,
     aggregation: 'avg' as MetricsExplorerAggregation,
-    label: metricLabel,
+    label: metricPopoverLabel,
   };
 
   const dateFormatter = useMemo(() => {
@@ -221,14 +222,11 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems={'center'}>
+          <EuiFlexGroup alignItems={'center'} responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+              <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    color={getTimelineChartTheme(isDarkMode).crosshair.band.fill}
-                    type={'dot'}
-                  />
+                  <EuiIcon color={colorTransformer(chartMetric.color)} type={'dot'} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size={'xs'}>
@@ -242,7 +240,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+              <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
                 <EuiFlexItem
                   grow={false}
                   style={{ backgroundColor: '#D36086', height: 5, width: 10 }}
@@ -319,6 +317,9 @@ const TimelineHeader = euiStyled.div`
   width: 100%;
   padding: ${(props) => props.theme.eui.paddingSizes.s} ${(props) =>
   props.theme.eui.paddingSizes.m};
+  @media only screen and (max-width: 767px) {
+      margin-top: 30px;
+  }
 `;
 
 const TimelineChartContainer = euiStyled.div`
@@ -335,11 +336,11 @@ const TimelineLoadingContainer = euiStyled.div`
 `;
 
 const noHistoryDataTitle = i18n.translate('xpack.infra.inventoryTimeline.noHistoryDataTitle', {
-  defaultMessage: 'There is no history data to display.',
+  defaultMessage: 'There is no historical data to display.',
 });
 
 const errorTitle = i18n.translate('xpack.infra.inventoryTimeline.errorTitle', {
-  defaultMessage: 'Unable to display history data.',
+  defaultMessage: 'Unable to show historical data.',
 });
 
 const checkNewDataButtonLabel = i18n.translate(

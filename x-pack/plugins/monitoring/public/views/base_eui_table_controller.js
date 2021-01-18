@@ -61,15 +61,21 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
     this.setSorting(sort);
 
     this.onTableChange = ({ page, sort }) => {
+      this.setPagination(page);
+      this.setSorting({ sort });
       setLocalStorageData(storage, {
         page,
         sort: {
           sort,
         },
       });
+      if (this.onTableChangeRender) {
+        this.onTableChangeRender();
+      }
     };
 
-    this.updateData();
+    // For pages where we do not fetch immediately, we want to fetch after pagination is applied
+    args.fetchDataImmediately === false && this.updateData();
   }
 
   setPagination(page) {

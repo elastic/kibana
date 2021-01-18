@@ -1,0 +1,60 @@
+parameters:
+  - schema:
+      type: string
+    name: agentId
+    in: path
+    required: true
+post:
+  summary: Fleet - Agent - Check In
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              action:
+                type: string
+                enum:
+                  - checkin
+              actions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    agent_id:
+                      type: string
+                    data:
+                      type: object
+                    id:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    type:
+                      type: string
+                  required:
+                    - agent_id
+                    - data
+                    - id
+                    - created_at
+                    - type
+  operationId: post-fleet-agents-agentId-checkin
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  security:
+    - Access API Key: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            local_metadata:
+              $ref: ../components/schemas/agent_metadata.yaml
+            events:
+              type: array
+              items:
+                $ref: ../components/schemas/new_agent_event.yaml

@@ -36,6 +36,7 @@ import {
   mergeReturns,
   createTotalHitsFromSearchResult,
   lastValidDate,
+  calculateThresholdSignalUuid,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -878,7 +879,7 @@ describe('utils', () => {
       ];
       const createdErrors = createErrorsFromShard({ errors });
       expect(createdErrors).toEqual([
-        'reason: some reason, type: some type, caused by: some reason',
+        'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
       ]);
     });
 
@@ -917,8 +918,56 @@ describe('utils', () => {
       ];
       const createdErrors = createErrorsFromShard({ errors });
       expect(createdErrors).toEqual([
-        'reason: some reason, type: some type, caused by: some reason',
-        'reason: some reason 2, type: some type 2, caused by: some reason 2',
+        'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
+        'index: "index-345" reason: "some reason 2" type: "some type 2" caused by reason: "some reason 2" caused by type: "some type 2"',
+      ]);
+    });
+
+    test('You can have missing values for the shard errors and get the expected output of an empty string', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {},
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual(['index: "index-123"']);
+    });
+
+    test('You can have a single value for the shard errors and get expected output without extra spaces anywhere', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {
+            reason: 'some reason something went wrong',
+          },
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual([
+        'index: "index-123" reason: "some reason something went wrong"',
+      ]);
+    });
+
+    test('You can have two values for the shard errors and get expected output with one space exactly between the two values', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {
+            reason: 'some reason something went wrong',
+            caused_by: { type: 'some type' },
+          },
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual([
+        'index: "index-123" reason: "some reason something went wrong" caused by type: "some type"',
       ]);
     });
   });
@@ -926,10 +975,14 @@ describe('utils', () => {
   describe('createSearchAfterReturnTypeFromResponse', () => {
     test('empty results will return successful type', () => {
       const searchResult = sampleEmptyDocSearchResults();
-      const newSearchResult = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const newSearchResult = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
@@ -940,10 +993,14 @@ describe('utils', () => {
 
     test('multiple results will return successful type with expected success', () => {
       const searchResult = sampleDocSearchResultsWithSortId();
-      const newSearchResult = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const newSearchResult = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
         searchAfterTimes: [],
@@ -955,42 +1012,60 @@ describe('utils', () => {
     test('result with error will create success: false within the result set', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 1;
-      const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
       expect(success).toEqual(false);
     });
 
     test('result with error will create success: false within the result set if failed is 2 or more', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
-      const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
       expect(success).toEqual(false);
     });
 
     test('result with error will create success: true within the result set if failed is 0', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 0;
-      const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
       expect(success).toEqual(true);
     });
 
     test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
-      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
       expect(lastLookBackDate).toEqual(null);
     });
 
     test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
-      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
       expect(lastLookBackDate).toEqual(null);
     });
 
     test('It will not set an invalid date time stamp from an invalid @timestamp string', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid';
-      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
       expect(lastLookBackDate).toEqual(null);
     });
   });
@@ -999,29 +1074,75 @@ describe('utils', () => {
     test('It returns undefined if the search result contains a null timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
-      const date = lastValidDate(searchResult);
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
 
     test('It returns undefined if the search result contains a undefined timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
-      const date = lastValidDate(searchResult);
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
 
     test('It returns undefined if the search result contains an invalid string value', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
-      const date = lastValidDate(searchResult);
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
 
     test('It returns correct date time stamp if the search result contains an invalid string value', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
-      const date = lastValidDate(searchResult);
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
+    });
+
+    test('It returns normal date time if set', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
+    });
+
+    test('It returns date time from field if set there', () => {
+      const timestamp = '2020-10-07T19:27:19.136Z';
+      const searchResult = sampleDocSearchResultsNoSortId();
+      if (searchResult.hits.hits[0] == null) {
+        throw new TypeError('Test requires one element');
+      }
+      searchResult.hits.hits[0] = {
+        ...searchResult.hits.hits[0],
+        fields: {
+          '@timestamp': [timestamp],
+        },
+      };
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual(timestamp);
+    });
+
+    test('It returns timestampOverride date time if set', () => {
+      const override = '2020-10-07T19:20:28.049Z';
+      const searchResult = sampleDocSearchResultsNoSortId();
+      searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
+      const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
+    });
+
+    test('It returns timestampOverride date time from fields if set on it', () => {
+      const override = '2020-10-07T19:36:31.110Z';
+      const searchResult = sampleDocSearchResultsNoSortId();
+      if (searchResult.hits.hits[0] == null) {
+        throw new TypeError('Test requires one element');
+      }
+      searchResult.hits.hits[0] = {
+        ...searchResult.hits.hits[0],
+        fields: {
+          different_timestamp: [override],
+        },
+      };
+      const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
     });
   });
 
@@ -1031,6 +1152,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
@@ -1043,6 +1165,7 @@ describe('utils', () => {
       const searchAfterReturnType = createSearchAfterReturnType({
         bulkCreateTimes: ['123'],
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
@@ -1051,6 +1174,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123'],
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
@@ -1062,11 +1186,13 @@ describe('utils', () => {
     test('createSearchAfterReturnType can override select values', () => {
       const searchAfterReturnType = createSearchAfterReturnType({
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: null,
         searchAfterTimes: [],
@@ -1082,6 +1208,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
@@ -1135,6 +1262,7 @@ describe('utils', () => {
         createSearchAfterReturnType({
           bulkCreateTimes: ['123'],
           createdSignalsCount: 3,
+          createdSignals: Array(3).fill(sampleSignalHit()),
           errors: ['error 1', 'error 2'],
           lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
           searchAfterTimes: ['123'],
@@ -1143,6 +1271,7 @@ describe('utils', () => {
         createSearchAfterReturnType({
           bulkCreateTimes: ['456'],
           createdSignalsCount: 2,
+          createdSignals: Array(2).fill(sampleSignalHit()),
           errors: ['error 3'],
           lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
           searchAfterTimes: ['567'],
@@ -1152,6 +1281,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123', '456'], // concatenates the prev and next together
         createdSignalsCount: 5, // Adds the 3 and 2 together
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
@@ -1174,6 +1304,20 @@ describe('utils', () => {
         searchResult: repeatedSearchResultsWithSortId(4, 1, ['1', '2', '3', '4']),
       });
       expect(result).toEqual(4);
+    });
+  });
+
+  describe('calculateThresholdSignalUuid', () => {
+    it('should generate a uuid without key', () => {
+      const startedAt = new Date('2020-12-17T16:27:00Z');
+      const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, 'agent.name');
+      expect(signalUuid).toEqual('c0cbe4b7-48de-5734-ae81-d8de3e79839d');
+    });
+
+    it('should generate a uuid with key', () => {
+      const startedAt = new Date('2019-11-18T13:32:00Z');
+      const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, 'host.ip', '1.2.3.4');
+      expect(signalUuid).toEqual('f568509e-b570-5d3c-a7ed-7c73fd29ddaf');
     });
   });
 });

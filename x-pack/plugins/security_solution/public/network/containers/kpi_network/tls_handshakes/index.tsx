@@ -20,10 +20,10 @@ import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -59,25 +59,12 @@ export const useNetworkKpiTlsHandshakes = ({
   const [
     networkKpiTlsHandshakesRequest,
     setNetworkKpiTlsHandshakesRequest,
-  ] = useState<NetworkKpiTlsHandshakesRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: NetworkKpiQueries.tlsHandshakes,
-          filterQuery: createFilter(filterQuery),
-          id: ID,
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-        }
-      : null
-  );
+  ] = useState<NetworkKpiTlsHandshakesRequestOptions | null>(null);
 
-  const [networkKpiTlsHandshakesResponse, setNetworkKpiTlsHandshakesResponse] = useState<
-    NetworkKpiTlsHandshakesArgs
-  >({
+  const [
+    networkKpiTlsHandshakesResponse,
+    setNetworkKpiTlsHandshakesResponse,
+  ] = useState<NetworkKpiTlsHandshakesArgs>({
     tlsHandshakes: 0,
     id: ID,
     inspect: {
@@ -90,7 +77,7 @@ export const useNetworkKpiTlsHandshakes = ({
 
   const networkKpiTlsHandshakesSearch = useCallback(
     (request: NetworkKpiTlsHandshakesRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
       let didCancel = false;
@@ -146,7 +133,7 @@ export const useNetworkKpiTlsHandshakes = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -156,19 +143,18 @@ export const useNetworkKpiTlsHandshakes = ({
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.tlsHandshakes,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     networkKpiTlsHandshakesSearch(networkKpiTlsHandshakesRequest);

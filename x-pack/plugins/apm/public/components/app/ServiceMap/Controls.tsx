@@ -8,13 +8,13 @@ import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useTheme } from '../../../hooks/useTheme';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useTheme } from '../../../hooks/use_theme';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import { APMQueryParams } from '../../shared/Links/url_helpers';
 import { CytoscapeContext } from './Cytoscape';
-import { getAnimationOptions, getNodeHeight } from './cytoscapeOptions';
+import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 
 const ControlsContainer = styled('div')`
   left: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};

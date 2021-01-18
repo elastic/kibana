@@ -29,7 +29,7 @@ interface Props {
   [key: string]: any;
 }
 
-export const RangeField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
+export const RangeField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { onChange: onFieldChange } = field;
 
@@ -50,8 +50,8 @@ export const RangeField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      data-test-subj={rest['data-test-subj']}
-      describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      describedByIds={idAria ? [idAria] : undefined}
+      {...rest}
     >
       <EuiRange
         value={field.value as number}

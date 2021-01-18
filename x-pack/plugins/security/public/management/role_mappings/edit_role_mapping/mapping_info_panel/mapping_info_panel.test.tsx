@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject } from '@kbn/test/jest';
 import { Role, RoleMapping } from '../../../../../common/model';
 import { RolesAPIClient } from '../../../roles';
-import { DocumentationLinksService } from '../../documentation_links';
 import { RoleSelector } from '../role_selector';
 import { RoleTemplateEditor } from '../role_selector/role_template_editor';
 import { MappingInfoPanel } from '.';
@@ -38,7 +38,7 @@ describe('MappingInfoPanel', () => {
         metadata: {},
       } as RoleMapping,
       mode: 'create',
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
       rolesAPIClient: rolesAPI,
     } as MappingInfoPanel['props'];
 
@@ -85,7 +85,7 @@ describe('MappingInfoPanel', () => {
         metadata: {},
       } as RoleMapping,
       mode: 'edit',
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
       rolesAPIClient: rolesAPI,
     } as MappingInfoPanel['props'];
 
@@ -111,7 +111,7 @@ describe('MappingInfoPanel', () => {
       canUseInlineScripts: true,
       canUseStoredScripts: false,
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
       rolesAPIClient: rolesAPI,
     };
 
@@ -152,7 +152,7 @@ describe('MappingInfoPanel', () => {
       canUseInlineScripts: false,
       canUseStoredScripts: true,
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
       rolesAPIClient: rolesAPI,
     };
 
@@ -193,7 +193,7 @@ describe('MappingInfoPanel', () => {
       canUseInlineScripts: false,
       canUseStoredScripts: false,
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
       rolesAPIClient: rolesAPI,
     };
 
@@ -218,7 +218,7 @@ describe('MappingInfoPanel', () => {
         metadata: {},
       } as RoleMapping,
       mode: 'edit',
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
       rolesAPIClient: rolesAPI,
     } as MappingInfoPanel['props'];
 

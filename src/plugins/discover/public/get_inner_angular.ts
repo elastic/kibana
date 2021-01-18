@@ -36,10 +36,12 @@ import {
   createToolBarPagerButtonsDirective,
   createToolBarPagerTextDirective,
 } from './application/angular/doc_table/components/pager';
+import { createContextAppLegacy } from './application/components/context_app/context_app_legacy_directive';
 import { createTableRowDirective } from './application/angular/doc_table/components/table_row';
 import { createPagerFactory } from './application/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './application/angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './application/angular/doc_viewer';
+import { createDiscoverGridDirective } from './application/components/create_discover_grid_directive';
 import { createRenderCompleteDirective } from './application/angular/directives/render_complete';
 import {
   initAngularBootstrap,
@@ -48,13 +50,11 @@ import {
   PromiseServiceCreator,
   registerListenEventListener,
   watchMultiDecorator,
-  createTopNavDirective,
-  createTopNavHelper,
 } from '../../kibana_legacy/public';
-import { createContextErrorMessageDirective } from './application/components/context_error_message';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
 import { createDiscoverLegacyDirective } from './application/components/create_discover_legacy_directive';
+import { createDiscoverDirective } from './application/components/create_discover_directive';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -96,7 +96,6 @@ export function initializeInnerAngularModule(
     createLocalI18nModule();
     createLocalPrivateModule();
     createLocalPromiseModule();
-    createLocalTopNavModule(navigation);
     createLocalStorageModule();
     createPagerFactoryModule();
     createDocTableModule();
@@ -129,7 +128,6 @@ export function initializeInnerAngularModule(
       'discoverI18n',
       'discoverPrivate',
       'discoverPromise',
-      'discoverTopNav',
       'discoverLocalStorageProvider',
       'discoverDocTable',
       'discoverPagerFactory',
@@ -138,7 +136,7 @@ export function initializeInnerAngularModule(
     .run(registerListenEventListener)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverLegacy', createDiscoverLegacyDirective)
-    .directive('contextErrorMessage', createContextErrorMessageDirective);
+    .directive('discover', createDiscoverDirective);
 }
 
 function createLocalPromiseModule() {
@@ -147,13 +145,6 @@ function createLocalPromiseModule() {
 
 function createLocalPrivateModule() {
   angular.module('discoverPrivate', []).provider('Private', PrivateProvider);
-}
-
-function createLocalTopNavModule(navigation: NavigationStart) {
-  angular
-    .module('discoverTopNav', ['react'])
-    .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {
@@ -190,5 +181,7 @@ function createDocTableModule() {
     .directive('kbnTableRow', createTableRowDirective)
     .directive('toolBarPagerButtons', createToolBarPagerButtonsDirective)
     .directive('kbnInfiniteScroll', createInfiniteScrollDirective)
-    .directive('docViewer', createDocViewerDirective);
+    .directive('discoverGrid', createDiscoverGridDirective)
+    .directive('docViewer', createDocViewerDirective)
+    .directive('contextAppLegacy', createContextAppLegacy);
 }

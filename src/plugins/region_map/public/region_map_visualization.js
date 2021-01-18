@@ -30,9 +30,8 @@ export function createRegionMapVisualization({
   getServiceSettings,
 }) {
   return class RegionMapsVisualization extends BaseMapsVisualization {
-    constructor(container, vis) {
-      super(container, vis);
-      this._vis = this.vis;
+    constructor(container, handlers, initialVisParams) {
+      super(container, handlers, initialVisParams);
       this._choroplethLayer = null;
       this._tooltipFormatter = mapTooltipProvider(container, tooltipFormatter);
     }
@@ -88,7 +87,7 @@ export function createRegionMapVisualization({
         );
       }
 
-      this._kibanaMap.useUiStateFromVisualization(this._vis);
+      this._kibanaMap.useUiStateFromVisualization(this.handlers.uiState);
     }
 
     async _loadConfig(fileLayerConfig) {
@@ -170,27 +169,29 @@ export function createRegionMapVisualization({
     }
 
     async _recreateChoroplethLayer(name, attribution, showAllData) {
+      const selectedLayer = await this._loadConfig(this._params.selectedLayer);
       this._kibanaMap.removeLayer(this._choroplethLayer);
 
       if (this._choroplethLayer) {
         this._choroplethLayer = this._choroplethLayer.cloneChoroplethLayerForNewData(
           name,
           attribution,
-          this._params.selectedLayer.format,
+          selectedLayer.format,
           showAllData,
-          this._params.selectedLayer.meta,
-          this._params.selectedLayer,
-          await getServiceSettings()
+          selectedLayer.meta,
+          selectedLayer,
+          await getServiceSettings(),
+          (await lazyLoadMapsLegacyModules()).L
         );
       } else {
         const { ChoroplethLayer } = await import('./choropleth_layer');
         this._choroplethLayer = new ChoroplethLayer(
           name,
           attribution,
-          this._params.selectedLayer.format,
+          selectedLayer.format,
           showAllData,
-          this._params.selectedLayer.meta,
-          this._params.selectedLayer,
+          selectedLayer.meta,
+          selectedLayer,
           await getServiceSettings(),
           (await lazyLoadMapsLegacyModules()).L
         );
@@ -199,11 +200,18 @@ export function createRegionMapVisualization({
       this._choroplethLayer.on('select', (event) => {
         const { rows, columns } = this._chartData;
         const rowIndex = rows.findIndex((row) => row[columns[0].id] === event);
-        this._vis.API.events.filter({
-          table: this._chartData,
-          column: 0,
-          row: rowIndex,
-          value: event,
+        this.handlers.event({
+          name: 'filterBucket',
+          data: {
+            data: [
+              {
+                table: this._chartData,
+                column: 0,
+                row: rowIndex,
+                value: event,
+              },
+            ],
+          },
         });
       });
 

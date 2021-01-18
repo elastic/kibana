@@ -24,22 +24,14 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { formatTimestampToDuration } from '../../../../common';
-import {
-  CALCULATE_DURATION_SINCE,
-  APM_SYSTEM_ID,
-  ALERT_MISSING_MONITORING_DATA,
-} from '../../../../common/constants';
+import { CALCULATE_DURATION_SINCE, APM_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
-import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
-import { AlertsBadge } from '../../../alerts/badge';
-
-const SERVERS_PANEL_ALERTS = [ALERT_MISSING_MONITORING_DATA];
 
 export function ApmPanel(props) {
-  const { setupMode, alerts } = props;
+  const { setupMode } = props;
   const apmsTotal = get(props, 'apms.total') || 0;
   // Do not show if we are not in setup mode
   if (apmsTotal === 0 && !setupMode.enabled) {
@@ -57,16 +49,6 @@ export function ApmPanel(props) {
       productName={APM_SYSTEM_ID}
     />
   ) : null;
-
-  let apmServersAlertStatus = null;
-  if (shouldShowAlertBadge(alerts, SERVERS_PANEL_ALERTS)) {
-    const alertsList = SERVERS_PANEL_ALERTS.map((alertType) => alerts[alertType]);
-    apmServersAlertStatus = (
-      <EuiFlexItem grow={false}>
-        <AlertsBadge alerts={alertsList} />
-      </EuiFlexItem>
-    );
-  }
 
   return (
     <ClusterItemContainer
@@ -161,7 +143,6 @@ export function ApmPanel(props) {
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   {setupModeMetricbeatMigrationTooltip}
-                  {apmServersAlertStatus}
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>

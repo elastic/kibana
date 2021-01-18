@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { AddRuleButton } from './add_rule_button';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject } from '@kbn/test/jest';
 import { FieldRule, AllRule } from '../../model';
 
 describe('AddRuleButton', () => {

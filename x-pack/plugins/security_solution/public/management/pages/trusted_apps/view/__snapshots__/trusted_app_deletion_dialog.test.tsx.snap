@@ -26,7 +26,7 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion failed 1`] = `
           class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
             data-euiicon-type="cross"
@@ -127,7 +127,7 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion is in progress
           class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
             data-euiicon-type="cross"
@@ -233,7 +233,7 @@ exports[`TrustedAppDeletionDialog renders correctly when dialog started 1`] = `
           class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
             data-euiicon-type="cross"

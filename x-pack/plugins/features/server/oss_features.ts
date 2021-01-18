@@ -21,8 +21,6 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       order: 100,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      icon: 'discoverApp',
-      navLinkId: 'discover',
       app: ['discover', 'kibana'],
       catalogue: ['discover'],
       privileges: {
@@ -73,6 +71,33 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             },
           ],
         },
+        {
+          name: i18n.translate('xpack.features.ossFeatures.discoverSearchSessionsFeatureName', {
+            defaultMessage: 'Store Search Sessions',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'store_search_session',
+                  name: i18n.translate(
+                    'xpack.features.ossFeatures.discoverStoreSearchSessionsPrivilegeName',
+                    {
+                      defaultMessage: 'Store Search Sessions',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['search-session'],
+                    read: [],
+                  },
+                  ui: ['storeSearchSession'],
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -82,8 +107,6 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       order: 700,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      icon: 'visualizeApp',
-      navLinkId: 'visualize',
       app: ['visualize', 'lens', 'kibana'],
       catalogue: ['visualize'],
       privileges: {
@@ -92,7 +115,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           catalogue: ['visualize'],
           savedObject: {
             all: ['visualization', 'query', 'lens'],
-            read: ['index-pattern', 'search'],
+            read: ['index-pattern', 'search', 'tag'],
           },
           ui: ['show', 'delete', 'save', 'saveQuery'],
         },
@@ -101,7 +124,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           catalogue: ['visualize'],
           savedObject: {
             all: [],
-            read: ['index-pattern', 'search', 'visualization', 'query', 'lens'],
+            read: ['index-pattern', 'search', 'visualization', 'query', 'lens', 'tag'],
           },
           ui: ['show'],
         },
@@ -143,8 +166,6 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       order: 200,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      icon: 'dashboardApp',
-      navLinkId: 'dashboards',
       app: ['dashboards', 'kibana'],
       catalogue: ['dashboard'],
       privileges: {
@@ -161,6 +182,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'canvas-workpad',
               'lens',
               'map',
+              'tag',
             ],
           },
           ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
@@ -180,6 +202,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'map',
               'dashboard',
               'query',
+              'tag',
             ],
           },
           ui: ['show'],
@@ -213,6 +236,33 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             },
           ],
         },
+        {
+          name: i18n.translate('xpack.features.ossFeatures.dashboardSearchSessionsFeatureName', {
+            defaultMessage: 'Store Search Sessions',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'store_search_session',
+                  name: i18n.translate(
+                    'xpack.features.ossFeatures.dashboardStoreSearchSessionsPrivilegeName',
+                    {
+                      defaultMessage: 'Store Search Sessions',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['search-session'],
+                    read: [],
+                  },
+                  ui: ['storeSearchSession'],
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -222,8 +272,6 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       order: 1300,
       category: DEFAULT_APP_CATEGORIES.management,
-      icon: 'devToolsApp',
-      navLinkId: 'dev_tools',
       app: ['dev_tools', 'kibana'],
       catalogue: ['console', 'searchprofiler', 'grokdebugger'],
       privileges: {
@@ -260,7 +308,6 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       order: 1500,
       category: DEFAULT_APP_CATEGORIES.management,
-      icon: 'advancedSettingsApp',
       app: ['kibana'],
       catalogue: ['advanced_settings'],
       management: {
@@ -300,7 +347,6 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       order: 1600,
       category: DEFAULT_APP_CATEGORIES.management,
-      icon: 'indexPatternApp',
       app: ['kibana'],
       catalogue: ['indexPatterns'],
       management: {
@@ -340,7 +386,6 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       order: 1700,
       category: DEFAULT_APP_CATEGORIES.management,
-      icon: 'savedObjectsApp',
       app: ['kibana'],
       catalogue: ['saved_objects'],
       management: {
@@ -384,8 +429,6 @@ const timelionFeature: KibanaFeatureConfig = {
   name: 'Timelion',
   order: 350,
   category: DEFAULT_APP_CATEGORIES.kibana,
-  icon: 'timelionApp',
-  navLinkId: 'timelion',
   app: ['timelion', 'kibana'],
   catalogue: ['timelion'],
   privileges: {

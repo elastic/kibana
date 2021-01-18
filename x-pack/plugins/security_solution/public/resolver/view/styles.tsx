@@ -17,6 +17,7 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
   border: none;
   display: flex;
   flex-flow: column;
+  z-index: auto;
 
   &.options {
     font-size: 0.8rem;
@@ -26,8 +27,20 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
     position: absolute;
     top: 4.5em;
     overflow-x: visible;
-    width: 12em;
-    z-index: 2;
+    width: 24ch;
+    z-index: auto;
+  }
+
+  &.options::after {
+    position: absolute;
+    content: '';
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    z-index: 20;
+    backdrop-filter: blur(2px);
+    pointer-events: none;
   }
 
   &.options .item {
@@ -37,6 +50,7 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
     width: fit-content;
     border-radius: 2px;
     line-height: 0.8;
+    z-index: 40;
   }
 
   &.options .item button {
@@ -114,6 +128,8 @@ export const GraphContainer = styled.div`
   display: flex;
   flex-grow: 1;
   contain: layout;
+  position: relative;
+  z-index: 0;
 `;
 
 /**

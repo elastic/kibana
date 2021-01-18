@@ -6,25 +6,17 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build"
   },
   "dependencies": {
-    "@elastic/safer-lodash-set": "0.0.0",
-    "@kbn/config-schema": "1.0.0",
-    "@kbn/dev-utils": "1.0.0",
-    "@kbn/logging": "1.0.0",
-    "@kbn/std": "1.0.0",
-    "@kbn/utility-types": "1.0.0",
-    "js-yaml": "^3.14.0",
-    "load-json-file": "^6.2.0",
-    "lodash": "^4.17.20",
-    "moment": "^2.24.0",
-    "rxjs": "^6.5.5",
-    "type-detect": "^4.0.8"
+    "@elastic/safer-lodash-set": "link:../elastic-safer-lodash-set",
+    "@kbn/config-schema": "link:../kbn-config-schema",
+    "@kbn/logging": "link:../kbn-logging",
+    "@kbn/std": "link:../kbn-std"
   },
   "devDependencies": {
-    "typescript": "4.0.2",
-    "tsd": "^0.13.1"
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "@kbn/utility-types": "link:../kbn-utility-types"
   }
 }

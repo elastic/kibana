@@ -19,15 +19,10 @@
 
 import React from 'react';
 import { injectI18n } from '@kbn/i18n/react';
-import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
 import { withKibana } from '../../../../kibana_react/public';
 import type { SearchBarProps } from './search_bar';
 
-const Fallback = () => (
-  <EuiDelayRender>
-    <EuiLoadingContent lines={3} />
-  </EuiDelayRender>
-);
+const Fallback = () => <div />;
 
 const LazySearchBar = React.lazy(() => import('./search_bar'));
 const WrappedSearchBar = (props: SearchBarProps) => (

@@ -44,6 +44,7 @@ import { initSavedObjectSaveAsCheckBoxDirective } from './directives/saved_objec
 import { initSavedObjectFinderDirective } from './directives/saved_object_finder';
 import { initTimelionTabsDirective } from './components/timelionhelp_tabs_directive';
 import { initTimelionTDeprecationDirective } from './components/timelion_deprecation_directive';
+import { initTimelionTopNavDirective } from './components/timelion_top_nav_directive';
 import { initInputFocusDirective } from './directives/input_focus';
 import { Chart } from './directives/chart/chart';
 import { TimelionInterval } from './directives/timelion_interval/timelion_interval';
@@ -86,6 +87,7 @@ export function initTimelionApp(app, deps) {
   initInputFocusDirective(app);
   initTimelionTabsDirective(app, deps);
   initTimelionTDeprecationDirective(app, deps);
+  initTimelionTopNavDirective(app, deps);
   initSavedObjectFinderDirective(app, savedSheetLoader, deps.core.uiSettings);
   initSavedObjectSaveAsCheckBoxDirective(app);
   initCellsDirective(app);

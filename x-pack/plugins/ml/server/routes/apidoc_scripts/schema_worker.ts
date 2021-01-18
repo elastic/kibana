@@ -10,10 +10,10 @@ import { DocEntry, extractDocumentation } from './schema_extractor';
 import { ApiParameter, Block } from './types';
 
 export function postProcess(parsedFiles: any[]): void {
-  const schemasDirPath = `${__dirname}${path.sep}..${path.sep}..${path.sep}schemas${path.sep}`;
+  const schemasDirPath = path.resolve(__dirname, '..', '..', 'schemas');
   const schemaFiles = fs
     .readdirSync(schemasDirPath)
-    .map((filename) => path.resolve(schemasDirPath + filename));
+    .map((filename) => path.resolve(schemasDirPath, filename));
 
   const schemaDocs = extractDocumentation(schemaFiles);
 

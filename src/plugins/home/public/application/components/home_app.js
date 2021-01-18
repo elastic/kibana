@@ -21,14 +21,13 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 import { Home } from './home';
-import { FeatureDirectory } from './feature_directory';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 
 const RedirectToDefaultApp = () => {
   useMount(() => {
@@ -78,9 +77,6 @@ export function HomeApp({ directories, solutions }) {
         <Switch>
           <Route path="/tutorial/:id" render={renderTutorial} />
           <Route path="/tutorial_directory/:tab?" render={renderTutorialDirectory} />
-          <Route exact path="/feature_directory">
-            <FeatureDirectory addBasePath={addBasePath} directories={directories} />
-          </Route>
           <Route exact path="/">
             <Home
               addBasePath={addBasePath}

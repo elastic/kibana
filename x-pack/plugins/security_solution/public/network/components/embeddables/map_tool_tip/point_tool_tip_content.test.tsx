@@ -24,15 +24,9 @@ describe('PointToolTipContent', () => {
   ];
 
   test('renders correctly against snapshot', () => {
-    const closeTooltip = jest.fn();
-
     const wrapper = shallow(
       <TestProviders>
-        <PointToolTipContentComponent
-          contextId={'contextId'}
-          featureProps={mockFeatureProps}
-          closeTooltip={closeTooltip}
-        />
+        <PointToolTipContentComponent contextId={'contextId'} featureProps={mockFeatureProps} />
       </TestProviders>
     );
     expect(wrapper.find('PointToolTipContentComponent')).toMatchSnapshot();

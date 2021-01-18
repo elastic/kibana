@@ -9,6 +9,7 @@ export {
   AuthenticationProviderOptions,
   AuthenticationProviderSpecificOptions,
 } from './base';
+export { AnonymousAuthenticationProvider } from './anonymous';
 export { BasicAuthenticationProvider } from './basic';
 export { KerberosAuthenticationProvider } from './kerberos';
 export { SAMLAuthenticationProvider, SAMLLogin } from './saml';

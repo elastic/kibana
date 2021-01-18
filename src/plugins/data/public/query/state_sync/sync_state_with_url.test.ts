@@ -29,10 +29,11 @@ import {
   Storage,
 } from '../../../../kibana_utils/public';
 import { QueryService, QueryStart } from '../query_service';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { TimefilterContract } from '../timefilter';
 import { syncQueryStateWithUrl } from './sync_state_with_url';
 import { QueryState } from './types';
+import { createNowProviderMock } from '../../now_provider/mocks';
 
 const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();
@@ -73,6 +74,7 @@ describe('sync_query_state_with_url', () => {
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
+      nowProvider: createNowProviderMock(),
     });
     queryServiceStart = queryService.start({
       uiSettings: startMock.uiSettings,

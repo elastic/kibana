@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { MountPoint } from 'kibana/public';
+import type { DocLinksStart, MountPoint } from 'kibana/public';
 import {
   EuiCheckbox,
   EuiText,
@@ -19,13 +19,19 @@ import {
 
 export const insecureClusterAlertTitle = i18n.translate(
   'xpack.security.checkup.insecureClusterTitle',
-  { defaultMessage: 'Please secure your installation' }
+  { defaultMessage: 'Your data is not secure' }
 );
 
-export const insecureClusterAlertText = (onDismiss: (persist: boolean) => void) =>
+export const insecureClusterAlertText = (
+  getDocLinks: () => DocLinksStart,
+  onDismiss: (persist: boolean) => void
+) =>
   ((e) => {
     const AlertText = () => {
       const [persist, setPersist] = useState(false);
+      const enableSecurityDocLink = `${
+        getDocLinks().links.security.elasticsearchEnableSecurity
+      }?blade=kibanasecuritymessage`;
 
       return (
         <I18nProvider>
@@ -33,7 +39,7 @@ export const insecureClusterAlertText = (onDismiss: (persist: boolean) => void) 
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.security.checkup.insecureClusterMessage"
-                defaultMessage="Our free security features can protect against unauthorized access."
+                defaultMessage="Don’t lose one bit. Enable our free security features."
               />
             </EuiText>
             <EuiSpacer />
@@ -52,8 +58,9 @@ export const insecureClusterAlertText = (onDismiss: (persist: boolean) => void) 
                   size="s"
                   color="primary"
                   fill
-                  href="https://www.elastic.co/what-is/elastic-stack-security"
+                  href={enableSecurityDocLink}
                   target="_blank"
+                  data-test-subj="learnMoreButton"
                 >
                   {i18n.translate('xpack.security.checkup.enableButtonText', {
                     defaultMessage: `Enable security`,

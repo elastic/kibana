@@ -19,7 +19,7 @@
 
 import { createSavedObjectsStreamFromNdJson, validateTypes, validateObjects } from './utils';
 import { Readable } from 'stream';
-import { createPromiseFromStreams, createConcatStream } from '../../utils/streams';
+import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);
@@ -27,7 +27,7 @@ async function readStreamToCompletion(stream: Readable) {
 
 describe('createSavedObjectsStreamFromNdJson', () => {
   it('transforms an ndjson stream into a stream of saved objects', async () => {
-    const savedObjectsStream = createSavedObjectsStreamFromNdJson(
+    const savedObjectsStream = await createSavedObjectsStreamFromNdJson(
       new Readable({
         read() {
           this.push('{"id": "foo", "type": "foo-type"}\n');
@@ -52,7 +52,7 @@ describe('createSavedObjectsStreamFromNdJson', () => {
   });
 
   it('skips empty lines', async () => {
-    const savedObjectsStream = createSavedObjectsStreamFromNdJson(
+    const savedObjectsStream = await createSavedObjectsStreamFromNdJson(
       new Readable({
         read() {
           this.push('{"id": "foo", "type": "foo-type"}\n');
@@ -79,7 +79,7 @@ describe('createSavedObjectsStreamFromNdJson', () => {
   });
 
   it('filters the export details entry from the stream', async () => {
-    const savedObjectsStream = createSavedObjectsStreamFromNdJson(
+    const savedObjectsStream = await createSavedObjectsStreamFromNdJson(
       new Readable({
         read() {
           this.push('{"id": "foo", "type": "foo-type"}\n');

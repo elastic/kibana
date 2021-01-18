@@ -25,13 +25,19 @@ import { getServices } from '../../../../kibana_services';
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
 import { getQueryParameterActions } from '../query_parameters';
-import { FAILURE_REASONS, LOADING_STATUS } from './constants';
+import { FAILURE_REASONS, LOADING_STATUS } from './index';
 import { MarkdownSimple } from '../../../../../../kibana_react/public';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 
 export function QueryActionsProvider(Promise) {
-  const { filterManager, indexPatterns, data } = getServices();
-  const fetchAnchor = fetchAnchorProvider(indexPatterns, data.search.searchSource.createEmpty());
-  const { fetchSurroundingDocs } = fetchContextProvider(indexPatterns);
+  const { filterManager, indexPatterns, data, uiSettings } = getServices();
+  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const fetchAnchor = fetchAnchorProvider(
+    indexPatterns,
+    data.search.searchSource.createEmpty(),
+    useNewFieldsApi
+  );
+  const { fetchSurroundingDocs } = fetchContextProvider(indexPatterns, useNewFieldsApi);
   const { setPredecessorCount, setQueryParameters, setSuccessorCount } = getQueryParameterActions(
     filterManager,
     indexPatterns

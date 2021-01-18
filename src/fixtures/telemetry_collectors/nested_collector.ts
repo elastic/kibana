@@ -29,7 +29,7 @@ interface Usage {
 }
 
 export class NestedInside {
-  collector?: UsageCollector<Usage, Usage>;
+  collector?: UsageCollector<Usage>;
   createMyCollector() {
     this.collector = collectorSet.makeUsageCollector<Usage>({
       type: 'my_nested_collector',

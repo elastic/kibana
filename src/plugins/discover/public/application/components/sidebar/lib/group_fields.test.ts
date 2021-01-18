@@ -19,51 +19,59 @@
 
 import { groupFields } from './group_fields';
 import { getDefaultFieldFilter } from './field_filter';
+import { IndexPatternField } from '../../../../../../data/common/index_patterns/fields';
+
+const fields = [
+  {
+    name: 'category',
+    type: 'string',
+    esTypes: ['text'],
+    count: 1,
+    scripted: false,
+    searchable: true,
+    aggregatable: true,
+    readFromDocValues: true,
+  },
+  {
+    name: 'currency',
+    type: 'string',
+    esTypes: ['keyword'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: true,
+    readFromDocValues: true,
+  },
+  {
+    name: 'customer_birth_date',
+    type: 'date',
+    esTypes: ['date'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: true,
+    readFromDocValues: true,
+  },
+];
+
+const fieldCounts = {
+  category: 1,
+  currency: 1,
+  customer_birth_date: 1,
+};
 
 describe('group_fields', function () {
   it('should group fields in selected, popular, unpopular group', function () {
-    const fields = [
-      {
-        name: 'category',
-        type: 'string',
-        esTypes: ['text'],
-        count: 1,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      {
-        name: 'currency',
-        type: 'string',
-        esTypes: ['keyword'],
-        count: 0,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      {
-        name: 'customer_birth_date',
-        type: 'date',
-        esTypes: ['date'],
-        count: 0,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-    ];
-
-    const fieldCounts = {
-      category: 1,
-      currency: 1,
-      customer_birth_date: 1,
-    };
-
     const fieldFilterState = getDefaultFieldFilter();
 
-    const actual = groupFields(fields as any, ['currency'], 5, fieldCounts, fieldFilterState);
+    const actual = groupFields(
+      fields as IndexPatternField[],
+      ['currency'],
+      5,
+      fieldCounts,
+      fieldFilterState,
+      false
+    );
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "popular": Array [
@@ -110,5 +118,111 @@ describe('group_fields', function () {
         ],
       }
     `);
+  });
+  it('should group fields in selected, popular, unpopular group if they contain multifields', function () {
+    const category = {
+      name: 'category',
+      type: 'string',
+      esTypes: ['text'],
+      count: 1,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    };
+    const currency = {
+      name: 'currency',
+      displayName: 'currency',
+      kbnFieldType: {
+        esTypes: ['string', 'text', 'keyword', '_type', '_id'],
+        filterable: true,
+        name: 'string',
+        sortable: true,
+      },
+      spec: {
+        esTypes: ['text'],
+        name: 'category',
+      },
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    };
+    const currencyKeyword = {
+      name: 'currency.keyword',
+      displayName: 'currency.keyword',
+      type: 'string',
+      esTypes: ['keyword'],
+      kbnFieldType: {
+        esTypes: ['string', 'text', 'keyword', '_type', '_id'],
+        filterable: true,
+        name: 'string',
+        sortable: true,
+      },
+      spec: {
+        aggregatable: true,
+        esTypes: ['keyword'],
+        name: 'category.keyword',
+        readFromDocValues: true,
+        searchable: true,
+        shortDotsEnable: false,
+        subType: {
+          multi: {
+            parent: 'currency',
+          },
+        },
+      },
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: false,
+    };
+    const fieldsToGroup = [category, currency, currencyKeyword];
+
+    const fieldFilterState = getDefaultFieldFilter();
+
+    const actual = groupFields(
+      fieldsToGroup as any,
+      ['currency'],
+      5,
+      fieldCounts,
+      fieldFilterState,
+      true
+    );
+    expect(actual.popular).toEqual([category]);
+    expect(actual.selected).toEqual([currency]);
+    expect(actual.unpopular).toEqual([]);
+  });
+
+  it('should sort selected fields by columns order ', function () {
+    const fieldFilterState = getDefaultFieldFilter();
+
+    const actual1 = groupFields(
+      fields as IndexPatternField[],
+      ['customer_birth_date', 'currency', 'unknown'],
+      5,
+      fieldCounts,
+      fieldFilterState,
+      false
+    );
+    expect(actual1.selected.map((field) => field.name)).toEqual([
+      'customer_birth_date',
+      'currency',
+      'unknown',
+    ]);
+
+    const actual2 = groupFields(
+      fields as IndexPatternField[],
+      ['currency', 'customer_birth_date', 'unknown'],
+      5,
+      fieldCounts,
+      fieldFilterState,
+      false
+    );
+    expect(actual2.selected.map((field) => field.name)).toEqual([
+      'currency',
+      'customer_birth_date',
+      'unknown',
+    ]);
   });
 });

@@ -6,6 +6,7 @@
 
 import React, { useEffect, useReducer, useState } from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { Datasource, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
@@ -31,6 +32,7 @@ export interface EditorFrameProps {
   initialDatasourceId: string | null;
   initialVisualizationId: string | null;
   ExpressionRenderer: ReactExpressionRendererType;
+  palettes: PaletteRegistry;
   onError: (e: { message: string }) => void;
   core: CoreSetup | CoreStart;
   plugins: EditorFrameStartPlugins;
@@ -41,6 +43,7 @@ export interface EditorFrameProps {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
+  searchSessionId: string;
   onChange: (arg: {
     filterableIndexPatterns: string[];
     doc: Document;
@@ -99,9 +102,12 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
+    activeData: state.activeData,
     dateRange: props.dateRange,
     query: props.query,
     filters: props.filters,
+    searchSessionId: props.searchSessionId,
+    availablePalettes: props.palettes,
 
     addNewLayer() {
       const newLayerId = generateId();
@@ -121,7 +127,7 @@ export function EditorFrame(props: EditorFrameProps) {
         dispatch({
           type: 'UPDATE_VISUALIZATION_STATE',
           visualizationId: activeVisualization.id,
-          newState: layerIds.reduce(
+          updater: layerIds.reduce(
             (acc, layerId) =>
               activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
             state.visualization.state
@@ -182,7 +188,7 @@ export function EditorFrame(props: EditorFrameProps) {
         dispatch({
           type: 'UPDATE_VISUALIZATION_STATE',
           visualizationId: activeVisualization.id,
-          newState: initialVisualizationState,
+          updater: initialVisualizationState,
         });
       }
     },
@@ -239,6 +245,7 @@ export function EditorFrame(props: EditorFrameProps) {
       activeVisualization,
       state.datasourceStates,
       state.visualization,
+      state.activeData,
       props.query,
       props.dateRange,
       props.filters,

@@ -40,11 +40,12 @@ export class SearchAPI {
   constructor(
     private readonly dependencies: SearchAPIDependencies,
     private readonly abortSignal?: AbortSignal,
-    public readonly inspectorAdapters?: VegaInspectorAdapters
+    public readonly inspectorAdapters?: VegaInspectorAdapters,
+    private readonly searchSessionId?: string
   ) {}
 
   search(searchRequests: SearchRequest[]) {
-    const { search } = this.dependencies.search;
+    const { search } = this.dependencies;
     const requestResponders: any = {};
 
     return combineLatest(
@@ -59,13 +60,15 @@ export class SearchAPI {
           requestResponders[requestId].json(params.body);
         }
 
-        return search({ params }, { abortSignal: this.abortSignal }).pipe(
-          tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
-          map((data) => ({
-            name: requestId,
-            rawResponse: data.rawResponse,
-          }))
-        );
+        return search
+          .search({ params }, { abortSignal: this.abortSignal, sessionId: this.searchSessionId })
+          .pipe(
+            tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
+            map((data) => ({
+              name: requestId,
+              rawResponse: data.rawResponse,
+            }))
+          );
       })
     );
   }

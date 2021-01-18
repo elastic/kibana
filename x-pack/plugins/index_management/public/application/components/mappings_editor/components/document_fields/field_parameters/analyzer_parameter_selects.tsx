@@ -53,7 +53,7 @@ export const AnalyzerParameterSelects = ({
 
   useEffect(() => {
     const subscription = subscribe((updateData) => {
-      const formData = updateData.data.raw;
+      const formData = updateData.data.internal;
       const value = formData.sub ? formData.sub : formData.main;
       onChange(value);
     });

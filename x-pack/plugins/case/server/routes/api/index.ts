@@ -27,6 +27,7 @@ import { initCaseConfigureGetActionConnector } from './cases/configure/get_conne
 import { initGetCaseConfigure } from './cases/configure/get_configure';
 import { initPatchCaseConfigure } from './cases/configure/patch_configure';
 import { initPostCaseConfigure } from './cases/configure/post_configure';
+import { initPostPushToService } from './cases/configure/post_push_to_service';
 
 import { RouteDeps } from './types';
 
@@ -52,6 +53,7 @@ export function initCaseApi(deps: RouteDeps) {
   initGetCaseConfigure(deps);
   initPatchCaseConfigure(deps);
   initPostCaseConfigure(deps);
+  initPostPushToService(deps);
   // Reporters
   initGetReportersApi(deps);
   // Status

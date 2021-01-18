@@ -80,7 +80,7 @@ export const WatchCommand: ICommand = {
       const completionHint = await waitUntilWatchIsReady(
         pkg.runScriptStreaming(watchScriptName, {
           debug: false,
-        }).stdout
+        }).stdout! // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
       );
 
       log.success(`[${pkg.name}] Initial build completed (${completionHint}).`);

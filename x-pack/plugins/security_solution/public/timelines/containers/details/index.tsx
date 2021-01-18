@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -18,6 +18,7 @@ import {
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
@@ -28,8 +29,6 @@ export interface UseTimelineEventsDetailsProps {
   eventId: string;
   skip: boolean;
 }
-
-const ID = 'timelineEventsDetails';
 
 export const useTimelineEventsDetails = ({
   docValueFields,
@@ -52,7 +51,7 @@ export const useTimelineEventsDetails = ({
 
   const timelineDetailsSearch = useCallback(
     (request: TimelineEventsDetailsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip || isEmpty(request.eventId)) {
         return;
       }
 
@@ -86,8 +85,13 @@ export const useTimelineEventsDetails = ({
                 searchSubscription$.unsubscribe();
               }
             },
-            error: () => {
-              notifications.toasts.addDanger('Failed to run search');
+            error: (msg) => {
+              if (!didCancel) {
+                setLoading(false);
+              }
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addDanger('Failed to run search');
+              }
             },
           });
       };
@@ -99,7 +103,7 @@ export const useTimelineEventsDetails = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -108,16 +112,15 @@ export const useTimelineEventsDetails = ({
         ...(prevRequest ?? {}),
         docValueFields,
         indexName,
-        id: ID,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [docValueFields, eventId, indexName, skip]);
+  }, [docValueFields, eventId, indexName]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);

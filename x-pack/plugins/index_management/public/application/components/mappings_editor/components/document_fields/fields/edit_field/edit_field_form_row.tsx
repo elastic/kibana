@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { get } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -193,7 +194,7 @@ export const EditFieldFormRow = React.memo(
     return formFieldPath ? (
       <FormDataProvider pathsToWatch={formFieldPath}>
         {(formData) => {
-          setIsContentVisible(formData[formFieldPath]);
+          setIsContentVisible(get(formData, formFieldPath));
           return renderContent();
         }}
       </FormDataProvider>

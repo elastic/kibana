@@ -13,13 +13,14 @@ import { Dictionary } from '../../../../../common/types/common';
 
 import { TimeseriesChart } from './timeseries_chart';
 
-import { annotation$ } from '../../../services/annotations_service';
+import { AnnotationUpdatesService } from '../../../services/annotations_service';
 
 export const ANNOTATION_MASK_ID = 'mlAnnotationMask';
 
 // getAnnotationBrush() is expected to be called like getAnnotationBrush.call(this)
 // so it gets passed on the context of the component it gets called from.
 export function getAnnotationBrush(this: TimeseriesChart) {
+  const { annotationUpdatesService } = this.props;
   const focusXScale = this.focusXScale;
 
   const annotateBrush = d3.svg.brush().x(focusXScale).on('brushend', brushend.bind(this));
@@ -35,7 +36,7 @@ export function getAnnotationBrush(this: TimeseriesChart) {
     const endTimestamp = extent[1].getTime();
 
     if (timestamp === endTimestamp) {
-      annotation$.next(null);
+      annotationUpdatesService.setValue(null);
       return;
     }
 
@@ -47,7 +48,7 @@ export function getAnnotationBrush(this: TimeseriesChart) {
       type: ANNOTATION_TYPE.ANNOTATION,
     };
 
-    annotation$.next(annotation);
+    annotationUpdatesService.setValue(annotation);
   }
 
   return annotateBrush;
@@ -90,7 +91,7 @@ const ANNOTATION_DEFAULT_LEVEL = 1;
 const ANNOTATION_LEVEL_HEIGHT = 28;
 const ANNOTATION_UPPER_RECT_MARGIN = 0;
 const ANNOTATION_UPPER_TEXT_MARGIN = -7;
-const ANNOTATION_MIN_WIDTH = 2;
+export const ANNOTATION_MIN_WIDTH = 2;
 const ANNOTATION_RECT_BORDER_RADIUS = 2;
 const ANNOTATION_TEXT_VERTICAL_OFFSET = 26;
 const ANNOTATION_TEXT_RECT_VERTICAL_OFFSET = 12;
@@ -105,7 +106,8 @@ export function renderAnnotations(
   focusXScale: TimeseriesChart['focusXScale'],
   showAnnotations: boolean,
   showFocusChartTooltip: (d: Annotation, t: object) => {},
-  hideFocusChartTooltip: () => void
+  hideFocusChartTooltip: () => void,
+  annotationUpdatesService: AnnotationUpdatesService
 ) {
   const upperRectMargin = ANNOTATION_UPPER_RECT_MARGIN;
   const upperTextMargin = ANNOTATION_UPPER_TEXT_MARGIN;
@@ -153,9 +155,9 @@ export function renderAnnotations(
       // clear a possible existing annotation set up for editing before setting the new one.
       // this needs to be done explicitly here because a new annotation created using the brush tool
       // could still be present in the chart.
-      annotation$.next(null);
+      annotationUpdatesService.setValue(null);
       // set the actual annotation and trigger the flyout
-      annotation$.next(d);
+      annotationUpdatesService.setValue(d);
     });
 
   rects

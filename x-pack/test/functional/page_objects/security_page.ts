@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { Role } from '../../../plugins/security/common/model';
+import { AuthenticatedUser, Role } from '../../../plugins/security/common/model';
 
 export function SecurityPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -17,6 +18,8 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   const esArchiver = getService('esArchiver');
   const userMenu = getService('userMenu');
   const comboBox = getService('comboBox');
+  const supertest = getService('supertestWithoutAuth');
+  const deployment = getService('deployment');
   const PageObjects = getPageObjects(['common', 'header', 'error']);
 
   interface LoginOptions {
@@ -41,10 +44,14 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
     });
   }
 
+  async function isLoginFormVisible() {
+    return await testSubjects.exists('loginForm');
+  }
+
   async function waitForLoginForm() {
     log.debug('Waiting for Login Form to appear.');
     await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => {
-      return await testSubjects.exists('loginForm');
+      return await isLoginFormVisible();
     });
   }
 
@@ -107,16 +114,17 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
   const loginPage = Object.freeze({
     async login(username?: string, password?: string, options: LoginOptions = {}) {
-      await PageObjects.common.navigateToApp('login');
+      if (!(await isLoginFormVisible())) {
+        await PageObjects.common.navigateToApp('login');
+      }
 
       // ensure welcome screen won't be shown. This is relevant for environments which don't allow
       // to use the yml setting, e.g. cloud
       await browser.setLocalStorageItem('home:welcome:show', 'false');
       await waitForLoginForm();
 
-      const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
-      await testSubjects.setValue('loginUsername', username || superUsername);
-      await testSubjects.setValue('loginPassword', password || superPassword);
+      await testSubjects.setValue('loginUsername', username || adminTestUser.username);
+      await testSubjects.setValue('loginPassword', password || adminTestUser.password);
       await testSubjects.click('loginSubmit');
 
       await waitForLoginResult(
@@ -154,9 +162,8 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       if (providerType === 'basic' || providerType === 'token') {
         await waitForLoginForm();
 
-        const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
-        await testSubjects.setValue('loginUsername', options?.username ?? superUsername);
-        await testSubjects.setValue('loginPassword', options?.password ?? superPassword);
+        await testSubjects.setValue('loginUsername', options?.username ?? adminTestUser.username);
+        await testSubjects.setValue('loginPassword', options?.password ?? adminTestUser.password);
         await testSubjects.click('loginSubmit');
       }
 
@@ -218,6 +225,21 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       await waitForLoginPage();
     }
 
+    async getCurrentUser() {
+      const sidCookie = await browser.getCookie('sid');
+      if (!sidCookie?.value) {
+        log.debug('User is not authenticated yet.');
+        return null;
+      }
+
+      const { body: user } = await supertest
+        .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
+        .set('Cookie', `sid=${sidCookie.value}`)
+        .expect(200);
+      return user as AuthenticatedUser;
+    }
+
     async forceLogout() {
       log.debug('SecurityPage.forceLogout');
       if (await find.existsByDisplayedByCssSelector('.login-form', 100)) {
@@ -226,7 +248,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       }
 
       log.debug('Redirecting to /logout to force the logout');
-      const url = PageObjects.common.getHostPort() + '/logout';
+      const url = deployment.getHostPort() + '/logout';
       await browser.get(url);
       log.debug('Waiting on the login form to appear');
       await waitForLoginPage();

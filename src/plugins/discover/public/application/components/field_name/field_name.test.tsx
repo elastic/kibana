@@ -27,14 +27,12 @@ test('FieldName renders a string field by providing fieldType and fieldName', ()
   expect(component).toMatchSnapshot();
 });
 
-test('FieldName renders a number field by providing a field record, useShortDots is set to false', () => {
+test('FieldName renders a number field by providing a field record', () => {
   const component = render(<FieldName fieldName={'test.test.test'} fieldType={'number'} />);
   expect(component).toMatchSnapshot();
 });
 
-test('FieldName renders a geo field, useShortDots is set to true', () => {
-  const component = render(
-    <FieldName fieldName={'test.test.test'} fieldType={'geo_point'} useShortDots={true} />
-  );
+test('FieldName renders a geo field', () => {
+  const component = render(<FieldName fieldName={'test.test.test'} fieldType={'geo_point'} />);
   expect(component).toMatchSnapshot();
 });

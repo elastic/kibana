@@ -6,11 +6,16 @@
 
 import { SavedObject } from 'kibana/server';
 import {
-  ESCasesConfigureAttributes,
+  CaseStatuses,
   CommentAttributes,
-  ESCaseAttributes,
+  CommentType,
+  ConnectorMappings,
   ConnectorTypes,
+  ESCaseAttributes,
+  ESCasesConfigureAttributes,
 } from '../../../../common/api';
+import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../saved_object_types';
+import { mappings } from '../../../client/configure/mock';
 
 export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
   {
@@ -34,13 +39,16 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       description: 'This is a brand new case of a bad meanie defacing data',
       external_service: null,
       title: 'Super Bad Security Issue',
-      status: 'open',
+      status: CaseStatuses.open,
       tags: ['defacement'],
       updated_at: '2019-11-25T21:54:48.952Z',
       updated_by: {
         full_name: 'elastic',
         email: 'testemail@elastic.co',
         username: 'elastic',
+      },
+      settings: {
+        syncAlerts: true,
       },
     },
     references: [],
@@ -68,13 +76,16 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       description: 'Oh no, a bad meanie destroying data!',
       external_service: null,
       title: 'Damaging Data Destruction Detected',
-      status: 'open',
+      status: CaseStatuses.open,
       tags: ['Data Destruction'],
       updated_at: '2019-11-25T22:32:00.900Z',
       updated_by: {
         full_name: 'elastic',
         email: 'testemail@elastic.co',
         username: 'elastic',
+      },
+      settings: {
+        syncAlerts: true,
       },
     },
     references: [],
@@ -106,13 +117,16 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       description: 'Oh no, a bad meanie going LOLBins all over the place!',
       external_service: null,
       title: 'Another bad one',
-      status: 'open',
+      status: CaseStatuses.open,
       tags: ['LOLBins'],
       updated_at: '2019-11-25T22:32:17.947Z',
       updated_by: {
         full_name: 'elastic',
         email: 'testemail@elastic.co',
         username: 'elastic',
+      },
+      settings: {
+        syncAlerts: true,
       },
     },
     references: [],
@@ -147,7 +161,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       },
       description: 'Oh no, a bad meanie going LOLBins all over the place!',
       external_service: null,
-      status: 'closed',
+      status: CaseStatuses.closed,
       title: 'Another bad one',
       tags: ['LOLBins'],
       updated_at: '2019-11-25T22:32:17.947Z',
@@ -155,6 +169,9 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         full_name: 'elastic',
         email: 'testemail@elastic.co',
         username: 'elastic',
+      },
+      settings: {
+        syncAlerts: true,
       },
     },
     references: [],
@@ -178,13 +195,16 @@ export const mockCaseNoConnectorId: SavedObject<Partial<ESCaseAttributes>> = {
     description: 'This is a brand new case of a bad meanie defacing data',
     external_service: null,
     title: 'Super Bad Security Issue',
-    status: 'open',
+    status: CaseStatuses.open,
     tags: ['defacement'],
     updated_at: '2019-11-25T21:54:48.952Z',
     updated_by: {
       full_name: 'elastic',
       email: 'testemail@elastic.co',
       username: 'elastic',
+    },
+    settings: {
+      syncAlerts: true,
     },
   },
   references: [],
@@ -207,6 +227,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-1',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
+      type: CommentType.user,
       created_at: '2019-11-25T21:55:00.177Z',
       created_by: {
         full_name: 'elastic',
@@ -237,6 +258,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-2',
     attributes: {
       comment: 'Well I decided to update my comment. So what? Deal with it.',
+      type: CommentType.user,
       created_at: '2019-11-25T21:55:14.633Z',
       created_by: {
         full_name: 'elastic',
@@ -268,6 +290,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-3',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
+      type: CommentType.user,
       created_at: '2019-11-25T22:32:30.608Z',
       created_by: {
         full_name: 'elastic',
@@ -288,6 +311,70 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         type: 'cases',
         name: 'associated-cases',
         id: 'mock-id-3',
+      },
+    ],
+    updated_at: '2019-11-25T22:32:30.608Z',
+    version: 'WzYsMV0=',
+  },
+  {
+    type: 'cases-comment',
+    id: 'mock-comment-4',
+    attributes: {
+      type: CommentType.alert,
+      index: 'test-index',
+      alertId: 'test-id',
+      created_at: '2019-11-25T22:32:30.608Z',
+      created_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: '2019-11-25T22:32:30.608Z',
+      updated_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+    },
+    references: [
+      {
+        type: 'cases',
+        name: 'associated-cases',
+        id: 'mock-id-4',
+      },
+    ],
+    updated_at: '2019-11-25T22:32:30.608Z',
+    version: 'WzYsMV0=',
+  },
+  {
+    type: 'cases-comment',
+    id: 'mock-comment-5',
+    attributes: {
+      type: CommentType.alert,
+      index: 'test-index-2',
+      alertId: 'test-id-2',
+      created_at: '2019-11-25T22:32:30.608Z',
+      created_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: '2019-11-25T22:32:30.608Z',
+      updated_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+    },
+    references: [
+      {
+        type: 'cases',
+        name: 'associated-cases',
+        id: 'mock-id-4',
       },
     ],
     updated_at: '2019-11-25T22:32:30.608Z',
@@ -323,5 +410,16 @@ export const mockCaseConfigure: Array<SavedObject<ESCasesConfigureAttributes>> =
     references: [],
     updated_at: '2020-04-09T09:43:51.778Z',
     version: 'WzYsMV0=',
+  },
+];
+
+export const mockCaseMappings: Array<SavedObject<ConnectorMappings>> = [
+  {
+    type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
+    id: 'mock-mappings-1',
+    attributes: {
+      mappings: mappings[ConnectorTypes.jira],
+    },
+    references: [],
   },
 ];

@@ -22,7 +22,7 @@ export const ControlPanel = memo<ControlPanelProps>(
     return (
       <EuiFlexGroup direction="row" alignItems="center">
         <EuiFlexItem grow={1}>
-          <EuiText color="subdued" size="xs">
+          <EuiText color="subdued" size="xs" data-test-subj="trustedAppsListViewCountLabel">
             {i18n.translate('xpack.securitySolution.trustedapps.list.totalCount', {
               defaultMessage:
                 '{totalItemCount, plural, one {# trusted application} other {# trusted applications}}',

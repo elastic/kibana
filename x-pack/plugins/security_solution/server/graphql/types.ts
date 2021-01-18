@@ -105,7 +105,7 @@ export interface TimelineInput {
 
   savedQueryId?: Maybe<string>;
 
-  sort?: Maybe<SortTimelineInput>;
+  sort?: Maybe<SortTimelineInput[]>;
 
   status?: Maybe<TimelineStatus>;
 }
@@ -492,6 +492,8 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: Maybe<string>;
 
+  agent?: Maybe<AgentFields>;
+
   cloud?: Maybe<CloudFields>;
 
   endpoint?: Maybe<EndpointFields>;
@@ -501,6 +503,10 @@ export interface HostItem {
   inspect?: Maybe<Inspect>;
 
   lastSeen?: Maybe<string>;
+}
+
+export interface AgentFields {
+  id?: Maybe<string>;
 }
 
 export interface CloudFields {
@@ -628,7 +634,7 @@ export interface TimelineResult {
 
   savedObjectId: string;
 
-  sort?: Maybe<SortTimelineResult>;
+  sort?: Maybe<ToAny>;
 
   status?: Maybe<TimelineStatus>;
 
@@ -769,12 +775,6 @@ export interface KueryFilterQueryResult {
   kind?: Maybe<string>;
 
   expression?: Maybe<string>;
-}
-
-export interface SortTimelineResult {
-  columnId?: Maybe<string>;
-
-  sortDirection?: Maybe<string>;
 }
 
 export interface ResponseTimelines {
@@ -2268,6 +2268,8 @@ export namespace HostItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HostItem> {
     _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
 
+    agent?: AgentResolver<Maybe<AgentFields>, TypeParent, TContext>;
+
     cloud?: CloudResolver<Maybe<CloudFields>, TypeParent, TContext>;
 
     endpoint?: EndpointResolver<Maybe<EndpointFields>, TypeParent, TContext>;
@@ -2284,6 +2286,11 @@ export namespace HostItemResolvers {
     Parent,
     TContext
   >;
+  export type AgentResolver<
+    R = Maybe<AgentFields>,
+    Parent = HostItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
   export type CloudResolver<
     R = Maybe<CloudFields>,
     Parent = HostItem,
@@ -2307,6 +2314,18 @@ export namespace HostItemResolvers {
   export type LastSeenResolver<
     R = Maybe<string>,
     Parent = HostItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace AgentFieldsResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = AgentFields> {
+    id?: IdResolver<Maybe<string>, TypeParent, TContext>;
+  }
+
+  export type IdResolver<
+    R = Maybe<string>,
+    Parent = AgentFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -2639,7 +2658,7 @@ export namespace TimelineResultResolvers {
 
     savedObjectId?: SavedObjectIdResolver<string, TypeParent, TContext>;
 
-    sort?: SortResolver<Maybe<SortTimelineResult>, TypeParent, TContext>;
+    sort?: SortResolver<Maybe<ToAny>, TypeParent, TContext>;
 
     status?: StatusResolver<Maybe<TimelineStatus>, TypeParent, TContext>;
 
@@ -2759,7 +2778,7 @@ export namespace TimelineResultResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type SortResolver<
-    R = Maybe<SortTimelineResult>,
+    R = Maybe<ToAny>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3215,25 +3234,6 @@ export namespace KueryFilterQueryResultResolvers {
   export type ExpressionResolver<
     R = Maybe<string>,
     Parent = KueryFilterQueryResult,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace SortTimelineResultResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = SortTimelineResult> {
-    columnId?: ColumnIdResolver<Maybe<string>, TypeParent, TContext>;
-
-    sortDirection?: SortDirectionResolver<Maybe<string>, TypeParent, TContext>;
-  }
-
-  export type ColumnIdResolver<
-    R = Maybe<string>,
-    Parent = SortTimelineResult,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type SortDirectionResolver<
-    R = Maybe<string>,
-    Parent = SortTimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -6043,6 +6043,7 @@ export type IResolvers<TContext = SiemContext> = {
   HostsData?: HostsDataResolvers.Resolvers<TContext>;
   HostsEdges?: HostsEdgesResolvers.Resolvers<TContext>;
   HostItem?: HostItemResolvers.Resolvers<TContext>;
+  AgentFields?: AgentFieldsResolvers.Resolvers<TContext>;
   CloudFields?: CloudFieldsResolvers.Resolvers<TContext>;
   CloudInstance?: CloudInstanceResolvers.Resolvers<TContext>;
   CloudMachine?: CloudMachineResolvers.Resolvers<TContext>;
@@ -6064,7 +6065,6 @@ export type IResolvers<TContext = SiemContext> = {
   SerializedFilterQueryResult?: SerializedFilterQueryResultResolvers.Resolvers<TContext>;
   SerializedKueryQueryResult?: SerializedKueryQueryResultResolvers.Resolvers<TContext>;
   KueryFilterQueryResult?: KueryFilterQueryResultResolvers.Resolvers<TContext>;
-  SortTimelineResult?: SortTimelineResultResolvers.Resolvers<TContext>;
   ResponseTimelines?: ResponseTimelinesResolvers.Resolvers<TContext>;
   Mutation?: MutationResolvers.Resolvers<TContext>;
   ResponseNote?: ResponseNoteResolvers.Resolvers<TContext>;

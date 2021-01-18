@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { MountPoint } from 'kibana/public';
+
+import { docLinksServiceMock } from '../../../../../src/core/public/mocks';
 import { mockSecurityOssPlugin } from '../../../../../src/plugins/security_oss/public/mocks';
 import { insecureClusterAlertTitle } from './components';
 import { SecurityCheckupService } from './security_checkup_service';
@@ -13,9 +16,12 @@ let mockOnDismiss = jest.fn();
 jest.mock('./components', () => {
   return {
     insecureClusterAlertTitle: 'mock insecure cluster title',
-    insecureClusterAlertText: (onDismiss: any) => {
+    insecureClusterAlertText: (getDocLinksService: any, onDismiss: any) => {
       mockOnDismiss = onDismiss;
-      return 'mock insecure cluster text';
+      const { insecureClusterAlertText } = jest.requireActual(
+        './components/insecure_cluster_alert'
+      );
+      return insecureClusterAlertText(getDocLinksService, onDismiss);
     },
   };
 });
@@ -31,9 +37,7 @@ describe('SecurityCheckupService', () => {
         insecureClusterAlertTitle
       );
 
-      expect(securityOssSetup.insecureCluster.setAlertText).toHaveBeenCalledWith(
-        'mock insecure cluster text'
-      );
+      expect(securityOssSetup.insecureCluster.setAlertText).toHaveBeenCalledTimes(1);
     });
   });
   describe('#start', () => {
@@ -42,13 +46,34 @@ describe('SecurityCheckupService', () => {
       const securityOssStart = mockSecurityOssPlugin.createStart();
       const service = new SecurityCheckupService();
       service.setup({ securityOssSetup });
-      service.start({ securityOssStart });
+      service.start({ securityOssStart, docLinks: docLinksServiceMock.createStartContract() });
 
       expect(securityOssStart.insecureCluster.hideAlert).toHaveBeenCalledTimes(0);
 
       mockOnDismiss();
 
       expect(securityOssStart.insecureCluster.hideAlert).toHaveBeenCalledTimes(1);
+    });
+
+    it('configures the doc link correctly', async () => {
+      const securityOssSetup = mockSecurityOssPlugin.createSetup();
+      const securityOssStart = mockSecurityOssPlugin.createStart();
+      const service = new SecurityCheckupService();
+      service.setup({ securityOssSetup });
+      service.start({ securityOssStart, docLinks: docLinksServiceMock.createStartContract() });
+
+      const [alertText] = securityOssSetup.insecureCluster.setAlertText.mock.calls[0];
+
+      const container = document.createElement('div');
+      (alertText as MountPoint)(container);
+
+      const docLink = container
+        .querySelector('[data-test-subj="learnMoreButton"]')
+        ?.getAttribute('href');
+
+      expect(docLink).toMatchInlineSnapshot(
+        `"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/get-started-enable-security.html?blade=kibanasecuritymessage"`
+      );
     });
   });
 });

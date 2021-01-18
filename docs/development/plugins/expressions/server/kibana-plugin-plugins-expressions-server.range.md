@@ -15,6 +15,7 @@ export interface Range
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [from](./kibana-plugin-plugins-expressions-server.range.from.md) | <code>number</code> |  |
+|  [label](./kibana-plugin-plugins-expressions-server.range.label.md) | <code>string</code> |  |
 |  [to](./kibana-plugin-plugins-expressions-server.range.to.md) | <code>number</code> |  |
 |  [type](./kibana-plugin-plugins-expressions-server.range.type.md) | <code>typeof name</code> |  |
 

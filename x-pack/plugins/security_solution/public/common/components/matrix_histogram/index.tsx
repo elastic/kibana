@@ -34,7 +34,6 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     defaultStackByOption: MatrixHistogramOption;
     errorMessage: string;
     headerChildren?: React.ReactNode;
-    footerChildren?: React.ReactNode;
     hideHistogramIfEmpty?: boolean;
     histogramType: MatrixHistogramType;
     id: string;
@@ -48,7 +47,6 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     subtitle?: string | GetSubTitle;
     timelineId?: string;
     title: string | GetTitle;
-    yTitle?: string | undefined;
   };
 
 const DEFAULT_PANEL_HEIGHT = 300;
@@ -60,21 +58,22 @@ const HeaderChildrenFlexItem = styled(EuiFlexItem)`
 const HistogramPanel = styled(Panel)<{ height?: number }>`
   display: flex;
   flex-direction: column;
-  ${({ height }) => (height != null ? `height: ${height}px;` : '')}
+  ${({ height }) => (height != null ? `min-height: ${height}px;` : '')}
 `;
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
   defaultStackByOption,
+  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
   headerChildren,
-  footerChildren,
   histogramType,
   hideHistogramIfEmpty = false,
   id,
   indexNames,
+  isPtrIncluded,
   legendPosition,
   mapping,
   panelHeight = DEFAULT_PANEL_HEIGHT,
@@ -89,7 +88,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   title,
   titleSize,
   yTickFormatter,
-  yTitle,
 }) => {
   const dispatch = useDispatch();
   const handleBrushEnd = useCallback(
@@ -118,18 +116,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
         onBrushEnd: handleBrushEnd,
         yTickFormatter,
         showLegend,
-        yTitle,
       }),
-    [
-      chartHeight,
-      startDate,
-      legendPosition,
-      endDate,
-      handleBrushEnd,
-      yTickFormatter,
-      showLegend,
-      yTitle,
-    ]
+    [chartHeight, startDate, legendPosition, endDate, handleBrushEnd, yTickFormatter, showLegend]
   );
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
@@ -152,6 +140,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     indexNames,
     startDate,
     stackByField: selectedStackByOption.value,
+    isPtrIncluded,
+    docValueFields,
   });
 
   const titleWithStackByField = useMemo(
@@ -242,11 +232,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
               stackByField={selectedStackByOption.value}
               timelineId={timelineId}
             />
-          )}
-          {footerChildren != null && (
-            <EuiFlexGroup gutterSize="none" direction="row">
-              {footerChildren}
-            </EuiFlexGroup>
           )}
         </HistogramPanel>
       </InspectButtonContainer>

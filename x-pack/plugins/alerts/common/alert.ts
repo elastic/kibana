@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes } from 'kibana/server';
+import { SavedObjectAttribute, SavedObjectAttributes } from 'kibana/server';
+import { AlertNotifyWhenType } from './alert_notify_when_type';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AlertTypeState = Record<string, any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AlertTypeParams = Record<string, any>;
+export type AlertTypeState = Record<string, unknown>;
+export type AlertTypeParams = Record<string, unknown>;
 
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
@@ -20,13 +19,13 @@ export interface IntervalSchedule extends SavedObjectAttributes {
 export const AlertExecutionStatusValues = ['ok', 'active', 'error', 'pending', 'unknown'] as const;
 export type AlertExecutionStatuses = typeof AlertExecutionStatusValues[number];
 
-export const AlertExecutionStatusErrorReasonValues = [
-  'read',
-  'decrypt',
-  'execute',
-  'unknown',
-] as const;
-export type AlertExecutionStatusErrorReasons = typeof AlertExecutionStatusErrorReasonValues[number];
+export enum AlertExecutionStatusErrorReasons {
+  Read = 'read',
+  Decrypt = 'decrypt',
+  Execute = 'execute',
+  Unknown = 'unknown',
+  License = 'license',
+}
 
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
@@ -38,6 +37,7 @@ export interface AlertExecutionStatus {
 }
 
 export type AlertActionParams = SavedObjectAttributes;
+export type AlertActionParam = SavedObjectAttribute;
 
 export interface AlertAction {
   group: string;
@@ -46,7 +46,11 @@ export interface AlertAction {
   params: AlertActionParams;
 }
 
-export interface Alert {
+export interface AlertAggregations {
+  alertExecutionStatus: { [status: string]: number };
+}
+
+export interface Alert<Params extends AlertTypeParams = never> {
   id: string;
   enabled: boolean;
   name: string;
@@ -55,7 +59,7 @@ export interface Alert {
   consumer: string;
   schedule: IntervalSchedule;
   actions: AlertAction[];
-  params: AlertTypeParams;
+  params: Params;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
@@ -64,9 +68,31 @@ export interface Alert {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
+  notifyWhen: AlertNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;
 }
 
-export type SanitizedAlert = Omit<Alert, 'apiKey'>;
+export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
+
+export enum HealthStatus {
+  OK = 'ok',
+  Warning = 'warn',
+  Error = 'error',
+}
+
+export interface AlertsHealth {
+  decryptionHealth: {
+    status: HealthStatus;
+    timestamp: string;
+  };
+  executionHealth: {
+    status: HealthStatus;
+    timestamp: string;
+  };
+  readHealth: {
+    status: HealthStatus;
+    timestamp: string;
+  };
+}

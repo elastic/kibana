@@ -15,8 +15,11 @@ import { ExamplesList } from '../examples_list';
 
 export const TextContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats } = config;
+  if (stats === undefined) return null;
 
   const { examples } = stats;
+  if (examples === undefined) return null;
+
   const numExamples = examples.length;
 
   return (

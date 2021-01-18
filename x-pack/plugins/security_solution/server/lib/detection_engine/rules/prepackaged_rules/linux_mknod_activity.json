@@ -23,7 +23,9 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection"
   ],
   "type": "query",
   "version": 5

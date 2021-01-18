@@ -44,7 +44,7 @@ export class Kibana {
     return new Kibana(await getProjects(rootPath, getProjectPaths({ rootPath })));
   }
 
-  private readonly kibanaProject: Project;
+  public readonly kibanaProject: Project;
 
   constructor(private readonly allWorkspaceProjects: ProjectMap) {
     const kibanaProject = allWorkspaceProjects.get('kibana');

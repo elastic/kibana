@@ -5,7 +5,7 @@
  */
 
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { Alert } from '../../../../../alerts/common';
+import { Alert, AlertTypeParams } from '../../../../../alerts/common';
 import { AlertsClient } from '../../../../../alerts/server';
 import { createRules } from './create_rules';
 import { PartialFilter } from '../types';
@@ -14,8 +14,8 @@ export const installPrepackagedRules = (
   alertsClient: AlertsClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string
-): Array<Promise<Alert>> =>
-  rules.reduce<Array<Promise<Alert>>>((acc, rule) => {
+): Array<Promise<Alert<AlertTypeParams>>> =>
+  rules.reduce<Array<Promise<Alert<AlertTypeParams>>>>((acc, rule) => {
     const {
       anomaly_threshold: anomalyThreshold,
       author,
@@ -51,6 +51,8 @@ export const installPrepackagedRules = (
       threat_filters: threatFilters,
       threat_mapping: threatMapping,
       threat_language: threatLanguage,
+      concurrent_searches: concurrentSearches,
+      items_per_search: itemsPerSearch,
       threat_query: threatQuery,
       threat_index: threatIndex,
       threshold,
@@ -103,6 +105,8 @@ export const installPrepackagedRules = (
         threatFilters,
         threatMapping,
         threatLanguage,
+        concurrentSearches,
+        itemsPerSearch,
         threatQuery,
         threatIndex,
         threshold,

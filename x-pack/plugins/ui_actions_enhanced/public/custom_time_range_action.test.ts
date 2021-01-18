@@ -16,9 +16,9 @@ import { HelloWorldContainer } from '../../../../src/plugins/embeddable/public/l
 import {
   HelloWorldEmbeddable,
   HELLO_WORLD_EMBEDDABLE,
-} from '../../../../examples/embeddable_examples/public';
+} from '../../../../src/plugins/embeddable/public/tests/fixtures';
 
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import { ReactElement } from 'react';
 
 const createOpenModalMock = () => {

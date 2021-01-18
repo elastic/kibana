@@ -5,25 +5,54 @@
  */
 
 import React, { useRef, useState, useEffect } from 'react';
-import styled from 'styled-components';
 import { isEmpty } from 'lodash';
-import { tint } from 'polished';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { rgba } from 'polished';
 import { Suggestion } from './suggestion';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { units, px, unit } from '../../../../../../apm/public/style/variables';
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
+import { euiStyled } from '../../../../../../observability/public';
 
-const List = styled.ul`
+export const unit = 16;
+
+export const units = {
+  unit,
+  eighth: unit / 8,
+  quarter: unit / 4,
+  half: unit / 2,
+  minus: unit * 0.75,
+  plus: unit * 1.5,
+  double: unit * 2,
+  triple: unit * 3,
+  quadruple: unit * 4,
+};
+
+export function px(value: number): string {
+  return `${value}px`;
+}
+
+const List = euiStyled.ul`
   width: 100%;
-  border: 1px solid ${theme.euiColorLightShade};
+  border: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
   border-radius: ${px(units.quarter)};
-  box-shadow: 0px ${px(units.quarter)} ${px(units.double)} ${tint(0.1, theme.euiColorFullShade)};
-  background: #fff;
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
   z-index: 10;
   max-height: ${px(unit * 20)};
-  overflow: scroll;
+  overflow: auto;
   position: absolute;
+
+  &::-webkit-scrollbar {
+    height: ${({ theme }) => theme.eui.euiScrollBar};
+    width: ${({ theme }) => theme.eui.euiScrollBar};
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-clip: content-box;
+    background-color: ${({ theme }) => rgba(theme.eui.euiColorDarkShade, 0.5)};
+    border: ${({ theme }) => theme.eui.euiScrollBarCorner} solid transparent;
+  }
+  &::-webkit-scrollbar-corner,
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 `;
 
 interface SuggestionsProps {

@@ -282,6 +282,10 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async hasIndexPattern(name: string) {
+      return await find.existsByLinkText(name);
+    }
+
     async clickIndexPatternByName(name: string) {
       const indexLink = await find.byXPath(`//a[descendant::*[text()='${name}']]`);
       await indexLink.click();
@@ -318,12 +322,20 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async createIndexPattern(
       indexPatternName: string,
-      timefield = '@timestamp',
+      // null to bypass default value
+      timefield: string | null = '@timestamp',
       isStandardIndexPattern = true
     ) {
       await retry.try(async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();
+        const exists = await this.hasIndexPattern(indexPatternName);
+
+        if (exists) {
+          await this.clickIndexPatternByName(indexPatternName);
+          return;
+        }
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickAddNewIndexPatternButton();
         if (!isStandardIndexPattern) {

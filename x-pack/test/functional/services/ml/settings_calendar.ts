@@ -48,12 +48,18 @@ export function MachineLearningSettingsCalendarProvider(
       return rows;
     },
 
-    rowSelector(calendarId: string, subSelector?: string) {
+    calendarRowSelector(calendarId: string, subSelector?: string) {
       const row = `~mlCalendarTable > ~row-${calendarId}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
     },
 
+    async waitForCalendarTableToLoad() {
+      await testSubjects.existOrFail('~mlCalendarTable', { timeout: 60 * 1000 });
+      await testSubjects.existOrFail('mlCalendarTable loaded', { timeout: 30 * 1000 });
+    },
+
     async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
+      await this.waitForCalendarTableToLoad();
       const tableListContainer = await testSubjects.find('mlCalendarTableContainer');
       const searchBarInput = await tableListContainer.findByClassName('euiFieldSearch');
       await searchBarInput.clearValueWithKeyboard();
@@ -69,7 +75,7 @@ export function MachineLearningSettingsCalendarProvider(
 
     async isCalendarRowSelected(calendarId: string): Promise<boolean> {
       return await testSubjects.isChecked(
-        this.rowSelector(calendarId, `checkboxSelectRow-${calendarId}`)
+        this.calendarRowSelector(calendarId, `checkboxSelectRow-${calendarId}`)
       );
     },
 
@@ -85,7 +91,9 @@ export function MachineLearningSettingsCalendarProvider(
 
     async selectCalendarRow(calendarId: string) {
       if ((await this.isCalendarRowSelected(calendarId)) === false) {
-        await testSubjects.click(this.rowSelector(calendarId, `checkboxSelectRow-${calendarId}`));
+        await testSubjects.click(
+          this.calendarRowSelector(calendarId, `checkboxSelectRow-${calendarId}`)
+        );
       }
 
       await this.assertCalendarRowSelected(calendarId, true);
@@ -93,7 +101,9 @@ export function MachineLearningSettingsCalendarProvider(
 
     async deselectCalendarRow(calendarId: string) {
       if ((await this.isCalendarRowSelected(calendarId)) === true) {
-        await testSubjects.click(this.rowSelector(calendarId, `checkboxSelectRow-${calendarId}`));
+        await testSubjects.click(
+          this.calendarRowSelector(calendarId, `checkboxSelectRow-${calendarId}`)
+        );
       }
 
       await this.assertCalendarRowSelected(calendarId, false);
@@ -120,7 +130,7 @@ export function MachineLearningSettingsCalendarProvider(
     },
 
     async openCalendarEditForm(calendarId: string) {
-      await testSubjects.click(this.rowSelector(calendarId, 'mlEditCalendarLink'));
+      await testSubjects.click(this.calendarRowSelector(calendarId, 'mlEditCalendarLink'));
       await testSubjects.existOrFail('mlPageCalendarEdit > mlCalendarFormEdit', { timeout: 5000 });
     },
 
@@ -176,11 +186,6 @@ export function MachineLearningSettingsCalendarProvider(
           isEnabled ? 'enabled' : 'disabled'
         }')`
       );
-    },
-
-    calendarRowSelector(calendarId: string, subSelector?: string) {
-      const row = `~mlCalendarTable > ~row-${calendarId}`;
-      return !subSelector ? row : `${row} > ${subSelector}`;
     },
 
     eventRowSelector(eventDescription: string, subSelector?: string) {
@@ -261,12 +266,20 @@ export function MachineLearningSettingsCalendarProvider(
       return isSelected === 'true';
     },
 
+    async assertApplyToAllJobsSwitchCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getApplyToAllJobsSwitchCheckedState();
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Apply to all jobs switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
     async toggleApplyToAllJobsSwitch(toggle: boolean) {
       const subj = 'mlCalendarApplyToAllJobsSwitch';
       if ((await this.getApplyToAllJobsSwitchCheckedState()) !== toggle) {
         await retry.tryForTime(5 * 1000, async () => {
           await testSubjects.clickWhenNotDisabled(subj);
-          await this.assertApplyToAllJobsSwitchEnabled(toggle);
+          await this.assertApplyToAllJobsSwitchCheckState(toggle);
         });
       }
     },

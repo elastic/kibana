@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { machineLearningRule, totalNumberOfPrebuiltRulesInEsArchive } from '../objects/rule';
+import { formatMitreAttackDescription } from '../helpers/rules';
+import { machineLearningRule } from '../objects/rule';
 
 import {
   CUSTOM_RULES_BTN,
@@ -23,6 +24,7 @@ import {
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
   getDetails,
+  removeExternalLinkText,
   MACHINE_LEARNING_JOB_ID,
   MACHINE_LEARNING_JOB_STATUS,
   MITRE_ATTACK_DETAILS,
@@ -50,6 +52,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -57,28 +60,19 @@ import {
   fillScheduleRuleAndContinue,
   selectMachineLearningRuleType,
 } from '../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-const expectedUrls = machineLearningRule.referenceUrls.join('');
-const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
-const expectedTags = machineLearningRule.tags.join('');
-const expectedMitre = machineLearningRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
-const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
-
 describe('Detection rules, machine learning', () => {
-  before(() => {
-    esArchiverLoad('prebuilt_rules_loaded');
-  });
+  const expectedUrls = machineLearningRule.referenceUrls.join('');
+  const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
+  const expectedTags = machineLearningRule.tags.join('');
+  const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
+  const expectedNumberOfRules = 1;
 
-  after(() => {
-    esArchiverUnload('prebuilt_rules_loaded');
+  beforeEach(() => {
+    cleanKibana();
   });
 
   it('Creates and activates a new ml rule', () => {
@@ -94,7 +88,7 @@ describe('Detection rules, machine learning', () => {
     fillScheduleRuleAndContinue(machineLearningRule);
     createAndActivateRule();
 
-    cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');
+    cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
@@ -115,14 +109,18 @@ describe('Detection rules, machine learning', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${machineLearningRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${machineLearningRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', machineLearningRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', machineLearningRule.severity);
       getDetails(RISK_SCORE_DETAILS).should('have.text', machineLearningRule.riskScore);
-      getDetails(REFERENCE_URLS_DETAILS).should('have.text', expectedUrls);
+      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
+        expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+      });
       getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
-      getDetails(MITRE_ATTACK_DETAILS).should('have.text', expectedMitre);
+      getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
+        expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+      });
       getDetails(TAGS_DETAILS).should('have.text', expectedTags);
     });
     cy.get(DEFINITION_DETAILS).within(() => {

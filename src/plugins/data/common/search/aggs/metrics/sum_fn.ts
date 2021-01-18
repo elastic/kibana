@@ -20,17 +20,16 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggSum';
+export const aggSumFnName = 'aggSum';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.SUM>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggSumFnName, Input, AggArgs, Output>;
 
 export const aggSum = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggSumFnName,
   help: i18n.translate('data.search.aggs.function.metrics.sum.help', {
     defaultMessage: 'Generates a serialized agg config for a Sum agg',
   }),
@@ -87,7 +86,6 @@ export const aggSum = (): FunctionDefinition => ({
         type: METRIC_TYPES.SUM,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

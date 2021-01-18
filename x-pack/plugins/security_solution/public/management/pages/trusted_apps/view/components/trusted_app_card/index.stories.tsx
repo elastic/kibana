@@ -10,7 +10,11 @@ import { action } from '@storybook/addon-actions';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { KibanaContextProvider } from '../../../../../../../../../../src/plugins/kibana_react/public';
-import { TrustedApp, WindowsConditionEntry } from '../../../../../../../common/endpoint/types';
+import {
+  ConditionEntryField,
+  TrustedApp,
+  WindowsConditionEntry,
+} from '../../../../../../../common/endpoint/types';
 
 import { createSampleTrustedApp } from '../../../test_utils';
 
@@ -25,14 +29,14 @@ addDecorator((storyFn) => (
 ));
 
 const PATH_CONDITION: WindowsConditionEntry = {
-  field: 'process.executable.caseless',
+  field: ConditionEntryField.PATH,
   operator: 'included',
   type: 'match',
   value: '/some/path/on/file/system',
 };
 
 const SIGNER_CONDITION: WindowsConditionEntry = {
-  field: 'process.code_signature',
+  field: ConditionEntryField.SIGNER,
   operator: 'included',
   type: 'match',
   value: 'Elastic',
@@ -53,11 +57,10 @@ storiesOf('TrustedApps/TrustedAppCard', module)
 
     return <TrustedAppCard trustedApp={trustedApp} onDelete={action('onClick')} />;
   })
-  .add('trim description', () => {
-    const trustedApp: TrustedApp = createSampleTrustedApp(5);
+  .add('longs texts', () => {
+    const trustedApp: TrustedApp = createSampleTrustedApp(5, true);
     trustedApp.created_at = '2020-09-17T14:52:33.899Z';
     trustedApp.entries = [PATH_CONDITION, SIGNER_CONDITION];
-    trustedApp.description = [...new Array(40).keys()].map((index) => `item${index}`).join(' ');
 
     return <TrustedAppCard trustedApp={trustedApp} onDelete={action('onClick')} />;
   });

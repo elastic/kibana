@@ -5,7 +5,7 @@
  */
 
 import { combineReducers, createStore } from 'redux';
-import { TrustedApp } from '../../../../../common/endpoint/types';
+import { TrustedApp, OperatingSystem } from '../../../../../common/endpoint/types';
 import { RoutingAction } from '../../../../common/store/routing';
 
 import {
@@ -31,31 +31,45 @@ import {
 import { trustedAppsPageReducer } from '../store/reducer';
 import { TrustedAppsListResourceStateChanged } from '../store/action';
 
-const OS_LIST: Array<TrustedApp['os']> = ['windows', 'macos', 'linux'];
+const OPERATING_SYSTEMS: OperatingSystem[] = [
+  OperatingSystem.WINDOWS,
+  OperatingSystem.MAC,
+  OperatingSystem.LINUX,
+];
 
-export const createSampleTrustedApp = (i: number): TrustedApp => {
+const generate = <T>(count: number, generator: (i: number) => T) =>
+  [...new Array(count).keys()].map(generator);
+
+export const createSampleTrustedApp = (i: number, longTexts?: boolean): TrustedApp => {
   return {
     id: String(i),
-    name: `trusted app ${i}`,
-    description: `Trusted App ${i}`,
+    name: generate(longTexts ? 10 : 1, () => `trusted app ${i}`).join(' '),
+    description: generate(longTexts ? 10 : 1, () => `Trusted App ${i}`).join(' '),
     created_at: '1 minute ago',
     created_by: 'someone',
-    os: OS_LIST[i % 3],
+    os: OPERATING_SYSTEMS[i % 3],
     entries: [],
   };
 };
 
-export const createSampleTrustedApps = (pagination: Partial<Pagination>): TrustedApp[] => {
+export const createSampleTrustedApps = (
+  pagination: Partial<Pagination>,
+  longTexts?: boolean
+): TrustedApp[] => {
   const fullPagination = { ...createDefaultPagination(), ...pagination };
 
-  return [...new Array(fullPagination.pageSize).keys()].map(createSampleTrustedApp);
+  return generate(fullPagination.pageSize, (i: number) => createSampleTrustedApp(i, longTexts));
 };
 
-export const createTrustedAppsListData = (pagination: Partial<Pagination>, timestamp: number) => {
+export const createTrustedAppsListData = (
+  pagination: Partial<Pagination>,
+  timestamp: number,
+  longTexts?: boolean
+) => {
   const fullPagination = { ...createDefaultPagination(), ...pagination };
 
   return {
-    items: createSampleTrustedApps(fullPagination),
+    items: createSampleTrustedApps(fullPagination, longTexts),
     pageSize: fullPagination.pageSize,
     pageIndex: fullPagination.pageIndex,
     totalItemsCount: fullPagination.totalItemCount,
@@ -75,10 +89,11 @@ export const createUninitialisedResourceState = (): UninitialisedResourceState =
 
 export const createListLoadedResourceState = (
   pagination: Partial<Pagination>,
-  timestamp: number
+  timestamp: number,
+  longTexts?: boolean
 ): LoadedResourceState<TrustedAppsListData> => ({
   type: 'LoadedResourceState',
-  data: createTrustedAppsListData(pagination, timestamp),
+  data: createTrustedAppsListData(pagination, timestamp, longTexts),
 });
 
 export const createListFailedResourceState = (

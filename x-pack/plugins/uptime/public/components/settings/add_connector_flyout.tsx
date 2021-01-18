@@ -4,49 +4,65 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { HttpStart, DocLinksStart, NotificationsStart, ApplicationStart } from 'src/core/public';
-import {
-  ActionsConnectorsContextProvider,
-  ConnectorAddFlyout,
-  TriggersAndActionsUIPublicPluginStart,
-} from '../../../../triggers_actions_ui/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public';
 import { getConnectorsAction } from '../../state/alerts/alerts';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useFetcher } from '../../../../observability/public';
+import { fetchActionTypes } from '../../state/api/alerts';
+
+import { ActionTypeId } from './types';
 
 interface Props {
   focusInput: () => void;
 }
+
 interface KibanaDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  application: ApplicationStart;
-  docLinks: DocLinksStart;
-  http: HttpStart;
-  notifications: NotificationsStart;
 }
+
+export const ALLOWED_ACTION_TYPES: ActionTypeId[] = [
+  '.slack',
+  '.pagerduty',
+  '.server-log',
+  '.index',
+  '.teams',
+  '.servicenow',
+  '.jira',
+  '.webhook',
+];
 
 export const AddConnectorFlyout = ({ focusInput }: Props) => {
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
-
   const {
     services: {
-      triggersActionsUi: { actionTypeRegistry },
-      application,
-      docLinks,
-      http,
-      notifications,
+      triggersActionsUi: { getAddConnectorFlyout },
     },
   } = useKibana<KibanaDeps>();
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(getConnectorsAction.get());
-    focusInput();
-  }, [addFlyoutVisible, dispatch, focusInput]);
+  const { data: actionTypes } = useFetcher(() => fetchActionTypes(), []);
+
+  const ConnectorAddFlyout = useMemo(
+    () =>
+      getAddConnectorFlyout({
+        consumer: 'uptime',
+        onClose: () => {
+          dispatch(getConnectorsAction.get());
+          setAddFlyoutVisibility(false);
+          focusInput();
+        },
+        actionTypes: (actionTypes ?? []).filter((actionType) =>
+          ALLOWED_ACTION_TYPES.includes(actionType.id as ActionTypeId)
+        ),
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [actionTypes]
+  );
 
   return (
     <>
@@ -60,20 +76,7 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
           defaultMessage="Create connector"
         />
       </EuiButtonEmpty>
-      <ActionsConnectorsContextProvider
-        value={{
-          http,
-          docLinks,
-          actionTypeRegistry,
-          toastNotifications: notifications?.toasts,
-          capabilities: application?.capabilities,
-        }}
-      >
-        <ConnectorAddFlyout
-          addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={setAddFlyoutVisibility}
-        />
-      </ActionsConnectorsContextProvider>
+      {addFlyoutVisible ? ConnectorAddFlyout : null}
     </>
   );
 };

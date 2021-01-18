@@ -18,6 +18,7 @@ import {
 export interface JourneyState {
   checkGroup: string;
   steps: Ping[];
+  details?: SyntheticsJourneyApiResponse['details'];
   loading: boolean;
   error?: Error;
 }
@@ -56,13 +57,14 @@ export const journeyReducer = handleActions<JourneyKVP, Payload>(
 
     [String(getJourneyStepsSuccess)]: (
       state: JourneyKVP,
-      { payload: { checkGroup, steps } }: Action<SyntheticsJourneyApiResponse>
+      { payload: { checkGroup, steps, details } }: Action<SyntheticsJourneyApiResponse>
     ) => ({
       ...state,
       [checkGroup]: {
         loading: false,
         checkGroup,
         steps,
+        details,
       },
     }),
 

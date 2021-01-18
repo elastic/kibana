@@ -20,6 +20,7 @@ export const estimateBucketSpanSchema = schema.object({
 });
 
 export const modelMemoryLimitSchema = schema.object({
+  datafeedConfig: datafeedConfigSchema,
   analysisConfig: analysisConfigSchema,
   indexPattern: schema.string(),
   query: schema.any(),

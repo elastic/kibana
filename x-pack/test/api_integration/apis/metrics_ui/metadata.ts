@@ -109,6 +109,13 @@ export default function ({ getService }: FtrProviderContext) {
                 machine: { type: 'n1-standard-4' },
                 project: { id: 'elastic-observability' },
               },
+              agent: {
+                hostname: 'gke-observability-8--observability-8--bc1afd95-f0zc',
+                id: 'c91c0d2b-6483-46bb-9731-f06afd32bb59',
+                ephemeral_id: '7cb259b1-795c-4c76-beaf-2eb8f18f5b02',
+                type: 'metricbeat',
+                version: '8.0.0',
+              },
               host: {
                 hostname: 'gke-observability-8--observability-8--bc1afd95-f0zc',
                 os: {
@@ -149,6 +156,13 @@ export default function ({ getService }: FtrProviderContext) {
                 machine: { type: 't2.micro' },
                 region: 'us-east-2',
                 account: { id: '015351775590' },
+              },
+              agent: {
+                hostname: 'ip-172-31-47-9.us-east-2.compute.internal',
+                id: 'd0943b36-d0d3-426d-892b-7d79c071b44b',
+                ephemeral_id: '64c94244-88b8-4a37-adc0-30428fefaf53',
+                type: 'metricbeat',
+                version: '8.0.0',
               },
               host: {
                 hostname: 'ip-172-31-47-9.us-east-2.compute.internal',
@@ -197,6 +211,13 @@ export default function ({ getService }: FtrProviderContext) {
                   id: 'elastic-observability',
                 },
               },
+              agent: {
+                hostname: 'gke-observability-8--observability-8--bc1afd95-ngmh',
+                id: '66dc19e6-da36-49d2-9471-2c9475503178',
+                ephemeral_id: 'a0c3a9ff-470a-41a0-bf43-d1af6b7a3b5b',
+                type: 'metricbeat',
+                version: '8.0.0',
+              },
               host: {
                 hostname: 'gke-observability-8--observability-8--bc1afd95-ngmh',
                 name: 'gke-observability-8--observability-8--bc1afd95-ngmh',
@@ -243,6 +264,13 @@ export default function ({ getService }: FtrProviderContext) {
                 project: {
                   id: 'elastic-observability',
                 },
+              },
+              agent: {
+                hostname: 'gke-observability-8--observability-8--bc1afd95-nhhw',
+                id: 'c58a514c-e971-4590-8206-385400e184dd',
+                ephemeral_id: 'e9d46cb0-2e89-469d-bd3b-6f32d7c96cc0',
+                type: 'metricbeat',
+                version: '8.0.0',
               },
               host: {
                 hostname: 'gke-observability-8--observability-8--bc1afd95-nhhw',

@@ -120,7 +120,7 @@ export const ImportModeControl = ({
       options={[overwriteEnabled, overwriteDisabled]}
       idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
       onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
-      disabled={createNewCopies}
+      disabled={createNewCopies && !isLegacyFile}
       data-test-subj={'savedObjectsManagement-importModeControl-overwriteRadioGroup'}
     />
   );

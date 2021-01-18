@@ -18,7 +18,8 @@
  */
 
 import { PluginInitializerContext } from '../../../core/public';
-import { VisualizationsSetup, VisualizationsStart } from './';
+import { Schema, VisualizationsSetup, VisualizationsStart } from './';
+import { Schemas } from './vis_types';
 import { VisualizationsPlugin } from './plugin';
 import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
 import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
@@ -28,6 +29,7 @@ import { usageCollectionPluginMock } from '../../../plugins/usage_collection/pub
 import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
 import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
 import { dashboardPluginMock } from '../../../plugins/dashboard/public/mocks';
+import { savedObjectsPluginMock } from '../../../plugins/saved_objects/public/mocks';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
@@ -40,6 +42,8 @@ const createStartContract = (): VisualizationsStart => ({
   get: jest.fn(),
   all: jest.fn(),
   getAliases: jest.fn(),
+  getByGroup: jest.fn(),
+  unRegisterAlias: jest.fn(),
   savedVisualizationsLoader: {
     get: jest.fn(),
   } as any,
@@ -73,6 +77,7 @@ const createInstance = async () => {
       dashboard: dashboardPluginMock.createStartContract(),
       getAttributeService: jest.fn(),
       savedObjectsClient: coreMock.createStart().savedObjects.client,
+      savedObjects: savedObjectsPluginMock.createStartContract(),
     });
 
   return {
@@ -81,6 +86,9 @@ const createInstance = async () => {
     doStart,
   };
 };
+
+export const createMockedVisEditorSchemas = (schemas: Array<Partial<Schema>>) =>
+  new Schemas(schemas);
 
 export const visualizationsPluginMock = {
   createSetupContract,

@@ -28,6 +28,7 @@ export * from './default_version_number';
 export * from './iso_date_string';
 export * from './lists';
 export * from './lists_default_array';
+export * from './non_empty_array';
 export * from './non_empty_string';
 export * from './only_false_allowed';
 export * from './positive_integer';

@@ -14,17 +14,26 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiFormRow,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NativeRenderer } from '../../../native_renderer';
 import { StateSetter, isDraggedOperation } from '../../../types';
-import { DragContext, DragDrop, ChildDragDropProvider } from '../../../drag_drop';
+import { DragContext, DragDrop, ChildDragDropProvider, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
+import { ColorIndicator } from './color_indicator';
+import { PaletteIndicator } from './palette_indicator';
+
+const triggerLinkA11yText = (label: string) =>
+  i18n.translate('xpack.lens.configure.editConfig', {
+    defaultMessage: 'Click to edit configuration for {label} or drag to move',
+    values: { label },
+  });
 
 const initialActiveDimensionState = {
   isNew: false,
@@ -34,9 +43,9 @@ function isConfiguration(
   value: unknown
 ): value is { columnId: string; groupId: string; layerId: string } {
   return (
-    value &&
+    Boolean(value) &&
     typeof value === 'object' &&
-    'columnId' in value &&
+    'columnId' in value! &&
     'groupId' in value &&
     'layerId' in value
   );
@@ -55,7 +64,7 @@ function isSameConfiguration(config1: unknown, config2: unknown) {
 export function LayerPanel(
   props: Exclude<ConfigPanelWrapperProps, 'state' | 'setState'> & {
     layerId: string;
-    dataTestSubj: string;
+    index: number;
     isOnlyLayer: boolean;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
@@ -65,6 +74,7 @@ export function LayerPanel(
       newVisualizationState: unknown
     ) => void;
     onRemoveLayer: () => void;
+    setLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
   }
 ) {
   const dragDropContext = useContext(DragContext);
@@ -72,12 +82,17 @@ export function LayerPanel(
     initialActiveDimensionState
   );
 
-  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, dataTestSubj } = props;
+  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, setLayerRef, index } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
   useEffect(() => {
     setActiveDimension(initialActiveDimensionState);
   }, [props.activeVisualizationId]);
+
+  const setLayerRefMemoized = React.useCallback((el) => setLayerRef(layerId, el), [
+    layerId,
+    setLayerRef,
+  ]);
 
   if (
     !datasourcePublicAPI ||
@@ -93,6 +108,7 @@ export function LayerPanel(
     state: props.visualizationState,
     frame: props.framePublicAPI,
     dateRange: props.framePublicAPI.dateRange,
+    activeData: props.framePublicAPI.activeData,
   };
   const datasourceId = datasourcePublicAPI.datasourceId;
   const layerDatasourceState = props.datasourceStates[datasourceId].state;
@@ -111,362 +127,490 @@ export function LayerPanel(
     ...layerDatasourceDropProps,
     frame: props.framePublicAPI,
     dateRange: props.framePublicAPI.dateRange,
+    activeData: props.framePublicAPI.activeData,
   };
 
   const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
+
+  const columnLabelMap = layerDatasource.uniqueLabels(layerDatasourceConfigProps.state);
   return (
     <ChildDragDropProvider {...dragDropContext}>
-      <EuiPanel data-test-subj={dataTestSubj} className="lnsLayerPanel" paddingSize="s">
-        <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem grow={false} className="lnsLayerPanel__settingsFlexItem">
-            <LayerSettings
-              layerId={layerId}
-              layerConfigProps={{
-                ...layerVisualizationConfigProps,
-                setState: props.updateVisualization,
-              }}
-              activeVisualization={activeVisualization}
-            />
-          </EuiFlexItem>
-
-          {layerDatasource && (
-            <EuiFlexItem className="lnsLayerPanel__sourceFlexItem">
-              <NativeRenderer
-                render={layerDatasource.renderLayerPanel}
-                nativeProps={{
-                  layerId,
-                  state: layerDatasourceState,
-                  setState: (updater: unknown) => {
-                    const newState =
-                      typeof updater === 'function' ? updater(layerDatasourceState) : updater;
-                    // Look for removed columns
-                    const nextPublicAPI = layerDatasource.getPublicAPI({
-                      state: newState,
-                      layerId,
-                    });
-                    const nextTable = new Set(
-                      nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
-                    );
-                    const removed = datasourcePublicAPI
-                      .getTableSpec()
-                      .map(({ columnId }) => columnId)
-                      .filter((columnId) => !nextTable.has(columnId));
-                    let nextVisState = props.visualizationState;
-                    removed.forEach((columnId) => {
-                      nextVisState = activeVisualization.removeDimension({
-                        layerId,
-                        columnId,
-                        prevState: nextVisState,
-                      });
-                    });
-
-                    props.updateAll(datasourceId, newState, nextVisState);
-                  },
+      <section tabIndex={-1} ref={setLayerRefMemoized} className="lnsLayerPanel">
+        <EuiPanel data-test-subj={`lns-layerPanel-${index}`} paddingSize="s">
+          <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+            <EuiFlexItem grow={false} className="lnsLayerPanel__settingsFlexItem">
+              <LayerSettings
+                layerId={layerId}
+                layerConfigProps={{
+                  ...layerVisualizationConfigProps,
+                  setState: props.updateVisualization,
                 }}
+                activeVisualization={activeVisualization}
               />
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
+            {layerDatasource && (
+              <EuiFlexItem className="lnsLayerPanel__sourceFlexItem">
+                <NativeRenderer
+                  render={layerDatasource.renderLayerPanel}
+                  nativeProps={{
+                    layerId,
+                    state: layerDatasourceState,
+                    activeData: props.framePublicAPI.activeData,
+                    setState: (updater: unknown) => {
+                      const newState =
+                        typeof updater === 'function' ? updater(layerDatasourceState) : updater;
+                      // Look for removed columns
+                      const nextPublicAPI = layerDatasource.getPublicAPI({
+                        state: newState,
+                        layerId,
+                      });
+                      const nextTable = new Set(
+                        nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
+                      );
+                      const removed = datasourcePublicAPI
+                        .getTableSpec()
+                        .map(({ columnId }) => columnId)
+                        .filter((columnId) => !nextTable.has(columnId));
+                      let nextVisState = props.visualizationState;
+                      removed.forEach((columnId) => {
+                        nextVisState = activeVisualization.removeDimension({
+                          layerId,
+                          columnId,
+                          prevState: nextVisState,
+                        });
+                      });
 
-        {groups.map((group, index) => {
-          const newId = generateId();
-          const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
+                      props.updateAll(datasourceId, newState, nextVisState);
+                    },
+                  }}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
 
-          return (
-            <EuiFormRow
-              className="lnsLayerPanel__row"
-              fullWidth
-              label={group.groupLabel}
-              labelType="legend"
-              key={index}
-              isInvalid={isMissing}
-              error={
-                isMissing
-                  ? i18n.translate('xpack.lens.editorFrame.requiredDimensionWarningLabel', {
-                      defaultMessage: 'Required dimension',
-                    })
-                  : []
-              }
-            >
-              <>
-                {group.accessors.map((accessor) => {
-                  return (
-                    <DragDrop
-                      key={accessor}
-                      dragType={
-                        isDraggedOperation(dragDropContext.dragging) &&
-                        accessor === dragDropContext.dragging.columnId
+          <EuiSpacer size="m" />
+
+          {groups.map((group, groupIndex) => {
+            const newId = generateId();
+            const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
+
+            return (
+              <EuiFormRow
+                className={
+                  group.supportsMoreColumns
+                    ? 'lnsLayerPanel__row'
+                    : 'lnsLayerPanel__row lnsLayerPanel__row--notSupportsMoreColumns'
+                }
+                fullWidth
+                label={<div className="lnsLayerPanel__groupLabel">{group.groupLabel}</div>}
+                labelType="legend"
+                key={groupIndex}
+                isInvalid={isMissing}
+                error={
+                  isMissing ? (
+                    <div className="lnsLayerPanel__error">
+                      {i18n.translate('xpack.lens.editorFrame.requiredDimensionWarningLabel', {
+                        defaultMessage: 'Required dimension',
+                      })}
+                    </div>
+                  ) : (
+                    []
+                  )
+                }
+              >
+                <>
+                  <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
+                    {group.accessors.map((accessorConfig) => {
+                      const accessor = accessorConfig.columnId;
+                      const { dragging } = dragDropContext;
+                      const dragType =
+                        isDraggedOperation(dragging) && accessor === dragging.columnId
                           ? 'move'
-                          : 'copy'
-                      }
-                      dropType={
-                        isDraggedOperation(dragDropContext.dragging) &&
-                        group.groupId !== dragDropContext.dragging.groupId
+                          : isDraggedOperation(dragging) && group.groupId === dragging.groupId
+                          ? 'reorder'
+                          : 'copy';
+
+                      const dropType = isDraggedOperation(dragging)
+                        ? group.groupId !== dragging.groupId
                           ? 'replace'
-                          : 'add'
-                      }
-                      data-test-subj={group.dataTestSubj}
-                      draggable={!activeId}
-                      value={{ columnId: accessor, groupId: group.groupId, layerId }}
-                      isValueEqual={isSameConfiguration}
-                      label={group.groupLabel}
-                      droppable={
-                        Boolean(dragDropContext.dragging) &&
-                        // Verify that the dragged item is not coming from the same group
-                        // since this would be a reorder
-                        (!isDraggedOperation(dragDropContext.dragging) ||
-                          dragDropContext.dragging.groupId !== group.groupId) &&
+                          : 'reorder'
+                        : 'add';
+
+                      const isFromCompatibleGroup =
+                        dragging?.groupId !== group.groupId &&
                         layerDatasource.canHandleDrop({
                           ...layerDatasourceDropProps,
                           columnId: accessor,
                           filterOperations: group.filterOperations,
-                        })
-                      }
-                      onDrop={(droppedItem) => {
-                        const dropResult = layerDatasource.onDrop({
-                          ...layerDatasourceDropProps,
-                          droppedItem,
-                          columnId: accessor,
-                          filterOperations: group.filterOperations,
                         });
-                        if (typeof dropResult === 'object') {
-                          // When a column is moved, we delete the reference to the old
-                          props.updateVisualization(
-                            activeVisualization.removeDimension({
-                              layerId,
-                              columnId: dropResult.deleted,
-                              prevState: props.visualizationState,
-                            })
-                          );
-                        }
-                      }}
-                    >
-                      <div className="lnsLayerPanel__dimension">
-                        <NativeRenderer
-                          render={props.datasourceMap[datasourceId].renderDimensionTrigger}
-                          nativeProps={{
-                            ...layerDatasourceConfigProps,
+
+                      const isFromTheSameGroup =
+                        isDraggedOperation(dragging) &&
+                        dragging.groupId === group.groupId &&
+                        dragging.columnId !== accessor;
+
+                      const isDroppable = isDraggedOperation(dragging)
+                        ? dragType === 'reorder'
+                          ? isFromTheSameGroup
+                          : isFromCompatibleGroup
+                        : layerDatasource.canHandleDrop({
+                            ...layerDatasourceDropProps,
                             columnId: accessor,
                             filterOperations: group.filterOperations,
-                            suggestedPriority: group.suggestedPriority,
-                            onClick: () => {
+                          });
+
+                      return (
+                        <DragDrop
+                          key={accessor}
+                          draggable={!activeId}
+                          dragType={dragType}
+                          dropType={dropType}
+                          data-test-subj={group.dataTestSubj}
+                          itemsInGroup={group.accessors.map((a) =>
+                            typeof a === 'string' ? a : a.columnId
+                          )}
+                          className={'lnsLayerPanel__dimensionContainer'}
+                          value={{
+                            columnId: accessor,
+                            groupId: group.groupId,
+                            layerId,
+                            id: accessor,
+                          }}
+                          isValueEqual={isSameConfiguration}
+                          label={columnLabelMap[accessor]}
+                          droppable={dragging && isDroppable}
+                          dropTo={(dropTargetId: string) => {
+                            layerDatasource.onDrop({
+                              isReorder: true,
+                              ...layerDatasourceDropProps,
+                              droppedItem: {
+                                columnId: accessor,
+                                groupId: group.groupId,
+                                layerId,
+                                id: accessor,
+                              },
+                              columnId: dropTargetId,
+                              filterOperations: group.filterOperations,
+                            });
+                          }}
+                          onDrop={(droppedItem) => {
+                            const isReorder =
+                              isDraggedOperation(droppedItem) &&
+                              droppedItem.groupId === group.groupId &&
+                              droppedItem.columnId !== accessor;
+
+                            const dropResult = layerDatasource.onDrop({
+                              isReorder,
+                              ...layerDatasourceDropProps,
+                              droppedItem,
+                              columnId: accessor,
+                              filterOperations: group.filterOperations,
+                            });
+                            if (typeof dropResult === 'object') {
+                              // When a column is moved, we delete the reference to the old
+                              props.updateVisualization(
+                                activeVisualization.removeDimension({
+                                  layerId,
+                                  columnId: dropResult.deleted,
+                                  prevState: props.visualizationState,
+                                })
+                              );
+                            }
+                          }}
+                        >
+                          <div className="lnsLayerPanel__dimension">
+                            <EuiLink
+                              className="lnsLayerPanel__dimensionLink"
+                              data-test-subj="lnsLayerPanel-dimensionLink"
+                              onClick={() => {
+                                if (activeId) {
+                                  setActiveDimension(initialActiveDimensionState);
+                                } else {
+                                  setActiveDimension({
+                                    isNew: false,
+                                    activeGroup: group,
+                                    activeId: accessor,
+                                  });
+                                }
+                              }}
+                              aria-label={triggerLinkA11yText(columnLabelMap[accessor])}
+                              title={triggerLinkA11yText(columnLabelMap[accessor])}
+                            >
+                              <ColorIndicator accessorConfig={accessorConfig}>
+                                <NativeRenderer
+                                  render={layerDatasource.renderDimensionTrigger}
+                                  nativeProps={{
+                                    ...layerDatasourceConfigProps,
+                                    columnId: accessor,
+                                    filterOperations: group.filterOperations,
+                                  }}
+                                />
+                              </ColorIndicator>
+                            </EuiLink>
+                            <EuiButtonIcon
+                              className="lnsLayerPanel__dimensionRemove"
+                              data-test-subj="indexPattern-dimension-remove"
+                              iconType="cross"
+                              iconSize="s"
+                              size="s"
+                              color="danger"
+                              aria-label={i18n.translate(
+                                'xpack.lens.indexPattern.removeColumnLabel',
+                                {
+                                  defaultMessage: 'Remove configuration from "{groupLabel}"',
+                                  values: { groupLabel: group.groupLabel },
+                                }
+                              )}
+                              title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+                                defaultMessage: 'Remove configuration from "{groupLabel}"',
+                                values: { groupLabel: group.groupLabel },
+                              })}
+                              onClick={() => {
+                                trackUiEvent('indexpattern_dimension_removed');
+                                props.updateAll(
+                                  datasourceId,
+                                  layerDatasource.removeColumn({
+                                    layerId,
+                                    columnId: accessor,
+                                    prevState: layerDatasourceState,
+                                  }),
+                                  activeVisualization.removeDimension({
+                                    layerId,
+                                    columnId: accessor,
+                                    prevState: props.visualizationState,
+                                  })
+                                );
+                              }}
+                            />
+                            <PaletteIndicator accessorConfig={accessorConfig} />
+                          </div>
+                        </DragDrop>
+                      );
+                    })}
+                  </ReorderProvider>
+                  {group.supportsMoreColumns ? (
+                    <div className={'lnsLayerPanel__dimensionContainer'}>
+                      <DragDrop
+                        data-test-subj={group.dataTestSubj}
+                        droppable={
+                          Boolean(dragDropContext.dragging) &&
+                          // Verify that the dragged item is not coming from the same group
+                          // since this would be a reorder
+                          (!isDraggedOperation(dragDropContext.dragging) ||
+                            dragDropContext.dragging.groupId !== group.groupId) &&
+                          layerDatasource.canHandleDrop({
+                            ...layerDatasourceDropProps,
+                            columnId: newId,
+                            filterOperations: group.filterOperations,
+                          })
+                        }
+                        onDrop={(droppedItem) => {
+                          const dropResult = layerDatasource.onDrop({
+                            ...layerDatasourceDropProps,
+                            droppedItem,
+                            columnId: newId,
+                            filterOperations: group.filterOperations,
+                          });
+                          if (dropResult) {
+                            props.updateVisualization(
+                              activeVisualization.setDimension({
+                                layerId,
+                                groupId: group.groupId,
+                                columnId: newId,
+                                prevState: props.visualizationState,
+                              })
+                            );
+
+                            if (typeof dropResult === 'object') {
+                              // When a column is moved, we delete the reference to the old
+                              props.updateVisualization(
+                                activeVisualization.removeDimension({
+                                  layerId,
+                                  columnId: dropResult.deleted,
+                                  prevState: props.visualizationState,
+                                })
+                              );
+                            }
+                          }
+                        }}
+                      >
+                        <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
+                          <EuiButtonEmpty
+                            className="lnsLayerPanel__triggerText"
+                            color="text"
+                            size="xs"
+                            iconType="plusInCircleFilled"
+                            contentProps={{
+                              className: 'lnsLayerPanel__triggerTextContent',
+                            }}
+                            aria-label={i18n.translate(
+                              'xpack.lens.indexPattern.removeColumnAriaLabel',
+                              {
+                                defaultMessage: 'Drop a field or click to add to {groupLabel}',
+                                values: { groupLabel: group.groupLabel },
+                              }
+                            )}
+                            data-test-subj="lns-empty-dimension"
+                            onClick={() => {
                               if (activeId) {
                                 setActiveDimension(initialActiveDimensionState);
                               } else {
                                 setActiveDimension({
-                                  isNew: false,
+                                  isNew: true,
                                   activeGroup: group,
-                                  activeId: accessor,
+                                  activeId: newId,
                                 });
                               }
-                            },
-                          }}
-                        />
-                        <EuiButtonIcon
-                          data-test-subj="indexPattern-dimension-remove"
-                          iconType="cross"
-                          iconSize="s"
-                          size="s"
-                          color="danger"
-                          aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-                            defaultMessage: 'Remove configuration',
-                          })}
-                          title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-                            defaultMessage: 'Remove configuration',
-                          })}
-                          onClick={() => {
-                            trackUiEvent('indexpattern_dimension_removed');
-                            props.updateAll(
-                              datasourceId,
-                              layerDatasource.removeColumn({
-                                layerId,
-                                columnId: accessor,
-                                prevState: layerDatasourceState,
-                              }),
-                              activeVisualization.removeDimension({
-                                layerId,
-                                columnId: accessor,
-                                prevState: props.visualizationState,
-                              })
-                            );
-                          }}
-                        />
-                      </div>
-                    </DragDrop>
-                  );
-                })}
-                {group.supportsMoreColumns ? (
-                  <DragDrop
-                    data-test-subj={group.dataTestSubj}
-                    droppable={
-                      Boolean(dragDropContext.dragging) &&
-                      // Verify that the dragged item is not coming from the same group
-                      // since this would be a reorder
-                      (!isDraggedOperation(dragDropContext.dragging) ||
-                        dragDropContext.dragging.groupId !== group.groupId) &&
-                      layerDatasource.canHandleDrop({
-                        ...layerDatasourceDropProps,
-                        columnId: newId,
-                        filterOperations: group.filterOperations,
-                      })
-                    }
-                    onDrop={(droppedItem) => {
-                      const dropResult = layerDatasource.onDrop({
-                        ...layerDatasourceDropProps,
-                        droppedItem,
-                        columnId: newId,
-                        filterOperations: group.filterOperations,
-                      });
-                      if (dropResult) {
-                        props.updateVisualization(
-                          activeVisualization.setDimension({
-                            layerId,
-                            groupId: group.groupId,
-                            columnId: newId,
-                            prevState: props.visualizationState,
-                          })
-                        );
-
-                        if (typeof dropResult === 'object') {
-                          // When a column is moved, we delete the reference to the old
-                          props.updateVisualization(
-                            activeVisualization.removeDimension({
-                              layerId,
-                              columnId: dropResult.deleted,
-                              prevState: props.visualizationState,
-                            })
-                          );
-                        }
-                      }
-                    }}
-                  >
-                    <div className="lnsLayerPanel__dimension">
-                      <EuiButtonEmpty
-                        className="lnsLayerPanel__triggerLink"
-                        color="text"
-                        size="xs"
-                        iconType="plusInCircleFilled"
-                        contentProps={{
-                          className: 'lnsLayerPanel__triggerLinkContent',
-                        }}
-                        data-test-subj="lns-empty-dimension"
-                        onClick={() => {
-                          if (activeId) {
-                            setActiveDimension(initialActiveDimensionState);
-                          } else {
-                            setActiveDimension({
-                              isNew: true,
-                              activeGroup: group,
-                              activeId: newId,
-                            });
-                          }
-                        }}
-                      >
-                        <FormattedMessage
-                          id="xpack.lens.configure.emptyConfig"
-                          defaultMessage="Drop a field or click to add"
-                        />
-                      </EuiButtonEmpty>
+                            }}
+                          >
+                            <FormattedMessage
+                              id="xpack.lens.configure.emptyConfig"
+                              defaultMessage="Drop a field or click to add"
+                            />
+                          </EuiButtonEmpty>
+                        </div>
+                      </DragDrop>
                     </div>
-                  </DragDrop>
-                ) : null}
-              </>
-            </EuiFormRow>
-          );
-        })}
-        <DimensionContainer
-          isOpen={!!activeId}
-          groupLabel={activeGroup?.groupLabel || ''}
-          handleClose={() => setActiveDimension(initialActiveDimensionState)}
-          panel={
-            <>
-              {activeGroup && activeId && (
-                <NativeRenderer
-                  render={props.datasourceMap[datasourceId].renderDimensionEditor}
-                  nativeProps={{
-                    ...layerDatasourceConfigProps,
-                    core: props.core,
-                    columnId: activeId,
-                    filterOperations: activeGroup.filterOperations,
-                    suggestedPriority: activeGroup?.suggestedPriority,
-                    setState: (newState: unknown) => {
-                      props.updateAll(
-                        datasourceId,
-                        newState,
-                        activeVisualization.setDimension({
-                          layerId,
-                          groupId: activeGroup.groupId,
-                          columnId: activeId,
-                          prevState: props.visualizationState,
-                        })
-                      );
-                      setActiveDimension({
-                        ...activeDimension,
-                        isNew: false,
-                      });
-                    },
-                  }}
-                />
-              )}
-              {activeGroup &&
-                activeId &&
-                !activeDimension.isNew &&
-                activeVisualization.renderDimensionEditor &&
-                activeGroup?.enableDimensionEditor && (
-                  <div className="lnsLayerPanel__styleEditor">
-                    <NativeRenderer
-                      render={activeVisualization.renderDimensionEditor}
-                      nativeProps={{
-                        ...layerVisualizationConfigProps,
-                        groupId: activeGroup.groupId,
-                        accessor: activeId,
-                        setState: props.updateVisualization,
-                      }}
-                    />
-                  </div>
-                )}
-            </>
-          }
-        />
-
-        <EuiSpacer size="s" />
-
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="trash"
-              color="danger"
-              data-test-subj="lnsLayerRemove"
-              onClick={() => {
-                // If we don't blur the remove / clear button, it remains focused
-                // which is a strange UX in this case. e.target.blur doesn't work
-                // due to who knows what, but probably event re-writing. Additionally,
-                // activeElement does not have blur so, we need to do some casting + safeguards.
-                const el = (document.activeElement as unknown) as { blur: () => void };
-
-                if (el?.blur) {
-                  el.blur();
+                  ) : null}
+                </>
+              </EuiFormRow>
+            );
+          })}
+          <DimensionContainer
+            isOpen={!!activeId}
+            groupLabel={activeGroup?.groupLabel || ''}
+            handleClose={() => {
+              if (layerDatasource.updateStateOnCloseDimension) {
+                const newState = layerDatasource.updateStateOnCloseDimension({
+                  state: layerDatasourceState,
+                  layerId,
+                  columnId: activeId!,
+                });
+                if (newState) {
+                  props.updateDatasource(datasourceId, newState);
                 }
+              }
+              setActiveDimension(initialActiveDimensionState);
+            }}
+            panel={
+              <>
+                {activeGroup && activeId && (
+                  <NativeRenderer
+                    render={layerDatasource.renderDimensionEditor}
+                    nativeProps={{
+                      ...layerDatasourceConfigProps,
+                      core: props.core,
+                      columnId: activeId,
+                      filterOperations: activeGroup.filterOperations,
+                      dimensionGroups: groups,
+                      setState: (
+                        newState: unknown,
+                        {
+                          shouldReplaceDimension,
+                          shouldRemoveDimension,
+                        }: {
+                          shouldReplaceDimension?: boolean;
+                          shouldRemoveDimension?: boolean;
+                        } = {}
+                      ) => {
+                        if (shouldReplaceDimension || shouldRemoveDimension) {
+                          props.updateAll(
+                            datasourceId,
+                            newState,
+                            shouldRemoveDimension
+                              ? activeVisualization.removeDimension({
+                                  layerId,
+                                  columnId: activeId,
+                                  prevState: props.visualizationState,
+                                })
+                              : activeVisualization.setDimension({
+                                  layerId,
+                                  groupId: activeGroup.groupId,
+                                  columnId: activeId,
+                                  prevState: props.visualizationState,
+                                })
+                          );
+                        } else {
+                          props.updateDatasource(datasourceId, newState);
+                        }
+                        setActiveDimension({
+                          ...activeDimension,
+                          isNew: false,
+                        });
+                      },
+                    }}
+                  />
+                )}
+                {activeGroup &&
+                  activeId &&
+                  !activeDimension.isNew &&
+                  activeVisualization.renderDimensionEditor &&
+                  activeGroup?.enableDimensionEditor && (
+                    <div className="lnsLayerPanel__styleEditor">
+                      <NativeRenderer
+                        render={activeVisualization.renderDimensionEditor}
+                        nativeProps={{
+                          ...layerVisualizationConfigProps,
+                          groupId: activeGroup.groupId,
+                          accessor: activeId,
+                          setState: props.updateVisualization,
+                        }}
+                      />
+                    </div>
+                  )}
+              </>
+            }
+          />
 
-                onRemoveLayer();
-              }}
-            >
-              {isOnlyLayer
-                ? i18n.translate('xpack.lens.resetLayer', {
-                    defaultMessage: 'Reset layer',
-                  })
-                : i18n.translate('xpack.lens.deleteLayer', {
-                    defaultMessage: 'Delete layer',
-                  })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+          <EuiSpacer size="m" />
+
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType="trash"
+                color="danger"
+                data-test-subj="lnsLayerRemove"
+                aria-label={
+                  isOnlyLayer
+                    ? i18n.translate('xpack.lens.resetLayerAriaLabel', {
+                        defaultMessage: 'Reset layer {index}',
+                        values: { index: index + 1 },
+                      })
+                    : i18n.translate('xpack.lens.deleteLayerAriaLabel', {
+                        defaultMessage: `Delete layer {index}`,
+                        values: { index: index + 1 },
+                      })
+                }
+                onClick={() => {
+                  // If we don't blur the remove / clear button, it remains focused
+                  // which is a strange UX in this case. e.target.blur doesn't work
+                  // due to who knows what, but probably event re-writing. Additionally,
+                  // activeElement does not have blur so, we need to do some casting + safeguards.
+                  const el = (document.activeElement as unknown) as { blur: () => void };
+
+                  if (el?.blur) {
+                    el.blur();
+                  }
+
+                  onRemoveLayer();
+                }}
+              >
+                {isOnlyLayer
+                  ? i18n.translate('xpack.lens.resetLayer', {
+                      defaultMessage: 'Reset layer',
+                    })
+                  : i18n.translate('xpack.lens.deleteLayer', {
+                      defaultMessage: `Delete layer`,
+                    })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </section>
     </ChildDragDropProvider>
   );
 }

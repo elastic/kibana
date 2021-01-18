@@ -41,7 +41,10 @@ export const CleanPackages: Task = {
   description: 'Cleaning source for packages that are now installed in node_modules',
 
   async run(config, log, build) {
-    await deleteAll([build.resolvePath('packages'), build.resolvePath('yarn.lock')], log);
+    await deleteAll(
+      [build.resolvePath('packages'), build.resolvePath('yarn.lock'), build.resolvePath('.npmrc')],
+      log
+    );
   },
 };
 
@@ -168,16 +171,6 @@ export const CleanExtraFilesFromModules: Task = {
         regularExpressions,
       })
     );
-
-    if (!build.isOss()) {
-      log.info(
-        'Deleted %d files',
-        await scanDelete({
-          directory: build.resolvePath('x-pack/node_modules'),
-          regularExpressions,
-        })
-      );
-    }
   },
 };
 

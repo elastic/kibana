@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { Header } from '../header';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@kbn/test/jest';
 
 describe('Header', () => {
   it('should render normally', () => {

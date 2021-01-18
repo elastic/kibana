@@ -11,6 +11,7 @@ export interface Calendar {
   description: string;
   events: any[];
   job_ids: string[];
+  total_job_count?: number;
 }
 
 export interface UpdateCalendar extends Calendar {

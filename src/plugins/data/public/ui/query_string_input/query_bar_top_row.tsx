@@ -36,11 +36,13 @@ import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
-import { useKibana, toMountPoint } from '../../../../kibana_react/public';
-import { QueryStringInput } from './';
+import { useKibana, toMountPoint, withKibana } from '../../../../kibana_react/public';
+import QueryStringInputUI from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
+
+const QueryStringInput = withKibana(QueryStringInputUI);
 
 // @internal
 export interface QueryBarTopRowProps {

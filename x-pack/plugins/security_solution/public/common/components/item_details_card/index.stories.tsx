@@ -21,7 +21,7 @@ storiesOf('Components/ItemDetailsCard', module).add('default', () => {
       <ItemDetailsPropertySummary name={'property 2'} value={'value 2'} />
       <ItemDetailsPropertySummary name={'property 3'} value={'value 3'} />
 
-      {'content text'}
+      {'content text '}
       <strong>{'content node'}</strong>
 
       <ItemDetailsAction size="s" color="primary">

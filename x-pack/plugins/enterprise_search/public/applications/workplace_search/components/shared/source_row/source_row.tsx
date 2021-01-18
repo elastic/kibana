@@ -23,10 +23,15 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { EuiLink } from '../../../../shared/react_router_helpers';
+import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { SOURCE_STATUSES as statuses } from '../../../constants';
-import { IContentSourceDetails } from '../../../types';
-import { ADD_SOURCE_PATH, SOURCE_DETAILS_PATH, getContentSourcePath } from '../../../routes';
+import { ContentSourceDetails } from '../../../types';
+import {
+  ADD_SOURCE_PATH,
+  SOURCE_DETAILS_PATH,
+  getContentSourcePath,
+  getSourcesPath,
+} from '../../../routes';
 
 import { SourceIcon } from '../source_icon';
 
@@ -40,11 +45,11 @@ export interface ISourceRow {
   onSearchableToggle?(sourceId: string, isSearchable: boolean): void;
 }
 
-interface ISourceRowProps extends ISourceRow {
-  source: IContentSourceDetails;
+interface SourceRowProps extends ISourceRow {
+  source: ContentSourceDetails;
 }
 
-export const SourceRow: React.FC<ISourceRowProps> = ({
+export const SourceRow: React.FC<SourceRowProps> = ({
   source: {
     id,
     serviceType,
@@ -77,9 +82,14 @@ export const SourceRow: React.FC<ISourceRowProps> = ({
   const imageClass = classNames('source-row__icon', { 'source-row__icon--loading': isIndexing });
 
   const fixLink = (
-    <EuiLink to={`${ADD_SOURCE_PATH}/${_kebabCase(serviceType)}/re-authenticate?sourceId=${id}`}>
+    <EuiLinkTo
+      to={getSourcesPath(
+        `${ADD_SOURCE_PATH}/${_kebabCase(serviceType)}/re-authenticate?sourceId=${id}`,
+        isOrganization
+      )}
+    >
       Fix
-    </EuiLink>
+    </EuiLinkTo>
   );
 
   const remoteTooltip = (
@@ -159,13 +169,13 @@ export const SourceRow: React.FC<ISourceRowProps> = ({
           {showFix && <EuiFlexItem grow={false}>{fixLink}</EuiFlexItem>}
           <EuiFlexItem grow={false}>
             {showDetails && (
-              <EuiLink
+              <EuiLinkTo
                 className="eui-textNoWrap"
                 data-test-subj="SourceDetailsLink"
                 to={getContentSourcePath(SOURCE_DETAILS_PATH, id, !!isOrganization)}
               >
                 Details
-              </EuiLink>
+              </EuiLinkTo>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -35,7 +35,12 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
   visualizeServices: VisualizeServices
 ) => {
-  const { chrome, data, overlays, createVisEmbeddableFromObject, savedObjects } = visualizeServices;
+  const {
+    data,
+    createVisEmbeddableFromObject,
+    savedObjects,
+    savedObjectsPublic,
+  } = visualizeServices;
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
     timeRange: data.query.timefilter.timefilter.getTime(),
     filters: data.query.filterManager.getFilters(),
@@ -55,10 +60,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   if (vis.data.savedSearchId) {
     savedSearch = await createSavedSearchesLoader({
       savedObjectsClient: savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      search: data.search,
-      chrome,
-      overlays,
+      savedObjects: savedObjectsPublic,
     }).get(vis.data.savedSearchId);
   }
 
@@ -69,8 +71,14 @@ export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
   input: VisualizeInput
 ) => {
-  const { visualizations } = visualizeServices;
+  const { visualizations, savedVisualizations } = visualizeServices;
   const visState = input.savedVis as SerializedVis;
+
+  /**
+   * A saved vis is needed even in by value mode to support 'save to library' which converts the 'by value'
+   * state of the visualization, into a new saved object.
+   */
+  const savedVis: VisSavedObject = await savedVisualizations.get();
   let vis = await visualizations.createVis(visState.type, cloneDeep(visState));
   if (vis.type.setup) {
     try {
@@ -85,6 +93,7 @@ export const getVisualizationInstanceFromInput = async (
   );
   return {
     vis,
+    savedVis,
     embeddableHandler,
     savedSearch,
   };

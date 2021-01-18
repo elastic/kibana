@@ -7,7 +7,8 @@
     "These programs may be used by Windows developers but use by non-engineers is unusual."
   ],
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -18,7 +19,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
@@ -43,15 +47,9 @@
         "name": "Execution",
         "reference": "https://attack.mitre.org/tactics/TA0002/"
       },
-      "technique": [
-        {
-          "id": "T1127",
-          "name": "Trusted Developer Utilities Proxy Execution",
-          "reference": "https://attack.mitre.org/techniques/T1127/"
-        }
-      ]
+      "technique": []
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

@@ -49,16 +49,19 @@ import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
-import { UiActionsStart, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
+import { UiActionsSetup, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
+import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import {
   setUISettings,
   setApplication,
   setIndexPatterns,
   setQueryService,
   setShareService,
+  setVisEditorsRegistry,
 } from './services';
 import { visualizeFieldAction } from './actions/visualize_field_action';
 import { createVisualizeUrlGenerator } from './url_generator';
+import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -69,7 +72,7 @@ export interface VisualizePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
-  uiActions: UiActionsStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -77,20 +80,32 @@ export interface VisualizePluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
   data: DataPublicPluginSetup;
   share?: SharePluginSetup;
+  uiActions: UiActionsSetup;
+}
+
+export interface VisualizePluginSetup {
+  visEditorsRegistry: VisEditorsRegistry;
 }
 
 export class VisualizePlugin
   implements
-    Plugin<void, void, VisualizePluginSetupDependencies, VisualizePluginStartDependencies> {
+    Plugin<
+      VisualizePluginSetup,
+      void,
+      VisualizePluginSetupDependencies,
+      VisualizePluginStartDependencies
+    > {
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
+
+  private readonly visEditorsRegistry = createVisEditorsRegistry();
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public async setup(
     core: CoreSetup<VisualizePluginStartDependencies>,
-    { home, urlForwarding, data, share }: VisualizePluginSetupDependencies
+    { home, urlForwarding, data, share, uiActions }: VisualizePluginSetupDependencies
   ) {
     const {
       appMounted,
@@ -135,6 +150,7 @@ export class VisualizePlugin
       );
     }
     setUISettings(core.uiSettings);
+    uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
 
     core.application.register({
       id: 'visualize',
@@ -189,6 +205,7 @@ export class VisualizePlugin
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
           embeddable: pluginsStart.embeddable,
+          stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
@@ -197,6 +214,7 @@ export class VisualizePlugin
           restorePreviousUrl,
           dashboard: pluginsStart.dashboard,
           setHeaderActionMenu: params.setHeaderActionMenu,
+          savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
         };
 
         params.element.classList.add('visAppWrapper');
@@ -227,16 +245,20 @@ export class VisualizePlugin
         category: FeatureCatalogueCategory.DATA,
       });
     }
+
+    return {
+      visEditorsRegistry: this.visEditorsRegistry,
+    } as VisualizePluginSetup;
   }
 
   public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {
+    setVisEditorsRegistry(this.visEditorsRegistry);
     setApplication(core.application);
     setIndexPatterns(plugins.data.indexPatterns);
     setQueryService(plugins.data.query);
     if (plugins.share) {
       setShareService(plugins.share);
     }
-    plugins.uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
   }
 
   stop() {

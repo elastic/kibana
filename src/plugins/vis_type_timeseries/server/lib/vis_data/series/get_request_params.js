@@ -21,16 +21,19 @@ import { getEsShardTimeout } from '../helpers/get_es_shard_timeout';
 import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
 export async function getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities) {
+  const uiSettings = req.getUiSettingsService();
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
   const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
-  const request = buildRequestBody(
+
+  const request = await buildRequestBody(
     req,
     panel,
     series,
     esQueryConfig,
     indexPatternObject,
-    capabilities
+    capabilities,
+    uiSettings
   );
   const esShardTimeout = await getEsShardTimeout(req);
 

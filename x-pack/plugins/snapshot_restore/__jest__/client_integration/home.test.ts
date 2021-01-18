@@ -12,6 +12,7 @@ import {
   setupEnvironment,
   pageHelpers,
   nextTick,
+  delay,
   getRandomString,
   findTestSubject,
 } from './helpers';
@@ -397,7 +398,7 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await nextTick(100);
+          await delay(100);
           testBed.component.update();
         });
       });
@@ -426,7 +427,7 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await nextTick(2000);
+          await delay(2000);
           testBed.component.update();
         });
       });
@@ -466,7 +467,7 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await nextTick(2000);
+          await delay(2000);
           testBed.component.update();
         });
       });

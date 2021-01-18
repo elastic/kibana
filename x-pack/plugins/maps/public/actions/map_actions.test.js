@@ -10,6 +10,13 @@ jest.mock('./data_request_actions', () => {
     syncDataForAllLayers: () => {},
   };
 });
+jest.mock('../kibana_services', () => {
+  return {
+    getMapsCapabilities() {
+      return { save: true };
+    },
+  };
+});
 
 import { mapExtentChanged, setMouseCoordinates, setQuery } from './map_actions';
 
@@ -26,6 +33,10 @@ describe('map_actions', () => {
       beforeEach(() => {
         require('../selectors/map_selectors').getDataFilters = () => {
           return {};
+        };
+
+        require('../selectors/map_selectors').getLayerList = () => {
+          return [];
         };
       });
 
@@ -289,7 +300,7 @@ describe('map_actions', () => {
             type: 'SET_QUERY',
           },
         ],
-        [undefined], // dispatch<any>(syncDataForAllLayers());
+        [undefined], // dispatch(syncDataForAllLayers());
       ]);
     });
 

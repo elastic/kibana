@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
+renderError?: (message?: string | null, error?: ExpressionRenderError | null) => React.ReactElement | React.ReactElement[];
 ```

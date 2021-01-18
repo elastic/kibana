@@ -18,8 +18,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DisposableAppender, LogRecord } from '../../../logging';
-import { LegacyLoggingServer } from '../legacy_logging_server';
+import { LegacyLoggingServer } from '@kbn/legacy-logging';
+import { DisposableAppender, LogRecord } from '@kbn/logging';
 import { LegacyVars } from '../../types';
 
 export interface LegacyAppenderConfig {

@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FieldTypeIcon render component when type matches a field type 1`] = `
+<EuiToolTip
+  content="keyword type"
+  delay="regular"
+  position="left"
+>
+  <FieldTypeIconContainer
+    ariaLabel="keyword type"
+    color="euiColorVis0"
+    iconType="tokenText"
+    needsAria={false}
+  />
+</EuiToolTip>
+`;

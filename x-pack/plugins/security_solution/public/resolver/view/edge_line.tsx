@@ -25,6 +25,7 @@ const StyledEdgeLine = styled.div<StyledEdgeLine>`
     return `${fontSize(props.magFactorX, 12, 8.5)}px`;
   }};
   background-color: ${(props) => props.resolverEdgeColor};
+  z-index: 10;
 `;
 
 interface StyledElapsedTime {

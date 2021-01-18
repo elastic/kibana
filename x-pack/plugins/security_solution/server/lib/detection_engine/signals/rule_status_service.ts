@@ -6,7 +6,7 @@
 
 import { assertUnreachable } from '../../../../common/utility_types';
 import { JobStatus } from '../../../../common/detection_engine/schemas/common/schemas';
-import { IRuleStatusAttributes } from '../rules/types';
+import { IRuleStatusSOAttributes } from '../rules/types';
 import { getOrCreateRuleStatuses } from './get_or_create_rule_statuses';
 import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';
 
@@ -23,6 +23,7 @@ interface Attributes {
 export interface RuleStatusService {
   goingToRun: () => Promise<void>;
   success: (message: string, attributes?: Attributes) => Promise<void>;
+  partialFailure: (message: string, attributes?: Attributes) => Promise<void>;
   error: (message: string, attributes?: Attributes) => Promise<void>;
 }
 
@@ -30,9 +31,9 @@ export const buildRuleStatusAttributes: (
   status: JobStatus,
   message?: string,
   attributes?: Attributes
-) => Partial<IRuleStatusAttributes> = (status, message, attributes = {}) => {
+) => Partial<IRuleStatusSOAttributes> = (status, message, attributes = {}) => {
   const now = new Date().toISOString();
-  const baseAttributes: Partial<IRuleStatusAttributes> = {
+  const baseAttributes: Partial<IRuleStatusSOAttributes> = {
     ...attributes,
     status,
     statusDate: now,
@@ -40,6 +41,13 @@ export const buildRuleStatusAttributes: (
 
   switch (status) {
     case 'succeeded': {
+      return {
+        ...baseAttributes,
+        lastSuccessAt: now,
+        lastSuccessMessage: message,
+      };
+    }
+    case 'partial failure': {
       return {
         ...baseAttributes,
         lastSuccessAt: now,
@@ -90,6 +98,18 @@ export const ruleStatusServiceFactory = async ({
       await ruleStatusClient.update(currentStatus.id, {
         ...currentStatus.attributes,
         ...buildRuleStatusAttributes('succeeded', message, attributes),
+      });
+    },
+
+    partialFailure: async (message, attributes) => {
+      const [currentStatus] = await getOrCreateRuleStatuses({
+        alertId,
+        ruleStatusClient,
+      });
+
+      await ruleStatusClient.update(currentStatus.id, {
+        ...currentStatus.attributes,
+        ...buildRuleStatusAttributes('partial failure', message, attributes),
       });
     },
 

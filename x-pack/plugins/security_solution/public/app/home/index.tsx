@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { TimelineId } from '../../../common/types/timeline';
@@ -23,6 +23,7 @@ import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
 import { useThrottledResizeObserver } from '../../common/components/utils';
+import { AppLeaveHandler } from '../../../../../../src/core/public';
 
 const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
   style: {
@@ -37,16 +38,24 @@ const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
 
 Main.displayName = 'Main';
 
-const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
-
 interface HomePageProps {
   children: React.ReactNode;
+  onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
-const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
-  const { application } = useKibana().services;
+const HomePageComponent: React.FC<HomePageProps> = ({ children, onAppLeave }) => {
+  const { application, overlays } = useKibana().services;
   const subPluginId = useRef<string>('');
   const { ref, height = 0 } = useThrottledResizeObserver(300);
+  const banners$ = overlays.banners.get$();
+  const [headerFixed, setHeaderFixed] = useState<boolean>(true);
+  const mainPaddingTop = headerFixed ? height : 0;
+
+  useEffect(() => {
+    const subscription = banners$.subscribe((banners) => setHeaderFixed(!banners.length));
+    return () => subscription.unsubscribe();
+  }, [banners$]); // Only un/re-subscribe if the Observable changes
+
   application.currentAppId$.subscribe((appId) => {
     subPluginId.current = appId ?? '';
   });
@@ -72,15 +81,15 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
 
   return (
     <SecuritySolutionAppWrapper>
-      <HeaderGlobal ref={ref} />
+      <HeaderGlobal ref={ref} isFixed={headerFixed} />
 
-      <Main paddingTop={height} data-test-subj="pageContainer">
+      <Main paddingTop={mainPaddingTop} data-test-subj="pageContainer">
         <DragDropContextWrapper browserFields={browserFields}>
           <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
           {indicesExist && showTimeline && (
             <>
               <AutoSaveWarningMsg />
-              <Flyout timelineId={TimelineId.active} usersViewing={usersViewing} />
+              <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
             </>
           )}
 

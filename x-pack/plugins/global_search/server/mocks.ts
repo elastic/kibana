@@ -26,12 +26,14 @@ const createStartMock = (): jest.Mocked<GlobalSearchPluginStart> => {
 
   return {
     find: searchMock.find,
+    getSearchableTypes: searchMock.getSearchableTypes,
   };
 };
 
 const createRouteHandlerContextMock = (): jest.Mocked<RouteHandlerGlobalSearchContext> => {
   const handlerContextMock = {
     find: jest.fn(),
+    getSearchableTypes: jest.fn(),
   };
 
   handlerContextMock.find.mockReturnValue(of([]));

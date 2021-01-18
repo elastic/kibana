@@ -81,7 +81,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
           }),
         ],
         icon: 'logoObservability',
-        path: '/app/observability/landing',
+        path: '/app/observability/',
         order: 200,
       });
     }

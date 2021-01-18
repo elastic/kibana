@@ -3,7 +3,14 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "expressions", "uiActions", "embeddable", "inspector", "dashboard"],
+  "requiredPlugins": [
+    "data",
+    "expressions",
+    "uiActions",
+    "embeddable",
+    "inspector",
+    "savedObjects"
+  ],
   "optionalPlugins": ["usageCollection"],
-  "requiredBundles": ["kibanaUtils", "discover", "savedObjects"]
+  "requiredBundles": ["kibanaUtils", "discover"]
 }

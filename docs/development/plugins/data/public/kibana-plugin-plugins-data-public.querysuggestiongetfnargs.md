@@ -23,4 +23,5 @@ export interface QuerySuggestionGetFnArgs
 |  [selectionEnd](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.selectionend.md) | <code>number</code> |  |
 |  [selectionStart](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.selectionstart.md) | <code>number</code> |  |
 |  [signal](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.signal.md) | <code>AbortSignal</code> |  |
+|  [useTimeRange](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.usetimerange.md) | <code>boolean</code> |  |
 

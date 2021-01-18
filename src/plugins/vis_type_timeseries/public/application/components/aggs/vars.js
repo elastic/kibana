@@ -70,7 +70,9 @@ export class CalculationVars extends Component {
               metrics={this.props.metrics}
               metric={this.props.model}
               value={row.field}
+              fields={this.props.fields[this.props.indexPattern]}
               includeSiblings={this.props.includeSiblings}
+              exclude={this.props.exclude}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -104,6 +106,8 @@ CalculationVars.defaultProps = {
 };
 
 CalculationVars.propTypes = {
+  fields: PropTypes.object,
+  indexPattern: PropTypes.string,
   metrics: PropTypes.array,
   model: PropTypes.object,
   name: PropTypes.string,

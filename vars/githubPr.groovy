@@ -87,15 +87,6 @@ def getLatestBuildInfo(comment) {
   return comment ? getBuildInfoFromComment(comment.body) : null
 }
 
-def createBuildInfo() {
-  return [
-    status: buildUtils.getBuildStatus(),
-    url: env.BUILD_URL,
-    number: env.BUILD_NUMBER,
-    commit: getCommitHash()
-  ]
-}
-
 def getHistoryText(builds) {
   if (!builds || builds.size() < 1) {
     return ""
@@ -155,6 +146,16 @@ def getTestFailuresMessage() {
   return messages.join("\n")
 }
 
+def getBuildStatusIncludingMetrics() {
+  def status = buildUtils.getBuildStatus()
+
+  if (status == 'SUCCESS' && shouldCheckCiMetricSuccess() && !ciStats.getMetricsSuccess()) {
+    return 'FAILURE'
+  }
+
+  return status
+}
+
 def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
   def info = previousCommentInfo ?: [:]
   info.builds = previousCommentInfo.builds ?: []
@@ -163,7 +164,10 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
   info.builds = info.builds.findAll { it.number != env.BUILD_NUMBER }
 
   def messages = []
-  def status = buildUtils.getBuildStatus()
+
+  def status = isFinal
+    ? getBuildStatusIncludingMetrics()
+    : buildUtils.getBuildStatus()
 
   if (!isFinal) {
     def failuresPart = status != 'SUCCESS' ? ', with failures' : ''
@@ -228,7 +232,12 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
 
   messages << "To update your PR or re-run it, just comment with:\n`@elasticmachine merge upstream`"
 
-  info.builds << createBuildInfo()
+  info.builds << [
+    status: status,
+    url: env.BUILD_URL,
+    number: env.BUILD_NUMBER,
+    commit: getCommitHash()
+  ]
 
   messages << """
     <!--PIPELINE
@@ -287,4 +296,13 @@ def getFailedSteps() {
   return jenkinsApi.getFailedSteps()?.findAll { step ->
     step.displayName != 'Check out from version control'
   }
+}
+
+def shouldCheckCiMetricSuccess() {
+  // disable ciMetrics success check when a PR is targetting a non-tracked branch
+  if (buildState.has('checkoutInfo') && !buildState.get('checkoutInfo').targetsTrackedBranch) {
+    return false
+  }
+
+  return true
 }

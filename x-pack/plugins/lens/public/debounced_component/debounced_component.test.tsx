@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount } from '@kbn/test/jest';
 import { debouncedComponent } from './debounced_component';
 import { act } from 'react-dom/test-utils';
 

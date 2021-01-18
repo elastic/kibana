@@ -20,17 +20,21 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggGeoBounds';
+export const aggGeoBoundsFnName = 'aggGeoBounds';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.GEO_BOUNDS>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggGeoBoundsFnName,
+  Input,
+  AggArgs,
+  Output
+>;
 
 export const aggGeoBounds = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggGeoBoundsFnName,
   help: i18n.translate('data.search.aggs.function.metrics.geo_bounds.help', {
     defaultMessage: 'Generates a serialized agg config for a Geo Bounds agg',
   }),
@@ -87,7 +91,6 @@ export const aggGeoBounds = (): FunctionDefinition => ({
         type: METRIC_TYPES.GEO_BOUNDS,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

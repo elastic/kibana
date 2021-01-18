@@ -7,6 +7,7 @@ exports[`Header renders correctly against snapshot 1`] = `
       Object {
         "columnHeaderType": "not-filtered",
         "id": "@timestamp",
+        "type": "number",
         "width": 190,
       }
     }
@@ -14,10 +15,13 @@ exports[`Header renders correctly against snapshot 1`] = `
     isResizing={false}
     onClick={[Function]}
     sort={
-      Object {
-        "columnId": "@timestamp",
-        "sortDirection": "desc",
-      }
+      Array [
+        Object {
+          "columnId": "@timestamp",
+          "columnType": "number",
+          "sortDirection": "desc",
+        },
+      ]
     }
   >
     <Actions
@@ -25,16 +29,20 @@ exports[`Header renders correctly against snapshot 1`] = `
         Object {
           "columnHeaderType": "not-filtered",
           "id": "@timestamp",
+          "type": "number",
           "width": 190,
         }
       }
       isLoading={false}
-      onColumnRemoved={[MockFunction]}
+      onColumnRemoved={[Function]}
       sort={
-        Object {
-          "columnId": "@timestamp",
-          "sortDirection": "desc",
-        }
+        Array [
+          Object {
+            "columnId": "@timestamp",
+            "columnType": "number",
+            "sortDirection": "desc",
+          },
+        ]
       }
     />
   </Memo(HeaderContentComponent)>
@@ -43,6 +51,7 @@ exports[`Header renders correctly against snapshot 1`] = `
       Object {
         "columnHeaderType": "not-filtered",
         "id": "@timestamp",
+        "type": "number",
         "width": 190,
       }
     }

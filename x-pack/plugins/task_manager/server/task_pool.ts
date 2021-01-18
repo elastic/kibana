@@ -8,20 +8,27 @@
  * This module contains the logic that ensures we don't run too many
  * tasks at once in a given Kibana instance.
  */
+import { Observable, Subject } from 'rxjs';
 import moment, { Duration } from 'moment';
 import { performance } from 'perf_hooks';
 import { padStart } from 'lodash';
-import { Logger } from './types';
-import { TaskRunner } from './task_runner';
+import { Logger } from '../../../../src/core/server';
+import { TaskRunner } from './task_running';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
+import { TaskManagerStat, asTaskManagerStatEvent } from './task_events';
+import { asOk } from './lib/result_type';
 
 interface Opts {
-  maxWorkers: number;
+  maxWorkers$: Observable<number>;
   logger: Logger;
 }
 
 export enum TaskPoolRunResult {
+  // This means we're running all the tasks we claimed
   RunningAllClaimedTasks = 'RunningAllClaimedTasks',
+  // This means we're running all the tasks we claimed and we're at capacity
+  RunningAtCapacity = 'RunningAtCapacity',
+  // This means we're prematurely out of capacity and have accidentally claimed more tasks than we had capacity for
   RanOutOfCapacity = 'RanOutOfCapacity',
 }
 
@@ -31,9 +38,10 @@ const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana servic
  * Runs tasks in batches, taking costs into account.
  */
 export class TaskPool {
-  private maxWorkers: number;
+  private maxWorkers: number = 0;
   private running = new Set<TaskRunner>();
   private logger: Logger;
+  private load$ = new Subject<TaskManagerStat>();
 
   /**
    * Creates an instance of TaskPool.
@@ -44,8 +52,15 @@ export class TaskPool {
    * @prop {Logger} logger - The task manager logger.
    */
   constructor(opts: Opts) {
-    this.maxWorkers = opts.maxWorkers;
     this.logger = opts.logger;
+    opts.maxWorkers$.subscribe((maxWorkers) => {
+      this.logger.debug(`Task pool now using ${maxWorkers} as the max worker value`);
+      this.maxWorkers = maxWorkers;
+    });
+  }
+
+  public get load(): Observable<TaskManagerStat> {
+    return this.load$;
   }
 
   /**
@@ -56,17 +71,21 @@ export class TaskPool {
   }
 
   /**
-   * Gets how many workers are currently available.
+   * Gets % of workers in use
    */
-  public get availableWorkers() {
-    return this.maxWorkers - this.occupiedWorkers;
+  public get workerLoad() {
+    return this.maxWorkers ? Math.round((this.occupiedWorkers * 100) / this.maxWorkers) : 100;
   }
 
   /**
    * Gets how many workers are currently available.
    */
-  public get hasAvailableWorkers() {
-    return this.availableWorkers > 0;
+  public get availableWorkers() {
+    // emit load whenever we check how many available workers there are
+    // this should happen less often than the actual changes to the worker queue
+    // so is lighter than emitting the load every time we add/remove a task from the queue
+    this.load$.next(asTaskManagerStatEvent('load', asOk(this.workerLoad)));
+    return this.maxWorkers - this.occupiedWorkers;
   }
 
   /**
@@ -119,6 +138,8 @@ export class TaskPool {
         return this.attemptToRun(leftOverTasks);
       }
       return TaskPoolRunResult.RanOutOfCapacity;
+    } else if (!this.availableWorkers) {
+      return TaskPoolRunResult.RunningAtCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
   }

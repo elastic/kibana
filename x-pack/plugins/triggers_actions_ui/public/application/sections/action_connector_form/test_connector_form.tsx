@@ -14,13 +14,13 @@ import {
   EuiDescriptionList,
   EuiCallOut,
   EuiSpacer,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 import { Option, map, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { ActionConnector } from '../../../types';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
 import { ActionTypeExecutorResult } from '../../../../../actions/common';
 
 export interface ConnectorAddFlyoutProps {
@@ -31,6 +31,7 @@ export interface ConnectorAddFlyoutProps {
   actionParams: Record<string, unknown>;
   onExecutAction: () => Promise<ActionTypeExecutorResult<unknown>>;
   executionResult: Option<ActionTypeExecutorResult<unknown>>;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export const TestConnectorForm = ({
@@ -41,44 +42,43 @@ export const TestConnectorForm = ({
   setActionParams,
   onExecutAction,
   isExecutingAction,
+  actionTypeRegistry,
 }: ConnectorAddFlyoutProps) => {
-  const { actionTypeRegistry, docLinks, http, toastNotifications } = useActionsConnectorsContext();
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
   const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
 
-  const actionErrors = actionTypeModel?.validateParams(actionParams);
-  const hasErrors = !!Object.values(actionErrors.errors).find((errors) => errors.length > 0);
+  const actionErrors = actionTypeModel?.validateParams(actionParams).errors as IErrorObject;
+  const hasErrors = !!Object.values(actionErrors).find((errors) => errors.length > 0);
 
   const steps = [
     {
       title: 'Create an action',
       children: ParamsFieldsComponent ? (
-        <Suspense
-          fallback={
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
-          <ParamsFieldsComponent
-            actionParams={actionParams}
-            index={0}
-            errors={actionErrors.errors}
-            editAction={(field, value) =>
-              setActionParams({
-                ...actionParams,
-                [field]: value,
-              })
+        <EuiErrorBoundary>
+          <Suspense
+            fallback={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             }
-            messageVariables={[]}
-            docLinks={docLinks}
-            http={http}
-            toastNotifications={toastNotifications}
-            actionConnector={connector}
-          />
-        </Suspense>
+          >
+            <ParamsFieldsComponent
+              actionParams={actionParams}
+              index={0}
+              errors={actionErrors}
+              editAction={(field, value) =>
+                setActionParams({
+                  ...actionParams,
+                  [field]: value,
+                })
+              }
+              messageVariables={[]}
+              actionConnector={connector}
+            />
+          </Suspense>
+        </EuiErrorBoundary>
       ) : (
         <EuiText>
           <p>This Connector does not require any Action Parameter.</p>

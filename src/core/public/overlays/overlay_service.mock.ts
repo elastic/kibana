@@ -17,6 +17,7 @@
  * under the License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { OverlayService, OverlayStart } from './overlay_service';
 import { overlayBannersServiceMock } from './banners/banners_service.mock';
 import { overlayFlyoutServiceMock } from './flyout/flyout_service.mock';

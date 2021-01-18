@@ -41,15 +41,19 @@ import {
   ALERT_CLUSTER_HEALTH,
   ALERT_CPU_USAGE,
   ALERT_DISK_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_MEMORY_USAGE,
   ALERT_NODES_CHANGED,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
   ALERT_MISSING_MONITORING_DATA,
+  ALERT_CCR_READ_EXCEPTIONS,
 } from '../../../../common/constants';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
 import { SetupModeFeature } from '../../../../common/enums';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeContext } from '../../setup_mode/setup_mode_context';
 
 const calculateShards = (shards) => {
   const total = get(shards, 'total', 0);
@@ -156,11 +160,17 @@ function renderLog(log) {
   );
 }
 
-const OVERVIEW_PANEL_ALERTS = [ALERT_CLUSTER_HEALTH, ALERT_LICENSE_EXPIRATION];
+const OVERVIEW_PANEL_ALERTS = [
+  ALERT_CLUSTER_HEALTH,
+  ALERT_LICENSE_EXPIRATION,
+  ALERT_CCR_READ_EXCEPTIONS,
+];
 
 const NODES_PANEL_ALERTS = [
   ALERT_CPU_USAGE,
   ALERT_DISK_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_MEMORY_USAGE,
   ALERT_NODES_CHANGED,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
@@ -173,6 +183,7 @@ export function ElasticsearchPanel(props) {
   const indices = clusterStats.indices;
   const setupMode = props.setupMode;
   const alerts = props.alerts;
+  const setupModeContext = React.useContext(SetupModeContext);
 
   const goToElasticsearch = () => getSafeForExternalLink('#/elasticsearch');
   const goToNodes = () => getSafeForExternalLink('#/elasticsearch/nodes');
@@ -224,6 +235,46 @@ export function ElasticsearchPanel(props) {
     return null;
   };
 
+  const showLicense = () => {
+    if (!props.showLicenseExpiration) {
+      return null;
+    }
+    return (
+      <Fragment>
+        <EuiDescriptionListTitle className="eui-textBreakWord">
+          <FormattedMessage
+            id="xpack.monitoring.cluster.overview.esPanel.licenseLabel"
+            defaultMessage="License"
+          />
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription data-test-subj="esLicenseType">
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiLink href={getSafeForExternalLink('#/license')}>
+                {capitalize(props.license.type)}
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                {props.license.expiry_date_in_millis === undefined ? (
+                  ''
+                ) : (
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.esPanel.expireDateText"
+                    defaultMessage="expires on {expiryDate}"
+                    values={{
+                      expiryDate: formatDateLocal(props.license.expiry_date_in_millis),
+                    }}
+                  />
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiDescriptionListDescription>
+      </Fragment>
+    );
+  };
+
   const statusColorMap = {
     green: 'success',
     yellow: 'warning',
@@ -231,7 +282,7 @@ export function ElasticsearchPanel(props) {
   };
 
   let nodesAlertStatus = null;
-  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS)) {
+  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS, setupModeContext)) {
     const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
@@ -241,7 +292,7 @@ export function ElasticsearchPanel(props) {
   }
 
   let overviewAlertStatus = null;
-  if (shouldShowAlertBadge(alerts, OVERVIEW_PANEL_ALERTS)) {
+  if (shouldShowAlertBadge(alerts, OVERVIEW_PANEL_ALERTS, setupModeContext)) {
     const alertsList = OVERVIEW_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     overviewAlertStatus = (
       <EuiFlexItem grow={false}>
@@ -319,36 +370,7 @@ export function ElasticsearchPanel(props) {
                 {formatNumber(get(nodes, 'jvm.max_uptime_in_millis'), 'time_since')}
               </EuiDescriptionListDescription>
               {showMlJobs()}
-              <EuiDescriptionListTitle className="eui-textBreakWord">
-                <FormattedMessage
-                  id="xpack.monitoring.cluster.overview.esPanel.licenseLabel"
-                  defaultMessage="License"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="esLicenseType">
-                <EuiFlexGroup direction="column" gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiLink href={getSafeForExternalLink('#/license')}>
-                      {capitalize(props.license.type)}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      {props.license.expiry_date_in_millis === undefined ? (
-                        ''
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.monitoring.cluster.overview.esPanel.expireDateText"
-                          defaultMessage="expires on {expiryDate}"
-                          values={{
-                            expiryDate: formatDateLocal(props.license.expiry_date_in_millis),
-                          }}
-                        />
-                      )}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiDescriptionListDescription>
+              {showLicense()}
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>

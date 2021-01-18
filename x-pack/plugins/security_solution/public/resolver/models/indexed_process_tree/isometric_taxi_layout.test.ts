@@ -3,24 +3,29 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IsometricTaxiLayout } from '../../types';
-import { LegacyEndpointEvent } from '../../../../common/endpoint/types';
+import { ResolverNode } from '../../../../common/endpoint/types';
 import { isometricTaxiLayoutFactory } from './isometric_taxi_layout';
-import { mockProcessEvent } from '../../models/process_event_test_helpers';
 import { factory } from './index';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { genResolverNode } from '../../mocks/generator';
+import { IsometricTaxiLayout } from '../../types';
+
+function layout(events: ResolverNode[]) {
+  return isometricTaxiLayoutFactory(factory(events, 'A'));
+}
 
 describe('resolver graph layout', () => {
-  let processA: LegacyEndpointEvent;
-  let processB: LegacyEndpointEvent;
-  let processC: LegacyEndpointEvent;
-  let processD: LegacyEndpointEvent;
-  let processE: LegacyEndpointEvent;
-  let processF: LegacyEndpointEvent;
-  let processG: LegacyEndpointEvent;
-  let processH: LegacyEndpointEvent;
-  let processI: LegacyEndpointEvent;
-  let events: LegacyEndpointEvent[];
-  let layout: () => IsometricTaxiLayout;
+  let processA: ResolverNode;
+  let processB: ResolverNode;
+  let processC: ResolverNode;
+  let processD: ResolverNode;
+  let processE: ResolverNode;
+  let processF: ResolverNode;
+  let processG: ResolverNode;
+  let processH: ResolverNode;
+  let processI: ResolverNode;
+
+  const gen = new EndpointDocGenerator('resolver');
 
   beforeEach(() => {
     /*
@@ -35,105 +40,76 @@ describe('resolver graph layout', () => {
      *                   H
      *
      */
-    processA = mockProcessEvent({
-      endgame: {
-        process_name: '',
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 0,
-      },
+    const timestamp = 1606234833273;
+    processA = genResolverNode(gen, { entityID: 'A', eventType: ['start'], timestamp });
+    processB = genResolverNode(gen, {
+      entityID: 'B',
+      parentEntityID: 'A',
+      eventType: ['info'],
+      timestamp,
     });
-    processB = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'already_running',
-        unique_pid: 1,
-        unique_ppid: 0,
-      },
+    processC = genResolverNode(gen, {
+      entityID: 'C',
+      parentEntityID: 'A',
+      eventType: ['start'],
+      timestamp,
     });
-    processC = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 2,
-        unique_ppid: 0,
-      },
+    processD = genResolverNode(gen, {
+      entityID: 'D',
+      parentEntityID: 'B',
+      eventType: ['start'],
+      timestamp,
     });
-    processD = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 3,
-        unique_ppid: 1,
-      },
+    processE = genResolverNode(gen, {
+      entityID: 'E',
+      parentEntityID: 'B',
+      eventType: ['start'],
+      timestamp,
     });
-    processE = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 4,
-        unique_ppid: 1,
-      },
+    processF = genResolverNode(gen, {
+      timestamp,
+      entityID: 'F',
+      parentEntityID: 'C',
+      eventType: ['start'],
     });
-    processF = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 5,
-        unique_ppid: 2,
-      },
+    processG = genResolverNode(gen, {
+      timestamp,
+      entityID: 'G',
+      parentEntityID: 'C',
+      eventType: ['start'],
     });
-    processG = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 6,
-        unique_ppid: 2,
-      },
+    processH = genResolverNode(gen, {
+      timestamp,
+      entityID: 'H',
+      parentEntityID: 'G',
+      eventType: ['start'],
     });
-    processH = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 7,
-        unique_ppid: 6,
-      },
+    processI = genResolverNode(gen, {
+      timestamp,
+      entityID: 'I',
+      parentEntityID: 'A',
+      eventType: ['end'],
     });
-    processI = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'termination_event',
-        unique_pid: 8,
-        unique_ppid: 0,
-      },
-    });
-    layout = () => isometricTaxiLayoutFactory(factory(events));
-    events = [];
   });
   describe('when rendering no nodes', () => {
     it('renders right', () => {
-      expect(layout()).toMatchSnapshot();
+      expect(layout([])).toMatchSnapshot();
     });
   });
   describe('when rendering one node', () => {
-    beforeEach(() => {
-      events = [processA];
-    });
     it('renders right', () => {
-      expect(layout()).toMatchSnapshot();
+      expect(layout([processA])).toMatchSnapshot();
     });
   });
   describe('when rendering two nodes, one being the parent of the other', () => {
-    beforeEach(() => {
-      events = [processA, processB];
-    });
     it('renders right', () => {
-      expect(layout()).toMatchSnapshot();
+      expect(layout([processA, processB])).toMatchSnapshot();
     });
   });
   describe('when rendering two forks, and one fork has an extra long tine', () => {
+    let layoutResponse: IsometricTaxiLayout;
     beforeEach(() => {
-      events = [
+      layoutResponse = layout([
         processA,
         processB,
         processC,
@@ -143,29 +119,29 @@ describe('resolver graph layout', () => {
         processG,
         processH,
         processI,
-      ];
+      ]);
     });
     it('renders right', () => {
-      expect(layout()).toMatchSnapshot();
+      expect(layoutResponse).toMatchSnapshot();
     });
     it('should have node a at level 1', () => {
-      expect(layout().ariaLevels.get(processA)).toBe(1);
+      expect(layoutResponse.ariaLevels.get(processA)).toBe(1);
     });
     it('should have nodes b and c at level 2', () => {
-      expect(layout().ariaLevels.get(processB)).toBe(2);
-      expect(layout().ariaLevels.get(processC)).toBe(2);
+      expect(layoutResponse.ariaLevels.get(processB)).toBe(2);
+      expect(layoutResponse.ariaLevels.get(processC)).toBe(2);
     });
     it('should have nodes d, e, f, and g at level 3', () => {
-      expect(layout().ariaLevels.get(processD)).toBe(3);
-      expect(layout().ariaLevels.get(processE)).toBe(3);
-      expect(layout().ariaLevels.get(processF)).toBe(3);
-      expect(layout().ariaLevels.get(processG)).toBe(3);
+      expect(layoutResponse.ariaLevels.get(processD)).toBe(3);
+      expect(layoutResponse.ariaLevels.get(processE)).toBe(3);
+      expect(layoutResponse.ariaLevels.get(processF)).toBe(3);
+      expect(layoutResponse.ariaLevels.get(processG)).toBe(3);
     });
     it('should have node h at level 4', () => {
-      expect(layout().ariaLevels.get(processH)).toBe(4);
+      expect(layoutResponse.ariaLevels.get(processH)).toBe(4);
     });
     it('should have 9 items in the map of aria levels', () => {
-      expect(layout().ariaLevels.size).toBe(9);
+      expect(layoutResponse.ariaLevels.size).toBe(9);
     });
   });
 });

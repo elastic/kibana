@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Payload } from 'boom';
+import { Payload } from '@hapi/boom';
 import {
   SavedObjectsImportSuccess,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportRetry,
+  SavedObjectsImportError,
 } from 'src/core/server';
 
 export interface CopyOptions {
@@ -32,6 +33,6 @@ export interface CopyResponse {
     success: boolean;
     successCount: number;
     successResults?: SavedObjectsImportSuccess[];
-    errors?: Array<SavedObjectsImportError | Payload>;
+    errors?: Array<SavedObjectsImportFailure | SavedObjectsImportError | Payload>;
   };
 }

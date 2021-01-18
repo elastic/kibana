@@ -6,16 +6,27 @@
 
 /* eslint-disable react/display-name */
 
-import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
 import { getColumnsWithTimestamp } from '../../../common/components/event_details/helpers';
 import { CountBadge } from '../../../common/components/page';
 import { OnUpdateColumns } from '../timeline/events';
-import { WithHoverActions } from '../../../common/components/with_hover_actions';
-import { LoadingSpinner, getCategoryPaneCategoryClassName, getFieldCount } from './helpers';
+import {
+  LoadingSpinner,
+  getCategoryPaneCategoryClassName,
+  getFieldCount,
+  VIEW_ALL_BUTTON_CLASS_NAME,
+} from './helpers';
 import * as i18n from './translations';
 import { useManageTimeline } from '../manage_timeline';
 
@@ -36,39 +47,48 @@ const LinkContainer = styled.div`
 
 LinkContainer.displayName = 'LinkContainer';
 
+const ViewAll = styled(EuiButtonIcon)`
+  margin-left: 2px;
+`;
+
+ViewAll.displayName = 'ViewAll';
+
 export interface CategoryItem {
   categoryId: string;
 }
 
-interface ToolTipProps {
+interface ViewAllButtonProps {
   categoryId: string;
   browserFields: BrowserFields;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
 }
 
-const ToolTip = React.memo<ToolTipProps>(
+export const ViewAllButton = React.memo<ViewAllButtonProps>(
   ({ categoryId, browserFields, onUpdateColumns, timelineId }) => {
     const { getManageTimelineById } = useManageTimeline();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     const { isLoading } = useMemo(() => getManageTimelineById(timelineId) ?? { isLoading: false }, [
+      getManageTimelineById,
       timelineId,
     ]);
+
+    const handleClick = useCallback(() => {
+      onUpdateColumns(
+        getColumnsWithTimestamp({
+          browserFields,
+          category: categoryId,
+        })
+      );
+    }, [browserFields, categoryId, onUpdateColumns]);
+
     return (
-      <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
+      <EuiToolTip content={i18n.VIEW_ALL_CATEGORY_FIELDS(categoryId)}>
         {!isLoading ? (
-          <EuiIcon
-            aria-label={i18n.VIEW_CATEGORY(categoryId)}
-            color="text"
-            onClick={() => {
-              onUpdateColumns(
-                getColumnsWithTimestamp({
-                  browserFields,
-                  category: categoryId,
-                })
-              );
-            }}
-            type="visTable"
+          <ViewAll
+            aria-label={i18n.VIEW_ALL_CATEGORY_FIELDS(categoryId)}
+            className={VIEW_ALL_BUTTON_CLASS_NAME}
+            onClick={handleClick}
+            iconType="visTable"
           />
         ) : (
           <LoadingSpinner size="m" />
@@ -78,23 +98,19 @@ const ToolTip = React.memo<ToolTipProps>(
   }
 );
 
-ToolTip.displayName = 'ToolTip';
+ViewAllButton.displayName = 'ViewAllButton';
 
 /**
  * Returns the column definition for the (single) column that displays all the
  * category names in the field browser */
 export const getCategoryColumns = ({
-  browserFields,
   filteredBrowserFields,
   onCategorySelected,
-  onUpdateColumns,
   selectedCategoryId,
   timelineId,
 }: {
-  browserFields: BrowserFields;
   filteredBrowserFields: BrowserFields;
   onCategorySelected: (categoryId: string) => void;
-  onUpdateColumns: OnUpdateColumns;
   selectedCategoryId: string;
   timelineId: string;
 }) => [
@@ -103,32 +119,30 @@ export const getCategoryColumns = ({
     name: '',
     sortable: true,
     truncateText: false,
-    render: (categoryId: string, _: { categoryId: string }) => (
+    render: (
+      categoryId: string,
+      { ariaRowindex }: { categoryId: string; ariaRowindex: number }
+    ) => (
       <LinkContainer>
-        <EuiLink data-test-subj="category-link" onClick={() => onCategorySelected(categoryId)}>
+        <EuiLink
+          aria-label={i18n.CATEGORY_LINK({
+            category: categoryId,
+            totalCount: getFieldCount(filteredBrowserFields[categoryId]),
+          })}
+          className={getCategoryPaneCategoryClassName({
+            categoryId,
+            timelineId,
+          })}
+          data-test-subj="category-link"
+          data-colindex={1}
+          data-rowindex={ariaRowindex}
+          onClick={() => onCategorySelected(categoryId)}
+        >
           <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <WithHoverActions
-                hoverContent={
-                  <ToolTip
-                    categoryId={categoryId}
-                    browserFields={browserFields}
-                    onUpdateColumns={onUpdateColumns}
-                    timelineId={timelineId}
-                  />
-                }
-                render={() => (
-                  <CategoryName
-                    bold={categoryId === selectedCategoryId}
-                    className={getCategoryPaneCategoryClassName({
-                      categoryId,
-                      timelineId,
-                    })}
-                  >
-                    <EuiText size="xs">{categoryId}</EuiText>
-                  </CategoryName>
-                )}
-              />
+              <CategoryName data-test-subj="categoryName" bold={categoryId === selectedCategoryId}>
+                <EuiText size="xs">{categoryId}</EuiText>
+              </CategoryName>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>

@@ -71,11 +71,6 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  */
 `;
 
-const allMochaRulesOff = {};
-Object.keys(require('eslint-plugin-mocha').rules).forEach((k) => {
-  allMochaRulesOff['mocha/' + k] = 'off';
-});
-
 module.exports = {
   root: true,
 
@@ -85,12 +80,6 @@ module.exports = {
     /**
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
-    {
-      files: ['packages/kbn-ui-framework/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'jsx-a11y/no-onchange': 'off',
-      },
-    },
     {
       files: ['src/plugins/kibana_react/**/*.{js,mjs,ts,tsx}'],
       rules: {
@@ -413,7 +402,6 @@ module.exports = {
     {
       files: [
         '**/public/**/*.js',
-        'packages/kbn-ui-framework/doc_site/src/**/*.js',
         'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
       ],
       settings: {
@@ -436,17 +424,14 @@ module.exports = {
      * Files that ARE NOT allowed to use devDependencies
      */
     {
-      files: [
-        'packages/kbn-ui-framework/**/*.js',
-        'x-pack/**/*.js',
-        'packages/kbn-interpreter/**/*.js',
-      ],
+      files: ['x-pack/**/*.js', 'packages/kbn-interpreter/**/*.js'],
       rules: {
         'import/no-extraneous-dependencies': [
           'error',
           {
             devDependencies: false,
             peerDependencies: true,
+            packageDir: '.',
           },
         ],
       },
@@ -457,10 +442,6 @@ module.exports = {
      */
     {
       files: [
-        'packages/kbn-ui-framework/**/*.test.js',
-        'packages/kbn-ui-framework/doc_site/**/*.js',
-        'packages/kbn-ui-framework/generator-kui/**/*.js',
-        'packages/kbn-ui-framework/Gruntfile.js',
         'packages/kbn-es/src/**/*.js',
         'packages/kbn-interpreter/tasks/**/*.js',
         'packages/kbn-interpreter/src/plugin/**/*.js',
@@ -478,6 +459,7 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
+            packageDir: '.',
           },
         ],
       },
@@ -555,7 +537,6 @@ module.exports = {
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
-        'x-pack/dev-tools/mocha/setup_mocha.js',
         'x-pack/scripts/*.js',
       ],
       excludedFiles: ['**/integration_tests/**/*'],
@@ -587,7 +568,9 @@ module.exports = {
      */
     {
       files: ['test/harden/*.js', 'packages/elastic-safer-lodash-set/test/*.js'],
-      rules: allMochaRulesOff,
+      rules: {
+        'mocha/handle-done-callback': 'off',
+      },
     },
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
@@ -637,6 +620,10 @@ module.exports = {
               {
                 name: 'lodash/fp/assocPath',
                 message: 'Please use @elastic/safer-lodash-set instead',
+              },
+              {
+                name: 'react-use',
+                message: 'Please use react-use/lib/{method} instead.',
               },
             ],
           },
@@ -733,22 +720,6 @@ module.exports = {
     },
 
     /**
-     * ML overrides
-     */
-    {
-      files: ['x-pack/plugins/ml/**/*.js'],
-      rules: {
-        'no-shadow': 'error',
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: './x-pack',
-          },
-        ],
-      },
-    },
-
-    /**
      * Security Solution overrides
      */
     {
@@ -819,7 +790,6 @@ module.exports = {
       files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
-        mocha: true,
         jest: true,
       },
       rules: {
@@ -873,7 +843,8 @@ module.exports = {
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
         'no-this-before-super': 'error',
-        'no-undef': 'error',
+        // rely on typescript
+        'no-undef': 'off',
         'no-unreachable': 'error',
         'no-unsafe-finally': 'error',
         'no-useless-call': 'error',
@@ -954,7 +925,6 @@ module.exports = {
       files: ['x-pack/plugins/lists/**/*.{js,mjs,ts,tsx}'],
       plugins: ['eslint-plugin-node'],
       env: {
-        mocha: true,
         jest: true,
       },
       rules: {
@@ -1008,7 +978,8 @@ module.exports = {
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
         'no-this-before-super': 'error',
-        'no-undef': 'error',
+        // rely on typescript
+        'no-undef': 'off',
         'no-unreachable': 'error',
         'no-unsafe-finally': 'error',
         'no-useless-call': 'error',
@@ -1045,8 +1016,15 @@ module.exports = {
      * Alerting Services overrides
      */
     {
-      // typescript only for front and back end
+      // typescript for front and back end
       files: ['x-pack/plugins/{alerts,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+    {
+      // typescript only for back end
+      files: ['x-pack/plugins/triggers_actions_ui/server/**/*.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1071,20 +1049,6 @@ module.exports = {
       rules: {
         'react-hooks/exhaustive-deps': 'off',
         '@typescript-eslint/no-explicit-any': 'error',
-      },
-    },
-
-    /**
-     * disable jsx-a11y for kbn-ui-framework
-     */
-    {
-      files: ['packages/kbn-ui-framework/**/*.js'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-        'jsx-a11y/anchor-has-content': 'off',
-        'jsx-a11y/tabindex-no-positive': 'off',
-        'jsx-a11y/label-has-associated-control': 'off',
-        'jsx-a11y/aria-role': 'off',
       },
     },
 
@@ -1149,14 +1113,9 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
+            packageDir: '.',
           },
         ],
-      },
-    },
-    {
-      files: ['x-pack/plugins/canvas/storybook/**'],
-      rules: {
-        'import/no-extraneous-dependencies': 0,
       },
     },
     {
@@ -1178,13 +1137,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
-      env: {
-        jquery: true,
-      },
-    },
-    {
-      files: ['x-pack/plugins/monitoring/public/lib/jquery_flot/**/*.js'],
+      files: ['packages/kbn-ui-shared-deps/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },
@@ -1239,6 +1192,22 @@ module.exports = {
           'error',
           {
             patterns: ['lodash/*', '!lodash/fp'],
+          },
+        ],
+      },
+    },
+
+    /**
+     * Single package.json rules, it tells eslint to ignore the child package.json files
+     * and look for dependencies declarations in the single and root level package.json
+     */
+    {
+      files: ['**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            packageDir: '.',
           },
         ],
       },

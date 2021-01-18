@@ -36,7 +36,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { FIELD_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/field_types';
+import { FIELD_TYPES } from '../../../../common/field_types';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
@@ -213,6 +213,7 @@ export const SplitByTermsUI = ({
               metrics={metrics}
               clearable={false}
               additionalOptions={[defaultCount, terms]}
+              fields={fields[indexPattern]}
               onChange={handleSelectChange('terms_order_by')}
               restrict="basic"
               value={model.terms_order_by}

@@ -19,13 +19,13 @@ import {
   INGEST_API_EPM_PACKAGES,
   INGEST_API_PACKAGE_POLICIES,
   INGEST_API_FLEET_AGENTS,
-} from '../../policy/store/policy_list/services/ingest';
+} from '../../policy/store/services/ingest';
 import {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
   GetAgentsResponse,
-} from '../../../../../../ingest_manager/common/types/rest_spec';
+} from '../../../../../../fleet/common/types/rest_spec';
 import { GetPolicyListResponse } from '../../policy/types';
 
 const generator = new EndpointDocGenerator('seed');
@@ -164,7 +164,7 @@ const endpointListApiPathHandlerMocks = ({
   if (endpointsResults) {
     endpointsResults.forEach((host) => {
       // @ts-expect-error
-      apiHandlers[`/api/endpoint/metadata/${host.metadata.host.id}`] = () => host;
+      apiHandlers[`/api/endpoint/metadata/${host.metadata.agent.id}`] = () => host;
     });
   }
 

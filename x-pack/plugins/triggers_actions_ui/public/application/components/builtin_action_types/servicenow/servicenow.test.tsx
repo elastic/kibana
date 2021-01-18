@@ -43,10 +43,16 @@ describe('servicenow connector validation', () => {
     } as ServiceNowActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: [],
-        username: [],
-        password: [],
+      config: {
+        errors: {
+          apiUrl: [],
+        },
+      },
+      secrets: {
+        errors: {
+          username: [],
+          password: [],
+        },
       },
     });
   });
@@ -63,10 +69,16 @@ describe('servicenow connector validation', () => {
     } as unknown) as ServiceNowActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: ['URL is required.'],
-        username: [],
-        password: ['Password is required.'],
+      config: {
+        errors: {
+          apiUrl: ['URL is required.'],
+        },
+      },
+      secrets: {
+        errors: {
+          username: [],
+          password: ['Password is required.'],
+        },
       },
     });
   });
@@ -75,22 +87,22 @@ describe('servicenow connector validation', () => {
 describe('servicenow action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
-      subActionParams: { title: 'some title {{test}}' },
+      subActionParams: { incident: { short_description: 'some title {{test}}' }, comments: [] },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { title: [] },
+      errors: { ['subActionParams.incident.short_description']: [] },
     });
   });
 
   test('params validation fails when body is not valid', () => {
     const actionParams = {
-      subActionParams: { title: '' },
+      subActionParams: { incident: { short_description: '' }, comments: [] },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        title: ['Title is required.'],
+        ['subActionParams.incident.short_description']: ['Short description is required.'],
       },
     });
   });

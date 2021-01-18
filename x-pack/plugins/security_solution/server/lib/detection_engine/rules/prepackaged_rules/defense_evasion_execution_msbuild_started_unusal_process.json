@@ -23,7 +23,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
@@ -35,13 +38,20 @@
       },
       "technique": [
         {
-          "id": "T1500",
-          "name": "Compile After Delivery",
-          "reference": "https://attack.mitre.org/techniques/T1500/"
+          "id": "T1027",
+          "name": "Obfuscated Files or Information",
+          "reference": "https://attack.mitre.org/techniques/T1027/",
+          "subtechnique": [
+            {
+              "id": "T1027.004",
+              "name": "Compile After Delivery",
+              "reference": "https://attack.mitre.org/techniques/T1027/004/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 5
 }

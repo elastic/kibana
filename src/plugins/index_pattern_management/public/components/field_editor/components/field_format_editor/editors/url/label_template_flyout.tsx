@@ -63,7 +63,7 @@ const items: LabelTemplateExampleItem[] = [
 
 export const LabelTemplateFlyout = ({ isVisible = false, onClose = () => {} }) => {
   return isVisible ? (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} data-test-subj={'labelTemplateFlyoutTestSubj'}>
       <EuiFlyoutBody>
         <EuiText>
           <h3>

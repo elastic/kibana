@@ -39,7 +39,7 @@ jest.mock('fs', () => ({
 import sinon from 'sinon';
 import { PassThrough } from 'stream';
 
-import { Keystore } from '../legacy/server/keystore';
+import { Keystore } from '../cli/keystore';
 import { add } from './add';
 import { Logger } from '../cli_plugin/lib/logger';
 import * as prompt from './utils/prompt';
@@ -127,6 +127,17 @@ describe('Kibana keystore', () => {
       await add(keystore, 'foo');
 
       expect(keystore.data.foo).toEqual('bar');
+    });
+
+    it('parses JSON values', async () => {
+      prompt.question.returns(Promise.resolve('["bar"]\n'));
+
+      const keystore = new Keystore('/data/test.keystore');
+      sandbox.stub(keystore, 'save');
+
+      await add(keystore, 'foo');
+
+      expect(keystore.data.foo).toEqual(['bar']);
     });
 
     it('persists updated keystore', async () => {

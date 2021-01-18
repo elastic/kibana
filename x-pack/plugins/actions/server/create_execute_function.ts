@@ -41,7 +41,7 @@ export function createExecutionEnqueuerFunction({
   ) {
     if (isESOUsingEphemeralEncryptionKey === true) {
       throw new Error(
-        `Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+        `Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
       );
     }
 
@@ -51,7 +51,7 @@ export function createExecutionEnqueuerFunction({
       id
     );
 
-    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId)) {
+    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
     }
 

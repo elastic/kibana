@@ -41,11 +41,7 @@ export class HeatmapStyle implements IStyle {
     return LAYER_STYLE_TYPE.HEATMAP;
   }
 
-  renderEditor({
-    onStyleDescriptorChange,
-  }: {
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
-  }) {
+  renderEditor(onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void) {
     const onHeatmapColorChange = ({ colorRampName }: { colorRampName: string }) => {
       const styleDescriptor = HeatmapStyle.createDescriptor(colorRampName);
       onStyleDescriptorChange(styleDescriptor);

@@ -5,17 +5,16 @@
  */
 
 import React from 'react';
-import { useValues } from 'kea';
+import { useActions } from 'kea';
 
 import { EuiButton, EuiButtonProps, EuiLinkProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { sendTelemetry } from '../../../../shared/telemetry';
-import { HttpLogic } from '../../../../shared/http';
+import { TelemetryLogic } from '../../../../shared/telemetry';
 import { getWorkplaceSearchUrl } from '../../../../shared/enterprise_search_url';
 
 export const ProductButton: React.FC = () => {
-  const { http } = useValues(HttpLogic);
+  const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const buttonProps = {
     fill: true,
@@ -25,9 +24,7 @@ export const ProductButton: React.FC = () => {
   buttonProps.href = getWorkplaceSearchUrl();
   buttonProps.target = '_blank';
   buttonProps.onClick = () =>
-    sendTelemetry({
-      http,
-      product: 'workplace_search',
+    sendWorkplaceSearchTelemetry({
       action: 'clicked',
       metric: 'header_launch_button',
     });

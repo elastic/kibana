@@ -17,11 +17,20 @@ import { EMPTY_RESPONSE } from './constants';
 import { createAggregations } from './lib/create_aggregations';
 import { convertHistogramBucketsToTimeseries } from './lib/convert_histogram_buckets_to_timeseries';
 import { calculateBucketSize } from './lib/calculate_bucket_size';
+import { calculatedInterval } from './lib/calculate_interval';
 
 export const query = async (
   search: ESSearchClient,
-  options: MetricsAPIRequest
+  rawOptions: MetricsAPIRequest
 ): Promise<MetricsAPIResponse> => {
+  const interval = await calculatedInterval(search, rawOptions);
+  const options = {
+    ...rawOptions,
+    timerange: {
+      ...rawOptions.timerange,
+      interval,
+    },
+  };
   const hasGroupBy = Array.isArray(options.groupBy) && options.groupBy.length > 0;
   const filter: Array<Record<string, any>> = [
     {
@@ -35,6 +44,7 @@ export const query = async (
     },
     ...(options.groupBy?.map((field) => ({ exists: { field } })) ?? []),
   ];
+
   const params = {
     allowNoIndices: true,
     ignoreUnavailable: true,
@@ -70,7 +80,7 @@ export const query = async (
     throw new Error('Aggregations should be present.');
   }
 
-  const { bucketSize } = calculateBucketSize(options.timerange);
+  const { bucketSize } = calculateBucketSize({ ...options.timerange, interval });
 
   if (hasGroupBy && GroupingResponseRT.is(response.aggregations)) {
     const { groupings } = response.aggregations;

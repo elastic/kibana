@@ -17,8 +17,14 @@
  * under the License.
  */
 
-import { getState, GetStateReturn } from './discover_state';
+import {
+  getState,
+  GetStateReturn,
+  createSearchSessionRestorationDataProvider,
+} from './discover_state';
 import { createBrowserHistory, History } from 'history';
+import { dataPluginMock } from '../../../../data/public/mocks';
+import { SavedSearch } from '../../saved_searches';
 
 let history: History;
 let state: GetStateReturn;
@@ -29,7 +35,7 @@ describe('Test discover state', () => {
     history = createBrowserHistory();
     history.push('/');
     state = getState({
-      defaultAppState: { index: 'test' },
+      getStateDefaults: () => ({ index: 'test' }),
       history,
     });
     await state.replaceUrlAppState({});
@@ -84,7 +90,7 @@ describe('Test discover state with legacy migration', () => {
       "/#?_a=(query:(query_string:(analyze_wildcard:!t,query:'type:nice%20name:%22yeah%22')))"
     );
     state = getState({
-      defaultAppState: { index: 'test' },
+      getStateDefaults: () => ({ index: 'test' }),
       history,
     });
     expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
@@ -101,5 +107,32 @@ describe('Test discover state with legacy migration', () => {
         },
       }
     `);
+  });
+});
+
+describe('createSearchSessionRestorationDataProvider', () => {
+  let mockSavedSearch: SavedSearch = ({} as unknown) as SavedSearch;
+  const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
+    data: dataPluginMock.createStartContract(),
+    appStateContainer: getState({
+      history: createBrowserHistory(),
+    }).appStateContainer,
+    getSavedSearch: () => mockSavedSearch,
+  });
+
+  describe('session name', () => {
+    test('No saved search returns default name', async () => {
+      expect(await searchSessionInfoProvider.getName()).toBe('Discover');
+    });
+
+    test('Saved Search with a title returns saved search title', async () => {
+      mockSavedSearch = ({ id: 'id', title: 'Name' } as unknown) as SavedSearch;
+      expect(await searchSessionInfoProvider.getName()).toBe('Name');
+    });
+
+    test('Saved Search without a title returns default name', async () => {
+      mockSavedSearch = ({ id: 'id', title: undefined } as unknown) as SavedSearch;
+      expect(await searchSessionInfoProvider.getName()).toBe('Discover');
+    });
   });
 });

@@ -12,7 +12,7 @@ import * as H from 'history';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { inputsSelectors, State } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
@@ -130,9 +130,10 @@ export const makeMapStateToProps = () => {
         ? {
             id: flyoutTimeline.savedObjectId != null ? flyoutTimeline.savedObjectId : '',
             isOpen: flyoutTimeline.show,
+            activeTab: flyoutTimeline.activeTab,
             graphEventId: flyoutTimeline.graphEventId ?? '',
           }
-        : { id: '', isOpen: false, graphEventId: '' };
+        : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
 
     let searchAttr: {
       [CONSTANTS.appQuery]?: Query;
@@ -278,6 +279,7 @@ export const replaceStateInLocation = <T>({
     replaceStateKeyInQueryString(urlStateKey, urlStateToReplace)(getQueryStringFromLocation(search))
   );
   if (history) {
+    newLocation.state = history.location.state;
     history.replace(newLocation);
   }
   return newLocation.search;

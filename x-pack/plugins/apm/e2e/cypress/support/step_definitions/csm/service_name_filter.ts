@@ -7,15 +7,15 @@
 import { When, Then } from 'cypress-cucumber-preprocessor/steps';
 import { verifyClientMetrics } from './client_metrics_helper';
 import { DEFAULT_TIMEOUT } from './csm_dashboard';
+import { waitForLoadingToFinish } from './utils';
 
 When('the user changes the selected service name', () => {
-  // wait for all loading to finish
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
+  waitForLoadingToFinish();
   cy.get(`[data-cy=serviceNameFilter]`, DEFAULT_TIMEOUT).select('client');
 });
 
 Then(`it displays relevant client metrics`, () => {
-  const metrics = ['4 ms', '58 ms', '55'];
+  const metrics = ['80 ms', '4 ms', '76 ms', '55'];
 
   verifyClientMetrics(metrics, false);
 });

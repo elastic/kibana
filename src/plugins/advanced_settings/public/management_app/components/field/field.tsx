@@ -22,6 +22,7 @@ import classNames from 'classnames';
 
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
+import 'brace/mode/json';
 
 import {
   EuiBadge,
@@ -262,7 +263,7 @@ export class Field extends PureComponent<FieldProps> {
 
     return new Promise((resolve, reject) => {
       reader.onload = () => {
-        resolve(reader.result || undefined);
+        resolve(reader.result!);
       };
       reader.onerror = (err) => {
         reject(err);

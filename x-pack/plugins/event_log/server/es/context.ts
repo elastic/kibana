@@ -18,6 +18,7 @@ export interface EsContext {
   esNames: EsNames;
   esAdapter: IClusterClientAdapter;
   initialize(): void;
+  shutdown(): Promise<void>;
   waitTillReady(): Promise<boolean>;
   initialized: boolean;
 }
@@ -35,6 +36,7 @@ export interface EsContextCtorParams {
   logger: Logger;
   clusterClientPromise: Promise<EsClusterClient>;
   indexNameRoot: string;
+  kibanaVersion: string;
 }
 
 class EsContextImpl implements EsContext {
@@ -46,12 +48,13 @@ class EsContextImpl implements EsContext {
 
   constructor(params: EsContextCtorParams) {
     this.logger = params.logger;
-    this.esNames = getEsNames(params.indexNameRoot);
+    this.esNames = getEsNames(params.indexNameRoot, params.kibanaVersion);
     this.readySignal = createReadySignal();
     this.initialized = false;
     this.esAdapter = new ClusterClientAdapter({
       logger: params.logger,
       clusterClientPromise: params.clusterClientPromise,
+      context: this,
     });
   }
 
@@ -72,6 +75,10 @@ class EsContextImpl implements EsContext {
         this.readySignal.signal(false);
       }
     });
+  }
+
+  async shutdown() {
+    await this.esAdapter.shutdown();
   }
 
   // waits till the ES initialization is done, returns true if it was successful,

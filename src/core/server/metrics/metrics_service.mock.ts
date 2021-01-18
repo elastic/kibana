@@ -19,7 +19,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { MetricsService } from './metrics_service';
+import type { MetricsService } from './metrics_service';
 import {
   InternalMetricsServiceSetup,
   InternalMetricsServiceStart,

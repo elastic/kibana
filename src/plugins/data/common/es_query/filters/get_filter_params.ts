@@ -26,9 +26,10 @@ export function getFilterParams(filter: Filter) {
     case FILTERS.PHRASES:
       return (filter as PhrasesFilter).meta.params;
     case FILTERS.RANGE:
+      const { gte, gt, lte, lt } = (filter as RangeFilter).meta.params;
       return {
-        from: (filter as RangeFilter).meta.params.gte,
-        to: (filter as RangeFilter).meta.params.lt,
+        from: gte ?? gt,
+        to: lt ?? lte,
       };
   }
 }

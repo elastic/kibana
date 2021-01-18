@@ -3,7 +3,7 @@
 [[fleet]]
 = {fleet}
 
-experimental[]
+beta[]
 
 {fleet} in {kib} enables you to add and manage integrations for popular
 services and platforms, as well as manage {elastic-agent} installations in
@@ -17,8 +17,6 @@ Standalone mode requires you to manually configure and manage the agent locally.
 * An overview of the data ingest in your {es} cluster.
 * Multiple integrations to collect and transform data.
 
-//TODO: Redo screen capture.
-
 [role="screenshot"]
 image::fleet/images/fleet-start.png[{fleet} app in {kib}]
 
@@ -26,4 +24,4 @@ image::fleet/images/fleet-start.png[{fleet} app in {kib}]
 == Get started
 
 To get started with {fleet}, refer to the
-{ingest-guide}/index.html[Ingest Management Guide].
+{fleet-guide}/index.html[{fleet}] docs.

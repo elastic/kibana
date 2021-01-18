@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { createValidationFunction } from '../../../../common/runtime_types';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import { getLogEntryExamples } from '../../../lib/log_analysis';

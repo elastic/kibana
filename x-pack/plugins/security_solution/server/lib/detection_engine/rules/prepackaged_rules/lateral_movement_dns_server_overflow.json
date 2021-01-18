@@ -26,7 +26,8 @@
   "tags": [
     "Elastic",
     "Network",
-    "Windows"
+    "Threat Detection",
+    "Lateral Movement"
   ],
   "threat": [
     {

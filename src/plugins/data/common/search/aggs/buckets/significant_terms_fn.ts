@@ -20,9 +20,8 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggSignificantTerms';
+export const aggSignificantTermsFnName = 'aggSignificantTerms';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.SIGNIFICANT_TERMS>;
@@ -30,10 +29,15 @@ type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.SIGNIFICANT_TERMS>;
 type Arguments = AggArgs;
 
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggSignificantTermsFnName,
+  Input,
+  Arguments,
+  Output
+>;
 
 export const aggSignificantTerms = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggSignificantTermsFnName,
   help: i18n.translate('data.search.aggs.function.buckets.significantTerms.help', {
     defaultMessage: 'Generates a serialized agg config for a Significant Terms agg',
   }),
@@ -108,7 +112,6 @@ export const aggSignificantTerms = (): FunctionDefinition => ({
         type: BUCKET_TYPES.SIGNIFICANT_TERMS,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

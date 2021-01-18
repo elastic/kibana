@@ -39,7 +39,7 @@ export const PanelEditWithDrilldownsAndContextActions: React.FC = () => {
   const customActionGrouping: Action['grouping'] = [
     {
       id: 'actions',
-      getDisplayName: () => 'Custom actions',
+      getDisplayName: () => 'API actions',
       getIconType: () => 'cloudStormy',
       order: 20,
     },
