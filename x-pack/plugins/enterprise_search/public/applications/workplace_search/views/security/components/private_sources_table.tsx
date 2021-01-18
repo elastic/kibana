@@ -29,8 +29,8 @@ import { SecurityLogic, PrivateSourceSection } from '../security_logic';
 interface PrivateSourcesTableProps {
   sourceType: 'remote' | 'standard';
   sourceSection: PrivateSourceSection;
-  updateSource(sourceId: string, isEnabled: boolean);
-  updateEnabled(isEnabled: boolean);
+  updateSource(sourceId: string, isEnabled: boolean): void;
+  updateEnabled(isEnabled: boolean): void;
 }
 
 const REMOTE_TABLE_SUBHEAD =
