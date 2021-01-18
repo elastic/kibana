@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle, EuiText, EuiButton } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiText, EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -30,7 +30,7 @@ export const SetupGuide: React.FC = () => {
       <SetPageChrome trail={[SETUP_GUIDE_TITLE]} />
       <SendTelemetry action="viewed" metric="setup_guide" />
 
-      <a href={GETTING_STARTED_LINK_URL} target="_blank" rel="noopener noreferrer">
+      <EuiLink href={GETTING_STARTED_LINK_URL} target="_blank">
         <img
           className="setupGuide__thumbnail"
           src={GettingStarted}
@@ -41,7 +41,7 @@ export const SetupGuide: React.FC = () => {
           width="1280"
           height-="720"
         />
-      </a>
+      </EuiLink>
 
       <EuiTitle size="s">
         <p>
