@@ -234,4 +234,27 @@ export const oauthApplication = {
   redirectUri: 'https://foo',
   confidential: false,
   nativeRedirectUri: 'https://bar',
+};  
+  
+export const exampleResult = {
+  sourceName: 'source',
+  searchResultConfig: {
+    titleField: 'otherTitle',
+    subtitleField: 'otherSubtitle',
+    urlField: 'myLink',
+    color: '#e3e3e3',
+    descriptionField: 'about',
+    detailFields: [
+      { fieldName: 'cats', label: 'Felines' },
+      { fieldName: 'dogs', label: 'Canines' },
+    ],
+  },
+  titleFieldHover: false,
+  urlFieldHover: false,
+  exampleDocuments: [
+    {
+      myLink: 'http://foo',
+      otherTitle: 'foo',
+    },
+  ],
 };

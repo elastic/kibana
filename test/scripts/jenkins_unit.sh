@@ -15,7 +15,6 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
 
   # Test
   ./test/scripts/test/jest_integration.sh
-  ./test/scripts/test/mocha.sh
   ./test/scripts/test/jest_unit.sh
   ./test/scripts/test/api_integration.sh
 
