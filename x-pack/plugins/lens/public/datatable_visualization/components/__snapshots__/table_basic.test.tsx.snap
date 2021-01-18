@@ -2,6 +2,7 @@
 
 exports[`DatatableComponent it renders actions column when there are row actions 1`] = `
 <VisualizationContainer
+  className="lnsDataTableContainer"
   reportTitle="My fanci metric chart"
 >
   <ContextProvider
@@ -200,6 +201,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
 
 exports[`DatatableComponent it renders the title and value 1`] = `
 <VisualizationContainer
+  className="lnsDataTableContainer"
   reportTitle="My fanci metric chart"
 >
   <ContextProvider
@@ -385,6 +387,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
 
 exports[`DatatableComponent it should not render actions on header when it is in read only mode 1`] = `
 <VisualizationContainer
+  className="lnsDataTableContainer"
   reportTitle="My fanci metric chart"
 >
   <ContextProvider
