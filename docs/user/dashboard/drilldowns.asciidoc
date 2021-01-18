@@ -50,7 +50,7 @@ The <<url-template-variables,variables>> you use to create a <<url_templating-la
 
 For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`.
 
-To disable URL drilldowns on your {kib} instance, disable the plugin:
+To disable URL drilldowns on your {kib} instance, add the following line to `kibana.yml` config file:
 
 ["source","yml"]
 -----------
