@@ -211,17 +211,6 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     session: data.search.session,
   });
 
-  // search session requested a data refresh
-  subscriptions.add(
-    data.search.session.onRefresh$.subscribe(() => {
-      searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-      refetch$.next();
-    }),
-    searchSessionManager.newSearchSessionIdFromURL$.subscribe(() => {
-      refetch$.next();
-    })
-  );
-
   const state = getState({
     getStateDefaults,
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
@@ -500,7 +489,8 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
         filterManager.getFetches$(),
         timefilter.getFetch$(),
         timefilter.getAutoRefreshFetch$(),
-        data.query.queryString.getUpdates$()
+        data.query.queryString.getUpdates$(),
+        searchSessionManager.newSearchSessionIdFromURL$
       ).pipe(debounceTime(100));
 
       subscriptions.add(
@@ -524,6 +514,13 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
           },
           (error) => addFatalError(core.fatalErrors, error)
         )
+      );
+
+      subscriptions.add(
+        data.search.session.onRefresh$.subscribe(() => {
+          searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
+          refetch$.next();
+        })
       );
 
       $scope.changeInterval = (interval) => {
