@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DocLinksStart } from 'src/core/public';
 import { RoleMapping } from '../../../../../common/model';
 import { RolesAPIClient } from '../../../roles';
 import {
@@ -28,7 +29,6 @@ import {
   validateRoleMappingRoleTemplates,
 } from '../services/role_mapping_validation';
 import { RoleSelector } from '../role_selector';
-import { DocumentationLinksService } from '../../documentation_links';
 
 interface Props {
   roleMapping: RoleMapping;
@@ -38,7 +38,7 @@ interface Props {
   canUseInlineScripts: boolean;
   canUseStoredScripts: boolean;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
 }
 
 interface State {
@@ -205,7 +205,7 @@ export class MappingInfoPanel extends Component<Props, State> {
                 defaultMessage="Create templates that describe the roles to assign to your users."
               />{' '}
               <EuiLink
-                href={this.props.docLinks.getRoleMappingTemplateDocUrl()}
+                href={this.props.docLinks.links.apis.createRoleMappingTemplates}
                 external={true}
                 target="_blank"
               >

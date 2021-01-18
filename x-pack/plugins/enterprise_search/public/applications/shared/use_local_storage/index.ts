@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SecureSpaceMessage } from './secure_space_message';
+export { useLocalStorage } from './use_local_storage';
