@@ -360,7 +360,7 @@ export class IndexPattern implements IIndexPattern {
     );
   }
 
-  saveRuntimeField(name: string, runtimeField: RuntimeField) {
+  addRuntimeField(name: string, runtimeField: RuntimeField) {
     const existingField = this.getFieldByName(name);
     if (existingField) {
       existingField.runtimeField = runtimeField;
@@ -375,21 +375,21 @@ export class IndexPattern implements IIndexPattern {
         readFromDocValues: false,
       });
     }
+    this.runtimeFieldMap[name] = runtimeField;
   }
 
-  deleteRuntimeField(name: string) {
+  removeRuntimeField(name: string) {
     const existingField = this.getFieldByName(name);
     if (existingField) {
       if (existingField.isMapped) {
         // mapped field, remove runtimeField def
-        delete existingField.runtimeField;
+        existingField.runtimeField = undefined;
       } else {
         // runtimeField only
         this.fields.remove(existingField);
       }
-    } else {
-      delete this.runtimeFieldMap[name];
     }
+    delete this.runtimeFieldMap[name];
   }
 
   /**

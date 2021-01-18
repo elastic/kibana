@@ -99,6 +99,7 @@ describe('SearchSource', () => {
             storedFields: ['hello'],
             scriptFields: { world: {} },
             docvalueFields: ['@timestamp'],
+            // todo
           }),
         } as unknown) as IndexPattern);
 
@@ -418,6 +419,7 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual(['@timestamp']);
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['@timestamp', 'bar']);
+        // todo
       });
 
       test('filters request when a specific list of fields is provided with fieldsFromSource or fields', async () => {
