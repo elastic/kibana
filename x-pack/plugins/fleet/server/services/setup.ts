@@ -174,7 +174,7 @@ export async function setupFleet(
 ) {
   // Create fleet_enroll role
   // This should be done directly in ES at some point
-  const res = putFleetRole(callCluster);
+  const res = await putFleetRole(callCluster);
 
   // If the role is already created skip the rest unless you have forceRecreate set to true
   if (options?.forceRecreate !== true && res.role.created === false) {
