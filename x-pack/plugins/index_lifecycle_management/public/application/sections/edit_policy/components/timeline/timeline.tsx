@@ -64,7 +64,7 @@ const i18nTexts = {
   }),
   deleteIcon: {
     toolTipContent: i18n.translate('xpack.indexLifecycleMgmt.timeline.delteIconToolTipContent', {
-      defaultMessage: 'Data will be deleted at the end of this policy',
+      defaultMessage: 'Policy deletes the index after lifecycle phases',
     }),
   },
 };
@@ -122,7 +122,11 @@ export const Timeline: FunctionComponent = () => {
   const widths = calculateWidths(phaseTimingInMs);
 
   const getDurationInPhaseContent = (phase: PhasesExceptDelete): string | React.ReactNode =>
-    phaseTimingInMs.phases[phase] === Infinity ? <InfinityIcon /> : humanReadableTimings[phase];
+    phaseTimingInMs.phases[phase] === Infinity ? (
+      <InfinityIcon aria-label={humanReadableTimings[phase]} />
+    ) : (
+      humanReadableTimings[phase]
+    );
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
