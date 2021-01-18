@@ -138,7 +138,7 @@ export class SearchSessionService implements ISessionService {
       filter,
       namespaces: ['*'],
     });
-    this.logger.warn(`getAllMappedSavedObjects | Got ${res.saved_objects.length} items`);
+    this.logger.debug(`getAllMappedSavedObjects | Got ${res.saved_objects.length} items`);
     return res.saved_objects;
   }
 
