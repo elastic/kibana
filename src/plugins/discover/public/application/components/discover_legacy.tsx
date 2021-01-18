@@ -52,7 +52,7 @@ import {
   FilterManager,
 } from '../../../../data/public';
 import { Chart } from '../angular/helpers/point_series';
-import { AppState } from '../angular/discover_state';
+import { AppState, GetStateReturn } from '../angular/discover_state';
 import { SavedSearch } from '../../saved_searches';
 import { SavedObject } from '../../../../../core/types';
 import { TopNavMenuData } from '../../../../navigation/public';
@@ -163,6 +163,10 @@ export interface DiscoverProps {
      */
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
     /**
+     * State manipulation functions
+     */
+    stateContainer: GetStateReturn;
+    /**
      * Timefield of the currently used index pattern
      */
     timefield: string;
@@ -267,12 +271,16 @@ export function DiscoverLegacy({
     return collapseIcon && !collapseIcon.current;
   };
 
-  const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const services = getServices();
   const { TopNavMenu } = services.navigation.ui;
   const { trackUiMetric } = services;
-  const { savedSearch, indexPatternList } = opts;
+  const { savedSearch, indexPatternList, stateContainer } = opts;
+  function toggleChart() {
+    const newState = { ...state, hideHistogram: !state.hideHistogram };
+    stateContainer.setAppState(newState);
+  }
+
   const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
   const bucketInterval =
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
@@ -385,7 +393,7 @@ export function DiscoverLegacy({
                             onResetQuery={resetQuery}
                           />
                         </EuiFlexItem>
-                        {toggleOn && (
+                        {!state.hideHistogram && (
                           <EuiFlexItem className="dscResultCount__actions">
                             <TimechartHeader
                               dateFormat={opts.config.get('dateFormat')}
@@ -401,13 +409,13 @@ export function DiscoverLegacy({
                           <EuiFlexItem className="dscResultCount__toggle" grow={false}>
                             <EuiButtonEmpty
                               size="xs"
-                              iconType={toggleOn ? 'eyeClosed' : 'eye'}
+                              iconType={state.hideHistogram ? 'eyeClosed' : 'eye'}
                               onClick={() => {
-                                toggleChart(!toggleOn);
+                                toggleChart();
                               }}
                               data-test-subj="discoverChartToggle"
                             >
-                              {toggleOn
+                              {!state.hideHistogram
                                 ? i18n.translate('discover.hideChart', {
                                     defaultMessage: 'Hide chart',
                                   })
@@ -420,7 +428,7 @@ export function DiscoverLegacy({
                       </EuiFlexGroup>
                       <SkipBottomButton onClick={onSkipBottomButtonClick} />
                     </EuiFlexItem>
-                    {toggleOn && opts.timefield && (
+                    {!state.hideHistogram && opts.timefield && (
                       <EuiFlexItem grow={false}>
                         <section
                           aria-label={i18n.translate(

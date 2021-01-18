@@ -202,6 +202,7 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
 
   //used for functional testing
   $scope.fetchCounter = 0;
+  $scope.hideHistogram = !!savedSearch.hideHistogram;
 
   const getTimeField = () => {
     return isDefaultType($scope.indexPattern) ? $scope.indexPattern.timeFieldName : undefined;
@@ -453,6 +454,9 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     if (savedSearch.grid) {
       defaultState.grid = savedSearch.grid;
     }
+    if (savedSearch.hideHistogram) {
+      defaultState.hideHistogram = savedSearch.hideHistogram;
+    }
 
     return defaultState;
   }
@@ -471,6 +475,7 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     filterManager,
     setAppState,
     data,
+    stateContainer: state,
   };
 
   const shouldSearchOnPageLoad = () => {
@@ -684,7 +689,7 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
   function onResults(resp) {
     inspectorRequest.stats(getResponseInspectorStats(resp, $scope.searchSource)).ok({ json: resp });
 
-    if (getTimeField()) {
+    if (getTimeField() && !$scope.hideHistogram) {
       const tabifiedData = tabifyAggResponse($scope.opts.chartAggConfigs, resp);
       $scope.searchSource.rawResponse = resp;
       $scope.histogramData = discoverResponseHandler(
@@ -830,7 +835,7 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
 
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
-    if (!getTimeField()) return;
+    if (!getTimeField() || $scope.hideHistogram) return;
     const { interval: histogramInterval } = $scope.state;
 
     const visStateAggs = [

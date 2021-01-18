@@ -34,6 +34,7 @@ export interface SavedSearch {
   save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
   lastSavedTitle?: string;
   copyOnSave?: boolean;
+  hideHistogram?: boolean;
 }
 export interface SavedSearchLoader {
   get: (id: string) => Promise<SavedSearch>;

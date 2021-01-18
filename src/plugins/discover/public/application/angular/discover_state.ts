@@ -55,6 +55,10 @@ export interface AppState {
    */
   grid?: DiscoverGridSettings;
   /**
+   * Hide Histogram
+   */
+  hideHistogram?: boolean;
+  /**
    * id of the used index pattern
    */
   index?: string;

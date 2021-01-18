@@ -93,6 +93,7 @@ function getProps(indexPattern: IndexPattern) {
       setHeaderActionMenu: jest.fn(),
       timefield: indexPattern.timeFieldName || '',
       setAppState: jest.fn(),
+      stateContainer: {} as GetStateReturn,
     },
     resetQuery: jest.fn(),
     resultState: 'ready',
