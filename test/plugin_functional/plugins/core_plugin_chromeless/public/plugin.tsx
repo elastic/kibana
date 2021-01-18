@@ -26,9 +26,9 @@ export class CorePluginChromelessPlugin
       id: 'chromeless',
       title: 'Chromeless',
       chromeless: true,
-      async mount(context, params) {
+      async mount(params) {
         const { renderApp } = await import('./application');
-        return renderApp(context, params);
+        return renderApp(params);
       },
     });
   }
