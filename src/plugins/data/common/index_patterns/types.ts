@@ -19,15 +19,20 @@
 
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
-import type { RuntimeField as SharedRuntimeField } from 'x-pack/plugins/runtime_fields/public';
-// eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
 import { IFieldType } from './fields';
 import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
-export type RuntimeField = Omit<SharedRuntimeField, 'name'>;
+const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
+type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+export interface RuntimeField {
+  type: RuntimeType;
+  script: {
+    source: string;
+  };
+}
 
 export interface IIndexPattern {
   fields: IFieldType[];
