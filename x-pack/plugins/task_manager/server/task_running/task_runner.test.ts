@@ -10,10 +10,10 @@ import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskManagerRunner, TaskRunResult } from '../task_running';
 import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent, TaskRun } from '../task_events';
-import { ConcreteTaskInstance, TaskStatus, TaskDefinition, SuccessfulRunResult } from '../task';
+import { ConcreteTaskInstance, TaskStatus, SuccessfulRunResult } from '../task';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import moment from 'moment';
-import { TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwUnrecoverableError } from './errors';
 
@@ -1121,7 +1121,7 @@ describe('TaskManagerRunner', () => {
 
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
-    definitions?: Record<string, Omit<TaskDefinition, 'type'>>;
+    definitions?: TaskDefinitionRegistry;
     onTaskEvent?: (event: TaskEvent<unknown, unknown>) => void;
   }
 
