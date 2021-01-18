@@ -58,8 +58,6 @@ import { popularizeField } from '../helpers/popularize_field';
 import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
-import { getQueryParams, createQueryParamObservable } from '../../../../kibana_utils/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
@@ -97,11 +95,6 @@ const fetchStatuses = {
   COMPLETE: 'complete',
   ERROR: 'error',
 };
-
-const getSearchSessionIdFromURL = (history) =>
-  getQueryParams(history.location)[SEARCH_SESSION_ID_QUERY_PARAM];
-const createSearchSessionIdFromURLObservable = (history) =>
-  createQueryParamObservable(history, SEARCH_SESSION_ID_QUERY_PARAM);
 
 const app = getAngularModule();
 
