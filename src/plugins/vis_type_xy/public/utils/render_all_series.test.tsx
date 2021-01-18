@@ -134,7 +134,7 @@ describe('renderAllSeries', function () {
     ]);
   });
 
-  it('defaults the CurveType to linear if', () => {
+  it('defaults the CurveType to linear', () => {
     const renderSeries = getAllSeries(getVisConfig(), defaultSeriesParams, defaultData);
     const wrapper = shallow(<div>{renderSeries}</div>);
     expect(wrapper.find(AreaSeries).prop('curve')).toEqual(CurveType.LINEAR);
