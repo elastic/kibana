@@ -15,7 +15,7 @@ export declare class SavedObjectsExporter
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)({ savedObjectsClient, exportSizeLimit, })](./kibana-plugin-core-server.savedobjectsexporter._constructor_.md) |  | Constructs a new instance of the <code>SavedObjectsExporter</code> class |
+|  [(constructor)({ savedObjectsClient, typeRegistry, exportSizeLimit, })](./kibana-plugin-core-server.savedobjectsexporter._constructor_.md) |  | Constructs a new instance of the <code>SavedObjectsExporter</code> class |
 
 ## Properties
 

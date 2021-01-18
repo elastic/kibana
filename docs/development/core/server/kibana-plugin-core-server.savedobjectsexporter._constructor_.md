@@ -9,8 +9,9 @@ Constructs a new instance of the `SavedObjectsExporter` class
 <b>Signature:</b>
 
 ```typescript
-constructor({ savedObjectsClient, exportSizeLimit, }: {
+constructor({ savedObjectsClient, typeRegistry, exportSizeLimit, }: {
         savedObjectsClient: SavedObjectsClientContract;
+        typeRegistry: ISavedObjectTypeRegistry;
         exportSizeLimit: number;
     });
 ```
@@ -19,5 +20,5 @@ constructor({ savedObjectsClient, exportSizeLimit, }: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  { savedObjectsClient, exportSizeLimit, } | <code>{</code><br/><code>        savedObjectsClient: SavedObjectsClientContract;</code><br/><code>        exportSizeLimit: number;</code><br/><code>    }</code> |  |
+|  { savedObjectsClient, typeRegistry, exportSizeLimit, } | <code>{</code><br/><code>        savedObjectsClient: SavedObjectsClientContract;</code><br/><code>        typeRegistry: ISavedObjectTypeRegistry;</code><br/><code>        exportSizeLimit: number;</code><br/><code>    }</code> |  |
 
