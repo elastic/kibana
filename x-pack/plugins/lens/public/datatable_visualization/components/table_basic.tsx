@@ -216,6 +216,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   return (
     <VisualizationContainer
+      className="lnsDataTableContainer"
       reportTitle={props.args.title}
       reportDescription={props.args.description}
     >
