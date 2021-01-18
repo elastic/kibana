@@ -281,7 +281,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     ).toBe(false);
   });
 
-  it('is not droppable if the dragged column is incompatible', () => {
+  it('is droppable if the dragged column is incompatible', () => {
     expect(
       canHandleDrop({
         ...defaultProps,
@@ -297,7 +297,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         columnId: 'col2',
         filterOperations: (op: OperationMetadata) => op.dataType === 'number',
       })
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('appends the dropped column when a field is dropped', () => {

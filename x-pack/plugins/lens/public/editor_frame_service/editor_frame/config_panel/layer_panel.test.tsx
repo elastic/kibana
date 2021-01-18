@@ -456,6 +456,10 @@ describe('LayerPanel', () => {
           dragging={draggingField}
           setDragging={jest.fn()}
           setActiveDropTarget={() => {}}
+          activeDropTarget={undefined}
+          keyboardMode={false}
+          setKeyboardMode={() => {}}
+          registerDropTarget={jest.fn()}
         >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
@@ -503,6 +507,10 @@ describe('LayerPanel', () => {
           dragging={draggingField}
           setDragging={jest.fn()}
           setActiveDropTarget={() => {}}
+          activeDropTarget={undefined}
+          keyboardMode={false}
+          setKeyboardMode={() => {}}
+          registerDropTarget={jest.fn()}
         >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
@@ -558,6 +566,10 @@ describe('LayerPanel', () => {
           dragging={draggingOperation}
           setDragging={jest.fn()}
           setActiveDropTarget={() => {}}
+          activeDropTarget={undefined}
+          keyboardMode={false}
+          setKeyboardMode={() => {}}
+          registerDropTarget={jest.fn()}
         >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
@@ -616,6 +628,10 @@ describe('LayerPanel', () => {
           dragging={draggingOperation}
           setDragging={jest.fn()}
           setActiveDropTarget={() => {}}
+          activeDropTarget={undefined}
+          keyboardMode={false}
+          setKeyboardMode={() => {}}
+          registerDropTarget={jest.fn()}
         >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
@@ -654,6 +670,10 @@ describe('LayerPanel', () => {
           dragging={draggingOperation}
           setDragging={jest.fn()}
           setActiveDropTarget={() => {}}
+          activeDropTarget={undefined}
+          keyboardMode={false}
+          setKeyboardMode={() => {}}
+          registerDropTarget={jest.fn()}
         >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>

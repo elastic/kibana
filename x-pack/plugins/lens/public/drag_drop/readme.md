@@ -30,7 +30,7 @@ In your child application, place a `ChildDragDropProvider` at the root of that, 
 
 This enables your child application to share the same drag / drop context as the root application.
 
-## Dragging
+## DragDropIdentifier
 
 An item can be both draggable and droppable at the same time, but for simplicity's sake, we'll treat these two cases separately.
 

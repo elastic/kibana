@@ -18,16 +18,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
 import { StateSetter, isDraggedOperation } from '../../../types';
-import {
-  DragContext,
-  DragDrop,
-  ChildDragDropProvider,
-  ReorderProvider,
-  DragDropIdentifier,
-} from '../../../drag_drop';
+import { DragContext, DragDrop, ChildDragDropProvider, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
 import { ColorIndicator } from './color_indicator';
@@ -277,18 +270,18 @@ export function LayerPanel(
                           dragType={dragType}
                           dropType={dropType}
                           data-test-subj={group.dataTestSubj}
-                          itemsInGroup={group.accessors.map((a) => ({
-                            columnId: a.columnId,
-                            groupId: group.groupId,
-                            layerId,
-                            id: a.columnId,
-                          }))}
                           value={{
                             columnId: accessor,
                             groupId: group.groupId,
                             layerId,
                             id: accessor,
                           }}
+                          itemsInGroup={group.accessors.map((a) => ({
+                            columnId: a.columnId,
+                            groupId: group.groupId,
+                            layerId,
+                            id: a.columnId,
+                          }))}
                           isValueEqual={isSameConfiguration}
                           label={columnLabelMap[accessor]}
                           droppable={dragging && isDroppable}
@@ -306,14 +299,15 @@ export function LayerPanel(
                                   columnId: accessor,
                                 };
 
-                            const droppedInGroup = groups.find(
-                              ({ groupId }) => groupId === dropTarget?.groupId
-                            );
+                            const filterOperations =
+                              groups.find(({ groupId }) => groupId === dropTarget?.groupId)
+                                ?.filterOperations || (() => false);
+
                             const dropResult = layerDatasource.onDrop({
                               ...layerDatasourceDropProps,
                               droppedItem,
                               ...dropTarget,
-                              filterOperations: droppedInGroup?.filterOperations,
+                              filterOperations,
                             });
                             if (dropResult) {
                               props.updateVisualization(

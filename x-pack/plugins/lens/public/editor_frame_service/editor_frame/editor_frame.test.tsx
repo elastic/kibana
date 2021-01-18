@@ -1334,6 +1334,7 @@ describe('editor_frame', () => {
         instance.find(DragDrop).filter('[data-test-subj="mockVisA"]').prop('onDrop')!({
           indexPatternId: '1',
           field: {},
+          id: '1',
         });
       });
 
@@ -1431,6 +1432,7 @@ describe('editor_frame', () => {
         instance.find(DragDrop).filter('[data-test-subj="lnsWorkspace"]').prop('onDrop')!({
           indexPatternId: '1',
           field: {},
+          id: '1',
         });
       });
 

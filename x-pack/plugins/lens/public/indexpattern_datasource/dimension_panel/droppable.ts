@@ -38,7 +38,7 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
 
   if (isDraggedField(dragging)) {
     const currentColumn = props.state.layers[props.layerId].columns[props.columnId];
-    return (
+    return Boolean(
       layerIndexPatternId === dragging.indexPatternId &&
       Boolean(hasOperationForField(dragging.field)) &&
       (!currentColumn ||
@@ -59,7 +59,7 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
     // suggest
     const field =
       hasField(op) && props.state.indexPatterns[layerIndexPatternId].getFieldByName(op.sourceField);
-    return field && hasOperationForField(field);
+    return Boolean(field && hasOperationForField(field));
   }
   return false;
 }
@@ -100,7 +100,7 @@ const onMoveDropToNonCompatibleGroup = ({
   layerId,
   droppedItem,
   operationSupportMatrix,
-}) => {
+}: DropHandlerProps) => {
   // move to suggest
   const layer = state.layers[layerId];
   const op = { ...layer.columns[droppedItem.columnId] };
