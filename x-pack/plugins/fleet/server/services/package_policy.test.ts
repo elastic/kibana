@@ -295,6 +295,36 @@ describe('Package policy service', () => {
         },
       ]);
     });
+
+    it('should work with a package without input', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          policy_templates: [
+            {
+              inputs: undefined,
+            },
+          ],
+        } as unknown) as PackageInfo,
+        []
+      );
+
+      expect(inputs).toEqual([]);
+    });
+
+    it('should work with a package with a empty inputs array', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          policy_templates: [
+            {
+              inputs: [],
+            },
+          ],
+        } as unknown) as PackageInfo,
+        []
+      );
+
+      expect(inputs).toEqual([]);
+    });
   });
 
   describe('update', () => {
