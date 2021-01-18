@@ -25,7 +25,7 @@ export default {
       label: '404: response',
       xAxisLabel: 'machine.ram',
       ordered: {
-        interval: 100,
+        interval: 1000000,
       },
       yAxisLabel: 'Count of documents',
       series: [
@@ -72,7 +72,7 @@ export default {
       label: '200: response',
       xAxisLabel: 'machine.ram',
       ordered: {
-        interval: 100,
+        interval: 1000000,
       },
       yAxisLabel: 'Count of documents',
       series: [
@@ -171,7 +171,7 @@ export default {
       label: '503: response',
       xAxisLabel: 'machine.ram',
       ordered: {
-        interval: 100,
+        interval: 1000000,
       },
       yAxisLabel: 'Count of documents',
       series: [
