@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 
 export function RemoveLayerButton({
   onRemoveLayer,
-  index,
+  layerIndex,
   isOnlyLayer,
 }: {
   onRemoveLayer: () => void;
-  index: number;
+  layerIndex: number;
   isOnlyLayer: boolean;
 }) {
   return (
@@ -27,11 +27,11 @@ export function RemoveLayerButton({
         isOnlyLayer
           ? i18n.translate('xpack.lens.resetLayerAriaLabel', {
               defaultMessage: 'Reset layer {index}',
-              values: { index: index + 1 },
+              values: { index: layerIndex + 1 },
             })
           : i18n.translate('xpack.lens.deleteLayerAriaLabel', {
               defaultMessage: `Delete layer {index}`,
-              values: { index: index + 1 },
+              values: { index: layerIndex + 1 },
             })
       }
       onClick={() => {

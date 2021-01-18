@@ -174,7 +174,7 @@ describe('DragDrop', () => {
         <DragDrop value={value} draggable={true} label="a">
           <button>Hello!</button>
         </DragDrop>
-        <DragDrop onDrop={(x: unknown) => {}} droppable={false} value={{id:'2'}}>
+        <DragDrop onDrop={(x: unknown) => {}} droppable={false} value={{ id: '2' }}>
           <button>Hello!</button>
         </DragDrop>
       </ChildDragDropProvider>
@@ -202,7 +202,7 @@ describe('DragDrop', () => {
           <button>Hello!</button>
         </DragDrop>
         <DragDrop
-        value={value}
+          value={value}
           onDrop={(x: unknown) => {}}
           droppable
           getAdditionalClassesOnEnter={getAdditionalClasses}

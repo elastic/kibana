@@ -15,12 +15,12 @@ import { generateId } from '../../../id_generator';
 import { DragDrop, DragDropIdentifier, DragContextState } from '../../../drag_drop';
 import { Datasource, VisualizationDimensionGroupConfig } from '../../../types';
 
-type LayerDatasourceDropProps = {
+interface LayerDatasourceDropProps {
   layerId: string;
   dragDropContext: DragContextState;
   state: unknown;
   setState: (newState: unknown) => void;
-};
+}
 
 export function EmptyDimensionButton({
   dragDropContext,
@@ -53,7 +53,8 @@ export function EmptyDimensionButton({
       isNew: true,
       id: newId,
     };
-  }, [group.accessors.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [group.accessors.length, group.groupId, layerId]);
 
   return (
     <div className="lnsLayerPanel__dimensionContainer">

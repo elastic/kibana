@@ -58,7 +58,7 @@ describe('LayerPanel', () => {
       onRemoveLayer: jest.fn(),
       dispatch: jest.fn(),
       core: coreMock.createStart(),
-      index: 0,
+      layerIndex: 0,
       setLayerRef: jest.fn(),
     };
   }

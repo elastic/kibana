@@ -40,9 +40,9 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
     const currentColumn = props.state.layers[props.layerId].columns[props.columnId];
     return Boolean(
       layerIndexPatternId === dragging.indexPatternId &&
-      Boolean(hasOperationForField(dragging.field)) &&
-      (!currentColumn ||
-        (hasField(currentColumn) && currentColumn.sourceField !== dragging.field.name))
+        Boolean(hasOperationForField(dragging.field)) &&
+        (!currentColumn ||
+          (hasField(currentColumn) && currentColumn.sourceField !== dragging.field.name))
     );
   }
 

@@ -350,7 +350,7 @@ export function replaceColumn({
   } else if (
     operationDefinition.input === 'field' &&
     field &&
-    'sourceField' in previousColumn 
+    'sourceField' in previousColumn
     // todo: ask if it's safe
     // &&
     // previousColumn.sourceField !== field.name

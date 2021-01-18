@@ -13,10 +13,10 @@ export type DragDropIdentifier = Record<string, unknown> & {
   id: string;
 };
 
-type ActiveDropTarget = {
+interface ActiveDropTarget {
   activeDropTarget?: DragDropIdentifier;
   dropTargetsByOrder: Record<string, { dropTarget: DragDropIdentifier } | undefined>;
-};
+}
 /**
  * The shape of the drag / drop context.
  */
@@ -253,11 +253,6 @@ export interface ReorderState {
   reorderedItems: DragDropIdentifier[];
 
   /**
-   * Ids of the elements that are translated up or down
-   */
-  itemsInGroup: DragDropIdentifier[];
-
-  /**
    * Direction of the move of dragged element in the reordered list
    */
   direction: '-' | '+';
@@ -293,7 +288,6 @@ export interface ReorderContextState {
 export const ReorderContext = React.createContext<ReorderContextState>({
   reorderState: {
     reorderedItems: [],
-    itemsInGroup: [],
     direction: '-',
     draggingHeight: 40,
     isReorderOn: false,
@@ -307,16 +301,13 @@ export function ReorderProvider({
   id,
   children,
   className,
-  itemsInGroup,
 }: {
   id: string;
   children: React.ReactNode;
   className?: string;
-  itemsInGroup: DragDropIdentifier[];
 }) {
   const [state, setState] = useState<ReorderContextState['reorderState']>({
     reorderedItems: [],
-    itemsInGroup,
     direction: '-',
     draggingHeight: 40,
     isReorderOn: false,
@@ -327,7 +318,6 @@ export function ReorderProvider({
   const setReorderState = useMemo(() => (dispatch: SetReorderStateDispatch) => setState(dispatch), [
     setState,
   ]);
-
   return (
     <div
       className={classNames(className, {
@@ -350,7 +340,7 @@ export function ReorderProvider({
             </p>
             <p id={`lnsDragDrop-groupMovementInstructions-${id}`}>
               {i18n.translate('xpack.lens.dragDrop.groupMovementInstructions', {
-                defaultMessage: `Use right arrow key to move dimension to next group.`,
+                defaultMessage: `Use right arrow and left key to move dimension to the next group.`,
               })}
             </p>
           </div>
@@ -359,3 +349,41 @@ export function ReorderProvider({
     </div>
   );
 }
+
+export const reorderAnnouncements = {
+  moved: (itemLabel: string, position: number, prevPosition: number) =>
+    i18n.translate('xpack.lens.dragDrop.elementMoved', {
+      defaultMessage: `You have moved the item {itemLabel} from position {prevPosition} to position {position}`,
+      values: {
+        itemLabel,
+        position,
+        prevPosition,
+      },
+    }),
+  lifted: (itemLabel: string, position: number) =>
+    i18n.translate('xpack.lens.dragDrop.elementLifted', {
+      defaultMessage: `You have lifted an item {itemLabel} in position {position}`,
+      values: {
+        itemLabel,
+        position,
+      },
+    }),
+
+  cancelled: (position: number) =>
+    i18n.translate('xpack.lens.dragDrop.abortMessageReorder', {
+      defaultMessage:
+        'Movement cancelled. The item has returned to its starting position {position}',
+      values: {
+        position,
+      },
+    }),
+  dropped: (position: number, prevPosition: number) =>
+    i18n.translate('xpack.lens.dragDrop.dropMessageReorder', {
+      defaultMessage:
+        'You have dropped the item. You have moved the item from position {prevPosition} to positon {position}',
+      values: {
+        position,
+        prevPosition,
+      },
+    }),
+};

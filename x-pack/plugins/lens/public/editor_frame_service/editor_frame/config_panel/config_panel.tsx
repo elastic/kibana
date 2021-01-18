@@ -136,13 +136,13 @@ export function LayerPanels(
 
   return (
     <EuiForm className="lnsConfigPanel">
-      {layerIds.map((layerId, index) => (
+      {layerIds.map((layerId, layerIndex) => (
         <LayerPanel
           {...props}
           setLayerRef={setLayerRef}
           key={layerId}
           layerId={layerId}
-          index={index}
+          layerIndex={layerIndex}
           visualizationState={visualizationState}
           updateVisualization={setVisualizationState}
           updateDatasource={updateDatasource}

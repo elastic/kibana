@@ -18,6 +18,7 @@ import {
   nextValidDropTarget,
   ReorderContext,
   ReorderState,
+  reorderAnnouncements,
 } from './providers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
@@ -139,29 +140,6 @@ type Props = DraggableProps | NonDraggableProps;
  * @param props
  */
 
-const getKeyboardReorderMessageMoved = (
-  itemLabel: string,
-  position: number,
-  prevPosition: number
-) =>
-  i18n.translate('xpack.lens.dragDrop.elementMoved', {
-    defaultMessage: `You have moved the item {itemLabel} from position {prevPosition} to position {position}`,
-    values: {
-      itemLabel,
-      position,
-      prevPosition,
-    },
-  });
-
-const getKeyboardReorderMessageLifted = (itemLabel: string, position: number) =>
-  i18n.translate('xpack.lens.dragDrop.elementLifted', {
-    defaultMessage: `You have lifted an item {itemLabel} in position {position}`,
-    values: {
-      itemLabel,
-      position,
-    },
-  });
-
 const lnsLayerPanelDimensionMargin = 8;
 
 export const DragDrop = (props: Props) => {
@@ -278,27 +256,26 @@ const DragDropInner = React.memo(function DragDropInner(
     [isReorderDragging, setReorderState]
   );
 
-  const heightRef = React.useRef(null);
+  const heightRef = React.useRef<HTMLElement>(null);
+
+  const isReordered =
+    isReorderOn && reorderedItems.some((el) => el.id === value.id) && reorderedItems.length;
 
   useEffect(() => {
-    if (heightRef?.current?.clientHeight && reorderedItems.find((el) => el.id === value.id)) {
+    if (isReordered && heightRef.current?.clientHeight) {
       setReorderState((s) => ({
         ...s,
         reorderedItems: s.reorderedItems.map((el) =>
           el.id === value.id
             ? {
                 ...el,
-                height: heightRef?.current.clientHeight,
+                height: heightRef.current?.clientHeight,
               }
             : el
         ),
       }));
     }
-  }, [reorderedItems.length, draggingHeight]);
-
-  if (reorderedItems.length) {
-    console.log(reorderedItems, draggingHeight);
-  }
+  }, [isReordered, setReorderState, value.id]);
 
   const dragStart = (e?: DroppableEvent) => {
     // Setting stopPropgagation causes Chrome failures, so
@@ -459,20 +436,23 @@ const DragDropInner = React.memo(function DragDropInner(
 
                 if (itemsInGroup && itemsInGroup.length > 1) {
                   if (isReorderOn) {
+                    const activeDropTargetIndex = itemsInGroup.findIndex(
+                      (i) => i.id === activeDropTarget?.activeDropTarget?.id
+                    );
                     setReorderState((s: ReorderState) => ({
                       ...s,
                       isReorderOn: false,
-                      keyboardReorderMessage: '',
+                      keyboardReorderMessage: reorderAnnouncements.dropped(
+                        activeDropTargetIndex + 1,
+                        currentIndex + 1
+                      ),
                       reorderedItems: [],
                     }));
                   } else {
                     setReorderState((s: ReorderState) => ({
                       ...s,
                       isReorderOn: true,
-                      keyboardReorderMessage: getKeyboardReorderMessageLifted(
-                        label,
-                        currentIndex + 1
-                      ),
+                      keyboardReorderMessage: reorderAnnouncements.lifted(label, currentIndex + 1),
                     }));
                   }
                 }
@@ -490,9 +470,11 @@ const DragDropInner = React.memo(function DragDropInner(
                 setReorderState((s: ReorderState) => ({
                   ...s,
                   isReorderOn: false,
-                  keyboardReorderMessage: i18n.translate('xpack.lens.dragDrop.abortMessage', {
-                    defaultMessage: 'Movement aborted.',
-                  }),
+                  keyboardReorderMessage: isReorderOn
+                    ? reorderAnnouncements.cancelled(currentIndex + 1)
+                    : i18n.translate('xpack.lens.dragDrop.abortMessage', {
+                        defaultMessage: 'Movement cancelled.',
+                      }),
                   reorderedItems: [],
                 }));
                 if (dragInProgress) {
@@ -590,10 +572,10 @@ const DragDropInner = React.memo(function DragDropInner(
                   if (activeDropTargetIndex < itemsInGroup.length - 1) {
                     setReorderState((s: ReorderState) => ({
                       ...s,
-                      keyboardReorderMessage: getKeyboardReorderMessageMoved(
+                      keyboardReorderMessage: reorderAnnouncements.moved(
                         label,
                         activeDropTargetIndex + 2,
-                        activeDropTargetIndex + 1
+                        currentIndex + 1
                       ),
                     }));
 
@@ -604,10 +586,10 @@ const DragDropInner = React.memo(function DragDropInner(
                   if (activeDropTargetIndex > 0) {
                     setReorderState((s: ReorderState) => ({
                       ...s,
-                      keyboardReorderMessage: getKeyboardReorderMessageMoved(
+                      keyboardReorderMessage: reorderAnnouncements.moved(
                         label,
                         activeDropTargetIndex,
-                        activeDropTargetIndex + 1
+                        currentIndex + 1
                       ),
                     }));
 
@@ -624,7 +606,7 @@ const DragDropInner = React.memo(function DragDropInner(
           className: classNames(children.props.className, classes, {
             'lnsDragDrop-isReorderable': isReorderDragging,
           }),
-          draggable: draggable,
+          draggable,
           onDragEnd: dragEnd,
           onDragStart: (e: DroppableEvent) => {
             const height = e.currentTarget.offsetHeight + lnsLayerPanelDimensionMargin;

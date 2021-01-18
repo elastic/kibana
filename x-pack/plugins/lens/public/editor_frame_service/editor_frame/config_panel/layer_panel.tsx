@@ -63,7 +63,7 @@ function isSameConfiguration(config1: unknown, config2: unknown) {
 export function LayerPanel(
   props: Exclude<ConfigPanelWrapperProps, 'state' | 'setState'> & {
     layerId: string;
-    index: number;
+    layerIndex: number;
     isOnlyLayer: boolean;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
@@ -81,7 +81,7 @@ export function LayerPanel(
     initialActiveDimensionState
   );
 
-  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, setLayerRef, index } = props;
+  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, setLayerRef, layerIndex } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
   useEffect(() => {
@@ -126,10 +126,6 @@ export function LayerPanel(
     activeData: props.framePublicAPI.activeData,
   };
 
-  const layerIndex = Object.keys(props.framePublicAPI.datasourceLayers).findIndex(
-    (id) => id === layerId
-  );
-
   const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
@@ -138,7 +134,7 @@ export function LayerPanel(
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <section tabIndex={-1} ref={setLayerRefMemoized} className="lnsLayerPanel">
-        <EuiPanel data-test-subj={`lns-layerPanel-${index}`} paddingSize="s">
+        <EuiPanel data-test-subj={`lns-layerPanel-${layerIndex}`} paddingSize="s">
           <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
             <EuiFlexItem grow={false} className="lnsLayerPanel__settingsFlexItem">
               <LayerSettings
@@ -222,7 +218,7 @@ export function LayerPanel(
               >
                 <>
                   <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
-                    {group.accessors.map((accessorConfig, index) => {
+                    {group.accessors.map((accessorConfig, accessorIndex) => {
                       const accessor = accessorConfig.columnId;
                       const { dragging } = dragDropContext;
                       const dragType =
@@ -265,7 +261,7 @@ export function LayerPanel(
                         <DragDrop
                           className="lnsLayerPanel__dimensionContainer"
                           key={accessor}
-                          order={[2, layerIndex, groupIndex, index]}
+                          order={[2, layerIndex, groupIndex, accessorIndex]}
                           draggable={!activeId}
                           dragType={dragType}
                           dropType={dropType}
@@ -414,7 +410,11 @@ export function LayerPanel(
                         });
                       }}
                       onDrop={(droppedItem, targetItem) => {
-                        const { columnId, groupId, layerId } = (targetItem as unknown) as {
+                        const {
+                          columnId,
+                          groupId,
+                          layerId: targetLayerId,
+                        } = (targetItem as unknown) as {
                           groupId: string;
                           columnId: string;
                           layerId: string;
@@ -425,7 +425,7 @@ export function LayerPanel(
                           droppedItem,
                           columnId,
                           groupId,
-                          layerId,
+                          layerId: targetLayerId,
                           isNew: true,
                           filterOperations: group.filterOperations,
                         });
@@ -434,7 +434,7 @@ export function LayerPanel(
                             activeVisualization.setDimension({
                               columnId,
                               groupId,
-                              layerId,
+                              layerId: targetLayerId,
                               prevState: props.visualizationState,
                             })
                           );
@@ -444,7 +444,7 @@ export function LayerPanel(
                             props.updateVisualization(
                               activeVisualization.removeDimension({
                                 columnId: dropResult.deleted,
-                                layerId,
+                                layerId: targetLayerId,
                                 prevState: props.visualizationState,
                               })
                             );
@@ -534,7 +534,7 @@ export function LayerPanel(
             <EuiFlexItem grow={false}>
               <RemoveLayerButton
                 onRemoveLayer={onRemoveLayer}
-                index={index}
+                layerIndex={layerIndex}
                 isOnlyLayer={isOnlyLayer}
               />
             </EuiFlexItem>
