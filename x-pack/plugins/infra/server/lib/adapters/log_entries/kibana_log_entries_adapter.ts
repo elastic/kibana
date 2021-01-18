@@ -11,7 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import * as runtimeTypes from 'io-ts';
 import { compact } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
-import { JsonArray } from '../../../../common/typed_json';
+import { JsonArray } from '../../../../../../../src/plugins/kibana_utils/common';
 import {
   LogEntriesAdapter,
   LogEntriesParams,

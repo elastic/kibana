@@ -36,6 +36,7 @@ export interface EsContextCtorParams {
   logger: Logger;
   clusterClientPromise: Promise<EsClusterClient>;
   indexNameRoot: string;
+  kibanaVersion: string;
 }
 
 class EsContextImpl implements EsContext {
@@ -47,7 +48,7 @@ class EsContextImpl implements EsContext {
 
   constructor(params: EsContextCtorParams) {
     this.logger = params.logger;
-    this.esNames = getEsNames(params.indexNameRoot);
+    this.esNames = getEsNames(params.indexNameRoot, params.kibanaVersion);
     this.readySignal = createReadySignal();
     this.initialized = false;
     this.esAdapter = new ClusterClientAdapter({

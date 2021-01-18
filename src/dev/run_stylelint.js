@@ -17,28 +17,20 @@
  * under the License.
  */
 
-import fs from 'fs';
-import { safeLoad } from 'js-yaml';
-import { makeRe } from 'minimatch';
-import path from 'path';
+import { resolve } from 'path';
+import { buildCLI } from 'stylelint/lib/cli';
 
-// load the include globs from .sass-lint.yml and convert them to regular expressions for filtering files
-const sassLintPath = path.resolve(__dirname, '..', '..', '..', '.sass-lint.yml');
-const sassLintConfig = safeLoad(fs.readFileSync(sassLintPath));
-const {
-  files: { include: includeGlobs },
-} = sassLintConfig;
-const includeRegex = includeGlobs.map((glob) => makeRe(glob));
+const options = buildCLI(process.argv.slice(2));
 
-function matchesInclude(file) {
-  for (let i = 0; i < includeRegex.length; i++) {
-    if (includeRegex[i].test(file.relativePath)) {
-      return true;
-    }
-  }
-  return false;
+const stylelintConfigPath = resolve(__dirname, '..', '..', '.stylelintrc');
+const stylelintIgnorePath = resolve(__dirname, '..', '..', '.stylelintignore');
+
+if (!options.input.length) {
+  process.argv.push('**/*.s+(a|c)ss');
 }
+process.argv.push('--max-warnings', '0'); // return nonzero exit code on any warnings
+process.argv.push('--config', stylelintConfigPath); // configuration file
+process.argv.push('--ignore-path', stylelintIgnorePath); // ignore file
 
-export function pickFilesToLint(log, files) {
-  return files.filter((file) => file.isSass()).filter(matchesInclude);
-}
+// common-js is required so that logic before this executes before loading sass-lint
+require('stylelint/bin/stylelint');
