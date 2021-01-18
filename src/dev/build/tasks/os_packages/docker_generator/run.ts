@@ -127,7 +127,12 @@ export async function runDockerGenerator(
   await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
 
   // Only build images on native targets
-  const buildImage = process.arch === flags.architecture && flags.image;
+  type HostArchitectureToDocker = Record<string, string>;
+  const hostTarget: HostArchitectureToDocker = {
+    x64: 'amd64',
+    arm64: 'aarch64',
+  };
+  const buildImage = hostTarget[process.arch] === flags.architecture && flags.image;
   if (buildImage) {
     await exec(log, `./build_docker.sh`, [], {
       cwd: dockerBuildDir,
