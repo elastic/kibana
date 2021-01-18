@@ -493,8 +493,8 @@ export class SearchSource {
     };
     body.stored_fields = storedFields;
 
-    body.runtime_mappings = index.fields
-      .filter((field: IndexPatternField) => field.runtimeField)
+    body.runtime_mappings = index?.fields
+      ?.filter((field: IndexPatternField) => field.runtimeField)
       .reduce(
         (
           col: Record<string, { type: string; script: { source: string } }>,
@@ -548,10 +548,12 @@ export class SearchSource {
           Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
         );
         // TODO verify this works
-        body.runtime_mappings = pick(
-          body.runtime_mappings,
-          Object.keys(body.runtime_mappings).filter((f) => uniqFieldNames.includes(f))
-        );
+        body.runtime_mappings = body.runtime_mappings
+          ? pick(
+              body.runtime_mappings,
+              Object.keys(body.runtime_mappings).filter((f) => uniqFieldNames.includes(f))
+            )
+          : {};
       }
 
       // request the remaining fields from stored_fields just in case, since the
