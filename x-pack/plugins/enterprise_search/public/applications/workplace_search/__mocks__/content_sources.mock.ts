@@ -234,8 +234,8 @@ export const oauthApplication = {
   redirectUri: 'https://foo',
   confidential: false,
   nativeRedirectUri: 'https://bar',
-};  
-  
+};
+
 export const exampleResult = {
   sourceName: 'source',
   searchResultConfig: {
