@@ -11,13 +11,12 @@
  * 1. Calculated px values come from the open/closed state of the global nav sidebar
  */
 
-
- #graphBasic {
-   display: flex;
-   flex-direction: column;
-   flex: 1;
-   overflow: hidden;
- }
+#graphBasic {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
 
 .gphGraph__container {
   display: flex;
