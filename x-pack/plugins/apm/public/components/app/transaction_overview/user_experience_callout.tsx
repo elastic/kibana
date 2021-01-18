@@ -9,9 +9,14 @@ import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-export function UserExperienceCallout() {
+interface Props {
+  serviceName: string;
+}
+export function UserExperienceCallout({ serviceName }: Props) {
   const { core } = useApmPluginContext();
-  const userExperienceHref = core.http.basePath.prepend(`/app/ux`);
+  const userExperienceHref = core.http.basePath.prepend(
+    `/app/ux?serviceName=${serviceName}`
+  );
 
   return (
     <EuiCallOut

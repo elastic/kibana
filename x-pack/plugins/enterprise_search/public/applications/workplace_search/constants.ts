@@ -136,6 +136,9 @@ export const SOURCE_NAMES = {
 };
 
 export const SOURCE_OBJ_TYPES = {
+  FOLDERS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.folders', {
+    defaultMessage: 'Folders',
+  }),
   PAGES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.pages', {
     defaultMessage: 'Pages',
   }),

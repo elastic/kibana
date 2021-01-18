@@ -4,23 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
-
-import { mockHttpValues } from '../../../__mocks__';
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: mockHttpValues },
-}));
-const { http } = mockHttpValues;
-
-jest.mock('../../../shared/flash_messages', () => ({
-  flashAPIErrors: jest.fn(),
-}));
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+  expectedAsyncError,
+} from '../../../__mocks__';
 
 import { LogRetentionOptions } from './types';
 import { LogRetentionLogic } from './log_retention_logic';
 
 describe('LogRetentionLogic', () => {
+  const { mount } = new LogicMounter(LogRetentionLogic);
+  const { http } = mockHttpValues;
+  const { flashAPIErrors } = mockFlashMessageHelpers;
+
   const TYPICAL_SERVER_LOG_RETENTION = {
     analytics: {
       disabled_at: null,
@@ -52,8 +50,6 @@ describe('LogRetentionLogic', () => {
     openedModal: null,
     isLogRetentionUpdating: false,
   };
-
-  const { mount } = new LogicMounter(LogRetentionLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -232,12 +228,8 @@ describe('LogRetentionLogic', () => {
         http.put.mockReturnValue(promise);
 
         LogRetentionLogic.actions.saveLogRetention(LogRetentionOptions.Analytics, true);
+        await expectedAsyncError(promise);
 
-        try {
-          await promise;
-        } catch {
-          // Do nothing
-        }
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
         expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
       });
@@ -305,12 +297,8 @@ describe('LogRetentionLogic', () => {
         http.get.mockReturnValue(promise);
 
         LogRetentionLogic.actions.fetchLogRetention();
+        await expectedAsyncError(promise);
 
-        try {
-          await promise;
-        } catch {
-          // Do nothing
-        }
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
         expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
       });
