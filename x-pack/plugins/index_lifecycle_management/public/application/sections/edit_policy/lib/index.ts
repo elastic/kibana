@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('../../scripts/mocha');
+export {
+  absoluteTimingToRelativeTiming,
+  calculateRelativeTimingMs,
+  normalizeTimingsToHumanReadable,
+  PhaseAgeInMilliseconds,
+} from './absolute_timing_to_relative_timing';

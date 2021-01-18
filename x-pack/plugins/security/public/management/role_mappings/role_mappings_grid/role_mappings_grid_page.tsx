@@ -25,7 +25,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart, ApplicationStart, ScopedHistory } from 'src/core/public';
+import type {
+  NotificationsStart,
+  ApplicationStart,
+  DocLinksStart,
+  ScopedHistory,
+} from 'src/core/public';
 import { RoleMapping, Role } from '../../../../common/model';
 import { EmptyPrompt } from './empty_prompt';
 import {
@@ -35,7 +40,6 @@ import {
   SectionLoading,
 } from '../components';
 import { EDIT_ROLE_MAPPING_PATH, getEditRoleMappingHref } from '../../management_urls';
-import { DocumentationLinksService } from '../documentation_links';
 import { RoleMappingsAPIClient } from '../role_mappings_api_client';
 import { RoleTableDisplay } from '../../role_table_display';
 import { RolesAPIClient } from '../../roles';
@@ -46,7 +50,7 @@ interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
   notifications: NotificationsStart;
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
   history: ScopedHistory;
   navigateToApp: ApplicationStart['navigateToApp'];
 }
@@ -148,7 +152,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                   values={{
                     learnMoreLink: (
                       <EuiLink
-                        href={this.props.docLinks.getRoleMappingDocUrl()}
+                        href={this.props.docLinks.links.security.mappingRoles}
                         external={true}
                         target="_blank"
                       >
@@ -179,7 +183,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           <Fragment>
             {!this.state.hasCompatibleRealms && (
               <>
-                <NoCompatibleRealms docLinks={this.props.docLinks} />
+                <NoCompatibleRealms />
                 <EuiSpacer />
               </>
             )}

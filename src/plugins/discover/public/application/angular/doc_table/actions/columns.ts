@@ -21,28 +21,32 @@
  * Helper function to provide a fallback to a single _source column if the given array of columns
  * is empty, and removes _source if there are more than 1 columns given
  * @param columns
+ * @param useNewFieldsApi should a new fields API be used
  */
-function buildColumns(columns: string[]) {
+function buildColumns(columns: string[], useNewFieldsApi = false) {
   if (columns.length > 1 && columns.indexOf('_source') !== -1) {
     return columns.filter((col) => col !== '_source');
   } else if (columns.length !== 0) {
     return columns;
   }
-  return ['_source'];
+  return useNewFieldsApi ? [] : ['_source'];
 }
 
-export function addColumn(columns: string[], columnName: string) {
+export function addColumn(columns: string[], columnName: string, useNewFieldsApi?: boolean) {
   if (columns.includes(columnName)) {
     return columns;
   }
-  return buildColumns([...columns, columnName]);
+  return buildColumns([...columns, columnName], useNewFieldsApi);
 }
 
-export function removeColumn(columns: string[], columnName: string) {
+export function removeColumn(columns: string[], columnName: string, useNewFieldsApi?: boolean) {
   if (!columns.includes(columnName)) {
     return columns;
   }
-  return buildColumns(columns.filter((col) => col !== columnName));
+  return buildColumns(
+    columns.filter((col) => col !== columnName),
+    useNewFieldsApi
+  );
 }
 
 export function moveColumn(columns: string[], columnName: string, newIndex: number) {
