@@ -7,4 +7,3 @@
 export * from './types';
 export * from './poll_search';
 export * from './session';
-export * from './sessions_mgmt';

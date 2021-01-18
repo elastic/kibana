@@ -4,4 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchSessionStatus } from '../../../../../common';
+
 export type OnActionComplete = () => void;
+
+export enum ACTION {
+  EXTEND = 'extend',
+  CANCEL = 'cancel',
+  RELOAD = 'reload',
+}
+
+export const DATE_STRING_FORMAT = 'D MMM, YYYY, HH:mm:ss';
+
+export interface UISession {
+  id: string;
+  name: string;
+  appId: string;
+  created: string;
+  expires: string | null;
+  status: SearchSessionStatus;
+  actions?: ACTION[];
+  reloadUrl: string;
+  restoreUrl: string;
+}

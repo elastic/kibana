@@ -7,8 +7,9 @@
 import { EuiTextProps, EuiToolTipProps } from '@elastic/eui';
 import { mount } from 'enzyme';
 import React from 'react';
-import { SearchSessionStatus, UISession } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../common/search';
 import { LocaleWrapper } from '../__mocks__';
+import { UISession } from './actions';
 import { getStatusText, StatusIndicator } from './status';
 
 let tz: string;

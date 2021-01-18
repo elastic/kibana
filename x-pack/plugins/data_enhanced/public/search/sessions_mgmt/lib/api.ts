@@ -13,7 +13,8 @@ import type { SharePluginStart } from 'src/plugins/share/public';
 import { SessionsMgmtConfigSchema } from '../';
 import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
 import type { SearchSessionSavedObjectAttributes } from '../../../../common';
-import { ACTION, SearchSessionStatus, UISession } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../common/search';
+import { ACTION, UISession } from '../components/actions';
 
 type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 

@@ -21,13 +21,14 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { SessionsMgmtConfigSchema } from '../';
-import { SearchSessionStatus, UISession } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../common/search';
 import { TableText } from '../components';
 import { OnActionComplete, PopoverActionsMenu } from '../components';
 import { StatusIndicator } from '../components/status';
 import { dateString } from '../lib/date_string';
 import { SearchSessionsMgmtAPI } from './api';
 import { getExpirationStatus } from './get_expiration_status';
+import { UISession } from '../components/actions';
 
 // Helper function: translate an app string to EuiIcon-friendly string
 const appToIcon = (app: string) => {

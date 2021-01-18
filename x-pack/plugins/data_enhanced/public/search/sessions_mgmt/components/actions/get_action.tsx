@@ -6,13 +6,12 @@
 
 import React from 'react';
 import { IClickActionDescriptor } from '../';
-import { ACTION, UISession } from '../../../../../common/search';
 import extendSessionIcon from '../../icons/extend_session.svg';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { CancelButton } from './cancel_button';
 import { ExtendButton } from './extend_button';
 import { ReloadButton } from './reload_button';
-import { OnActionComplete } from './types';
+import { ACTION, UISession, OnActionComplete } from './types';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,

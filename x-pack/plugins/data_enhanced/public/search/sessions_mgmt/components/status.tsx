@@ -7,9 +7,10 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
-import { SearchSessionStatus, UISession } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../common/search';
 import { dateString } from '../lib/date_string';
 import { StatusDef as StatusAttributes, TableText } from './';
+import { UISession } from './actions';
 
 // Shared helper function
 export const getStatusText = (statusType: string): string => {

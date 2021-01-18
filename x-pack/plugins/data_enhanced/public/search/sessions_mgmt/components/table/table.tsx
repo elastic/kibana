@@ -13,10 +13,9 @@ import useDebounce from 'react-use/lib/useDebounce';
 import useInterval from 'react-use/lib/useInterval';
 import { TableText } from '../';
 import { SessionsMgmtConfigSchema } from '../..';
-import { UISession } from '../../../../../common/search';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
-import { OnActionComplete } from '../actions';
+import { OnActionComplete, UISession } from '../actions';
 import { getAppFilter } from './app_filter';
 import { getStatusFilter } from './status_filter';
 
