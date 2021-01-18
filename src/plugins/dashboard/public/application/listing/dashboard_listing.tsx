@@ -102,11 +102,10 @@ export const DashboardListing = ({
           redirectTo({
             destination: 'dashboard',
             id,
-            editMode: dashboardPanelStorage.dashboardHasUnsavedEdits(id),
           }),
         savedObjectsTagging
       ),
-    [savedObjectsTagging, redirectTo, dashboardPanelStorage]
+    [savedObjectsTagging, redirectTo]
   );
 
   const noItemsFragment = useMemo(

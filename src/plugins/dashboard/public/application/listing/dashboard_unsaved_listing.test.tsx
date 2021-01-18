@@ -112,16 +112,16 @@ describe('Unsaved listing', () => {
 
   it('Redirects to the requested dashboard in edit mode when continue editing clicked', async () => {
     const { props, component } = mountWith({});
+    const getEditButton = () => findTestSubject(component, 'edit-unsaved-dashboardUnsavedOne');
     await waitFor(() => {
       component.update();
-      const editButton = findTestSubject(component, 'edit-unsaved-dashboardUnsavedOne');
-      editButton.simulate('click');
-      component.update();
-      expect(props.redirectTo).toHaveBeenCalledWith({
-        destination: 'dashboard',
-        id: 'dashboardUnsavedOne',
-        editMode: true,
-      });
+      expect(getEditButton().length).toEqual(1);
+    });
+    getEditButton().simulate('click');
+    expect(props.redirectTo).toHaveBeenCalledWith({
+      destination: 'dashboard',
+      id: 'dashboardUnsavedOne',
+      editMode: true,
     });
   });
 
@@ -131,25 +131,30 @@ describe('Unsaved listing', () => {
       .fn()
       .mockImplementation(() => [DASHBOARD_PANELS_UNSAVED_ID]);
     const { props, component } = mountWith({ services });
+    const getEditButton = () =>
+      findTestSubject(component, `edit-unsaved-${DASHBOARD_PANELS_UNSAVED_ID}`);
     await waitFor(() => {
       component.update();
-      const editButton = findTestSubject(component, `edit-unsaved-${DASHBOARD_PANELS_UNSAVED_ID}`);
-      editButton.simulate('click');
-      component.update();
-      expect(props.redirectTo).toHaveBeenCalledWith({
-        destination: 'dashboard',
-        id: undefined,
-        editMode: true,
-      });
+      expect(getEditButton().length).toBe(1);
+    });
+    getEditButton().simulate('click');
+    expect(props.redirectTo).toHaveBeenCalledWith({
+      destination: 'dashboard',
+      id: undefined,
+      editMode: true,
     });
   });
 
   it('Shows a warning then clears changes when delete unsaved changes is pressed', async () => {
     const { services, component } = mountWith({});
+    const getDiscardButton = () =>
+      findTestSubject(component, 'discard-unsaved-dashboardUnsavedOne');
     await waitFor(() => {
       component.update();
-      const discardButton = findTestSubject(component, 'discard-unsaved-dashboardUnsavedOne');
-      discardButton.simulate('click');
+      expect(getDiscardButton().length).toBe(1);
+    });
+    getDiscardButton().simulate('click');
+    waitFor(() => {
       component.update();
       expect(services.core.overlays.openConfirm).toHaveBeenCalled();
       expect(services.dashboardPanelStorage.clearPanels).toHaveBeenCalledWith(
