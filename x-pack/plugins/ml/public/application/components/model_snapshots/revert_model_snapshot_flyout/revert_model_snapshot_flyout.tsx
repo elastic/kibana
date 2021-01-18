@@ -53,10 +53,17 @@ interface Props {
   snapshot: ModelSnapshot;
   snapshots: ModelSnapshot[];
   job: CombinedJobWithStats;
-  closeFlyout(reload: boolean): void;
+  closeFlyout(): void;
+  refresh(): void;
 }
 
-export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job, closeFlyout }) => {
+export const RevertModelSnapshotFlyout: FC<Props> = ({
+  snapshot,
+  snapshots,
+  job,
+  closeFlyout,
+  refresh,
+}) => {
   const { toasts } = useNotifications();
   const { loadAnomalyDataForJob, loadEventRateForJob } = useMemo(
     () => chartLoaderProvider(mlResultsService),
@@ -110,13 +117,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
     setChartReady(true);
   }, [job]);
 
-  function closeWithReload() {
-    closeFlyout(true);
-  }
-  function closeWithoutReload() {
-    closeFlyout(false);
-  }
-
   function showRevertModal() {
     setRevertModalVisible(true);
   }
@@ -138,15 +138,18 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             }))
           : undefined;
 
-      await ml.jobs.revertModelSnapshot(
-        job.job_id,
-        currentSnapshot.snapshot_id,
-        replay,
-        end,
-        events
-      );
+      ml.jobs
+        .revertModelSnapshot(job.job_id, currentSnapshot.snapshot_id, replay, end, events)
+        .then(() => {
+          toasts.addSuccess(
+            i18n.translate('xpack.ml.revertModelSnapshotFlyout.revertSuccessTitle', {
+              defaultMessage: 'Model snapshot revert successful',
+            })
+          );
+          refresh();
+        });
       hideRevertModal();
-      closeWithReload();
+      closeFlyout();
     } catch (error) {
       setApplying(false);
       toasts.addError(new Error(error.body.message), {
@@ -166,7 +169,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
 
   return (
     <>
-      <EuiFlyout onClose={closeWithoutReload} hideCloseButton size="m">
+      <EuiFlyout onClose={closeFlyout} hideCloseButton size="m">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h5>
@@ -347,7 +350,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeWithoutReload} flush="left">
+              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
                 <FormattedMessage
                   id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.closeButton"
                   defaultMessage="Close"
@@ -395,7 +398,12 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             confirmButtonDisabled={applying}
             buttonColor="danger"
             defaultFocusedButton="confirm"
-          />
+          >
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.modalBody"
+              defaultMessage="The snapshot revert will be carried out in the background and may take some time."
+            />
+          </EuiConfirmModal>
         </EuiOverlayMask>
       )}
     </>
