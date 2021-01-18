@@ -51,7 +51,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   const {
     services: { cloud },
   } = useKibana();
-  const { getUrlForApp, policy, license } = useEditPolicyContext();
+  const { getUrlForApp, policy, license, isNewPolicy } = useEditPolicyContext();
   const { isUsingSearchableSnapshotInHotPhase, isUsingRollover } = useConfigurationIssues();
 
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
@@ -59,15 +59,20 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   const [formData] = useFormData({ watch: searchableSnapshotPath });
   const searchableSnapshotRepo = get(formData, searchableSnapshotPath);
 
+  const isColdPhase = phase === 'cold';
   const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
-  const isDisabledInColdDueToHotPhase = phase === 'cold' && isUsingSearchableSnapshotInHotPhase;
-  const isDisabledInColdDueToRollover = phase === 'cold' && !isUsingRollover;
+  const isDisabledInColdDueToHotPhase = isColdPhase && isUsingSearchableSnapshotInHotPhase;
+  const isDisabledInColdDueToRollover = isColdPhase && !isUsingRollover;
 
   const isDisabled =
     isDisabledDueToLicense || isDisabledInColdDueToHotPhase || isDisabledInColdDueToRollover;
 
   const [isFieldToggleChecked, setIsFieldToggleChecked] = useState(() =>
-    Boolean(policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository)
+    Boolean(
+      // New policy on cloud should have searchable snapshot on in cold phase
+      (isColdPhase && isNewPolicy && cloud?.isCloudEnabled) ||
+        policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
+    )
   );
 
   useEffect(() => {
