@@ -110,8 +110,15 @@ export class UrlPanelContent extends Component<Props, State> {
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
           {this.renderExportAsRadioGroup()}
           {this.renderUrlParamExtensions()}
-          {this.renderShortUrlSwitch()}
-          {this.renderPublicUrlSwitch()}
+
+          <EuiFormRow
+            label={<FormattedMessage id="share.urlPanel.urlGroupTitle" defaultMessage="URL" />}
+          >
+            <>
+              {this.renderShortUrlSwitch()}
+              {this.renderPublicUrlSwitch()}
+            </>
+          </EuiFormRow>
 
           <EuiSpacer size="m" />
 
