@@ -13,7 +13,6 @@ export function getFullAgentPolicyKibanaConfig(kibanaUrls: string[]): FullAgentP
     // remove the : from http:
     protocol: firstUrlParsed.protocol.replace(':', ''),
     hosts: kibanaUrls.map((url) => new URL(url).host),
-    port: '8000',
   };
 
   // add path if user provided one
