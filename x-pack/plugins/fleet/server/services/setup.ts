@@ -142,7 +142,7 @@ async function updateFleetRoleIfExists(callCluster: CallESAsCurrentUser) {
 }
 
 async function putFleetRole(callCluster: CallESAsCurrentUser) {
-  return await callCluster('transport.request', {
+  return callCluster('transport.request', {
     method: 'PUT',
     path: `/_security/role/${FLEET_ENROLL_ROLE}`,
     body: {
