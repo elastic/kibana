@@ -89,7 +89,7 @@ export const dashboardFeatureCatalog = {
 export const dashboardAddToLibraryAction = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.AddToLibrary', {
-      defaultMessage: 'Add to library',
+      defaultMessage: 'Save to library',
     }),
   getSuccessMessage: (panelTitle: string) =>
     i18n.translate('dashboard.panel.addToLibrary.successMessage', {

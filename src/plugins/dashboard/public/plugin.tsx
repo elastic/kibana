@@ -84,6 +84,7 @@ import { PlaceholderEmbeddableFactory } from './application/embeddable/placehold
 import { UrlGeneratorState } from '../../share/public';
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
+import { replaceUrlHashQuery } from '../../kibana_utils/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -250,6 +251,19 @@ export class DashboardPlugin
         },
       ],
       getHistory: () => this.currentHistory!,
+      onBeforeNavLinkSaved: (newNavLink: string) => {
+        // Do not save SEARCH_SESSION_ID into nav link, because of possible edge cases
+        // that could lead to session restoration failure.
+        // see: https://github.com/elastic/kibana/issues/87149
+        if (newNavLink.includes(DashboardConstants.SEARCH_SESSION_ID)) {
+          newNavLink = replaceUrlHashQuery(newNavLink, (query) => {
+            delete query[DashboardConstants.SEARCH_SESSION_ID];
+            return query;
+          });
+        }
+
+        return newNavLink;
+      },
     });
 
     const dashboardContainerFactory = new DashboardContainerFactoryDefinition(getStartServices);

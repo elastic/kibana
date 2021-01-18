@@ -18,3 +18,4 @@
  */
 
 export { buildPointSeriesData } from './point_series';
+export { formatRow } from './row_formatter';

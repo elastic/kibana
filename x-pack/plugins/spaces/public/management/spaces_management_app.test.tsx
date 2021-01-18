@@ -20,9 +20,7 @@ jest.mock('./edit_space', () => ({
 import { spacesManagementApp } from './spaces_management_app';
 
 import { coreMock, scopedHistoryMock } from '../../../../../src/core/public/mocks';
-import { securityMock } from '../../../security/public/mocks';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-import { SecurityLicenseFeatures } from '../../../security/public';
 import { featuresPluginMock } from '../../../features/public/mocks';
 import { PluginsStart } from '../plugin';
 
@@ -39,18 +37,12 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
     });
   }
 
-  const securityLicense = securityMock.createSetup().license;
-  securityLicense.getFeatures.mockReturnValue({
-    showLinks: true,
-  } as SecurityLicenseFeatures);
-
   const [coreStart, pluginsStart] = await coreMock.createSetup().getStartServices();
   (pluginsStart as PluginsStart).features = featuresPluginMock.createStart();
 
   const unmount = await spacesManagementApp
     .create({
       spacesManager,
-      securityLicense,
       getStartServices: async () => [coreStart, pluginsStart as PluginsStart, {}],
     })
     .mount({
@@ -68,7 +60,6 @@ describe('spacesManagementApp', () => {
     expect(
       spacesManagementApp.create({
         spacesManager: spacesManagerMock.create(),
-        securityLicense: securityMock.createSetup().license,
         getStartServices: coreMock.createSetup().getStartServices as any,
       })
     ).toMatchInlineSnapshot(`
@@ -91,7 +82,7 @@ describe('spacesManagementApp', () => {
         <div
           class="kbnRedirectCrossAppLinks"
         >
-          Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"securityEnabled":true}
+          Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}}}
         </div>
       </div>
     `);
@@ -114,7 +105,7 @@ describe('spacesManagementApp', () => {
         <div
           class="kbnRedirectCrossAppLinks"
         >
-          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}},"securityEnabled":true}
+          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}}}
         </div>
       </div>
     `);
@@ -139,7 +130,7 @@ describe('spacesManagementApp', () => {
         <div
           class="kbnRedirectCrossAppLinks"
         >
-          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}},"securityEnabled":true}
+          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}}}
         </div>
       </div>
     `);
