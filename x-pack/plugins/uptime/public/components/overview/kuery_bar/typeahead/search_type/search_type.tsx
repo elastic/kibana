@@ -16,9 +16,9 @@ import {
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { useUrlParams } from '../../../../hooks';
-import { euiStyled } from '../../../../../../observability/public';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { useUrlParams } from '../../../../../hooks';
+import { euiStyled } from '../../../../../../../observability/public';
 
 const BoxesVerticalIcon = euiStyled(EuiIcon)`
   padding: 10px 8px 0 8px;
@@ -64,14 +64,14 @@ export const SearchType = ({ kqlSyntax, setKqlSyntax }: Props) => {
   }, [isPopoverOpen, query, search, updateUrlParams]);
 
   const button = kqlSyntax ? (
-    <EuiButtonEmpty data-test-subj="syntaxChangeSimple" onClick={onButtonClick}>
+    <EuiButtonEmpty data-test-subj="syntaxChangeToSimple" onClick={onButtonClick}>
       KQL
     </EuiButtonEmpty>
   ) : (
     <BoxesVerticalIcon
       type="boxesVertical"
       onClick={onButtonClick}
-      data-test-subj="syntaxChangeKql"
+      data-test-subj="syntaxChangeToKql"
     />
   );
 
@@ -81,7 +81,6 @@ export const SearchType = ({ kqlSyntax, setKqlSyntax }: Props) => {
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        // style={kqlSyntax ? {} : popoverStyle}
         ownFocus={true}
         anchorPosition="downRight"
       >

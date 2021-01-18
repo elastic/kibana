@@ -8,18 +8,19 @@ import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { Typeahead } from './typehead';
 import { render } from '../../../../lib/helper/rtl_helpers';
-import { act } from 'react-dom/test-utils';
 
 describe('Type head', () => {
-  it('it renders all tabs', () => {
-    const { getByTestId } = render(
+  jest.useFakeTimers();
+
+  it('it sets initial value', () => {
+    const { getByTestId, getByDisplayValue, history } = render(
       <Typeahead
         ariaLabel={'Search for data'}
         dataTestSubj={'kueryBar'}
         disabled={false}
         isLoading={false}
-        initialValue={''}
-        onChange={() => {}}
+        initialValue={'elastic'}
+        onChange={jest.fn()}
         onSubmit={() => {}}
         suggestions={[]}
         loadMore={() => {}}
@@ -27,20 +28,16 @@ describe('Type head', () => {
       />
     );
 
-    // open popover to change
-    fireEvent.click(getByTestId('syntaxChangeKql'));
+    const input = getByTestId('uptimeKueryBarInput');
 
-    act(() => {
-      // change syntax
-      fireEvent.click(getByTestId('toggleKqlSyntax'));
-    });
+    expect(input).toBeInTheDocument();
+    expect(getByDisplayValue('elastic')).toBeInTheDocument();
 
-    act(() => {
-      //  close popover
-      fireEvent.click(getByTestId('kueryBar'));
-    });
+    fireEvent.change(input, { target: { value: 'kibana' } });
 
-    expect(getByTestId('syntaxChangeSimple')).toBeInTheDocument();
-    expect(getByTestId('toggleKqlSyntax')).toBeInTheDocument();
+    // to check if it updateds the query params, needed for debounce wait
+    jest.advanceTimersByTime(250);
+
+    expect(history.location.search).toBe('?query=kibana');
   });
 });

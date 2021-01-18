@@ -8,7 +8,7 @@ import React, { ChangeEvent, MouseEvent, useState, useRef, useEffect } from 'rea
 import { EuiFieldSearch, EuiProgress, EuiOutsideClickDetector } from '@elastic/eui';
 import { Suggestions } from './suggestions';
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
-import { SearchType } from './search_type';
+import { SearchType } from './search_type/search_type';
 import { useKqlSyntax } from './use_kql_syntax';
 import { useKeyEvents } from './use_key_events';
 import { KQL_PLACE_HOLDER, SIMPLE_SEARCH_PLACEHOLDER } from './translations';
@@ -177,6 +177,7 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
             onClick={onClickInput}
             autoComplete="off"
             spellCheck={false}
+            data-test-subj={'uptimeKueryBarInput'}
             append={<SearchType kqlSyntax={kqlSyntax} setKqlSyntax={setKqlSyntax} />}
           />
 
