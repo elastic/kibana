@@ -1,15 +1,14 @@
 package builds
 
+import builds.default.DefaultSavedObjectFieldMetrics
 import dependsOn
-import jetbrains.buildServer.configs.kotlin.v2019_2.AbsoluteId
+import getProjectBranch
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.PullRequests
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.commitStatusPublisher
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.pullRequests
 import vcs.Kibana
 
 object PullRequestCi : BuildType({
-  id("PullRequest_CI")
+  id("Pull_Request")
   name = "Pull Request CI"
   type = Type.COMPOSITE
 
@@ -36,7 +35,7 @@ object PullRequestCi : BuildType({
 
   params {
     param("elastic.pull_request.enabled", "true")
-    param("elastic.pull_request.target_branch", "7.x_teamcity")
+    param("elastic.pull_request.target_branch", getProjectBranch())
     param("elastic.pull_request.allow_org_users", "true")
     param("elastic.pull_request.allowed_repo_permissions", "admin,write")
     param("elastic.pull_request.allowed_list", prAllowedList.joinToString(","))
@@ -74,5 +73,8 @@ object PullRequestCi : BuildType({
     }
   }
 
-  dependsOn(FullCi)
+  dependsOn(
+    FullCi,
+    DefaultSavedObjectFieldMetrics
+  )
 })

@@ -16,11 +16,14 @@ import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
   MlSummaryJob,
   AuditMessage,
-  Job,
-  JobStats,
   DatafeedWithStats,
   CombinedJobWithStats,
 } from '../../../common/types/anomaly_detection_jobs';
+import {
+  MlJobsResponse,
+  MlJobsStatsResponse,
+  JobsExistResponse,
+} from '../../../common/types/job_service';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
@@ -33,16 +36,6 @@ import {
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
-
-export interface MlJobsResponse {
-  jobs: Job[];
-  count: number;
-}
-
-export interface MlJobsStatsResponse {
-  jobs: JobStats[];
-  count: number;
-}
 
 interface Results {
   [id: string]: {
@@ -420,10 +413,18 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   // Checks if each of the jobs in the specified list of IDs exist.
   // Job IDs in supplied array may contain wildcard '*' characters
   // e.g. *_low_request_rate_ecs
-  async function jobsExist(jobIds: string[] = [], allSpaces: boolean = false) {
-    const results: { [id: string]: boolean } = {};
+  async function jobsExist(
+    jobIds: string[] = [],
+    allSpaces: boolean = false
+  ): Promise<JobsExistResponse> {
+    const results: JobsExistResponse = {};
     for (const jobId of jobIds) {
       try {
+        if (jobId === '') {
+          results[jobId] = { exists: false, isGroup: false };
+          continue;
+        }
+
         const { body } = allSpaces
           ? await client.asInternalUser.ml.getJobs<MlJobsResponse>({
               job_id: jobId,
@@ -431,13 +432,15 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
           : await mlClient.getJobs<MlJobsResponse>({
               job_id: jobId,
             });
-        results[jobId] = body.count > 0;
+
+        const isGroup = body.jobs.some((j) => j.groups !== undefined && j.groups.includes(jobId));
+        results[jobId] = { exists: body.count > 0, isGroup };
       } catch (e) {
         // if a non-wildcarded job id is supplied, the get jobs endpoint will 404
         if (e.statusCode !== 404) {
           throw e;
         }
-        results[jobId] = false;
+        results[jobId] = { exists: false, isGroup: false };
       }
     }
     return results;
