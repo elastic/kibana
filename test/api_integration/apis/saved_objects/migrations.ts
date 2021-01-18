@@ -400,6 +400,8 @@ async function migrateIndex({
     log: getLogMock(),
   });
 
+  documentMigrator.prepareMigrations();
+
   const migrator = new IndexMigrator({
     client: createMigrationEsClient(esClient, getLogMock()),
     documentMigrator,
