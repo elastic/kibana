@@ -17,7 +17,10 @@ const persistedFilters: Array<keyof APMQueryParams> = [
 ];
 
 export function useErrorOverviewHref(serviceName: string) {
-  return useAPMHref(`/services/${serviceName}/errors`, persistedFilters);
+  return useAPMHref({
+    path: `/services/${serviceName}/errors`,
+    persistedFilters,
+  });
 }
 
 interface Props extends APMLinkExtendProps {

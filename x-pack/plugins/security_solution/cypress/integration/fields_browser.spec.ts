@@ -47,7 +47,7 @@ const defaultHeaders = [
 ];
 
 describe('Fields Browser', () => {
-  context.skip('Fields Browser rendering', () => {
+  context('Fields Browser rendering', () => {
     before(() => {
       cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
@@ -154,7 +154,7 @@ describe('Fields Browser', () => {
       cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('exist');
     });
 
-    it.skip('adds a field to the timeline when the user drags and drops a field', () => {
+    it('adds a field to the timeline when the user drags and drops a field', () => {
       const filterInput = 'host.geo.c';
 
       filterFieldsBrowser(filterInput);

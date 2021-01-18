@@ -11,7 +11,7 @@ import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
 import { isSecurityAppError } from '../../../../common/utils/api';
 
-type Func = () => void;
+type Func = () => Promise<void>;
 
 export interface ReturnSignalIndex {
   loading: boolean;
