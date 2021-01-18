@@ -13,6 +13,7 @@ import { StepScreenshotDisplay } from './step_screenshot_display';
 import { StatusBadge } from './status_badge';
 import { Ping } from '../../../../common/runtime_types';
 import { StepDetailLink } from '../../common/step_detail_link';
+import { VIEW_PERFORMANCE } from './translations';
 
 const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
 
@@ -26,24 +27,9 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup })
   return (
     <>
       <div style={{ padding: '8px' }}>
-        <div>
-          {step.synthetics?.step?.index && checkGroup ? (
-            <StepDetailLink checkGroupId={checkGroup} stepIndex={step.synthetics.step.index!}>
-              <EuiText>
-                <strong>
-                  <FormattedMessage
-                    id="xpack.uptime.synthetics.executedStep.stepName"
-                    defaultMessage="{stepNumber}. {stepName}"
-                    values={{
-                      stepNumber: index + 1,
-                      stepName: step.synthetics?.step?.name,
-                    }}
-                  />
-                </strong>
-              </EuiText>
-            </StepDetailLink>
-          ) : (
-            <EuiText>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false} style={{ flexBasis: 325 }}>
+            <EuiText grow={false}>
               <strong>
                 <FormattedMessage
                   id="xpack.uptime.synthetics.executedStep.stepName"
@@ -55,12 +41,19 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup })
                 />
               </strong>
             </EuiText>
+            <EuiSpacer size="s" />
+            <div>
+              <StatusBadge status={step.synthetics?.payload?.status} />
+            </div>
+          </EuiFlexItem>
+          {step.synthetics?.step?.index && checkGroup && (
+            <EuiFlexItem grow={false}>
+              <StepDetailLink checkGroupId={checkGroup} stepIndex={step.synthetics.step.index!}>
+                {VIEW_PERFORMANCE}
+              </StepDetailLink>
+            </EuiFlexItem>
           )}
-        </div>
-        <EuiSpacer size="s" />
-        <div>
-          <StatusBadge status={step.synthetics?.payload?.status} />
-        </div>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <div>
           <EuiFlexGroup>
