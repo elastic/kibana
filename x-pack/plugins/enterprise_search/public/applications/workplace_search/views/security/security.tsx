@@ -20,9 +20,10 @@ import {
   EuiText,
   EuiSpacer,
   EuiPanel,
+  EuiConfirmModal,
+  EuiOverlayMask,
 } from '@elastic/eui';
 
-import ConfirmModal from 'shared/components/ConfirmModal';
 import { AppView, SidebarNavigation } from 'workplace_search/components';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { LicenseCallout } from '../../components/shared/license_callout';
@@ -164,16 +165,18 @@ export const Security: React.FC = () => {
   );
 
   const confirmModal = (
-    <ConfirmModal
-      title="Confirm changes"
-      onConfirm={savePrivateSources}
-      onCancel={hideConfirmModal}
-      buttonColor="primary"
-      cancelButtonText="Keep editing"
-      confirmButtonText="Save changes"
-    >
-      Updates to private source configuration will take effect immediately.
-    </ConfirmModal>
+    <EuiOverlayMask>
+      <EuiConfirmModal
+        title="Confirm changes"
+        onConfirm={savePrivateSources}
+        onCancel={hideConfirmModal}
+        buttonColor="primary"
+        cancelButtonText="Keep editing"
+        confirmButtonText="Save changes"
+      >
+        Updates to private source configuration will take effect immediately.
+      </EuiConfirmModal>
+    </EuiOverlayMask>
   );
 
   return (
