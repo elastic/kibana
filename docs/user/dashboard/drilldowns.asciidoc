@@ -68,11 +68,9 @@ externalUrl.policy:
   - allow: true
     host: example.com
     protocol: https
-  - allow: true
-    host: example.co
 -----------
 
-The above rules allows external URLs only to `example.com` domain with `https` scheme, except for `danger.example.com` sub-domain,
+The above rules allow external URLs only to `example.com` domain with `https` scheme, except for `danger.example.com` sub-domain,
 which is denied even when `https` scheme is used.
 
 [float]
