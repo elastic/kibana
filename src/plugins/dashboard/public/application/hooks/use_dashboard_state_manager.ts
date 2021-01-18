@@ -184,7 +184,7 @@ export const useDashboardStateManager = (
     );
 
     if (stateManager.getIsEditMode()) {
-      stateManager.restoreUnsavedPanels();
+      stateManager.restorePanels();
     }
 
     setDashboardStateManager(stateManager);

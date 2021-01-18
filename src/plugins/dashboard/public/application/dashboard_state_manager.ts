@@ -185,9 +185,6 @@ export class DashboardStateManager {
 
     this.stateContainerChangeSub = this.stateContainer.state$.subscribe(() => {
       this.isDirty = this.checkIsDirty();
-      if (!this.isDirty && this.getIsViewMode()) {
-        this.clearUnsavedPanels();
-      }
       this.changeListeners.forEach((listener) => listener({ dirty: this.isDirty }));
     });
 
@@ -209,9 +206,14 @@ export class DashboardStateManager {
             const currentDashboardIdInUrl = getDashboardIdFromUrl(history.location.pathname);
             if (currentDashboardIdInUrl !== this.savedDashboard.id) return;
 
+            // set View mode before the rest of the state so unsaved panels can be added correctly.
+            if (this.appState.viewMode !== stateFromUrl.viewMode) {
+              this.switchViewMode(stateFromUrl.viewMode);
+            }
+
             this.stateContainer.set({
               ...this.stateDefaults,
-              ...(this.getUnsavedPanelState() || {}),
+              ...this.getUnsavedPanelState(),
               ...stateFromUrl,
             });
           } else {
@@ -295,6 +297,11 @@ export class DashboardStateManager {
         this.saveState({ replace: true });
       } else {
         this.setUnsavedPanels(this.getPanels());
+      }
+
+      // If a panel has been changed, and the state is now equal to the state in the saved object, remove the unsaved panels
+      if (!this.isDirty && this.getIsEditMode()) {
+        this.clearUnsavedPanels();
       }
     }
 
@@ -672,7 +679,7 @@ export class DashboardStateManager {
     }
   }
 
-  public restoreUnsavedPanels() {
+  public restorePanels() {
     const unsavedState = this.getUnsavedPanelState();
     if (!unsavedState || unsavedState.panels?.length === 0) {
       return;

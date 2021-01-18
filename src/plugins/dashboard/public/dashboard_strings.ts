@@ -318,6 +318,20 @@ export const emptyScreenStrings = {
 };
 
 /*
+  Toasts
+*/
+export const unsavedChangesRetainedStrings = {
+  getTitle: () =>
+    i18n.translate('dashboard.changesRetainedToast.title', {
+      defaultMessage: 'Your changes are still here!',
+    }),
+  getText: () =>
+    i18n.translate('dashboard.changesRetainedToast.text', {
+      defaultMessage: 'Return to edit mode to continue from where you left off.',
+    }),
+};
+
+/*
   Dashboard Listing Page
 */
 export const dashboardListingTable = {
@@ -353,7 +367,7 @@ export const dashboardUnsavedListingStrings = {
     }),
   getEditTitle: () =>
     i18n.translate('dashboard.listing.unsaved.editTitle', {
-      defaultMessage: 'Continue Editing',
+      defaultMessage: 'Continue editing',
     }),
   getDiscardTitle: () =>
     i18n.translate('dashboard.listing.unsaved.discardTitle', {

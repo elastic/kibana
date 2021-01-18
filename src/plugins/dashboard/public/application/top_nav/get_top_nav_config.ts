@@ -52,6 +52,7 @@ export function getTopNavConfig(
         getShareConfig(actions[TopNavIds.SHARE]),
         getAddConfig(actions[TopNavIds.ADD_EXISTING]),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
+        getDiscardConfig(actions[TopNavIds.DISCARD_CHANGES]),
         getSaveConfig(actions[TopNavIds.SAVE]),
         getCreateNewConfig(actions[TopNavIds.VISUALIZE]),
       ];
@@ -118,14 +119,31 @@ function getSaveConfig(action: NavAction) {
  */
 function getViewConfig(action: NavAction) {
   return {
-    id: 'cancel',
-    label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
-      defaultMessage: 'cancel',
+    id: 'view',
+    label: i18n.translate('dashboard.topNave.viewButtonAriaLabel', {
+      defaultMessage: 'view',
     }),
     description: i18n.translate('dashboard.topNave.viewConfigDescription', {
-      defaultMessage: 'Cancel editing and switch to view-only mode',
+      defaultMessage: 'Return to view mode',
     }),
     testId: 'dashboardViewOnlyMode',
+    run: action,
+  };
+}
+
+/**
+ * @returns {kbnTopNavConfig}
+ */
+function getDiscardConfig(action: NavAction) {
+  return {
+    id: 'discard',
+    label: i18n.translate('dashboard.topNave.discardlButtonAriaLabel', {
+      defaultMessage: 'discard',
+    }),
+    description: i18n.translate('dashboard.topNave.discardConfigDescription', {
+      defaultMessage: 'Discard unsaved changes',
+    }),
+    testId: 'dashboardDiscardChanges',
     run: action,
   };
 }
