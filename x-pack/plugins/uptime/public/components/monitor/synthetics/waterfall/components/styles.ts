@@ -47,6 +47,7 @@ export const WaterfallChartFixedTopContainerSidebarCover = euiStyled(EuiPanel)`
 
 export const WaterfallChartFixedAxisContainer = euiStyled.div`
   height: ${FIXED_AXIS_HEIGHT}px;
+  z-index: ${(props) => props.theme.eui.euiZLevel4};
 `;
 
 interface WaterfallChartSidebarContainer {
@@ -54,7 +55,7 @@ interface WaterfallChartSidebarContainer {
 }
 
 export const WaterfallChartSidebarContainer = euiStyled.div<WaterfallChartSidebarContainer>`
-  height: ${(props) => `${props.height - FIXED_AXIS_HEIGHT}px`};
+  height: ${(props) => `${props.height}px`};
   overflow-y: hidden;
 `;
 
@@ -76,12 +77,14 @@ export const WaterfallChartSidebarFlexItem = euiStyled(EuiFlexItem)`
 
 interface WaterfallChartChartContainer {
   height: number;
+  chartIndex: number;
 }
 
 export const WaterfallChartChartContainer = euiStyled.div<WaterfallChartChartContainer>`
   width: 100%;
-  height: ${(props) => `${props.height}px`};
-  margin-top: -${FIXED_AXIS_HEIGHT}px;
+  height: ${(props) => `${props.height + FIXED_AXIS_HEIGHT - 4}px`};
+  margin-top: -${FIXED_AXIS_HEIGHT - 4}px;
+  z-index: ${(props) => Math.round(props.theme.eui.euiZLevel3 / (props.chartIndex + 1))};
 `;
 
 export const WaterfallChartLegendContainer = euiStyled.div`
