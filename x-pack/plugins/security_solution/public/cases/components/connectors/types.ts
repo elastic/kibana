@@ -22,5 +22,4 @@ export interface ThirdPartyField {
 
 export interface ConnectorConfiguration extends ActionType {
   logo: string;
-  fields: Record<string, ThirdPartyField>;
 }
