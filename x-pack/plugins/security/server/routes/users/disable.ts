@@ -12,7 +12,7 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 export function defineDisableUserRoutes({ router }: RouteDefinitionParams) {
   router.post(
     {
-      path: '/internal/security/users/{username}/disable',
+      path: '/internal/security/users/{username}/_disable',
       validate: {
         params: schema.object({ username: schema.string({ minLength: 1, maxLength: 1024 }) }),
       },

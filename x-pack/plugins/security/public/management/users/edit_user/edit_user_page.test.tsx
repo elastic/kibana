@@ -390,7 +390,7 @@ describe('EditUserPage', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Deactivate user' }));
 
     await waitForElementToBeRemoved(() => getByRole('dialog'));
-    expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/disable');
+    expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/_disable');
   });
 
   it('activates user when confirming and closes dialog', async () => {
@@ -415,7 +415,7 @@ describe('EditUserPage', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Activate user' }));
 
     await waitForElementToBeRemoved(() => getByRole('dialog'));
-    expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/enable');
+    expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/_enable');
   });
 
   it('deletes user when confirming and redirects back', async () => {

@@ -44,10 +44,10 @@ export class UserAPIClient {
   }
 
   public async disableUser(username: string) {
-    await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/disable`);
+    await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/_disable`);
   }
 
   public async enableUser(username: string) {
-    await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/enable`);
+    await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/_enable`);
   }
 }

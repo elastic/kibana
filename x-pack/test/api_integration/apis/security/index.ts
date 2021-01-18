@@ -19,6 +19,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./change_password'));
     loadTestFile(require.resolve('./index_fields'));
     loadTestFile(require.resolve('./roles'));
+    loadTestFile(require.resolve('./users'));
     loadTestFile(require.resolve('./privileges'));
   });
 }
