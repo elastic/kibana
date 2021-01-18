@@ -7,7 +7,7 @@
 import './app.scss';
 
 import _ from 'lodash';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -39,6 +39,7 @@ import {
   LensByReferenceInput,
   LensEmbeddableInput,
 } from '../editor_frame_service/embeddable/embeddable';
+import { useTimeRange } from './time_range';
 
 export function App({
   history,
@@ -107,43 +108,11 @@ export function App({
     state.searchSessionId,
   ]);
 
-  const timefilter = data.query.timefilter.timefilter;
-  const currentNow = data.nowProvider.get();
-
-  // Need a stable reference for the frame component of the dateRange
-  const { from: fromDate, to: toDate } = data.query.timefilter.timefilter.getTime();
-  const currentDateRange = useMemo(() => {
-    const { min, max } = timefilter.calculateBounds({
-      from: fromDate,
-      to: toDate,
-    });
-    return { fromDate: min?.toISOString() || fromDate, toDate: max?.toISOString() || toDate };
-    // recalculate current date range if current "now" value changes because calculateBounds
-    // depends on it internally
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromDate, toDate, timefilter, currentNow]);
-
-  useEffect(() => {
-    // TODO check whether dynamic dates are even used - if not, all of this is irrelevant
-    // calculate length of currently configured range in ms
-    const timeRangeLength =
-      new Date(currentDateRange.toDate!).valueOf() - new Date(currentDateRange.fromDate!).valueOf();
-    // calculate lag of managed "now" for date math
-    const nowDiff = Date.now() - data.nowProvider.get().valueOf();
-    // if the lag is signifcant, start a new session to clear the cache
-    if (nowDiff > timeRangeLength * 0.02) {
-      setState((s) => ({
-        ...s,
-        searchSessionId: data.search.session.start(),
-      }));
-    }
-  }, [
-    currentDateRange.fromDate,
-    currentDateRange.toDate,
-    data.nowProvider,
-    data.search.session,
+  const { resolvedDateRange, from: fromDate, to: toDate } = useTimeRange(
+    data,
     state.lastKnownDoc,
-  ]);
+    setState
+  );
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -692,7 +661,7 @@ export function App({
             render={editorFrame.mount}
             nativeProps={{
               searchSessionId: state.searchSessionId,
-              dateRange: currentDateRange,
+              dateRange: resolvedDateRange,
               query: state.query,
               filters: state.filters,
               savedQuery: state.savedQuery,
