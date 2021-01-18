@@ -13,6 +13,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import { EuiToolTip } from '@elastic/eui';
+import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import {
   ActionMenuDivider,
   Section,
@@ -147,6 +150,9 @@ function BottomSection({
   toggleShowAll: () => void;
   onClickCreate: () => void;
 }) {
+  const { core } = useApmPluginContext();
+  const canSave = !!core.application.capabilities.apm.save;
+
   if (status === FETCH_STATUS.LOADING) {
     return <LoadingStatePrompt />;
   }
@@ -154,7 +160,7 @@ function BottomSection({
   // render empty prompt if there are no custom links
   if (isEmpty(customLinks)) {
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup responsive={false} direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiText size="xs" grow={false} style={{ width: px(300) }}>
             {i18n.translate('xpack.apm.customLink.empty', {
@@ -163,15 +169,20 @@ function BottomSection({
             })}
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiButtonEmpty
-            iconType="plusInCircle"
-            size="xs"
-            onClick={onClickCreate}
-          >
-            {i18n.translate('xpack.apm.customLink.buttom.create', {
-              defaultMessage: 'Create custom link',
-            })}
-          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem style={{ alignItems: 'center' }}>
+          <EuiToolTip content={!canSave && NO_PERMISSION_LABEL}>
+            <EuiButtonEmpty
+              isDisabled={!canSave}
+              iconType="plusInCircle"
+              size="xs"
+              onClick={onClickCreate}
+            >
+              {i18n.translate('xpack.apm.customLink.buttom.create', {
+                defaultMessage: 'Create custom link',
+              })}
+            </EuiButtonEmpty>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

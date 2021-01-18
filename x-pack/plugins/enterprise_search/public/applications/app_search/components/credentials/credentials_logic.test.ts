@@ -4,24 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
-
-import { mockHttpValues } from '../../../__mocks__';
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: mockHttpValues },
-}));
-const { http } = mockHttpValues;
-
-jest.mock('../../../shared/flash_messages', () => ({
-  FlashMessagesLogic: { actions: { clearFlashMessages: jest.fn() } },
-  setSuccessMessage: jest.fn(),
-  flashAPIErrors: jest.fn(),
-}));
 import {
-  FlashMessagesLogic,
-  setSuccessMessage,
-  flashAPIErrors,
-} from '../../../shared/flash_messages';
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+  expectedAsyncError,
+} from '../../../__mocks__';
 
 jest.mock('../../app_logic', () => ({
   AppLogic: {
@@ -35,6 +23,10 @@ import { ApiTokenTypes } from './constants';
 import { CredentialsLogic } from './credentials_logic';
 
 describe('CredentialsLogic', () => {
+  const { mount } = new LogicMounter(CredentialsLogic);
+  const { http } = mockHttpValues;
+  const { clearFlashMessages, setSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+
   const DEFAULT_VALUES = {
     activeApiToken: {
       name: '',
@@ -56,8 +48,6 @@ describe('CredentialsLogic', () => {
     shouldShowCredentialsForm: false,
     fullEngineAccessChecked: false,
   };
-
-  const { mount } = new LogicMounter(CredentialsLogic);
 
   const newToken = {
     id: 1,
@@ -956,7 +946,7 @@ describe('CredentialsLogic', () => {
       describe('listener side-effects', () => {
         it('should clear flashMessages whenever the credentials form flyout is opened', () => {
           CredentialsLogic.actions.showCredentialsForm();
-          expect(FlashMessagesLogic.actions.clearFlashMessages).toHaveBeenCalled();
+          expect(clearFlashMessages).toHaveBeenCalled();
         });
       });
     });
@@ -1093,11 +1083,9 @@ describe('CredentialsLogic', () => {
         http.get.mockReturnValue(promise);
 
         CredentialsLogic.actions.fetchCredentials();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1124,11 +1112,9 @@ describe('CredentialsLogic', () => {
         http.get.mockReturnValue(promise);
 
         CredentialsLogic.actions.fetchDetails();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1154,11 +1140,9 @@ describe('CredentialsLogic', () => {
         http.delete.mockReturnValue(promise);
 
         CredentialsLogic.actions.deleteApiKey(tokenName);
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1218,11 +1202,9 @@ describe('CredentialsLogic', () => {
         http.post.mockReturnValue(promise);
 
         CredentialsLogic.actions.onApiTokenChange();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
 
       describe('token type data', () => {
