@@ -15,6 +15,11 @@
   .visLegend__toggle {
     border-bottom-right-radius: 0;
     border-top-left-radius: 0;
+    opacity: 0; /* 1 */
+
+    &:focus {
+      opacity: 1; /* 2 */
+    }
   }
 }
 
@@ -26,18 +31,10 @@
   * 3. Always show in editing mode
   */
 
-.embPanel_optionsMenuPopover[class*="-isOpen"],
-.embPanel:hover  {
+.embPanel_optionsMenuPopover[class*='-isOpen'],
+.embPanel:hover {
   .visLegend__toggle {
     opacity: 1;
-  }
-}
-
-.embPanel .visLegend__toggle {
-  opacity: 0; /* 1 */
-
-  &:focus {
-    opacity: 1; /* 2 */
   }
 }
 
