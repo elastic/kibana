@@ -24,7 +24,6 @@ import {
   EuiOverlayMask,
 } from '@elastic/eui';
 
-import { AppView, SidebarNavigation } from 'workplace_search/components';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { LicenseCallout } from '../../components/shared/license_callout';
 import { Loading } from '../../../shared/loading';
@@ -95,13 +94,6 @@ export const Security: React.FC = () => {
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-
-  const sidebar = (
-    <SidebarNavigation
-      title="Security"
-      description="Manage content source connection rules and information access for your organization."
-    />
   );
 
   const header = (
@@ -180,7 +172,7 @@ export const Security: React.FC = () => {
   );
 
   return (
-    <AppView sidebar={sidebar}>
+    <>
       <Prompt when={unsavedChanges} message={UNSAVED_MESSAGE} />
       <FlashMessages />
       {header}
@@ -188,6 +180,6 @@ export const Security: React.FC = () => {
       {isLocked && platinumLicenseCallout}
       {sourceTables}
       {confirmModalVisible && confirmModal}
-    </AppView>
+    </>
   );
 };
