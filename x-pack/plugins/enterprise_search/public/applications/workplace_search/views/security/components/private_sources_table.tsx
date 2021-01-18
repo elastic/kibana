@@ -24,6 +24,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { LicensingLogic } from '../../../../shared/licensing';
 import { SecurityLogic, PrivateSourceSection } from '../security_logic';
 
 interface PrivateSourcesTableProps {
@@ -56,11 +57,12 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
   updateSource,
   updateEnabled,
 }) => {
-  const { isLocked, isEnabled } = useValues(SecurityLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { isEnabled } = useValues(SecurityLogic);
 
   const isRemote = sourceType === 'remote';
   const hasSources = contentSources.length > 0;
-  const panelDisabled = !isEnabled || isLocked;
+  const panelDisabled = !isEnabled || !hasPlatinumLicense;
   const sectionDisabled = !sectionEnabled;
 
   const panelClass = classNames('euiPanel--outline euiPanel--noShadow', {
@@ -90,7 +92,7 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
         <EuiSwitch
           checked={sectionEnabled}
           onChange={(e) => updateEnabled(e.target.checked)}
-          disabled={!isEnabled || isLocked}
+          disabled={!isEnabled || !hasPlatinumLicense}
           showLabel={false}
           label={`${sourceType} Sources Toggle`}
           data-test-subj={`${sourceType}EnabledToggle`}

@@ -30,7 +30,6 @@ export interface PrivateSourceSection {
 
 export interface SecurityServerProps {
   isEnabled: boolean;
-  isLocked: boolean;
   remote: PrivateSourceSection;
   standard: PrivateSourceSection;
 }
@@ -96,13 +95,6 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
         setServerProps: (_, { isEnabled }) => isEnabled,
         setSourceRestrictionsUpdated: (_, { isEnabled }) => isEnabled,
         updatePrivateSourcesEnabled: (_, { isEnabled }) => isEnabled,
-      },
-    ],
-    isLocked: [
-      false,
-      {
-        setServerProps: (_, { isLocked }) => isLocked,
-        setSourceRestrictionsUpdated: (_, { isLocked }) => isLocked,
       },
     ],
     remote: [

@@ -24,6 +24,7 @@ import {
   EuiOverlayMask,
 } from '@elastic/eui';
 
+import { LicensingLogic } from '../../../shared/licensing';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { LicenseCallout } from '../../components/shared/license_callout';
 import { Loading } from '../../../shared/loading';
@@ -41,6 +42,8 @@ export const Security: React.FC = () => {
   const hideConfirmModal = () => setConfirmModalVisibility(false);
   const showConfirmModal = () => setConfirmModalVisibility(true);
 
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+
   const {
     initializeSourceRestrictions,
     updatePrivateSourcesEnabled,
@@ -52,9 +55,7 @@ export const Security: React.FC = () => {
     resetState,
   } = useActions(SecurityLogic);
 
-  const { isEnabled, isLocked, remote, standard, dataLoading, unsavedChanges } = useValues(
-    SecurityLogic
-  );
+  const { isEnabled, remote, standard, dataLoading, unsavedChanges } = useValues(SecurityLogic);
 
   useEffect(() => {
     initializeSourceRestrictions();
@@ -69,7 +70,9 @@ export const Security: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const panelClass = classNames('euiPanel--noShadow', { 'euiPanel--disabled': isLocked });
+  const panelClass = classNames('euiPanel--noShadow', {
+    'euiPanel--disabled': !hasPlatinumLicense,
+  });
 
   const savePrivateSources = () => {
     saveSourceRestrictions();
@@ -85,7 +88,7 @@ export const Security: React.FC = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiButton
-          disabled={isLocked || !unsavedChanges}
+          disabled={!hasPlatinumLicense || !unsavedChanges}
           onClick={showConfirmModal}
           fill
           data-test-subj="SaveSettingsButton"
@@ -115,7 +118,7 @@ export const Security: React.FC = () => {
           <EuiSwitch
             checked={isEnabled}
             onChange={(e) => updatePrivateSourcesEnabled(e.target.checked)}
-            disabled={isLocked}
+            disabled={!hasPlatinumLicense}
             showLabel={false}
             label="Private Sources Toggle"
             data-test-subj="PrivateSourcesToggle"
@@ -177,7 +180,7 @@ export const Security: React.FC = () => {
       <FlashMessages />
       {header}
       {allSourcesToggle}
-      {isLocked && platinumLicenseCallout}
+      {!hasPlatinumLicense && platinumLicenseCallout}
       {sourceTables}
       {confirmModalVisible && confirmModal}
     </>
