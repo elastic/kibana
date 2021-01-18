@@ -168,6 +168,7 @@ export const WaterfallChart = ({
               <WaterfallChartChartContainer
                 height={getChartHeight(chartData, ind)}
                 chartIndex={ind}
+                key={ind}
               >
                 <Chart className="data-chart">
                   <Settings
