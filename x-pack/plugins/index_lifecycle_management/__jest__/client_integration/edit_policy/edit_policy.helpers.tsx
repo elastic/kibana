@@ -41,6 +41,7 @@ jest.mock('@elastic/eui', () => {
         }}
       />
     ),
+    EuiIcon: 'eui-icon',
   };
 });
 

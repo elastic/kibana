@@ -81,6 +81,15 @@ for (let i = 0; i < 105; i++) {
 }
 window.scrollTo = jest.fn();
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    EuiIcon: 'eui-icon', // using custom react-svg icon causes issues, mocking for now.
+  };
+});
+
 let component: ReactElement;
 const activatePhase = async (rendered: ReactWrapper, phase: string) => {
   const testSubject = `enablePhaseSwitch-${phase}`;
