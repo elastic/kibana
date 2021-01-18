@@ -13,6 +13,7 @@
     "plugins/graph/**/*",
     "plugins/features/**/*",
     "plugins/embeddable_enhanced/**/*",
+    "plugins/event_log/**/*",
     "plugins/licensing/**/*",
     "plugins/searchprofiler/**/*",
     "plugins/security_solution/cypress/**/*",
@@ -21,6 +22,9 @@
     "plugins/translations/**/*",
     "plugins/ui_actions_enhanced/**/*",
     "plugins/vis_type_timeseries_enhanced/**/*",
+    "plugins/spaces/**/*",
+    "plugins/security/**/*",
+    "plugins/encrypted_saved_objects/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -70,6 +74,7 @@
     { "path": "./plugins/features/tsconfig.json" },
     { "path": "./plugins/graph/tsconfig.json" },
     { "path": "./plugins/embeddable_enhanced/tsconfig.json" },
+    { "path": "./plugins/event_log/tsconfig.json"},
     { "path": "./plugins/licensing/tsconfig.json" },
     { "path": "./plugins/searchprofiler/tsconfig.json" },
     { "path": "./plugins/task_manager/tsconfig.json" },
@@ -77,5 +82,8 @@
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "./plugins/vis_type_timeseries_enhanced/tsconfig.json" },
     { "path": "./plugins/translations/tsconfig.json" },
+    { "path": "./plugins/spaces/tsconfig.json" },
+    { "path": "./plugins/security/tsconfig.json" },
+    { "path": "./plugins/encrypted_saved_objects/tsconfig.json" }
   ]
 }
