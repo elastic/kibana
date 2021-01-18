@@ -23,16 +23,12 @@ export const DisplaySettingsRouter: React.FC = () => {
   const { isOrganization } = useValues(AppLogic);
   return (
     <Switch>
-      <Route
-        exact
-        path={getSourcesPath(DISPLAY_SETTINGS_SEARCH_RESULT_PATH, isOrganization)}
-        render={() => <DisplaySettings tabId={0} />}
-      />
-      <Route
-        exact
-        path={getSourcesPath(DISPLAY_SETTINGS_RESULT_DETAIL_PATH, isOrganization)}
-        render={() => <DisplaySettings tabId={1} />}
-      />
+      <Route exact path={getSourcesPath(DISPLAY_SETTINGS_SEARCH_RESULT_PATH, isOrganization)}>
+        <DisplaySettings tabId={0} />
+      </Route>
+      <Route exact path={getSourcesPath(DISPLAY_SETTINGS_RESULT_DETAIL_PATH, isOrganization)}>
+        <DisplaySettings tabId={1} />
+      </Route>
     </Switch>
   );
 };

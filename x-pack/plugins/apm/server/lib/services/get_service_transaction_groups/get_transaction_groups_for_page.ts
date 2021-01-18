@@ -64,6 +64,8 @@ export async function getTransactionGroupsForPage({
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
+  const deltaAsMinutes = (end - start) / 1000 / 60;
+
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions
   );
@@ -122,7 +124,7 @@ export async function getTransactionGroupsForPage({
           latencyAggregationType,
           aggregation: bucket.latency,
         }),
-        throughput: bucket.transaction_count.value,
+        throughput: bucket.transaction_count.value / deltaAsMinutes,
         errorRate,
       };
     }) ?? [];

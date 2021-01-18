@@ -62,7 +62,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           });
         });
 
-        it.skip('should schedule actions on legacy alerts', async () => {
+        it('should schedule actions on legacy alerts', async () => {
           const reference = `alert:migrated-to-7.10:${user.username}`;
           const migratedAlertId = MIGRATED_ALERT_ID[user.username];
 
