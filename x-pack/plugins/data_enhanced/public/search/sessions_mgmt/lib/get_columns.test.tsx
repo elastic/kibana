@@ -136,9 +136,7 @@ describe('Search Sessions Management table column factory', () => {
 
       const statusLine = mount(status.render!(mockSession.status, mockSession) as ReactElement);
       expect(
-        statusLine
-          .find('.euiText[data-test-subj="sessionManagementStatusTooltip--in_progress"]')
-          .text()
+        statusLine.find('.euiText[data-test-subj="sessionManagementStatusTooltip"]').text()
       ).toMatchInlineSnapshot(`"In progress"`);
     });
 

@@ -119,7 +119,7 @@ describe('Background Search Session Management Table', () => {
           "Namevery background search",
           "StatusIn progress",
           "Created2 Dec, 2020, 00:19:32",
-          "Expiration--",
+          "Expiration7 Dec, 2020, 00:19:32",
           "",
           "",
         ]
