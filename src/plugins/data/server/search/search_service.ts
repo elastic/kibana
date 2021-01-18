@@ -174,12 +174,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                 // eslint-disable-next-line no-throw-literal
                 throw {
                   statusCode: err.statusCode || 500,
-                  body: {
-                    message: err.message,
-                    attributes: {
-                      error: err.body?.error || err.message,
-                    },
-                  },
+                  message: err.body?.error || err.message,
                 };
               })
             )

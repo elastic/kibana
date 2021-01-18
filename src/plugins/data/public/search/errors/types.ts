@@ -69,5 +69,5 @@ export interface IEsError {
 }
 
 export function isEsError(e: any): e is IEsError {
-  return !!e.body?.attributes;
+  return !!e.body?.attributes?.error?.root_cause;
 }
