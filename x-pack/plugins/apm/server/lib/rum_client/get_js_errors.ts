@@ -57,6 +57,20 @@ export async function getJSErrors({
                 from: pageIndex * pageSize,
               },
             },
+            impactedPages: {
+              filter: {
+                term: {
+                  'transaction.type': 'page-load',
+                },
+              },
+              aggs: {
+                pageCount: {
+                  cardinality: {
+                    field: 'transaction.id',
+                  },
+                },
+              },
+            },
             sample: {
               top_hits: {
                 _source: [
@@ -86,9 +100,9 @@ export async function getJSErrors({
     totalErrorPages: totalErrorPages?.value ?? 0,
     totalErrors: response.hits.total.value ?? 0,
     totalErrorGroups: totalErrorGroups?.value ?? 0,
-    items: errors?.buckets.map(({ sample, doc_count: count, key }) => {
+    items: errors?.buckets.map(({ sample, key, impactedPages }) => {
       return {
-        count,
+        count: impactedPages.pageCount.value,
         errorGroupId: key,
         errorMessage: (sample.hits.hits[0]._source as {
           error: { exception: Array<{ message: string }> };
