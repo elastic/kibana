@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { delay } from 'bluebird';
 import { cloneDeepWith } from 'lodash';
 import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
@@ -309,11 +310,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
             dispatchEvent(target, dropEvent, dragStartEvent.dataTransfer);
             const dragEndEvent = createEvent('dragend');
             dispatchEvent(origin, dragEndEvent, dropEvent.dataTransfer);
-          }, 50);
+          }, 100);
       `,
         from,
         to
       );
+      // wait for 150ms to make sure the script has run
+      await delay(150);
     }
 
     /**
