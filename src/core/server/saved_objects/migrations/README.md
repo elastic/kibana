@@ -66,7 +66,7 @@ To write a migration for this document, the dashboard plugin might look somethin
 
 ```js
 uiExports: {
-  migrations: () => ({
+  migrations: {
     // This is whatever value your document's "type" field is
     dashboard: {
       // Takes a pre 1.9.0 dashboard doc, and converts it to 1.9.0
@@ -81,7 +81,7 @@ uiExports: {
         return doc;
       },
     },
-  }),
+  },
   // ... normal uiExport stuff
 }
 ```
@@ -150,7 +150,7 @@ FanciPlugin's uiExports is modified to have a migrations section that looks like
 
 ```js
 uiExports: {
-  migrations: () => ({
+  migrations: {
     // This is whatever value your document's "type" field is
     fanci: {
       // This is the version of the plugin for which this migration was written, and
@@ -165,7 +165,7 @@ uiExports: {
         return doc;
       },
     },
-  }),
+  },
   // ... normal uiExport stuff
 }
 ```

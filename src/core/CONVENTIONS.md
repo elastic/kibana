@@ -347,10 +347,10 @@ export const myType: SavedObjectsType = {
       },
     },
   },
-  migrations: () => ({
+  migrations: {
     '1.0.0': migrateFirstTypeToV1,
     '2.0.0': migrateFirstTypeToV2,
-  }),
+  },
 };
 ```
 
