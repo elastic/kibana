@@ -10,7 +10,6 @@ import { isEqual } from 'lodash';
 import { kea, MakeLogicType } from 'kea';
 
 import http from 'shared/http';
-import routes from 'workplace_search/routes';
 
 import {
   clearFlashMessages,
@@ -62,7 +61,7 @@ interface SecurityActions {
   resetState(): void;
 }
 
-const route = routes.fritoPieOrganizationSecuritySourceRestrictionsPath();
+const route = '/api/workplace_search/org/security/source_restrictions';
 
 export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>({
   path: ['enterprise_search', 'workplace_search', 'security_logic'],
