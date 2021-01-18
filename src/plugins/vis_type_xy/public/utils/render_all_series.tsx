@@ -32,9 +32,10 @@ import {
 import { ColorVariant } from '@elastic/charts/dist/utils/commons';
 
 import { DatatableRow } from '../../../expressions/public';
+import { METRIC_TYPES } from '../../../data/common';
 
 import { ChartType } from '../../common';
-import { SeriesParam, VisConfig } from '../types';
+import { SeriesParam, VisConfig, Aspect } from '../types';
 
 /**
  * Matches vislib curve to elastic charts
@@ -50,6 +51,26 @@ const getCurveType = (type?: 'linear' | 'cardinal' | 'step-after'): CurveType =>
     default:
       return CurveType.LINEAR;
   }
+};
+
+const getYAspectors = (yAspects: Aspect[]) => {
+  let yAccessors: string[] = [];
+
+  const isPercentile = yAspects.find(
+    ({ aggType }) =>
+      aggType === METRIC_TYPES.PERCENTILES || aggType === METRIC_TYPES.PERCENTILE_RANKS
+  );
+  if (isPercentile) {
+    yAspects.forEach((aspect) => {
+      if (aspect.accessor) {
+        yAccessors.push(aspect.accessor);
+      }
+    });
+  } else if (yAspects[0].accessor) {
+    yAccessors = [yAspects[0].accessor];
+  }
+
+  return yAccessors;
 };
 
 /**
@@ -82,13 +103,13 @@ export const renderAllSeries = (
       interpolate,
       type,
     }) => {
-      const yAspect = aspects.y.find(({ aggId }) => aggId === paramId);
-
-      if (!show || !yAspect || yAspect.accessor === null) {
+      const yAspects = aspects.y.filter(({ aggId }) => aggId?.includes(paramId));
+      if (!show || !yAspects.length) {
         return null;
       }
+      const yAccessors = getYAspectors(yAspects);
 
-      const id = `${type}-${yAspect.accessor}`;
+      const id = `${type}-${yAccessors[0]}`;
       const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
       const isStacked = mode === 'stacked' || yAxisScale?.mode === 'percentage';
       const stackMode = yAxisScale?.mode === 'normal' ? undefined : yAxisScale?.mode;
@@ -105,13 +126,13 @@ export const renderAllSeries = (
               id={id}
               name={getSeriesName}
               color={getSeriesColor}
-              tickFormat={yAspect.formatter}
+              tickFormat={yAspects[0].formatter}
               groupId={pseudoGroupId}
               useDefaultGroupDomain={useDefaultGroupDomain}
               xScaleType={xAxis.scale.type}
               yScaleType={yAxisScale?.type}
               xAccessor={xAccessor}
-              yAccessors={[yAspect.accessor]}
+              yAccessors={yAccessors}
               splitSeriesAccessors={splitSeriesAccessors}
               data={data}
               timeZone={timeZone}
@@ -136,7 +157,7 @@ export const renderAllSeries = (
               id={id}
               fit={fittingFunction}
               color={getSeriesColor}
-              tickFormat={yAspect.formatter}
+              tickFormat={yAspects[0].formatter}
               name={getSeriesName}
               curve={getCurveType(interpolate)}
               groupId={pseudoGroupId}
@@ -144,7 +165,7 @@ export const renderAllSeries = (
               xScaleType={xAxis.scale.type}
               yScaleType={yAxisScale?.type}
               xAccessor={xAccessor}
-              yAccessors={[yAspect.accessor]}
+              yAccessors={yAccessors}
               markSizeAccessor={markSizeAccessor}
               markFormat={aspects.z?.formatter}
               splitSeriesAccessors={splitSeriesAccessors}
