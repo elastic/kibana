@@ -167,13 +167,6 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
 
   const enable = (phase: Phases) => createFormToggleAction(`enablePhaseSwitch-${phase}`);
 
-  const clickSettingsButton = (phase: Phases) => () => {
-    act(() => {
-      find(`${phase}-settingsSwitch`).simulate('click');
-    });
-    component.update();
-  };
-
   const setMinAgeValue = (phase: Phases) => createFormSetValueAction(`${phase}-selectedMinimumAge`);
 
   const setMinAgeUnits = (phase: Phases) =>
@@ -264,7 +257,6 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       setWaitForSnapshotPolicy,
       savePolicy,
       hot: {
-        clickSettingsButton: clickSettingsButton('hot'),
         setMaxSize,
         setMaxDocs,
         setMaxAge,
@@ -278,7 +270,6 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       },
       warm: {
         enable: enable('warm'),
-        clickSettingsButton: clickSettingsButton('warm'),
         setMinAgeValue: setMinAgeValue('warm'),
         setMinAgeUnits: setMinAgeUnits('warm'),
         ...createDataAllocationActions('warm'),
@@ -291,7 +282,6 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       },
       cold: {
         enable: enable('cold'),
-        clickSettingsButton: clickSettingsButton('cold'),
         setMinAgeValue: setMinAgeValue('cold'),
         setMinAgeUnits: setMinAgeUnits('cold'),
         ...createDataAllocationActions('cold'),

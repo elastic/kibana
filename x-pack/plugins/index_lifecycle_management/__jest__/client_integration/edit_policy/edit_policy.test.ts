@@ -192,9 +192,7 @@ describe('<EditPolicy />', () => {
         const { actions } = testBed;
 
         await actions.warm.enable(true);
-        actions.warm.clickSettingsButton();
         await actions.cold.enable(true);
-        actions.cold.clickSettingsButton();
 
         expect(actions.warm.forceMergeFieldExists()).toBeTruthy();
         expect(actions.warm.shrinkExists()).toBeTruthy();
@@ -697,7 +695,6 @@ describe('<EditPolicy />', () => {
       test('correctly sets snapshot repository default to "found-snapshots"', async () => {
         const { actions } = testBed;
         await actions.cold.enable(true);
-        actions.cold.clickSettingsButton();
         await actions.cold.toggleSearchableSnapshot(true);
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
@@ -735,7 +732,6 @@ describe('<EditPolicy />', () => {
         expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
 
         await actions.cold.enable(true);
-        actions.cold.clickSettingsButton();
 
         // Still hidden in hot
         expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
