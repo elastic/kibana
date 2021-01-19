@@ -13,7 +13,7 @@ import { waitFor } from '@testing-library/react';
 import { connector } from '../mock';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
-import Fields from './fields';
+import Fields from './case_fields';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_get_incident_types');

@@ -16,8 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { useKibana } from '../../../../common/lib/kibana';
-import { SettingFieldsProps } from '../types';
-
+import { ConnectorFieldsProps } from '../types';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 
@@ -25,8 +24,8 @@ import * as i18n from './translations';
 import { ConnectorTypes, ResilientFieldsType } from '../../../../../../case/common/api/connectors';
 import { ConnectorCard } from '../card';
 
-const ResilientSettingFieldsComponent: React.FunctionComponent<
-  SettingFieldsProps<ResilientFieldsType>
+const ResilientFieldsComponent: React.FunctionComponent<
+  ConnectorFieldsProps<ResilientFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
   const { incidentTypes = null, severityCode = null } = fields ?? {};
 
@@ -143,7 +142,7 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<
   }, []);
 
   return isEdit ? (
-    <span data-test-subj={'connector-settings-resilient'}>
+    <span data-test-subj={'connector-fields-resilient'}>
       <EuiFormRow fullWidth label={i18n.INCIDENT_TYPES_LABEL}>
         <EuiComboBox
           data-test-subj="incidentTypeComboBox"
@@ -184,4 +183,4 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<
 };
 
 // eslint-disable-next-line import/no-default-export
-export { ResilientSettingFieldsComponent as default };
+export { ResilientFieldsComponent as default };

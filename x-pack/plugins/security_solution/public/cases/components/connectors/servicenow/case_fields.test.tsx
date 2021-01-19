@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import Fields from './fields';
+import Fields from './case_fields';
 import { connector } from '../mock';
 import { waitFor } from '@testing-library/dom';
 import { EuiSelect } from '@elastic/eui';

@@ -8,24 +8,22 @@
 import React, { memo, Suspense } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-import { CaseSettingsConnector, SettingFieldsProps } from './types';
-import { getCaseSettings } from '.';
+import { CaseActionConnector, ConnectorFieldsProps } from './types';
+import { getCaseConnectors } from '.';
 import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
 
-interface Props extends Omit<SettingFieldsProps<ConnectorTypeFields['fields']>, 'connector'> {
-  connector: CaseSettingsConnector | null;
+interface Props extends Omit<ConnectorFieldsProps<ConnectorTypeFields['fields']>, 'connector'> {
+  connector: CaseActionConnector | null;
 }
 
-const SettingFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onChange, fields }) => {
-  const { caseSettingsRegistry } = getCaseSettings();
+const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onChange, fields }) => {
+  const { caseConnectorsRegistry } = getCaseConnectors();
 
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {
     return null;
   }
 
-  const { caseSettingFieldsComponent: FieldsComponent } = caseSettingsRegistry.get(
-    connector.actionTypeId
-  );
+  const { fieldsComponent: FieldsComponent } = caseConnectorsRegistry.get(connector.actionTypeId);
 
   return (
     <>
@@ -39,7 +37,7 @@ const SettingFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onChan
             </EuiFlexGroup>
           }
         >
-          <div data-test-subj={'connector-settings'}>
+          <div data-test-subj={'connector-fields'}>
             <FieldsComponent
               isEdit={isEdit}
               fields={fields}
@@ -53,4 +51,4 @@ const SettingFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onChan
   );
 };
 
-export const SettingFieldsForm = memo(SettingFieldsFormComponent);
+export const ConnectorFieldsForm = memo(ConnectorFieldsFormComponent);

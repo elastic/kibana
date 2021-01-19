@@ -16,7 +16,7 @@ import {
 } from '../../../../../case/common/api';
 
 export { ThirdPartyField as AllThirdPartyFields } from '../../../../../case/common/api';
-export type CaseSettingsConnector = ActionConnector;
+export type CaseActionConnector = ActionConnector;
 
 export interface ThirdPartyField {
   label: string;
@@ -29,23 +29,25 @@ export interface ConnectorConfiguration extends ActionType {
   logo: string;
 }
 
-export interface CaseSetting<UIProps = unknown> {
+export interface CaseConnector<UIProps = unknown> {
   id: string;
-  caseSettingFieldsComponent: React.LazyExoticComponent<
-    React.ComponentType<SettingFieldsProps<UIProps>>
+  fieldsComponent: React.LazyExoticComponent<
+    React.ComponentType<ConnectorFieldsProps<UIProps>>
   > | null;
 }
 
-export interface CaseSettingsRegistry {
+export interface CaseConnectorsRegistry {
   has: (id: string) => boolean;
-  register: <UIProps extends ConnectorTypeFields['fields']>(setting: CaseSetting<UIProps>) => void;
-  get: <UIProps extends ConnectorTypeFields['fields']>(id: string) => CaseSetting<UIProps>;
-  list: () => CaseSetting[];
+  register: <UIProps extends ConnectorTypeFields['fields']>(
+    connector: CaseConnector<UIProps>
+  ) => void;
+  get: <UIProps extends ConnectorTypeFields['fields']>(id: string) => CaseConnector<UIProps>;
+  list: () => CaseConnector[];
 }
 
-export interface SettingFieldsProps<TFields> {
+export interface ConnectorFieldsProps<TFields> {
   isEdit?: boolean;
-  connector: CaseSettingsConnector;
+  connector: CaseActionConnector;
   fields: TFields;
   onChange: (fields: TFields) => void;
 }

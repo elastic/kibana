@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { UseField, useFormData, FieldHook } from '../../../shared_imports';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { ConnectorSelector } from '../connector_selector/form';
-import { SettingFieldsForm } from '../connectors/fields_form';
+import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { ActionConnector } from '../../containers/types';
 import { getConnectorById } from '../configure_cases/utils';
 import { FormProps } from './schema';
@@ -20,13 +20,13 @@ interface Props {
   isLoading: boolean;
 }
 
-interface SettingsFieldProps {
+interface ConnectorsFieldProps {
   connectors: ActionConnector[];
   field: FieldHook<FormProps['fields']>;
   isEdit: boolean;
 }
 
-const SettingsField = ({ connectors, isEdit, field }: SettingsFieldProps) => {
+const ConnectorFields = ({ connectors, isEdit, field }: ConnectorsFieldProps) => {
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
   const { setValue } = field;
   const connector = getConnectorById(connectorId, connectors) ?? null;
@@ -38,7 +38,7 @@ const SettingsField = ({ connectors, isEdit, field }: SettingsFieldProps) => {
   }, [setValue, connectorId]);
 
   return (
-    <SettingFieldsForm
+    <ConnectorFieldsForm
       connector={connector}
       fields={field.value}
       isEdit={isEdit}
@@ -68,7 +68,7 @@ const ConnectorComponent: React.FC<Props> = ({ isLoading }) => {
       <EuiFlexItem>
         <UseField
           path="fields"
-          component={SettingsField}
+          component={ConnectorFields}
           componentProps={{
             connectors,
             isEdit: true,

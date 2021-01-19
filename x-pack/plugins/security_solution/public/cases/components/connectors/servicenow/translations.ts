@@ -8,41 +8,41 @@
 import { i18n } from '@kbn/i18n';
 
 export const SEVERITY_HIGH = i18n.translate(
-  'xpack.securitySolution.components.settings.servicenow.severitySelectHighOptionLabel',
+  'xpack.securitySolution.components.connectors.servicenow.severitySelectHighOptionLabel',
   {
     defaultMessage: 'High',
   }
 );
 export const SEVERITY_MEDIUM = i18n.translate(
-  'xpack.securitySolution.components.settings.servicenow.severitySelectMediumOptionLabel',
+  'xpack.securitySolution.components.connectors.servicenow.severitySelectMediumOptionLabel',
   {
     defaultMessage: 'Medium',
   }
 );
 
 export const SEVERITY_LOW = i18n.translate(
-  'xpack.securitySolution.components.settings.servicenow.severitySelectLowOptionLabel',
+  'xpack.securitySolution.components.connectors.servicenow.severitySelectLowOptionLabel',
   {
     defaultMessage: 'Low',
   }
 );
 
 export const URGENCY = i18n.translate(
-  'xpack.securitySolution.components.settings.serviceNow.urgencySelectFieldLabel',
+  'xpack.securitySolution.components.connectors.serviceNow.urgencySelectFieldLabel',
   {
     defaultMessage: 'Urgency',
   }
 );
 
 export const SEVERITY = i18n.translate(
-  'xpack.securitySolution.components.settings.serviceNow.severitySelectFieldLabel',
+  'xpack.securitySolution.components.connectors.serviceNow.severitySelectFieldLabel',
   {
     defaultMessage: 'Severity',
   }
 );
 
 export const IMPACT = i18n.translate(
-  'xpack.securitySolution.components.settings.serviceNow.impactSelectFieldLabel',
+  'xpack.securitySolution.components.connectors.serviceNow.impactSelectFieldLabel',
   {
     defaultMessage: 'Impact',
   }

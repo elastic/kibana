@@ -100,7 +100,7 @@ describe('Connector', () => {
     );
 
     expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="connector-settings"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="connector-fields"]`).exists()).toBeTruthy();
 
     await waitFor(() => {
       expect(wrapper.find(`button[data-test-subj="dropdown-connectors"]`).first().text()).toBe(
@@ -110,7 +110,7 @@ describe('Connector', () => {
 
     await waitFor(() => {
       wrapper.update();
-      expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-sn"]`).exists()).toBeTruthy();
     });
   });
 
@@ -163,7 +163,7 @@ describe('Connector', () => {
     );
 
     await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="connector-settings-resilient"]`).exists()).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeFalsy();
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
       wrapper.update();
@@ -171,7 +171,7 @@ describe('Connector', () => {
 
     await waitFor(() => {
       wrapper.update();
-      expect(wrapper.find(`[data-test-subj="connector-settings-resilient"]`).exists()).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeTruthy();
     });
 
     act(() => {

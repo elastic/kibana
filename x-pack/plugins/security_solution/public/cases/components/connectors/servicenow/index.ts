@@ -7,14 +7,14 @@
 
 import { lazy } from 'react';
 
-import { CaseSetting } from '../types';
+import { CaseConnector } from '../types';
 import { ServiceNowFieldsType } from '../../../../../../case/common/api/connectors';
 import * as i18n from './translations';
 
-export const getCaseSetting = (): CaseSetting<ServiceNowFieldsType> => {
+export const getCaseConnector = (): CaseConnector<ServiceNowFieldsType> => {
   return {
     id: '.servicenow',
-    caseSettingFieldsComponent: lazy(() => import('./fields')),
+    fieldsComponent: lazy(() => import('./case_fields')),
   };
 };
 

@@ -8,69 +8,69 @@
 import { i18n } from '@kbn/i18n';
 
 export const ISSUE_TYPES_API_ERROR = i18n.translate(
-  'xpack.securitySolution.components.settings.jira.unableToGetIssueTypesMessage',
+  'xpack.securitySolution.components.connectors.jira.unableToGetIssueTypesMessage',
   {
     defaultMessage: 'Unable to get issue types',
   }
 );
 
 export const FIELDS_API_ERROR = i18n.translate(
-  'xpack.securitySolution.components.settings.jira.unableToGetFieldsMessage',
+  'xpack.securitySolution.components.connectors.jira.unableToGetFieldsMessage',
   {
-    defaultMessage: 'Unable to get fields',
+    defaultMessage: 'Unable to get connectors',
   }
 );
 
 export const ISSUES_API_ERROR = i18n.translate(
-  'xpack.securitySolution.components.settings.jira.unableToGetIssuesMessage',
+  'xpack.securitySolution.components.connectors.jira.unableToGetIssuesMessage',
   {
     defaultMessage: 'Unable to get issues',
   }
 );
 
 export const GET_ISSUE_API_ERROR = (id: string) =>
-  i18n.translate('xpack.securitySolution.components.settings.jira.unableToGetIssueMessage', {
+  i18n.translate('xpack.securitySolution.components.connectors.jira.unableToGetIssueMessage', {
     defaultMessage: 'Unable to get issue with id {id}',
     values: { id },
   });
 
 export const SEARCH_ISSUES_COMBO_BOX_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.components.settings.jira.searchIssuesComboBoxAriaLabel',
+  'xpack.securitySolution.components.connectors.jira.searchIssuesComboBoxAriaLabel',
   {
     defaultMessage: 'Type to search',
   }
 );
 
 export const SEARCH_ISSUES_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.components.settings.jira.searchIssuesComboBoxPlaceholder',
+  'xpack.securitySolution.components.connectors.jira.searchIssuesComboBoxPlaceholder',
   {
     defaultMessage: 'Type to search',
   }
 );
 
 export const SEARCH_ISSUES_LOADING = i18n.translate(
-  'xpack.securitySolution.components.settings.jira.searchIssuesLoading',
+  'xpack.securitySolution.components.connectors.jira.searchIssuesLoading',
   {
     defaultMessage: 'Loading...',
   }
 );
 
 export const PRIORITY = i18n.translate(
-  'xpack.securitySolution.case.settings.jira.prioritySelectFieldLabel',
+  'xpack.securitySolution.case.connectors.jira.prioritySelectFieldLabel',
   {
     defaultMessage: 'Priority',
   }
 );
 
 export const ISSUE_TYPE = i18n.translate(
-  'xpack.securitySolution.case.settings.jira.issueTypesSelectFieldLabel',
+  'xpack.securitySolution.case.connectors.jira.issueTypesSelectFieldLabel',
   {
     defaultMessage: 'Issue type',
   }
 );
 
 export const PARENT_ISSUE = i18n.translate(
-  'xpack.securitySolution.case.settings.jira.parentIssueSearchLabel',
+  'xpack.securitySolution.case.connectors.jira.parentIssueSearchLabel',
   {
     defaultMessage: 'Parent issue',
   }

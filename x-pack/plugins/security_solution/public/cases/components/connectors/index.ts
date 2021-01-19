@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CaseSettingsRegistry } from './types';
-import { createCaseSettingsRegistry } from './settings_registry';
-import { getCaseSetting as getJiraCaseSetting } from './jira';
-import { getCaseSetting as getResilientCaseSetting } from './resilient';
-import { getCaseSetting as getServiceNowCaseSetting } from './servicenow';
+import { CaseConnectorsRegistry } from './types';
+import { createCaseConnectorsRegistry } from './connectors_registry';
+import { getCaseConnector as getJiraCaseConnector } from './jira';
+import { getCaseConnector as getResilientCaseConnector } from './resilient';
+import { getCaseConnector as getServiceNowCaseConnector } from './servicenow';
 import {
   JiraFieldsType,
   ServiceNowFieldsType,
@@ -21,33 +21,33 @@ export { getActionType as getCaseConnectorUI } from './case';
 export * from './config';
 export * from './types';
 
-interface GetCaseSettingReturn {
-  caseSettingsRegistry: CaseSettingsRegistry;
+interface GetCaseConnectorsReturn {
+  caseConnectorsRegistry: CaseConnectorsRegistry;
 }
 
-class CaseSettings {
-  private caseSettingsRegistry: CaseSettingsRegistry;
+class CaseConnectors {
+  private caseConnectorsRegistry: CaseConnectorsRegistry;
 
   constructor() {
-    this.caseSettingsRegistry = createCaseSettingsRegistry();
+    this.caseConnectorsRegistry = createCaseConnectorsRegistry();
     this.init();
   }
 
   private init() {
-    this.caseSettingsRegistry.register<JiraFieldsType>(getJiraCaseSetting());
-    this.caseSettingsRegistry.register<ResilientFieldsType>(getResilientCaseSetting());
-    this.caseSettingsRegistry.register<ServiceNowFieldsType>(getServiceNowCaseSetting());
+    this.caseConnectorsRegistry.register<JiraFieldsType>(getJiraCaseConnector());
+    this.caseConnectorsRegistry.register<ResilientFieldsType>(getResilientCaseConnector());
+    this.caseConnectorsRegistry.register<ServiceNowFieldsType>(getServiceNowCaseConnector());
   }
 
-  registry(): CaseSettingsRegistry {
-    return this.caseSettingsRegistry;
+  registry(): CaseConnectorsRegistry {
+    return this.caseConnectorsRegistry;
   }
 }
 
-const caseSettings = new CaseSettings();
+const caseConnectors = new CaseConnectors();
 
-export const getCaseSettings = (): GetCaseSettingReturn => {
+export const getCaseConnectors = (): GetCaseConnectorsReturn => {
   return {
-    caseSettingsRegistry: caseSettings.registry(),
+    caseConnectorsRegistry: caseConnectors.registry(),
   };
 };

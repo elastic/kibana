@@ -7,16 +7,16 @@
 
 import { lazy } from 'react';
 
-import { CaseSetting } from '../types';
+import { CaseConnector } from '../types';
 import { JiraFieldsType } from '../../../../../../case/common/api/connectors';
 import * as i18n from './translations';
 
 export * from './types';
 
-export const getCaseSetting = (): CaseSetting<JiraFieldsType> => {
+export const getCaseConnector = (): CaseConnector<JiraFieldsType> => {
   return {
     id: '.jira',
-    caseSettingFieldsComponent: lazy(() => import('./fields')),
+    fieldsComponent: lazy(() => import('./case_fields')),
   };
 };
 

@@ -8,35 +8,35 @@
 import { i18n } from '@kbn/i18n';
 
 export const INCIDENT_TYPES_API_ERROR = i18n.translate(
-  'xpack.securitySolution.case.settings.resilient.unableToGetIncidentTypesMessage',
+  'xpack.securitySolution.case.connectors.resilient.unableToGetIncidentTypesMessage',
   {
     defaultMessage: 'Unable to get incident types',
   }
 );
 
 export const SEVERITY_API_ERROR = i18n.translate(
-  'xpack.securitySolution.case.settings.resilient.unableToGetSeverityMessage',
+  'xpack.securitySolution.case.connectors.resilient.unableToGetSeverityMessage',
   {
     defaultMessage: 'Unable to get severity',
   }
 );
 
 export const INCIDENT_TYPES_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.case.settings.resilient.incidentTypesPlaceholder',
+  'xpack.securitySolution.case.connectors.resilient.incidentTypesPlaceholder',
   {
     defaultMessage: 'Choose types',
   }
 );
 
 export const INCIDENT_TYPES_LABEL = i18n.translate(
-  'xpack.securitySolution.case.settings.resilient.incidentTypesLabel',
+  'xpack.securitySolution.case.connectors.resilient.incidentTypesLabel',
   {
     defaultMessage: 'Incident Types',
   }
 );
 
 export const SEVERITY_LABEL = i18n.translate(
-  'xpack.securitySolution.case.settings.resilient.severityLabel',
+  'xpack.securitySolution.case.connectors.resilient.severityLabel',
   {
     defaultMessage: 'Severity',
   }

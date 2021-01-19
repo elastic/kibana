@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
 
-import { SettingFieldsProps } from '../types';
+import { ConnectorFieldsProps } from '../types';
 import { ConnectorTypes, ServiceNowFieldsType } from '../../../../../../case/common/api/connectors';
 import { ConnectorCard } from '../card';
 
@@ -28,8 +28,8 @@ const selectOptions = [
   },
 ];
 
-const ServiceNowSettingFieldsComponent: React.FunctionComponent<
-  SettingFieldsProps<ServiceNowFieldsType>
+const ServiceNowFieldsComponent: React.FunctionComponent<
+  ConnectorFieldsProps<ServiceNowFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
   const { severity = null, urgency = null, impact = null } = fields ?? {};
 
@@ -77,7 +77,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<
   );
 
   return isEdit ? (
-    <span data-test-subj={'connector-settings-sn'}>
+    <span data-test-subj={'connector-fields-sn'}>
       <EuiFormRow fullWidth label={i18n.URGENCY}>
         <EuiSelect
           fullWidth
@@ -127,4 +127,4 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<
 };
 
 // eslint-disable-next-line import/no-default-export
-export { ServiceNowSettingFieldsComponent as default };
+export { ServiceNowFieldsComponent as default };

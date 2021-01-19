@@ -12,13 +12,13 @@ import * as i18n from './translations';
 
 import { ConnectorTypes, JiraFieldsType } from '../../../../../../case/common/api/connectors';
 import { useKibana } from '../../../../common/lib/kibana';
-import { SettingFieldsProps } from '../types';
+import { ConnectorFieldsProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
 import { ConnectorCard } from '../card';
 
-const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<JiraFieldsType>> = ({
+const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<JiraFieldsType>> = ({
   connector,
   fields,
   isEdit = true,
@@ -139,7 +139,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
   );
 
   return isEdit ? (
-    <div data-test-subj={'connector-settings-jira'}>
+    <div data-test-subj={'connector-fields-jira'}>
       <EuiFormRow fullWidth label={i18n.ISSUE_TYPE}>
         <EuiSelect
           data-test-subj="issueTypeSelect"
@@ -202,4 +202,4 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
 };
 
 // eslint-disable-next-line import/no-default-export
-export { JiraSettingFieldsComponent as default };
+export { JiraFieldsComponent as default };

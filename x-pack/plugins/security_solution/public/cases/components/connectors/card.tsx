@@ -51,10 +51,10 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
   );
   return (
     <>
-      {isLoading && <EuiLoadingSpinner data-test-subj="settings-connector-card-loading" />}
+      {isLoading && <EuiLoadingSpinner data-test-subj="connector-card-loading" />}
       {!isLoading && (
         <EuiCard
-          data-test-subj={`settings-connector-card`}
+          data-test-subj={`connector-card`}
           description={description}
           display="plain"
           icon={icon}

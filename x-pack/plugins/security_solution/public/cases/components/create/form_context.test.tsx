@@ -283,13 +283,13 @@ describe('Create case', () => {
       );
 
       fillForm(wrapper);
-      expect(wrapper.find(`[data-test-subj="connector-settings-jira"]`).exists()).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeFalsy();
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
 
       await waitFor(() => {
         wrapper.update();
-        expect(wrapper.find(`[data-test-subj="connector-settings-jira"]`).exists()).toBeTruthy();
+        expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeTruthy();
       });
 
       wrapper
@@ -353,15 +353,13 @@ describe('Create case', () => {
       );
 
       fillForm(wrapper);
-      expect(wrapper.find(`[data-test-subj="connector-settings-resilient"]`).exists()).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeFalsy();
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
 
       await waitFor(() => {
         wrapper.update();
-        expect(
-          wrapper.find(`[data-test-subj="connector-settings-resilient"]`).exists()
-        ).toBeTruthy();
+        expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeTruthy();
       });
 
       act(() => {
@@ -426,10 +424,10 @@ describe('Create case', () => {
       );
 
       fillForm(wrapper);
-      expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-sn"]`).exists()).toBeFalsy();
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.find(`button[data-test-subj="dropdown-connector-servicenow-1"]`).simulate('click');
-      expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-sn"]`).exists()).toBeTruthy();
 
       ['severitySelect', 'urgencySelect', 'impactSelect'].forEach((subj) => {
         wrapper
