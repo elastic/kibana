@@ -32,8 +32,8 @@ export function createSessionRestorationDataProvider(deps: {
     getUrlGeneratorData: async () => {
       return {
         urlGeneratorId: DASHBOARD_APP_URL_GENERATOR,
-        initialState: getUrlGeneratorState({ ...deps, forceAbsoluteTime: false }),
-        restoreState: getUrlGeneratorState({ ...deps, forceAbsoluteTime: true }),
+        initialState: getUrlGeneratorState({ ...deps, shouldRestoreSearchSession: false }),
+        restoreState: getUrlGeneratorState({ ...deps, shouldRestoreSearchSession: true }),
       };
     },
   };
@@ -43,20 +43,17 @@ function getUrlGeneratorState({
   data,
   getAppState,
   getDashboardId,
-  forceAbsoluteTime,
+  shouldRestoreSearchSession,
 }: {
   data: DataPublicPluginStart;
   getAppState: () => DashboardAppState;
   getDashboardId: () => string;
-  /**
-   * Can force time range from time filter to convert from relative to absolute time range
-   */
-  forceAbsoluteTime: boolean;
+  shouldRestoreSearchSession: boolean;
 }): DashboardUrlGeneratorState {
   const appState = getAppState();
   return {
     dashboardId: getDashboardId(),
-    timeRange: forceAbsoluteTime
+    timeRange: shouldRestoreSearchSession
       ? data.query.timefilter.timefilter.getAbsoluteTime()
       : data.query.timefilter.timefilter.getTime(),
     filters: data.query.filterManager.getFilters(),
@@ -66,6 +63,6 @@ function getUrlGeneratorState({
     preserveSavedFilters: false,
     viewMode: appState.viewMode,
     panels: getDashboardId() ? undefined : appState.panels,
-    searchSessionId: data.search.session.getSessionId(),
+    searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
   };
 }
