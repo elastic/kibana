@@ -9,7 +9,11 @@ export { mockKibanaValues } from './kibana_logic.mock';
 export { mockLicensingValues } from './licensing_logic.mock';
 export { mockHttpValues } from './http_logic.mock';
 export { mockTelemetryActions } from './telemetry_logic.mock';
-export { mockFlashMessagesValues, mockFlashMessagesActions } from './flash_messages_logic.mock';
+export {
+  mockFlashMessagesValues,
+  mockFlashMessagesActions,
+  mockFlashMessageHelpers,
+} from './flash_messages_logic.mock';
 export {
   mockAllValues,
   mockAllActions,
