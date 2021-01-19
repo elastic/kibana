@@ -32,7 +32,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'kibana/public';
 
 const Home = () => (
   <EuiPageBody data-test-subj="chromelessAppHome">
@@ -56,7 +56,7 @@ const Home = () => (
   </EuiPageBody>
 );
 
-const ChromelessApp = ({ basename }: { basename: string; context: AppMountContext }) => (
+const ChromelessApp = ({ basename }: { basename: string }) => (
   <Router basename={basename}>
     <EuiPage>
       <Route path="/" component={Home} />
@@ -64,11 +64,8 @@ const ChromelessApp = ({ basename }: { basename: string; context: AppMountContex
   </Router>
 );
 
-export const renderApp = (
-  context: AppMountContext,
-  { appBasePath, element }: AppMountParameters
-) => {
-  render(<ChromelessApp basename={appBasePath} context={context} />, element);
+export const renderApp = ({ appBasePath, element }: AppMountParameters) => {
+  render(<ChromelessApp basename={appBasePath} />, element);
 
   return () => unmountComponentAtNode(element);
 };
