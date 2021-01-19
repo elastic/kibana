@@ -67,7 +67,7 @@ describe('VectorTileLayer', () => {
 
     await layer.syncData(mockContext);
 
-    expect(actualMeta).toStrictEqual({ dataFilters: { foo: 'bar' }, tileLayerId: 'mockSourceId' });
+    expect(actualMeta).toStrictEqual({ tileLayerId: 'mockSourceId' });
     expect(actualErrorMessage).toStrictEqual('network error');
   });
 });
