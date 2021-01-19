@@ -25,7 +25,6 @@ import { createBrowserHistory, History } from 'history';
 import { MountPoint } from '../types';
 import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
-import { ContextSetup, IContextContainer } from '../context';
 import { PluginOpaqueId } from '../plugins';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
@@ -33,7 +32,6 @@ import {
   App,
   AppLeaveHandler,
   AppMount,
-  AppMountDeprecated,
   AppNavLinkStatus,
   AppStatus,
   AppUpdatableFields,
@@ -47,7 +45,6 @@ import { getLeaveAction, isConfirmAction } from './application_leave';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
 
 interface SetupDeps {
-  context: ContextSetup;
   http: HttpSetup;
   history?: History<any>;
   /** Used to redirect to external urls */
@@ -59,9 +56,6 @@ interface StartDeps {
   overlays: OverlayStart;
 }
 
-// Mount functions with two arguments are assumed to expect deprecated `context` object.
-const isAppMountDeprecated = (mount: (...args: any[]) => any): mount is AppMountDeprecated =>
-  mount.length === 2;
 function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
   return new Map(
     [...m].filter(
@@ -107,12 +101,10 @@ export class ApplicationService {
   private stop$ = new Subject();
   private registrationClosed = false;
   private history?: History<any>;
-  private mountContext?: IContextContainer<AppMountDeprecated>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
   private redirectTo?: (url: string) => void;
 
   public setup({
-    context,
     http: { basePath },
     redirectTo = (path: string) => {
       window.location.assign(path);
@@ -128,7 +120,6 @@ export class ApplicationService {
     };
 
     this.redirectTo = redirectTo;
-    this.mountContext = context.createContextContainer();
 
     const registerStatusUpdater = (application: string, updater$: Observable<AppUpdater>) => {
       const updaterId = Symbol();
@@ -144,26 +135,13 @@ export class ApplicationService {
     };
 
     const wrapMount = (plugin: PluginOpaqueId, app: App<any>): AppMount => {
-      let handler: AppMount;
-      if (isAppMountDeprecated(app.mount)) {
-        handler = this.mountContext!.createHandler(plugin, app.mount);
-        if (process.env.NODE_ENV === 'development') {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `App [${app.id}] is using deprecated mount context. Use core.getStartServices() instead.`
-          );
-        }
-      } else {
-        handler = app.mount;
-      }
       return async (params) => {
         this.currentAppId$.next(app.id);
-        return handler(params);
+        return app.mount(params);
       };
     };
 
     return {
-      registerMountContext: this.mountContext!.registerContext,
       register: (plugin, app: App<any>) => {
         app = { appRoute: `/app/${app.id}`, ...app };
 
@@ -202,7 +180,7 @@ export class ApplicationService {
   }
 
   public async start({ http, overlays }: StartDeps): Promise<InternalApplicationStart> {
-    if (!this.mountContext) {
+    if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
 
@@ -278,7 +256,6 @@ export class ApplicationService {
         takeUntil(this.stop$)
       ),
       history: this.history!,
-      registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (
         appId,
         { path, absolute = false }: { path?: string; absolute?: boolean } = {}
