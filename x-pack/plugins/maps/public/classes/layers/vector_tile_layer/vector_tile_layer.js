@@ -63,7 +63,7 @@ export class VectorTileLayer extends TileLayer {
         ...styleAndSprites,
         spriteSheetImageData,
       };
-      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, data, nextMeta);
+      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, data);
     } catch (error) {
       onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
     }
