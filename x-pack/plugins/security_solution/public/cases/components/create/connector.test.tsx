@@ -14,8 +14,8 @@ import { useForm, Form, FormHook } from '../../../shared_imports';
 import { connectorsMock } from '../../containers/mock';
 import { Connector } from './connector';
 import { useConnectors } from '../../containers/configure/use_connectors';
-import { useGetIncidentTypes } from '../settings/resilient/use_get_incident_types';
-import { useGetSeverity } from '../settings/resilient/use_get_severity';
+import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
+import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { schema, FormProps } from './schema';
 
 jest.mock('../../../common/lib/kibana', () => {
@@ -29,8 +29,8 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 jest.mock('../../containers/configure/use_connectors');
-jest.mock('../settings/resilient/use_get_incident_types');
-jest.mock('../settings/resilient/use_get_severity');
+jest.mock('../connectors/resilient/use_get_incident_types');
+jest.mock('../connectors/resilient/use_get_severity');
 
 const useConnectorsMock = useConnectors as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;

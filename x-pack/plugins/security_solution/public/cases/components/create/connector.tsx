@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { UseField, useFormData, FieldHook } from '../../../shared_imports';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { ConnectorSelector } from '../connector_selector/form';
-import { SettingFieldsForm } from '../settings/fields_form';
+import { SettingFieldsForm } from '../connectors/fields_form';
 import { ActionConnector } from '../../containers/types';
 import { getConnectorById } from '../configure_cases/utils';
 import { FormProps } from './schema';

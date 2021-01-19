@@ -24,7 +24,7 @@ import { Form, UseField, useForm } from '../../../shared_imports';
 import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ActionConnector } from '../../../../../case/common/api/cases';
-import { SettingFieldsForm } from '../settings/fields_form';
+import { SettingFieldsForm } from '../connectors/fields_form';
 import { getConnectorById } from '../configure_cases/utils';
 import { CaseUserActions } from '../../containers/types';
 import { schema } from './schema';

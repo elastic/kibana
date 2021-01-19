@@ -12,6 +12,7 @@ export const connector = {
   config: {},
   isPreconfigured: false,
 };
+
 export const issues = [
   { id: 'personId', title: 'Person Task', key: 'personKey' },
   { id: 'womanId', title: 'Woman Task', key: 'womanKey' },

@@ -5,7 +5,49 @@
  * 2.0.
  */
 
+import { CaseSettingsRegistry } from './types';
+import { createCaseSettingsRegistry } from './settings_registry';
+import { getCaseSetting as getJiraCaseSetting } from './jira';
+import { getCaseSetting as getResilientCaseSetting } from './resilient';
+import { getCaseSetting as getServiceNowCaseSetting } from './servicenow';
+import {
+  JiraFieldsType,
+  ServiceNowFieldsType,
+  ResilientFieldsType,
+} from '../../../../../case/common/api/connectors';
+
 export { getActionType as getCaseConnectorUI } from './case';
 
 export * from './config';
 export * from './types';
+
+interface GetCaseSettingReturn {
+  caseSettingsRegistry: CaseSettingsRegistry;
+}
+
+class CaseSettings {
+  private caseSettingsRegistry: CaseSettingsRegistry;
+
+  constructor() {
+    this.caseSettingsRegistry = createCaseSettingsRegistry();
+    this.init();
+  }
+
+  private init() {
+    this.caseSettingsRegistry.register<JiraFieldsType>(getJiraCaseSetting());
+    this.caseSettingsRegistry.register<ResilientFieldsType>(getResilientCaseSetting());
+    this.caseSettingsRegistry.register<ServiceNowFieldsType>(getServiceNowCaseSetting());
+  }
+
+  registry(): CaseSettingsRegistry {
+    return this.caseSettingsRegistry;
+  }
+}
+
+const caseSettings = new CaseSettings();
+
+export const getCaseSettings = (): GetCaseSettingReturn => {
+  return {
+    caseSettingsRegistry: caseSettings.registry(),
+  };
+};

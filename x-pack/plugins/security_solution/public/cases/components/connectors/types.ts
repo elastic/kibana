@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
 import { ActionType } from '../../../../../triggers_actions_ui/public';
 
 import {
   ActionType as ThirdPartySupportedActions,
   CaseField,
+  ActionConnector,
+  ConnectorTypeFields,
 } from '../../../../../case/common/api';
 
 export { ThirdPartyField as AllThirdPartyFields } from '../../../../../case/common/api';
+export type CaseSettingsConnector = ActionConnector;
 
 export interface ThirdPartyField {
   label: string;
@@ -23,4 +27,25 @@ export interface ThirdPartyField {
 
 export interface ConnectorConfiguration extends ActionType {
   logo: string;
+}
+
+export interface CaseSetting<UIProps = unknown> {
+  id: string;
+  caseSettingFieldsComponent: React.LazyExoticComponent<
+    React.ComponentType<SettingFieldsProps<UIProps>>
+  > | null;
+}
+
+export interface CaseSettingsRegistry {
+  has: (id: string) => boolean;
+  register: <UIProps extends ConnectorTypeFields['fields']>(setting: CaseSetting<UIProps>) => void;
+  get: <UIProps extends ConnectorTypeFields['fields']>(id: string) => CaseSetting<UIProps>;
+  list: () => CaseSetting[];
+}
+
+export interface SettingFieldsProps<TFields> {
+  isEdit?: boolean;
+  connector: CaseSettingsConnector;
+  fields: TFields;
+  onChange: (fields: TFields) => void;
 }
