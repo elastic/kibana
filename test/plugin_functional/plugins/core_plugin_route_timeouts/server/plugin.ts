@@ -20,16 +20,6 @@
 import { Plugin, CoreSetup } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 
-export interface PluginARequestContext {
-  ping: () => Promise<string>;
-}
-
-declare module 'kibana/server' {
-  interface RequestHandlerContext {
-    pluginA?: PluginARequestContext;
-  }
-}
-
 export class CorePluginRouteTimeoutsPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
     const { http } = core;

@@ -23,20 +23,17 @@ export interface PluginARequestContext {
   ping: () => Promise<string>;
 }
 
-declare module 'kibana/server' {
-  interface RequestHandlerContext {
-    pluginA?: PluginARequestContext;
-  }
-}
-
 export class CorePluginAPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
-    core.http.registerRouteHandlerContext('pluginA', (context) => {
-      return {
-        ping: () =>
-          context.core.elasticsearch.legacy.client.callAsInternalUser('ping') as Promise<string>,
-      };
-    });
+    core.http.registerRouteHandlerContext(
+      'pluginA',
+      (context): PluginARequestContext => {
+        return {
+          ping: () =>
+            context.core.elasticsearch.legacy.client.callAsInternalUser('ping') as Promise<string>,
+        };
+      }
+    );
   }
 
   public start() {}
