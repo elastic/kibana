@@ -129,7 +129,7 @@ export const hasTimestampFields = async (
 };
 
 export const checkPrivileges = async (
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
+  services: AlertServices,
   indices: string[]
 ): Promise<Privilege> =>
   services.callCluster('transport.request', {
