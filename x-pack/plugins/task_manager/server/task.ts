@@ -130,7 +130,7 @@ export const taskDefinitionSchema = schema.object(
   {
     validate({ timeout }) {
       if (!isInterval(timeout) || isErr(tryAsResult(() => parseIntervalAsMillisecond(timeout)))) {
-        return `Invalid timeout "${timeout}". Timeout must be of the form "{number}{cadance}". Example: 5m.`;
+        return `Invalid timeout "${timeout}". Timeout must be of the form "{number}{cadance}" where number is an integer. Example: 5m.`;
       }
     },
   }

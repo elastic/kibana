@@ -123,7 +123,7 @@ describe('taskTypeDictionary', () => {
     };
 
     expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid timeout \\"15 days\\". Timeout must be of the form \\"{number}{cadance}\\". Example: 5m."`
+      `"Invalid timeout \\"15 days\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
     );
   });
 
@@ -150,7 +150,7 @@ describe('taskTypeDictionary', () => {
     };
 
     expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid timeout \\"1.5h\\". Timeout must be of the form \\"{number}{cadance}\\". Example: 5m."`
+      `"Invalid timeout \\"1.5h\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
     );
   });
 });
