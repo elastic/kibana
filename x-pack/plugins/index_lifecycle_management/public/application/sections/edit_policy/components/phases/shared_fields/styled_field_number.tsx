@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiFieldNumber, EuiFieldNumberProps, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFieldNumber, EuiFieldNumberProps, EuiFormRow, EuiIcon } from '@elastic/eui';
 import { getFieldValidityAndErrorMessage, UseField } from '../../../../../../shared_imports';
 
 interface Props {
@@ -21,7 +21,7 @@ export const StyledFieldNumber: FunctionComponent<Props> = ({ path, fieldNumberP
           ? { append: <EuiIcon type={'alert'} color={'danger'} /> }
           : {};
         return (
-          <div style={{ maxWidth: 350 }} className={'ilmStyledFieldNumber'}>
+          <EuiFormRow style={{ maxWidth: 350 }} isInvalid={isInvalid} error={errorMessage}>
             <EuiFieldNumber
               aria-label={field.label}
               prepend={field.label}
@@ -32,12 +32,7 @@ export const StyledFieldNumber: FunctionComponent<Props> = ({ path, fieldNumberP
               {...fieldNumberProps}
               {...appendProps}
             />
-            {isInvalid && errorMessage && (
-              <EuiText size={'xs'} color={'danger'}>
-                {errorMessage}
-              </EuiText>
-            )}
-          </div>
+          </EuiFormRow>
         );
       }}
     </UseField>

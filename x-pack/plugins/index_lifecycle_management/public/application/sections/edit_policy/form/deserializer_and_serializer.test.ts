@@ -260,15 +260,6 @@ describe('deserializer and serializer', () => {
     expect(result.phases.hot!.actions.readonly).toBeUndefined();
   });
 
-  it('removes min_age from warm when rollover is enabled', () => {
-    formInternal._meta.hot.customRollover.enabled = true;
-    formInternal._meta.warm.warmPhaseOnRollover = true;
-
-    const result = serializer(formInternal);
-
-    expect(result.phases.warm!.min_age).toBeUndefined();
-  });
-
   it('adds default rollover configuration when enabled, but previously not configured', () => {
     delete formInternal.phases.hot!.actions.rollover;
     formInternal._meta.hot.isUsingDefaultRollover = true;
@@ -334,7 +325,7 @@ describe('deserializer and serializer', () => {
 
   it('sets allocate and migrate actions when defined together', () => {
     formInternal.phases.warm!.actions.allocate!.number_of_replicas = 0;
-    formInternal._meta.warm.dataTierAllocationType = 'none';
+    formInternal._meta.warm.dataTierAllocationEnabled = false;
     // This should not be set...
     formInternal._meta.warm.allocationNodeAttribute = 'some:value';
 

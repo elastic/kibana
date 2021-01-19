@@ -47,43 +47,43 @@ export const serializeMigrateAndAllocateActions = (
     }
   }
 
-  switch (dataTierAllocationType) {
-    case 'node_attrs':
-      if (allocationNodeAttribute) {
-        const [name, value] = allocationNodeAttribute.split(':');
-        actions.allocate = {
-          // copy over any other allocate details like "number_of_replicas"
-          ...actions.allocate,
-          require: {
-            [name]: value,
-          },
-        };
-      } else {
-        // The form has been configured to use node attribute based allocation but no node attribute
-        // was selected. We fall back to what was originally selected in this case. This might be
-        // migrate.enabled: "false"
-        actions.migrate = originalActions.migrate;
-      }
+  if (dataTierAllocationEnabled) {
+    switch (dataTierAllocationType) {
+      case 'node_attrs':
+        if (allocationNodeAttribute) {
+          const [name, value] = allocationNodeAttribute.split(':');
+          actions.allocate = {
+            // copy over any other allocate details like "number_of_replicas"
+            ...actions.allocate,
+            require: {
+              [name]: value,
+            },
+          };
+        } else {
+          // The form has been configured to use node attribute based allocation but no node attribute
+          // was selected. We fall back to what was originally selected in this case. This might be
+          // migrate.enabled: "false"
+          actions.migrate = originalActions.migrate;
+        }
 
-      // copy over the original include and exclude values until we can set them in the form.
-      if (!isEmpty(originalActions?.allocate?.include)) {
-        actions.allocate = {
-          ...actions.allocate,
-          include: { ...originalActions?.allocate?.include },
-        };
-      }
+        // copy over the original include and exclude values until we can set them in the form.
+        if (!isEmpty(originalActions?.allocate?.include)) {
+          actions.allocate = {
+            ...actions.allocate,
+            include: { ...originalActions?.allocate?.include },
+          };
+        }
 
-      if (!isEmpty(originalActions?.allocate?.exclude)) {
-        actions.allocate = {
-          ...actions.allocate,
-          exclude: { ...originalActions?.allocate?.exclude },
-        };
-      }
-      break;
-    default:
-  }
-
-  if (!dataTierAllocationEnabled) {
+        if (!isEmpty(originalActions?.allocate?.exclude)) {
+          actions.allocate = {
+            ...actions.allocate,
+            exclude: { ...originalActions?.allocate?.exclude },
+          };
+        }
+        break;
+      default:
+    }
+  } else {
     actions.migrate = {
       ...originalActions?.migrate,
       enabled: false,
