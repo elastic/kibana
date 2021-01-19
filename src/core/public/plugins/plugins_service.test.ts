@@ -45,7 +45,6 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
-import { contextServiceMock } from '../context/context_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -89,7 +88,6 @@ describe('PluginsService', () => {
     ];
     mockSetupDeps = {
       application: applicationServiceMock.createInternalSetupContract(),
-      context: contextServiceMock.createSetupContract(),
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
       http: httpServiceMock.createSetupContract(),
       injectedMetadata: injectedMetadataServiceMock.createStartContract(),
