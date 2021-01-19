@@ -44,8 +44,8 @@ export const createVislibVisController = (
   charts: ChartsPluginSetup
 ) => {
   return class VislibVisController {
-    private removeListeners?: () => void;
-    private unmountLegend?: () => void;
+    removeListeners?: () => void;
+    unmountLegend?: () => void;
 
     legendRef: RefObject<VisLegend>;
     container: HTMLDivElement;

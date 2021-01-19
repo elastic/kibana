@@ -45,7 +45,7 @@ export interface ISearchSetup {
    */
   session: ISessionService;
   /**
-   * Background search sessions SO CRUD
+   * Search sessions SO CRUD
    * {@link ISessionsClient}
    */
   sessionsClient: ISessionsClient;
@@ -84,7 +84,7 @@ export interface ISearchStart {
    */
   session: ISessionService;
   /**
-   * Background search sessions SO CRUD
+   * Search sessions SO CRUD
    * {@link ISessionsClient}
    */
   sessionsClient: ISessionsClient;

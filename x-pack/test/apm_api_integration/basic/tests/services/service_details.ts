@@ -22,11 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           url.format({
             pathname: `/api/apm/services/opbeans-java/metadata/details`,
-            query: {
-              start,
-              end,
-              uiFilters: '{}',
-            },
+            query: { start, end },
           })
         );
 
@@ -43,11 +39,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           url.format({
             pathname: `/api/apm/services/opbeans-java/metadata/details`,
-            query: {
-              start,
-              end,
-              uiFilters: '{}',
-            },
+            query: { start, end },
           })
         );
 
@@ -67,7 +59,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 "name": "java",
                 "version": "1.19.1-SNAPSHOT.null",
               },
-              "framework": "Servlet API",
               "runtime": Object {
                 "name": "Java",
                 "version": "11.0.9.1",
@@ -84,11 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           url.format({
             pathname: `/api/apm/services/opbeans-python/metadata/details`,
-            query: {
-              start,
-              end,
-              uiFilters: '{}',
-            },
+            query: { start, end },
           })
         );
 

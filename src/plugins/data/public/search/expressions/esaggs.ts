@@ -53,6 +53,7 @@ export function getFunctionDefinition({
         deserializeFieldFormat,
         indexPatterns,
         searchSource,
+        getNow,
       } = await getStartDependencies();
 
       const indexPattern = await indexPatterns.create(args.index.value, true);
@@ -75,6 +76,7 @@ export function getFunctionDefinition({
         searchSourceService: searchSource,
         timeFields: args.timeFields,
         timeRange: get(input, 'timeRange', undefined),
+        getNow,
       });
     },
   });
@@ -102,12 +104,13 @@ export function getEsaggs({
   return getFunctionDefinition({
     getStartDependencies: async () => {
       const [, , self] = await getStartServices();
-      const { fieldFormats, indexPatterns, search } = self;
+      const { fieldFormats, indexPatterns, search, nowProvider } = self;
       return {
         aggs: search.aggs,
         deserializeFieldFormat: fieldFormats.deserialize.bind(fieldFormats),
         indexPatterns,
         searchSource: search.searchSource,
+        getNow: () => nowProvider.get(),
       };
     },
   });

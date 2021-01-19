@@ -64,7 +64,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe.skip('Detection rules, machine learning', () => {
+describe('Detection rules, machine learning', () => {
   const expectedUrls = machineLearningRule.referenceUrls.join('');
   const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
   const expectedTags = machineLearningRule.tags.join('');
@@ -88,7 +88,7 @@ describe.skip('Detection rules, machine learning', () => {
     fillScheduleRuleAndContinue(machineLearningRule);
     createAndActivateRule();
 
-    cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');
+    cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();

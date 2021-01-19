@@ -119,7 +119,7 @@ export class DiscoverUrlGenerator
     sort,
     interval,
   }: DiscoverUrlGeneratorState): Promise<string> => {
-    const savedSearchPath = savedSearchId ? encodeURIComponent(savedSearchId) : '';
+    const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
     const appState: {
       query?: Query;
       filters?: Filter[];

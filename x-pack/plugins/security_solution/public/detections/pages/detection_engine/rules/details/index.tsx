@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
@@ -81,7 +81,12 @@ import { useGlobalFullScreen } from '../../../../../common/containers/use_full_s
 import { Display } from '../../../../../hosts/pages/display';
 import { ExceptionListTypeEnum, ExceptionListIdentifiers } from '../../../../../shared_imports';
 import { useRuleAsync } from '../../../../containers/detection_engine/rules/use_rule_async';
-import { showGlobalFilters } from '../../../../../timelines/components/timeline/helpers';
+import {
+  focusUtilityBarAction,
+  onTimelineTabKeyPressed,
+  resetKeyboardFocus,
+  showGlobalFilters,
+} from '../../../../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
@@ -95,6 +100,7 @@ import {
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
+import { isTab } from '../../../../../common/components/accessibility/helpers';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -127,6 +133,7 @@ const getRuleDetailsTabs = (rule: Rule | null) => {
 
 const RuleDetailsPageComponent = () => {
   const dispatch = useDispatch();
+  const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) =>
@@ -149,6 +156,7 @@ const RuleDetailsPageComponent = () => {
       hasEncryptionKey,
       canUserCRUD,
       hasIndexWrite,
+      hasIndexMaintenance,
       signalIndexName,
     },
   ] = useUserData();
@@ -408,6 +416,28 @@ const RuleDetailsPageComponent = () => {
     }
   }, [rule]);
 
+  const onSkipFocusBeforeEventsTable = useCallback(() => {
+    focusUtilityBarAction(containerElement.current);
+  }, [containerElement]);
+
+  const onSkipFocusAfterEventsTable = useCallback(() => {
+    resetKeyboardFocus();
+  }, []);
+
+  const onKeyDown = useCallback(
+    (keyboardEvent: React.KeyboardEvent) => {
+      if (isTab(keyboardEvent)) {
+        onTimelineTabKeyPressed({
+          containerElement: containerElement.current,
+          keyboardEvent,
+          onSkipFocusBeforeEventsTable,
+          onSkipFocusAfterEventsTable,
+        });
+      }
+    },
+    [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
+  );
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -430,7 +460,7 @@ const RuleDetailsPageComponent = () => {
       <ReadOnlyAlertsCallOut />
       <ReadOnlyRulesCallOut />
       {indicesExist ? (
-        <>
+        <div onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
@@ -562,9 +592,9 @@ const RuleDetailsPageComponent = () => {
                 {ruleId != null && (
                   <AlertsTable
                     timelineId={TimelineId.detectionsRulesDetailsPage}
-                    canUserCRUD={canUserCRUD ?? false}
                     defaultFilters={alertDefaultFilters}
                     hasIndexWrite={hasIndexWrite ?? false}
+                    hasIndexMaintenance={hasIndexMaintenance ?? false}
                     from={from}
                     loading={loading}
                     showBuildingBlockAlerts={showBuildingBlockAlerts}
@@ -588,7 +618,7 @@ const RuleDetailsPageComponent = () => {
             )}
             {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
           </WrapperPage>
-        </>
+        </div>
       ) : (
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />

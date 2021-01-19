@@ -17,12 +17,13 @@ import {
 import { CommentType } from '../../../../../case/common/api';
 import { Ecs } from '../../../../common/ecs';
 import { ActionIconItem } from '../../../timelines/components/timeline/body/actions/action_icon_item';
-import * as i18n from './translations';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
-import { displaySuccessToast, useStateToaster } from '../../../common/components/toasters';
+import { useStateToaster } from '../../../common/components/toasters';
 import { useCreateCaseModal } from '../use_create_case_modal';
 import { useAllCasesModal } from '../use_all_cases_modal';
+import { createUpdateSuccessToaster } from './helpers';
+import * as i18n from './translations';
 
 interface AddToCaseActionProps {
   ariaLabel?: string;
@@ -53,7 +54,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           alertId: eventId,
           index: eventIndex ?? '',
         },
-        () => displaySuccessToast(i18n.CASE_CREATED_SUCCESS_TOAST(theCase.title), dispatchToaster)
+        () => dispatchToaster({ type: 'addToaster', toast: createUpdateSuccessToaster(theCase) })
       );
     },
     [postComment, eventId, eventIndex, dispatchToaster]

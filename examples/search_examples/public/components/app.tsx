@@ -295,7 +295,7 @@ export const SearchExamplesApp = ({
                             <EuiFormLabel>Index Pattern</EuiFormLabel>
                             <IndexPatternSelect
                               placeholder={i18n.translate(
-                                'backgroundSessionExample.selectIndexPatternPlaceholder',
+                                'searchSessionExample.selectIndexPatternPlaceholder',
                                 {
                                   defaultMessage: 'Select index pattern',
                                 }

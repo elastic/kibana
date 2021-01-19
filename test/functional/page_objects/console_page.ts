@@ -17,12 +17,14 @@
  * under the License.
  */
 
+import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export function ConsolePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
 
   class ConsolePage {
     public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
@@ -78,6 +80,38 @@ export function ConsolePageProvider({ getService }: FtrProviderContext) {
 
     public async getRequestFontSize() {
       return await this.getFontSize(await this.getRequestEditor());
+    }
+
+    public async getEditor() {
+      return testSubjects.find('console-application');
+    }
+
+    public async dismissTutorial() {
+      try {
+        const closeButton = await testSubjects.find('help-close-button');
+        await closeButton.click();
+      } catch (e) {
+        // Ignore because it is probably not there.
+      }
+    }
+
+    public async promptAutocomplete() {
+      // This focusses the cursor on the bottom of the text area
+      const editor = await this.getEditor();
+      const content = await editor.findByCssSelector('.ace_content');
+      await content.click();
+      const textArea = await testSubjects.find('console-textarea');
+      // There should be autocomplete for this on all license levels
+      await textArea.pressKeys('\nGET s');
+      await textArea.pressKeys([Key.CONTROL, Key.SPACE]);
+    }
+
+    public async hasAutocompleter(): Promise<boolean> {
+      try {
+        return Boolean(await find.byCssSelector('.ace_autocomplete'));
+      } catch (e) {
+        return false;
+      }
     }
   }
 

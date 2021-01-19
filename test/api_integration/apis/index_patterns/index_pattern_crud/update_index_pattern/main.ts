@@ -262,44 +262,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response3.body.index_pattern.typeMeta).to.eql({ foo: 'baz' });
     });
 
-    it('can update index_pattern fields', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
-      const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
-        index_pattern: {
-          title,
-          fields: {
-            foo: {
-              name: 'foo',
-              type: 'string',
-            },
-          },
-        },
-      });
-
-      expect(response1.body.index_pattern.fields.foo.name).to.be('foo');
-      expect(response1.body.index_pattern.fields.foo.type).to.be('string');
-
-      const id = response1.body.index_pattern.id;
-      const response2 = await supertest.post('/api/index_patterns/index_pattern/' + id).send({
-        index_pattern: {
-          fields: {
-            bar: {
-              name: 'bar',
-              type: 'number',
-            },
-          },
-        },
-      });
-
-      expect(response2.body.index_pattern.fields.bar.name).to.be('bar');
-      expect(response2.body.index_pattern.fields.bar.type).to.be('number');
-
-      const response3 = await supertest.get('/api/index_patterns/index_pattern/' + id);
-
-      expect(response3.body.index_pattern.fields.bar.name).to.be('bar');
-      expect(response3.body.index_pattern.fields.bar.type).to.be('number');
-    });
-
     it('can update multiple index pattern fields at once', async () => {
       const title = `foo-${Date.now()}-${Math.random()}*`;
       const response1 = await supertest.post('/api/index_patterns/index_pattern').send({

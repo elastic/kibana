@@ -53,6 +53,7 @@ export const getTemplate = ({
   order = getRandomNumber(),
   indexPatterns = [],
   template: { settings, aliases, mappings } = {},
+  dataStream,
   hasDatastream = false,
   isLegacy = false,
   type = 'default',
@@ -73,12 +74,13 @@ export const getTemplate = ({
       mappings,
       settings,
     },
+    dataStream,
     hasSettings: objHasProperties(settings),
     hasMappings: objHasProperties(mappings),
     hasAliases: objHasProperties(aliases),
     _kbnMeta: {
       type,
-      hasDatastream,
+      hasDatastream: dataStream !== undefined ? true : hasDatastream,
       isLegacy,
     },
   };

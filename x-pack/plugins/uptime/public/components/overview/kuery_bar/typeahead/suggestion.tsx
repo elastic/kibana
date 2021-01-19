@@ -5,14 +5,13 @@
  */
 
 import React, { useRef, useEffect, RefObject } from 'react';
-import styled from 'styled-components';
 import { EuiSuggestItem } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
+import { euiStyled } from '../../../../../../observability/public';
 
-const SuggestionItem = styled.div<{ selected: boolean }>`
-  background: ${(props) => (props.selected ? theme.euiColorLightestShade : 'initial')};
+const SuggestionItem = euiStyled.div<{ selected: boolean }>`
+  background: ${(props) => (props.selected ? props.theme.eui.euiColorLightestShade : 'initial')};
 `;
 
 function getIconColor(type: string) {

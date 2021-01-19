@@ -86,7 +86,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
           return {
             'data-test-subj': `note-preview-${note.savedObjectId}`,
             username: defaultToEmptyTag(note.updatedBy),
-            event: 'added a comment',
+            event: i18n.ADDED_A_NOTE,
             timestamp: note.updated ? (
               <FormattedRelative data-test-subj="updated" value={new Date(note.updated)} />
             ) : (
@@ -95,7 +95,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
             children: (
               <div className={NOTE_CONTENT_CLASS_NAME} tabIndex={0}>
                 <EuiScreenReaderOnly data-test-subj="screenReaderOnlyUserAddedANote">
-                  <p>{i18n.USER_ADDED_A_NOTE(note.updatedBy ?? i18n.AN_UNKNOWN_USER)}</p>
+                  <p>{`${note.updatedBy ?? i18n.AN_UNKNOWN_USER} ${i18n.ADDED_A_NOTE}`}</p>
                 </EuiScreenReaderOnly>
                 <MarkdownRenderer>{note.note ?? ''}</MarkdownRenderer>
               </div>

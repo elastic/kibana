@@ -71,6 +71,10 @@ describe('<TemplateEdit />', () => {
     const templateToEdit = fixtures.getTemplate({
       name: 'index_template_without_mappings',
       indexPatterns: ['indexPattern1'],
+      dataStream: {
+        hidden: true,
+        anyUnknownKey: 'should_be_kept',
+      },
     });
 
     beforeAll(() => {
@@ -85,7 +89,7 @@ describe('<TemplateEdit />', () => {
       testBed.component.update();
     });
 
-    it('allows you to add mappings', async () => {
+    test('allows you to add mappings', async () => {
       const { actions, find } = testBed;
       // Logistics
       await actions.completeStepOne();
@@ -97,6 +101,47 @@ describe('<TemplateEdit />', () => {
       await actions.mappings.addField('field_1', 'text');
 
       expect(find('fieldsListItem').length).toBe(1);
+    });
+
+    test('should keep data stream configuration', async () => {
+      const { actions } = testBed;
+      // Logistics
+      await actions.completeStepOne({
+        name: 'test',
+        indexPatterns: ['myPattern*'],
+        version: 1,
+      });
+      // Component templates
+      await actions.completeStepTwo();
+      // Index settings
+      await actions.completeStepThree();
+      // Mappings
+      await actions.completeStepFour();
+      // Aliases
+      await actions.completeStepFive();
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+
+      const latestRequest = server.requests[server.requests.length - 1];
+
+      const expected = {
+        name: 'test',
+        indexPatterns: ['myPattern*'],
+        dataStream: {
+          hidden: true,
+          anyUnknownKey: 'should_be_kept',
+        },
+        version: 1,
+        _kbnMeta: {
+          type: 'default',
+          isLegacy: false,
+          hasDatastream: true,
+        },
+      };
+
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
     });
   });
 

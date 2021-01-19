@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { AuthenticatedUser, Role } from '../../../plugins/security/common/model';
 
@@ -122,9 +123,8 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       await browser.setLocalStorageItem('home:welcome:show', 'false');
       await waitForLoginForm();
 
-      const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
-      await testSubjects.setValue('loginUsername', username || superUsername);
-      await testSubjects.setValue('loginPassword', password || superPassword);
+      await testSubjects.setValue('loginUsername', username || adminTestUser.username);
+      await testSubjects.setValue('loginPassword', password || adminTestUser.password);
       await testSubjects.click('loginSubmit');
 
       await waitForLoginResult(
@@ -162,9 +162,8 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       if (providerType === 'basic' || providerType === 'token') {
         await waitForLoginForm();
 
-        const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
-        await testSubjects.setValue('loginUsername', options?.username ?? superUsername);
-        await testSubjects.setValue('loginPassword', options?.password ?? superPassword);
+        await testSubjects.setValue('loginUsername', options?.username ?? adminTestUser.username);
+        await testSubjects.setValue('loginPassword', options?.password ?? adminTestUser.password);
         await testSubjects.click('loginSubmit');
       }
 

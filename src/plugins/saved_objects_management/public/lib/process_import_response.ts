@@ -24,12 +24,12 @@ import {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportSuccess,
 } from 'src/core/public';
 
 export interface FailedImport {
-  obj: Omit<SavedObjectsImportError, 'error'>;
+  obj: Omit<SavedObjectsImportFailure, 'error'>;
   error:
     | SavedObjectsImportConflictError
     | SavedObjectsImportAmbiguousConflictError
@@ -40,7 +40,7 @@ export interface FailedImport {
 
 interface UnmatchedReference {
   existingIndexPatternId: string;
-  list: Array<Omit<SavedObjectsImportError, 'error'>>;
+  list: Array<Omit<SavedObjectsImportFailure, 'error'>>;
   newIndexPatternId?: string;
 }
 

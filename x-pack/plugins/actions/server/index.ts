@@ -21,6 +21,30 @@ export {
   ActionType,
   PreConfiguredAction,
 } from './types';
+
+export type {
+  EmailActionTypeId,
+  EmailActionParams,
+  IndexActionTypeId,
+  IndexActionParams,
+  PagerDutyActionTypeId,
+  PagerDutyActionParams,
+  ServerLogActionTypeId,
+  ServerLogActionParams,
+  SlackActionTypeId,
+  SlackActionParams,
+  WebhookActionTypeId,
+  WebhookActionParams,
+  ServiceNowActionTypeId,
+  ServiceNowActionParams,
+  JiraActionTypeId,
+  JiraActionParams,
+  ResilientActionTypeId,
+  ResilientActionParams,
+  TeamsActionTypeId,
+  TeamsActionParams,
+} from './builtin_action_types';
+
 export { PluginSetupContract, PluginStartContract } from './plugin';
 
 export { asSavedObjectExecutionSource, asHttpRequestExecutionSource } from './lib';

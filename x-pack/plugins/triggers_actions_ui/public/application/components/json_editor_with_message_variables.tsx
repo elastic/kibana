@@ -5,6 +5,8 @@
  */
 import React, { useState } from 'react';
 import { EuiCodeEditor, EuiFormRow } from '@elastic/eui';
+
+import 'brace/theme/github';
 import { XJsonMode } from '@kbn/ace';
 
 import './add_message_variables.scss';

@@ -15,8 +15,8 @@ $mlAnnotationBorderWidth: 2px;
 
 // Instead of different EUI colors we use opacity settings
 // here to avoid opaque layers on top of existing chart elements.
-$mlAnnotationRectDefaultStrokeOpacity: 0.2;
-$mlAnnotationRectDefaultFillOpacity: 0.05;
+$mlAnnotationRectDefaultStrokeOpacity: .2;
+$mlAnnotationRectDefaultFillOpacity: .05;
 
 .mlAnnotationRect {
   stroke: $euiColorFullShade;
@@ -32,7 +32,7 @@ $mlAnnotationRectDefaultFillOpacity: 0.05;
 }
 
 .mlAnnotationRect-isHighlight {
-  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity * 2;;
+  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity * 2;
   transition: stroke-opacity $euiAnimSpeedFast;
 
   fill-opacity: $mlAnnotationRectDefaultFillOpacity * 2;

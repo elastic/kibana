@@ -20,7 +20,7 @@
 import { Client } from 'elasticsearch';
 import { ToolingLog, KbnClient } from '@kbn/dev-utils';
 
-import { migrateKibanaIndex, deleteKibanaIndices, createStats } from '../lib';
+import { migrateKibanaIndex, createStats, cleanKibanaIndices } from '../lib';
 
 export async function emptyKibanaIndexAction({
   client,
@@ -32,8 +32,9 @@ export async function emptyKibanaIndexAction({
   kbnClient: KbnClient;
 }) {
   const stats = createStats('emptyKibanaIndex', log);
+  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
-  await deleteKibanaIndices({ client, stats, log });
+  await cleanKibanaIndices({ client, stats, log, kibanaPluginIds });
   await migrateKibanaIndex({ client, kbnClient });
   return stats;
 }

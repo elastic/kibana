@@ -38,7 +38,11 @@ export const IndexParamsFields = ({
       paramsProperty={'documents'}
       data-test-subj="documentToIndex"
       inputTargetValue={
-        documents && documents.length > 0 ? ((documents[0] as unknown) as string) : undefined
+        documents === null
+          ? '{}' // need this to trigger validation
+          : documents && documents.length > 0
+          ? ((documents[0] as unknown) as string)
+          : undefined
       }
       label={i18n.translate(
         'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.documentsFieldLabel',

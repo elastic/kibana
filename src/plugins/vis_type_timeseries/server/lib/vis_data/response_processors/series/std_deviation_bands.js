@@ -20,36 +20,38 @@
 import { getAggValue, getLastMetric, getSplits } from '../../helpers';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export function stdDeviationBands(resp, panel, series, meta) {
-  return (next) => (results) => {
+export function stdDeviationBands(resp, panel, series, meta, extractFields) {
+  return (next) => async (results) => {
     const metric = getLastMetric(series);
     if (metric.type === METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
-      getSplits(resp, panel, series, meta).forEach(({ id, color, label, timeseries }) => {
-        const data = timeseries.buckets.map((bucket) => [
-          bucket.key,
-          getAggValue(bucket, { ...metric, mode: 'upper' }),
-          getAggValue(bucket, { ...metric, mode: 'lower' }),
-        ]);
+      (await getSplits(resp, panel, series, meta, extractFields)).forEach(
+        ({ id, color, label, timeseries }) => {
+          const data = timeseries.buckets.map((bucket) => [
+            bucket.key,
+            getAggValue(bucket, { ...metric, mode: 'upper' }),
+            getAggValue(bucket, { ...metric, mode: 'lower' }),
+          ]);
 
-        results.push({
-          id,
-          label,
-          color,
-          data,
-          lines: {
-            show: series.chart_type === 'line',
-            fill: 0.5,
-            lineWidth: 0,
-            mode: 'band',
-          },
-          bars: {
-            show: series.chart_type === 'bar',
-            fill: 0.5,
-            mode: 'band',
-          },
-          points: { show: false },
-        });
-      });
+          results.push({
+            id,
+            label,
+            color,
+            data,
+            lines: {
+              show: series.chart_type === 'line',
+              fill: 0.5,
+              lineWidth: 0,
+              mode: 'band',
+            },
+            bars: {
+              show: series.chart_type === 'bar',
+              fill: 0.5,
+              mode: 'band',
+            },
+            points: { show: false },
+          });
+        }
+      );
     }
     return next(results);
   };

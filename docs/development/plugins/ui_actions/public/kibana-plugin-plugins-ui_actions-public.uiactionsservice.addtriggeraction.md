@@ -6,8 +6,6 @@
 
 `addTriggerAction` is similar to `attachAction` as it attaches action to a trigger, but it also registers the action, if it has not been registered, yet.
 
-`addTriggerAction` also infers better typing of the `action` argument.
-
 <b>Signature:</b>
 
 ```typescript

@@ -29,18 +29,16 @@ import {
 import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
 import { ENGINES_TITLE } from '../engines';
 import { OVERVIEW_TITLE } from '../engine_overview';
-import {
-  ANALYTICS_TITLE,
-  DOCUMENTS_TITLE,
-  SCHEMA_TITLE,
-  CRAWLER_TITLE,
-  RELEVANCE_TUNING_TITLE,
-  SYNONYMS_TITLE,
-  CURATIONS_TITLE,
-  RESULT_SETTINGS_TITLE,
-  SEARCH_UI_TITLE,
-  API_LOGS_TITLE,
-} from './constants';
+import { ANALYTICS_TITLE } from '../analytics';
+import { DOCUMENTS_TITLE } from '../documents';
+import { SCHEMA_TITLE } from '../schema';
+import { CRAWLER_TITLE } from '../crawler';
+import { RELEVANCE_TUNING_TITLE } from '../relevance_tuning';
+import { SYNONYMS_TITLE } from '../synonyms';
+import { CURATIONS_TITLE } from '../curations';
+import { RESULT_SETTINGS_TITLE } from '../result_settings';
+import { SEARCH_UI_TITLE } from '../search_ui';
+import { API_LOGS_TITLE } from '../api_logs';
 
 import { EngineLogic } from './';
 import { EngineDetails } from './types';
@@ -105,7 +103,11 @@ export const EngineNav: React.FC = () => {
         {OVERVIEW_TITLE}
       </SideNavLink>
       {canViewEngineAnalytics && (
-        <SideNavLink to={engineRoute + ENGINE_ANALYTICS_PATH} data-test-subj="EngineAnalyticsLink">
+        <SideNavLink
+          to={engineRoute + ENGINE_ANALYTICS_PATH}
+          shouldShowActiveForSubroutes={true}
+          data-test-subj="EngineAnalyticsLink"
+        >
           {ANALYTICS_TITLE}
         </SideNavLink>
       )}

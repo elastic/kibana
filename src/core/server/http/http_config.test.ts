@@ -22,8 +22,8 @@ import { config, HttpConfig } from './http_config';
 import { CspConfig } from '../csp';
 import { ExternalUrlConfig } from '../external_url';
 
-const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
-const invalidHostname = 'asdf$%^';
+const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
+const invalidHostnames = ['asdf$%^', '0'];
 
 jest.mock('os', () => {
   const original = jest.requireActual('os');
@@ -48,11 +48,10 @@ test('accepts valid hostnames', () => {
 });
 
 test('throws if invalid hostname', () => {
-  const httpSchema = config.schema;
-  const obj = {
-    host: invalidHostname,
-  };
-  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  for (const host of invalidHostnames) {
+    const httpSchema = config.schema;
+    expect(() => httpSchema.validate({ host })).toThrowErrorMatchingSnapshot();
+  }
 });
 
 describe('requestId', () => {
@@ -304,9 +303,9 @@ describe('with compression', () => {
 
   test('throws if invalid referrer whitelist', () => {
     const httpSchema = config.schema;
-    const invalidHostnames = {
+    const nonEmptyArray = {
       compression: {
-        referrerWhitelist: [invalidHostname],
+        referrerWhitelist: invalidHostnames,
       },
     };
     const emptyArray = {
@@ -314,7 +313,7 @@ describe('with compression', () => {
         referrerWhitelist: [],
       },
     };
-    expect(() => httpSchema.validate(invalidHostnames)).toThrowErrorMatchingSnapshot();
+    expect(() => httpSchema.validate(nonEmptyArray)).toThrowErrorMatchingSnapshot();
     expect(() => httpSchema.validate(emptyArray)).toThrowErrorMatchingSnapshot();
   });
 

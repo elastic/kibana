@@ -18,7 +18,6 @@ import { initShareToSpacesApi } from './share_to_space';
 export interface ExternalRouteDeps {
   externalRouter: IRouter;
   getStartServices: CoreSetup['getStartServices'];
-  getImportExportObjectLimit: () => number;
   getSpacesService: () => SpacesServiceStart;
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
   log: Logger;

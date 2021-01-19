@@ -14,6 +14,9 @@ const initialState: State = {
     filter: '',
     sortField: 'enabled',
     sortOrder: 'desc',
+    tags: [],
+    showCustomRules: false,
+    showElasticRules: false,
   },
   loadingRuleIds: [],
   loadingRulesAction: null,
@@ -193,6 +196,9 @@ describe('allRulesReducer', () => {
         filter: 'host.name:*',
         sortField: 'enabled',
         sortOrder: 'desc',
+        tags: [],
+        showCustomRules: false,
+        showElasticRules: false,
       };
       const { filterOptions, pagination } = reducer(initialState, {
         type: 'updateFilterOptions',

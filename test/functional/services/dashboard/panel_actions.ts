@@ -33,6 +33,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
+  const inspector = getService('inspector');
 
   return new (class DashboardPanelActions {
     async findContextMenu(parent?: WebElementWrapper) {
@@ -161,6 +162,16 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
     async openInspectorByTitle(title: string) {
       const header = await this.getPanelHeading(title);
       await this.openInspector(header);
+    }
+
+    async getSearchSessionIdByTitle(title: string) {
+      await this.openInspectorByTitle(title);
+      await inspector.openInspectorRequestsView();
+      const searchSessionId = await (
+        await testSubjects.find('inspectorRequestSearchSessionId')
+      ).getAttribute('data-search-session-id');
+      await inspector.close();
+      return searchSessionId;
     }
 
     async openInspector(parent?: WebElementWrapper) {

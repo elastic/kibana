@@ -10,6 +10,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   AlertExecutorOptions,
+  ActionGroupIdsOf,
 } from '../../../../../alerts/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
@@ -33,7 +34,8 @@ export type MetricThresholdAlertType = AlertType<
   Record<string, any>,
   Record<string, any>,
   AlertInstanceState,
-  AlertInstanceContext
+  AlertInstanceContext,
+  ActionGroupIdsOf<typeof FIRED_ACTIONS>
 >;
 export type MetricThresholdAlertExecutorOptions = AlertExecutorOptions<
   /**
@@ -42,7 +44,8 @@ export type MetricThresholdAlertExecutorOptions = AlertExecutorOptions<
   Record<string, any>,
   Record<string, any>,
   AlertInstanceState,
-  AlertInstanceContext
+  AlertInstanceContext,
+  ActionGroupIdsOf<typeof FIRED_ACTIONS>
 >;
 
 export function registerMetricThresholdAlertType(libs: InfraBackendLibs): MetricThresholdAlertType {

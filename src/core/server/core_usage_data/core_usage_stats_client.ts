@@ -24,7 +24,6 @@ import {
   ISavedObjectsRepository,
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsExportOptions,
   KibanaRequest,
   IBasePath,
 } from '..';
@@ -40,8 +39,10 @@ export type IncrementSavedObjectsImportOptions = BaseIncrementOptions &
 export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptions &
   Pick<SavedObjectsResolveImportErrorsOptions, 'createNewCopies'>;
 /** @internal */
-export type IncrementSavedObjectsExportOptions = BaseIncrementOptions &
-  Pick<SavedObjectsExportOptions, 'types'> & { supportedTypes: string[] };
+export type IncrementSavedObjectsExportOptions = BaseIncrementOptions & {
+  types?: string[];
+  supportedTypes: string[];
+};
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
 export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';

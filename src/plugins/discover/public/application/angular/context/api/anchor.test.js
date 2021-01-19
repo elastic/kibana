@@ -144,4 +144,29 @@ describe('context app', function () {
       });
     });
   });
+
+  describe('useNewFields API', () => {
+    let fetchAnchor;
+    let searchSourceStub;
+
+    beforeEach(() => {
+      searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }]);
+      fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub, true);
+    });
+
+    it('should request fields if useNewFieldsApi set', function () {
+      searchSourceStub._stubHits = [{ property1: 'value1' }, { property2: 'value2' }];
+
+      return fetchAnchor('INDEX_PATTERN_ID', 'id', [
+        { '@timestamp': 'desc' },
+        { _doc: 'desc' },
+      ]).then(() => {
+        const setFieldsSpy = searchSourceStub.setField.withArgs('fields');
+        const removeFieldsSpy = searchSourceStub.removeField.withArgs('fieldsFromSource');
+        expect(setFieldsSpy.calledOnce).toBe(true);
+        expect(removeFieldsSpy.calledOnce).toBe(true);
+        expect(setFieldsSpy.firstCall.args[1]).toEqual(['*']);
+      });
+    });
+  });
 });

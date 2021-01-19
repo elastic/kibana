@@ -92,6 +92,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickMarkdownWidget();
         await PageObjects.visEditor.setMarkdownTxt(`[abc](#/dashboard/${testDashboardId})`);
         await PageObjects.visEditor.clickGo();
+
+        await PageObjects.visualize.saveVisualizationExpectSuccess('legacy url markdown');
+
         (await find.byLinkText('abc')).click();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -108,6 +111,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.goBack();
         await PageObjects.visEditor.expectMarkdownTextArea();
         await browser.goForward();
+      });
+
+      it('resolves markdown link from dashboard', async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.clickNewDashboard();
+        await dashboardAddPanel.addVisualization('legacy url markdown');
+        (await find.byLinkText('abc')).click();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setDefaultDataRange();
+
+        await PageObjects.dashboard.waitForRenderComplete();
+        await pieChart.expectPieSliceCount(5);
       });
     });
   });

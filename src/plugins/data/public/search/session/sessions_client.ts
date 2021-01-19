@@ -27,7 +27,7 @@ export interface SessionsClientDeps {
 }
 
 /**
- * CRUD backgroundSession SO
+ * CRUD Search Session SO
  */
 export class SessionsClient {
   private readonly http: HttpSetup;
