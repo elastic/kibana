@@ -10,7 +10,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
   const PageObjects = getPageObjects(['canvas', 'common', 'header', 'lens']);
   const esArchiver = getService('esArchiver');
 
-  describe.only('lens in canvas', function () {
+  describe('lens in canvas', function () {
     this.tags('skipFirefox');
 
     before(async () => {
