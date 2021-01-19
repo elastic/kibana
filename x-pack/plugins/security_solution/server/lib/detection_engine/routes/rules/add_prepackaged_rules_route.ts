@@ -97,7 +97,7 @@ export const createPrepackagedRules = async (
   const clusterClient = context.core.elasticsearch.legacy.client;
   const savedObjectsClient = context.core.savedObjects.client;
   const exceptionsListClient =
-    context.lists != null ? context.lists?.getExceptionListClient() : exceptionsClient;
+    context.lists != null ? context.lists.getExceptionListClient() : exceptionsClient;
 
   if (!siemClient || !alertsClient) {
     throw new PrepackagedRulesError('', 404);

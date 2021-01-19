@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-
 import { PrePackagedRulesAndTimelinesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../plugins/security_solution/common/constants';
