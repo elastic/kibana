@@ -127,13 +127,8 @@ describe('engine routes', () => {
 
     it('creates a request handler', () => {
       mockRouter.callRoute({ body: { name: 'some-engine', language: 'en' } });
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines',
-        body: {
-          name: 'some-engine',
-          language: 'en',
-        },
       });
     });
 

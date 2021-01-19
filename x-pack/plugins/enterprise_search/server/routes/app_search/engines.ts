@@ -57,7 +57,6 @@ export function registerEnginesRoutes({
     async (context, request, response) => {
       return enterpriseSearchRequestHandler.createRequest({
         path: `/as/engines`,
-        body: request.body,
       })(context, request, response);
     }
   );
