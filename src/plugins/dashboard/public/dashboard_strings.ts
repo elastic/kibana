@@ -365,9 +365,19 @@ export const dashboardUnsavedListingStrings = {
           : dashboardListingTable.getEntityName(),
       },
     }),
+  getEditAriaLabel: (title: string) =>
+    i18n.translate('dashboard.listing.unsaved.editAria', {
+      defaultMessage: 'Continue editing {title}',
+      values: { title },
+    }),
   getEditTitle: () =>
     i18n.translate('dashboard.listing.unsaved.editTitle', {
       defaultMessage: 'Continue editing',
+    }),
+  getDiscardAriaLabel: (title: string) =>
+    i18n.translate('dashboard.listing.unsaved.discardAria', {
+      defaultMessage: 'Discard changes to {title}',
+      values: { title },
     }),
   getDiscardTitle: () =>
     i18n.translate('dashboard.listing.unsaved.discardTitle', {
