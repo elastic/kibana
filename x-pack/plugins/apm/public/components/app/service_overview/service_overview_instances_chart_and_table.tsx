@@ -27,15 +27,15 @@ export type ServiceInstanceItem = ValuesType<
   throughputValue: number;
 };
 
-interface ServiceOverviewInstancesRowProps {
+interface ServiceOverviewInstancesChartAndTableProps {
   chartHeight: number;
   serviceName: string;
 }
 
-export function ServiceOverviewInstancesRow({
+export function ServiceOverviewInstancesChartAndTable({
   chartHeight,
   serviceName,
-}: ServiceOverviewInstancesRowProps) {
+}: ServiceOverviewInstancesChartAndTableProps) {
   const { transactionType } = useApmServiceContext();
 
   const {

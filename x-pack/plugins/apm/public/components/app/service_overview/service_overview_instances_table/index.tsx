@@ -29,7 +29,7 @@ import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink
 import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { ServiceInstanceItem } from '../service_overview_instances_row';
+import { ServiceInstanceItem } from '../service_overview_instances_chart_and_table';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
 interface Props {
