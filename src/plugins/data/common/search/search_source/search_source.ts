@@ -74,7 +74,7 @@ import { uniqueId, keyBy, pick, difference, omit, isObject, isFunction } from 'l
 import { map } from 'rxjs/operators';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, IndexPatternField } from '../../index_patterns';
+import { IIndexPattern } from '../../index_patterns';
 import { ISearchGeneric, ISearchOptions } from '../..';
 import type {
   ISearchSource,
