@@ -358,7 +358,7 @@ export const dashboardListingTable = {
 export const dashboardUnsavedListingStrings = {
   getUnsavedChangesTitle: (plural = false) =>
     i18n.translate('dashboard.listing.unsaved.unsavedChangesTitle', {
-      defaultMessage: 'You have unsaved changes in the following {dash}',
+      defaultMessage: 'You have unsaved changes in the following {dash}.',
       values: {
         dash: plural
           ? dashboardListingTable.getEntityNamePlural()

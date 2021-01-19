@@ -46,17 +46,28 @@ const DashboardUnsavedItem = ({
 }) => {
   const title = dashboard?.title ?? getNewDashboardTitle();
   return (
-    <>
-      <EuiTitle size="xxs" className="dshUnsavedListingItemTitle">
-        <h3 className="dshUnsavedListingItemTitle">
-          <EuiIcon type="pencil" /> {dashboard?.title ?? getNewDashboardTitle()}
-        </h3>
-      </EuiTitle>
-      <EuiFlexGroup gutterSize="s" alignItems="flexStart" className="dshUnsavedListingButtons">
+    <div className="dshUnsavedListingItem">
+      <EuiFlexGroup alignItems="center" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiIcon color="text" className="dshUnsavedListingItem__icon" type="dashboardApp" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <h4 className="dshUnsavedListingItem__title">
+              {dashboard?.title ?? getNewDashboardTitle()}
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup
+        gutterSize="none"
+        alignItems="flexStart"
+        className="dshUnsavedListingItem__actions"
+      >
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             flush="left"
-            size="xs"
+            size="s"
             color="primary"
             onClick={onOpenClick}
             data-test-subj={`edit-unsaved-${dashboard?.id ?? DASHBOARD_PANELS_UNSAVED_ID}`}
@@ -67,7 +78,7 @@ const DashboardUnsavedItem = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            size="xs"
+            size="s"
             color="danger"
             onClick={onDiscardClick}
             data-test-subj={`discard-unsaved-${dashboard?.id ?? DASHBOARD_PANELS_UNSAVED_ID}`}
@@ -77,7 +88,7 @@ const DashboardUnsavedItem = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </div>
   );
 };
 
@@ -149,7 +160,10 @@ export const DashboardUnsavedListing = ({ redirectTo }: { redirectTo: DashboardR
 
   return items.length === 0 ? null : (
     <>
-      <EuiCallOut title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(items.length > 1)}>
+      <EuiCallOut
+        heading="h3"
+        title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(items.length > 1)}
+      >
         {items}
       </EuiCallOut>
       <EuiSpacer size="m" />

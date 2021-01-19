@@ -34,10 +34,18 @@
   text-align: center;
 }
 
-.dshUnsavedListingItemTitle {
+.dshUnsavedListingItem {
+  margin-top: $euiSizeM;
+}
+
+.dshUnsavedListingItem__icon {
+  margin-right: $euiSizeM;
+}
+
+.dshUnsavedListingItem__title {
   margin-bottom: 0 !important;
 }
 
-.dshUnsavedListingButtons {
-  margin-left: 15px;
+.dshUnsavedListingItem__actions {
+  margin-left: $euiSizeL + $euiSizeXS;
 }
