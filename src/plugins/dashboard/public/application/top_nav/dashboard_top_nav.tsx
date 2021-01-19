@@ -166,8 +166,6 @@ export function DashboardTopNav({
   const onDiscardChanges = useCallback(() => {
     function revertChangesAndExitEditMode() {
       dashboardStateManager.resetState();
-      // This is only necessary for new dashboards, which will default to Edit mode.
-      dashboardStateManager.switchViewMode(ViewMode.VIEW);
       dashboardStateManager.clearUnsavedPanels();
 
       // We need to do a hard reset of the timepicker. appState will not reload like
@@ -177,11 +175,10 @@ export function DashboardTopNav({
         dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
         dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
       }
-      redirectTo({ destination: 'dashboard', id: savedDashboard.id });
+      dashboardStateManager.switchViewMode(ViewMode.VIEW);
     }
-
     confirmDiscardUnsavedChanges(core.overlays, revertChangesAndExitEditMode);
-  }, [core.overlays, dashboardStateManager, redirectTo, timefilter, savedDashboard.id]);
+  }, [core.overlays, dashboardStateManager, timefilter]);
 
   const onChangeViewMode = useCallback(
     (newMode: ViewMode) => {
