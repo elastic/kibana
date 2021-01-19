@@ -27,6 +27,7 @@ import { EndpointAppContext } from './types';
 import { MetadataRequestContext } from './routes/metadata/handlers';
 // import { licenseMock } from '../../../licensing/common/licensing.mock';
 import { LicenseService } from '../../common/license/license';
+import { SecuritySolutionRequestHandlerContext } from '../types';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -116,7 +117,7 @@ export const createMockMetadataRequestContext = (): jest.Mocked<MetadataRequestC
   return {
     endpointAppContextService: createMockEndpointAppContextService(),
     logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
-    requestHandlerContext: xpackMocks.createRequestHandlerContext(),
+    requestHandlerContext: (xpackMocks.createRequestHandlerContext() as unknown) as jest.Mocked<SecuritySolutionRequestHandlerContext>,
   };
 };
 

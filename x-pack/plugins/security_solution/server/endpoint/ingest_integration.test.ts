@@ -15,7 +15,7 @@ import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
 } from './ingest_integration';
-import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import { KibanaRequest } from 'kibana/server';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
 import { createMockEndpointAppContextServiceStartContract } from './mocks';
@@ -25,11 +25,12 @@ import { Subject } from 'rxjs';
 import { ILicense } from '../../../licensing/common/types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { ProtectionModes } from '../../common/endpoint/types';
+import type { SecuritySolutionRequestHandlerContext } from '../types';
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
   let req: KibanaRequest;
-  let ctx: RequestHandlerContext;
+  let ctx: SecuritySolutionRequestHandlerContext;
   const maxTimelineImportExportSize = createMockConfig().maxTimelineImportExportSize;
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;

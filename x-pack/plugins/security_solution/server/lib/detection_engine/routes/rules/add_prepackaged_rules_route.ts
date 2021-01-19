@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppClient } from '../../../../types';
-import { IRouter, RequestHandlerContext } from '../../../../../../../../src/core/server';
+import type {
+  AppClient,
+  SecuritySolutionPluginRouter,
+  SecuritySolutionRequestHandlerContext,
+} from '../../../../types';
 
 import { validate } from '../../../../../common/validate';
 import {
@@ -33,7 +36,7 @@ import { AlertsClient } from '../../../../../../alerts/server';
 import { FrameworkRequest } from '../../../framework';
 
 export const addPrepackedRulesRoute = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {
@@ -85,7 +88,7 @@ class PrepackagedRulesError extends Error {
 }
 
 export const createPrepackagedRules = async (
-  context: RequestHandlerContext,
+  context: SecuritySolutionRequestHandlerContext,
   siemClient: AppClient,
   alertsClient: AlertsClient,
   frameworkRequest: FrameworkRequest,
