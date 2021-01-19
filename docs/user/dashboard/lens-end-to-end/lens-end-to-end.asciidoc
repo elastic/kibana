@@ -20,7 +20,7 @@ When you're finished creating the dashboard, you'll be able to answer the follow
 
 To create visualizations of the website traffic data, add the data set, then create the dashboard.
 
-. From the {kib} *Home* page, click *Try our sample data*.
+. From the *Home* page, click *Try our sample data*.
 
 . From *Sample web logs*, click *Add data*.
 

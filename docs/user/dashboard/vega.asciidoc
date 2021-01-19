@@ -1,5 +1,5 @@
 [[vega]]
-=== Vega and Vega-Lite
+=== Vega
 
 *Vega* and *Vega-Lite* are both grammars for creating custom visualizations.
 They are recommended for advanced users who are comfortable writing {es} queries manually.
@@ -46,7 +46,8 @@ A pre-populated line chart displays the total number of documents.
 . Change the <<set-time-filter,time range>> to *Last 7 days*.
 
 [float]
-===== Create a stacked area chart from an {es} search query
+[[vega-tutorial-create-a-stacked-area-chart]]
+=== Tutorial: Create a stacked area chart from an {es} search query
 
 Learn how to query {es} from *Vega-Lite*, displaying the results in a stacked area chart.
 
@@ -1099,3 +1100,5 @@ dragging:
 
 ----
 ====
+
+include::vega-reference.asciidoc[]

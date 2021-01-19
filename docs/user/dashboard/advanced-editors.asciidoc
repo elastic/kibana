@@ -12,6 +12,7 @@
 With *TSVB*, you can:
 
 * Combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
+* Annotate time series data with timestamped events from an {es} index.
 * View the data in several types of visualizations, including charts, data tables, and markdown panels.
 * Display multiple <<index-patterns, index patterns>> in each visualization.
 * Customize the data with labels and colors.
@@ -61,5 +62,4 @@ image:dashboard/images/timelion.png[Timelion]
 
 include::tsvb.asciidoc[]
 include::vega.asciidoc[]
-include::vega-reference.asciidoc[]
 include::timelion.asciidoc[]

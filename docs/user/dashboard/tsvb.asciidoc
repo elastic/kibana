@@ -1,60 +1,56 @@
 [[TSVB]]
 === TSVB
 
-TSVB is the Time Series Visual Builder. It requires a date field, and supports
-<<aggregation-reference, most {es} metric aggregations>>, multiple visualization types
-and some math. It also has custom functions which are explained in the <<tsvb-reference, TSVB reference>>.
-TSVB is able to annotate the time series with timestamped events from an {es} index.
+*TSVB* requires a date field and supports <<aggregation-reference, most {es} metric aggregations>>, multiple visualization types, custom functions,
+and some math. 
 
-TSVB can display multiple series like <<add-a-data-layer, Lens>> and
-<<create-panels-with-timelion, Timelion>>, but only Timelion can perform math across layers.
+TIP: With *TSVB*, you can visualize the data from multiple series, but only *Timelion* can perform math across layers.
 
 [role="screenshot"]
 image::visualize/images/tsvb-screenshot.png[TSVB overview]
 
 [float]
-==== Options specific to each chart type
+[[tsvb-required-choices]]
+==== Requirements
+
+When you open *TSVB*, click *Panel options*, then verify the following:
+
+* The index pattern, time field, and interval are configured
+* Specify if you want to show the last bucket, which usually contains partial data
+* For non-time series visualizations, specify if you want the *Data timerange mode*.
+* Specify any <<kuery-query, KQL filters>> to select specific documents
+
+[float]
+==== Visualization options
 
 Time series::
   Supports annotations based on timestamped documents in a separate {es} index.
 
 All other chart types::
-  These charts have a *Panel options > Data timerange mode* setting
-  which controls the timespan used for matching documents.
-  "Last value" will not match all documents, only the specific interval.
-  "Entire timerange" will match all the documents selected in the timepicker.
+  *Panel options > Data timerange mode* controls the timespan used for matching documents.
+  *Last value* is unable to match all documents, only the specific interval.
+  *Entire timerange* matches all the documents specified in the time filter.
 
-Metric, Top N, and Gauge chart types::
-  Conditional coloring based on the values, under *Panel options > Color rules*.
+Metric, Top N, and Gauge::
+  *Panel options > Color rules* contains conditional coloring based on the values.
 
-Top N and Table chart types::
-  When you click a series from this chart type, it normally applies a filter based
-  on the series name. You can change this behavior by setting *Panel options > Item URL*,
-  which will open a URL instead of applying a filter on click.
+Top N and Table::
+  When you click a series, *TSVB* applies a filter based
+  on the series name. To change this behavior, configure *Panel options > Item URL*,
+  which opens a URL instead of applying a filter on click.
 
 Markdown::
   Supports Markdown with Handlebars syntax to insert dynamic data. Also supports
   custom CSS using LESS syntax.
 
 [float]
-[[tsvb-required-choices]]
-==== Required choices
-
-Each time you open TSVB, check the *Panel options* tab to make sure:
-
-* The index pattern, time field, and interval are set
-* Whether you want to show the last bucket, which usually contains partial data
-* For non-time-series charts, whether you have set *Data timerange mode*.
-* You have applied any <<kuery-query, KQL filters>> to select specific documents
-
-[float]
 [[tsvb-series-options]]
 ==== Understanding the TSVB series panel
 
-Every chart type in TSVB shares the same interface for creating a *Series*.
+Every visualization shares the same interface for creating a *Series*.
 Each series can be thought of as a separate {es} aggregation, which prevents
 them from being compared with math. Each series has an *Options* tab
-which controls both styling and {es} options, which are inherited from the *Panel options*.
+that controls the styling and {es} options, which are inherited from the *Panel options*.
 Having separate options for each series allows you to compare different
 {es} indices, or to view two time periods from the same index.
 

@@ -7,12 +7,12 @@ This reference can help simplify the comparison if you need a specific feature.
 
 [float]
 [[chart-types]]
-=== Chart types
+=== Supported panel types by editor
 
 [options="header"]
 |===
 
-| Type | Agg-based | Lens | TSVB | Timelion | Vega
+| Type | Aggregation-based | Lens | TSVB | Timelion | Vega
 
 | Table
 ^| X
@@ -28,7 +28,7 @@ This reference can help simplify the comparison if you need a specific feature.
 |
 |
 
-| Bar, line, area charts
+| Bar, line, and area charts
 ^| X
 ^| X
 ^| X
@@ -42,7 +42,7 @@ This reference can help simplify the comparison if you need a specific feature.
 |
 ^| X
 
-| Split bar, line, area charts
+| Split bar, line, and area charts
 ^| X
 |
 |

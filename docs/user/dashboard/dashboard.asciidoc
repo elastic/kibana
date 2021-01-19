@@ -43,12 +43,13 @@ Dashboards support many types of panels, and provide several editors that you ca
 |===
 
 [float]
-[[create-the-dashboard]]
+[[create-dashboards]]
 == Create dashboards
 
 Dashboards provide you with the space where you add panels of your data.
 
 [float]
+[[dashboard-minimum-requirements]]
 === Minimum requirements
 
 To create dashboards, you must meet the minimum requirements. 
@@ -64,6 +65,7 @@ to create or save dashboards. The options to create and save dashboards are not 
 refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
 [float]
+[[open-the-dashboard]]
 === Open the dashboard
 
 Begin with an empty dashboard, or open an existing dashboard. 
@@ -119,17 +121,17 @@ To compare the data in the panels, arrange the panels on the dashboard, or remov
 . To save your changes, click *Save* in the toolbar.
 
 [float]
-[[search-in-dashboard]]
+[[search-or-filter-your-data]]
 === Search or filter your data
 
-{kib} provides you with several ways to search your data and applying {es} filters. You can combine the filters with any panel-specific
+{kib} provides you with several ways to search your data and apply {es} filters. You can combine the filters with any panel-specific
 filters to display the data want to you see.
 
 [role="screenshot"]
 image::dashboard/images/dashboard-filters.png[Labeled interface with semi-structured search, time filter, and additional filters]
 
 Semi-structured search::
-  Combines free text search with field-based search using the <<kuery-query,Kibana Query Language>>.
+  Combine free text search with field-based search using the <<kuery-query,{kib} Query Language>>.
   Type a search term to match across all fields, or begin typing a field name to
   get prompted with field names and operators you can use to build a structured query.
   +
@@ -142,11 +144,10 @@ Semi-structured search::
     `geo.src : "US" and url.keyword : "https://www.elastic.co/downloads/beats/metricbeat"`
 
 Time filter::
-  Dashboards have a global time filter which restricts the data shown, but individual panels can
-  override the time range.
-  The time range can be updated by dragging on a panel which shows time on the X axis.
-
-  To override the time range for a specific panel:
+  Dashboards have a global time filter that restricts the data that displays, but individual panels can
+  override the global time filter.
+  
+  . To update the time filter, add a panel that displays time on the x-axis.
 
   . Open the panel menu, then select *More > Customize time range*.
 
@@ -156,22 +157,16 @@ Time filter::
 image:images/time_range_per_panel.gif[Time range per dashboard panel]
 
 Additional filters with AND::
-  Individual filters can be added to a single dashboard or pinned to multiple pages in {kib}. Filters can be added using a simple editor or an advanced JSON editor for the {es} {ref}/query-dsl.html[query DSL].
-  +
-  If more than one index pattern is shown on the dashboard, the filter editor will let you filter only one of them.
-  +
-  Filters can be dynamically added when you click a series in the dashboard.
-  +
-  For example, to filter the dashboard to display only ios data:
+  You can add filters to a dashboard, or pin filters to multiple places in {kib}. To add filters, using a basic editor or an advanced JSON editor for the {es} {ref}/query-dsl.html[query DSL].
+  
+  When you use more than one index pattern on a dashboard, the filter editor allows you to filter only one dashboard.
+  
+  To dynamically add filters, click a series on a dashboard. For example, to filter the dashboard to display only ios data:
 
   . Click *Add filter*.
   . Set *Field* to *machine.os*, *Operator* to *is*, and *Value* to *ios*.
   . *Save* the filter.
   . To remove the filter, click *x* next to the filter.
-
-Dynamic filters::
-  The options above are present on all dashboard, but can be enhanced by adding a <<add-controls, *Control*>> to
-  filter for a specific value of a field.
 
 [float]
 [[clone-panels]]
@@ -218,7 +213,7 @@ TIP: *Explore underlying data* is available only for visualization panels with a
 [[download-csv]]
 === Download panel data as CSV
 
-Most panels can be individually downloaded as CSV, but there is a shortcut available
+Download panel data in a CSV file. You can download most panels in a CSV file, but there is a shortcut available
 for *Lens* panels.
 
 [role="xpack"]
@@ -229,7 +224,7 @@ Open the *Lens* panel menu, then select *More > Download as CSV*.
 image::images/download_csv_context_menu.png[Download as CSV from panel context menu]
 
 All panels::
-  . Open the panel context menu and select *Inspect*.
+  . Open the panel menu, then select *Inspect*.
 
   . Click *Download CSV*, then select the CSV type from the dropdown. The *Formatted CSV* contains
     human-readable dates and numbers, while the *Unformatted* option is for computer use.
@@ -259,9 +254,9 @@ When you're finished making changes, save the dashboard.
 
 To share the dashboard with a larger audience, click *Share* in the toolbar, then choose one of the following options:
 
-* *Embed code* &mdash; Embed the dashboard as an iframe in a web page. Embedded dashboards are fully interactive, but you can
-  hide some parts of the dashboard using the options in the menu. User authentication is required, which can be provided by
-  the end user or via reverse proxy. <<anonymous-authentication, Anonymous access>> is also supported. For more details,
+* *Embed code* &mdash; Embed the dashboard as an iframe on a web page. Embedded dashboards are fully interactive, but you can
+  hide some parts of the dashboard using the menu options. User authentication is required, which the user provides or via reverse proxy. 
+  <<anonymous-authentication, Anonymous access>> is also supported. For more details,
   learn about <<kibana-authentication>>.
 
 * *Permalinks* &mdash; Share a direct link to a {kib} dashboard. User authentication is required.
@@ -274,8 +269,7 @@ To share the dashboard with a larger audience, click *Share* in the toolbar, the
 [[import-dashboards]]
 === Export the dashboard
 
-Dashboards can be exported as JSON, which can be used to automate {kib}. The simplest way to do this is using
-the <<dashboard-api>>. It is important to export dashboards with all references needed.
+To automate {kib}, you can export dashboards as JSON using the <<dashboard-api,import and export dashboard APIs>>. It is important to export dashboards with all references needed.
 
 --
 include::lens.asciidoc[]

@@ -53,7 +53,7 @@ image::images/lens_data_info_documents.png[Data summary analyzed documents]
 When *Lens* presents the top 10 values distribution, it also shows the percentage of *Other* values. For array value fields, the percentage distribution considers each value in the array as separate.
 
 [role="screenshot"]
-image::images/lens_data_info_other.png[Data summary window with Other]
+image::images/lens_data_info.png[Data summary window with Other]
 
 NOTE: The sum of all the *Other* fields can equal more than 100% by a small amount.
 
@@ -64,9 +64,6 @@ NOTE: The sum of all the *Other* fields can equal more than 100% by a small amou
 To determine how many users have visited your website within the last 90 days, create a metric visualization, then add it to the dashboard.
 
 . Set the <<set-time-filter,time filter>> to *Last 90 days*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_2.png[Index pattern switch and time picker]
 
 . From the *Chart Type* dropdown, select *Metric*.
 +
