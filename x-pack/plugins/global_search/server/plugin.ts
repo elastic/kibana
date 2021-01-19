@@ -18,12 +18,6 @@ import {
 } from './types';
 import { GlobalSearchConfigType } from './config';
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    globalSearch?: RouteHandlerGlobalSearchContext;
-  }
-}
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GlobalSearchPluginSetupDeps {}
 export interface GlobalSearchPluginStartDeps {
@@ -56,12 +50,15 @@ export class GlobalSearchPlugin
 
     registerRoutes(core.http.createRouter());
 
-    core.http.registerRouteHandlerContext('globalSearch', (_, req) => {
-      return {
-        find: (term, options) => this.searchServiceStart!.find(term, options, req),
-        getSearchableTypes: () => this.searchServiceStart!.getSearchableTypes(req),
-      };
-    });
+    core.http.registerRouteHandlerContext(
+      'globalSearch',
+      (_, req): RouteHandlerGlobalSearchContext => {
+        return {
+          find: (term, options) => this.searchServiceStart!.find(term, options, req),
+          getSearchableTypes: () => this.searchServiceStart!.getSearchableTypes(req),
+        };
+      }
+    );
 
     return {
       registerResultProvider,

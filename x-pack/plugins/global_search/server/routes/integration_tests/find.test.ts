@@ -47,7 +47,7 @@ describe('POST /internal/global_search/find', () => {
       () => globalSearchHandlerContext
     );
 
-    const router = httpSetup.createRouter('/');
+    const router = httpSetup.createRouter<{ globalSearch: typeof globalSearchHandlerContext }>('/');
 
     registerInternalFindRoute(router);
 

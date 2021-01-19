@@ -11,6 +11,7 @@ import {
   IUiSettingsClient,
   SavedObjectsClientContract,
   Capabilities,
+  IRouter,
 } from 'src/core/server';
 import {
   GlobalSearchBatchedResults,
@@ -24,6 +25,9 @@ import { SearchServiceSetup, SearchServiceStart } from './services';
 export type GlobalSearchPluginSetup = Pick<SearchServiceSetup, 'registerResultProvider'>;
 export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find' | 'getSearchableTypes'>;
 
+export type GlobalSearchRouter = IRouter<{
+  globalSearch: RouteHandlerGlobalSearchContext;
+}>;
 /**
  * globalSearch route handler context.
  *

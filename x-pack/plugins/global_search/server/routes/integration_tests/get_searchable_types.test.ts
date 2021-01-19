@@ -30,7 +30,7 @@ describe('GET /internal/global_search/searchable_types', () => {
       () => globalSearchHandlerContext
     );
 
-    const router = httpSetup.createRouter('/');
+    const router = httpSetup.createRouter<{ globalSearch: typeof globalSearchHandlerContext }>('/');
 
     registerInternalSearchableTypesRoute(router);
 
