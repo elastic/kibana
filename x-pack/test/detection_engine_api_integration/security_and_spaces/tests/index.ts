@@ -39,6 +39,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./delete_signals_migrations'));
     });
 
+    // That split here enable us on using a different ciGroup to run the tests
+    // listed on ./exception_operators_data_types/index
     describe('', function () {
       loadTestFile(require.resolve('./exception_operators_data_types/index'));
     });
