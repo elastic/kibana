@@ -37,6 +37,7 @@ describe('kbnUrlTracker', () => {
   let state2Subject: Subject<{ key2: string }>;
   let navLinkUpdaterSubject: BehaviorSubject<AppUpdater>;
   let toastService: jest.Mocked<ToastsSetup>;
+  const onBeforeNavLinkSaved = jest.fn((url) => url);
 
   function createTracker(shouldTrackUrlUpdate?: (pathname: string) => boolean) {
     urlTracker = createKbnUrlTracker({
@@ -58,6 +59,7 @@ describe('kbnUrlTracker', () => {
       navLinkUpdater$: navLinkUpdaterSubject,
       toastNotifications: toastService,
       shouldTrackUrlUpdate,
+      onBeforeNavLinkSaved,
     });
   }
 
@@ -101,6 +103,14 @@ describe('kbnUrlTracker', () => {
     expect(getActiveNavLinkUrl()).toEqual('#/start');
   });
 
+  test('save current URL to storage when app is mounted', () => {
+    history.push('#/start/deep/path/2');
+    createTracker();
+    urlTracker.appMounted();
+    expect(storage.getItem('storageKey')).toBe('#/start/deep/path/2');
+    expect(getActiveNavLinkUrl()).toEqual('#/start');
+  });
+
   test('change nav link to last visited url within app after unmount', () => {
     createTracker();
     urlTracker.appMounted();
@@ -117,7 +127,7 @@ describe('kbnUrlTracker', () => {
     history.push('#/start/deep/path/2');
     history.push('#/start/deep/path/3');
     urlTracker.appUnMounted();
-    expect(unhashUrl).toHaveBeenCalledTimes(2);
+    expect(unhashUrl).toHaveBeenCalledTimes(3); // from initial mount + two subsequent location changes
     expect(getActiveNavLinkUrl()).toEqual('#/start/deep/path/3?unhashed');
   });
 
@@ -213,6 +223,16 @@ describe('kbnUrlTracker', () => {
       history.push('#/setup/path/2');
       urlTracker.appUnMounted();
       expect(getActiveNavLinkUrl()).toEqual('#/start/deep/path');
+    });
+  });
+
+  describe('onBeforeNavLinkSaved', () => {
+    test('onBeforeNavLinkSaved saves changed URL', () => {
+      createTracker();
+      urlTracker.appMounted();
+      onBeforeNavLinkSaved.mockImplementationOnce(() => 'new_url');
+      history.push('#/start/deep/path?state1=(key1:abc)');
+      expect(storage.getItem('storageKey')).toEqual('new_url');
     });
   });
 });
