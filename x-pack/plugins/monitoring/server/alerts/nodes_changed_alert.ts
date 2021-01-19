@@ -205,9 +205,9 @@ export class NodesChangedAlert extends BaseAlert {
     });
     const action = `[${fullActionText}](elasticsearch/nodes)`;
     const states = getNodeStates(nodes);
-    const added = states.added.join(',');
-    const removed = states.removed.join(',');
-    const restarted = states.restarted.join(',');
+    const added = states.added.map((node) => node.nodeName).join(',');
+    const removed = states.removed.map((node) => node.nodeName).join(',');
+    const restarted = states.restarted.map((node) => node.nodeName).join(',');
     instance.scheduleActions('default', {
       internalShortMessage: i18n.translate(
         'xpack.monitoring.alerts.nodesChanged.firing.internalShortMessage',

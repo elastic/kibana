@@ -23,6 +23,7 @@ jest.mock('moment', () => {
     };
   };
   moment.duration = () => ({ humanize: () => 'HUMANIZED_DURATION' });
+  moment.utc = () => '';
   return moment;
 });
 
