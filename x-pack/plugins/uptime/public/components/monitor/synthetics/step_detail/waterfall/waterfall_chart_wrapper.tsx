@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState } from 'react';
-import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import React, { useEffect, useMemo, useState } from 'react';
+import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFieldSearch } from '@elastic/eui';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
 import { SidebarItem, LegendItem, NetworkItems } from './types';
 import {
@@ -14,6 +14,7 @@ import {
   MiddleTruncatedText,
   RenderItem,
 } from '../../waterfall';
+import { FILTER_REQUESTS_LABEL } from '../../waterfall/components/translations';
 
 export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
   const { status } = item;
@@ -52,7 +53,9 @@ interface Props {
 }
 
 export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
-  const [networkData] = useState<NetworkItems>(data);
+  const [query, setQuery] = useState<string>('');
+
+  const [networkData, setNetworkData] = useState<NetworkItems>(data);
 
   const { series, domain } = useMemo(() => {
     return getSeriesAndDomain(networkData);
@@ -63,6 +66,30 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
   }, [networkData]);
 
   const legendItems = getLegendItems();
+
+  const renderFilter = () => {
+    return (
+      <EuiFieldSearch
+        placeholder={FILTER_REQUESTS_LABEL}
+        onChange={(evt) => {
+          setQuery(evt.target.value);
+        }}
+        value={query}
+      />
+    );
+  };
+
+  useEffect(() => {
+    if (query) {
+      setNetworkData(
+        networkData.filter((networkItem) => {
+          return networkItem.url?.includes(query);
+        })
+      );
+    } else {
+      setNetworkData(data);
+    }
+  }, [query]);
 
   return (
     <WaterfallProvider
@@ -81,6 +108,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
         }}
         renderSidebarItem={renderSidebarItem}
         renderLegendItem={renderLegendItem}
+        renderFilter={renderFilter}
         fullHeight={true}
       />
     </WaterfallProvider>

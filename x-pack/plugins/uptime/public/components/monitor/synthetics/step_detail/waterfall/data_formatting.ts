@@ -77,6 +77,8 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
     }
   };
 
+  const t0 = performance.now();
+
   const series = items.reduce<WaterfallData>((acc, item, index) => {
     if (!item.timings) {
       acc.push({
@@ -95,10 +97,13 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
 
     let currentOffset = offsetValue - zeroOffset;
 
+    let valueFound = false;
+
     TIMING_ORDER.forEach((timing) => {
       const value = getValue(item.timings, timing);
-      const colour = timing === Timings.Receive ? mimeTypeColour : colourPalette[timing];
       if (value && value >= 0) {
+        valueFound = true;
+        const colour = timing === Timings.Receive ? mimeTypeColour : colourPalette[timing];
         const y = currentOffset + value;
 
         acc.push({
@@ -125,7 +130,7 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
     /* if no specific timing values are found, use the total time
      * if total time is not available use 0, set showTooltip to false,
      * and omit tooltip props */
-    if (!acc.find((entry) => entry.x === index)) {
+    if (!valueFound) {
       const total = item.timings.total;
       const hasTotal = total !== -1;
       acc.push({
@@ -151,8 +156,12 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
     return acc;
   }, []);
 
+  const t1 = performance.now();
+  console.log(`Call to doSomething took ${t1 - t0} milliseconds.`);
+
   const yValues = series.map((serie) => serie.y);
   const domain = { min: 0, max: Math.max(...yValues) };
+
   return { series, domain };
 };
 
@@ -183,6 +192,7 @@ export const getLegendItems = (): LegendItems => {
       { name: FriendlyMimetypeLabels[mimeType], colour: MIME_TYPE_PALETTE[mimeType] },
     ];
   });
+
   return [...timingItems, ...mimeTypeItems];
 };
 

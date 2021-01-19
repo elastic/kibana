@@ -59,6 +59,7 @@ const Tooltip = (tooltipInfo: TooltipInfo) => {
 };
 
 export type RenderItem<I = any> = (item: I, index: number) => JSX.Element;
+export type RenderFilter = () => JSX.Element;
 
 export interface WaterfallChartProps {
   tickFormat: TickFormatter;
@@ -66,6 +67,7 @@ export interface WaterfallChartProps {
   barStyleAccessor: BarStyleAccessor;
   renderSidebarItem?: RenderItem;
   renderLegendItem?: RenderItem;
+  renderFilter?: RenderFilter;
   maxHeight?: string;
   fullHeight?: boolean;
 }
@@ -81,6 +83,7 @@ export const WaterfallChart = ({
   barStyleAccessor,
   renderSidebarItem,
   renderLegendItem,
+  renderFilter,
   maxHeight = '800px',
   fullHeight = false,
 }: WaterfallChartProps) => {
@@ -162,7 +165,13 @@ export const WaterfallChart = ({
           style={{ paddingTop: '10px' }}
           ref={chartWrapperDivRef}
         >
-          {shouldRenderSidebar && <Sidebar items={sidebarItems!} render={renderSidebarItem!} />}
+          {shouldRenderSidebar && (
+            <Sidebar
+              renderFilter={renderFilter}
+              items={sidebarItems!}
+              render={renderSidebarItem!}
+            />
+          )}
           <EuiFlexItem grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}>
             {chartsToDisplay.map((chartData, ind) => (
               <WaterfallChartChartContainer
