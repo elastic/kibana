@@ -12,6 +12,7 @@
     "public/**/*",
     "server/**/*",
     "types/**/*",
+    "scripts/**/*",
     "server/index_templates/*.json",
   ],
   "references": [
