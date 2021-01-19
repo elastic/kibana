@@ -24,7 +24,6 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import { createRenderer } from './utils';
 import { ApplicationService } from '../application_service';
 import { httpServiceMock } from '../../http/http_service.mock';
-import { contextServiceMock } from '../../context/context_service.mock';
 import { MockLifecycle } from '../test_types';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { AppMountParameters } from '../types';
@@ -53,7 +52,6 @@ describe('ApplicationService', () => {
 
     setupDeps = {
       http,
-      context: contextServiceMock.createSetupContract(),
       history: history as any,
     };
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };

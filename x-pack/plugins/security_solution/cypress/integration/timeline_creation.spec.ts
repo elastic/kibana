@@ -32,9 +32,8 @@ import { cleanKibana } from '../tasks/common';
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
 import {
-  addDescriptionToTimeline,
   addFilter,
-  addNameToTimeline,
+  addNameAndDescriptionToTimeline,
   addNotesToTimeline,
   closeTimeline,
   createNewTimeline,
@@ -58,21 +57,20 @@ describe('Timelines', () => {
 
     loginAndWaitForPage(OVERVIEW_URL);
     openTimelineUsingToggle();
-    populateTimeline();
-    addFilter(timeline.filter);
-    pinFirstEvent();
-
-    cy.get(PIN_EVENT)
-      .should('have.attr', 'aria-label')
-      .and('match', /Unpin the event in row 2/);
-    cy.get(LOCKED_ICON).should('be.visible');
-
-    addNameToTimeline(timeline.title);
+    addNameAndDescriptionToTimeline(timeline);
 
     cy.wait('@timeline').then(({ response }) => {
       const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
 
-      addDescriptionToTimeline(timeline.description);
+      populateTimeline();
+      addFilter(timeline.filter);
+      pinFirstEvent();
+
+      cy.get(PIN_EVENT)
+        .should('have.attr', 'aria-label')
+        .and('match', /Unpin the event in row 2/);
+      cy.get(LOCKED_ICON).should('be.visible');
+
       addNotesToTimeline(timeline.notes);
       markAsFavorite();
       waitForTimelineChanges();

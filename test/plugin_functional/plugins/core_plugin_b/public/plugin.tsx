@@ -39,9 +39,10 @@ export class CorePluginBPlugin
     core.application.register({
       id: 'bar',
       title: 'Bar',
-      async mount(context, params) {
+      async mount(params) {
         const { renderApp } = await import('./application');
-        return renderApp(context, params);
+        const [coreStart] = await core.getStartServices();
+        return renderApp(coreStart, params);
       },
     });
 

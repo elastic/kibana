@@ -50,12 +50,28 @@ The <<url-template-variables,variables>> you use to create a <<url_templating-la
 
 For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`.
 
-To disable URL drilldowns on your {kib} instance, disable the plugin:
+To disable URL drilldowns on your {kib} instance, add the following line to `kibana.yml` config file:
 
 ["source","yml"]
 -----------
 url_drilldown.enabled: false
 -----------
+
+URL drilldown also respects the global *External URL* service, which can be used to deny/allow external URLs.
+By default all external URLs are allowed. To configure external URL policies you need to use `externalUrl.policy` setting in `kibana.yml`, for example:
+
+["source","yml"]
+-----------
+externalUrl.policy:
+  - allow: false
+    host: danger.example.com
+  - allow: true
+    host: example.com
+    protocol: https
+-----------
+
+The above rules allow external URLs only to `example.com` domain with `https` scheme, except for `danger.example.com` sub-domain,
+which is denied even when `https` scheme is used.
 
 [float]
 [[dashboard-drilldown-supported-panels]]
