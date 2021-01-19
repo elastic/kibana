@@ -22,10 +22,10 @@ import {
  */
 export function mapNodesInfo(
   nodeHits: ElasticsearchResponseHit[],
-  clusterStats: ElasticsearchModifiedSource,
-  nodesShardCount: { nodes: { [nodeId: string]: { shardCount: number } } }
+  clusterStats?: ElasticsearchModifiedSource,
+  nodesShardCount?: { nodes: { [nodeId: string]: { shardCount: number } } }
 ) {
-  const clusterState = clusterStats.cluster_state ?? { nodes: {} };
+  const clusterState = clusterStats?.cluster_state ?? { nodes: {} };
 
   return nodeHits.reduce((prev, node) => {
     const sourceNode = node._source.source_node || node._source.elasticsearch?.node;
@@ -50,7 +50,7 @@ export function mapNodesInfo(
         isOnline,
         nodeTypeLabel,
         nodeTypeClass,
-        shardCount: nodesShardCount.nodes[uuid]?.shardCount ?? 0,
+        shardCount: nodesShardCount?.nodes[uuid]?.shardCount ?? 0,
       },
     };
   }, {});

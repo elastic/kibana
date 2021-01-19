@@ -22,8 +22,8 @@ import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../../
  */
 export function handleResponse(
   response: ElasticsearchResponse,
-  clusterStats: ElasticsearchModifiedSource,
-  nodesShardCount: { nodes: { [nodeId: string]: { shardCount: number } } },
+  clusterStats: ElasticsearchModifiedSource | undefined,
+  nodesShardCount: { nodes: { [nodeId: string]: { shardCount: number } } } | undefined,
   pageOfNodes: Array<{ uuid: string }>,
   timeOptions = {}
 ) {

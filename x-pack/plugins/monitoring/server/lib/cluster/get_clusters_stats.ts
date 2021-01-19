@@ -87,7 +87,7 @@ function fetchClusterStats(req: LegacyRequest, esIndexPattern: string, clusterUu
  * @return {Array} Objects representing each cluster.
  */
 export function handleClusterStats(response: ElasticsearchResponse) {
-  const hits = response.hits?.hits ?? [];
+  const hits = response?.hits?.hits ?? [];
 
   return hits
     .map((hit) => {
