@@ -84,7 +84,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.only('workspace drop', () => {
+    describe('workspace drop', () => {
       it('should always nest time dimension in categorical dimension', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVisType('lens');
