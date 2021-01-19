@@ -107,7 +107,8 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
       const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
         savedObjects.client,
         uiSettings.get('defaultIndex'),
-        indexPatternManagementStart
+        indexPatternManagementStart,
+        http
       );
       setIsLoadingIndexPatterns(false);
       setCreationOptions(options);
@@ -115,12 +116,12 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     })();
   }, [
     history.push,
-    indexPatterns.length,
+    http,
     indexPatternManagementStart,
-    uiSettings,
+    indexPatterns.length,
     savedObjects.client,
+    uiSettings,
   ]);
-  console.log('indexPatterns', indexPatterns);
 
   const removeAliases = (item: MatchedItem) =>
     !((item as unknown) as ResolveIndexResponseItemAlias).indices;

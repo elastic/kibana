@@ -116,6 +116,27 @@ export class IndexPatternsFetcher {
     }
     return await getFieldCapabilities(this.elasticsearchClient, indices, metaFields);
   }
-
-  async validatePatternListActive(patternList: string[]) {}
+  /**
+   *  Get a list of field objects for a time pattern
+   *
+   *  @param patternList
+   *  @return {Promise<Array<string>>}
+   */
+  async validatePatternListActive(patternList: string[]) {
+    const result = await Promise.all(
+      patternList.map((pattern) =>
+        this.elasticsearchClient.transport.request({
+          method: 'GET',
+          path: `/_resolve/index/${encodeURIComponent(pattern)}`,
+        })
+      )
+    );
+    return result.reduce(
+      (acc: string[], { body: indexLookup }, patternListIndex) =>
+        indexLookup.indices && indexLookup.indices.length > 0
+          ? [...acc, patternList[patternListIndex]]
+          : acc,
+      []
+    );
+  }
 }

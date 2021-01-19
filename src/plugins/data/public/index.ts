@@ -260,6 +260,7 @@ export {
   IndexPattern,
   IIndexPatternFieldList,
   IndexPatternField,
+  IndexPatternsApiClient,
 } from './index_patterns';
 
 export {

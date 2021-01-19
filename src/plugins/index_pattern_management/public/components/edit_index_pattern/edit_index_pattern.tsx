@@ -78,6 +78,7 @@ export const EditIndexPattern = withRouter(
       savedObjects,
       chrome,
       data,
+      http,
     } = useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
@@ -113,7 +114,8 @@ export const EditIndexPattern = withRouter(
           const indexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
             savedObjects.client,
             uiSettings.get('defaultIndex'),
-            indexPatternManagementStart
+            indexPatternManagementStart,
+            http
           );
           uiSettings.remove('defaultIndex');
           const otherPatterns = filter(indexPatterns, (pattern) => {
@@ -172,7 +174,7 @@ export const EditIndexPattern = withRouter(
               defaultMessage="Index Alias Collection: "
             />
             <PatternList
-              patternList={indexPattern.patternList.map(({ pattern }) => pattern)}
+              patternList={indexPattern.patternList}
               patternListActive={indexPattern.patternListActive}
             />
             <EuiSpacer size="m" />

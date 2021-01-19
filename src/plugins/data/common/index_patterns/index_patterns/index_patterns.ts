@@ -364,12 +364,9 @@ export class IndexPatternsService {
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
     const parsedFieldAttrs: FieldAttrs = fieldAttrs ? JSON.parse(fieldAttrs) : {};
 
-    const doesIt = this.doSomething();
-    console.log('does it client side??', doesIt);
     const patternListActive = await this.apiClient.validatePatternListActive({
       patternList: savedObject.attributes.patternList,
     });
-    console.log('patternListActive', patternListActive);
 
     return {
       allowNoIndex,
@@ -620,11 +617,6 @@ export class IndexPatternsService {
   async delete(indexPatternId: string) {
     this.indexPatternCache.clear(indexPatternId);
     return this.savedObjectsClient.delete('index-pattern', indexPatternId);
-  }
-
-  doSomething() {
-    console.log('DOES SOMETHING!!!!');
-    return true;
   }
 }
 

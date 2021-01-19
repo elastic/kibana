@@ -18,44 +18,27 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IRouter } from 'kibana/server';
 import { handleErrors } from './util/handle_errors';
-import { IRouter, StartServicesAccessor } from '../../../../../core/server';
-import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
+import { IndexPatternsFetcher } from '../fetcher';
 
-export const registerValidatePatternListActiveRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
-) => {
+export const registerValidatePatternListActiveRoute = (router: IRouter) => {
   router.post(
     {
       path: '/api/index_patterns/_validate_pattern_list_active',
       validate: {
         body: schema.object({
-          id: schema.string(),
           patternList: schema.arrayOf(schema.string()),
-          patternListActive: schema.arrayOf(schema.string()),
-          version: schema.string(),
         }),
       },
     },
     router.handleLegacyErrors(
-      handleErrors(async (ctx, req, res) => {
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const { patternList } = req.body;
-        const result = await Promise.all(
-          patternList.map((pattern) =>
-            elasticsearchClient.transport.request({
-              method: 'GET',
-              path: `/_resolve/index/${encodeURIComponent(pattern)}`,
-            })
-          )
+      handleErrors(async (context, req, res) => {
+        const indexPatterns = new IndexPatternsFetcher(
+          context.core.elasticsearch.client.asCurrentUser
         );
-        const patternListActive = result.reduce(
-          (acc: string[], { body: indexLookup }, patternListIndex) =>
-            indexLookup.indices && indexLookup.indices.length > 0
-              ? [...acc, patternList[patternListIndex]]
-              : acc,
-          []
+        const patternListActive = await indexPatterns.validatePatternListActive(
+          req.body.patternList
         );
 
         return res.ok({ body: patternListActive });

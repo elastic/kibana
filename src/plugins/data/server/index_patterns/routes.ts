@@ -55,7 +55,7 @@ export function registerRoutes(
   registerGetIndexPatternRoute(router, getStartServices);
   registerDeleteIndexPatternRoute(router, getStartServices);
   registerUpdateIndexPatternRoute(router, getStartServices);
-  registerValidatePatternListActiveRoute(router, getStartServices);
+  registerValidatePatternListActiveRoute(router);
 
   // Fields API
   registerUpdateFieldsRoute(router, getStartServices);

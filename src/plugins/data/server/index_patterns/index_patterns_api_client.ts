@@ -34,7 +34,8 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
     this.esClient = elasticsearchClient;
   }
   async validatePatternListActive({ patternList, allowNoIndex }: ValidatePatternListActive) {
-    console.log('IndexPatternsApiServer validatePatternListActive MYSTERY HIT');
+    const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
+    return indexPatterns.validatePatternListActive(patternList);
   }
   async getFieldsForWildcard({
     allowNoIndex,
@@ -44,7 +45,6 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
     rollupIndex,
     type,
   }: GetFieldsOptions) {
-    console.log('IndexPatternsApiServer getFieldsForWildcard MYSTERY HIT');
     const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
     const fieldsArr: Array<FieldDescriptor[] | boolean> = await Promise.all(
       patternList
