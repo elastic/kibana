@@ -27,7 +27,7 @@ export declare class IndexPatternField implements IFieldType
 |  [displayName](./kibana-plugin-plugins-data-public.indexpatternfield.displayname.md) |  | <code>string</code> |  |
 |  [esTypes](./kibana-plugin-plugins-data-public.indexpatternfield.estypes.md) |  | <code>string[] &#124; undefined</code> |  |
 |  [filterable](./kibana-plugin-plugins-data-public.indexpatternfield.filterable.md) |  | <code>boolean</code> |  |
-|  [isMapped](./kibana-plugin-plugins-data-public.indexpatternfield.ismapped.md) |  | <code>boolean &#124; undefined</code> |  |
+|  [isMapped](./kibana-plugin-plugins-data-public.indexpatternfield.ismapped.md) |  | <code>boolean &#124; undefined</code> | Is the field part of the index mapping? |
 |  [lang](./kibana-plugin-plugins-data-public.indexpatternfield.lang.md) |  | <code>string &#124; undefined</code> | Script field language |
 |  [name](./kibana-plugin-plugins-data-public.indexpatternfield.name.md) |  | <code>string</code> |  |
 |  [readFromDocValues](./kibana-plugin-plugins-data-public.indexpatternfield.readfromdocvalues.md) |  | <code>boolean</code> |  |

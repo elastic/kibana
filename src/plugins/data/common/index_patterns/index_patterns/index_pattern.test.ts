@@ -279,25 +279,6 @@ describe('IndexPattern', () => {
       });
       expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
     });
-
-    /*
-    test('remove runtime field from mapped field', () => {
-      indexPattern.removeRuntimeField('@tags');
-      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
-        runtime_field: runtimeField.runtimeField,
-        new_field: runtime,
-      });
-      expect(indexPattern.toSpec()!.fields!['@tags'].runtimeField).toBeUndefined();
-    });
-
-    test('remove runtime field from unmapped field', () => {
-      indexPattern.removeRuntimeField('new_field');
-      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
-        runtime_field: runtimeField.runtimeField,
-      });
-      expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
-    });
-    */
   });
 
   describe('getFormatterForField', () => {

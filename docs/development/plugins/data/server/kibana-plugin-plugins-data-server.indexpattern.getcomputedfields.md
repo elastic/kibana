@@ -14,28 +14,12 @@ getComputedFields(): {
             field: any;
             format: string;
         }[];
-        runtimeFields?: undefined;
-    } | {
-        storedFields: string[];
-        scriptFields: any;
-        docvalueFields: {
-            field: any;
-            format: string;
-        }[];
         runtimeFields: Record<string, RuntimeField>;
     };
 ```
 <b>Returns:</b>
 
 `{
-        storedFields: string[];
-        scriptFields: any;
-        docvalueFields: {
-            field: any;
-            format: string;
-        }[];
-        runtimeFields?: undefined;
-    } | {
         storedFields: string[];
         scriptFields: any;
         docvalueFields: {

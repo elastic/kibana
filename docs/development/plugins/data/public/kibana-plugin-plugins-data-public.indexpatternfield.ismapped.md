@@ -4,6 +4,8 @@
 
 ## IndexPatternField.isMapped property
 
+Is the field part of the index mapping?
+
 <b>Signature:</b>
 
 ```typescript

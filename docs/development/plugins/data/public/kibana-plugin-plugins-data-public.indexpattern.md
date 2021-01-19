@@ -30,7 +30,6 @@ export declare class IndexPattern implements IIndexPattern
 |  [formatHit](./kibana-plugin-plugins-data-public.indexpattern.formathit.md) |  | <code>{</code><br/><code>        (hit: Record&lt;string, any&gt;, type?: string): any;</code><br/><code>        formatField: FormatFieldFn;</code><br/><code>    }</code> |  |
 |  [getFieldAttrs](./kibana-plugin-plugins-data-public.indexpattern.getfieldattrs.md) |  | <code>() =&gt; {</code><br/><code>        [x: string]: FieldAttrSet;</code><br/><code>    }</code> |  |
 |  [getOriginalSavedObjectBody](./kibana-plugin-plugins-data-public.indexpattern.getoriginalsavedobjectbody.md) |  | <code>() =&gt; {</code><br/><code>        fieldAttrs?: string &#124; undefined;</code><br/><code>        title?: string &#124; undefined;</code><br/><code>        timeFieldName?: string &#124; undefined;</code><br/><code>        intervalName?: string &#124; undefined;</code><br/><code>        fields?: string &#124; undefined;</code><br/><code>        sourceFilters?: string &#124; undefined;</code><br/><code>        fieldFormatMap?: string &#124; undefined;</code><br/><code>        typeMeta?: string &#124; undefined;</code><br/><code>        type?: string &#124; undefined;</code><br/><code>    }</code> | Get last saved saved object fields |
-|  [getRuntimeFieldMap](./kibana-plugin-plugins-data-public.indexpattern.getruntimefieldmap.md) |  | <code>() =&gt; Record&lt;string, RuntimeField&gt;</code> |  |
 |  [id](./kibana-plugin-plugins-data-public.indexpattern.id.md) |  | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpattern.intervalname.md) |  | <code>string &#124; undefined</code> |  |
 |  [metaFields](./kibana-plugin-plugins-data-public.indexpattern.metafields.md) |  | <code>string[]</code> |  |
@@ -47,7 +46,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [addRuntimeField(name, runtimeField)](./kibana-plugin-plugins-data-public.indexpattern.addruntimefield.md) |  |  |
+|  [addRuntimeField(name, runtimeField)](./kibana-plugin-plugins-data-public.indexpattern.addruntimefield.md) |  | Add a runtime field - Appended to existing mapped field or a new field is created as appropriate |
 |  [addScriptedField(name, script, fieldType)](./kibana-plugin-plugins-data-public.indexpattern.addscriptedfield.md) |  | Add scripted field to field list |
 |  [getAggregationRestrictions()](./kibana-plugin-plugins-data-public.indexpattern.getaggregationrestrictions.md) |  |  |
 |  [getAsSavedObjectBody()](./kibana-plugin-plugins-data-public.indexpattern.getassavedobjectbody.md) |  | Returns index pattern as saved object body for saving |
@@ -61,7 +60,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [getTimeField()](./kibana-plugin-plugins-data-public.indexpattern.gettimefield.md) |  |  |
 |  [isTimeBased()](./kibana-plugin-plugins-data-public.indexpattern.istimebased.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-public.indexpattern.istimenanosbased.md) |  |  |
-|  [removeRuntimeField(name)](./kibana-plugin-plugins-data-public.indexpattern.removeruntimefield.md) |  |  |
+|  [removeRuntimeField(name)](./kibana-plugin-plugins-data-public.indexpattern.removeruntimefield.md) |  | Remove a runtime field - removed from mapped field or removed unmapped field as appropriate |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
 |  [setFieldAttrs(fieldName, attrName, value)](./kibana-plugin-plugins-data-public.indexpattern.setfieldattrs.md) |  |  |
 |  [setFieldCount(fieldName, count)](./kibana-plugin-plugins-data-public.indexpattern.setfieldcount.md) |  |  |

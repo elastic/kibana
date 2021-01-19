@@ -4,6 +4,8 @@
 
 ## IndexPattern.addRuntimeField() method
 
+Add a runtime field - Appended to existing mapped field or a new field is created as appropriate
+
 <b>Signature:</b>
 
 ```typescript

@@ -4,6 +4,8 @@
 
 ## IndexPattern.removeRuntimeField() method
 
+Remove a runtime field - removed from mapped field or removed unmapped field as appropriate
+
 <b>Signature:</b>
 
 ```typescript

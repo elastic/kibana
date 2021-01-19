@@ -133,7 +133,7 @@ export class IndexPattern implements IIndexPattern {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
   };
 
-  getRuntimeFieldMap = () =>
+  private getRuntimeFieldMap = () =>
     this.fields.reduce((col, field) => {
       if (field.runtimeField) {
         col[field.name] = field.runtimeField;
@@ -168,11 +168,13 @@ export class IndexPattern implements IIndexPattern {
 
   getComputedFields() {
     const scriptFields: any = {};
+    const runtimeFields: Record<string, RuntimeField> = {};
     if (!this.fields) {
       return {
         storedFields: ['*'],
         scriptFields,
         docvalueFields: [] as Array<{ field: any; format: string }>,
+        runtimeFields,
       };
     }
 
@@ -200,12 +202,12 @@ export class IndexPattern implements IIndexPattern {
       };
     });
 
-    const runtimeFields = this.fields.reduce((col, field) => {
+    this.fields.reduce((col, field) => {
       if (field.runtimeField) {
         col[field.name] = field.runtimeField;
       }
       return col;
-    }, {} as Record<string, RuntimeField>);
+    }, runtimeFields);
 
     return {
       storedFields: ['*'],
@@ -360,6 +362,13 @@ export class IndexPattern implements IIndexPattern {
     );
   }
 
+  /**
+   * Add a runtime field - Appended to existing mapped field or a new field is
+   * created as appropriate
+   * @param name Field name
+   * @param runtimeField Runtime field definition
+   */
+
   addRuntimeField(name: string, runtimeField: RuntimeField) {
     const existingField = this.getFieldByName(name);
     if (existingField) {
@@ -377,6 +386,12 @@ export class IndexPattern implements IIndexPattern {
     }
     this.runtimeFieldMap[name] = runtimeField;
   }
+
+  /**
+   * Remove a runtime field - removed from mapped field or removed unmapped
+   * field as appropriate
+   * @param name Field name
+   */
 
   removeRuntimeField(name: string) {
     const existingField = this.getFieldByName(name);

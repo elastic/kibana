@@ -137,6 +137,9 @@ export class IndexPatternField implements IFieldType {
     return this.spec.subType;
   }
 
+  /**
+   * Is the field part of the index mapping?
+   */
   public get isMapped() {
     return this.spec.isMapped;
   }
