@@ -28,13 +28,13 @@ import {
   CoreStart,
   SavedObjectsServiceStart,
   IContextProvider,
-  RequestHandler,
   ElasticsearchServiceStart,
   ILegacyClusterClient,
   StatusServiceSetup,
   ServiceStatus,
   SavedObjectsBulkGetObject,
 } from '../../../../src/core/server';
+import type { AlertingRequestHandlerContext, AlertingApiRequestHandlerContext } from './types';
 
 import {
   aggregateAlertRoute,
@@ -258,7 +258,7 @@ export class AlertingPlugin {
     core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
 
     // Routes
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<AlertingRequestHandlerContext>();
     // Register routes
     aggregateAlertRoute(router, this.licenseState);
     createAlertRoute(router, this.licenseState);
@@ -392,7 +392,7 @@ export class AlertingPlugin {
 
   private createRouteHandlerContext = (
     core: CoreSetup
-  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'alerting'> => {
+  ): IContextProvider<AlertingApiRequestHandlerContext> => {
     const { alertTypeRegistry, alertsClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
