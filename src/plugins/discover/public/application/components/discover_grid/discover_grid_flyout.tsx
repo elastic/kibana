@@ -107,7 +107,15 @@ export function DiscoverGridFlyout({
                 <EuiButtonEmpty
                   size="xs"
                   iconType="documents"
-                  href={getContextUrl(hit._id, indexPattern.id, columns, services.filterManager)}
+                  href={getContextUrl({
+                    documentId: hit._id,
+                    indexPatternId: indexPattern.id,
+                    columns,
+                    filterManager: services.filterManager,
+                    timeRange: services.timefilter.getAbsoluteTime(),
+                    // @ts-expect-error for some reason this is not part of the public types
+                    routing: hit._routing,
+                  })}
                   data-test-subj="docTableRowAction"
                 >
                   {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple', {
