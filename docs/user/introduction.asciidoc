@@ -128,7 +128,7 @@ Or, just see the most recent documents added to {es}.
 
 . *Visualize.* {kib} provides many options to create visualizations of your data&mdash;from simple
 aggregation- to time series-based.
-<<dashboard, *Dashboard*>> is your starting point for building visualizations,
+<<dashboard, *Dashboard*>> is your starting point to create visualizations,
 and then pulling them together to show your data from multiple perspectives.
 
 . *Present.*  Display your data on a visually
