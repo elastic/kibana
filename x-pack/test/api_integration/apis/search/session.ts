@@ -48,8 +48,6 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         await supertest.delete(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(200);
-
-        await supertest.get(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(404);
       });
 
       it('should sync search ids into session', async () => {
