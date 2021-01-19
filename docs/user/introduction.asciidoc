@@ -37,7 +37,7 @@ No matter your data, {kib} can help you use it to tackle your problems.
 
 Even with so much to offer, {kib} makes it easy to find your path forward.
 On the home page, you’re guided toward the most common use cases.
-For a quick reference of all {kib} apps, see <<whats-the-right-app,What’s the right app for you?>>
+For a reference of all {kib} app use cases, refer to <<whats-the-right-app,What’s the right app for you?>>
 
 [role="screenshot"]
 image::images/home-page.png[Kibana home page]
