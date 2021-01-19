@@ -103,6 +103,7 @@ describe('Change password', () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       params: { username },
       body: { password: 'old-password', newPassword: 'new-password' },
+      headers: { 'some-custom-header': 'foo' }, // the test cases below assert that this custom request header is NOT included in the ES API calls
     });
 
     it('returns 403 if old password is wrong.', async () => {
@@ -119,7 +120,6 @@ describe('Change password', () => {
       expect(response.payload).toEqual(changePasswordFailure);
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
@@ -141,7 +141,6 @@ describe('Change password', () => {
       expect(response.payload).toEqual(loginFailureReason);
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
@@ -158,7 +157,6 @@ describe('Change password', () => {
       expect(response.payload).toEqual(failureReason);
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
@@ -170,7 +168,6 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 
@@ -198,7 +195,6 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 
@@ -217,7 +213,6 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 
