@@ -34,8 +34,8 @@ const mockMBMap = ({
         return 75;
       },
       getSouth: () => {
-        return -60
-      }
+        return -60;
+      },
     } as unknown) as LngLatBounds;
   },
   unproject: (point: PointLike) => {
