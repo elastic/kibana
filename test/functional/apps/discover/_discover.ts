@@ -238,7 +238,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
     describe('usage of discover:searchOnPageLoad', () => {
-      it('should fetch data from ES initially when discover:searchOnPageLoad is false', async function () {
+      it('should not fetch data from ES initially when discover:searchOnPageLoad is false', async function () {
         await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': false });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
@@ -246,7 +246,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.discover.getNrOfFetches()).to.be(0);
       });
 
-      it('should not fetch data from ES initially when discover:searchOnPageLoad is true', async function () {
+      it('should fetch data from ES initially when discover:searchOnPageLoad is true', async function () {
         await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
