@@ -21,6 +21,7 @@ import { map, shareReplay } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import { PathConfigType, config as pathConfig } from '@kbn/utils';
 import { pick, deepFreeze } from '@kbn/std';
+import type { RequestHandlerContext } from 'src/core/server';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -35,6 +36,7 @@ import {
   ElasticsearchConfigType,
   config as elasticsearchConfig,
 } from '../elasticsearch/elasticsearch_config';
+import { IRouter, RequestHandlerContextProvider } from '../http';
 import { SavedObjectsConfigType, savedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
 
@@ -160,11 +162,14 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
-      registerRouteHandlerContext: deps.http.registerRouteHandlerContext.bind(
-        null,
-        plugin.opaqueId
-      ),
-      createRouter: () => router,
+      registerRouteHandlerContext: <
+        Context extends object = object,
+        Deps extends RequestHandlerContext = RequestHandlerContext
+      >(
+        contextName: string,
+        provider: RequestHandlerContextProvider<Context, Deps>
+      ) => deps.http.registerRouteHandlerContext(plugin.opaqueId, contextName, provider),
+      createRouter: <Context extends object = object>() => router as IRouter<Context>,
       resources: deps.httpResources.createRegistrar(router),
       registerOnPreRouting: deps.http.registerOnPreRouting,
       registerOnPreAuth: deps.http.registerOnPreAuth,

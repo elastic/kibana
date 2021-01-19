@@ -31,13 +31,13 @@ import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
 import { ExternalUrlConfig } from '../external_url';
-import { PluginOpaqueId, RequestHandlerContext } from '..';
+import type { PluginOpaqueId, RequestHandlerContext } from '..';
 
 /**
  * An object that handles registration of http request context providers.
  * @public
  */
-export type RequestHandlerContextContainer = IContextContainer<RequestHandler<any, any, any>>;
+export type RequestHandlerContextContainer = IContextContainer<RequestHandler>;
 
 /**
  * Context provider for request handler.
@@ -46,8 +46,9 @@ export type RequestHandlerContextContainer = IContextContainer<RequestHandler<an
  * @public
  */
 export type RequestHandlerContextProvider<
-  TContextName extends keyof RequestHandlerContext
-> = IContextProvider<RequestHandler<any, any, any>, TContextName>;
+  Context extends object = object,
+  Deps extends RequestHandlerContext = RequestHandlerContext
+> = IContextProvider<Context, Deps>;
 
 /**
  * @public
@@ -240,7 +241,7 @@ export interface HttpServiceSetup {
    * ```
    * @public
    */
-  createRouter: () => IRouter;
+  createRouter: <Context extends object = object>() => IRouter<Context>;
 
   /**
    * Register a context provider for a route handler.
@@ -265,9 +266,12 @@ export interface HttpServiceSetup {
    * ```
    * @public
    */
-  registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
-    contextName: T,
-    provider: RequestHandlerContextProvider<T>
+  registerRouteHandlerContext: <
+    Context extends object = object,
+    Deps extends RequestHandlerContext = RequestHandlerContext
+  >(
+    contextName: string,
+    provider: RequestHandlerContextProvider<Context, Deps>
   ) => RequestHandlerContextContainer;
 
   /**
@@ -282,13 +286,19 @@ export interface InternalHttpServiceSetup
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   externalUrl: ExternalUrlConfig;
-  createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+  createRouter: <Context extends object = object>(
+    path: string,
+    plugin?: PluginOpaqueId
+  ) => IRouter<Context>;
   registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
-  registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+  registerRouteHandlerContext: <
+    Context extends object = object,
+    Deps extends RequestHandlerContext = RequestHandlerContext
+  >(
     pluginOpaqueId: PluginOpaqueId,
-    contextName: T,
-    provider: RequestHandlerContextProvider<T>
+    contextName: string,
+    provider: RequestHandlerContextProvider<Context, Deps>
   ) => RequestHandlerContextContainer;
 }
 

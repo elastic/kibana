@@ -22,6 +22,7 @@ import { first, map } from 'rxjs/operators';
 import { Server } from '@hapi/hapi';
 import { pick } from '@kbn/std';
 
+import type { RequestHandlerContext } from 'src/core/server';
 import { CoreService } from '../../types';
 import { Logger, LoggerFactory } from '../logging';
 import { ContextSetup } from '../context';
@@ -42,7 +43,6 @@ import {
   InternalHttpServiceStart,
 } from './types';
 
-import { RequestHandlerContext } from '../../server';
 import { registerCoreHandlers } from './lifecycle_handlers';
 import {
   ExternalUrlConfigType,
@@ -111,17 +111,23 @@ export class HttpService
 
       externalUrl: new ExternalUrlConfig(config.externalUrl),
 
-      createRouter: (path: string, pluginId: PluginOpaqueId = this.coreContext.coreId) => {
+      createRouter: <Context extends object = object>(
+        path: string,
+        pluginId: PluginOpaqueId = this.coreContext.coreId
+      ) => {
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
-        const router = new Router(path, this.log, enhanceHandler);
+        const router = new Router<Context>(path, this.log, enhanceHandler);
         registerRouter(router);
         return router;
       },
 
-      registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+      registerRouteHandlerContext: <
+        Context extends object = object,
+        Deps extends RequestHandlerContext = RequestHandlerContext
+      >(
         pluginOpaqueId: PluginOpaqueId,
-        contextName: T,
-        provider: RequestHandlerContextProvider<T>
+        contextName: string,
+        provider: RequestHandlerContextProvider<Context, Deps>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
 
