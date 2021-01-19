@@ -7,7 +7,7 @@
 import { PropsOf } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
-import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { DataSearchProgress } from './data_search_progress';
 
 export default {

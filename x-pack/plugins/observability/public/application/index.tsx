@@ -7,7 +7,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,

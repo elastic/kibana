@@ -19,9 +19,9 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
-import { EuiTheme, withTheme } from 'src/plugins/kibana_react/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiTheme, withTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   SnapshotCustomAggregation,
   SnapshotCustomMetricInput,

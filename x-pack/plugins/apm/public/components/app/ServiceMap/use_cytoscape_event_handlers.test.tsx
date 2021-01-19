@@ -7,7 +7,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
-import { EuiTheme } from 'src/plugins/kibana_react/common';
+import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { useUiTracker } from '../../../../../observability/public';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 import lodash from 'lodash';

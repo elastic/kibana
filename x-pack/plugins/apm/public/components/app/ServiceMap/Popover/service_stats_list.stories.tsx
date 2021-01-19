@@ -5,7 +5,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ServiceStatsList } from './ServiceStatsList';
 
 export default {

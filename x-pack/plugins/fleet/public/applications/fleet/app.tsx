@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import {
   ConfigContext,
   FleetStatusProvider,

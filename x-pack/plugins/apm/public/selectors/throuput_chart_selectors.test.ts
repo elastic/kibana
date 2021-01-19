@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTheme } from 'src/plugins/kibana_react/common';
+import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import {
   getThrouputChartSelector,
   ThrouputChartsResponse,

@@ -14,7 +14,7 @@ import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import {
   ESFilter,
   ESSearchRequest,

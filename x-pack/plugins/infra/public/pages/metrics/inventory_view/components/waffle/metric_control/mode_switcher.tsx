@@ -7,7 +7,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/e
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiTheme, withTheme } from 'src/plugins/kibana_react/common';
+import { EuiTheme, withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { CustomMetricMode } from './types';
 import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
 
