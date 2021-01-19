@@ -121,6 +121,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
       <EuiAccordion
         id="accordion_url_drilldown_additional_options"
         buttonContent={txtUrlTemplateAdditionalOptions}
+        data-test-subj="urlDrilldownAdditionalOptions"
       >
         <EuiSpacer size={'s'} />
         <EuiPanel color="subdued" borderRadius="none" hasShadow={false} style={{ border: 'none' }}>
@@ -131,6 +132,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
               label={txtUrlTemplateOpenInNewTab}
               checked={config.openInNewTab}
               onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
+              data-test-subj="urlDrilldownOpenInNewTab"
             />
           </EuiFormRow>
           <EuiFormRow hasChildLabel={false} fullWidth>

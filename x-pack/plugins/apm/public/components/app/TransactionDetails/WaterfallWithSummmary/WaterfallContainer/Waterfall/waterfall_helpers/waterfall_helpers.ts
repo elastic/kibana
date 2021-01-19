@@ -32,7 +32,7 @@ export interface IWaterfall {
   rootTransaction?: Transaction;
 
   /**
-   * Duration in us
+   * Latency in us
    */
   duration: number;
   items: IWaterfallItem[];
@@ -53,7 +53,7 @@ interface IWaterfallItemBase<T, U> {
   parentId?: string;
 
   /**
-   * Duration in us
+   * Latency in us
    */
   duration: number;
 
