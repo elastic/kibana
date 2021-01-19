@@ -423,27 +423,25 @@ the request handler context:
 ----
 import type { CoreSetup, IScopedClusterClient } from 'kibana/server';
 
-export interface MyPluginContext {
+interface MyPluginContext {
   client: IScopedClusterClient;
 }
 
-// extend RequestHandlerContext when a dependent plugin imports MyPluginContext from the file
-declare module 'kibana/server' {
-  interface RequestHandlerContext {
-    myPlugin?: MyPluginContext;
-  }
+interface RequestHandlerContext {
+ myPlugin?: MyPluginContext;
 }
 
 class MyPlugin {
   setup(core: CoreSetup) {
     const client = core.elasticsearch.createClient('myClient');
-    core.http.registerRouteHandlerContext('myPlugin', (context, req, res) => {
+    core.http.registerRouteHandlerContext('myPlugin', (context, req, res): MyPluginContext => {
       return { client: client.asScoped(req) };
     });
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<RequestHandlerContext>();
     router.get(
       { path: '/api/my-plugin/', validate: … },
       async (context, req, res) => {
+        // context type is inferred as MyPluginContext & RequestHandlerContext
         const data = await context.myPlugin.client.asCurrentUser('endpoint');
       }
     );
