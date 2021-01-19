@@ -15,11 +15,12 @@ import {
   LegacyClusterClient,
   SharedGlobalConfig,
   IContextProvider,
-  RequestHandler,
 } from 'src/core/server';
 import { SpacesPluginStart } from '../../spaces/server';
 
-import {
+import type {
+  EventLogApiRequestHandlerContext,
+  EventLogRequestHandlerContext,
   IEventLogConfig,
   IEventLogService,
   IEventLogger,
@@ -100,7 +101,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     core.http.registerRouteHandlerContext('eventLog', this.createRouteHandlerContext());
 
     // Routes
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<EventLogRequestHandlerContext>();
     // Register routes
     findRoute(router, this.systemLogger);
     findByIdsRoute(router, this.systemLogger);
@@ -168,10 +169,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     this.systemLogger.debug('shutdown: finished');
   }
 
-  private createRouteHandlerContext = (): IContextProvider<
-    RequestHandler<unknown, unknown, unknown>,
-    'eventLog'
-  > => {
+  private createRouteHandlerContext = (): IContextProvider<EventLogApiRequestHandlerContext> => {
     return async (context, request) => {
       return {
         getEventLogClient: () => this.eventLogClientService!.getClient(request),
