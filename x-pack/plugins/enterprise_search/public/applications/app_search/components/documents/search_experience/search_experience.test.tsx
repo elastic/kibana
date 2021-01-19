@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import '../../../../__mocks__/kea.mock';
-import { setMockValues } from '../../../../__mocks__';
+
 import '../../../../__mocks__/enterprise_search_url.mock';
+import { setMockValues } from '../../../../__mocks__';
 
 jest.mock('../../../../shared/use_local_storage', () => ({
   useLocalStorage: jest.fn(),

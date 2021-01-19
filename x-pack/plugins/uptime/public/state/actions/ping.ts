@@ -12,6 +12,8 @@ import {
   GetPingsParams,
 } from '../../../common/runtime_types';
 
+export const clearPings = createAction('CLEAR PINGS');
+
 export const getPingHistogram = createAction<GetPingHistogramParams>('GET_PING_HISTOGRAM');
 export const getPingHistogramSuccess = createAction<HistogramResult>('GET_PING_HISTOGRAM_SUCCESS');
 export const getPingHistogramFail = createAction<Error>('GET_PING_HISTOGRAM_FAIL');
