@@ -6,26 +6,12 @@
 
 import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { ValuesType } from 'utility-types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import {
-  APIReturnType,
-  callApmApi,
-} from '../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
 import { ServiceOverviewInstancesTable } from './service_overview_instances_table';
-
-export type ServiceInstanceItem = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances'>
-> & {
-  cpuUsageValue: number;
-  errorRateValue: number;
-  latencyValue: number;
-  memoryUsageValue: number;
-  throughputValue: number;
-};
 
 interface ServiceOverviewInstancesChartAndTableProps {
   chartHeight: number;
@@ -66,29 +52,19 @@ export function ServiceOverviewInstancesChartAndTable({
     });
   }, [start, end, serviceName, transactionType, uiFilters]);
 
-  // need top-level sortable fields for the managed table
-  const items = data.map((item) => ({
-    ...item,
-    latencyValue: item.latency?.value ?? 0,
-    throughputValue: item.throughput?.value ?? 0,
-    errorRateValue: item.errorRate?.value ?? 0,
-    cpuUsageValue: item.cpuUsage?.value ?? 0,
-    memoryUsageValue: item.memoryUsage?.value ?? 0,
-  }));
-
   return (
     <>
       <EuiFlexItem grow={3}>
         <InstancesLatencyDistributionChart
           height={chartHeight}
-          items={items}
+          items={data}
           status={status}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
         <EuiPanel>
           <ServiceOverviewInstancesTable
-            items={items}
+            items={data}
             serviceName={serviceName}
             status={status}
           />
