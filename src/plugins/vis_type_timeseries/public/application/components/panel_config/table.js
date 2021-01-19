@@ -45,7 +45,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-import { VisDataContext } from './../../contexts/vis_data_context';
+import { VisDataContext } from '../../contexts/vis_data_context';
 import { BUCKET_TYPES } from '../../../../common/metric_types';
 export class TablePanelConfig extends Component {
   static contextType = VisDataContext;

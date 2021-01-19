@@ -213,6 +213,7 @@ export const SplitByTermsUI = ({
               metrics={metrics}
               clearable={false}
               additionalOptions={[defaultCount, terms]}
+              fields={fields[indexPattern]}
               onChange={handleSelectChange('terms_order_by')}
               restrict="basic"
               value={model.terms_order_by}

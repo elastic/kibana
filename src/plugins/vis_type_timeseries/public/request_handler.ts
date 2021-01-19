@@ -29,39 +29,57 @@ interface MetricsRequestHandlerParams {
   input: KibanaContext | null;
   uiState: Record<string, any>;
   visParams: TimeseriesVisParams;
+  searchSessionId?: string;
 }
 
 export const metricsRequestHandler = async ({
   input,
   uiState,
   visParams,
+  searchSessionId,
 }: MetricsRequestHandlerParams): Promise<TimeseriesVisData | {}> => {
   const config = getUISettings();
   const timezone = getTimezone(config);
   const uiStateObj = uiState[visParams.type] ?? {};
-  const dataSearch = getDataStart();
-  const parsedTimeRange = dataSearch.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
+  const data = getDataStart();
+  const dataSearch = getDataStart().search;
+  const parsedTimeRange = data.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
 
   if (visParams && visParams.id && !visParams.isModelInvalid) {
     const maxBuckets = config.get(MAX_BUCKETS_SETTING);
 
     validateInterval(parsedTimeRange, visParams, maxBuckets);
 
-    const resp = await getCoreStart().http.post(ROUTES.VIS_DATA, {
-      body: JSON.stringify({
-        timerange: {
-          timezone,
-          ...parsedTimeRange,
+    const untrackSearch =
+      dataSearch.session.isCurrentSession(searchSessionId) &&
+      dataSearch.session.trackSearch({
+        abort: () => {
+          // TODO: support search cancellations
         },
-        query: input?.query,
-        filters: input?.filters,
-        panels: [visParams],
-        state: uiStateObj,
-        sessionId: dataSearch.search.session.getSessionId(),
-      }),
-    });
+      });
 
-    return resp;
+    try {
+      return await getCoreStart().http.post(ROUTES.VIS_DATA, {
+        body: JSON.stringify({
+          timerange: {
+            timezone,
+            ...parsedTimeRange,
+          },
+          query: input?.query,
+          filters: input?.filters,
+          panels: [visParams],
+          state: uiStateObj,
+          ...(searchSessionId && {
+            searchSession: dataSearch.session.getSearchOptions(searchSessionId),
+          }),
+        }),
+      });
+    } finally {
+      if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
+        // untrack if this search still belongs to current session
+        untrackSearch();
+      }
+    }
   }
 
   return {};

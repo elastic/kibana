@@ -4,7 +4,6 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["charts", "data", "expressions", "visualizations"],
-  "optionalPlugins": ["usageCollection"],
+  "requiredPlugins": ["charts", "data", "expressions", "visualizations", "visualize"],
   "requiredBundles": ["kibanaUtils", "kibanaReact"]
 }

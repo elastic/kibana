@@ -31,10 +31,14 @@ export function updateSearchSource(
     indexPattern,
     services,
     sort,
+    columns,
+    useNewFieldsApi,
   }: {
     indexPattern: IndexPattern;
     services: DiscoverServices;
     sort: SortOrder[];
+    columns: string[];
+    useNewFieldsApi: boolean;
   }
 ) {
   const { uiSettings, data } = services;
@@ -50,5 +54,13 @@ export function updateSearchSource(
     .setField('sort', usedSort)
     .setField('query', data.query.queryString.getQuery() || null)
     .setField('filter', data.query.filterManager.getFilters());
+  if (useNewFieldsApi) {
+    searchSource.removeField('fieldsFromSource');
+    searchSource.setField('fields', ['*']);
+  } else {
+    searchSource.removeField('fields');
+    const fieldNames = indexPattern.fields.map((field) => field.name);
+    searchSource.setField('fieldsFromSource', fieldNames);
+  }
   return searchSource;
 }

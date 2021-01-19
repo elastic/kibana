@@ -412,7 +412,7 @@ export class AlertsClient {
     this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
     let events: IEvent[];
     try {
-      const queryResults = await eventLogClient.findEventsBySavedObject('alert', id, {
+      const queryResults = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
         page: 1,
         per_page: 10000,
         start: parsedDateStart.toISOString(),
@@ -817,10 +817,7 @@ export class AlertsClient {
         attributes.consumer,
         WriteOperations.UpdateApiKey
       );
-      if (
-        attributes.actions.length &&
-        !this.authorization.shouldUseLegacyAuthorization(attributes)
-      ) {
+      if (attributes.actions.length) {
         await this.actionsAuthorization.ensureAuthorized('execute');
       }
     } catch (error) {

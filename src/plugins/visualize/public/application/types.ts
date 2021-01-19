@@ -18,13 +18,14 @@
  */
 
 import { History } from 'history';
-import { Query, Filter, DataPublicPluginStart } from 'src/plugins/data/public';
+import { Query, Filter, DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
 import {
   SavedVisState,
   VisualizationsStart,
   Vis,
   VisualizeEmbeddableContract,
   VisSavedObject,
+  PersistedState,
 } from 'src/plugins/visualizations/public';
 import {
   CoreStart,
@@ -44,6 +45,7 @@ import { SharePluginStart } from 'src/plugins/share/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
 import { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { EventEmitter } from 'events';
 import { DashboardStart } from '../../../dashboard/public';
 import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 
@@ -119,3 +121,29 @@ export interface ByValueVisInstance {
 }
 
 export type VisualizeEditorVisInstance = SavedVisInstance | ByValueVisInstance;
+
+export type VisEditorConstructor = new (
+  element: HTMLElement,
+  vis: Vis,
+  eventEmitter: EventEmitter,
+  embeddableHandler: VisualizeEmbeddableContract
+) => IEditorController;
+
+export interface IEditorController {
+  render(props: EditorRenderProps): Promise<void> | void;
+  destroy(): void;
+}
+
+export interface EditorRenderProps {
+  core: CoreStart;
+  data: DataPublicPluginStart;
+  filters: Filter[];
+  timeRange: TimeRange;
+  query?: Query;
+  savedSearch?: SavedObject;
+  uiState: PersistedState;
+  /**
+   * Flag to determine if visualiztion is linked to the saved search
+   */
+  linked: boolean;
+}

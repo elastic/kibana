@@ -30,7 +30,7 @@ export class VisDefaultEditorPlugin
   implements Plugin<void, void, VisDefaultEditorSetupDependencies, {}> {
   public setup(core: CoreSetup, { visualize }: VisDefaultEditorSetupDependencies) {
     if (visualize) {
-      visualize.setDefaultEditor(DefaultEditorController);
+      visualize.visEditorsRegistry.registerDefault(DefaultEditorController);
     }
   }
 

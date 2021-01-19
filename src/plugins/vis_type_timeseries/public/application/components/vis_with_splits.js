@@ -20,8 +20,7 @@
 import React from 'react';
 import { getDisplayName } from './lib/get_display_name';
 import { labelDateFormatter } from './lib/label_date_formatter';
-import { last, findIndex, first } from 'lodash';
-import { calculateLabel } from '../../../common/calculate_label';
+import { findIndex, first } from 'lodash';
 
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
@@ -35,8 +34,8 @@ export function visWithSplits(WrappedComponent) {
       const [seriesId, splitId] = series.id.split(':');
       const seriesModel = model.series.find((s) => s.id === seriesId);
       if (!seriesModel || !splitId) return acc;
-      const metric = last(seriesModel.metrics);
-      const label = calculateLabel(metric, seriesModel.metrics);
+
+      const label = series.splitByLabel;
 
       if (!acc[splitId]) {
         acc[splitId] = {
@@ -102,6 +101,7 @@ export function visWithSplits(WrappedComponent) {
 
     return <div className="tvbSplitVis">{rows}</div>;
   }
+
   SplitVisComponent.displayName = `SplitVisComponent(${getDisplayName(WrappedComponent)})`;
   return SplitVisComponent;
 }

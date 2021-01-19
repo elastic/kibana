@@ -18,5 +18,5 @@
  */
 
 // @ts-ignore
-export { EditorController } from './editor_controller';
+export { EditorController, TSVB_EDITOR_NAME } from './editor_controller';
 export * from './lib';

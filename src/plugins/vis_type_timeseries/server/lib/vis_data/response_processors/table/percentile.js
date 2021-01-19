@@ -22,8 +22,8 @@ import { getLastMetric } from '../../helpers/get_last_metric';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export function percentile(bucket, panel, series) {
-  return (next) => (results) => {
+export function percentile(bucket, panel, series, meta, extractFields) {
+  return (next) => async (results) => {
     const metric = getLastMetric(series);
 
     if (metric.type !== METRIC_TYPES.PERCENTILE) {
@@ -34,7 +34,7 @@ export function percentile(bucket, panel, series) {
       aggregations: bucket,
     };
 
-    getSplits(fakeResp, panel, series).forEach((split) => {
+    (await getSplits(fakeResp, panel, series, meta, extractFields)).forEach((split) => {
       // table allows only one percentile in a series (the last one will be chosen in case of several)
       const percentile = last(metric.percentiles);
       const percentileKey = toPercentileNumber(percentile.value);
@@ -45,6 +45,7 @@ export function percentile(bucket, panel, series) {
 
       results.push({
         id: split.id,
+        label: `${split.label} (${percentile.value ?? 0})`,
         data,
       });
     });

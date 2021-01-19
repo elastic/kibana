@@ -101,10 +101,8 @@ export function TransactionList({ items, isLoading }: Props) {
       {
         field: 'transactionsPerMinute',
         name: i18n.translate(
-          'xpack.apm.transactionsTable.transactionsPerMinuteColumnLabel',
-          {
-            defaultMessage: 'Trans. per minute',
-          }
+          'xpack.apm.transactionsTable.throughputColumnLabel',
+          { defaultMessage: 'Throughput' }
         ),
         sortable: true,
         dataType: 'number',
@@ -128,7 +126,7 @@ export function TransactionList({ items, isLoading }: Props) {
                 'xpack.apm.transactionsTable.impactColumnDescription',
                 {
                   defaultMessage:
-                    "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute.",
+                    'The most used and slowest endpoints in your service. It is the result of multiplying latency and throughput',
                 }
               )}
             />

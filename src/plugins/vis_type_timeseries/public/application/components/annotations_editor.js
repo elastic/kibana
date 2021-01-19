@@ -74,6 +74,7 @@ export class AnnotationsEditor extends Component {
       handleChange(_.assign({}, item, part));
     };
   }
+
   handleQueryChange = (model, filter) => {
     const part = { query_string: filter };
     collectionActions.handleChange(this.props, {

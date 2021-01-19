@@ -49,5 +49,7 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     isStored: jest.fn(),
     isRestore: jest.fn(),
     save: jest.fn(),
+    isCurrentSession: jest.fn(),
+    getSearchOptions: jest.fn(),
   };
 }

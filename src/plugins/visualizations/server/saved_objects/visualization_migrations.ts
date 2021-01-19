@@ -21,7 +21,6 @@ import { cloneDeep, get, omit, has, flow } from 'lodash';
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 
-import { ChartType } from '../../../vis_type_xy/common';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -804,6 +803,11 @@ const decorateAxes = <T extends { labels: { filter?: boolean } }>(
     },
   }));
 
+// Inlined from vis_type_xy
+const CHART_TYPE_AREA = 'area';
+const CHART_TYPE_LINE = 'line';
+const CHART_TYPE_HISTOGRAM = 'histogram';
+
 /**
  * Migrate vislib bar, line and area charts to use new vis_type_xy plugin
  */
@@ -819,11 +823,11 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
     }
     if (
       visState &&
-      [ChartType.Area, ChartType.Line, ChartType.Histogram].includes(visState?.params?.type)
+      [CHART_TYPE_AREA, CHART_TYPE_LINE, CHART_TYPE_HISTOGRAM].includes(visState?.params?.type)
     ) {
       const isHorizontalBar = visState.type === 'horizontal_bar';
       const isLineOrArea =
-        visState?.params?.type === ChartType.Area || visState?.params?.type === ChartType.Line;
+        visState?.params?.type === CHART_TYPE_AREA || visState?.params?.type === CHART_TYPE_LINE;
       return {
         ...doc,
         attributes: {
@@ -832,6 +836,10 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
             ...visState,
             params: {
               ...visState.params,
+              palette: {
+                type: 'palette',
+                name: 'kibana_palette',
+              },
               categoryAxes:
                 visState.params.categoryAxes &&
                 decorateAxes(visState.params.categoryAxes, !isHorizontalBar),

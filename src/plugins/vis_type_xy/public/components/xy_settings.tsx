@@ -32,6 +32,8 @@ import {
   LegendColorPicker,
   TooltipProps,
   TickFormatter,
+  VerticalAlignment,
+  HorizontalAlignment,
 } from '@elastic/charts';
 
 import { renderEndzoneTooltip } from '../../../charts/public';
@@ -70,6 +72,27 @@ type XYSettingsProps = Pick<
   legendPosition: Position;
 };
 
+function getValueLabelsStyling(isHorizontal: boolean) {
+  const VALUE_LABELS_MAX_FONTSIZE = 15;
+  const VALUE_LABELS_MIN_FONTSIZE = 10;
+  const VALUE_LABELS_VERTICAL_OFFSET = -10;
+  const VALUE_LABELS_HORIZONTAL_OFFSET = 10;
+
+  return {
+    displayValue: {
+      fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
+      fill: { textInverted: true, textBorder: 2 },
+      alignment: isHorizontal
+        ? {
+            vertical: VerticalAlignment.Middle,
+          }
+        : { horizontal: HorizontalAlignment.Center },
+      offsetX: isHorizontal ? VALUE_LABELS_HORIZONTAL_OFFSET : 0,
+      offsetY: isHorizontal ? 0 : VALUE_LABELS_VERTICAL_OFFSET,
+    },
+  };
+}
+
 export const XYSettings: FC<XYSettingsProps> = ({
   markSizeRatio,
   rotation,
@@ -92,10 +115,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
   const theme = themeService.useChartsTheme();
   const baseTheme = themeService.useChartsBaseTheme();
   const dimmingOpacity = getUISettings().get<number | undefined>('visualization:dimmingOpacity');
-  const fontSize =
-    typeof theme.barSeriesStyle?.displayValue?.fontSize === 'number'
-      ? { min: theme.barSeriesStyle?.displayValue?.fontSize }
-      : theme.barSeriesStyle?.displayValue?.fontSize ?? { min: 8 };
+  const valueLabelsStyling = getValueLabelsStyling(rotation === 90 || rotation === -90);
 
   const themeOverrides: PartialTheme = {
     markSizeRatio,
@@ -105,13 +125,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
       },
     },
     barSeriesStyle: {
-      displayValue: {
-        fontSize,
-        alignment: {
-          horizontal: 'center',
-          vertical: 'middle',
-        },
-      },
+      ...valueLabelsStyling,
     },
     axes: {
       axisTitle: {

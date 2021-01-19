@@ -29,8 +29,8 @@ import { UpdateAlertsStatus } from '../types';
 import { FILTER_CLOSED, FILTER_IN_PROGRESS, FILTER_OPEN } from '../alerts_filter_group';
 
 export interface AlertsUtilityBarProps {
-  canUserCRUD: boolean;
   hasIndexWrite: boolean;
+  hasIndexMaintenance: boolean;
   areEventsLoading: boolean;
   clearSelection: () => void;
   currentFilter: Status;
@@ -59,8 +59,8 @@ const BuildingBlockContainer = styled(EuiFlexItem)`
 `;
 
 const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
-  canUserCRUD,
   hasIndexWrite,
+  hasIndexMaintenance,
   areEventsLoading,
   clearSelection,
   totalCount,
@@ -180,7 +180,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
           </UtilityBarGroup>
 
           <UtilityBarGroup grow={true}>
-            {canUserCRUD && hasIndexWrite && (
+            {hasIndexWrite && hasIndexMaintenance && (
               <>
                 <UtilityBarText dataTestSubj="selectedAlerts">
                   {i18n.SELECTED_ALERTS(

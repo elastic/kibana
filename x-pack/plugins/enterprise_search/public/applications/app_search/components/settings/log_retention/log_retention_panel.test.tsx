@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../../__mocks__/kea.mock';
 import '../../../../__mocks__/shallow_useeffect.mock';
-
 import { setMockActions, setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import { LogRetention } from '../../log_retention/types';
 import { LogRetentionPanel } from './log_retention_panel';
-import { LogRetention } from './types';
 
 describe('<LogRetentionPanel />', () => {
   const actions = {

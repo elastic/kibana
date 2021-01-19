@@ -12,6 +12,7 @@ import React from 'react';
 import { EuiBasicTable, EuiPagination, EuiButtonEmpty } from '@elastic/eui';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
+import { EngineDetails } from '../engine/types';
 import { EnginesTable } from './engines_table';
 
 describe('EnginesTable', () => {
@@ -25,7 +26,7 @@ describe('EnginesTable', () => {
       isMeta: false,
       document_count: 99999,
       field_count: 10,
-    },
+    } as EngineDetails,
   ];
   const pagination = {
     totalEngines: 50,

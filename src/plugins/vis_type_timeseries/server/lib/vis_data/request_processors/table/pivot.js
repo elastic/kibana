@@ -27,6 +27,7 @@ import { bucketTransform } from '../../helpers/bucket_transform';
 export function pivot(req, panel) {
   return (next) => (doc) => {
     const { sort } = req.payload.state;
+
     if (panel.pivot_id) {
       overwrite(doc, 'aggs.pivot.terms.field', panel.pivot_id);
       overwrite(doc, 'aggs.pivot.terms.size', panel.pivot_rows);

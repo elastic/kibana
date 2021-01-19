@@ -47,7 +47,7 @@ import { AgentTableHeader } from './components/table_header';
 import { SelectionMode } from './components/bulk_actions';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
 
-const REFRESH_INTERVAL_MS = 10000;
+const REFRESH_INTERVAL_MS = 30000;
 
 const RowActions = React.memo<{
   agent: Agent;
@@ -282,7 +282,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           healthy: agentsStatusRequest.data.results.online,
           unhealthy: agentsStatusRequest.data.results.error,
           offline: agentsStatusRequest.data.results.offline,
-          updating: agentsStatusRequest.data.results.other,
+          updating: agentsStatusRequest.data.results.updating,
           inactive: agentsRequest.data.totalInactive,
         });
 
