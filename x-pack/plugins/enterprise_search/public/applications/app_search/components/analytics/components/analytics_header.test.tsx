@@ -13,6 +13,7 @@ import { EuiPageHeader, EuiSelect, EuiDatePickerRange, EuiButton } from '@elasti
 
 import { LogRetentionTooltip } from '../../log_retention';
 
+import { DEFAULT_START_DATE, DEFAULT_END_DATE } from '../constants';
 import { AnalyticsHeader } from './';
 
 describe('AnalyticsHeader', () => {
@@ -48,6 +49,14 @@ describe('AnalyticsHeader', () => {
     expect(wrapper.find(LogRetentionTooltip)).toHaveLength(1);
     expect(wrapper.find(EuiSelect)).toHaveLength(1);
     expect(wrapper.find(EuiDatePickerRange)).toHaveLength(1);
+  });
+
+  it('renders tags & dates with default values when no search query params are present', () => {
+    wrapper = shallow(<AnalyticsHeader title="" />);
+
+    expect(getTagsSelect().prop('value')).toEqual('');
+    expect(getStartDatePicker().props.startDate._i).toEqual(DEFAULT_START_DATE);
+    expect(getEndDatePicker().props.endDate._i).toEqual(DEFAULT_END_DATE);
   });
 
   describe('tags select', () => {

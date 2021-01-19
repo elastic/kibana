@@ -27,7 +27,7 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { LogRetentionTooltip, LogRetentionOptions } from '../../log_retention';
 
 import { AnalyticsLogic } from '../';
-import { SERVER_DATE_FORMAT } from '../constants';
+import { DEFAULT_START_DATE, DEFAULT_END_DATE, SERVER_DATE_FORMAT } from '../constants';
 import { convertTagsToSelectOptions } from '../utils';
 
 interface Props {
@@ -40,9 +40,11 @@ export const AnalyticsHeader: React.FC<Props> = ({ title }) => {
   // Parse out existing filters from URL query string
   const { start, end, tag } = queryString.parse(history.location.search);
   const [startDate, setStartDate] = useState(
-    start ? moment(start, SERVER_DATE_FORMAT) : moment().subtract(6, 'days')
+    start ? moment(start, SERVER_DATE_FORMAT) : moment(DEFAULT_START_DATE)
   );
-  const [endDate, setEndDate] = useState(end ? moment(end, SERVER_DATE_FORMAT) : moment());
+  const [endDate, setEndDate] = useState(
+    end ? moment(end, SERVER_DATE_FORMAT) : moment(DEFAULT_END_DATE)
+  );
   const [currentTag, setCurrentTag] = useState((tag as string) || '');
 
   // Set the current URL query string on filter
