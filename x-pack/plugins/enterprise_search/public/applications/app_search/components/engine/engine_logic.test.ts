@@ -6,14 +6,12 @@
 
 import { LogicMounter, mockHttpValues, expectedAsyncError } from '../../../__mocks__';
 
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: mockHttpValues },
-}));
-const { http } = mockHttpValues;
-
 import { EngineLogic } from './';
 
 describe('EngineLogic', () => {
+  const { mount } = new LogicMounter(EngineLogic);
+  const { http } = mockHttpValues;
+
   const mockEngineData = {
     name: 'some-engine',
     type: 'default',
@@ -44,8 +42,6 @@ describe('EngineLogic', () => {
     hasUnconfirmedSchemaFields: false,
     engineNotFound: false,
   };
-
-  const { mount } = new LogicMounter(EngineLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();

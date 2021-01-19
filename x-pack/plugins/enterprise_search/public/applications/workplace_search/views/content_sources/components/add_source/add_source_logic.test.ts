@@ -4,24 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
-
-import { mockHttpValues, expectedAsyncError } from '../../../../../__mocks__';
-
-jest.mock('../../../../../shared/http', () => ({
-  HttpLogic: {
-    values: { http: mockHttpValues.http },
-  },
-}));
-import { HttpLogic } from '../../../../../shared/http';
-
-jest.mock('../../../../../shared/flash_messages', () => ({
-  FlashMessagesLogic: { actions: { clearFlashMessages: jest.fn(), setQueuedMessages: jest.fn() } },
-  flashAPIErrors: jest.fn(),
-  setSuccessMessage: jest.fn(),
-  setQueuedSuccessMessage: jest.fn(),
-}));
-import { FlashMessagesLogic, flashAPIErrors } from '../../../../../shared/flash_messages';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+  expectedAsyncError,
+} from '../../../../../__mocks__';
 
 import { AppLogic } from '../../../../app_logic';
 jest.mock('../../../../app_logic', () => ({
@@ -41,6 +29,10 @@ import {
 } from './add_source_logic';
 
 describe('AddSourceLogic', () => {
+  const { mount } = new LogicMounter(AddSourceLogic);
+  const { http } = mockHttpValues;
+  const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
+
   const defaultValues = {
     addSourceCurrentStep: AddSourceSteps.ConfigIntroStep,
     addSourceProps: {},
@@ -77,12 +69,9 @@ describe('AddSourceLogic', () => {
 
   const CUSTOM_SERVICE_TYPE_INDEX = 17;
 
-  const clearFlashMessagesSpy = jest.spyOn(FlashMessagesLogic.actions, 'clearFlashMessages');
-
   beforeEach(() => {
     jest.clearAllMocks();
-    resetContext({});
-    AddSourceLogic.mount();
+    mount();
   });
 
   it('has expected default values', () => {
@@ -283,10 +272,10 @@ describe('AddSourceLogic', () => {
         it('calls API and sets values', async () => {
           const setSourceConfigDataSpy = jest.spyOn(AddSourceLogic.actions, 'setSourceConfigData');
           const promise = Promise.resolve(sourceConfigData);
-          (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+          http.get.mockReturnValue(promise);
 
           AddSourceLogic.actions.getSourceConfigData('github');
-          expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
+          expect(http.get).toHaveBeenCalledWith(
             '/api/workplace_search/org/settings/connectors/github'
           );
           await promise;
@@ -295,7 +284,7 @@ describe('AddSourceLogic', () => {
 
         it('handles error', async () => {
           const promise = Promise.reject('this is an error');
-          (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+          http.get.mockReturnValue(promise);
 
           AddSourceLogic.actions.getSourceConfigData('github');
           await expectedAsyncError(promise);
@@ -314,15 +303,13 @@ describe('AddSourceLogic', () => {
             'setSourceConnectData'
           );
           const promise = Promise.resolve(sourceConnectData);
-          (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+          http.get.mockReturnValue(promise);
 
           AddSourceLogic.actions.getSourceConnectData('github', successCallback);
 
-          expect(clearFlashMessagesSpy).toHaveBeenCalled();
+          expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
-          expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/github/prepare'
-          );
+          expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/sources/github/prepare');
           await promise;
           expect(setSourceConnectDataSpy).toHaveBeenCalledWith(sourceConnectData);
           expect(successCallback).toHaveBeenCalledWith(sourceConnectData.oauthUrl);
@@ -334,14 +321,14 @@ describe('AddSourceLogic', () => {
           AddSourceLogic.actions.setSourceIndexPermissionsValue(true);
           AddSourceLogic.actions.getSourceConnectData('github', successCallback);
 
-          expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
+          expect(http.get).toHaveBeenCalledWith(
             '/api/workplace_search/org/sources/github/prepare?subdomain=subdomain&index_permissions=true'
           );
         });
 
         it('handles error', async () => {
           const promise = Promise.reject('this is an error');
-          (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+          http.get.mockReturnValue(promise);
 
           AddSourceLogic.actions.getSourceConnectData('github', successCallback);
           await expectedAsyncError(promise);
@@ -357,11 +344,11 @@ describe('AddSourceLogic', () => {
             'setSourceConnectData'
           );
           const promise = Promise.resolve(sourceConnectData);
-          (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+          http.get.mockReturnValue(promise);
 
           AddSourceLogic.actions.getSourceReConnectData('github');
 
-          expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
+          expect(http.get).toHaveBeenCalledWith(
             '/api/workplace_search/org/sources/github/reauth_prepare'
           );
           await promise;
@@ -370,7 +357,7 @@ describe('AddSourceLogic', () => {
 
         it('handles error', async () => {
           const promise = Promise.reject('this is an error');
-          (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+          http.get.mockReturnValue(promise);
 
           AddSourceLogic.actions.getSourceReConnectData('github');
           await expectedAsyncError(promise);
@@ -386,20 +373,18 @@ describe('AddSourceLogic', () => {
             'setPreContentSourceConfigData'
           );
           const promise = Promise.resolve(config);
-          (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+          http.get.mockReturnValue(promise);
 
           AddSourceLogic.actions.getPreContentSourceConfigData('123');
 
-          expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
-            '/api/workplace_search/org/pre_sources/123'
-          );
+          expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/pre_sources/123');
           await promise;
           expect(setPreContentSourceConfigDataSpy).toHaveBeenCalledWith(config);
         });
 
         it('handles error', async () => {
           const promise = Promise.reject('this is an error');
-          (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+          http.get.mockReturnValue(promise);
 
           AddSourceLogic.actions.getPreContentSourceConfigData('123');
           await expectedAsyncError(promise);
@@ -430,14 +415,14 @@ describe('AddSourceLogic', () => {
           const setButtonNotLoadingSpy = jest.spyOn(AddSourceLogic.actions, 'setButtonNotLoading');
           const setSourceConfigDataSpy = jest.spyOn(AddSourceLogic.actions, 'setSourceConfigData');
           const promise = Promise.resolve({ sourceConfigData });
-          (HttpLogic.values.http.put as jest.Mock).mockReturnValue(promise);
+          http.put.mockReturnValue(promise);
 
           AddSourceLogic.actions.saveSourceConfig(true, successCallback);
 
-          expect(clearFlashMessagesSpy).toHaveBeenCalled();
+          expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
           expect(
-            HttpLogic.values.http.put
+            http.put
           ).toHaveBeenCalledWith(
             `/api/workplace_search/org/settings/connectors/${sourceConfigData.serviceType}`,
             { body: JSON.stringify({ params }) }
@@ -462,17 +447,14 @@ describe('AddSourceLogic', () => {
             consumer_key: sourceConfigData.configuredFields?.consumerKey,
           };
 
-          expect(HttpLogic.values.http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/org/settings/connectors',
-            {
-              body: JSON.stringify({ params: createParams }),
-            }
-          );
+          expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/settings/connectors', {
+            body: JSON.stringify({ params: createParams }),
+          });
         });
 
         it('handles error', async () => {
           const promise = Promise.reject('this is an error');
-          (HttpLogic.values.http.put as jest.Mock).mockReturnValue(promise);
+          http.put.mockReturnValue(promise);
 
           AddSourceLogic.actions.saveSourceConfig(true);
           await expectedAsyncError(promise);
@@ -514,18 +496,15 @@ describe('AddSourceLogic', () => {
           const setButtonNotLoadingSpy = jest.spyOn(AddSourceLogic.actions, 'setButtonNotLoading');
           const setCustomSourceDataSpy = jest.spyOn(AddSourceLogic.actions, 'setCustomSourceData');
           const promise = Promise.resolve({ sourceConfigData });
-          (HttpLogic.values.http.post as jest.Mock).mockReturnValue(promise);
+          http.post.mockReturnValue(promise);
 
           AddSourceLogic.actions.createContentSource(serviceType, successCallback, errorCallback);
 
-          expect(clearFlashMessagesSpy).toHaveBeenCalled();
+          expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
-          expect(HttpLogic.values.http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/org/create_source',
-            {
-              body: JSON.stringify({ ...params }),
-            }
-          );
+          expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/create_source', {
+            body: JSON.stringify({ ...params }),
+          });
           await promise;
           expect(setCustomSourceDataSpy).toHaveBeenCalledWith({ sourceConfigData });
           expect(successCallback).toHaveBeenCalled();
@@ -534,7 +513,7 @@ describe('AddSourceLogic', () => {
 
         it('handles error', async () => {
           const promise = Promise.reject('this is an error');
-          (HttpLogic.values.http.post as jest.Mock).mockReturnValue(promise);
+          http.post.mockReturnValue(promise);
 
           AddSourceLogic.actions.createContentSource(serviceType, successCallback, errorCallback);
           await expectedAsyncError(promise);
@@ -553,7 +532,7 @@ describe('AddSourceLogic', () => {
       it('getSourceConnectData', () => {
         AddSourceLogic.actions.getSourceConnectData('github', jest.fn());
 
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
+        expect(http.get).toHaveBeenCalledWith(
           '/api/workplace_search/account/sources/github/prepare'
         );
       });
@@ -561,7 +540,7 @@ describe('AddSourceLogic', () => {
       it('getSourceReConnectData', () => {
         AddSourceLogic.actions.getSourceReConnectData('123');
 
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
+        expect(http.get).toHaveBeenCalledWith(
           '/api/workplace_search/account/sources/123/reauth_prepare'
         );
       });
@@ -569,20 +548,15 @@ describe('AddSourceLogic', () => {
       it('getPreContentSourceConfigData', () => {
         AddSourceLogic.actions.getPreContentSourceConfigData('123');
 
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/pre_sources/123'
-        );
+        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/account/pre_sources/123');
       });
 
       it('createContentSource', () => {
         AddSourceLogic.actions.createContentSource('github', jest.fn());
 
-        expect(HttpLogic.values.http.post).toHaveBeenCalledWith(
-          '/api/workplace_search/account/create_source',
-          {
-            body: JSON.stringify({ service_type: 'github' }),
-          }
-        );
+        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/account/create_source', {
+          body: JSON.stringify({ service_type: 'github' }),
+        });
       });
     });
   });
