@@ -138,7 +138,7 @@ the “wow” factor needed to impress your CEO or to captivate coworkers with a
 . *Share.* Share your findings using the option that works best for you&mdash;embed
 a dashboard, share a link, or export to PDF, PNG, or CSV files and send as an attachment.
 
-For hands-on experience analyzing and visualizing your data, check out the Elastic https://www.elastic.co/demos[demo site].
+For hands-on experience with analyzing your data, check out the Elastic https://www.elastic.co/demos[demo site].
 
 [float]
 ==== Plot location data on a map
