@@ -21,7 +21,7 @@ import { IUiSettingsClient } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { includes } from 'lodash';
 import { stackManagementSchema } from './schema';
-import { WhitelistedSettings, BlacklistedSettings } from './settings_list';
+import { WhitelistedSettings, BlacklistedSettings } from './types';
 
 export type UsageStats = WhitelistedSettings | BlacklistedSettings;
 
@@ -112,7 +112,10 @@ const whitelistedSettings: Array<keyof WhitelistedSettings> = [
   'dateFormat',
 ];
 
-export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClient | undefined) {
+export function createCollectorFetch(
+  getUiSettingsClient: () => IUiSettingsClient | undefined,
+  whitelist = whitelistedSettings
+) {
   return async function fetchUsageStats(): Promise<UsageStats | undefined> {
     const uiSettingsClient = getUiSettingsClient();
     if (!uiSettingsClient) {
@@ -123,7 +126,7 @@ export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClien
     const modifiedEntries = Object.entries(userProvided)
       .filter(([key]) => key !== 'buildNum')
       .reduce((obj: any, [key, { userValue }]) => {
-        const isWhitelisted = includes(whitelistedSettings, key);
+        const isWhitelisted = includes(whitelist, key);
         obj[key] = isWhitelisted ? userValue : true;
         return obj;
       }, {});
@@ -139,7 +142,7 @@ export function registerManagementUsageCollector(
   const collector = usageCollection.makeUsageCollector<UsageStats | undefined>({
     type: 'stack_management',
     isReady: () => typeof getUiSettingsClient() !== 'undefined',
-    fetch: createCollectorFetch(getUiSettingsClient),
+    fetch: createCollectorFetch(getUiSettingsClient, whitelistedSettings),
     schema: stackManagementSchema,
   });
 
