@@ -114,6 +114,17 @@ const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, log) 
   return settings;
 };
 
+const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.events.request') || has(settings, 'logging.events.response')) {
+    log(
+      '"logging.events.request" and "logging.events.response" have been deprecated and will be removed ' +
+        'in 8.0. To access request/response data moving forward, please enable debug logs for the ' +
+        '"http.server.Kibana.response" context in your logging configuration.'
+    );
+  }
+  return settings;
+};
+
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
@@ -149,4 +160,5 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   cspRulesDeprecation,
   mapManifestServiceUrlDeprecation,
   opsLoggingEventDeprecation,
+  requestLoggingEventDeprecation,
 ];

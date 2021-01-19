@@ -256,4 +256,46 @@ describe('core deprecations', () => {
       expect(messages).toEqual([]);
     });
   });
+
+  describe('logging.events.request and logging.events.response', () => {
+    it('warns when request and response events are used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { request: '*', response: '*' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request/response data moving forward, please enable debug logs for the \\"http.server.Kibana.response\\" context in your logging configuration.",
+        ]
+      `);
+    });
+
+    it('warns when only request event is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { request: '*' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request/response data moving forward, please enable debug logs for the \\"http.server.Kibana.response\\" context in your logging configuration.",
+        ]
+      `);
+    });
+
+    it('warns when only response event is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { response: '*' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request/response data moving forward, please enable debug logs for the \\"http.server.Kibana.response\\" context in your logging configuration.",
+        ]
+      `);
+    });
+
+    it('does not warn when other events are configured', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { log: '*' } },
+      });
+      expect(messages).toEqual([]);
+    });
+  });
 });
