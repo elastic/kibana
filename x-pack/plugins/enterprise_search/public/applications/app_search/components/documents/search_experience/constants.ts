@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ASCENDING = (fieldName: string) =>
-  i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.descending', {
+  i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.ascending', {
     defaultMessage: '{fieldName} (asc)',
     values: { fieldName },
   });
