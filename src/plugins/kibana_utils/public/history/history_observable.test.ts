@@ -62,10 +62,9 @@ test('createQueryParamsObservable', () => {
   history.push('/?foo=bar');
   history.push('/test?foo=bar&foo1=bar1');
 
-  expect(emits.length).toEqual(3);
+  expect(emits.length).toEqual(2);
   expect(emits).toMatchInlineSnapshot(`
     Array [
-      Object {},
       Object {
         "foo": "bar",
       },
@@ -90,10 +89,9 @@ test('createQueryParamObservable', () => {
   history.push('/test?foo=baaaar&foo1=bar1');
   history.push('/test?foo1=bar1');
 
-  expect(emits.length).toEqual(4);
+  expect(emits.length).toEqual(3);
   expect(emits).toMatchInlineSnapshot(`
     Array [
-      null,
       "bar",
       "baaaar",
       null,

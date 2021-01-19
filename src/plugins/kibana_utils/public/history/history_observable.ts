@@ -21,9 +21,14 @@ import { Action, History, Location } from 'history';
 import { Observable } from 'rxjs';
 import { ParsedQuery } from 'query-string';
 import deepEqual from 'fast-deep-equal';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { getQueryParams } from './get_query_params';
+import { distinctUntilChangedWithInitialValue } from '../../common';
 
+/**
+ * Convert history.listen into an observable
+ * @param history - {@link History} instance
+ */
 export function createHistoryObservable(
   history: History
 ): Observable<{ location: Location; action: Action }> {
@@ -35,19 +40,32 @@ export function createHistoryObservable(
   });
 }
 
+/**
+ * Create an observable that emits every time any of query params change.
+ * Uses deepEqual check.
+ * @param history - {@link History} instance
+ */
 export function createQueryParamsObservable(history: History): Observable<ParsedQuery> {
   return createHistoryObservable(history).pipe(
     map(({ location }) => ({ ...getQueryParams(location) })),
-    distinctUntilChanged(deepEqual)
+    distinctUntilChangedWithInitialValue({ ...getQueryParams(history.location) }, deepEqual)
   );
 }
 
+/**
+ * Create an observable that emits every time _paramKey_ changes
+ * @param history - {@link History} instance
+ * @param paramKey - query param key to observe
+ */
 export function createQueryParamObservable<Param = unknown>(
   history: History,
   paramKey: string
 ): Observable<Param | null> {
   return createQueryParamsObservable(history).pipe(
     map((params) => (params[paramKey] ?? null) as Param | null),
-    distinctUntilChanged(deepEqual)
+    distinctUntilChangedWithInitialValue(
+      getQueryParams(history.location)[paramKey] as Param | null,
+      deepEqual
+    )
   );
 }
