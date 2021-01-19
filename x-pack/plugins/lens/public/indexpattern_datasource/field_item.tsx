@@ -468,6 +468,9 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   }
 
   if (props.topValues && props.topValues.buckets.length) {
+    const digitsRequired = props.topValues.buckets.some(
+      (topValue) => !Number.isInteger(topValue.count / props.sampledValues!)
+    );
     return wrapInPopover(
       <div data-test-subj="lnsFieldListPanel-topValues">
         {props.topValues.buckets.map((topValue) => {
@@ -494,7 +497,10 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" textAlign="left" color="accent">
-                    {Math.round((topValue.count / props.sampledValues!) * 100)}%
+                    {(Math.round((topValue.count / props.sampledValues!) * 1000) / 10).toFixed(
+                      digitsRequired ? 1 : 0
+                    )}
+                    %
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -522,7 +528,10 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
               <EuiFlexItem grow={false} className="eui-textTruncate">
                 <EuiText size="xs" color="subdued">
-                  {Math.round((otherCount / props.sampledValues!) * 100)}%
+                  {(Math.round((otherCount / props.sampledValues!) * 1000) / 10).toFixed(
+                    digitsRequired ? 1 : 0
+                  )}
+                  %
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
