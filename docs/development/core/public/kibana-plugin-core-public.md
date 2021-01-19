@@ -38,7 +38,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |  |
 |  [ApplicationStart](./kibana-plugin-core-public.applicationstart.md) |  |
 |  [AppMeta](./kibana-plugin-core-public.appmeta.md) | Input type for meta data for an application.<!-- -->Meta fields include <code>keywords</code> and <code>searchDeepLinks</code> Keywords is an array of string with which to associate the app, must include at least one unique string as an array. <code>searchDeepLinks</code> is an array of links that represent secondary in-app locations for the app. |
-|  [AppMountContext](./kibana-plugin-core-public.appmountcontext.md) | The context object received when applications are mounted to the DOM. Deprecated, use [CoreSetup.getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->. |
 |  [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) |  |
 |  [Capabilities](./kibana-plugin-core-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [ChromeBadge](./kibana-plugin-core-public.chromebadge.md) |  |
@@ -56,7 +55,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeRecentlyAccessed](./kibana-plugin-core-public.chromerecentlyaccessed.md) | [APIs](./kibana-plugin-core-public.chromerecentlyaccessed.md) for recently accessed history. |
 |  [ChromeRecentlyAccessedHistoryItem](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.md) |  |
 |  [ChromeStart](./kibana-plugin-core-public.chromestart.md) | ChromeStart allows plugins to customize the global chrome header UI and enrich the UX with additional information about the current location of the browser. |
-|  [ContextSetup](./kibana-plugin-core-public.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CoreSetup](./kibana-plugin-core-public.coresetup.md) | Core services exposed to the <code>Plugin</code> setup lifecycle |
 |  [CoreStart](./kibana-plugin-core-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |
@@ -77,7 +75,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [I18nStart](./kibana-plugin-core-public.i18nstart.md) | I18nStart.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
 |  [IAnonymousPaths](./kibana-plugin-core-public.ianonymouspaths.md) | APIs for denoting paths as not requiring authentication |
 |  [IBasePath](./kibana-plugin-core-public.ibasepath.md) | APIs for manipulating the basePath on URL segments. |
-|  [IContextContainer](./kibana-plugin-core-public.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [IExternalUrl](./kibana-plugin-core-public.iexternalurl.md) | APIs for working with external URLs. |
 |  [IExternalUrlPolicy](./kibana-plugin-core-public.iexternalurlpolicy.md) | A policy describing whether access to an external destination is allowed. |
 |  [IHttpFetchError](./kibana-plugin-core-public.ihttpfetcherror.md) |  |
@@ -144,7 +141,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppLeaveAction](./kibana-plugin-core-public.appleaveaction.md) | Possible actions to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md)<!-- -->See [AppLeaveConfirmAction](./kibana-plugin-core-public.appleaveconfirmaction.md) and [AppLeaveDefaultAction](./kibana-plugin-core-public.appleavedefaultaction.md) |
 |  [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) | A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return <code>confirm</code> to to prompt a message to the user before leaving the page, or <code>default</code> to keep the default behavior (doing nothing).<!-- -->See [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) for detailed usage examples. |
 |  [AppMount](./kibana-plugin-core-public.appmount.md) | A mount function called when the user navigates to this app's route. |
-|  [AppMountDeprecated](./kibana-plugin-core-public.appmountdeprecated.md) | A mount function called when the user navigates to this app's route. |
 |  [AppSearchDeepLink](./kibana-plugin-core-public.appsearchdeeplink.md) | Input type for registering secondary in-app locations for an application.<!-- -->Deep links must include at least one of <code>path</code> or <code>searchDeepLinks</code>. A deep link that does not have a <code>path</code> represents a topological level in the application's hierarchy, but does not have a destination URL that is user-accessible. |
 |  [AppUnmount](./kibana-plugin-core-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
 |  [AppUpdatableFields](./kibana-plugin-core-public.appupdatablefields.md) | Defines the list of fields that can be updated via an [AppUpdater](./kibana-plugin-core-public.appupdater.md)<!-- -->. |
@@ -154,11 +150,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeHelpExtensionMenuLink](./kibana-plugin-core-public.chromehelpextensionmenulink.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-core-public.chromenavlinkupdateablefields.md) |  |
 |  [FatalErrorsStart](./kibana-plugin-core-public.fatalerrorsstart.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
-|  [HandlerContextType](./kibana-plugin-core-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-core-public.handlerfunction.md) to represent the type of the context. |
-|  [HandlerFunction](./kibana-plugin-core-public.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-core-public.icontextcontainer.md) |
-|  [HandlerParameters](./kibana-plugin-core-public.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-core-public.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-core-public.handlercontexttype.md)<!-- -->. |
 |  [HttpStart](./kibana-plugin-core-public.httpstart.md) | See [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
-|  [IContextProvider](./kibana-plugin-core-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IToasts](./kibana-plugin-core-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-core-public.toastsapi.md)<!-- -->. |
 |  [MountPoint](./kibana-plugin-core-public.mountpoint.md) | A function that should mount DOM content inside the provided container element and return a handler to unmount it. |
 |  [NavType](./kibana-plugin-core-public.navtype.md) |  |
