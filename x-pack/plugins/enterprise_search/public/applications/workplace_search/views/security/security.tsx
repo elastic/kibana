@@ -9,8 +9,6 @@ import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { useActions, useValues } from 'kea';
 
-import { Prompt } from 'react-router-dom';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -176,7 +174,6 @@ export const Security: React.FC = () => {
 
   return (
     <>
-      <Prompt when={unsavedChanges} message={UNSAVED_MESSAGE} />
       <FlashMessages />
       {header}
       {allSourcesToggle}
