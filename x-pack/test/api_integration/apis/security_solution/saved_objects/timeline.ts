@@ -19,6 +19,7 @@ import { deleteTimelineMutation } from '../../../../../plugins/security_solution
 import { persistTimelineFavoriteMutation } from '../../../../../plugins/security_solution/public/timelines/containers/favorite/persist.gql_query';
 import { persistTimelineMutation } from '../../../../../plugins/security_solution/public/timelines/containers/persist.gql_query';
 import { TimelineResult } from '../../../../../plugins/security_solution/public/graphql/types';
+import { TimelineType } from '../../../../../plugins/security_solution/common/types/timeline';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -209,12 +210,51 @@ export default function ({ getService }: FtrProviderContext) {
           mutation: persistTimelineFavoriteMutation,
           variables: {
             timelineId: savedObjectId,
+            templateTimelineId: null,
+            templateTimelineVersion: null,
+            timelineType: TimelineType.default,
           },
         });
 
         expect(responseToTest.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
         expect(responseToTest.data!.persistFavorite.favorite.length).to.be(1);
         expect(responseToTest.data!.persistFavorite.version).to.not.be.eql(version);
+        expect(responseToTest.data!.persistFavorite.templateTimelineId).to.not.be.eql(null);
+        expect(responseToTest.data!.persistFavorite.templateTimelineVersion).to.not.be.eql(null);
+        expect(responseToTest.data!.persistFavorite.timelineType).to.not.be.eql(
+          TimelineType.default
+        );
+      });
+
+      it('to an existing timeline template', async () => {
+        const titleToSaved = 'hello title';
+        const templateTimelineIdFromStore = 'f4a90a2d-365c-407b-9fef-c1dcb33a6ab3';
+        const templateTimelineVersionFromStor = 1;
+        const response = await createBasicTimeline(client, titleToSaved);
+        const { savedObjectId, version } = response.data && response.data.persistTimeline.timeline;
+
+        const responseToTest = await client.mutate<any>({
+          mutation: persistTimelineFavoriteMutation,
+          variables: {
+            timelineId: savedObjectId,
+            templateTimelineId: templateTimelineIdFromStore,
+            templateTimelineVersion: templateTimelineVersionFromStor,
+            timelineType: TimelineType.template,
+          },
+        });
+
+        expect(responseToTest.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.data!.persistFavorite.favorite.length).to.be(1);
+        expect(responseToTest.data!.persistFavorite.version).to.not.be.eql(version);
+        expect(responseToTest.data!.persistFavorite.templateTimelineId).to.not.be.eql(
+          templateTimelineIdFromStore
+        );
+        expect(responseToTest.data!.persistFavorite.templateTimelineVersion).to.not.be.eql(
+          templateTimelineVersionFromStor
+        );
+        expect(responseToTest.data!.persistFavorite.timelineType).to.not.be.eql(
+          TimelineType.template
+        );
       });
 
       it('to Unfavorite an existing timeline', async () => {
