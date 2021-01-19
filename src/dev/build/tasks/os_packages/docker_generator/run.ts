@@ -129,7 +129,7 @@ export async function runDockerGenerator(
   // Only build images on native targets
   type HostArchitectureToDocker = Record<string, string>;
   const hostTarget: HostArchitectureToDocker = {
-    x64: 'amd64',
+    x64: 'x64',
     arm64: 'aarch64',
   };
   const buildImage = hostTarget[process.arch] === flags.architecture && flags.image;
