@@ -17,15 +17,18 @@
  * under the License.
  */
 
+import { TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from 'kibana/server';
-import { configSchema, ConfigSchema } from '../config';
+import { tilemapConfigSchema } from '../../maps_legacy/config';
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
+export type TilemapConfig = TypeOf<typeof tilemapConfigSchema>;
+
+export const config: PluginConfigDescriptor<TilemapConfig> = {
   exposeToBrowser: {
     url: true,
     options: true,
   },
-  schema: configSchema,
+  schema: tilemapConfigSchema,
 };
 
 export const plugin = () => ({
