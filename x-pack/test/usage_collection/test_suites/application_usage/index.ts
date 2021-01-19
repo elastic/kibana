@@ -17,7 +17,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('keys in the schema match the registered application IDs', async () => {
       await common.navigateToApp('home'); // Navigate to Home to make sure all the appIds are loaded
       const appIds = await browser.execute(() => window.__applicationIds__);
-      expect(Object.keys(applicationUsageSchema).sort()).to.eql(appIds.sort());
+      try {
+        expect(Object.keys(applicationUsageSchema).sort()).to.eql(appIds.sort());
+      } catch (err) {
+        err.message = `Application Usage's schema is not up-to-date with the actual registered apps. Please update it at src/plugins/kibana_usage_collection/server/collectors/application_usage/schema.ts.\n${err.message}`;
+        throw err;
+      }
     });
   });
 }
