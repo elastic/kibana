@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ValuesType } from 'utility-types';
 import { isJavaAgentName } from '../../../../../common/agent_name';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
@@ -23,14 +24,18 @@ import {
 } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { px, unit } from '../../../../style/variables';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink';
 import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { ServiceInstanceItem } from '../service_overview_instances_chart_and_table';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
+
+type ServiceInstanceItem = ValuesType<
+  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances'>
+>;
 
 interface Props {
   items?: ServiceInstanceItem[];
@@ -191,6 +196,16 @@ export function ServiceOverviewInstancesTable({
     },
   ];
 
+  // need top-level sortable fields for the managed table
+  const tableItems = items.map((item) => ({
+    ...item,
+    latencyValue: item.latency?.value ?? 0,
+    throughputValue: item.throughput?.value ?? 0,
+    errorRateValue: item.errorRate?.value ?? 0,
+    cpuUsageValue: item.cpuUsage?.value ?? 0,
+    memoryUsageValue: item.memoryUsage?.value ?? 0,
+  }));
+
   const isLoading = status === FETCH_STATUS.LOADING;
 
   return (
@@ -211,7 +226,7 @@ export function ServiceOverviewInstancesTable({
           >
             <EuiInMemoryTable
               columns={columns}
-              items={items}
+              items={tableItems}
               allowNeutralSort={false}
               loading={isLoading}
               pagination={{
