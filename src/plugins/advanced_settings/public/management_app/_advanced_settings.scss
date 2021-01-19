@@ -17,7 +17,7 @@
  * under the License.
  */
 
- .mgtAdvancedSettings__field {
+.mgtAdvancedSettings__field {
   + * {
     margin-top: $euiSize;
   }
@@ -29,11 +29,11 @@
 
   &--unsaved .mgtAdvancedSettings__fieldTitle {
     // Simulates a left side border without shifting content
-    box-shadow: -$euiSizeXS 0px $euiColorWarning;
+    box-shadow: -$euiSizeXS 0 $euiColorWarning;
   }
   &--invalid .mgtAdvancedSettings__fieldTitle {
     // Simulates a left side border without shifting content
-    box-shadow: -$euiSizeXS 0px $euiColorDanger;
+    box-shadow: -$euiSizeXS 0 $euiColorDanger;
   }
 
   @include internetExplorerOnly {
@@ -57,7 +57,7 @@
 
 .mgtAdvancedSettingsForm__unsavedCountMessage {
   // Simulates a left side border without shifting content
-  box-shadow: -$euiSizeXS 0px $euiColorWarning;
+  box-shadow: -$euiSizeXS 0 $euiColorWarning;
   padding-left: $euiSizeS;
 }
 

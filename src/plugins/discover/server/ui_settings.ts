@@ -35,6 +35,7 @@ import {
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
   DOC_TABLE_LEGACY,
   MODIFY_COLUMNS_ON_SWITCH,
+  SEARCH_FIELDS_FROM_SOURCE,
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -197,5 +198,12 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       type: METRIC_TYPE.CLICK,
       name: 'discover:modifyColumnsOnSwitchTitle',
     },
+  },
+  [SEARCH_FIELDS_FROM_SOURCE]: {
+    name: 'Read fields from _source',
+    description: `When enabled will load documents directly from \`_source\`. This is soon going to be deprecated. When disabled, will retrieve fields via the new Fields API in the high-level search service.`,
+    value: false,
+    category: ['discover'],
+    schema: schema.boolean(),
   },
 };

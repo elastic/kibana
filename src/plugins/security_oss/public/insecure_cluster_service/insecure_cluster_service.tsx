@@ -21,7 +21,8 @@ import { CoreSetup, CoreStart, MountPoint, Toast } from 'kibana/public';
 
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
-import { ConfigType } from '../config';
+import type { ConfigType } from '../config';
+import type { AppStateServiceStart } from '../app_state';
 import { defaultAlertText, defaultAlertTitle } from './components';
 
 interface SetupDeps {
@@ -29,7 +30,8 @@ interface SetupDeps {
 }
 
 interface StartDeps {
-  core: Pick<CoreStart, 'notifications' | 'http' | 'application'>;
+  core: Pick<CoreStart, 'notifications' | 'application'>;
+  appState: AppStateServiceStart;
 }
 
 export interface InsecureClusterServiceSetup {
@@ -84,12 +86,9 @@ export class InsecureClusterService {
     };
   }
 
-  public start({ core }: StartDeps): InsecureClusterServiceStart {
-    const shouldInitialize =
-      this.enabled && !core.http.anonymousPaths.isAnonymous(window.location.pathname);
-
-    if (shouldInitialize) {
-      this.initializeAlert(core);
+  public start({ core, appState }: StartDeps): InsecureClusterServiceStart {
+    if (this.enabled) {
+      this.initializeAlert(core, appState);
     }
 
     return {
@@ -97,24 +96,20 @@ export class InsecureClusterService {
     };
   }
 
-  private initializeAlert(core: StartDeps['core']) {
-    const displayAlert$ = from(
-      core.http
-        .get<{ displayAlert: boolean }>('/internal/security_oss/display_insecure_cluster_alert')
-        .catch((e) => {
-          // in the event we can't make this call, assume we shouldn't display this alert.
-          return { displayAlert: false };
-        })
-    );
+  private initializeAlert(core: StartDeps['core'], appState: AppStateServiceStart) {
+    const appState$ = from(appState.getState());
 
     // 10 days is reasonably long enough to call "forever" for a page load.
     // Can't go too much longer than this. See https://github.com/elastic/kibana/issues/64264#issuecomment-618400354
     const oneMinute = 60000;
     const tenDays = oneMinute * 60 * 24 * 10;
 
-    combineLatest([displayAlert$, this.alertVisibility$])
+    combineLatest([appState$, this.alertVisibility$])
       .pipe(
-        map(([{ displayAlert }, isAlertVisible]) => displayAlert && isAlertVisible),
+        map(
+          ([{ insecureClusterAlert }, isAlertVisible]) =>
+            insecureClusterAlert.displayAlert && isAlertVisible
+        ),
         distinctUntilChanged()
       )
       .subscribe((showAlert) => {

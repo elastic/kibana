@@ -62,6 +62,10 @@ export function mockReduxHooks(response?: any) {
   jest.spyOn(redux, 'useSelector').mockReturnValue(response);
 }
 
+export function mockDispatch() {
+  jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
+}
+
 export function mockReactRouterDomHooks({ useParamsResponse }: { useParamsResponse: any }) {
   jest.spyOn(reactRouterDom, 'useParams').mockReturnValue(useParamsResponse);
 }

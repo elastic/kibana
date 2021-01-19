@@ -94,7 +94,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
 
         await PageObjects.visualize.ensureSavePanelOpen();
-        await testSubjects.setValue('savedObjectTitle', 'My new markdown viz');
+        await PageObjects.visualize.setSaveModalValues('My new markdown viz');
+
         await selectSavedObjectTags('tag-1');
 
         await testSubjects.click('confirmSaveSavedObjectButton');
@@ -118,7 +119,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
 
         await PageObjects.visualize.ensureSavePanelOpen();
-        await testSubjects.setValue('savedObjectTitle', 'vis-with-new-tag');
+        await PageObjects.visualize.setSaveModalValues('vis-with-new-tag');
 
         await testSubjects.click('savedObjectTagSelector');
         await testSubjects.click(`tagSelectorOption-action__create`);

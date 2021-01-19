@@ -97,6 +97,7 @@ export interface DocTableLegacyProps {
   onMoveColumn?: (columns: string, newIdx: number) => void;
   onRemoveColumn?: (column: string) => void;
   sort?: string[][];
+  useNewFieldsApi?: boolean;
 }
 
 export function DocTableLegacy(renderProps: DocTableLegacyProps) {
@@ -118,6 +119,7 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
                 on-move-column="onMoveColumn"
                 on-remove-column="onRemoveColumn"
                 render-complete
+                use-new-fields-api="useNewFieldsApi"
                 sorting="sort"></doc_table>`,
     },
     () => getServices().getEmbeddableInjector()
