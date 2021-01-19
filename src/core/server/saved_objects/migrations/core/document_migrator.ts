@@ -74,7 +74,7 @@ import {
 } from '../../types';
 import { MigrationLogger } from './migration_logger';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { SavedObjectMigrationFn } from '../types';
+import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '../types';
 import { DEFAULT_NAMESPACE_STRING } from '../../service/lib/utils';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
@@ -147,14 +147,16 @@ export interface VersionedTransformer {
   migrationVersion: SavedObjectsMigrationVersion;
   migrate: MigrateFn;
   migrateAndConvert: MigrateAndConvertFn;
+  prepareMigrations: () => void;
 }
 
 /**
  * A concrete implementation of the VersionedTransformer interface.
  */
 export class DocumentMigrator implements VersionedTransformer {
-  private migrations: ActiveMigrations;
-  private transformDoc: ApplyTransformsFn;
+  private documentMigratorOptions: Omit<DocumentMigratorOptions, 'minimumConvertVersion'>;
+  private migrations?: ActiveMigrations;
+  private transformDoc?: ApplyTransformsFn;
 
   /**
    * Creates an instance of DocumentMigrator.
@@ -174,11 +176,7 @@ export class DocumentMigrator implements VersionedTransformer {
   }: DocumentMigratorOptions) {
     validateMigrationDefinition(typeRegistry, kibanaVersion, minimumConvertVersion);
 
-    this.migrations = buildActiveMigrations(typeRegistry, log);
-    this.transformDoc = buildDocumentTransform({
-      kibanaVersion,
-      migrations: this.migrations,
-    });
+    this.documentMigratorOptions = { typeRegistry, kibanaVersion, log };
   }
 
   /**
@@ -189,6 +187,10 @@ export class DocumentMigrator implements VersionedTransformer {
    * @memberof DocumentMigrator
    */
   public get migrationVersion(): SavedObjectsMigrationVersion {
+    if (!this.migrations) {
+      throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
+    }
+
     return Object.entries(this.migrations).reduce((acc, [prop, { latestMigrationVersion }]) => {
       // some migration objects won't have a latestMigrationVersion (they only contain reference transforms that are applied from other types)
       if (latestMigrationVersion) {
@@ -199,6 +201,22 @@ export class DocumentMigrator implements VersionedTransformer {
   }
 
   /**
+   * Prepares active migrations and document transformer function.
+   *
+   * @returns {void}
+   * @memberof DocumentMigrator
+   */
+
+  public prepareMigrations = () => {
+    const { typeRegistry, kibanaVersion, log } = this.documentMigratorOptions;
+    this.migrations = buildActiveMigrations(typeRegistry, kibanaVersion, log);
+    this.transformDoc = buildDocumentTransform({
+      kibanaVersion,
+      migrations: this.migrations,
+    });
+  };
+
+  /**
    * Migrates a document to the latest version.
    *
    * @param {SavedObjectUnsanitizedDoc} doc
@@ -206,6 +224,10 @@ export class DocumentMigrator implements VersionedTransformer {
    * @memberof DocumentMigrator
    */
   public migrate = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc => {
+    if (!this.migrations || !this.transformDoc) {
+      throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
+    }
+
     // Clone the document to prevent accidental mutations on the original data
     // Ex: Importing sample data that is cached at import level, migrations would
     // execute on mutated data the second time.
@@ -223,6 +245,10 @@ export class DocumentMigrator implements VersionedTransformer {
    * @memberof DocumentMigrator
    */
   public migrateAndConvert = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[] => {
+    if (!this.migrations || !this.transformDoc) {
+      throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
+    }
+
     // Clone the document to prevent accidental mutations on the original data
     // Ex: Importing sample data that is cached at import level, migrations would
     // execute on mutated data the second time.
@@ -232,6 +258,47 @@ export class DocumentMigrator implements VersionedTransformer {
     });
     return [transformedDoc, ...additionalDocs];
   };
+}
+
+function validateMigrationsMapObject(
+  name: string,
+  kibanaVersion: string,
+  migrationsMap?: SavedObjectMigrationMap
+) {
+  function assertObject(obj: any, prefix: string) {
+    if (!obj || typeof obj !== 'object') {
+      throw new Error(`${prefix} Got ${obj}.`);
+    }
+  }
+  function assertValidSemver(version: string, type: string) {
+    if (!Semver.valid(version)) {
+      throw new Error(
+        `Invalid migration for type ${type}. Expected all properties to be semvers, but got ${version}.`
+      );
+    }
+    if (Semver.gt(version, kibanaVersion)) {
+      throw new Error(
+        `Invalid migration for type ${type}. Property '${version}' cannot be greater than the current Kibana version '${kibanaVersion}'.`
+      );
+    }
+  }
+  function assertValidTransform(fn: any, version: string, type: string) {
+    if (typeof fn !== 'function') {
+      throw new Error(`Invalid migration ${type}.${version}: expected a function, but got ${fn}.`);
+    }
+  }
+
+  if (migrationsMap) {
+    assertObject(
+      migrationsMap,
+      `Migrations map for type ${name} should be an object like { '2.0.0': (doc) => doc }.`
+    );
+
+    Object.entries(migrationsMap).forEach(([version, fn]) => {
+      assertValidSemver(version, name);
+      assertValidTransform(fn, version, name);
+    });
+  }
 }
 
 /**
@@ -245,28 +312,9 @@ function validateMigrationDefinition(
   kibanaVersion: string,
   minimumConvertVersion: string
 ) {
-  function assertObject(obj: any, prefix: string) {
-    if (!obj || typeof obj !== 'object') {
-      throw new Error(`${prefix} Got ${obj}.`);
-    }
-  }
-
-  function assertValidSemver(version: string, type: string) {
-    if (!Semver.valid(version)) {
-      throw new Error(
-        `Invalid migration for type ${type}. Expected all properties to be semvers, but got ${version}.`
-      );
-    }
-    if (Semver.gt(version, kibanaVersion)) {
-      throw new Error(
-        `Invalid migration for type ${type}. Property '${version}' cannot be greater than the current Kibana version '${kibanaVersion}'.`
-      );
-    }
-  }
-
-  function assertValidTransform(fn: any, version: string, type: string) {
-    if (typeof fn !== 'function') {
-      throw new Error(`Invalid migration ${type}.${version}: expected a function, but got ${fn}.`);
+  function assertObjectOrFunction(entity: any, prefix: string) {
+    if (!entity || (typeof entity !== 'function' && typeof entity !== 'object')) {
+      throw new Error(`${prefix} Got! ${typeof entity}, ${JSON.stringify(entity)}.`);
     }
   }
 
@@ -301,14 +349,10 @@ function validateMigrationDefinition(
   registry.getAllTypes().forEach((type) => {
     const { name, migrations, convertToMultiNamespaceTypeVersion, namespaceType } = type;
     if (migrations) {
-      assertObject(
+      assertObjectOrFunction(
         type.migrations,
-        `Migration for type ${name} should be an object like { '2.0.0': (doc) => doc }.`
+        `Migration for type ${name} should be an object or a function returning an object like { '2.0.0': (doc) => doc }.`
       );
-      Object.entries(migrations).forEach(([version, fn]) => {
-        assertValidSemver(version, name);
-        assertValidTransform(fn, version, name);
-      });
     }
     if (convertToMultiNamespaceTypeVersion) {
       assertValidConvertToMultiNamespaceType(
@@ -328,12 +372,17 @@ function validateMigrationDefinition(
  */
 function buildActiveMigrations(
   typeRegistry: ISavedObjectTypeRegistry,
+  kibanaVersion: string,
   log: Logger
 ): ActiveMigrations {
   const referenceTransforms = getReferenceTransforms(typeRegistry);
 
   return typeRegistry.getAllTypes().reduce((migrations, type) => {
-    const migrationTransforms = Object.entries(type.migrations ?? {}).map<Transform>(
+    const migrationsMap =
+      typeof type.migrations === 'function' ? type.migrations() : type.migrations;
+    validateMigrationsMapObject(type.name, kibanaVersion, migrationsMap);
+
+    const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(
       ([version, transform]) => ({
         version,
         transform: wrapWithTry(version, type.name, transform, log),

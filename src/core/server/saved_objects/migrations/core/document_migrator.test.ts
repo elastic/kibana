@@ -61,66 +61,97 @@ describe('DocumentMigrator', () => {
   }
 
   describe('validation', () => {
-    it('validates individual migration definitions', () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          migrations: _.noop as any,
-        }),
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-        /Migration for type foo should be an object/i
-      );
+    const createDefinition = (migrations: any) => ({
+      kibanaVersion: '3.2.3',
+      typeRegistry: createRegistry({
+        name: 'foo',
+        migrations: migrations as any,
+      }),
+      log: mockLogger,
     });
 
-    it('validates individual migrations are valid semvers', () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          migrations: {
-            bar: (doc) => doc,
-          },
-        }),
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-        /Expected all properties to be semvers/i
-      );
+    describe('#prepareMigrations', () => {
+      it('validates individual migration definitions', () => {
+        const invalidMigrator = new DocumentMigrator(createDefinition(() => 123));
+        const voidMigrator = new DocumentMigrator(createDefinition(() => {}));
+        const emptyObjectMigrator = new DocumentMigrator(createDefinition(() => ({})));
+
+        expect(invalidMigrator.prepareMigrations).toThrow(
+          /Migrations map for type foo should be an object/i
+        );
+        expect(voidMigrator.prepareMigrations).not.toThrow();
+        expect(emptyObjectMigrator.prepareMigrations).not.toThrow();
+      });
+
+      it('validates individual migrations are valid semvers', () => {
+        const withInvalidVersion = {
+          bar: (doc: any) => doc,
+          '1.2.3': (doc: any) => doc,
+        };
+        const migrationFn = new DocumentMigrator(createDefinition(() => withInvalidVersion));
+        const migrationObj = new DocumentMigrator(createDefinition(withInvalidVersion));
+
+        expect(migrationFn.prepareMigrations).toThrow(/Expected all properties to be semvers/i);
+        expect(migrationObj.prepareMigrations).toThrow(/Expected all properties to be semvers/i);
+      });
+
+      it('validates individual migrations are not greater than the current Kibana version', () => {
+        const withGreaterVersion = {
+          '3.2.4': (doc: any) => doc,
+        };
+        const migrationFn = new DocumentMigrator(createDefinition(() => withGreaterVersion));
+        const migrationObj = new DocumentMigrator(createDefinition(withGreaterVersion));
+
+        const expectedError = `Invalid migration for type foo. Property '3.2.4' cannot be greater than the current Kibana version '3.2.3'.`;
+        expect(migrationFn.prepareMigrations).toThrowError(expectedError);
+        expect(migrationObj.prepareMigrations).toThrowError(expectedError);
+      });
+
+      it('validates the migration function', () => {
+        const invalidVersionFunction = { '1.2.3': 23 as any };
+        const migrationFn = new DocumentMigrator(createDefinition(() => invalidVersionFunction));
+        const migrationObj = new DocumentMigrator(createDefinition(invalidVersionFunction));
+
+        expect(migrationFn.prepareMigrations).toThrow(/expected a function, but got 23/i);
+        expect(migrationObj.prepareMigrations).toThrow(/expected a function, but got 23/i);
+      });
+      it('validates definitions with migrations: Function | Objects', () => {
+        const validMigrationMap = { '1.2.3': () => {} };
+        const migrationFn = new DocumentMigrator(createDefinition(() => validMigrationMap));
+        const migrationObj = new DocumentMigrator(createDefinition(validMigrationMap));
+        expect(migrationFn.prepareMigrations).not.toThrow();
+        expect(migrationObj.prepareMigrations).not.toThrow();
+      });
     });
 
-    it('validates individual migrations are not greater than the current Kibana version', () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
+    it('throws if #prepareMigrations is not called before #migrate or #migrateAndConvert is called', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
         typeRegistry: createRegistry({
-          name: 'foo',
+          name: 'user',
           migrations: {
-            '3.2.4': (doc) => doc,
+            '1.2.3': setAttr('attributes.name', 'Chris'),
           },
         }),
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
-        `Invalid migration for type foo. Property '3.2.4' cannot be greater than the current Kibana version '3.2.3'.`
-      );
-    });
+      });
 
-    it('validates the migration function', () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          migrations: {
-            '1.2.3': 23 as any,
-          },
-        }),
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-        /expected a function, but got 23/i
-      );
+      expect(() =>
+        migrator.migrate({
+          id: 'me',
+          type: 'user',
+          attributes: { name: 'Christopher' },
+          migrationVersion: {},
+        })
+      ).toThrow(/Migrations are not ready. Make sure prepareMigrations is called first./i);
+
+      expect(() =>
+        migrator.migrateAndConvert({
+          id: 'me',
+          type: 'user',
+          attributes: { name: 'Christopher' },
+          migrationVersion: {},
+        })
+      ).toThrow(/Migrations are not ready. Make sure prepareMigrations is called first./i);
     });
 
     it(`validates convertToMultiNamespaceTypeVersion can only be used with namespaceType 'multiple'`, () => {
@@ -214,6 +245,7 @@ describe('DocumentMigrator', () => {
           },
         }),
       });
+      migrator.prepareMigrations();
       const actual = migrator.migrate({
         id: 'me',
         type: 'user',
@@ -242,6 +274,7 @@ describe('DocumentMigrator', () => {
           },
         }),
       });
+      migrator.prepareMigrations();
       const originalDoc = {
         id: 'me',
         type: 'user',
@@ -263,6 +296,7 @@ describe('DocumentMigrator', () => {
           },
         }),
       });
+      migrator.prepareMigrations();
       const actual = migrator.migrate({
         id: 'me',
         type: 'user',
@@ -304,6 +338,7 @@ describe('DocumentMigrator', () => {
           }
         ),
       });
+      migrator.prepareMigrations();
       const actual = migrator.migrate({
         id: 'me',
         type: 'user',
@@ -342,6 +377,7 @@ describe('DocumentMigrator', () => {
           }
         ),
       });
+      migrator.prepareMigrations();
       const actual = migrator.migrate({
         id: 'me',
         type: 'user',
@@ -374,6 +410,7 @@ describe('DocumentMigrator', () => {
           },
         }),
       });
+      migrator.prepareMigrations();
       const actual = migrator.migrate({
         id: 'smelly',
         type: 'dog',
@@ -393,6 +430,7 @@ describe('DocumentMigrator', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
       });
+      migrator.prepareMigrations();
       expect(() =>
         migrator.migrate({
           id: 'smelly',
@@ -415,6 +453,7 @@ describe('DocumentMigrator', () => {
           },
         }),
       });
+      migrator.prepareMigrations();
       expect(() =>
         migrator.migrate({
           id: 'fleabag',
@@ -432,6 +471,7 @@ describe('DocumentMigrator', () => {
         ...testOpts(),
         kibanaVersion: '8.0.1',
       });
+      migrator.prepareMigrations();
       expect(() =>
         migrator.migrate({
           id: 'happy',
@@ -449,6 +489,7 @@ describe('DocumentMigrator', () => {
         ...testOpts(),
         kibanaVersion: '8.0.1',
       });
+      migrator.prepareMigrations();
       expect(() =>
         migrator.migrate({
           id: 'wet',
@@ -474,6 +515,7 @@ describe('DocumentMigrator', () => {
           },
         }),
       });
+      migrator.prepareMigrations();
       const actual = migrator.migrate({
         id: 'smelly',
         type: 'dog',
@@ -507,6 +549,7 @@ describe('DocumentMigrator', () => {
           }
         ),
       });
+      migrator.prepareMigrations();
       const actual = migrator.migrate({
         id: 'smelly',
         type: 'dog',
@@ -535,6 +578,7 @@ describe('DocumentMigrator', () => {
           },
         }),
       });
+      migrator.prepareMigrations();
       const actual = migrator.migrate({
         id: 'smelly',
         type: 'dog',
@@ -568,6 +612,7 @@ describe('DocumentMigrator', () => {
           }
         ),
       });
+      migrator.prepareMigrations();
       const actual = migrator.migrate({
         id: 'smelly',
         type: 'dog',
@@ -593,7 +638,7 @@ describe('DocumentMigrator', () => {
           },
         }),
       });
-
+      migrator.prepareMigrations();
       expect(() =>
         migrator.migrate({
           id: 'smelly',
@@ -616,6 +661,7 @@ describe('DocumentMigrator', () => {
           },
         }),
       });
+      migrator.prepareMigrations();
       expect(() =>
         migrator.migrate({
           id: 'smelly',
@@ -645,6 +691,7 @@ describe('DocumentMigrator', () => {
           },
         }),
       });
+      migrator.prepareMigrations();
       const actual = migrator.migrate({
         id: 'smelly',
         type: 'cat',
@@ -670,6 +717,7 @@ describe('DocumentMigrator', () => {
           },
         }),
       });
+      migrator.prepareMigrations();
       const actual = migrator.migrate({
         id: 'smelly',
         type: 'cat',
@@ -699,6 +747,7 @@ describe('DocumentMigrator', () => {
         }),
         log,
       });
+      migrator.prepareMigrations();
       const failedDoc = {
         id: 'smelly',
         type: 'dog',
@@ -732,6 +781,7 @@ describe('DocumentMigrator', () => {
         }),
         log: mockLogger,
       });
+      migrator.prepareMigrations();
       const doc = {
         id: 'joker',
         type: 'dog',
@@ -744,7 +794,7 @@ describe('DocumentMigrator', () => {
     });
 
     test('extracts the latest migration version info', () => {
-      const { migrationVersion } = new DocumentMigrator({
+      const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry(
           {
@@ -772,8 +822,8 @@ describe('DocumentMigrator', () => {
           }
         ),
       });
-
-      expect(migrationVersion).toEqual({
+      migrator.prepareMigrations();
+      expect(migrator.migrationVersion).toEqual({
         aaa: '10.4.0',
         bbb: '3.2.3',
         ccc: '11.0.0',
@@ -789,6 +839,7 @@ describe('DocumentMigrator', () => {
             // no migration transforms are defined, the migrationVersion will be derived from 'convertToMultiNamespaceTypeVersion'
           ),
         });
+        migrator.prepareMigrations();
         const obj = {
           id: 'mischievous',
           type: 'dog',
@@ -816,6 +867,7 @@ describe('DocumentMigrator', () => {
             { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
           ),
         });
+        migrator.prepareMigrations();
         const obj = {
           id: 'cowardly',
           type: 'dog',
@@ -846,6 +898,7 @@ describe('DocumentMigrator', () => {
             { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
           ),
         });
+        migrator.prepareMigrations();
         const obj = {
           id: 'bad',
           type: 'dog',
@@ -894,6 +947,7 @@ describe('DocumentMigrator', () => {
             convertToMultiNamespaceTypeVersion: '1.0.0',
           }),
         });
+        migrator.prepareMigrations();
         const obj = {
           id: 'loud',
           type: 'dog',
@@ -953,6 +1007,7 @@ describe('DocumentMigrator', () => {
             { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
           ),
         });
+        migrator.prepareMigrations();
         const obj = {
           id: 'cute',
           type: 'dog',
@@ -1023,6 +1078,7 @@ describe('DocumentMigrator', () => {
             { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
           ),
         });
+        migrator.prepareMigrations();
         const obj = {
           id: 'sleepy',
           type: 'dog',
@@ -1077,6 +1133,7 @@ describe('DocumentMigrator', () => {
             convertToMultiNamespaceTypeVersion: '1.0.0', // the conversion transform occurs before the migration transform above
           }),
         });
+        migrator.prepareMigrations();
         const obj = {
           id: 'hungry',
           type: 'dog',
@@ -1144,6 +1201,7 @@ describe('DocumentMigrator', () => {
             { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
           ),
         });
+        migrator.prepareMigrations();
         const obj = {
           id: 'pretty',
           type: 'dog',

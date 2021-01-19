@@ -44,6 +44,7 @@ describe('IndexMigrator', () => {
         migrationVersion: {},
         migrate: _.identity,
         migrateAndConvert: _.identity,
+        prepareMigrations: jest.fn(),
       },
       serializer: new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
     };
@@ -333,6 +334,7 @@ describe('IndexMigrator', () => {
       migrationVersion: { foo: '1.2.3' },
       migrate: jest.fn(),
       migrateAndConvert: migrateAndConvertDoc,
+      prepareMigrations: jest.fn(),
     };
 
     withIndex(client, {
@@ -386,6 +388,7 @@ describe('IndexMigrator', () => {
       migrationVersion: { foo: '1.2.3' },
       migrate: jest.fn(),
       migrateAndConvert: migrateAndConvertDoc,
+      prepareMigrations: jest.fn(),
     };
 
     withIndex(client, {

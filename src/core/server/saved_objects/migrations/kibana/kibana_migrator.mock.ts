@@ -32,7 +32,7 @@ const defaultSavedObjectTypes: SavedObjectsType[] = [
         name: { type: 'keyword' },
       },
     },
-    migrations: {},
+    migrations: () => ({}),
   },
 ];
 
@@ -56,6 +56,7 @@ const createMigrator = (
     runMigrations: jest.fn(),
     getActiveMappings: jest.fn(),
     migrateDocument: jest.fn(),
+    prepareMigrations: jest.fn(),
     getStatus$: jest.fn(
       () =>
         new BehaviorSubject<KibanaMigratorStatus>({

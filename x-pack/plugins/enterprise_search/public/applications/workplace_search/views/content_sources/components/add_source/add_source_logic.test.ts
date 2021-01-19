@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
-
 import {
+  LogicMounter,
   mockFlashMessageHelpers,
   mockHttpValues,
   expectedAsyncError,
@@ -30,6 +29,7 @@ import {
 } from './add_source_logic';
 
 describe('AddSourceLogic', () => {
+  const { mount } = new LogicMounter(AddSourceLogic);
   const { http } = mockHttpValues;
   const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
 
@@ -71,8 +71,7 @@ describe('AddSourceLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetContext({});
-    AddSourceLogic.mount();
+    mount();
   });
 
   it('has expected default values', () => {

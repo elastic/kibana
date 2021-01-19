@@ -159,6 +159,10 @@ export class KibanaMigrator {
     return this.migrationResult;
   }
 
+  public prepareMigrations() {
+    this.documentMigrator.prepareMigrations();
+  }
+
   public getStatus$() {
     return this.status$.asObservable();
   }
