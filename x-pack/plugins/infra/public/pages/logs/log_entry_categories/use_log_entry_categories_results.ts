@@ -9,6 +9,7 @@ import { useMemo, useState } from 'react';
 import {
   GetLogEntryCategoriesSuccessResponsePayload,
   GetLogEntryCategoryDatasetsSuccessResponsePayload,
+  CategorySort,
 } from '../../../../common/http_api/log_analysis';
 import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetTopLogEntryCategoriesAPI } from './service_calls/get_top_log_entry_categories';
@@ -17,6 +18,9 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 type TopLogEntryCategories = GetLogEntryCategoriesSuccessResponsePayload['data']['categories'];
 type LogEntryCategoryDatasets = GetLogEntryCategoryDatasetsSuccessResponsePayload['data']['datasets'];
+
+export type SortOptions = CategorySort;
+export type ChangeSortOptions = (sortOptions: CategorySort) => void;
 
 export const useLogEntryCategoriesResults = ({
   categoriesCount,
@@ -35,6 +39,10 @@ export const useLogEntryCategoriesResults = ({
   sourceId: string;
   startTime: number;
 }) => {
+  const [sortOptions, setSortOptions] = useState<SortOptions>({
+    field: 'maximumAnomalyScore',
+    direction: 'desc',
+  });
   const { services } = useKibanaContextForPlugin();
   const [topLogEntryCategories, setTopLogEntryCategories] = useState<TopLogEntryCategories>([]);
   const [
@@ -53,6 +61,7 @@ export const useLogEntryCategoriesResults = ({
             endTime,
             categoryCount: categoriesCount,
             datasets: filteredDatasets,
+            sort: sortOptions,
           },
           services.http.fetch
         );
@@ -70,7 +79,7 @@ export const useLogEntryCategoriesResults = ({
         }
       },
     },
-    [categoriesCount, endTime, filteredDatasets, sourceId, startTime]
+    [categoriesCount, endTime, filteredDatasets, sourceId, startTime, sortOptions]
   );
 
   const [getLogEntryCategoryDatasetsRequest, getLogEntryCategoryDatasets] = useTrackedPromise(
@@ -121,5 +130,7 @@ export const useLogEntryCategoriesResults = ({
     isLoadingTopLogEntryCategories,
     logEntryCategoryDatasets,
     topLogEntryCategories,
+    sortOptions,
+    changeSortOptions: setSortOptions,
   };
 };

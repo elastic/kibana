@@ -181,7 +181,7 @@ export interface CustomSource {
 }
 
 export interface Result {
-  [key: string]: string;
+  [key: string]: string | string[];
 }
 
 export interface OptionValue {
