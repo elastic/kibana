@@ -98,18 +98,6 @@
 #CC# /x-pack/legacy/plugins/canvas/ @elastic/kibana-presentation
 #CC# /x-pack/plugins/dashboard_mode @elastic/kibana-presentation
 
-# Core UI
-# Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
-/src/plugins/home/public @elastic/kibana-core-ui
-/src/plugins/home/server/*.ts @elastic/kibana-core-ui
-/src/plugins/home/server/services/ @elastic/kibana-core-ui
-/src/plugins/kibana_overview/ @elastic/kibana-core-ui
-/x-pack/plugins/global_search_bar/ @elastic/kibana-core-ui
-#CC# /src/plugins/newsfeed @elastic/kibana-core-ui
-#CC# /src/plugins/home/public @elastic/kibana-core-ui
-#CC# /src/plugins/home/server/services/ @elastic/kibana-core-ui
-#CC# /src/plugins/home/ @elastic/kibana-core-ui
-#CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core-ui
 
 # Observability UIs
 /x-pack/plugins/infra/ @elastic/logs-metrics-ui
@@ -138,10 +126,6 @@
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
 /x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
-/x-pack/plugins/stack_alerts/server/alert_types/geo_containment @elastic/kibana-gis
-/x-pack/plugins/stack_alerts/public/alert_types/geo_containment @elastic/kibana-gis
-/x-pack/plugins/stack_alerts/server/alert_types/geo_threshold @elastic/kibana-gis
-/x-pack/plugins/stack_alerts/public/alert_types/geo_threshold @elastic/kibana-gis
 #CC# /src/plugins/maps_legacy/ @elastic/kibana-gis
 #CC# /src/plugins/maps_oss/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
@@ -200,6 +184,11 @@
 /src/plugins/status_page/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/dev/run_check_published_api_changes.ts @elastic/kibana-core
+/src/plugins/home/public @elastic/kibana-core
+/src/plugins/home/server/*.ts @elastic/kibana-core
+/src/plugins/home/server/services/ @elastic/kibana-core
+/src/plugins/kibana_overview/ @elastic/kibana-core
+/x-pack/plugins/global_search_bar/ @elastic/kibana-core
 #CC# /src/core/server/csp/ @elastic/kibana-core
 #CC# /src/legacy/server/config/ @elastic/kibana-core
 #CC# /src/legacy/server/http/ @elastic/kibana-core
@@ -210,6 +199,11 @@
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-core
 #CC# /x-pack/plugins/features/ @elastic/kibana-core
 #CC# /x-pack/plugins/global_search/ @elastic/kibana-core
+#CC# /src/plugins/newsfeed @elastic/kibana-core
+#CC# /src/plugins/home/public @elastic/kibana-core
+#CC# /src/plugins/home/server/services/ @elastic/kibana-core
+#CC# /src/plugins/home/ @elastic/kibana-core
+#CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
 # Kibana Telemetry
 /packages/kbn-analytics/ @elastic/kibana-core
@@ -236,7 +230,6 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-core
 /src/plugins/security_oss/ @elastic/kibana-security
-/src/plugins/spaces_oss/ @elastic/kibana-security
 /test/security_functional/ @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
@@ -263,7 +256,7 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/kibana-alerting-services
 /docs/user/alerting/ @elastic/kibana-alerting-services
 /docs/management/alerting/ @elastic/kibana-alerting-services
-#CC# /x-pack/plugins/stack_alerts/ @elastic/kibana-alerting-services
+#CC# /x-pack/plugins/stack_alerts @elastic/kibana-alerting-services
 
 # Enterprise Search
 # Shared

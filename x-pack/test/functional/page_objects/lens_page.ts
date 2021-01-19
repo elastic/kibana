@@ -16,7 +16,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['header', 'timePicker', 'common']);
+  const PageObjects = getPageObjects(['header', 'timePicker', 'common', 'visualize']);
 
   return logWrapper('lensPage', log, {
     /**
@@ -270,22 +270,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Save the current Lens visualization.
      */
-    async save(title: string, saveAsNew?: boolean, redirectToOrigin?: boolean) {
+    async save(
+      title: string,
+      saveAsNew?: boolean,
+      redirectToOrigin?: boolean,
+      addToDashboard?: boolean,
+      dashboardId?: string
+    ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
-      await testSubjects.setValue('savedObjectTitle', title);
 
-      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
-      if (saveAsNewCheckboxExists) {
-        const state = saveAsNew ? 'check' : 'uncheck';
-        await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
-      }
-
-      const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
-      if (redirectToOriginCheckboxExists) {
-        const state = redirectToOrigin ? 'check' : 'uncheck';
-        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
-      }
+      await PageObjects.visualize.setSaveModalValues(title, {
+        saveAsNew,
+        redirectToOrigin,
+        addToDashboard,
+        dashboardId,
+      });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
       await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>

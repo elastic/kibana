@@ -162,7 +162,7 @@ export function TransactionDistribution({
           {i18n.translate(
             'xpack.apm.transactionDetails.transactionsDurationDistributionChartTitle',
             {
-              defaultMessage: 'Transactions duration distribution',
+              defaultMessage: 'Latency distribution',
             }
           )}{' '}
           <EuiIconTip

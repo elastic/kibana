@@ -36,7 +36,7 @@ import {
   EuiSideNav,
 } from '@elastic/eui';
 
-import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { CoreStart, AppMountParameters } from 'kibana/public';
 
 const Home = () => (
   <EuiPageBody data-test-subj="barAppHome">
@@ -90,7 +90,7 @@ const PageB = ({ location }: RouteComponentProps) => {
 };
 
 type NavProps = RouteComponentProps & {
-  navigateToApp: AppMountContext['core']['application']['navigateToApp'];
+  navigateToApp: CoreStart['application']['navigateToApp'];
 };
 const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
   <EuiSideNav
@@ -123,11 +123,11 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
   />
 ));
 
-const BarApp = ({ history, context }: { history: History; context: AppMountContext }) => (
+const BarApp = ({ history, coreStart }: { history: History; coreStart: CoreStart }) => (
   <Router history={history}>
     <EuiPage>
       <EuiPageSideBar>
-        <Nav navigateToApp={context.core.application.navigateToApp} />
+        <Nav navigateToApp={coreStart.application.navigateToApp} />
       </EuiPageSideBar>
       <Route path="/" exact component={Home} />
       <Route path="/page-b" component={PageB} />
@@ -135,8 +135,8 @@ const BarApp = ({ history, context }: { history: History; context: AppMountConte
   </Router>
 );
 
-export const renderApp = (context: AppMountContext, { history, element }: AppMountParameters) => {
-  ReactDOM.render(<BarApp history={history} context={context} />, element);
+export const renderApp = (coreStart: CoreStart, { history, element }: AppMountParameters) => {
+  ReactDOM.render(<BarApp history={history} coreStart={coreStart} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
