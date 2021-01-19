@@ -34,6 +34,7 @@ export class ReportingPlugin
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     // prevent throwing errors in route handlers about async deps not being initialized
+    // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
     core.http.registerRouteHandlerContext(PLUGIN_ID, () => {
       if (this.reportingCore.pluginIsStarted()) {
         return {}; // ReportingStart contract
