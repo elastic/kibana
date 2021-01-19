@@ -65,6 +65,29 @@ describe('KibanaMigrator', () => {
     });
   });
 
+  describe('migrateDocument', () => {
+    it('throws an error if documentMigrator.prepareMigrations is not called previously', () => {
+      const options = mockOptions();
+      const kibanaMigrator = new KibanaMigrator(options);
+      const doc = {} as any;
+      expect(() => kibanaMigrator.migrateDocument(doc)).toThrowError(
+        /Migrations are not ready. Make sure prepareMigrations is called first./i
+      );
+    });
+
+    it('calls documentMigrator.migrate', () => {
+      const options = mockOptions();
+      const kibanaMigrator = new KibanaMigrator(options);
+      const mockDocumentMigrator = { migrate: jest.fn() };
+      // @ts-expect-error `documentMigrator` is readonly.
+      kibanaMigrator.documentMigrator = mockDocumentMigrator;
+      const doc = {} as any;
+
+      expect(() => kibanaMigrator.migrateDocument(doc)).not.toThrowError();
+      expect(mockDocumentMigrator.migrate).toBeCalledTimes(1);
+    });
+  });
+
   describe('runMigrations', () => {
     it('throws if prepareMigrations is not called first', async () => {
       const options = mockOptions();

@@ -237,10 +237,13 @@ function buildActiveMigrations(
   typeRegistry: ISavedObjectTypeRegistry,
   log: Logger
 ): ActiveMigrations {
-  const typesWithMigrationMaps = typeRegistry.getAllTypes().map((type) => ({
-    ...type,
-    migrationsMap: typeof type.migrations === 'function' ? type.migrations() : type.migrations,
-  }));
+  const typesWithMigrationMaps = typeRegistry
+    .getAllTypes()
+    .map((type) => ({
+      ...type,
+      migrationsMap: typeof type.migrations === 'function' ? type.migrations() : type.migrations,
+    }))
+    .filter((type) => typeof type.migrationsMap !== 'undefined');
 
   typesWithMigrationMaps.forEach((type) =>
     validateMigrationsMapObject(type.name, type.migrationsMap)

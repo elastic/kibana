@@ -234,7 +234,6 @@ export class KibanaMigrator {
    * @returns `doc` with all registered migrations applied.
    */
   public migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
-    this.documentMigrator.prepareMigrations();
     return this.documentMigrator.migrate(doc);
   }
 }
