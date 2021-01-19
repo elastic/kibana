@@ -26,8 +26,6 @@ export const createNetworkEventsRoute: UMRestApiRouteFactory = (libs: UMServerLi
       stepIndex,
     });
 
-    return {
-      events: result,
-    };
+    return result;
   },
 });

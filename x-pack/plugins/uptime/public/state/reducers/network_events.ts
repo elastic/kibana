@@ -18,6 +18,7 @@ export interface NetworkEventsState {
   [checkGroup: string]: {
     [stepIndex: number]: {
       events: NetworkEvent[];
+      total: number;
       loading: boolean;
       error?: Error;
     };
@@ -45,16 +46,19 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
                   ...state[checkGroup][stepIndex],
                   loading: true,
                   events: [],
+                  total: 0,
                 }
               : {
                   loading: true,
                   events: [],
+                  total: 0,
                 },
           }
         : {
             [stepIndex]: {
               loading: true,
               events: [],
+              total: 0,
             },
           },
     }),
@@ -62,7 +66,7 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
     [String(getNetworkEventsSuccess)]: (
       state: NetworkEventsState,
       {
-        payload: { events, checkGroup, stepIndex },
+        payload: { events, total, checkGroup, stepIndex },
       }: Action<SyntheticsNetworkEventsApiResponse & FetchNetworkEventsParams>
     ) => {
       return {
@@ -74,16 +78,19 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
                     ...state[checkGroup][stepIndex],
                     loading: false,
                     events,
+                    total,
                   }
                 : {
                     loading: false,
                     events,
+                    total,
                   },
             }
           : {
               [stepIndex]: {
                 loading: false,
                 events,
+                total,
               },
             },
       };
@@ -101,11 +108,13 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
                   ...state[checkGroup][stepIndex],
                   loading: false,
                   events: [],
+                  total: 0,
                   error,
                 }
               : {
                   loading: false,
                   events: [],
+                  total: 0,
                   error,
                 },
           }
@@ -113,6 +122,7 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
             [stepIndex]: {
               loading: false,
               events: [],
+              total: 0,
               error,
             },
           },

@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import {
   Axis,
   BarSeries,
@@ -92,7 +92,7 @@ export const WaterfallChart = ({
   maxHeight = '800px',
   fullHeight = false,
 }: WaterfallChartProps) => {
-  const { data, sidebarItems, legendItems } = useWaterfallContext();
+  const { data, sidebarItems, legendItems, total, eventsCount } = useWaterfallContext();
 
   const generatedHeight = useMemo(() => {
     return getChartHeight(data);
@@ -127,7 +127,13 @@ export const WaterfallChart = ({
           <EuiFlexGroup gutterSize="none" responsive={false}>
             {shouldRenderSidebar && (
               <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
-                <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false} />
+                <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false}>
+                  <EuiText size="xs">
+                    <h3>
+                      Network requests {eventsCount} of {total}
+                    </h3>
+                  </EuiText>
+                </WaterfallChartFixedTopContainerSidebarCover>
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}>
