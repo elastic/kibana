@@ -113,7 +113,7 @@ export const SearchExperience: React.FC = () => {
                       filterType="any"
                     />
                     <EuiSpacer size="l" />
-                  </div>
+                  </section>
                 ))}
                 <EuiButton
                   data-test-subj="customize"
