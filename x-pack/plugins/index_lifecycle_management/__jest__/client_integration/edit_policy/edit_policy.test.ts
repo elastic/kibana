@@ -700,33 +700,60 @@ describe('<EditPolicy />', () => {
 
   describe('searchable snapshot', () => {
     describe('on cloud', () => {
-      beforeEach(async () => {
-        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-        httpRequestsMockHelpers.setListNodes({
-          isUsingDeprecatedDataRoleConfig: false,
-          nodesByAttributes: { test: ['123'] },
-          nodesByRoles: { data: ['123'] },
-        });
-        httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+      describe('new policy', () => {
+        beforeEach(async () => {
+          // simulate creating a new policy
+          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('')]);
+          httpRequestsMockHelpers.setListNodes({
+            isUsingDeprecatedDataRoleConfig: false,
+            nodesByAttributes: { test: ['123'] },
+            nodesByRoles: { data: ['123'] },
+          });
+          httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
-        await act(async () => {
-          testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
-        });
+          await act(async () => {
+            testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+          });
 
-        const { component } = testBed;
-        component.update();
+          const { component } = testBed;
+          component.update();
+        });
+        test('defaults searchable snapshot to true on cloud', async () => {
+          const { find, actions } = testBed;
+          await actions.cold.enable(true);
+          expect(
+            find('searchableSnapshotField-cold.searchableSnapshotToggle').props()['aria-checked']
+          ).toBe(true);
+        });
       });
+      describe('existing policy', () => {
+        beforeEach(async () => {
+          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+          httpRequestsMockHelpers.setListNodes({
+            isUsingDeprecatedDataRoleConfig: false,
+            nodesByAttributes: { test: ['123'] },
+            nodesByRoles: { data: ['123'] },
+          });
+          httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
-      test('correctly sets snapshot repository default to "found-snapshots"', async () => {
-        const { actions } = testBed;
-        await actions.cold.enable(true);
-        await actions.cold.toggleSearchableSnapshot(true);
-        await actions.savePolicy();
-        const latestRequest = server.requests[server.requests.length - 1];
-        const request = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-        expect(request.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
-          'found-snapshots'
-        );
+          await act(async () => {
+            testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+          });
+
+          const { component } = testBed;
+          component.update();
+        });
+        test('correctly sets snapshot repository default to "found-snapshots"', async () => {
+          const { actions } = testBed;
+          await actions.cold.enable(true);
+          await actions.cold.toggleSearchableSnapshot(true);
+          await actions.savePolicy();
+          const latestRequest = server.requests[server.requests.length - 1];
+          const request = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+          expect(request.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
+            'found-snapshots'
+          );
+        });
       });
     });
     describe('on non-enterprise license', () => {
