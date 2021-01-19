@@ -126,6 +126,7 @@ export const anomalyDataChange = function (
           datafeedQuery,
           config.metricFunction,
           config.metricFieldName,
+          config.summaryCountFieldName,
           config.timeField,
           range.min,
           range.max,

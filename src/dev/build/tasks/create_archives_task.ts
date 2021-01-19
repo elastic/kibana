@@ -21,7 +21,7 @@ import Path from 'path';
 import Fs from 'fs';
 import { promisify } from 'util';
 
-import { CiStatsReporter, CiStatsMetrics } from '@kbn/dev-utils';
+import { CiStatsMetrics } from '@kbn/dev-utils';
 
 import { mkdirp, compressTar, compressZip, Task } from '../lib';
 
@@ -99,6 +99,7 @@ export const CreateArchives: Task = {
     }
     log.debug('archive metrics:', metrics);
 
-    await CiStatsReporter.fromEnv(log).metrics(metrics);
+    // FLAKY: https://github.com/elastic/kibana/issues/87529
+    // await CiStatsReporter.fromEnv(log).metrics(metrics);
   },
 };

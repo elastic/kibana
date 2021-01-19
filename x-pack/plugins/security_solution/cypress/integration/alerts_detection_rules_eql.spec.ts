@@ -77,7 +77,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe.skip('Detection rules, EQL', () => {
+describe('Detection rules, EQL', () => {
   const expectedUrls = eqlRule.referenceUrls.join('');
   const expectedFalsePositives = eqlRule.falsePositivesExamples.join('');
   const expectedTags = eqlRule.tags.join('');
@@ -85,16 +85,20 @@ describe.skip('Detection rules, EQL', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfAlerts = 7;
 
-  const rule = { ...eqlRule };
-
   beforeEach(() => {
     cleanKibana();
     createTimeline(eqlRule.timeline).then((response) => {
-      rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
+      cy.wrap({
+        ...eqlRule,
+        timeline: {
+          ...eqlRule.timeline,
+          id: response.body.data.persistTimeline.timeline.savedObjectId,
+        },
+      }).as('rule');
     });
   });
 
-  it('Creates and activates a new EQL rule', () => {
+  it('Creates and activates a new EQL rule', function () {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
@@ -102,9 +106,9 @@ describe.skip('Detection rules, EQL', () => {
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     goToCreateNewRule();
     selectEqlRuleType();
-    fillDefineEqlRuleAndContinue(rule);
-    fillAboutRuleAndContinue(rule);
-    fillScheduleRuleAndContinue(rule);
+    fillDefineEqlRuleAndContinue(this.rule);
+    fillAboutRuleAndContinue(this.rule);
+    fillScheduleRuleAndContinue(this.rule);
     createAndActivateRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
@@ -121,18 +125,18 @@ describe.skip('Detection rules, EQL', () => {
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
     });
-    cy.get(RULE_NAME).should('have.text', rule.name);
-    cy.get(RISK_SCORE).should('have.text', rule.riskScore);
-    cy.get(SEVERITY).should('have.text', rule.severity);
+    cy.get(RULE_NAME).should('have.text', this.rule.name);
+    cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
+    cy.get(SEVERITY).should('have.text', this.rule.severity);
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${rule.name}`);
-    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${this.rule.name}`);
+    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', this.rule.description);
     cy.get(ABOUT_DETAILS).within(() => {
-      getDetails(SEVERITY_DETAILS).should('have.text', rule.severity);
-      getDetails(RISK_SCORE_DETAILS).should('have.text', rule.riskScore);
+      getDetails(SEVERITY_DETAILS).should('have.text', this.rule.severity);
+      getDetails(RISK_SCORE_DETAILS).should('have.text', this.rule.riskScore);
       getDetails(REFERENCE_URLS_DETAILS).should((details) => {
         expect(removeExternalLinkText(details.text())).equal(expectedUrls);
       });
@@ -146,18 +150,18 @@ describe.skip('Detection rules, EQL', () => {
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.customQuery);
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Event Correlation');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
       getDetails(RUNS_EVERY_DETAILS).should(
         'have.text',
-        `${rule.runsEvery.interval}${rule.runsEvery.type}`
+        `${this.rule.runsEvery.interval}${this.rule.runsEvery.type}`
       );
       getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
         'have.text',
-        `${rule.lookBack.interval}${rule.lookBack.type}`
+        `${this.rule.lookBack.interval}${this.rule.lookBack.type}`
       );
     });
 
@@ -165,27 +169,32 @@ describe.skip('Detection rules, EQL', () => {
     waitForAlertsToPopulate();
 
     cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
-    cy.get(ALERT_RULE_NAME).first().should('have.text', rule.name);
+    cy.get(ALERT_RULE_NAME).first().should('have.text', this.rule.name);
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'eql');
-    cy.get(ALERT_RULE_SEVERITY).first().should('have.text', rule.severity.toLowerCase());
-    cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', rule.riskScore);
+    cy.get(ALERT_RULE_SEVERITY).first().should('have.text', this.rule.severity.toLowerCase());
+    cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', this.rule.riskScore);
   });
 });
 
-describe.skip('Detection rules, sequence EQL', () => {
+describe('Detection rules, sequence EQL', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfSequenceAlerts = 1;
-  const rule = { ...eqlSequenceRule };
 
   beforeEach(() => {
     cleanKibana();
     createTimeline(eqlSequenceRule.timeline).then((response) => {
-      rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
+      cy.wrap({
+        ...eqlSequenceRule,
+        timeline: {
+          ...eqlSequenceRule.timeline,
+          id: response.body.data.persistTimeline.timeline.savedObjectId,
+        },
+      }).as('rule');
     });
   });
 
-  it('Creates and activates a new EQL rule with a sequence', () => {
+  it('Creates and activates a new EQL rule with a sequence', function () {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
@@ -193,9 +202,9 @@ describe.skip('Detection rules, sequence EQL', () => {
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     goToCreateNewRule();
     selectEqlRuleType();
-    fillDefineEqlRuleAndContinue(rule);
-    fillAboutRuleAndContinue(rule);
-    fillScheduleRuleAndContinue(rule);
+    fillDefineEqlRuleAndContinue(this.rule);
+    fillAboutRuleAndContinue(this.rule);
+    fillScheduleRuleAndContinue(this.rule);
     createAndActivateRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
@@ -213,10 +222,10 @@ describe.skip('Detection rules, sequence EQL', () => {
     waitForAlertsToPopulate();
 
     cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfSequenceAlerts);
-    cy.get(ALERT_RULE_NAME).first().should('have.text', rule.name);
+    cy.get(ALERT_RULE_NAME).first().should('have.text', this.rule.name);
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'eql');
-    cy.get(ALERT_RULE_SEVERITY).first().should('have.text', rule.severity.toLowerCase());
-    cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', rule.riskScore);
+    cy.get(ALERT_RULE_SEVERITY).first().should('have.text', this.rule.severity.toLowerCase());
+    cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', this.rule.riskScore);
   });
 });

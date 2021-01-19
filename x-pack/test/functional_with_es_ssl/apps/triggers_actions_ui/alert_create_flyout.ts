@@ -204,5 +204,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertsToDelete = await getAlertsByName(alertName);
       await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
+
+    it('should show discard confirmation before closing flyout without saving', async () => {
+      await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.click('cancelSaveAlertButton');
+      await testSubjects.missingOrFail('confirmAlertCloseModal');
+
+      await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.setValue('intervalInput', '10');
+      await testSubjects.click('cancelSaveAlertButton');
+      await testSubjects.existOrFail('confirmAlertCloseModal');
+      await testSubjects.click('confirmAlertCloseModal > confirmModalCancelButton');
+      await testSubjects.missingOrFail('confirmAlertCloseModal');
+    });
   });
 };

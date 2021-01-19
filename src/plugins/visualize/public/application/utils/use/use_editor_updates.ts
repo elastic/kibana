@@ -25,8 +25,8 @@ import {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
-  IEditorController,
   VisualizeEditorVisInstance,
+  IEditorController,
 } from '../../types';
 
 export const useEditorUpdates = (

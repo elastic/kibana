@@ -39,10 +39,15 @@ type ESGeoLineSourceSyncMeta = {
   sortField: string;
 };
 
+type ESTermSourceSyncMeta = {
+  size: number;
+};
+
 export type VectorSourceSyncMeta =
   | ESSearchSourceSyncMeta
   | ESGeoGridSourceSyncMeta
   | ESGeoLineSourceSyncMeta
+  | ESTermSourceSyncMeta
   | null;
 
 export type VectorSourceRequestMeta = MapFilters & {
@@ -54,10 +59,9 @@ export type VectorSourceRequestMeta = MapFilters & {
   sourceMeta: VectorSourceSyncMeta;
 };
 
-export type VectorJoinSourceRequestMeta = Omit<
-  VectorSourceRequestMeta,
-  'geogridPrecision' | 'sourceMeta'
-> & { sourceQuery?: Query };
+export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'> & {
+  sourceQuery?: Query;
+};
 
 export type VectorStyleRequestMeta = MapFilters & {
   dynamicStyleFields: string[];

@@ -17,11 +17,18 @@
  * under the License.
  */
 
-const { ToolingLog, ES_P12_PATH, ES_P12_PASSWORD } = require('@kbn/dev-utils');
+const {
+  ToolingLog,
+  ES_P12_PATH,
+  ES_P12_PASSWORD,
+  createAnyInstanceSerializer,
+} = require('@kbn/dev-utils');
 const execa = require('execa');
 const { Cluster } = require('../cluster');
 const { installSource, installSnapshot, installArchive } = require('../install');
 const { extractConfigFiles } = require('../utils/extract_config_files');
+
+expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 
 jest.mock('../install', () => ({
   installSource: jest.fn(),
@@ -265,8 +272,19 @@ describe('#start(installPath)', () => {
     const cluster = new Cluster({ log, ssl: false });
     await cluster.start();
 
-    const config = extractConfigFiles.mock.calls[0][0];
-    expect(config).toHaveLength(0);
+    expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Array [
+            "indices.query.bool.max_nested_depth=100",
+          ],
+          undefined,
+          Object {
+            "log": <ToolingLog>,
+          },
+        ],
+      ]
+    `);
   });
 });
 
@@ -332,8 +350,19 @@ describe('#run()', () => {
     const cluster = new Cluster({ log, ssl: false });
     await cluster.run();
 
-    const config = extractConfigFiles.mock.calls[0][0];
-    expect(config).toHaveLength(0);
+    expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Array [
+            "indices.query.bool.max_nested_depth=100",
+          ],
+          undefined,
+          Object {
+            "log": <ToolingLog>,
+          },
+        ],
+      ]
+    `);
   });
 });
 

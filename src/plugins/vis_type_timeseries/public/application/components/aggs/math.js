@@ -42,7 +42,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 const checkModel = (model) => Array.isArray(model.variables) && model.script !== undefined;
 
 export function MathAgg(props) {
-  const { siblings, model } = props;
+  const { siblings, model, fields, indexPattern } = props;
   const htmlId = htmlIdGenerator();
 
   const handleChange = createChangeHandler(props.onChange, model);
@@ -95,6 +95,8 @@ export function MathAgg(props) {
           <CalculationVars
             id={htmlId('variables')}
             metrics={siblings}
+            fields={fields}
+            indexPattern={indexPattern}
             onChange={handleChange}
             name="variables"
             model={model}
@@ -159,6 +161,7 @@ export function MathAgg(props) {
 MathAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
+  indexPattern: PropTypes.string,
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onChange: PropTypes.func,

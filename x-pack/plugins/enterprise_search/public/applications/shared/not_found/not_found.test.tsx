@@ -13,6 +13,7 @@ import { shallow } from 'enzyme';
 import { EuiButton as EuiButtonExternal, EuiEmptyPrompt } from '@elastic/eui';
 
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../common/constants';
+import { SetAppSearchChrome } from '../kibana_chrome';
 import { AppSearchLogo } from './assets/app_search_logo';
 import { WorkplaceSearchLogo } from './assets/workplace_search_logo';
 
@@ -49,6 +50,14 @@ describe('NotFound', () => {
     const prompt = wrapper.find(EuiEmptyPrompt).dive().shallow();
 
     expect(prompt.find(EuiButtonExternal).prop('href')).toEqual('https://support.elastic.co');
+  });
+
+  it('passes down optional custom breadcrumbs', () => {
+    const wrapper = shallow(
+      <NotFound product={APP_SEARCH_PLUGIN} breadcrumbs={['Hello', 'World']} />
+    );
+
+    expect(wrapper.find(SetAppSearchChrome).prop('trail')).toEqual(['Hello', 'World']);
   });
 
   it('does not render anything without a valid product', () => {

@@ -61,6 +61,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    */
   await run(Tasks.CopySource);
   await run(Tasks.CopyBinScripts);
+  await run(Tasks.ReplaceFavicon);
   await run(Tasks.CreateEmptyDirsAndFiles);
   await run(Tasks.CreateReadme);
   await run(Tasks.BuildPackages);

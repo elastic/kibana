@@ -60,15 +60,17 @@ describe('timeShift(resp, panel, series)', () => {
     };
   });
 
-  test('calls next when finished', () => {
+  test('calls next when finished', async () => {
     const next = jest.fn();
-    timeShift(resp, panel, series)(next)([]);
+    await timeShift(resp, panel, series, {})(next)([]);
+
     expect(next.mock.calls.length).toEqual(1);
   });
 
-  test('creates a series', () => {
-    const next = timeShift(resp, panel, series)((results) => results);
-    const results = stdMetric(resp, panel, series)(next)([]);
+  test('creates a series', async () => {
+    const next = await timeShift(resp, panel, series, {})((results) => results);
+    const results = await stdMetric(resp, panel, series, {})(next)([]);
+
     expect(results).toHaveLength(1);
     expect(results[0]).toHaveProperty('color', 'rgb(255, 0, 0)');
     expect(results[0]).toHaveProperty('id', 'test');

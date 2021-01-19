@@ -33,7 +33,10 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
     {
       function: 'earliest',
       display: (
-        <FormattedMessage id="xpack.ml.fieldDataCard.cardDate.minLabel" defaultMessage="min" />
+        <FormattedMessage
+          id="xpack.ml.fieldDataCard.cardDate.earliestLabel"
+          defaultMessage="earliest"
+        />
       ),
       value: formatDate(earliest, TIME_FORMAT),
     },
@@ -41,8 +44,8 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
       function: 'latest',
       display: (
         <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardDate.medianLabel"
-          defaultMessage="median"
+          id="xpack.ml.fieldDataCard.cardDate.latestLabel"
+          defaultMessage="latest"
         />
       ),
       value: formatDate(latest, TIME_FORMAT),

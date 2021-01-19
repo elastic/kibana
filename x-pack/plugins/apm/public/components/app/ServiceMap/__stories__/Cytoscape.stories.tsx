@@ -186,6 +186,13 @@ export function NodeIcons() {
     },
     {
       data: {
+        id: 'erlang',
+        'service.name': 'erlang service',
+        'agent.name': 'erlang',
+      },
+    },
+    {
+      data: {
         id: 'go',
         'service.name': 'go service',
         'agent.name': 'go',
@@ -217,6 +224,13 @@ export function NodeIcons() {
         id: 'nodejs',
         'service.name': 'nodejs service',
         'agent.name': 'nodejs',
+      },
+    },
+    {
+      data: {
+        id: 'ocaml',
+        'service.name': 'ocaml service',
+        'agent.name': 'ocaml',
       },
     },
     {

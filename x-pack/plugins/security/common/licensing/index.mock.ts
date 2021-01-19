@@ -5,14 +5,14 @@
  */
 
 import { of } from 'rxjs';
-import { SecurityLicense } from '.';
+import { SecurityLicense, SecurityLicenseFeatures } from '.';
 
 export const licenseMock = {
-  create: (): jest.Mocked<SecurityLicense> => ({
+  create: (features?: Partial<SecurityLicenseFeatures>): jest.Mocked<SecurityLicense> => ({
     isLicenseAvailable: jest.fn(),
     isEnabled: jest.fn().mockReturnValue(true),
     getType: jest.fn().mockReturnValue('basic'),
     getFeatures: jest.fn(),
-    features$: of(),
+    features$: features ? of(features as SecurityLicenseFeatures) : of(),
   }),
 };

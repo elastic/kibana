@@ -18,8 +18,7 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObjectsClientContract, SavedObject } from '../types';
-import { ISavedObjectTypeRegistry } from '..';
+import { SavedObject } from '../types';
 
 /**
  * Describes a retry operation for importing a saved object.
@@ -98,7 +97,7 @@ export interface SavedObjectsImportMissingReferencesError {
  * Represents a failure to import.
  * @public
  */
-export interface SavedObjectsImportError {
+export interface SavedObjectsImportFailure {
   id: string;
   type: string;
   /**
@@ -154,7 +153,7 @@ export interface SavedObjectsImportResponse {
   success: boolean;
   successCount: number;
   successResults?: SavedObjectsImportSuccess[];
-  errors?: SavedObjectsImportError[];
+  errors?: SavedObjectsImportFailure[];
 }
 
 /**
@@ -164,14 +163,8 @@ export interface SavedObjectsImportResponse {
 export interface SavedObjectsImportOptions {
   /** The stream of {@link SavedObject | saved objects} to import */
   readStream: Readable;
-  /** The maximum number of object to import */
-  objectLimit: number;
   /** If true, will override existing object if present. Note: this has no effect when used with the `createNewCopies` option. */
   overwrite: boolean;
-  /** {@link SavedObjectsClientContract | client} to use to perform the import operation */
-  savedObjectsClient: SavedObjectsClientContract;
-  /** The registry of all known saved object types */
-  typeRegistry: ISavedObjectTypeRegistry;
   /** if specified, will import in given namespace, else will import as global object */
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
@@ -185,12 +178,6 @@ export interface SavedObjectsImportOptions {
 export interface SavedObjectsResolveImportErrorsOptions {
   /** The stream of {@link SavedObject | saved objects} to resolve errors from */
   readStream: Readable;
-  /** The maximum number of object to import */
-  objectLimit: number;
-  /** client to use to perform the import operation */
-  savedObjectsClient: SavedObjectsClientContract;
-  /** The registry of all known saved object types */
-  typeRegistry: ISavedObjectTypeRegistry;
   /** saved object import references to retry */
   retries: SavedObjectsImportRetry[];
   /** if specified, will import in given namespace */

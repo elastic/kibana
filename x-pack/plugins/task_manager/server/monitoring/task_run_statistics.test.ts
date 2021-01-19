@@ -427,25 +427,95 @@ describe('Task Run Statistics', () => {
               taskStats.map((taskStat) => taskStat.value.polling.result_frequency_percent_as_number)
             ).toEqual([
               // NoTasksClaimed
-              { NoTasksClaimed: 100, RanOutOfCapacity: 0, PoolFilled: 0 },
+              {
+                NoTasksClaimed: 100,
+                RanOutOfCapacity: 0,
+                PoolFilled: 0,
+                Failed: 0,
+                NoAvailableWorkers: 0,
+                RunningAtCapacity: 0,
+              },
               // NoTasksClaimed, NoTasksClaimed,
-              { NoTasksClaimed: 100, RanOutOfCapacity: 0, PoolFilled: 0 },
+              {
+                NoTasksClaimed: 100,
+                RanOutOfCapacity: 0,
+                PoolFilled: 0,
+                Failed: 0,
+                NoAvailableWorkers: 0,
+                RunningAtCapacity: 0,
+              },
               // NoTasksClaimed, NoTasksClaimed, NoTasksClaimed
-              { NoTasksClaimed: 100, RanOutOfCapacity: 0, PoolFilled: 0 },
+              {
+                NoTasksClaimed: 100,
+                RanOutOfCapacity: 0,
+                PoolFilled: 0,
+                Failed: 0,
+                NoAvailableWorkers: 0,
+                RunningAtCapacity: 0,
+              },
               // NoTasksClaimed, NoTasksClaimed, NoTasksClaimed, PoolFilled
-              { NoTasksClaimed: 75, RanOutOfCapacity: 0, PoolFilled: 25 },
+              {
+                NoTasksClaimed: 75,
+                RanOutOfCapacity: 0,
+                PoolFilled: 25,
+                Failed: 0,
+                NoAvailableWorkers: 0,
+                RunningAtCapacity: 0,
+              },
               // NoTasksClaimed, NoTasksClaimed, NoTasksClaimed, PoolFilled, PoolFilled
-              { NoTasksClaimed: 60, RanOutOfCapacity: 0, PoolFilled: 40 },
+              {
+                NoTasksClaimed: 60,
+                RanOutOfCapacity: 0,
+                PoolFilled: 40,
+                Failed: 0,
+                NoAvailableWorkers: 0,
+                RunningAtCapacity: 0,
+              },
               // NoTasksClaimed, NoTasksClaimed, PoolFilled, PoolFilled, PoolFilled
-              { NoTasksClaimed: 40, RanOutOfCapacity: 0, PoolFilled: 60 },
+              {
+                NoTasksClaimed: 40,
+                RanOutOfCapacity: 0,
+                PoolFilled: 60,
+                Failed: 0,
+                NoAvailableWorkers: 0,
+                RunningAtCapacity: 0,
+              },
               // NoTasksClaimed, PoolFilled, PoolFilled, PoolFilled, RanOutOfCapacity
-              { NoTasksClaimed: 20, RanOutOfCapacity: 20, PoolFilled: 60 },
+              {
+                NoTasksClaimed: 20,
+                RanOutOfCapacity: 20,
+                PoolFilled: 60,
+                Failed: 0,
+                NoAvailableWorkers: 0,
+                RunningAtCapacity: 0,
+              },
               // PoolFilled, PoolFilled, PoolFilled, RanOutOfCapacity, RanOutOfCapacity
-              { NoTasksClaimed: 0, RanOutOfCapacity: 40, PoolFilled: 60 },
+              {
+                NoTasksClaimed: 0,
+                RanOutOfCapacity: 40,
+                PoolFilled: 60,
+                Failed: 0,
+                NoAvailableWorkers: 0,
+                RunningAtCapacity: 0,
+              },
               // PoolFilled, PoolFilled, RanOutOfCapacity, RanOutOfCapacity, NoTasksClaimed
-              { NoTasksClaimed: 20, RanOutOfCapacity: 40, PoolFilled: 40 },
+              {
+                NoTasksClaimed: 20,
+                RanOutOfCapacity: 40,
+                PoolFilled: 40,
+                Failed: 0,
+                NoAvailableWorkers: 0,
+                RunningAtCapacity: 0,
+              },
               // PoolFilled, RanOutOfCapacity, RanOutOfCapacity, NoTasksClaimed, NoTasksClaimed
-              { NoTasksClaimed: 40, RanOutOfCapacity: 40, PoolFilled: 20 },
+              {
+                NoTasksClaimed: 40,
+                RanOutOfCapacity: 40,
+                PoolFilled: 20,
+                Failed: 0,
+                NoAvailableWorkers: 0,
+                RunningAtCapacity: 0,
+              },
             ]);
             resolve();
           } catch (e) {
@@ -453,16 +523,34 @@ describe('Task Run Statistics', () => {
           }
         });
 
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.RanOutOfCapacity)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.RanOutOfCapacity)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
+      const timing = {
+        start: 0,
+        stop: 0,
+      };
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
+      events$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.PoolFilled, timing })));
+      events$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.PoolFilled, timing })));
+      events$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.PoolFilled, timing })));
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.RanOutOfCapacity, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.RanOutOfCapacity, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
     });
   });
 });

@@ -22,8 +22,8 @@ import { getLastMetric } from '../../helpers/get_last_metric';
 import { mapBucket } from '../../helpers/map_bucket';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export function stdMetric(bucket, panel, series) {
-  return (next) => (results) => {
+export function stdMetric(bucket, panel, series, meta, extractFields) {
+  return (next) => async (results) => {
     const metric = getLastMetric(series);
 
     if (metric.type === METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
@@ -42,7 +42,7 @@ export function stdMetric(bucket, panel, series) {
       aggregations: bucket,
     };
 
-    getSplits(fakeResp, panel, series).forEach((split) => {
+    (await getSplits(fakeResp, panel, series, meta, extractFields)).forEach((split) => {
       const data = split.timeseries.buckets.map(mapBucket(metric));
       results.push({
         id: split.id,

@@ -21,13 +21,7 @@ const areObjectsUnique = (objects: SavedObjectIdentifier[]) =>
   _.uniqBy(objects, (o: SavedObjectIdentifier) => `${o.type}:${o.id}`).length === objects.length;
 
 export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
-  const {
-    externalRouter,
-    getSpacesService,
-    usageStatsServicePromise,
-    getImportExportObjectLimit,
-    getStartServices,
-  } = deps;
+  const { externalRouter, getSpacesService, usageStatsServicePromise, getStartServices } = deps;
   const usageStatsClientPromise = usageStatsServicePromise.then(({ getClient }) => getClient());
 
   externalRouter.post(
@@ -99,7 +93,6 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
 
       const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
         startServices.savedObjects,
-        getImportExportObjectLimit,
         request
       );
       const sourceSpaceId = getSpacesService().getSpaceId(request);
@@ -169,7 +162,6 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
 
       const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
         startServices.savedObjects,
-        getImportExportObjectLimit,
         request
       );
       const sourceSpaceId = getSpacesService().getSpaceId(request);

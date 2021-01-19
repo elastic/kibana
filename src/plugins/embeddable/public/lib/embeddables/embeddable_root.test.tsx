@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { HelloWorldEmbeddable } from '../../../../../../examples/embeddable_examples/public';
+import { HelloWorldEmbeddable } from '../../tests/fixtures';
 import { EmbeddableRoot } from './embeddable_root';
 import { mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';

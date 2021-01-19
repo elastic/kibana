@@ -80,15 +80,18 @@ describe('percentile(resp, panel, series)', () => {
     };
   });
 
-  test('calls next when finished', () => {
+  test('calls next when finished', async () => {
     const next = jest.fn();
-    percentile(resp, panel, series)(next)([]);
+
+    await percentile(resp, panel, series, {})(next)([]);
+
     expect(next.mock.calls.length).toEqual(1);
   });
 
-  test('creates a series', () => {
+  test('creates a series', async () => {
     const next = (results) => results;
-    const results = percentile(resp, panel, series)(next)([]);
+    const results = await percentile(resp, panel, series, {})(next)([]);
+
     expect(results).toHaveLength(2);
 
     expect(results[0]).toHaveProperty('id', 'test:10-90');

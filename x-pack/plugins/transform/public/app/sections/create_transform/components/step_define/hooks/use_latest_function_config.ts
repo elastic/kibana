@@ -11,6 +11,8 @@ import { LatestFunctionConfigUI } from '../../../../../../../common/types/transf
 import { StepDefineFormProps } from '../step_define_form';
 import { StepDefineExposedState } from '../common';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
+import { AggConfigs, FieldParamType } from '../../../../../../../../../../src/plugins/data/common';
+import { useAppDependencies } from '../../../../../app_dependencies';
 
 /**
  * Latest function config mapper between API and UI
@@ -32,26 +34,33 @@ export const latestConfigMapper = {
 /**
  * Provides available options for unique_key and sort fields
  * @param indexPattern
+ * @param aggConfigs
  */
-function getOptions(indexPattern: StepDefineFormProps['searchItems']['indexPattern']) {
-  const uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>> = [];
-  const sortFieldOptions: Array<EuiComboBoxOptionOption<string>> = [];
+function getOptions(
+  indexPattern: StepDefineFormProps['searchItems']['indexPattern'],
+  aggConfigs: AggConfigs
+) {
+  const aggConfig = aggConfigs.aggs[0];
+  const param = aggConfig.type.params.find((p) => p.type === 'field');
+  const filteredIndexPatternFields = param
+    ? ((param as unknown) as FieldParamType).getAvailableFields(aggConfig)
+    : [];
 
-  const ignoreFieldNames = new Set(['_id', '_index', '_type']);
+  const ignoreFieldNames = new Set(['_source', '_type', '_index', '_id', '_version', '_score']);
 
-  for (const field of indexPattern.fields) {
-    if (ignoreFieldNames.has(field.name)) {
-      continue;
-    }
+  const uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>> = filteredIndexPatternFields
+    .filter((v) => !ignoreFieldNames.has(v.name))
+    .map((v) => ({
+      label: v.displayName,
+      value: v.name,
+    }));
 
-    if (field.aggregatable) {
-      uniqueKeyOptions.push({ label: field.displayName, value: field.name });
-    }
-
-    if (field.sortable) {
-      sortFieldOptions.push({ label: field.displayName, value: field.name });
-    }
-  }
+  const sortFieldOptions: Array<EuiComboBoxOptionOption<string>> = indexPattern.fields
+    .filter((v) => !ignoreFieldNames.has(v.name) && v.sortable)
+    .map((v) => ({
+      label: v.displayName,
+      value: v.name,
+    }));
 
   return { uniqueKeyOptions, sortFieldOptions };
 }
@@ -92,9 +101,12 @@ export function useLatestFunctionConfig(
     sort: defaults.sort,
   });
 
-  const { uniqueKeyOptions, sortFieldOptions } = useMemo(() => getOptions(indexPattern), [
-    indexPattern,
-  ]);
+  const { data } = useAppDependencies();
+
+  const { uniqueKeyOptions, sortFieldOptions } = useMemo(() => {
+    const aggConfigs = data.search.aggs.createAggConfigs(indexPattern, [{ type: 'terms' }]);
+    return getOptions(indexPattern, aggConfigs);
+  }, [indexPattern, data.search.aggs]);
 
   const updateLatestFunctionConfig = useCallback(
     (update) =>

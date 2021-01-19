@@ -27,7 +27,7 @@ import { formatKey } from './format_key';
 const getTimeSeries = (resp, series) =>
   _.get(resp, `aggregations.timeseries`) || _.get(resp, `aggregations.${series.id}.timeseries`);
 
-export function getSplits(resp, panel, series, meta) {
+export async function getSplits(resp, panel, series, meta, extractFields) {
   if (!meta) {
     meta = _.get(resp, `aggregations.${series.id}.meta`);
   }
@@ -35,12 +35,17 @@ export function getSplits(resp, panel, series, meta) {
   const color = new Color(series.color);
   const metric = getLastMetric(series);
   const buckets = _.get(resp, `aggregations.${series.id}.buckets`);
+
+  const fieldsForMetaIndex = meta.index ? await extractFields(meta.index) : [];
+  const splitByLabel = calculateLabel(metric, series.metrics, fieldsForMetaIndex);
+
   if (buckets) {
     if (Array.isArray(buckets)) {
       const size = buckets.length;
       const colors = getSplitColors(series.color, size, series.split_color_mode);
       return buckets.map((bucket) => {
         bucket.id = `${series.id}:${bucket.key}`;
+        bucket.splitByLabel = splitByLabel;
         bucket.label = formatKey(bucket.key, series);
         bucket.labelFormatted = bucket.key_as_string ? formatKey(bucket.key_as_string, series) : '';
         bucket.color = panel.type === 'top_n' ? color.string() : colors.shift();
@@ -72,10 +77,12 @@ export function getSplits(resp, panel, series, meta) {
     .forEach((m) => {
       mergeObj[m.id] = _.get(resp, `aggregations.${series.id}.${m.id}`);
     });
+
   return [
     {
       id: series.id,
-      label: series.label || calculateLabel(metric, series.metrics),
+      splitByLabel,
+      label: series.label || splitByLabel,
       color: color.string(),
       ...mergeObj,
       meta,

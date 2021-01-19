@@ -19,7 +19,7 @@
 
 // @ts-ignore
 import { getUiSettings } from '../kibana_services';
-import { geohashColumns } from './decode_geo_hash';
+import { geohashColumns } from './geohash_columns';
 
 /**
  * Get the number of geohash columns (world-wide) for a given precision

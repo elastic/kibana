@@ -36,10 +36,11 @@ import {
 } from '@elastic/eui';
 
 export function CumulativeSumAgg(props) {
-  const { model, siblings } = props;
+  const { model, siblings, fields, indexPattern } = props;
   const htmlId = htmlIdGenerator();
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
+
   return (
     <AggRow
       disableDelete={props.disableDelete}
@@ -80,6 +81,7 @@ export function CumulativeSumAgg(props) {
               onChange={handleSelectChange('field')}
               metrics={siblings}
               metric={model}
+              fields={fields[indexPattern]}
               value={model.field}
               exclude={[METRIC_TYPES.TOP_HIT]}
             />
@@ -93,6 +95,7 @@ export function CumulativeSumAgg(props) {
 CumulativeSumAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
+  indexPattern: PropTypes.string,
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onChange: PropTypes.func,
