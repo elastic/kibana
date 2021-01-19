@@ -68,9 +68,5 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
     describe('Metrics', function () {
       loadTestFile(require.resolve('./metrics_charts/metrics_charts'));
     });
-
-    describe('Correlations', function () {
-      loadTestFile(require.resolve('./correlations/slow_transactions'));
-    });
   });
 }

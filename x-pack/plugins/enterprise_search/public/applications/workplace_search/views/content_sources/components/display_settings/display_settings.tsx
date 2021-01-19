@@ -6,9 +6,7 @@
 
 import React, { FormEvent, useEffect } from 'react';
 
-import { History } from 'history';
 import { useActions, useValues } from 'kea';
-import { useHistory } from 'react-router-dom';
 
 import './display_settings.scss';
 
@@ -26,6 +24,9 @@ import {
   getContentSourcePath,
 } from '../../../../routes';
 
+import { clearFlashMessages } from '../../../../../shared/flash_messages';
+
+import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
 
 import { Loading } from '../../../../../shared/loading';
@@ -45,10 +46,7 @@ interface DisplaySettingsProps {
 }
 
 export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
-  const history = useHistory() as History;
-  const { initializeDisplaySettings, setServerData, resetDisplaySettingsState } = useActions(
-    DisplaySettingsLogic
-  );
+  const { initializeDisplaySettings, setServerData } = useActions(DisplaySettingsLogic);
 
   const {
     dataLoading,
@@ -64,7 +62,7 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
 
   useEffect(() => {
     initializeDisplaySettings();
-    return resetDisplaySettingsState;
+    return clearFlashMessages;
   }, []);
 
   useEffect(() => {
@@ -95,7 +93,7 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
         ? getContentSourcePath(DISPLAY_SETTINGS_RESULT_DETAIL_PATH, sourceId, isOrganization)
         : getContentSourcePath(DISPLAY_SETTINGS_SEARCH_RESULT_PATH, sourceId, isOrganization);
 
-    history.push(path);
+    KibanaLogic.values.navigateToUrl(path);
   };
 
   const handleFormSubmit = (e: FormEvent) => {

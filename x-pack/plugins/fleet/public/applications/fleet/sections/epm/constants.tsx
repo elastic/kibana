@@ -28,6 +28,7 @@ export const AssetTitleMap: Record<AssetType, string> = {
   input: 'Agent input',
   map: 'Map',
   data_stream_ilm_policy: 'Data Stream ILM Policy',
+  lens: 'Lens',
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {
@@ -40,7 +41,8 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   index_pattern: 'indexPatternApp',
   search: 'searchProfilerApp',
   visualization: 'visualizeApp',
-  map: 'mapApp',
+  map: 'emsApp',
+  lens: 'lensApp',
 };
 
 export const ServiceIcons: Record<ServiceName, IconType> = {

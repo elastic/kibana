@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
-    it.skip('should create dashboard to URL drilldown and use it to navigate to discover', async () => {
+    it('should create dashboard to URL drilldown and use it to navigate to discover', async () => {
       await PageObjects.dashboard.gotoDashboardEditMode(
         dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
       );
@@ -43,6 +43,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         destinationURLTemplate: urlTemplate,
         trigger: 'SELECT_RANGE_TRIGGER',
       });
+
+      await testSubjects.click('urlDrilldownAdditionalOptions');
+      await testSubjects.click('urlDrilldownOpenInNewTab');
+
       await dashboardDrilldownsManage.saveChanges();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutClose();
 
