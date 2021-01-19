@@ -42,7 +42,7 @@ For a reference of all {kib} app use cases, refer to <<whats-the-right-app,Whatâ
 [role="screenshot"]
 image::images/home-page.png[Kibana home page]
 
-The Kibana main menu can get you where you need to go, at any time. Like the home page,
+The Kibana main menu gets you to where you need to go. Like the home page,
 the menu is organized by use case. Want to work with your logs, metrics, APM, or
 Uptime data? The apps you need are under *Observability*. The main menu also includes
 *Recently viewed* so you can easily access your previously opened apps.
