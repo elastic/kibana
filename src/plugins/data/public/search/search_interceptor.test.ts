@@ -74,12 +74,12 @@ describe('SearchInterceptor', () => {
     test('Renders a PainlessError', async () => {
       searchInterceptor.showError(
         new PainlessError({
-          body: {
-            attributes: {
-              error: {
-                failed_shards: {
-                  reason: 'bananas',
-                },
+          statusCode: 400,
+          message: '',
+          attributes: {
+            error: {
+              failed_shards: {
+                reason: 'bananas',
               },
             },
           } as any,
@@ -171,10 +171,8 @@ describe('SearchInterceptor', () => {
       describe('Should handle Timeout errors', () => {
         test('Should throw SearchTimeoutError on server timeout AND show toast', async () => {
           const mockResponse: any = {
-            result: 500,
-            body: {
-              message: 'Request timed out',
-            },
+            statusCode: 500,
+            message: 'Request timed out',
           };
           fetchMock.mockRejectedValueOnce(mockResponse);
           const mockRequest: IEsSearchRequest = {
@@ -187,10 +185,8 @@ describe('SearchInterceptor', () => {
 
         test('Timeout error should show multiple times if not in a session', async () => {
           const mockResponse: any = {
-            result: 500,
-            body: {
-              message: 'Request timed out',
-            },
+            statusCode: 500,
+            message: 'Request timed out',
           };
           fetchMock.mockRejectedValue(mockResponse);
           const mockRequest: IEsSearchRequest = {
@@ -208,10 +204,8 @@ describe('SearchInterceptor', () => {
 
         test('Timeout error should show once per each session', async () => {
           const mockResponse: any = {
-            result: 500,
-            body: {
-              message: 'Request timed out',
-            },
+            statusCode: 500,
+            message: 'Request timed out',
           };
           fetchMock.mockRejectedValue(mockResponse);
           const mockRequest: IEsSearchRequest = {
@@ -229,10 +223,8 @@ describe('SearchInterceptor', () => {
 
         test('Timeout error should show once in a single session', async () => {
           const mockResponse: any = {
-            result: 500,
-            body: {
-              message: 'Request timed out',
-            },
+            statusCode: 500,
+            message: 'Request timed out',
           };
           fetchMock.mockRejectedValue(mockResponse);
           const mockRequest: IEsSearchRequest = {
@@ -250,21 +242,20 @@ describe('SearchInterceptor', () => {
 
       test('Should throw Painless error on server error with OSS format', async () => {
         const mockResponse: any = {
-          result: 500,
-          body: {
-            attributes: {
-              error: {
-                root_cause: 'this is the problem',
-                failed_shards: [
-                  {
-                    reason: {
-                      lang: 'painless',
-                      script_stack: ['a', 'b'],
-                      reason: 'banana',
-                    },
+          statusCode: 500,
+          message: 'search_phase_execution_exception',
+          attributes: {
+            error: {
+              root_cause: 'this is the problem',
+              failed_shards: [
+                {
+                  reason: {
+                    lang: 'painless',
+                    script_stack: ['a', 'b'],
+                    reason: 'banana',
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         };

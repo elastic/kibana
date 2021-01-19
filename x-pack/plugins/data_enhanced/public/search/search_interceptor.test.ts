@@ -342,9 +342,8 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            error: {
-              message: 'oh no',
-            },
+            statusCode: 500,
+            message: 'oh no',
             id: 1,
           },
           isError: true,

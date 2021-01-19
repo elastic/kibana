@@ -23,18 +23,18 @@ import { IEsError } from './types';
 describe('EsError', () => {
   it('contains the same body as the wrapped error', () => {
     const error = {
-      body: {
-        attributes: {
-          error: {
-            type: 'top_level_exception_type',
-            reason: 'top-level reason',
-          },
+      statusCode: 500,
+      message: 'nope',
+      attributes: {
+        error: {
+          type: 'top_level_exception_type',
+          reason: 'top-level reason',
         },
-      },
+      } as any,
     } as IEsError;
     const esError = new EsError(error);
 
-    expect(typeof esError.body).toEqual('object');
-    expect(esError.body).toEqual(error.body);
+    expect(typeof esError.attributes).toEqual('object');
+    expect(esError).toEqual(error.attributes);
   });
 });

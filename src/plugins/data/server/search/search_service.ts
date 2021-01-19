@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import {
   CoreSetup,
@@ -73,7 +73,7 @@ import {
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { SessionService, IScopedSessionService, ISessionService } from './session';
-import { KbnServerError } from '../../../kibana_utils/server';
+import { KbnServerError, getErrorResponseInfo } from '../../../kibana_utils/server';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
@@ -171,11 +171,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                 };
               }),
               catchError((err) => {
-                // eslint-disable-next-line no-throw-literal
-                throw {
-                  statusCode: err.statusCode || 500,
-                  message: err.body?.error || err.message,
-                };
+                throw getErrorResponseInfo(err);
               })
             )
             .toPromise();
@@ -293,10 +289,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     options: ISearchOptions,
     deps: SearchStrategyDependencies
   ) => {
-    const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
-      options.strategy
-    );
-    return session.search(strategy, request, options, deps);
+    try {
+      const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
+        options.strategy
+      );
+      return session.search(strategy, request, options, deps);
+    } catch (e) {
+      return throwError(e);
+    }
   };
 
   private cancel = (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => {

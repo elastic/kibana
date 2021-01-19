@@ -37,6 +37,7 @@ export default async function ({ readConfigFile }) {
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         '--elasticsearch.healthCheck.delay=3600000',
         '--server.xsrf.disableProtection=true',
+        '--data.search.aggs.shardDelay.enabled=true',
         '--server.compression.referrerWhitelist=["some-host.com"]',
       ],
     },

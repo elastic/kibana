@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { KibanaResponseFactory } from 'kibana/server';
-import { KbnError } from '../common';
+import { KbnError, KibanaServerError } from '../common';
 
 export class KbnServerError extends KbnError {
   constructor(message: string, public readonly statusCode: number) {
@@ -26,14 +27,24 @@ export class KbnServerError extends KbnError {
   }
 }
 
-export function reportServerError(res: KibanaResponseFactory, err: any) {
-  return res.customError({
+export function getErrorResponseInfo(err: any): KibanaServerError {
+  let rootCause;
+  // Forward the cause of an Elasticsearch initiated error
+  if (err instanceof ResponseError) {
+    rootCause = err.body.error;
+  }
+  return {
     statusCode: err.statusCode ?? 500,
-    body: {
-      message: err.message,
-      attributes: {
-        error: err.body?.error || err.message,
-      },
-    },
+    message: err.message,
+    attributes: rootCause,
+  };
+}
+
+export function reportServerError(res: KibanaResponseFactory, err: any) {
+  const errParams = getErrorResponseInfo(err);
+  const { statusCode, ...rest } = errParams;
+  return res.customError({
+    statusCode,
+    body: rest,
   });
 }

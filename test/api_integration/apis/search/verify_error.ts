@@ -17,13 +17,21 @@
  * under the License.
  */
 
-import { KibanaServerError } from '../../../../kibana_utils/common';
+import expect from '@kbn/expect';
 
-export function getFailedShards(err: KibanaServerError) {
-  const failedShards = err.attributes?.failed_shards || err.attributes?.caused_by?.failed_shards;
-  return failedShards ? failedShards[0] : undefined;
-}
-
-export function getRootCause(err: KibanaServerError) {
-  return getFailedShards(err)?.reason;
-}
+export const verifyErrorResponse = (
+  r: any,
+  expectedCode: number,
+  message?: string,
+  shouldHaveAttrs?: boolean
+) => {
+  expect(r.statusCode).to.be(expectedCode);
+  if (message) {
+    expect(r.message).to.be(message);
+  }
+  if (shouldHaveAttrs) {
+    expect(r).to.have.property('attributes');
+  } else {
+    expect(r).not.to.have.property('attributes');
+  }
+};
