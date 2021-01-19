@@ -69,14 +69,6 @@ import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
-import {
-  IContextContainer,
-  IContextProvider,
-  ContextSetup,
-  HandlerFunction,
-  HandlerContextType,
-  HandlerParameters,
-} from './context';
 
 export { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
 /** @interal */
@@ -98,9 +90,7 @@ export {
   ApplicationStart,
   App,
   AppMount,
-  AppMountDeprecated,
   AppUnmount,
-  AppMountContext,
   AppMountParameters,
   AppLeaveHandler,
   AppLeaveActionType,
@@ -218,11 +208,6 @@ export { URL_MAX_LENGTH } from './core_app';
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
-  /**
-   * {@link ContextSetup}
-   * @deprecated
-   */
-  context: ContextSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -318,12 +303,6 @@ export {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
-  IContextContainer,
-  HandlerFunction,
-  HandlerContextType,
-  HandlerParameters,
-  IContextProvider,
-  ContextSetup,
   DocLinksStart,
   FatalErrorInfo,
   FatalErrorsSetup,
