@@ -353,6 +353,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private cancelSession = async (deps: SearchStrategyDependencies, sessionId: string) => {
     const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
+    const response = await deps.searchSessionsClient.cancel(sessionId);
 
     for (const [searchId, strategyName] of searchIdMapping.entries()) {
       const searchOptions = {
@@ -360,10 +361,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         strategy: strategyName,
         isStored: true,
       };
-      await this.cancel(deps, searchId, searchOptions);
+      this.cancel(deps, searchId, searchOptions);
     }
 
-    return deps.searchSessionsClient.cancel(sessionId);
+    return response;
   };
 
   private extendSession = async (
