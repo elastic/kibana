@@ -16,7 +16,8 @@
 }
 
 .lnsIndexPatternDimensionEditor__operation {
-  position: static;
+  // overrides the .euiListGroupItem display flex. The parent container has a column-count property that only works properly with block elements. 
+  display: block;
 }
 
 .lnsIndexPatternDimensionEditor__operation .euiListGroupItem__label {
