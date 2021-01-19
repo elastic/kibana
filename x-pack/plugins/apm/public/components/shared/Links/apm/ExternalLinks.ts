@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import url from 'url';
 
 export const getTraceUrl = ({
   traceId,
@@ -14,8 +13,8 @@ export const getTraceUrl = ({
   rangeFrom: string;
   rangeTo: string;
 }) => {
-  return url.format({
-    pathname: `/link-to/trace/${traceId}`,
-    query: { rangeFrom, rangeTo },
-  });
+  return (
+    `/link-to/trace/${traceId}?` +
+    new URLSearchParams({ rangeFrom, rangeTo }).toString()
+  );
 };
