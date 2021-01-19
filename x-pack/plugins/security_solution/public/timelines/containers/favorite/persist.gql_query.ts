@@ -7,8 +7,18 @@
 import gql from 'graphql-tag';
 
 export const persistTimelineFavoriteMutation = gql`
-  mutation PersistTimelineFavoriteMutation($timelineId: ID) {
-    persistFavorite(timelineId: $timelineId) {
+  mutation PersistTimelineFavoriteMutation(
+    $timelineId: ID
+    $templateTimelineId: String
+    $templateTimelineVersion: Int
+    $timelineType: TimelineType!
+  ) {
+    persistFavorite(
+      timelineId: $timelineId
+      templateTimelineId: $templateTimelineId
+      templateTimelineVersion: $templateTimelineVersion
+      timelineType: $timelineType
+    ) {
       savedObjectId
       version
       favorite {
@@ -16,6 +26,9 @@ export const persistTimelineFavoriteMutation = gql`
         userName
         favoriteDate
       }
+      templateTimelineId
+      templateTimelineVersion
+      timelineType
     }
   }
 `;

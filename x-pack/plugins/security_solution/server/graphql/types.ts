@@ -837,6 +837,12 @@ export interface ResponseFavoriteTimeline {
 
   savedObjectId: string;
 
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
+
   version: string;
 
   favorite?: Maybe<FavoriteTimelineResult[]>;
@@ -1693,6 +1699,12 @@ export interface PersistTimelineMutationArgs {
 }
 export interface PersistFavoriteMutationArgs {
   timelineId?: Maybe<string>;
+
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
 }
 export interface DeleteTimelineMutationArgs {
   id: string[];
@@ -3419,6 +3431,12 @@ export namespace MutationResolvers {
   > = Resolver<R, Parent, TContext, PersistFavoriteArgs>;
   export interface PersistFavoriteArgs {
     timelineId?: Maybe<string>;
+
+    templateTimelineId?: Maybe<string>;
+
+    templateTimelineVersion?: Maybe<number>;
+
+    timelineType?: Maybe<TimelineType>;
   }
 
   export type DeleteTimelineResolver<R = boolean, Parent = {}, TContext = SiemContext> = Resolver<
@@ -3492,6 +3510,12 @@ export namespace ResponseFavoriteTimelineResolvers {
 
     savedObjectId?: SavedObjectIdResolver<string, TypeParent, TContext>;
 
+    templateTimelineId?: TemplateTimelineIdResolver<Maybe<string>, TypeParent, TContext>;
+
+    templateTimelineVersion?: TemplateTimelineVersionResolver<Maybe<number>, TypeParent, TContext>;
+
+    timelineType?: TimelineTypeResolver<Maybe<TimelineType>, TypeParent, TContext>;
+
     version?: VersionResolver<string, TypeParent, TContext>;
 
     favorite?: FavoriteResolver<Maybe<FavoriteTimelineResult[]>, TypeParent, TContext>;
@@ -3509,6 +3533,21 @@ export namespace ResponseFavoriteTimelineResolvers {
   > = Resolver<R, Parent, TContext>;
   export type SavedObjectIdResolver<
     R = string,
+    Parent = ResponseFavoriteTimeline,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TemplateTimelineIdResolver<
+    R = Maybe<string>,
+    Parent = ResponseFavoriteTimeline,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TemplateTimelineVersionResolver<
+    R = Maybe<number>,
+    Parent = ResponseFavoriteTimeline,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TimelineTypeResolver<
+    R = Maybe<TimelineType>,
     Parent = ResponseFavoriteTimeline,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

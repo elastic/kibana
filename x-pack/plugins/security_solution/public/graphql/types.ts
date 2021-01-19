@@ -835,6 +835,12 @@ export interface ResponseFavoriteTimeline {
 
   savedObjectId: string;
 
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
+
   version: string;
 
   favorite?: Maybe<FavoriteTimelineResult[]>;
@@ -1691,6 +1697,12 @@ export interface PersistTimelineMutationArgs {
 }
 export interface PersistFavoriteMutationArgs {
   timelineId?: Maybe<string>;
+
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
 }
 export interface DeleteTimelineMutationArgs {
   id: string[];
@@ -2096,6 +2108,9 @@ export namespace DeleteTimelineMutation {
 export namespace PersistTimelineFavoriteMutation {
   export type Variables = {
     timelineId?: Maybe<string>;
+    templateTimelineId?: Maybe<string>;
+    templateTimelineVersion?: Maybe<number>;
+    timelineType: TimelineType;
   };
 
   export type Mutation = {
@@ -2112,6 +2127,12 @@ export namespace PersistTimelineFavoriteMutation {
     version: string;
 
     favorite: Maybe<Favorite[]>;
+
+    templateTimelineId: Maybe<string>;
+
+    templateTimelineVersion: Maybe<number>;
+
+    timelineType: Maybe<TimelineType>;
   };
 
   export type Favorite = {
