@@ -35,17 +35,21 @@ export function createSearchStartMock(): jest.Mocked<ISearchStart> {
   return {
     aggs: searchAggsStartMock(),
     getSearchStrategy: jest.fn(),
-    asScoped: jest.fn().mockReturnValue({
-      search: jest.fn(),
-      cancel: jest.fn(),
-      extend: jest.fn(),
-      saveSession: jest.fn(),
-      getSession: jest.fn(),
-      findSessions: jest.fn(),
-      updateSession: jest.fn(),
-      extendSession: jest.fn(),
-      cancelSession: jest.fn(),
-    }),
+    asScoped: jest.fn().mockReturnValue(createSearchRequestHandlerContext()),
     searchSource: searchSourceMock.createStartContract(),
+  };
+}
+
+export function createSearchRequestHandlerContext() {
+  return {
+    search: jest.fn(),
+    cancel: jest.fn(),
+    extend: jest.fn(),
+    saveSession: jest.fn(),
+    getSession: jest.fn(),
+    findSessions: jest.fn(),
+    updateSession: jest.fn(),
+    extendSession: jest.fn(),
+    cancelSession: jest.fn(),
   };
 }

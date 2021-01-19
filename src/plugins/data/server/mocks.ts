@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { createSearchSetupMock, createSearchStartMock } from './search/mocks';
+import { RequestHandlerContext } from 'kibana/server';
+import {
+  createSearchSetupMock,
+  createSearchStartMock,
+  createSearchRequestHandlerContext,
+} from './search/mocks';
 import { createFieldFormatsSetupMock, createFieldFormatsStartMock } from './field_formats/mocks';
 import { createIndexPatternsStartMock } from './index_patterns/mocks';
 
@@ -36,7 +41,14 @@ function createStartContract() {
   };
 }
 
+function createRequestHandlerContext() {
+  return ({
+    search: createSearchRequestHandlerContext(),
+  } as unknown) as jest.Mocked<RequestHandlerContext>;
+}
+
 export const dataPluginMock = {
   createSetupContract,
   createStartContract,
+  createRequestHandlerContext,
 };

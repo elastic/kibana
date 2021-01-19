@@ -8,7 +8,7 @@ import type { MockedKeys } from '@kbn/utility-types/jest';
 import type { CoreSetup, RequestHandlerContext } from 'kibana/server';
 import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
-import { createSearchRequestHandlerContext } from './mocks';
+import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 import { registerSessionRoutes } from './session';
 
 describe('registerSessionRoutes', () => {
@@ -17,7 +17,7 @@ describe('registerSessionRoutes', () => {
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
-    mockContext = createSearchRequestHandlerContext();
+    mockContext = dataPluginMock.createRequestHandlerContext();
     registerSessionRoutes(mockCoreSetup.http.createRouter());
   });
 
