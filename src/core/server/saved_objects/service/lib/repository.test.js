@@ -217,6 +217,7 @@ describe('SavedObjectsRepository', () => {
   beforeEach(() => {
     client = elasticsearchClientMock.createElasticsearchClient();
     migrator = mockKibanaMigrator.create();
+    documentMigrator.prepareMigrations();
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = async () => ({ status: 'skipped' });
 
