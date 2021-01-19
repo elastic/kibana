@@ -121,6 +121,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   if (!props.selectedIndexPattern) {
     return null;
   }
+  // console.count('Render sidebar');
 
   return (
     <>

@@ -16,11 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import React from 'react';
 import { DiscoverLegacy } from './discover_legacy';
 
+const DataGridContainer = (props: any) => {
+  return <DiscoverLegacy {...props} />;
+};
+
 export function createDiscoverLegacyDirective(reactDirective: any) {
-  return reactDirective(DiscoverLegacy, [
+  return reactDirective(DataGridContainer, [
     ['fetch', { watchDepth: 'reference' }],
     ['fetchCounter', { watchDepth: 'reference' }],
     ['fetchError', { watchDepth: 'reference' }],

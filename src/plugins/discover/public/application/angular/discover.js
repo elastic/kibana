@@ -187,6 +187,7 @@ app.directive('discoverApp', function () {
 });
 
 function discoverController($element, $route, $scope, $timeout, Promise) {
+  // console.count('execute discover controller');
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
@@ -483,6 +484,12 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     );
   };
 
+  $scope.changeInterval = (interval) => {
+    if (interval) {
+      setAppState({ interval });
+    }
+  };
+
   const init = _.once(() => {
     $scope.updateDataSource().then(async () => {
       const fetch$ = merge(
@@ -515,12 +522,6 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
           (error) => addFatalError(core.fatalErrors, error)
         )
       );
-
-      $scope.changeInterval = (interval) => {
-        if (interval) {
-          setAppState({ interval });
-        }
-      };
 
       $scope.$watchMulti(
         ['rows', 'fetchStatus'],

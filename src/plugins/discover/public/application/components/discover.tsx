@@ -84,6 +84,7 @@ export function Discover({
   updateQuery,
   updateSavedQueryId,
 }: DiscoverProps) {
+  // console.count('discover layout render');
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
   const [toggleOn, toggleChart] = useState(true);
@@ -319,3 +320,5 @@ export function Discover({
     </I18nProvider>
   );
 }
+
+export const DiscoverMemoized = React.memo(Discover);

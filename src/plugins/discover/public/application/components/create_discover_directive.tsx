@@ -16,11 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { DiscoverMemoized } from './discover';
+import { DiscoverProps } from './discover_legacy';
 
-import { Discover } from './discover';
+class DiscoverWrapper extends React.Component<DiscoverProps> {
+  shouldComponentUpdate(nextProps: Readonly<DiscoverProps>): boolean {
+    for (const [k, v] of Object.entries(this.props)) {
+      // @ts-ignore
+      if (typeof v !== 'function' && v !== nextProps[k]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  componentDidUpdate(prevProps: Readonly<DiscoverProps>) {
+    for (const [k, v] of Object.entries(this.props)) {
+      // @ts-ignore
+      if (typeof v !== 'function' && v !== prevProps[k]) {
+        // console.log(`Prop '${k}' changed`, { old: prevProps[k], new: v });
+      }
+    }
+  }
+  public render() {
+    if (!this.props.resultState) {
+      return null;
+    }
+    return <DiscoverMemoized {...this.props} />;
+  }
+}
 
 export function createDiscoverDirective(reactDirective: any) {
-  return reactDirective(Discover, [
+  return reactDirective(DiscoverWrapper, [
     ['fetch', { watchDepth: 'reference' }],
     ['fetchCounter', { watchDepth: 'reference' }],
     ['fetchError', { watchDepth: 'reference' }],
