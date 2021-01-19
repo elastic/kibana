@@ -48,7 +48,7 @@ Uptime data? The apps you need are under *Observability*. The main menu also inc
 *Recently viewed* so you can easily access your previously opened apps.
 
 Hidden by default, you can access the main menu with a single click on the
-hamburger icon. Use the *Dock navigation* link at the bottom of the sidebar to keep the navigation visible.
+hamburger icon. To keep the main menu visible at all times, open the main menu, then click *Dock navigation*.
 
 [role="screenshot"]
 image::images/kibana-main-menu.png[Kibana main menu]
