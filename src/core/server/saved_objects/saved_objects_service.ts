@@ -388,6 +388,12 @@ export class SavedObjectsService
      */
     const skipMigrations = this.config.migration.skip || !pluginsInitialized;
 
+    /**
+     * Note: Prepares all migrations maps. If a saved object type was registered with property `migrations`
+     * of type function; this function will be called to get the type's SavedObjectMigrationMap.
+     */
+    migrator.prepareMigrations();
+
     if (skipMigrations) {
       this.logger.warn(
         'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
