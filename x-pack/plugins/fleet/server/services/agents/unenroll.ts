@@ -6,13 +6,18 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AgentSOAttributes } from '../../types';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { getAgent } from './crud';
+import { agentPolicyService } from '../agent_policy';
 import * as APIKeyService from '../api_keys';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
-import { getAgents, listAllAgents } from './crud';
+import { getAgent, getAgents, listAllAgents } from './crud';
 
 export async function unenrollAgent(soClient: SavedObjectsClientContract, agentId: string) {
   const now = new Date().toISOString();
+  const agent = await getAgent(soClient, agentId);
+  if (!agent.policy_id) throw new Error(`Cannot find agent ${agentId}`);
+  const agentPolicy = await agentPolicyService.get(soClient, agent.policy_id, false);
+  if (agentPolicy?.is_managed) throw new Error('Cannot unenroll from a managed agent policy');
+
   await createAgentAction(soClient, {
     agent_id: agentId,
     created_at: now,
