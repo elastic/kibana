@@ -26,6 +26,7 @@ import { ILicense } from '../../../licensing/common/types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { ProtectionModes } from '../../common/endpoint/types';
 import { getExceptionListClientMock } from '../../../lists/server/services/exception_lists/exception_list_client.mock';
+import { ExceptionListClient } from '../../../lists/server';
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
@@ -207,12 +208,11 @@ describe('ingest_integration tests ', () => {
     });
 
     test('policy creation succeeds even if endpoint exception list creation fails', async () => {
+      const mockError = new Error('error creating endpoint list');
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const manifestManager = getManifestManagerMock();
       const lastComputed = await manifestManager.getLastComputedManifest();
-      exceptionListClient.manifestManager.buildNewManifest = jest
-        .fn()
-        .mockResolvedValue(lastComputed); // no diffs
+      exceptionListClient.createEndpointList = jest.fn().mockRejectedValue(mockError);
       const callback = getPackagePolicyCreateCallback(
         logger,
         manifestManager,
@@ -225,6 +225,7 @@ describe('ingest_integration tests ', () => {
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
 
+      expect(exceptionListClient.createEndpointList).toHaveBeenCalled();
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
       expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
       expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
