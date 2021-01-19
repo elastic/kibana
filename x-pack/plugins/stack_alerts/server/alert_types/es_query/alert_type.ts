@@ -155,7 +155,7 @@ export function getAlertType(
         const instanceId = hit._id;
         const baseContext: EsQueryAlertActionContext = {
           date: new Date(date).toISOString(),
-          value: searchResults.hits.hits.length,
+          value: searchResult.hits.hits.length,
           conditions: `document with id '${instanceId}' matched query "${params.esQuery}"`,
         };
 
