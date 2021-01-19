@@ -19,7 +19,7 @@
 
 import { Discover } from './discover';
 
-export function createDiscoverLegacyDirective(reactDirective: any) {
+export function createDiscoverDirective(reactDirective: any) {
   return reactDirective(Discover, [
     ['fetch', { watchDepth: 'reference' }],
     ['fetchCounter', { watchDepth: 'reference' }],
