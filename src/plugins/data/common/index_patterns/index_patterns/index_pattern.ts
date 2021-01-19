@@ -133,14 +133,6 @@ export class IndexPattern implements IIndexPattern {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
   };
 
-  private getRuntimeFieldMap = () =>
-    this.fields.reduce((col, field) => {
-      if (field.runtimeField) {
-        col[field.name] = field.runtimeField;
-      }
-      return col;
-    }, {} as Record<string, RuntimeField>);
-
   getFieldAttrs = () => {
     const newFieldAttrs = { ...this.fieldAttrs };
 
@@ -168,13 +160,12 @@ export class IndexPattern implements IIndexPattern {
 
   getComputedFields() {
     const scriptFields: any = {};
-    const runtimeFields: Record<string, RuntimeField> = {};
     if (!this.fields) {
       return {
         storedFields: ['*'],
         scriptFields,
-        docvalueFields: [] as Array<{ field: any; format: string }>,
-        runtimeFields,
+        docvalueFields: [] as Array<{ field: string; format: string }>,
+        runtimeFields: {},
       };
     }
 
@@ -202,18 +193,11 @@ export class IndexPattern implements IIndexPattern {
       };
     });
 
-    this.fields.reduce((col, field) => {
-      if (field.runtimeField) {
-        col[field.name] = field.runtimeField;
-      }
-      return col;
-    }, runtimeFields);
-
     return {
       storedFields: ['*'],
       scriptFields,
       docvalueFields,
-      runtimeFields,
+      runtimeFields: this.runtimeFieldMap,
     };
   }
 
@@ -229,7 +213,7 @@ export class IndexPattern implements IIndexPattern {
       typeMeta: this.typeMeta,
       type: this.type,
       fieldFormats: this.fieldFormatMap,
-      runtimeFieldMap: this.getRuntimeFieldMap(),
+      runtimeFieldMap: this.runtimeFieldMap,
       fieldAttrs: this.fieldAttrs,
       intervalName: this.intervalName,
       allowNoIndex: this.allowNoIndex,
@@ -325,7 +309,7 @@ export class IndexPattern implements IIndexPattern {
       ? undefined
       : JSON.stringify(this.fieldFormatMap);
     const fieldAttrs = this.getFieldAttrs();
-    const runtimeFieldMap = this.getRuntimeFieldMap();
+    const runtimeFieldMap = this.runtimeFieldMap;
 
     return {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
