@@ -92,7 +92,7 @@ export const findAlertsWithInstancesTimelineRoute = (
           : [query.search_fields];
       }
 
-      const findResult = await alertsClient.findAlertsWithInstancesSummary({ options });
+      const findResult = await alertsClient.findAlertsWithInstancesTimeline({ options });
       return res.ok({
         body: findResult,
       });

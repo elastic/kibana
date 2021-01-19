@@ -138,7 +138,9 @@ export function alertInstancesStatusTimelineFromEventLog<
 } {
   // initialize the  result
   const { alert, events } = params;
-  const alertResult = {
+  const alertResult: SanitizedAlert<Params> & {
+    instances: Record<string, Array<{ status: AlertInstanceStatusValues; timeStamp: string }>>;
+  } = {
     ...alert,
     instances: {},
   };
@@ -149,7 +151,7 @@ export function alertInstancesStatusTimelineFromEventLog<
   >();
 
   // loop through the events
-  for (const event of events) {
+  for (const event of events.reverse()) {
     const timeStamp = event?.['@timestamp'];
     if (timeStamp === undefined) continue;
 
@@ -165,12 +167,10 @@ export function alertInstancesStatusTimelineFromEventLog<
     const statuses = instances.has(instanceId) ? instances.get(instanceId)! : [];
     const currentStatus: { timeStamp: string; status: AlertInstanceStatusValues } = {
       status: 'OK',
-      timeStamp: '',
+      timeStamp,
     };
     switch (action) {
       case EVENT_LOG_ACTIONS.newInstance:
-        currentStatus.timeStamp = timeStamp;
-      // intentionally no break here
       case EVENT_LOG_ACTIONS.activeInstance:
         currentStatus.status = 'Active';
         break;
@@ -179,6 +179,12 @@ export function alertInstancesStatusTimelineFromEventLog<
         currentStatus.status = 'OK';
     }
     statuses.push(currentStatus);
+    instances.set(instanceId, statuses);
+  }
+  // convert the instances map to object form
+  const instanceIds = Array.from(instances.keys()).sort();
+  for (const instanceId of instanceIds) {
+    alertResult.instances[instanceId] = instances.get(instanceId)!;
   }
   return alertResult;
 }

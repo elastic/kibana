@@ -38,7 +38,7 @@ describe('findAlertsWithInstancesTimelineRoute', () => {
       total: 0,
       data: [],
     };
-    alertsClient.findAlertsWithInstancesSummary.mockResolvedValueOnce(findResult);
+    alertsClient.findAlertsWithInstancesTimeline.mockResolvedValueOnce(findResult);
 
     const [context, req, res] = mockHandlerArguments(
       { alertsClient },
@@ -63,8 +63,8 @@ describe('findAlertsWithInstancesTimelineRoute', () => {
       }
     `);
 
-    expect(alertsClient.findAlertsWithInstancesSummary).toHaveBeenCalledTimes(1);
-    expect(alertsClient.findAlertsWithInstancesSummary.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClient.findAlertsWithInstancesTimeline).toHaveBeenCalledTimes(1);
+    expect(alertsClient.findAlertsWithInstancesTimeline.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "options": Object {
@@ -89,7 +89,7 @@ describe('findAlertsWithInstancesTimelineRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    alertsClient.findAlertsWithInstancesSummary.mockResolvedValueOnce({
+    alertsClient.findAlertsWithInstancesTimeline.mockResolvedValueOnce({
       page: 1,
       perPage: 1,
       total: 0,
