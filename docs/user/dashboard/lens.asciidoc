@@ -1,11 +1,11 @@
-[[create-panels-with-lens]]
+[[create-a-dashboard-of-panels-with-web-server-data]]
 == Tutorial: Create a dashboard of panels with web server data
 
 You collected data from your web server, and you want to visualize and analyze the data on a dashboard. To create dashboard panels of the data, open the *Lens* visualization builder, then  
 create the visualization panels that best display the data.
 
 [discrete]
-[[add-the-sample-web-logs-data]]
+[[add-the-data-and-create-the-dashboard]]
 === Add the data and create the dashboard
 
 To create visualizations of the data from the web server, add the data set, then create the dashboard.
@@ -37,6 +37,7 @@ image::images/lens_end_to_end_1_1.png[New visualization popover]
 The list of fields are dependent on the <<index-patterns,index pattern>>, <<set-time-filter,time filter>>, and field filters. 
 
 [float]
+[[view-the-data-summaries]]
 === View the data summaries
 
 For each field, *Lens* shows a summary depending on the type of data. Date fields show the time distribution, string fields show the top 10 values, 
@@ -57,7 +58,7 @@ image::images/lens_data_info_other.png[Data summary window with Other]
 NOTE: The sum of all the *Other* fields can equal more than 100% by a small amount.
 
 [discrete]
-[[metric-vis]]
+[[view-the-number-of-website-visitors]]
 === View the number of website visitors
 
 To determine how many users have visited your website within the last 90 days, create a metric visualization, then add it to the dashboard.
@@ -89,7 +90,7 @@ image::images/lens_end_to_end_1_4.png[Flyout config open]
 . *Save* the panel, enter `Unique visitors` in the *Title* field, then add the panel to the dashboard.
 
 [discrete]
-[[donut-vis]]
+[[view-the-distribution-of-visitors-by-operating-system]]
 === View the distribution of visitors by operating system
 
 To determine the operating systems you should continue to support, and the importance of mobile traffic from iOS devices, 

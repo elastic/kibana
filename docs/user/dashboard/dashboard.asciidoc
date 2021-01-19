@@ -77,13 +77,14 @@ Begin with an empty dashboard, or open an existing dashboard.
 * To open an existing dashboard, click the dashboard *Title* you want to open.
 
 [float]
+[[create-panels-with-lens]]
 === Create panels
 
 Choose the type of panel you want to create, then save the panel to the dashboard.
 
 . From the dashboard, choose one of the following options:
 
-* To create a panel, click *Create panel*, then click the panel type on the *New visualization* window.
+* To create a panel, click *Create panel*, then click the panel type on the *New visualization* window. *Lens* is recommended for most users. 
 
 * To add a saved panel, click *Add from library*, then select the panel you want to add. When a panel contains a stored query, both queries are applied.
 
@@ -155,7 +156,7 @@ Time filter::
 image:images/time_range_per_panel.gif[Time range per dashboard panel]
 
 Additional filters with AND::
-  Individual filters can be added to a single dashboard or pinned to multiple pages in {kib}. Filters can be added using a simple editor or an advanced JSON editor for the {es} {ref}query-dsl.html[query DSL].
+  Individual filters can be added to a single dashboard or pinned to multiple pages in {kib}. Filters can be added using a simple editor or an advanced JSON editor for the {es} {ref}/query-dsl.html[query DSL].
   +
   If more than one index pattern is shown on the dashboard, the filter editor will let you filter only one of them.
   +
@@ -273,7 +274,7 @@ To share the dashboard with a larger audience, click *Share* in the toolbar, the
 [[import-dashboards]]
 === Export the dashboard
 
-Dashboards can be exported as JSON, which can be used to automate Kibana. The simplest way to do this is using
+Dashboards can be exported as JSON, which can be used to automate {kib}. The simplest way to do this is using
 the <<dashboard-api>>. It is important to export dashboards with all references needed.
 
 --
