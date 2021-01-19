@@ -13,10 +13,14 @@ import { SecurityLayerTemplate } from './security_layer_template';
 
 export const SecurityLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH, LAYER_WIZARD_CATEGORY.SOLUTIONS],
-  checkVisibility: async () => {
+  getIsDisabled: async () => {
     const indexPatterns = await getSecurityIndexPatterns();
-    return indexPatterns.length > 0;
+    return indexPatterns.length === 0;
   },
+  disabledReason: i18n.translate('xpack.maps.security.disabledDesc', {
+    defaultMessage:
+      'Cannot find security index pattern. To get started with Security, go to Security > Overview.',
+  }),
   description: i18n.translate('xpack.maps.security.desc', {
     defaultMessage: 'Security layers',
   }),

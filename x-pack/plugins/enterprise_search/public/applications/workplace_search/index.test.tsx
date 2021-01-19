@@ -5,7 +5,6 @@
  */
 
 import '../__mocks__/shallow_useeffect.mock';
-import '../__mocks__/kea.mock';
 import { setMockValues, setMockActions, mockKibanaValues } from '../__mocks__';
 
 import React from 'react';
