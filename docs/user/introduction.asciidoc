@@ -101,7 +101,7 @@ Available types: `application`, `canvas-workpad`, `dashboard`, `index-pattern`, 
 [[visualize-and-analyze]]
 === Analyze your data
 
-Data exploration and visualizations are core features of {kib}.
+Data analysis is the core functionality of {kib}.
 You can quickly search through large amounts of data, explore fields and values
 present, and then use {kib}’s drag-and-drop interface to rapidly build charts, tables, metrics, and more.
 
