@@ -19,6 +19,7 @@ import type {
   ContextProviderReturn,
   ListPluginSetup,
   ListsPluginStart,
+  ListsRequestHandlerContext,
   PluginsStart,
 } from './types';
 import { createConfig$ } from './create_config';
@@ -45,7 +46,7 @@ export class ListPlugin
     initSavedObjects(core.savedObjects);
 
     core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<ListsRequestHandlerContext>();
     initRoutes(router, config);
 
     return {
