@@ -7,12 +7,16 @@
 import { CoreStart } from 'kibana/public';
 import {
   EmbeddableFactoryDefinition,
-  EmbeddableInput,
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
-import { LogStreamEmbeddable, LOG_STREAM_EMBEDDABLE } from './log_stream_embeddable';
+import {
+  LogStreamEmbeddable,
+  LOG_STREAM_EMBEDDABLE,
+  LogStreamEmbeddableInput,
+} from './log_stream_embeddable';
 
-export class LogStreamEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
+export class LogStreamEmbeddableFactoryDefinition
+  implements EmbeddableFactoryDefinition<LogStreamEmbeddableInput> {
   public readonly type = LOG_STREAM_EMBEDDABLE;
 
   constructor(private getCoreServices: () => Promise<CoreStart>) {}
@@ -22,7 +26,7 @@ export class LogStreamEmbeddableFactoryDefinition implements EmbeddableFactoryDe
     return true;
   }
 
-  public async create(initialInput: EmbeddableInput, parent?: IContainer) {
+  public async create(initialInput: LogStreamEmbeddableInput, parent?: IContainer) {
     const services = await this.getCoreServices();
     return new LogStreamEmbeddable(services, initialInput, parent);
   }

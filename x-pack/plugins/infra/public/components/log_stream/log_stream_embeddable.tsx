@@ -21,7 +21,7 @@ import LogStream from './log_stream';
 
 export const LOG_STREAM_EMBEDDABLE = 'LOG_STREAM_EMBEDDABLE';
 
-interface LogStreamEmbeddableInput extends EmbeddableInput {
+export interface LogStreamEmbeddableInput extends EmbeddableInput {
   timeRange: TimeRange;
   query: Query;
 }
