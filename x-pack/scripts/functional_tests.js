@@ -60,7 +60,7 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/ui_capabilities/security_and_spaces/config.ts'),
   require.resolve('../test/ui_capabilities/security_only/config.ts'),
   require.resolve('../test/ui_capabilities/spaces_only/config.ts'),
-  require.resolve('../test/upgrade_assistant_integration/config.ts'),
+  require.resolve('../test/upgrade_assistant_integration/config.js'),
   require.resolve('../test/licensing_plugin/config.ts'),
   require.resolve('../test/licensing_plugin/config.public.ts'),
   require.resolve('../test/endpoint_api_integration_no_ingest/config.ts'),
