@@ -35,9 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/88130
-  // FLAKY: https://github.com/elastic/kibana/issues/87988
-  describe.skip('patch_cases', () => {
+  describe('patch_cases', () => {
     afterEach(async () => {
       await deleteCases(es);
       await deleteCasesUserActions(es);
@@ -277,7 +275,8 @@ export default ({ getService }: FtrProviderContext): void => {
         await esArchiver.unload('auditbeat/hosts');
       });
 
-      it('updates alert status when the status is updated and syncAlerts=true', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/87988
+      it.skip('updates alert status when the status is updated and syncAlerts=true', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
 
         const { body: postedCase } = await supertest
@@ -377,7 +376,8 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
       });
 
-      it('it updates alert status when syncAlerts is turned on', async () => {
+      // Failing: See https://github.com/elastic/kibana/issues/88130
+      it.skip('it updates alert status when syncAlerts is turned on', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
 
         const { body: postedCase } = await supertest
