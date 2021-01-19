@@ -5,7 +5,7 @@
  */
 
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
-import { Job } from '../../../common/types/anomaly_detection_jobs';
+import { Job, JobStats } from '../../../common/types/anomaly_detection_jobs';
 import { GetGuards } from '../shared_services';
 
 export interface AnomalyDetectorsProvider {
@@ -32,6 +32,18 @@ export function getAnomalyDetectorsProvider(getGuards: GetGuards): AnomalyDetect
               const { body } = await mlClient.getJobs<{
                 count: number;
                 jobs: Job[];
+              }>(jobId !== undefined ? { job_id: jobId } : undefined);
+              return body;
+            });
+        },
+        async jobsStats(jobId?: string) {
+          return await getGuards(request, savedObjectsClient)
+            .isFullLicense()
+            .hasMlCapabilities(['canGetJobs'])
+            .ok(async ({ mlClient }) => {
+              const { body } = await mlClient.getJobStats<{
+                count: number;
+                jobs: JobStats[];
               }>(jobId !== undefined ? { job_id: jobId } : undefined);
               return body;
             });
