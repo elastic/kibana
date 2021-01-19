@@ -19,6 +19,7 @@ import {
   TooltipInfo,
   TooltipType,
 } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 // NOTE: The WaterfallChart has a hard requirement that consumers / solutions are making use of KibanaReactContext, and useKibana etc
 // can therefore be accessed.
@@ -118,7 +119,10 @@ export const WaterfallChart = ({
                 <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false}>
                   <EuiText size="xs">
                     <h3>
-                      Network requests {eventsCount} of {total}
+                      {i18n.translate('xpack.uptime.synthetics.waterfall.requestsTotalMessage', {
+                        defaultMessage: 'Network requests: {count}',
+                        values: { count: total > eventsCount ? `${eventsCount}/${total}` : total },
+                      })}
                     </h3>
                   </EuiText>
                 </WaterfallChartFixedTopContainerSidebarCover>
