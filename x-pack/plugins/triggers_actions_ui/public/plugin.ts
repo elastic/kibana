@@ -122,7 +122,14 @@ export class Plugin
         ];
 
         const { renderApp } = await import('./application/app');
-        const kibanaFeatures = await pluginsStart.features.getFeatures();
+
+        let kibanaFeatures;
+        try {
+          kibanaFeatures = await pluginsStart.features.getFeatures();
+        } catch (err) {
+          logger.error(`Unable to get features ${err.message}`);
+        }
+
         return renderApp({
           ...coreStart,
           data: pluginsStart.data,
