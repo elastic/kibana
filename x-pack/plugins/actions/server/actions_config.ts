@@ -59,7 +59,7 @@ function disabledActionTypeErrorMessage(actionType: string) {
 function isAllowed({ allowedHosts }: ActionsConfigType, hostname: string | null): boolean {
   const allowed = new Set(allowedHosts);
   if (allowed.has(AllowedHosts.Any)) return true;
-  if (hostname && allowed.has(hostname)) return true;
+  if (allowed.has(hostname)) return true;
   return false;
 }
 
