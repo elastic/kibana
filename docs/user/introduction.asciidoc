@@ -126,7 +126,7 @@ you can add a sample data set and give {kib} a test drive.
 insights and relationships. Ask your questions, and then filter the results to just the data you want.
 Or, just see the most recent documents added to {es}.
 
-. *Visualize.* {kib} provides many options for visualizing your data&mdash;from simple
+. *Visualize.* {kib} provides many options to create visualizations of your data&mdash;from simple
 aggregation-based charts to complex time series visualizations.
 <<dashboard, *Dashboard*>> is your starting point for building visualizations,
 and then pulling them together to show your data from multiple perspectives.
