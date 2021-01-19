@@ -6,14 +6,9 @@
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
-export default function observabilityApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
+export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('APM specs (trial)', function () {
     this.tags('ciGroup1');
-
-    describe('Services', function () {
-      loadTestFile(require.resolve('./services/annotations'));
-      loadTestFile(require.resolve('./services/top_services.ts'));
-    });
 
     describe('Transactions', function () {
       loadTestFile(require.resolve('./transactions/latency'));
@@ -41,10 +36,6 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
       loadTestFile(require.resolve('./csm/js_errors.ts'));
       loadTestFile(require.resolve('./csm/has_rum_data.ts'));
       loadTestFile(require.resolve('./csm/page_load_dist.ts'));
-    });
-
-    describe('Correlations', function () {
-      loadTestFile(require.resolve('./correlations/slow_transactions'));
     });
   });
 }

@@ -11,11 +11,13 @@ import path from 'path';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
+import { createRunnerProvider } from './runner';
+import { APMFtrConfigName } from '../configs';
 
-interface Settings {
+interface Config {
+  name: APMFtrConfigName;
   license: 'basic' | 'trial';
-  testFiles: string[];
-  name: string;
+  testFiles?: string[];
 }
 
 const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async (
@@ -34,8 +36,8 @@ const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async 
   return supertestAsPromised(url);
 };
 
-export function createTestConfig(settings: Settings) {
-  const { testFiles, license, name } = settings;
+export function createTestConfig(config: Config) {
+  const { license, name, testFiles = [] } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackAPITestsConfig = await readConfigFile(
@@ -48,13 +50,14 @@ export function createTestConfig(settings: Settings) {
     const supertestAsApmReadUser = supertestAsApmUser(servers.kibana, ApmUser.apmReadUser);
 
     return {
-      testFiles,
+      testFiles: [require.resolve('../tests'), ...testFiles],
       servers,
       esArchiver: {
         directory: path.resolve(__dirname, './fixtures/es_archiver'),
       },
       services: {
         ...services,
+        runner: createRunnerProvider(config.name),
         supertest: supertestAsApmReadUser,
         supertestAsApmReadUser,
         supertestAsNoAccessUser: supertestAsApmUser(servers.kibana, ApmUser.noAccessUser),
@@ -69,7 +72,7 @@ export function createTestConfig(settings: Settings) {
         ),
       },
       junit: {
-        reportName: name,
+        reportName: `APM API Integration tests (${name})`,
       },
       esTestCluster: {
         ...xPackAPITestsConfig.get('esTestCluster'),
