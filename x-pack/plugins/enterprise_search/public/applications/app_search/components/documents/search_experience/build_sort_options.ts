@@ -6,11 +6,14 @@
 
 import { flatten } from 'lodash';
 
+import { i18n } from '@kbn/i18n';
+
 import { Fields, SortOption, SortDirection } from './types';
+import { ASCENDING, DESCENDING } from './constants';
 
 const fieldNameToSortOptions = (fieldName: string): SortOption[] =>
   ['asc', 'desc'].map((direction) => ({
-    name: `${fieldName} (${direction})`,
+    name: direction === 'asc' ? ASCENDING(fieldName) : DESCENDING(fieldName),
     value: fieldName,
     direction: direction as SortDirection,
   }));

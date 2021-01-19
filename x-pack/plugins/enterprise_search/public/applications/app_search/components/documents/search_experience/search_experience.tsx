@@ -26,19 +26,22 @@ import { buildSearchUIConfig } from './build_search_ui_config';
 import { CustomizationCallout } from './customization_callout';
 import { CustomizationModal } from './customization_modal';
 import { buildSortOptions } from './build_sort_options';
+import { ASCENDING, DESCENDING } from './constants';
 
+const RECENTLY_UPLOADED = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.recentlyUploaded',
+  {
+    defaultMessage: 'Recently Uploaded',
+  }
+);
 const DEFAULT_SORT_OPTIONS: SortOption[] = [
   {
-    name: i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.recentlyUploadedDesc', {
-      defaultMessage: 'Recently Uploaded (desc)',
-    }),
+    name: DESCENDING(RECENTLY_UPLOADED),
     value: 'id',
     direction: 'desc',
   },
   {
-    name: i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.recentlyUploadedAsc', {
-      defaultMessage: 'Recently Uploaded (asc)',
-    }),
+    name: ASCENDING(RECENTLY_UPLOADED),
     value: 'id',
     direction: 'asc',
   },
