@@ -14,7 +14,6 @@ import {
   CoreStart,
   KibanaRequest,
   Logger,
-  RequestHandler,
   IContextProvider,
   ElasticsearchServiceStart,
   ILegacyClusterClient,
@@ -46,6 +45,7 @@ import {
   ActionTypeConfig,
   ActionTypeSecrets,
   ActionTypeParams,
+  RequestHandlerContextActionsPlugin,
 } from './types';
 
 import { getActionsConfigurationUtilities } from './actions_config';
@@ -243,7 +243,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     });
 
     // Routes
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<RequestHandlerContextActionsPlugin>();
     createActionRoute(router, this.licenseState);
     deleteActionRoute(router, this.licenseState);
     getActionRoute(router, this.licenseState);
@@ -448,7 +448,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private createRouteHandlerContext = (
     core: CoreSetup<ActionsPluginsStart>,
     defaultKibanaIndex: string
-  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'actions'> => {
+  ): IContextProvider<RequestHandlerContextActionsPlugin['actions']> => {
     const {
       actionTypeRegistry,
       isESOUsingEphemeralEncryptionKey,
