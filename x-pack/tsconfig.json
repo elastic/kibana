@@ -25,6 +25,9 @@
     "plugins/spaces/**/*",
     "plugins/security/**/*",
     "plugins/encrypted_saved_objects/**/*",
+    "plugins/beats_management/**/*",
+    "plugins/cloud/**/*",
+    "plugins/saved_objects_tagging/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -74,7 +77,7 @@
     { "path": "./plugins/features/tsconfig.json" },
     { "path": "./plugins/graph/tsconfig.json" },
     { "path": "./plugins/embeddable_enhanced/tsconfig.json" },
-    { "path": "./plugins/event_log/tsconfig.json"},
+    { "path": "./plugins/event_log/tsconfig.json" },
     { "path": "./plugins/licensing/tsconfig.json" },
     { "path": "./plugins/searchprofiler/tsconfig.json" },
     { "path": "./plugins/task_manager/tsconfig.json" },
@@ -84,6 +87,9 @@
     { "path": "./plugins/translations/tsconfig.json" },
     { "path": "./plugins/spaces/tsconfig.json" },
     { "path": "./plugins/security/tsconfig.json" },
-    { "path": "./plugins/encrypted_saved_objects/tsconfig.json" }
+    { "path": "./plugins/encrypted_saved_objects/tsconfig.json" },
+    { "path": "./plugins/beats_management/tsconfig.json" },
+    { "path": "./plugins/cloud/tsconfig.json" },
+    { "path": "./plugins/saved_objects_tagging/tsconfig.json" }
   ]
 }
