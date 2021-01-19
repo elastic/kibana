@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    rollup?: RollupContext;
-  }
-}
-
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
@@ -18,7 +12,6 @@ import {
   Plugin,
   Logger,
   PluginInitializerContext,
-  ILegacyScopedClusterClient,
   SharedGlobalConfig,
 } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
@@ -36,9 +29,6 @@ import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 import { getCapabilitiesForRollupIndices } from '../../../../src/plugins/data/server';
 
-interface RollupContext {
-  client: ILegacyScopedClusterClient;
-}
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
   const [core] = await getStartServices();
   // Extend the elasticsearchJs client with additional endpoints.
