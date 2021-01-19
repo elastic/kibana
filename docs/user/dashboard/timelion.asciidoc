@@ -29,7 +29,7 @@ Set up Metricbeat, then create the dashboard.
 
 . From {kib}, open the main menu, then click *Dashboard*.
 
-. Click *Create dashboard*.
+. On the *Dashboards* page, click *Create dashboard*.
 
 [float]
 ===== Open and set up Timelion

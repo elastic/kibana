@@ -91,7 +91,7 @@ create visual art for a specific topic.
 
 Choose the type of panel you want to create, then use the editor to configure the options. Each panel type supports different options. 
 
-. From the dashboard, click *Create new*, then click *Aggregation based* on the *New visualization* window.
+. From the dashboard, click *Create panel*, then click *Aggregation based* on the *New visualization* window.
 
 .. Click the type of panel you want to create.
 
@@ -123,13 +123,13 @@ a bar chart that displays the top five log traffic sources for every three hours
 
 Add the sample web logs data that you'll use to create the bar chart, then create the dashboard.
 
-. From the {kib} *Home* page, click *Try our sample data*.
+. From the *Home* page, click *Try our sample data*.
 
 . From *Sample web logs*, click *Add data*.
 
 . Open the main menu, then click *Dashboard*.
 
-. Click *Create dashboard*.
+. On the *Dashboards* page, click *Create dashboard*.
 
 [float]
 ==== Open and set up the aggregation-based bar chart
@@ -140,9 +140,9 @@ Open the bar chart visualization builder and change the time range.
 
 . On the *New visualization* window, click *Aggregation based > Vertical bar*.
 
-.. On the *Choose a source* window, click *kibana_sample_data_logs*.
+. On the *Choose a source* window, click *kibana_sample_data_logs*.
 
-. Change the <<set-time-filter, date time filter>>> to *Last 7 days*.
+. Change the <<set-time-filter, time filter>>> to *Last 7 days*.
 
 [float]
 [[tutorial-configure-the-bar-chart]]

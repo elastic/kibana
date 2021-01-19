@@ -26,9 +26,7 @@ To create visualizations of the website traffic data, add the data set, then cre
 
 . Open the main menu, click *Dashboard*.
 
-. Click *Create dashboard*.
-
-
+. On the *Dashboards* page, click *Create dashboard*.
 
 [discrete]
 [[donut-vis]]

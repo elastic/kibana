@@ -32,7 +32,7 @@ Add the eCommerce sample data that you'll use to create the stacked area chart, 
 
 . Open the main menu, then click *Dashboard*.
 
-. Click *Create dashboard*.
+. On the *Dashboards* page, click *Create dashboard*.
 
 [float]
 ===== Open and set up Vega

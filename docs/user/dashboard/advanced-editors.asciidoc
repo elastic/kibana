@@ -7,11 +7,11 @@
 [[tsvb-advanced-editor]]
 === TSVB
 
-*TSVB* is a time series data visualization editor that allows you to use the full power of the {es} aggregation framework. To use *TSVB*,
-you can combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
+*TSVB* is a time series data visualization editor that allows you to use the full power of the {es} aggregation framework. 
 
 With *TSVB*, you can:
 
+* Combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
 * View the data in several types of visualizations, including charts, data tables, and markdown panels.
 * Display multiple <<index-patterns, index patterns>> in each visualization.
 * Customize the data with labels and colors.

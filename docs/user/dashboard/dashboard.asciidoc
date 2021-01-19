@@ -6,7 +6,7 @@
 **_Visualize your data with dashboards._**
 
 The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<index-patterns, index patterns>> into a collection of panels 
-that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. Configure each panel to display your data in a supported chart, table, map, and more, 
+that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. Configure each panel to display your data in a chart, table, map, and more, 
 then compare the panels side-by-side to identify the patterns and connections in your data. 
 
 [role="screenshot"]
@@ -14,7 +14,7 @@ image:images/Dashboard_example.png[Example dashboard]
 
 [[tsvb]]
 
-Dashboards support many types of panels, and several editors that you can use to create panels.
+Dashboards support many types of panels, and provide several editors that you can use to create panels.
 
 [cols="2"]
 |===
@@ -26,7 +26,7 @@ Dashboards support many types of panels, and several editors that you can use to
 | Create beautiful displays of your geographical data.
 
 | <<add-panels-with-advanced-editors,Advanced editors>>
-| Manually create panels of your data with the *TSVB*, *Vega*, and *Timelion* editors.
+| Manually create panels of your data with the advanced *TSVB*, *Vega*, and *Timelion* editors.
 
 | <<add-aggregation-based-visualization-panels,Aggregation-based visualization panels>>
 | Manually create panels based on <<aggregation-reference,aggregations>>.
@@ -35,7 +35,7 @@ Dashboards support many types of panels, and several editors that you can use to
 | Add context to your panels with <<add-text,text>>, or filter the data in real-time with <<add-controls,*Controls*>>.
 
 | <<save-your-search,Saved search>>
-| Add a saved search from *Discover*.
+| Add a aved search from *Discover*.
 
 | <<xpack-ml-anomalies,Machine Learning>>
 | Create a panel with your machine learning anomaly detection data.
@@ -70,20 +70,22 @@ Begin with an empty dashboard, or open an existing dashboard.
 
 . Open the main menu, then click *Dashboard*.
 
-. Choose one of the following options:
+. On the *Dashboards* page, choose one of the following options:
 
 * To start with an empty dashboard, click *Create dashboard*.
 
-* To open an existing dashboard, Click the dashboard *Title* you want to open.
+* To open an existing dashboard, click the dashboard *Title*.
 
 [float]
 === Create panels
 
 Choose the type of panel you want to create, then save the panel to the dashboard.
 
-. To create a panel, click *Create panel*, then click the panel type on the *New visualization* window.
-+
-To add a saved panel, click *Add from library*, then select the panel you want to add. When a panel contains a stored query, both queries are applied.
+. From the dashboard, choose one of the following options:
+
+* To create a panel, click *Create panel*, then click the panel type on the *New visualization* window.
+
+* To add a saved panel, click *Add from library*, then select the panel you want to add. When a panel contains a stored query, both queries are applied.
 
 . To save the panel, click *Save* in the toolbar, then configure the *Save visualization* options.
 
@@ -110,13 +112,13 @@ create the visualization panels that best display the data.
 
 To create visualizations of the data from the web server, add the data set, then create the dashboard.
 
-. From the {kib} *Home* page, click *Try our sample data*.
+. On the *Home* page, click *Try our sample data*.
 
 . From *Sample web logs*, click *Add data*.
 
-. Open the main menu, click *Dashboard*.
+. Open the main menu, then click *Dashboard*.
 
-. Click *Create dashboard*.
+. On the *Dashboards* page, click *Create dashboard*.
 
 [float]
 [[open-and-set-up-lens]]
@@ -145,7 +147,7 @@ and numeric fields show a detailed summary with the top 10 values and a value di
 To view the data summary for a field, click *i* next to the field.
 
 [role="screenshot"]
-image::images/lens_data_info_documents.png[Data summary analyzed documents]
+image::images/lens_data_info.png[Data summary analyzed documents]
 
 *Lens* uses a sample of 5,000 documents to perform the field analysis. The bottom line of the summary shows the percentage of sampled documents over all available documents.
 
@@ -163,9 +165,6 @@ NOTE: The sum of all the *Other* fields can equal more than 100% by a small amou
 To determine how many users have visited your website within the last 90 days, create a metric visualization, then add it to the dashboard.
 
 . Set the <<set-time-filter,time filter>> to *Last 90 days*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_2.png[Index pattern switch and time picker]
 
 . From the *Chart Type* dropdown, select *Metric*.
 +
