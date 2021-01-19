@@ -34,7 +34,7 @@ export const ALERT_TYPES_CONFIG = {
   },
   [AlertType.TransactionDuration]: {
     name: i18n.translate('xpack.apm.transactionDurationAlert.name', {
-      defaultMessage: 'Transaction duration threshold',
+      defaultMessage: 'Latency threshold',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: 'threshold_met',
@@ -43,7 +43,7 @@ export const ALERT_TYPES_CONFIG = {
   },
   [AlertType.TransactionDurationAnomaly]: {
     name: i18n.translate('xpack.apm.transactionDurationAnomalyAlert.name', {
-      defaultMessage: 'Transaction duration anomaly',
+      defaultMessage: 'Latency anomaly',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: 'threshold_met',

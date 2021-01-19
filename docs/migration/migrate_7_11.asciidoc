@@ -1,0 +1,43 @@
+[[breaking-changes-7.11]]
+== Breaking changes in 7.11
+++++
+<titleabbrev>7.11</titleabbrev>
+++++
+
+coming::[7.11.0]
+
+This page discusses the breaking changes that you need to be aware of when migrating
+your application to {kib} 7.11.
+
+// The following section is re-used in the Installation and Upgrade Guide
+
+// tag::notable-breaking-changes[]
+
+
+[discrete]
+[[ingestManager_renamed_fleet]]
+=== Ingest Manager plugin renamed Fleet
+
+*Details:* The `ingestManager` plugin has been renamed `fleet`.
+
+*Impact*:
+
+* The app url change from /app/ingestManager to /app/fleet.
+* The privilege `feature_ingestManager.*` is not valid anymore and should be replaced by `feature_fleet.*`.
+
+*via https://github.com/elastic/kibana/pull/83200[#83200]*
+
+[discrete]
+[[reporting_plugin]]
+=== Reporting plugin added new validation for protocol
+
+*Details:* The Reporting plugin added new validation for protocol strings in Network Policy configurations.
+
+*Impact*: See {kibana-ref}/reporting-network-policy.html[Restrict requests with a Reporting network policy].
+If the kibana.yml has a Reporting network policy before upgrade,
+the protocol strings must end with a colon. Otherwise, config validation
+will fail and Kibana will not start.
+
+*via https://github.com/elastic/kibana/pull/80766[#80766]*
+
+// end::notable-breaking-changes[]

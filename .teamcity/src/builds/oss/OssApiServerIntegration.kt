@@ -1,10 +1,8 @@
-package builds.test
+package builds.oss
 
-import addTestSettings
-import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import runbld
 
-object ApiServerIntegration : BuildType({
+object OssApiServerIntegration : OssFunctionalBase({
   name = "API/Server Integration"
   description = "Executes API and Server Integration Tests"
 
@@ -12,6 +10,4 @@ object ApiServerIntegration : BuildType({
     runbld("API Integration", "./.ci/teamcity/oss/api_integration.sh")
     runbld("Server Integration", "./.ci/teamcity/oss/server_integration.sh")
   }
-
-  addTestSettings()
 })

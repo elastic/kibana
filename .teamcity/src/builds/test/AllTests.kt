@@ -1,5 +1,6 @@
 package builds.test
 
+import builds.oss.OssApiServerIntegration
 import dependsOn
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 
@@ -8,5 +9,5 @@ object AllTests : BuildType({
   description = "All Non-Functional Tests"
   type = Type.COMPOSITE
 
-  dependsOn(QuickTests, Jest, XPackJest, JestIntegration, ApiServerIntegration)
+  dependsOn(QuickTests, Jest, XPackJest, JestIntegration, OssApiServerIntegration)
 })

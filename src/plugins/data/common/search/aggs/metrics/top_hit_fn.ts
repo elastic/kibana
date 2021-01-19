@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
 export const aggTopHitFnName = 'aggTopHit';
 
@@ -119,7 +118,6 @@ export const aggTopHit = (): FunctionDefinition => ({
         type: METRIC_TYPES.TOP_HITS,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
         },
       },
     };
