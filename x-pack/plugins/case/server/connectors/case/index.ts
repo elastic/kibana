@@ -111,7 +111,7 @@ async function executor(
 
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    data = await caseClient.addComment({ caseClient, caseId, comment });
+    data = await caseClient.addCommentFromRule({ caseClient, caseId, comment });
   }
 
   return { status: 'ok', data: data ?? {}, actionId };

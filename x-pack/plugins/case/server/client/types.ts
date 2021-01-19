@@ -15,6 +15,8 @@ import {
   CommentRequest,
   ConnectorMappingsAttributes,
   GetFieldsResponse,
+  InternalCommentRequest,
+  SubCaseResponse,
 } from '../../common/api';
 import {
   CaseConfigureServiceSetup,
@@ -36,6 +38,12 @@ export interface CaseClientAddComment {
   caseClient: CaseClient;
   caseId: string;
   comment: CommentRequest;
+}
+
+export interface CaseClientAddInternalComment {
+  caseClient: CaseClient;
+  caseId: string;
+  comment: InternalCommentRequest;
 }
 
 export interface CaseClientUpdateAlertsStatus {
@@ -61,6 +69,9 @@ export interface ConfigureFields {
 }
 export interface CaseClient {
   addComment: (args: CaseClientAddComment) => Promise<CaseResponse>;
+  addCommentFromRule: (
+    args: CaseClientAddInternalComment
+  ) => Promise<SubCaseResponse | CaseResponse>;
   create: (args: CaseClientCreate) => Promise<CaseResponse>;
   getFields: (args: ConfigureFields) => Promise<GetFieldsResponse>;
   getMappings: (args: MappingsClient) => Promise<ConnectorMappingsAttributes[]>;

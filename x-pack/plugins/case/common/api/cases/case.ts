@@ -71,6 +71,7 @@ export const CaseAttributesRt = rt.intersection([
   rt.type({
     closed_at: rt.union([rt.string, rt.null]),
     closed_by: rt.union([UserRT, rt.null]),
+    converted_by: rt.union([UserRT, rt.null]),
     created_at: rt.string,
     created_by: UserRT,
     external_service: CaseFullExternalServiceRt,

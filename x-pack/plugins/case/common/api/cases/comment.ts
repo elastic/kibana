@@ -35,6 +35,7 @@ export const CommentAttributesBasicRt = rt.type({
 export enum CommentType {
   user = 'user',
   alert = 'alert',
+  alertGroup = 'alert_group',
 }
 
 export const ContextTypeUserRt = rt.type({
@@ -48,11 +49,47 @@ export const ContextTypeAlertRt = rt.type({
   index: rt.string,
 });
 
+const AlertIDRt = rt.type({
+  _id: rt.string,
+});
+
+export const ContextTypeAlertGroupRt = rt.type({
+  type: rt.literal(CommentType.alertGroup),
+  alerts: rt.union([rt.array(AlertIDRt), AlertIDRt]),
+  index: rt.string,
+  ruleId: rt.string,
+});
+
+export const ContextTypeAlertGroupAttributesRt = rt.type({
+  type: rt.literal(CommentType.alertGroup),
+  alertIds: rt.union([rt.array(rt.string), rt.string]),
+  index: rt.string,
+  ruleId: rt.string,
+});
+
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);
 const AttributesTypeAlertsRt = rt.intersection([ContextTypeAlertRt, CommentAttributesBasicRt]);
-const CommentAttributesRt = rt.union([AttributesTypeUserRt, AttributesTypeAlertsRt]);
+const AttributesTypeAlertGroupRt = rt.intersection([
+  ContextTypeAlertGroupAttributesRt,
+  CommentAttributesBasicRt,
+]);
+const CommentAttributesRt = rt.union([
+  AttributesTypeUserRt,
+  AttributesTypeAlertsRt,
+  AttributesTypeAlertGroupRt,
+]);
 
 const ContextBasicRt = rt.union([ContextTypeUserRt, ContextTypeAlertRt]);
+
+/**
+ * The internal comment request includes all types, this is to allow creation of all types of comments when using a rule
+ * but limits the external public HTTP API to only User and Alert
+ */
+export const InternalCommentRequestRt = rt.union([
+  ContextTypeUserRt,
+  ContextTypeAlertRt,
+  ContextTypeAlertGroupRt,
+]);
 
 export const CommentRequestRt = ContextBasicRt;
 
@@ -96,6 +133,7 @@ export const CommentsResponseRt = rt.type({
 export const AllCommentsResponseRt = rt.array(CommentResponseRt);
 
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
+export type InternalCommentRequest = rt.TypeOf<typeof InternalCommentRequestRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
 export type AllCommentsResponse = rt.TypeOf<typeof AllCommentsResponseRt>;
@@ -104,3 +142,9 @@ export type CommentPatchRequest = rt.TypeOf<typeof CommentPatchRequestRt>;
 export type CommentPatchAttributes = rt.TypeOf<typeof CommentPatchAttributesRt>;
 export type CommentRequestUserType = rt.TypeOf<typeof ContextTypeUserRt>;
 export type CommentRequestAlertType = rt.TypeOf<typeof ContextTypeAlertRt>;
+
+// TODO: make sure this is right
+export type CommentRequestAlertGroupType = rt.TypeOf<typeof ContextTypeAlertGroupRt>;
+export type NeedToFixCommentRequestAlertGroupType = rt.TypeOf<
+  typeof ContextTypeAlertGroupAttributesRt
+>;

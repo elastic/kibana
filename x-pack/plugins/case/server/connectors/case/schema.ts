@@ -31,6 +31,20 @@ const ContextTypeUserSchema = schema.object({
  * Issue: https://github.com/elastic/kibana/issues/85750
  *  */
 
+const AlertIDSchema = schema.object(
+  {
+    _id: schema.string(),
+  },
+  { unknowns: 'ignore' }
+);
+
+const ContextTypeAlertGroupSchema = schema.object({
+  type: schema.literal(CommentType.alertGroup),
+  alerts: schema.oneOf([schema.arrayOf(AlertIDSchema), AlertIDSchema]),
+  index: schema.string(),
+  ruleId: schema.string(),
+});
+
 const ContextTypeAlertSchema = schema.object({
   type: schema.literal(CommentType.alert),
   // allowing either an array or a single value to preserve the previous API of attaching a single alert ID
@@ -38,7 +52,11 @@ const ContextTypeAlertSchema = schema.object({
   index: schema.string(),
 });
 
-export const CommentSchema = schema.oneOf([ContextTypeUserSchema, ContextTypeAlertSchema]);
+export const CommentSchema = schema.oneOf([
+  ContextTypeUserSchema,
+  ContextTypeAlertSchema,
+  ContextTypeAlertGroupSchema,
+]);
 
 const JiraFieldsSchema = schema.object({
   issueType: schema.string(),

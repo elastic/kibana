@@ -10,7 +10,12 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import { decodeComment, flattenCaseSavedObject, transformNewComment } from '../../routes/api/utils';
+import {
+  decodeComment,
+  flattenCaseSavedObject,
+  flattenSubCaseSavedObject,
+  transformNewComment,
+} from '../../routes/api/utils';
 
 import {
   throwErrors,
@@ -22,11 +27,20 @@ import {
   AssociationType,
   CaseType,
   SubCaseAttributes,
+  SubCaseResponseRt,
+  SubCaseResponse,
+  InternalCommentRequestRt,
+  InternalCommentRequest,
+  CommentRequest,
 } from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
-import { CaseClientAddComment, CaseClientFactoryArguments } from '../types';
-import { CASE_SAVED_OBJECT } from '../../saved_object_types';
+import {
+  CaseClientAddComment,
+  CaseClientAddInternalComment,
+  CaseClientFactoryArguments,
+} from '../types';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseServiceSetup } from '../../services';
 
 async function getSubCase({
@@ -48,6 +62,150 @@ async function getSubCase({
   // else need to create a new sub case
   return caseService.createSubCase(savedObjectsClient, createdAt, caseId);
 }
+
+function isUserOrAlertComment(comment: InternalCommentRequest): comment is CommentRequest {
+  return comment.type === CommentType.user || comment.type === CommentType.alert;
+}
+
+export const addCommentFromRule = ({
+  savedObjectsClient,
+  caseService,
+  userActionService,
+  request,
+}: CaseClientFactoryArguments) => async ({
+  caseClient,
+  caseId,
+  comment,
+}: CaseClientAddInternalComment): Promise<SubCaseResponse | CaseResponse> => {
+  const query = pipe(
+    InternalCommentRequestRt.decode(comment),
+    fold(throwErrors(Boom.badRequest), identity)
+  );
+
+  if (isUserOrAlertComment(comment)) {
+    return caseClient.addComment({ caseClient, caseId, comment });
+  }
+
+  decodeComment(comment);
+  const createdDate = new Date().toISOString();
+
+  const myCase = await caseService.getCase({
+    client: savedObjectsClient,
+    caseId,
+  });
+
+  if (query.type === CommentType.alertGroup && myCase.attributes.type !== CaseType.parent) {
+    throw Boom.badRequest('Sub case style alert comment cannot be added to an individual case');
+  }
+
+  const subCase = await getSubCase({
+    caseService,
+    savedObjectsClient,
+    caseId,
+    createdAt: createdDate,
+  });
+
+  const userDetails = {
+    username: myCase.attributes.converted_by?.username,
+    full_name: myCase.attributes.converted_by?.full_name,
+    email: myCase.attributes.converted_by?.email,
+  };
+
+  const [newComment, , updatedSubCase] = await Promise.all([
+    // TODO: probably move this to the service layer
+    caseService.postNewComment({
+      client: savedObjectsClient,
+      attributes: transformNewComment({
+        associationType: AssociationType.subCase,
+        createdDate,
+        ...query,
+        ...userDetails,
+      }),
+      references: [
+        {
+          type: CASE_SAVED_OBJECT,
+          name: `associated-${CASE_SAVED_OBJECT}`,
+          id: myCase.id,
+        },
+        {
+          type: SUB_CASE_SAVED_OBJECT,
+          name: `associated-${SUB_CASE_SAVED_OBJECT}`,
+          id: subCase.id,
+        },
+      ],
+    }),
+    caseService.patchCase({
+      client: savedObjectsClient,
+      caseId,
+      updatedAttributes: {
+        updated_at: createdDate,
+        updated_by: {
+          ...userDetails,
+        },
+      },
+      version: myCase.version,
+    }),
+    caseService.patchSubCase({
+      client: savedObjectsClient,
+      subCaseId: subCase.id,
+      updatedAttributes: {
+        updated_at: createdDate,
+        updated_by: {
+          ...userDetails,
+        },
+      },
+      version: subCase.version,
+    }),
+  ]);
+
+  // TODO: handle updating the alert group status
+
+  const totalCommentsFindBySubCase = await caseService.getAllSubCaseComments(
+    savedObjectsClient,
+    subCase.id,
+    {
+      fields: [],
+      page: 1,
+      perPage: 1,
+    }
+  );
+
+  const [comments] = await Promise.all([
+    caseService.getAllSubCaseComments(savedObjectsClient, subCase.id, {
+      fields: [],
+      page: 1,
+      perPage: totalCommentsFindBySubCase.total,
+    }),
+    userActionService.postUserActions({
+      client: savedObjectsClient,
+      actions: [
+        buildCommentUserActionItem({
+          action: 'create',
+          actionAt: createdDate,
+          actionBy: { ...userDetails },
+          caseId: myCase.id,
+          commentId: newComment.id,
+          fields: ['comment'],
+          newValue: JSON.stringify(query),
+        }),
+      ],
+    }),
+  ]);
+
+  // TODO: should we return anything? This will only return the sub case and comments
+  return SubCaseResponseRt.encode(
+    flattenSubCaseSavedObject({
+      savedObject: {
+        ...subCase,
+        ...updatedSubCase,
+        attributes: { ...subCase.attributes, ...updatedSubCase.attributes },
+        version: updatedSubCase.version ?? subCase.version,
+        references: subCase.references,
+      },
+      comments: comments.saved_objects,
+    })
+  );
+};
 
 export const addComment = ({
   savedObjectsClient,
@@ -72,18 +230,6 @@ export const addComment = ({
     caseId,
   });
 
-  if (myCase.attributes.type === CaseType.parent) {
-    // get or create a sub case
-  }
-  /**
-   * TODO: check if myCase is a 'case' or a 'subCase'
-   * if case then the association type should be 'case'
-   * if subCase then the association should be 'subCase'
-   *
-   * Alternatively we could not save both references...need to figure out what the tradeoff is
-   */
-  const associationType = AssociationType.case;
-
   // An alert cannot be attach to a closed case.
   if (query.type === CommentType.alert && myCase.attributes.status === CaseStatuses.closed) {
     throw Boom.badRequest('Alert cannot be attached to a closed case');
@@ -96,7 +242,7 @@ export const addComment = ({
     caseService.postNewComment({
       client: savedObjectsClient,
       attributes: transformNewComment({
-        associationType,
+        associationType: AssociationType.case,
         createdDate,
         ...query,
         username,

@@ -7,7 +7,7 @@
 import { CaseClientFactoryArguments, CaseClient } from './types';
 import { create } from './cases/create';
 import { update } from './cases/update';
-import { addComment } from './comments/add';
+import { addComment, addCommentFromRule } from './comments/add';
 import { getFields } from './configure/get_fields';
 import { getMappings } from './configure/get_mappings';
 import { updateAlertsStatus } from './alerts/update_status';
@@ -19,6 +19,7 @@ export const createCaseClient = (clientArgs: CaseClientFactoryArguments): CaseCl
     create: create(clientArgs),
     update: update(clientArgs),
     addComment: addComment(clientArgs),
+    addCommentFromRule: addCommentFromRule(clientArgs),
     getFields: getFields(),
     getMappings: getMappings(clientArgs),
     updateAlertsStatus: updateAlertsStatus(clientArgs),

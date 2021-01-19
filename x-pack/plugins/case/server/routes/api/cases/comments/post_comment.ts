@@ -28,6 +28,7 @@ export function initPostCommentApi({ router }: RouteDeps) {
 
       const caseClient = context.case.getCaseClient();
       const caseId = request.params.case_id;
+      // TODO: is it bad if this allows alert groups? Currently it will not allow it
       const comment = request.body as CommentRequest;
 
       try {

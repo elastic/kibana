@@ -100,6 +100,13 @@ interface PatchComments extends ClientArgs {
   comments: PatchComment[];
 }
 
+interface PatchSubCase {
+  client: SavedObjectsClientContract;
+  subCaseId: string;
+  updatedAttributes: Partial<SubCaseAttributes>;
+  version?: string;
+}
+
 interface GetUserArgs {
   request: KibanaRequest;
   response?: KibanaResponseFactory;
@@ -114,7 +121,13 @@ export interface CaseServiceSetup {
   deleteCase(args: GetCaseArgs): Promise<{}>;
   deleteComment(args: GetCommentArgs): Promise<{}>;
   findCases(args: FindCasesArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>>;
+  // TODO: refactor these because they use the same parameters and implementation
   getAllCaseComments(args: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>>;
+  getAllSubCaseComments(
+    client: SavedObjectsClientContract,
+    id: string,
+    options?: SavedObjectFindOptions
+  ): Promise<SavedObjectsFindResponse<CommentAttributes>>;
   getCase(args: GetCaseArgs): Promise<SavedObject<ESCaseAttributes>>;
   getCases(args: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>>;
   getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
@@ -136,6 +149,7 @@ export interface CaseServiceSetup {
     createdAt: string,
     caseId: string
   ): Promise<SavedObject<SubCaseAttributes>>;
+  patchSubCase(args: PatchSubCase): Promise<SavedObjectsUpdateResponse<SubCaseAttributes>>;
 }
 
 export class CaseService {
@@ -248,6 +262,23 @@ export class CaseService {
         });
       } catch (error) {
         this.log.debug(`Error on GET all comments for case ${caseId}: ${error}`);
+        throw error;
+      }
+    },
+    getAllSubCaseComments: async (
+      client: SavedObjectsClientContract,
+      id: string,
+      options?: SavedObjectFindOptions
+    ) => {
+      try {
+        this.log.debug(`Attempting to GET all comments for sub case ${id}`);
+        return await client.find({
+          ...options,
+          type: CASE_COMMENT_SAVED_OBJECT,
+          hasReference: { type: SUB_CASE_SAVED_OBJECT, id },
+        });
+      } catch (error) {
+        this.log.debug(`Error on GET all comments for sub case ${id}: ${error}`);
         throw error;
       }
     },
@@ -374,6 +405,20 @@ export class CaseService {
         this.log.debug(
           `Error on UPDATE comments ${comments.map((c) => c.commentId).join(', ')}: ${error}`
         );
+        throw error;
+      }
+    },
+    patchSubCase: async ({ client, subCaseId, updatedAttributes, version }: PatchSubCase) => {
+      try {
+        this.log.debug(`Attempting to UPDATE sub case ${subCaseId}`);
+        return await client.update(
+          CASE_SAVED_OBJECT,
+          subCaseId,
+          { ...updatedAttributes },
+          { version }
+        );
+      } catch (error) {
+        this.log.debug(`Error on UPDATE sub case ${subCaseId}: ${error}`);
         throw error;
       }
     },
