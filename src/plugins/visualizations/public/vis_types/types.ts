@@ -157,7 +157,7 @@ export interface VisTypeDefinition<TVisParams> {
   readonly getInfoMessage?: (vis: Vis) => React.ReactNode;
   /**
    * Should be provided to expand base visualization expression with
-   * custom exprssion chain, including render expression.
+   * custom exprsesion chain, including render expression.
    * Explicit renderer should be registered in expressions plugin to render your visualization.
    */
   readonly toExpressionAst: VisToExpressionAst<TVisParams>;

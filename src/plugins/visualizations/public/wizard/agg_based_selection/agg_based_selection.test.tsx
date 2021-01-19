@@ -61,16 +61,10 @@ describe('AggBasedSelection', () => {
     get<T>(id: string): BaseVisType<T> {
       return (_visTypes.find((vis) => vis.name === id) as unknown) as BaseVisType<T>;
     },
-    all: () => {
-      return (_visTypes as unknown) as BaseVisType[];
-    },
+    all: () => _visTypes,
     getAliases: () => [],
     unRegisterAlias: () => [],
-    getByGroup: (group: VisGroups) => {
-      return _visTypes.filter((type) => {
-        return type.group === group;
-      }) as BaseVisType[];
-    },
+    getByGroup: (group: VisGroups) => _visTypes.filter((type) => type.group === group),
   };
 
   beforeAll(() => {

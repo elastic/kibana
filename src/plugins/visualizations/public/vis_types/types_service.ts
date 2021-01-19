@@ -79,7 +79,7 @@ export class TypesService {
        * returns specific visualization or undefined if not found
        * @param {string} visualization - id of visualization to return
        */
-      get: <TVisParams>(visualization: string): BaseVisType<TVisParams> => {
+      get: <TVisParams>(visualization: string): BaseVisType<TVisParams> | undefined => {
         return this.types[visualization];
       },
       /**
