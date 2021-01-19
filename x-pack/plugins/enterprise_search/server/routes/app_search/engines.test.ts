@@ -109,17 +109,6 @@ describe('engine routes', () => {
   });
 
   describe('POST /api/app_search/engines', () => {
-    const AUTH_HEADER = 'Basic 123';
-    const mockRequest = {
-      headers: {
-        authorization: AUTH_HEADER,
-      },
-      body: {
-        name: 'some-engine',
-        language: 'en',
-      },
-    };
-
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -137,7 +126,7 @@ describe('engine routes', () => {
     });
 
     it('creates a request handler', () => {
-      mockRouter.callRoute(mockRequest);
+      mockRouter.callRoute({ body: { name: 'some-engine', language: 'en' } });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines',
@@ -145,15 +134,6 @@ describe('engine routes', () => {
           name: 'some-engine',
           language: 'en',
         },
-      });
-    });
-
-    it('passes the body to enterpriseSearchRequestHandler', () => {
-      mockRouter.callRoute({ body: { name: 'some-engine', language: 'en' } });
-
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines',
-        body: { name: 'some-engine', language: 'en' },
       });
     });
 
