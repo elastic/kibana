@@ -186,7 +186,6 @@ exports[`Header renders 1`] = `
       },
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
-      "registerMountContext": [MockFunction],
     }
   }
   badge$={
