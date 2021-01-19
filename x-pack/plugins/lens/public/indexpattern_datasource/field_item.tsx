@@ -6,7 +6,7 @@
 
 import './field_item.scss';
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import DateMath from '@elastic/datemath';
 import {
   EuiButtonGroup,
@@ -100,9 +100,18 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     dateRange,
     filters,
     hideDetails,
+    dropOntoWorkspace,
   } = props;
 
   const [infoIsOpen, setOpen] = useState(false);
+
+  const dropOntoWorkspaceAndClose = useCallback(
+    (field: Dragging) => {
+      dropOntoWorkspace(field);
+      setOpen(false);
+    },
+    [dropOntoWorkspace, setOpen]
+  );
 
   const [state, setState] = useState<State>({
     isLoading: false,
@@ -229,7 +238,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         anchorPosition="rightUp"
         panelClassName="lnsFieldItem__fieldPanel"
       >
-        <FieldItemPopoverContents {...state} {...props} />
+        <FieldItemPopoverContents {...state} {...props} dropOntoWorkspace={dropOntoWorkspaceAndClose} />
       </EuiPopover>
     </li>
   );
