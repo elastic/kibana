@@ -151,6 +151,7 @@ export function alertInstancesStatusTimelineFromEventLog<
   >();
 
   // loop through the events
+  // should be sorted newest to oldest, we want oldest to newest, so reverse
   for (const event of events.reverse()) {
     const timeStamp = event?.['@timestamp'];
     if (timeStamp === undefined) continue;
@@ -177,6 +178,9 @@ export function alertInstancesStatusTimelineFromEventLog<
       case LEGACY_EVENT_LOG_ACTIONS.resolvedInstance:
       case EVENT_LOG_ACTIONS.recoveredInstance:
         currentStatus.status = 'OK';
+    }
+    if (params.status !== undefined && params.status !== currentStatus.status) {
+      continue; // filter instance events by the params status
     }
     statuses.push(currentStatus);
     instances.set(instanceId, statuses);
