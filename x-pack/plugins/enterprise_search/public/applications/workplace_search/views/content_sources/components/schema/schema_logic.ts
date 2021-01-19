@@ -17,7 +17,7 @@ import { OptionValue } from '../../../../types';
 import {
   flashAPIErrors,
   setSuccessMessage,
-  FlashMessagesLogic,
+  clearFlashMessages,
 } from '../../../../../shared/flash_messages';
 
 import { AppLogic } from '../../../../app_logic';
@@ -348,10 +348,10 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       }
     },
     resetMostRecentIndexJob: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     resetSchemaState: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });
