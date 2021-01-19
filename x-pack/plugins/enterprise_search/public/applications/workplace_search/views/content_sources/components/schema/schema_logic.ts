@@ -46,7 +46,6 @@ interface SchemaActions {
   }): { schema: Schema; formUnchanged: boolean };
   onIndexingComplete(numDocumentsWithErrors: number): number;
   resetMostRecentIndexJob(emptyReindexJob: IndexJob): IndexJob;
-  showFieldSuccess(successMessage: string): string;
   setFieldName(rawFieldName: string): string;
   setFilterValue(filterValue: string): string;
   addNewField(
@@ -132,7 +131,6 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     }),
     onIndexingComplete: (numDocumentsWithErrors: number) => numDocumentsWithErrors,
     resetMostRecentIndexJob: (emptyReindexJob: IndexJob) => emptyReindexJob,
-    showFieldSuccess: (successMessage: string) => successMessage,
     setFieldName: (rawFieldName: string) => rawFieldName,
     setFilterValue: (filterValue: string) => filterValue,
     openAddFieldModal: () => true,
