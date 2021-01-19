@@ -106,8 +106,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
 
   const dropOntoWorkspaceAndClose = useCallback(
-    (field: Dragging) => {
-      dropOntoWorkspace(field);
+    (droppedField: Dragging) => {
+      dropOntoWorkspace(droppedField);
       setOpen(false);
     },
     [dropOntoWorkspace, setOpen]
@@ -238,7 +238,11 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         anchorPosition="rightUp"
         panelClassName="lnsFieldItem__fieldPanel"
       >
-        <FieldItemPopoverContents {...state} {...props} dropOntoWorkspace={dropOntoWorkspaceAndClose} />
+        <FieldItemPopoverContents
+          {...state}
+          {...props}
+          dropOntoWorkspace={dropOntoWorkspaceAndClose}
+        />
       </EuiPopover>
     </li>
   );
