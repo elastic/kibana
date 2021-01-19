@@ -108,7 +108,7 @@ export function alertInstanceSummaryFromEventLog<Params extends Record<string, u
   const instanceIds = Array.from(instances.keys()).sort();
   for (const instanceId of instanceIds) {
     const alertInstanceStatus = instances.get(instanceId)!;
-    if (params.muted === false && alertInstanceStatus.muted) {
+    if (params.muted !== undefined && params.muted !== alertInstanceStatus.muted) {
       continue; // filter instances by the params muted
     }
     if (params.status !== undefined && params.status !== alertInstanceStatus.status) {
