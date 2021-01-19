@@ -135,7 +135,6 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
       switchProps={{
         path: `_meta.${phase}.dataTierAllocationEnabled`,
         'data-test-subj': `${phase}-dataAllocationSwitch`,
-        'aria-controls': 'ilmDataTierAllocationField',
       }}
     >
       <div className="ilmDataTierAllocationField">

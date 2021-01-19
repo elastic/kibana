@@ -41,27 +41,24 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
       }
       titleSize="xs"
       switchProps={{
-        'aria-controls': 'shrinkContent',
         'data-test-subj': `${phase}-shrinkSwitch`,
         'aria-label': i18nTexts.editPolicy.shrinkLabel,
         initialValue: Boolean(policy.phases[phase]?.actions?.shrink),
       }}
       fullWidth
     >
-      <div id="shrinkContent" aria-live="polite" role="region">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <StyledFieldNumber
-              path={path}
-              fieldNumberProps={{
-                'data-test-subj': `${phase}-primaryShardCount`,
-                min: 1,
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-      </div>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <StyledFieldNumber
+            path={path}
+            fieldNumberProps={{
+              'data-test-subj': `${phase}-primaryShardCount`,
+              min: 1,
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
     </DescribedFormRow>
   );
 };

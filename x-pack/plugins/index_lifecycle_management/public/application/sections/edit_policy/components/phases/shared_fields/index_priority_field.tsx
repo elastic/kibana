@@ -55,20 +55,17 @@ export const IndexPriorityField: FunctionComponent<Props> = ({ phase }) => {
       switchProps={{
         'aria-label': i18nTexts.editPolicy.indexPriorityFieldLabel,
         'data-test-subj': `${phase}-indexPrioritySwitch`,
-        'aria-controls': 'setPriorityContent',
         initialValue: initialToggleValue,
       }}
     >
       <EuiSpacer />
-      <div id="indexPriorityContent" aria-live="polite" role="region">
-        <StyledFieldNumber
-          path={`phases.${phase}.actions.set_priority.priority`}
-          fieldNumberProps={{
-            'data-test-subj': `${phase}-indexPriority`,
-            min: 0,
-          }}
-        />
-      </div>
+      <StyledFieldNumber
+        path={`phases.${phase}.actions.set_priority.priority`}
+        fieldNumberProps={{
+          'data-test-subj': `${phase}-indexPriority`,
+          min: 0,
+        }}
+      />
     </DescribedFormRow>
   );
 };

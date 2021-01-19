@@ -52,30 +52,27 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
       switchProps={{
         'aria-label': i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
         'data-test-subj': `${phase}-forceMergeSwitch`,
-        'aria-controls': 'forcemergeContent',
         initialValue: initialToggleValue,
       }}
     >
       <EuiSpacer />
-      <div id="forcemergeContent" aria-live="polite" role="region">
-        <StyledFieldNumber
-          path={`phases.${phase}.actions.forcemerge.max_num_segments`}
-          fieldNumberProps={{
-            'data-test-subj': `${phase}-selectedForceMergeSegments`,
-            min: 1,
-          }}
-        />
-        <UseField
-          path={`_meta.${phase}.bestCompression`}
-          component={CheckBoxField}
-          componentProps={{
-            hasEmptyLabelSpace: true,
-            euiFieldProps: {
-              'data-test-subj': `${phase}-bestCompression`,
-            },
-          }}
-        />
-      </div>
+      <StyledFieldNumber
+        path={`phases.${phase}.actions.forcemerge.max_num_segments`}
+        fieldNumberProps={{
+          'data-test-subj': `${phase}-selectedForceMergeSegments`,
+          min: 1,
+        }}
+      />
+      <UseField
+        path={`_meta.${phase}.bestCompression`}
+        component={CheckBoxField}
+        componentProps={{
+          hasEmptyLabelSpace: true,
+          euiFieldProps: {
+            'data-test-subj': `${phase}-bestCompression`,
+          },
+        }}
+      />
     </DescribedFormRow>
   );
 };

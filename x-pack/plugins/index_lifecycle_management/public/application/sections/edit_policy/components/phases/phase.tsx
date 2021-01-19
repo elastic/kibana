@@ -55,7 +55,6 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
                       componentProps={{
                         euiFieldProps: {
                           'data-test-subj': `enablePhaseSwitch-${phase}`,
-                          'aria-controls': `${phase}PhaseContent`,
                           showLabel: false,
                         },
                       }}
@@ -64,7 +63,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
                 )}
                 <EuiFlexItem grow={false}>
                   <EuiTitle size={'s'}>
-                    <h3>{i18nTexts.editPolicy.titles[phase]}</h3>
+                    <h2>{i18nTexts.editPolicy.titles[phase]}</h2>
                   </EuiTitle>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -94,11 +93,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
             )}
           </EuiFlexGroup>
           <EuiSpacer />
-          {enabled && (
-            <div id={`${phase}PhaseContent`} style={isShowingSettings ? {} : { display: 'none' }}>
-              {children}
-            </div>
-          )}
+          {enabled && <div style={isShowingSettings ? {} : { display: 'none' }}>{children}</div>}
 
           {(!enabled || !isShowingSettings) && (
             <EuiText color="subdued" size={'s'}>
