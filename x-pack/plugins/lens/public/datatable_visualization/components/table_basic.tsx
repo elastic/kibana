@@ -27,11 +27,13 @@ import {
   LensSortAction,
   LensResizeAction,
   LensGridDirection,
+  LensToggleAction,
 } from './types';
 import { createGridColumns } from './columns';
 import { createGridCell } from './cell_value';
 import {
   createGridFilterHandler,
+  createGridHideHandler,
   createGridResizeHandler,
   createGridSortingConfig,
 } from './table_actions';
@@ -84,7 +86,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const onEditAction = useCallback(
-    (data: LensSortAction['data'] | LensResizeAction['data']) => {
+    (data: LensSortAction['data'] | LensResizeAction['data'] | LensToggleAction['data']) => {
       if (renderMode === 'edit') {
         dispatchEvent({ name: 'edit', data });
       }
@@ -120,9 +122,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     (bucketColumns.length &&
       firstTable.rows.every((row) => bucketColumns.every((col) => row[col] == null)));
 
-  const visibleColumns = useMemo(() => columnConfig.columnIds.filter((field) => !!field), [
-    columnConfig,
-  ]);
+  const visibleColumns = useMemo(
+    () =>
+      columnConfig.columnIds.filter(
+        (field) => !!field && !columnConfig.hiddenColumnIds?.includes(field)
+      ),
+    [columnConfig]
+  );
 
   const { sortBy, sortDirection } = columnConfig;
 
@@ -130,6 +136,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const onColumnResize = useMemo(
     () => createGridResizeHandler(columnConfig, setColumnConfig, onEditAction),
+    [onEditAction, setColumnConfig, columnConfig]
+  );
+
+  const onColumnHide = useMemo(
+    () => createGridHideHandler(columnConfig, setColumnConfig, onEditAction),
     [onEditAction, setColumnConfig, columnConfig]
   );
 
@@ -143,7 +154,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         columnConfig,
         visibleColumns,
         formatFactory,
-        onColumnResize
+        onColumnResize,
+        onColumnHide
       ),
     [
       bucketColumns,
@@ -154,6 +166,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       visibleColumns,
       formatFactory,
       onColumnResize,
+      onColumnHide,
     ]
   );
 

@@ -136,6 +136,11 @@ export const datatableColumns: ExpressionFunctionDefinition<
       multi: true,
       help: '',
     },
+    hiddenColumnIds: {
+      types: ['string'],
+      multi: true,
+      help: '',
+    },
     columnWidth: {
       types: ['lens_datatable_column_width'],
       multi: true,

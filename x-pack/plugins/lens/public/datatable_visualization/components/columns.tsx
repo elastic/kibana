@@ -25,7 +25,8 @@ export const createGridColumns = (
   columnConfig: DatatableColumns & { type: 'lens_datatable_columns' },
   visibleColumns: string[],
   formatFactory: FormatFactory,
-  onColumnResize: (eventData: { columnId: string; width: number | undefined }) => void
+  onColumnResize: (eventData: { columnId: string; width: number | undefined }) => void,
+  onColumnHide: (eventData: { columnId: string }) => void
 ) => {
   const columnsReverseLookup = table.columns.reduce<
     Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
@@ -172,6 +173,16 @@ export const createGridColumns = (
                 }),
                 'data-test-subj': 'lensDatatableResetWidth',
                 isDisabled: initialWidth == null,
+              },
+              {
+                color: 'text',
+                size: 'xs',
+                onClick: () => onColumnHide({ columnId: field }),
+                iconType: 'empty',
+                label: i18n.translate('xpack.lens.table.hide.hideLabel', {
+                  defaultMessage: 'Hide',
+                }),
+                'data-test-subj': 'lensDatatableHide',
               },
             ],
       },

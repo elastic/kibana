@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
+import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import type {
   SuggestionRequest,
@@ -15,6 +18,7 @@ import type {
 } from '../types';
 import type { DatatableColumnWidth } from './components/types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
+import { TableToolbar } from './components/toolbar';
 
 export interface LayerState {
   layerId: string;
@@ -28,6 +32,7 @@ export interface DatatableVisualizationState {
     direction: 'asc' | 'desc' | 'none';
   };
   columnWidth?: DatatableColumnWidth[];
+  hiddenColumnIds?: string[];
 }
 
 function newLayerState(layerId: string): LayerState {
@@ -205,6 +210,14 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       sorting: prevState.sorting?.columnId === columnId ? undefined : prevState.sorting,
     };
   },
+  renderToolbar(domElement, props) {
+    render(
+      <I18nProvider>
+        <TableToolbar {...props} />
+      </I18nProvider>,
+      domElement
+    );
+  },
 
   toExpression(state, datasourceLayers, { title, description } = {}): Ast | null {
     const { sortedColumns, datasource } =
@@ -239,6 +252,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                     function: 'lens_datatable_columns',
                     arguments: {
                       columnIds: operations.map((o) => o.columnId),
+                      hiddenColumnIds: state.hiddenColumnIds || [],
                       sortBy: [state.sorting?.columnId || ''],
                       sortDirection: [state.sorting?.direction || 'none'],
                       columnWidth: (state.columnWidth || []).map((columnWidth) => ({
@@ -278,6 +292,15 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
             columnId: event.data.columnId,
             direction: event.data.direction,
           },
+        };
+      case 'toggle':
+        const isHidden = state.hiddenColumnIds?.includes(event.data.columnId);
+        return {
+          ...state,
+          hiddenColumnIds:
+            isHidden && state.hiddenColumnIds
+              ? state.hiddenColumnIds.filter((id) => id !== event.data.columnId)
+              : [...(state.hiddenColumnIds || []), event.data.columnId],
         };
       case 'resize':
         return {

@@ -9,7 +9,7 @@ import type { IAggType } from 'src/plugins/data/public';
 import type { Datatable, RenderMode } from 'src/plugins/expressions';
 import type { FormatFactory, ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';
 import type { DatatableProps } from '../expression';
-import { LENS_EDIT_SORT_ACTION, LENS_EDIT_RESIZE_ACTION } from './constants';
+import { LENS_EDIT_SORT_ACTION, LENS_EDIT_RESIZE_ACTION, LENS_TOGGLE_ACTION } from './constants';
 
 export type LensGridDirection = 'none' | Direction;
 
@@ -23,11 +23,17 @@ export interface LensResizeActionData {
   width: number | undefined;
 }
 
+export interface LensToggleActionData {
+  columnId: string;
+}
+
 export type LensSortAction = LensEditEvent<typeof LENS_EDIT_SORT_ACTION>;
 export type LensResizeAction = LensEditEvent<typeof LENS_EDIT_RESIZE_ACTION>;
+export type LensToggleAction = LensEditEvent<typeof LENS_TOGGLE_ACTION>;
 
 export interface DatatableColumns {
   columnIds: string[];
+  hiddenColumnIds?: string[];
   sortBy: string;
   sortDirection: string;
   columnWidth?: DatatableColumnWidthResult[];
