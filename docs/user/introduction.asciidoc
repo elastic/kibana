@@ -55,7 +55,7 @@ image::images/kibana-main-menu.png[Kibana main menu]
 
 [float]
 [[kibana-navigation-search]]
-=== Navigating {kib}
+=== Navigate {kib} with search
 
 Another way to navigate {kib} is by using search in the global header.
 You can jump between applications and the objects you’ve saved, including
