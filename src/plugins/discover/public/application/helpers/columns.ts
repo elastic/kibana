@@ -16,8 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../data/common';
 
+/**
+ * Function to provide fallback when
+ * 1) no columns are given
+ * 2) Just one column is given, which is the configured timefields
+ */
 export function getDisplayedColumns(stateColumns: string[] = [], indexPattern: IndexPattern) {
   return stateColumns &&
     stateColumns.length > 0 &&
