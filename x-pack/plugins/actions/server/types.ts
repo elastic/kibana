@@ -54,12 +54,6 @@ export interface ActionsPlugin {
   start: PluginStartContract;
 }
 
-export interface ActionsConfigType {
-  enabled: boolean;
-  allowedHosts: string[];
-  enabledActionTypes: string[];
-}
-
 // the parameters passed to an action type executor function
 export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   actionId: string;

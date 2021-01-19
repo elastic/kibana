@@ -10,7 +10,7 @@ import { URL } from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ActionsConfigType } from './types';
+import { ActionsConfig } from './config';
 import { ActionTypeDisabledError } from './lib';
 
 export enum AllowedHosts {
@@ -56,14 +56,14 @@ function disabledActionTypeErrorMessage(actionType: string) {
   });
 }
 
-function isAllowed({ allowedHosts }: ActionsConfigType, hostname: string): boolean {
+function isAllowed({ allowedHosts }: ActionsConfig, hostname: string): boolean {
   const allowed = new Set(allowedHosts);
   if (allowed.has(AllowedHosts.Any)) return true;
   if (allowed.has(hostname)) return true;
   return false;
 }
 
-function isHostnameAllowedInUri(config: ActionsConfigType, uri: string): boolean {
+function isHostnameAllowedInUri(config: ActionsConfig, uri: string): boolean {
   return pipe(
     tryCatch(() => new URL(uri)),
     map((url) => url.hostname),
@@ -73,7 +73,7 @@ function isHostnameAllowedInUri(config: ActionsConfigType, uri: string): boolean
 }
 
 function isActionTypeEnabledInConfig(
-  { enabledActionTypes }: ActionsConfigType,
+  { enabledActionTypes }: ActionsConfig,
   actionType: string
 ): boolean {
   const enabled = new Set(enabledActionTypes);
@@ -83,7 +83,7 @@ function isActionTypeEnabledInConfig(
 }
 
 export function getActionsConfigurationUtilities(
-  config: ActionsConfigType
+  config: ActionsConfig
 ): ActionsConfigurationUtilities {
   const isHostnameAllowed = curry(isAllowed)(config);
   const isUriAllowed = curry(isHostnameAllowedInUri)(config);
