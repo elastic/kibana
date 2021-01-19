@@ -17,6 +17,8 @@
  * under the License.
  */
 import React, { useEffect, useState, useCallback } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+
 import { EuiSuggest, EuiSuggestProps } from '@elastic/eui';
 import { getDataStart } from '../../services';
 import { INDEXES_SEPARATOR } from '../../../common/constants';
@@ -58,13 +60,17 @@ export const IndexPatternSuggest = ({
     fetchIndexes();
   }, []);
 
-  useEffect(() => {
-    if (inputValue !== value) {
-      onChange({
-        [indexPatternName]: inputValue,
-      });
-    }
-  }, [onChange, inputValue, indexPatternName, value]);
+  useDebounce(
+    () => {
+      if (inputValue !== value) {
+        onChange({
+          [indexPatternName]: inputValue,
+        });
+      }
+    },
+    300,
+    [onChange, inputValue, indexPatternName, value]
+  );
 
   const onItemClick: EuiSuggestProps['onItemClick'] = useCallback(
     ({ label }) => {
