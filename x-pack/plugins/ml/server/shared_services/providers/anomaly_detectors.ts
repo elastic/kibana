@@ -14,6 +14,7 @@ export interface AnomalyDetectorsProvider {
     savedObjectsClient: SavedObjectsClientContract
   ): {
     jobs(jobId?: string): Promise<{ count: number; jobs: Job[] }>;
+    jobsStats(jobId?: string): Promise<{ count: number; jobs: JobStats[] }>;
   };
 }
 
