@@ -237,15 +237,16 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     }, []);
 
     const handleSearch = useCallback((search: string) => {
-      const regex = search.split(/\s+(?=([^"]*"[^"]*")*[^"]*$)/);
+      const searchTerm = search.trim();
+      const regex = searchTerm.split(/\s+(?=([^"]*"[^"]*")*[^"]*$)/);
       const formattedFilter = regex
-        .filter((c) => c != null)
+        .filter((regexResult) => regexResult != null)
         .reduce<ExceptionListFilter>(
           (filter, term) => {
             const [qualifier, value] = term.split(':');
 
-            if (qualifier == null) {
-              filter.name = search;
+            if (value == null) {
+              filter.name = searchTerm;
             } else if (value != null && Object.keys(filter).includes(qualifier)) {
               return set(qualifier, value, filter);
             }
@@ -254,6 +255,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
           },
           { name: null, list_id: null, created_by: null }
         );
+
       setFilters(formattedFilter);
     }, []);
 
@@ -369,6 +371,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
             {loadingTableInfo && !initLoading && !showReferenceErrorModal && (
               <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
             )}
+
             {initLoading ? (
               <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
             ) : (

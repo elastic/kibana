@@ -22,3 +22,13 @@ export const OPERATOR_INPUT = '[data-test-subj="operatorAutocompleteComboBox"]';
 
 export const VALUES_INPUT =
   '[data-test-subj="valuesAutocompleteMatch"] [data-test-subj="comboBoxInput"]';
+
+export const EXCEPTIONS_TABLE_TAB = '[data-test-subj="allRulesTableTab-exceptions"]';
+
+export const EXCEPTIONS_TABLE = '[data-test-subj="exceptions-table"]';
+
+export const EXCEPTIONS_TABLE_SEARCH = 'input[data-test-subj="exceptionsHeaderSearch"]';
+
+export const EXCEPTIONS_TABLE_SHOWING_LISTS = '[data-test-subj="showingExceptionLists"]';
+
+export const EXCEPTIONS_TABLE_DELETE_BTN = '[data-test-subj="exceptionsTableDeleteButton"]';

@@ -13,6 +13,13 @@ export const EXCEPTION_LIST_ID_TITLE = i18n.translate(
   }
 );
 
+export const EXCEPTION_LIST_NAME = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.all.exceptions.listName',
+  {
+    defaultMessage: 'Name',
+  }
+);
+
 export const NUMBER_RULES_ASSIGNED_TO_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.all.exceptions.numberRulesAssignedTitle',
   {

@@ -17,6 +17,7 @@ import {
 } from '../screens/exceptions';
 import {
   ALERTS_TAB,
+  BACK_TO_RULES,
   EXCEPTIONS_TAB,
   REFRESH_BUTTON,
   REMOVE_EXCEPTION_BTN,
@@ -88,4 +89,8 @@ export const waitForTheRuleToBeExecuted = async () => {
     cy.get(REFRESH_BUTTON).click({ force: true });
     status = await cy.get(RULE_STATUS).invoke('text').promisify();
   }
+};
+
+export const goBackToAllRulesTable = () => {
+  cy.get(BACK_TO_RULES).click();
 };
