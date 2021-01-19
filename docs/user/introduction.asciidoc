@@ -45,7 +45,7 @@ image::images/home-page.png[Kibana home page]
 The Kibana main menu can get you where you need to go, at any time. Like the home page,
 the menu is organized by use case. Want to work with your logs, metrics, APM, or
 Uptime data? The apps you need are under *Observability*. The main menu also includes
-*Recently viewed* to easily access your previously opened apps.
+*Recently viewed* so you can easily access your previously opened apps.
 
 Hidden by default, you can access the main menu with a single click on the
 hamburger icon. Use the *Dock navigation* link at the bottom of the sidebar to keep the navigation visible.
