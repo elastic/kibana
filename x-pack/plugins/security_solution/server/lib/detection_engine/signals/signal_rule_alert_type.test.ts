@@ -226,7 +226,7 @@ describe('rules_notification_alert_type', () => {
       await alert.executor(payload);
       expect(ruleStatusService.partialFailure).toHaveBeenCalled();
       expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
-        'Missing required read permissions on indexes: ["some*"]'
+        'Missing required read privileges on the following indices: ["some*"]'
       );
     });
 
@@ -247,9 +247,9 @@ describe('rules_notification_alert_type', () => {
       });
       payload.params.index = ['some*', 'myfa*'];
       await alert.executor(payload);
-      expect(ruleStatusService.error).toHaveBeenCalled();
-      expect(ruleStatusService.error.mock.calls[0][0]).toContain(
-        'The rule does not have read privileges to any of the following indices: ["myfa*","some*"]'
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
+        'This rule may not have the required read privileges to the following indices: ["myfa*","some*"]'
       );
     });
 
