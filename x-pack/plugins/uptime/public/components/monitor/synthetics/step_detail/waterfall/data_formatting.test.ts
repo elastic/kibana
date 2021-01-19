@@ -5,7 +5,8 @@
  */
 
 import { colourPalette, getSeriesAndDomain } from './data_formatting';
-import { NetworkItems } from './types';
+import { NetworkItems, MimeType } from './types';
+import { WaterfallDataEntry } from '../../waterfall/types';
 
 describe('Palettes', () => {
   it('A colour palette comprising timing and mime type colours is correctly generated', () => {
@@ -484,67 +485,19 @@ describe('getSeriesAndDomain', () => {
 
   it('handles formatting when mime type is not mapped to a specific mime type bucket', () => {
     const actual = getSeriesAndDomain(networkItemsWithUncommonMimeType);
-    expect(actual).toMatchInlineSnapshot(`
-      Object {
-        "domain": Object {
-          "max": 140.41400000132853,
-          "min": 0,
-        },
-        "series": Array [
-          Object {
-            "config": Object {
-              "colour": "#b9a888",
-              "showTooltip": true,
-              "tooltipProps": Object {
-                "colour": "#b9a888",
-                "value": "Queued / Blocked: 84.546ms",
-              },
-            },
-            "x": 0,
-            "y": 84.54599999822676,
-            "y0": 0,
-          },
-          Object {
-            "config": Object {
-              "colour": "#d36086",
-              "showTooltip": true,
-              "tooltipProps": Object {
-                "colour": "#d36086",
-                "value": "Sending request: 0.239ms",
-              },
-            },
-            "x": 0,
-            "y": 84.78499999910127,
-            "y0": 84.54599999822676,
-          },
-          Object {
-            "config": Object {
-              "colour": "#b0c9e0",
-              "showTooltip": true,
-              "tooltipProps": Object {
-                "colour": "#b0c9e0",
-                "value": "Waiting (TTFB): 52.561ms",
-              },
-            },
-            "x": 0,
-            "y": 137.3459999995248,
-            "y0": 84.78499999910127,
-          },
-          Object {
-            "config": Object {
-              "colour": "#e7664c",
-              "showTooltip": true,
-              "tooltipProps": Object {
-                "colour": "#e7664c",
-                "value": "Content downloading (application/x-javascript): 3.068ms",
-              },
-            },
-            "x": 0,
-            "y": 140.41400000132853,
-            "y0": 137.3459999995248,
-          },
-        ],
+    const { series } = actual;
+    /* verify that raw mime type appears in the tooltip config and that
+     * the colour is mapped to mime type other */
+    const contentDownloadedingConfigItem = series.find((item: WaterfallDataEntry) => {
+      const { tooltipProps } = item.config;
+      if (tooltipProps && typeof tooltipProps.value === 'string') {
+        return (
+          tooltipProps.value.includes('application/x-javascript') &&
+          tooltipProps.colour === colourPalette[MimeType.Other]
+        );
       }
-    `);
+      return false;
+    });
+    expect(contentDownloadedingConfigItem).toBeDefined();
   });
 });
