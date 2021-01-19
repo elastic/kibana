@@ -524,6 +524,21 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should increment attempts when task fails on markAsRunning', async () => {
+      const originalTask = await scheduleTask({
+        taskType: 'sampleTask',
+        params: { throwOnMarkAsRunning: true },
+      });
+
+      await delay(DEFAULT_POLL_INTERVAL * 3);
+
+      await retry.try(async () => {
+        const task = await currentTask(originalTask.id);
+        expect(task.attempts).to.eql(3);
+        expect(task.status).to.eql('failed');
+      });
+    });
+
     it('should return a task run error result when trying to run a non-existent task', async () => {
       // runNow should fail
       const failedRunNowResult = await runTaskNow({

@@ -10,14 +10,24 @@
  * rescheduling, middleware application, etc.
  */
 
-import { Logger } from 'src/core/server';
 import apm from 'elastic-apm-node';
 import { performance } from 'perf_hooks';
 import Joi from 'joi';
 import { identity, defaults, flow } from 'lodash';
+import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
 import { Middleware } from '../lib/middleware';
-import { asOk, asErr, mapErr, eitherAsync, unwrap, isOk, mapOk, Result } from '../lib/result_type';
+import {
+  asOk,
+  asErr,
+  mapErr,
+  eitherAsync,
+  unwrap,
+  isOk,
+  mapOk,
+  Result,
+  promiseResult,
+} from '../lib/result_type';
 import {
   TaskRun,
   TaskMarkRunning,
@@ -228,17 +238,15 @@ export class TaskManagerRunner implements TaskRunner {
       'taskManager'
     );
 
-    const VERSION_CONFLICT_STATUS = 409;
     const now = new Date();
-
-    const { taskInstance } = await this.beforeMarkRunning({
-      taskInstance: this.instance,
-    });
-
-    const attempts = taskInstance.attempts + 1;
-    const ownershipClaimedUntil = taskInstance.retryAt;
-
     try {
+      const { taskInstance } = await this.beforeMarkRunning({
+        taskInstance: this.instance,
+      });
+
+      const attempts = taskInstance.attempts + 1;
+      const ownershipClaimedUntil = taskInstance.retryAt;
+
       const { id } = taskInstance;
 
       const timeUntilClaimExpires = howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
@@ -286,7 +294,16 @@ export class TaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('failure');
       performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
-      if (error.statusCode !== VERSION_CONFLICT_STATUS) {
+      if (!SavedObjectsErrorHelpers.isConflictError(error)) {
+        if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          // try to release claim as an unknown failure prevented us from marking as running
+          mapErr((errReleaseClaim: Error) => {
+            this.logger.error(
+              `[Task Runner] Task ${this.instance.id} failed to release claim after failure: ${errReleaseClaim}`
+            );
+          }, await promiseResult(this.releaseClaimAndIncrementAttempts()));
+        }
+
         throw error;
       }
     }
@@ -325,6 +342,19 @@ export class TaskManagerRunner implements TaskRunner {
     }
 
     return isFailedRunResult(result) ? asErr({ ...result, error: result.error }) : asOk(result);
+  }
+
+  private async releaseClaimAndIncrementAttempts(): Promise<Result<ConcreteTaskInstance, Error>> {
+    return promiseResult(
+      this.bufferedTaskStore.update({
+        ...this.instance,
+        status: TaskStatus.Idle,
+        attempts: this.instance.attempts + 1,
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      })
+    );
   }
 
   private shouldTryToScheduleRetry(): boolean {
