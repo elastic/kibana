@@ -207,7 +207,7 @@ export function LayerPanel(
                 fullWidth
                 label={<div className="lnsLayerPanel__groupLabel">{group.groupLabel}</div>}
                 labelType="legend"
-                key={groupIndex}
+                key={group.groupId}
                 isInvalid={isMissing}
                 error={
                   isMissing ? (
@@ -222,7 +222,11 @@ export function LayerPanel(
                 }
               >
                 <>
-                  <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
+                  <ReorderProvider
+                    id={group.groupId}
+                    key={group.groupId}
+                    className={'lnsLayerPanel__group'}
+                  >
                     {group.accessors.map((accessorConfig) => {
                       const accessor = accessorConfig.columnId;
                       const { dragging } = dragDropContext;
