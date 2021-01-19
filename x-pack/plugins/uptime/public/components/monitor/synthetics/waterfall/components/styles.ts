@@ -5,6 +5,7 @@
  */
 
 import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { rgba } from 'polished';
 import { euiStyled } from '../../../../../../../observability/public';
 import { FIXED_AXIS_HEIGHT } from './constants';
 
@@ -16,6 +17,19 @@ export const WaterfallChartOuterContainer = euiStyled.div<WaterfallChartOuterCon
   height: ${(props) => (props.height ? `${props.height}` : 'auto')};
   overflow-y: ${(props) => (props.height ? 'scroll' : 'visible')};
   overflow-x: hidden;
+  &::-webkit-scrollbar {
+    height: ${({ theme }) => theme.eui.euiScrollBar};
+    width: ${({ theme }) => theme.eui.euiScrollBar};
+  }
+  &::-webkit-scrollbar-thumb {
+    background-clip: content-box;
+    background-color: ${({ theme }) => rgba(theme.eui.euiColorDarkShade, 0.5)};
+    border: ${({ theme }) => theme.eui.euiScrollBarCorner} solid transparent;
+  }
+  &::-webkit-scrollbar-corner,
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 `;
 
 export const WaterfallChartFixedTopContainer = euiStyled.div`

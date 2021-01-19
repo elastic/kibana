@@ -36,6 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   // Failing: See https://github.com/elastic/kibana/issues/88130
+  // FLAKY: https://github.com/elastic/kibana/issues/87988
   describe.skip('patch_cases', () => {
     afterEach(async () => {
       await deleteCases(es);

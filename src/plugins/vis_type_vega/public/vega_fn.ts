@@ -74,6 +74,7 @@ export const createVegaFn = (
       query: get(input, 'query') as Query,
       filters: get(input, 'filters') as any,
       visParams: { spec: args.spec },
+      searchSessionId: context.getSearchSessionId(),
     });
 
     return {

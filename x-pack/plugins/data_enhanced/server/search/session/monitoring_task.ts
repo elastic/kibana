@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { Duration } from 'moment';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -12,15 +15,22 @@ import {
 import { checkRunningSessions } from './check_running_sessions';
 import { CoreSetup, SavedObjectsClient, Logger } from '../../../../../../src/core/server';
 import { SEARCH_SESSION_TYPE } from '../../saved_objects';
+import { ConfigSchema } from '../../../config';
 
 export const SEARCH_SESSIONS_TASK_TYPE = 'bg_monitor';
 export const SEARCH_SESSIONS_TASK_ID = `data_enhanced_${SEARCH_SESSIONS_TASK_TYPE}`;
-export const MONITOR_INTERVAL = 15; // in seconds
 
-function searchSessionRunner(core: CoreSetup, logger: Logger) {
+interface SearchSessionTaskDeps {
+  taskManager: TaskManagerSetupContract;
+  logger: Logger;
+  config$: Observable<ConfigSchema>;
+}
+
+function searchSessionRunner(core: CoreSetup, { logger, config$ }: SearchSessionTaskDeps) {
   return ({ taskInstance }: RunContext) => {
     return {
       async run() {
+        const config = await config$.pipe(first()).toPromise();
         const [coreStart] = await core.getStartServices();
         const internalRepo = coreStart.savedObjects.createInternalRepository([SEARCH_SESSION_TYPE]);
         const internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
@@ -31,7 +41,7 @@ function searchSessionRunner(core: CoreSetup, logger: Logger) {
         );
 
         return {
-          runAt: new Date(Date.now() + MONITOR_INTERVAL * 1000),
+          runAt: new Date(Date.now() + config.search.sessions.trackingInterval.asMilliseconds()),
           state: {},
         };
       },
@@ -39,22 +49,19 @@ function searchSessionRunner(core: CoreSetup, logger: Logger) {
   };
 }
 
-export function registerSearchSessionsTask(
-  core: CoreSetup,
-  taskManager: TaskManagerSetupContract,
-  logger: Logger
-) {
-  taskManager.registerTaskDefinitions({
+export function registerSearchSessionsTask(core: CoreSetup, deps: SearchSessionTaskDeps) {
+  deps.taskManager.registerTaskDefinitions({
     [SEARCH_SESSIONS_TASK_TYPE]: {
       title: 'Search Sessions Monitor',
-      createTaskRunner: searchSessionRunner(core, logger),
+      createTaskRunner: searchSessionRunner(core, deps),
     },
   });
 }
 
 export async function scheduleSearchSessionsTasks(
   taskManager: TaskManagerStartContract,
-  logger: Logger
+  logger: Logger,
+  trackingInterval: Duration
 ) {
   await taskManager.removeIfExists(SEARCH_SESSIONS_TASK_ID);
 
@@ -63,7 +70,7 @@ export async function scheduleSearchSessionsTasks(
       id: SEARCH_SESSIONS_TASK_ID,
       taskType: SEARCH_SESSIONS_TASK_TYPE,
       schedule: {
-        interval: `${MONITOR_INTERVAL}s`,
+        interval: `${trackingInterval.asSeconds()}s`,
       },
       state: {},
       params: {},

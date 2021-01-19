@@ -5,7 +5,13 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
-import { isPackageLimited, installationStatuses } from '../../../../common';
+import {
+  isPackageLimited,
+  installationStatuses,
+  PackageUsageStats,
+  PackagePolicySOAttributes,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { ArchivePackage, RegistryPackage, EpmPackageAdditions } from '../../../../common/types';
 import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
@@ -13,6 +19,7 @@ import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
 import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
+import { normalizeKuery } from '../../saved_object';
 
 export { getFile, SearchParams } from '../registry';
 
@@ -115,6 +122,43 @@ export async function getPackageInfo(options: {
 
   return createInstallableFrom(updated, savedObject);
 }
+
+export const getPackageUsageStats = async ({
+  savedObjectsClient,
+  pkgName,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+}): Promise<PackageUsageStats> => {
+  const filter = normalizeKuery(
+    PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${pkgName}`
+  );
+  const agentPolicyCount = new Set<string>();
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    // using saved Objects client directly, instead of the `list()` method of `package_policy` service
+    // in order to not cause a circular dependency (package policy service imports from this module)
+    const packagePolicies = await savedObjectsClient.find<PackagePolicySOAttributes>({
+      type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      perPage: 1000,
+      page: page++,
+      filter,
+    });
+
+    for (let index = 0, total = packagePolicies.saved_objects.length; index < total; index++) {
+      agentPolicyCount.add(packagePolicies.saved_objects[index].attributes.policy_id);
+    }
+
+    hasMore = packagePolicies.saved_objects.length > 0;
+  }
+
+  return {
+    agent_policy_count: agentPolicyCount.size,
+  };
+};
 
 interface PackageResponse {
   paths: string[];

@@ -12,6 +12,7 @@ import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable/types';
 import { SourceRegistryEntry } from '../classes/sources/source_registry';
 import { LayerWizard } from '../classes/layers/layer_wizard_registry';
+import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
 
 let loadModulesPromise: Promise<LazyLoadedMapModules>;
 
@@ -71,6 +72,7 @@ interface LazyLoadedMapModules {
     metricFieldName?: string;
   }) => LayerDescriptor | null;
   createBasemapLayerDescriptor: () => LayerDescriptor | null;
+  createESSearchSourceLayerDescriptor: (params: CreateLayerDescriptorParams) => LayerDescriptor;
 }
 
 export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
@@ -90,6 +92,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       createTileMapLayerDescriptor,
       createRegionMapLayerDescriptor,
       createBasemapLayerDescriptor,
+      createESSearchSourceLayerDescriptor,
     } = await import('./lazy');
 
     resolve({
@@ -103,6 +106,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       createTileMapLayerDescriptor,
       createRegionMapLayerDescriptor,
       createBasemapLayerDescriptor,
+      createESSearchSourceLayerDescriptor,
     });
   });
   return loadModulesPromise;

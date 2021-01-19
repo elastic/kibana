@@ -23,16 +23,11 @@ import { ensureNoUnsafeProperties } from '@kbn/std';
 import { getVisData, GetVisDataOptions } from '../lib/get_vis_data';
 import { visPayloadSchema } from '../../common/vis_schema';
 import { ROUTES } from '../../common/constants';
-import { ValidationTelemetryServiceSetup } from '../index';
 import { Framework } from '../plugin';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
-export const visDataRoutes = (
-  router: IRouter,
-  framework: Framework,
-  { logFailedValidation }: ValidationTelemetryServiceSetup
-) => {
+export const visDataRoutes = (router: IRouter, framework: Framework) => {
   router.post(
     {
       path: ROUTES.VIS_DATA,
@@ -52,9 +47,7 @@ export const visDataRoutes = (
       try {
         visPayloadSchema.validate(request.body);
       } catch (error) {
-        logFailedValidation();
-
-        framework.logger.warn(
+        framework.logger.debug(
           `Request validation error: ${error.message}. This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/kibana/issues/new?template=Bug_report.md`
         );
       }

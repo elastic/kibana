@@ -27,10 +27,8 @@ import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SpaceAvatar } from '../../space_avatar';
 import { getSpacesFeatureDescription } from '../../constants';
-import { SpacesManager } from '../..//spaces_manager';
-import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
-import { SecureSpaceMessage } from '../components/secure_space_message';
-import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
+import { SpacesManager } from '../../spaces_manager';
+import { ConfirmDeleteModal, UnauthorizedPrompt } from '../components';
 import { getEnabledFeatures } from '../lib/feature_utils';
 import { reactRouterNavigate } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -39,7 +37,6 @@ interface Props {
   notifications: NotificationsStart;
   getFeatures: FeaturesPluginStart['getFeatures'];
   capabilities: Capabilities;
-  securityEnabled: boolean;
   history: ScopedHistory;
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
@@ -74,9 +71,6 @@ export class SpacesGridPage extends Component<Props, State> {
     return (
       <div className="spcGridPage" data-test-subj="spaces-grid-page">
         <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
-        {this.props.securityEnabled && (
-          <SecureSpaceMessage getUrlForApp={this.props.getUrlForApp} />
-        )}
         {this.getConfirmDeleteModal()}
       </div>
     );

@@ -19,7 +19,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../pl
 import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
 import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerts/server';
 import { MlPluginSetup } from '../../../../../ml/server';
-import { JsonArray, JsonValue } from '../../../../common/typed_json';
+import { JsonArray, JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
 
 export interface InfraServerPluginSetupDeps {
   data: DataPluginSetup;

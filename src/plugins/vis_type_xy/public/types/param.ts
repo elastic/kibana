@@ -18,7 +18,7 @@
  */
 import { Fit, Position } from '@elastic/charts';
 
-import { Style, Labels } from '../../../charts/public';
+import { Style, Labels, PaletteOutput } from '../../../charts/public';
 import { SchemaConfig } from '../../../visualizations/public';
 
 import { ChartType } from '../../common';
@@ -156,5 +156,6 @@ export interface VisParams {
    * Add for detailed tooltip option
    */
   detailedTooltip?: boolean;
+  palette: PaletteOutput;
   fittingFunction?: Exclude<Fit, 'explicit'>;
 }

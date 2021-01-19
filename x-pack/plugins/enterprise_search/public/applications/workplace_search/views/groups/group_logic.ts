@@ -10,13 +10,14 @@ import { i18n } from '@kbn/i18n';
 
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
-
 import {
-  FlashMessagesLogic,
+  clearFlashMessages,
   flashAPIErrors,
   setSuccessMessage,
   setQueuedSuccessMessage,
+  setQueuedErrorMessage,
 } from '../../../shared/flash_messages';
+
 import { GROUPS_PATH } from '../../routes';
 
 import { ContentSourceDetails, GroupDetails, User, SourcePriority } from '../../types';
@@ -223,10 +224,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
         );
 
         const error = e.response?.status === 404 ? NOT_FOUND_MESSAGE : e;
-        FlashMessagesLogic.actions.setQueuedMessages({
-          type: 'error',
-          message: error,
-        });
+        setQueuedErrorMessage(error);
 
         KibanaLogic.values.navigateToUrl(GROUPS_PATH);
       }
@@ -360,16 +358,16 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
       }
     },
     showConfirmDeleteModal: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     showManageUsersModal: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     showSharedSourcesModal: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     resetFlashMessages: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });

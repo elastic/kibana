@@ -1,0 +1,28 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "public/**/*",
+    "../../../typings/**/*"
+  ],
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../kibana_utils/tsconfig.json" },
+    { "path": "../usage_collection/tsconfig.json" },
+    { "path": "../telemetry/tsconfig.json" },
+    { "path": "../kibana_legacy/tsconfig.json"},
+    { "path": "../ui_actions/tsconfig.json" },
+    { "path": "../expressions/tsconfig.json" },
+    { "path": "../home/tsconfig.json" },
+    { "path": "../bfetch/tsconfig.json"},
+    { "path": "../data/tsconfig.json"},
+    { "path": "../advanced_settings/tsconfig.json" },
+    { "path": "../management/tsconfig.json"}
+  ]
+}

@@ -220,6 +220,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         'data-test-subj': `lns-indexPatternDimension-${operationType}${
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
+        [`aria-pressed`]: isActive,
         onClick() {
           if (
             operationDefinitionMap[operationType].input === 'none' ||

@@ -90,7 +90,6 @@ export const aggFilters = (): FunctionDefinition => ({
         params: {
           ...rest,
           filters: getParsedValue(args, 'filters'),
-          json: getParsedValue(args, 'json'),
         },
       },
     };

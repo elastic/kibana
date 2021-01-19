@@ -24,3 +24,4 @@ export { getSeriesNameFn } from './get_series_name_fn';
 export { getXDomain, getAdjustedDomain } from './domain';
 export { useColorPicker } from './use_color_picker';
 export { getXAccessor } from './accessors';
+export { getAllSeries } from './get_all_series';

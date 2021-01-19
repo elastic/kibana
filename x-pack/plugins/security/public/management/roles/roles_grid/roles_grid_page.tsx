@@ -154,6 +154,7 @@ export class RolesGridPage extends Component<Props, State> {
                 toolsRight: this.renderToolsRight(),
                 box: {
                   incremental: true,
+                  'data-test-subj': 'searchRoles',
                 },
                 onChange: (query: Record<string, any>) => {
                   this.setState({

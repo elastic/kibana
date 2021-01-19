@@ -6,21 +6,7 @@
 
 import { resetContext } from 'kea';
 
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: {
-    values: { http: { get: jest.fn(), post: jest.fn() } },
-  },
-}));
-import { HttpLogic } from '../../../shared/http';
-
-jest.mock('../../../shared/flash_messages', () => ({
-  FlashMessagesLogic: { actions: { clearFlashMessages: jest.fn(), setQueuedMessages: jest.fn() } },
-  flashAPIErrors: jest.fn(),
-  setSuccessMessage: jest.fn(),
-  setQueuedSuccessMessage: jest.fn(),
-}));
-import { FlashMessagesLogic, flashAPIErrors } from '../../../shared/flash_messages';
-
+import { mockFlashMessageHelpers, mockHttpValues, expectedAsyncError } from '../../../__mocks__';
 import { DEFAULT_META } from '../../../shared/constants';
 import { JSON_HEADER as headers } from '../../../../../common/constants';
 
@@ -35,7 +21,9 @@ const TIMEOUT = 400;
 const delay = () => new Promise((resolve) => setTimeout(resolve, TIMEOUT));
 
 describe('GroupsLogic', () => {
-  const clearFlashMessagesSpy = jest.spyOn(FlashMessagesLogic.actions, 'clearFlashMessages');
+  const { http } = mockHttpValues;
+  const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
+
   const groupsResponse = {
     results: groups,
     meta: DEFAULT_META,
@@ -227,24 +215,22 @@ describe('GroupsLogic', () => {
       it('calls API and sets values', async () => {
         const onInitializeGroupsSpy = jest.spyOn(GroupsLogic.actions, 'onInitializeGroups');
         const promise = Promise.resolve(groupsResponse);
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(promise);
 
         GroupsLogic.actions.initializeGroups();
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/workplace_search/groups');
+        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/groups');
         await promise;
         expect(onInitializeGroupsSpy).toHaveBeenCalledWith(groupsResponse);
       });
 
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(promise);
 
         GroupsLogic.actions.initializeGroups();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -269,14 +255,11 @@ describe('GroupsLogic', () => {
       it('calls API and sets values', async () => {
         const setSearchResultsSpy = jest.spyOn(GroupsLogic.actions, 'setSearchResults');
         const promise = Promise.resolve(groups);
-        (HttpLogic.values.http.post as jest.Mock).mockReturnValue(promise);
+        http.post.mockReturnValue(promise);
 
         GroupsLogic.actions.getSearchResults();
         await delay();
-        expect(HttpLogic.values.http.post).toHaveBeenCalledWith(
-          '/api/workplace_search/groups/search',
-          payload
-        );
+        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/groups/search', payload);
         await promise;
         expect(setSearchResultsSpy).toHaveBeenCalledWith(groups);
       });
@@ -286,31 +269,25 @@ describe('GroupsLogic', () => {
         GroupsLogic.actions.setActivePage(2);
         const setSearchResultsSpy = jest.spyOn(GroupsLogic.actions, 'setSearchResults');
         const promise = Promise.resolve(groups);
-        (HttpLogic.values.http.post as jest.Mock).mockReturnValue(promise);
+        http.post.mockReturnValue(promise);
 
         GroupsLogic.actions.getSearchResults(true);
         // Account for `breakpoint` that debounces filter value.
         await delay();
-        expect(HttpLogic.values.http.post).toHaveBeenCalledWith(
-          '/api/workplace_search/groups/search',
-          payload
-        );
+        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/groups/search', payload);
         await promise;
         expect(setSearchResultsSpy).toHaveBeenCalledWith(groups);
       });
 
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
-        (HttpLogic.values.http.post as jest.Mock).mockReturnValue(promise);
+        http.post.mockReturnValue(promise);
 
         GroupsLogic.actions.getSearchResults();
-        try {
-          await promise;
-        } catch {
-          // Account for `breakpoint` that debounces filter value.
-          await delay();
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
+        await expectedAsyncError(promise);
+        await delay();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -318,26 +295,22 @@ describe('GroupsLogic', () => {
       it('calls API and sets values', async () => {
         const setGroupUsersSpy = jest.spyOn(GroupsLogic.actions, 'setGroupUsers');
         const promise = Promise.resolve(users);
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(promise);
 
         GroupsLogic.actions.fetchGroupUsers('123');
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/groups/123/group_users'
-        );
+        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/groups/123/group_users');
         await promise;
         expect(setGroupUsersSpy).toHaveBeenCalledWith(users);
       });
 
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(promise);
 
         GroupsLogic.actions.fetchGroupUsers('123');
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -347,10 +320,10 @@ describe('GroupsLogic', () => {
         GroupsLogic.actions.setNewGroupName(GROUP_NAME);
         const setNewGroupSpy = jest.spyOn(GroupsLogic.actions, 'setNewGroup');
         const promise = Promise.resolve(groups[0]);
-        (HttpLogic.values.http.post as jest.Mock).mockReturnValue(promise);
+        http.post.mockReturnValue(promise);
 
         GroupsLogic.actions.saveNewGroup();
-        expect(HttpLogic.values.http.post).toHaveBeenCalledWith('/api/workplace_search/groups', {
+        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/groups', {
           body: JSON.stringify({ group_name: GROUP_NAME }),
           headers,
         });
@@ -360,14 +333,12 @@ describe('GroupsLogic', () => {
 
       it('handles error', async () => {
         const promise = Promise.reject('this is an error');
-        (HttpLogic.values.http.post as jest.Mock).mockReturnValue(promise);
+        http.post.mockReturnValue(promise);
 
         GroupsLogic.actions.saveNewGroup();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -395,7 +366,7 @@ describe('GroupsLogic', () => {
 
         expect(GroupsLogic.values.newGroupModalOpen).toEqual(true);
         expect(GroupsLogic.values.newGroup).toEqual(null);
-        expect(clearFlashMessagesSpy).toHaveBeenCalled();
+        expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
 
@@ -407,7 +378,7 @@ describe('GroupsLogic', () => {
         expect(GroupsLogic.values.filteredUsers).toEqual([]);
         expect(GroupsLogic.values.filterValue).toEqual('');
         expect(GroupsLogic.values.groupsMeta).toEqual(DEFAULT_META);
-        expect(clearFlashMessagesSpy).toHaveBeenCalled();
+        expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
 
@@ -416,7 +387,7 @@ describe('GroupsLogic', () => {
         GroupsLogic.actions.toggleFilterSourcesDropdown();
 
         expect(GroupsLogic.values.filterSourcesDropdownOpen).toEqual(true);
-        expect(clearFlashMessagesSpy).toHaveBeenCalled();
+        expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
 
@@ -425,7 +396,7 @@ describe('GroupsLogic', () => {
         GroupsLogic.actions.toggleFilterUsersDropdown();
 
         expect(GroupsLogic.values.filterUsersDropdownOpen).toEqual(true);
-        expect(clearFlashMessagesSpy).toHaveBeenCalled();
+        expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
   });

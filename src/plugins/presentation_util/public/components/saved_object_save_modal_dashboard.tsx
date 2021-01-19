@@ -99,11 +99,11 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
           }
           hasChildLabel={false}
         >
-          <EuiPanel color="subdued" hasShadow={false}>
+          <EuiPanel color="subdued" hasShadow={false} data-test-subj="add-to-dashboard-options">
             <div>
               <EuiRadio
                 checked={dashboardOption === 'existing'}
-                id="existing"
+                id="existing-dashboard-option"
                 name="dashboard-option"
                 label={i18n.translate(
                   'presentationUtil.saveModalDashboard.existingDashboardOptionLabel',
@@ -129,7 +129,7 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
 
               <EuiRadio
                 checked={dashboardOption === 'new'}
-                id="new"
+                id="new-dashboard-option"
                 name="dashboard-option"
                 label={i18n.translate(
                   'presentationUtil.saveModalDashboard.newDashboardOptionLabel',
@@ -145,7 +145,7 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
 
               <EuiRadio
                 checked={dashboardOption === null}
-                id="library"
+                id="add-to-library-option"
                 name="dashboard-option"
                 label={i18n.translate('presentationUtil.saveModalDashboard.libraryOptionLabel', {
                   defaultMessage: 'No dashboard, but add to library',
