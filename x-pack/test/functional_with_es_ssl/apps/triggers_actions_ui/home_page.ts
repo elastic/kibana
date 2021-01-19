@@ -35,45 +35,45 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
       });
-  
-      it('Loads the app', async () => {
+
+      it('Loads the Alerts page', async () => {
         await log.debug('Checking for section heading to say Triggers and Actions.');
-  
+
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
         expect(headingText).to.be('Alerts and Actions');
       });
-  
+
       describe('Connectors tab', () => {
         it('renders the connectors tab', async () => {
           // Navigate to the connectors tab
           await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
-  
+
           await pageObjects.header.waitUntilLoadingHasFinished();
-  
+
           // Verify url
           const url = await browser.getCurrentUrl();
           expect(url).to.contain(`/connectors`);
-  
+
           // Verify content
           await testSubjects.existOrFail('actionsList');
         });
       });
-  
+
       describe('Alerts tab', () => {
         it('renders the alerts tab', async () => {
           // Navigate to the alerts tab
           await pageObjects.triggersActionsUI.changeTabs('alertsTab');
-  
+
           await pageObjects.header.waitUntilLoadingHasFinished();
-  
+
           // Verify url
           const url = await browser.getCurrentUrl();
           expect(url).to.contain(`/alerts`);
-  
+
           // Verify content
           await testSubjects.existOrFail('alertsList');
         });
-  
+
         it('navigates to an alert details page', async () => {
           const action = await alerting.actions.createAction({
             name: `Slack-${Date.now()}`,
@@ -83,7 +83,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               webhookUrl: 'https://test',
             },
           });
-  
+
           const alert = await alerting.alerts.createAlwaysFiringWithAction(
             `test-alert-${Date.now()}`,
             {
@@ -95,21 +95,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               },
             }
           );
-  
+
           // refresh to see alert
           await browser.refresh();
-  
+
           await pageObjects.header.waitUntilLoadingHasFinished();
-  
+
           // Verify content
           await testSubjects.existOrFail('alertsList');
-  
+
           // click on first alert
           await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
-  
+
           // Verify url
           expect(await browser.getCurrentUrl()).to.contain(`/alert/${alert.id}`);
-  
+
           await alerting.alerts.deleteAlert(alert.id);
         });
       });
