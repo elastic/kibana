@@ -65,7 +65,53 @@ describe('KibanaMigrator', () => {
     });
   });
 
+  describe('migrateDocument', () => {
+    it('throws an error if documentMigrator.prepareMigrations is not called previously', () => {
+      const options = mockOptions();
+      const kibanaMigrator = new KibanaMigrator(options);
+      const doc = {} as any;
+      expect(() => kibanaMigrator.migrateDocument(doc)).toThrowError(
+        /Migrations are not ready. Make sure prepareMigrations is called first./i
+      );
+    });
+
+    it('calls documentMigrator.migrate', () => {
+      const options = mockOptions();
+      const kibanaMigrator = new KibanaMigrator(options);
+      const mockDocumentMigrator = { migrate: jest.fn() };
+      // @ts-expect-error `documentMigrator` is readonly.
+      kibanaMigrator.documentMigrator = mockDocumentMigrator;
+      const doc = {} as any;
+
+      expect(() => kibanaMigrator.migrateDocument(doc)).not.toThrowError();
+      expect(mockDocumentMigrator.migrate).toBeCalledTimes(1);
+    });
+  });
+
   describe('runMigrations', () => {
+    it('throws if prepareMigrations is not called first', async () => {
+      const options = mockOptions();
+
+      options.client.cat.templates.mockReturnValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          { templates: [] },
+          { statusCode: 404 }
+        )
+      );
+      options.client.indices.get.mockReturnValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+      );
+      options.client.indices.getAlias.mockReturnValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+      );
+
+      const migrator = new KibanaMigrator(options);
+
+      expect(() => migrator.runMigrations()).rejects.toThrow(
+        /Migrations are not ready. Make sure prepareMigrations is called first./i
+      );
+    });
+
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
 
@@ -84,6 +130,7 @@ describe('KibanaMigrator', () => {
 
       const migrator = new KibanaMigrator(options);
 
+      migrator.prepareMigrations();
       await migrator.runMigrations();
       await migrator.runMigrations();
 
@@ -120,6 +167,8 @@ describe('KibanaMigrator', () => {
 
         const migrator = new KibanaMigrator(options);
         const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+
+        migrator.prepareMigrations();
         await migrator.runMigrations();
 
         expect(options.client.indices.create).toHaveBeenCalledTimes(3);
@@ -145,6 +194,7 @@ describe('KibanaMigrator', () => {
 
         const migrator = new KibanaMigrator(options);
         const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+        migrator.prepareMigrations();
         await migrator.runMigrations();
         const { status, result } = await migratorStatus;
         expect(status).toEqual('completed');
@@ -171,6 +221,7 @@ describe('KibanaMigrator', () => {
         const options = mockV2MigrationOptions();
         const migrator = new KibanaMigrator(options);
         const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+        migrator.prepareMigrations();
         await migrator.runMigrations();
 
         // Basic assertions that we're creating and reindexing the expected indices
@@ -212,6 +263,7 @@ describe('KibanaMigrator', () => {
         const options = mockV2MigrationOptions();
         const migrator = new KibanaMigrator(options);
         const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+        migrator.prepareMigrations();
         await migrator.runMigrations();
 
         const { status, result } = await migratorStatus;
@@ -247,6 +299,7 @@ describe('KibanaMigrator', () => {
         );
 
         const migrator = new KibanaMigrator(options);
+        migrator.prepareMigrations();
         return expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(
           `[Error: Unable to complete saved object migrations for the [.my-index] index: The .my-index alias is pointing to a newer version of Kibana: v8.2.4]`
         );
@@ -263,7 +316,7 @@ describe('KibanaMigrator', () => {
         );
 
         const migrator = new KibanaMigrator(options);
-
+        migrator.prepareMigrations();
         await expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(`
                 [Error: Unable to complete saved object migrations for the [.my-index] index. Please check the health of your Elasticsearch cluster and try again. Error: Reindex failed with the following error:
                 {"_tag":"Some","value":{"type":"elatsicsearch_exception","reason":"task failed with an error"}}]

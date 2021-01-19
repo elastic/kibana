@@ -23,9 +23,7 @@ export { ScopedHistory } from './scoped_history';
 export {
   App,
   AppMount,
-  AppMountDeprecated,
   AppUnmount,
-  AppMountContext,
   AppMountParameters,
   AppStatus,
   AppNavLinkStatus,
