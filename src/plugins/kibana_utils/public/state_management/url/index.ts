@@ -28,3 +28,4 @@ export {
 export { createKbnUrlTracker } from './kbn_url_tracker';
 export { createUrlTracker } from './url_tracker';
 export { withNotifyOnErrors, saveStateInUrlErrorTitle, restoreUrlErrorTitle } from './errors';
+export { replaceUrlHashQuery, replaceUrlQuery } from './format';
