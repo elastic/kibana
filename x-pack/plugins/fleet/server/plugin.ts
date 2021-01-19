@@ -81,6 +81,7 @@ import { agentCheckinState } from './services/agents/checkin/state';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
+import { runFleetServerMigration } from './services/fleet_server_migration';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -293,6 +294,12 @@ export class FleetPlugin
     });
     licenseService.start(this.licensing$);
     agentCheckinState.start();
+
+    const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
+    if (fleetServerEnabled) {
+      await this.licensing$.pipe(first()).toPromise();
+      await runFleetServerMigration();
+    }
 
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
