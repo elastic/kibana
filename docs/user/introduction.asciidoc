@@ -61,7 +61,7 @@ Another way to navigate {kib} is by using search in the global header.
 You can jump between applications and the objects you’ve saved, including
 dashboards, visualizations, workpads, and searches.
 
-When searching for objects, you can search by type, by name, and by tag.
+When searching for objects, you can search by type, name, and tag.
 Tags are keywords or labels that you assign to {kib} saved objects,
 so you can classify them in a way that is meaningful to you.
 You can then quickly search for related objects based on shared tags.
