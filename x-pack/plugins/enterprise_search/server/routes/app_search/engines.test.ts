@@ -143,7 +143,7 @@ describe('engine routes', () => {
         mockRouter.shouldThrow(request);
       });
 
-      it('missing language', () => {
+      it('optional language', () => {
         const request = { body: { name: 'some-engine' } };
         mockRouter.shouldValidate(request);
       });
