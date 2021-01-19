@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import { SIDEBAR_GROW_SIZE } from './constants';
+import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
 import { IWaterfallContext } from '../context/waterfall_chart';
 import {
   WaterfallChartSidebarContainer,
@@ -18,14 +18,13 @@ import { WaterfallChartProps } from './waterfall_chart';
 
 interface SidebarProps {
   items: Required<IWaterfallContext>['sidebarItems'];
-  height: number;
   render: Required<WaterfallChartProps>['renderSidebarItem'];
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ items, height, render }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
   return (
     <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
-      <WaterfallChartSidebarContainer height={height}>
+      <WaterfallChartSidebarContainer height={items.length * FIXED_AXIS_HEIGHT}>
         <WaterfallChartSidebarContainerInnerPanel paddingSize="none">
           <WaterfallChartSidebarContainerFlexGroup
             direction="column"
