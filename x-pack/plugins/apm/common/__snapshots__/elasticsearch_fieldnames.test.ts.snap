@@ -33,8 +33,6 @@ exports[`Error CLOUD_REGION 1`] = `"europe-west1"`;
 
 exports[`Error CLS_FIELD 1`] = `undefined`;
 
-exports[`Error CONTAINER 1`] = `undefined`;
-
 exports[`Error CONTAINER_ID 1`] = `undefined`;
 
 exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
@@ -68,6 +66,8 @@ Object {
 `;
 
 exports[`Error HOST_NAME 1`] = `"my hostname"`;
+
+exports[`Error HOST_OS_PLATFORM 1`] = `undefined`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
@@ -246,8 +246,6 @@ exports[`Span CLOUD_REGION 1`] = `"europe-west1"`;
 
 exports[`Span CLS_FIELD 1`] = `undefined`;
 
-exports[`Span CONTAINER 1`] = `undefined`;
-
 exports[`Span CONTAINER_ID 1`] = `undefined`;
 
 exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
@@ -277,6 +275,8 @@ exports[`Span FID_FIELD 1`] = `undefined`;
 exports[`Span HOST 1`] = `undefined`;
 
 exports[`Span HOST_NAME 1`] = `undefined`;
+
+exports[`Span HOST_OS_PLATFORM 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
@@ -451,8 +451,6 @@ exports[`Transaction CLOUD_REGION 1`] = `"europe-west1"`;
 
 exports[`Transaction CLS_FIELD 1`] = `undefined`;
 
-exports[`Transaction CONTAINER 1`] = `"container1234567890abcdef"`;
-
 exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
 
 exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
@@ -486,6 +484,8 @@ Object {
 `;
 
 exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
+
+exports[`Transaction HOST_OS_PLATFORM 1`] = `undefined`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
