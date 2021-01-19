@@ -21,9 +21,9 @@ export class LogStreamEmbeddableFactoryDefinition
 
   constructor(private getCoreServices: () => Promise<CoreStart>) {}
 
-  // TODO
   public async isEditable() {
-    return true;
+    const { application } = await this.getCoreServices();
+    return application.capabilities.logs.save as boolean;
   }
 
   public async create(initialInput: LogStreamEmbeddableInput, parent?: IContainer) {
