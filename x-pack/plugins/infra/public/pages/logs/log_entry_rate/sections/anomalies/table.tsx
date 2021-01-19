@@ -20,12 +20,12 @@ import React, { useCallback, useMemo } from 'react';
 import useSet from 'react-use/lib/useSet';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import {
+  AnomalyType,
   formatAnomalyScore,
   getFriendlyNameForPartitionId,
   formatOneDecimalPlace,
   isCategoryAnomaly,
 } from '../../../../../../common/log_analysis';
-import { AnomalyType } from '../../../../../../common/log_analysis';
 import { RowExpansionButton } from '../../../../../components/basic_table';
 import { AnomaliesTableExpandedRow } from './expanded_row';
 import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
@@ -258,16 +258,20 @@ const AnomalyMessage = ({ anomaly }: { anomaly: TableItem }) => {
   const ratioMessage = useRatio ? `${formatOneDecimalPlace(ratio)}x` : '';
 
   return (
-    <span>
-      <EuiIcon type={icon} />
-      {`${ratioMessage} ${message}`}
-      {anomaly.type === 'logCategory' && anomaly.categoryRegex && (
-        <>
-          {': '}
-          <RegularExpressionRepresentation regularExpression={anomaly.categoryRegex} />
-        </>
-      )}
-    </span>
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem grow={false} component="span">
+        <EuiIcon type={icon} />
+      </EuiFlexItem>
+      <EuiFlexItem component="span">
+        {`${ratioMessage} ${message}`}
+        {anomaly.categoryRegex && (
+          <>
+            {': '}
+            <RegularExpressionRepresentation regularExpression={anomaly.categoryRegex} />
+          </>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
