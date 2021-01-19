@@ -22,10 +22,10 @@ import { KibanaSocket } from './socket';
 
 describe('KibanaSocket', () => {
   describe('getPeerCertificate', () => {
-    it('returns null for net.Socket instance', () => {
+    it('returns `null` for net.Socket instance', () => {
       const socket = new KibanaSocket(new Socket());
 
-      expect(socket.getPeerCertificate()).toBe(null);
+      expect(socket.getPeerCertificate()).toBeNull();
     });
 
     it('delegates a call to tls.Socket instance', () => {
@@ -40,20 +40,82 @@ describe('KibanaSocket', () => {
       expect(result).toBe(cert);
     });
 
-    it('returns null if tls.Socket getPeerCertificate returns null', () => {
+    it('returns `null` if tls.Socket getPeerCertificate returns null', () => {
       const tlsSocket = new TLSSocket(new Socket());
       jest.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => null as any);
       const socket = new KibanaSocket(tlsSocket);
 
-      expect(socket.getPeerCertificate()).toBe(null);
+      expect(socket.getPeerCertificate()).toBeNull();
     });
 
-    it('returns null if tls.Socket getPeerCertificate returns empty object', () => {
+    it('returns `null` if tls.Socket getPeerCertificate returns empty object', () => {
       const tlsSocket = new TLSSocket(new Socket());
       jest.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => ({} as any));
       const socket = new KibanaSocket(tlsSocket);
 
-      expect(socket.getPeerCertificate()).toBe(null);
+      expect(socket.getPeerCertificate()).toBeNull();
+    });
+  });
+
+  describe('getProtocol', () => {
+    it('returns `null` for net.Socket instance', () => {
+      const socket = new KibanaSocket(new Socket());
+
+      expect(socket.getProtocol()).toBeNull();
+    });
+
+    it('delegates a call to tls.Socket instance', () => {
+      const tlsSocket = new TLSSocket(new Socket());
+      const protocol = 'TLSv1.2';
+      const spy = jest.spyOn(tlsSocket, 'getProtocol').mockImplementation(() => protocol);
+      const socket = new KibanaSocket(tlsSocket);
+      const result = socket.getProtocol();
+
+      expect(spy).toBeCalledTimes(1);
+      expect(result).toBe(protocol);
+    });
+
+    it('returns `null` if tls.Socket getProtocol returns null', () => {
+      const tlsSocket = new TLSSocket(new Socket());
+      jest.spyOn(tlsSocket, 'getProtocol').mockImplementation(() => null as any);
+      const socket = new KibanaSocket(tlsSocket);
+
+      expect(socket.getProtocol()).toBeNull();
+    });
+  });
+
+  describe('renegotiate', () => {
+    it('throws error for net.Socket instance', async () => {
+      const socket = new KibanaSocket(new Socket());
+
+      expect(() => socket.renegotiate({})).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot renegotiate a connection when TLS is not enabled."`
+      );
+    });
+
+    it('delegates a call to tls.Socket instance', async () => {
+      const tlsSocket = new TLSSocket(new Socket());
+      const result = Symbol();
+      const spy = jest.spyOn(tlsSocket, 'renegotiate').mockImplementation((_, callback) => {
+        callback(result as any);
+        return undefined;
+      });
+      const socket = new KibanaSocket(tlsSocket);
+
+      expect(socket.renegotiate({})).resolves.toBe(result);
+      expect(spy).toBeCalledTimes(1);
+    });
+
+    it('throws error if tls.Socket renegotiate returns error', async () => {
+      const tlsSocket = new TLSSocket(new Socket());
+      const error = new Error('Oh no!');
+      jest.spyOn(tlsSocket, 'renegotiate').mockImplementation((_, callback) => {
+        callback(error);
+        return undefined;
+      });
+      const socket = new KibanaSocket(tlsSocket);
+
+      expect(() => socket.renegotiate({})).rejects.toThrow(error);
     });
   });
 
@@ -68,12 +130,11 @@ describe('KibanaSocket', () => {
       const tlsSocket = new TLSSocket(new Socket());
 
       tlsSocket.authorized = true;
-      let socket = new KibanaSocket(tlsSocket);
+      const socket = new KibanaSocket(tlsSocket);
       expect(tlsSocket.authorized).toBe(true);
       expect(socket.authorized).toBe(true);
 
       tlsSocket.authorized = false;
-      socket = new KibanaSocket(tlsSocket);
       expect(tlsSocket.authorized).toBe(false);
       expect(socket.authorized).toBe(false);
     });
@@ -90,13 +151,12 @@ describe('KibanaSocket', () => {
       const tlsSocket = new TLSSocket(new Socket());
       tlsSocket.authorizationError = undefined as any;
 
-      let socket = new KibanaSocket(tlsSocket);
+      const socket = new KibanaSocket(tlsSocket);
       expect(tlsSocket.authorizationError).toBeUndefined();
       expect(socket.authorizationError).toBeUndefined();
 
       const authorizationError = new Error('some error');
       tlsSocket.authorizationError = authorizationError;
-      socket = new KibanaSocket(tlsSocket);
 
       expect(tlsSocket.authorizationError).toBe(authorizationError);
       expect(socket.authorizationError).toBe(authorizationError);

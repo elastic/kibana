@@ -41,10 +41,10 @@ describe('Alerts detection rules', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule, 'rule1');
-    createCustomRule(existingRule, 'rule2');
-    createCustomRule(newOverrideRule, 'rule3');
-    createCustomRule(newThresholdRule, 'rule4');
+    createCustomRule(newRule, '1');
+    createCustomRule(existingRule, '2');
+    createCustomRule(newOverrideRule, '3');
+    createCustomRule(newThresholdRule, '4');
   });
 
   after(() => {

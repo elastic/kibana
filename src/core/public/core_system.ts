@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { pick } from '@kbn/std';
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
@@ -39,7 +38,6 @@ import { ApplicationService } from './application';
 import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
-import { ContextService } from './context';
 import { IntegrationsService } from './integrations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
@@ -93,7 +91,6 @@ export class CoreSystem {
   private readonly application: ApplicationService;
   private readonly docLinks: DocLinksService;
   private readonly rendering: RenderingService;
-  private readonly context: ContextService;
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreApp;
 
@@ -129,8 +126,6 @@ export class CoreSystem {
     this.integrations = new IntegrationsService();
 
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
-
-    this.context = new ContextService(this.coreContext);
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
   }
@@ -150,16 +145,11 @@ export class CoreSystem {
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
 
-      const pluginDependencies = this.plugins.getOpaqueIds();
-      const context = this.context.setup({
-        pluginDependencies: new Map([...pluginDependencies]),
-      });
-      const application = this.application.setup({ context, http });
+      const application = this.application.setup({ http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
         application,
-        context,
         fatalErrors: this.fatalErrorsSetup,
         http,
         injectedMetadata,
@@ -219,19 +209,6 @@ export class CoreSystem {
       });
 
       this.coreApp.start({ application, http, notifications, uiSettings });
-
-      application.registerMountContext(this.coreContext.coreId, 'core', () => ({
-        application: pick(application, ['capabilities', 'navigateToApp']),
-        chrome,
-        docLinks,
-        http,
-        i18n,
-        injectedMetadata: pick(injectedMetadata, ['getInjectedVar']),
-        notifications,
-        overlays,
-        savedObjects,
-        uiSettings,
-      }));
 
       const core: InternalCoreStart = {
         application,

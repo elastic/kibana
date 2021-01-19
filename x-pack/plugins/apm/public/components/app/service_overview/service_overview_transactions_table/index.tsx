@@ -16,7 +16,7 @@ import React, { useState } from 'react';
 import { ValuesType } from 'utility-types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
-  asDuration,
+  asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
@@ -201,7 +201,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
             color="euiColorVis1"
             compact
             series={latency.timeseries ?? undefined}
-            valueLabel={asDuration(latency.value)}
+            valueLabel={asMillisecondDuration(latency.value)}
           />
         );
       },

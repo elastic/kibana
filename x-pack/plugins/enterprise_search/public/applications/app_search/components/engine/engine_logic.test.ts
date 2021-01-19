@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
-
-import { mockHttpValues } from '../../../__mocks__';
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: mockHttpValues },
-}));
-const { http } = mockHttpValues;
+import { LogicMounter, mockHttpValues, expectedAsyncError } from '../../../__mocks__';
 
 import { EngineLogic } from './';
 
 describe('EngineLogic', () => {
+  const { mount } = new LogicMounter(EngineLogic);
+  const { http } = mockHttpValues;
+
   const mockEngineData = {
     name: 'some-engine',
     type: 'default',
@@ -45,8 +42,6 @@ describe('EngineLogic', () => {
     hasUnconfirmedSchemaFields: false,
     engineNotFound: false,
   };
-
-  const { mount } = new LogicMounter(EngineLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -193,12 +188,9 @@ describe('EngineLogic', () => {
         const promise = Promise.reject('An error occured');
         http.get.mockReturnValue(promise);
 
-        try {
-          EngineLogic.actions.initializeEngine();
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        EngineLogic.actions.initializeEngine();
+        await expectedAsyncError(promise);
+
         expect(EngineLogic.actions.setEngineNotFound).toHaveBeenCalledWith(true);
       });
     });

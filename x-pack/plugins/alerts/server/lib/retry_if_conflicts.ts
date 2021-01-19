@@ -15,9 +15,7 @@ import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server
 type RetryableForConflicts<T> = () => Promise<T>;
 
 // number of times to retry when conflicts occur
-// note: it seems unlikely that we'd need more than one retry, but leaving
-// this statically configurable in case we DO need > 1
-export const RetryForConflictsAttempts = 1;
+export const RetryForConflictsAttempts = 2;
 
 // milliseconds to wait before retrying when conflicts occur
 // note: we considered making this random, to help avoid a stampede, but

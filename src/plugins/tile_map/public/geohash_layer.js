@@ -19,11 +19,12 @@
 
 import { min, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { KibanaMapLayer, MapTypes } from '../../maps_legacy/public';
+import { KibanaMapLayer } from '../../maps_legacy/public';
 import { HeatmapMarkers } from './markers/heatmap';
 import { ScaledCirclesMarkers } from './markers/scaled_circles';
 import { ShadedCirclesMarkers } from './markers/shaded_circles';
 import { GeohashGridMarkers } from './markers/geohash_grid';
+import { MapTypes } from './utils/map_types';
 
 export class GeohashLayer extends KibanaMapLayer {
   constructor(featureCollection, featureCollectionMetaData, options, zoom, kibanaMap, leaflet) {

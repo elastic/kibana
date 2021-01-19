@@ -87,7 +87,12 @@ export {
 };
 
 export { bootstrap } from './bootstrap';
-export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
+export {
+  Capabilities,
+  CapabilitiesProvider,
+  CapabilitiesSwitcher,
+  ResolveCapabilitiesOptions,
+} from './capabilities';
 export {
   ConfigPath,
   ConfigService,
