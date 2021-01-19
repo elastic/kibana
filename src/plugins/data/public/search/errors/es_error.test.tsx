@@ -18,7 +18,6 @@
  */
 
 import { EsError } from './es_error';
-import { IEsError } from './types';
 
 describe('EsError', () => {
   it('contains the same body as the wrapped error', () => {
@@ -30,8 +29,8 @@ describe('EsError', () => {
           type: 'top_level_exception_type',
           reason: 'top-level reason',
         },
-      } as any,
-    } as IEsError;
+      },
+    } as any;
     const esError = new EsError(error);
 
     expect(typeof esError.attributes).toEqual('object');
