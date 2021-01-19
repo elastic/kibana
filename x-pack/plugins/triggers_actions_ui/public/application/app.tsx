@@ -34,7 +34,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertTypeRegistry: AlertTypeRegistryContract;
   history: ScopedHistory;
-  kibanaFeatures?: KibanaFeature[];
+  kibanaFeatures: KibanaFeature[];
   element: HTMLElement;
 }
 

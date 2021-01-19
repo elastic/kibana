@@ -9,6 +9,7 @@ import { CoreSetup, CoreStart, Plugin as CorePlugin } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { ReactElement } from 'react';
 import { FeaturesPluginStart } from '../../features/public';
+import { KibanaFeature } from '../../features/common';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
 import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
@@ -123,11 +124,14 @@ export class Plugin
 
         const { renderApp } = await import('./application/app');
 
-        let kibanaFeatures;
+        // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
+        // subset of this privilege are not authorized to access this endpoint and will receive a 404
+        // error that causes the Alerting view to fail to load.
+        let kibanaFeatures: KibanaFeature[];
         try {
           kibanaFeatures = await pluginsStart.features.getFeatures();
         } catch (err) {
-          logger.error(`Unable to get features ${err.message}`);
+          kibanaFeatures = [];
         }
 
         return renderApp({
