@@ -1,0 +1,9 @@
+{
+  "id": "indexPatternFieldEditor",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": ["runtimeFields"],
+  "requiredBundles": ["kibanaReact"]
+}
