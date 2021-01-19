@@ -33,7 +33,6 @@ import { notificationServiceMock } from './notifications/notifications_service.m
 import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
-import { contextServiceMock } from './context/context_service.mock';
 import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 
 export { chromeServiceMock } from './chrome/chrome_service.mock';
@@ -60,7 +59,6 @@ function createCoreSetupMock({
 } = {}) {
   const mock = {
     application: applicationServiceMock.createSetupContract(),
-    context: contextServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, any, any]>, []>(() =>
