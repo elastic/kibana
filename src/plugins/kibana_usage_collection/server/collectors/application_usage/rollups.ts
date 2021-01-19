@@ -115,8 +115,8 @@ export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedO
       }
     } while (toCreate.size > 0);
   } catch (err) {
-    logger.warn(`Failed to rollup transactional to daily entries`);
-    logger.warn(err);
+    logger.debug(`Failed to rollup transactional to daily entries`);
+    logger.debug(err);
   }
 }
 
@@ -237,7 +237,7 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
       ),
     ]);
   } catch (err) {
-    logger.warn(`Failed to rollup daily entries to totals`);
-    logger.warn(err);
+    logger.debug(`Failed to rollup daily entries to totals`);
+    logger.debug(err);
   }
 }

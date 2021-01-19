@@ -77,7 +77,7 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
 };
 
 /**
- * Callback to handle creation of PackagePolicies in Ingest Manager
+ * Callback to handle creation of PackagePolicies in Fleet
  */
 export const getPackagePolicyCreateCallback = (
   logger: Logger,

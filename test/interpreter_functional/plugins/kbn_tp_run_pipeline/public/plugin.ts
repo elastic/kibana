@@ -32,9 +32,9 @@ export class Plugin {
     application.register({
       id: 'kbn_tp_run_pipeline',
       title: 'Run Pipeline',
-      async mount(context, params) {
+      async mount(params) {
         const { renderApp } = await import('./app/app');
-        return renderApp(context, params);
+        return renderApp(params);
       },
     });
   }

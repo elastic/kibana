@@ -5,6 +5,8 @@
  */
 
 import { extname } from 'path';
+import { uniq } from 'lodash';
+import { safeLoad } from 'js-yaml';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import uuidv5 from 'uuid/v5';
@@ -14,8 +16,11 @@ import {
   InstallablePackage,
   InstallSource,
   PackageAssetReference,
+  RegistryDataStream,
 } from '../../../../common';
-import { getArchiveEntry } from './index';
+import { ArchiveEntry, getArchiveEntry, setArchiveEntry, setArchiveFilelist } from './index';
+import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
+import { pkgToPkgKey } from '../registry';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
 const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
@@ -121,6 +126,15 @@ export async function archiveEntryToBulkCreateObject(opts: {
     attributes: doc,
   };
 }
+export function packageAssetToArchiveEntry(asset: PackageAsset): ArchiveEntry {
+  const { asset_path: path, data_utf8: utf8, data_base64: base64 } = asset;
+  const buffer = utf8 ? Buffer.from(utf8, 'utf8') : Buffer.from(base64, 'base64');
+
+  return {
+    path,
+    buffer,
+  };
+}
 
 export async function getAsset(opts: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -138,3 +152,102 @@ export async function getAsset(opts: {
 
   return storedAsset;
 }
+
+export const getEsPackage = async (
+  pkgName: string,
+  pkgVersion: string,
+  references: PackageAssetReference[],
+  savedObjectsClient: SavedObjectsClientContract
+) => {
+  const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });
+  const bulkRes = await savedObjectsClient.bulkGet<PackageAsset>(
+    references.map((reference) => ({
+      ...reference,
+      fields: ['asset_path', 'data_utf8', 'data_base64'],
+    }))
+  );
+  const assets = bulkRes.saved_objects.map((so) => so.attributes);
+
+  // add asset references to cache
+  const paths: string[] = [];
+  const entries: ArchiveEntry[] = assets.map(packageAssetToArchiveEntry);
+  entries.forEach(({ path, buffer }) => {
+    if (path && buffer) {
+      setArchiveEntry(path, buffer);
+      paths.push(path);
+    }
+  });
+  setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
+  // create the packageInfo
+  // TODO: this is mostly copied from validtion.ts, needed in case package does not exist in storage yet or is missing from cache
+  // we don't want to reach out to the registry again so recreate it here.  should check whether it exists in packageInfoCache first
+
+  const manifestPath = `${pkgName}-${pkgVersion}/manifest.yml`;
+  const soResManifest = await savedObjectsClient.get<PackageAsset>(
+    ASSETS_SAVED_OBJECT_TYPE,
+    assetPathToObjectId(manifestPath)
+  );
+  const packageInfo = safeLoad(soResManifest.attributes.data_utf8);
+
+  try {
+    const readmePath = `docs/README.md`;
+    await savedObjectsClient.get<PackageAsset>(
+      ASSETS_SAVED_OBJECT_TYPE,
+      assetPathToObjectId(`${pkgName}-${pkgVersion}/${readmePath}`)
+    );
+    packageInfo.readme = `/package/${pkgName}/${pkgVersion}/${readmePath}`;
+  } catch (err) {
+    // read me doesn't exist
+  }
+
+  let dataStreamPaths: string[] = [];
+  const dataStreams: RegistryDataStream[] = [];
+  paths
+    .filter((path) => path.startsWith(`${pkgKey}/data_stream/`))
+    .forEach((path) => {
+      const parts = path.split('/');
+      if (parts.length > 2 && parts[2]) dataStreamPaths.push(parts[2]);
+    });
+
+  dataStreamPaths = uniq(dataStreamPaths);
+
+  await Promise.all(
+    dataStreamPaths.map(async (dataStreamPath) => {
+      const dataStreamManifestPath = `${pkgKey}/data_stream/${dataStreamPath}/manifest.yml`;
+      const soResDataStreamManifest = await savedObjectsClient.get<PackageAsset>(
+        ASSETS_SAVED_OBJECT_TYPE,
+        assetPathToObjectId(dataStreamManifestPath)
+      );
+      const dataStreamManifest = safeLoad(soResDataStreamManifest.attributes.data_utf8);
+      const {
+        title: dataStreamTitle,
+        release,
+        ingest_pipeline: ingestPipeline,
+        type,
+        dataset,
+      } = dataStreamManifest;
+      const streams = parseAndVerifyStreams(dataStreamManifest, dataStreamPath);
+
+      dataStreams.push({
+        dataset: dataset || `${pkgName}.${dataStreamPath}`,
+        title: dataStreamTitle,
+        release,
+        package: pkgName,
+        ingest_pipeline: ingestPipeline || 'default',
+        path: dataStreamPath,
+        type,
+        streams,
+      });
+    })
+  );
+  packageInfo.policy_templates = parseAndVerifyPolicyTemplates(packageInfo);
+  packageInfo.data_streams = dataStreams;
+  packageInfo.assets = paths.map((path) => {
+    return path.replace(`${pkgName}-${pkgVersion}`, `/package/${pkgName}/${pkgVersion}`);
+  });
+
+  return {
+    paths,
+    packageInfo,
+  };
+};

@@ -31,6 +31,7 @@ describe('Session state container', () => {
       state.transitions.start();
       expect(state.selectors.getState()).toBe(SearchSessionState.None);
       expect(state.get().sessionId).not.toBeUndefined();
+      expect(state.get().startTime).not.toBeUndefined();
     });
 
     test('track', () => {
@@ -56,6 +57,7 @@ describe('Session state container', () => {
       state.transitions.clear();
       expect(state.selectors.getState()).toBe(SearchSessionState.None);
       expect(state.get().sessionId).toBeUndefined();
+      expect(state.get().startTime).toBeUndefined();
     });
 
     test('cancel', () => {

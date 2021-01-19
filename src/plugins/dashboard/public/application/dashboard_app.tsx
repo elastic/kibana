@@ -173,10 +173,14 @@ export function DashboardApp({
       ).subscribe(() => refreshDashboardContainer())
     );
     subscriptions.add(
-      data.search.session.onRefresh$.subscribe(() => {
+      merge(
+        data.search.session.onRefresh$,
+        data.query.timefilter.timefilter.getAutoRefreshFetch$()
+      ).subscribe(() => {
         setLastReloadTime(() => new Date().getTime());
       })
     );
+
     dashboardStateManager.registerChangeListener(() => {
       // we aren't checking dirty state because there are changes the container needs to know about
       // that won't make the dashboard "dirty" - like a view mode change.
