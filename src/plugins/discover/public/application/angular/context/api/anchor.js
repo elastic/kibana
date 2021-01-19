@@ -20,7 +20,12 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-export function fetchAnchorProvider(indexPatterns, searchSource, timefilter, useNewFieldsApi = false) {
+export function fetchAnchorProvider(
+  indexPatterns,
+  searchSource,
+  timefilter,
+  useNewFieldsApi = false
+) {
   return async function fetchAnchor(props) {
     const { indexPatternId, anchorId, sort, timeRange, routing } = props;
     const indexPattern = await indexPatterns.get(indexPatternId);
