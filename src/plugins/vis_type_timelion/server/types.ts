@@ -17,4 +17,13 @@
  * under the License.
  */
 
+import { ISearchClient } from '../../data/common';
+import { IScopedSessionService } from '../../data/server';
+
 export { TimelionFunctionInterface, TimelionFunctionConfig } from './lib/classes/timelion_function';
+
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    search?: ISearchClient & { session: IScopedSessionService };
+  }
+}
