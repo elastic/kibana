@@ -227,6 +227,11 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('dashboardViewOnlyMode');
     }
 
+    public async clickDiscardChanges() {
+      log.debug('clickDiscardChanges');
+      await testSubjects.click('dashboardDiscardChanges');
+    }
+
     public async clickNewDashboard() {
       await listingTable.clickNewButton('createDashboardPromptButton');
       // make sure the dashboard page is shown
