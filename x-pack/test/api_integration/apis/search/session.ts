@@ -121,6 +121,29 @@ export default function ({ getService }: FtrProviderContext) {
         expect(idMappings).to.contain(id1);
         expect(idMappings).to.contain(id2);
       });
+
+      it('should create and extend a session', async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertest
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(200);
+
+        await supertest
+          .post(`/internal/session/${sessionId}/_extend`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            keepAlive: '5m',
+          })
+          .expect(200);
+      });
     });
   });
 }
