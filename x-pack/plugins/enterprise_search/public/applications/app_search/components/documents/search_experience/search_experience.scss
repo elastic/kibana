@@ -25,7 +25,7 @@
     background-color: $euiPageBackgroundColor;
     padding: $euiSizeL;
   }
-  
+
   .documentsSearchExperience__facet {
     .euiCheckboxGroup__item {
       // Adding text-overflow to euiCheckbox__label below
@@ -35,10 +35,7 @@
     }
 
     .euiCheckbox__label {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      width: 100%;
+      @include euiTextTruncate;
     }
   }
 }
