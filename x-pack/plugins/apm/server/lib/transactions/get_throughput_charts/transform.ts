@@ -37,7 +37,7 @@ export function getThroughputBuckets({
         .map((bucket) => bucket.count.value)
         .reduce((a, b) => a + b, 0);
 
-      // calculate request/minute
+      // calculate average throughput
       const avg = docCountTotal / durationAsMinutes;
 
       return { key, dataPoints, avg };

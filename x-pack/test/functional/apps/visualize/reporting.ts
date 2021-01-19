@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visEditor',
   ]);
 
-  describe('Visualize', () => {
+  describe('Visualize Reporting Screenshots', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.loadIfNeeded('reporting/ecommerce');

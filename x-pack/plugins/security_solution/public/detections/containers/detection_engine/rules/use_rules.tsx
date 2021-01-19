@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
 import { useEffect, useState, useRef } from 'react';
 
 import { FetchRulesResponse, FilterOptions, PaginationOptions, Rule } from './types';
@@ -12,16 +11,11 @@ import { errorToToaster, useStateToaster } from '../../../../common/components/t
 import { fetchRules } from './api';
 import * as i18n from './translations';
 
-export type ReturnRules = [
-  boolean,
-  FetchRulesResponse | null,
-  (refreshPrePackagedRule?: boolean) => void
-];
+export type ReturnRules = [boolean, FetchRulesResponse | null, () => Promise<void>];
 
 export interface UseRules {
   pagination: PaginationOptions;
   filterOptions: FilterOptions;
-  refetchPrePackagedRulesStatus?: () => void;
   dispatchRulesInReducer?: (rules: Rule[], pagination: Partial<PaginationOptions>) => void;
 }
 
@@ -34,20 +28,19 @@ export interface UseRules {
 export const useRules = ({
   pagination,
   filterOptions,
-  refetchPrePackagedRulesStatus,
   dispatchRulesInReducer,
 }: UseRules): ReturnRules => {
   const [rules, setRules] = useState<FetchRulesResponse | null>(null);
-  const reFetchRules = useRef<(refreshPrePackagedRule?: boolean) => void>(noop);
+  const reFetchRules = useRef<() => Promise<void>>(() => Promise.resolve());
   const [loading, setLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
 
-  const filterTags = filterOptions.tags?.sort().join();
+  const filterTags = filterOptions.tags.sort().join();
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    async function fetchData() {
+    const fetchData = async () => {
       try {
         setLoading(true);
         const fetchRulesResult = await fetchRules({
@@ -77,15 +70,10 @@ export const useRules = ({
       if (isSubscribed) {
         setLoading(false);
       }
-    }
+    };
 
     fetchData();
-    reFetchRules.current = (refreshPrePackagedRule: boolean = false) => {
-      fetchData();
-      if (refreshPrePackagedRule && refetchPrePackagedRulesStatus != null) {
-        refetchPrePackagedRulesStatus();
-      }
-    };
+    reFetchRules.current = (): Promise<void> => fetchData();
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
@@ -100,7 +88,6 @@ export const useRules = ({
     filterTags,
     filterOptions.showCustomRules,
     filterOptions.showElasticRules,
-    refetchPrePackagedRulesStatus,
   ]);
 
   return [loading, rules, reFetchRules.current];

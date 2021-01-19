@@ -34,13 +34,11 @@ import { ApplicationServiceContract } from './test_types';
 const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
   register: jest.fn(),
   registerAppUpdater: jest.fn(),
-  registerMountContext: jest.fn(),
 });
 
 const createInternalSetupContractMock = (): jest.Mocked<InternalApplicationSetup> => ({
   register: jest.fn(),
   registerAppUpdater: jest.fn(),
-  registerMountContext: jest.fn(),
 });
 
 const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
@@ -53,7 +51,6 @@ const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
     navigateToApp: jest.fn(),
     navigateToUrl: jest.fn(),
     getUrlForApp: jest.fn(),
-    registerMountContext: jest.fn(),
   };
 };
 
@@ -91,7 +88,6 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
     getUrlForApp: jest.fn(),
     navigateToApp: jest.fn().mockImplementation((appId) => currentAppId$.next(appId)),
     navigateToUrl: jest.fn(),
-    registerMountContext: jest.fn(),
     history: createHistoryMock(),
   };
 };

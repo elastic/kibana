@@ -11,3 +11,7 @@ export const mockLicensingValues = {
   hasPlatinumLicense: false,
   hasGoldLicense: false,
 };
+
+jest.mock('../shared/licensing', () => ({
+  LicensingLogic: { values: mockLicensingValues },
+}));

@@ -35,7 +35,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { LinkButton } from '../../../../common/components/links';
 import { useFormatUrl } from '../../../../common/components/link_to';
 
-type Func = (refreshPrePackagedRule?: boolean) => void;
+type Func = () => Promise<void>;
 
 const RulesPageComponent: React.FC = () => {
   const history = useHistory();
@@ -94,20 +94,22 @@ const RulesPageComponent: React.FC = () => {
 
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {
-      refreshRulesData.current(true);
+      await refreshRulesData.current();
     }
   }, [refreshRulesData]);
 
   const handleCreatePrePackagedRules = useCallback(async () => {
     if (createPrePackagedRules != null) {
       await createPrePackagedRules();
-      handleRefreshRules();
+      return handleRefreshRules();
     }
   }, [createPrePackagedRules, handleRefreshRules]);
 
   const handleRefetchPrePackagedRulesStatus = useCallback(() => {
     if (refetchPrePackagedRulesStatus != null) {
-      refetchPrePackagedRulesStatus();
+      return refetchPrePackagedRulesStatus();
+    } else {
+      return Promise.resolve();
     }
   }, [refetchPrePackagedRulesStatus]);
 

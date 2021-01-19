@@ -87,6 +87,8 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
     isLoadingTopLogEntryCategories,
     logEntryCategoryDatasets,
     topLogEntryCategories,
+    sortOptions,
+    changeSortOptions,
   } = useLogEntryCategoriesResults({
     categoriesCount: 25,
     endTime: categoryQueryTimeRange.timeRange.endTime,
@@ -145,7 +147,12 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
 
   useEffect(() => {
     getTopLogEntryCategories();
-  }, [getTopLogEntryCategories, categoryQueryDatasets, categoryQueryTimeRange.lastChangedTime]);
+  }, [
+    getTopLogEntryCategories,
+    categoryQueryDatasets,
+    categoryQueryTimeRange.lastChangedTime,
+    sortOptions,
+  ]);
 
   useEffect(() => {
     getLogEntryCategoryDatasets();
@@ -219,6 +226,8 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
                 sourceId={sourceId}
                 timeRange={categoryQueryTimeRange.timeRange}
                 topCategories={topLogEntryCategories}
+                sortOptions={sortOptions}
+                changeSortOptions={changeSortOptions}
               />
             </EuiPanel>
           </EuiFlexItem>
