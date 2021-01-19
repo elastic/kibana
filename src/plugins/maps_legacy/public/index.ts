@@ -53,7 +53,7 @@ export {
 
 export * from '../common';
 export * from './common/types';
-export { ORIGIN } from './common/constants/origin';
+export { ORIGIN, TMS_IN_YML_ID } from './common/constants';
 
 export { WmsOptions } from './components/wms_options';
 export { LegacyMapDeprecationMessage } from './components/legacy_map_deprecation_message';

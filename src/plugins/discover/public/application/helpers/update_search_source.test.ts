@@ -44,8 +44,37 @@ describe('updateSearchSource', () => {
         } as unknown) as IUiSettingsClient,
       } as unknown) as DiscoverServices,
       sort: [] as SortOrder[],
+      columns: [],
+      useNewFieldsApi: false,
     });
     expect(result.getField('index')).toEqual(indexPatternMock);
     expect(result.getField('size')).toEqual(sampleSize);
+    expect(result.getField('fields')).toBe(undefined);
+  });
+
+  test('updates a given search source with the usage of the new fields api', async () => {
+    const searchSourceMock = createSearchSourceMock({});
+    const sampleSize = 250;
+    const result = updateSearchSource(searchSourceMock, {
+      indexPattern: indexPatternMock,
+      services: ({
+        data: dataPluginMock.createStartContract(),
+        uiSettings: ({
+          get: (key: string) => {
+            if (key === SAMPLE_SIZE_SETTING) {
+              return sampleSize;
+            }
+            return false;
+          },
+        } as unknown) as IUiSettingsClient,
+      } as unknown) as DiscoverServices,
+      sort: [] as SortOrder[],
+      columns: [],
+      useNewFieldsApi: true,
+    });
+    expect(result.getField('index')).toEqual(indexPatternMock);
+    expect(result.getField('size')).toEqual(sampleSize);
+    expect(result.getField('fields')).toEqual(['*']);
+    expect(result.getField('fieldsFromSource')).toBe(undefined);
   });
 });

@@ -28,7 +28,6 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { bufferCount, take, takeUntil } from 'rxjs/operators';
 import { shallow, mount } from 'enzyme';
 
-import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { MockLifecycle } from './test_types';
@@ -54,7 +53,6 @@ describe('#setup()', () => {
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
-      context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
@@ -367,16 +365,6 @@ describe('#setup()', () => {
       MockHistory.push.mockClear();
     });
   });
-
-  it("`registerMountContext` calls context container's registerContext", () => {
-    const { registerMountContext } = service.setup(setupDeps);
-    const container = setupDeps.context.createContextContainer.mock.results[0].value;
-    const pluginId = Symbol();
-
-    const appMount = () => () => undefined;
-    registerMountContext(pluginId, 'test' as any, appMount);
-    expect(container.registerContext).toHaveBeenCalledWith(pluginId, 'test', appMount);
-  });
 });
 
 describe('#start()', () => {
@@ -384,7 +372,6 @@ describe('#start()', () => {
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
-      context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
@@ -869,7 +856,6 @@ describe('#stop()', () => {
     const http = httpServiceMock.createSetupContract({ basePath: '/test' });
     setupDeps = {
       http,
-      context: contextServiceMock.createSetupContract(),
     };
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();

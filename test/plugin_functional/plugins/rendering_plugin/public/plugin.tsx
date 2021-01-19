@@ -27,7 +27,7 @@ export class RenderingPlugin implements Plugin {
       id: 'rendering',
       title: 'Rendering',
       appRoute: '/render/core',
-      async mount(context, { element }) {
+      async mount({ element }) {
         render(<h1 data-test-subj="renderingHeader">rendering service</h1>, element);
 
         return () => unmountComponentAtNode(element);
@@ -38,7 +38,7 @@ export class RenderingPlugin implements Plugin {
       id: 'custom-app-route',
       title: 'Custom App Route',
       appRoute: '/custom/appRoute',
-      async mount(context, { element }) {
+      async mount({ element }) {
         render(<h1 data-test-subj="customAppRouteHeader">Custom App Route</h1>, element);
 
         return () => unmountComponentAtNode(element);
