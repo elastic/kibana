@@ -55,6 +55,7 @@ describe('DocumentMigrator', () => {
     return {
       kibanaVersion,
       typeRegistry: createRegistry(),
+      minimumConvertVersion: '0.0.0', // no minimum version unless we specify it for a test case
       log: mockLogger,
     };
   }
@@ -129,6 +130,7 @@ describe('DocumentMigrator', () => {
           name: 'foo',
           convertToMultiNamespaceTypeVersion: 'bar',
         }),
+        minimumConvertVersion: '0.0.0',
         log: mockLogger,
       };
       expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
@@ -144,10 +146,27 @@ describe('DocumentMigrator', () => {
           convertToMultiNamespaceTypeVersion: 'bar',
           namespaceType: 'multiple',
         }),
+        minimumConvertVersion: '0.0.0',
         log: mockLogger,
       };
       expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
         `Invalid convertToMultiNamespaceTypeVersion for type foo. Expected value to be a semver, but got 'bar'.`
+      );
+    });
+
+    it('validates convertToMultiNamespaceTypeVersion is not less than the minimum allowed version', () => {
+      const invalidDefinition = {
+        kibanaVersion: '3.2.3',
+        typeRegistry: createRegistry({
+          name: 'foo',
+          convertToMultiNamespaceTypeVersion: '3.2.4',
+          namespaceType: 'multiple',
+        }),
+        // not using a minimumConvertVersion parameter, the default is 8.0.0
+        log: mockLogger,
+      };
+      expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
+        `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be less than '8.0.0'.`
       );
     });
 
@@ -159,6 +178,7 @@ describe('DocumentMigrator', () => {
           convertToMultiNamespaceTypeVersion: '3.2.4',
           namespaceType: 'multiple',
         }),
+        minimumConvertVersion: '0.0.0',
         log: mockLogger,
       };
       expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
@@ -174,6 +194,7 @@ describe('DocumentMigrator', () => {
           convertToMultiNamespaceTypeVersion: '3.1.1',
           namespaceType: 'multiple',
         }),
+        minimumConvertVersion: '0.0.0',
         log: mockLogger,
       };
       expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(

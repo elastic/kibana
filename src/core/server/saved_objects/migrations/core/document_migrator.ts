@@ -78,6 +78,8 @@ import { SavedObjectMigrationFn } from '../types';
 import { DEFAULT_NAMESPACE_STRING } from '../../service/lib/utils';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
+const DEFAULT_MINIMUM_CONVERT_VERSION = '8.0.0';
+
 export type MigrateFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 export type MigrateAndConvertFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];
 
@@ -105,6 +107,7 @@ interface TransformOptions {
 interface DocumentMigratorOptions {
   kibanaVersion: string;
   typeRegistry: ISavedObjectTypeRegistry;
+  minimumConvertVersion?: string;
   log: Logger;
 }
 
@@ -159,11 +162,17 @@ export class DocumentMigrator implements VersionedTransformer {
    * @param {DocumentMigratorOptions} opts
    * @prop {string} kibanaVersion - The current version of Kibana
    * @prop {SavedObjectTypeRegistry} typeRegistry - The type registry to get type migrations from
+   * @prop {string} minimumConvertVersion - The minimum version of Kibana in which documents can be converted to multi-namespace types
    * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
-  constructor({ typeRegistry, kibanaVersion, log }: DocumentMigratorOptions) {
-    validateMigrationDefinition(typeRegistry, kibanaVersion);
+  constructor({
+    typeRegistry,
+    kibanaVersion,
+    minimumConvertVersion = DEFAULT_MINIMUM_CONVERT_VERSION,
+    log,
+  }: DocumentMigratorOptions) {
+    validateMigrationDefinition(typeRegistry, kibanaVersion, minimumConvertVersion);
 
     this.migrations = buildActiveMigrations(typeRegistry, log);
     this.transformDoc = buildDocumentTransform({
@@ -231,7 +240,11 @@ export class DocumentMigrator implements VersionedTransformer {
  * language. So, this is just to provide a little developer-friendly error messaging. Joi was
  * giving weird errors, so we're just doing manual validation.
  */
-function validateMigrationDefinition(registry: ISavedObjectTypeRegistry, kibanaVersion: string) {
+function validateMigrationDefinition(
+  registry: ISavedObjectTypeRegistry,
+  kibanaVersion: string,
+  minimumConvertVersion: string
+) {
   function assertObject(obj: any, prefix: string) {
     if (!obj || typeof obj !== 'object') {
       throw new Error(`${prefix} Got ${obj}.`);
@@ -269,6 +282,10 @@ function validateMigrationDefinition(registry: ISavedObjectTypeRegistry, kibanaV
     } else if (!Semver.valid(convertToMultiNamespaceTypeVersion)) {
       throw new Error(
         `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Expected value to be a semver, but got '${convertToMultiNamespaceTypeVersion}'.`
+      );
+    } else if (Semver.lt(convertToMultiNamespaceTypeVersion, minimumConvertVersion)) {
+      throw new Error(
+        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Value '${convertToMultiNamespaceTypeVersion}' cannot be less than '${minimumConvertVersion}'.`
       );
     } else if (Semver.gt(convertToMultiNamespaceTypeVersion, kibanaVersion)) {
       throw new Error(

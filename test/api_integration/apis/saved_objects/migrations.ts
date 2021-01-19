@@ -641,6 +641,7 @@ async function migrateIndex({
   const documentMigrator = new DocumentMigrator({
     kibanaVersion: KIBANA_VERSION,
     typeRegistry,
+    minimumConvertVersion: '0.0.0', // bypass the restriction of a minimum version of 8.0.0 for these integration tests
     log: getLogMock(),
   });
 
