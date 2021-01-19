@@ -399,7 +399,14 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           />
         </EuiFormRow>
         <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
-          <EffectedPolicySelect />
+          <EffectedPolicySelect
+            isGlobal={true}
+            onChange={(_args) => {
+              console.log('onChange(): ', _args);
+            }}
+            options={[]}
+            selected={[]}
+          />
         </EuiFormRow>
       </EuiForm>
     );

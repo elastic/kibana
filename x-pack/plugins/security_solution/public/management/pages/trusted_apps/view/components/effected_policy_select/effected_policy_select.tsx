@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFormRow,
   EuiSelectable,
@@ -13,30 +13,67 @@ import {
   EuiSwitchProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
 
-export type EffectedPolicySelectProps = Omit<EuiSelectableProps, 'onChange' | 'options'> & {
-  options: Omit<EuiSelectableProps['options'], 'label'> & { policy: PolicyData };
-  onChange: (selection: { isGlobal: boolean; selectedPolicies: PolicyData[] }) => void;
+interface OptionPolicyData {
+  policy: PolicyData;
+}
+
+type EffectedPolicyOption = EuiSelectableOption<OptionPolicyData>;
+
+interface EffectedPolicySelectionState {
   isGlobal: boolean;
+  selected: PolicyData[];
+}
+
+export type EffectedPolicySelectProps = Omit<
+  EuiSelectableProps,
+  'onChange' | 'options' | 'children'
+> & {
+  options: PolicyData[];
+  isGlobal: boolean;
+  onChange: (selection: EffectedPolicySelectionState) => void;
+  selected?: PolicyData[];
 };
 export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
-  ({ isGlobal, onChange, listProps, ...otherSelectableProps }) => {
+  ({ isGlobal, onChange, listProps, options, selected = [], ...otherSelectableProps }) => {
     const DEFAULT_LIST_PROPS = useMemo(() => ({ bordered: true }), []);
 
-    // FIXME: temporary for testing only
-    const policyOptions = Array.from({ length: 30 }, (_, i) => ({ label: `policy ${i + 1}` }));
+    const [selectionState, setSelectionState] = useState<EffectedPolicySelectionState>({
+      isGlobal,
+      selected,
+    });
+
+    const selectableOptions: EffectedPolicyOption[] = useMemo(() => {
+      // FIXME:PT temporary for testing only
+      const tempOptions = Array.from({ length: 30 }, (_, i) => ({
+        name: `policy ${i + 1}`,
+      }));
+      options;
+      return tempOptions.map((policy) => ({ label: policy.name, policy }));
+    }, [options]);
 
     const handleOnPolicySelectChange: EuiSelectableProps['onChange'] = useCallback(
       (changedOptions) => {
-        debugger;
+        console.log('handleOnPolicySelectChange triggered');
       },
       []
     );
 
-    const handleGlobalSwitchChange: EuiSwitchProps['onChange'] = useCallback(() => {
-      debugger;
-    }, []);
+    const handleGlobalSwitchChange: EuiSwitchProps['onChange'] = useCallback(
+      ({ target: { checked } }) => {
+        setSelectionState((prevState) => ({ ...prevState, isGlobal: checked }));
+      },
+      []
+    );
+
+    const listBuilderCallback: EuiSelectableProps['children'] = useCallback((list) => list, []);
+
+    // Anytime selection state is updated, call `onChange`
+    useEffect(() => {
+      onChange(selectionState);
+    }, [onChange, selectionState]);
 
     return (
       <>
@@ -56,7 +93,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
                 defaultMessage: 'Apply trusted application globally',
               }
             )}
-            checked={isGlobal}
+            checked={selectionState.isGlobal}
             onChange={handleGlobalSwitchChange}
           />
         </EuiFormRow>
@@ -66,13 +103,13 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             defaultMessage: 'Apply to specific endpoint policies',
           })}
         >
-          <EuiSelectable
+          <EuiSelectable<OptionPolicyData>
             {...otherSelectableProps}
-            options={policyOptions}
+            options={selectableOptions}
             listProps={listProps || DEFAULT_LIST_PROPS}
             onChange={handleOnPolicySelectChange}
           >
-            {(list) => list}
+            {listBuilderCallback}
           </EuiSelectable>
         </EuiFormRow>
       </>
