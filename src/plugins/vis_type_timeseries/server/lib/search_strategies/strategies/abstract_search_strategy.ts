@@ -17,12 +17,7 @@
  * under the License.
  */
 
-import type {
-  RequestHandlerContext,
-  FakeRequest,
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import type { FakeRequest, IUiSettingsClient, SavedObjectsClientContract } from 'kibana/server';
 
 import type { Framework } from '../../../plugin';
 import type { IndexPatternsFetcher, IFieldType } from '../../../../../data/server';
@@ -30,6 +25,7 @@ import type { VisPayload } from '../../../../common/types';
 import type { IndexPatternsService } from '../../../../../data/common';
 import { indexPatterns } from '../../../../../data/server';
 import { SanitizedFieldType } from '../../../../common/types';
+import type { VisTypeTimeseriesRequestHandlerContext } from '../../../types';
 
 /**
  * ReqFacade is a regular KibanaRequest object extended with additional service
@@ -38,7 +34,7 @@ import { SanitizedFieldType } from '../../../../common/types';
  * This will be replaced by standard KibanaRequest and RequestContext objects in a later version.
  */
 export interface ReqFacade<T = unknown> extends FakeRequest {
-  requestContext: RequestHandlerContext;
+  requestContext: VisTypeTimeseriesRequestHandlerContext;
   framework: Framework;
   payload: T;
   pre: {
@@ -69,8 +65,8 @@ export abstract class AbstractSearchStrategy {
 
     bodies.forEach((body) => {
       requests.push(
-        req.requestContext
-          .search!.search(
+        req.requestContext.search
+          .search(
             {
               indexType,
               params: {

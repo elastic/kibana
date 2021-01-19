@@ -17,17 +17,18 @@
  * under the License.
  */
 
-import { IRouter, KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ensureNoUnsafeProperties } from '@kbn/std';
 import { getVisData, GetVisDataOptions } from '../lib/get_vis_data';
 import { visPayloadSchema } from '../../common/vis_schema';
 import { ROUTES } from '../../common/constants';
 import { Framework } from '../plugin';
+import type { VisTypeTimeseriesRouter } from '../types';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
-export const visDataRoutes = (router: IRouter, framework: Framework) => {
+export const visDataRoutes = (router: VisTypeTimeseriesRouter, framework: Framework) => {
   router.post(
     {
       path: ROUTES.VIS_DATA,
