@@ -19,10 +19,10 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'kibana/public';
 import { Main } from './components/main';
 
-export const renderApp = (context: AppMountContext, { element }: AppMountParameters) => {
+export const renderApp = ({ element }: AppMountParameters) => {
   render(<Main />, element);
   return () => unmountComponentAtNode(element);
 };

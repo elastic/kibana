@@ -14,13 +14,33 @@ import {
   createDatasetsFilters,
 } from './common';
 
+import { CategorySort } from '../../../../common/http_api/log_analysis';
+
+type CategoryAggregationOrder =
+  | 'filter_record>maximum_record_score'
+  | 'filter_model_plot>sum_actual';
+const getAggregationOrderForSortField = (
+  field: CategorySort['field']
+): CategoryAggregationOrder => {
+  switch (field) {
+    case 'maximumAnomalyScore':
+      return 'filter_record>maximum_record_score';
+      break;
+    case 'logEntryCount':
+      return 'filter_model_plot>sum_actual';
+      break;
+    default:
+      return 'filter_model_plot>sum_actual';
+  }
+};
+
 export const createTopLogEntryCategoriesQuery = (
   logEntryCategoriesJobId: string,
   startTime: number,
   endTime: number,
   size: number,
   datasets: string[],
-  sortDirection: 'asc' | 'desc' = 'desc'
+  sort: CategorySort
 ) => ({
   ...defaultRequestParameters,
   body: {
@@ -65,7 +85,7 @@ export const createTopLogEntryCategoriesQuery = (
           field: 'by_field_value',
           size,
           order: {
-            'filter_model_plot>sum_actual': sortDirection,
+            [getAggregationOrderForSortField(sort.field)]: sort.direction,
           },
         },
         aggs: {
