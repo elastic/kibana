@@ -19,12 +19,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { IRouter } from 'src/core/server';
 import { SearchRouteDependencies } from '../search_service';
 
 import { getCallMsearch } from './call_msearch';
 import { reportServerError } from '../../../../kibana_utils/server';
-
+import type { DataPluginRouter } from '../types';
 /**
  * The msearch route takes in an array of searches, each consisting of header
  * and body json, and reformts them into a single request for the _msearch API.
@@ -38,7 +37,10 @@ import { reportServerError } from '../../../../kibana_utils/server';
  *
  * @deprecated
  */
-export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependencies): void {
+export function registerMsearchRoute(
+  router: DataPluginRouter,
+  deps: SearchRouteDependencies
+): void {
   router.post(
     {
       path: '/internal/_msearch',

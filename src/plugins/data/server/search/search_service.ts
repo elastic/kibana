@@ -74,12 +74,7 @@ import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { SessionService, IScopedSessionService, ISessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    search?: ISearchClient & { session: IScopedSessionService };
-  }
-}
+import type { DataRequestHandlerContext } from './types';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -123,7 +118,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<DataRequestHandlerContext>();
     const routeDependencies = {
       getStartServices: core.getStartServices,
       globalConfig$: this.initializerContext.config.legacy.globalConfig$,
