@@ -23,7 +23,7 @@ Elastic Stack cluster, and control which users have access to which features and
 As an admin, you’re concerned with managing the system, from establishing
 the deployment to getting {es} data into {kib}, and then
 managing the data.  As an analyst, your job is to discover insights
-from the data, build charts, and share your findings.  If you’re a business user,
+in the data, visualize your data on dashboards, and share your findings.  As a business user,
 you’ll want to view existing dashboards and drill down into details.
 
 *{kib} works with all types of data:* structured or unstructured text,
