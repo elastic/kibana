@@ -37,13 +37,30 @@ export type EffectedPolicySelectProps = Omit<
   selected?: PolicyData[];
 };
 export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
-  ({ isGlobal, onChange, listProps, options, selected = [], ...otherSelectableProps }) => {
+  ({
+    isGlobal,
+    onChange,
+    listProps,
+    options,
+    selected = [],
+    'data-test-subj': dataTestSubj,
+    ...otherSelectableProps
+  }) => {
     const DEFAULT_LIST_PROPS = useMemo(() => ({ bordered: true }), []);
 
     const [selectionState, setSelectionState] = useState<EffectedPolicySelectionState>({
       isGlobal,
       selected,
     });
+
+    const getTestId = useCallback(
+      (suffix): string | undefined => {
+        if (dataTestSubj) {
+          return `${dataTestSubj}-${suffix}`;
+        }
+      },
+      [dataTestSubj]
+    );
 
     const selectableOptions: EffectedPolicyOption[] = useMemo(() => {
       const isPolicySelected = selected.reduce<{ [K: string]: PolicyData }>(
@@ -108,6 +125,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             )}
             checked={selectionState.isGlobal}
             onChange={handleGlobalSwitchChange}
+            data-test-subj={getTestId('globalSwitch')}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -121,6 +139,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             options={selectableOptions}
             listProps={listProps || DEFAULT_LIST_PROPS}
             onChange={handleOnPolicySelectChange}
+            data-test-subj={getTestId('policiesSelectable')}
           >
             {listBuilderCallback}
           </EuiSelectable>
