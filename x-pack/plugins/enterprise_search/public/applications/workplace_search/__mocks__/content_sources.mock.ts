@@ -226,3 +226,35 @@ export const sourceConfigData = {
     consumerKey: 'elastic_enterprise_search_123',
   },
 };
+
+export const oauthApplication = {
+  name: 'app',
+  uid: '123uid123',
+  secret: 'shhhhhhhhh',
+  redirectUri: 'https://foo',
+  confidential: false,
+  nativeRedirectUri: 'https://bar',
+};
+
+export const exampleResult = {
+  sourceName: 'source',
+  searchResultConfig: {
+    titleField: 'otherTitle',
+    subtitleField: 'otherSubtitle',
+    urlField: 'myLink',
+    color: '#e3e3e3',
+    descriptionField: 'about',
+    detailFields: [
+      { fieldName: 'cats', label: 'Felines' },
+      { fieldName: 'dogs', label: 'Canines' },
+    ],
+  },
+  titleFieldHover: false,
+  urlFieldHover: false,
+  exampleDocuments: [
+    {
+      myLink: 'http://foo',
+      otherTitle: 'foo',
+    },
+  ],
+};
