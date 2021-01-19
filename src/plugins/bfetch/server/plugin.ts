@@ -88,9 +88,16 @@ export interface BfetchServerSetup {
    *
    * @param streamHandler
    */
-  createStreamingRequestHandler: <Response, P, Q, B, Method extends RouteMethod = any>(
+  createStreamingRequestHandler: <
+    Response,
+    P,
+    Q,
+    B,
+    Context extends object = object,
+    Method extends RouteMethod = any
+  >(
     streamHandler: StreamingRequestHandler<Response, P, Q, B, Method>
-  ) => RequestHandler<P, Q, B, Method>;
+  ) => RequestHandler<P, Q, B, Context, Method>;
 }
 
 // eslint-disable-next-line
