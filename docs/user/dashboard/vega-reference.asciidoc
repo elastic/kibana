@@ -1,11 +1,11 @@
 [[vega-reference]]
-== Vega reference
+=== Vega reference
 
 Learn more about {kib} extension, additional *Vega* resources, and examples.
 
 [float]
 [[reference-for-kibana-extensions]]
-=== Reference for {kib} extensions
+==== Reference for {kib} extensions
 
 {kib} has extended Vega and Vega-Lite with extensions that support:
 
@@ -15,12 +15,12 @@ Learn more about {kib} extension, additional *Vega* resources, and examples.
 * experimental[] Using the Elastic Map Service in Vega maps
 * Additional tooltip styling
 * Advanced setting to enable URL loading from any domain
-* Limited debugging support using the browser dev tools
+* Debugging support using the {kib} inspector or browser console
 * (Vega only) Expression functions which can update the time range and dashboard filters
 
 [float]
 [[vega-sizing-and-positioning]]
-==== Automatic sizing
+===== Automatic sizing
 
 Most users will want their Vega visualizations to take the full available space, so unlike
 Vega examples, `width` and `height` are not required parameters in {kib}. To set the width
@@ -52,7 +52,7 @@ in the Vega documentation.
 
 [float]
 [[vega-theme]]
-==== Default theme to match {kib}
+===== Default theme to match {kib}
 
 {kib} registers a default https://vega.github.io/vega/docs/schemes/[Vega color scheme]
 with the id `elastic`, and sets a default color for each `mark` type.
@@ -60,7 +60,7 @@ Override it by providing a different `stroke`, `fill`, or `color` (Vega-Lite) va
 
 [float]
 [[vega-queries]]
-==== Writing {es} queries in Vega
+===== Writing {es} queries in Vega
 
 {kib} extends the Vega https://vega.github.io/vega/docs/data/[data] elements
 with support for direct {es} queries specified as `url`.
@@ -215,7 +215,7 @@ try to get about 10-15 data points (buckets).
 
 [float]
 [[vega-esmfiles]]
-=== Access Elastic Map Service files
+==== Access Elastic Map Service files
 
 experimental[] Access the Elastic Map Service files via the same mechanism:
 
@@ -282,7 +282,7 @@ position of the map.
 
 [float]
 [[vega-tooltip]]
-==== Additional tooltip styling
+===== Additional tooltip styling
 
 {kib} has installed the https://vega.github.io/vega-lite/docs/tooltip.html[Vega tooltip plugin],
 so tooltips can be defined in the ways documented there. Beyond that, {kib} also supports
@@ -304,7 +304,7 @@ a configuration option for changing the tooltip position and padding:
 
 [float]
 [[vega-url-loading]]
-==== Advanced setting to enable URL loading from any domain
+===== Advanced setting to enable URL loading from any domain
 
 Vega can load data from any URL, but this is disabled by default in {kib}. 
 To change this, set `vis_type_vega.enableExternalUrls: true` in `kibana.yml`,
@@ -312,13 +312,13 @@ then restart {kib}.
 
 [float]
 [[vega-inspector]]
-==== Vega Inspector
+===== Vega Inspector
 Use the contextual *Inspect* tool to gain insights into different elements. 
 For Vega visualizations, there are two different views: *Request* and *Vega debug*.
 
 [float]
 [[inspect-elasticsearch-requests]]
-===== Inspect {es} requests
+====== Inspect {es} requests
 
 Vega uses the {ref}/search-search.html[{es} search API] to get documents and aggregation 
 results from {es}. To troubleshoot these requests, click *Inspect*, which shows the most recent requests. 
@@ -329,7 +329,7 @@ image::visualize/images/vega_tutorial_inspect_requests.png[]
 
 [float]
 [[vega-debugging]]
-===== Vega debugging
+====== Vega debugging
 
 With the *Vega debug* view, you can inspect the *Data sets* and *Signal Values* runtime data. 
  
@@ -344,7 +344,7 @@ the <<vega-browser-debugging-console, Vega browser debugging process>>.
 
 [float]
 [[asking-for-help-with-a-vega-spec]]
-===== Asking for help with a Vega spec
+====== Asking for help with a Vega spec
 
 Because of the dynamic nature of the data in {es}, it is hard to help you with 
 Vega specs unless you can share a dataset. To do this, click *Inspect*, select the *Vega debug* view,
@@ -359,7 +359,7 @@ and share that when asking for help.
 
 [float]
 [[vega-browser-debugging-console]]
-==== Browser debugging console
+===== Browser debugging console
 
 experimental[] Use browser debugging tools (for example, F12 or Ctrl+Shift+J in Chrome) to
 inspect the `VEGA_DEBUG` variable:
@@ -377,7 +377,7 @@ Vega-Lite compilation.
 
 [float]
 [[vega-expression-functions]]
-==== (Vega only) Expression functions which can update the time range and dashboard filters
+===== (Vega only) Expression functions which can update the time range and dashboard filters
 
 {kib} has extended the Vega expression language with these functions:
 
@@ -406,7 +406,7 @@ kibanaSetTimeFilter(start, end)
 
 [float]
 [[vega-additional-configuration-options]]
-==== Additional configuration options
+===== Additional configuration options
 
 [source,yaml]
 ----
@@ -430,26 +430,26 @@ kibanaSetTimeFilter(start, end)
 [float]
 [[vega-notes]]
 [[resources-and-examples]]
-=== Resources and examples
+==== Resources and examples
 
 To learn more about Vega and Vega-Lite, refer to the resources and examples.
 
 [float]
 [[vega-editor]]
-==== Vega editor
+===== Vega editor
 The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Vega-Lite, but does not support any
 {kib}-specific features like {es} requests and interactive base maps.
 
 [float]
 [[vega-lite-resources]]
-==== Vega-Lite resources
+===== Vega-Lite resources
 * https://vega.github.io/vega-lite/tutorials/getting_started.html[Tutorials]
 * https://vega.github.io/vega-lite/docs/[Docs]
 * https://vega.github.io/vega-lite/examples/[Examples]
 
 [float]
 [[vega-resources]]
-==== Vega resources
+===== Vega resources
 * https://vega.github.io/vega/tutorials/[Tutorials]
 * https://vega.github.io/vega/docs/[Docs]
 * https://vega.github.io/vega/examples/[Examples]
