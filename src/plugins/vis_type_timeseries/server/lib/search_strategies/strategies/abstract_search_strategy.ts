@@ -27,7 +27,7 @@ import type {
 import type { Framework } from '../../../plugin';
 import type { IndexPatternsFetcher, IFieldType } from '../../../../../data/server';
 import type { VisPayload } from '../../../../common/types';
-import type { IndexPatternsService } from '../../../../../data/common';
+import type { IndexPatternsService, ISearchClient } from '../../../../../data/common';
 import { indexPatterns } from '../../../../../data/server';
 import { SanitizedFieldType } from '../../../../common/types';
 
@@ -69,7 +69,8 @@ export abstract class AbstractSearchStrategy {
 
     bodies.forEach((body) => {
       requests.push(
-        req.requestContext
+        // Temporary workaround until https://github.com/elastic/kibana/issues/57588
+        ((req.requestContext as unknown) as { search: ISearchClient })
           .search!.search(
             {
               indexType,
