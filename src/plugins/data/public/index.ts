@@ -394,6 +394,7 @@ export {
   SearchTimeoutError,
   TimeoutErrorMode,
   PainlessError,
+  noSearchSessionStorageCapabilityMessage,
 } from './search';
 
 export type {

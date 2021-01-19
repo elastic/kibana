@@ -124,7 +124,7 @@ describe('Session service', () => {
       sessionId,
     });
 
-    sessionService.setSearchSessionInfoProvider({
+    sessionService.setupStorage({
       getName: async () => 'Name',
       getUrlGeneratorData: async () => ({
         urlGeneratorId: 'id',
@@ -166,5 +166,52 @@ describe('Session service', () => {
     expect(sessionService.isCurrentSession()).toBeFalsy();
     expect(sessionService.isCurrentSession('some-other')).toBeFalsy();
     expect(sessionService.isCurrentSession(sessionId)).toBeTruthy();
+  });
+
+  test('setupStorage() enables storage capabilities', async () => {
+    sessionService.start();
+    await expect(() => sessionService.save()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"No info provider for current session"`
+    );
+
+    expect(sessionService.isSessionStorageReady()).toBe(false);
+
+    sessionService.setupStorage({
+      getName: async () => 'Name',
+      getUrlGeneratorData: async () => ({
+        urlGeneratorId: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+    });
+
+    expect(sessionService.isSessionStorageReady()).toBe(true);
+
+    await expect(() => sessionService.save()).resolves;
+
+    sessionService.clear();
+    expect(sessionService.isSessionStorageReady()).toBe(false);
+  });
+
+  test('can provide config for search session indicator', () => {
+    expect(sessionService.getSearchSessionIndicatorUiConfig().isDisabled().disabled).toBe(false);
+    sessionService.setupStorage(
+      {
+        getName: async () => 'Name',
+        getUrlGeneratorData: async () => ({
+          urlGeneratorId: 'id',
+          initialState: {},
+          restoreState: {},
+        }),
+      },
+      {
+        isDisabled: () => ({ disabled: true, reasonText: 'text' }),
+      }
+    );
+
+    expect(sessionService.getSearchSessionIndicatorUiConfig().isDisabled().disabled).toBe(true);
+
+    sessionService.clear();
+    expect(sessionService.getSearchSessionIndicatorUiConfig().isDisabled().disabled).toBe(false);
   });
 });
