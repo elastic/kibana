@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { ComparatorFnNames, getInvalidComparatorMessage } from '../lib';
+import { ComparatorFnNames } from '../lib';
 import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
 import { AlertTypeState } from '../../../../alerts/server';
 
@@ -70,8 +70,10 @@ function validateParams(anyParams: unknown): string | undefined {
 export function validateComparator(comparator: string): string | undefined {
   if (ComparatorFnNames.has(comparator)) return;
 
-  return getInvalidComparatorMessage(
-    'xpack.stackAlerts.esQuery.invalidComparatorErrorMessage',
-    comparator
-  );
+  return i18n.translate('xpack.stackAlerts.esQuery.invalidComparatorErrorMessage', {
+    defaultMessage: 'invalid thresholdComparator specified: {comparator}',
+    values: {
+      comparator,
+    },
+  });
 }

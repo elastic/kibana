@@ -86,6 +86,8 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
     timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
     timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+    threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
+    thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
   });
 
   const { http } = useKibana<KibanaDeps>().services;
@@ -180,13 +182,10 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
 
       const hits = rawResponse.hits;
       setRunResult(
-        i18n.translate(
-          'xpack.triggersActionsUI.components.deleteSelectedIdsSuccessNotification.descriptionText',
-          {
-            defaultMessage: 'Query matched {count} documents in the last {window}',
-            values: { count: hits.total, window },
-          }
-        )
+        i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
+          defaultMessage: 'Query matched {count} documents in the last {window}',
+          values: { count: hits.total, window },
+        })
       );
     }
   };
@@ -328,7 +327,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                aria-label={i18n.translate('xpack.infra.logs.alertFlyout.removeCondition', {
+                aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.removeCondition', {
                   defaultMessage: 'Remove condition',
                 })}
                 color={'danger'}

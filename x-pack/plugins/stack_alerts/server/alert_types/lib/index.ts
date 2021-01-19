@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  ComparatorFns,
-  ComparatorFnNames,
-  getHumanReadableComparator,
-  getInvalidComparatorMessage,
-} from './comparator_types';
+export { ComparatorFns, ComparatorFnNames, getHumanReadableComparator } from './comparator_types';

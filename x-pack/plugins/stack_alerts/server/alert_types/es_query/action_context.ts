@@ -42,7 +42,11 @@ export function addMessages(
 
   const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
   const message = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextMessageDescription', {
-    defaultMessage: getDefaultMessage(baseContext),
+    defaultMessage: `alert '{name}' is active':
+
+- Value: {value}
+- Conditions Met: {conditions} over {window}
+- Timestamp: {date}`,
     values: {
       name: alertInfo.name,
       value: baseContext.value,
@@ -53,17 +57,4 @@ export function addMessages(
   });
 
   return { ...baseContext, title, message };
-}
-
-function getDefaultMessage(baseContext: EsQueryAlertActionContext) {
-  return baseContext.value
-    ? `alert '{name}' is active':
-
-- Value: {value}
-- Conditions Met: {conditions} over {window}
-- Timestamp: {date}`
-    : `alert '{name}' is active':
-
-- Conditions Met: {conditions} over {window}
-- Timestamp: {date}`;
 }

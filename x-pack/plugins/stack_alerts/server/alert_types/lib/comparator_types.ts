@@ -54,12 +54,3 @@ export function getHumanReadableComparator(comparator: string) {
     ? humanReadableComparators.get(comparator)
     : comparator;
 }
-
-export function getInvalidComparatorMessage(i18nId: string, comparator: string) {
-  return i18n.translate(i18nId, {
-    defaultMessage: 'invalid thresholdComparator specified: {comparator}',
-    values: {
-      comparator,
-    },
-  });
-}

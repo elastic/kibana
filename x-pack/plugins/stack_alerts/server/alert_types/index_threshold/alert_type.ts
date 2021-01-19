@@ -14,7 +14,7 @@ import {
   CoreQueryParamsSchemaProperties,
   TimeSeriesQuery,
 } from '../../../../triggers_actions_ui/server';
-import { ComparatorFns, getHumanReadableComparator, getInvalidComparatorMessage } from '../lib';
+import { ComparatorFns, getHumanReadableComparator } from '../lib';
 
 export const ID = '.index-threshold';
 const ActionGroupId = 'threshold met';
@@ -136,10 +136,12 @@ export function getAlertType(
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
       throw new Error(
-        getInvalidComparatorMessage(
-          'xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage',
-          params.thresholdComparator
-        )
+        i18n.translate('xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage', {
+          defaultMessage: 'invalid thresholdComparator specified: {comparator}',
+          values: {
+            comparator: params.thresholdComparator,
+          },
+        })
       );
     }
 

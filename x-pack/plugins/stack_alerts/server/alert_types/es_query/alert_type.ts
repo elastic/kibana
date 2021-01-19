@@ -16,7 +16,7 @@ import {
   EsQueryAlertState,
 } from './alert_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
-import { ComparatorFns, getHumanReadableComparator, getInvalidComparatorMessage } from '../lib';
+import { ComparatorFns, getHumanReadableComparator } from '../lib';
 import {
   searchAfter,
   searchAfterCount,
@@ -155,6 +155,7 @@ export function getAlertType(
         const instanceId = hit._id;
         const baseContext: EsQueryAlertActionContext = {
           date: new Date(date).toISOString(),
+          value: searchResults.hits.hits.length,
           conditions: `document with id '${instanceId}' matched query "${params.esQuery}"`,
         };
 
@@ -255,8 +256,10 @@ export function getAlertType(
 }
 
 function getInvalidComparatorError(comparator: string) {
-  return getInvalidComparatorMessage(
-    'xpack.stackAlerts.esQuery.invalidComparatorErrorMessage',
-    comparator
-  );
+  return i18n.translate('xpack.stackAlerts.esQuery.invalidComparatorErrorMessage', {
+    defaultMessage: 'invalid thresholdComparator specified: {comparator}',
+    values: {
+      comparator,
+    },
+  });
 }
