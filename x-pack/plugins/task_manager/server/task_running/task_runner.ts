@@ -301,7 +301,7 @@ export class TaskManagerRunner implements TaskRunner {
             this.logger.error(
               `[Task Runner] Task ${this.instance.id} failed to release claim after failure: ${errReleaseClaim}`
             );
-          }, await promiseResult(this.releaseClaimAndIncrementAttempts()));
+          }, await this.releaseClaimAndIncrementAttempts());
         }
 
         throw error;
