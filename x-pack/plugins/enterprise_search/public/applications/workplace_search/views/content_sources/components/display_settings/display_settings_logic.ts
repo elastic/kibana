@@ -13,7 +13,7 @@ import { HttpLogic } from '../../../../../shared/http';
 
 import {
   setSuccessMessage,
-  FlashMessagesLogic,
+  clearFlashMessages,
   flashAPIErrors,
 } from '../../../../../shared/flash_messages';
 
@@ -61,7 +61,6 @@ interface DisplaySettingsActions {
   toggleSubtitleFieldHover(): void;
   toggleDescriptionFieldHover(): void;
   toggleUrlFieldHover(): void;
-  resetDisplaySettingsState(): void;
 }
 
 interface DisplaySettingsValues {
@@ -85,7 +84,7 @@ interface DisplaySettingsValues {
   unsavedChanges: boolean;
 }
 
-const defaultSearchResultConfig = {
+export const defaultSearchResultConfig = {
   titleField: '',
   subtitleField: '',
   descriptionField: '',
@@ -117,7 +116,6 @@ export const DisplaySettingsLogic = kea<
     toggleSubtitleFieldHover: () => true,
     toggleDescriptionFieldHover: () => true,
     toggleUrlFieldHover: () => true,
-    resetDisplaySettingsState: () => true,
     initializeDisplaySettings: () => true,
     setServerData: () => true,
   },
@@ -330,10 +328,7 @@ export const DisplaySettingsLogic = kea<
       setSuccessMessage(SUCCESS_MESSAGE);
     },
     toggleFieldEditorModal: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
-    },
-    resetDisplaySettingsState: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });
