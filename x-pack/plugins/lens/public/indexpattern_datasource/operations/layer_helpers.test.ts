@@ -2174,5 +2174,34 @@ describe('state_helpers', () => {
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
     });
+
+    it('should consider incompleteColumns before layer columns', () => {
+      const savedRef = jest.fn().mockReturnValue(['error 1']);
+      const incompleteRef = jest.fn();
+      operationDefinitionMap.testReference.getErrorMessage = savedRef;
+      // @ts-expect-error invalid type, just need a single function on it
+      operationDefinitionMap.testIncompleteReference = {
+        getErrorMessage: incompleteRef,
+      };
+
+      const errors = getErrorMessages({
+        indexPatternId: '1',
+        columnOrder: [],
+        columns: {
+          col1:
+            // @ts-expect-error not statically analyzed
+            { operationType: 'testReference', references: [] },
+        },
+        incompleteColumns: {
+          // @ts-expect-error not statically analyzed
+          col1: { operationType: 'testIncompleteReference' },
+        },
+      });
+      expect(savedRef).not.toHaveBeenCalled();
+      expect(incompleteRef).toHaveBeenCalled();
+      expect(errors).toBeUndefined();
+
+      delete operationDefinitionMap.testIncompleteReference;
+    });
   });
 });
