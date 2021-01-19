@@ -4,50 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import type { PartialTheme } from '@elastic/charts';
-import { useUiSettings } from '../../../contexts/kibana';
+import { useMemo } from 'react';
+import { useCurrentEuiTheme } from '../../../components/color_range_legend';
 export const useDataVizChartTheme = (): PartialTheme => {
-  const isDarkTheme = useUiSettings().get('theme:darkMode');
-  const themeName = isDarkTheme ? darkTheme : lightTheme;
-  const AREA_SERIES_COLOR = themeName.euiColorVis0;
-  return {
-    axes: {
-      tickLabel: {
-        fontSize: parseInt(themeName.euiFontSizeXS, 10),
-        fontFamily: themeName.euiFontFamily,
-        fontStyle: 'italic',
+  const { euiTheme } = useCurrentEuiTheme();
+  const chartTheme = useMemo(() => {
+    const AREA_SERIES_COLOR = euiTheme.euiColorVis0;
+    return {
+      axes: {
+        tickLabel: {
+          fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
+          fontFamily: euiTheme.euiFontFamily,
+          fontStyle: 'italic',
+        },
       },
-    },
-    background: { color: 'transparent' },
-    chartMargins: {
-      left: 0,
-      right: 0,
-      top: 0,
-      bottom: 0,
-    },
-    chartPaddings: {
-      left: 0,
-      right: 0,
-      top: 4,
-      bottom: 0,
-    },
-    scales: { barsPadding: 0.1 },
-    colors: {
-      vizColors: [AREA_SERIES_COLOR],
-    },
-    areaSeriesStyle: {
-      line: {
-        strokeWidth: 1,
-        visible: true,
+      background: { color: 'transparent' },
+      chartMargins: {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
       },
-      point: {
-        visible: false,
-        radius: 0,
-        opacity: 0,
+      chartPaddings: {
+        left: 0,
+        right: 0,
+        top: 4,
+        bottom: 0,
       },
-      area: { visible: true, opacity: 1 },
-    },
-  };
+      scales: { barsPadding: 0.1 },
+      colors: {
+        vizColors: [AREA_SERIES_COLOR],
+      },
+      areaSeriesStyle: {
+        line: {
+          strokeWidth: 1,
+          visible: true,
+        },
+        point: {
+          visible: false,
+          radius: 0,
+          opacity: 0,
+        },
+        area: { visible: true, opacity: 1 },
+      },
+    };
+  }, [euiTheme]);
+  return chartTheme;
 };
