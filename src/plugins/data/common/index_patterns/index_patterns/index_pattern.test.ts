@@ -138,7 +138,6 @@ describe('IndexPattern', () => {
       expect(docValueFieldNames).toContain('@timestamp');
       expect(docValueFieldNames).toContain('time');
       expect(docValueFieldNames).toContain('utc_time');
-      // todo add runtime field
     });
 
     test('should return runtimeField', () => {
