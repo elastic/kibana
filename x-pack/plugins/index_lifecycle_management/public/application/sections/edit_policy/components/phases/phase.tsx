@@ -76,6 +76,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
                   <EuiFlexItem>{phase !== 'hot' && <MinAgeField phase={phase} />}</EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj={`${phase}-settingsSwitch`}
                       onClick={() => {
                         setShowingSettings(!isShowingSettings);
                       }}
@@ -96,7 +97,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
           <EuiSpacer />
           {enabled && <div style={isShowingSettings ? {} : { display: 'none' }}>{children}</div>}
 
-          {!isShowingSettings && (
+          {(!enabled || !isShowingSettings) && (
             <EuiText color="subdued" size={'s'}>
               {i18nTexts.editPolicy.descriptions[phase]}
               <br />

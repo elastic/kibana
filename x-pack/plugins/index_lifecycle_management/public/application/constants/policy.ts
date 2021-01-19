@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SerializedPhase,
-  DeletePhase,
-  SerializedPolicy,
-  RolloverAction,
-} from '../../../common/types';
+import { SerializedPolicy, RolloverAction } from '../../../common/types';
 
 export const defaultIndexPriority = {
   hot: '100',
@@ -31,16 +26,4 @@ export const defaultPolicy: SerializedPolicy = {
       },
     },
   },
-};
-
-export const defaultNewDeletePhase: DeletePhase = {
-  phaseEnabled: false,
-  selectedMinimumAge: '0',
-  selectedMinimumAgeUnits: 'd',
-  waitForSnapshotPolicy: '',
-};
-
-export const serializedPhaseInitialization: SerializedPhase = {
-  min_age: '0ms',
-  actions: {},
 };

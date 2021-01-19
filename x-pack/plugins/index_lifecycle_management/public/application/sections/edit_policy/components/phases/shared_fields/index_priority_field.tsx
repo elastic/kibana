@@ -20,11 +20,15 @@ interface Props {
 }
 
 export const IndexPriorityField: FunctionComponent<Props> = ({ phase }) => {
-  const { policy } = useEditPolicyContext();
+  const { policy, isNewPolicy } = useEditPolicyContext();
 
   const initialToggleValue = useMemo<boolean>(() => {
-    return policy.phases[phase]?.actions?.set_priority != null;
-  }, [policy, phase]);
+    return (
+      isNewPolicy || // enable index priority for new policies
+      !policy.phases[phase]?.actions || // enable index priority for new phases
+      policy.phases[phase]?.actions?.set_priority != null // enable index priority if it's set
+    );
+  }, [isNewPolicy, policy.phases, phase]);
 
   return (
     <DescribedFormRow

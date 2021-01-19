@@ -185,16 +185,16 @@ describe('<EditPolicy />', () => {
         const hotActions = policy.phases.hot.actions;
         const rolloverAction = hotActions.rollover;
         expect(rolloverAction).toBe(undefined);
-        expect(hotActions).toMatchInlineSnapshot(`
-          Object {}
-        `);
+        expect(hotActions).toMatchInlineSnapshot(`Object {}`);
       });
 
       test('enabling searchable snapshot should hide force merge, freeze and shrink in subsequent phases', async () => {
         const { actions } = testBed;
 
         await actions.warm.enable(true);
+        actions.warm.clickSettingsButton();
         await actions.cold.enable(true);
+        actions.cold.clickSettingsButton();
 
         expect(actions.warm.forceMergeFieldExists()).toBeTruthy();
         expect(actions.warm.shrinkExists()).toBeTruthy();
@@ -255,6 +255,7 @@ describe('<EditPolicy />', () => {
                 "priority": 50,
               },
             },
+            "min_age": "0ms",
           }
         `);
       });
@@ -262,9 +263,10 @@ describe('<EditPolicy />', () => {
       test('setting all values', async () => {
         const { actions } = testBed;
         await actions.warm.enable(true);
-        await actions.warm.setDataAllocation('node_attrs');
+        await actions.warm.setDataAllocationType('node_attrs');
         await actions.warm.setSelectedNodeAttribute('test:123');
         await actions.warm.setReplicas('123');
+        await actions.warm.toggleShrink(true);
         await actions.warm.setShrink('123');
         await actions.warm.toggleForceMerge(true);
         await actions.warm.setForcemergeSegmentsCount('123');
@@ -284,9 +286,6 @@ describe('<EditPolicy />', () => {
                   "rollover": Object {
                     "max_age": "30d",
                     "max_size": "50gb",
-                  },
-                  "set_priority": Object {
-                    "priority": 100,
                   },
                 },
                 "min_age": "0ms",
@@ -311,23 +310,11 @@ describe('<EditPolicy />', () => {
                     "number_of_shards": 123,
                   },
                 },
+                "min_age": "0ms",
               },
             },
           }
         `);
-      });
-
-      test('setting warm phase on rollover to "false"', async () => {
-        const { actions } = testBed;
-        await actions.warm.enable(true);
-        await actions.warm.warmPhaseOnRollover(false);
-        await actions.warm.setMinAgeValue('123');
-        await actions.warm.setMinAgeUnits('d');
-        await actions.savePolicy();
-        const latestRequest = server.requests[server.requests.length - 1];
-        const warmPhaseMinAge = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
-          .min_age;
-        expect(warmPhaseMinAge).toBe('123d');
       });
     });
 
@@ -351,7 +338,7 @@ describe('<EditPolicy />', () => {
 
       test('preserves include, exclude allocation settings', async () => {
         const { actions } = testBed;
-        await actions.warm.setDataAllocation('node_attrs');
+        await actions.warm.setDataAllocationType('node_attrs');
         await actions.warm.setSelectedNodeAttribute('test:123');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
@@ -418,7 +405,7 @@ describe('<EditPolicy />', () => {
         await actions.cold.enable(true);
         await actions.cold.setMinAgeValue('123');
         await actions.cold.setMinAgeUnits('s');
-        await actions.cold.setDataAllocation('node_attrs');
+        await actions.cold.setDataAllocationType('node_attrs');
         await actions.cold.setSelectedNodeAttribute('test:123');
         await actions.cold.setReplicas('123');
         await actions.cold.setFreeze(true);
@@ -452,9 +439,6 @@ describe('<EditPolicy />', () => {
                   "rollover": Object {
                     "max_age": "30d",
                     "max_size": "50gb",
-                  },
-                  "set_priority": Object {
-                    "priority": 100,
                   },
                 },
                 "min_age": "0ms",
@@ -612,7 +596,8 @@ describe('<EditPolicy />', () => {
 
     test('setting node_attr based allocation, but not selecting node attribute', async () => {
       const { actions } = testBed;
-      await actions.warm.setDataAllocation('node_attrs');
+      await actions.warm.toggleDataAllocation(true);
+      await actions.warm.setDataAllocationType('node_attrs');
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
       const warmPhase = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm;
@@ -657,9 +642,6 @@ describe('<EditPolicy />', () => {
             "allocate": Object {
               "number_of_replicas": 123,
             },
-            "set_priority": Object {
-              "priority": 50,
-            },
           }
         `);
       });
@@ -688,7 +670,7 @@ describe('<EditPolicy />', () => {
       });
       test('detecting use of the "off" allocation type', () => {
         const { find } = testBed;
-        expect(find('cold-dataTierAllocationControls.dataTierSelect').text()).toContain('Off');
+        expect(find('cold-dataAllocationSwitch').prop('aria-checked')).toBe(false);
       });
     });
   });
@@ -715,6 +697,7 @@ describe('<EditPolicy />', () => {
       test('correctly sets snapshot repository default to "found-snapshots"', async () => {
         const { actions } = testBed;
         await actions.cold.enable(true);
+        actions.cold.clickSettingsButton();
         await actions.cold.toggleSearchableSnapshot(true);
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
@@ -752,6 +735,7 @@ describe('<EditPolicy />', () => {
         expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
 
         await actions.cold.enable(true);
+        actions.cold.clickSettingsButton();
 
         // Still hidden in hot
         expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();

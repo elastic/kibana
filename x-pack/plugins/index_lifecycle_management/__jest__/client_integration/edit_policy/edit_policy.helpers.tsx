@@ -167,7 +167,12 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
 
   const enable = (phase: Phases) => createFormToggleAction(`enablePhaseSwitch-${phase}`);
 
-  const warmPhaseOnRollover = createFormToggleAction(`warm-warmPhaseOnRollover`);
+  const clickSettingsButton = (phase: Phases) => () => {
+    act(() => {
+      find(`${phase}-settingsSwitch`).simulate('click');
+    });
+    component.update();
+  };
 
   const setMinAgeValue = (phase: Phases) => createFormSetValueAction(`${phase}-selectedMinimumAge`);
 
@@ -192,6 +197,13 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       }
     });
     component.update();
+  };
+
+  const createDataAllocationActions = (phase: Phases) => {
+    return {
+      toggleDataAllocation: createFormToggleAction(`${phase}-dataAllocationSwitch`),
+      setDataAllocationType: setDataAllocation(phase),
+    };
   };
 
   const setSelectedNodeAttribute = (phase: Phases) =>
@@ -252,6 +264,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       setWaitForSnapshotPolicy,
       savePolicy,
       hot: {
+        clickSettingsButton: clickSettingsButton('hot'),
         setMaxSize,
         setMaxDocs,
         setMaxAge,
@@ -265,10 +278,10 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       },
       warm: {
         enable: enable('warm'),
-        warmPhaseOnRollover,
+        clickSettingsButton: clickSettingsButton('warm'),
         setMinAgeValue: setMinAgeValue('warm'),
         setMinAgeUnits: setMinAgeUnits('warm'),
-        setDataAllocation: setDataAllocation('warm'),
+        ...createDataAllocationActions('warm'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
         ...createShrinkActions('warm'),
@@ -278,9 +291,10 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       },
       cold: {
         enable: enable('cold'),
+        clickSettingsButton: clickSettingsButton('cold'),
         setMinAgeValue: setMinAgeValue('cold'),
         setMinAgeUnits: setMinAgeUnits('cold'),
-        setDataAllocation: setDataAllocation('cold'),
+        ...createDataAllocationActions('cold'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('cold'),
         setReplicas: setReplicas('cold'),
         setFreeze,

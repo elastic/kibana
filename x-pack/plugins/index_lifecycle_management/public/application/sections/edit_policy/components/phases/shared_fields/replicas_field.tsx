@@ -21,22 +21,22 @@ export const ReplicasField: FunctionComponent<Props> = ({ phase }) => {
     <DescribedFormRow
       title={
         <h3>
-          {i18n.translate('xpack.indexLifecycleMgmt.warmPhase.replicasTitle', {
+          {i18n.translate('xpack.indexLifecycleMgmt.numberOfReplicas.formRowTitle', {
             defaultMessage: 'Replicas',
           })}
         </h3>
       }
       description={i18n.translate(
-        'xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasDescription',
+        'xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.formRowDescription',
         {
           defaultMessage:
             'Set the number of replicas. Remains the same as the previous phase by default.',
         }
       )}
       switchProps={{
-        'data-test-subj': 'warm-setReplicasSwitch',
+        'data-test-subj': `${phase}-setReplicasSwitch`,
         'aria-label': i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.warmPhase.numberOfReplicas.switchLabel',
+          'xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.switchLabel',
           { defaultMessage: 'Set replicas' }
         ),
         initialValue,
@@ -44,7 +44,7 @@ export const ReplicasField: FunctionComponent<Props> = ({ phase }) => {
       fullWidth
     >
       <StyledFieldNumber
-        path={'phases.warm.actions.allocate.number_of_replicas'}
+        path={`phases.${phase}.actions.allocate.number_of_replicas`}
         fieldNumberProps={{
           'data-test-subj': `${phase}-selectedReplicaCount`,
           min: 0,
