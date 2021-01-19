@@ -101,7 +101,8 @@ export const useSavedVisInstance = (
           ? stateTransferService.getAppNameFromId(originatingApp)
           : undefined;
         const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
-        const byValueCreateMode = dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
+        const byValueCreateMode =
+          Boolean(originatingApp) && dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
 
         if (savedVis.id) {
           chrome.setBreadcrumbs(

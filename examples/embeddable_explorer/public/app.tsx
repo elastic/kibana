@@ -27,7 +27,6 @@ import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from '../../../src/plugins/inspector/public';
 import {
-  AppMountContext,
   AppMountParameters,
   CoreStart,
   SavedObjectsStart,
@@ -47,7 +46,7 @@ interface PageDef {
 }
 
 type NavProps = RouteComponentProps & {
-  navigateToApp: AppMountContext['core']['application']['navigateToApp'];
+  navigateToApp: CoreStart['application']['navigateToApp'];
   pages: PageDef[];
 };
 

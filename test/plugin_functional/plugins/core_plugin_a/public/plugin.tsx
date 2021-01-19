@@ -24,9 +24,10 @@ export class CorePluginAPlugin implements Plugin<CorePluginAPluginSetup, CorePlu
     core.application.register({
       id: 'foo',
       title: 'Foo',
-      async mount(context, params) {
+      async mount(params) {
         const { renderApp } = await import('./application');
-        return renderApp(context, params);
+        const [coreStart] = await core.getStartServices();
+        return renderApp(coreStart, params);
       },
     });
 
