@@ -508,7 +508,7 @@ describe('CaseView ', () => {
               connector: {
                 id: 'servicenow-1',
                 name: 'SN 1',
-                type: ConnectorTypes.servicenow,
+                type: ConnectorTypes.serviceNowIM,
                 fields: null,
               },
             }}
@@ -556,7 +556,7 @@ describe('CaseView ', () => {
               connector: {
                 id: 'servicenow-1',
                 name: 'SN 1',
-                type: ConnectorTypes.servicenow,
+                type: ConnectorTypes.serviceNowIM,
                 fields: null,
               },
             }}

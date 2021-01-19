@@ -189,7 +189,7 @@ describe('Create case', () => {
         connector: {
           id: 'servicenow-1',
           name: 'SN',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowIM,
           fields: null,
         },
         persistLoading: false,
@@ -237,7 +237,7 @@ describe('Create case', () => {
         connector: {
           id: 'not-exist',
           name: 'SN',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowIM,
           fields: null,
         },
         persistLoading: false,

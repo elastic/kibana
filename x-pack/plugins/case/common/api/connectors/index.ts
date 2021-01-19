@@ -9,23 +9,28 @@ import * as rt from 'io-ts';
 
 import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
-import { ServiceNowFieldsRT } from './servicenow';
+import { ServiceNowIMFieldsRT } from './servicenow';
+import { ServiceNowSIRFieldsRT } from './servicenow_sir';
 
 export * from './jira';
 export * from './servicenow';
+export * from './servicenow_sir';
 export * from './resilient';
 export * from './mappings';
 
 export const ConnectorFieldsRt = rt.union([
   JiraFieldsRT,
   ResilientFieldsRT,
-  ServiceNowFieldsRT,
+  ServiceNowIMFieldsRT,
+  ServiceNowSIRFieldsRT,
   rt.null,
 ]);
+
 export enum ConnectorTypes {
   jira = '.jira',
   resilient = '.resilient',
-  servicenow = '.servicenow',
+  serviceNowIM = '.servicenow',
+  serviceNowSIR = '.servicenow-sir',
   none = '.none',
 }
 
@@ -39,9 +44,14 @@ const ConnectorResillientTypeFieldsRt = rt.type({
   fields: rt.union([ResilientFieldsRT, rt.null]),
 });
 
-const ConnectorServiceNowTypeFieldsRt = rt.type({
-  type: rt.literal(ConnectorTypes.servicenow),
-  fields: rt.union([ServiceNowFieldsRT, rt.null]),
+const ConnectorServiceNowIMTypeFieldsRt = rt.type({
+  type: rt.literal(ConnectorTypes.serviceNowIM),
+  fields: rt.union([ServiceNowIMFieldsRT, rt.null]),
+});
+
+const ConnectorServiceNowSIRTypeFieldsRt = rt.type({
+  type: rt.literal(ConnectorTypes.serviceNowSIR),
+  fields: rt.union([ServiceNowSIRFieldsRT, rt.null]),
 });
 
 const ConnectorNoneTypeFieldsRt = rt.type({
@@ -52,7 +62,8 @@ const ConnectorNoneTypeFieldsRt = rt.type({
 export const ConnectorTypeFieldsRt = rt.union([
   ConnectorJiraTypeFieldsRt,
   ConnectorResillientTypeFieldsRt,
-  ConnectorServiceNowTypeFieldsRt,
+  ConnectorServiceNowIMTypeFieldsRt,
+  ConnectorServiceNowSIRTypeFieldsRt,
   ConnectorNoneTypeFieldsRt,
 ]);
 

@@ -12,5 +12,6 @@ export * from './lib';
 export * from './types';
 
 export { serviceNowITSMConfiguration as ServiceNowITSMConnectorConfiguration } from '../application/components/builtin_action_types/servicenow/config';
+export { serviceNowSIRConfiguration as ServiceNowSIRConnectorConfiguration } from '../application/components/builtin_action_types/servicenow/config';
 export { connectorConfiguration as JiraConnectorConfiguration } from '../application/components/builtin_action_types/jira/config';
 export { connectorConfiguration as ResilientConnectorConfiguration } from '../application/components/builtin_action_types/resilient/config';

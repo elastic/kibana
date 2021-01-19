@@ -61,7 +61,7 @@ describe('usePushToService', () => {
     connector: {
       id: mockConnector.id,
       name: mockConnector.name,
-      type: ConnectorTypes.servicenow,
+      type: ConnectorTypes.serviceNowIM,
       fields: null,
     },
     caseId,
@@ -112,7 +112,7 @@ describe('usePushToService', () => {
           fields: null,
           id: 'servicenow-1',
           name: 'My Connector',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowIM,
         },
         updateCase,
         alerts: {

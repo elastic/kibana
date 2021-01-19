@@ -186,14 +186,14 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-1',
           name: 'unchanged',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowIM,
           fields: null,
         },
         currentConfiguration: {
           connector: {
             id: 'servicenow-1',
             name: 'unchanged',
-            type: ConnectorTypes.servicenow,
+            type: ConnectorTypes.serviceNowIM,
             fields: null,
           },
           closureType: 'close-by-user',
@@ -271,7 +271,7 @@ describe('ConfigureCases', () => {
           connector: {
             id: 'servicenow-1',
             name: 'unchanged',
-            type: ConnectorTypes.servicenow,
+            type: ConnectorTypes.serviceNowIM,
             fields: null,
           },
           closureType: 'close-by-user',
@@ -331,7 +331,7 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-1',
           name: 'SN',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowIM,
           fields: null,
         },
         persistLoading: true,
@@ -450,7 +450,7 @@ describe('ConfigureCases', () => {
           connector: {
             id: 'servicenow-1',
             name: 'My connector',
-            type: ConnectorTypes.servicenow,
+            type: ConnectorTypes.serviceNowIM,
             fields: null,
           },
         }))
@@ -493,7 +493,7 @@ describe('closure options', () => {
       connector: {
         id: 'servicenow-1',
         name: 'My connector',
-        type: ConnectorTypes.servicenow,
+        type: ConnectorTypes.serviceNowIM,
         fields: null,
       },
       currentConfiguration: {
@@ -522,7 +522,7 @@ describe('closure options', () => {
       connector: {
         id: 'servicenow-1',
         name: 'My connector',
-        type: ConnectorTypes.servicenow,
+        type: ConnectorTypes.serviceNowIM,
         fields: null,
       },
       closureType: 'close-by-pushing',
@@ -546,7 +546,7 @@ describe('user interactions', () => {
         connector: {
           id: 'resilient-2',
           name: 'unchanged',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowIM,
           fields: null,
         },
         closureType: 'close-by-user',

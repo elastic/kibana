@@ -10,7 +10,10 @@ import { EuiFormRow, EuiSelect, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@el
 import * as i18n from './translations';
 
 import { ConnectorFieldsProps } from '../types';
-import { ConnectorTypes, ServiceNowFieldsType } from '../../../../../../case/common/api/connectors';
+import {
+  ConnectorTypes,
+  ServiceNowIMFieldsType,
+} from '../../../../../../case/common/api/connectors';
 import { ConnectorCard } from '../card';
 
 const selectOptions = [
@@ -29,7 +32,7 @@ const selectOptions = [
 ];
 
 const ServiceNowFieldsComponent: React.FunctionComponent<
-  ConnectorFieldsProps<ServiceNowFieldsType>
+  ConnectorFieldsProps<ServiceNowIMFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
   const { severity = null, urgency = null, impact = null } = fields ?? {};
 
@@ -70,7 +73,10 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
   }, []);
 
   const onChangeCb = useCallback(
-    (key: keyof ServiceNowFieldsType, value: ServiceNowFieldsType[keyof ServiceNowFieldsType]) => {
+    (
+      key: keyof ServiceNowIMFieldsType,
+      value: ServiceNowIMFieldsType[keyof ServiceNowIMFieldsType]
+    ) => {
       onChange({ ...fields, [key]: value });
     },
     [fields, onChange]
@@ -118,7 +124,7 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
     </span>
   ) : (
     <ConnectorCard
-      connectorType={ConnectorTypes.servicenow}
+      connectorType={ConnectorTypes.serviceNowIM}
       title={connector.name}
       listItems={listItems}
       isLoading={false}

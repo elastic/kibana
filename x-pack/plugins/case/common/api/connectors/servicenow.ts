@@ -7,10 +7,10 @@
 
 import * as rt from 'io-ts';
 
-export const ServiceNowFieldsRT = rt.type({
+export const ServiceNowIMFieldsRT = rt.type({
   impact: rt.union([rt.string, rt.null]),
   severity: rt.union([rt.string, rt.null]),
   urgency: rt.union([rt.string, rt.null]),
 });
 
-export type ServiceNowFieldsType = rt.TypeOf<typeof ServiceNowFieldsRT>;
+export type ServiceNowIMFieldsType = rt.TypeOf<typeof ServiceNowIMFieldsRT>;

@@ -48,11 +48,22 @@ export const params = {
     severityCode: '1',
     ...entity,
   } as ServiceConnectorCaseParams,
-  [ConnectorTypes.servicenow]: {
+  [ConnectorTypes.serviceNowIM]: {
     ...basicParams,
     impact: '3',
     severity: '1',
     urgency: '2',
+    ...entity,
+  } as ServiceConnectorCaseParams,
+  [ConnectorTypes.serviceNowSIR]: {
+    ...basicParams,
+    category: 'Denial of Service',
+    destIP: '192.68.1.1',
+    sourceIP: '192.68.1.2',
+    malwareHash: '098f6bcd4621d373cade4e832627b4f6',
+    malwareUrl: 'https://attack.com',
+    priority: '1',
+    subcategory: '20',
     ...entity,
   } as ServiceConnectorCaseParams,
   [ConnectorTypes.none]: {},

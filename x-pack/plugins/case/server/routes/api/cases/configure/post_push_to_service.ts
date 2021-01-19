@@ -62,6 +62,7 @@ export function initPostPushToService({ router }: RouteDeps) {
           myConnectorMappings,
           body.params
         );
+
         const pushRes = await actionsClient.execute({
           actionId: params.connector_id,
           params: {

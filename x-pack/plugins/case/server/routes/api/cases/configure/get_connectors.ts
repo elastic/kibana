@@ -14,18 +14,15 @@ import { FindActionResult } from '../../../../../../actions/server/types';
 
 import {
   CASE_CONFIGURE_CONNECTORS_URL,
-  SERVICENOW_ACTION_TYPE_ID,
-  JIRA_ACTION_TYPE_ID,
-  RESILIENT_ACTION_TYPE_ID,
+  SUPPORTED_CONNECTORS,
 } from '../../../../../common/constants';
 
 const isConnectorSupported = (
   action: FindActionResult,
   actionTypes: Record<string, ActionType>
 ): boolean =>
-  [SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
-    action.actionTypeId
-  ) && actionTypes[action.actionTypeId]?.enabledInLicense;
+  SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
+  actionTypes[action.actionTypeId]?.enabledInLicense;
 
 /*
  * Be aware that this api will only return 20 connectors

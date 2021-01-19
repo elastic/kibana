@@ -9,10 +9,11 @@ import { CaseConnectorsRegistry } from './types';
 import { createCaseConnectorsRegistry } from './connectors_registry';
 import { getCaseConnector as getJiraCaseConnector } from './jira';
 import { getCaseConnector as getResilientCaseConnector } from './resilient';
-import { getCaseConnector as getServiceNowCaseConnector } from './servicenow';
+import { getServiceNowIMCaseConnector, getServiceNowSIRCaseConnector } from './servicenow';
 import {
   JiraFieldsType,
-  ServiceNowFieldsType,
+  ServiceNowIMFieldsType,
+  ServiceNowSIRFieldsType,
   ResilientFieldsType,
 } from '../../../../../case/common/api/connectors';
 
@@ -36,7 +37,8 @@ class CaseConnectors {
   private init() {
     this.caseConnectorsRegistry.register<JiraFieldsType>(getJiraCaseConnector());
     this.caseConnectorsRegistry.register<ResilientFieldsType>(getResilientCaseConnector());
-    this.caseConnectorsRegistry.register<ServiceNowFieldsType>(getServiceNowCaseConnector());
+    this.caseConnectorsRegistry.register<ServiceNowIMFieldsType>(getServiceNowIMCaseConnector());
+    this.caseConnectorsRegistry.register<ServiceNowSIRFieldsType>(getServiceNowSIRCaseConnector());
   }
 
   registry(): CaseConnectorsRegistry {

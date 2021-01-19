@@ -397,7 +397,6 @@ export const CaseComponent = React.memo<CaseProps>(
         );
       }
     }, [dispatch]);
-
     return (
       <>
         <HeaderWrapper>

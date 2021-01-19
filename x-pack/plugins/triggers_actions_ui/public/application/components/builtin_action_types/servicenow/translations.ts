@@ -172,7 +172,7 @@ export const MALWARE_URL_LABEL = i18n.translate(
 export const MALWARE_HASH_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareHashTitle',
   {
-    defaultMessage: 'Malware hash',
+    defaultMessage: 'Malware Hash',
   }
 );
 

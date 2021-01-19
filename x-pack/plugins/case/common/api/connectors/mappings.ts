@@ -21,8 +21,9 @@ import {
   ServiceNowITSMIncident,
 } from '../../../../actions/server/builtin_action_types/servicenow/types';
 import { ResilientFieldsRT } from './resilient';
-import { ServiceNowFieldsRT } from './servicenow';
+import { ServiceNowIMFieldsRT } from './servicenow';
 import { JiraFieldsRT } from './jira';
+import { ServiceNowSIRFieldsRT } from './servicenow_sir';
 
 // Formerly imported from security_solution
 export interface ElasticUser {
@@ -150,7 +151,8 @@ export const ServiceConnectorBasicCaseParamsRt = rt.type({
 export const ConnectorPartialFieldsRt = rt.partial({
   ...JiraFieldsRT.props,
   ...ResilientFieldsRT.props,
-  ...ServiceNowFieldsRT.props,
+  ...ServiceNowIMFieldsRT.props,
+  ...ServiceNowSIRFieldsRT.props,
 });
 
 export const ServiceConnectorCaseParamsRt = rt.intersection([

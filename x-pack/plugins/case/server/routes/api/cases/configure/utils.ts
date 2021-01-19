@@ -106,7 +106,7 @@ export const serviceFormatter = (
         incident: { incidentTypes, severityCode },
         thirdPartyName: 'Resilient',
       };
-    case ConnectorTypes.servicenow:
+    case ConnectorTypes.serviceNowIM:
       const {
         severity,
         urgency,

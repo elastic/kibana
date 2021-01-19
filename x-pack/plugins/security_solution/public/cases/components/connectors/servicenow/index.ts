@@ -8,17 +8,27 @@
 import { lazy } from 'react';
 
 import { CaseConnector } from '../types';
-import { ServiceNowFieldsType } from '../../../../../../case/common/api/connectors';
+import {
+  ServiceNowIMFieldsType,
+  ServiceNowSIRFieldsType,
+} from '../../../../../../case/common/api/connectors';
 import * as i18n from './translations';
 
-export const getCaseConnector = (): CaseConnector<ServiceNowFieldsType> => {
+export const getServiceNowIMCaseConnector = (): CaseConnector<ServiceNowIMFieldsType> => {
   return {
     id: '.servicenow',
-    fieldsComponent: lazy(() => import('./case_fields')),
+    fieldsComponent: lazy(() => import('./servicenow_case_fields')),
   };
 };
 
-export const fieldLabels = {
+export const getServiceNowSIRCaseConnector = (): CaseConnector<ServiceNowSIRFieldsType> => {
+  return {
+    id: '.servicenow-sir',
+    fieldsComponent: lazy(() => import('./servicenow_sir_case_fields')),
+  };
+};
+
+export const serviceNowIMFieldLabels = {
   impact: i18n.IMPACT,
   severity: i18n.SEVERITY,
   urgency: i18n.URGENCY,

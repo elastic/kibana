@@ -7,17 +7,19 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import Fields from './case_fields';
+import Fields from './servicenow_case_fields';
 import { connector } from '../mock';
 import { waitFor } from '@testing-library/dom';
 import { EuiSelect } from '@elastic/eui';
 
-describe('ServiceNow Fields', () => {
+describe('ServiceNowIM Fields', () => {
   const fields = { severity: '1', urgency: '2', impact: '3' };
   const onChange = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
   it('all params fields are rendered - isEdit: true', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
     expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toEqual('1');
