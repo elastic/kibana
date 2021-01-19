@@ -24,7 +24,7 @@ As an admin, you’re concerned with managing the system, from establishing
 the deployment to getting {es} data into {kib}, and then
 managing the data.  As an analyst, your job is to discover insights
 in the data, visualize your data on dashboards, and share your findings.  As a business user,
-you’ll want to view existing dashboards and drill down into details.
+you want to view existing dashboards and drill down into details.
 
 *{kib} works with all types of data:* structured or unstructured text,
 numerical data, time-series data, geospatial data, logs, metrics, security events,
