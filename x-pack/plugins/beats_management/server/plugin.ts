@@ -5,17 +5,16 @@
  */
 
 import { take } from 'rxjs/operators';
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '../../../../src/core/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginStart } from '../../licensing/server';
 import { BeatsManagementConfigType } from '../common';
-import { CMServerLibs } from './lib/types';
+import type {
+  BeatsManagementApiRequestHandlerContext,
+  BeatsManagementRequestHandlerContext,
+  CMServerLibs,
+} from './lib/types';
 import { registerRoutes } from './routes';
 import { compose } from './lib/compose/kibana';
 import { INDEX_NAMES } from '../common/constants';
@@ -30,12 +29,6 @@ interface StartDeps {
   licensing: LicensingPluginStart;
 }
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    beatsManagement?: CMServerLibs;
-  }
-}
-
 export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDeps> {
   private securitySetup?: SecurityPluginSetup;
   private beatsLibs?: CMServerLibs;
@@ -47,12 +40,15 @@ export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDep
   public async setup(core: CoreSetup<StartDeps>, { features, security }: SetupDeps) {
     this.securitySetup = security;
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<BeatsManagementRequestHandlerContext>();
     registerRoutes(router);
 
-    core.http.registerRouteHandlerContext('beatsManagement', (_, req) => {
-      return this.beatsLibs!;
-    });
+    core.http.registerRouteHandlerContext(
+      'beatsManagement',
+      (_, req): BeatsManagementApiRequestHandlerContext => {
+        return this.beatsLibs!;
+      }
+    );
 
     features.registerElasticsearchFeature({
       id: 'beats_management',

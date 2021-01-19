@@ -5,11 +5,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import type { BeatsManagementRouter } from '../../lib/types';
 import { ReturnTypeBulkAction } from '../../../common/return_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-export const registerBeatEventsRoute = (router: IRouter) => {
+export const registerBeatEventsRoute = (router: BeatsManagementRouter) => {
   router.post(
     {
       path: '/api/beats/{beatId}/events',
