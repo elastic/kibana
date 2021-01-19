@@ -247,18 +247,27 @@ export function LayerPanel(
                         dragging.groupId === group.groupId &&
                         dragging.columnId !== accessor;
 
+                      const isFromNotCompatibleGroup =
+                        !isFromTheSameGroup &&
+                        !isCompatibleFromOtherGroup &&
+                        layerDatasource.canHandleDrop({
+                          ...layerDatasourceDropProps,
+                          columnId: accessor,
+                          filterOperations: group.filterOperations,
+                        });
+
                       const isDroppable = isDraggedOperation(dragging)
                         ? dragType === 'reorder'
                           ? isFromTheSameGroup
                           : isCompatibleFromOtherGroup
-                        : layerDatasource.canHandleDrop({
-                            ...layerDatasourceDropProps,
-                            columnId: accessor,
-                            filterOperations: group.filterOperations,
-                          });
+                        : isFromNotCompatibleGroup;
 
                       return (
                         <DragDrop
+                          getAdditionalClassesOnEnter={() => {
+                            if (isCompatibleFromOtherGroup) return 'lnsDragDrop-notCompatible';
+                            return '';
+                          }}
                           className="lnsLayerPanel__dimensionContainer"
                           key={accessor}
                           order={[2, layerIndex, groupIndex, accessorIndex]}
