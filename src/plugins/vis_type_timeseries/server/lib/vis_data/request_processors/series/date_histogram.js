@@ -22,7 +22,7 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
-import { search } from '../../../../../../../plugins/data/server';
+import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
 const { dateHistogramInterval } = search.aggs;
 
 export function dateHistogram(
@@ -32,9 +32,12 @@ export function dateHistogram(
   esQueryConfig,
   indexPatternObject,
   capabilities,
-  { maxBarsUiSettings, barTargetUiSettings }
+  uiSettings
 ) {
-  return (next) => (doc) => {
+  return (next) => async (doc) => {
+    const maxBarsUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
+    const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
+
     const { timeField, interval, maxBars } = getIntervalAndTimefield(
       panel,
       series,
@@ -73,11 +76,10 @@ export function dateHistogram(
       ? getDateHistogramForLastBucketMode()
       : getDateHistogramForEntireTimerangeMode();
 
-    // master
-
     overwrite(doc, `aggs.${series.id}.meta`, {
       timeField,
       intervalString,
+      index: indexPatternObject?.title,
       bucketSize,
       seriesId: series.id,
     });

@@ -55,7 +55,7 @@ function getFieldsMeta(esDocsBase: string) {
       ),
       testSubject: 'indexPatternsField',
     },
-    dataStream: {
+    createDataStream: {
       title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.dataStreamTitle', {
         defaultMessage: 'Data stream',
       }),
@@ -119,6 +119,7 @@ interface LogisticsForm {
 
 interface LogisticsFormInternal extends LogisticsForm {
   addMeta: boolean;
+  doCreateDataStream: boolean;
 }
 
 interface Props {
@@ -132,12 +133,16 @@ function formDeserializer(formData: LogisticsForm): LogisticsFormInternal {
   return {
     ...formData,
     addMeta: Boolean(formData._meta && Object.keys(formData._meta).length),
+    doCreateDataStream: Boolean(formData.dataStream),
   };
 }
 
-function formSerializer(formData: LogisticsFormInternal): LogisticsForm {
-  const { addMeta, ...rest } = formData;
-  return rest;
+function getformSerializer(initialTemplateData: LogisticsForm = {}) {
+  return (formData: LogisticsFormInternal): LogisticsForm => {
+    const { addMeta, doCreateDataStream, ...rest } = formData;
+    const dataStream = doCreateDataStream ? initialTemplateData.dataStream ?? {} : undefined;
+    return { ...rest, dataStream };
+  };
 }
 
 export const StepLogistics: React.FunctionComponent<Props> = React.memo(
@@ -146,7 +151,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       schema: schemas.logistics,
       defaultValue,
       options: { stripEmptyFields: false },
-      serializer: formSerializer,
+      serializer: getformSerializer(defaultValue),
       deserializer: formDeserializer,
     });
     const {
@@ -178,7 +183,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       });
     }, [onChange, isFormValid, validate, getFormData]);
 
-    const { name, indexPatterns, dataStream, order, priority, version } = getFieldsMeta(
+    const { name, indexPatterns, createDataStream, order, priority, version } = getFieldsMeta(
       documentationService.getEsDocsBase()
     );
 
@@ -245,10 +250,10 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
 
           {/* Create data stream */}
           {isLegacy !== true && (
-            <FormRow title={dataStream.title} description={dataStream.description}>
+            <FormRow title={createDataStream.title} description={createDataStream.description}>
               <UseField
-                path="dataStream"
-                componentProps={{ 'data-test-subj': dataStream.testSubject }}
+                path="doCreateDataStream"
+                componentProps={{ 'data-test-subj': createDataStream.testSubject }}
               />
             </FormRow>
           )}

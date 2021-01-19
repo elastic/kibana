@@ -13,25 +13,23 @@ import { expectedExportedTimeline, timeline } from '../objects/timeline';
 import { cleanKibana } from '../tasks/common';
 
 describe('Export timelines', () => {
-  let timelineResponse: Cypress.Response;
-  let timelineId: string;
   beforeEach(() => {
     cleanKibana();
     cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
     createTimeline(timeline).then((response) => {
-      timelineResponse = response;
-      timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
+      cy.wrap(response).as('timelineResponse');
+      cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId');
     });
   });
 
-  it('Exports a custom timeline', () => {
+  it('Exports a custom timeline', function () {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
-    exportTimeline(timelineId);
+    exportTimeline(this.timelineId);
 
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response!.statusCode).should('eql', 200);
-      cy.wrap(response!.body).should('eql', expectedExportedTimeline(timelineResponse));
+      cy.wrap(response!.body).should('eql', expectedExportedTimeline(this.timelineResponse));
     });
   });
 });

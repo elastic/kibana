@@ -325,7 +325,7 @@ describe('SavedObjectsTable', () => {
       (component.find('Header') as any).prop('onExportAll')();
       component.update();
 
-      expect(component.find('EuiModal')).toMatchSnapshot();
+      expect(component.find('ExportModal')).toMatchSnapshot();
     });
 
     it('should export all', async () => {
@@ -504,7 +504,7 @@ describe('SavedObjectsTable', () => {
       await component.instance().onDelete();
       component.update();
 
-      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.find('DeleteConfirmModal')).toMatchSnapshot();
     });
 
     it('should delete selected objects', async () => {

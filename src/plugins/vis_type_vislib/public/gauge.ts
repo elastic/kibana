@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { ColorMode, ColorSchemas, ColorSchemaParams, Labels, Style } from '../../charts/public';
-import { RangeValues, Schemas } from '../../vis_default_editor/public';
+import { RangeValues } from '../../vis_default_editor/public';
 import { AggGroupNames } from '../../data/public';
 import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
@@ -115,7 +115,7 @@ export const gaugeVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   editorConfig: {
     collections: getGaugeCollections(),
     optionsTemplate: GaugeOptions,
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -144,7 +144,7 @@ export const gaugeVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
-    ]),
+    ],
   },
   useCustomNoDataScreen: true,
 };

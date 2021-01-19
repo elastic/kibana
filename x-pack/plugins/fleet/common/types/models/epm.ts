@@ -46,6 +46,7 @@ export enum KibanaAssetType {
   search = 'search',
   indexPattern = 'index_pattern',
   map = 'map',
+  lens = 'lens',
 }
 
 /*
@@ -57,6 +58,7 @@ export enum KibanaSavedObjectType {
   search = 'search',
   indexPattern = 'index-pattern',
   map = 'map',
+  lens = 'lens',
 }
 
 export enum ElasticsearchAssetType {
@@ -187,8 +189,8 @@ export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeTo
 export type AssetsGroupedByServiceByType = Record<
   Extract<ServiceName, 'kibana'>,
   KibanaAssetTypeToParts
->;
-// & Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
+> &
+  Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
 
 export type KibanaAssetParts = AssetParts & {
   service: Extract<ServiceName, 'kibana'>;
@@ -277,6 +279,10 @@ export interface Installation extends SavedObjectAttributes {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
+}
+
+export interface PackageUsageStats {
+  agent_policy_count: number;
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;

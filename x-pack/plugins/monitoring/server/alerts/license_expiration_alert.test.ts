@@ -22,9 +22,7 @@ jest.mock('moment', () => {
       format: () => 'THE_DATE',
     };
   };
-  moment.utc = () => ({
-    format: () => 'THE_DATE',
-  });
+  moment.duration = () => ({ humanize: () => 'HUMANIZED_DURATION' });
   return moment;
 });
 
@@ -178,11 +176,11 @@ describe('LicenseExpirationAlert', () => {
         action: '[Please update your license.](elasticsearch/nodes)',
         actionPlain: 'Please update your license.',
         internalFullMessage:
-          'License expiration alert is firing for testCluster. Your license expires in THE_DATE. [Please update your license.](elasticsearch/nodes)',
+          'License expiration alert is firing for testCluster. Your license expires in HUMANIZED_DURATION. [Please update your license.](elasticsearch/nodes)',
         internalShortMessage:
-          'License expiration alert is firing for testCluster. Your license expires in THE_DATE. Please update your license.',
+          'License expiration alert is firing for testCluster. Your license expires in HUMANIZED_DURATION. Please update your license.',
         clusterName,
-        expiredDate: 'THE_DATE',
+        expiredDate: 'HUMANIZED_DURATION',
         state: 'firing',
       });
     });

@@ -127,7 +127,8 @@ describe('migration v2', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   };
 
-  describe('migrating from 7.3.0-xpack version', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/87968
+  describe.skip('migrating from 7.3.0-xpack version', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
     beforeAll(async () => {

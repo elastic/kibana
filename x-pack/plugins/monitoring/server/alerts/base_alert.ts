@@ -36,8 +36,6 @@ import { mbSafeQuery } from '../lib/mb_safe_query';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { parseDuration } from '../../../alerts/common/parse_duration';
 import { Globals } from '../static_globals';
-// import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
-// import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
 
 type ExecutedState =
   | {
@@ -86,7 +84,7 @@ export class BaseAlert {
     this.scopedLogger = Globals.app.getLogger(alertOptions.id!);
   }
 
-  public getAlertType(): AlertType {
+  public getAlertType(): AlertType<never, never, never, never, 'default'> {
     const { id, name, actionVariables } = this.alertOptions;
     return {
       id,
@@ -101,8 +99,11 @@ export class BaseAlert {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
-      executor: (options: AlertExecutorOptions & { state: ExecutedState }): Promise<any> =>
-        this.execute(options),
+      executor: (
+        options: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+          state: ExecutedState;
+        }
+      ): Promise<any> => this.execute(options),
       producer: 'monitoring',
       actionVariables: {
         context: actionVariables,
@@ -231,7 +232,9 @@ export class BaseAlert {
     services,
     params,
     state,
-  }: AlertExecutorOptions & { state: ExecutedState }): Promise<any> {
+  }: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+    state: ExecutedState;
+  }): Promise<any> {
     this.scopedLogger.debug(
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
@@ -274,7 +277,7 @@ export class BaseAlert {
       ? {
           timestamp: {
             format: 'epoch_millis',
-            gte: limit - this.alertOptions.fetchClustersRange,
+            gte: +new Date() - limit - this.alertOptions.fetchClustersRange,
           },
         }
       : undefined;
@@ -293,7 +296,7 @@ export class BaseAlert {
   protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: AlertServices,
+    services: AlertServices<AlertInstanceState, never, 'default'>,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();

@@ -20,7 +20,7 @@
 import { defaults } from 'lodash';
 import { IndexPatternsService, IndexPattern } from '.';
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
+import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({

@@ -4,12 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
-import { rangeRt } from './default_api_types';
-import { getCorrelationsForSlowTransactions } from '../lib/correlations/get_correlations_for_slow_transactions';
+import { isActivePlatinumLicense } from '../../common/license_check';
 import { getCorrelationsForFailedTransactions } from '../lib/correlations/get_correlations_for_failed_transactions';
-import { createRoute } from './create_route';
+import { getCorrelationsForSlowTransactions } from '../lib/correlations/get_correlations_for_slow_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
+import { createRoute } from './create_route';
+import { rangeRt } from './default_api_types';
+
+const INVALID_LICENSE = i18n.translate(
+  'xpack.apm.significanTerms.license.text',
+  {
+    defaultMessage:
+      'To use the correlations API, you must be subscribed to an Elastic Platinum license.',
+  }
+);
 
 export const correlationsForSlowTransactionsRoute = createRoute({
   endpoint: 'GET /api/apm/correlations/slow_transactions',
@@ -30,6 +41,9 @@ export const correlationsForSlowTransactionsRoute = createRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
     const setup = await setupRequest(context, request);
     const {
       serviceName,
@@ -68,6 +82,9 @@ export const correlationsForFailedTransactionsRoute = createRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
     const setup = await setupRequest(context, request);
     const {
       serviceName,

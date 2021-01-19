@@ -20,12 +20,12 @@
 import expect from '@kbn/expect';
 import { join } from 'path';
 import dedent from 'dedent';
-import type { SavedObjectsImportError } from 'src/core/server';
+import type { SavedObjectsImportFailure } from 'src/core/server';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const createConflictError = (
-  object: Omit<SavedObjectsImportError, 'error'>
-): SavedObjectsImportError => ({
+  object: Omit<SavedObjectsImportFailure, 'error'>
+): SavedObjectsImportFailure => ({
   ...object,
   title: object.meta.title,
   error: { type: 'conflict' },

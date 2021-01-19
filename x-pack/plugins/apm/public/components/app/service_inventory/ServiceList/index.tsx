@@ -27,7 +27,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, px, truncate, unit } from '../../../../style/variables';
 import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
-import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview';
+import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview_link';
 import { AgentIcon } from '../../../shared/AgentIcon';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
@@ -104,7 +104,7 @@ export function getServiceColumns({
             id="service-name-tooltip"
             anchorClassName="apmServiceList__serviceNameTooltip"
           >
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               {agentName && (
                 <EuiFlexItem grow={false}>
                   <AgentIcon agentName={agentName} />
@@ -137,9 +137,7 @@ export function getServiceColumns({
             field: 'transactionType',
             name: i18n.translate(
               'xpack.apm.servicesTable.transactionColumnLabel',
-              {
-                defaultMessage: 'Transaction type',
-              }
+              { defaultMessage: 'Transaction type' }
             ),
             width: px(unit * 10),
             sortable: true,
@@ -148,12 +146,9 @@ export function getServiceColumns({
       : []),
     {
       field: 'avgResponseTime',
-      name: i18n.translate(
-        'xpack.apm.servicesTable.avgResponseTimeColumnLabel',
-        {
-          defaultMessage: 'Avg. response time',
-        }
-      ),
+      name: i18n.translate('xpack.apm.servicesTable.latencyAvgColumnLabel', {
+        defaultMessage: 'Latency (avg.)',
+      }),
       sortable: true,
       dataType: 'number',
       render: (_, { avgResponseTime }) => (
@@ -168,12 +163,9 @@ export function getServiceColumns({
     },
     {
       field: 'transactionsPerMinute',
-      name: i18n.translate(
-        'xpack.apm.servicesTable.transactionsPerMinuteColumnLabel',
-        {
-          defaultMessage: 'Trans. per minute',
-        }
-      ),
+      name: i18n.translate('xpack.apm.servicesTable.throughputColumnLabel', {
+        defaultMessage: 'Throughput',
+      }),
       sortable: true,
       dataType: 'number',
       render: (_, { transactionsPerMinute }) => (

@@ -34,16 +34,16 @@ export type MapContext = {
   refreshConfig?: MapRefreshConfig;
   refreshTimerLastTriggeredAt?: string;
   drawState?: DrawState;
-  disableInteractive: boolean;
-  disableTooltipControl: boolean;
-  hideToolbarOverlay: boolean;
-  hideLayerControl: boolean;
-  hideViewControl: boolean;
 };
 
 export type MapSettings = {
   autoFitToDataBounds: boolean;
   backgroundColor: string;
+  disableInteractive: boolean;
+  disableTooltipControl: boolean;
+  hideToolbarOverlay: boolean;
+  hideLayerControl: boolean;
+  hideViewControl: boolean;
   initialLocation: INITIAL_LOCATION;
   fixedLocation: {
     lat: number;

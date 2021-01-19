@@ -40,7 +40,7 @@ describe('AlertingBuiltins Plugin', () => {
           "actionGroups": Array [
             Object {
               "id": "threshold met",
-              "name": "Threshold Met",
+              "name": "Threshold met",
             },
           ],
           "id": ".index-threshold",

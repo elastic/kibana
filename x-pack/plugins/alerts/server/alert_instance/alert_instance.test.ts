@@ -6,6 +6,7 @@
 
 import sinon from 'sinon';
 import { AlertInstance } from './alert_instance';
+import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -17,12 +18,20 @@ afterAll(() => clock.restore());
 
 describe('hasScheduledActions()', () => {
   test('defaults to false', () => {
-    const alertInstance = new AlertInstance();
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >();
     expect(alertInstance.hasScheduledActions()).toEqual(false);
   });
 
   test('returns true when scheduleActions is called', () => {
-    const alertInstance = new AlertInstance();
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >();
     alertInstance.scheduleActions('default');
     expect(alertInstance.hasScheduledActions()).toEqual(true);
   });
@@ -30,7 +39,11 @@ describe('hasScheduledActions()', () => {
 
 describe('isThrottled', () => {
   test(`should throttle when group didn't change and throttle period is still active`, () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       meta: {
         lastScheduledActions: {
           date: new Date(),
@@ -44,7 +57,11 @@ describe('isThrottled', () => {
   });
 
   test(`shouldn't throttle when group didn't change and throttle period expired`, () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       meta: {
         lastScheduledActions: {
           date: new Date(),
@@ -58,7 +75,7 @@ describe('isThrottled', () => {
   });
 
   test(`shouldn't throttle when group changes`, () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<never, never, 'default' | 'other-group'>({
       meta: {
         lastScheduledActions: {
           date: new Date(),
@@ -74,12 +91,20 @@ describe('isThrottled', () => {
 
 describe('scheduledActionGroupOrSubgroupHasChanged()', () => {
   test('should be false if no last scheduled and nothing scheduled', () => {
-    const alertInstance = new AlertInstance();
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >();
     expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
   });
 
   test('should be false if group does not change', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       meta: {
         lastScheduledActions: {
           date: new Date(),
@@ -92,7 +117,11 @@ describe('scheduledActionGroupOrSubgroupHasChanged()', () => {
   });
 
   test('should be false if group and subgroup does not change', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       meta: {
         lastScheduledActions: {
           date: new Date(),
@@ -106,7 +135,11 @@ describe('scheduledActionGroupOrSubgroupHasChanged()', () => {
   });
 
   test('should be false if group does not change and subgroup goes from undefined to defined', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       meta: {
         lastScheduledActions: {
           date: new Date(),
@@ -119,7 +152,11 @@ describe('scheduledActionGroupOrSubgroupHasChanged()', () => {
   });
 
   test('should be false if group does not change and subgroup goes from defined to undefined', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       meta: {
         lastScheduledActions: {
           date: new Date(),
@@ -133,13 +170,17 @@ describe('scheduledActionGroupOrSubgroupHasChanged()', () => {
   });
 
   test('should be true if no last scheduled and has scheduled action', () => {
-    const alertInstance = new AlertInstance();
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >();
     alertInstance.scheduleActions('default');
     expect(alertInstance.scheduledActionGroupOrSubgroupHasChanged()).toEqual(true);
   });
 
   test('should be true if group does change', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<never, never, 'default' | 'penguin'>({
       meta: {
         lastScheduledActions: {
           date: new Date(),
@@ -152,7 +193,7 @@ describe('scheduledActionGroupOrSubgroupHasChanged()', () => {
   });
 
   test('should be true if group does change and subgroup does change', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<never, never, 'default' | 'penguin'>({
       meta: {
         lastScheduledActions: {
           date: new Date(),
@@ -166,7 +207,11 @@ describe('scheduledActionGroupOrSubgroupHasChanged()', () => {
   });
 
   test('should be true if group does not change and subgroup does change', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       meta: {
         lastScheduledActions: {
           date: new Date(),
@@ -182,14 +227,22 @@ describe('scheduledActionGroupOrSubgroupHasChanged()', () => {
 
 describe('getScheduledActionOptions()', () => {
   test('defaults to undefined', () => {
-    const alertInstance = new AlertInstance();
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >();
     expect(alertInstance.getScheduledActionOptions()).toBeUndefined();
   });
 });
 
 describe('unscheduleActions()', () => {
   test('makes hasScheduledActions() return false', () => {
-    const alertInstance = new AlertInstance();
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >();
     alertInstance.scheduleActions('default');
     expect(alertInstance.hasScheduledActions()).toEqual(true);
     alertInstance.unscheduleActions();
@@ -197,7 +250,11 @@ describe('unscheduleActions()', () => {
   });
 
   test('makes getScheduledActionOptions() return undefined', () => {
-    const alertInstance = new AlertInstance();
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >();
     alertInstance.scheduleActions('default');
     expect(alertInstance.getScheduledActionOptions()).toEqual({
       actionGroup: 'default',
@@ -212,14 +269,22 @@ describe('unscheduleActions()', () => {
 describe('getState()', () => {
   test('returns state passed to constructor', () => {
     const state = { foo: true };
-    const alertInstance = new AlertInstance({ state });
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({ state });
     expect(alertInstance.getState()).toEqual(state);
   });
 });
 
 describe('scheduleActions()', () => {
   test('makes hasScheduledActions() return true', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       state: { foo: true },
       meta: {
         lastScheduledActions: {
@@ -233,7 +298,11 @@ describe('scheduleActions()', () => {
   });
 
   test('makes isThrottled() return true when throttled', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       state: { foo: true },
       meta: {
         lastScheduledActions: {
@@ -247,7 +316,11 @@ describe('scheduleActions()', () => {
   });
 
   test('make isThrottled() return false when throttled expired', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       state: { foo: true },
       meta: {
         lastScheduledActions: {
@@ -262,7 +335,11 @@ describe('scheduleActions()', () => {
   });
 
   test('makes getScheduledActionOptions() return given options', () => {
-    const alertInstance = new AlertInstance({ state: { foo: true }, meta: {} });
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({ state: { foo: true }, meta: {} });
     alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
     expect(alertInstance.getScheduledActionOptions()).toEqual({
       actionGroup: 'default',
@@ -272,7 +349,11 @@ describe('scheduleActions()', () => {
   });
 
   test('cannot schdule for execution twice', () => {
-    const alertInstance = new AlertInstance();
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >();
     alertInstance.scheduleActions('default', { field: true });
     expect(() =>
       alertInstance.scheduleActions('default', { field: false })
@@ -284,7 +365,11 @@ describe('scheduleActions()', () => {
 
 describe('scheduleActionsWithSubGroup()', () => {
   test('makes hasScheduledActions() return true', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       state: { foo: true },
       meta: {
         lastScheduledActions: {
@@ -300,7 +385,11 @@ describe('scheduleActionsWithSubGroup()', () => {
   });
 
   test('makes isThrottled() return true when throttled and subgroup is the same', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       state: { foo: true },
       meta: {
         lastScheduledActions: {
@@ -317,7 +406,11 @@ describe('scheduleActionsWithSubGroup()', () => {
   });
 
   test('makes isThrottled() return true when throttled and last schedule had no subgroup', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       state: { foo: true },
       meta: {
         lastScheduledActions: {
@@ -333,7 +426,11 @@ describe('scheduleActionsWithSubGroup()', () => {
   });
 
   test('makes isThrottled() return false when throttled and subgroup is the different', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       state: { foo: true },
       meta: {
         lastScheduledActions: {
@@ -350,7 +447,11 @@ describe('scheduleActionsWithSubGroup()', () => {
   });
 
   test('make isThrottled() return false when throttled expired', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       state: { foo: true },
       meta: {
         lastScheduledActions: {
@@ -367,7 +468,11 @@ describe('scheduleActionsWithSubGroup()', () => {
   });
 
   test('makes getScheduledActionOptions() return given options', () => {
-    const alertInstance = new AlertInstance({ state: { foo: true }, meta: {} });
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({ state: { foo: true }, meta: {} });
     alertInstance
       .replaceState({ otherField: true })
       .scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
@@ -380,7 +485,11 @@ describe('scheduleActionsWithSubGroup()', () => {
   });
 
   test('cannot schdule for execution twice', () => {
-    const alertInstance = new AlertInstance();
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >();
     alertInstance.scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
     expect(() =>
       alertInstance.scheduleActionsWithSubGroup('default', 'subgroup', { field: false })
@@ -390,7 +499,11 @@ describe('scheduleActionsWithSubGroup()', () => {
   });
 
   test('cannot schdule for execution twice with different subgroups', () => {
-    const alertInstance = new AlertInstance();
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >();
     alertInstance.scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
     expect(() =>
       alertInstance.scheduleActionsWithSubGroup('default', 'subgroup', { field: false })
@@ -400,7 +513,11 @@ describe('scheduleActionsWithSubGroup()', () => {
   });
 
   test('cannot schdule for execution twice whether there are subgroups', () => {
-    const alertInstance = new AlertInstance();
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >();
     alertInstance.scheduleActions('default', { field: true });
     expect(() =>
       alertInstance.scheduleActionsWithSubGroup('default', 'subgroup', { field: false })
@@ -412,7 +529,11 @@ describe('scheduleActionsWithSubGroup()', () => {
 
 describe('replaceState()', () => {
   test('replaces previous state', () => {
-    const alertInstance = new AlertInstance({ state: { foo: true } });
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({ state: { foo: true } });
     alertInstance.replaceState({ bar: true });
     expect(alertInstance.getState()).toEqual({ bar: true });
     alertInstance.replaceState({ baz: true });
@@ -422,7 +543,11 @@ describe('replaceState()', () => {
 
 describe('updateLastScheduledActions()', () => {
   test('replaces previous lastScheduledActions', () => {
-    const alertInstance = new AlertInstance({ meta: {} });
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({ meta: {} });
     alertInstance.updateLastScheduledActions('default');
     expect(alertInstance.toJSON()).toEqual({
       state: {},
@@ -438,7 +563,11 @@ describe('updateLastScheduledActions()', () => {
 
 describe('toJSON', () => {
   test('only serializes state and meta', () => {
-    const alertInstance = new AlertInstance({
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >({
       state: { foo: true },
       meta: {
         lastScheduledActions: {
@@ -464,7 +593,11 @@ describe('toRaw', () => {
         },
       },
     };
-    const alertInstance = new AlertInstance(raw);
+    const alertInstance = new AlertInstance<
+      AlertInstanceState,
+      AlertInstanceContext,
+      DefaultActionGroupId
+    >(raw);
     expect(alertInstance.toRaw()).toEqual(raw);
   });
 });

@@ -37,8 +37,10 @@ import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_m
 
 export function StandardAgg(props) {
   const { model, panel, series, fields, uiRestrictions } = props;
+
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
+
   const restrictFields = getSupportedFieldsByMetricType(model.type);
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;

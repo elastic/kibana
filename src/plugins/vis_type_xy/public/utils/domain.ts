@@ -52,7 +52,7 @@ export const getAdjustedDomain = (
   data: Datatable['rows'],
   { accessor, params }: Aspect,
   timeZone: string,
-  domain?: DomainRange,
+  domain: DomainRange | undefined,
   hasBars?: boolean
 ): DomainRange => {
   if (

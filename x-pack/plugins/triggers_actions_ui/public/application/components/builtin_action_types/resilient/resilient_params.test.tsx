@@ -42,7 +42,7 @@ const connector = {
 const editAction = jest.fn();
 const defaultProps = {
   actionParams,
-  errors: { name: [] },
+  errors: { 'subActionParams.incident.name': [] },
   editAction,
   index: 0,
   messageVariables: [],
@@ -128,7 +128,7 @@ describe('ResilientParamsFields renders', () => {
   test('If name has errors, form row is invalid', () => {
     const newProps = {
       ...defaultProps,
-      errors: { name: ['error'] },
+      errors: { 'subActionParams.incident.name': ['error'] },
     };
     const wrapper = mount(<ResilientParamsFields {...newProps} />);
     const title = wrapper.find('[data-test-subj="nameInput"]').first();

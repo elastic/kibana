@@ -51,6 +51,7 @@ export interface RequestHandlerParams {
   searchSourceService: ISearchStartSearchSource;
   timeFields?: string[];
   timeRange?: TimeRange;
+  getNow?: () => Date;
 }
 
 export const handleRequest = async ({
@@ -67,7 +68,9 @@ export const handleRequest = async ({
   searchSourceService,
   timeFields,
   timeRange,
+  getNow,
 }: RequestHandlerParams) => {
+  const forceNow = getNow?.();
   const searchSource = await searchSourceService.create();
 
   searchSource.setField('index', indexPattern);
@@ -115,7 +118,7 @@ export const handleRequest = async ({
   if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
       return allTimeFields
-        .map((fieldName) => getTime(indexPattern, timeRange, { fieldName }))
+        .map((fieldName) => getTime(indexPattern, timeRange, { fieldName, forceNow }))
         .filter(isRangeFilter);
     });
   }
@@ -183,7 +186,7 @@ export const handleRequest = async ({
     }
   }
 
-  const parsedTimeRange = timeRange ? calculateBounds(timeRange) : null;
+  const parsedTimeRange = timeRange ? calculateBounds(timeRange, { forceNow }) : null;
   const tabifyParams = {
     metricsAtAllLevels,
     partialRows,

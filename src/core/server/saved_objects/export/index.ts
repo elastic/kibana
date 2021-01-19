@@ -18,7 +18,10 @@
  */
 
 export {
-  exportSavedObjectsToStream,
-  SavedObjectsExportOptions,
+  SavedObjectsExportByObjectOptions,
+  SavedObjectExportBaseOptions,
+  SavedObjectsExportByTypeOptions,
   SavedObjectsExportResultDetails,
-} from './get_sorted_objects_for_export';
+} from './types';
+export { ISavedObjectsExporter, SavedObjectsExporter } from './saved_objects_exporter';
+export { SavedObjectsExportError } from './errors';

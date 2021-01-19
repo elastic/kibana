@@ -126,7 +126,6 @@ export const aggGeoHash = (): FunctionDefinition => ({
         params: {
           ...rest,
           boundingBox: getParsedValue(args, 'boundingBox'),
-          json: getParsedValue(args, 'json'),
         },
       },
     };

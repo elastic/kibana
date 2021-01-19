@@ -41,6 +41,7 @@ export const CaseConfigureResponseRt = rt.intersection([
   ConnectorMappingsRt,
   rt.type({
     version: rt.string,
+    error: rt.union([rt.string, rt.null]),
   }),
 ]);
 

@@ -42,6 +42,7 @@ const ParamsSchema = schema.object({
   message: schema.string({ minLength: 1 }),
 });
 
+export const ActionTypeId = '.teams';
 // action type definition
 export function getActionType({
   logger,
@@ -51,7 +52,7 @@ export function getActionType({
   configurationUtilities: ActionsConfigurationUtilities;
 }): TeamsActionType {
   return {
-    id: '.teams',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.teamsTitle', {
       defaultMessage: 'Microsoft Teams',

@@ -104,6 +104,7 @@ const eventsViewerDefaultProps = {
   sort: [
     {
       columnId: 'foo',
+      columnType: 'number',
       sortDirection: 'asc' as SortDirection,
     },
   ],

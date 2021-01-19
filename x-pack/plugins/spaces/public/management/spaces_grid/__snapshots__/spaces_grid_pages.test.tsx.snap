@@ -125,9 +125,6 @@ exports[`SpacesGridPage renders as expected 1`] = `
       tableLayout="fixed"
     />
   </EuiPageContent>
-  <SecureSpaceMessage
-    getUrlForApp={[Function]}
-  />
 </div>
 `;
 

@@ -32,7 +32,7 @@
       position: absolute;
       right: $euiSize;
       top: $sideBarMobileHeight / 2;
-      transform: translateY(-50%) scale(0.9);
+      transform: translateY(-50%) scale(.9);
 
       .euiButton {
         min-width: 0;
@@ -52,7 +52,7 @@
     width: $sideBarWidth;
 
     background-color: $euiColorLightestShade;
-    box-shadow: inset (-1 * $euiSizeXS) 0 $euiSizeS (-1 * $euiSizeXS) rgba($euiShadowColor, 0.25);
+    box-shadow: inset (-1 * $euiSizeXS) 0 $euiSizeS (-1 * $euiSizeXS) rgba($euiShadowColor, .25);
 
     @include euiBreakpoint('xs', 's', 'm') {
       position: relative;

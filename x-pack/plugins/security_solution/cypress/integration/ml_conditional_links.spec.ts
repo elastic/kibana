@@ -32,36 +32,34 @@ describe('ml conditional links', () => {
 
   it('sets the KQL from a single IP with a value for the query', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkSingleIpKqlQuery);
-    cy.get(KQL_INPUT)
-      .invoke('text')
-      .should('eq', '(process.name: "conhost.exe" or process.name: "sc.exe")');
+    cy.get(KQL_INPUT).should(
+      'have.text',
+      '(process.name: "conhost.exe" or process.name: "sc.exe")'
+    );
   });
 
   it('sets the KQL from a multiple IPs with a null for the query', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkMultipleIpNullKqlQuery);
-    cy.get(KQL_INPUT)
-      .invoke('text')
-      .should(
-        'eq',
-        '((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1") or (source.ip: "127.0.0.2" or destination.ip: "127.0.0.2"))'
-      );
+    cy.get(KQL_INPUT).should(
+      'have.text',
+      '((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1") or (source.ip: "127.0.0.2" or destination.ip: "127.0.0.2"))'
+    );
   });
 
   it('sets the KQL from a multiple IPs with a value for the query', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkMultipleIpKqlQuery);
-    cy.get(KQL_INPUT)
-      .invoke('text')
-      .should(
-        'eq',
-        '((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1") or (source.ip: "127.0.0.2" or destination.ip: "127.0.0.2")) and ((process.name: "conhost.exe" or process.name: "sc.exe"))'
-      );
+    cy.get(KQL_INPUT).should(
+      'have.text',
+      '((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1") or (source.ip: "127.0.0.2" or destination.ip: "127.0.0.2")) and ((process.name: "conhost.exe" or process.name: "sc.exe"))'
+    );
   });
 
   it('sets the KQL from a $ip$ with a value for the query', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkKqlQuery);
-    cy.get(KQL_INPUT)
-      .invoke('text')
-      .should('eq', '(process.name: "conhost.exe" or process.name: "sc.exe")');
+    cy.get(KQL_INPUT).should(
+      'have.text',
+      '(process.name: "conhost.exe" or process.name: "sc.exe")'
+    );
   });
 
   it('sets the KQL from a single host name with a value for query', () => {
@@ -73,26 +71,26 @@ describe('ml conditional links', () => {
 
   it('sets the KQL from a multiple host names with null for query', () => {
     loginAndWaitForPageWithoutDateRange(mlHostMultiHostNullKqlQuery);
-    cy.get(KQL_INPUT)
-      .invoke('text')
-      .should('eq', '(host.name: "siem-windows" or host.name: "siem-suricata")');
+    cy.get(KQL_INPUT).should(
+      'have.text',
+      '(host.name: "siem-windows" or host.name: "siem-suricata")'
+    );
   });
 
   it('sets the KQL from a multiple host names with a value for query', () => {
     loginAndWaitForPageWithoutDateRange(mlHostMultiHostKqlQuery);
-    cy.get(KQL_INPUT)
-      .invoke('text')
-      .should(
-        'eq',
-        '(host.name: "siem-windows" or host.name: "siem-suricata") and ((process.name: "conhost.exe" or process.name: "sc.exe"))'
-      );
+    cy.get(KQL_INPUT).should(
+      'have.text',
+      '(host.name: "siem-windows" or host.name: "siem-suricata") and ((process.name: "conhost.exe" or process.name: "sc.exe"))'
+    );
   });
 
   it('sets the KQL from a undefined/null host name but with a value for query', () => {
     loginAndWaitForPageWithoutDateRange(mlHostVariableHostKqlQuery);
-    cy.get(KQL_INPUT)
-      .invoke('text')
-      .should('eq', '(process.name: "conhost.exe" or process.name: "sc.exe")');
+    cy.get(KQL_INPUT).should(
+      'have.text',
+      '(process.name: "conhost.exe" or process.name: "sc.exe")'
+    );
   });
 
   it('redirects from a single IP with a null for the query', () => {

@@ -69,5 +69,5 @@ export function createSavedSheetClass(savedObjects: SavedObjectsStart, config: I
     }
   }
 
-  return SavedSheet;
+  return SavedSheet as unknown;
 }

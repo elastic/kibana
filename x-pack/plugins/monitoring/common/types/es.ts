@@ -24,6 +24,16 @@ export interface ElasticsearchSourceKibanaStats {
   };
 }
 
+export interface ElasticsearchSourceLogstashPipelineVertex {
+  id: string;
+  plugin_type: string;
+  stats?: {
+    [key: string]: {
+      data?: any[];
+    };
+  };
+}
+
 export interface ElasticsearchSource {
   timestamp: string;
   cluster_uuid: string;
@@ -34,6 +44,27 @@ export interface ElasticsearchSource {
   cluster_stats?: {
     nodes?: {
       versions?: string[];
+    };
+  };
+  logstash_state?: {
+    pipeline?: {
+      representation?: {
+        graph?: {
+          vertices?: ElasticsearchSourceLogstashPipelineVertex[];
+        };
+      };
+    };
+  };
+  logstash_stats?: {
+    timestamp?: string;
+    logstash?: {};
+    events?: {};
+    reloads?: {};
+    queue?: {
+      type?: string;
+    };
+    jvm?: {
+      uptime_in_millis?: number;
     };
   };
   beats_stats?: {

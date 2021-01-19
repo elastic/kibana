@@ -99,7 +99,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { elasticsearch, http, savedObjects }: CoreSetup,
+    { http, savedObjects }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
   ): TelemetryPluginSetup {
     const currentKibanaVersion = this.currentKibanaVersion;

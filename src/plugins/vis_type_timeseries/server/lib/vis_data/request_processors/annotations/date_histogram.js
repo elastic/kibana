@@ -20,7 +20,8 @@
 import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getTimerange } from '../../helpers/get_timerange';
-import { search } from '../../../../../../../plugins/data/server';
+import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
+
 const { dateHistogramInterval } = search.aggs;
 
 export function dateHistogram(
@@ -30,9 +31,10 @@ export function dateHistogram(
   esQueryConfig,
   indexPatternObject,
   capabilities,
-  { barTargetUiSettings }
+  uiSettings
 ) {
-  return (next) => (doc) => {
+  return (next) => async (doc) => {
+    const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
     const timeField = annotation.time_field;
     const { bucketSize, intervalString } = getBucketSize(
       req,

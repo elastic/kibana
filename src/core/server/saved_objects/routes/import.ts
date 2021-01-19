@@ -22,8 +22,8 @@ import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
 import { CoreUsageDataSetup } from '../../core_usage_data';
-import { importSavedObjectsFromStream } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
+import { SavedObjectsImportError } from '../import';
 import { createSavedObjectsStreamFromNdJson } from './utils';
 
 interface RouteDependencies {
@@ -41,7 +41,7 @@ export const registerImportRoute = (
   router: IRouter,
   { config, coreUsageData }: RouteDependencies
 ) => {
-  const { maxImportExportSize, maxImportPayloadBytes } = config;
+  const { maxImportPayloadBytes } = config;
 
   router.post(
     {
@@ -95,16 +95,26 @@ export const registerImportRoute = (
         });
       }
 
-      const result = await importSavedObjectsFromStream({
-        savedObjectsClient: context.core.savedObjects.client,
-        typeRegistry: context.core.savedObjects.typeRegistry,
-        readStream,
-        objectLimit: maxImportExportSize,
-        overwrite,
-        createNewCopies,
-      });
+      const { importer } = context.core.savedObjects;
+      try {
+        const result = await importer.import({
+          readStream,
+          overwrite,
+          createNewCopies,
+        });
 
-      return res.ok({ body: result });
+        return res.ok({ body: result });
+      } catch (e) {
+        if (e instanceof SavedObjectsImportError) {
+          return res.badRequest({
+            body: {
+              message: e.message,
+              attributes: e.attributes,
+            },
+          });
+        }
+        throw e;
+      }
     })
   );
 };

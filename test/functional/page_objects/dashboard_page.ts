@@ -33,6 +33,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const dashboardAddPanel = getService('dashboardAddPanel');
   const renderable = getService('renderable');
   const listingTable = getService('listingTable');
+  const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
   interface SaveDashboardOptions {
@@ -272,6 +273,20 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       const isMarginsOn = await this.isMarginsOn();
       if (isMarginsOn !== 'on') {
         return await testSubjects.click('dashboardMarginsCheckbox');
+      }
+    }
+
+    public async isColorSyncOn() {
+      log.debug('isColorSyncOn');
+      await this.openOptions();
+      return await testSubjects.getAttribute('dashboardSyncColorsCheckbox', 'checked');
+    }
+
+    public async useColorSync(on = true) {
+      await this.openOptions();
+      const isColorSyncOn = await this.isColorSyncOn();
+      if (isColorSyncOn !== 'on') {
+        return await testSubjects.click('dashboardSyncColorsCheckbox');
       }
     }
 
@@ -553,6 +568,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         // if not found then this is 0 (we don't show badge with 0)
         return 0;
       }
+    }
+
+    public async getPanelChartDebugState(panelIndex: number) {
+      return await elasticChart.getChartDebugData(undefined, panelIndex);
     }
   }
 

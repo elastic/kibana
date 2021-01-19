@@ -17,6 +17,7 @@
  * under the License.
  */
 import { isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { NotificationsStart } from 'kibana/public';
 import {
@@ -38,6 +39,7 @@ import {
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../url_generator';
+import { SavedSearch } from '../../saved_searches';
 
 export interface AppState {
   /**
@@ -264,15 +266,32 @@ export function isEqualState(stateA: AppState, stateB: AppState) {
 export function createSearchSessionRestorationDataProvider(deps: {
   appStateContainer: StateContainer<AppState>;
   data: DataPublicPluginStart;
-  getSavedSearchId: () => string | undefined;
+  getSavedSearch: () => SavedSearch;
 }): SearchSessionInfoProvider {
+  const getSavedSearchId = () => deps.getSavedSearch().id;
   return {
-    getName: async () => 'Discover',
+    getName: async () => {
+      const savedSearch = deps.getSavedSearch();
+      return (
+        (savedSearch.id && savedSearch.title) ||
+        i18n.translate('discover.discoverDefaultSearchSessionName', {
+          defaultMessage: 'Discover',
+        })
+      );
+    },
     getUrlGeneratorData: async () => {
       return {
         urlGeneratorId: DISCOVER_APP_URL_GENERATOR,
-        initialState: createUrlGeneratorState({ ...deps, forceAbsoluteTime: false }),
-        restoreState: createUrlGeneratorState({ ...deps, forceAbsoluteTime: true }),
+        initialState: createUrlGeneratorState({
+          ...deps,
+          getSavedSearchId,
+          forceAbsoluteTime: false,
+        }),
+        restoreState: createUrlGeneratorState({
+          ...deps,
+          getSavedSearchId,
+          forceAbsoluteTime: true,
+        }),
       };
     },
   };
@@ -282,11 +301,14 @@ function createUrlGeneratorState({
   appStateContainer,
   data,
   getSavedSearchId,
-  forceAbsoluteTime, // TODO: not implemented
+  forceAbsoluteTime,
 }: {
   appStateContainer: StateContainer<AppState>;
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
+  /**
+   * Can force time range from time filter to convert from relative to absolute time range
+   */
   forceAbsoluteTime: boolean;
 }): DiscoverUrlGeneratorState {
   const appState = appStateContainer.get();
@@ -295,7 +317,9 @@ function createUrlGeneratorState({
     indexPatternId: appState.index,
     query: appState.query,
     savedSearchId: getSavedSearchId(),
-    timeRange: data.query.timefilter.timefilter.getTime(), // TODO: handle relative time range
+    timeRange: forceAbsoluteTime
+      ? data.query.timefilter.timefilter.getAbsoluteTime()
+      : data.query.timefilter.timefilter.getTime(),
     searchSessionId: data.search.session.getSessionId(),
     columns: appState.columns,
     sort: appState.sort,

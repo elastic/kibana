@@ -3,8 +3,8 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "optionalPlugins": ["usageCollection"],
   "requiredBundles": ["usageCollection"],
+  "optionalPlugins": ["usageCollection"],
   "requiredPlugins": [
     "advancedSettings",
     "telemetry"

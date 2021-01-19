@@ -8,6 +8,7 @@ import uuid from 'uuid/v4';
 import {
   AggDescriptor,
   ColorDynamicOptions,
+  ESTermSourceDescriptor,
   LayerDescriptor,
 } from '../../../common/descriptor_types';
 import {
@@ -48,6 +49,7 @@ export function createRegionMapLayerDescriptor({
   emsLayerId,
   leftFieldName,
   termsFieldName,
+  termsSize,
   colorSchema,
   indexPatternId,
   indexPatternTitle,
@@ -58,6 +60,7 @@ export function createRegionMapLayerDescriptor({
   emsLayerId?: string;
   leftFieldName?: string;
   termsFieldName?: string;
+  termsSize?: number;
   colorSchema: string;
   indexPatternId?: string;
   indexPatternTitle?: string;
@@ -78,21 +81,25 @@ export function createRegionMapLayerDescriptor({
   const colorPallette = NUMERICAL_COLOR_PALETTES.find((pallette) => {
     return pallette.value.toLowerCase() === colorSchema.toLowerCase();
   });
+  const termSourceDescriptor: ESTermSourceDescriptor = {
+    type: SOURCE_TYPES.ES_TERM_SOURCE,
+    id: joinId,
+    indexPatternId,
+    indexPatternTitle: indexPatternTitle ? indexPatternTitle : indexPatternId,
+    term: termsFieldName,
+    metrics: [metricsDescriptor],
+    applyGlobalQuery: true,
+    applyGlobalTime: true,
+  };
+  if (termsSize !== undefined) {
+    termSourceDescriptor.size = termsSize;
+  }
   return VectorLayer.createDescriptor({
     label,
     joins: [
       {
         leftField: leftFieldName,
-        right: {
-          type: SOURCE_TYPES.ES_TERM_SOURCE,
-          id: joinId,
-          indexPatternId,
-          indexPatternTitle: indexPatternTitle ? indexPatternTitle : indexPatternId,
-          term: termsFieldName,
-          metrics: [metricsDescriptor],
-          applyGlobalQuery: true,
-          applyGlobalTime: true,
-        },
+        right: termSourceDescriptor,
       },
     ],
     sourceDescriptor: EMSFileSource.createDescriptor({

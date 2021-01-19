@@ -37,8 +37,6 @@ export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
   schema: configSchema,
 };
 
-export { ValidationTelemetryServiceSetup } from './validation_telemetry';
-
 export {
   AbstractSearchStrategy,
   ReqFacade,

@@ -33,9 +33,16 @@
       },
       "technique": [
         {
-          "id": "T1166",
-          "name": "Setuid and Setgid",
-          "reference": "https://attack.mitre.org/techniques/T1166/"
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "reference": "https://attack.mitre.org/techniques/T1548/",
+          "subtechnique": [
+            {
+              "id": "T1548.001",
+              "name": "Setuid and Setgid",
+              "reference": "https://attack.mitre.org/techniques/T1548/001/"
+            }
+          ]
         }
       ]
     },
@@ -46,15 +53,9 @@
         "name": "Persistence",
         "reference": "https://attack.mitre.org/tactics/TA0003/"
       },
-      "technique": [
-        {
-          "id": "T1166",
-          "name": "Setuid and Setgid",
-          "reference": "https://attack.mitre.org/techniques/T1166/"
-        }
-      ]
+      "technique": []
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

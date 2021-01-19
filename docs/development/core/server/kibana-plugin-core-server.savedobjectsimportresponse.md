@@ -16,7 +16,7 @@ export interface SavedObjectsImportResponse
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [errors](./kibana-plugin-core-server.savedobjectsimportresponse.errors.md) | <code>SavedObjectsImportError[]</code> |  |
+|  [errors](./kibana-plugin-core-server.savedobjectsimportresponse.errors.md) | <code>SavedObjectsImportFailure[]</code> |  |
 |  [success](./kibana-plugin-core-server.savedobjectsimportresponse.success.md) | <code>boolean</code> |  |
 |  [successCount](./kibana-plugin-core-server.savedobjectsimportresponse.successcount.md) | <code>number</code> |  |
 |  [successResults](./kibana-plugin-core-server.savedobjectsimportresponse.successresults.md) | <code>SavedObjectsImportSuccess[]</code> |  |

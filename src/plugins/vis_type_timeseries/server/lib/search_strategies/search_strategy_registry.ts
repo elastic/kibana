@@ -24,7 +24,8 @@ import { DefaultSearchStrategy } from './strategies/default_search_strategy';
 import { extractIndexPatterns } from '../../../common/extract_index_patterns';
 
 export type RequestFacade = any;
-export type Panel = any;
+
+import { PanelSchema } from '../../../common/types';
 
 export class SearchStrategyRegistry {
   private strategies: AbstractSearchStrategy[] = [];
@@ -53,8 +54,8 @@ export class SearchStrategyRegistry {
     }
   }
 
-  async getViableStrategyForPanel(req: RequestFacade, panel: Panel) {
-    const indexPattern = extractIndexPatterns(panel).join(',');
+  async getViableStrategyForPanel(req: RequestFacade, panel: PanelSchema) {
+    const indexPattern = extractIndexPatterns(panel, panel.default_index_pattern).join(',');
 
     return this.getViableStrategy(req, indexPattern);
   }

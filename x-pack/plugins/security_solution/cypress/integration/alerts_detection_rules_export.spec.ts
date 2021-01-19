@@ -17,8 +17,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe.skip('Export rules', () => {
-  let ruleResponse: Cypress.Response;
+describe('Export rules', () => {
   beforeEach(() => {
     cleanKibana();
     cy.intercept(
@@ -28,16 +27,14 @@ describe.skip('Export rules', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule).then((response) => {
-      ruleResponse = response;
-    });
+    createCustomRule(newRule).as('ruleResponse');
   });
 
-  it('Exports a custom rule', () => {
+  it('Exports a custom rule', function () {
     goToManageAlertsDetectionRules();
     exportFirstRule();
     cy.wait('@export').then(({ response }) => {
-      cy.wrap(response!.body).should('eql', expectedExportedRule(ruleResponse));
+      cy.wrap(response!.body).should('eql', expectedExportedRule(this.ruleResponse));
     });
   });
 });

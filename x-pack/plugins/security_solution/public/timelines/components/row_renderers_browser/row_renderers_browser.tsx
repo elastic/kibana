@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem, EuiInMemoryTable } from '@elastic/eui';
+import { EuiCheckbox, EuiFlexItem, EuiInMemoryTable } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
-import { xor, xorBy } from 'lodash/fp';
+import { xor } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { RowRendererId } from '../../../../common/types/timeline';
@@ -76,101 +76,89 @@ const StyledNameButton = styled.button`
   text-align: left;
 `;
 
-const RowRenderersBrowserComponent = React.forwardRef(
-  ({ excludedRowRendererIds = [], setExcludedRowRendererIds }: RowRenderersBrowserProps, ref) => {
-    const notExcludedRowRenderers = useMemo(() => {
-      if (excludedRowRendererIds.length === Object.keys(RowRendererId).length) return [];
+const RowRenderersBrowserComponent = ({
+  excludedRowRendererIds = [],
+  setExcludedRowRendererIds,
+}: RowRenderersBrowserProps) => {
+  const handleNameClick = useCallback(
+    (item: RowRendererOption) => () => {
+      const newSelection = xor([item.id], excludedRowRendererIds);
 
-      return renderers.filter((renderer) => !excludedRowRendererIds.includes(renderer.id));
-    }, [excludedRowRendererIds]);
+      setExcludedRowRendererIds(newSelection);
+    },
+    [excludedRowRendererIds, setExcludedRowRendererIds]
+  );
 
-    const handleNameClick = useCallback(
-      (item: RowRendererOption) => () => {
-        const newSelection = xor([item], notExcludedRowRenderers);
-        // @ts-expect-error
-        ref?.current?.setSelection(newSelection);
-      },
-      [notExcludedRowRenderers, ref]
-    );
+  const nameColumnRenderCallback = useCallback(
+    (value, item) => (
+      <StyledNameButton className="kbn-resetFocusState" onClick={handleNameClick(item)}>
+        {value}
+      </StyledNameButton>
+    ),
+    [handleNameClick]
+  );
 
-    const nameColumnRenderCallback = useCallback(
-      (value, item) => (
-        <StyledNameButton className="kbn-resetFocusState" onClick={handleNameClick(item)}>
-          {value}
-        </StyledNameButton>
-      ),
-      [handleNameClick]
-    );
-
-    const columns = useMemo(
-      () => [
-        {
-          field: 'name',
-          name: 'Name',
-          sortable: true,
-          width: '10%',
-          render: nameColumnRenderCallback,
-        },
-        {
-          field: 'description',
-          name: 'Description',
-          width: '25%',
-          render: (description: React.ReactNode) => description,
-        },
-        {
-          field: 'example',
-          name: 'Example',
-          width: '65%',
-          render: ExampleWrapperComponent,
-        },
-        {
-          field: 'searchableDescription',
-          name: 'Searchable Description',
-          sortable: false,
-          width: '0px',
-          render: renderSearchableDescriptionNoop,
-        },
-      ],
-      [nameColumnRenderCallback]
-    );
-
-    const handleSelectable = useCallback(() => true, []);
-
-    const handleSelectionChange = useCallback(
-      (selection: RowRendererOption[]) => {
-        if (!selection || !selection.length)
-          return setExcludedRowRendererIds(Object.values(RowRendererId));
-
-        const excludedRowRenderers = xorBy('id', renderers, selection);
-
-        setExcludedRowRendererIds(excludedRowRenderers.map((rowRenderer) => rowRenderer.id));
-      },
-      [setExcludedRowRendererIds]
-    );
-
-    const selectionValue = useMemo(
-      () => ({
-        selectable: handleSelectable,
-        onSelectionChange: handleSelectionChange,
-        initialSelected: notExcludedRowRenderers,
-      }),
-      [handleSelectable, handleSelectionChange, notExcludedRowRenderers]
-    );
-
-    return (
-      <StyledEuiInMemoryTable
-        ref={ref}
-        items={renderers}
-        itemId="id"
-        columns={columns}
-        search={search}
-        sorting={initialSorting}
-        isSelectable={true}
-        selection={selectionValue}
+  const idColumnRenderCallback = useCallback(
+    (_, item) => (
+      <EuiCheckbox
+        id={item.id}
+        onChange={handleNameClick(item)}
+        checked={!excludedRowRendererIds.includes(item.id)}
       />
-    );
-  }
-);
+    ),
+    [excludedRowRendererIds, handleNameClick]
+  );
+
+  const columns = useMemo(
+    () => [
+      {
+        field: 'id',
+        name: '',
+        sortable: false,
+        width: '32px',
+        render: idColumnRenderCallback,
+      },
+      {
+        field: 'name',
+        name: 'Name',
+        sortable: true,
+        width: '10%',
+        render: nameColumnRenderCallback,
+      },
+      {
+        field: 'description',
+        name: 'Description',
+        width: '25%',
+        render: (description: React.ReactNode) => description,
+      },
+      {
+        field: 'example',
+        name: 'Example',
+        width: '65%',
+        render: ExampleWrapperComponent,
+      },
+      {
+        field: 'searchableDescription',
+        name: 'Searchable Description',
+        sortable: false,
+        width: '0px',
+        render: renderSearchableDescriptionNoop,
+      },
+    ],
+    [idColumnRenderCallback, nameColumnRenderCallback]
+  );
+
+  return (
+    <StyledEuiInMemoryTable
+      items={renderers}
+      itemId="id"
+      columns={columns}
+      search={search}
+      sorting={initialSorting}
+      isSelectable={true}
+    />
+  );
+};
 
 RowRenderersBrowserComponent.displayName = 'RowRenderersBrowserComponent';
 

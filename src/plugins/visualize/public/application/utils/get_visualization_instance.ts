@@ -71,8 +71,14 @@ export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
   input: VisualizeInput
 ) => {
-  const { visualizations } = visualizeServices;
+  const { visualizations, savedVisualizations } = visualizeServices;
   const visState = input.savedVis as SerializedVis;
+
+  /**
+   * A saved vis is needed even in by value mode to support 'save to library' which converts the 'by value'
+   * state of the visualization, into a new saved object.
+   */
+  const savedVis: VisSavedObject = await savedVisualizations.get();
   let vis = await visualizations.createVis(visState.type, cloneDeep(visState));
   if (vis.type.setup) {
     try {
@@ -87,6 +93,7 @@ export const getVisualizationInstanceFromInput = async (
   );
   return {
     vis,
+    savedVis,
     embeddableHandler,
     savedSearch,
   };

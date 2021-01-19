@@ -908,8 +908,7 @@ describe('migration actions', () => {
     });
   });
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/87160
-  describe.skip('createIndex', () => {
+  describe('createIndex', () => {
     afterAll(async () => {
       await client.indices.delete({ index: 'yellow_then_green_index' });
     });
@@ -936,6 +935,7 @@ describe('migration actions', () => {
 
       setTimeout(() => {
         client.indices.putSettings({
+          index: 'yellow_then_green_index',
           body: {
             index: {
               number_of_replicas: 0,

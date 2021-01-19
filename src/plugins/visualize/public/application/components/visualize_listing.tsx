@@ -45,7 +45,7 @@ export const VisualizeListing = () => {
       savedVisualizations,
       toastNotifications,
       visualizations,
-      embeddable,
+      stateTransferService,
       savedObjects,
       savedObjectsPublic,
       savedObjectsTagging,
@@ -74,7 +74,7 @@ export const VisualizeListing = () => {
 
   useMount(() => {
     // Reset editor state if the visualize listing page is loaded.
-    embeddable.getStateTransfer().clearEditorState();
+    stateTransferService.clearEditorState();
     chrome.setBreadcrumbs([
       {
         text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {

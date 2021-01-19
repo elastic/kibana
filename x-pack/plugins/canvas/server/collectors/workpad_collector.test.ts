@@ -6,7 +6,7 @@
 
 import { cloneDeep } from 'lodash';
 import { summarizeWorkpads } from './workpad_collector';
-import { workpads } from '../../__tests__/fixtures/workpads';
+import { workpads } from '../../__fixtures__/workpads';
 
 describe('usage collector handle es response data', () => {
   it('should summarize workpads, pages, and elements', () => {

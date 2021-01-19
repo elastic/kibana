@@ -28,6 +28,7 @@ import { createQueryStateObservable } from './state_sync/create_global_query_obs
 import { QueryStringManager, QueryStringContract } from './query_string';
 import { buildEsQuery, getEsQueryConfig } from '../../common';
 import { getUiSettings } from '../services';
+import { NowProviderInternalContract } from '../now_provider';
 import { IndexPattern } from '..';
 
 /**
@@ -38,6 +39,7 @@ import { IndexPattern } from '..';
 interface QueryServiceSetupDependencies {
   storage: IStorageWrapper;
   uiSettings: IUiSettingsClient;
+  nowProvider: NowProviderInternalContract;
 }
 
 interface QueryServiceStartDependencies {
@@ -53,10 +55,10 @@ export class QueryService {
 
   state$!: ReturnType<typeof createQueryStateObservable>;
 
-  public setup({ storage, uiSettings }: QueryServiceSetupDependencies) {
+  public setup({ storage, uiSettings, nowProvider }: QueryServiceSetupDependencies) {
     this.filterManager = new FilterManager(uiSettings);
 
-    const timefilterService = new TimefilterService();
+    const timefilterService = new TimefilterService(nowProvider);
     this.timefilter = timefilterService.setup({
       uiSettings,
       storage,

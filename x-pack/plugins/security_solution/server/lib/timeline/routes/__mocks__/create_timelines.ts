@@ -212,6 +212,6 @@ export const mockTimeline = {
   templateTimelineId: null,
   dateRange: { start: '2020-11-03T13:34:40.339Z', end: '2020-11-04T13:34:40.339Z' },
   savedQueryId: null,
-  sort: { columnId: '@timestamp', sortDirection: 'desc' },
+  sort: { columnId: '@timestamp', columnType: 'number', sortDirection: 'desc' },
   status: 'draft',
 };
