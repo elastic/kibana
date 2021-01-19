@@ -16,22 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+import { services } from '../../services';
+import { pageObjects } from '../../page_objects';
 
-// @ts-expect-error
-import stubbedLogstashFields from './logstash_fields';
-
-const mockLogstashFields = stubbedLogstashFields();
-
-export function stubbedSavedObjectIndexPattern(id: string | null = null) {
-  return {
-    id,
-    type: 'index-pattern',
-    attributes: {
-      timeFieldName: 'timestamp',
-      customFormats: {},
-      fields: mockLogstashFields,
-      title: 'title',
-    },
-    version: '2',
-  };
-}
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

@@ -22,10 +22,10 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
-import { DiscoverFieldDetails } from './discover_field_details';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../data/public';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
+import { DiscoverFieldDetailsFooter } from './discover_field_details_footer';
 
 const indexPattern = getStubIndexPattern(
   'logstash-*',
@@ -35,19 +35,20 @@ const indexPattern = getStubIndexPattern(
   coreMock.createSetup()
 );
 
-describe('discover sidebar field details', function () {
+describe('discover sidebar field details footer', function () {
+  const onAddFilter = jest.fn();
   const defaultProps = {
     indexPattern,
     details: { buckets: [], error: '', exists: 1, total: 2, columns: [] },
-    onAddFilter: jest.fn(),
+    onAddFilter,
   };
 
   function mountComponent(field: IndexPatternField) {
     const compProps = { ...defaultProps, field };
-    return mountWithIntl(<DiscoverFieldDetails {...compProps} />);
+    return mountWithIntl(<DiscoverFieldDetailsFooter {...compProps} />);
   }
 
-  it('should enable the visualize link for a number field', function () {
+  it('renders properly', function () {
     const visualizableField = new IndexPatternField({
       name: 'bytes',
       type: 'number',
@@ -58,37 +59,24 @@ describe('discover sidebar field details', function () {
       aggregatable: true,
       readFromDocValues: true,
     });
-    const comp = mountComponent(visualizableField);
-    expect(findTestSubject(comp, 'fieldVisualize-bytes')).toBeTruthy();
+    const component = mountComponent(visualizableField);
+    expect(component).toMatchSnapshot();
   });
 
-  it('should disable the visualize link for an _id field', function () {
-    const conflictField = new IndexPatternField({
-      name: '_id',
-      type: 'string',
-      esTypes: ['_id'],
-      count: 0,
+  it('click on addFilter calls the function', function () {
+    const visualizableField = new IndexPatternField({
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
       scripted: false,
       searchable: true,
       aggregatable: true,
       readFromDocValues: true,
     });
-    const comp = mountComponent(conflictField);
-    expect(findTestSubject(comp, 'fieldVisualize-_id')).toEqual({});
-  });
-
-  it('should disable the visualize link for an unknown field', function () {
-    const unknownField = new IndexPatternField({
-      name: 'test',
-      type: 'unknown',
-      esTypes: ['double'],
-      count: 0,
-      scripted: false,
-      searchable: true,
-      aggregatable: true,
-      readFromDocValues: true,
-    });
-    const comp = mountComponent(unknownField);
-    expect(findTestSubject(comp, 'fieldVisualize-test')).toEqual({});
+    const component = mountComponent(visualizableField);
+    const onAddButton = findTestSubject(component, 'onAddFilterButton');
+    onAddButton.simulate('click');
+    expect(onAddFilter).toHaveBeenCalledWith('_exists_', visualizableField.name, '+');
   });
 });

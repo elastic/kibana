@@ -82,7 +82,7 @@ function getComponent({
   const props = {
     indexPattern,
     field: finalField,
-    getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: true, columns: [] })),
+    getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2, columns: [] })),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
