@@ -4,84 +4,86 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { fetchAllFromScroll } from './fetch_all_from_scroll';
-import { set } from '@elastic/safer-lodash-set';
 
 describe('fetch_all_from_scroll', () => {
-  let mockResponse;
-  let stubCallWithRequest;
+  let mockScopedClusterClient;
 
   beforeEach(() => {
-    mockResponse = {};
+    mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
 
-    stubCallWithRequest = jest.fn();
-
-    // TODO: That mocking needs to be migrated to jest
-    // stubCallWithRequest.onCall(0).returns(
-    //   new Promise((resolve) => {
-    //     const mockInnerResponse = {
-    //       hits: {
-    //         hits: ['newhit'],
-    //       },
-    //       _scroll_id: 'newScrollId',
-    //     };
-    //     return resolve(mockInnerResponse);
-    //   })
-    // );
-    //
-    // stubCallWithRequest.onCall(1).returns(
-    //   new Promise((resolve) => {
-    //     const mockInnerResponse = {
-    //       hits: {
-    //         hits: [],
-    //       },
-    //     };
-    //     return resolve(mockInnerResponse);
-    //   })
-    // );
+    elasticsearchServiceMock
+      .createLegacyClusterClient()
+      .asScoped.mockReturnValue(mockScopedClusterClient);
   });
 
   describe('#fetchAllFromScroll', () => {
     describe('when the passed-in response has no hits', () => {
-      beforeEach(() => {
-        set(mockResponse, 'hits.hits', []);
-      });
+      const mockSearchResults = {
+        hits: {
+          hits: [],
+        },
+      };
 
       it('should return an empty array of hits', () => {
-        return fetchAllFromScroll(mockResponse).then((hits) => {
+        return fetchAllFromScroll(mockSearchResults).then((hits) => {
           expect(hits).toEqual([]);
         });
       });
 
       it('should not call callWithRequest', () => {
-        return fetchAllFromScroll(mockResponse, stubCallWithRequest).then(() => {
-          expect(stubCallWithRequest).not.toHaveBeenCalled();
+        return fetchAllFromScroll(mockSearchResults, mockScopedClusterClient).then(() => {
+          expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
         });
       });
     });
 
-    // TODO: tests were not running and are not up to date
-    describe.skip('when the passed-in response has some hits', () => {
+    describe('when the passed-in response has some hits', () => {
+      const mockInitialSearchResults = {
+        hits: {
+          hits: ['foo', 'bar'],
+        },
+        _scroll_id: 'originalScrollId',
+      };
+
       beforeEach(() => {
-        set(mockResponse, 'hits.hits', ['foo', 'bar']);
-        set(mockResponse, '_scroll_id', 'originalScrollId');
+        const mockResponse1 = {
+          hits: {
+            hits: ['newHit'],
+          },
+          _scroll_id: 'newScrollId',
+        };
+
+        const mockResponse2 = {
+          hits: {
+            hits: [],
+          },
+        };
+
+        mockScopedClusterClient.callAsCurrentUser
+          .mockReturnValueOnce(Promise.resolve(mockResponse1))
+          .mockReturnValueOnce(Promise.resolve(mockResponse2));
       });
 
       it('should return the hits from the response', () => {
-        return fetchAllFromScroll(mockResponse, stubCallWithRequest).then((hits) => {
-          expect(hits).toEqual(['foo', 'bar', 'newhit']);
-        });
+        return fetchAllFromScroll(mockInitialSearchResults, mockScopedClusterClient).then(
+          (hits) => {
+            expect(hits).toEqual(['foo', 'bar', 'newHit']);
+          }
+        );
       });
 
       it('should call callWithRequest', () => {
-        return fetchAllFromScroll(mockResponse, stubCallWithRequest).then(() => {
-          expect(stubCallWithRequest.calledTwice).toBe(true);
+        return fetchAllFromScroll(mockInitialSearchResults, mockScopedClusterClient).then(() => {
+          expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(2);
 
-          const firstCallWithRequestCallArgs = stubCallWithRequest.args[0];
-          expect(firstCallWithRequestCallArgs[1].body.scroll_id).toEqual('originalScrollId');
-
-          const secondCallWithRequestCallArgs = stubCallWithRequest.args[1];
-          expect(secondCallWithRequestCallArgs[1].body.scroll_id).toEqual('newScrollId');
+          expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenNthCalledWith(1, 'scroll', {
+            body: { scroll: '30s', scroll_id: 'originalScrollId' },
+          });
+          expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenNthCalledWith(2, 'scroll', {
+            body: { scroll: '30s', scroll_id: 'newScrollId' },
+          });
         });
       });
     });

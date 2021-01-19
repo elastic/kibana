@@ -203,7 +203,7 @@ export const ActionTypeForm = ({
                   >
                     <FormattedMessage
                       id="xpack.triggersActionsUI.sections.alertForm.actionRunWhenInActionGroup"
-                      defaultMessage="Run When"
+                      defaultMessage="Run when"
                     />
                   </EuiFormLabel>
                 }

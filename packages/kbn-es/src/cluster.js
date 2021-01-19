@@ -257,8 +257,9 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
+    const esArgs = ['indices.query.bool.max_nested_depth=100'].concat(options.esArgs || []);
+
     // Add to esArgs if ssl is enabled
-    const esArgs = [].concat(options.esArgs || []);
     if (this._ssl) {
       esArgs.push('xpack.security.http.ssl.enabled=true');
       esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);

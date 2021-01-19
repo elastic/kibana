@@ -24,7 +24,7 @@ const ciStats = require('./ci_stats');
       branch: process.env.GIT_BRANCH.replace(/^(refs\/heads\/|origin\/)/, ''),
       commit: process.env.GIT_COMMIT,
       targetBranch: process.env.GITHUB_PR_TARGET_BRANCH || null,
-      mergeBase: null, // TODO
+      mergeBase: process.env.GITHUB_PR_MERGE_BASE || null,
     });
   } catch (ex) {
     console.error(ex);

@@ -6,13 +6,14 @@
 
 import { resetContext } from 'kea';
 
-jest.mock('../../../shared/http', () => ({ HttpLogic: { values: { http: { get: jest.fn() } } } }));
-import { HttpLogic } from '../../../shared/http';
+import { mockHttpValues } from '../../../__mocks__';
 
 import { mockOverviewValues } from './__mocks__';
 import { OverviewLogic } from './overview_logic';
 
 describe('OverviewLogic', () => {
+  const { http } = mockHttpValues;
+
   beforeEach(() => {
     jest.clearAllMocks();
     resetContext({});
@@ -65,7 +66,7 @@ describe('OverviewLogic', () => {
 
       await OverviewLogic.actions.initializeOverview();
 
-      expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/workplace_search/overview');
+      expect(http.get).toHaveBeenCalledWith('/api/workplace_search/overview');
       expect(setServerDataSpy).toHaveBeenCalled();
     });
   });

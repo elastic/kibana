@@ -6,7 +6,8 @@
 
 import * as rt from 'io-ts';
 import stringify from 'json-stable-stringify';
-import { JsonValue, jsonValueRT } from '../../common/typed_json';
+import { JsonValue } from '../../../../../src/plugins/kibana_utils/common';
+import { jsonValueRT } from '../../common/typed_json';
 import { SearchStrategyError } from '../../common/search_strategies/common/errors';
 import { ShardFailure } from './elasticsearch_runtime_types';
 
