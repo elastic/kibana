@@ -76,6 +76,7 @@ export const getEventHandlers = ({ nonSerializableInstances }) => {
 };
 
 export function getChartsPaletteServiceGetColor({ nonSerializableInstances }) {
+  console.log('getChartsPaletteServiceGetColor', nonSerializableInstances);
   return nonSerializableInstances.chartsPaletteServiceGetColor;
 }
 

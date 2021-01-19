@@ -15,7 +15,12 @@ import {
   getPercentilesMbColorRampStops,
   getColorPalette,
 } from '../../color_palettes';
-import { COLOR_MAP_TYPE, DATA_MAPPING_FUNCTION } from '../../../../../common/constants';
+import {
+  COLOR_MAP_TYPE,
+  DATA_MAPPING_FUNCTION,
+  FieldFormatter,
+  VECTOR_STYLES,
+} from '../../../../../common/constants';
 import {
   isCategoricalStopsInvalid,
   getOtherCategoryLabel,
@@ -25,6 +30,8 @@ import { Break, BreakedLegend } from '../components/legend/breaked_legend';
 import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
 import { LegendProps } from './style_property';
 import { getOrdinalSuffix } from '../../../util/ordinal_suffix';
+import { IField } from '../../../fields/field';
+import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 
 const UP_TO = i18n.translate('xpack.maps.legend.upto', {
   defaultMessage: 'up to',
@@ -36,7 +43,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   private readonly _chartsPaletteServiceGetColor?: (value: string) => string | null;
 
   constructor(
-    options: SizeDynamicOptions,
+    options: ColorDynamicOptions,
     styleName: VECTOR_STYLES,
     field: IField | null,
     vectorLayer: IVectorLayer,
@@ -405,8 +412,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   _getCategoricalBreaks(symbolId?: string): Break[] {
     const breaks: Break[] = [];
     const { stops, defaultColor } = this._getColorPaletteStops();
-    stops.forEach(({ stop, color }: { stop: string | number | null; color: string }) => {
-      if (stop !== null) {
+    stops.forEach(({ stop, color }: { stop: string | number | null; color: string | null }) => {
+      if (stop !== null && color != null) {
         breaks.push({
           color,
           symbolId,

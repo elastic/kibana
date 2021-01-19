@@ -86,7 +86,7 @@ export const getIsAllowByValueEmbeddables = () =>
 export async function getChartsPaletteServiceGetColor(): Promise<
   ((value: string) => string) | null
 > {
-  const paletteRegistry: PaletteRegistry = pluginsStart.charts
+  const paletteRegistry: PaletteRegistry | null = pluginsStart.charts
     ? await pluginsStart.charts.palettes.getPalettes()
     : null;
   if (!paletteRegistry) {

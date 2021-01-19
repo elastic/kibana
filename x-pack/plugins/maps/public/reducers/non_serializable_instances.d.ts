@@ -62,7 +62,7 @@ export function getChartsPaletteServiceGetColor(
 ): (value: string) => string | null;
 
 export function setChartsPaletteServiceGetColor(
-  chartsPaletteServiceGetColor: (value: string) => string | null
+  chartsPaletteServiceGetColor: ((value: string) => string) | null
 ): AnyAction;
 
 export function cancelRequest(requestToken?: symbol): AnyAction;

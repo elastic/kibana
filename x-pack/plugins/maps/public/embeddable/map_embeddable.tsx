@@ -265,7 +265,7 @@ export class MapEmbeddable
     );
   }
 
-  async _dispatchSetChartsPaletteServiceGetColor(syncColors: boolean) {
+  async _dispatchSetChartsPaletteServiceGetColor(syncColors?: boolean) {
     this._prevSyncColors = syncColors;
     const chartsPaletteServiceGetColor = syncColors
       ? await getChartsPaletteServiceGetColor()
