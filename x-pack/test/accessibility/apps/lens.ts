@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('lens chart', async () => {
+    it('lens XY chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
 
@@ -51,6 +51,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'AvgTicketPrice',
       });
 
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens pie chart', async () => {
+      await PageObjects.lens.switchToVisualization('pie');
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens datatable', async () => {
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens metric chart', async () => {
+      await PageObjects.lens.switchToVisualization('lnsMetric');
       await a11y.testAppSnapshot();
     });
 
@@ -87,6 +102,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await testSubjects.click('lnsSuggestion-barChart > lnsSuggestion');
+      await a11y.testAppSnapshot();
+    });
+
+    // Skip until https://github.com/elastic/kibana/issues/88661 gets closed
+    it.skip('lens XY chart with multiple layers', async () => {
+      await PageObjects.lens.createLayer();
+
+      await PageObjects.lens.switchToVisualization('area');
+      await PageObjects.lens.configureDimension(
+        {
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'terms',
+          field: 'DestCityName',
+        },
+        1
+      );
+
+      await PageObjects.lens.configureDimension(
+        {
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'median',
+          field: 'FlightTimeMin',
+        },
+        1
+      );
       await a11y.testAppSnapshot();
     });
 
