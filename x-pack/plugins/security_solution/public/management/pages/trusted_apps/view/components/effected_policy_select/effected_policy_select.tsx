@@ -46,17 +46,27 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     });
 
     const selectableOptions: EffectedPolicyOption[] = useMemo(() => {
-      // FIXME:PT temporary for testing only
-      const tempOptions = Array.from({ length: 30 }, (_, i) => ({
-        name: `policy ${i + 1}`,
-      }));
-      options;
-      return tempOptions.map((policy) => ({ label: policy.name, policy }));
-    }, [options]);
+      const isPolicySelected = selected.reduce<{ [K: string]: PolicyData }>(
+        (idToPolicyData, policy) => {
+          idToPolicyData[policy.id] = policy;
+          return idToPolicyData;
+        },
+        {}
+      );
 
-    const handleOnPolicySelectChange: EuiSelectableProps['onChange'] = useCallback(
-      (changedOptions) => {
-        console.log('handleOnPolicySelectChange triggered');
+      return options.map<EffectedPolicyOption>((policy) => ({
+        label: policy.name,
+        policy,
+        checked: isPolicySelected[policy.id] ? 'on' : undefined,
+      }));
+    }, [options, selected]);
+
+    const handleOnPolicySelectChange: EuiSelectableProps<OptionPolicyData>['onChange'] = useCallback(
+      (currentOptions) => {
+        setSelectionState((prevState) => ({
+          ...prevState,
+          selected: currentOptions.filter((opt) => opt.checked).map((opt) => opt.policy),
+        }));
       },
       []
     );
