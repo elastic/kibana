@@ -8,12 +8,11 @@ import { errors } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { SecurityRequestHandlerContext, SecurityPluginRouter } from '../../types';
 import {
   Headers,
-  IRouter,
   kibanaResponseFactory,
   RequestHandler,
-  RequestHandlerContext,
   RouteConfig,
 } from '../../../../../../src/core/server';
 import { AuthenticationResult, AuthenticationServiceStart } from '../../authentication';
@@ -27,12 +26,12 @@ import { routeDefinitionParamsMock } from '../index.mock';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 
 describe('Change password', () => {
-  let router: jest.Mocked<IRouter>;
+  let router: jest.Mocked<SecurityPluginRouter>;
   let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
-  let routeHandler: RequestHandler<any, any, any>;
+  let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
   let routeConfig: RouteConfig<any, any, any, any>;
-  let mockContext: DeeplyMockedKeys<RequestHandlerContext>;
+  let mockContext: DeeplyMockedKeys<SecurityRequestHandlerContext>;
 
   function checkPasswordChangeAPICall(username: string, headers?: Headers) {
     expect(
