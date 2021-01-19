@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useCallback, useState } from 'react';
+import React, { FC, useEffect, useCallback, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -50,16 +50,16 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
   const [closeJobModalVisible, setCloseJobModalVisible] = useState<ModelSnapshot | null>(null);
   const [combinedJobState, setCombinedJobState] = useState<COMBINED_JOB_STATE | null>(null);
 
-  let unmounted = false;
+  const isMounted = useRef(true);
   useEffect(() => {
     loadModelSnapshots();
     return () => {
-      unmounted = true;
+      isMounted.current = false;
     };
   }, []);
 
   async function loadModelSnapshots() {
-    if (unmounted === true) {
+    if (isMounted.current === false) {
       // table refresh can be triggered a while after a snapshot revert has been triggered.
       // ensure the table is still visible before attempted to refresh it.
       return;
