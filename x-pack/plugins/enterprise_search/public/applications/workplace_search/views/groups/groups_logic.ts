@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { HttpLogic } from '../../../shared/http';
 
 import {
-  FlashMessagesLogic,
+  clearFlashMessages,
   flashAPIErrors,
   setSuccessMessage,
 } from '../../../shared/flash_messages';
@@ -339,16 +339,16 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
       actions.getSearchResults();
     },
     openNewGroupModal: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     resetGroupsFilters: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     toggleFilterSourcesDropdown: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     toggleFilterUsersDropdown: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });

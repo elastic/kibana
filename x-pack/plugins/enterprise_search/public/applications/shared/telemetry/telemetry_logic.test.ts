@@ -7,14 +7,13 @@
 import { resetContext } from 'kea';
 
 import { JSON_HEADER as headers } from '../../../../common/constants';
-import { mockHttpValues } from '../../__mocks__';
-jest.mock('../http', () => ({
-  HttpLogic: { values: { http: mockHttpValues.http } },
-}));
+import { mockHttpValues } from '../../__mocks__/http_logic.mock';
 
 import { TelemetryLogic } from './';
 
 describe('Telemetry logic', () => {
+  const { http } = mockHttpValues;
+
   beforeEach(() => {
     jest.clearAllMocks();
     resetContext({});
@@ -29,14 +28,14 @@ describe('Telemetry logic', () => {
         product: 'enterprise_search',
       });
 
-      expect(mockHttpValues.http.put).toHaveBeenCalledWith('/api/enterprise_search/stats', {
+      expect(http.put).toHaveBeenCalledWith('/api/enterprise_search/stats', {
         headers,
         body: '{"product":"enterprise_search","action":"viewed","metric":"setup_guide"}',
       });
     });
 
     it('throws an error if the telemetry endpoint fails', async () => {
-      mockHttpValues.http.put.mockImplementationOnce(() => Promise.reject());
+      http.put.mockImplementationOnce(() => Promise.reject());
 
       // To capture thrown errors, we have to call the listener fn directly
       // instead of using `TelemetryLogic.actions.sendTelemetry` - this is
