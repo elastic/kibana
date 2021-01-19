@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    crossClusterReplication?: CrossClusterReplicationContext;
-  }
-}
-
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +14,6 @@ import {
   Logger,
   PluginInitializerContext,
   LegacyAPICaller,
-  ILegacyScopedClusterClient,
 } from 'src/core/server';
 
 import { Index } from '../../index_management/server';
@@ -32,10 +25,6 @@ import { elasticsearchJsPlugin } from './client/elasticsearch_ccr';
 import { CrossClusterReplicationConfig } from './config';
 import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
-
-interface CrossClusterReplicationContext {
-  client: ILegacyScopedClusterClient;
-}
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
   const [core] = await getStartServices();
