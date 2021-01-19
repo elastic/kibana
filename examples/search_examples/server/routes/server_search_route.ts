@@ -17,13 +17,16 @@
  * under the License.
  */
 
-import { PluginStart as DataPluginStart, IEsSearchRequest } from 'src/plugins/data/server';
+import { IEsSearchRequest } from 'src/plugins/data/server';
 import { schema } from '@kbn/config-schema';
 import { IEsSearchResponse } from 'src/plugins/data/common';
+import type { DataApiRequestHandlerContext } from 'src/plugins/data/server';
 import { IRouter } from '../../../../src/core/server';
 import { SERVER_SEARCH_ROUTE_PATH } from '../../common';
 
-export function registerServerSearchRoute(router: IRouter, data: DataPluginStart) {
+export function registerServerSearchRoute(
+  router: IRouter<{ search: DataApiRequestHandlerContext }>
+) {
   router.get(
     {
       path: SERVER_SEARCH_ROUTE_PATH,
