@@ -43,7 +43,7 @@ export const i18nTexts = {
     indexPriorityFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.indexPriorityLabel',
       {
-        defaultMessage: 'Index priority (optional)',
+        defaultMessage: 'Index priority',
       }
     ),
     bestCompressionFieldLabel: i18n.translate(
