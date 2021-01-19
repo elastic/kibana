@@ -19,7 +19,6 @@
 
 import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
-import image from './expressions.png';
 import { ExpressionsSetup, ExpressionsStart } from '../../../src/plugins/expressions/public';
 import {
   Setup as InspectorSetup,
@@ -80,8 +79,7 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
     deps.developerExamples.register({
       appId: 'expressionsExplorer',
       title: 'Expressions',
-      description: `Expressions are ...`,
-      image,
+      description: `Expressions is a plugin that allows to execute Kibana expressions and render content using expression renderers. This example plugin showcases various usage scenarios.`,
       links: [
         {
           label: 'README',
