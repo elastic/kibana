@@ -28,7 +28,9 @@ import {
   SwitchOption,
   RangeOption,
 } from '../../../vis_default_editor/public';
-import { WmsOptions, TileMapVisParams, MapTypes } from '../../../maps_legacy/public';
+import { WmsOptions } from '../../../maps_legacy/public';
+import { TileMapVisParams } from '../types';
+import { MapTypes } from '../utils/map_types';
 
 export type TileMapOptionsProps = VisOptionsProps<TileMapVisParams>;
 
@@ -102,4 +104,6 @@ function TileMapOptions(props: TileMapOptionsProps) {
   );
 }
 
-export { TileMapOptions };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TileMapOptions as default };

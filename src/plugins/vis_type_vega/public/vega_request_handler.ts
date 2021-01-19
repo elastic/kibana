@@ -32,6 +32,7 @@ interface VegaRequestHandlerParams {
   filters: Filter;
   timeRange: TimeRange;
   visParams: VisParams;
+  searchSessionId?: string;
 }
 
 interface VegaRequestHandlerContext {
@@ -52,6 +53,7 @@ export function createVegaRequestHandler(
     filters,
     query,
     visParams,
+    searchSessionId,
   }: VegaRequestHandlerParams) {
     if (!searchAPI) {
       searchAPI = new SearchAPI(
@@ -61,7 +63,8 @@ export function createVegaRequestHandler(
           injectedMetadata: getInjectedMetadata(),
         },
         context.abortSignal,
-        context.inspectorAdapters
+        context.inspectorAdapters,
+        searchSessionId
       );
     }
 

@@ -385,7 +385,7 @@ export const ConnectorEditFlyout = ({
                     >
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.editConnectorForm.saveAndCloseButtonLabel"
-                        defaultMessage="Save & Close"
+                        defaultMessage="Save & close"
                       />
                     </EuiButton>
                   </EuiFlexItem>

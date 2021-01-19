@@ -3,26 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Fit } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
 import { EuiTheme } from '../../../observability/public';
 import { asDuration } from '../../common/utils/formatters';
-import {
-  Coordinate,
-  RectCoordinate,
-  TimeSeries,
-} from '../../typings/timeseries';
+import { APMChartSpec, Coordinate } from '../../typings/timeseries';
 import { APIReturnType } from '../services/rest/createCallApmApi';
 
 export type LatencyChartsResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
 
-interface LatencyChart {
-  latencyTimeseries: Array<TimeSeries<Coordinate>>;
+interface LatencyChartData {
+  latencyTimeseries: Array<APMChartSpec<Coordinate>>;
   mlJobId?: string;
-  anomalyTimeseries?: {
-    bounderies: TimeSeries;
-    scores: TimeSeries;
-  };
+  anomalyTimeseries?: { boundaries: APMChartSpec[]; scores: APMChartSpec };
 }
 
 export function getLatencyChartSelector({
@@ -33,7 +27,7 @@ export function getLatencyChartSelector({
   latencyChart?: LatencyChartsResponse;
   theme: EuiTheme;
   latencyAggregationType?: string;
-}): LatencyChart {
+}): LatencyChartData {
   if (!latencyChart?.latencyTimeseries || !latencyAggregationType) {
     return {
       latencyTimeseries: [],
@@ -48,7 +42,7 @@ export function getLatencyChartSelector({
       latencyAggregationType,
     }),
     mlJobId: latencyChart.anomalyTimeseries?.jobId,
-    anomalyTimeseries: getAnnomalyTimeseries({
+    anomalyTimeseries: getAnomalyTimeseries({
       anomalyTimeseries: latencyChart.anomalyTimeseries,
       theme,
     }),
@@ -114,45 +108,57 @@ function getLatencyTimeseries({
   return [];
 }
 
-function getAnnomalyTimeseries({
+function getAnomalyTimeseries({
   anomalyTimeseries,
   theme,
 }: {
   anomalyTimeseries: LatencyChartsResponse['anomalyTimeseries'];
   theme: EuiTheme;
-}) {
-  if (anomalyTimeseries) {
-    return {
-      bounderies: getAnomalyBoundariesSeries(
-        anomalyTimeseries.anomalyBoundaries,
-        theme
-      ),
-      scores: getAnomalyScoreSeries(anomalyTimeseries.anomalyScore, theme),
-    };
+}): { boundaries: APMChartSpec[]; scores: APMChartSpec } | undefined {
+  if (!anomalyTimeseries) {
+    return undefined;
   }
-}
 
-export function getAnomalyScoreSeries(data: RectCoordinate[], theme: EuiTheme) {
-  return {
-    title: i18n.translate('xpack.apm.transactions.chart.anomalyScoreLabel', {
-      defaultMessage: 'Anomaly score',
-    }),
-    data,
+  const boundariesConfigBase = {
+    type: 'area',
+    fit: Fit.Lookahead,
+    hideLegend: true,
+    hideTooltipValue: true,
+    stackAccessors: ['y'],
+    areaSeriesStyle: {
+      point: {
+        opacity: 0,
+      },
+    },
+  };
+
+  const boundaries = [
+    {
+      ...boundariesConfigBase,
+      title: 'anomalyBoundariesLower',
+      data: anomalyTimeseries.anomalyBoundaries.map((coord) => ({
+        x: coord.x,
+        y: coord.y0,
+      })),
+      color: rgba(0, 0, 0, 0),
+    },
+    {
+      ...boundariesConfigBase,
+      title: 'anomalyBoundariesUpper',
+      data: anomalyTimeseries.anomalyBoundaries.map((coord) => ({
+        x: coord.x,
+        y: coord.y - coord.y0,
+      })),
+      color: rgba(theme.eui.euiColorVis1, 0.5),
+    },
+  ];
+
+  const scores = {
+    title: 'anomalyScores',
     type: 'rectAnnotation',
+    data: anomalyTimeseries.anomalyScore,
     color: theme.eui.euiColorVis9,
   };
-}
 
-function getAnomalyBoundariesSeries(data: Coordinate[], theme: EuiTheme) {
-  return {
-    title: i18n.translate(
-      'xpack.apm.transactions.chart.anomalyBoundariesLabel',
-      {
-        defaultMessage: 'Anomaly Boundaries',
-      }
-    ),
-    data,
-    type: 'area',
-    color: rgba(theme.eui.euiColorVis1, 0.5),
-  };
+  return { boundaries, scores };
 }

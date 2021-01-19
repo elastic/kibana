@@ -284,5 +284,12 @@ export const visPayloadSchema = schema.object({
     min: stringRequired,
     max: stringRequired,
   }),
-  sessionId: schema.maybe(schema.string()),
+
+  searchSession: schema.maybe(
+    schema.object({
+      sessionId: schema.string(),
+      isRestore: schema.boolean({ defaultValue: false }),
+      isStored: schema.boolean({ defaultValue: false }),
+    })
+  ),
 });

@@ -24,6 +24,7 @@ interface Props {
   params?: Record<string, string | number | boolean | undefined>;
   showCount?: boolean;
   children?: React.ReactNode;
+  shouldFetch?: boolean;
 }
 
 const ButtonWrapper = styled.div`
@@ -36,11 +37,13 @@ function LocalUIFilters({
   filterNames,
   children,
   showCount = true,
+  shouldFetch = true,
 }: Props) {
   const { filters, setFilterValue, clearValues } = useLocalUIFilters({
     filterNames,
     projection,
     params,
+    shouldFetch,
   });
 
   const hasValues = filters.some((filter) => filter.value.length > 0);

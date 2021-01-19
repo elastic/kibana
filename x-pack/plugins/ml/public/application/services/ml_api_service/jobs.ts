@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import { HttpService } from '../http_service';
 
 import { basePath } from './index';
@@ -23,6 +24,7 @@ import {
 } from '../../../../common/types/categories';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/categorization_job';
 import { Category } from '../../../../common/types/categories';
+import { JobsExistResponse } from '../../../../common/types/job_service';
 
 export const jobsApiProvider = (httpService: HttpService) => ({
   jobsSummary(jobIds: string[]) {
@@ -138,9 +140,18 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  jobsExist(jobIds: string[]) {
-    const body = JSON.stringify({ jobIds });
-    return httpService.http<any>({
+  jobsExist(jobIds: string[], allSpaces: boolean = false) {
+    const body = JSON.stringify({ jobIds, allSpaces });
+    return httpService.http<JobsExistResponse>({
+      path: `${basePath()}/jobs/jobs_exist`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  jobsExist$(jobIds: string[], allSpaces: boolean = false): Observable<JobsExistResponse> {
+    const body = JSON.stringify({ jobIds, allSpaces });
+    return httpService.http$({
       path: `${basePath()}/jobs/jobs_exist`,
       method: 'POST',
       body,

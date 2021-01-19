@@ -22,7 +22,7 @@ import { EuiLink, EuiSpacer, EuiText, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { TextInputOption } from '../../../vis_default_editor/public';
-import { WMSOptions } from '../common/types/external_basemap_types';
+import { WMSOptions } from '../common/types';
 
 interface WmsInternalOptions {
   wms: WMSOptions;

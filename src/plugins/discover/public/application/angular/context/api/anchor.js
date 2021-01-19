@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-export function fetchAnchorProvider(indexPatterns, searchSource, timefilter) {
+export function fetchAnchorProvider(indexPatterns, searchSource, timefilter, useNewFieldsApi = false) {
   return async function fetchAnchor(props) {
     const { indexPatternId, anchorId, sort, timeRange, routing } = props;
     const indexPattern = await indexPatterns.get(indexPatternId);
@@ -45,6 +45,10 @@ export function fetchAnchorProvider(indexPatterns, searchSource, timefilter) {
       searchSource.setField('routing', routing);
     }
 
+    if (useNewFieldsApi) {
+      searchSource.removeField('fieldsFromSource');
+      searchSource.setField('fields', ['*']);
+    }
     const response = await searchSource.fetch();
 
     if (_.get(response, ['hits', 'total'], 0) < 1) {

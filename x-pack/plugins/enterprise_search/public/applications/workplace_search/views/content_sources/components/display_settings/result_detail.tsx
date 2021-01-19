@@ -80,7 +80,7 @@ export const ResultDetail: React.FC = () => {
                       <>
                         {detailFields.map(({ fieldName, label }, index) => (
                           <EuiDraggable
-                            key={index}
+                            key={`${fieldName}-${index}`}
                             index={index}
                             draggableId={`${fieldName}-${index}`}
                             customDragHandle={true}
@@ -105,11 +105,13 @@ export const ResultDetail: React.FC = () => {
                                   <EuiFlexItem grow={false}>
                                     <div>
                                       <EuiButtonIcon
+                                        data-test-subj="EditFieldButton"
                                         aria-label="Edit Field"
                                         iconType="pencil"
                                         onClick={() => openEditDetailField(index)}
                                       />
                                       <EuiButtonIcon
+                                        data-test-subj="RemoveFieldButton"
                                         aria-label="Remove Field"
                                         iconType="cross"
                                         onClick={() => removeDetailField(index)}
@@ -125,7 +127,9 @@ export const ResultDetail: React.FC = () => {
                     </EuiDroppable>
                   </EuiDragDropContext>
                 ) : (
-                  <p>Add fields and move them into the order you want them to appear.</p>
+                  <p data-test-subj="EmptyFieldsDescription">
+                    Add fields and move them into the order you want them to appear.
+                  </p>
                 )}
               </>
             </EuiFormRow>

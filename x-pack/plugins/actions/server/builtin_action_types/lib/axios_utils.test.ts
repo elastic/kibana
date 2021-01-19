@@ -46,12 +46,9 @@ describe('request', () => {
     expect(axiosMock).toHaveBeenCalledWith('/test', {
       method: 'get',
       data: {},
-      headers: undefined,
       httpAgent: undefined,
       httpsAgent: undefined,
-      params: undefined,
       proxy: false,
-      validateStatus: undefined,
     });
     expect(res).toEqual({
       status: 200,
@@ -80,12 +77,9 @@ describe('request', () => {
     expect(axiosMock).toHaveBeenCalledWith('http://testProxy', {
       method: 'get',
       data: {},
-      headers: undefined,
       httpAgent,
       httpsAgent,
-      params: undefined,
       proxy: false,
-      validateStatus: undefined,
     });
     expect(res).toEqual({
       status: 200,
@@ -108,12 +102,9 @@ describe('request', () => {
     expect(axiosMock).toHaveBeenCalledWith('https://testProxy', {
       method: 'get',
       data: {},
-      headers: undefined,
       httpAgent: undefined,
       httpsAgent: undefined,
-      params: undefined,
       proxy: false,
-      validateStatus: undefined,
     });
     expect(res).toEqual({
       status: 200,
@@ -128,12 +119,9 @@ describe('request', () => {
     expect(axiosMock).toHaveBeenCalledWith('/test', {
       method: 'post',
       data: { id: '123' },
-      headers: undefined,
       httpAgent: undefined,
       httpsAgent: undefined,
-      params: undefined,
       proxy: false,
-      validateStatus: undefined,
     });
     expect(res).toEqual({
       status: 200,
@@ -156,12 +144,9 @@ describe('patch', () => {
     expect(axiosMock).toHaveBeenCalledWith('/test', {
       method: 'patch',
       data: { id: '123' },
-      headers: undefined,
       httpAgent: undefined,
       httpsAgent: undefined,
-      params: undefined,
       proxy: false,
-      validateStatus: undefined,
     });
   });
 });

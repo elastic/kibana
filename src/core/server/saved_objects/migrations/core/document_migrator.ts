@@ -69,7 +69,7 @@ import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { SavedObjectsMigrationVersion } from '../../types';
 import { MigrationLogger } from './migration_logger';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { SavedObjectMigrationFn } from '../types';
+import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '../types';
 
 export type TransformFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 
@@ -94,6 +94,7 @@ interface ActiveMigrations {
  */
 export interface VersionedTransformer {
   migrationVersion: SavedObjectsMigrationVersion;
+  prepareMigrations: () => void;
   migrate: TransformFn;
 }
 
@@ -101,8 +102,9 @@ export interface VersionedTransformer {
  * A concrete implementation of the VersionedTransformer interface.
  */
 export class DocumentMigrator implements VersionedTransformer {
-  private migrations: ActiveMigrations;
-  private transformDoc: TransformFn;
+  private documentMigratorOptions: DocumentMigratorOptions;
+  private migrations?: ActiveMigrations;
+  private transformDoc?: TransformFn;
 
   /**
    * Creates an instance of DocumentMigrator.
@@ -115,12 +117,7 @@ export class DocumentMigrator implements VersionedTransformer {
    */
   constructor({ typeRegistry, kibanaVersion, log }: DocumentMigratorOptions) {
     validateMigrationDefinition(typeRegistry);
-
-    this.migrations = buildActiveMigrations(typeRegistry, log);
-    this.transformDoc = buildDocumentTransform({
-      kibanaVersion,
-      migrations: this.migrations,
-    });
+    this.documentMigratorOptions = { typeRegistry, kibanaVersion, log };
   }
 
   /**
@@ -131,8 +128,27 @@ export class DocumentMigrator implements VersionedTransformer {
    * @memberof DocumentMigrator
    */
   public get migrationVersion(): SavedObjectsMigrationVersion {
+    if (!this.migrations) {
+      throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
+    }
     return _.mapValues(this.migrations, ({ latestVersion }) => latestVersion);
   }
+
+  /**
+   * Prepares active migrations and document transformer function.
+   *
+   * @returns {void}
+   * @memberof DocumentMigrator
+   */
+
+  public prepareMigrations = () => {
+    const { typeRegistry, kibanaVersion, log } = this.documentMigratorOptions;
+    this.migrations = buildActiveMigrations(typeRegistry, log);
+    this.transformDoc = buildDocumentTransform({
+      kibanaVersion,
+      migrations: this.migrations,
+    });
+  };
 
   /**
    * Migrates a document to the latest version.
@@ -142,6 +158,10 @@ export class DocumentMigrator implements VersionedTransformer {
    * @memberof DocumentMigrator
    */
   public migrate = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc => {
+    if (!this.migrations || !this.transformDoc) {
+      throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
+    }
+
     // Clone the document to prevent accidental mutations on the original data
     // Ex: Importing sample data that is cached at import level, migrations would
     // execute on mutated data the second time.
@@ -150,13 +170,7 @@ export class DocumentMigrator implements VersionedTransformer {
   };
 }
 
-/**
- * Basic validation that the migraiton definition matches our expectations. We can't
- * rely on TypeScript here, as the caller may be JavaScript / ClojureScript / any compile-to-js
- * language. So, this is just to provide a little developer-friendly error messaging. Joi was
- * giving weird errors, so we're just doing manual validation.
- */
-function validateMigrationDefinition(registry: ISavedObjectTypeRegistry) {
+function validateMigrationsMapObject(name: string, migrationsMap?: SavedObjectMigrationMap) {
   function assertObject(obj: any, prefix: string) {
     if (!obj || typeof obj !== 'object') {
       throw new Error(`${prefix} Got ${obj}.`);
@@ -177,16 +191,38 @@ function validateMigrationDefinition(registry: ISavedObjectTypeRegistry) {
     }
   }
 
+  if (migrationsMap) {
+    assertObject(
+      migrationsMap,
+      `Migrations map for type ${name} should be an object like { '2.0.0': (doc) => doc }.`
+    );
+
+    Object.entries(migrationsMap).forEach(([version, fn]) => {
+      assertValidSemver(version, name);
+      assertValidTransform(fn, version, name);
+    });
+  }
+}
+
+/**
+ * Basic validation that the migraiton definition matches our expectations. We can't
+ * rely on TypeScript here, as the caller may be JavaScript / ClojureScript / any compile-to-js
+ * language. So, this is just to provide a little developer-friendly error messaging. Joi was
+ * giving weird errors, so we're just doing manual validation.
+ */
+function validateMigrationDefinition(registry: ISavedObjectTypeRegistry) {
+  function assertObjectOrFunction(entity: any, prefix: string) {
+    if (!entity || (typeof entity !== 'function' && typeof entity !== 'object')) {
+      throw new Error(`${prefix} Got! ${typeof entity}, ${JSON.stringify(entity)}.`);
+    }
+  }
+
   registry.getAllTypes().forEach((type) => {
     if (type.migrations) {
-      assertObject(
+      assertObjectOrFunction(
         type.migrations,
-        `Migration for type ${type.name} should be an object like { '2.0.0': (doc) => doc }.`
+        `Migration for type ${type.name} should be an object or a function returning an object like { '2.0.0': (doc) => doc }.`
       );
-      Object.entries(type.migrations).forEach(([version, fn]) => {
-        assertValidSemver(version, type.name);
-        assertValidTransform(fn, version, type.name);
-      });
     }
   });
 }
@@ -201,11 +237,22 @@ function buildActiveMigrations(
   typeRegistry: ISavedObjectTypeRegistry,
   log: Logger
 ): ActiveMigrations {
-  return typeRegistry
+  const typesWithMigrationMaps = typeRegistry
     .getAllTypes()
-    .filter((type) => type.migrations && Object.keys(type.migrations).length > 0)
+    .map((type) => ({
+      ...type,
+      migrationsMap: typeof type.migrations === 'function' ? type.migrations() : type.migrations,
+    }))
+    .filter((type) => typeof type.migrationsMap !== 'undefined');
+
+  typesWithMigrationMaps.forEach((type) =>
+    validateMigrationsMapObject(type.name, type.migrationsMap)
+  );
+
+  return typesWithMigrationMaps
+    .filter((type) => type.migrationsMap && Object.keys(type.migrationsMap).length > 0)
     .reduce((migrations, type) => {
-      const transforms = Object.entries(type.migrations!)
+      const transforms = Object.entries(type.migrationsMap!)
         .map(([version, transform]) => ({
           version,
           transform: wrapWithTry(version, type.name, transform, log),
@@ -220,7 +267,6 @@ function buildActiveMigrations(
       };
     }, {} as ActiveMigrations);
 }
-
 /**
  * Creates a function which migrates and validates any document that is passed to it.
  */

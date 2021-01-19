@@ -66,7 +66,6 @@ const toSanitizedFieldType = (fields: IFieldType[]) => {
 export abstract class AbstractSearchStrategy {
   async search(req: ReqFacade<VisPayload>, bodies: any[], indexType?: string) {
     const requests: any[] = [];
-    const { sessionId } = req.payload;
 
     bodies.forEach((body) => {
       requests.push(
@@ -78,9 +77,7 @@ export abstract class AbstractSearchStrategy {
                 ...body,
               },
             },
-            {
-              sessionId,
-            }
+            req.payload.searchSession
           )
           .toPromise()
       );

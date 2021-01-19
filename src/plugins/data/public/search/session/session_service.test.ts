@@ -33,10 +33,18 @@ describe('Session service', () => {
 
   beforeEach(() => {
     const initializerContext = coreMock.createPluginInitializerContext();
+    const startService = coreMock.createSetup().getStartServices;
     nowProvider = createNowProviderMock();
     sessionService = new SessionService(
       initializerContext,
-      coreMock.createSetup().getStartServices,
+      () =>
+        startService().then(([coreStart, ...rest]) => [
+          {
+            ...coreStart,
+            application: { ...coreStart.application, currentAppId$: new BehaviorSubject('app') },
+          },
+          ...rest,
+        ]),
       getSessionsClientMock(),
       nowProvider,
       { freezeState: false } // needed to use mocks inside state container
@@ -99,5 +107,64 @@ describe('Session service', () => {
 
       expect(abort).toBeCalledTimes(3);
     });
+  });
+
+  test('getSearchOptions infers isRestore & isStored from state', async () => {
+    const sessionId = sessionService.start();
+    const someOtherId = 'some-other-id';
+
+    expect(sessionService.getSearchOptions(someOtherId)).toEqual({
+      isStored: false,
+      isRestore: false,
+      sessionId: someOtherId,
+    });
+    expect(sessionService.getSearchOptions(sessionId)).toEqual({
+      isStored: false,
+      isRestore: false,
+      sessionId,
+    });
+
+    sessionService.setSearchSessionInfoProvider({
+      getName: async () => 'Name',
+      getUrlGeneratorData: async () => ({
+        urlGeneratorId: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+    });
+    await sessionService.save();
+
+    expect(sessionService.getSearchOptions(someOtherId)).toEqual({
+      isStored: false,
+      isRestore: false,
+      sessionId: someOtherId,
+    });
+    expect(sessionService.getSearchOptions(sessionId)).toEqual({
+      isStored: true,
+      isRestore: false,
+      sessionId,
+    });
+
+    await sessionService.restore(sessionId);
+
+    expect(sessionService.getSearchOptions(someOtherId)).toEqual({
+      isStored: false,
+      isRestore: false,
+      sessionId: someOtherId,
+    });
+    expect(sessionService.getSearchOptions(sessionId)).toEqual({
+      isStored: true,
+      isRestore: true,
+      sessionId,
+    });
+  });
+  test('isCurrentSession', () => {
+    expect(sessionService.isCurrentSession()).toBeFalsy();
+
+    const sessionId = sessionService.start();
+
+    expect(sessionService.isCurrentSession()).toBeFalsy();
+    expect(sessionService.isCurrentSession('some-other')).toBeFalsy();
+    expect(sessionService.isCurrentSession(sessionId)).toBeTruthy();
   });
 });
