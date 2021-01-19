@@ -105,7 +105,7 @@ export const SearchExperience: React.FC = () => {
             {fields.filterFields.length > 0 ? (
               <>
                 {fields.filterFields.map((fieldName) => (
-                  <div key={fieldName}>
+                  <section key={fieldName}>
                     <Facet
                       field={fieldName}
                       label={fieldName}
