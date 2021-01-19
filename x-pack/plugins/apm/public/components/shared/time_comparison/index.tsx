@@ -113,6 +113,7 @@ export function TimeComparison() {
       }
     >
       <EuiSelect
+        data-test-subj="comparisonSelect"
         disabled={selectOptions.length <= 1}
         options={selectOptions}
         value={comparisonType}
