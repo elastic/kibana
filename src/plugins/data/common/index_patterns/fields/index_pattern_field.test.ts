@@ -20,7 +20,7 @@
 import { IndexPatternField } from './index_pattern_field';
 import { IndexPattern } from '../index_patterns';
 import { KBN_FIELD_TYPES, FieldFormat } from '../../../common';
-import { FieldSpec } from '../types';
+import { FieldSpec, RuntimeField } from '../types';
 
 describe('Field', function () {
   function flatten(obj: Record<string, any>) {
@@ -53,6 +53,12 @@ describe('Field', function () {
     } as unknown) as IndexPattern,
     $$spec: ({} as unknown) as FieldSpec,
     conflictDescriptions: { a: ['b', 'c'], d: ['e'] },
+    runtimeField: {
+      type: 'keyword' as RuntimeField['type'],
+      script: {
+        source: "emit('hello world')",
+      },
+    },
   };
 
   it('the correct properties are writable', () => {
