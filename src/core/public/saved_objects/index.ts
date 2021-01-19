@@ -43,7 +43,7 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectsNamespaceType,
 } from '../../server/types';

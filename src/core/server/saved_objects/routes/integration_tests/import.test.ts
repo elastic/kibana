@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockUuidv4 } from '../../import/__mocks__';
+import { mockUuidv4 } from '../../import/lib/__mocks__';
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerImportRoute } from '../import';
@@ -27,7 +27,7 @@ import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_st
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { setupServer, createExportableType } from '../test_utils';
-import { SavedObjectsErrorHelpers } from '../..';
+import { SavedObjectsErrorHelpers, SavedObjectsImporter } from '../..';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -73,6 +73,15 @@ describe(`POST ${URL}`, () => {
     savedObjectsClient = handlerContext.savedObjects.client;
     savedObjectsClient.find.mockResolvedValue(emptyResponse);
     savedObjectsClient.checkConflicts.mockResolvedValue({ errors: [] });
+
+    const importer = new SavedObjectsImporter({
+      savedObjectsClient,
+      typeRegistry: handlerContext.savedObjects.typeRegistry,
+      importSizeLimit: 10000,
+    });
+    handlerContext.savedObjects.importer.import.mockImplementation((options) =>
+      importer.import(options)
+    );
 
     const router = httpSetup.createRouter('/internal/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();

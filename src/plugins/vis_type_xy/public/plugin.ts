@@ -29,10 +29,10 @@ import {
   setDataActions,
   setFormatService,
   setThemeService,
-  setColorsService,
   setTimefilter,
   setUISettings,
   setDocLinks,
+  setPalettesService,
   setTrackUiMetric,
 } from './services';
 import { visTypesDefinitions } from './vis_types';
@@ -77,8 +77,7 @@ export class VisTypeXyPlugin
     if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, false)) {
       setUISettings(core.uiSettings);
       setThemeService(charts.theme);
-      setColorsService(charts.legacyColors);
-
+      setPalettesService(charts.palettes);
       [createVisTypeXyVisFn].forEach(expressions.registerFunction);
       expressions.registerRenderer(xyVisRenderer);
       visTypesDefinitions.forEach(visualizations.createBaseVisualization);

@@ -22,15 +22,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '../../../../../../kibana_react/public';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { calculateLabel } from '../../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
 import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
-
-import { METRIC_TYPES } from '../../../../../common/metric_types';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -109,30 +106,19 @@ class TableVis extends Component {
   };
 
   renderHeader() {
-    const { model, uiState, onUiState } = this.props;
+    const { model, uiState, onUiState, visData } = this.props;
     const stateKey = `${model.type}.sort`;
     const sort = uiState.get(stateKey, {
       column: '_default_',
       order: 'asc',
     });
 
-    const calculateHeaderLabel = (metric, item) => {
-      const defaultLabel = item.label || calculateLabel(metric, item.metrics);
-
-      switch (metric.type) {
-        case METRIC_TYPES.PERCENTILE:
-          return `${defaultLabel} (${last(metric.percentiles).value || 0})`;
-        case METRIC_TYPES.PERCENTILE_RANK:
-          return `${defaultLabel} (${last(metric.values) || 0})`;
-        default:
-          return defaultLabel;
-      }
-    };
+    const calculateHeaderLabel = (metric, item) =>
+      item.label || visData.series[0]?.series?.find((s) => item.id === s.id)?.label;
 
     const columns = this.visibleSeries.map((item) => {
       const metric = last(item.metrics);
       const label = calculateHeaderLabel(metric, item);
-
       const handleClick = () => {
         if (!isSortable(metric)) return;
         let order;
@@ -179,7 +165,7 @@ class TableVis extends Component {
         </th>
       );
     });
-    const label = model.pivot_label || model.pivot_field || model.pivot_id;
+    const label = visData.pivot_label || model.pivot_label || model.pivot_id;
     let sortIcon;
     if (sort.column === '_default_') {
       sortIcon = sort.order === 'asc' ? 'sortUp' : 'sortDown';

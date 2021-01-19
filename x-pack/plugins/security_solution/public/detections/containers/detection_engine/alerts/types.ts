@@ -79,6 +79,7 @@ export interface Privilege {
   index: {
     [indexName: string]: {
       all: boolean;
+      maintenance: boolean;
       manage_ilm: boolean;
       read: boolean;
       create_index: boolean;

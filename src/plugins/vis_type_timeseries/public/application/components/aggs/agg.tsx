@@ -59,6 +59,10 @@ export function Agg(props: AggProps) {
     ...props.style,
   };
 
+  const indexPattern =
+    (props.series.override_index_pattern && props.series.series_index_pattern) ||
+    props.panel.index_pattern;
+
   return (
     <div className={props.className} style={style}>
       <Component
@@ -71,6 +75,7 @@ export function Agg(props: AggProps) {
         panel={props.panel}
         series={props.series}
         siblings={props.siblings}
+        indexPattern={indexPattern}
         uiRestrictions={props.uiRestrictions}
         dragHandleProps={props.dragHandleProps}
       />

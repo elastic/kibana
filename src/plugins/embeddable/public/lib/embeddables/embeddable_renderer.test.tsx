@@ -24,7 +24,7 @@ import {
   HelloWorldEmbeddable,
   HelloWorldEmbeddableFactoryDefinition,
   HELLO_WORLD_EMBEDDABLE,
-} from '../../../../../../examples/embeddable_examples/public/hello_world';
+} from '../../tests/fixtures';
 import { EmbeddableRenderer } from './embeddable_renderer';
 import { embeddablePluginMock } from '../../mocks';
 

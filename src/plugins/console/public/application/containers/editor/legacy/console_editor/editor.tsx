@@ -97,6 +97,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
     if (textareaElement) {
       textareaElement.setAttribute('id', inputId);
+      textareaElement.setAttribute('data-test-subj', 'console-textarea');
     }
 
     const readQueryParams = () => {
@@ -204,7 +205,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
   }, [sendCurrentRequestToES, openDocumentation]);
 
   return (
-    <div style={abs} className="conApp">
+    <div style={abs} data-test-subj="console-application" className="conApp">
       <div className="conApp__editor">
         <ul className="conApp__autoComplete" id="autocomplete" />
         <EuiFlexGroup

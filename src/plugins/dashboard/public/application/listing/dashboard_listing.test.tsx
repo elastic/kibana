@@ -39,6 +39,7 @@ import { dataPluginMock } from '../../../../data/public/mocks';
 import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
+import { UrlForwardingStart } from '../../../../url_forwarding/public';
 
 function makeDefaultServices(): DashboardAppServices {
   const core = coreMock.createStart();
@@ -71,6 +72,7 @@ function makeDefaultServices(): DashboardAppServices {
     scopedHistory: () => ({} as ScopedHistory),
     savedQueryService: {} as SavedQueryService,
     setHeaderActionMenu: (mountPoint) => {},
+    urlForwarding: {} as UrlForwardingStart,
     uiSettings: {} as IUiSettingsClient,
     restorePreviousUrl: () => {},
     onAppLeave: (handler) => {},

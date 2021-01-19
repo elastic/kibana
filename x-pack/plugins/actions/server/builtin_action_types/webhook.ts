@@ -71,6 +71,7 @@ const ParamsSchema = schema.object({
   body: schema.maybe(schema.string()),
 });
 
+export const ActionTypeId = '.webhook';
 // action type definition
 export function getActionType({
   logger,
@@ -80,7 +81,7 @@ export function getActionType({
   configurationUtilities: ActionsConfigurationUtilities;
 }): WebhookActionType {
   return {
-    id: '.webhook',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.webhookTitle', {
       defaultMessage: 'Webhook',
@@ -111,9 +112,9 @@ function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ) {
-  let url: URL;
+  const configuredUrl = configObject.url;
   try {
-    url = new URL(configObject.url);
+    new URL(configuredUrl);
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
       defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
@@ -124,7 +125,7 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureUriAllowed(url.toString());
+    configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',

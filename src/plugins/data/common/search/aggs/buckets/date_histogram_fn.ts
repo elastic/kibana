@@ -152,7 +152,6 @@ export const aggDateHistogram = (): FunctionDefinition => ({
           ...rest,
           timeRange: getParsedValue(args, 'timeRange'),
           extended_bounds: getParsedValue(args, 'extended_bounds'),
-          json: getParsedValue(args, 'json'),
         },
       },
     };

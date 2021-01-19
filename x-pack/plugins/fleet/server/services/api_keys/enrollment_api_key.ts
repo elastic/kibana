@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
-import { createAPIKey, invalidateAPIKey } from './security';
+import { createAPIKey, invalidateAPIKeys } from './security';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 import { normalizeKuery } from '../saved_object';
@@ -66,7 +66,7 @@ export async function getEnrollmentAPIKey(soClient: SavedObjectsClientContract, 
 export async function deleteEnrollmentApiKey(soClient: SavedObjectsClientContract, id: string) {
   const enrollmentApiKey = await getEnrollmentAPIKey(soClient, id);
 
-  await invalidateAPIKey(soClient, enrollmentApiKey.api_key_id);
+  await invalidateAPIKeys(soClient, [enrollmentApiKey.api_key_id]);
 
   await soClient.update(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, id, {
     active: false,

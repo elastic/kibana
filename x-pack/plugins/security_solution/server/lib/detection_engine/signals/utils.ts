@@ -10,7 +10,12 @@ import dateMath from '@elastic/datemath';
 
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger, SavedObjectsClientContract } from '../../../../../../../src/core/server';
-import { AlertServices, parseDuration } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+  parseDuration,
+} from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
@@ -52,7 +57,10 @@ export const shorthandMap = {
   },
 };
 
-export const checkPrivileges = async (services: AlertServices, indices: string[]) =>
+export const checkPrivileges = async (
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
+  indices: string[]
+) =>
   services.callCluster('transport.request', {
     path: '/_security/user/_has_privileges',
     method: 'POST',
@@ -154,7 +162,7 @@ export const getListsClient = ({
   lists: ListPluginSetup | undefined;
   spaceId: string;
   updatedByUser: string | null;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   savedObjectClient: SavedObjectsClientContract;
 }): {
   listClient: ListClient;

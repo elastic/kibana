@@ -19,6 +19,7 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import JSON5 from 'json5';
 import { get } from 'lodash';
 import { run, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { getPluginDeps, findPlugins } from './plugin_discovery';
@@ -46,7 +47,8 @@ run(
         id: pluginId,
       });
 
-      if (deps.size === 0 && errors.size === 0) {
+      const allDepsMigrated = [...deps].every((p) => isMigratedToTsProjectRefs(p.directory));
+      if (allDepsMigrated && errors.size === 0) {
         readyToMigrate.add(pluginMap.get(pluginId)!);
       }
     }
@@ -82,7 +84,7 @@ function isMigratedToTsProjectRefs(dir: string): boolean {
   try {
     const path = Path.join(dir, 'tsconfig.json');
     const content = Fs.readFileSync(path, { encoding: 'utf8' });
-    return get(JSON.parse(content), 'compilerOptions.composite', false);
+    return get(JSON5.parse(content), 'compilerOptions.composite', false);
   } catch (e) {
     return false;
   }

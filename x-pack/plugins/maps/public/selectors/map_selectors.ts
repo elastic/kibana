@@ -150,21 +150,6 @@ export const getWaitingForMapReadyLayerListRaw = ({ map }: MapStoreState): Layer
 
 export const getScrollZoom = ({ map }: MapStoreState): boolean => map.mapState.scrollZoom;
 
-export const isInteractiveDisabled = ({ map }: MapStoreState): boolean =>
-  map.mapState.disableInteractive;
-
-export const isTooltipControlDisabled = ({ map }: MapStoreState): boolean =>
-  map.mapState.disableTooltipControl;
-
-export const isToolbarOverlayHidden = ({ map }: MapStoreState): boolean =>
-  map.mapState.hideToolbarOverlay;
-
-export const isLayerControlHidden = ({ map }: MapStoreState): boolean =>
-  map.mapState.hideLayerControl;
-
-export const isViewControlHidden = ({ map }: MapStoreState): boolean =>
-  map.mapState.hideViewControl;
-
 export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.extent;
 
 export const getMapBuffer = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.buffer;

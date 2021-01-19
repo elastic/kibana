@@ -53,12 +53,14 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { DataPublicPluginStart, DataStartDependencies } from '../types';
+import { NowProviderInternalContract } from '../now_provider';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
   bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   usageCollection?: UsageCollectionSetup;
+  nowProvider: NowProviderInternalContract;
 }
 
 /** @internal */
@@ -79,7 +81,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     { http, getStartServices, notifications, uiSettings }: CoreSetup,
-    { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
+    { bfetch, expressions, usageCollection, nowProvider }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
@@ -87,7 +89,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.sessionService = new SessionService(
       this.initializerContext,
       getStartServices,
-      this.sessionsClient
+      this.sessionsClient,
+      nowProvider
     );
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
@@ -118,6 +121,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const aggs = this.aggsService.setup({
       registerFunction: expressions.registerFunction,
       uiSettings,
+      nowProvider,
     });
 
     if (this.initializerContext.config.get().search.aggs.shardDelay.enabled) {

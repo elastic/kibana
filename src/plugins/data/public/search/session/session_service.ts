@@ -23,8 +23,14 @@ import { Observable, Subject, Subscription } from 'rxjs';
 import { PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
 import { UrlGeneratorId, UrlGeneratorStateMapping } from '../../../../share/public/';
 import { ConfigSchema } from '../../../config';
-import { createSessionStateContainer, SessionState, SessionStateContainer } from './session_state';
+import {
+  createSessionStateContainer,
+  SearchSessionState,
+  SessionStateContainer,
+} from './search_session_state';
 import { ISessionsClient } from './sessions_client';
+import { ISearchOptions } from '../../../common';
+import { NowProviderInternalContract } from '../../now_provider';
 
 export type ISessionService = PublicContract<SessionService>;
 
@@ -33,12 +39,12 @@ export interface TrackSearchDescriptor {
 }
 
 /**
- * Provide info about current search session to be stored in backgroundSearch saved object
+ * Provide info about current search session to be stored in the Search Session saved object
  */
 export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId> {
   /**
    * User-facing name of the session.
-   * e.g. will be displayed in background sessions management list
+   * e.g. will be displayed in saved Search Sessions management list
    */
   getName: () => Promise<string>;
   getUrlGeneratorData: () => Promise<{
@@ -52,50 +58,64 @@ export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGenera
  * Responsible for tracking a current search session. Supports only a single session at a time.
  */
 export class SessionService {
-  public readonly state$: Observable<SessionState>;
+  public readonly state$: Observable<SearchSessionState>;
   private readonly state: SessionStateContainer<TrackSearchDescriptor>;
 
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
-  private appChangeSubscription$?: Subscription;
+  private subscription = new Subscription();
   private curApp?: string;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
     getStartServices: StartServicesAccessor,
     private readonly sessionsClient: ISessionsClient,
+    private readonly nowProvider: NowProviderInternalContract,
     { freezeState = true }: { freezeState: boolean } = { freezeState: true }
   ) {
-    const { stateContainer, sessionState$ } = createSessionStateContainer<TrackSearchDescriptor>({
+    const {
+      stateContainer,
+      sessionState$,
+      sessionStartTime$,
+    } = createSessionStateContainer<TrackSearchDescriptor>({
       freeze: freezeState,
     });
     this.state$ = sessionState$;
     this.state = stateContainer;
 
+    this.subscription.add(
+      sessionStartTime$.subscribe((startTime) => {
+        if (startTime) this.nowProvider.set(startTime);
+        else this.nowProvider.reset();
+      })
+    );
+
     getStartServices().then(([coreStart]) => {
       // Apps required to clean up their sessions before unmounting
       // Make sure that apps don't leave sessions open.
-      this.appChangeSubscription$ = coreStart.application.currentAppId$.subscribe((appName) => {
-        if (this.state.get().sessionId) {
-          const message = `Application '${this.curApp}' had an open session while navigating`;
-          if (initializerContext.env.mode.dev) {
-            // TODO: This setTimeout is necessary due to a race condition while navigating.
-            setTimeout(() => {
-              coreStart.fatalErrors.add(message);
-            }, 100);
-          } else {
-            // eslint-disable-next-line no-console
-            console.warn(message);
-            this.clear();
+      this.subscription.add(
+        coreStart.application.currentAppId$.subscribe((appName) => {
+          if (this.state.get().sessionId) {
+            const message = `Application '${this.curApp}' had an open session while navigating`;
+            if (initializerContext.env.mode.dev) {
+              // TODO: This setTimeout is necessary due to a race condition while navigating.
+              setTimeout(() => {
+                coreStart.fatalErrors.add(message);
+              }, 100);
+            } else {
+              // eslint-disable-next-line no-console
+              console.warn(message);
+              this.clear();
+            }
           }
-        }
-        this.curApp = appName;
-      });
+          this.curApp = appName;
+        })
+      );
     });
   }
 
   /**
    * Set a provider of info about current session
-   * This will be used for creating a background session saved object
+   * This will be used for creating a search session saved object
    * @param searchSessionInfoProvider
    */
   public setSearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId>(
@@ -118,9 +138,7 @@ export class SessionService {
   }
 
   public destroy() {
-    if (this.appChangeSubscription$) {
-      this.appChangeSubscription$.unsubscribe();
-    }
+    this.subscription.unsubscribe();
     this.clear();
   }
 
@@ -184,7 +202,7 @@ export class SessionService {
   private refresh$ = new Subject<void>();
   /**
    * Observable emits when search result refresh was requested
-   * For example, search to background UI could have it's own "refresh" button
+   * For example, the UI could have it's own "refresh" button
    * Application would use this observable to handle user interaction on that button
    */
   public onRefresh$ = this.refresh$.asObservable();
@@ -238,5 +256,28 @@ export class SessionService {
     if (this.getSessionId() === sessionId) {
       this.state.transitions.store();
     }
+  }
+
+  /**
+   * Checks if passed sessionId is a current sessionId
+   * @param sessionId
+   */
+  public isCurrentSession(sessionId?: string): boolean {
+    return !!sessionId && this.getSessionId() === sessionId;
+  }
+
+  /**
+   * Infers search session options for sessionId using current session state
+   * @param sessionId
+   */
+  public getSearchOptions(
+    sessionId: string
+  ): Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>> {
+    const isCurrentSession = this.isCurrentSession(sessionId);
+    return {
+      sessionId,
+      isRestore: isCurrentSession ? this.isRestore() : false,
+      isStored: isCurrentSession ? this.isStored() : false,
+    };
   }
 }

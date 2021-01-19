@@ -18,9 +18,11 @@
  */
 
 import { findIndex, isEmpty } from 'lodash';
-import { IAggConfig } from 'src/plugins/data/public';
-import { AggsState } from './agg_group_state';
-import { Schema, getSchemaByName } from '../schemas';
+import type { IAggConfig } from 'src/plugins/data/public';
+import type { Schema } from 'src/plugins/visualizations/public';
+
+import { getSchemaByName } from '../schemas';
+import type { AggsState } from './agg_group_state';
 
 const isAggRemovable = (agg: IAggConfig, group: IAggConfig[], schemas: Schema[]) => {
   const schema = getSchemaByName(schemas, agg.schema);

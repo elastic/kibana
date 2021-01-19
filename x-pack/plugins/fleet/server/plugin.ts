@@ -91,12 +91,12 @@ export interface FleetSetupDeps {
 }
 
 export interface FleetStartDeps {
-  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
 }
 
 export interface FleetAppContext {
-  encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   security?: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
@@ -250,8 +250,7 @@ export class FleetPlugin
 
       // Conditional config routes
       if (config.agents.enabled) {
-        const isESOUsingEphemeralEncryptionKey =
-          deps.encryptedSavedObjects.usingEphemeralEncryptionKey;
+        const isESOUsingEphemeralEncryptionKey = !deps.encryptedSavedObjects;
         if (isESOUsingEphemeralEncryptionKey) {
           if (this.logger) {
             this.logger.warn(

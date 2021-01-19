@@ -29,7 +29,7 @@ export function addHelpMenuToAppChrome(chrome) {
     links: [
       {
         linkType: 'documentation',
-        href: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/discover.html`,
+        href: `${docLinks.links.discover.guide}`,
       },
     ],
   });

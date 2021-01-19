@@ -30,23 +30,21 @@ import { KibanaContext, Filter, Query, TimeRange } from '../../data/public';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<TimelionRenderValue>>;
-interface Arguments {
-  expression: string;
-  interval: string;
-}
-
 export interface TimelionRenderValue {
   visData: TimelionSuccessResponse;
   visType: 'timelion';
   visParams: TimelionVisParams;
 }
 
-export type TimelionVisParams = Arguments;
+export interface TimelionVisParams {
+  expression: string;
+  interval: string;
+}
 
 export type TimelionExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'timelion_vis',
   Input,
-  Arguments,
+  TimelionVisParams,
   Output
 >;
 
@@ -72,7 +70,7 @@ export const getTimelionVisualizationConfig = (
       help: '',
     },
   },
-  async fn(input, args) {
+  async fn(input, args, { getSearchSessionId }) {
     const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
     const visParams = { expression: args.expression, interval: args.interval };
@@ -82,6 +80,7 @@ export const getTimelionVisualizationConfig = (
       query: get(input, 'query') as Query,
       filters: get(input, 'filters') as Filter[],
       visParams,
+      searchSessionId: getSearchSessionId(),
     });
 
     response.visType = TIMELION_VIS_NAME;

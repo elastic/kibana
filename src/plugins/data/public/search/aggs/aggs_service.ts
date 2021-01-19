@@ -22,7 +22,6 @@ import { Subscription } from 'rxjs';
 import { IUiSettingsClient } from 'src/core/public';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import { FieldFormatsStart } from '../../field_formats';
-import { getForceNow } from '../../query/timefilter/lib/get_force_now';
 import { calculateBounds, TimeRange } from '../../../common';
 import {
   aggsRequiredUiSettings,
@@ -33,6 +32,7 @@ import {
 } from '../../../common/search/aggs';
 import { AggsSetup, AggsStart } from './types';
 import { IndexPatternsContract } from '../../index_patterns';
+import { NowProviderInternalContract } from '../../now_provider';
 
 /**
  * Aggs needs synchronous access to specific uiSettings. Since settings can change
@@ -63,6 +63,7 @@ export function createGetConfig(
 export interface AggsSetupDependencies {
   registerFunction: ExpressionsServiceSetup['registerFunction'];
   uiSettings: IUiSettingsClient;
+  nowProvider: NowProviderInternalContract;
 }
 
 /** @internal */
@@ -82,15 +83,17 @@ export class AggsService {
   private readonly initializedAggTypes = new Map();
   private getConfig?: AggsCommonStartDependencies['getConfig'];
   private subscriptions: Subscription[] = [];
+  private nowProvider!: NowProviderInternalContract;
 
   /**
-   * getForceNow uses window.location, so we must have a separate implementation
+   * NowGetter uses window.location, so we must have a separate implementation
    * of calculateBounds on the client and the server.
    */
   private calculateBounds = (timeRange: TimeRange) =>
-    calculateBounds(timeRange, { forceNow: getForceNow() });
+    calculateBounds(timeRange, { forceNow: this.nowProvider.get() });
 
-  public setup({ registerFunction, uiSettings }: AggsSetupDependencies): AggsSetup {
+  public setup({ registerFunction, uiSettings, nowProvider }: AggsSetupDependencies): AggsSetup {
+    this.nowProvider = nowProvider;
     this.getConfig = createGetConfig(uiSettings, aggsRequiredUiSettings, this.subscriptions);
 
     return this.aggsCommonService.setup({ registerFunction });

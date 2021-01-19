@@ -16,22 +16,15 @@ import { getEngineRoute } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
 import { UNIVERSAL_LANGUAGE } from '../../constants';
+import { EngineDetails } from '../engine/types';
 
-interface EnginesTableData {
-  name: string;
-  created_at: string;
-  document_count: number;
-  field_count: number;
-  language: string | null;
-  isMeta: boolean;
-}
 interface EnginesTablePagination {
   totalEngines: number;
   pageIndex: number;
   onPaginate(pageIndex: number): void;
 }
 interface EnginesTableProps {
-  data: EnginesTableData[];
+  data: EngineDetails[];
   pagination: EnginesTablePagination;
 }
 interface OnChange {
@@ -55,7 +48,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       }),
   });
 
-  const columns: Array<EuiBasicTableColumn<EnginesTableData>> = [
+  const columns: Array<EuiBasicTableColumn<EngineDetails>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name', {
@@ -100,7 +93,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         }
       ),
       dataType: 'string',
-      render: (language: string, engine: EnginesTableData) =>
+      render: (language: string, engine: EngineDetails) =>
         engine.isMeta ? '' : language || UNIVERSAL_LANGUAGE,
     },
     {

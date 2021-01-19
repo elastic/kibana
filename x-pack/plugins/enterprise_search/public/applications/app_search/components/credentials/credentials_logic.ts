@@ -11,7 +11,7 @@ import { ApiTokenTypes, CREATE_MESSAGE, UPDATE_MESSAGE, DELETE_MESSAGE } from '.
 
 import { HttpLogic } from '../../../shared/http';
 import {
-  FlashMessagesLogic,
+  clearFlashMessages,
   setSuccessMessage,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
@@ -227,7 +227,7 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
   }),
   listeners: ({ actions, values }) => ({
     showCredentialsForm: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     initializeCredentialsData: () => {
       actions.fetchCredentials();

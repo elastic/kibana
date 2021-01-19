@@ -11,7 +11,7 @@ import { ChartContainer } from './chart_container';
 describe('ChartContainer', () => {
   describe('loading indicator', () => {
     it('shows loading when status equals to Loading or Pending and has no data', () => {
-      [FETCH_STATUS.PENDING, FETCH_STATUS.LOADING].map((status) => {
+      [FETCH_STATUS.NOT_INITIATED, FETCH_STATUS.LOADING].map((status) => {
         const { queryAllByTestId } = render(
           <ChartContainer
             height={100}
@@ -26,7 +26,7 @@ describe('ChartContainer', () => {
       });
     });
     it('does not show loading when status equals to Loading or Pending and has data', () => {
-      [FETCH_STATUS.PENDING, FETCH_STATUS.LOADING].map((status) => {
+      [FETCH_STATUS.NOT_INITIATED, FETCH_STATUS.LOADING].map((status) => {
         const { queryAllByText } = render(
           <ChartContainer height={100} status={status} hasData={true}>
             <div>My amazing component</div>

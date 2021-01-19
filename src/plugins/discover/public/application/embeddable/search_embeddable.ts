@@ -29,7 +29,6 @@ import {
   Filter,
   TimeRange,
   FilterManager,
-  getTime,
   Query,
   IFieldType,
 } from '../../../../data/public';
@@ -98,7 +97,6 @@ export class SearchEmbeddable
   private panelTitle: string = '';
   private filtersSearchSource?: ISearchSource;
   private searchInstance?: JQLite;
-  private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterManager: FilterManager;
@@ -148,10 +146,6 @@ export class SearchEmbeddable
     };
     this.initializeSearchScope();
 
-    this.autoRefreshFetchSubscription = this.services.timefilter
-      .getAutoRefreshFetch$()
-      .subscribe(this.fetch);
-
     this.subscription = this.getUpdated$().subscribe(() => {
       this.panelTitle = this.output.title || '';
 
@@ -199,9 +193,7 @@ export class SearchEmbeddable
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    if (this.autoRefreshFetchSubscription) {
-      this.autoRefreshFetchSubscription.unsubscribe();
-    }
+
     if (this.abortController) this.abortController.abort();
   }
 
@@ -224,7 +216,7 @@ export class SearchEmbeddable
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
       if (!this.searchScope || !this.input.timeRange) return;
-      return getTime(indexPattern, this.input.timeRange);
+      return this.services.timefilter.createFilter(indexPattern, this.input.timeRange);
     });
 
     this.filtersSearchSource = searchSource.create();

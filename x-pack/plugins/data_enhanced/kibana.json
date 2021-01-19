@@ -8,7 +8,8 @@
   "requiredPlugins": [
     "bfetch",
     "data",
-    "features"
+    "features",
+    "taskManager"
   ],
   "optionalPlugins": ["kibanaUtils", "usageCollection"],
   "server": true,

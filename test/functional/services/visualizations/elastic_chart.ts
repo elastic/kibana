@@ -81,19 +81,23 @@ export function ElasticChartProvider({ getService }: FtrProviderContext) {
       }
     }
 
-    private async getChart(dataTestSubj?: string, timeout?: number): Promise<WebElementWrapper> {
+    private async getChart(
+      dataTestSubj?: string,
+      timeout?: number,
+      match: number = 0
+    ): Promise<WebElementWrapper> {
       if (dataTestSubj) {
         if (!(await testSubjects.exists(dataTestSubj, { timeout }))) {
           throw Error(`Failed to find an elastic-chart with testSubject '${dataTestSubj}'`);
         }
 
-        return await testSubjects.find(dataTestSubj);
+        return (await testSubjects.findAll(dataTestSubj))[match];
       } else {
         const charts = await this.getAllCharts(timeout);
         if (charts.length === 0) {
           throw Error(`Failed to find any elastic-charts on the page`);
         } else {
-          return charts[0];
+          return charts[match];
         }
       }
     }
@@ -106,8 +110,11 @@ export function ElasticChartProvider({ getService }: FtrProviderContext) {
      * used to get chart data from `@elastic/charts`
      * requires `window._echDebugStateFlag` to be true
      */
-    public async getChartDebugData(dataTestSubj?: string): Promise<DebugState | null> {
-      const chart = await this.getChart(dataTestSubj);
+    public async getChartDebugData(
+      dataTestSubj?: string,
+      match: number = 0
+    ): Promise<DebugState | null> {
+      const chart = await this.getChart(dataTestSubj, undefined, match);
 
       try {
         const visContainer = await chart.findByCssSelector('.echChartStatus');

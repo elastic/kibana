@@ -22,8 +22,32 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('main', () => {
+    const basicIndex = 'ba*ic_index';
+    let indexPattern: any;
+
+    before(async () => {
+      await esArchiver.load('index_patterns/basic_index');
+
+      indexPattern = (
+        await supertest.post('/api/index_patterns/index_pattern').send({
+          index_pattern: {
+            title: basicIndex,
+          },
+        })
+      ).body.index_pattern;
+    });
+
+    after(async () => {
+      await esArchiver.unload('index_patterns/basic_index');
+
+      if (indexPattern) {
+        await supertest.delete('/api/index_patterns/index_pattern/' + indexPattern.id);
+      }
+    });
+
     it('can update multiple fields', async () => {
       const title = `foo-${Date.now()}-${Math.random()}*`;
       const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
@@ -171,48 +195,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response3.status).to.be(200);
         expect(response3.body.index_pattern.fieldAttrs.foo.count).to.be(undefined);
       });
-
-      it('can set field "count" attribute on an existing field', async () => {
-        const title = `foo-${Date.now()}-${Math.random()}*`;
-        const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
-          index_pattern: {
-            title,
-            fields: {
-              foo: {
-                name: 'foo',
-                type: 'string',
-                count: 123,
-              },
-            },
-          },
-        });
-
-        expect(response1.status).to.be(200);
-        expect(response1.body.index_pattern.fieldAttrs.foo).to.be(undefined);
-        expect(response1.body.index_pattern.fields.foo.count).to.be(123);
-
-        const response2 = await supertest
-          .post(`/api/index_patterns/index_pattern/${response1.body.index_pattern.id}/fields`)
-          .send({
-            fields: {
-              foo: {
-                count: 456,
-              },
-            },
-          });
-
-        expect(response2.status).to.be(200);
-        expect(response2.body.index_pattern.fieldAttrs.foo).to.be(undefined);
-        expect(response2.body.index_pattern.fields.foo.count).to.be(456);
-
-        const response3 = await supertest.get(
-          `/api/index_patterns/index_pattern/${response1.body.index_pattern.id}`
-        );
-
-        expect(response3.status).to.be(200);
-        expect(response3.body.index_pattern.fieldAttrs.foo).to.be(undefined);
-        expect(response3.body.index_pattern.fields.foo.count).to.be(456);
-      });
     });
 
     describe('customLabel', () => {
@@ -323,46 +305,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('can set field "customLabel" attribute on an existing field', async () => {
-        const title = `foo-${Date.now()}-${Math.random()}*`;
-        const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
-          index_pattern: {
-            title,
-            fields: {
-              foo: {
-                name: 'foo',
-                type: 'string',
-                count: 123,
-                customLabel: 'foo',
-              },
+        await supertest.post(`/api/index_patterns/index_pattern/${indexPattern.id}/fields`).send({
+          fields: {
+            foo: {
+              customLabel: 'baz',
             },
           },
         });
 
-        expect(response1.status).to.be(200);
-        expect(response1.body.index_pattern.fieldAttrs.foo).to.be(undefined);
-        expect(response1.body.index_pattern.fields.foo.customLabel).to.be('foo');
-
-        const response2 = await supertest
-          .post(`/api/index_patterns/index_pattern/${response1.body.index_pattern.id}/fields`)
-          .send({
-            fields: {
-              foo: {
-                customLabel: 'baz',
-              },
-            },
-          });
-
-        expect(response2.status).to.be(200);
-        expect(response2.body.index_pattern.fieldAttrs.foo).to.be(undefined);
-        expect(response2.body.index_pattern.fields.foo.customLabel).to.be('baz');
-
-        const response3 = await supertest.get(
-          `/api/index_patterns/index_pattern/${response1.body.index_pattern.id}`
+        const response1 = await supertest.get(
+          `/api/index_patterns/index_pattern/${indexPattern.id}`
         );
 
-        expect(response3.status).to.be(200);
-        expect(response3.body.index_pattern.fieldAttrs.foo).to.be(undefined);
-        expect(response3.body.index_pattern.fields.foo.customLabel).to.be('baz');
+        expect(response1.status).to.be(200);
+        expect(response1.body.index_pattern.fields.foo.customLabel).to.be('baz');
       });
     });
 
@@ -463,31 +419,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('can remove "format" attribute from index_pattern format map', async () => {
-        const title = `foo-${Date.now()}-${Math.random()}*`;
-        const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
-          index_pattern: {
-            title,
-            fieldFormats: {
-              foo: {
-                id: 'bar',
-                params: {
-                  baz: 'qux',
-                },
-              },
-            },
-          },
-        });
-
-        expect(response1.status).to.be(200);
-        expect(response1.body.index_pattern.fieldFormats.foo).to.eql({
-          id: 'bar',
-          params: {
-            baz: 'qux',
-          },
-        });
-
         const response2 = await supertest
-          .post(`/api/index_patterns/index_pattern/${response1.body.index_pattern.id}/fields`)
+          .post(`/api/index_patterns/index_pattern/${indexPattern.id}/fields`)
           .send({
             fields: {
               foo: {
@@ -500,7 +433,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response2.body.index_pattern.fieldFormats.foo).to.be(undefined);
 
         const response3 = await supertest.get(
-          `/api/index_patterns/index_pattern/${response1.body.index_pattern.id}`
+          `/api/index_patterns/index_pattern/${indexPattern.id}`
         );
 
         expect(response3.status).to.be(200);

@@ -112,6 +112,8 @@ export async function getServiceInstanceTransactionStats({
     },
   });
 
+  const deltaAsMinutes = (end - start) / 60 / 1000;
+
   return (
     response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
       (serviceNodeBucket) => {
@@ -133,10 +135,10 @@ export async function getServiceInstanceTransactionStats({
             })),
           },
           throughput: {
-            value: count.value,
+            value: count.value / deltaAsMinutes,
             timeseries: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
-              y: dateBucket.count.value,
+              y: dateBucket.count.value / deltaAsMinutes,
             })),
           },
           latency: {

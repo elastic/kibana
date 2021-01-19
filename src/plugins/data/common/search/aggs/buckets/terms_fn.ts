@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
 export const aggTermsFnName = 'aggTerms';
 
@@ -160,7 +159,6 @@ export const aggTerms = (): FunctionDefinition => ({
         params: {
           ...rest,
           orderAgg: args.orderAgg?.value,
-          json: getParsedValue(args, 'json'),
         },
       },
     };

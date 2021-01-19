@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { EditorController } from './application';
+import { TSVB_EDITOR_NAME } from './application';
 import { PANEL_TYPES } from '../common/panel_types';
 import { toExpressionAst } from './to_ast';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
@@ -70,7 +70,9 @@ export const metricsVisDefinition = {
       tooltip_mode: 'show_all',
     },
   },
-  editor: EditorController,
+  editorConfig: {
+    editor: TSVB_EDITOR_NAME,
+  },
   options: {
     showQueryBar: false,
     showFilterBar: false,

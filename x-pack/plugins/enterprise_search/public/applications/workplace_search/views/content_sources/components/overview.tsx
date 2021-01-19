@@ -9,7 +9,6 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
-  EuiAvatar,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,20 +33,17 @@ import {
   DOCUMENT_PERMISSIONS_DOCS_URL,
   ENT_SEARCH_LICENSE_MANAGEMENT,
   EXTERNAL_IDENTITIES_DOCS_URL,
-  SOURCE_CONTENT_PATH,
-  getContentSourcePath,
   getGroupPath,
 } from '../../../routes';
 
 import { AppLogic } from '../../../app_logic';
-import { User } from '../../../types';
 
 import { ComponentLoader } from '../../../components/shared/component_loader';
 import { CredentialItem } from '../../../components/shared/credential_item';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { LicenseBadge } from '../../../components/shared/license_badge';
 import { Loading } from '../../../../shared/loading';
-import { EuiButtonEmptyTo, EuiPanelTo } from '../../../../shared/react_router_helpers';
+import { EuiPanelTo } from '../../../../shared/react_router_helpers';
 
 import aclImage from '../../../assets/supports_acl.svg';
 import { SourceLogic } from '../source_logic';
@@ -65,7 +61,6 @@ export const Overview: React.FC = () => {
     details,
     custom,
     accessToken,
-    key,
     licenseSupportsPermissions,
     serviceTypeSupportsPermissions,
     indexPermissions,
@@ -107,24 +102,9 @@ export const Overview: React.FC = () => {
     return (
       <div className="content-section">
         <div className="section-header">
-          <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h4>Content summary</h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            {totalDocuments > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmptyTo
-                  to={getContentSourcePath(SOURCE_CONTENT_PATH, id, isOrganization)}
-                  data-test-subj="ManageSourceContentLink"
-                  size="s"
-                >
-                  Manage
-                </EuiButtonEmptyTo>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <EuiTitle size="xs">
+            <h4>Content summary</h4>
+          </EuiTitle>
         </div>
         <EuiSpacer size="s" />
         {!summary && <ComponentLoader text="Loading summary details..." />}
@@ -223,31 +203,6 @@ export const Overview: React.FC = () => {
   };
 
   const GroupsSummary = () => {
-    const GroupAvatars = ({ users }: { users: User[] }) => {
-      const MAX_USERS = 4;
-      return (
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
-          {users.slice(0, MAX_USERS).map((user) => (
-            <EuiFlexItem key={user.id}>
-              <EuiAvatar
-                size="s"
-                initials={user.initials}
-                name={user.name || user.initials}
-                imageUrl={user.pictureUrl || ''}
-              />
-            </EuiFlexItem>
-          ))}
-          {users.slice(MAX_USERS).length > 0 && (
-            <EuiFlexItem>
-              <EuiText color="subdued" size="xs">
-                <strong>+{users.slice(MAX_USERS).length}</strong>
-              </EuiText>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      );
-    };
-
     return !groups.length ? null : (
       <>
         <EuiText>
@@ -262,16 +217,9 @@ export const Overview: React.FC = () => {
                 data-test-subj="SourceGroupLink"
                 className="euiPanel--inset"
               >
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem>
-                    <EuiText size="s" className="eui-textTruncate">
-                      <strong>{group.name}</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <GroupAvatars users={group.users} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiText size="s" className="eui-textTruncate">
+                  <strong>{group.name}</strong>
+                </EuiText>
               </EuiPanelTo>
             </EuiFlexItem>
           ))}
@@ -422,9 +370,9 @@ export const Overview: React.FC = () => {
         </h6>
       </EuiText>
       <EuiSpacer size="s" />
-      <CredentialItem label="Access Token" value={accessToken} testSubj="AccessToken" />
+      <CredentialItem label="ID" value={id} testSubj="ContentSourceId" />
       <EuiSpacer size="s" />
-      <CredentialItem label="Key" value={key} testSubj="ContentSourceKey" />
+      <CredentialItem label="Access Token" value={accessToken} testSubj="AccessToken" />
     </EuiPanel>
   );
 

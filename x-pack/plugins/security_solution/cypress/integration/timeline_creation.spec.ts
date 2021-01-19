@@ -8,6 +8,7 @@ import { timeline } from '../objects/timeline';
 import {
   FAVORITE_TIMELINE,
   LOCKED_ICON,
+  UNLOCKED_ICON,
   NOTES_TAB_BUTTON,
   NOTES_TEXT,
   // NOTES_COUNT,
@@ -18,6 +19,7 @@ import {
   // TIMELINE_FILTER,
   TIMELINE_QUERY,
   TIMELINE_TITLE,
+  OPEN_TIMELINE_MODAL,
 } from '../screens/timeline';
 import {
   TIMELINES_DESCRIPTION,
@@ -30,9 +32,8 @@ import { cleanKibana } from '../tasks/common';
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
 import {
-  addDescriptionToTimeline,
   addFilter,
-  addNameToTimeline,
+  addNameAndDescriptionToTimeline,
   addNotesToTimeline,
   closeTimeline,
   createNewTimeline,
@@ -47,8 +48,6 @@ import { openTimeline } from '../tasks/timelines';
 import { OVERVIEW_URL } from '../urls/navigation';
 
 describe('Timelines', () => {
-  let timelineId: string;
-
   beforeEach(() => {
     cleanKibana();
   });
@@ -58,21 +57,20 @@ describe('Timelines', () => {
 
     loginAndWaitForPage(OVERVIEW_URL);
     openTimelineUsingToggle();
-    populateTimeline();
-    addFilter(timeline.filter);
-    pinFirstEvent();
-
-    cy.get(PIN_EVENT)
-      .should('have.attr', 'aria-label')
-      .and('match', /Unpin the event in row 2/);
-    cy.get(LOCKED_ICON).should('be.visible');
-
-    addNameToTimeline(timeline.title);
+    addNameAndDescriptionToTimeline(timeline);
 
     cy.wait('@timeline').then(({ response }) => {
-      timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
+      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
 
-      addDescriptionToTimeline(timeline.description);
+      populateTimeline();
+      addFilter(timeline.filter);
+      pinFirstEvent();
+
+      cy.get(PIN_EVENT)
+        .should('have.attr', 'aria-label')
+        .and('match', /Unpin the event in row 2/);
+      cy.get(LOCKED_ICON).should('be.visible');
+
       addNotesToTimeline(timeline.notes);
       markAsFavorite();
       waitForTimelineChanges();
@@ -80,6 +78,7 @@ describe('Timelines', () => {
       closeTimeline();
       openTimelineFromSettings();
 
+      cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
       cy.contains(timeline.title).should('exist');
       cy.get(TIMELINES_DESCRIPTION).first().should('have.text', timeline.description);
       cy.get(TIMELINES_PINNED_EVENT_COUNT).first().should('have.text', '1');
@@ -96,6 +95,7 @@ describe('Timelines', () => {
       cy.get(PIN_EVENT)
         .should('have.attr', 'aria-label')
         .and('match', /Unpin the event in row 2/);
+      cy.get(UNLOCKED_ICON).should('be.visible');
       cy.get(NOTES_TAB_BUTTON).click();
       cy.get(NOTES_TEXT_AREA).should('exist');
 

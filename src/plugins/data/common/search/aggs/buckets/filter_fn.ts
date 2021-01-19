@@ -95,7 +95,6 @@ export const aggFilter = (): FunctionDefinition => ({
         type: BUCKET_TYPES.FILTER,
         params: {
           ...rest,
-          json: getParsedValue(args, 'json'),
           geo_bounding_box: getParsedValue(args, 'geo_bounding_box'),
         },
       },

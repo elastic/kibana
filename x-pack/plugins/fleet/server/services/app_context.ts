@@ -114,10 +114,6 @@ class AppContextService {
   }
 
   public getEncryptedSavedObjectsSetup() {
-    if (!this.encryptedSavedObjectsSetup) {
-      throw new Error('encryptedSavedObjectsSetup is not set');
-    }
-
     return this.encryptedSavedObjectsSetup;
   }
 

@@ -26,8 +26,11 @@ function getProps() {
     kibana: {
       services: {
         docLinks: {
-          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-          DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+          links: {
+            aggs: {
+              date_format_pattern: 'jest-metadata-mock-url',
+            },
+          },
         },
       },
     },

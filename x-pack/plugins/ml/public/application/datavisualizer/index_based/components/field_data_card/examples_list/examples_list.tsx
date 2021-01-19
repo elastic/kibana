@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { EuiListGroup, EuiListGroupItem, EuiSpacer } from '@elastic/eui';
+import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ExpandedRowFieldHeader } from '../../../../stats_datagrid/components/expanded_row_field_header';
@@ -46,7 +46,6 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
           }}
         />
       </ExpandedRowFieldHeader>
-      <EuiSpacer size="s" />
       <EuiListGroup showToolTips={true} maxWidth={'s'} gutterSize={'none'} flush={true}>
         {examplesContent}
       </EuiListGroup>

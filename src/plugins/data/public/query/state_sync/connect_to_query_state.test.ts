@@ -28,6 +28,7 @@ import { StubBrowserStorage } from '@kbn/test/jest';
 import { connectToQueryState } from './connect_to_query_state';
 import { TimefilterContract } from '../timefilter';
 import { QueryState } from './types';
+import { createNowProviderMock } from '../../now_provider/mocks';
 
 const connectToQueryGlobalState = (query: QueryStart, state: BaseStateContainer<QueryState>) =>
   connectToQueryState(query, state, {
@@ -79,6 +80,7 @@ describe('connect_to_global_state', () => {
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
+      nowProvider: createNowProviderMock(),
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
@@ -312,6 +314,7 @@ describe('connect_to_app_state', () => {
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
+      nowProvider: createNowProviderMock(),
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
@@ -490,6 +493,7 @@ describe('filters with different state', () => {
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
+      nowProvider: createNowProviderMock(),
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,

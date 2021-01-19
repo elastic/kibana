@@ -76,13 +76,13 @@ describe('ServiceList', () => {
       expect(healthHeading).toBeNull();
     });
 
-    it('sorts by transactions per minute', async () => {
+    it('sorts by throughput', async () => {
       const { findByTitle } = renderWithTheme(<ServiceList items={items} />, {
         wrapper: Wrapper,
       });
 
       expect(
-        await findByTitle('Trans. per minute; Sorted in descending order')
+        await findByTitle('Throughput; Sorted in descending order')
       ).toBeInTheDocument();
     });
   });

@@ -7,12 +7,13 @@
 import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-interface GroupByEntry {
-  identifier: string;
-  label: string;
-  intervalLabel?: string;
-}
+import {
+  GroupByEntry,
+  isLatestTransformTestData,
+  isPivotTransformTestData,
+  LatestTransformTestData,
+  PivotTransformTestData,
+} from './index';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -32,8 +33,9 @@ export default function ({ getService }: FtrProviderContext) {
       await transform.api.cleanTransformIndices();
     });
 
-    const testDataList = [
+    const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
       {
+        type: 'pivot',
         suiteTitle: 'batch transform with terms groups and avg agg with saved search filter',
         source: 'ft_farequote_filter',
         groupByEntries: [
@@ -55,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         expected: {
-          pivotPreview: {
+          transformPreview: {
             column: 0,
             values: ['ASA'],
           },
@@ -70,7 +72,44 @@ export default function ({ getService }: FtrProviderContext) {
             values: ['ASA'],
           },
         },
-      },
+      } as PivotTransformTestData,
+      {
+        type: 'latest',
+        suiteTitle: 'batch transform with unique term and sort by time with saved search filter',
+        source: 'ft_farequote_filter',
+        uniqueKeys: [
+          {
+            identifier: 'airline',
+            label: 'airline',
+          },
+        ],
+        sortField: {
+          identifier: '@timestamp',
+          label: '@timestamp',
+        },
+        transformId: `fq_2_${Date.now()}`,
+        transformDescription:
+          'farequote batch transform with airline unique key and sort by timestamp with saved search filter',
+        get destinationIndex(): string {
+          return `user-latest-${this.transformId}`;
+        },
+        expected: {
+          transformPreview: {
+            column: 0,
+            values: ['February 11th 2016, 23:59:54'],
+          },
+          row: {
+            status: TRANSFORM_STATE.STOPPED,
+            mode: 'batch',
+            progress: '100',
+          },
+          sourceIndex: 'ft_farequote',
+          indexPreview: {
+            column: 2,
+            values: ['ASA'],
+          },
+        },
+      } as LatestTransformTestData,
     ];
 
     for (const testData of testDataList) {
@@ -99,6 +138,9 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('displays the define pivot step');
           await transform.wizard.assertDefineStepActive();
 
+          await transform.testExecution.logTestStep('has correct transform function selected');
+          await transform.wizard.assertSelectedTransformFunction('pivot');
+
           await transform.testExecution.logTestStep('loads the index preview');
           await transform.wizard.assertIndexPreviewLoaded();
 
@@ -108,8 +150,8 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.indexPreview.values
           );
 
-          await transform.testExecution.logTestStep('displays an empty pivot preview');
-          await transform.wizard.assertPivotPreviewEmpty();
+          await transform.testExecution.logTestStep('displays an empty transform preview');
+          await transform.wizard.assertTransformPreviewEmpty();
 
           await transform.testExecution.logTestStep('hides the query input');
           await transform.wizard.assertQueryInputMissing();
@@ -117,36 +159,55 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('hides the advanced query editor switch');
           await transform.wizard.assertAdvancedQueryEditorSwitchMissing();
 
-          await transform.testExecution.logTestStep('adds the group by entries');
-          for (const [index, entry] of testData.groupByEntries.entries()) {
-            await transform.wizard.assertGroupByInputExists();
-            await transform.wizard.assertGroupByInputValue([]);
-            await transform.wizard.addGroupByEntry(
-              index,
-              entry.identifier,
-              entry.label,
-              entry.intervalLabel
+          if (isPivotTransformTestData(testData)) {
+            await transform.testExecution.logTestStep('adds the group by entries');
+            for (const [index, entry] of testData.groupByEntries.entries()) {
+              await transform.wizard.assertGroupByInputExists();
+              await transform.wizard.assertGroupByInputValue([]);
+              await transform.wizard.addGroupByEntry(
+                index,
+                entry.identifier,
+                entry.label,
+                entry.intervalLabel
+              );
+            }
+            await transform.testExecution.logTestStep('adds the aggregation entries');
+            for (const [index, agg] of testData.aggregationEntries.entries()) {
+              await transform.wizard.assertAggregationInputExists();
+              await transform.wizard.assertAggregationInputValue([]);
+              await transform.wizard.addAggregationEntry(index, agg.identifier, agg.label);
+            }
+
+            await transform.testExecution.logTestStep('displays the advanced pivot editor switch');
+            await transform.wizard.assertAdvancedPivotEditorSwitchExists();
+            await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
+          }
+
+          if (isLatestTransformTestData(testData)) {
+            await transform.testExecution.logTestStep('sets latest transform method');
+            await transform.wizard.selectTransformFunction('latest');
+            await transform.testExecution.logTestStep('adds unique keys');
+            for (const { identifier, label } of testData.uniqueKeys) {
+              await transform.wizard.assertUniqueKeysInputExists();
+              await transform.wizard.assertUniqueKeysInputValue([]);
+              await transform.wizard.addUniqueKeyEntry(identifier, label);
+            }
+            await transform.testExecution.logTestStep('sets the sort field');
+            await transform.wizard.assertSortFieldInputExists();
+            await transform.wizard.assertSortFieldInputValue('');
+            await transform.wizard.setSortFieldValue(
+              testData.sortField.identifier,
+              testData.sortField.label
             );
           }
-
-          await transform.testExecution.logTestStep('adds the aggregation entries');
-          for (const [index, agg] of testData.aggregationEntries.entries()) {
-            await transform.wizard.assertAggregationInputExists();
-            await transform.wizard.assertAggregationInputValue([]);
-            await transform.wizard.addAggregationEntry(index, agg.identifier, agg.label);
-          }
-
-          await transform.testExecution.logTestStep('displays the advanced pivot editor switch');
-          await transform.wizard.assertAdvancedPivotEditorSwitchExists();
-          await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
 
           await transform.testExecution.logTestStep('loads the pivot preview');
           await transform.wizard.assertPivotPreviewLoaded();
 
           await transform.testExecution.logTestStep('shows the pivot preview');
           await transform.wizard.assertPivotPreviewColumnValues(
-            testData.expected.pivotPreview.column,
-            testData.expected.pivotPreview.values
+            testData.expected.transformPreview.column,
+            testData.expected.transformPreview.values
           );
 
           await transform.testExecution.logTestStep('loads the details step');
@@ -231,8 +292,8 @@ export default function ({ getService }: FtrProviderContext) {
             'displays the transform preview in the expanded row'
           );
           await transform.table.assertTransformsExpandedRowPreviewColumnValues(
-            testData.expected.pivotPreview.column,
-            testData.expected.pivotPreview.values
+            testData.expected.transformPreview.column,
+            testData.expected.transformPreview.values
           );
         });
       });

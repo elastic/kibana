@@ -34,6 +34,17 @@ export function calculateBounds(
   };
 }
 
+export function getAbsoluteTimeRange(
+  timeRange: TimeRange,
+  { forceNow }: { forceNow?: Date } = {}
+): TimeRange {
+  const { min, max } = calculateBounds(timeRange, { forceNow });
+  return {
+    from: min ? min.toISOString() : timeRange.from,
+    to: max ? max.toISOString() : timeRange.to,
+  };
+}
+
 export function getTime(
   indexPattern: IIndexPattern | undefined,
   timeRange: TimeRange,

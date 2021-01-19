@@ -18,7 +18,11 @@
  */
 
 import _ from 'lodash';
-import { CONTEXT_STEP_SETTING, CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../common';
+import {
+  CONTEXT_STEP_SETTING,
+  CONTEXT_TIE_BREAKER_FIELDS_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+} from '../../../common';
 import { getAngularModule, getServices } from '../../kibana_services';
 import contextAppTemplate from './context_app.html';
 import './context/components/action_bar';
@@ -59,9 +63,11 @@ function ContextAppController($scope, Private) {
   const { filterManager, indexPatterns, uiSettings, navigation } = getServices();
   const queryParameterActions = getQueryParameterActions(filterManager, indexPatterns);
   const queryActions = Private(QueryActionsProvider);
+  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   this.state = createInitialState(
     parseInt(uiSettings.get(CONTEXT_STEP_SETTING), 10),
-    getFirstSortableField(this.indexPattern, uiSettings.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING))
+    getFirstSortableField(this.indexPattern, uiSettings.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING)),
+    useNewFieldsApi
   );
   this.topNavMenu = navigation.ui.TopNavMenu;
 
@@ -127,7 +133,7 @@ function ContextAppController($scope, Private) {
   );
 }
 
-function createInitialState(defaultStepSize, tieBreakerField) {
+function createInitialState(defaultStepSize, tieBreakerField, useNewFieldsApi) {
   return {
     queryParameters: createInitialQueryParametersState(defaultStepSize, tieBreakerField),
     rows: {
@@ -137,5 +143,6 @@ function createInitialState(defaultStepSize, tieBreakerField) {
       successors: [],
     },
     loadingStatus: createInitialLoadingStatusState(),
+    useNewFieldsApi,
   };
 }

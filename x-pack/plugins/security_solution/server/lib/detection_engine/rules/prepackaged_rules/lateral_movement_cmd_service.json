@@ -35,20 +35,54 @@
           "id": "T1021",
           "name": "Remote Services",
           "reference": "https://attack.mitre.org/techniques/T1021/"
-        },
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
         {
-          "id": "T1050",
-          "name": "New Service",
-          "reference": "https://attack.mitre.org/techniques/T1050/"
-        },
+          "id": "T1543",
+          "name": "Create or Modify System Process",
+          "reference": "https://attack.mitre.org/techniques/T1543/",
+          "subtechnique": [
+            {
+              "id": "T1543.003",
+              "name": "Windows Service",
+              "reference": "https://attack.mitre.org/techniques/T1543/003/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
         {
-          "id": "T1035",
-          "name": "Service Execution",
-          "reference": "https://attack.mitre.org/techniques/T1035/"
+          "id": "T1569",
+          "name": "System Services",
+          "reference": "https://attack.mitre.org/techniques/T1569/",
+          "subtechnique": [
+            {
+              "id": "T1569.002",
+              "name": "Service Execution",
+              "reference": "https://attack.mitre.org/techniques/T1569/002/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

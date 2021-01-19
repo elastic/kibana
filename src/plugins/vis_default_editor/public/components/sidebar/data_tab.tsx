@@ -28,6 +28,7 @@ import {
   search,
   TimeRange,
 } from '../../../../data/public';
+import type { ISchemas } from '../../../../visualizations/public';
 import { DefaultEditorAggGroup } from '../agg_group';
 import {
   EditorAction,
@@ -38,9 +39,8 @@ import {
   changeAggType,
   toggleEnabledAgg,
 } from './state';
-import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from '../agg_common_props';
-import { ISchemas } from '../../schemas';
-import { EditorVisState } from './state/reducers';
+import type { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from '../agg_common_props';
+import type { EditorVisState } from './state/reducers';
 
 export interface DefaultEditorDataTabProps {
   dispatch: React.Dispatch<EditorAction>;

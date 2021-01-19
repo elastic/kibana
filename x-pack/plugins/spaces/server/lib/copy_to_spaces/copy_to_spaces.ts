@@ -6,10 +6,6 @@
 
 import { SavedObject, KibanaRequest, CoreStart } from 'src/core/server';
 import { Readable } from 'stream';
-import {
-  exportSavedObjectsToStream,
-  importSavedObjectsFromStream,
-} from '../../../../../../src/core/server';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, CopyResponse } from './types';
 import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
@@ -20,24 +16,23 @@ import { getIneligibleTypes } from './lib/get_ineligible_types';
 
 export function copySavedObjectsToSpacesFactory(
   savedObjects: CoreStart['savedObjects'],
-  getImportExportObjectLimit: () => number,
   request: KibanaRequest
 ) {
-  const { getTypeRegistry, getScopedClient } = savedObjects;
+  const { getTypeRegistry, getScopedClient, createExporter, createImporter } = savedObjects;
 
   const savedObjectsClient = getScopedClient(request, COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS);
+  const savedObjectsExporter = createExporter(savedObjectsClient);
+  const savedObjectsImporter = createImporter(savedObjectsClient);
 
   const exportRequestedObjects = async (
     sourceSpaceId: string,
     options: Pick<CopyOptions, 'includeReferences' | 'objects'>
   ) => {
-    const objectStream = await exportSavedObjectsToStream({
+    const objectStream = await savedObjectsExporter.exportByObjects({
       namespace: spaceIdToNamespace(sourceSpaceId),
       includeReferencesDeep: options.includeReferences,
       excludeExportDetails: true,
       objects: options.objects,
-      savedObjectsClient,
-      exportSizeLimit: getImportExportObjectLimit(),
     });
 
     return readStreamToCompletion<SavedObject>(objectStream);
@@ -49,12 +44,9 @@ export function copySavedObjectsToSpacesFactory(
     options: CopyOptions
   ) => {
     try {
-      const importResponse = await importSavedObjectsFromStream({
+      const importResponse = await savedObjectsImporter.import({
         namespace: spaceIdToNamespace(spaceId),
-        objectLimit: getImportExportObjectLimit(),
         overwrite: options.overwrite,
-        savedObjectsClient,
-        typeRegistry: getTypeRegistry(),
         readStream: objectsStream,
         createNewCopies: options.createNewCopies,
       });

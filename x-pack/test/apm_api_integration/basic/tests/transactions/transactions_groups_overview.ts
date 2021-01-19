@@ -111,7 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             "name": "DispatcherServlet#doGet",
             "throughput": Object {
-              "value": 16,
+              "value": 0.533333333333333,
             },
           }
         `);

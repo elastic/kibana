@@ -8,7 +8,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionTypeMenu } from './action_type_menu';
-import { ValidationResult } from '../../../types';
+import { ConnectorValidationResult, GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -38,10 +38,10 @@ describe('connector_add_flyout', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
@@ -75,10 +75,10 @@ describe('connector_add_flyout', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
@@ -112,10 +112,10 @@ describe('connector_add_flyout', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },

@@ -128,7 +128,6 @@ export class Plugin {
       externalRouter,
       log: this.log,
       getStartServices: core.getStartServices,
-      getImportExportObjectLimit: core.savedObjects.getImportExportObjectLimit,
       getSpacesService,
       usageStatsServicePromise,
     });
