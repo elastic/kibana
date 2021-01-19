@@ -127,7 +127,7 @@ insights and relationships. Ask your questions, and then filter the results to j
 Or, just see the most recent documents added to {es}.
 
 . *Visualize.* {kib} provides many options to create visualizations of your data&mdash;from simple
-aggregation-based charts to complex time series visualizations.
+aggregation- to time series-based.
 <<dashboard, *Dashboard*>> is your starting point for building visualizations,
 and then pulling them together to show your data from multiple perspectives.
 
