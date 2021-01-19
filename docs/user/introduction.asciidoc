@@ -133,7 +133,7 @@ and then pulling them together to show your data from multiple perspectives.
 
 . *Present.* <<canvas, *Canvas*>> enables you to display your data in a visually
 compelling, pixel-perfect presentation. With **Canvas**, you can give your data
-the “wow” factor needed to impress your CEO or to captivate coworkers with a big-screen display.
+the “wow” factor needed to impress your CEO, or  captivate coworkers with a big-screen display.
 
 . *Share.* Share your findings using the option that works best for you&mdash;embed
 a dashboard, share a link, or export to PDF, PNG, or CSV files and send as an attachment.
