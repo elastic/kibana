@@ -43,6 +43,21 @@ export const NAV = {
   SETTINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.settings', {
     defaultMessage: 'Settings',
   }),
+  SETTINGS_CUSTOMIZE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.nav.settingsCustomize',
+    {
+      defaultMessage: 'Customize',
+    }
+  ),
+  SETTINGS_SOURCE_PRIORITIZATION: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.nav.settingsSourcePrioritization',
+    {
+      defaultMessage: 'Content source connectors',
+    }
+  ),
+  SETTINGS_OAUTH: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.settingsOauth', {
+    defaultMessage: 'OAuth application',
+  }),
   ADD_SOURCE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.addSource', {
     defaultMessage: 'Add Source',
   }),
@@ -275,43 +290,240 @@ export const DOCUMENTATION_LINK_TITLE = i18n.translate(
 );
 
 export const PUBLIC_KEY_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearc.publicKey.label',
+  'xpack.enterpriseSearch.workplaceSearch.publicKey.label',
   {
     defaultMessage: 'Public Key',
   }
 );
 
 export const CONSUMER_KEY_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearc.consumerKey.label',
+  'xpack.enterpriseSearch.workplaceSearch.consumerKey.label',
   {
     defaultMessage: 'Consumer Key',
   }
 );
 
 export const BASE_URI_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearc.baseUri.label',
+  'xpack.enterpriseSearch.workplaceSearch.baseUri.label',
   {
     defaultMessage: 'Base URI',
   }
 );
 
 export const BASE_URL_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearc.baseUrl.label',
+  'xpack.enterpriseSearch.workplaceSearch.baseUrl.label',
   {
     defaultMessage: 'Base URL',
   }
 );
 
 export const CLIENT_ID_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearc.clientId.label',
+  'xpack.enterpriseSearch.workplaceSearch.clientId.label',
   {
     defaultMessage: 'Client id',
   }
 );
 
 export const CLIENT_SECRET_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearc.clientSecret.label',
+  'xpack.enterpriseSearch.workplaceSearch.clientSecret.label',
   {
     defaultMessage: 'Client secret',
+  }
+);
+
+export const CONFIDENTIAL_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.confidential.label',
+  {
+    defaultMessage: 'Confidential',
+  }
+);
+
+export const CONFIDENTIAL_HELP_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.confidential.text',
+  {
+    defaultMessage:
+      'Deselect for environments in which the client secret cannot be kept confidential, such as native mobile apps and single page applications.',
+  }
+);
+
+export const CREDENTIALS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.credentials.title',
+  {
+    defaultMessage: 'Credentials',
+  }
+);
+
+export const CREDENTIALS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.credentials.description',
+  {
+    defaultMessage:
+      'Use the following credentials within your client to request access tokens from our authentication server.',
+  }
+);
+
+export const ORG_UPDATED_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.settings.orgUpdated.message',
+  {
+    defaultMessage: 'Successfully updated organization.',
+  }
+);
+
+export const OAUTH_APP_UPDATED_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.settings.oauthAppUpdated.message',
+  {
+    defaultMessage: 'Successfully updated application.',
+  }
+);
+
+export const SAVE_CHANGES_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.saveChanges.button',
+  {
+    defaultMessage: 'Save changes',
+  }
+);
+
+export const NAME_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.name.label', {
+  defaultMessage: 'Name',
+});
+
+export const OAUTH_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.oauth.description',
+  {
+    defaultMessage: 'Create an OAuth client for your organization.',
+  }
+);
+
+export const OAUTH_PERSISTED_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.oauthPersisted.description',
+  {
+    defaultMessage:
+      "Access your organization's OAuth client credentials and manage OAuth settings.",
+  }
+);
+
+export const REDIRECT_URIS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.redirectURIs.label',
+  {
+    defaultMessage: 'Redirect URIs',
+  }
+);
+
+export const REDIRECT_HELP_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.redirectHelp.text',
+  {
+    defaultMessage: 'Provide one URI per line.',
+  }
+);
+
+export const REDIRECT_NATIVE_HELP_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.redirectNativeHelp.text',
+  {
+    defaultMessage: 'For local development URIs, use format',
+  }
+);
+
+export const REDIRECT_SECURE_ERROR_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.redirectSecureError.text',
+  {
+    defaultMessage: 'Cannot contain duplicate redirect URIs.',
+  }
+);
+
+export const REDIRECT_INSECURE_ERROR_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.redirectInsecureError.text',
+  {
+    defaultMessage: 'Using an insecure redirect URI (http) is not recommended.',
+  }
+);
+
+export const LICENSE_MODAL_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.licenseModal.title',
+  {
+    defaultMessage: 'Configuring OAuth for Custom Search Applications',
+  }
+);
+
+export const LICENSE_MODAL_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.licenseModal.description',
+  {
+    defaultMessage:
+      'Configure an OAuth application for secure use of the Workplace Search Search API. Upgrade to a Platinum license to enable the Search API and create your OAuth application.',
+  }
+);
+
+export const LICENSE_MODAL_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.licenseModal.link',
+  {
+    defaultMessage: 'Explore Platinum features',
+  }
+);
+
+export const CUSTOMIZE_HEADER_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.customize.header.title',
+  {
+    defaultMessage: 'Customize Workplace Search',
+  }
+);
+
+export const CUSTOMIZE_HEADER_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.customize.header.description',
+  {
+    defaultMessage: 'Personalize general organization settings.',
+  }
+);
+
+export const CUSTOMIZE_NAME_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.customize.name.label',
+  {
+    defaultMessage: 'Personalize general organization settings.',
+  }
+);
+
+export const CUSTOMIZE_NAME_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.customize.name.button',
+  {
+    defaultMessage: 'Save organization name',
+  }
+);
+
+export const UPDATE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.update.button',
+  {
+    defaultMessage: 'Update',
+  }
+);
+
+export const CONFIGURE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.configure.button',
+  {
+    defaultMessage: 'Configure',
+  }
+);
+
+export const PRIVATE_PLATINUM_LICENSE_CALLOUT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.privatePlatinumCallout.text',
+  {
+    defaultMessage: 'Private Sources require a Platinum license.',
+  }
+);
+
+export const PRIVATE_SOURCE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.privateSource.text',
+  {
+    defaultMessage: 'Private Source',
+  }
+);
+
+export const CONNECTORS_HEADER_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.connectors.header.title',
+  {
+    defaultMessage: 'Content source connectors',
+  }
+);
+
+export const CONNECTORS_HEADER_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.connectors.header.description',
+  {
+    defaultMessage: 'All of your configurable connectors.',
   }
 );
