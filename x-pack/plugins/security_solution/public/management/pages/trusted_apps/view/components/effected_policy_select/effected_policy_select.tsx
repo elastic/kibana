@@ -54,12 +54,15 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         {}
       );
 
-      return options.map<EffectedPolicyOption>((policy) => ({
-        label: policy.name,
-        policy,
-        checked: isPolicySelected[policy.id] ? 'on' : undefined,
-      }));
-    }, [options, selected]);
+      return options
+        .map<EffectedPolicyOption>((policy) => ({
+          label: policy.name,
+          policy,
+          checked: isPolicySelected[policy.id] ? 'on' : undefined,
+          disabled: isGlobal,
+        }))
+        .sort(({ label: labelA }, { label: labelB }) => labelA.localeCompare(labelB));
+    }, [isGlobal, options, selected]);
 
     const handleOnPolicySelectChange: EuiSelectableProps<OptionPolicyData>['onChange'] = useCallback(
       (currentOptions) => {
