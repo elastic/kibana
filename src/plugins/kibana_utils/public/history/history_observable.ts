@@ -64,7 +64,7 @@ export function createQueryParamObservable<Param = unknown>(
   return createQueryParamsObservable(history).pipe(
     map((params) => (params[paramKey] ?? null) as Param | null),
     distinctUntilChangedWithInitialValue(
-      getQueryParams(history.location)[paramKey] as Param | null,
+      (getQueryParams(history.location)[paramKey] ?? null) as Param | null,
       deepEqual
     )
   );
