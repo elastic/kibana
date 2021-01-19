@@ -107,7 +107,6 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                             onChange={(e) => {
                               unitField.setValue(e.target.value);
                             }}
-                            hasNoInitialSelection={true}
                             isInvalid={isUnitFieldInvalid}
                             append={'old'}
                             data-test-subj={`${phase}-selectedMinimumAgeUnits`}

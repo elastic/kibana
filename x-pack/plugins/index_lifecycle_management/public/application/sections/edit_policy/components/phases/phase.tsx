@@ -94,9 +94,9 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
             )}
           </EuiFlexGroup>
           <EuiSpacer />
-          <div style={isShowingSettings && enabled ? {} : { display: 'none' }}>{children}</div>
+          {enabled && <div style={isShowingSettings ? {} : { display: 'none' }}>{children}</div>}
 
-          <div style={isShowingSettings && enabled ? { display: 'none' } : {}}>
+          {!isShowingSettings && (
             <EuiText color="subdued" size={'s'}>
               {i18nTexts.editPolicy.descriptions[phase]}
               <br />
@@ -112,7 +112,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
                 }}
               />
             </EuiText>
-          </div>
+          )}
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

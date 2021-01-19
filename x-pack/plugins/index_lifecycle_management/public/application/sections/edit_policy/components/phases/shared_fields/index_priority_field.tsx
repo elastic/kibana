@@ -50,7 +50,7 @@ export const IndexPriorityField: FunctionComponent<Props> = ({ phase }) => {
       fullWidth
       switchProps={{
         'aria-label': i18nTexts.editPolicy.indexPriorityFieldLabel,
-        'data-test-subj': `${phase}-setPrioritySwitch`,
+        'data-test-subj': `${phase}-indexPrioritySwitch`,
         'aria-controls': 'setPriorityContent',
         initialValue: initialToggleValue,
       }}

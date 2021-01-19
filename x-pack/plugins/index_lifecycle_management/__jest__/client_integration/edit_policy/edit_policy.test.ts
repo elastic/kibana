@@ -76,9 +76,6 @@ describe('<EditPolicy />', () => {
                 max_size: '50gb',
                 unknown_setting: 123, // Made up setting that should stay preserved
               },
-              set_priority: {
-                priority: 100,
-              },
             },
             min_age: '0ms',
           },
@@ -126,8 +123,10 @@ describe('<EditPolicy />', () => {
         await actions.hot.toggleForceMerge(true);
         await actions.hot.setForcemergeSegmentsCount('123');
         await actions.hot.setBestCompression(true);
+        await actions.hot.toggleShrink(true);
         await actions.hot.setShrink('2');
         await actions.hot.setReadonly(true);
+        await actions.hot.toggleIndexPriority(true);
         await actions.hot.setIndexPriority('123');
 
         await actions.savePolicy();
@@ -187,11 +186,7 @@ describe('<EditPolicy />', () => {
         const rolloverAction = hotActions.rollover;
         expect(rolloverAction).toBe(undefined);
         expect(hotActions).toMatchInlineSnapshot(`
-          Object {
-            "set_priority": Object {
-              "priority": 100,
-            },
-          }
+          Object {}
         `);
       });
 
