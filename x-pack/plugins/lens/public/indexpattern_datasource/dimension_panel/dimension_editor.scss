@@ -15,8 +15,9 @@
   column-gap: $euiSizeXL;
 }
 
+// overrides the .euiListGroupItem display flex.
+// The parent container has a column-count property that only works properly with block elements.
 .lnsIndexPatternDimensionEditor__operation {
-  // overrides the .euiListGroupItem display flex. The parent container has a column-count property that only works properly with block elements. 
   display: block;
 }
 
