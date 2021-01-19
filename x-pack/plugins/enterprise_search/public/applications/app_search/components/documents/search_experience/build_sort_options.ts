@@ -6,8 +6,6 @@
 
 import { flatten } from 'lodash';
 
-import { i18n } from '@kbn/i18n';
-
 import { Fields, SortOption, SortDirection } from './types';
 import { ASCENDING, DESCENDING } from './constants';
 
