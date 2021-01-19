@@ -299,10 +299,10 @@ export const SAVE_CUSTOM_ACCESS_TOKEN_LABEL = i18n.translate(
   }
 );
 
-export const SAVE_CUSTOM_API_KEY_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.apiKey.label',
+export const SAVE_CUSTOM_ID_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.id.label',
   {
-    defaultMessage: 'Key',
+    defaultMessage: 'ID',
   }
 );
 
