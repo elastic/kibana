@@ -117,7 +117,6 @@ async function teamsExecutor(
       url: webhookUrl,
       logger,
       data,
-      proxySettings: execOptions.proxySettings,
       configurationUtilities,
     })
   );

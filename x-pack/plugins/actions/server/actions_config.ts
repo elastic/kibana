@@ -12,6 +12,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { ActionsConfig } from './config';
 import { ActionTypeDisabledError } from './lib';
+import { ProxySettings } from './types';
 
 export enum AllowedHosts {
   Any = '*',
@@ -34,6 +35,7 @@ export interface ActionsConfigurationUtilities {
   ensureUriAllowed: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
   isRejectUnauthorizedCertificatesEnabled: () => boolean;
+  getProxySettings: () => undefined | ProxySettings;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -83,6 +85,18 @@ function isActionTypeEnabledInConfig(
   return false;
 }
 
+function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySettings {
+  if (!config.proxyUrl) {
+    return undefined;
+  }
+
+  return {
+    proxyUrl: config.proxyUrl,
+    proxyHeaders: config.proxyHeaders,
+    proxyRejectUnauthorizedCertificates: config.proxyRejectUnauthorizedCertificates,
+  };
+}
+
 export function getActionsConfigurationUtilities(
   config: ActionsConfig
 ): ActionsConfigurationUtilities {
@@ -93,6 +107,7 @@ export function getActionsConfigurationUtilities(
     isHostnameAllowed,
     isUriAllowed,
     isActionTypeEnabled,
+    getProxySettings: () => getProxySettingsFromConfig(config),
     isRejectUnauthorizedCertificatesEnabled: () => config.rejectUnauthorized,
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {

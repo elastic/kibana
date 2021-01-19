@@ -9,7 +9,6 @@ import { Agent as HttpsAgent } from 'https';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { Logger } from '../../../../../../src/core/server';
-import { ProxySettings } from '../../types';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 interface GetProxyAgentsResponse {
@@ -19,9 +18,9 @@ interface GetProxyAgentsResponse {
 
 export function getProxyAgents(
   configurationUtilities: ActionsConfigurationUtilities,
-  proxySettings: ProxySettings | undefined | null,
   logger: Logger
 ): GetProxyAgentsResponse {
+  const proxySettings = configurationUtilities.getProxySettings();
   const defaultResponse = {
     httpAgent: undefined,
     httpsAgent: new HttpsAgent({

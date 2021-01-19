@@ -160,38 +160,47 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
     });
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
-          Object {
-            "axios": undefined,
-            "data": Object {
-              "text": "this invocation should succeed",
-            },
-            "logger": Object {
-              "context": Array [],
-              "debug": [MockFunction] {
-                "calls": Array [
-                  Array [
-                    "response from teams action \\"some-id\\": [HTTP 200] ",
-                  ],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
+      Object {
+        "axios": undefined,
+        "configurationUtilities": Object {
+          "ensureActionTypeEnabled": [MockFunction],
+          "ensureHostnameAllowed": [MockFunction],
+          "ensureUriAllowed": [MockFunction],
+          "getProxySettings": [MockFunction],
+          "isActionTypeEnabled": [MockFunction],
+          "isHostnameAllowed": [MockFunction],
+          "isRejectUnauthorizedCertificatesEnabled": [MockFunction],
+          "isUriAllowed": [MockFunction],
+        },
+        "data": Object {
+          "text": "this invocation should succeed",
+        },
+        "logger": Object {
+          "context": Array [],
+          "debug": [MockFunction] {
+            "calls": Array [
+              Array [
+                "response from teams action \\"some-id\\": [HTTP 200] ",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
               },
-              "error": [MockFunction],
-              "fatal": [MockFunction],
-              "get": [MockFunction],
-              "info": [MockFunction],
-              "log": [MockFunction],
-              "trace": [MockFunction],
-              "warn": [MockFunction],
-            },
-            "method": "post",
-            "proxySettings": undefined,
-            "url": "http://example.com",
-          }
+            ],
+          },
+          "error": [MockFunction],
+          "fatal": [MockFunction],
+          "get": [MockFunction],
+          "info": [MockFunction],
+          "log": [MockFunction],
+          "trace": [MockFunction],
+          "warn": [MockFunction],
+        },
+        "method": "post",
+        "url": "http://example.com",
+      }
     `);
     expect(response).toMatchInlineSnapshot(`
       Object {
@@ -211,47 +220,49 @@ describe('execute()', () => {
       config: {},
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
-      proxySettings: {
-        proxyUrl: 'https://someproxyhost',
-        proxyRejectUnauthorizedCertificates: false,
-      },
     });
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
-          Object {
-            "axios": undefined,
-            "data": Object {
-              "text": "this invocation should succeed",
-            },
-            "logger": Object {
-              "context": Array [],
-              "debug": [MockFunction] {
-                "calls": Array [
-                  Array [
-                    "response from teams action \\"some-id\\": [HTTP 200] ",
-                  ],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
+      Object {
+        "axios": undefined,
+        "configurationUtilities": Object {
+          "ensureActionTypeEnabled": [MockFunction],
+          "ensureHostnameAllowed": [MockFunction],
+          "ensureUriAllowed": [MockFunction],
+          "getProxySettings": [MockFunction],
+          "isActionTypeEnabled": [MockFunction],
+          "isHostnameAllowed": [MockFunction],
+          "isRejectUnauthorizedCertificatesEnabled": [MockFunction],
+          "isUriAllowed": [MockFunction],
+        },
+        "data": Object {
+          "text": "this invocation should succeed",
+        },
+        "logger": Object {
+          "context": Array [],
+          "debug": [MockFunction] {
+            "calls": Array [
+              Array [
+                "response from teams action \\"some-id\\": [HTTP 200] ",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
               },
-              "error": [MockFunction],
-              "fatal": [MockFunction],
-              "get": [MockFunction],
-              "info": [MockFunction],
-              "log": [MockFunction],
-              "trace": [MockFunction],
-              "warn": [MockFunction],
-            },
-            "method": "post",
-            "proxySettings": Object {
-              "proxyRejectUnauthorizedCertificates": false,
-              "proxyUrl": "https://someproxyhost",
-            },
-            "url": "http://example.com",
-          }
+            ],
+          },
+          "error": [MockFunction],
+          "fatal": [MockFunction],
+          "get": [MockFunction],
+          "info": [MockFunction],
+          "log": [MockFunction],
+          "trace": [MockFunction],
+          "warn": [MockFunction],
+        },
+        "method": "post",
+        "url": "http://example.com",
+      }
     `);
     expect(response).toMatchInlineSnapshot(`
       Object {

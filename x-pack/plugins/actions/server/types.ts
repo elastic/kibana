@@ -61,7 +61,6 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   config: Config;
   secrets: Secrets;
   params: Params;
-  proxySettings?: ProxySettings;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {

@@ -177,7 +177,6 @@ async function executor(
   const secrets = execOptions.secrets;
   const params = execOptions.params;
   const services = execOptions.services;
-  const proxySettings = execOptions.proxySettings;
 
   const apiUrl = getPagerDutyApiUrl(config);
   const headers = {
@@ -189,7 +188,7 @@ async function executor(
   let response;
   try {
     response = await postPagerduty(
-      { apiUrl, data, headers, services, proxySettings },
+      { apiUrl, data, headers, services },
       logger,
       configurationUtilities
     );

@@ -233,6 +233,7 @@ describe('IBM Resilient service', () => {
         params: {
           text_content_output_format: 'objects_convert',
         },
+        configurationUtilities,
       });
     });
 
@@ -301,6 +302,7 @@ describe('IBM Resilient service', () => {
           'https://resilient.elastic.co/rest/orgs/201/incidents?text_content_output_format=objects_convert',
         logger,
         method: 'post',
+        configurationUtilities,
         data: {
           name: 'title',
           description: {
@@ -374,6 +376,7 @@ describe('IBM Resilient service', () => {
         axios,
         logger,
         method: 'patch',
+        configurationUtilities,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1',
         data: {
           changes: [
@@ -487,7 +490,7 @@ describe('IBM Resilient service', () => {
         axios,
         logger,
         method: 'post',
-        proxySettings: undefined,
+        configurationUtilities,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1/comments',
         data: {
           text: {
@@ -591,6 +594,7 @@ describe('IBM Resilient service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url: 'https://resilient.elastic.co/rest/orgs/201/types/incident/fields',
       });
     });

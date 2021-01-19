@@ -26,7 +26,6 @@ import {
 
 import * as i18n from './translations';
 import { request, getErrorMessage } from '../lib/axios_utils';
-import { ProxySettings } from '../../types';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VERSION = '2';
@@ -40,8 +39,7 @@ const createMetaCapabilities = ['list-project-issuetypes', 'list-issuetype-field
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities,
-  proxySettings?: ProxySettings
+  configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
   const { apiUrl: url, projectKey } = config as JiraPublicConfigurationType;
   const { apiToken, email } = secrets as JiraSecretConfigurationType;
@@ -175,7 +173,6 @@ export const createExternalService = (
         axios: axiosInstance,
         url: `${incidentUrl}/${id}`,
         logger,
-        proxySettings,
         configurationUtilities,
       });
 
@@ -225,7 +222,6 @@ export const createExternalService = (
         data: {
           fields,
         },
-        proxySettings,
         configurationUtilities,
       });
 
@@ -267,7 +263,6 @@ export const createExternalService = (
         url: `${incidentUrl}/${incidentId}`,
         logger,
         data: { fields },
-        proxySettings,
         configurationUtilities,
       });
 
@@ -302,7 +297,6 @@ export const createExternalService = (
         url: getCommentsURL(incidentId),
         logger,
         data: { body: comment.comment },
-        proxySettings,
         configurationUtilities,
       });
 
@@ -330,7 +324,6 @@ export const createExternalService = (
         method: 'get',
         url: capabilitiesUrl,
         logger,
-        proxySettings,
         configurationUtilities,
       });
 
@@ -357,7 +350,6 @@ export const createExternalService = (
           method: 'get',
           url: getIssueTypesOldAPIURL,
           logger,
-          proxySettings,
           configurationUtilities,
         });
 
@@ -369,7 +361,6 @@ export const createExternalService = (
           method: 'get',
           url: getIssueTypesUrl,
           logger,
-          proxySettings,
           configurationUtilities,
         });
 
@@ -398,7 +389,6 @@ export const createExternalService = (
           method: 'get',
           url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsOldAPIURL, issueTypeId),
           logger,
-          proxySettings,
           configurationUtilities,
         });
 
@@ -410,7 +400,6 @@ export const createExternalService = (
           method: 'get',
           url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsUrl, issueTypeId),
           logger,
-          proxySettings,
           configurationUtilities,
         });
 
@@ -470,7 +459,6 @@ export const createExternalService = (
         method: 'get',
         url: query,
         logger,
-        proxySettings,
         configurationUtilities,
       });
 
@@ -495,7 +483,6 @@ export const createExternalService = (
         method: 'get',
         url: getIssueUrl,
         logger,
-        proxySettings,
         configurationUtilities,
       });
 

@@ -165,10 +165,6 @@ describe('execute()', () => {
       config: {},
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
-      proxySettings: {
-        proxyUrl: 'https://someproxyhost',
-        proxyRejectUnauthorizedCertificates: false,
-      },
     });
     expect(response).toMatchInlineSnapshot(`
       Object {
@@ -194,9 +190,14 @@ describe('execute()', () => {
   });
 
   test('calls the mock executor with success proxy', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: 'https://someproxyhost',
+      proxyRejectUnauthorizedCertificates: false,
+    });
     const actionTypeProxy = getActionType({
       logger: mockedLogger,
-      configurationUtilities: actionsConfigMock.create(),
+      configurationUtilities,
     });
     await actionTypeProxy.executor({
       actionId: 'some-id',
@@ -204,10 +205,6 @@ describe('execute()', () => {
       config: {},
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
-      proxySettings: {
-        proxyUrl: 'https://someproxyhost',
-        proxyRejectUnauthorizedCertificates: false,
-      },
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'

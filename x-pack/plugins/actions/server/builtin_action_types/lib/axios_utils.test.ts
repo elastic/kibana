@@ -5,6 +5,7 @@
  */
 
 import axios from 'axios';
+import { Agent as HttpsAgent } from 'https';
 import { Logger } from '../../../../../../src/core/server';
 import { addTimeZoneToDate, request, patch, getErrorMessage } from './axios_utils';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
@@ -50,7 +51,7 @@ describe('request', () => {
       method: 'get',
       data: {},
       httpAgent: undefined,
-      httpsAgent: undefined,
+      httpsAgent: expect.any(HttpsAgent),
       proxy: false,
     });
     expect(res).toEqual({
@@ -61,20 +62,16 @@ describe('request', () => {
   });
 
   test('it have been called with proper proxy agent for a valid url', async () => {
-    const proxySettings = {
+    configurationUtilities.getProxySettings.mockReturnValue({
       proxyRejectUnauthorizedCertificates: true,
       proxyUrl: 'https://localhost:1212',
-    };
-    const { httpAgent, httpsAgent } = getProxyAgents(configurationUtilities, proxySettings, logger);
+    });
+    const { httpAgent, httpsAgent } = getProxyAgents(configurationUtilities, logger);
 
     const res = await request({
       axios,
       url: 'http://testProxy',
       logger,
-      proxySettings: {
-        proxyUrl: 'https://localhost:1212',
-        proxyRejectUnauthorizedCertificates: true,
-      },
       configurationUtilities,
     });
 
@@ -93,14 +90,14 @@ describe('request', () => {
   });
 
   test('it have been called with proper proxy agent for an invalid url', async () => {
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: ':nope:',
+      proxyRejectUnauthorizedCertificates: false,
+    });
     const res = await request({
       axios,
       url: 'https://testProxy',
       logger,
-      proxySettings: {
-        proxyUrl: ':nope:',
-        proxyRejectUnauthorizedCertificates: false,
-      },
       configurationUtilities,
     });
 
@@ -108,7 +105,7 @@ describe('request', () => {
       method: 'get',
       data: {},
       httpAgent: undefined,
-      httpsAgent: undefined,
+      httpsAgent: expect.any(HttpsAgent),
       proxy: false,
     });
     expect(res).toEqual({
@@ -132,7 +129,7 @@ describe('request', () => {
       method: 'post',
       data: { id: '123' },
       httpAgent: undefined,
-      httpsAgent: undefined,
+      httpsAgent: expect.any(HttpsAgent),
       proxy: false,
     });
     expect(res).toEqual({
@@ -157,7 +154,7 @@ describe('patch', () => {
       method: 'patch',
       data: { id: '123' },
       httpAgent: undefined,
-      httpsAgent: undefined,
+      httpsAgent: expect.any(HttpsAgent),
       proxy: false,
     });
   });

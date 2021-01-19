@@ -109,6 +109,7 @@ describe('ServiceNow service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
       });
     });
@@ -153,6 +154,7 @@ describe('ServiceNow service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url: 'https://dev102283.service-now.com/api/now/v2/table/incident',
         method: 'post',
         data: { short_description: 'title', description: 'desc' },
@@ -206,6 +208,7 @@ describe('ServiceNow service', () => {
       expect(patchMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
         data: { short_description: 'title', description: 'desc' },
       });
@@ -254,6 +257,7 @@ describe('ServiceNow service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url:
           'https://dev102283.service-now.com/api/now/v2/table/sys_dictionary?sysparm_query=name=task^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
       });

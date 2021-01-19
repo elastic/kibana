@@ -24,7 +24,6 @@ import {
 
 import * as i18n from './translations';
 import { getErrorMessage, request } from '../lib/axios_utils';
-import { ProxySettings } from '../../types';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VIEW_INCIDENT_URL = `#incidents`;
@@ -94,8 +93,7 @@ export const formatUpdateRequest = ({
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities,
-  proxySettings?: ProxySettings
+  configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
   const { apiUrl: url, orgId } = config as ResilientPublicConfigurationType;
   const { apiKeyId, apiKeySecret } = secrets as ResilientSecretConfigurationType;
@@ -132,7 +130,6 @@ export const createExternalService = (
         params: {
           text_content_output_format: 'objects_convert',
         },
-        proxySettings,
         configurationUtilities,
       });
 
@@ -181,7 +178,6 @@ export const createExternalService = (
         method: 'post',
         logger,
         data,
-        proxySettings,
         configurationUtilities,
       });
 
@@ -212,7 +208,6 @@ export const createExternalService = (
         url: `${incidentUrl}/${incidentId}`,
         logger,
         data,
-        proxySettings,
         configurationUtilities,
       });
 
@@ -246,7 +241,6 @@ export const createExternalService = (
         url: getCommentsURL(incidentId),
         logger,
         data: { text: { format: 'text', content: comment.comment } },
-        proxySettings,
         configurationUtilities,
       });
 
@@ -272,7 +266,6 @@ export const createExternalService = (
         method: 'get',
         url: incidentTypesUrl,
         logger,
-        proxySettings,
         configurationUtilities,
       });
 
@@ -295,7 +288,6 @@ export const createExternalService = (
         method: 'get',
         url: severityUrl,
         logger,
-        proxySettings,
         configurationUtilities,
       });
 
@@ -317,7 +309,6 @@ export const createExternalService = (
         axios: axiosInstance,
         url: incidentFieldsUrl,
         logger,
-        proxySettings,
         configurationUtilities,
       });
       return res.data ?? [];

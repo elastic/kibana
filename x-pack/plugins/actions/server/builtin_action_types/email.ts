@@ -226,9 +226,8 @@ async function executor(
       subject: params.subject,
       message: `${params.message}${EMAIL_FOOTER_DIVIDER}${footerMessage}`,
     },
-    proxySettings: execOptions.proxySettings,
     hasAuth: config.hasAuth,
-    rejectUnauthorized: configurationUtilities.isRejectUnauthorizedCertificatesEnabled(),
+    configurationUtilities,
   };
 
   let result;

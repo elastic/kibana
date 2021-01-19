@@ -12,7 +12,6 @@ import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import { request, getErrorMessage, addTimeZoneToDate, patch } from '../lib/axios_utils';
-import { ProxySettings } from '../../types';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const API_VERSION = 'v2';
@@ -25,8 +24,7 @@ const VIEW_INCIDENT_URL = `nav_to.do?uri=incident.do?sys_id=`;
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities,
-  proxySettings?: ProxySettings
+  configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
   const { apiUrl: url } = config as ServiceNowPublicConfigurationType;
   const { username, password } = secrets as ServiceNowSecretConfigurationType;
@@ -60,7 +58,6 @@ export const createExternalService = (
         axios: axiosInstance,
         url: `${incidentUrl}/${id}`,
         logger,
-        proxySettings,
         configurationUtilities,
       });
       checkInstance(res);
@@ -78,7 +75,6 @@ export const createExternalService = (
         axios: axiosInstance,
         url: incidentUrl,
         logger,
-        proxySettings,
         params,
         configurationUtilities,
       });
@@ -97,7 +93,6 @@ export const createExternalService = (
         axios: axiosInstance,
         url: `${incidentUrl}`,
         logger,
-        proxySettings,
         method: 'post',
         data: { ...(incident as Record<string, unknown>) },
         configurationUtilities,
@@ -123,7 +118,6 @@ export const createExternalService = (
         url: `${incidentUrl}/${incidentId}`,
         logger,
         data: { ...(incident as Record<string, unknown>) },
-        proxySettings,
         configurationUtilities,
       });
       checkInstance(res);
@@ -149,7 +143,6 @@ export const createExternalService = (
         axios: axiosInstance,
         url: fieldsUrl,
         logger,
-        proxySettings,
         configurationUtilities,
       });
       checkInstance(res);

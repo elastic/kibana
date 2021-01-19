@@ -165,7 +165,6 @@ export async function executor(
       ...basicAuth,
       headers,
       data,
-      proxySettings: execOptions.proxySettings,
       configurationUtilities,
     })
   );

@@ -98,8 +98,7 @@ async function executor(
       secrets,
     },
     logger,
-    configurationUtilities,
-    execOptions.proxySettings
+    configurationUtilities
   );
 
   if (!api[subAction]) {
