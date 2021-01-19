@@ -97,10 +97,7 @@ export function createPluginSetupContext<
     application: {
       register: (app) => deps.application.register(plugin.opaqueId, app),
       registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
-      registerMountContext: (contextName, provider) =>
-        deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },
-    context: deps.context,
     fatalErrors: deps.fatalErrors,
     http: deps.http,
     notifications: deps.notifications,
@@ -140,8 +137,6 @@ export function createPluginStartContext<
       navigateToApp: deps.application.navigateToApp,
       navigateToUrl: deps.application.navigateToUrl,
       getUrlForApp: deps.application.getUrlForApp,
-      registerMountContext: (contextName, provider) =>
-        deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },
     docLinks: deps.docLinks,
     http: deps.http,
