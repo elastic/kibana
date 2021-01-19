@@ -4,22 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter, mockHttpValues, expectedAsyncError } from '../../../__mocks__';
-
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: mockHttpValues },
-}));
-const { http } = mockHttpValues;
-
-jest.mock('../../../shared/flash_messages', () => ({
-  flashAPIErrors: jest.fn(),
-}));
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+  expectedAsyncError,
+} from '../../../__mocks__';
 
 import { LogRetentionOptions } from './types';
 import { LogRetentionLogic } from './log_retention_logic';
 
 describe('LogRetentionLogic', () => {
+  const { mount } = new LogicMounter(LogRetentionLogic);
+  const { http } = mockHttpValues;
+  const { flashAPIErrors } = mockFlashMessageHelpers;
+
   const TYPICAL_SERVER_LOG_RETENTION = {
     analytics: {
       disabled_at: null,
@@ -51,8 +50,6 @@ describe('LogRetentionLogic', () => {
     openedModal: null,
     isLogRetentionUpdating: false,
   };
-
-  const { mount } = new LogicMounter(LogRetentionLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
