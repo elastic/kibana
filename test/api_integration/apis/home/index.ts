@@ -6,7 +6,9 @@
  * Public License, v 1.
  */
 
-export default function ({ loadTestFile }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('home apis', () => {
     loadTestFile(require.resolve('./sample_data'));
   });

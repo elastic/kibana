@@ -9,22 +9,27 @@
 import expect from '@kbn/expect';
 import _ from 'lodash';
 import { basicUiCounters } from './__fixtures__/ui_counters';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { SavedObject } from '../../../../src/core/server';
 /*
  * Create a single-level array with strings for all the paths to values in the
  * source object, up to 3 deep. Going deeper than 3 causes a bit too much churn
  * in the tests.
  */
-function flatKeys(source) {
-  const recursivelyFlatKeys = (obj, path = [], depth = 0) => {
+function flatKeys(source: any) {
+  const recursivelyFlatKeys = (obj: any, path: string[] = [], depth = 0): string[] => {
     return depth < 3 && _.isObject(obj)
-      ? _.map(obj, (v, k) => recursivelyFlatKeys(v, [...path, k], depth + 1))
-      : path.join('.');
+      ? Object.entries(obj).reduce(
+          (acc, [k, v]) => [...acc, ...recursivelyFlatKeys(v, [...path, k], depth + 1)],
+          [] as string[]
+        )
+      : [path.join('.')];
   };
 
   return _.uniq(_.flattenDeep(recursivelyFlatKeys(source))).sort((a, b) => a.localeCompare(b));
 }
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
@@ -52,7 +57,7 @@ export default function ({ getService }) {
       const stats = body[0];
       expect(stats.collection).to.be('local');
       expect(stats.collectionSource).to.be('local');
-      expect(stats.license).to.be.undefined; // OSS cannot get the license
+      expect(stats.license).to.be(undefined); // OSS cannot get the license
       expect(stats.stack_stats.kibana.count).to.be.a('number');
       expect(stats.stack_stats.kibana.indices).to.be.a('number');
       expect(stats.stack_stats.kibana.os.platforms[0].platform).to.be.a('string');
@@ -153,7 +158,7 @@ export default function ({ getService }) {
     });
 
     describe('application usage limits', () => {
-      function createSavedObject(viewId) {
+      function createSavedObject(viewId?: string) {
         return supertest
           .post('/api/saved_objects/application_usage_transactional')
           .send({
@@ -170,7 +175,7 @@ export default function ({ getService }) {
       }
 
       describe('basic behaviour', () => {
-        let savedObjectIds = [];
+        let savedObjectIds: string[] = [];
         before('create application usage entries', async () => {
           savedObjectIds = await Promise.all([
             createSavedObject(),
@@ -245,7 +250,9 @@ export default function ({ getService }) {
               }))
             )
             .expect(200)
-            .then((resp) => resp.body.saved_objects.forEach(({ id }) => savedObjectIds.push(id)));
+            .then((resp) =>
+              resp.body.saved_objects.forEach(({ id }: SavedObject) => savedObjectIds.push(id))
+            );
         });
         after('clean them all', async () => {
           // The SavedObjects API does not allow bulk deleting, and deleting one by one takes ages and the tests timeout

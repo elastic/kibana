@@ -7,10 +7,12 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { SavedObject } from '../../../../src/core/server';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('find', () => {
@@ -256,6 +258,7 @@ export default function ({ getService }) {
             )
             .expect(400)
             .then((resp) => {
+              // eslint-disable-next-line no-console
               console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
                 error: 'Bad Request',
@@ -271,6 +274,7 @@ export default function ({ getService }) {
             )
             .expect(400)
             .then((resp) => {
+              // eslint-disable-next-line no-console
               console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
                 error: 'Bad Request',
@@ -297,7 +301,10 @@ export default function ({ getService }) {
             .expect(200)
             .then((resp) => {
               const objects = resp.body.saved_objects;
-              expect(objects.map((obj) => obj.id)).to.eql(['only-ref-1', 'ref-1-and-ref-2']);
+              expect(objects.map((obj: SavedObject) => obj.id)).to.eql([
+                'only-ref-1',
+                'ref-1-and-ref-2',
+              ]);
             });
         });
 
@@ -315,7 +322,7 @@ export default function ({ getService }) {
             .expect(200)
             .then((resp) => {
               const objects = resp.body.saved_objects;
-              expect(objects.map((obj) => obj.id)).to.eql([
+              expect(objects.map((obj: SavedObject) => obj.id)).to.eql([
                 'only-ref-1',
                 'ref-1-and-ref-2',
                 'only-ref-2',
@@ -337,7 +344,7 @@ export default function ({ getService }) {
             .expect(200)
             .then((resp) => {
               const objects = resp.body.saved_objects;
-              expect(objects.map((obj) => obj.id)).to.eql(['ref-1-and-ref-2']);
+              expect(objects.map((obj: SavedObject) => obj.id)).to.eql(['ref-1-and-ref-2']);
             });
         });
       });
@@ -358,7 +365,9 @@ export default function ({ getService }) {
           .expect(200)
           .then((resp) => {
             const savedObjects = resp.body.saved_objects;
-            expect(savedObjects.map((so) => so.attributes.title)).to.eql(['my-visualization']);
+            expect(
+              savedObjects.map((so: SavedObject<{ title: string }>) => so.attributes.title)
+            ).to.eql(['my-visualization']);
           }));
 
       it('can search with the prefix search character just after a special one', async () =>
@@ -372,7 +381,9 @@ export default function ({ getService }) {
           .expect(200)
           .then((resp) => {
             const savedObjects = resp.body.saved_objects;
-            expect(savedObjects.map((so) => so.attributes.title)).to.eql(['my-visualization']);
+            expect(
+              savedObjects.map((so: SavedObject<{ title: string }>) => so.attributes.title)
+            ).to.eql(['my-visualization']);
           }));
 
       it('can search for objects with asterisk', async () =>
@@ -386,7 +397,9 @@ export default function ({ getService }) {
           .expect(200)
           .then((resp) => {
             const savedObjects = resp.body.saved_objects;
-            expect(savedObjects.map((so) => so.attributes.title)).to.eql(['some*visualization']);
+            expect(
+              savedObjects.map((so: SavedObject<{ title: string }>) => so.attributes.title)
+            ).to.eql(['some*visualization']);
           }));
 
       it('can still search tokens by prefix', async () =>
@@ -400,10 +413,9 @@ export default function ({ getService }) {
           .expect(200)
           .then((resp) => {
             const savedObjects = resp.body.saved_objects;
-            expect(savedObjects.map((so) => so.attributes.title)).to.eql([
-              'my-visualization',
-              'some*visualization',
-            ]);
+            expect(
+              savedObjects.map((so: SavedObject<{ title: string }>) => so.attributes.title)
+            ).to.eql(['my-visualization', 'some*visualization']);
           }));
     });
 
@@ -411,10 +423,7 @@ export default function ({ getService }) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
-            ignore: [404],
-          })
+          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
       );
 
       it('should return 200 with empty response', async () =>
@@ -513,6 +522,7 @@ export default function ({ getService }) {
             )
             .expect(400)
             .then((resp) => {
+              // eslint-disable-next-line no-console
               console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
                 error: 'Bad Request',

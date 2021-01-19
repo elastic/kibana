@@ -7,20 +7,26 @@
  */
 
 import expect from '@kbn/expect';
-import { ReportManager, METRIC_TYPE } from '@kbn/analytics';
+import { ReportManager, METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { UserAgentMetric } from '@kbn/analytics/target/types/metrics/user_agent';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
-  const createStatsMetric = (eventName, type = METRIC_TYPE.CLICK, count = 1) => ({
+  const createStatsMetric = (
+    eventName: string,
+    type: UiCounterMetricType = METRIC_TYPE.CLICK,
+    count = 1
+  ) => ({
     eventName,
     appName: 'myApp',
     type,
     count,
   });
 
-  const createUserAgentMetric = (appName) => ({
+  const createUserAgentMetric = (appName: string): UserAgentMetric => ({
     appName,
     type: METRIC_TYPE.USER_AGENT,
     userAgent:
@@ -39,8 +45,8 @@ export default function ({ getService }) {
         .send({ report })
         .expect(200);
 
-      const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
-      const ids = response.hits.hits.map(({ _id }) => _id);
+      const { body: response } = await es.search({ index: '.kibana', q: 'type:ui-metric' });
+      const ids = response.hits.hits.map(({ _id }: { _id: string }) => _id);
       expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
     });
 
@@ -64,8 +70,8 @@ export default function ({ getService }) {
         .send({ report })
         .expect(200);
 
-      const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
-      const ids = response.hits.hits.map(({ _id }) => _id);
+      const { body: response } = await es.search({ index: '.kibana', q: 'type:ui-metric' });
+      const ids = response.hits.hits.map(({ _id }: { _id: string }) => _id);
       expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
       expect(ids.includes(`ui-metric:myApp:${uniqueEventName}`)).to.eql(true);
       expect(ids.includes(`ui-metric:kibana-user_agent:${userAgentMetric.userAgent}`)).to.eql(true);
@@ -77,7 +83,6 @@ export default function ({ getService }) {
       const nano = hrTime[0] * 1000000000 + hrTime[1];
       const uniqueEventName = `my_event_${nano}`;
       const { report } = reportManager.assignReports([
-        ,
         createStatsMetric(uniqueEventName, METRIC_TYPE.CLICK, 2),
         createStatsMetric(uniqueEventName, METRIC_TYPE.LOADED),
       ]);
@@ -89,10 +94,14 @@ export default function ({ getService }) {
         .expect(200);
 
       const {
-        hits: { hits },
+        body: {
+          hits: { hits },
+        },
       } = await es.search({ index: '.kibana', q: 'type:ui-metric' });
 
-      const countTypeEvent = hits.find((hit) => hit._id === `ui-metric:myApp:${uniqueEventName}`);
+      const countTypeEvent = hits.find(
+        (hit: { _id: string }) => hit._id === `ui-metric:myApp:${uniqueEventName}`
+      );
       expect(countTypeEvent._source['ui-metric'].count).to.eql(3);
     });
   });

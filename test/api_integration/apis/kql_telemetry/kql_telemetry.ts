@@ -9,11 +9,12 @@
 import expect from '@kbn/expect';
 import Bluebird from 'bluebird';
 import { get } from 'lodash';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('telemetry API', () => {
     before(() => esArchiver.load('saved_objects/basic'));
@@ -31,7 +32,7 @@ export default function ({ getService }) {
           index: '.kibana',
           q: 'type:kql-telemetry',
         })
-        .then((response) => {
+        .then(({ body: response }) => {
           const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
           expect(kqlTelemetryDoc.optInCount).to.be(1);
         });
@@ -49,7 +50,7 @@ export default function ({ getService }) {
           index: '.kibana',
           q: 'type:kql-telemetry',
         })
-        .then((response) => {
+        .then(({ body: response }) => {
           const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
           expect(kqlTelemetryDoc.optOutCount).to.be(1);
         });
