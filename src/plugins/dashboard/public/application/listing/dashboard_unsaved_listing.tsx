@@ -44,6 +44,7 @@ const DashboardUnsavedItem = ({
   onOpenClick: () => void;
   onDiscardClick: () => void;
 }) => {
+  const title = dashboard?.title ?? getNewDashboardTitle();
   return (
     <>
       <EuiTitle size="xxs" className="dshUnsavedListingItemTitle">
@@ -59,6 +60,7 @@ const DashboardUnsavedItem = ({
             color="primary"
             onClick={onOpenClick}
             data-test-subj={`edit-unsaved-${dashboard?.id ?? DASHBOARD_PANELS_UNSAVED_ID}`}
+            aria-label={`${dashboardUnsavedListingStrings.getEditTitle()} ${title}`}
           >
             {dashboardUnsavedListingStrings.getEditTitle()}
           </EuiButtonEmpty>
@@ -69,6 +71,7 @@ const DashboardUnsavedItem = ({
             color="danger"
             onClick={onDiscardClick}
             data-test-subj={`discard-unsaved-${dashboard?.id ?? DASHBOARD_PANELS_UNSAVED_ID}`}
+            aria-label={`${dashboardUnsavedListingStrings.getDiscardTitle()} ${title}`}
           >
             {dashboardUnsavedListingStrings.getDiscardTitle()}
           </EuiButtonEmpty>
