@@ -8,6 +8,7 @@ import { AxiosInstance, Method, AxiosResponse, AxiosBasicCredentials } from 'axi
 import { Logger } from '../../../../../../src/core/server';
 import { ProxySettings } from '../../types';
 import { getProxyAgents } from './get_proxy_agents';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 export const request = async <T = unknown>({
   axios,
@@ -16,6 +17,7 @@ export const request = async <T = unknown>({
   method = 'get',
   data,
   proxySettings,
+  configurationUtilities,
   ...rest
 }: {
   axios: AxiosInstance;
@@ -25,11 +27,12 @@ export const request = async <T = unknown>({
   data?: T;
   params?: unknown;
   proxySettings?: ProxySettings;
+  configurationUtilities: ActionsConfigurationUtilities;
   headers?: Record<string, string> | null;
   validateStatus?: (status: number) => boolean;
   auth?: AxiosBasicCredentials;
 }): Promise<AxiosResponse> => {
-  const { httpAgent, httpsAgent } = getProxyAgents(proxySettings, logger);
+  const { httpAgent, httpsAgent } = getProxyAgents(configurationUtilities, proxySettings, logger);
 
   return await axios(url, {
     ...rest,
@@ -48,12 +51,14 @@ export const patch = async <T = unknown>({
   data,
   logger,
   proxySettings,
+  configurationUtilities,
 }: {
   axios: AxiosInstance;
   url: string;
   data: T;
   logger: Logger;
   proxySettings?: ProxySettings;
+  configurationUtilities: ActionsConfigurationUtilities;
 }): Promise<AxiosResponse> => {
   return request({
     axios,
@@ -62,6 +67,7 @@ export const patch = async <T = unknown>({
     method: 'patch',
     data,
     proxySettings,
+    configurationUtilities,
   });
 };
 

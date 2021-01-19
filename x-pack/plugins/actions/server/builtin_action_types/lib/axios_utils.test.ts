@@ -8,9 +8,11 @@ import axios from 'axios';
 import { Logger } from '../../../../../../src/core/server';
 import { addTimeZoneToDate, request, patch, getErrorMessage } from './axios_utils';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { actionsConfigMock } from '../../actions_config.mock';
 import { getProxyAgents } from './get_proxy_agents';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const configurationUtilities = actionsConfigMock.create();
 jest.mock('axios');
 const axiosMock = (axios as unknown) as jest.Mock;
 
@@ -41,6 +43,7 @@ describe('request', () => {
       axios,
       url: '/test',
       logger,
+      configurationUtilities,
     });
 
     expect(axiosMock).toHaveBeenCalledWith('/test', {
@@ -62,7 +65,7 @@ describe('request', () => {
       proxyRejectUnauthorizedCertificates: true,
       proxyUrl: 'https://localhost:1212',
     };
-    const { httpAgent, httpsAgent } = getProxyAgents(proxySettings, logger);
+    const { httpAgent, httpsAgent } = getProxyAgents(configurationUtilities, proxySettings, logger);
 
     const res = await request({
       axios,
@@ -72,6 +75,7 @@ describe('request', () => {
         proxyUrl: 'https://localhost:1212',
         proxyRejectUnauthorizedCertificates: true,
       },
+      configurationUtilities,
     });
 
     expect(axiosMock).toHaveBeenCalledWith('http://testProxy', {
@@ -97,6 +101,7 @@ describe('request', () => {
         proxyUrl: ':nope:',
         proxyRejectUnauthorizedCertificates: false,
       },
+      configurationUtilities,
     });
 
     expect(axiosMock).toHaveBeenCalledWith('https://testProxy', {
@@ -114,7 +119,14 @@ describe('request', () => {
   });
 
   test('it fetch correctly', async () => {
-    const res = await request({ axios, url: '/test', method: 'post', logger, data: { id: '123' } });
+    const res = await request({
+      axios,
+      url: '/test',
+      method: 'post',
+      logger,
+      data: { id: '123' },
+      configurationUtilities,
+    });
 
     expect(axiosMock).toHaveBeenCalledWith('/test', {
       method: 'post',
@@ -140,7 +152,7 @@ describe('patch', () => {
   });
 
   test('it fetch correctly', async () => {
-    await patch({ axios, url: '/test', data: { id: '123' }, logger });
+    await patch({ axios, url: '/test', data: { id: '123' }, logger, configurationUtilities });
     expect(axiosMock).toHaveBeenCalledWith('/test', {
       method: 'patch',
       data: { id: '123' },

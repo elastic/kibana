@@ -19,7 +19,7 @@ export interface SendEmailOptions {
   routing: Routing;
   content: Content;
   proxySettings?: ProxySettings;
-  rejectUnauthorized?: boolean;
+  rejectUnauthorized: boolean;
   hasAuth: boolean;
 }
 

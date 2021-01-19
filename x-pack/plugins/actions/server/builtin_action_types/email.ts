@@ -156,7 +156,7 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
       params: ParamsSchema,
     },
     renderParameterTemplates,
-    executor: curry(executor)({ logger, publicBaseUrl }),
+    executor: curry(executor)({ logger, publicBaseUrl, configurationUtilities }),
   };
 }
 
@@ -178,7 +178,12 @@ async function executor(
   {
     logger,
     publicBaseUrl,
-  }: { logger: GetActionTypeParams['logger']; publicBaseUrl: GetActionTypeParams['publicBaseUrl'] },
+    configurationUtilities,
+  }: {
+    logger: GetActionTypeParams['logger'];
+    publicBaseUrl: GetActionTypeParams['publicBaseUrl'];
+    configurationUtilities: ActionsConfigurationUtilities;
+  },
   execOptions: EmailActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -223,6 +228,7 @@ async function executor(
     },
     proxySettings: execOptions.proxySettings,
     hasAuth: config.hasAuth,
+    rejectUnauthorized: configurationUtilities.isRejectUnauthorizedCertificatesEnabled(),
   };
 
   let result;

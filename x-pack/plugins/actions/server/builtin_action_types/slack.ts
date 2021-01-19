@@ -56,7 +56,7 @@ export const ActionTypeId = '.slack';
 export function getActionType({
   logger,
   configurationUtilities,
-  executor = curry(slackExecutor)({ logger }),
+  executor = curry(slackExecutor)({ logger, configurationUtilities }),
 }: {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -116,7 +116,10 @@ function valdiateActionTypeConfig(
 // action executor
 
 async function slackExecutor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: SlackActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -129,7 +132,11 @@ async function slackExecutor(
 
   let httpProxyAgent: Agent | undefined;
   if (execOptions.proxySettings) {
-    const httpProxyAgents = getProxyAgents(execOptions.proxySettings, logger);
+    const httpProxyAgents = getProxyAgents(
+      configurationUtilities,
+      execOptions.proxySettings,
+      logger
+    );
     httpProxyAgent = webhookUrl.toLowerCase().startsWith('https')
       ? httpProxyAgents.httpsAgent
       : httpProxyAgents.httpAgent;

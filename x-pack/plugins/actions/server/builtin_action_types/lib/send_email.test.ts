@@ -244,6 +244,7 @@ function getSendEmailOptions(
     },
     proxySettings,
     hasAuth: true,
+    rejectUnauthorized: true,
   };
 }
 
@@ -269,5 +270,6 @@ function getSendEmailOptionsNoAuth(
     },
     proxySettings,
     hasAuth: false,
+    rejectUnauthorized: true,
   };
 }

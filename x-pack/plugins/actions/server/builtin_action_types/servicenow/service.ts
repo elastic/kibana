@@ -13,6 +13,7 @@ import { Logger } from '../../../../../../src/core/server';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import { request, getErrorMessage, addTimeZoneToDate, patch } from '../lib/axios_utils';
 import { ProxySettings } from '../../types';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const API_VERSION = 'v2';
 const INCIDENT_URL = `api/now/${API_VERSION}/table/incident`;
@@ -24,6 +25,7 @@ const VIEW_INCIDENT_URL = `nav_to.do?uri=incident.do?sys_id=`;
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
+  configurationUtilities: ActionsConfigurationUtilities,
   proxySettings?: ProxySettings
 ): ExternalService => {
   const { apiUrl: url } = config as ServiceNowPublicConfigurationType;
@@ -59,6 +61,7 @@ export const createExternalService = (
         url: `${incidentUrl}/${id}`,
         logger,
         proxySettings,
+        configurationUtilities,
       });
       checkInstance(res);
       return { ...res.data.result };
@@ -77,6 +80,7 @@ export const createExternalService = (
         logger,
         proxySettings,
         params,
+        configurationUtilities,
       });
       checkInstance(res);
       return res.data.result.length > 0 ? { ...res.data.result } : undefined;
@@ -96,6 +100,7 @@ export const createExternalService = (
         proxySettings,
         method: 'post',
         data: { ...(incident as Record<string, unknown>) },
+        configurationUtilities,
       });
       checkInstance(res);
       return {
@@ -119,6 +124,7 @@ export const createExternalService = (
         logger,
         data: { ...(incident as Record<string, unknown>) },
         proxySettings,
+        configurationUtilities,
       });
       checkInstance(res);
       return {
@@ -144,6 +150,7 @@ export const createExternalService = (
         url: fieldsUrl,
         logger,
         proxySettings,
+        configurationUtilities,
       });
       checkInstance(res);
       return res.data.result.length > 0 ? res.data.result : [];

@@ -94,7 +94,7 @@ export function getActionType({
       params: ParamsSchema,
     },
     renderParameterTemplates,
-    executor: curry(executor)({ logger }),
+    executor: curry(executor)({ logger, configurationUtilities }),
   };
 }
 
@@ -138,7 +138,10 @@ function validateActionTypeConfig(
 
 // action executor
 export async function executor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: WebhookActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -163,6 +166,7 @@ export async function executor(
       headers,
       data,
       proxySettings: execOptions.proxySettings,
+      configurationUtilities,
     })
   );
 

@@ -9,11 +9,15 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import { Logger } from '../../../../../../src/core/server';
 import { getProxyAgents } from './get_proxy_agents';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { actionsConfigMock } from '../../actions_config.mock';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 describe('getProxyAgents', () => {
+  const configurationUtilities = actionsConfigMock.create();
+
   test('get agents for valid proxy URL', () => {
     const { httpAgent, httpsAgent } = getProxyAgents(
+      configurationUtilities,
       { proxyUrl: 'https://someproxyhost', proxyRejectUnauthorizedCertificates: false },
       logger
     );
@@ -23,6 +27,7 @@ describe('getProxyAgents', () => {
 
   test('return undefined agents for invalid proxy URL', () => {
     const { httpAgent, httpsAgent } = getProxyAgents(
+      configurationUtilities,
       { proxyUrl: ':nope: not a valid URL', proxyRejectUnauthorizedCertificates: false },
       logger
     );
@@ -31,13 +36,13 @@ describe('getProxyAgents', () => {
   });
 
   test('return undefined agents for null proxy options', () => {
-    const { httpAgent, httpsAgent } = getProxyAgents(null, logger);
+    const { httpAgent, httpsAgent } = getProxyAgents(configurationUtilities, null, logger);
     expect(httpAgent).toBe(undefined);
     expect(httpsAgent).toBe(undefined);
   });
 
   test('return undefined agents for undefined proxy options', () => {
-    const { httpAgent, httpsAgent } = getProxyAgents(undefined, logger);
+    const { httpAgent, httpsAgent } = getProxyAgents(configurationUtilities, undefined, logger);
     expect(httpAgent).toBe(undefined);
     expect(httpsAgent).toBe(undefined);
   });

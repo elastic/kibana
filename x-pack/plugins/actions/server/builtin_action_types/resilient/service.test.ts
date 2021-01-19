@@ -12,6 +12,7 @@ import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { incidentTypes, resilientFields, severity } from './mocks';
+import { actionsConfigMock } from '../../actions_config.mock';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -28,6 +29,7 @@ axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
 const now = Date.now;
 const TIMESTAMP = 1589391874472;
+const configurationUtilities = actionsConfigMock.create();
 
 // Incident update makes three calls to the API.
 // The function below mocks this calls.
@@ -86,7 +88,8 @@ describe('IBM Resilient service', () => {
         config: { apiUrl: 'https://resilient.elastic.co/', orgId: '201' },
         secrets: { apiKeyId: 'keyId', apiKeySecret: 'secret' },
       },
-      logger
+      logger,
+      configurationUtilities
     );
   });
 
@@ -155,7 +158,8 @@ describe('IBM Resilient service', () => {
             config: { apiUrl: null, orgId: '201' },
             secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -167,7 +171,8 @@ describe('IBM Resilient service', () => {
             config: { apiUrl: 'test.com', orgId: null },
             secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -179,7 +184,8 @@ describe('IBM Resilient service', () => {
             config: { apiUrl: 'test.com', orgId: '201' },
             secrets: { apiKeyId: '', apiKeySecret: 'secret' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -191,7 +197,8 @@ describe('IBM Resilient service', () => {
             config: { apiUrl: 'test.com', orgId: '201' },
             secrets: { apiKeyId: '', apiKeySecret: undefined },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });

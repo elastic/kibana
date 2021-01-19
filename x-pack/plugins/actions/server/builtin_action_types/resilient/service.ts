@@ -25,6 +25,7 @@ import {
 import * as i18n from './translations';
 import { getErrorMessage, request } from '../lib/axios_utils';
 import { ProxySettings } from '../../types';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VIEW_INCIDENT_URL = `#incidents`;
 
@@ -93,6 +94,7 @@ export const formatUpdateRequest = ({
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
+  configurationUtilities: ActionsConfigurationUtilities,
   proxySettings?: ProxySettings
 ): ExternalService => {
   const { apiUrl: url, orgId } = config as ResilientPublicConfigurationType;
@@ -131,6 +133,7 @@ export const createExternalService = (
           text_content_output_format: 'objects_convert',
         },
         proxySettings,
+        configurationUtilities,
       });
 
       return { ...res.data, description: res.data.description?.content ?? '' };
@@ -179,6 +182,7 @@ export const createExternalService = (
         logger,
         data,
         proxySettings,
+        configurationUtilities,
       });
 
       return {
@@ -209,6 +213,7 @@ export const createExternalService = (
         logger,
         data,
         proxySettings,
+        configurationUtilities,
       });
 
       if (!res.data.success) {
@@ -242,6 +247,7 @@ export const createExternalService = (
         logger,
         data: { text: { format: 'text', content: comment.comment } },
         proxySettings,
+        configurationUtilities,
       });
 
       return {
@@ -267,6 +273,7 @@ export const createExternalService = (
         url: incidentTypesUrl,
         logger,
         proxySettings,
+        configurationUtilities,
       });
 
       const incidentTypes = res.data?.values ?? [];
@@ -289,6 +296,7 @@ export const createExternalService = (
         url: severityUrl,
         logger,
         proxySettings,
+        configurationUtilities,
       });
 
       const incidentTypes = res.data?.values ?? [];
@@ -310,6 +318,7 @@ export const createExternalService = (
         url: incidentFieldsUrl,
         logger,
         proxySettings,
+        configurationUtilities,
       });
       return res.data ?? [];
     } catch (error) {

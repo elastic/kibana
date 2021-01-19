@@ -11,6 +11,7 @@ import * as utils from '../lib/axios_utils';
 import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { actionsConfigMock } from '../../actions_config.mock';
 import { serviceNowCommonFields } from './mocks';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -27,6 +28,7 @@ jest.mock('../lib/axios_utils', () => {
 axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
 const patchMock = utils.patch as jest.Mock;
+const configurationUtilities = actionsConfigMock.create();
 
 describe('ServiceNow service', () => {
   let service: ExternalService;
@@ -39,7 +41,8 @@ describe('ServiceNow service', () => {
         config: { apiUrl: 'https://dev102283.service-now.com/' },
         secrets: { username: 'admin', password: 'admin' },
       },
-      logger
+      logger,
+      configurationUtilities
     );
   });
 
@@ -55,7 +58,8 @@ describe('ServiceNow service', () => {
             config: { apiUrl: null },
             secrets: { username: 'admin', password: 'admin' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -67,7 +71,8 @@ describe('ServiceNow service', () => {
             config: { apiUrl: 'test.com' },
             secrets: { username: '', password: 'admin' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -79,7 +84,8 @@ describe('ServiceNow service', () => {
             config: { apiUrl: 'test.com' },
             secrets: { username: '', password: undefined },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });

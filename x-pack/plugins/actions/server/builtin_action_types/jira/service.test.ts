@@ -11,6 +11,7 @@ import * as utils from '../lib/axios_utils';
 import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { actionsConfigMock } from '../../actions_config.mock';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
@@ -28,6 +29,7 @@ jest.mock('../lib/axios_utils', () => {
 
 axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
+const configurationUtilities = actionsConfigMock.create();
 
 const issueTypesResponse = {
   data: {
@@ -116,7 +118,8 @@ describe('Jira service', () => {
         config: { apiUrl: 'https://siem-kibana.atlassian.net/', projectKey: 'CK' },
         secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
       },
-      logger
+      logger,
+      configurationUtilities
     );
   });
 
@@ -132,7 +135,8 @@ describe('Jira service', () => {
             config: { apiUrl: null, projectKey: 'CK' },
             secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -144,7 +148,8 @@ describe('Jira service', () => {
             config: { apiUrl: 'test.com', projectKey: null },
             secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -156,7 +161,8 @@ describe('Jira service', () => {
             config: { apiUrl: 'test.com' },
             secrets: { apiToken: '', email: 'elastic@elastic.com' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -168,7 +174,8 @@ describe('Jira service', () => {
             config: { apiUrl: 'test.com' },
             secrets: { apiToken: '', email: undefined },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });

@@ -33,6 +33,7 @@ export interface ActionsConfigurationUtilities {
   ensureHostnameAllowed: (hostname: string) => void;
   ensureUriAllowed: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
+  isRejectUnauthorizedCertificatesEnabled: () => boolean;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -92,6 +93,7 @@ export function getActionsConfigurationUtilities(
     isHostnameAllowed,
     isUriAllowed,
     isActionTypeEnabled,
+    isRejectUnauthorizedCertificatesEnabled: () => config.rejectUnauthorized,
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.url, uri));
