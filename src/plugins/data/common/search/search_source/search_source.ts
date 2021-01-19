@@ -472,12 +472,13 @@ export class SearchSource {
     searchRequest.indexType = this.getIndexType(index);
 
     // get some special field types from the index pattern
-    const { docvalueFields, scriptFields, storedFields } = index
+    const { docvalueFields, scriptFields, storedFields, runtimeFields } = index
       ? index.getComputedFields()
       : {
           docvalueFields: [],
           scriptFields: {},
           storedFields: ['*'],
+          runtimeFields: {},
         };
 
     const fieldListProvided = !!body.fields;
@@ -492,24 +493,7 @@ export class SearchSource {
       ...scriptFields,
     };
     body.stored_fields = storedFields;
-
-    body.runtime_mappings = index?.fields
-      ?.filter((field: IndexPatternField) => field.runtimeField)
-      .reduce(
-        (
-          col: Record<string, { type: string; script: { source: string } }>,
-          field: IndexPatternField
-        ) => {
-          col[field.name] = {
-            type: field.runtimeField!.type,
-            script: {
-              source: field.runtimeField!.script.source,
-            },
-          };
-          return col;
-        },
-        {}
-      );
+    body.runtime_mappings = runtimeFields || {};
 
     // apply source filters from index pattern if specified by the user
     let filteredDocvalueFields = docvalueFields;
@@ -558,9 +542,10 @@ export class SearchSource {
 
       // request the remaining fields from stored_fields just in case, since the
       // fields API does not handle stored fields
-      const remainingFields = difference(uniqFieldNames, Object.keys(body.script_fields)).filter(
-        Boolean
-      );
+      const remainingFields = difference(uniqFieldNames, [
+        ...Object.keys(body.script_fields),
+        ...Object.keys(body.runtime_mappings),
+      ]).filter(Boolean);
 
       // only include unique values
       body.stored_fields = [...new Set(remainingFields)];

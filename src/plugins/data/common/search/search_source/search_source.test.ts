@@ -31,6 +31,7 @@ const getComputedFields = () => ({
   storedFields: [],
   scriptFields: {},
   docvalueFields: [],
+  runtimeFields: {},
 });
 
 const mockSource = { excludes: ['foo-*'] };
@@ -47,6 +48,13 @@ const indexPattern2 = ({
   getComputedFields,
   getSourceFiltering: () => mockSource2,
 } as unknown) as IndexPattern;
+
+const runtimeFieldDef = {
+  type: 'keyword',
+  script: {
+    source: "emit('hello world')",
+  },
+};
 
 describe('SearchSource', () => {
   let mockSearchMethod: any;
@@ -93,13 +101,14 @@ describe('SearchSource', () => {
 
     describe('computed fields handling', () => {
       test('still provides computed fields when no fields are specified', async () => {
+        const runtimeFields = { runtime_field: runtimeFieldDef };
         searchSource.setField('index', ({
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: ['hello'],
             scriptFields: { world: {} },
             docvalueFields: ['@timestamp'],
-            // todo
+            runtimeFields,
           }),
         } as unknown) as IndexPattern);
 
@@ -107,6 +116,7 @@ describe('SearchSource', () => {
         expect(request.stored_fields).toEqual(['hello']);
         expect(request.script_fields).toEqual({ world: {} });
         expect(request.fields).toEqual(['@timestamp']);
+        expect(request.runtime_mappings).toEqual(runtimeFields);
       });
 
       test('never includes docvalue_fields', async () => {
@@ -402,15 +412,23 @@ describe('SearchSource', () => {
       });
 
       test('filters request when a specific list of fields is provided with fieldsFromSource', async () => {
+        const runtimeFields = { runtime_field: runtimeFieldDef, runtime_field_b: runtimeFieldDef };
         searchSource.setField('index', ({
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: ['*'],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp', 'date'],
+            runtimeFields,
           }),
         } as unknown) as IndexPattern);
-        searchSource.setField('fieldsFromSource', ['hello', '@timestamp', 'foo-a', 'bar']);
+        searchSource.setField('fieldsFromSource', [
+          'hello',
+          '@timestamp',
+          'foo-a',
+          'bar',
+          'runtime_field',
+        ]);
 
         const request = await searchSource.getSearchRequestBody();
         expect(request._source).toEqual({
@@ -419,7 +437,7 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual(['@timestamp']);
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['@timestamp', 'bar']);
-        // todo
+        expect(request.runtime_mappings).toEqual({ runtime_field: runtimeFieldDef });
       });
 
       test('filters request when a specific list of fields is provided with fieldsFromSource or fields', async () => {
