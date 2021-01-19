@@ -9,6 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './KueryBar';
+import { TimeComparison } from './time_comparison';
 
 const SearchBarFlexGroup = styled(EuiFlexGroup)`
   margin: ${({ theme }) =>
@@ -20,6 +21,9 @@ export function SearchBar(props: { prepend?: React.ReactNode | string }) {
     <SearchBarFlexGroup alignItems="flexStart" gutterSize="s">
       <EuiFlexItem grow={3}>
         <KueryBar prepend={props.prepend} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <TimeComparison />
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
         <DatePicker />

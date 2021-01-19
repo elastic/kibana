@@ -29,4 +29,6 @@ export type IUrlParams = {
   searchTerm?: string;
   percentile?: number;
   latencyAggregationType?: string;
+  comparisonEnabled?: boolean;
+  comparisonType?: string;
 } & Partial<Record<LocalUIFilterName, string>>;
