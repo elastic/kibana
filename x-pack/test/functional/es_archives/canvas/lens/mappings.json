@@ -384,3 +384,26 @@
     }
   }
 }
+
+{
+  "type": "index",
+  "value": {
+    "index": "logstash-lens",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+            "type": "date"
+        },
+        "bytes": {
+          "type": "float"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "0"
+      }
+    }
+  }
+}
