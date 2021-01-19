@@ -252,10 +252,10 @@ export const HotPhase: FunctionComponent = () => {
       </DescribedFormRow>
       {isUsingRollover && (
         <>
-          {<ForcemergeField phase="hot" />}
-          <ShrinkField phase="hot" />
-          {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
-          <ReadonlyField phase={'hot'} />
+          {<ForcemergeField phase={hotProperty} />}
+          <ShrinkField phase={hotProperty} />
+          {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase={hotProperty} />}
+          <ReadonlyField phase={hotProperty} />
         </>
       )}
       <IndexPriorityField phase={hotProperty} />
