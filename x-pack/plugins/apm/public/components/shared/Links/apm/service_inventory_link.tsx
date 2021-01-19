@@ -15,5 +15,5 @@ import { useAPMHref } from './APMLink';
 const persistedFilters: Array<keyof APMQueryParams> = ['host', 'agentName'];
 
 export function useServiceInventoryHref() {
-  return useAPMHref('/services', persistedFilters);
+  return useAPMHref({ path: '/services', persistedFilters });
 }

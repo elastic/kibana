@@ -36,7 +36,7 @@ import { patchRule } from '../../../../../containers/detection_engine/rules/api'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
 
-export type Func = () => void;
+export type Func = () => Promise<void>;
 export interface ExceptionListFilter {
   name?: string | null;
   list_id?: string | null;
