@@ -180,7 +180,7 @@ export const transactionLatencyChatsRoute = createRoute({
       getAnomalySeries(options).catch((error) => {
         logger.warn(`Unable to retrieve anomalies for latency charts.`);
         logger.error(error);
-        return undefined;
+        return [];
       }),
     ]);
 

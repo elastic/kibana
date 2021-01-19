@@ -3,15 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { compact } from 'lodash';
+import { compact, uniqBy, difference } from 'lodash';
 import { Logger } from 'src/core/server';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { maybe } from '../../../../common/utils/maybe';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { anomalySeriesFetcher } from './fetcher';
-import { getMLJobIds } from '../../service_map/get_service_anomalies';
+import { getMLJobs } from '../../service_map/get_service_anomalies';
 import { ANOMALY_THRESHOLD } from '../../../../../ml/common';
 
 export async function getAnomalySeries({
@@ -27,23 +26,17 @@ export async function getAnomalySeries({
   setup: Setup & SetupTimeRange;
   logger: Logger;
 }) {
-  const { uiFilters, start, end, ml } = setup;
-  const { environment } = uiFilters;
+  const { start, end, ml } = setup;
 
   // don't fetch anomalies if the ML plugin is not setup
   if (!ml) {
-    return undefined;
+    return [];
   }
 
   // don't fetch anomalies if requested for a specific transaction name
   // as ML results are not partitioned by transaction name
   if (!!transactionName) {
-    return undefined;
-  }
-
-  // don't fetch anomalies when no specific environment is selected
-  if (environment === ENVIRONMENT_ALL.value) {
-    return undefined;
+    return [];
   }
 
   // don't fetch anomalies if unknown uiFilters are applied
@@ -54,7 +47,7 @@ export async function getAnomalySeries({
     .some((uiFilterName) => !knownFilters.includes(uiFilterName));
 
   if (hasUnknownFiltersApplied) {
-    return undefined;
+    return [];
   }
 
   const { intervalString } = getBucketSize({ start, end });
@@ -64,7 +57,7 @@ export async function getAnomalySeries({
   // are smaller, we might have several null buckets in the beginning
   const mlStart = start - 900 * 1000;
 
-  const [anomaliesResponse, jobIds] = await Promise.all([
+  const [anomaliesResponse, jobsInSpace] = await Promise.all([
     anomalySeriesFetcher({
       serviceName,
       transactionType,
@@ -73,12 +66,11 @@ export async function getAnomalySeries({
       start: mlStart,
       end,
     }),
-    getMLJobIds(ml.anomalyDetectors, environment),
+    getMLJobs(ml.anomalyDetectors),
   ]);
 
-  const scoreSeriesCollection = anomaliesResponse?.aggregations?.job_id.buckets
-    .filter((bucket) => jobIds.includes(bucket.key as string))
-    .map((bucket) => {
+  const allSeries =
+    anomaliesResponse?.aggregations?.job_id.buckets.map((bucket) => {
       const dateBuckets = bucket.ml_avg_response_times.buckets;
 
       return {
@@ -118,13 +110,37 @@ export async function getAnomalySeries({
             y: dateBucket.upper.value as number,
           })),
       };
-    });
+    }) ?? [];
 
-  if ((scoreSeriesCollection?.length ?? 0) > 1) {
-    logger.warn(
-      `More than one ML job was found for ${serviceName} for environment ${environment}. Only showing results from ${scoreSeriesCollection?.[0].jobId}`
-    );
+  const seriesWithJobs = compact(
+    allSeries.map((series) => {
+      const { jobId, ...data } = series;
+      const job = jobsInSpace.find((j) => j.job_id === jobId);
+
+      if (!job) {
+        return undefined;
+      }
+
+      return {
+        ...data,
+        job: {
+          id: job.job_id,
+          environment: job.custom_settings?.job_tags?.environment,
+        },
+      };
+    })
+  );
+
+  const deduped = uniqBy(seriesWithJobs, (series) => series.job.environment);
+
+  const droppedJobs = difference(seriesWithJobs, deduped).map(
+    (series) => series.job.id
+  );
+
+  if (droppedJobs.length) {
+    logger.warn(`Multiple ML jobs for the same environment found. To guarantee consistent results, make sure there is only one job per environment per space. Dropped results for:
+      ${droppedJobs.map((id) => `${id}`).join(', ')}`);
   }
 
-  return scoreSeriesCollection?.[0];
+  return deduped;
 }

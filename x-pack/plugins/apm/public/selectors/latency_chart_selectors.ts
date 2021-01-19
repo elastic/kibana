@@ -6,7 +6,9 @@
 import { Fit } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
+import { ValuesType } from 'utility-types';
 import { EuiTheme } from '../../../observability/public';
+import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { asDuration } from '../../common/utils/formatters';
 import { APMChartSpec, Coordinate } from '../../typings/timeseries';
 import { APIReturnType } from '../services/rest/createCallApmApi';
@@ -23,10 +25,14 @@ export function getLatencyChartSelector({
   latencyChart,
   theme,
   latencyAggregationType,
+  availableEnvironments,
+  selectedEnvironment,
 }: {
   latencyChart?: LatencyChartsResponse;
   theme: EuiTheme;
   latencyAggregationType?: string;
+  availableEnvironments: string[] | undefined;
+  selectedEnvironment: string;
 }): LatencyChartData {
   if (!latencyChart?.latencyTimeseries || !latencyAggregationType) {
     return {
@@ -35,15 +41,28 @@ export function getLatencyChartSelector({
       anomalyTimeseries: undefined,
     };
   }
+
+  const environmentForMlJob =
+    selectedEnvironment === ENVIRONMENT_ALL.value &&
+    availableEnvironments?.length === 1
+      ? availableEnvironments?.[0]
+      : selectedEnvironment;
+
+  const anomalyData = environmentForMlJob
+    ? latencyChart.anomalyTimeseries?.find(
+        (series) => series.job.environment === environmentForMlJob
+      )
+    : undefined;
+
   return {
     latencyTimeseries: getLatencyTimeseries({
       latencyChart,
       theme,
       latencyAggregationType,
     }),
-    mlJobId: latencyChart.anomalyTimeseries?.jobId,
+    mlJobId: anomalyData?.job.id,
     anomalyTimeseries: getAnomalyTimeseries({
-      anomalyTimeseries: latencyChart.anomalyTimeseries,
+      anomalyTimeseries: anomalyData,
       theme,
     }),
   };
@@ -112,7 +131,9 @@ function getAnomalyTimeseries({
   anomalyTimeseries,
   theme,
 }: {
-  anomalyTimeseries: LatencyChartsResponse['anomalyTimeseries'];
+  anomalyTimeseries:
+    | ValuesType<LatencyChartsResponse['anomalyTimeseries']>
+    | undefined;
   theme: EuiTheme;
 }): { boundaries: APMChartSpec[]; scores: APMChartSpec } | undefined {
   if (!anomalyTimeseries) {
@@ -121,7 +142,7 @@ function getAnomalyTimeseries({
 
   const boundariesConfigBase = {
     type: 'area',
-    fit: Fit.Lookahead,
+    fit: Fit.Linear,
     hideLegend: true,
     hideTooltipValue: true,
     stackAccessors: ['y'],

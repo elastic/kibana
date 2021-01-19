@@ -65,18 +65,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(response.status).to.eql(200);
           });
 
-          it('should return the ML job id for anomalies of the selected environment', () => {
+          it('should only return ML results for the currently selected environment', () => {
             expect(response.body).to.have.property('anomalyTimeseries');
-            expect(response.body.anomalyTimeseries).to.have.property('jobId');
-            expectSnapshot(response.body.anomalyTimeseries.jobId).toMatchInline(
+
+            expect(response.body.anomalyTimeseries.length).to.be(1);
+
+            expect(response.body.anomalyTimeseries[0].job.id).to.be.a('string');
+            expect(response.body.anomalyTimeseries[0].job.environment).to.be('production');
+
+            expectSnapshot(response.body.anomalyTimeseries[0].job.id).toMatchInline(
               `"apm-production-1369-high_mean_transaction_duration"`
             );
           });
 
           it('should return a non-empty anomaly series', () => {
             expect(response.body).to.have.property('anomalyTimeseries');
-            expect(response.body.anomalyTimeseries.anomalyBoundaries?.length).to.be.greaterThan(0);
-            expectSnapshot(response.body.anomalyTimeseries.anomalyBoundaries).toMatch();
+            expect(response.body.anomalyTimeseries[0].anomalyBoundaries?.length).to.be.greaterThan(
+              0
+            );
+            expectSnapshot(response.body.anomalyTimeseries[0].anomalyBoundaries).toMatch();
           });
         });
 
@@ -96,15 +103,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('should return the ML job id for anomalies with no defined environment', () => {
             expect(response.body).to.have.property('anomalyTimeseries');
-            expect(response.body.anomalyTimeseries).to.have.property('jobId');
-            expectSnapshot(response.body.anomalyTimeseries.jobId).toMatchInline(
+
+            expect(response.body.anomalyTimeseries[0].job.environment).to.be(
+              'ENVIRONMENT_NOT_DEFINED'
+            );
+
+            expectSnapshot(response.body.anomalyTimeseries[0].job.id).toMatchInline(
               `"apm-environment_not_defined-5626-high_mean_transaction_duration"`
             );
           });
 
           it('should return the correct anomaly boundaries', () => {
             expect(response.body).to.have.property('anomalyTimeseries');
-            expectSnapshot(response.body.anomalyTimeseries.anomalyBoundaries).toMatch();
+            expectSnapshot(response.body.anomalyTimeseries[0].anomalyBoundaries).toMatch();
           });
         });
 
@@ -120,8 +131,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(response.status).to.eql(200);
           });
 
-          it('should not return anomaly timeseries data', () => {
-            expect(response.body).to.not.have.property('anomalyTimeseries');
+          it('should return anomaly data from all ML jobs', () => {
+            expect(response.body.anomalyTimeseries.length).to.be.greaterThan(0);
+            expectSnapshot(response.body.anomalyTimeseries.map((data: any) => data.job))
+              .toMatchInline(`
+              Array [
+                Object {
+                  "environment": "production",
+                  "id": "apm-production-1369-high_mean_transaction_duration",
+                },
+              ]
+            `);
           });
         });
 
@@ -141,16 +161,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('should return the ML job id for anomalies of the selected environment', () => {
             expect(response.body).to.have.property('anomalyTimeseries');
-            expect(response.body.anomalyTimeseries).to.have.property('jobId');
-            expectSnapshot(response.body.anomalyTimeseries.jobId).toMatchInline(
+            expect(response.body.anomalyTimeseries[0].job.id).to.be.a('string');
+            expect(response.body.anomalyTimeseries[0].job.environment).to.be('production');
+            expectSnapshot(response.body.anomalyTimeseries[0].job.id).toMatchInline(
               `"apm-production-1369-high_mean_transaction_duration"`
             );
           });
 
           it('should return a non-empty anomaly series', () => {
             expect(response.body).to.have.property('anomalyTimeseries');
-            expect(response.body.anomalyTimeseries.anomalyBoundaries?.length).to.be.greaterThan(0);
-            expectSnapshot(response.body.anomalyTimeseries.anomalyBoundaries).toMatch();
+            expect(response.body.anomalyTimeseries[0].anomalyBoundaries?.length).to.be.greaterThan(
+              0
+            );
+            expectSnapshot(response.body.anomalyTimeseries[0].anomalyBoundaries).toMatch();
           });
         });
       });

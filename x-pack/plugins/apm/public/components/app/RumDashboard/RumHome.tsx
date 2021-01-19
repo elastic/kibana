@@ -11,6 +11,7 @@ import { RumOverview } from '../RumDashboard';
 import { CsmSharedContextProvider } from './CsmSharedContext';
 import { MainFilters } from './Panels/MainFilters';
 import { DatePicker } from '../../shared/DatePicker';
+import { EnvironmentProvider } from '../../../context/environments/environment_context';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'User Experience',
@@ -19,27 +20,29 @@ export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
 export function RumHome() {
   return (
     <CsmSharedContextProvider>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
-            <h1 className="eui-textNoWrap">{UX_LABEL}</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            wrap
-            style={{ flexWrap: 'wrap-reverse' }}
-            justifyContent="flexEnd"
-            gutterSize="s"
-          >
-            <MainFilters />
-            <EuiFlexItem grow={false}>
-              <DatePicker />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <RumOverview />
+      <EnvironmentProvider>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle>
+              <h1 className="eui-textNoWrap">{UX_LABEL}</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              wrap
+              style={{ flexWrap: 'wrap-reverse' }}
+              justifyContent="flexEnd"
+              gutterSize="s"
+            >
+              <MainFilters />
+              <EuiFlexItem grow={false}>
+                <DatePicker />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <RumOverview />
+      </EnvironmentProvider>
     </CsmSharedContextProvider>
   );
 }

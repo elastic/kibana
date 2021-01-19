@@ -8,14 +8,14 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import React from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
-import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../Links/url_helpers';
+import { useEnvironments } from '../../../context/environments/use_enviroments';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 function updateEnvironmentUrl(
   history: History,
@@ -62,16 +62,8 @@ function getOptions(environments: string[]) {
 export function EnvironmentFilter() {
   const history = useHistory();
   const location = useLocation();
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const { uiFilters, urlParams } = useUrlParams();
 
-  const { environment } = uiFilters;
-  const { start, end } = urlParams;
-  const { environments, status = 'loading' } = useEnvironmentsFetcher({
-    serviceName,
-    start,
-    end,
-  });
+  const { availableEnvironments, selectedEnvironment } = useEnvironments();
 
   // Set the min-width so we don't see as much collapsing of the select during
   // the loading state. 200px is what is looks like if "production" is
@@ -83,12 +75,12 @@ export function EnvironmentFilter() {
       prepend={i18n.translate('xpack.apm.filter.environment.label', {
         defaultMessage: 'Environment',
       })}
-      options={getOptions(environments)}
-      value={environment || ENVIRONMENT_ALL.value}
+      options={getOptions(availableEnvironments ?? [])}
+      value={selectedEnvironment}
       onChange={(event) => {
         updateEnvironmentUrl(history, location, event.target.value);
       }}
-      isLoading={status === 'loading'}
+      isLoading={status === FETCH_STATUS.LOADING}
       style={{ minWidth }}
     />
   );

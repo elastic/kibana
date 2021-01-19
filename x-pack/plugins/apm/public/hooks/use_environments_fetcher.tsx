@@ -32,7 +32,7 @@ export function useEnvironmentsFetcher({
   start?: string;
   end?: string;
 }) {
-  const { data: environments = [], status = 'loading' } = useFetcher(() => {
+  const { data: environments = [], status } = useFetcher(() => {
     if (start && end) {
       return callApmApi({
         endpoint: 'GET /api/apm/ui_filters/environments',

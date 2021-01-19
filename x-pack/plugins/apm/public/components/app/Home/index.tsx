@@ -8,6 +8,7 @@ import { EuiTab, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ComponentType } from 'react';
 import { $ElementType } from 'utility-types';
+import { EnvironmentProvider } from '../../../context/environments/environment_context';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
 import { useServiceInventoryHref } from '../../shared/Links/apm/service_inventory_link';
@@ -60,7 +61,7 @@ export function Home({ tab }: Props) {
   ) as $ElementType<typeof homeTabs, number>;
 
   return (
-    <>
+    <EnvironmentProvider>
       <ApmHeader>
         <EuiTitle>
           <h1>APM</h1>
@@ -74,6 +75,6 @@ export function Home({ tab }: Props) {
         ))}
       </MainTabs>
       <selectedTab.Component />
-    </>
+    </EnvironmentProvider>
   );
 }

@@ -29,7 +29,7 @@ export const CsmSharedContext = createContext(defaultContext);
 export function CsmSharedContextProvider({
   children,
 }: {
-  children: JSX.Element[];
+  children: React.ReactNode;
 }) {
   const [newData, setNewData] = useState<SharedData>({ totalPageViews: 0 });
 
