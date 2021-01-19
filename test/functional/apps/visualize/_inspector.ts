@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('advanced input JSON', () => {
-      it('should match JSON string', async () => {
+      it('should have "missing" property with value 10', async () => {
         log.debug('Add Max Metric on memory field');
         await PageObjects.visEditor.clickBucket('Y-axis', 'metrics');
         await PageObjects.visEditor.selectAggregation('Max', 'metrics');
@@ -53,20 +53,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await inspector.openInspectorRequestsView();
         const requestTab = await inspector.getOpenRequestDetailRequestButton();
         await requestTab.click();
-        const requestJSON = await inspector.getCodeEditorValue();
+        const requestJSON = JSON.parse(await inspector.getCodeEditorValue());
 
-        expect(requestJSON).to.be(
-          '{\n  "aggs": {\n    "2": {\n      "max": {\n        "field": "memory",\n        "missing": 10\n      }\n' +
-            '    }\n  },\n  "size": 0,\n  "fields": [\n    {\n      "field": "@timestamp",\n      "format": "date_time"\n' +
-            '    },\n    {\n      "field": "relatedContent.article:modified_time",\n      "format": "date_time"\n    },\n' +
-            '    {\n      "field": "relatedContent.article:published_time",\n      "format": "date_time"\n    },\n    {\n' +
-            '      "field": "utc_time",\n      "format": "date_time"\n    }\n  ],\n  "script_fields": {},\n  "stored_fields": ' +
-            '[\n    "*"\n  ],\n  "_source": {\n    "excludes": []\n  },\n  "query": {\n    "bool": {\n      "must": [],\n      ' +
-            '"filter": [\n        {\n          "match_all": {}\n        },\n        {\n          "range": {\n            ' +
-            '"@timestamp": {\n              "gte": "2015-09-19T06:31:44.000Z",\n              "lte": "2015-09-23T18:31:44.000Z",\n' +
-            '              "format": "strict_date_optional_time"\n            }\n          }\n        }\n      ],\n      ' +
-            '"should": [],\n      "must_not": []\n    }\n  }\n}'
-        );
+        expect(requestJSON.aggs['2'].max).property('missing', 10);
       });
 
       after(async () => {
