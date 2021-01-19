@@ -25,7 +25,7 @@ export const QueryDetail: React.FC<Props> = ({ breadcrumbs }) => {
   const { query } = useParams() as { query: string };
 
   return (
-    <AnalyticsLayout title={`"${query}"`}>
+    <AnalyticsLayout isQueryView title={`"${query}"`}>
       <SetPageChrome trail={[...breadcrumbs, QUERY_DETAIL_TITLE, query]} />
 
       <p>TODO: Query detail page</p>

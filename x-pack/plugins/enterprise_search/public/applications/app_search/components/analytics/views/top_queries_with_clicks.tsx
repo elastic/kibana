@@ -11,7 +11,7 @@ import { AnalyticsLayout } from '../analytics_layout';
 
 export const TopQueriesWithClicks: React.FC = () => {
   return (
-    <AnalyticsLayout title={TOP_QUERIES_WITH_CLICKS}>
+    <AnalyticsLayout isAnalyticsView title={TOP_QUERIES_WITH_CLICKS}>
       <p>TODO: Top queries with clicks</p>
     </AnalyticsLayout>
   );

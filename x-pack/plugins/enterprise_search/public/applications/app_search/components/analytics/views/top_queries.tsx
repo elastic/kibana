@@ -11,7 +11,7 @@ import { AnalyticsLayout } from '../analytics_layout';
 
 export const TopQueries: React.FC = () => {
   return (
-    <AnalyticsLayout title={TOP_QUERIES}>
+    <AnalyticsLayout isAnalyticsView title={TOP_QUERIES}>
       <p>TODO: Top queries</p>
     </AnalyticsLayout>
   );

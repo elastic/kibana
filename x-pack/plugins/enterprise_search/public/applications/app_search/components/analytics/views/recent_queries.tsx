@@ -11,7 +11,7 @@ import { AnalyticsLayout } from '../analytics_layout';
 
 export const RecentQueries: React.FC = () => {
   return (
-    <AnalyticsLayout title={RECENT_QUERIES}>
+    <AnalyticsLayout isAnalyticsView title={RECENT_QUERIES}>
       <p>TODO: Recent queries</p>
     </AnalyticsLayout>
   );

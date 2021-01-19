@@ -70,19 +70,19 @@ describe('AnalyticsLayout', () => {
   describe('data loading', () => {
     it('loads query data for query details pages', () => {
       (useParams as jest.Mock).mockReturnValueOnce({ query: 'test' });
-      shallow(<AnalyticsLayout title="" />);
+      shallow(<AnalyticsLayout isQueryView title="" />);
 
       expect(actions.loadQueryData).toHaveBeenCalledWith('test');
     });
 
     it('loads analytics data for non query details pages', () => {
-      shallow(<AnalyticsLayout title="" />);
+      shallow(<AnalyticsLayout isAnalyticsView title="" />);
 
       expect(actions.loadAnalyticsData).toHaveBeenCalled();
     });
 
     it('reloads data when search params are updated (by our AnalyticsHeader filters)', () => {
-      const wrapper = shallow(<AnalyticsLayout title="" />);
+      const wrapper = shallow(<AnalyticsLayout isAnalyticsView title="" />);
       expect(actions.loadAnalyticsData).toHaveBeenCalledTimes(1);
 
       history.location.search = '?tag=some-filter';

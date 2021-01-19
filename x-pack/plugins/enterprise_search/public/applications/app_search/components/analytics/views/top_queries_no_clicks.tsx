@@ -11,7 +11,7 @@ import { AnalyticsLayout } from '../analytics_layout';
 
 export const TopQueriesNoClicks: React.FC = () => {
   return (
-    <AnalyticsLayout title={TOP_QUERIES_NO_CLICKS}>
+    <AnalyticsLayout isAnalyticsView title={TOP_QUERIES_NO_CLICKS}>
       <p>TODO: Top queries with no clicks</p>
     </AnalyticsLayout>
   );

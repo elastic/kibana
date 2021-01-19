@@ -19,19 +19,23 @@ import { AnalyticsHeader, AnalyticsUnavailable } from './components';
 
 interface Props {
   title: string;
+  isQueryView?: boolean;
+  isAnalyticsView?: boolean;
 }
-export const AnalyticsLayout: React.FC<Props> = ({ title, children }) => {
+export const AnalyticsLayout: React.FC<Props> = ({
+  title,
+  isQueryView,
+  isAnalyticsView,
+  children,
+}) => {
   const { history } = useValues(KibanaLogic);
   const { query } = useParams() as { query: string };
   const { dataLoading, analyticsUnavailable } = useValues(AnalyticsLogic);
   const { loadAnalyticsData, loadQueryData } = useActions(AnalyticsLogic);
 
   useEffect(() => {
-    if (query) {
-      loadQueryData(query);
-    } else {
-      loadAnalyticsData();
-    }
+    if (isQueryView) loadQueryData(query);
+    if (isAnalyticsView) loadAnalyticsData();
   }, [history.location.search]);
 
   if (dataLoading) return <Loading />;

@@ -11,7 +11,7 @@ import { AnalyticsLayout } from '../analytics_layout';
 
 export const Analytics: React.FC = () => {
   return (
-    <AnalyticsLayout title={ANALYTICS_TITLE}>
+    <AnalyticsLayout isAnalyticsView title={ANALYTICS_TITLE}>
       <p>TODO: Analytics overview</p>
     </AnalyticsLayout>
   );
