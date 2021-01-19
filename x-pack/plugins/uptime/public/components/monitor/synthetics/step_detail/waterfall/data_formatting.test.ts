@@ -136,6 +136,31 @@ describe('getSeriesAndDomain', () => {
     },
   ];
 
+  const networkItemsWithUncommonMimeType: NetworkItems = [
+    {
+      timestamp: '2021-01-05T19:22:28.928Z',
+      method: 'GET',
+      url: 'https://unpkg.com/director@1.2.8/build/director.js',
+      status: 200,
+      mimeType: 'application/x-javascript',
+      requestSentTime: 18098833.537,
+      requestStartTime: 18098837.233999997,
+      loadEndTime: 18098977.648000002,
+      timings: {
+        blocked: 84.54599999822676,
+        receive: 3.068000001803739,
+        queueing: 3.69700000010198,
+        proxy: -1,
+        total: 144.1110000014305,
+        wait: 52.56100000042352,
+        connect: -1,
+        send: 0.2390000008745119,
+        ssl: -1,
+        dns: -1,
+      },
+    },
+  ];
+
   it('formats timings', () => {
     const actual = getSeriesAndDomain(networkItems);
     expect(actual).toMatchInlineSnapshot(`
@@ -451,6 +476,72 @@ describe('getSeriesAndDomain', () => {
             "x": 0,
             "y": 0,
             "y0": 0,
+          },
+        ],
+      }
+    `);
+  });
+
+  it('handles formatting when mime type is not mapped to a specific mime type bucket', () => {
+    const actual = getSeriesAndDomain(networkItemsWithUncommonMimeType);
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "domain": Object {
+          "max": 140.41400000132853,
+          "min": 0,
+        },
+        "series": Array [
+          Object {
+            "config": Object {
+              "colour": "#b9a888",
+              "showTooltip": true,
+              "tooltipProps": Object {
+                "colour": "#b9a888",
+                "value": "Queued / Blocked: 84.546ms",
+              },
+            },
+            "x": 0,
+            "y": 84.54599999822676,
+            "y0": 0,
+          },
+          Object {
+            "config": Object {
+              "colour": "#d36086",
+              "showTooltip": true,
+              "tooltipProps": Object {
+                "colour": "#d36086",
+                "value": "Sending request: 0.239ms",
+              },
+            },
+            "x": 0,
+            "y": 84.78499999910127,
+            "y0": 84.54599999822676,
+          },
+          Object {
+            "config": Object {
+              "colour": "#b0c9e0",
+              "showTooltip": true,
+              "tooltipProps": Object {
+                "colour": "#b0c9e0",
+                "value": "Waiting (TTFB): 52.561ms",
+              },
+            },
+            "x": 0,
+            "y": 137.3459999995248,
+            "y0": 84.78499999910127,
+          },
+          Object {
+            "config": Object {
+              "colour": "#e7664c",
+              "showTooltip": true,
+              "tooltipProps": Object {
+                "colour": "#e7664c",
+                "value": "Content downloading (application/x-javascript): 3.068ms",
+              },
+            },
+            "x": 0,
+            "y": 140.41400000132853,
+            "y0": 137.3459999995248,
           },
         ],
       }
