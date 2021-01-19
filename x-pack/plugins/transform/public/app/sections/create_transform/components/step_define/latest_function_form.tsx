@@ -66,7 +66,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
             <EuiComboBox
               fullWidth
               placeholder={i18n.translate('xpack.transform.stepDefineForm.sortPlaceholder', {
-                defaultMessage: 'Add a sort field ...',
+                defaultMessage: 'Add a date field ...',
               })}
               singleSelection={{ asPlainText: true }}
               options={latestFunctionService.sortFieldOptions}
@@ -87,7 +87,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
               <p>
                 <FormattedMessage
                   id="xpack.transform.stepDefineForm.sortFieldOptionsEmptyError"
-                  defaultMessage="No date fields available to sort on. To override the configuration with another field type, please copy the configuration to the clipboard using the following button and continue creating the transform in Kibana Dev Console."
+                  defaultMessage="No date fields are available to sort on. To use another field type, copy the configuration to the clipboard and continue creating the transform in the Console."
                 />{' '}
                 <EuiCopy beforeMessage={copyToClipboardDescription} textToCopy={copyToClipboard}>
                   {(copy: () => void) => (
