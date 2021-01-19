@@ -21,6 +21,7 @@ import {
   eqlSearchStrategyProvider,
 } from './search';
 import { getUiSettings } from './ui_settings';
+import type { DataEnhancedRequestHandlerContext } from './type';
 
 interface SetupDependencies {
   data: DataPluginSetup;
@@ -73,7 +74,7 @@ export class EnhancedDataServerPlugin
       },
     });
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<DataEnhancedRequestHandlerContext>();
     registerSessionRoutes(router);
 
     this.sessionService.setup(core, {

@@ -5,10 +5,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
 import { reportServerError } from '../../../../../src/plugins/kibana_utils/server';
+import { DataEnhancedPluginRouter } from '../type';
 
-export function registerSessionRoutes(router: IRouter): void {
+export function registerSessionRoutes(router: DataEnhancedPluginRouter): void {
   router.post(
     {
       path: '/internal/session',
