@@ -28,7 +28,7 @@ export const ExampleResultDetailCard: React.FC = () => {
   const result = exampleDocuments[0];
 
   return (
-    <div className="example-result-detail-card">
+    <div className="example-result-detail-card" data-test-subj="ExampleResultDetailCard">
       <div className="example-result-detail-card__header">
         <div className="example-result-detail-card__border" style={{ backgroundColor: color }} />
         <div className="example-result-detail-card__source-name">
@@ -49,7 +49,9 @@ export const ExampleResultDetailCard: React.FC = () => {
             {urlField ? (
               <div className="eui-textTruncate">{result[urlField]}</div>
             ) : (
-              <span className="example-result-content-placeholder">URL</span>
+              <span className="example-result-content-placeholder" data-test-subj="DefaultUrlLabel">
+                URL
+              </span>
             )}
           </div>
         </div>
@@ -57,7 +59,11 @@ export const ExampleResultDetailCard: React.FC = () => {
       <div className="example-result-detail-card__content">
         {detailFields.length > 0 ? (
           detailFields.map(({ fieldName, label }, index) => (
-            <div className="example-result-detail-card__field" key={index}>
+            <div
+              data-test-subj="DetailField"
+              className="example-result-detail-card__field"
+              key={index}
+            >
               <EuiTitle size="xs">
                 <h4>{label}</h4>
               </EuiTitle>

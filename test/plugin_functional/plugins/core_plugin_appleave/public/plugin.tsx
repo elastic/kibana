@@ -25,7 +25,7 @@ export class CoreAppLeavePlugin
     core.application.register({
       id: 'appleave1',
       title: 'AppLeave 1',
-      async mount(context, params) {
+      async mount(params) {
         const { renderApp } = await import('./application');
         params.onAppLeave((actions) => actions.confirm('confirm-message', 'confirm-title'));
         return renderApp('AppLeave 1', params);
@@ -34,7 +34,7 @@ export class CoreAppLeavePlugin
     core.application.register({
       id: 'appleave2',
       title: 'AppLeave 2',
-      async mount(context, params) {
+      async mount(params) {
         const { renderApp } = await import('./application');
         params.onAppLeave((actions) => actions.default());
         return renderApp('AppLeave 2', params);
