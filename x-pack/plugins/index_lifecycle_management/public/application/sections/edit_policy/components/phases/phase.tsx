@@ -13,7 +13,6 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiText,
-  EuiTextColor,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { get } from 'lodash';
@@ -95,23 +94,15 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
             )}
           </EuiFlexGroup>
           <EuiSpacer />
-          {enabled && <div style={isShowingSettings ? {} : { display: 'none' }}>{children}</div>}
+          {enabled && (
+            <div id={`${phase}PhaseContent`} style={isShowingSettings ? {} : { display: 'none' }}>
+              {children}
+            </div>
+          )}
 
           {(!enabled || !isShowingSettings) && (
             <EuiText color="subdued" size={'s'}>
               {i18nTexts.editPolicy.descriptions[phase]}
-              <br />
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseOptionsList"
-                defaultMessage="Available options: {list}"
-                values={{
-                  list: (
-                    <EuiTextColor color="default">
-                      {i18nTexts.editPolicy.options[phase]}
-                    </EuiTextColor>
-                  ),
-                }}
-              />
             </EuiText>
           )}
         </EuiPanel>

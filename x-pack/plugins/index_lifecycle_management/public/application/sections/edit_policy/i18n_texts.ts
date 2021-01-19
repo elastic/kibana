@@ -194,26 +194,15 @@ export const i18nTexts = {
     descriptions: {
       hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescription', {
         defaultMessage:
-          'COPY Ingest and process frequently queried data. But at a slightly higher cost.',
+          'This phase is required. You are actively querying and writing to your index. For faster updates, you can roll over the index when it gets too big or too old.',
       }),
       warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescription', {
         defaultMessage:
-          'COPY Ingest and process frequently queried data. But at a slightly higher cost.',
+          'You are still querying your index, but it is read-only. You can allocate shards to less performant hardware. For faster searches, you can reduce the number of shards and force merge segments.',
       }),
       cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescription', {
         defaultMessage:
-          'COPY Ingest and process frequently queried data. But at a slightly higher cost.',
-      }),
-    },
-    options: {
-      hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseOptionsList', {
-        defaultMessage: 'Rollover, Force Merge, Shrink, Read Only',
-      }),
-      warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseOptionsList', {
-        defaultMessage: 'Replicas, Shrink, Force Merge, Read Only, Data Allocation',
-      }),
-      cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseOptionsList', {
-        defaultMessage: 'Searchable Snapshot, Replicas, Freeze, Data Allocation',
+          'You are querying your index less frequently, so you can allocate shards on significantly less performant hardware. Because your queries are slower, you can reduce the number of replicas.',
       }),
     },
   },
