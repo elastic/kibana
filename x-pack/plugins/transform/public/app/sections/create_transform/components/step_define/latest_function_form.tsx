@@ -57,6 +57,9 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
             defaultMessage="Sort field"
           />
         }
+        helpText={i18n.translate('xpack.transform.stepDefineForm.sortHelpText', {
+          defaultMessage: 'Select the date field to be used to identify the latest document.',
+        })}
       >
         <>
           {latestFunctionService.sortFieldOptions.length > 0 && (
