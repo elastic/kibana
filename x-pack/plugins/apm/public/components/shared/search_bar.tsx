@@ -16,15 +16,22 @@ const SearchBarFlexGroup = styled(EuiFlexGroup)`
     `${theme.eui.euiSizeM} ${theme.eui.euiSizeM} -${theme.eui.gutterTypes.gutterMedium} ${theme.eui.euiSizeM}`};
 `;
 
-export function SearchBar(props: { prepend?: React.ReactNode | string }) {
+interface Props {
+  prepend?: React.ReactNode | string;
+  showTimeComparison?: boolean;
+}
+
+export function SearchBar({ prepend, showTimeComparison = false }: Props) {
   return (
     <SearchBarFlexGroup alignItems="flexStart" gutterSize="s">
       <EuiFlexItem grow={3}>
-        <KueryBar prepend={props.prepend} />
+        <KueryBar prepend={prepend} />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <TimeComparison />
-      </EuiFlexItem>
+      {showTimeComparison && (
+        <EuiFlexItem>
+          <TimeComparison />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={1}>
         <DatePicker />
       </EuiFlexItem>

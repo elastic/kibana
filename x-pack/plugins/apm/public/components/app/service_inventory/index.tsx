@@ -129,7 +129,7 @@ export function ServiceInventory() {
 
   return (
     <>
-      <SearchBar />
+      <SearchBar showTimeComparison />
       <EuiPage>
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>

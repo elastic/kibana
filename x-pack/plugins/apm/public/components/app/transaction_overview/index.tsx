@@ -108,7 +108,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
   return (
     <>
-      <SearchBar />
+      <SearchBar showTimeComparison />
 
       <EuiPage>
         <EuiFlexGroup>
