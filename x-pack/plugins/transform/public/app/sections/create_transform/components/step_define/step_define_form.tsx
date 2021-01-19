@@ -386,12 +386,21 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
           </EuiFlexGroup>
         ) : null}
         {stepDefineForm.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
-          <LatestFunctionForm latestFunctionService={stepDefineForm.latestFunctionConfig} />
+          <LatestFunctionForm
+            latestFunctionService={stepDefineForm.latestFunctionConfig}
+            copyToClipboard={copyToClipboardPivot}
+            copyToClipboardDescription={copyToClipboardPivotDescription}
+          />
         ) : null}
       </EuiForm>
       <EuiSpacer size="m" />
-      <DataGrid {...pivotPreviewProps} />
-      <EuiSpacer size="m" />
+      {(stepDefineForm.transformFunction !== TRANSFORM_FUNCTION.LATEST ||
+        stepDefineForm.latestFunctionConfig.sortFieldOptions.length > 0) && (
+        <>
+          <DataGrid {...pivotPreviewProps} />
+          <EuiSpacer size="m" />
+        </>
+      )}
     </div>
   );
 });
