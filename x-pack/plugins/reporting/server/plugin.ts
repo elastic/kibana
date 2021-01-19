@@ -16,14 +16,9 @@ import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
 import { registerReportingUsageCollector } from './usage';
+import type { ReportingRequestHandlerContext } from './types';
 
 const kbToBase64Length = (kb: number) => Math.floor((kb * 1024 * 8) / 6);
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    reporting?: ReportingStart | null;
-  }
-}
 
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
@@ -73,7 +68,7 @@ export class ReportingPlugin
     const { features, licensing, security, spaces } = plugins;
     const { initializerContext: initContext, reportingCore } = this;
 
-    const router = http.createRouter();
+    const router = http.createRouter<ReportingRequestHandlerContext>();
     const basePath = http.basePath;
 
     reportingCore.pluginSetup({
