@@ -7,10 +7,11 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const MILLISECOND_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
 
@@ -43,7 +44,7 @@ export default function ({ getService }) {
       });
 
       it('should load elasticsearch index containing sample data with dates relative to current time', async () => {
-        const resp = await es.search({
+        const { body: resp } = await es.search({
           index: 'kibana_sample_data_flights',
         });
 
@@ -61,7 +62,7 @@ export default function ({ getService }) {
             .post(`/api/sample_data/flights?now=${nowString}`)
             .set('kbn-xsrf', 'kibana');
 
-          const resp = await es.search({
+          const { body: resp } = await es.search({
             index: 'kibana_sample_data_flights',
           });
 
@@ -80,7 +81,7 @@ export default function ({ getService }) {
       });
 
       it('should remove elasticsearch index containing sample data', async () => {
-        const resp = await es.indices.exists({
+        const { body: resp } = await es.indices.exists({
           index: 'kibana_sample_data_flights',
         });
         expect(resp).to.be(false);

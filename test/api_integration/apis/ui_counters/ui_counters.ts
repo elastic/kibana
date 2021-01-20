@@ -7,14 +7,15 @@
  */
 
 import expect from '@kbn/expect';
-import { ReportManager, METRIC_TYPE } from '@kbn/analytics';
+import { ReportManager, METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import moment from 'moment';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
-  const createUiCounterEvent = (eventName, type, count = 1) => ({
+  const createUiCounterEvent = (eventName: string, type: UiCounterMetricType, count = 1) => ({
     eventName,
     appName: 'myApp',
     type,
@@ -39,9 +40,9 @@ export default function ({ getService }) {
         .send({ report })
         .expect(200);
 
-      const response = await es.search({ index: '.kibana', q: 'type:ui-counter' });
+      const { body: response } = await es.search({ index: '.kibana', q: 'type:ui-counter' });
 
-      const ids = response.hits.hits.map(({ _id }) => _id);
+      const ids = response.hits.hits.map(({ _id }: { _id: string }) => _id);
       expect(ids.includes(`ui-counter:myApp:${dayDate}:${METRIC_TYPE.COUNT}:my_event`)).to.eql(
         true
       );
@@ -65,21 +66,26 @@ export default function ({ getService }) {
         .expect(200);
 
       const {
-        hits: { hits },
+        body: {
+          hits: { hits },
+        },
       } = await es.search({ index: '.kibana', q: 'type:ui-counter' });
 
       const countTypeEvent = hits.find(
-        (hit) => hit._id === `ui-counter:myApp:${dayDate}:${METRIC_TYPE.COUNT}:${uniqueEventName}`
+        (hit: { _id: string }) =>
+          hit._id === `ui-counter:myApp:${dayDate}:${METRIC_TYPE.COUNT}:${uniqueEventName}`
       );
       expect(countTypeEvent._source['ui-counter'].count).to.eql(1);
 
       const clickTypeEvent = hits.find(
-        (hit) => hit._id === `ui-counter:myApp:${dayDate}:${METRIC_TYPE.CLICK}:${uniqueEventName}`
+        (hit: { _id: string }) =>
+          hit._id === `ui-counter:myApp:${dayDate}:${METRIC_TYPE.CLICK}:${uniqueEventName}`
       );
       expect(clickTypeEvent._source['ui-counter'].count).to.eql(2);
 
       const secondEvent = hits.find(
-        (hit) => hit._id === `ui-counter:myApp:${dayDate}:${METRIC_TYPE.COUNT}:${uniqueEventName}_2`
+        (hit: { _id: string }) =>
+          hit._id === `ui-counter:myApp:${dayDate}:${METRIC_TYPE.COUNT}:${uniqueEventName}_2`
       );
       expect(secondEvent._source['ui-counter'].count).to.eql(1);
     });

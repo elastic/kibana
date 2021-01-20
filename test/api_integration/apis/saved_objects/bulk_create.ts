@@ -7,10 +7,11 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   const BULK_REQUESTS = [
@@ -74,11 +75,10 @@ export default function ({ getService }) {
       it('should not return raw id when object id is unspecified', async () =>
         await supertest
           .post(`/api/saved_objects/_bulk_create`)
-          // eslint-disable-next-line no-unused-vars
           .send(BULK_REQUESTS.map(({ id, ...rest }) => rest))
           .expect(200)
           .then((resp) => {
-            resp.body.saved_objects.map(({ id }) =>
+            resp.body.saved_objects.map(({ id }: { id: string }) =>
               expect(id).not.match(/visualization|dashboard/)
             );
           }));
@@ -88,10 +88,7 @@ export default function ({ getService }) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
-            ignore: [404],
-          })
+          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
       );
 
       it('should return 200 with individual responses', async () =>
