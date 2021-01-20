@@ -16,6 +16,7 @@ jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'test-engine' } },
 }));
 
+import { DEFAULT_START_DATE, DEFAULT_END_DATE } from './constants';
 import { AnalyticsLogic } from './';
 
 describe('AnalyticsLogic', () => {
@@ -27,6 +28,7 @@ describe('AnalyticsLogic', () => {
   const DEFAULT_VALUES = {
     dataLoading: true,
     analyticsUnavailable: false,
+    allTags: [],
   };
 
   const MOCK_TOP_QUERIES = [
@@ -117,6 +119,7 @@ describe('AnalyticsLogic', () => {
           ...DEFAULT_VALUES,
           dataLoading: false,
           analyticsUnavailable: false,
+          allTags: ['some-tag'],
           // TODO: more state will get set here in future PRs
         });
       });
@@ -131,6 +134,7 @@ describe('AnalyticsLogic', () => {
           ...DEFAULT_VALUES,
           dataLoading: false,
           analyticsUnavailable: false,
+          allTags: ['some-tag'],
           // TODO: more state will get set here in future PRs
         });
       });
@@ -162,7 +166,11 @@ describe('AnalyticsLogic', () => {
         expect(http.get).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/analytics/queries',
           {
-            query: { size: 20 },
+            query: {
+              start: DEFAULT_START_DATE,
+              end: DEFAULT_END_DATE,
+              size: 20,
+            },
           }
         );
         expect(AnalyticsLogic.actions.onAnalyticsDataLoad).toHaveBeenCalledWith(
@@ -239,7 +247,12 @@ describe('AnalyticsLogic', () => {
 
         expect(http.get).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/analytics/queries/some-query',
-          expect.any(Object) // empty query obj
+          {
+            query: {
+              start: DEFAULT_START_DATE,
+              end: DEFAULT_END_DATE,
+            },
+          }
         );
         expect(AnalyticsLogic.actions.onQueryDataLoad).toHaveBeenCalledWith(MOCK_QUERY_RESPONSE);
       });
