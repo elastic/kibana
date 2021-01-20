@@ -68,9 +68,13 @@ export class DiscoverSearchSessionManager {
    * @param replace - methods to change the URL
    */
   removeSearchSessionIdFromURL({ replace = true }: { replace?: boolean } = { replace: true }) {
-    if (this.deps.history.location.search.includes(SEARCH_SESSION_ID_QUERY_PARAM)) {
+    if (this.hasSearchSessionIdInURL()) {
       removeQueryParam(this.deps.history, SEARCH_SESSION_ID_QUERY_PARAM, replace);
     }
+  }
+
+  hasSearchSessionIdInURL() {
+    return !!this.getSearchSessionIdFromURL();
   }
 
   private getSearchSessionIdFromURL = () =>

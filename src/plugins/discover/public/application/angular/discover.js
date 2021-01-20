@@ -467,7 +467,8 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     return (
       config.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch.id !== undefined ||
-      timefilter.getRefreshInterval().pause === false
+      timefilter.getRefreshInterval().pause === false ||
+      searchSessionManager.hasSearchSessionIdInURL()
     );
   };
 
