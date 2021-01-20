@@ -32,7 +32,7 @@ import { MatchedItem, Tag } from '../../../../types';
 
 interface IndicesListProps {
   indices: MatchedItem[];
-  query: string;
+  query: string[];
 }
 
 interface IndicesListState {
@@ -161,8 +161,8 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
   }
 
   render() {
-    const { indices, query, ...rest } = this.props;
-
+    const { indices, query: fakeIt, ...rest } = this.props;
+    const query = fakeIt.length ? fakeIt[0] : '';
     const queryWithoutWildcard = query.endsWith('*') ? query.substr(0, query.length - 1) : query;
 
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);

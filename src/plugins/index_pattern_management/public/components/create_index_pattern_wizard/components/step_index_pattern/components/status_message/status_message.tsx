@@ -21,7 +21,7 @@ interface StatusMessageProps {
     partialMatchedIndices: MatchedItem[];
   };
   isIncludingSystemIndices: boolean;
-  query: string;
+  query: string[];
   showSystemIndices: boolean;
 }
 
