@@ -98,6 +98,9 @@ describe('When showing the Trusted App Create Form', () => {
     formProps = {
       'data-test-subj': dataTestSubjForForm,
       onChange: jest.fn(),
+      policies: {
+        options: [],
+      },
     };
     render = () => mockedContext.render(<CreateTrustedAppForm {...formProps} />);
   });

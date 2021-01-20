@@ -278,7 +278,10 @@ export const retrieveListOfPoliciesIfNeeded = async (
   if (!isLoading) {
     dispatch({
       type: 'trustedAppsPoliciesStateChanged',
-      payload: { type: 'LoadingResourceState', previousState: currentPoliciesState },
+      payload: {
+        type: 'LoadingResourceState',
+        previousState: currentPoliciesState,
+      } as TrustedAppsListPageState['policies'],
     });
 
     try {

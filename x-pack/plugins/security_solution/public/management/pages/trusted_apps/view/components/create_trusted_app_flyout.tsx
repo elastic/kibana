@@ -50,7 +50,8 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
 
     const policies = useMemo<CreateTrustedAppFormProps['policies']>(() => {
       return {
-        options: policyList,
+        // Casting is needed due to the use of `Immutable<>` on the return value from the selector above
+        options: policyList as CreateTrustedAppFormProps['policies']['options'],
         isLoading: isLoadingPolicies,
       };
     }, [isLoadingPolicies, policyList]);

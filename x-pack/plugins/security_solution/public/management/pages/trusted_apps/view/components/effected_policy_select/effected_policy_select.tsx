@@ -29,7 +29,7 @@ export interface EffectedPolicySelection {
 
 export type EffectedPolicySelectProps = Omit<
   EuiSelectableProps<OptionPolicyData>,
-  'onChange' | 'options' | 'children'
+  'onChange' | 'options' | 'children' | 'searchable'
 > & {
   options: PolicyData[];
   isGlobal: boolean;
@@ -81,15 +81,14 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         .sort(({ label: labelA }, { label: labelB }) => labelA.localeCompare(labelB));
     }, [isGlobal, options, selected]);
 
-    const handleOnPolicySelectChange: EuiSelectableProps<OptionPolicyData>['onChange'] = useCallback(
-      (currentOptions) => {
-        setSelectionState((prevState) => ({
-          ...prevState,
-          selected: currentOptions.filter((opt) => opt.checked).map((opt) => opt.policy),
-        }));
-      },
-      []
-    );
+    const handleOnPolicySelectChange = useCallback<
+      Required<EuiSelectableProps<OptionPolicyData>>['onChange']
+    >((currentOptions) => {
+      setSelectionState((prevState) => ({
+        ...prevState,
+        selected: currentOptions.filter((opt) => opt.checked).map((opt) => opt.policy),
+      }));
+    }, [])!;
 
     const handleGlobalSwitchChange: EuiSwitchProps['onChange'] = useCallback(
       ({ target: { checked } }) => {
