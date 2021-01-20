@@ -17,6 +17,14 @@ import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../angular/discover_state';
 import { IndexPattern } from '../../../kibana_services';
 
+interface DiscoverCapabilities {
+  createShortUrl?: boolean;
+  save?: boolean;
+  saveQuery?: boolean;
+  show?: boolean;
+  storeSearchSession?: boolean;
+}
+
 /**
  * Helper function to build the top nav links
  */
@@ -108,6 +116,13 @@ export const getTopNavLinks = ({
           title: savedSearch.title,
         },
         isDirty: !savedSearch.id || state.isAppStateDirty(),
+        showPublicUrlSwitch: async (anonymousUserCapabilities) => {
+          if (!anonymousUserCapabilities.visualize) return false;
+
+          const discover = (anonymousUserCapabilities.discover as unknown) as DiscoverCapabilities;
+
+          return !!discover.show;
+        },
       });
     },
   };
