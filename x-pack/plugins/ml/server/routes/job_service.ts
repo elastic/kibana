@@ -294,8 +294,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         const { createFullJobsList } = jobServiceProvider(client, mlClient);
-        const { jobIds } = request.body;
-        const resp = await createFullJobsList(jobIds);
+        const { jobIds, excludeGenerated } = request.body;
+        const resp = await createFullJobsList(jobIds, excludeGenerated);
 
         return response.ok({
           body: resp,

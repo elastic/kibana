@@ -36,6 +36,23 @@ export function loadFullJob(jobId) {
   });
 }
 
+export function loadClonableJob(jobId) {
+  return new Promise((resolve, reject) => {
+    ml.jobs
+      .jobs([jobId], true)
+      .then((jobs) => {
+        if (jobs.length) {
+          resolve(jobs[0]);
+        } else {
+          throw new Error(`Could not find job ${jobId}`);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
 export function isStartable(jobs) {
   return jobs.some(
     (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSING
@@ -180,10 +197,12 @@ function showResults(resp, action) {
 
 export async function cloneJob(jobId) {
   try {
-    const job = await loadFullJob(jobId);
-    if (job.custom_settings && job.custom_settings.created_by) {
+    const [job, originalJob] = await Promise.all([loadClonableJob(jobId), loadFullJob(jobId)]);
+    if (job.custom_settings && originalJob?.custom_settings?.created_by) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
+      job.custom_settings.created_by = originalJob?.custom_settings?.created_by;
+
       mlJobService.tempJobCloningObjects.job = job;
 
       if (
@@ -214,6 +233,7 @@ export async function cloneJob(jobId) {
       // otherwise use the tempJobCloningObjects
       mlJobService.tempJobCloningObjects.job = job;
     }
+    mlJobService.tempJobCloningObjects.job = job;
 
     if (job.calendars) {
       mlJobService.tempJobCloningObjects.calendars = await mlCalendarService.fetchCalendarsByIds(
