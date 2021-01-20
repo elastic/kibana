@@ -15,7 +15,11 @@ import { requestContextMock, serverMock, createMockConfig, mockGetCurrentUser } 
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { SecurityPluginSetup } from '../../../../../../security/server';
 import { installPrepackagedTimelines } from '../../../timeline/routes/utils/install_prepacked_timelines';
-import { addPrepackedRulesRoute } from './add_prepackaged_rules_route';
+import { addPrepackedRulesRoute, createPrepackagedRules } from './add_prepackaged_rules_route';
+import { listMock } from '../../../../../../lists/server/mocks';
+import { siemMock } from '../../../../mocks';
+import { FrameworkRequest } from '../../../framework';
+import { ExceptionListClient } from '../../../../../../lists/server';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -66,9 +70,11 @@ jest.mock('../../../timeline/routes/utils/install_prepacked_timelines', () => {
 });
 
 describe('add_prepackaged_rules_route', () => {
+  const siemMockClient = siemMock.createClient();
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let securitySetup: SecurityPluginSetup;
+  let mockExceptionsClient: ExceptionListClient;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -79,6 +85,8 @@ describe('add_prepackaged_rules_route', () => {
       },
       authz: {},
     } as unknown) as SecurityPluginSetup;
+
+    mockExceptionsClient = listMock.getExceptionListClient();
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
@@ -269,6 +277,42 @@ describe('add_prepackaged_rules_route', () => {
       rules_updated: 1,
       timelines_installed: 0,
       timelines_updated: 0,
+    });
+  });
+
+  describe('createPrepackagedRules', () => {
+    test('uses exception lists client from context when available', async () => {
+      context.lists = {
+        getExceptionListClient: jest.fn(),
+        getListClient: jest.fn(),
+      };
+
+      await createPrepackagedRules(
+        context,
+        siemMockClient,
+        clients.alertsClient,
+        {} as FrameworkRequest,
+        1200,
+        mockExceptionsClient
+      );
+
+      expect(mockExceptionsClient.createEndpointList).not.toHaveBeenCalled();
+      expect(context.lists?.getExceptionListClient).toHaveBeenCalled();
+    });
+
+    test('uses passed in exceptions list client when lists client not available in context', async () => {
+      const { lists, ...myContext } = context;
+
+      await createPrepackagedRules(
+        myContext,
+        siemMockClient,
+        clients.alertsClient,
+        {} as FrameworkRequest,
+        1200,
+        mockExceptionsClient
+      );
+
+      expect(mockExceptionsClient.createEndpointList).toHaveBeenCalled();
     });
   });
 });
