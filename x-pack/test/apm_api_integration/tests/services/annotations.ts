@@ -16,7 +16,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   const supertestWrite = getService('supertestAsApmAnnotationsWriteUser');
   const es = getService('es');
 
-  const runner = getService('runner');
+  const registry = getService('registry');
 
   function expectContainsObj(source: JsonObject, expected: JsonObject) {
     expect(source).to.eql(
@@ -42,7 +42,32 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
     }
   }
 
-  runner.when('Annotations', { config: 'trial', archives: [] }, () => {
+  registry.when('Annotations with a basic license', { config: 'basic', archives: [] }, () => {
+    describe('when creating an annotation', () => {
+      it('fails with a 403 forbidden', async () => {
+        const response = await request({
+          url: '/api/apm/services/opbeans-java/annotation',
+          method: 'POST',
+          data: {
+            '@timestamp': new Date().toISOString(),
+            message: 'New deployment',
+            tags: ['foo'],
+            service: {
+              version: '1.1',
+              environment: 'production',
+            },
+          },
+        });
+
+        expect(response.status).to.be(403);
+        expect(response.body.message).to.be(
+          'Annotations require at least a gold license or a trial license.'
+        );
+      });
+    });
+  });
+
+  registry.when('Annotations with a trial license', { config: 'trial', archives: [] }, () => {
     describe('when creating an annotation', () => {
       afterEach(async () => {
         const indexExists = (await es.indices.exists({ index: DEFAULT_INDEX_NAME })).body;

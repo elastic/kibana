@@ -11,13 +11,12 @@ import path from 'path';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
-import { createRunnerProvider } from './runner';
+import { createTestRegistryProvider } from './test_registry_provider';
 import { APMFtrConfigName } from '../configs';
 
 interface Config {
   name: APMFtrConfigName;
   license: 'basic' | 'trial';
-  testFiles?: string[];
 }
 
 const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async (
@@ -37,7 +36,7 @@ const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async 
 };
 
 export function createTestConfig(config: Config) {
-  const { license, name, testFiles = [] } = config;
+  const { license, name } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackAPITestsConfig = await readConfigFile(
@@ -50,14 +49,14 @@ export function createTestConfig(config: Config) {
     const supertestAsApmReadUser = supertestAsApmUser(servers.kibana, ApmUser.apmReadUser);
 
     return {
-      testFiles: [require.resolve('../tests'), ...testFiles],
+      testFiles: [require.resolve('../tests')],
       servers,
       esArchiver: {
         directory: path.resolve(__dirname, './fixtures/es_archiver'),
       },
       services: {
         ...services,
-        runner: createRunnerProvider(config.name),
+        registry: createTestRegistryProvider(config.name),
         supertest: supertestAsApmReadUser,
         supertestAsApmReadUser,
         supertestAsNoAccessUser: supertestAsApmUser(servers.kibana, ApmUser.noAccessUser),

@@ -10,9 +10,9 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function rumJsErrorsApiTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const runner = getService('runner');
+  const registry = getService('registry');
 
-  runner.when('CSM JS errors with data', { config: 'trial', archives: [] }, () => {
+  registry.when('CSM JS errors with data', { config: 'trial', archives: [] }, () => {
     it('returns no js errors', async () => {
       const response = await supertest.get(
         '/api/apm/rum-client/js-errors?pageSize=5&pageIndex=0&start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-14T20%3A35%3A54.654Z&uiFilters=%7B%22serviceName%22%3A%5B%22elastic-co-rum-test%22%5D%7D'
@@ -29,7 +29,7 @@ export default function rumJsErrorsApiTests({ getService }: FtrProviderContext) 
     });
   });
 
-  runner.when(
+  registry.when(
     'CSM JS errors without data',
     { config: 'trial', archives: ['8.0.0', 'rum_8.0.0'] },
     () => {

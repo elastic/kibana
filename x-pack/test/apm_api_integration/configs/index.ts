@@ -9,7 +9,6 @@ import { createTestConfig } from '../common/config';
 const apmFtrConfigs = {
   basic: {
     license: 'basic' as const,
-    testFiles: [require.resolve('../basic/tests')],
   },
   trial: {
     license: 'trial' as const,

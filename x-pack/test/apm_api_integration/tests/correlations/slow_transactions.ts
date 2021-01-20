@@ -7,12 +7,12 @@
 import expect from '@kbn/expect';
 import { format } from 'url';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
-import archives_metadata from '../../common/archives_metadata';
+import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const runner = getService('runner');
+  const registry = getService('registry');
   const archiveName = 'apm_8.0.0';
   const range = archives_metadata[archiveName];
 
@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   describe('Slow transactions', () => {
-    runner.when('without data', { config: 'trial', archives: [] }, () => {
+    registry.when('without data', { config: 'trial', archives: [] }, () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(url);
 
@@ -37,24 +37,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    runner.when('with data and default args', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
-      type ResponseBody = APIReturnType<'GET /api/apm/correlations/slow_transactions'>;
-      let response: {
-        status: number;
-        body: NonNullable<ResponseBody>;
-      };
+    registry.when(
+      'with data and default args',
+      { config: 'trial', archives: ['apm_8.0.0'] },
+      () => {
+        type ResponseBody = APIReturnType<'GET /api/apm/correlations/slow_transactions'>;
+        let response: {
+          status: number;
+          body: NonNullable<ResponseBody>;
+        };
 
-      before(async () => {
-        response = await supertest.get(url);
-      });
+        before(async () => {
+          response = await supertest.get(url);
+        });
 
-      it('returns successfully', () => {
-        expect(response.status).to.eql(200);
-      });
+        it('returns successfully', () => {
+          expect(response.status).to.eql(200);
+        });
 
-      it('returns significant terms', () => {
-        const sorted = response.body?.significantTerms?.sort();
-        expectSnapshot(sorted?.map((term) => term.fieldName)).toMatchInline(`
+        it('returns significant terms', () => {
+          const sorted = response.body?.significantTerms?.sort();
+          expectSnapshot(sorted?.map((term) => term.fieldName)).toMatchInline(`
             Array [
               "user_agent.name",
               "url.domain",
@@ -65,11 +68,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "user_agent.name",
             ]
           `);
-      });
+        });
 
-      it('returns a distribution per term', () => {
-        expectSnapshot(response.body?.significantTerms?.map((term) => term.distribution.length))
-          .toMatchInline(`
+        it('returns a distribution per term', () => {
+          expectSnapshot(response.body?.significantTerms?.map((term) => term.distribution.length))
+            .toMatchInline(`
             Array [
               11,
               11,
@@ -80,11 +83,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               11,
             ]
           `);
-      });
+        });
 
-      it('returns overall distribution', () => {
-        expectSnapshot(response.body?.overall?.distribution.length).toMatchInline(`11`);
-      });
-    });
+        it('returns overall distribution', () => {
+          expectSnapshot(response.body?.overall?.distribution.length).toMatchInline(`11`);
+        });
+      }
+    );
   });
 }

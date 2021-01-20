@@ -15,14 +15,26 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
   const supertestAsApmReadUserWithoutMlAccess = getService('supertestAsApmReadUserWithoutMlAccess');
 
-  const runner = getService('runner');
+  const registry = getService('registry');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
 
-  runner.when('Service map without data', { config: 'trial', archives: [] }, () => {
+  registry.when('Service map with a basic license', { config: 'basic', archives: [] }, () => {
+    it('is only be available to users with Platinum license (or higher)', async () => {
+      const response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
+
+      expect(response.status).to.be(403);
+
+      expectSnapshot(response.body.message).toMatchInline(
+        `"In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."`
+      );
+    });
+  });
+
+  registry.when('Service map without data', { config: 'trial', archives: [] }, () => {
     describe('/api/apm/service-map', () => {
       it('returns an empty list', async () => {
         const response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
@@ -52,7 +64,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
     });
   });
 
-  runner.when('Service Map with data', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
+  registry.when('Service Map with data', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
     describe('/api/apm/service-map', () => {
       let response: PromiseReturnType<typeof supertest.get>;
 

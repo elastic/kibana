@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
   const apmReadUser = getService('supertestAsApmReadUser');
-  const runner = getService('runner');
+  const registry = getService('registry');
 
   function getJobs() {
     return apmReadUser.get(`/api/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
@@ -22,7 +22,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
       .set('kbn-xsrf', 'foo');
   }
 
-  runner.when('ML jobs', { config: 'trial', archives: [] }, () => {
+  registry.when('ML jobs', { config: 'trial', archives: [] }, () => {
     describe('when user has read access to ML', () => {
       describe('when calling the endpoint for listing jobs', () => {
         it('returns a list of jobs', async () => {

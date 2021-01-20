@@ -9,9 +9,9 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function rumHasDataApiTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const runner = getService('runner');
+  const registry = getService('registry');
 
-  runner.when('has_rum_data without data', { config: 'trial', archives: [] }, () => {
+  registry.when('has_rum_data without data', { config: 'trial', archives: [] }, () => {
     it('returns empty list', async () => {
       const response = await supertest.get(
         '/api/apm/observability_overview/has_rum_data?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-14T20%3A35%3A54.654Z&uiFilters='
@@ -26,7 +26,7 @@ export default function rumHasDataApiTests({ getService }: FtrProviderContext) {
     });
   });
 
-  runner.when(
+  registry.when(
     'has RUM data with data',
     { config: 'trial', archives: ['8.0.0', 'rum_8.0.0'] },
     () => {
