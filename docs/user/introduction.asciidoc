@@ -53,7 +53,7 @@ image::images/intro-discover.png[Discover UI]
 === Visualize & analyze
 
 A visualization is worth a thousand log lines, and {kib} provides
-many options for showcasing your data. Use <<lens, Lens>>,
+many options for showcasing your data. Use <<create-panels-with-lens,Lens>>,
 our drag-and-drop interface,
 to rapidly build
 charts, tables, metrics, and more. If there
@@ -78,7 +78,7 @@ questions of your location-based data. Maps supports multiple
 layers and data sources, mapping of individual geo points and shapes,
 and dynamic client-side styling.
 
-* <<tsvb, TSVB>> allows you to combine
+* <<tsvb-advanced-editor, TSVB>> allows you to combine
 an infinite number of aggregations to display complex data.
 With TSVB, you can customize
 every aspect of your visualization. Choose your own date format and color
