@@ -312,8 +312,8 @@ logging:
     - context: telemetry
       level: all
       appenders: [json-file-appender]
-    - context: metrics
-      level: info
+    - context: metrics.ops
+      level: debug
       appenders: [console]
 ```
 
@@ -327,7 +327,7 @@ Here is what we get with the config above:
 | server           | console, file            | fatal |
 | optimize         | console                  | error |
 | telemetry        | json-file-appender       | all   |
-| metrics          | console                  | info |
+| metrics.ops      | console                  | debug |
 
 
 ### Dedicated loggers
@@ -336,8 +336,8 @@ The `root` logger has a dedicated configuration node since this context is speci
 default `root` is configured with `info` level and `default` appender that is also always available. This is the 
 configuration that all custom loggers will use unless they're re-configured explicitly.
 
-The `metrics` logger is configured with `info` level and will automatically output sample system and process information at a regular interval.
-The metrics that are logged are a subset of the data collected and are formatted as follows:
+The `metrics.ops` logger is configured with `debug` level and will automatically output sample system and process information at a regular interval.
+The metrics that are logged are a subset of the data collected and are formatted in the log message as follows:
 
 | Ops formatted log property | Location in metrics service | Log units
 | :------------------------- | :-------------------------- | :-------------------------- |
