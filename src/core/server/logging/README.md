@@ -479,6 +479,16 @@ logging:
 #### logging.events
 Define a custom logger for a specific context.
 
+**`logging.events.request` and `logging.events.response`** provide logs for each request handled
+by the http service. With the new logging config, these are provided by a dedicated [context](#logger-hierarchy),
+and you can enable them by adjusting the minimum required [logging level](#log-level) to `debug`:
+```yaml
+  loggers:
+    - context: http.server.Kibana.response
+      appenders: [console]
+      level: debug
+```
+
 #### logging.filter
 TBD
 

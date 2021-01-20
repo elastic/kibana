@@ -58,7 +58,8 @@ for example, `logstash-*`.
 ==== Responses are never logged by default
 *Details:* Previously responses would be logged if either `logging.json` was true, `logging.dest` was specified, or a `TTY` was detected.
 
-*Impact:* To restore the previous behavior, in kibana.yml set `logging.events.response=*`.
+*Impact:* To restore the previous behavior, in kibana.yml enable `debug` logs for the `http.server.Kibana.response` context under `logging.loggers`.
+See https://github.com/elastic/kibana/pull/87939 for more details.
 
 [float]
 ==== `xpack.security.authProviders` is no longer valid
