@@ -205,18 +205,11 @@ export class UrlPanelContent extends Component<Props, State> {
     // Get the application route, after the hash, and remove the #.
     const parsedAppUrl = parseUrl(parsedUrl.hash.slice(1), true);
 
-    const query: Record<string, string> = {};
-
-    if (this.state.anonymousAccessParameters && this.state.usePublicUrl) {
-      Object.assign(query, this.state.anonymousAccessParameters);
-    }
-
     const formattedUrl = formatUrl({
       protocol: parsedUrl.protocol,
       auth: parsedUrl.auth,
       host: parsedUrl.host,
       pathname: parsedUrl.pathname,
-      query,
       hash: formatUrl({
         pathname: parsedAppUrl.pathname,
         query: {
