@@ -875,8 +875,8 @@ export const withEmbeddableSubscription: <I extends EmbeddableInput, O extends E
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/embeddable/common/types.ts:42:3 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
-// src/plugins/embeddable/public/lib/triggers/triggers.ts:46:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/common/types.ts:31:3 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/public/lib/triggers/triggers.ts:35:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
