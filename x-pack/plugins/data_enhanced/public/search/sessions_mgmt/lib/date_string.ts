@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { DATE_STRING_FORMAT } from '../components/actions';
+import { DATE_STRING_FORMAT } from '../types';
 
 export const dateString = (inputString: string, tz: string): string => {
   if (inputString == null) {

@@ -28,7 +28,7 @@ import { StatusIndicator } from '../components/status';
 import { dateString } from '../lib/date_string';
 import { SearchSessionsMgmtAPI } from './api';
 import { getExpirationStatus } from './get_expiration_status';
-import { UISession } from '../components/actions';
+import { UISession } from '../types';
 
 // Helper function: translate an app string to EuiIcon-friendly string
 const appToIcon = (app: string) => {

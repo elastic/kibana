@@ -100,7 +100,7 @@ export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
     public async deleteAllSearchSessions() {
       log.debug('Deleting created background sessions');
       // ignores 409 errs and keeps retrying
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(10000, async () => {
         const { body } = await supertest
           .post('/internal/session/_find')
           .set('kbn-xsrf', 'anything')

@@ -8,10 +8,11 @@ import React from 'react';
 import { IClickActionDescriptor } from '../';
 import extendSessionIcon from '../../icons/extend_session.svg';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
+import { UISession } from '../../types';
 import { CancelButton } from './cancel_button';
 import { ExtendButton } from './extend_button';
 import { ReloadButton } from './reload_button';
-import { ACTION, UISession, OnActionComplete } from './types';
+import { ACTION, OnActionComplete } from './types';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,

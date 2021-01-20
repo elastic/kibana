@@ -15,7 +15,8 @@ import { TableText } from '../';
 import { SessionsMgmtConfigSchema } from '../..';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
-import { OnActionComplete, UISession } from '../actions';
+import { UISession } from '../../types';
+import { OnActionComplete } from '../actions';
 import { getAppFilter } from './app_filter';
 import { getStatusFilter } from './status_filter';
 
@@ -72,8 +73,6 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
 
   useInterval(doRefresh, refreshInterval);
 
-  // When action such as cancel, delete, extend occurs, use the async return
-  // value to refresh the table
   const onActionComplete: OnActionComplete = () => {
     doRefresh();
   };

@@ -15,7 +15,7 @@ import { SessionsClient } from 'src/plugins/data/public/search';
 import { SessionsMgmtConfigSchema } from '../';
 import { SearchSessionStatus } from '../../../../common/search';
 import { OnActionComplete } from '../components';
-import { UISession } from '../components/actions';
+import { UISession } from '../types';
 import { mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtAPI } from './api';
 import { getColumns } from './get_columns';

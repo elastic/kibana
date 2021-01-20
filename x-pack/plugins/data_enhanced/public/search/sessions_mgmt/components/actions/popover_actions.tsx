@@ -29,8 +29,9 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactElement, useState } from 'react';
 import { TableText } from '../';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
+import { UISession } from '../../types';
 import { getAction } from './get_action';
-import { ACTION, UISession, OnActionComplete } from './types';
+import { ACTION, OnActionComplete } from './types';
 
 // interfaces
 interface PopoverActionProps {
