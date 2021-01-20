@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { services as functionalServices } from '../../functional/services';
-import { SendToBackgroundProvider } from './send_to_background';
+export type OnActionComplete = () => void;
 
-export const services = {
-  ...functionalServices,
-  searchSessions: SendToBackgroundProvider,
-};
+export enum ACTION {
+  EXTEND = 'extend',
+  CANCEL = 'cancel',
+  RELOAD = 'reload',
+}

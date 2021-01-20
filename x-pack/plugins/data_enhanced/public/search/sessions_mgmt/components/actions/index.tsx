@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { services as functionalServices } from '../../functional/services';
-import { SendToBackgroundProvider } from './send_to_background';
-
-export const services = {
-  ...functionalServices,
-  searchSessions: SendToBackgroundProvider,
-};
+export { PopoverActionsMenu } from './popover_actions';
+export * from './types';
