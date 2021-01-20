@@ -53,6 +53,7 @@ import {
   getListTotalItemsCount,
   trustedAppsListPageActive,
   entriesExistState,
+  policiesState,
 } from './selectors';
 
 const createTrustedAppsListResourceStateChangedAction = (
@@ -267,6 +268,47 @@ const checkTrustedAppsExistIfNeeded = async (
   }
 };
 
+export const retrieveListOfPoliciesIfNeeded = async (
+  { getState, dispatch }: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const currentPoliciesState = policiesState(getState());
+  const isLoading = isLoadingResourceState(currentPoliciesState);
+
+  if (!isLoading) {
+    dispatch({
+      type: 'trustedAppsPoliciesStateChanged',
+      payload: { type: 'LoadingResourceState', previousState: currentPoliciesState },
+    });
+
+    try {
+      const policyList = await trustedAppsService.getPolicyList({
+        query: {
+          page: 1,
+          perPage: 1000,
+        },
+      });
+
+      dispatch({
+        type: 'trustedAppsPoliciesStateChanged',
+        payload: {
+          type: 'LoadedResourceState',
+          data: policyList,
+        },
+      });
+    } catch (error) {
+      dispatch({
+        type: 'trustedAppsPoliciesStateChanged',
+        payload: {
+          type: 'FailedResourceState',
+          error: error.body,
+          lastLoadedState: getLastLoadedResourceState(policiesState(getState())),
+        },
+      });
+    }
+  }
+};
+
 export const createTrustedAppsPageMiddleware = (
   trustedAppsService: TrustedAppsService
 ): ImmutableMiddleware<TrustedAppsListPageState, AppAction> => {
@@ -289,6 +331,10 @@ export const createTrustedAppsPageMiddleware = (
 
     if (action.type === 'trustedAppDeletionDialogConfirmed') {
       await submitDeletionIfNeeded(store, trustedAppsService);
+    }
+
+    if (action.type === 'trustedAppCreationDialogStarted') {
+      retrieveListOfPoliciesIfNeeded(store, trustedAppsService);
     }
   };
 };

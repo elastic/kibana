@@ -6,6 +6,7 @@
 
 import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
 import { AsyncResourceState } from '.';
+import { GetPolicyListResponse } from '../../policy/types';
 
 export interface Pagination {
   pageIndex: number;
@@ -53,6 +54,8 @@ export interface TrustedAppsListPageState {
     confirmed: boolean;
     submissionResourceState: AsyncResourceState<TrustedApp>;
   };
+  /** A list of all available polices for use in associating TA to policies */
+  policies: AsyncResourceState<GetPolicyListResponse>;
   location: TrustedAppsListPageLocation;
   active: boolean;
 }

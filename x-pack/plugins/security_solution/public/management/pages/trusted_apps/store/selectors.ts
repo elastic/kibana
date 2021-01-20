@@ -184,3 +184,7 @@ export const entriesExist: (state: Immutable<TrustedAppsListPageState>) => boole
 export const trustedAppsListPageActive: (state: Immutable<TrustedAppsListPageState>) => boolean = (
   state
 ) => state.active;
+
+export const policiesState = (
+  state: Immutable<TrustedAppsListPageState>
+): Immutable<TrustedAppsListPageState['policies']> => state.policies;
