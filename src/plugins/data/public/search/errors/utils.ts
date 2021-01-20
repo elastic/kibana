@@ -17,10 +17,12 @@
  * under the License.
  */
 
+import { FailedShard } from './types';
 import { KibanaServerError } from '../../../../kibana_utils/common';
 
-export function getFailedShards(err: KibanaServerError) {
-  const failedShards = err.attributes?.failed_shards || err.attributes?.caused_by?.failed_shards;
+export function getFailedShards(err: KibanaServerError<any>): FailedShard | undefined {
+  const errorInfo = err.attributes;
+  const failedShards = errorInfo?.failed_shards;
   return failedShards ? failedShards[0] : undefined;
 }
 

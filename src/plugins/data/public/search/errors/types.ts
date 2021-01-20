@@ -23,42 +23,31 @@ export interface FailedShard {
   shard: number;
   index: string;
   node: string;
-  reason: {
+  reason: Reason;
+}
+
+export interface Reason {
+  type: string;
+  reason: string;
+  script_stack?: string[];
+  position?: {
+    offset: number;
+    start: number;
+    end: number;
+  };
+  lang?: string;
+  script?: string;
+  caused_by?: {
     type: string;
     reason: string;
-    script_stack: string[];
-    script: string;
-    lang: string;
-    position: {
-      offset: number;
-      start: number;
-      end: number;
-    };
-    caused_by: {
-      type: string;
-      reason: string;
-    };
   };
 }
 
 export interface IEsErrorAttributes {
-  root_cause?: [
-    {
-      lang: string;
-      script: string;
-    }
-  ];
   type: string;
   reason: string;
-  failed_shards: FailedShard[];
-  caused_by: {
-    type: string;
-    reason: string;
-    phase: string;
-    grouped: boolean;
-    failed_shards: FailedShard[];
-    script_stack: string[];
-  };
+  root_cause?: Reason[];
+  failed_shards?: FailedShard[];  
 }
 
 export type IEsError = KibanaServerError<IEsErrorAttributes>;

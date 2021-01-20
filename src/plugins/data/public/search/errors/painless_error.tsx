@@ -44,10 +44,12 @@ export class PainlessError extends EsError {
 
     return (
       <>
-        {i18n.translate('data.painlessError.painlessScriptedFieldErrorMessage', {
-          defaultMessage: "Error executing Painless script: '{script}'.",
-          values: { script: rootCause?.script },
-        })}
+        <EuiText data-test-subj="painlessScript" >
+          {i18n.translate('data.painlessError.painlessScriptedFieldErrorMessage', {
+            defaultMessage: "Error executing Painless script: '{script}'",
+            values: { script: rootCause?.script },
+          })}
+        </EuiText>
         <EuiSpacer size="s" />
         <EuiSpacer size="s" />
         {painlessStack ? (
