@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
           await security.testUser.restoreDefaults();
         });
 
-        it('should not show legacy region map visualizion in create menu', async () => {
+        it('should not show maps application in create menu', async () => {
           const hasMapsApp = await PageObjects.visualize.hasMapsApp();
           expect(hasMapsApp).to.equal(false);
         });
