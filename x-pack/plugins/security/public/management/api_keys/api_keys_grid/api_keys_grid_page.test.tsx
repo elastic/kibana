@@ -10,10 +10,10 @@ import { ReactWrapper } from 'enzyme';
 import { EuiCallOut } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { NotEnabled } from './not_enabled';
 import { PermissionDenied } from './permission_denied';
 import { APIKeysAPIClient } from '../api_keys_api_client';
-import { DocumentationLinksService } from '../documentation_links';
 import { APIKeysGridPage } from './api_keys_grid_page';
 
 import { coreMock } from '../../../../../../../src/core/public/mocks';
@@ -66,21 +66,16 @@ describe('APIKeysGridPage', () => {
   });
 
   const coreStart = coreMock.createStart();
-
-  const getViewProperties = () => {
-    const { docLinks, notifications, application } = coreStart;
-    return {
-      docLinks: new DocumentationLinksService(docLinks),
-      navigateToApp: application.navigateToApp,
-      notifications,
-      apiKeysAPIClient: apiClientMock,
-    };
+  const renderView = () => {
+    return mountWithIntl(
+      <KibanaContextProvider services={coreStart}>
+        <APIKeysGridPage apiKeysAPIClient={apiClientMock} notifications={coreStart.notifications} />
+      </KibanaContextProvider>
+    );
   };
 
   it('renders a loading state when fetching API keys', async () => {
-    const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
-
-    expect(wrapper.find('[data-test-subj="apiKeysSectionLoading"]')).toHaveLength(1);
+    expect(renderView().find('[data-test-subj="apiKeysSectionLoading"]')).toHaveLength(1);
   });
 
   it('renders a callout when API keys are not enabled', async () => {
@@ -90,13 +85,12 @@ describe('APIKeysGridPage', () => {
       areApiKeysEnabled: false,
     });
 
-    const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
-
+    const wrapper = renderView();
     await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(NotEnabled).length > 0;
     });
 
-    expect(wrapper.find(NotEnabled)).toMatchSnapshot();
+    expect(wrapper.find(NotEnabled).find(EuiCallOut)).toMatchSnapshot();
   });
 
   it('renders permission denied if user does not have required permissions', async () => {
@@ -106,8 +100,7 @@ describe('APIKeysGridPage', () => {
       areApiKeysEnabled: true,
     });
 
-    const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
-
+    const wrapper = renderView();
     await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(PermissionDenied).length > 0;
     });
@@ -118,8 +111,7 @@ describe('APIKeysGridPage', () => {
   it('renders error callout if error fetching API keys', async () => {
     apiClientMock.getApiKeys.mockRejectedValue(mock500());
 
-    const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
-
+    const wrapper = renderView();
     await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(EuiCallOut).length > 0;
     });
@@ -130,7 +122,7 @@ describe('APIKeysGridPage', () => {
   describe('Admin view', () => {
     let wrapper: ReactWrapper<any>;
     beforeEach(() => {
-      wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
+      wrapper = renderView();
     });
 
     it('renders a callout indicating the user is an administrator', async () => {
@@ -165,7 +157,7 @@ describe('APIKeysGridPage', () => {
         areApiKeysEnabled: true,
       });
 
-      wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
+      wrapper = renderView();
     });
 
     it('does NOT render a callout indicating the user is an administrator', async () => {
