@@ -64,11 +64,11 @@ Using the https://mustache.github.io/[Mustache] template syntax `{{variable name
 [role="screenshot"]
 image::images/alert-flyout-action-variables.png[Passing alert values to an action]
 
-There are some cases where the variable values will be "escaped", when used in a context where escaping is needed:
+Some cases exist where the variable values will be "escaped", when used in a context where escaping is needed:
 
-- for the <<email-action-type, Email>> connector, the `message` action configuration property escapes any characters that would be interpreted as Markdown
-- for the <<slack-action-type, Slack>> connector, the `message` action configuration property escapes any characters that would be interpreted as Slack markdown
-- for the <<webhook-action-type, Webhook>> connector, the `body` action configuration property escapes any characters that are invalid in JSON string values
+- For the <<email-action-type, Email>> connector, the `message` action configuration property escapes any characters that would be interpreted as Markdown.
+- For the <<slack-action-type, Slack>> connector, the `message` action configuration property escapes any characters that would be interpreted as Slack Markdown.
+- For the <<webhook-action-type, Webhook>> connector, the `body` action configuration property escapes any characters that are invalid in JSON string values.
 
 Mustache also supports "triple braces" of the form `{{{variable name}}}`, which indicates no escaping should be done at all.  Care should be used when using this form, as it could end up rendering the variable content in such a way as to make the resulting parameter invalid or formatted incorrectly.
 
