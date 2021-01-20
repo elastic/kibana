@@ -18,7 +18,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { first, map } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import {
