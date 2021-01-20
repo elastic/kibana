@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   MonitorSummariesResult,
   CursorDirection,
@@ -20,6 +19,7 @@ import * as redux from 'react-redux';
 import moment from 'moment';
 import { IHttpFetchError } from '../../../../../../../src/core/public';
 import { mockMoment } from '../../../lib/helper/test_helpers';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
