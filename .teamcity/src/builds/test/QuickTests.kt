@@ -13,7 +13,7 @@ object QuickTests : BuildType({
 
   val testScripts = mapOf(
     "Test Hardening" to ".ci/teamcity/checks/test_hardening.sh",
-    "Test Projects" to ".ci/teamcity/tests/test_projects.sh",
+    "Test Projects" to ".ci/teamcity/tests/test_projects.sh"
   )
 
   steps {
