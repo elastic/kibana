@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiCheckbox, EuiSelect, EuiToolTip } from '@elastic/eui';
+import { EuiCheckbox, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
@@ -108,46 +108,36 @@ export function TimeComparison() {
   }
 
   return (
-    <EuiToolTip
-      content={
-        selectOptions.length === 0 &&
-        i18n.translate('xpack.apm.timeComparison.tooltipLabel', {
-          defaultMessage:
-            'Week-over-week comparison is not available for ranges longer than 7 days.',
-        })
+    <EuiSelect
+      data-test-subj="comparisonSelect"
+      disabled={selectOptions.length <= 1}
+      options={selectOptions}
+      value={comparisonType}
+      prepend={
+        <PrependContainer>
+          <EuiCheckbox
+            id="comparison"
+            label={i18n.translate('xpack.apm.timeComparison.label', {
+              defaultMessage: 'Comparison',
+            })}
+            checked={comparisonEnabled && selectOptions.length > 0}
+            onChange={() => {
+              urlHelpers.push(history, {
+                query: {
+                  comparisonEnabled: Boolean(!comparisonEnabled).toString(),
+                },
+              });
+            }}
+          />
+        </PrependContainer>
       }
-    >
-      <EuiSelect
-        data-test-subj="comparisonSelect"
-        disabled={selectOptions.length <= 1}
-        options={selectOptions}
-        value={comparisonType}
-        prepend={
-          <PrependContainer>
-            <EuiCheckbox
-              id="comparison"
-              label={i18n.translate('xpack.apm.timeComparison.label', {
-                defaultMessage: 'Comparison',
-              })}
-              checked={comparisonEnabled && selectOptions.length > 0}
-              onChange={() => {
-                urlHelpers.push(history, {
-                  query: {
-                    comparisonEnabled: Boolean(!comparisonEnabled).toString(),
-                  },
-                });
-              }}
-            />
-          </PrependContainer>
-        }
-        onChange={(e) => {
-          urlHelpers.push(history, {
-            query: {
-              comparisonType: e.target.value,
-            },
-          });
-        }}
-      />
-    </EuiToolTip>
+      onChange={(e) => {
+        urlHelpers.push(history, {
+          query: {
+            comparisonType: e.target.value,
+          },
+        });
+      }}
+    />
   );
 }
