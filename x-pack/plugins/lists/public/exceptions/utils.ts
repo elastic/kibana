@@ -76,7 +76,7 @@ export const getGeneralFilters = (
       if (value != null) {
         const filtersByNamespace = namespaceTypes
           .map((namespace) => {
-            return `${namespace}.attributes.${filterKey}:${value}*`;
+            return `${namespace}.attributes.${filterKey}:${value}`;
           })
           .join(' OR ');
         return `(${filtersByNamespace})`;

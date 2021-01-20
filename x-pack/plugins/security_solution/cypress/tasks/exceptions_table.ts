@@ -20,6 +20,7 @@ export const goToExceptionsTable = () => {
 
 export const waitForExceptionsTableToBeLoaded = () => {
   cy.get(EXCEPTIONS_TABLE).should('exist');
+  cy.get(EXCEPTIONS_TABLE_SEARCH).should('exist');
 };
 
 export const searchForExceptionList = (searchText: string) => {

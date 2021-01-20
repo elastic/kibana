@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
-import { EuiSearchBar, Query } from '@elastic/eui';
+import React from 'react';
+import { EuiSearchBar, EuiSearchBarProps } from '@elastic/eui';
 
 import * as i18n from './translations';
 
-export const ExceptionsSearchBar = React.memo<ExceptionListsTableProps>(({ onSearch }) => {
+interface ExceptionListsTableSearchProps {
+  onSearch: (args: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]) => void;
+}
+
+export const ExceptionsSearchBar = React.memo<ExceptionListsTableSearchProps>(({ onSearch }) => {
   const schema = {
     strict: true,
     fields: {

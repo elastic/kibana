@@ -10,11 +10,10 @@ import {
   EuiEmptyPrompt,
   EuiLoadingContent,
   EuiProgress,
-  EuiFieldSearch,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { History } from 'history';
-import { set } from 'lodash/fp';
 
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
 import { NamespaceType } from '../../../../../../../../lists/common';
@@ -238,16 +237,22 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     }, []);
 
     const handleSearch = useCallback(
-      ({ query, queryText }: EuiSearchBarProps['onChange']): void => {
+      ({ query, queryText }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]): void => {
         try {
-          const fieldClause = query.getSimpleFieldClause();
+          const fieldClauses = query?.ast.getFieldClauses();
 
-          if (fieldClause == null) {
-            setFilters({ name: queryText });
+          if (fieldClauses != null && fieldClauses.length > 0) {
+            const filtersReduced = fieldClauses.reduce<Record<string, string>>(
+              (acc, { field, value }) => {
+                acc[field] = `${value}`;
+                return acc;
+              },
+              {}
+            );
+
+            setFilters(filtersReduced);
           } else {
-            const { field, value } = fieldClause;
-
-            setFilters({ [field]: value });
+            setFilters({ name: queryText });
           }
         } catch {
           setFilters({ name: queryText });
@@ -354,7 +359,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
               title={i18n.ALL_EXCEPTIONS}
               subtitle={<LastUpdatedAt showUpdating={loading} updatedAt={lastUpdated} />}
             >
-              <ExceptionsSearchBar onSearch={handleSearch} />
+              {!initLoading && <ExceptionsSearchBar onSearch={handleSearch} />}
             </HeaderSection>
 
             {loadingTableInfo && !initLoading && !showReferenceErrorModal && (
