@@ -5,14 +5,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  METRIC_ANOMALY_ALERT_TYPE_ID,
-  MetricAnomalyParams,
-} from '../../../common/alerting/metrics';
+import { METRIC_ANOMALY_ALERT_TYPE_ID } from '../../../common/alerting/metrics';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { AlertTypeParams } from '../../../../alerts/common';
-import { validateMetricThreshold } from './components/validation';
+import { validateMetricAnomaly } from './components/validation';
 
 export function createMetricAnomalyAlertType(): AlertTypeModel<AlertTypeParams> {
   return {
@@ -25,7 +22,7 @@ export function createMetricAnomalyAlertType(): AlertTypeModel<AlertTypeParams> 
       return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/metric-anomaly-alert.html`;
     },
     alertParamsExpression: React.lazy(() => import('./components/expression')),
-    validate: validateMetricThreshold,
+    validate: validateMetricAnomaly,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.anomaly.defaultActionMessage',
       {

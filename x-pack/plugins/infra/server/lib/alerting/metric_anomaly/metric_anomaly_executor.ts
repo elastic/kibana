@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
-import { getMetricsHostsAnomalies, getMetricK8sAnomalies, MappedAnomalyHit } from '../../infra_ml';
+import { MappedAnomalyHit } from '../../infra_ml';
 import { AlertStates } from '../common/types';
 import {
   ActionGroup,
@@ -19,6 +19,7 @@ import { MetricAnomalyAllowedActionGroups } from './register_metric_anomaly_aler
 import { MlPluginSetup } from '../../../../../ml/server';
 import { KibanaRequest } from '../../../../../../../src/core/server';
 import { InfraBackendLibs } from '../../infra_types';
+import { evaluateCondition } from './evaluate_condition';
 
 export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPluginSetup) => async ({
   services,
@@ -51,29 +52,24 @@ export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPlugi
     threshold,
   } = params as MetricAnomalyParams;
 
-  const alertInstance = services.alertInstanceFactory(
-    `${nodeType}-${metric}-${filterQuery ?? '*'}`
-  );
+  const alertInstance = services.alertInstanceFactory(`${nodeType}-${metric}`);
 
   const endTime = startedAt.getTime();
   const startTime =
-    previousStartedAt?.getTime() ?? endTime - getIntervalInSeconds(alertInterval) * 1000;
-  const getAnomalies = nodeType === 'k8s' ? getMetricK8sAnomalies : getMetricsHostsAnomalies;
+    previousStartedAt?.getTime() ?? endTime - getIntervalInSeconds(alertInterval ?? '1m') * 1000;
 
-  const { data } = await getAnomalies(
-    {
-      spaceId: 'default',
-      mlSystem,
-      mlAnomalyDetectors,
-    },
-    sourceId ?? 'default',
+  const { data } = await evaluateCondition({
+    sourceId: sourceId ?? 'default',
+    spaceId: 'default',
+    mlSystem,
+    mlAnomalyDetectors,
     startTime,
     endTime,
     metric,
-    { field: 'anomalyScore', direction: 'desc' },
-    { pageSize: 10 },
-    threshold
-  );
+    threshold,
+    nodeType,
+    filterQuery,
+  });
 
   const shouldAlertFire = data.some(
     (anomaly: MappedAnomalyHit) => anomaly.anomalyScore >= threshold

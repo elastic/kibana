@@ -34,10 +34,17 @@ export enum Aggregators {
   P99 = 'p99',
 }
 
+const metricAnomalyNodeTypeRT = rt.union([rt.literal('hosts'), rt.literal('k8s')]);
+const metricAnomalyMetricTypeRT = rt.union([
+  rt.literal('memory_usage'),
+  rt.literal('network_in'),
+  rt.literal('network_out'),
+]);
+
 export interface MetricAnomalyParams {
-  nodeType: 'hosts' | 'k8s';
-  metric: 'memory_usage' | 'network_in' | 'network_out';
-  alertInterval: string;
+  nodeType: rt.TypeOf<typeof metricAnomalyNodeTypeRT>;
+  metric: rt.TypeOf<typeof metricAnomalyMetricTypeRT>;
+  alertInterval?: string;
   sourceId?: string;
   threshold: Exclude<ANOMALY_THRESHOLD, ANOMALY_THRESHOLD.LOW>;
   filterQuery: string | undefined;
@@ -60,7 +67,6 @@ const baseAlertRequestParamsRT = rt.intersection([
       rt.literal('M'),
       rt.literal('y'),
     ]),
-    criteria: rt.array(rt.any),
     alertInterval: rt.string,
     alertThrottle: rt.string,
     alertOnNoData: rt.boolean,
@@ -74,6 +80,7 @@ const metricThresholdAlertPreviewRequestParamsRT = rt.intersection([
   }),
   rt.type({
     alertType: rt.literal(METRIC_THRESHOLD_ALERT_TYPE_ID),
+    criteria: rt.array(rt.any),
   }),
 ]);
 export type MetricThresholdAlertPreviewRequestParams = rt.TypeOf<
@@ -85,15 +92,30 @@ const inventoryAlertPreviewRequestParamsRT = rt.intersection([
   rt.type({
     nodeType: ItemTypeRT,
     alertType: rt.literal(METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID),
+    criteria: rt.array(rt.any),
   }),
 ]);
 export type InventoryAlertPreviewRequestParams = rt.TypeOf<
   typeof inventoryAlertPreviewRequestParamsRT
 >;
 
+const metricAnomalyAlertPreviewRequestParamsRT = rt.intersection([
+  baseAlertRequestParamsRT,
+  rt.type({
+    nodeType: metricAnomalyNodeTypeRT,
+    metric: metricAnomalyMetricTypeRT,
+    threshold: rt.number,
+    alertType: rt.literal(METRIC_ANOMALY_ALERT_TYPE_ID),
+  }),
+]);
+export type MetricAnomalyAlertPreviewRequestParams = rt.TypeOf<
+  typeof metricAnomalyAlertPreviewRequestParamsRT
+>;
+
 export const alertPreviewRequestParamsRT = rt.union([
   metricThresholdAlertPreviewRequestParamsRT,
   inventoryAlertPreviewRequestParamsRT,
+  metricAnomalyAlertPreviewRequestParamsRT,
 ]);
 export type AlertPreviewRequestParams = rt.TypeOf<typeof alertPreviewRequestParamsRT>;
 

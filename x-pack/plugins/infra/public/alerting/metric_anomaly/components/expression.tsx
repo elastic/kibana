@@ -5,19 +5,8 @@
  */
 
 import { debounce, pick } from 'lodash';
-import { Unit } from '@elastic/datemath';
-import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
-import { IFieldType } from 'src/plugins/data/public';
-import {
-  EuiFlexGroup,
-  EuiSpacer,
-  EuiText,
-  EuiFormRow,
-  EuiFieldSearch,
-  EuiCheckbox,
-  EuiToolTip,
-  EuiIcon,
-} from '@elastic/eui';
+import React, { useCallback, useMemo, useEffect, ChangeEvent } from 'react';
+import { EuiFlexGroup, EuiSpacer, EuiText, EuiFormRow, EuiFieldSearch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AlertPreview } from '../../common';
@@ -28,8 +17,6 @@ import {
 import { euiStyled } from '../../../../../observability/public';
 import {
   WhenExpression,
-  ThresholdExpression,
-  ForLastExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -37,22 +24,14 @@ import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 import { findInventoryModel } from '../../../../common/inventory_models';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-  SnapshotMetricTypeRT,
-} from '../../../../common/inventory_models/types';
+import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { NodeTypeExpression } from './node_type';
 import { SeverityThresholdExpression } from './severity_threshold';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
-import {
-  SnapshotCustomMetricInput,
-  SnapshotCustomMetricInputRT,
-} from '../../../../common/http_api/snapshot_api';
 import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 
-import { validateMetricThreshold } from './validation';
+import { validateMetricAnomaly } from './validation';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
@@ -61,13 +40,13 @@ export interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
   filter?: string;
-  customMetrics?: SnapshotCustomMetricInput[];
 }
 
 interface Props {
   errors: IErrorObject[];
   alertParams: MetricAnomalyParams & {
     filterQueryText?: string;
+    sourceId: string;
   };
   alertInterval: string;
   alertThrottle: string;
@@ -77,14 +56,14 @@ interface Props {
 }
 
 export const defaultExpression = {
-  metric: 'memory_usage' as SnapshotMetricType,
+  metric: 'memory_usage' as MetricAnomalyParams['metric'],
   threshold: ANOMALY_THRESHOLD.MAJOR,
   nodeType: 'host',
 };
 
 export const Expression: React.FC<Props> = (props) => {
   const { http, notifications } = useKibanaContextForPlugin().services;
-  const { setAlertParams, alertParams, errors, alertInterval, alertThrottle, metadata } = props;
+  const { setAlertParams, alertParams, alertInterval, alertThrottle, metadata } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
@@ -111,14 +90,6 @@ export const Expression: React.FC<Props> = (props) => {
   const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
     onFilterChange,
   ]);
-
-  const emptyError = useMemo(() => {
-    return {
-      aggField: [],
-      timeSizeUnit: [],
-      timeWindowSize: [],
-    };
-  }, []);
 
   useEffect(() => {
     setAlertParams('alertInterval', alertInterval);
@@ -161,38 +132,42 @@ export const Expression: React.FC<Props> = (props) => {
     }
   }, [metadata, derivedIndexPattern, setAlertParams]);
 
-  useEffect(() => {
+  const prefillNodeType = useCallback(() => {
     const md = metadata;
+    if (md && md.nodeType) {
+      setAlertParams(
+        'nodeType',
+        getMLNodeTypeFromInventoryNodeType(md.nodeType) ?? defaultExpression.nodeType
+      );
+    } else {
+      setAlertParams('nodeType', defaultExpression.nodeType);
+    }
+  }, [metadata, setAlertParams]);
+
+  const prefillMetric = useCallback(() => {
+    const md = metadata;
+    if (md && md.options?.metric) {
+      setAlertParams(
+        'metric',
+        getMLMetricFromInventoryMetric(md.options.metric!.type) ?? defaultExpression.metric
+      );
+    } else {
+      setAlertParams('metric', defaultExpression.metric);
+    }
+  }, [metadata, setAlertParams]);
+
+  useEffect(() => {
     if (!alertParams.nodeType) {
-      if (md && md.nodeType) {
-        setAlertParams('nodeType', md.nodeType);
-      } else {
-        setAlertParams('nodeType', defaultExpression.nodeType);
-      }
+      prefillNodeType();
     }
 
     if (!alertParams.threshold) {
-      if (md && md.threshold) {
-        setAlertParams('threshold', md.threshold);
-      } else {
-        setAlertParams('threshold', defaultExpression.threshold);
-      }
+      setAlertParams('threshold', defaultExpression.threshold);
     }
 
     if (!alertParams.metric) {
-      if (md && md.metric) {
-        setAlertParams('metric', md.metric);
-      } else {
-        setAlertParams('metric', defaultExpression.metric);
-      }
+      prefillMetric();
     }
-
-    // if (alertParams.criteria && alertParams.criteria.length) {
-    //   setTimeSize(alertParams.criteria[0].timeSize);
-    //   setTimeUnit(alertParams.criteria[0].timeUnit);
-    // } else {
-    //   preFillAlertCriteria();
-    // }
 
     if (!alertParams.filterQuery) {
       preFillAlertFilter();
@@ -297,9 +272,15 @@ export const Expression: React.FC<Props> = (props) => {
         alertInterval={alertInterval}
         alertThrottle={alertThrottle}
         alertType={METRIC_ANOMALY_ALERT_TYPE_ID}
-        alertParams={pick(alertParams, 'criteria', 'nodeType', 'sourceId', 'filterQuery')}
-        validate={validateMetricThreshold}
-        groupByDisplayName={alertParams.nodeType}
+        alertParams={pick(
+          alertParams,
+          'metric',
+          'threshold',
+          'nodeType',
+          'sourceId',
+          'filterQuery'
+        )}
+        validate={validateMetricAnomaly}
       />
       <EuiSpacer size={'m'} />
     </>
@@ -334,4 +315,28 @@ export const nodeTypes: { [key: string]: any } = {
     text: getDisplayNameForType('pod'),
     value: 'k8s',
   },
+};
+
+const getMLMetricFromInventoryMetric = (metric: SnapshotMetricType) => {
+  switch (metric) {
+    case 'memory':
+      return 'memory_usage';
+    case 'tx':
+      return 'network_out';
+    case 'rx':
+      return 'network_in';
+    default:
+      return false;
+  }
+};
+
+const getMLNodeTypeFromInventoryNodeType = (nodeType: InventoryItemType) => {
+  switch (nodeType) {
+    case 'host':
+      return 'host';
+    case 'pod':
+      return 'k8s';
+    default:
+      return false;
+  }
 };
