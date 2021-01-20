@@ -3,6 +3,7 @@ package builds
 import builds.default.DefaultSavedObjectFieldMetrics
 import dependsOn
 import getProjectBranch
+import isReportingEnabled
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.commitStatusPublisher
 import vcs.Kibana
@@ -63,6 +64,7 @@ object PullRequestCi : BuildType({
 
   features {
     commitStatusPublisher {
+      enabled = isReportingEnabled()
       vcsRootExtId = "${Kibana.id}"
       publisher = github {
         githubUrl = "https://api.github.com"
