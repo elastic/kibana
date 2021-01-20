@@ -197,8 +197,18 @@ With *Lens*, you can:
 * Create visualizations with multiple layers and indices.
 * Change the aggregation and labels to customize the data.
 
-[role="screenshot"]
-image::images/lens_drag_drop.gif[Drag and drop]
+++++
+<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js"></script>
+<img
+  style="width: 100%; margin: auto; display: block;"
+  class="vidyard-player-embed"
+  src="https://play.vidyard.com/8SAFKR2tDTwGbNcynK8Bb2.jpg"
+  data-uuid="ZWSdKk4waG1bKf7oRa6Dvq"
+  data-v="4"
+  data-type="inline"
+/>
+</br>
+++++
 
 TIP: Drag-and-drop capabilities are available only when *Lens* knows how to use the data. If *Lens* is unable to automatically generate a
 visualization, configure the customization options for your visualization.
