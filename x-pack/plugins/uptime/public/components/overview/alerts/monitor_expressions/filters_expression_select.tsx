@@ -106,7 +106,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       disabled: locations?.length === 0,
       items: locations ?? [],
       selectedItems: selectedLocations,
-      title: filterLabels.SCHEME,
+      title: filterLabels.LOCATION,
       description:
         selectedLocations.length === 0 ? alertFilterLabels.FROM : alertFilterLabels.FROM_LOCATION,
       value:
@@ -152,7 +152,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              aria-label={alertFilterLabels.REMOVE_FILTER_LABEL}
+              aria-label={alertFilterLabels.REMOVE_FILTER_LABEL(item.title)}
               iconType="trash"
               color="danger"
               onClick={() => {

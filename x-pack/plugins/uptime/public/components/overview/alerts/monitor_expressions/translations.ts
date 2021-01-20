@@ -55,9 +55,11 @@ export const alertFilterLabels = {
     defaultMessage: 'any location',
   }),
 
-  REMOVE_FILTER_LABEL: i18n.translate('xpack.uptime.alerts.monitorExpression.label', {
-    defaultMessage: 'Remove filter',
-  }),
+  REMOVE_FILTER_LABEL: (title: string) =>
+    i18n.translate('xpack.uptime.alerts.monitorExpression.label', {
+      defaultMessage: 'Remove filter {title}',
+      values: { title },
+    }),
 };
 
 export const statusExpLabels = {
