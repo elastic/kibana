@@ -29,6 +29,7 @@ import { listMock } from '../../../../../lists/server/mocks';
 import { getListClientMock } from '../../../../../lists/server/services/lists/list_client.mock';
 import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -127,7 +128,7 @@ describe('rules_notification_alert_type', () => {
       searchAfterTimes: [],
       createdSignalsCount: 10,
     });
-    (checkPrivileges as jest.Mock).mockImplementation((_, indices) => {
+    (checkPrivileges as jest.Mock).mockImplementation(async (_, indices) => {
       return {
         index: indices.reduce(
           (acc: { index: { [x: string]: { read: boolean } } }, index: string) => {
@@ -147,6 +148,21 @@ describe('rules_notification_alert_type', () => {
         total: { value: 10 },
       },
     });
+    const value: Partial<ApiResponse> = {
+      statusCode: 200,
+      body: {
+        fields: {
+          '@timestamp': {
+            date: {
+              indices: ['index1', 'index2', 'index3', 'index4'],
+              searchable: true,
+              aggregatable: false,
+            },
+          },
+        },
+      },
+    };
+    alertServices.scopedClusterClient.fieldCaps.mockResolvedValue(value as ApiResponse);
     const ruleAlert = getResult();
     alertServices.savedObjectsClient.get.mockResolvedValue({
       id: 'id',
