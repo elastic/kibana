@@ -5,58 +5,58 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
 import { PingList } from './ping_list';
 import { Ping, PingsResponse } from '../../../../common/runtime_types';
 import { ExpandedRowMap } from '../../overview/monitor_list/types';
 import { rowShouldExpand, toggleDetails } from './columns/expand_row';
 import * as pingListHook from './use_pings';
-import { mockReduxHooks } from '../../../lib/helper/test_helpers';
+import { mockDispatch } from '../../../lib/helper/test_helpers';
+import { render } from '../../../lib/helper/rtl_helpers';
 
-mockReduxHooks();
+mockDispatch();
 
 describe('PingList component', () => {
-  let response: PingsResponse;
+  const defaultPings = [
+    {
+      docId: 'fewjio21',
+      timestamp: '2019-01-28T17:47:08.078Z',
+      error: {
+        message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
+        type: 'io',
+      },
+      monitor: {
+        duration: { us: 1430 },
+        id: 'auto-tcp-0X81440A68E839814F',
+        ip: '127.0.0.1',
+        name: '',
+        status: 'down',
+        type: 'tcp',
+      },
+    },
+    {
+      docId: 'fewjoo21',
+      timestamp: '2019-01-28T17:47:09.075Z',
+      error: {
+        message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
+        type: 'io',
+      },
+      monitor: {
+        duration: { us: 1370 },
+        id: 'auto-tcp-0X81440A68E839814D',
+        ip: '255.255.255.0',
+        name: '',
+        status: 'down',
+        type: 'tcp',
+      },
+    },
+  ];
 
-  beforeAll(() => {
-    response = {
-      total: 9231,
-      pings: [
-        {
-          docId: 'fewjio21',
-          timestamp: '2019-01-28T17:47:08.078Z',
-          error: {
-            message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
-            type: 'io',
-          },
-          monitor: {
-            duration: { us: 1430 },
-            id: 'auto-tcp-0X81440A68E839814F',
-            ip: '127.0.0.1',
-            name: '',
-            status: 'down',
-            type: 'tcp',
-          },
-        },
-        {
-          docId: 'fewjoo21',
-          timestamp: '2019-01-28T17:47:09.075Z',
-          error: {
-            message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
-            type: 'io',
-          },
-          monitor: {
-            duration: { us: 1370 },
-            id: 'auto-tcp-0X81440A68E839814D',
-            ip: '127.0.0.1',
-            name: '',
-            status: 'down',
-            type: 'tcp',
-          },
-        },
-      ],
-    };
+  const response: PingsResponse = {
+    total: 9231,
+    pings: defaultPings,
+  };
 
+  beforeEach(() => {
     jest.spyOn(pingListHook, 'usePingsList').mockReturnValue({
       ...response,
       error: undefined,
@@ -65,9 +65,34 @@ describe('PingList component', () => {
     });
   });
 
-  it('renders sorted list without errors', () => {
-    const component = shallowWithIntl(<PingList />);
-    expect(component).toMatchSnapshot();
+  it('renders loading state when pings are loading', () => {
+    jest.spyOn(pingListHook, 'usePingsList').mockReturnValue({
+      pings: [],
+      total: 0,
+      error: undefined,
+      loading: true,
+      failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
+    });
+    const { getByText } = render(<PingList />);
+    expect(getByText('Loading history...')).toBeInTheDocument();
+  });
+
+  it('renders no pings state when pings are not found', () => {
+    jest.spyOn(pingListHook, 'usePingsList').mockReturnValue({
+      pings: [],
+      total: 0,
+      error: undefined,
+      loading: false,
+      failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
+    });
+    const { getByText } = render(<PingList />);
+    expect(getByText('No history found')).toBeInTheDocument();
+  });
+
+  it('renders list without errors', () => {
+    const { getByText } = render(<PingList />);
+    expect(getByText(`${response.pings[0].monitor.ip}`)).toBeInTheDocument();
+    expect(getByText(`${response.pings[1].monitor.ip}`)).toBeInTheDocument();
   });
 
   describe('toggleDetails', () => {
@@ -139,7 +164,7 @@ describe('PingList component', () => {
                   "us": 1370,
                 },
                 "id": "auto-tcp-0X81440A68E839814D",
-                "ip": "127.0.0.1",
+                "ip": "255.255.255.0",
                 "name": "",
                 "status": "down",
                 "type": "tcp",

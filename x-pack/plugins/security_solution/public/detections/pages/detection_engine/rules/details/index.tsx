@@ -22,6 +22,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 
 import {
   useDeepEqualSelector,
@@ -102,6 +103,15 @@ import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { isTab } from '../../../../../common/components/accessibility/helpers';
 
+/**
+ * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
+ */
+const StyledFullHeightContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+`;
+
 enum RuleDetailTabs {
   alerts = 'alerts',
   failures = 'failures',
@@ -156,6 +166,7 @@ const RuleDetailsPageComponent = () => {
       hasEncryptionKey,
       canUserCRUD,
       hasIndexWrite,
+      hasIndexMaintenance,
       signalIndexName,
     },
   ] = useUserData();
@@ -459,7 +470,7 @@ const RuleDetailsPageComponent = () => {
       <ReadOnlyAlertsCallOut />
       <ReadOnlyRulesCallOut />
       {indicesExist ? (
-        <div onKeyDown={onKeyDown} ref={containerElement}>
+        <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
@@ -591,9 +602,9 @@ const RuleDetailsPageComponent = () => {
                 {ruleId != null && (
                   <AlertsTable
                     timelineId={TimelineId.detectionsRulesDetailsPage}
-                    canUserCRUD={canUserCRUD ?? false}
                     defaultFilters={alertDefaultFilters}
                     hasIndexWrite={hasIndexWrite ?? false}
+                    hasIndexMaintenance={hasIndexMaintenance ?? false}
                     from={from}
                     loading={loading}
                     showBuildingBlockAlerts={showBuildingBlockAlerts}
@@ -617,7 +628,7 @@ const RuleDetailsPageComponent = () => {
             )}
             {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
           </WrapperPage>
-        </div>
+        </StyledFullHeightContainer>
       ) : (
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />

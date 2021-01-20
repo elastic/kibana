@@ -177,6 +177,8 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
                 "polling": {
                     /* When was the last polling cycle? */
                     "last_successful_poll": "2020-10-05T17:57:55.411Z",
+                    /* When was the last time Task Manager adjusted it's polling delay? */
+                    "last_polling_delay": "2020-10-05T17:57:55.411Z",
                     /* Running average of polling duration measuring the time from the scheduled polling cycle
                         start until all claimed tasks are marked as running */
                     "duration": {

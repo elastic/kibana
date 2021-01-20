@@ -120,9 +120,9 @@ export const fetchRules = async ({
     ...showElasticRuleFilter,
   ].join(' AND ');
 
-  const tags = [
-    ...(filterOptions.tags?.map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`) ?? []),
-  ].join(' AND ');
+  const tags = filterOptions.tags
+    .map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`)
+    .join(' AND ');
 
   const filterString =
     filtersWithoutTags !== '' && tags !== ''
@@ -205,7 +205,7 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<B
  */
 export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<BulkRuleResponse> =>
   KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`, {
-    method: 'DELETE',
+    method: 'POST',
     body: JSON.stringify(ids.map((id) => ({ id }))),
   });
 

@@ -5,6 +5,7 @@
  */
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -52,6 +53,15 @@ import { buildShowBuildingBlockFilter } from '../../components/alerts_table/defa
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
+/**
+ * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
+ */
+const StyledFullHeightContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+`;
+
 const DetectionEnginePageComponent = () => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
@@ -75,9 +85,9 @@ const DetectionEnginePageComponent = () => {
       isSignalIndexExists,
       isAuthenticated: isUserAuthenticated,
       hasEncryptionKey,
-      canUserCRUD,
       signalIndexName,
       hasIndexWrite,
+      hasIndexMaintenance,
     },
   ] = useUserData();
   const {
@@ -183,7 +193,7 @@ const DetectionEnginePageComponent = () => {
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       <ReadOnlyAlertsCallOut />
       {indicesExist ? (
-        <div onKeyDown={onKeyDown} ref={containerElement}>
+        <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
@@ -232,7 +242,7 @@ const DetectionEnginePageComponent = () => {
               timelineId={TimelineId.detectionsPage}
               loading={loading}
               hasIndexWrite={hasIndexWrite ?? false}
-              canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
+              hasIndexMaintenance={hasIndexMaintenance ?? false}
               from={from}
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}
@@ -240,7 +250,7 @@ const DetectionEnginePageComponent = () => {
               to={to}
             />
           </WrapperPage>
-        </div>
+        </StyledFullHeightContainer>
       ) : (
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />

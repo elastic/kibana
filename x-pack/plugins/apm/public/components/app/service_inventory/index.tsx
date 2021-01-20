@@ -13,7 +13,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
-import url from 'url';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
@@ -27,6 +26,7 @@ import { NoServicesMessage } from './no_services_message';
 import { ServiceList } from './ServiceList';
 import { MLCallout } from './ServiceList/MLCallout';
 import { useAnomalyDetectionJobsFetcher } from './use_anomaly_detection_jobs_fetcher';
+import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 
 const initialData = {
   items: [],
@@ -39,6 +39,7 @@ let hasDisplayedToast = false;
 function useServicesFetcher() {
   const { urlParams, uiFilters } = useUrlParams();
   const { core } = useApmPluginContext();
+  const upgradeAssistantHref = useUpgradeAssistantHref();
   const { start, end } = urlParams;
   const { data = initialData, status } = useFetcher(
     (callApmApi) => {
@@ -70,12 +71,7 @@ function useServicesFetcher() {
                 "You're running Elastic Stack 7.0+ and we've detected incompatible data from a previous 6.x version. If you want to view this data in APM, you should migrate it. See more in ",
             })}
 
-            <EuiLink
-              href={url.format({
-                pathname: core.http.basePath.prepend('/app/kibana'),
-                hash: '/management/stack/upgrade_assistant',
-              })}
-            >
+            <EuiLink href={upgradeAssistantHref}>
               {i18n.translate(
                 'xpack.apm.serviceInventory.upgradeAssistantLinkText',
                 {
@@ -87,7 +83,7 @@ function useServicesFetcher() {
         ),
       });
     }
-  }, [data.hasLegacyData, core.http.basePath, core.notifications.toasts]);
+  }, [data.hasLegacyData, upgradeAssistantHref, core.notifications.toasts]);
 
   return { servicesData: data, servicesStatus: status };
 }

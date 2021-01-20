@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import {
@@ -23,9 +12,7 @@ import {
   SerializedFieldFormat,
 } from '../../../../plugins/expressions/public';
 import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';
-
-import { Vis, VisParams } from '../types';
-
+import { Vis } from '../types';
 const { isDateHistogramBucketAggConfig } = search.aggs;
 
 interface SchemaConfigParams {
@@ -55,25 +42,6 @@ export interface Schemas {
   // catch all for schema name
   [key: string]: any[] | undefined;
 }
-
-type BuildVisFunction = (
-  params: VisParams,
-  schemas: Schemas,
-  uiState: any,
-  meta?: { savedObjectId?: string }
-) => string;
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
-
-interface BuildPipelineVisFunction {
-  [key: string]: BuildVisFunction;
-}
-
-interface BuildVisConfigFunction {
-  [key: string]: buildVisConfigFunction;
-}
-
 export interface BuildPipelineParams {
   timefilter: TimefilterContract;
   timeRange?: any;
@@ -224,43 +192,6 @@ export const prepareDimension = (variable: string, data: any) => {
   return expr;
 };
 
-export const buildPipelineVisFunction: BuildPipelineVisFunction = {
-  region_map: (params, schemas) => {
-    const visConfig = {
-      ...params,
-      ...buildVisConfig.region_map(schemas),
-    };
-    return `regionmap ${prepareJson('visConfig', visConfig)}`;
-  },
-  tile_map: (params, schemas) => {
-    const visConfig = {
-      ...params,
-      ...buildVisConfig.tile_map(schemas),
-    };
-    return `tilemap ${prepareJson('visConfig', visConfig)}`;
-  },
-};
-
-const buildVisConfig: BuildVisConfigFunction = {
-  region_map: (schemas) => {
-    const visConfig = {} as any;
-    visConfig.metric = schemas.metric[0];
-    if (schemas.segment) {
-      visConfig.bucket = schemas.segment[0];
-    }
-    return visConfig;
-  },
-  tile_map: (schemas) => {
-    const visConfig = {} as any;
-    visConfig.dimensions = {
-      metric: schemas.metric[0],
-      geohash: schemas.segment ? schemas.segment[0] : null,
-      geocentroid: schemas.geo_centroid ? schemas.geo_centroid[0] : null,
-    };
-    return visConfig;
-  },
-};
-
 export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
   const { indexPattern, searchSource } = vis.data;
   const query = searchSource!.getField('query');
@@ -299,17 +230,8 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
         });
       }
       pipeline += `| `;
-    }
-
-    const schemas = getSchemas(vis, params);
-
-    if (buildPipelineVisFunction[vis.type.name]) {
-      pipeline += buildPipelineVisFunction[vis.type.name](
-        { title, ...vis.params },
-        schemas,
-        uiState
-      );
     } else {
+      const schemas = getSchemas(vis, params);
       const visConfig = { ...vis.params };
       visConfig.dimensions = schemas;
       visConfig.title = title;

@@ -25,6 +25,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({ latestFunction
             defaultMessage="Unique keys"
           />
         }
+        data-test-subj="transformLatestFunctionForm"
       >
         <EuiComboBox<string>
           fullWidth
