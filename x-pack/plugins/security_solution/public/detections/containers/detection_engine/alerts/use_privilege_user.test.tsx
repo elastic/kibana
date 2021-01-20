@@ -20,6 +20,7 @@ describe('usePrivilegeUser', () => {
       expect(result.current).toEqual({
         hasEncryptionKey: null,
         hasIndexManage: null,
+        hasIndexMaintenance: null,
         hasIndexWrite: null,
         hasIndexUpdateDelete: null,
         isAuthenticated: null,
@@ -38,6 +39,7 @@ describe('usePrivilegeUser', () => {
       expect(result.current).toEqual({
         hasEncryptionKey: true,
         hasIndexManage: true,
+        hasIndexMaintenance: true,
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
         isAuthenticated: true,
@@ -60,6 +62,7 @@ describe('usePrivilegeUser', () => {
       expect(result.current).toEqual({
         hasEncryptionKey: false,
         hasIndexManage: false,
+        hasIndexMaintenance: false,
         hasIndexWrite: false,
         hasIndexUpdateDelete: false,
         isAuthenticated: false,

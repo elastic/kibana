@@ -506,17 +506,32 @@ export function LayerPanel(
                       columnId: activeId,
                       filterOperations: activeGroup.filterOperations,
                       dimensionGroups: groups,
-                      setState: (newState: unknown, shouldUpdateVisualization?: boolean) => {
-                        if (shouldUpdateVisualization) {
+                      setState: (
+                        newState: unknown,
+                        {
+                          shouldReplaceDimension,
+                          shouldRemoveDimension,
+                        }: {
+                          shouldReplaceDimension?: boolean;
+                          shouldRemoveDimension?: boolean;
+                        } = {}
+                      ) => {
+                        if (shouldReplaceDimension || shouldRemoveDimension) {
                           props.updateAll(
                             datasourceId,
                             newState,
-                            activeVisualization.setDimension({
-                              layerId,
-                              groupId: activeGroup.groupId,
-                              columnId: activeId,
-                              prevState: props.visualizationState,
-                            })
+                            shouldRemoveDimension
+                              ? activeVisualization.removeDimension({
+                                  layerId,
+                                  columnId: activeId,
+                                  prevState: props.visualizationState,
+                                })
+                              : activeVisualization.setDimension({
+                                  layerId,
+                                  groupId: activeGroup.groupId,
+                                  columnId: activeId,
+                                  prevState: props.visualizationState,
+                                })
                           );
                         } else {
                           props.updateDatasource(datasourceId, newState);

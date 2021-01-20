@@ -16,6 +16,11 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLa
       return;
     }
 
+    // ignore gl-draw layers
+    if (mbLayer.id.startsWith('gl-draw')) {
+      return;
+    }
+
     const layer = layerList.find((layer) => {
       return layer.ownsMbLayerId(mbLayer.id);
     });

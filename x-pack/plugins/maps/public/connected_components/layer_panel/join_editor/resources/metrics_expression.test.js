@@ -22,6 +22,7 @@ test('Should render metrics expression for metrics', () => {
   const component = shallow(
     <MetricsExpression
       {...defaultProps}
+      rightFields={['foobar', 'prop1']}
       metrics={[
         { type: 'count', label: 'my count' }, // should ignore label
         { type: 'max' }, // incomplete - no field, should not be included in expression

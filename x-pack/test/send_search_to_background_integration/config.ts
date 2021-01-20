@@ -29,7 +29,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.data_enhanced.search.sendToBackground.enabled=true', // enable WIP send to background UI
+        '--xpack.data_enhanced.search.sessions.enabled=true', // enable WIP send to background UI
       ],
     },
     services: {

@@ -47,10 +47,10 @@ export const findRoute = (router: IRouter, systemLogger: Logger) => {
 
       try {
         return res.ok({
-          body: await eventLogClient.findEventsBySavedObject(type, id, query),
+          body: await eventLogClient.findEventsBySavedObjectIds(type, [id], query),
         });
       } catch (err) {
-        const call = `findEventsBySavedObject(${type}, ${id}, ${JSON.stringify(query)})`;
+        const call = `findEventsBySavedObjectIds(${type}, [${id}], ${JSON.stringify(query)})`;
         systemLogger.debug(`error calling eventLog ${call}: ${err.message}`);
         return res.notFound();
       }

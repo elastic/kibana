@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import './discover.scss';
 
 import React, { useState, useRef } from 'react';
@@ -219,6 +209,7 @@ export interface DiscoverProps {
    * Function to update the actual savedQuery id
    */
   updateSavedQueryId: (savedQueryId?: string) => void;
+  useNewFieldsApi?: boolean;
 }
 
 export const DocTableLegacyMemoized = React.memo((props: DocTableLegacyProps) => (
@@ -257,6 +248,7 @@ export function DiscoverLegacy({
   topNavMenu,
   updateQuery,
   updateSavedQueryId,
+  useNewFieldsApi,
 }: DiscoverProps) {
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
@@ -277,6 +269,17 @@ export function DiscoverLegacy({
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
   const contentCentered = resultState === 'uninitialized';
+
+  const getDisplayColumns = () => {
+    if (!state.columns) {
+      return [];
+    }
+    const columns = [...state.columns];
+    if (useNewFieldsApi) {
+      return columns.filter((column) => column !== '_source');
+    }
+    return columns.length === 0 ? ['_source'] : columns;
+  };
 
   return (
     <I18nProvider>
@@ -315,6 +318,7 @@ export function DiscoverLegacy({
                 setIndexPattern={setIndexPattern}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
+                useNewFieldsApi={useNewFieldsApi}
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
@@ -445,7 +449,7 @@ export function DiscoverLegacy({
                         {rows && rows.length && (
                           <div>
                             <DocTableLegacyMemoized
-                              columns={state.columns || []}
+                              columns={getDisplayColumns()}
                               indexPattern={indexPattern}
                               minimumVisibleRows={minimumVisibleRows}
                               rows={rows}
@@ -457,6 +461,7 @@ export function DiscoverLegacy({
                               onMoveColumn={onMoveColumn}
                               onRemoveColumn={onRemoveColumn}
                               onSort={onSort}
+                              useNewFieldsApi={useNewFieldsApi}
                             />
                             {rows.length === opts.sampleSize ? (
                               <div

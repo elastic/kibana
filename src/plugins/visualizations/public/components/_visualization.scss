@@ -27,14 +27,14 @@
     display: flex;
     flex-direction: row;
     overflow: auto;
-    transition: opacity 0.01s;
+    transition: opacity .01s;
 
     // IE11 Hack
     //
     // Normally we would just set flex: 1 1 0%, which works as expected in IE11.
     // Unfortunately, a recent bug in Firefox causes this rule to be ignored, so we
     // have to use an IE-specific hack instead.
-    @include internetExplorerOnly(){
+    @include internetExplorerOnly() {
       flex: 1 0;
     }
 
@@ -45,7 +45,7 @@
 
   // SASSTODO: Can't find exact usage
   .loading {
-    opacity: 0.5;
+    opacity: .5;
   }
 
   // SASSTODO: Can't find exact usage
@@ -55,7 +55,7 @@
     left: 0;
     right: 0;
     z-index: 20;
-    opacity: 0.5;
+    opacity: .5;
   }
 }
 
