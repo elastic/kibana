@@ -19,6 +19,10 @@ import {
 } from '../../../../../common/endpoint/types';
 import { HttpFetchOptions } from 'kibana/public';
 import { TRUSTED_APPS_LIST_API } from '../../../../../common/endpoint/constants';
+import {
+  GetPackagePoliciesResponse,
+  PACKAGE_POLICY_API_ROUTES,
+} from '../../../../../../fleet/common';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -70,6 +74,17 @@ describe('When on the Trusted Apps Page', () => {
           per_page: httpOptions?.query?.per_page ?? 20,
         };
       }
+
+      if (PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) {
+        const response: GetPackagePoliciesResponse = {
+          items: [],
+          page: 1,
+          perPage: 1000,
+          total: 0,
+        };
+        return response;
+      }
+
       if (currentGetHandler) {
         return currentGetHandler(...args);
       }
