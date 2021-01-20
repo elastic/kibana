@@ -329,26 +329,17 @@ class JobService {
     // create a deep copy of a job object
     // also remove items from the job which are set by the server and not needed
     // in the future this formatting could be optional
+
     const tempJob = cloneDeep(job);
 
     // remove all of the items which should not be copied
     // such as counts, state and times
-    delete tempJob.state;
-    delete tempJob.job_version;
-    delete tempJob.data_counts;
-    delete tempJob.create_time;
-    delete tempJob.finished_time;
-    delete tempJob.last_data_time;
-    delete tempJob.model_size_stats;
-    delete tempJob.node;
-    delete tempJob.average_bucket_processing_time_ms;
-    delete tempJob.model_snapshot_id;
-    delete tempJob.open_time;
-    delete tempJob.established_model_memory;
     delete tempJob.calendars;
-    delete tempJob.timing_stats;
+    delete tempJob.data_counts;
+    delete tempJob.model_size_stats;
     delete tempJob.forecasts_stats;
-    delete tempJob.assignment_explanation;
+    delete tempJob.state;
+    delete tempJob.timing_stats;
 
     delete tempJob.analysis_config.use_per_partition_normalization;
 

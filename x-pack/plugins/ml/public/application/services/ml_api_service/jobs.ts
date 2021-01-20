@@ -48,8 +48,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  jobs(jobIds: string[]) {
-    const body = JSON.stringify({ jobIds });
+  jobs(jobIds: string[], excludeGenerated?: boolean) {
+    const body = JSON.stringify({ jobIds, excludeGenerated });
     return httpService.http<CombinedJobWithStats[]>({
       path: `${basePath()}/jobs/jobs`,
       method: 'POST',
