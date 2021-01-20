@@ -87,13 +87,18 @@ export type ESGeoLineSourceResponseMeta = {
   totalEntities: number;
 };
 
+export type VectorTileLayerMeta = {
+  tileLayerId: string;
+};
+
 // Partial because objects are justified downstream in constructors
 export type DataMeta = Partial<
   VectorSourceRequestMeta &
     VectorJoinSourceRequestMeta &
     VectorStyleRequestMeta &
     ESSearchSourceResponseMeta &
-    ESGeoLineSourceResponseMeta
+    ESGeoLineSourceResponseMeta &
+    VectorTileLayerMeta
 >;
 
 type NumericalStyleFieldData = {
