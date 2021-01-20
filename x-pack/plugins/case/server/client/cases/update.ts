@@ -162,7 +162,7 @@ export const update = ({
       const currentCase = myCases.saved_objects.find((c) => c.id === theCase.id);
       const totalComments = await caseService.getAllCaseComments({
         client: savedObjectsClient,
-        caseId: theCase.id,
+        id: theCase.id,
         options: {
           fields: [],
           filter: 'cases-comments.attributes.type: alert',
@@ -173,7 +173,7 @@ export const update = ({
 
       const caseComments = (await caseService.getAllCaseComments({
         client: savedObjectsClient,
-        caseId: theCase.id,
+        id: theCase.id,
         options: {
           fields: [],
           filter: 'cases-comments.attributes.type: alert',

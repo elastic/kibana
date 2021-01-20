@@ -41,10 +41,13 @@ import {
   CommentRequestAlertGroupType,
   ContextTypeAlertGroupRt,
   NeedToFixCommentRequestAlertGroupType,
+  CombinedCaseResponse,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
 import { SortFieldCase, TotalCommentByCase } from './types';
+// TODO: figure out where the class should actually be stored
+import { CombinedCase } from '../../client/comments/combined_case';
 
 // TODO: refactor these functions to a common location, this is used by the caseClient too
 
@@ -202,6 +205,22 @@ export const flattenCaseSavedObject = ({
   totalComment,
   ...savedObject.attributes,
   connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
+});
+
+export const flattenCombinedCaseSavedObject = ({
+  combinedCase,
+  comments = [],
+  totalComment = comments.length,
+}: {
+  combinedCase: CombinedCase;
+  comments?: Array<SavedObject<CommentAttributes>>;
+  totalComment?: number;
+}): CombinedCaseResponse => ({
+  id: combinedCase.id,
+  version: combinedCase.version ?? '0',
+  comments: flattenCommentSavedObjects(comments),
+  totalComment,
+  ...combinedCase.attributes,
 });
 
 export const flattenSubCaseSavedObject = ({

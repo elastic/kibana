@@ -48,7 +48,7 @@ export function initPatchCommentApi({
 
         const myCase = await caseService.getCase({
           client,
-          caseId,
+          id: caseId,
         });
 
         const myComment = await caseService.getComment({
@@ -102,7 +102,7 @@ export function initPatchCommentApi({
 
         const totalCommentsFindByCases = await caseService.getAllCaseComments({
           client,
-          caseId,
+          id: caseId,
           options: {
             fields: [],
             page: 1,
@@ -113,7 +113,7 @@ export function initPatchCommentApi({
         const [comments] = await Promise.all([
           caseService.getAllCaseComments({
             client,
-            caseId: request.params.case_id,
+            id: request.params.case_id,
             options: {
               fields: [],
               page: 1,

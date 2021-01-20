@@ -132,6 +132,7 @@ export const CasesFindResponseRt = rt.intersection([
 ]);
 
 export const CasePatchRequestRt = rt.intersection([
+  // TODO: need to refactor so type is not updatable using patch
   rt.partial(CaseBasicRt.props),
   rt.type({ id: rt.string, version: rt.string }),
 ]);
@@ -150,6 +151,7 @@ export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type CaseExternalServiceRequest = rt.TypeOf<typeof CaseExternalServiceRequestRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
+export type CaseSettings = rt.TypeOf<typeof SettingsRt>;
 
 export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };
 export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {

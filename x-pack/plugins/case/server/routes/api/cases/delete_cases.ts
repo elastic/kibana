@@ -28,7 +28,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
           request.query.ids.map((id) =>
             caseService.deleteCase({
               client,
-              caseId: id,
+              id,
             })
           )
         );
@@ -36,7 +36,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
           request.query.ids.map((id) =>
             caseService.getAllCaseComments({
               client,
-              caseId: id,
+              id,
             })
           )
         );

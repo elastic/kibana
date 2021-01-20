@@ -100,7 +100,7 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
           cases.saved_objects.map((c) =>
             caseService.getAllCaseComments({
               client,
-              caseId: c.id,
+              id: c.id,
               options: {
                 fields: [],
                 page: 1,

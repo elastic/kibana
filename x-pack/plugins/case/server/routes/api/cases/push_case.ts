@@ -67,12 +67,12 @@ export function initPushCaseUserActionApi({
         const [myCase, myCaseConfigure, totalCommentsFindByCases, connectors] = await Promise.all([
           caseService.getCase({
             client,
-            caseId: request.params.case_id,
+            id: request.params.case_id,
           }),
           caseConfigureService.find({ client }),
           caseService.getAllCaseComments({
             client,
-            caseId,
+            id: caseId,
             options: {
               fields: [],
               page: 1,
@@ -90,7 +90,7 @@ export function initPushCaseUserActionApi({
 
         const comments = await caseService.getAllCaseComments({
           client,
-          caseId,
+          id: caseId,
           options: {
             fields: [],
             page: 1,

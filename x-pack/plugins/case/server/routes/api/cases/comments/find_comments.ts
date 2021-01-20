@@ -42,7 +42,7 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
         const args = query
           ? {
               client,
-              caseId: request.params.case_id,
+              id: request.params.case_id,
               options: {
                 ...query,
                 sortField: 'created_at',
@@ -50,7 +50,7 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
             }
           : {
               client,
-              caseId: request.params.case_id,
+              id: request.params.case_id,
             };
 
         const theComments = await caseService.getAllCaseComments(args);

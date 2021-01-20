@@ -50,7 +50,7 @@ interface PushedArgs {
 }
 
 interface GetCaseArgs extends ClientArgs {
-  caseId: string;
+  id: string;
 }
 
 interface GetCasesArgs extends ClientArgs {
@@ -123,12 +123,8 @@ export interface CaseServiceSetup {
   findCases(args: FindCasesArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>>;
   // TODO: refactor these because they use the same parameters and implementation
   getAllCaseComments(args: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>>;
-  getAllSubCaseComments(
-    client: SavedObjectsClientContract,
-    id: string,
-    options?: SavedObjectFindOptions
-  ): Promise<SavedObjectsFindResponse<CommentAttributes>>;
   getCase(args: GetCaseArgs): Promise<SavedObject<ESCaseAttributes>>;
+  getSubCase(args: GetCaseArgs): Promise<SavedObject<SubCaseAttributes>>;
   getCases(args: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>>;
   getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
   getTags(args: ClientArgs): Promise<string[]>;
@@ -196,7 +192,7 @@ export class CaseService {
         throw error;
       }
     },
-    deleteCase: async ({ client, caseId }: GetCaseArgs) => {
+    deleteCase: async ({ client, id: caseId }: GetCaseArgs) => {
       try {
         this.log.debug(`Attempting to GET case ${caseId}`);
         return await client.delete(CASE_SAVED_OBJECT, caseId);
@@ -214,12 +210,21 @@ export class CaseService {
         throw error;
       }
     },
-    getCase: async ({ client, caseId }: GetCaseArgs) => {
+    getCase: async ({ client, id: caseId }: GetCaseArgs) => {
       try {
         this.log.debug(`Attempting to GET case ${caseId}`);
         return await client.get(CASE_SAVED_OBJECT, caseId);
       } catch (error) {
         this.log.debug(`Error on GET case ${caseId}: ${error}`);
+        throw error;
+      }
+    },
+    getSubCase: async ({ client, id }: GetCaseArgs) => {
+      try {
+        this.log.debug(`Attempting to GET sub case ${id}`);
+        return await client.get(SUB_CASE_SAVED_OBJECT, id);
+      } catch (error) {
+        this.log.debug(`Error on GET sub case ${id}: ${error}`);
         throw error;
       }
     },
@@ -252,33 +257,21 @@ export class CaseService {
         throw error;
       }
     },
-    getAllCaseComments: async ({ client, caseId, options }: FindCommentsArgs) => {
+    getAllCaseComments: async ({ client, id, options }: FindCommentsArgs) => {
       try {
-        this.log.debug(`Attempting to GET all comments for case ${caseId}`);
+        this.log.debug(`Attempting to GET all comments for case ${id}`);
         return await client.find({
-          ...options,
           type: CASE_COMMENT_SAVED_OBJECT,
-          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          hasReferenceOperator: 'OR',
+          hasReference: [
+            { type: CASE_SAVED_OBJECT, id },
+            { type: SUB_CASE_SAVED_OBJECT, id },
+          ],
+          // spread the options after so the caller can override the default behavior if they want
+          ...options,
         });
       } catch (error) {
-        this.log.debug(`Error on GET all comments for case ${caseId}: ${error}`);
-        throw error;
-      }
-    },
-    getAllSubCaseComments: async (
-      client: SavedObjectsClientContract,
-      id: string,
-      options?: SavedObjectFindOptions
-    ) => {
-      try {
-        this.log.debug(`Attempting to GET all comments for sub case ${id}`);
-        return await client.find({
-          ...options,
-          type: CASE_COMMENT_SAVED_OBJECT,
-          hasReference: { type: SUB_CASE_SAVED_OBJECT, id },
-        });
-      } catch (error) {
-        this.log.debug(`Error on GET all comments for sub case ${id}: ${error}`);
+        this.log.debug(`Error on GET all comments for case ${id}: ${error}`);
         throw error;
       }
     },

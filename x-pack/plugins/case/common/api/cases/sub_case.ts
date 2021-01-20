@@ -10,7 +10,7 @@ import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
-import { CaseStatusRt } from './case';
+import { CaseAttributesRt, CaseStatusRt } from './case';
 
 // TODO: comments
 
@@ -29,6 +29,11 @@ export const SubCaseAttributesRt = rt.intersection([
   }),
 ]);
 
+export const CombinedCaseAttributesRt = rt.type({
+  subCase: rt.union([SubCaseAttributesRt, rt.null]),
+  caseCollection: CaseAttributesRt,
+});
+
 export const SubCasesFindRequestRt = rt.partial({
   status: CaseStatusRt,
   defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
@@ -40,6 +45,18 @@ export const SubCasesFindRequestRt = rt.partial({
   sortField: rt.string,
   sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
 });
+
+export const CombinedCaseResponseRt = rt.intersection([
+  CombinedCaseAttributesRt,
+  rt.type({
+    id: rt.string,
+    totalComment: rt.number,
+    version: rt.string,
+  }),
+  rt.partial({
+    comments: rt.array(CommentResponseRt),
+  }),
+]);
 
 export const SubCaseResponseRt = rt.intersection([
   SubCaseAttributesRt,
@@ -71,6 +88,8 @@ export const SubCasePatchRequestRt = rt.intersection([
 export const SubCasesPatchRequestRt = rt.type({ cases: rt.array(SubCasePatchRequestRt) });
 export const SubCasesResponseRt = rt.array(SubCaseResponseRt);
 
+export type CombinedCaseAttributes = rt.TypeOf<typeof CombinedCaseAttributesRt>;
+export type CombinedCaseResponse = rt.TypeOf<typeof CombinedCaseResponseRt>;
 export type SubCaseAttributes = rt.TypeOf<typeof SubCaseAttributesRt>;
 export type SubCaseResponse = rt.TypeOf<typeof SubCaseResponseRt>;
 export type SubCasesResponse = rt.TypeOf<typeof SubCasesResponseRt>;

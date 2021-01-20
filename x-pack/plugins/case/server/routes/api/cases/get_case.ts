@@ -32,7 +32,7 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
         const [theCase] = await Promise.all([
           caseService.getCase({
             client,
-            caseId: request.params.case_id,
+            id: request.params.case_id,
           }),
         ]);
 
@@ -48,7 +48,7 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
 
         const theComments = await caseService.getAllCaseComments({
           client,
-          caseId: request.params.case_id,
+          id: request.params.case_id,
           options: {
             sortField: 'created_at',
             sortOrder: 'asc',

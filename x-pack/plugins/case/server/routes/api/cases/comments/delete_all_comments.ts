@@ -30,7 +30,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
 
         const comments = await caseService.getAllCaseComments({
           client,
-          caseId: request.params.case_id,
+          id: request.params.case_id,
         });
         await Promise.all(
           comments.saved_objects.map((comment) =>
