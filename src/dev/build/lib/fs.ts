@@ -153,7 +153,7 @@ export async function copy(source: string, destination: string, options: CopyOpt
 interface CopyAllOptions {
   select?: string[];
   dot?: boolean;
-  time?: string | number | Date;
+  time?: Date;
 }
 
 export async function copyAll(
