@@ -2,7 +2,7 @@
   "name": "@kbn/ui-shared-deps",
   "version": "1.0.0",
   "private": true,
-  "license": "Apache-2.0",
+  "license": "SSPL-1.0 OR Elastic License",
   "scripts": {
     "build": "node scripts/build",
     "kbn:bootstrap": "node scripts/build --dev",
