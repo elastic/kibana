@@ -21,15 +21,15 @@ To create either a *Tracking threshold* or a *Tracking containment* alert, the
 following requirements must be present:
 
 - *Trackable index or index pattern data*: An index containing a `geo_point` field, `date` field,
-and some form of Entity identifier. An Entity identifier is a `keyword` or `number`
-field that consistently identifies the Entity to be tracked. The data in this index should be dynamically
-updating so that there are Entity movements to alert upon.
+and some form of entity identifier. An entity identifier is a `keyword` or `number`
+field that consistently identifies the entity to be tracked. The data in this index should be dynamically
+updating so that there are entity movements to alert upon.
 - *Boundary index or index pattern data*: An index containing `geo_shape` data, such as boundary data and bounding box data.
 This data is presumed to be static (not updating). Shape data matching the query is
 harvested once when the alert is created and anytime after when the alert is re-enabled
 after disablement.
 
-By design, current interval Entity locations (_current_ is determined by `date` in
+By design, current interval entity locations (_current_ is determined by `date` in
 the *Tracked index or index pattern*) are queried to determine if they are contained
 within any monitored boundaries. Entity
 data should be somewhat "real time", meaning the dates of new documents aren’t older
@@ -48,11 +48,11 @@ image::images/alert-types-tracking-select.png[Choosing a tracking alert type]
 
 Depending on the specific requirements for the alert, either tracking or containment
 might be appropriate. Select <<alert-type-tracking-threshold>> if the alert is more
-focused on generating an alert when an Entity crosses a boundary, and you desire the
+focused on generating an alert when an entity crosses a boundary, and you desire the
 ability to highlight lines of crossing on a custom map. Select  
-<<alert-type-tracking-containment>> if an Entity should send out constant alerts
+<<alert-type-tracking-containment>> if an entity should send out constant alerts
 while contained within a boundary (this feature is optional) or if the alert is generally
-just more focused around activity when an Entity exists within a shape.
+just more focused around activity when an entity exists within a shape.
 
 [NOTE]
 ==================================================
@@ -67,7 +67,7 @@ in the future.
 [[alert-type-tracking-threshold]]
 === Tracking threshold
 The Tracking threshold alert type runs an {es} query over indices, comparing the latest
-Entity locations with their previous locations. In the event that an Entity has crossed a
+entity locations with their previous locations. In the event that an entity has crossed a
 boundary from the selected boundary index, an alert may be generated.
 
 [float]
@@ -84,11 +84,11 @@ Delayed evaluation offset:: If a data source lags or is intermittent, you may su
 an optional value to evaluate alert conditions following a fixed delay. For instance, if data
 is consistently indexed 5-10 minutes following its original timestamp, a *Delayed evaluation
 offset* of `10 minutes` would ensure that alertable instances are still captured.
-Index (Entity):: This clause requires an *index or index pattern*, a *time field* that will be used for the *time window*, and a *`geo_point` field* for tracking.
+Index (entity):: This clause requires an *index or index pattern*, a *time field* that will be used for the *time window*, and a *`geo_point` field* for tracking.
 By:: This clause specifies the field to use in the previously provided
-*index or index pattern* for tracking Entities. An Entity is a `keyword`
-or `number` field that consistently identifies the Entity to be tracked. 
-When Entity:: This clause specifies which crossing option to track. The values
+*index or index pattern* for tracking Entities. An entity is a `keyword`
+or `number` field that consistently identifies the entity to be tracked. 
+When entity:: This clause specifies which crossing option to track. The values
 *Entered*, *Exited*, and *Crossed* can be selected to indicate which crossing conditions
 should trigger an alert. *Entered* alerts on entry into a boundary, *Exited* alerts on exit
 from a boundary, and *Crossed* alerts on all boundary crossings whether they be entrances
@@ -102,7 +102,7 @@ messages.
 === Tracking containment
 The Tracking containment alert type runs an {es} query over indices, determining if any
 documents are currently contained within any boundaries from the specified boundary index.
-In the event that an Entity is contained within a boundary, an alert may be generated.
+In the event that an entity is contained within a boundary, an alert may be generated.
 
 [float]
 ==== Defining the conditions
@@ -112,8 +112,8 @@ as well as 2 Kuery bars used to provide additional filtering context for each of
 [role="screenshot"]
 image::images/alert-types-tracking-containment-conditions.png[Five clauses define the condition to detect]
 
-Index (Entity):: This clause requires an *index or index pattern*, a *time field* that will be used for the *time window*, and a *`geo_point` field* for tracking.
-When Entity:: This clause specifies which crossing option to track. The values
+Index (entity):: This clause requires an *index or index pattern*, a *time field* that will be used for the *time window*, and a *`geo_point` field* for tracking.
+When entity:: This clause specifies which crossing option to track. The values
 *Entered*, *Exited*, and *Crossed* can be selected to indicate which crossing conditions
 should trigger an alert. *Entered* alerts on entry into a boundary, *Exited* alerts on exit
 from a boundary, and *Crossed* alerts on all boundary crossings whether they be entrances
@@ -123,7 +123,7 @@ identifying boundaries, and an optional *Human-readable boundary name* for bette
 messages.
 
 Conditions for how an alert is tracked can be specified uniquely for each individual action.
-An alert can be triggered either when a containment condition is met or when an Entity
+An alert can be triggered either when a containment condition is met or when an entity
 is no longer contained.
 
 [role="screenshot"]
