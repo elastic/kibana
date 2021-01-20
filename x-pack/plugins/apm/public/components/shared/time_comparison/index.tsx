@@ -65,14 +65,12 @@ function getSelectOptions({ start, end }: { start?: string; end?: string }) {
   }
 
   // Less than one week
-  else if (dateDiff <= 7) {
+  if (dateDiff <= 7) {
     return [aWeekAgoOption];
   }
 
   // above one week
-  else if (dateDiff > 7) {
-    return [prevPeriodOption];
-  }
+  return [prevPeriodOption];
 }
 
 export function TimeComparison() {
