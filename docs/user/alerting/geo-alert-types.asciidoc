@@ -89,7 +89,7 @@ Index (Entity):: This clause requires an *index or index pattern*, a *time field
 By:: This clause specifies the field to be used in the previously provided
 *index or index pattern* for tracking Entities. An entity is a `text`
 or `number` field that consistently identifies the entity to be tracked. 
-When Entity:: This clause specifies which crossing option should be tracked. The values
+When Entity:: This clause specifies which crossing option to track. The values
 *Entered*, *Exited*, and *Crossed* can be selected to indicate which crossing conditions
 should trigger an alert. *Entered* alerts on entry into a boundary, *Exited* alerts on exit
 from a boundary, and *Crossed* alerts on all boundary crossings whether they be entrances
