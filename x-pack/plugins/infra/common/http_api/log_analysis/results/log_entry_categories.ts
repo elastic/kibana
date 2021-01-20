@@ -30,6 +30,23 @@ export type LogEntryCategoriesHistogramParameters = rt.TypeOf<
   typeof logEntryCategoriesHistogramParametersRT
 >;
 
+const sortOptionsRT = rt.keyof({
+  maximumAnomalyScore: null,
+  logEntryCount: null,
+});
+
+const sortDirectionsRT = rt.keyof({
+  asc: null,
+  desc: null,
+});
+
+const categorySortRT = rt.type({
+  field: sortOptionsRT,
+  direction: sortDirectionsRT,
+});
+
+export type CategorySort = rt.TypeOf<typeof categorySortRT>;
+
 export const getLogEntryCategoriesRequestPayloadRT = rt.type({
   data: rt.intersection([
     rt.type({
@@ -41,6 +58,8 @@ export const getLogEntryCategoriesRequestPayloadRT = rt.type({
       timeRange: timeRangeRT,
       // a list of histograms to create
       histograms: rt.array(logEntryCategoriesHistogramParametersRT),
+      // the criteria to the categories by
+      sort: categorySortRT,
     }),
     rt.partial({
       // the datasets to filter for (optional, unfiltered if not present)

@@ -11,3 +11,7 @@ export const mockHttpValues = {
   errorConnecting: false,
   readOnlyMode: false,
 };
+
+jest.mock('../shared/http', () => ({
+  HttpLogic: { values: mockHttpValues },
+}));

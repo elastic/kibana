@@ -6,7 +6,7 @@
 
 import { handleActions, Action } from 'redux-actions';
 import { PingsResponse } from '../../../common/runtime_types';
-import { getPings, getPingsSuccess, getPingsFail } from '../actions';
+import { clearPings, getPings, getPingsSuccess, getPingsFail } from '../actions';
 
 export interface PingListState {
   pingList: PingsResponse;
@@ -26,6 +26,10 @@ type PingListPayload = PingsResponse & Error;
 
 export const pingListReducer = handleActions<PingListState, PingListPayload>(
   {
+    [String(clearPings)]: (state) => ({
+      ...state,
+      ...initialState,
+    }),
     [String(getPings)]: (state) => ({
       ...state,
       loading: true,
