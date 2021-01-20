@@ -40,36 +40,39 @@ function getSelectOptions({ start, end }: { start?: string; end?: string }) {
   const momentEnd = moment(end);
   const dateDiff = getDateDifference(momentStart, momentEnd, 'days');
 
-  const selectOptions = [];
+  const yesterdayOption = {
+    value: 'yesterday',
+    text: i18n.translate('xpack.apm.timeComparison.select.yesterday', {
+      defaultMessage: 'Yesterday',
+    }),
+  };
 
-  // shows Yesterday when date diff is less than 1 day
+  const aWeekAgoOption = {
+    value: 'week',
+    text: i18n.translate('xpack.apm.timeComparison.select.weekAgo', {
+      defaultMessage: 'A week ago',
+    }),
+  };
+
+  const prevPeriodOption = {
+    value: 'previousPeriod',
+    text: formatPreviousPeriodDates({ momentStart, momentEnd }),
+  };
+
+  // Less than one day
   if (dateDiff < 1) {
-    selectOptions.push({
-      value: 'yesterday',
-      text: i18n.translate('xpack.apm.timeComparison.select.yesterday', {
-        defaultMessage: 'Yesterday',
-      }),
-    });
+    return [yesterdayOption, aWeekAgoOption];
   }
 
-  // shows A week ago when date diff is less than or equals to 7 day
-  if (dateDiff <= 7) {
-    selectOptions.push({
-      value: 'week',
-      text: i18n.translate('xpack.apm.timeComparison.select.weekAgo', {
-        defaultMessage: 'A week ago',
-      }),
-    });
+  // Less than one week
+  else if (dateDiff <= 7) {
+    return [aWeekAgoOption];
   }
 
-  // shows previous period when date diff is greater than 7 days
-  if (dateDiff > 7) {
-    selectOptions.push({
-      value: 'previousPeriod',
-      text: formatPreviousPeriodDates({ momentStart, momentEnd }),
-    });
+  // above one week
+  else if (dateDiff > 7) {
+    return [prevPeriodOption];
   }
-  return selectOptions;
 }
 
 export function TimeComparison() {
