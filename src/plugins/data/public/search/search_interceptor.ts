@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, memoize } from 'lodash';
+import { memoize } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -36,7 +36,11 @@ import {
   getHttpError,
 } from './errors';
 import { toMountPoint } from '../../../kibana_react/public';
-import { AbortError, getCombinedAbortSignal } from '../../../kibana_utils/public';
+import {
+  AbortError,
+  getCombinedAbortSignal,
+  KibanaServerError,
+} from '../../../kibana_utils/public';
 import { ISessionService } from './session';
 
 export interface SearchInterceptorDeps {
@@ -99,11 +103,11 @@ export class SearchInterceptor {
    * @internal
    */
   protected handleSearchError(
-    e: Record<string, any> | AbortError,
+    e: KibanaServerError | AbortError,
     timeoutSignal: AbortSignal,
     options?: ISearchOptions
   ): Error {
-    if (timeoutSignal.aborted || get(e, 'message') === 'Request timed out') {
+    if (timeoutSignal.aborted || e.message === 'Request timed out') {
       // Handle a client or a server side timeout
       const err = new SearchTimeoutError(e, this.getTimeoutMode());
 
@@ -127,6 +131,7 @@ export class SearchInterceptor {
 
   /**
    * @internal
+   * @throws `AbortError` | Object
    */
   protected runSearch(
     request: IKibanaSearchRequest,
@@ -249,7 +254,7 @@ export class SearchInterceptor {
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
       return from(this.runSearch(request, { ...options, abortSignal: combinedSignal })).pipe(
-        catchError((e: Record<string, any> | AbortError) => {
+        catchError((e: Error | AbortError) => {
           return throwError(this.handleSearchError(e, timeoutSignal, options));
         }),
         finalize(() => {

@@ -22,11 +22,14 @@ import { coreMock } from '../../../../core/public/mocks';
 import { IEsSearchRequest } from '../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '../../../kibana_utils/public';
-import { SearchTimeoutError, PainlessError, TimeoutErrorMode } from './errors';
+import { SearchTimeoutError, PainlessError, TimeoutErrorMode, EsError } from './errors';
 import { searchServiceMock } from './mocks';
 import { ISearchStart, ISessionService } from '.';
 import { bfetchPluginMock } from '../../../bfetch/public/mocks';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
+
+import * as searchPhaseException from '../../common/search/test_data/search_phase_execution_exception.json';
+import * as resourceNotFoundException from '../../common/search/test_data/resource_not_found_exception.json';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
@@ -75,14 +78,8 @@ describe('SearchInterceptor', () => {
       searchInterceptor.showError(
         new PainlessError({
           statusCode: 400,
-          message: '',
-          attributes: {
-            error: {
-              failed_shards: {
-                reason: 'bananas',
-              },
-            },
-          } as any,
+          message: 'search_phase_execution_exception',
+          attributes: searchPhaseException.error,
         })
       );
       expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
@@ -242,22 +239,9 @@ describe('SearchInterceptor', () => {
 
       test('Should throw Painless error on server error with OSS format', async () => {
         const mockResponse: any = {
-          statusCode: 500,
+          statusCode: 400,
           message: 'search_phase_execution_exception',
-          attributes: {
-            error: {
-              root_cause: 'this is the problem',
-              failed_shards: [
-                {
-                  reason: {
-                    lang: 'painless',
-                    script_stack: ['a', 'b'],
-                    reason: 'banana',
-                  },
-                },
-              ],
-            },
-          },
+          attributes: searchPhaseException.error,
         };
         fetchMock.mockRejectedValueOnce(mockResponse);
         const mockRequest: IEsSearchRequest = {
@@ -265,6 +249,20 @@ describe('SearchInterceptor', () => {
         };
         const response = searchInterceptor.search(mockRequest);
         await expect(response.toPromise()).rejects.toThrow(PainlessError);
+      });
+
+      test('Should throw ES error on ES server error', async () => {
+        const mockResponse: any = {
+          statusCode: 400,
+          message: 'resource_not_found_exception',
+          attributes: resourceNotFoundException.error,
+        };
+        fetchMock.mockRejectedValueOnce(mockResponse);
+        const mockRequest: IEsSearchRequest = {
+          params: {},
+        };
+        const response = searchInterceptor.search(mockRequest);
+        await expect(response.toPromise()).rejects.toThrow(EsError);
       });
 
       test('Observable should fail if user aborts (test merged signal)', async () => {
