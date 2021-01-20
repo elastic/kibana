@@ -86,6 +86,22 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         })}`,
       ],
     },
+    security: {
+      roles: {
+        alerts_and_actions_role: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
+                stackAlerts: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+      },
+      defaultRoles: ['superuser'],
+    },
   };
 
   return returnedObject;
