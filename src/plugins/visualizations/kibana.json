@@ -12,5 +12,6 @@
     "savedObjects"
   ],
   "optionalPlugins": ["usageCollection"],
-  "requiredBundles": ["kibanaUtils", "discover"]
+  "requiredBundles": ["kibanaUtils", "discover"],
+  "extraPublicDirs": ["common/constants"]
 }

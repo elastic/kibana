@@ -8,4 +8,3 @@
 
 export const DIMMING_OPACITY_SETTING = 'visualization:dimmingOpacity';
 export const HEATMAP_MAX_BUCKETS_SETTING = 'visualization:heatmap:maxBuckets';
-export const LEGACY_CHARTS_LIBRARY = 'visualization:visualize:legacyChartsLibrary';

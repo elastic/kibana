@@ -22,5 +22,3 @@ export type ChartType = $Values<typeof ChartType>;
  * Type of xy visualizations
  */
 export type XyVisType = ChartType | 'horizontal_bar';
-
-export const LEGACY_CHARTS_LIBRARY = 'visualization:visualize:legacyChartsLibrary';

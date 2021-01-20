@@ -25,7 +25,7 @@ import {
   setTrackUiMetric,
 } from './services';
 import { visTypesDefinitions } from './vis_types';
-import { LEGACY_CHARTS_LIBRARY } from '../common';
+import { LEGACY_CHARTS_LIBRARY } from '../../visualizations/common/constants';
 import { xyVisRenderer } from './vis_renderer';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

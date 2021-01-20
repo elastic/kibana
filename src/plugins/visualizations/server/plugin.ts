@@ -18,7 +18,7 @@ import {
   Logger,
 } from '../../../core/server';
 
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
+import { VISUALIZE_ENABLE_LABS_SETTING, LEGACY_CHARTS_LIBRARY } from '../common/constants';
 
 import { visualizationSavedObjectType } from './saved_objects';
 
@@ -50,6 +50,26 @@ export class VisualizationsPlugin
           defaultMessage: `Allows users to create, view, and edit experimental visualizations. If disabled,
             only visualizations that are considered production-ready are available to the user.`,
         }),
+        category: ['visualization'],
+        schema: schema.boolean(),
+      },
+      // TODO: Remove this when vis_type_vislib is removed
+      // https://github.com/elastic/kibana/issues/56143
+      [LEGACY_CHARTS_LIBRARY]: {
+        name: i18n.translate(
+          'visTypeVislib.advancedSettings.visualization.legacyChartsLibrary.name',
+          {
+            defaultMessage: 'Legacy charts library',
+          }
+        ),
+        value: false,
+        description: i18n.translate(
+          'visTypeVislib.advancedSettings.visualization.legacyChartsLibrary.description',
+          {
+            defaultMessage:
+              'Enables legacy charts library for area, line and bar charts in visualize. Currently, only legacy charts library supports split chart aggregation.',
+          }
+        ),
         category: ['visualization'],
         schema: schema.boolean(),
       },
