@@ -45,7 +45,6 @@ export function defineChangeUserPasswordRoutes({
       const options = isUserChangingOwnPassword
         ? {
             headers: {
-              ...request.headers,
               authorization: new HTTPAuthorizationHeader(
                 'Basic',
                 new BasicHTTPAuthorizationHeaderCredentials(
