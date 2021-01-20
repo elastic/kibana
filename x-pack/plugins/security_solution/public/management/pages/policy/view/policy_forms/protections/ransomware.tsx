@@ -37,6 +37,7 @@ import { policyConfig } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 import { popupVersionsMap } from './popup_options_to_versions';
+import { AppAction } from '../../../../../../common/store/actions';
 
 const ProtectionRadioGroup = styled.div`
   display: flex;
@@ -48,47 +49,49 @@ const ProtectionRadioGroup = styled.div`
 const OSes: Immutable<RansomwareProtectionOSes[]> = [OS.windows, OS.mac];
 const protection = 'ransomware';
 
-const ProtectionRadio = React.memo(({ id, label }: { id: ProtectionModes; label: string }) => {
-  const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
-  const dispatch = useDispatch();
-  const radioButtonId = useMemo(() => htmlIdGenerator()(), []);
-  // currently just taking windows.ransomware, but both windows.ransomware and mac.ransomware should be the same value
-  const selected = policyDetailsConfig && policyDetailsConfig.windows.ransomware.mode;
+const ProtectionRadio = React.memo(
+  ({ protectionMode, label }: { protectionMode: ProtectionModes; label: string }) => {
+    const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
+    const dispatch = useDispatch<(action: AppAction) => void>();
+    const radioButtonId = useMemo(() => htmlIdGenerator()(), []);
+    // currently just taking windows.ransomware, but both windows.ransomware and mac.ransomware should be the same value
+    const selected = policyDetailsConfig && policyDetailsConfig.windows.ransomware.mode;
 
-  const handleRadioChange = useCallback(() => {
-    if (policyDetailsConfig) {
-      const newPayload = cloneDeep(policyDetailsConfig);
-      for (const os of OSes) {
-        newPayload[os][protection].mode = id;
-        if (id === ProtectionModes.prevent) {
-          newPayload[os].popup[protection].enabled = true;
-        } else {
-          newPayload[os].popup[protection].enabled = false;
+    const handleRadioChange = useCallback(() => {
+      if (policyDetailsConfig) {
+        const newPayload = cloneDeep(policyDetailsConfig);
+        for (const os of OSes) {
+          newPayload[os][protection].mode = protectionMode;
+          if (protectionMode === ProtectionModes.prevent) {
+            newPayload[os].popup[protection].enabled = true;
+          } else {
+            newPayload[os].popup[protection].enabled = false;
+          }
         }
+        dispatch({
+          type: 'userChangedPolicyConfig',
+          payload: { policyConfig: newPayload },
+        });
       }
-      dispatch({
-        type: 'userChangedPolicyConfig',
-        payload: { policyConfig: newPayload },
-      });
-    }
-  }, [dispatch, id, policyDetailsConfig]);
+    }, [dispatch, protectionMode, policyDetailsConfig]);
 
-  /**
-   *  Passing an arbitrary id because EuiRadio
-   *  requires an id if label is passed
-   */
+    /**
+     *  Passing an arbitrary id because EuiRadio
+     *  requires an id if label is passed
+     */
 
-  return (
-    <EuiRadio
-      className="policyDetailsProtectionRadio"
-      label={label}
-      id={radioButtonId}
-      checked={selected === id}
-      onChange={handleRadioChange}
-      disabled={selected === ProtectionModes.off}
-    />
-  );
-});
+    return (
+      <EuiRadio
+        className="policyDetailsProtectionRadio"
+        label={label}
+        id={radioButtonId}
+        checked={selected === protectionMode}
+        onChange={handleRadioChange}
+        disabled={selected === ProtectionModes.off}
+      />
+    );
+  }
+);
 
 ProtectionRadio.displayName = 'ProtectionRadio';
 
@@ -116,7 +119,7 @@ const SupportedVersionNotice = ({ optionName }: { optionName: string }) => {
  */
 export const Ransomware = React.memo(() => {
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<(action: AppAction) => void>();
   // currently just taking windows.ransomware, but both windows.ransomware and mac.ransomware should be the same value
   const selected = policyDetailsConfig && policyDetailsConfig.windows.ransomware.mode;
   const userNotificationSelected =
@@ -219,7 +222,7 @@ export const Ransomware = React.memo(() => {
           {radios.map((radio) => {
             return (
               <ProtectionRadio
-                id={radio.id}
+                protectionMode={radio.id}
                 key={radio.protection + radio.id}
                 label={radio.label}
               />
@@ -318,7 +321,7 @@ export const Ransomware = React.memo(() => {
           'xpack.securitySolution.endpoint.policy.details.ransomwareProtectionsEnabled',
           {
             defaultMessage:
-              'Ransomware Protections {mode, select, true {Enabled} false {Disabled}}',
+              'Ransomware protections {mode, select, true {enabled} false {disabled}}',
             values: {
               mode: selected !== ProtectionModes.off,
             },

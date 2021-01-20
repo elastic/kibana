@@ -9,7 +9,7 @@ import { isAtLeast } from './license';
 import { PolicyConfig } from '../endpoint/types';
 import {
   DefaultMalwareMessage,
-  factoryWithoutPaidFeatures,
+  policyFactoryWithoutPaidFeatures,
 } from '../endpoint/models/policy_config';
 
 /**
@@ -24,7 +24,7 @@ export const isEndpointPolicyValidForLicense = (
     return true; // currently, platinum allows all features
   }
 
-  const defaults = factoryWithoutPaidFeatures();
+  const defaults = policyFactoryWithoutPaidFeatures();
 
   // only platinum or higher may disable malware notification
   if (
@@ -84,7 +84,7 @@ export const unsetPolicyFeaturesAboveLicenseLevel = (
     return policy;
   }
 
-  const defaults = factoryWithoutPaidFeatures();
+  const defaults = policyFactoryWithoutPaidFeatures();
   // set any license-gated features back to the defaults
   policy.windows.popup.malware.enabled = defaults.windows.popup.malware.enabled;
   policy.mac.popup.malware.enabled = defaults.mac.popup.malware.enabled;

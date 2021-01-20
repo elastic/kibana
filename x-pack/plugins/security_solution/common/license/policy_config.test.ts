@@ -8,7 +8,7 @@ import {
   isEndpointPolicyValidForLicense,
   unsetPolicyFeaturesAboveLicenseLevel,
 } from './policy_config';
-import { DefaultMalwareMessage, factory } from '../endpoint/models/policy_config';
+import { DefaultMalwareMessage, policyFactory } from '../endpoint/models/policy_config';
 import { licenseMock } from '../../../licensing/common/licensing.mock';
 
 describe('policy_config and licenses', () => {
@@ -18,13 +18,13 @@ describe('policy_config and licenses', () => {
 
   describe('isEndpointPolicyValidForLicense', () => {
     it('allows malware notification to be disabled with a Platinum license', () => {
-      const policy = factory();
+      const policy = policyFactory();
       policy.windows.popup.malware.enabled = false; // make policy change
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
     });
     it('blocks windows malware notification changes below Platinum licenses', () => {
-      const policy = factory();
+      const policy = policyFactory();
       policy.windows.popup.malware.enabled = false; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -34,7 +34,7 @@ describe('policy_config and licenses', () => {
     });
 
     it('blocks mac malware notification changes below Platinum licenses', () => {
-      const policy = factory();
+      const policy = policyFactory();
       policy.mac.popup.malware.enabled = false; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -44,13 +44,13 @@ describe('policy_config and licenses', () => {
     });
 
     it('allows malware notification message changes with a Platinum license', () => {
-      const policy = factory();
+      const policy = policyFactory();
       policy.windows.popup.malware.message = 'BOOM'; // make policy change
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
     });
     it('blocks windows malware notification message changes below Platinum licenses', () => {
-      const policy = factory();
+      const policy = policyFactory();
       policy.windows.popup.malware.message = 'BOOM'; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -59,7 +59,7 @@ describe('policy_config and licenses', () => {
       expect(valid).toBeFalsy();
     });
     it('blocks mac malware notification message changes below Platinum licenses', () => {
-      const policy = factory();
+      const policy = policyFactory();
       policy.mac.popup.malware.message = 'BOOM'; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -69,7 +69,7 @@ describe('policy_config and licenses', () => {
     });
 
     it('allows default policyConfig with Basic', () => {
-      const policy = factory();
+      const policy = policyFactory();
       const valid = isEndpointPolicyValidForLicense(policy, Basic);
       expect(valid).toBeTruthy();
     });
@@ -77,7 +77,7 @@ describe('policy_config and licenses', () => {
 
   describe('unsetPolicyFeaturesAboveLicenseLevel', () => {
     it('does not change any fields with a Platinum license', () => {
-      const policy = factory();
+      const policy = policyFactory();
       const popupMessage = 'WOOP WOOP';
       policy.windows.popup.malware.message = popupMessage;
       policy.mac.popup.malware.message = popupMessage;
@@ -89,12 +89,17 @@ describe('policy_config and licenses', () => {
       expect(retPolicy.mac.popup.malware.message).toEqual(popupMessage);
     });
     it('resets Platinum-paid fields for lower license tiers', () => {
-      const defaults = factory(); // reference
-      const policy = factory(); // what we will modify, and should be reset
+      const defaults = policyFactory(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
       const popupMessage = 'WOOP WOOP';
       policy.windows.popup.malware.message = popupMessage;
       policy.mac.popup.malware.message = popupMessage;
       policy.windows.popup.malware.enabled = false;
+
+      policy.windows.popup.ransomware.message = popupMessage;
+      policy.mac.popup.ransomware.message = popupMessage;
+      policy.windows.popup.ransomware.enabled = false;
+      policy.mac.popup.ransomware.enabled = false;
 
       const retPolicy = unsetPolicyFeaturesAboveLicenseLevel(policy, Gold);
       expect(retPolicy.windows.popup.malware.enabled).toEqual(

@@ -9,7 +9,7 @@ import { PolicyConfig, ProtectionModes } from '../types';
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
  */
-export const factory = (): PolicyConfig => {
+export const policyFactory = (): PolicyConfig => {
   return {
     windows: {
       events: {
@@ -86,7 +86,7 @@ export const factory = (): PolicyConfig => {
 /**
  * Return a new default `PolicyConfig` for gold and below license
  */
-export const factoryWithoutPaidFeatures = (): PolicyConfig => {
+export const policyFactoryWithoutPaidFeatures = (): PolicyConfig => {
   return {
     windows: {
       events: {

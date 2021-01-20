@@ -16,7 +16,7 @@ import {
   PolicyData,
   UIPolicyConfig,
 } from '../../../../../../common/endpoint/types';
-import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
+import { policyFactory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
 import { MANAGEMENT_ROUTING_POLICY_DETAILS_PATH } from '../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 

@@ -10,8 +10,8 @@ import { ExternalCallback } from '../../../fleet/server';
 import { KibanaRequest, Logger, RequestHandlerContext } from '../../../../../src/core/server';
 import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common/types/models';
 import {
-  factory as policyConfigFactory,
-  factoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
+  policyFactory as policyConfigFactory,
+  policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
 } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
 import { ManifestManager } from './services/artifacts';
