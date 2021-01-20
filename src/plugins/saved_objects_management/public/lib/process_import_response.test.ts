@@ -232,7 +232,7 @@ describe('processImportResponse()', () => {
         {
           type: 'action_required',
           message: 'foo',
-          actionUrl: '/somewhere',
+          actionPath: '/somewhere',
         },
       ],
     };

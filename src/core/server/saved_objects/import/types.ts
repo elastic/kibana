@@ -202,7 +202,7 @@ export interface SavedObjectsImportActionRequiredWarning {
   /** The translated message to display to the user. */
   message: string;
   /** The path (without the basePath) that the user should be redirect to to address this warning. */
-  actionUrl: string;
+  actionPath: string;
   /** An optional label to use for the link button. If unspecified, a default label will be used. */
   buttonLabel?: string;
 }

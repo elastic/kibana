@@ -50,7 +50,7 @@ export class SavedObjectHooksPlugin implements Plugin {
               {
                 type: 'action_required',
                 message: 'warning for test_import_warning_2',
-                actionUrl: '/some/url',
+                actionPath: '/some/url',
               },
             ],
           };

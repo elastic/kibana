@@ -167,7 +167,7 @@ describe('ImportSummary', () => {
         {
           type: 'action_required',
           message: 'bar',
-          actionUrl: '/app/lost',
+          actionPath: '/app/lost',
         },
       ],
     });

@@ -35,7 +35,7 @@ export class Plugin() {
                   {
                     type: 'action_required',
                     message: 'Objects need to be manually enabled after import',
-                    actionUrl: '/app/my-app/require-activation',
+                    actionPath: '/app/my-app/require-activation',
                   },
                 ]
              }

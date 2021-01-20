@@ -2475,7 +2475,7 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
 
 // @public
 export interface SavedObjectsImportActionRequiredWarning {
-    actionUrl: string;
+    actionPath: string;
     buttonLabel?: string;
     message: string;
     // (undocumented)
