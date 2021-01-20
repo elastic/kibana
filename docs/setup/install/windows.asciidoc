@@ -42,10 +42,6 @@ terminal window, `CD` to the `$KIBANA_HOME` directory, for instance:
 CD c:\kibana-{version}-windows-x86_64
 ----------------------------
 
-Alternatively, you can download the following package, which contains only
-features that are available under the Apache 2.0 license:
-https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-windows-x86_64.zip
-
 endif::[]
 
 [[windows-running]]
