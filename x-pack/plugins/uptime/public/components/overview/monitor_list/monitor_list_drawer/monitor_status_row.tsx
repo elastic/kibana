@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiSpacer } from '@elastic/eui';
 import { UNNAMED_LOCATION, STATUS } from '../../../../../common/constants';
 import { getHealthMessage } from '../columns/monitor_status_column';
@@ -35,7 +36,14 @@ export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProp
     <span>
       <EuiBadge color={color}>{getHealthMessage(status)}</EuiBadge>
       <EuiSpacer size="xs" />
-      {locations || '--'}
+      <span
+        aria-label={i18n.translate('xpack.uptime.monitorList.drawer.statusRowLocationList', {
+          defaultMessage: 'A list of locations with "{status}" status when last checked.',
+          values: { status },
+        })}
+      >
+        {locations || '--'}
+      </span>
       <EuiSpacer size="xs" />
     </span>
   );
