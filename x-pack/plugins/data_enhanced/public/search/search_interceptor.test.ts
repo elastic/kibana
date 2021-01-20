@@ -192,7 +192,7 @@ describe('EnhancedSearchInterceptor', () => {
       await timeTravel(10);
 
       expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
+      expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
     });
 
     test('should abort on user abort', async () => {
@@ -262,7 +262,7 @@ describe('EnhancedSearchInterceptor', () => {
       expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
 
       expect(fetchMock).toHaveBeenCalledTimes(2);
-      expect(mockCoreSetup.http.delete).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
     });
 
     test('should not DELETE a running async search on async timeout prior to first response', async () => {
@@ -326,7 +326,7 @@ describe('EnhancedSearchInterceptor', () => {
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0]).toBeInstanceOf(SearchTimeoutError);
       expect(fetchMock).toHaveBeenCalledTimes(2);
-      expect(mockCoreSetup.http.delete).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
     });
 
     test('should DELETE a running async search on async timeout on error from fetch', async () => {
@@ -343,8 +343,6 @@ describe('EnhancedSearchInterceptor', () => {
           time: 10,
           value: {
             error: 'oh no',
-            isPartial: false,
-            isRunning: false,
             id: 1,
           },
           isError: true,
@@ -368,7 +366,7 @@ describe('EnhancedSearchInterceptor', () => {
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0]).toBe(responses[1].value);
       expect(fetchMock).toHaveBeenCalledTimes(2);
-      expect(mockCoreSetup.http.delete).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
     });
 
     test('should NOT DELETE a running SAVED async search on abort', async () => {
