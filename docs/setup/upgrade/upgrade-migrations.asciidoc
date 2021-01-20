@@ -21,7 +21,7 @@ Saved objects are stored in two indices:
  
 The index aliases `.kibana` and `.kibana_task_manager` will always point to the most up-to-date version indices.
 
-The first time a newer {kib} starts, it will first perform an upgrade migration before starting plugins or serving HTTP traffic.
+The first time a newer {kib} starts, it will first perform an upgrade migration before starting plugins or serving HTTP traffic. To prevent losing acknowledged writes old nodes should be shutdown before starting the upgrade. To reduce the likelyhood of old nodes losing acknowledged writes, {kib} 7.12+ will add a write block to the outdated index.
 
 When several {kib} instances are connected to the same {es} cluster and upgraded, all {kib} instances will participate in the upgrade migration in parallel.
 
