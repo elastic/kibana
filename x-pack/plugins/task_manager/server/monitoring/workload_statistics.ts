@@ -9,6 +9,7 @@ import { mergeMap, map, filter, switchMap, catchError } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { keyBy, mapValues } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
 import { AggregationResultOf } from '../../../../typings/elasticsearch';
@@ -133,7 +134,11 @@ export function createWorkloadAggregator(
                   field: 'task.runAt',
                   ranges: [
                     {
+                      // The `AggregationRange` type only supports `double` for `from` and `to` but it can be a string too
+                      // for time based ranges
+                      // @ts-expect-error
                       from: `now`,
+                      // @ts-expect-error
                       to: `now+${asInterval(scheduleDensityBuckets * pollInterval)}`,
                     },
                   ],
@@ -169,19 +174,11 @@ export function createWorkloadAggregator(
     map((result) => {
       const {
         aggregations,
-        hits: {
-          total: { value: count },
-        },
+        hits: { total },
       } = result;
+      const count = typeof total === 'number' ? total : total.value;
 
-      if (
-        !(
-          aggregations?.taskType &&
-          aggregations?.schedule &&
-          aggregations?.idleTasks?.overdue &&
-          aggregations?.idleTasks?.scheduleDensity
-        )
-      ) {
+      if (!hasAggregations(aggregations)) {
         throw new Error(`Invalid workload: ${JSON.stringify(result)}`);
       }
 
@@ -343,4 +340,85 @@ export function summarizeWorkloadStat(
     value: workloadStats,
     status: HealthStatus.OK,
   };
+}
+
+function hasAggregations(
+  aggregations?: Record<string, estypes.Aggregate>
+): aggregations is WorkloadAggregationResponse {
+  return !!(
+    aggregations?.taskType &&
+    aggregations?.schedule &&
+    (aggregations?.idleTasks as IdleTasksAggregation)?.overdue &&
+    (aggregations?.idleTasks as IdleTasksAggregation)?.scheduleDensity
+  );
+}
+export interface WorkloadAggregationResponse {
+  taskType: TaskTypeAggregation;
+  schedule: ScheduleAggregation;
+  idleTasks: IdleTasksAggregation;
+  [otherAggs: string]: estypes.Aggregate;
+}
+export interface TaskTypeAggregation extends estypes.FiltersAggregate {
+  buckets: Array<{
+    doc_count: number;
+    key: string | number;
+    status: {
+      buckets: Array<{
+        doc_count: number;
+        key: string | number;
+      }>;
+      doc_count_error_upper_bound?: number | undefined;
+      sum_other_doc_count?: number | undefined;
+    };
+  }>;
+  doc_count_error_upper_bound?: number | undefined;
+  sum_other_doc_count?: number | undefined;
+}
+export interface ScheduleAggregation extends estypes.FiltersAggregate {
+  buckets: Array<{
+    doc_count: number;
+    key: string | number;
+  }>;
+  doc_count_error_upper_bound?: number | undefined;
+  sum_other_doc_count?: number | undefined;
+}
+
+export type ScheduleDensityHistogram = DateRangeBucket & {
+  histogram: {
+    buckets: Array<
+      DateHistogramBucket & {
+        interval: {
+          buckets: Array<{
+            doc_count: number;
+            key: string | number;
+          }>;
+          doc_count_error_upper_bound?: number | undefined;
+          sum_other_doc_count?: number | undefined;
+        };
+      }
+    >;
+  };
+};
+export interface IdleTasksAggregation extends estypes.FiltersAggregate {
+  doc_count: number;
+  scheduleDensity: {
+    buckets: ScheduleDensityHistogram[];
+  };
+  overdue: {
+    doc_count: number;
+  };
+}
+
+interface DateHistogramBucket {
+  doc_count: number;
+  key: number;
+  key_as_string: string;
+}
+interface DateRangeBucket {
+  key: string;
+  to?: number;
+  from?: number;
+  to_as_string?: string;
+  from_as_string?: string;
+  doc_count: number;
 }

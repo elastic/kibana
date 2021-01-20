@@ -8,6 +8,7 @@ import _ from 'lodash';
 import uuid from 'uuid';
 import { filter, take, first } from 'rxjs/operators';
 import { Option, some, none } from 'fp-ts/lib/Option';
+import { estypes } from '@elastic/elasticsearch';
 
 import {
   TaskInstance,
@@ -28,10 +29,8 @@ import {
 import { asTaskClaimEvent, TaskEvent } from './task_events';
 import { asOk, asErr } from './lib/result_type';
 import { TaskTypeDictionary } from './task_type_dictionary';
-import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
-import { Search, UpdateByQuery } from '@elastic/elasticsearch/api/requestParams';
-import { BoolClauseWithAnyCondition, TermFilter } from './queries/query_clauses';
 import { mockLogger } from './test_utils';
+import { ScriptBasedSortClause } from './queries/query_clauses';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
@@ -64,6 +63,21 @@ taskDefinitions.registerTaskDefinitions({
     createTaskRunner: jest.fn(),
   },
 });
+
+type MockedUpdateByQueryRequest = Omit<estypes.UpdateByQueryRequest, 'body'> & {
+  body: {
+    max_docs: number;
+    query: estypes.QueryContainer;
+    script: estypes.Script;
+    sort: ScriptBasedSortClause[];
+  };
+};
+type MockedSearchRequest = Omit<estypes.SearchRequest, 'body'> & {
+  body: estypes.SearchRequest['body'] & {
+    query: estypes.QueryContainer;
+    sort: ScriptBasedSortClause[];
+  };
+};
 
 describe('TaskStore', () => {
   describe('schedule', () => {
@@ -214,8 +228,8 @@ describe('TaskStore', () => {
       });
     });
 
-    async function testFetch(opts?: SearchOpts, hits: unknown[] = []) {
-      esClient.search.mockResolvedValue(asApiResponse({ hits: { hits } }));
+    async function testFetch(opts?: SearchOpts, hits: Array<estypes.Hit<unknown>> = []) {
+      esClient.search.mockResolvedValue(asApiResponse({ hits: { hits, total: hits.length } }));
 
       const result = await store.fetch(opts);
 
@@ -271,14 +285,14 @@ describe('TaskStore', () => {
       claimingOpts,
     }: {
       opts: Partial<StoreOpts>;
-      hits?: unknown[];
+      hits?: Array<estypes.Hit<unknown>>;
       claimingOpts: OwnershipClaimingOpts;
     }) {
       const versionConflicts = 2;
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.search.mockResolvedValue(asApiResponse({ hits: { hits } }));
+      esClient.search.mockResolvedValue(asApiResponse({ hits: { hits, total: hits.length } }));
       esClient.updateByQuery.mockResolvedValue(
-        asApiResponse({
+        asUpdateByQueryApiResponse({
           total: hits.length + versionConflicts,
           updated: hits.length,
           version_conflicts: versionConflicts,
@@ -298,24 +312,15 @@ describe('TaskStore', () => {
 
       const result = await store.claimAvailableTasks(claimingOpts);
 
-      expect(esClient.updateByQuery.mock.calls[0][0]).toMatchObject({
+      expect(esClient.updateByQuery.mock.calls[0][0].body).toMatchObject({
         max_docs: claimingOpts.size,
       });
       expect(esClient.search.mock.calls[0][0]).toMatchObject({ body: { size: claimingOpts.size } });
       return {
         result,
         args: {
-          search: esClient.search.mock.calls[0][0]! as Search<{
-            query: BoolClauseWithAnyCondition<TermFilter>;
-            size: number;
-            sort: string | string[];
-          }>,
-          updateByQuery: esClient.updateByQuery.mock.calls[0][0]! as UpdateByQuery<{
-            query: BoolClauseWithAnyCondition<TermFilter>;
-            size: number;
-            sort: string | string[];
-            script: object;
-          }>,
+          search: esClient.search.mock.calls[0][0]! as MockedSearchRequest,
+          updateByQuery: esClient.updateByQuery.mock.calls[0][0]! as MockedUpdateByQueryRequest,
         },
       };
     }
@@ -323,7 +328,7 @@ describe('TaskStore', () => {
     test('it returns normally with no tasks when the index does not exist.', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       esClient.updateByQuery.mockResolvedValue(
-        asApiResponse({
+        asUpdateByQueryApiResponse({
           total: 0,
           updated: 0,
         })
@@ -343,7 +348,9 @@ describe('TaskStore', () => {
       });
       expect(esClient.updateByQuery.mock.calls[0][0]).toMatchObject({
         ignore_unavailable: true,
-        max_docs: 10,
+        body: {
+          max_docs: 10,
+        },
       });
       expect(docs.length).toBe(0);
     });
@@ -679,8 +686,9 @@ if (doc['task.runAt'].size()!=0) {
       const taskManagerId = uuid.v1();
       const claimOwnershipUntil = new Date(Date.now());
       const runAt = new Date();
-      const tasks = [
+      const tasks: Array<estypes.Hit<unknown>> = [
         {
+          _index: `.kibana_task_manager`,
           _id: 'task:aaa',
           _source: {
             type: 'task',
@@ -703,6 +711,7 @@ if (doc['task.runAt'].size()!=0) {
         },
         {
           // this is invalid as it doesn't have the `type` prefix
+          _index: `.kibana_task_manager`,
           _id: 'bbb',
           _source: {
             type: 'task',
@@ -774,8 +783,9 @@ if (doc['task.runAt'].size()!=0) {
       const taskManagerId = uuid.v1();
       const claimOwnershipUntil = new Date(Date.now());
       const runAt = new Date();
-      const tasks = [
+      const tasks: Array<estypes.Hit<unknown>> = [
         {
+          _index: `.kibana_task_manager`,
           _id: 'task:aaa',
           _source: {
             type: 'task',
@@ -797,6 +807,7 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['a', 1],
         },
         {
+          _index: `.kibana_task_manager`,
           _id: 'task:bbb',
           _source: {
             type: 'task',
@@ -868,8 +879,9 @@ if (doc['task.runAt'].size()!=0) {
       const taskManagerId = uuid.v1();
       const claimOwnershipUntil = new Date(Date.now());
       const runAt = new Date();
-      const tasks = [
+      const tasks: Array<estypes.Hit<unknown>> = [
         {
+          _index: `.kibana_task_manager`,
           _id: 'task:aaa',
           _source: {
             type: 'task',
@@ -891,6 +903,7 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['a', 1],
         },
         {
+          _index: `.kibana_task_manager`,
           _id: 'task:bbb',
           _source: {
             type: 'task',
@@ -1313,8 +1326,9 @@ if (doc['task.runAt'].size()!=0) {
     function generateTasks() {
       const taskManagerId = uuid.v1();
       const runAt = new Date();
-      const tasks = [
+      const tasks: Array<estypes.Hit<unknown>> = [
         {
+          _index: `.kibana_task_manager`,
           _id: 'task:claimed-by-id',
           _source: {
             type: 'task',
@@ -1339,6 +1353,7 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['a', 1],
         },
         {
+          _index: `.kibana_task_manager`,
           _id: 'task:claimed-by-schedule',
           _source: {
             type: 'task',
@@ -1363,6 +1378,7 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['b', 2],
         },
         {
+          _index: `.kibana_task_manager`,
           _id: 'task:already-running',
           _source: {
             type: 'task',
@@ -1395,9 +1411,11 @@ if (doc['task.runAt'].size()!=0) {
       const { taskManagerId, runAt, tasks } = generateTasks();
 
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.search.mockResolvedValue(asApiResponse({ hits: { hits: tasks } }));
+      esClient.search.mockResolvedValue(
+        asApiResponse({ hits: { hits: tasks, total: tasks.length } })
+      );
       esClient.updateByQuery.mockResolvedValue(
-        asApiResponse({
+        asUpdateByQueryApiResponse({
           total: tasks.length,
           updated: tasks.length,
         })
@@ -1572,8 +1590,9 @@ if (doc['task.runAt'].size()!=0) {
   });
 });
 
-function generateFakeTasks(count: number = 1) {
+function generateFakeTasks(count: number = 1): Array<estypes.Hit<unknown>> {
   return _.times(count, (index) => ({
+    _index: `.kibana_task_manager`,
     _id: `task:id-${index}`,
     _source: {
       type: 'task',
@@ -1585,9 +1604,37 @@ function generateFakeTasks(count: number = 1) {
   }));
 }
 
-const asApiResponse = <T>(body: T): RequestEvent<T> =>
-  ({
-    body,
-  } as RequestEvent<T>);
+const asApiResponse = (body: Pick<estypes.SearchResponse, 'hits'>) =>
+  elasticsearchServiceMock.createSuccessTransportRequestPromise({
+    hits: body.hits,
+    took: 0,
+    timed_out: false,
+    _shards: {
+      failed: 0,
+      successful: body.hits.hits.length,
+      total: 0,
+    },
+  });
+
+const asUpdateByQueryApiResponse = (
+  body: Pick<Partial<estypes.UpdateByQueryResponse>, 'total' | 'updated' | 'version_conflicts'>
+) =>
+  elasticsearchServiceMock.createSuccessTransportRequestPromise({
+    batches: 0,
+    failures: [],
+    noops: 0,
+    requests_per_second: 0,
+    retries: {
+      bulk: 0,
+      search: 0,
+    },
+    task: '',
+    timed_out: false,
+    took: 0,
+    total: 0,
+    updated: 0,
+    version_conflicts: 0,
+    ...body,
+  });
 
 const randomId = () => `id-${_.random(1, 20)}`;

@@ -13,7 +13,7 @@ import { omit, difference, partition, map, defaults } from 'lodash';
 
 import { some, none } from 'fp-ts/lib/Option';
 
-import { SearchResponse, UpdateDocumentByQueryResponse } from 'elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import {
   SavedObject,
   SavedObjectsSerializer,
@@ -37,13 +37,11 @@ import {
 import { TaskClaim, asTaskClaimEvent } from './task_events';
 
 import {
-  asUpdateByQuery,
   shouldBeOneOf,
   mustBeAllOf,
   filterDownBy,
   asPinnedQuery,
   matchesClauses,
-  SortOptions,
 } from './queries/query_clauses';
 
 import {
@@ -56,8 +54,6 @@ import {
 } from './queries/mark_available_tasks_as_claimed';
 import { TaskTypeDictionary } from './task_type_dictionary';
 
-import { ESSearchResponse, ESSearchBody } from '../../../typings/elasticsearch';
-
 export interface StoreOpts {
   esClient: ElasticsearchClient;
   index: string;
@@ -69,18 +65,21 @@ export interface StoreOpts {
 }
 
 export interface SearchOpts {
-  sort?: string | object | object[];
-  query?: object;
+  search_after?: Array<number | string>;
   size?: number;
+  sort?: estypes.SearchRequest['sort'];
+  query?: estypes.QueryContainer;
   seq_no_primary_term?: boolean;
-  search_after?: unknown[];
 }
 
-export type AggregationOpts = Pick<Required<ESSearchBody>, 'aggs'> &
-  Pick<ESSearchBody, 'query' | 'size'>;
+export interface AggregationOpts {
+  aggs: Record<string, estypes.AggregationContainer>;
+  query?: estypes.QueryContainer;
+  size?: number;
+}
 
 export interface UpdateByQuerySearchOpts extends SearchOpts {
-  script?: object;
+  script?: estypes.Script;
 }
 
 export interface UpdateByQueryOpts extends SearchOpts {
@@ -281,14 +280,14 @@ export class TaskStore {
     // the score seems to favor newer documents rather than older documents, so
     // if there are not pinned tasks being queried, we do NOT want to sort by score
     // at all, just by runAt/retryAt.
-    const sort: SortOptions = [SortByRunAtAndRetryAt];
+    const sort: SearchOpts['sort'] = [SortByRunAtAndRetryAt];
     if (claimTasksById && claimTasksById.length) {
       sort.unshift('_score');
     }
 
     const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
     const result = await this.updateByQuery(
-      asUpdateByQuery({
+      {
         query: matchesClauses(
           mustBeAllOf(
             claimTasksById && claimTasksById.length
@@ -297,7 +296,7 @@ export class TaskStore {
           ),
           filterDownBy(InactiveTasks)
         ),
-        update: updateFieldsAndMarkAsFailed(
+        script: updateFieldsAndMarkAsFailed(
           {
             ownerId: this.taskManagerId,
             retryAt: claimOwnershipUntil,
@@ -306,8 +305,9 @@ export class TaskStore {
           registeredTaskTypes,
           taskMaxAttempts
         ),
+        seq_no_primary_term: true,
         sort,
-      }),
+      },
       {
         max_docs: size,
       }
@@ -331,7 +331,7 @@ export class TaskStore {
           ? asPinnedQuery(claimTasksById, claimedTasksQuery)
           : claimedTasksQuery,
       size,
-      sort: SortByRunAtAndRetryAt,
+      sort: [SortByRunAtAndRetryAt],
       seq_no_primary_term: true,
     });
 
@@ -485,7 +485,7 @@ export class TaskStore {
         body: {
           hits: { hits: tasks },
         },
-      } = await this.esClient.search<SearchResponse<SavedObjectsRawDoc['_source']>>({
+      } = await this.esClient.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
         body: {
@@ -496,7 +496,10 @@ export class TaskStore {
 
       return {
         docs: tasks
+          // There's an incompatability between the `_id` field on `estypes.Hit<SavedObjectsRawDocSource>` and `SavedObjectsRawDoc`
+          // @ts-expect-error
           .filter((doc) => this.serializer.isRawSavedObject(doc))
+          // @ts-expect-error
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
           .map(savedObjectToConcreteTaskInstance),
@@ -511,10 +514,8 @@ export class TaskStore {
     aggs,
     query,
     size = 0,
-  }: TSearchRequest): Promise<ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>> {
-    const { body } = await this.esClient.search<
-      ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>
-    >({
+  }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
+    const { body } = await this.esClient.search<ConcreteTaskInstance>({
       index: this.index,
       ignore_unavailable: true,
       body: ensureAggregationOnlyReturnsTaskObjects({
@@ -536,14 +537,14 @@ export class TaskStore {
       const {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         body: { total, updated, version_conflicts },
-      } = await this.esClient.updateByQuery<UpdateDocumentByQueryResponse>({
+      } = await this.esClient.updateByQuery({
         index: this.index,
         ignore_unavailable: true,
         refresh: true,
-        max_docs,
         conflicts: 'proceed',
         body: {
           ...opts,
+          max_docs,
           query,
         },
       });
