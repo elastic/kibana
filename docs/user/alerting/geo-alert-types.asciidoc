@@ -60,7 +60,7 @@ just more focused around activity when an entity exists within a shape.
 With recent advances in the alerting framework, most of the features
 available in Tracking threshold alerts can be replicated with just
 a little more work in Tracking containment alerts. The capabilities of Tracking
-threshold alerts may be deprecated and/or folded into Tracking containment alerts
+threshold alerts may be deprecated or folded into Tracking containment alerts
 in the future.
 ==================================================
 
