@@ -73,9 +73,9 @@ export class TopN extends Component {
     return {};
   };
 
-  static calcInnerBarDivStyles = (item, width, isPositive) => {
+  static calcInnerBarDivStyles = (color, width, isPositive) => {
     return {
-      backgroundColor: item.color,
+      backgroundColor: color,
       width: width + '%',
       float: isPositive ? 'left' : 'right',
     };
@@ -104,6 +104,21 @@ export class TopN extends Component {
       // For this it defaults to 0
       const width = 100 * (Math.abs(lastValue) / intervalLength) || 0;
 
+      const overwriteSeries = this.props.uiState
+        .get('vis.colors', [])
+        .filter((color) => color.id === item.id);
+      let finalColor = item.color;
+      let seriesName = item.label.toString();
+      if (item.labelFormatted) {
+        seriesName = labelDateFormatter(item.labelFormatted);
+      }
+      if (
+        overwriteSeries.length &&
+        Object.keys(overwriteSeries[0].overwrite).includes(seriesName)
+      ) {
+        finalColor = overwriteSeries[0].overwrite[seriesName];
+      }
+
       const styles = reactcss(
         {
           default: {
@@ -111,7 +126,7 @@ export class TopN extends Component {
               ...TopN.calcInnerBarStyles(renderMode, isPositiveValue),
             },
             innerBarValue: {
-              ...TopN.calcInnerBarDivStyles(item, width, isPositiveValue),
+              ...TopN.calcInnerBarDivStyles(finalColor, width, isPositiveValue),
             },
             label: {
               maxWidth: this.state.labelMaxWidth,

@@ -113,26 +113,33 @@ export const TimeSeries = ({
   }, [uiState]);
 
   const setColor = useCallback(
-    (newColor, seriesLabel, event) => {
+    (newColor, seriesLabel, seriesId, event) => {
       if (event.key && event.key !== keys.ENTER) {
         return;
       }
+      const seriesColors = uiState.get('vis.colors', []);
+      const colors = seriesColors.find(({ id }) => id === seriesId) || {};
 
-      const colors = uiState?.get('vis.colors') || {};
-      if (colors[seriesLabel] === newColor || !newColor) {
-        delete colors[seriesLabel];
-      } else {
+      if (Object.keys(colors).length === 0 && colors.constructor === Object) {
         colors[seriesLabel] = newColor;
+        seriesColors.push({ id: seriesId, overwrite: colors });
+      } else {
+        if (colors.overwrite[seriesLabel] === newColor || !newColor) {
+          delete colors.overwrite[seriesLabel];
+        } else {
+          colors.overwrite[seriesLabel] = newColor;
+        }
       }
 
       if (uiState?.set) {
         uiState.setSilent('vis.colors', null);
-        uiState.set('vis.colors', colors);
+        uiState.set('vis.colors', seriesColors);
         uiState.emit('colorChanged');
       }
     },
     [uiState]
   );
+  console.dir(series);
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
@@ -213,14 +220,17 @@ export const TimeSeries = ({
           const isStacked = stack !== STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
           // Only use color mapping if there is no color from the server
-          const overwriteColors = uiState.get ? uiState.get('vis.colors', {}) : {};
+          const overwriteSeries = uiState.get('vis.colors', []).filter((color) => color.id === id);
           let finalColor = color ?? colors.mappedColors.mapping[label];
           let seriesName = label.toString();
           if (labelFormatted) {
             seriesName = labelDateFormatter(labelFormatted);
           }
-          if (Object.keys(overwriteColors).includes(seriesName)) {
-            finalColor = overwriteColors[seriesName];
+          if (
+            overwriteSeries.length &&
+            Object.keys(overwriteSeries[0].overwrite).includes(seriesName)
+          ) {
+            finalColor = overwriteSeries[0].overwrite[seriesName];
           }
           if (bars?.show) {
             return (
