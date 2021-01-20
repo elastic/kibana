@@ -14,7 +14,7 @@
 |  [IndexPatternsService](./kibana-plugin-plugins-data-server.indexpatternsservice.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-server.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-server.plugin.md) |  |
-|  [SessionService](./kibana-plugin-plugins-data-server.sessionservice.md) | The OSS session service. See data\_enhanced in X-Pack for the background session service. |
+|  [SessionService](./kibana-plugin-plugins-data-server.sessionservice.md) | The OSS session service. See data\_enhanced in X-Pack for the search session service. |
 
 ## Enumerations
 
