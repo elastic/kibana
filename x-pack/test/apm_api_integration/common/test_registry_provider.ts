@@ -13,7 +13,8 @@ type ArchiveName =
   | 'metrics_8.0.0'
   | 'ml_8.0.0'
   | 'observability_overview'
-  | 'rum_8.0.0';
+  | 'rum_8.0.0'
+  | 'rum_test_data';
 
 interface RunCondition<T extends string> {
   config: T;

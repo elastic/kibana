@@ -501,6 +501,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         newIndexPatternUrl={newIndexPatternUrl}
         allowedTypes={this.props.allowedTypes}
         overlays={this.props.overlays}
+        basePath={this.props.http.basePath}
         search={this.props.search}
       />
     );
