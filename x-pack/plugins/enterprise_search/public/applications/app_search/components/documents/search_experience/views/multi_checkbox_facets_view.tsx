@@ -80,7 +80,7 @@ export const MultiCheckboxFacetsView: React.FC<Props> = ({
   return (
     <>
       <EuiCheckboxGroup
-        data-test-subj="checkbox_group"
+        data-test-subj="checkbox-group"
         className="documentsSearchExperience__facet"
         legend={{ children: label }}
         options={checkboxGroupOptions}

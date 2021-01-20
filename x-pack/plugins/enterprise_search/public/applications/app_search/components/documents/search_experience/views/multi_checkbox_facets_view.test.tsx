@@ -46,7 +46,7 @@ describe('MultiCheckboxFacetsView', () => {
 
   it('calls onSelect when an option is selected', () => {
     const wrapper = shallow(<MultiCheckboxFacetsView {...props} />);
-    wrapper.find('[data-test-subj="checkbox_group"]').simulate('change', 'generated-id_1');
+    wrapper.find('[data-test-subj="checkbox-group"]').simulate('change', 'generated-id_1');
     expect(props.onSelect).toHaveBeenCalledWith('value2');
   });
 
@@ -68,7 +68,7 @@ describe('MultiCheckboxFacetsView', () => {
         }}
       />
     );
-    wrapper.find('[data-test-subj="checkbox_group"]').simulate('change', 'generated-id_1');
+    wrapper.find('[data-test-subj="checkbox-group"]').simulate('change', 'generated-id_1');
     expect(props.onRemove).toHaveBeenCalledWith('value2');
   });
 
@@ -90,7 +90,7 @@ describe('MultiCheckboxFacetsView', () => {
         }}
       />
     );
-    const options = wrapper.find('[data-test-subj="checkbox_group"]').prop('options');
+    const options = wrapper.find('[data-test-subj="checkbox-group"]').prop('options');
     expect(options).toEqual([
       { id: 'generated-id_0', label: 'value1' },
       { id: 'generated-id_1', label: '<No value>' },
