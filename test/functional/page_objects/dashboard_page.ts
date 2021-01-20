@@ -221,8 +221,15 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('dashboardDiscardChanges');
     }
 
-    public async clickNewDashboard() {
+    public async clickNewDashboard(continueEditing = false) {
       await listingTable.clickNewButton('createDashboardPromptButton');
+      if (await testSubjects.exists('dashboardCreateConfirm')) {
+        if (continueEditing) {
+          await testSubjects.click('dashboardCreateConfirmContinue');
+        } else {
+          await testSubjects.click('dashboardCreateConfirmStartOver');
+        }
+      }
       // make sure the dashboard page is shown
       await this.waitForRenderComplete();
     }

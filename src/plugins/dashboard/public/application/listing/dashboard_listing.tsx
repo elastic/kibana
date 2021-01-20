@@ -97,12 +97,24 @@ export const DashboardListing = ({
     [savedObjectsTagging, redirectTo]
   );
 
+  const createItem = useCallback(() => {
+    if (!dashboardPanelStorage.dashboardHasUnsavedEdits()) {
+      redirectTo({ destination: 'dashboard' });
+    } else {
+      confirmCreateWithUnsaved(
+        core.overlays,
+        () => {
+          dashboardPanelStorage.clearPanels();
+          redirectTo({ destination: 'dashboard' });
+        },
+        () => redirectTo({ destination: 'dashboard' })
+      );
+    }
+  }, [dashboardPanelStorage, redirectTo, core.overlays]);
+
   const noItemsFragment = useMemo(
-    () =>
-      getNoItemsMessage(hideWriteControls, core.application, () =>
-        redirectTo({ destination: 'dashboard' })
-      ),
-    [redirectTo, core.application, hideWriteControls]
+    () => getNoItemsMessage(hideWriteControls, core.application, createItem),
+    [createItem, core.application, hideWriteControls]
   );
 
   const fetchItems = useCallback(
@@ -136,21 +148,6 @@ export const DashboardListing = ({
       redirectTo({ destination: 'dashboard', id, editMode: true }),
     [redirectTo]
   );
-
-  const createItem = useCallback(() => {
-    if (!dashboardPanelStorage.dashboardHasUnsavedEdits()) {
-      redirectTo({ destination: 'dashboard' });
-    } else {
-      confirmCreateWithUnsaved(
-        core.overlays,
-        () => {
-          dashboardPanelStorage.clearPanels();
-          redirectTo({ destination: 'dashboard' });
-        },
-        () => redirectTo({ destination: 'dashboard' })
-      );
-    }
-  }, [dashboardPanelStorage, redirectTo, core.overlays]);
 
   const searchFilters = useMemo(() => {
     return savedObjectsTagging
