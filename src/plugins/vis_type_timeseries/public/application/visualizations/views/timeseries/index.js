@@ -139,7 +139,6 @@ export const TimeSeries = ({
     },
     [uiState]
   );
-  console.dir(series);
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
