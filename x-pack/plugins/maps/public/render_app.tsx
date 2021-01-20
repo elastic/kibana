@@ -42,14 +42,14 @@ function setAppChrome() {
     });
   }
 
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+  const mapUrl = getDocLinks().links.maps.guide;
 
   getCoreChrome().setHelpExtension({
     appName: 'Maps',
     links: [
       {
         linkType: 'documentation',
-        href: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/maps.html`,
+        href: `${mapUrl}`,
       },
       {
         linkType: 'github',
