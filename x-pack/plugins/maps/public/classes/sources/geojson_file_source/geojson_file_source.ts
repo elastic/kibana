@@ -6,11 +6,16 @@
 
 import { Feature, FeatureCollection } from 'geojson';
 import { AbstractVectorSource, ESGlobalFilters, GeoJsonWithMeta } from '../vector_source';
-import { EMPTY_FEATURE_COLLECTION, SOURCE_TYPES } from '../../../../common/constants';
-import { GeojsonFileSourceDescriptor, MapExtent } from '../../../../common/descriptor_types';
+import { EMPTY_FEATURE_COLLECTION, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
+import {
+  GeoJsonFileFieldDescriptor,
+  GeojsonFileSourceDescriptor,
+  MapExtent,
+} from '../../../../common/descriptor_types';
 import { registerSource } from '../source_registry';
 import { IField } from '../../fields/field';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
+import { GeoJsonFileField } from '../../fields/geojson_file_field';
 
 function getFeatureCollection(geoJson: Feature | FeatureCollection | null): FeatureCollection {
   if (!geoJson) {
@@ -31,16 +36,54 @@ function getFeatureCollection(geoJson: Feature | FeatureCollection | null): Feat
   return EMPTY_FEATURE_COLLECTION;
 }
 
-export class GeojsonFileSource extends AbstractVectorSource {
+export class GeoJsonFileSource extends AbstractVectorSource {
   static createDescriptor(
     geoJson: Feature | FeatureCollection | null,
-    name: string
+    name: string,
+    fields?: GeoJsonFileFieldDescriptor[]
   ): GeojsonFileSourceDescriptor {
     return {
       type: SOURCE_TYPES.GEOJSON_FILE,
       __featureCollection: getFeatureCollection(geoJson),
+      __fields: fields || [],
       name,
     };
+  }
+
+  _getFields(): GeoJsonFileFieldDescriptor[] {
+    const fields = (this._descriptor as GeojsonFileSourceDescriptor).__fields;
+    return fields ? fields : [];
+  }
+
+  createField({ fieldName }: { fieldName: string }): IField {
+    const fields = this._getFields();
+    const descriptor: GeoJsonFileFieldDescriptor | undefined = fields.find((field) => {
+      return field.name === fieldName;
+    });
+
+    if (!descriptor) {
+      throw new Error(
+        `Cannot find corresponding field ${fieldName} in __fields array ${JSON.stringify(
+          this._getFields()
+        )} `
+      );
+    }
+    return new GeoJsonFileField({
+      fieldName: descriptor.name,
+      source: this,
+      origin: FIELD_ORIGIN.SOURCE,
+    });
+  }
+
+  async getFields(): Promise<IField[]> {
+    const fields = this._getFields();
+    return fields.map((field: GeoJsonFileFieldDescriptor) => {
+      return new GeoJsonFileField({
+        fieldName: field.name,
+        source: this,
+        origin: FIELD_ORIGIN.SOURCE,
+      });
+    });
   }
 
   isBoundsAware(): boolean {
@@ -62,10 +105,6 @@ export class GeojsonFileSource extends AbstractVectorSource {
     };
   }
 
-  createField({ fieldName }: { fieldName: string }): IField {
-    throw new Error('Not implemented');
-  }
-
   async getDisplayName() {
     return (this._descriptor as GeojsonFileSourceDescriptor).name;
   }
@@ -76,6 +115,6 @@ export class GeojsonFileSource extends AbstractVectorSource {
 }
 
 registerSource({
-  ConstructorFunction: GeojsonFileSource,
+  ConstructorFunction: GeoJsonFileSource,
   type: SOURCE_TYPES.GEOJSON_FILE,
 });

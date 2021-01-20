@@ -22,7 +22,7 @@ import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vec
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
-import { GeojsonFileSource } from '../classes/sources/geojson_file_source';
+import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
   SOURCE_DATA_REQUEST_ID,
   STYLE_TYPE,
@@ -241,7 +241,7 @@ export const getSpatialFiltersLayer = createSelector(
       type: 'FeatureCollection',
       features: extractFeaturesFromFilters(filters),
     };
-    const geoJsonSourceDescriptor = GeojsonFileSource.createDescriptor(
+    const geoJsonSourceDescriptor = GeoJsonFileSource.createDescriptor(
       featureCollection,
       'spatialFilters'
     );
@@ -272,7 +272,7 @@ export const getSpatialFiltersLayer = createSelector(
           },
         }),
       }),
-      source: new GeojsonFileSource(geoJsonSourceDescriptor),
+      source: new GeoJsonFileSource(geoJsonSourceDescriptor),
     });
   }
 );
