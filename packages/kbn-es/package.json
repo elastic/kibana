@@ -2,7 +2,7 @@
   "name": "@kbn/es",
   "main": "./target/index.js",
   "version": "1.0.0",
-  "license": "Apache-2.0",
+  "license": "SSPL-1.0 OR Elastic License",
   "private": true,
   "kibana": {
     "devOnly": true
