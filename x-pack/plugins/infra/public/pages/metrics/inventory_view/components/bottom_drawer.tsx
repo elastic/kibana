@@ -8,7 +8,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
-import { euiStyled, useUiTracker } from '../../../../../../observability/public';
+import { euiStyled, useUiTracker } from '../../../../../../../../src/plugins/kibana_react/common';
 import { InfraFormatter } from '../../../../lib/lib';
 import { Timeline } from './timeline/timeline';
 
