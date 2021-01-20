@@ -4,22 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+// @ts-ignore
 import { checkParam } from '../../error_missing_required';
+// @ts-ignore
 import { createQuery } from '../../create_query';
+// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
+import { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
+import { LegacyRequest } from '../../../types';
 
-export function handleResponse(response) {
-  const hits = get(response, 'hits.hits');
+export function handleResponse(response: ElasticsearchResponse) {
+  const hits = response.hits?.hits;
   if (!hits) {
     return [];
   }
 
   // deduplicate any shards from earlier days with the same cluster state state_uuid
-  const uniqueShards = new Set();
+  const uniqueShards = new Set<string>();
 
   // map into object with shard and source properties
-  return hits.reduce((shards, hit) => {
+  return hits.reduce((shards: Array<ElasticsearchLegacySource['shard']>, hit) => {
     const shard = hit._source.shard;
 
     if (shard) {
@@ -37,9 +41,13 @@ export function handleResponse(response) {
 }
 
 export function getShardAllocation(
-  req,
-  esIndexPattern,
-  { shardFilter, stateUuid, showSystemIndices = false }
+  req: LegacyRequest,
+  esIndexPattern: string,
+  {
+    shardFilter,
+    stateUuid,
+    showSystemIndices = false,
+  }: { shardFilter: any; stateUuid: string; showSystemIndices: boolean }
 ) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardAllocation');
 
