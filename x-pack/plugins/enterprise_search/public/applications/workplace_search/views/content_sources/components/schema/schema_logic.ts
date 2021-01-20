@@ -110,7 +110,7 @@ interface SchemaChangeErrorsProps {
   fieldCoercionErrors: FieldCoercionErrors;
 }
 
-const dataTypeOptions = [
+export const dataTypeOptions = [
   { value: 'text', text: 'Text' },
   { value: 'date', text: 'Date' },
   { value: 'number', text: 'Number' },
