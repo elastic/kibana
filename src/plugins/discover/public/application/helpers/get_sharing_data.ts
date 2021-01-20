@@ -7,33 +7,11 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import { SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import { getSortForSearchSource } from '../angular/doc_table';
 import { SearchSource } from '../../../../data/common';
 import { AppState } from '../angular/discover_state';
 import { SortOrder } from '../../saved_searches/types';
-
-const getSharingDataFields = async (
-  getFieldCounts: () => Promise<Record<string, number>>,
-  selectedFields: string[],
-  timeFieldName: string,
-  hideTimeColumn: boolean
-) => {
-  if (selectedFields.length === 1 && selectedFields[0] === '_source') {
-    const fieldCounts = await getFieldCounts();
-    return {
-      searchFields: undefined,
-      selectFields: Object.keys(fieldCounts).sort(),
-    };
-  }
-
-  const fields =
-    timeFieldName && !hideTimeColumn ? [timeFieldName, ...selectedFields] : selectedFields;
-  return {
-    searchFields: fields,
-    selectFields: fields,
-  };
-};
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -41,19 +19,11 @@ const getSharingDataFields = async (
 export async function getSharingData(
   currentSearchSource: SearchSource,
   state: AppState,
-  config: IUiSettingsClient,
-  getFieldCounts: () => Promise<Record<string, number>>
+  config: IUiSettingsClient
 ) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
 
-  const { searchFields } = await getSharingDataFields(
-    getFieldCounts,
-    state.columns || [],
-    index.timeFieldName || '',
-    config.get(DOC_HIDE_TIME_COLUMN_SETTING)
-  );
-  searchSource.setField('fieldsFromSource', searchFields);
   searchSource.setField(
     'sort',
     getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))

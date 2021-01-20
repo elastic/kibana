@@ -70,7 +70,7 @@ export const tabifyDocs = (
 
   const rows = esResponse.hits.hits
     .map((hit) => {
-      const toConvert = params.source ? hit._source : hit.fields;
+      const toConvert = params.source && hit._source ? hit._source : hit.fields;
       const flat = flattenHit(toConvert, index, params.shallow);
       for (const [key, value] of Object.entries(flat)) {
         const field = index?.fields.getByName(key);
