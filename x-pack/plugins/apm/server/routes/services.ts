@@ -52,14 +52,22 @@ export const serviceMetadataDetailsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
   params: t.type({
     path: t.type({ serviceName: t.string }),
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
 
-    return getServiceMetadataDetails({ serviceName, setup });
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getServiceMetadataDetails({
+      serviceName,
+      setup,
+      searchAggregatedTransactions,
+    });
   },
 });
 
@@ -67,14 +75,22 @@ export const serviceMetadataIconsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/metadata/icons',
   params: t.type({
     path: t.type({ serviceName: t.string }),
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
 
-    return getServiceMetadataIcons({ serviceName, setup });
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getServiceMetadataIcons({
+      serviceName,
+      setup,
+      searchAggregatedTransactions,
+    });
   },
 });
 
