@@ -2203,5 +2203,33 @@ describe('state_helpers', () => {
 
       delete operationDefinitionMap.testIncompleteReference;
     });
+
+    it('should forward the indexpattern when available', () => {
+      const mock = jest.fn();
+      operationDefinitionMap.testReference.getErrorMessage = mock;
+      getErrorMessages(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            col1:
+              // @ts-expect-error not statically analyzed
+              { operationType: 'testReference', references: [] },
+          },
+        },
+        indexPattern
+      );
+      expect(mock).toHaveBeenCalledWith(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            col1: { operationType: 'testReference', references: [] },
+          },
+        },
+        'col1',
+        indexPattern
+      );
+    });
   });
 });
