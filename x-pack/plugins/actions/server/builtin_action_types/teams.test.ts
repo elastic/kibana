@@ -117,7 +117,7 @@ describe('validateActionTypeSecrets()', () => {
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureHostnameAllowed: () => {
+        ensureUriAllowed: () => {
           throw new Error(`target hostname is not added to allowedHosts`);
         },
       },
