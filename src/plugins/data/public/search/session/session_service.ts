@@ -44,12 +44,15 @@ export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGenera
 }
 
 /**
- * Configure "Send to background UI"
+ * Configure a "Search session indicator" UI
  */
 export interface SearchSessionIndicatorUiConfig {
   /**
-   * App controls if "Search session indicator" should be disabled.
+   * App controls if "Search session indicator" UI should be disabled.
    * reasonText will appear in a tooltip.
+   *
+   * Could be used, for example, to disable "Search session indicator" UI
+   * in case user doesn't have permissions to store a search session
    */
   isDisabled: () => { disabled: true; reasonText: string } | { disabled: false };
 }
@@ -273,9 +276,8 @@ export class SessionService {
   }
 
   /**
-   * Provide an info about current session.
-   * This will be used for creating a search session saved object.
-   * To enabled "Search session indicator" UI app has to call setupStoreSession()
+   * Provide an info about current session which is needed for storing a search session.
+   * To opt-into "Search session indicator" UI app has to call {@link setupStorage}.
    *
    * @param searchSessionInfoProvider - info provider for saving a search session
    * @param searchSessionIndicatorUiConfig - config for "Search session indicator" UI
@@ -288,6 +290,10 @@ export class SessionService {
     this.searchSessionIndicatorUiConfig = searchSessionIndicatorUiConfig;
   }
 
+  /**
+   * If the current app explicitly called {@link setupStorage} and provided all configuration needed
+   * for storing its search sessions
+   */
   public isSessionStorageReady(): boolean {
     return !!this.searchSessionInfoProvider;
   }
