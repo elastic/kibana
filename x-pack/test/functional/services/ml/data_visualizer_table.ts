@@ -308,6 +308,32 @@ export function MachineLearningDataVisualizerTableProvider(
       await this.ensureDetailsClosed(fieldName);
     }
 
+    public async assertGeoPointFieldContents(
+      fieldName: string,
+      docCountFormatted: string,
+      topValuesCount: number
+    ) {
+      await this.assertRowExists(fieldName);
+      await this.assertFieldDocCount(fieldName, docCountFormatted);
+      await this.ensureDetailsOpen(fieldName);
+
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlFieldDataTopValues'));
+      await this.assertTopValuesContents(fieldName, topValuesCount);
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlEmbeddedMapContent'));
+
+      await this.ensureDetailsClosed(fieldName);
+    }
+
+    public async assertUnknownFieldContents(fieldName: string, docCountFormatted: string) {
+      await this.assertRowExists(fieldName);
+      await this.assertFieldDocCount(fieldName, docCountFormatted);
+      await this.ensureDetailsOpen(fieldName);
+
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlDVDocumentStatsContent'));
+
+      await this.ensureDetailsClosed(fieldName);
+    }
+
     public async assertNonMetricFieldContents(
       fieldType: string,
       fieldName: string,
@@ -321,6 +347,10 @@ export function MachineLearningDataVisualizerTableProvider(
         await this.assertKeywordFieldContents(fieldName, docCountFormatted, exampleCount);
       } else if (fieldType === ML_JOB_FIELD_TYPES.TEXT) {
         await this.assertTextFieldContents(fieldName, docCountFormatted, exampleCount);
+      } else if (fieldType === ML_JOB_FIELD_TYPES.GEO_POINT) {
+        await this.assertGeoPointFieldContents(fieldName, docCountFormatted, exampleCount);
+      } else if (fieldType === ML_JOB_FIELD_TYPES.UNKNOWN) {
+        await this.assertUnknownFieldContents(fieldName, docCountFormatted);
       }
     }
 

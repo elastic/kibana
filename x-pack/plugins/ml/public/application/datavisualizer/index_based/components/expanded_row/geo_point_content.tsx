@@ -7,7 +7,6 @@
 import React, { FC, useEffect, useState } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import uuid from 'uuid';
 import { ExamplesList } from '../../../index_based/components/field_data_row/examples_list';
 import { FieldVisConfig } from '../../../stats_table/types';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';

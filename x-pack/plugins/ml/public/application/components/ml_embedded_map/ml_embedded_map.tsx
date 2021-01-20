@@ -136,7 +136,7 @@ export function MlEmbeddedMapComponent({
 
   return (
     <div
-      data-test-subj="xpack.ml.dataVisualizer.embeddedMapPanel"
+      data-test-subj="mlEmbeddedMapContent"
       className="mlEmbeddedMapContent"
       ref={embeddableRoot}
     />

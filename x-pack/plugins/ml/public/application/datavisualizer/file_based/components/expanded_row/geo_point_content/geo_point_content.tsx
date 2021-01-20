@@ -66,7 +66,10 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
         </EuiFlexItem>
       )}
       {formattedResults && Array.isArray(formattedResults.layerList) && (
-        <EuiFlexItem className={'mlDataVisualizerMapWrapper'}>
+        <EuiFlexItem
+          className={'mlDataVisualizerMapWrapper'}
+          data-test-subj={'mlDataVisualizerEmbeddedMap'}
+        >
           <MlEmbeddedMapComponent layerList={formattedResults.layerList} />
         </EuiFlexItem>
       )}
