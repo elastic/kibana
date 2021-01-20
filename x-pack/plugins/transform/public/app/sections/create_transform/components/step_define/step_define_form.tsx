@@ -387,9 +387,9 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
         ) : null}
         {stepDefineForm.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
           <LatestFunctionForm
-            latestFunctionService={stepDefineForm.latestFunctionConfig}
             copyToClipboard={copyToClipboardPivot}
             copyToClipboardDescription={copyToClipboardPivotDescription}
+            latestFunctionService={stepDefineForm.latestFunctionConfig}
           />
         ) : null}
       </EuiForm>

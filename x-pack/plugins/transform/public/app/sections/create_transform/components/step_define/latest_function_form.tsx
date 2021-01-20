@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiCallOut, EuiComboBox, EuiCopy, EuiFormRow } from '@el
 import { LatestFunctionService } from './hooks/use_latest_function_config';
 
 interface LatestFunctionFormProps {
-  copyToClipboard: any;
+  copyToClipboard: string;
   copyToClipboardDescription: string;
   latestFunctionService: LatestFunctionService;
 }
@@ -57,9 +57,13 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
             defaultMessage="Sort field"
           />
         }
-        helpText={i18n.translate('xpack.transform.stepDefineForm.sortHelpText', {
-          defaultMessage: 'Select the date field to be used to identify the latest document.',
-        })}
+        helpText={
+          latestFunctionService.sortFieldOptions.length > 0
+            ? i18n.translate('xpack.transform.stepDefineForm.sortHelpText', {
+                defaultMessage: 'Select the date field to be used to identify the latest document.',
+              })
+            : undefined
+        }
       >
         <>
           {latestFunctionService.sortFieldOptions.length > 0 && (
