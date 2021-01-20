@@ -208,7 +208,7 @@ async function run() {
     'x-pack/test/apm_api_integration/common',
     esArchiverDir
   );
-  const e2eDir = path.join(__dirname, '../../new_e2e/cypress', esArchiverDir);
+  const e2eDir = path.join(__dirname, '../../ftr_e2e/cypress', esArchiverDir);
 
   // Copy generated files to e2e test folder
   execSync(`cp -r ${tmpDir} ${e2eDir}`);

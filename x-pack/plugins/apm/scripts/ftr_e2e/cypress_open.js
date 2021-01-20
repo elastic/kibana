@@ -6,7 +6,7 @@
 const childProcess = require('child_process');
 const path = require('path');
 
-const e2eDir = path.join(__dirname, '../../new_e2e');
+const e2eDir = path.join(__dirname, '../../ftr_e2e');
 
 childProcess.execSync(
   `node ../../../../scripts/functional_tests --config ./cypress_open.ts`,

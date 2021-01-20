@@ -32,8 +32,8 @@ async function cypressStart(
   await cypressExecution({
     config: { baseUrl: Url.format(config.get('servers.kibana')) },
     env: {
-      METADATA_START_DATE: start,
-      METADATA_END_DATE: end,
+      START_DATE: start,
+      END_DATE: end,
     },
   });
 }

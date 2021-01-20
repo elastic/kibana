@@ -6,8 +6,8 @@
 
 describe('Home page', () => {
   it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
-    const now = new Date(Cypress.env('METADATA_END_DATE'));
-    cy.clock(now);
+    const endDate = new Date(Cypress.env('END_DATE'));
+    cy.clock(endDate);
 
     cy.visit('/app/apm');
 
