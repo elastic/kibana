@@ -6,7 +6,6 @@
  * Public License, v 1.
  */
 
-// @ts-ignore
 import fetch from 'node-fetch';
 
 import { IRouter } from 'kibana/server';
