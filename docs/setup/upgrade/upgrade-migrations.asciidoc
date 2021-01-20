@@ -21,7 +21,7 @@ Saved objects are stored in two indices:
  
 The index aliases `.kibana` and `.kibana_task_manager` will always point to the most up-to-date version indices.
 
-The first time a newer {kib} starts it will first perform an upgrade migration before starting plugins or serving HTTP traffic.
+The first time a newer {kib} starts, it will first perform an upgrade migration before starting plugins or serving HTTP traffic.
 
 When several {kib} instances are connected to the same {es} cluster and upgraded, all {kib} instances will participate in the upgrade migration in parallel.
 
@@ -66,7 +66,7 @@ For {kib} < 7.5.1, if the task manager index is set to `.tasks` with the configu
 [[resolve-migrations-failures]]
 ==== Resolving migration failures
 
-If {kib} terminates unexpectedly while migrating a saved object index it will automatically restart and attempt to perform the migration again. If upgrade migrations fail repeatedly, follow the advice in (preventing migration failures)[preventing-migration-failures]. Unlike previous versions of {kib}, v7.12+ does not require deleting any indices to release a failed migration lock. Once the root cause for the migration failure has been addressed, {kib} will automatically retry the migration.
+If {kib} terminates unexpectedly while migrating a saved object index it will automatically attempt to perform the migration again once the process has restarted. If upgrade migrations fail repeatedly, follow the advice in (preventing migration failures)[preventing-migration-failures]. Unlike previous versions of {kib}, v7.12+ does not require deleting any indices to release a failed migration lock. Once the root cause for the migration failure has been addressed, {kib} will automatically retry the migration without any further intervention.
 
 [float]
 [[upgrade-migrations-rolling-back]]
