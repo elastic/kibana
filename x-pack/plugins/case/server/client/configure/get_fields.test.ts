@@ -22,7 +22,7 @@ describe('get_fields', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseMappingsSavedObject: mockCaseMappings,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.getFields({
         actionsClient: actionsMock,
         connectorType: ConnectorTypes.jira,
@@ -43,7 +43,7 @@ describe('get_fields', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseMappingsSavedObject: mockCaseMappings,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       await caseClient.client
         .getFields({
           actionsClient: { ...actionsMock, execute: jest.fn().mockReturnValue(actionsErrResponse) },

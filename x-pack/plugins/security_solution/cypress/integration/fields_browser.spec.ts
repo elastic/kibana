@@ -16,6 +16,7 @@ import {
   FIELDS_BROWSER_SELECTED_CATEGORY_COUNT,
   FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
 } from '../screens/fields_browser';
+import { TIMELINE_FIELDS_BUTTON } from '../screens/timeline';
 import { cleanKibana } from '../tasks/common';
 
 import {
@@ -46,7 +47,7 @@ const defaultHeaders = [
 ];
 
 describe('Fields Browser', () => {
-  context.skip('Fields Browser rendering', () => {
+  context('Fields Browser rendering', () => {
     before(() => {
       cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
@@ -153,7 +154,7 @@ describe('Fields Browser', () => {
       cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('exist');
     });
 
-    it.skip('adds a field to the timeline when the user drags and drops a field', () => {
+    it('adds a field to the timeline when the user drags and drops a field', () => {
       const filterInput = 'host.geo.c';
 
       filterFieldsBrowser(filterInput);
@@ -181,6 +182,20 @@ describe('Fields Browser', () => {
       resetFields();
 
       cy.get(FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER).should('not.exist');
+    });
+
+    it('restores focus to the Customize Columns button when `Reset Fields` is clicked', () => {
+      openTimelineFieldsBrowser();
+      resetFields();
+
+      cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
+    });
+
+    it('restores focus to the Customize Columns button when Esc is pressed', () => {
+      openTimelineFieldsBrowser();
+      cy.get('body').type('{esc}');
+
+      cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
     });
   });
 });

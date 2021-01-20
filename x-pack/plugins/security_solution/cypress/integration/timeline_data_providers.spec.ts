@@ -8,6 +8,7 @@ import {
   TIMELINE_DATA_PROVIDERS,
   TIMELINE_DATA_PROVIDERS_EMPTY,
   TIMELINE_DROPPED_DATA_PROVIDERS,
+  TIMELINE_DATA_PROVIDERS_ACTION_MENU,
 } from '../screens/timeline';
 import { HOSTS_NAMES_DRAGGABLE } from '../screens/hosts/all_hosts';
 
@@ -51,6 +52,17 @@ describe('timeline data providers', () => {
             expect(dataProviderText).to.eq(`host.name: "${hostname}"AND`);
           });
       });
+  });
+
+  it('displays the data provider action menu when Enter is pressed', () => {
+    dragAndDropFirstHostToTimeline();
+    openTimelineUsingToggle();
+    cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
+
+    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS).first().focus();
+    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS).first().parent().type('{enter}');
+
+    cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
   });
 
   it('sets the background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the data providers', () => {

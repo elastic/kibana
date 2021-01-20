@@ -332,7 +332,7 @@ describe('LayerPanel', () => {
             columns: {},
             columnOrder: [],
           },
-          true
+          { shouldReplaceDimension: true }
         );
       });
       expect(updateAll).toHaveBeenCalled();

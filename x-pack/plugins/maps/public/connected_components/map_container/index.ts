@@ -16,7 +16,6 @@ import {
   getMapInitError,
   getMapSettings,
   getQueryableUniqueIndexPatternIds,
-  isToolbarOverlayHidden,
 } from '../../selectors/map_selectors';
 import { MapStoreState } from '../../reducers/store';
 import { getCoreChrome } from '../../kibana_services';
@@ -29,8 +28,7 @@ function mapStateToProps(state: MapStoreState) {
     refreshConfig: getRefreshConfig(state),
     mapInitError: getMapInitError(state),
     indexPatternIds: getQueryableUniqueIndexPatternIds(state),
-    hideToolbarOverlay: isToolbarOverlayHidden(state),
-    backgroundColor: getMapSettings(state).backgroundColor,
+    settings: getMapSettings(state),
   };
 }
 

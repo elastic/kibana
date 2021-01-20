@@ -62,7 +62,7 @@ export class DataEnhancedPlugin
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
     setAutocompleteService(plugins.data.autocomplete);
 
-    if (this.initializerContext.config.get().search.sendToBackground.enabled) {
+    if (this.initializerContext.config.get().search.sessions.enabled) {
       core.chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
           React.createElement(

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React, { FC } from 'react';
@@ -32,6 +21,8 @@ import {
   LegendColorPicker,
   TooltipProps,
   TickFormatter,
+  VerticalAlignment,
+  HorizontalAlignment,
 } from '@elastic/charts';
 
 import { renderEndzoneTooltip } from '../../../charts/public';
@@ -70,6 +61,27 @@ type XYSettingsProps = Pick<
   legendPosition: Position;
 };
 
+function getValueLabelsStyling(isHorizontal: boolean) {
+  const VALUE_LABELS_MAX_FONTSIZE = 15;
+  const VALUE_LABELS_MIN_FONTSIZE = 10;
+  const VALUE_LABELS_VERTICAL_OFFSET = -10;
+  const VALUE_LABELS_HORIZONTAL_OFFSET = 10;
+
+  return {
+    displayValue: {
+      fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
+      fill: { textInverted: true, textBorder: 2 },
+      alignment: isHorizontal
+        ? {
+            vertical: VerticalAlignment.Middle,
+          }
+        : { horizontal: HorizontalAlignment.Center },
+      offsetX: isHorizontal ? VALUE_LABELS_HORIZONTAL_OFFSET : 0,
+      offsetY: isHorizontal ? 0 : VALUE_LABELS_VERTICAL_OFFSET,
+    },
+  };
+}
+
 export const XYSettings: FC<XYSettingsProps> = ({
   markSizeRatio,
   rotation,
@@ -92,10 +104,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
   const theme = themeService.useChartsTheme();
   const baseTheme = themeService.useChartsBaseTheme();
   const dimmingOpacity = getUISettings().get<number | undefined>('visualization:dimmingOpacity');
-  const fontSize =
-    typeof theme.barSeriesStyle?.displayValue?.fontSize === 'number'
-      ? { min: theme.barSeriesStyle?.displayValue?.fontSize }
-      : theme.barSeriesStyle?.displayValue?.fontSize ?? { min: 8 };
+  const valueLabelsStyling = getValueLabelsStyling(rotation === 90 || rotation === -90);
 
   const themeOverrides: PartialTheme = {
     markSizeRatio,
@@ -105,13 +114,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
       },
     },
     barSeriesStyle: {
-      displayValue: {
-        fontSize,
-        alignment: {
-          horizontal: 'center',
-          vertical: 'middle',
-        },
-      },
+      ...valueLabelsStyling,
     },
     axes: {
       axisTitle: {

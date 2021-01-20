@@ -43,7 +43,6 @@ import {
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
-import { deleteTaskIfItExists } from '../lib/delete_task_if_it_exists';
 import { RegistryAlertType, UntypedNormalizedAlertType } from '../alert_type_registry';
 import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authorization';
 import { IEventLogClient } from '../../../../plugins/event_log/server';
@@ -413,7 +412,7 @@ export class AlertsClient {
     this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
     let events: IEvent[];
     try {
-      const queryResults = await eventLogClient.findEventsBySavedObject('alert', id, {
+      const queryResults = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
         page: 1,
         per_page: 10000,
         start: parsedDateStart.toISOString(),
@@ -602,7 +601,7 @@ export class AlertsClient {
     const removeResult = await this.unsecuredSavedObjectsClient.delete('alert', id);
 
     await Promise.all([
-      taskIdToRemove ? deleteTaskIfItExists(this.taskManager, taskIdToRemove) : null,
+      taskIdToRemove ? this.taskManager.removeIfExists(taskIdToRemove) : null,
       apiKeyToInvalidate
         ? markApiKeyForInvalidation(
             { apiKey: apiKeyToInvalidate },
@@ -818,10 +817,7 @@ export class AlertsClient {
         attributes.consumer,
         WriteOperations.UpdateApiKey
       );
-      if (
-        attributes.actions.length &&
-        !this.authorization.shouldUseLegacyAuthorization(attributes)
-      ) {
+      if (attributes.actions.length) {
         await this.actionsAuthorization.ensureAuthorized('execute');
       }
     } catch (error) {
@@ -1060,7 +1056,7 @@ export class AlertsClient {
 
       await Promise.all([
         attributes.scheduledTaskId
-          ? deleteTaskIfItExists(this.taskManager, attributes.scheduledTaskId)
+          ? this.taskManager.removeIfExists(attributes.scheduledTaskId)
           : null,
         apiKeyToInvalidate
           ? await markApiKeyForInvalidation(

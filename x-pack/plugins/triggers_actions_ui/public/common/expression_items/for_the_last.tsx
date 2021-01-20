@@ -84,6 +84,7 @@ export const ForLastExpression = ({
       ownFocus
       display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downLeft'}
+      repositionOnScroll
     >
       <div>
         <ClosablePopoverTitle onClose={() => setAlertDurationPopoverOpen(false)}>

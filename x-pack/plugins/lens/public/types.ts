@@ -243,7 +243,10 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns
-  setState: (newState: Parameters<StateSetter<T>>[0], publishToVisualization?: boolean) => void;
+  setState: (
+    newState: Parameters<StateSetter<T>>[0],
+    publishToVisualization?: { shouldReplaceDimension?: boolean; shouldRemoveDimension?: boolean }
+  ) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];

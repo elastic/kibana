@@ -51,7 +51,7 @@ export function ServiceOverviewThroughputChart({
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
-            defaultMessage: 'Traffic',
+            defaultMessage: 'Throughput',
           })}
         </h2>
       </EuiTitle>
@@ -66,10 +66,8 @@ export function ServiceOverviewThroughputChart({
             type: 'linemark',
             color: theme.eui.euiColorVis0,
             title: i18n.translate(
-              'xpack.apm.serviceOverview.throughputChart.traffic',
-              {
-                defaultMessage: 'Traffic',
-              }
+              'xpack.apm.serviceOverview.throughtputChartTitle',
+              { defaultMessage: 'Throughput' }
             ),
           },
         ]}

@@ -34,9 +34,16 @@
       },
       "technique": [
         {
-          "id": "T1122",
-          "name": "Component Object Model Hijacking",
-          "reference": "https://attack.mitre.org/techniques/T1122/"
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.015",
+              "name": "Component Object Model Hijacking",
+              "reference": "https://attack.mitre.org/techniques/T1546/015/"
+            }
+          ]
         }
       ]
     }

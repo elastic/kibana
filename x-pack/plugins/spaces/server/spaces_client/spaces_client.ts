@@ -8,15 +8,10 @@ import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import { ISavedObjectsRepository, SavedObject } from 'src/core/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { Space } from 'src/plugins/spaces_oss/common';
+import { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../../common';
 import { isReservedSpace } from '../../common';
-import { Space } from '../../common/model/space';
 import { ConfigType } from '../config';
-import { GetAllSpacesPurpose, GetSpaceResult } from '../../common/model/types';
-
-export interface GetAllSpacesOptions {
-  purpose?: GetAllSpacesPurpose;
-  includeAuthorizedPurposes?: boolean;
-}
 
 const SUPPORTED_GET_SPACE_PURPOSES: GetAllSpacesPurpose[] = [
   'any',
