@@ -41,6 +41,7 @@ interface Props {
   basePath: string;
   post: HttpStart['post'];
   urlParamExtensions?: UrlParamExtension[];
+  anonymousAccessParams?: () => Promise<boolean>;
 }
 
 export enum ExportUrlAsType {
@@ -58,6 +59,7 @@ interface State {
   exportUrlAs: ExportUrlAsType;
   useShortUrl: boolean;
   usePublicUrl: boolean;
+  anonymousAccessIsAvailable: boolean;
   isCreatingShortUrl: boolean;
   url?: string;
   shortUrlErrorMsg?: string;
@@ -77,6 +79,7 @@ export class UrlPanelContent extends Component<Props, State> {
       exportUrlAs: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
       useShortUrl: false,
       usePublicUrl: false,
+      anonymousAccessIsAvailable: false,
       isCreatingShortUrl: false,
       url: '',
     };
@@ -93,6 +96,20 @@ export class UrlPanelContent extends Component<Props, State> {
     this.setUrl();
 
     window.addEventListener('hashchange', this.resetUrl, false);
+
+    if (this.props.anonymousAccessParams) {
+      this.props.anonymousAccessParams().then((result) => {
+        if (!this.mounted) {
+          return;
+        }
+
+        if (result) {
+          this.setState({
+            anonymousAccessIsAvailable: true,
+          });
+        }
+      });
+    }
   }
 
   public render() {
@@ -441,6 +458,10 @@ export class UrlPanelContent extends Component<Props, State> {
   };
 
   private renderPublicUrlSwitch = () => {
+    if (!this.state.anonymousAccessIsAvailable) {
+      return null;
+    }
+
     const switchLabel = (
       <FormattedMessage id="share.urlPanel.publicUrlLabel" defaultMessage="Public URL" />
     );
