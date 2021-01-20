@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { getLastValue } from '../../../../common/get_last_value';
 import { labelDateFormatter } from '../../components/lib/label_date_formatter';
+import { getSeriesColor } from '../../components/lib/get_series_color';
 import reactcss from 'reactcss';
 
 const RENDER_MODES = {
@@ -104,20 +105,10 @@ export class TopN extends Component {
       // For this it defaults to 0
       const width = 100 * (Math.abs(lastValue) / intervalLength) || 0;
 
-      const overwriteSeries = this.props.uiState
+      const overwriteColors = this.props.uiState
         .get('vis.colors', [])
         .filter((color) => color.id === item.id);
-      let finalColor = item.color;
-      let seriesName = item.label.toString();
-      if (item.labelFormatted) {
-        seriesName = labelDateFormatter(item.labelFormatted);
-      }
-      if (
-        overwriteSeries.length &&
-        Object.keys(overwriteSeries[0].overwrite).includes(seriesName)
-      ) {
-        finalColor = overwriteSeries[0].overwrite[seriesName];
-      }
+      const overwriteColor = getSeriesColor(overwriteColors, item.label, item.labelFormatted);
 
       const styles = reactcss(
         {
@@ -126,7 +117,7 @@ export class TopN extends Component {
               ...TopN.calcInnerBarStyles(renderMode, isPositiveValue),
             },
             innerBarValue: {
-              ...TopN.calcInnerBarDivStyles(finalColor, width, isPositiveValue),
+              ...TopN.calcInnerBarDivStyles(overwriteColor ?? item.color, width, isPositiveValue),
             },
             label: {
               maxWidth: this.state.labelMaxWidth,

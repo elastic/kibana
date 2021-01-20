@@ -10,6 +10,7 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
+import { getSeriesColor } from '../../../components/lib/get_series_color';
 
 import {
   Axis,
@@ -219,17 +220,14 @@ export const TimeSeries = ({
           const isStacked = stack !== STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
           // Only use color mapping if there is no color from the server
-          const overwriteSeries = uiState.get('vis.colors', []).filter((color) => color.id === id);
-          let finalColor = color ?? colors.mappedColors.mapping[label];
+          const overwriteColors = uiState.get('vis.colors', []).filter((color) => color.id === id);
+          const overwriteColor = getSeriesColor(overwriteColors, label, labelFormatted);
+          const finalColor = overwriteColor
+            ? overwriteColor
+            : color ?? colors.mappedColors.mapping[label];
           let seriesName = label.toString();
           if (labelFormatted) {
             seriesName = labelDateFormatter(labelFormatted);
-          }
-          if (
-            overwriteSeries.length &&
-            Object.keys(overwriteSeries[0].overwrite).includes(seriesName)
-          ) {
-            finalColor = overwriteSeries[0].overwrite[seriesName];
           }
           if (bars?.show) {
             return (
