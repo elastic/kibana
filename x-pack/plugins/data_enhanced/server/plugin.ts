@@ -61,7 +61,10 @@ export class EnhancedDataServerPlugin
       eqlSearchStrategyProvider(this.logger)
     );
 
-    this.sessionService = new SearchSessionService(this.logger);
+    this.sessionService = new SearchSessionService(
+      this.logger,
+      this.initializerContext.config.create()
+    );
 
     deps.data.__enhance({
       search: {
@@ -81,7 +84,6 @@ export class EnhancedDataServerPlugin
   public start(core: CoreStart, { taskManager }: StartDependencies) {
     this.sessionService.start(core, {
       taskManager,
-      config$: this.initializerContext.config.create(),
     });
   }
 

@@ -135,6 +135,7 @@ a dashboard, share a link, export to PDF, and more.
 
 For hands-on experience with analyzing your data, check out the Elastic https://www.elastic.co/demos[demo site].
 
+
 [float]
 ==== Plot location data on a map
 If you’re looking to better understand the “where’’ in your data, your data

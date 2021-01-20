@@ -309,7 +309,7 @@ export const DataGrid: FC<Props> = memo(
                         })}
                       >
                         <EuiButtonEmpty
-                          aria-checked={chartsVisible}
+                          aria-pressed={chartsVisible}
                           className={`euiDataGrid__controlBtn${
                             chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
                           }`}
