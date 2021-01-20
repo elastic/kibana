@@ -163,13 +163,14 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       registerRouteHandlerContext: <
-        Context extends object = object,
-        Deps extends RequestHandlerContext = RequestHandlerContext
+        Context extends RequestHandlerContext,
+        ContextName extends keyof Context
       >(
-        contextName: string,
-        provider: RequestHandlerContextProvider<Context, Deps>
+        contextName: ContextName,
+        provider: RequestHandlerContextProvider<Context, ContextName>
       ) => deps.http.registerRouteHandlerContext(plugin.opaqueId, contextName, provider),
-      createRouter: <Context extends object = object>() => router as IRouter<Context>,
+      createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() =>
+        router as IRouter<Context>,
       resources: deps.httpResources.createRegistrar(router),
       registerOnPreRouting: deps.http.registerOnPreRouting,
       registerOnPreAuth: deps.http.registerOnPreAuth,

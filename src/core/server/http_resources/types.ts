@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import {
+import type { RequestHandlerContext } from 'src/core/server';
+import type {
   IRouter,
   RouteConfig,
   IKibanaResponse,
@@ -87,7 +88,7 @@ export type HttpResourcesRequestHandler<
   P = unknown,
   Q = unknown,
   B = unknown,
-  Context extends object = object
+  Context extends RequestHandlerContext = RequestHandlerContext
 > = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
 
 /**
@@ -108,7 +109,7 @@ export interface InternalHttpResourcesSetup {
  */
 export interface HttpResources {
   /** To register a route handler executing passed function to form response. */
-  register: <P, Q, B, Context extends object = object>(
+  register: <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext>(
     route: RouteConfig<P, Q, B, 'get'>,
     handler: HttpResourcesRequestHandler<P, Q, B, Context>
   ) => void;

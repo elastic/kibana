@@ -36,13 +36,13 @@ import type { CoreId, PluginOpaqueId, RequestHandler, RequestHandlerContext } fr
  * @public
  */
 export type IContextProvider<
-  Context extends object = object,
-  Deps extends RequestHandlerContext = RequestHandlerContext
+  Context extends RequestHandlerContext,
+  ContextName extends keyof Context
 > = (
   // context.core will always be available, but plugin contexts are typed as optional
-  context: RequestHandlerContext & Deps,
+  context: Omit<Context, ContextName>,
   ...rest: HandlerParameters<RequestHandler>
-) => Promise<Context> | Context;
+) => Promise<Context[ContextName]> | Context[ContextName];
 
 /**
  * A function that accepts a context object and an optional number of additional arguments. Used for the generic types
@@ -161,13 +161,10 @@ export interface IContextContainer<THandler extends RequestHandler> {
    * @param provider - A {@link IContextProvider} to be called each time a new context is created.
    * @returns The {@link IContextContainer} for method chaining.
    */
-  registerContext<
-    Context extends object = object,
-    Deps extends RequestHandlerContext = RequestHandlerContext
-  >(
+  registerContext<Context extends RequestHandlerContext, ContextName extends keyof Context>(
     pluginOpaqueId: PluginOpaqueId,
-    contextName: string,
-    provider: IContextProvider<Context, Deps>
+    contextName: ContextName,
+    provider: IContextProvider<Context, ContextName>
   ): this;
 
   /**
@@ -212,13 +209,14 @@ export class ContextContainer<THandler extends RequestHandler>
   }
 
   public registerContext = <
-    Context extends object = object,
-    Deps extends RequestHandlerContext = RequestHandlerContext
+    Context extends RequestHandlerContext,
+    ContextName extends keyof Context
   >(
     source: symbol,
-    contextName: string,
-    provider: IContextProvider<Context, Deps>
+    name: ContextName,
+    provider: IContextProvider<Context, ContextName>
   ): this => {
+    const contextName = name as string;
     if (this.contextProviders.has(contextName)) {
       throw new Error(`Context provider for ${contextName} has already been registered.`);
     }

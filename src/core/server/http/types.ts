@@ -46,9 +46,9 @@ export type RequestHandlerContextContainer = IContextContainer<RequestHandler>;
  * @public
  */
 export type RequestHandlerContextProvider<
-  Context extends object = object,
-  Deps extends RequestHandlerContext = RequestHandlerContext
-> = IContextProvider<Context, Deps>;
+  Context extends RequestHandlerContext,
+  ContextName extends keyof Context
+> = IContextProvider<Context, ContextName>;
 
 /**
  * @public
@@ -241,7 +241,9 @@ export interface HttpServiceSetup {
    * ```
    * @public
    */
-  createRouter: <Context extends object = object>() => IRouter<Context>;
+  createRouter: <
+    Context extends RequestHandlerContext = RequestHandlerContext
+  >() => IRouter<Context>;
 
   /**
    * Register a context provider for a route handler.
@@ -267,11 +269,11 @@ export interface HttpServiceSetup {
    * @public
    */
   registerRouteHandlerContext: <
-    Context extends object = object,
-    Deps extends RequestHandlerContext = RequestHandlerContext
+    Context extends RequestHandlerContext,
+    ContextName extends keyof Context
   >(
-    contextName: string,
-    provider: RequestHandlerContextProvider<Context, Deps>
+    contextName: ContextName,
+    provider: RequestHandlerContextProvider<Context, ContextName>
   ) => RequestHandlerContextContainer;
 
   /**
@@ -286,19 +288,19 @@ export interface InternalHttpServiceSetup
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   externalUrl: ExternalUrlConfig;
-  createRouter: <Context extends object = object>(
+  createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>(
     path: string,
     plugin?: PluginOpaqueId
   ) => IRouter<Context>;
   registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
   registerRouteHandlerContext: <
-    Context extends object = object,
-    Deps extends RequestHandlerContext = RequestHandlerContext
+    Context extends RequestHandlerContext,
+    ContextName extends keyof Context
   >(
     pluginOpaqueId: PluginOpaqueId,
-    contextName: string,
-    provider: RequestHandlerContextProvider<Context, Deps>
+    contextName: ContextName,
+    provider: RequestHandlerContextProvider<Context, ContextName>
   ) => RequestHandlerContextContainer;
 }
 

@@ -245,13 +245,14 @@ export class LegacyService implements CoreService {
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
         registerRouteHandlerContext: <
-          Context extends object = object,
-          Deps extends RequestHandlerContext = RequestHandlerContext
+          Context extends RequestHandlerContext,
+          ContextName extends keyof Context
         >(
-          contextName: string,
-          provider: RequestHandlerContextProvider<Context, Deps>
+          contextName: ContextName,
+          provider: RequestHandlerContextProvider<Context, ContextName>
         ) => setupDeps.core.http.registerRouteHandlerContext(this.legacyId, contextName, provider),
-        createRouter: <Context extends object = object>() => router as IRouter<Context>,
+        createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() =>
+          router as IRouter<Context>,
         resources: setupDeps.core.httpResources.createRegistrar(router),
         registerOnPreRouting: setupDeps.core.http.registerOnPreRouting,
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,

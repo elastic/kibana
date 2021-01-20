@@ -55,7 +55,10 @@ interface RouterRoute {
  *
  * @public
  */
-export type RouteRegistrar<Method extends RouteMethod, Context extends object = object> = <P, Q, B>(
+export type RouteRegistrar<
+  Method extends RouteMethod,
+  Context extends RequestHandlerContext = RequestHandlerContext
+> = <P, Q, B>(
   route: RouteConfig<P, Q, B, Method>,
   handler: RequestHandler<P, Q, B, Context, Method>
 ) => void;
@@ -66,7 +69,7 @@ export type RouteRegistrar<Method extends RouteMethod, Context extends object = 
  *
  * @public
  */
-export interface IRouter<Context extends object = object> {
+export interface IRouter<Context extends RequestHandlerContext = RequestHandlerContext> {
   /**
    * Resulted path
    */
@@ -210,7 +213,8 @@ function validOptions(
 /**
  * @internal
  */
-export class Router<Context extends object = object> implements IRouter<Context> {
+export class Router<Context extends RequestHandlerContext = RequestHandlerContext>
+  implements IRouter<Context> {
   public routes: Array<Readonly<RouterRoute>> = [];
   public get: IRouter<Context>['get'];
   public post: IRouter<Context>['post'];
@@ -356,11 +360,11 @@ export type RequestHandler<
   P = unknown,
   Q = unknown,
   B = unknown,
-  Context extends object = object,
+  Context extends RequestHandlerContext = RequestHandlerContext,
   Method extends RouteMethod = any,
   ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
 > = (
-  context: RequestHandlerContext & Context,
+  context: Context,
   request: KibanaRequest<P, Q, B, Method>,
   response: ResponseFactory
 ) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
@@ -382,7 +386,7 @@ export type RequestHandlerWrapper = <
   P,
   Q,
   B,
-  Context extends object = object,
+  Context extends RequestHandlerContext = RequestHandlerContext,
   Method extends RouteMethod = any,
   ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
 >(

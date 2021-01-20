@@ -111,7 +111,7 @@ export class HttpService
 
       externalUrl: new ExternalUrlConfig(config.externalUrl),
 
-      createRouter: <Context extends object = object>(
+      createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>(
         path: string,
         pluginId: PluginOpaqueId = this.coreContext.coreId
       ) => {
@@ -122,12 +122,12 @@ export class HttpService
       },
 
       registerRouteHandlerContext: <
-        Context extends object = object,
-        Deps extends RequestHandlerContext = RequestHandlerContext
+        Context extends RequestHandlerContext,
+        ContextName extends keyof Context
       >(
         pluginOpaqueId: PluginOpaqueId,
-        contextName: string,
-        provider: RequestHandlerContextProvider<Context, Deps>
+        contextName: ContextName,
+        provider: RequestHandlerContextProvider<Context, ContextName>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
 
