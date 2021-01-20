@@ -30,7 +30,7 @@ NODE_OPTIONS="--max-old-space-size=4096" node scripts/build --release
 
 The majority of this logic is extracted from the grunt build that has existed forever, and is designed to maintain the general structure grunt provides including tasks and config. The [build_distributables.js] file defines which tasks are run.
 
-**Task**: [tasks/\*] define individual parts of the build. Each task is an object with a `run()` method, a `description` property, and optionally a `global` property. They are executed with the runner either once (if they are global) or once for each build. Non-global/local tasks are called once for each build, meaning they will be called twice be default, once for the OSS build and once for the default build and receive a build object as the third argument to `run()` which can be used to determine paths and properties for that build.
+**Task**: [tasks/\*] define individual parts of the build. Each task is an object with a `run()` method and a `description` property. They are executed with the runner once. Tasks receive a build object as the third argument to `run()` which can be used to determine paths and properties for that build.
 
 **Config**: [lib/config.js] defines the config used to execute tasks. It is mostly used to determine absolute paths to specific locations, and to get access to the Platforms.
 
@@ -38,7 +38,7 @@ The majority of this logic is extracted from the grunt build that has existed fo
 
 **Log**: We uses the `ToolingLog` defined in [../tooling_log/tooling_log.js]
 
-**Runner**: [lib/runner.js] defines the runner used to execute tasks. It calls tasks with specific arguments based on whether they are global or not.
+**Runner**: [lib/runner.js] defines the runner used to execute tasks. It calls tasks with the proper build log tag.
 
 **Build**:  [lib/build.js], created by the runner and passed to tasks so they can resolve paths and get information about the build they are operating on.
 

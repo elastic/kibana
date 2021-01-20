@@ -6,12 +6,11 @@
  * Public License, v 1.
  */
 
-import { getFileHash, GlobalTask } from '../../lib';
+import { getFileHash, Task } from '../../lib';
 import { getNodeDownloadInfo } from './node_download_info';
 import { getNodeShasums } from './node_shasums';
 
-export const VerifyExistingNodeBuilds: GlobalTask = {
-  global: true,
+export const VerifyExistingNodeBuilds: Task = {
   description: 'Verifying previously downloaded node.js build for all platforms',
   async run(config, log) {
     const shasums = await getNodeShasums(log, config.getNodeVersion());

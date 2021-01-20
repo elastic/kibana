@@ -6,10 +6,9 @@
  * Public License, v 1.
  */
 
-import { GlobalTask } from '../lib';
+import { Task } from '../lib';
 
-export const VerifyEnv: GlobalTask = {
-  global: true,
+export const VerifyEnv: Task = {
   description: 'Verifying environment meets requirements',
 
   async run(config, log) {

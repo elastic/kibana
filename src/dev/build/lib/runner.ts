@@ -18,20 +18,13 @@ interface Options {
   log: ToolingLog;
 }
 
-export interface GlobalTask {
-  global: true;
-  description: string;
-  run(config: Config, log: ToolingLog, builds: Build[]): Promise<void>;
-}
-
 export interface Task {
-  global?: false;
   description: string;
   run(config: Config, log: ToolingLog, build: Build): Promise<void>;
 }
 
 export function createRunner({ config, log }: Options) {
-  async function execTask(desc: string, task: Task | GlobalTask, lastArg: any) {
+  async function execTask(desc: string, task: Task, lastArg: any) {
     log.info(desc);
     log.indent(4);
 
@@ -60,21 +53,15 @@ export function createRunner({ config, log }: Options) {
     }
   }
 
-  const builds: Build[] = [new Build(config)];
+  const build: Build = new Build(config);
 
   /**
    * Run a task by calling its `run()` method with three arguments:
    *    `config`: an object with methods for determining top-level config values, see `./config.js`
    *    `log`: an instance of the `ToolingLog`, see `../../tooling_log/tooling_log.js`
-   *    `builds?`: If task does is not defined as `global: true` then it is called for each build and passed each one here.
+   *    `build`: build to call the task on
    */
-  return async function run(task: Task | GlobalTask) {
-    if (task.global) {
-      await execTask(chalk`{dim [  global  ]} ${task.description}`, task, builds);
-    } else {
-      for (const build of builds) {
-        await execTask(`${build.getLogTag()} ${task.description}`, task, build);
-      }
-    }
+  return async function run(task: Task) {
+    await execTask(`${build.getLogTag()} ${task.description}`, task, build);
   };
 }

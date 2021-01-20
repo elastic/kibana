@@ -8,11 +8,10 @@
 
 import Path from 'path';
 
-import { untar, GlobalTask, copy } from '../../lib';
+import { untar, Task, copy } from '../../lib';
 import { getNodeDownloadInfo } from './node_download_info';
 
-export const ExtractNodeBuilds: GlobalTask = {
-  global: true,
+export const ExtractNodeBuilds: Task = {
   description: 'Extracting node.js builds for all platforms',
   async run(config) {
     await Promise.all(

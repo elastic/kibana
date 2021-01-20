@@ -8,10 +8,9 @@
 
 import minimatch from 'minimatch';
 
-import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask } from '../lib';
+import { deleteAll, deleteEmptyFolders, scanDelete, Task } from '../lib';
 
-export const Clean: GlobalTask = {
-  global: true,
+export const Clean: Task = {
   description: 'Cleaning artifacts from previous builds',
 
   async run(config, log) {

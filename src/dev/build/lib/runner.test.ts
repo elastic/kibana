@@ -61,22 +61,7 @@ const setup = async () => {
 };
 
 describe('default build', () => {
-  it('runs global task once, passing config and log', async () => {
-    const { config, run } = await setup();
-
-    const mock = jest.fn();
-
-    await run({
-      global: true,
-      description: 'foo',
-      run: mock,
-    });
-
-    expect(mock).toHaveBeenCalledTimes(1);
-    expect(mock).toHaveBeenLastCalledWith(config, log, [expect.any(Build), expect.any(Build)]);
-  });
-
-  it('calls local tasks once', async () => {
+  it('calls tasks once, passing config and log', async () => {
     const { config, run } = await setup();
 
     const mock = jest.fn();

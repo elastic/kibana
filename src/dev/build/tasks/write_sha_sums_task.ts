@@ -8,10 +8,9 @@
 
 import globby from 'globby';
 
-import { getFileHash, write, GlobalTask } from '../lib';
+import { getFileHash, write, Task } from '../lib';
 
-export const WriteShaSums: GlobalTask = {
-  global: true,
+export const WriteShaSums: Task = {
   description: 'Writing sha1sums of archives and packages in target directory',
 
   async run(config) {
