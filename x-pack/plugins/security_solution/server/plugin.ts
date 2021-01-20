@@ -374,6 +374,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerIngestCallback,
       savedObjectsStart: core.savedObjects,
       licenseService,
+      exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
     });
 
     this.telemetryEventsSender.start(core, plugins.telemetry, plugins.taskManager);
