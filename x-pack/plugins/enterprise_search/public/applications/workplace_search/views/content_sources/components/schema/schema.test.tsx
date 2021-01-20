@@ -13,6 +13,8 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiFieldSearch } from '@elastic/eui';
 
+import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
+
 import { IndexingStatus } from '../../../../../shared/indexing_status';
 import { Loading } from '../../../../../shared/loading';
 import { SchemaAddFieldModal } from '../../../../../shared/schema/schema_add_field_modal';
@@ -37,12 +39,6 @@ describe('Schema', () => {
   const filterValue = '';
   const showAddFieldModal = false;
   const addFieldFormErrors = null;
-  const mostRecentIndexJob = {
-    isActive: true,
-    hasErrors: true,
-    percentageComplete: 50,
-    activeReindexJobId: '123',
-  };
   const formUnchanged = true;
   const dataLoading = false;
   const isOrganization = true;
