@@ -9,7 +9,6 @@ import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
-import { DetailedPeerCertificate } from 'tls';
 import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
@@ -19,26 +18,20 @@ import { EuiGlobalToastListToast } from '@elastic/eui';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
-import { IncomingHttpHeaders } from 'http';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
-import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
-import { PeerCertificate } from 'tls';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
 import React from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Request } from '@hapi/hapi';
 import * as Rx from 'rxjs';
-import { SchemaTypeError } from '@kbn/config-schema';
-import { ShallowPromise } from '@kbn/utility-types';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -46,7 +39,6 @@ import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
-import { URL } from 'url';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
@@ -64,7 +56,7 @@ export interface App<HistoryLocationState = unknown> {
     icon?: string;
     id: string;
     meta?: AppMeta;
-    mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
+    mount: AppMount<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
     order?: number;
     status?: AppStatus;
@@ -124,8 +116,6 @@ export type AppLeaveHandler = (factory: AppLeaveActionFactory, nextAppId?: strin
 export interface ApplicationSetup {
     register<HistoryLocationState = unknown>(app: App<HistoryLocationState>): void;
     registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
-    // @deprecated
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
 
 // @public (undocumented)
@@ -139,8 +129,6 @@ export interface ApplicationStart {
     }): string;
     navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
     navigateToUrl(url: string): Promise<void>;
-    // @deprecated
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
 
 // @public
@@ -151,27 +139,6 @@ export interface AppMeta {
 
 // @public
 export type AppMount<HistoryLocationState = unknown> = (params: AppMountParameters<HistoryLocationState>) => AppUnmount | Promise<AppUnmount>;
-
-// @public @deprecated
-export interface AppMountContext {
-    core: {
-        application: Pick<ApplicationStart, 'capabilities' | 'navigateToApp'>;
-        chrome: ChromeStart;
-        docLinks: DocLinksStart;
-        http: HttpStart;
-        i18n: I18nStart;
-        notifications: NotificationsStart;
-        overlays: OverlayStart;
-        savedObjects: SavedObjectsStart;
-        uiSettings: IUiSettingsClient;
-        injectedMetadata: {
-            getInjectedVar: (name: string, defaultValue?: any) => unknown;
-        };
-    };
-}
-
-// @public @deprecated
-export type AppMountDeprecated<HistoryLocationState = unknown> = (context: AppMountContext, params: AppMountParameters<HistoryLocationState>) => AppUnmount | Promise<AppUnmount>;
 
 // @public (undocumented)
 export interface AppMountParameters<HistoryLocationState = unknown> {
@@ -399,11 +366,6 @@ export interface ChromeStart {
     setIsVisible(isVisible: boolean): void;
 }
 
-// @public
-export interface ContextSetup {
-    createContextContainer<THandler extends HandlerFunction<any>>(): IContextContainer<THandler>;
-}
-
 // @internal (undocumented)
 export interface CoreContext {
     // Warning: (ae-forgotten-export) The symbol "CoreId" needs to be exported by the entry point index.d.ts
@@ -421,8 +383,6 @@ export interface CoreContext {
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
     application: ApplicationSetup;
-    // @deprecated (undocumented)
-    context: ContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
@@ -656,15 +616,6 @@ export interface FatalErrorsSetup {
 // @public
 export type FatalErrorsStart = FatalErrorsSetup;
 
-// @public
-export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
-
-// @public
-export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => any;
-
-// @public
-export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
-
 // @internal (undocumented)
 export class HttpFetchError extends Error implements IHttpFetchError {
     constructor(message: string, name: string, request: Request, response?: Response | undefined, body?: any);
@@ -820,17 +771,6 @@ export interface IBasePath {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "BasePath"
     readonly serverBasePath: string;
 }
-
-// @public
-export interface IContextContainer<THandler extends HandlerFunction<any>> {
-    createHandler(pluginOpaqueId: PluginOpaqueId, handler: THandler): (...rest: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
-    registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
-}
-
-// Warning: (ae-forgotten-export) The symbol "PartialExceptFor" needs to be exported by the entry point index.d.ts
-//
-// @public
-export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: PartialExceptFor<HandlerContextType<THandler>, 'core'>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 
 // @public
 export interface IExternalUrl {
@@ -1562,6 +1502,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:185:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:164:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

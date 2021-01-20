@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { StubBrowserStorage } from '@kbn/test/jest';
@@ -37,6 +26,7 @@ describe('kbnUrlTracker', () => {
   let state2Subject: Subject<{ key2: string }>;
   let navLinkUpdaterSubject: BehaviorSubject<AppUpdater>;
   let toastService: jest.Mocked<ToastsSetup>;
+  const onBeforeNavLinkSaved = jest.fn((url) => url);
 
   function createTracker(shouldTrackUrlUpdate?: (pathname: string) => boolean) {
     urlTracker = createKbnUrlTracker({
@@ -58,6 +48,7 @@ describe('kbnUrlTracker', () => {
       navLinkUpdater$: navLinkUpdaterSubject,
       toastNotifications: toastService,
       shouldTrackUrlUpdate,
+      onBeforeNavLinkSaved,
     });
   }
 
@@ -101,6 +92,14 @@ describe('kbnUrlTracker', () => {
     expect(getActiveNavLinkUrl()).toEqual('#/start');
   });
 
+  test('save current URL to storage when app is mounted', () => {
+    history.push('#/start/deep/path/2');
+    createTracker();
+    urlTracker.appMounted();
+    expect(storage.getItem('storageKey')).toBe('#/start/deep/path/2');
+    expect(getActiveNavLinkUrl()).toEqual('#/start');
+  });
+
   test('change nav link to last visited url within app after unmount', () => {
     createTracker();
     urlTracker.appMounted();
@@ -117,7 +116,7 @@ describe('kbnUrlTracker', () => {
     history.push('#/start/deep/path/2');
     history.push('#/start/deep/path/3');
     urlTracker.appUnMounted();
-    expect(unhashUrl).toHaveBeenCalledTimes(2);
+    expect(unhashUrl).toHaveBeenCalledTimes(3); // from initial mount + two subsequent location changes
     expect(getActiveNavLinkUrl()).toEqual('#/start/deep/path/3?unhashed');
   });
 
@@ -213,6 +212,16 @@ describe('kbnUrlTracker', () => {
       history.push('#/setup/path/2');
       urlTracker.appUnMounted();
       expect(getActiveNavLinkUrl()).toEqual('#/start/deep/path');
+    });
+  });
+
+  describe('onBeforeNavLinkSaved', () => {
+    test('onBeforeNavLinkSaved saves changed URL', () => {
+      createTracker();
+      urlTracker.appMounted();
+      onBeforeNavLinkSaved.mockImplementationOnce(() => 'new_url');
+      history.push('#/start/deep/path?state1=(key1:abc)');
+      expect(storage.getItem('storageKey')).toEqual('new_url');
     });
   });
 });
