@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiFlyoutProps } from '@elastic/eui/src/components/flyout/flyout';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
@@ -27,6 +27,8 @@ import {
   isCreationDialogFormValid,
   isCreationInProgress,
   isCreationSuccessful,
+  listOfPolicies,
+  loadingPolicies,
 } from '../../store/selectors';
 import { AppAction } from '../../../../../common/store/actions';
 import { useTrustedAppsSelector } from '../hooks';
@@ -41,8 +43,17 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     const creationErrors = useTrustedAppsSelector(getCreationError);
     const creationSuccessful = useTrustedAppsSelector(isCreationSuccessful);
     const isFormValid = useTrustedAppsSelector(isCreationDialogFormValid);
+    const isLoadingPolicies = useTrustedAppsSelector(loadingPolicies);
+    const policyList = useTrustedAppsSelector(listOfPolicies);
 
     const dataTestSubj = flyoutProps['data-test-subj'];
+
+    const policies = useMemo<CreateTrustedAppFormProps['policies']>(() => {
+      return {
+        options: policyList,
+        isLoading: isLoadingPolicies,
+      };
+    }, [isLoadingPolicies, policyList]);
 
     const getTestId = useCallback(
       (suffix: string): string | undefined => {
@@ -102,6 +113,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             onChange={handleFormOnChange}
             isInvalid={!!creationErrors}
             error={creationErrors?.message}
+            policies={policies}
             data-test-subj={getTestId('createForm')}
           />
         </EuiFlyoutBody>

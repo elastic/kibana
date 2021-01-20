@@ -22,18 +22,18 @@ interface OptionPolicyData {
 
 type EffectedPolicyOption = EuiSelectableOption<OptionPolicyData>;
 
-interface EffectedPolicySelectionState {
+export interface EffectedPolicySelection {
   isGlobal: boolean;
   selected: PolicyData[];
 }
 
 export type EffectedPolicySelectProps = Omit<
-  EuiSelectableProps,
+  EuiSelectableProps<OptionPolicyData>,
   'onChange' | 'options' | 'children'
 > & {
   options: PolicyData[];
   isGlobal: boolean;
-  onChange: (selection: EffectedPolicySelectionState) => void;
+  onChange: (selection: EffectedPolicySelection) => void;
   selected?: PolicyData[];
 };
 export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
@@ -48,7 +48,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   }) => {
     const DEFAULT_LIST_PROPS = useMemo(() => ({ bordered: true }), []);
 
-    const [selectionState, setSelectionState] = useState<EffectedPolicySelectionState>({
+    const [selectionState, setSelectionState] = useState<EffectedPolicySelection>({
       isGlobal,
       selected,
     });
@@ -149,4 +149,4 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   }
 );
 
-EffectedPolicySelect.displayName = 'PolicySelect';
+EffectedPolicySelect.displayName = 'EffectedPolicySelect';

@@ -116,10 +116,10 @@ const updateCreationDialogIfNeeded = (
   const newEntry = getCreationDialogFormEntry(store.getState());
   const shouldShow = isCreationDialogLocation(store.getState());
 
-  if (shouldShow && !newEntry) {
+  if (shouldShow) {
     store.dispatch({
       type: 'trustedAppCreationDialogStarted',
-      payload: { entry: defaultNewTrustedApp() },
+      payload: { entry: newEntry || defaultNewTrustedApp() },
     });
   } else if (!shouldShow && newEntry) {
     store.dispatch({
