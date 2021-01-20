@@ -193,7 +193,7 @@ export function LayerPanel(
 
           <EuiSpacer size="m" />
 
-          {groups.map((group, groupIndex) => {
+          {groups.map((group) => {
             const newId = generateId();
             const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
 
@@ -207,7 +207,7 @@ export function LayerPanel(
                 fullWidth
                 label={<div className="lnsLayerPanel__groupLabel">{group.groupLabel}</div>}
                 labelType="legend"
-                key={groupIndex}
+                key={group.groupId}
                 isInvalid={isMissing}
                 error={
                   isMissing ? (
@@ -222,7 +222,10 @@ export function LayerPanel(
                 }
               >
                 <>
-                  <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
+                  <ReorderProvider
+                    id={`${layerId}-${group.groupId}`}
+                    className={'lnsLayerPanel__group'}
+                  >
                     {group.accessors.map((accessorConfig) => {
                       const accessor = accessorConfig.columnId;
                       const { dragging } = dragDropContext;
@@ -506,17 +509,32 @@ export function LayerPanel(
                       columnId: activeId,
                       filterOperations: activeGroup.filterOperations,
                       dimensionGroups: groups,
-                      setState: (newState: unknown, shouldUpdateVisualization?: boolean) => {
-                        if (shouldUpdateVisualization) {
+                      setState: (
+                        newState: unknown,
+                        {
+                          shouldReplaceDimension,
+                          shouldRemoveDimension,
+                        }: {
+                          shouldReplaceDimension?: boolean;
+                          shouldRemoveDimension?: boolean;
+                        } = {}
+                      ) => {
+                        if (shouldReplaceDimension || shouldRemoveDimension) {
                           props.updateAll(
                             datasourceId,
                             newState,
-                            activeVisualization.setDimension({
-                              layerId,
-                              groupId: activeGroup.groupId,
-                              columnId: activeId,
-                              prevState: props.visualizationState,
-                            })
+                            shouldRemoveDimension
+                              ? activeVisualization.removeDimension({
+                                  layerId,
+                                  columnId: activeId,
+                                  prevState: props.visualizationState,
+                                })
+                              : activeVisualization.setDimension({
+                                  layerId,
+                                  groupId: activeGroup.groupId,
+                                  columnId: activeId,
+                                  prevState: props.visualizationState,
+                                })
                           );
                         } else {
                           props.updateDatasource(datasourceId, newState);

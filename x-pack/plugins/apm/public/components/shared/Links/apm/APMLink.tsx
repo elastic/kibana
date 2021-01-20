@@ -36,16 +36,24 @@ export const PERSISTENT_APM_PARAMS: Array<keyof APMQueryParams> = [
 /**
  * Hook to get a link for a path with persisted filters
  */
-export function useAPMHref(
-  path: string,
-  persistentFilters: Array<keyof APMQueryParams> = []
-) {
+export function useAPMHref({
+  path,
+  persistedFilters,
+  query,
+}: {
+  path: string;
+  persistedFilters?: Array<keyof APMQueryParams>;
+  query?: APMQueryParams;
+}) {
   const { urlParams } = useUrlParams();
   const { basePath } = useApmPluginContext().core.http;
   const { search } = useLocation();
-  const query = pickKeys(urlParams as APMQueryParams, ...persistentFilters);
+  const nextQuery = {
+    ...pickKeys(urlParams as APMQueryParams, ...(persistedFilters ?? [])),
+    ...query,
+  };
 
-  return getAPMHref({ basePath, path, query, search });
+  return getAPMHref({ basePath, path, query: nextQuery, search });
 }
 
 /**

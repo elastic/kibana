@@ -5,8 +5,10 @@
  */
 
 import Boom from '@hapi/boom';
-import { errors as esErrors } from 'elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
+import { errors as legacyESErrors } from 'elasticsearch';
 import * as errors from './errors';
+import { securityMock } from './mocks';
 
 describe('lib/errors', () => {
   describe('#wrapError', () => {
@@ -55,14 +57,76 @@ describe('lib/errors', () => {
       expect(errors.getErrorStatusCode(Boom.unauthorized())).toBe(401);
     });
 
-    it('extracts status code from Elasticsearch client error', () => {
-      expect(errors.getErrorStatusCode(new esErrors.BadRequest())).toBe(400);
-      expect(errors.getErrorStatusCode(new esErrors.AuthenticationException())).toBe(401);
+    it('extracts status code from Elasticsearch client response error', () => {
+      expect(
+        errors.getErrorStatusCode(
+          new esErrors.ResponseError(securityMock.createApiResponse({ statusCode: 400, body: {} }))
+        )
+      ).toBe(400);
+      expect(
+        errors.getErrorStatusCode(
+          new esErrors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
+        )
+      ).toBe(401);
+    });
+
+    it('extracts status code from legacy Elasticsearch client error', () => {
+      expect(errors.getErrorStatusCode(new legacyESErrors.BadRequest())).toBe(400);
+      expect(errors.getErrorStatusCode(new legacyESErrors.AuthenticationException())).toBe(401);
     });
 
     it('extracts status code from `status` property', () => {
       expect(errors.getErrorStatusCode({ statusText: 'Bad Request', status: 400 })).toBe(400);
       expect(errors.getErrorStatusCode({ statusText: 'Unauthorized', status: 401 })).toBe(401);
+    });
+  });
+
+  describe('#getDetailedErrorMessage', () => {
+    it('extracts body payload from Boom error', () => {
+      expect(errors.getDetailedErrorMessage(Boom.badRequest())).toBe(
+        JSON.stringify({ statusCode: 400, error: 'Bad Request', message: 'Bad Request' })
+      );
+      expect(errors.getDetailedErrorMessage(Boom.unauthorized())).toBe(
+        JSON.stringify({ statusCode: 401, error: 'Unauthorized', message: 'Unauthorized' })
+      );
+
+      const customBoomError = Boom.unauthorized();
+      customBoomError.output.payload = {
+        statusCode: 401,
+        error: 'some-weird-error',
+        message: 'some-weird-message',
+      };
+      expect(errors.getDetailedErrorMessage(customBoomError)).toBe(
+        JSON.stringify({
+          statusCode: 401,
+          error: 'some-weird-error',
+          message: 'some-weird-message',
+        })
+      );
+    });
+
+    it('extracts body from Elasticsearch client response error', () => {
+      expect(
+        errors.getDetailedErrorMessage(
+          new esErrors.ResponseError(
+            securityMock.createApiResponse({
+              statusCode: 401,
+              body: { field1: 'value-1', field2: 'value-2' },
+            })
+          )
+        )
+      ).toBe(JSON.stringify({ field1: 'value-1', field2: 'value-2' }));
+    });
+
+    it('extracts status code from legacy Elasticsearch client error', () => {
+      expect(errors.getDetailedErrorMessage(new legacyESErrors.BadRequest())).toBe('Bad Request');
+      expect(errors.getDetailedErrorMessage(new legacyESErrors.AuthenticationException())).toBe(
+        'Authentication Exception'
+      );
+    });
+
+    it('extracts `message` property', () => {
+      expect(errors.getDetailedErrorMessage(new Error('some-message'))).toBe('some-message');
     });
   });
 });

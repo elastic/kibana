@@ -1,4 +1,5 @@
-body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
+/* stylelint-disable selector-no-qualifying-type */
+body.canvas-isFullscreen {
   // following two rules are for overriding the header bar padding
   &.euiBody--headerIsFixed {
     padding-top: 0;
