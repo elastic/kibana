@@ -53,5 +53,11 @@ function getUrlGeneratorState({
     viewMode: appState.viewMode,
     panels: getDashboardId() ? undefined : appState.panels,
     searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
+    refreshInterval: shouldRestoreSearchSession
+      ? {
+          pause: true, // force pause refresh interval when restoring a session
+          value: 0,
+        }
+      : undefined,
   };
 }

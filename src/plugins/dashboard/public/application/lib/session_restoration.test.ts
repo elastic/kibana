@@ -50,5 +50,11 @@ describe('createSessionRestorationDataProvider', () => {
       expect(initialState.timeRange).toBe(relativeTime);
       expect(restoreState.timeRange).toBe(absoluteTime);
     });
+
+    test('restoreState has refreshInterval paused', async () => {
+      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      expect(initialState.refreshInterval).toBeUndefined();
+      expect(restoreState.refreshInterval?.pause).toBe(true);
+    });
   });
 });
