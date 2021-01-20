@@ -231,8 +231,7 @@ which also contains the timelion APIs and backend, look at the vis_type_timelion
 
 
 |{kib-repo}blob/{branch}/src/plugins/usage_collection/README.md[usageCollection]
-|Usage Collection allows collecting usage data for other services to consume (telemetry and monitoring).
-To integrate with the telemetry services for usage collection of your feature, there are 2 steps:
+|The Usage Collection Service defines a set of APIs for other plugins to report the usage of their features. At the same time, it provides necessary the APIs for other services (i.e.: telemetry, monitoring, ...) to consume that usage data.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_default_editor/README.md[visDefaultEditor]
