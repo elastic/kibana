@@ -7,10 +7,11 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   const BULK_REQUESTS = [
@@ -98,10 +99,7 @@ export default function ({ getService }) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
-            ignore: [404],
-          })
+          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
       );
 
       it('should return 200 with individual responses', async () =>
