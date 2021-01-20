@@ -1,0 +1,65 @@
+[[add-panels-with-advanced-editors]]
+== Create panels with the advanced editors
+
+{kib} provides you with three advanced editors that you can use to manually create dashboard panels.
+
+[float]
+[[tsvb-advanced-editor]]
+=== TSVB
+
+*TSVB* is a time series data visualization editor that allows you to use the full power of the {es} aggregation framework. 
+
+With *TSVB*, you can:
+
+* Combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
+* Annotate time series data with timestamped events from an {es} index.
+* View the data in several types of visualizations, including charts, data tables, and markdown panels.
+* Display multiple <<index-patterns, index patterns>> in each visualization.
+* Customize the data with labels and colors.
+
+image::images/tsvb.png[TSVB UI]
+
+[float]
+[[vega-advanced-editor]]
+=== Custom visualizations
+
+*Vega* and *Vega-Lite* are visualization grammars that are integrated into {kib} for custom visualizations.
+
+* *Vega-Lite* &mdash; A high-level grammar for rapid analysis
+
+* *Vega* &mdash; A declarative language with support for interactivity
+
+*Vega* and *Vega-Lite* panels can display one or more data sources, including {es}, Elastic Map Service,
+URL, or static data, and support <<reference-for-kibana-extensions,{kib} extensions>> that allow you to embed the panels on your dashboard and add interactive tools.
+
+Use *Vega* or *Vega-Lite* when you want to create visualizations with:
+
+* Aggregations that use `nested` or `parent/child` mapping
+* Aggregations without an index pattern
+* Queries that use custom time filters
+* Complex calculations
+* Extracted data from _source instead of aggregations
+* Scatter charts, sankey charts, and custom maps
+* An unsupported visual theme
+
+These grammars have some limitations: they do not support tables, and can't run queries conditionally.
+
+image::images/vega.png[Vega UI]
+
+For detailed *Vega* and *Vega-Lite* information and examples, refer to <<resources-and-examples,Resources and examples>>. 
+
+[float]
+[[timelion-advanced-editor]]
+=== Timelion
+
+*Timelion* is driven by a simple expression language that you use to:
+
+* Retrieve time series data from one or more indices
+* Perform math across two or more time series
+* Visualize the results
+
+image:dashboard/images/timelion.png[Timelion]
+
+include::tsvb.asciidoc[]
+include::vega.asciidoc[]
+include::timelion.asciidoc[]

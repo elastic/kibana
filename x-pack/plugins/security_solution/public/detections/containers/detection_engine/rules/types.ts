@@ -177,9 +177,9 @@ export interface FilterOptions {
   filter: string;
   sortField: RulesSortingFields;
   sortOrder: SortOrder;
-  showCustomRules?: boolean;
-  showElasticRules?: boolean;
-  tags?: string[];
+  showCustomRules: boolean;
+  showElasticRules: boolean;
+  tags: string[];
 }
 
 export interface FetchRulesResponse {

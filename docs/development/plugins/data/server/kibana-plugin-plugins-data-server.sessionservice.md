@@ -4,7 +4,7 @@
 
 ## SessionService class
 
-The OSS session service. See data\_enhanced in X-Pack for the background session service.
+The OSS session service. See data\_enhanced in X-Pack for the search session service.
 
 <b>Signature:</b>
 

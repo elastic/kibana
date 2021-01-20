@@ -27,7 +27,7 @@ export const ExampleSearchResultGroup: React.FC = () => {
   } = useValues(DisplaySettingsLogic);
 
   return (
-    <div className="example-result-group">
+    <div className="example-result-group" data-test-subj="ExampleSearchResultGroup">
       <div className="example-result-group__header" style={{ backgroundColor: color }}>
         <CustomSourceIcon color={isColorDark.apply(null, hexToRgb(color)) ? 'white' : 'black'} />
         <span
@@ -61,7 +61,12 @@ export const ExampleSearchResultGroup: React.FC = () => {
                   {descriptionField ? (
                     <div>{result[descriptionField]}</div>
                   ) : (
-                    <span className="example-result-content-placeholder">Description</span>
+                    <span
+                      className="example-result-content-placeholder"
+                      data-test-subj="DefaultDescriptionLabel"
+                    >
+                      Description
+                    </span>
                   )}
                 </div>
               </div>
