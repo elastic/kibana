@@ -29,7 +29,6 @@ describe('buildSortedEventsQuery', () => {
       index: ['index-name'],
       size: 100,
       ignoreUnavailable: true,
-      ignore: [404],
       track_total_hits: true,
       body: {
         docvalue_fields: [
@@ -81,7 +80,6 @@ describe('buildSortedEventsQuery', () => {
       index: ['index-name'],
       size: 100,
       ignoreUnavailable: true,
-      ignore: [404],
       track_total_hits: true,
       body: {
         docvalue_fields: [
@@ -134,7 +132,6 @@ describe('buildSortedEventsQuery', () => {
       index: ['index-name'],
       size: 100,
       ignoreUnavailable: true,
-      ignore: [404],
       track_total_hits: true,
       body: {
         docvalue_fields: [
@@ -188,7 +185,6 @@ describe('buildSortedEventsQuery', () => {
       index: ['index-name'],
       size: 100,
       ignoreUnavailable: true,
-      ignore: [404],
       track_total_hits: true,
       body: {
         docvalue_fields: [
@@ -247,7 +243,6 @@ describe('buildSortedEventsQuery', () => {
       index: ['index-name'],
       size: 100,
       ignoreUnavailable: true,
-      ignore: [404],
       track_total_hits: true,
       body: {
         docvalue_fields: [
@@ -306,7 +301,6 @@ describe('buildSortedEventsQuery', () => {
       index: ['index-name'],
       size: 100,
       ignoreUnavailable: true,
-      ignore: [404],
       track_total_hits: true,
       body: {
         docvalue_fields: [
