@@ -20,7 +20,7 @@ import { from, Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 import type { SearchResponse } from 'elasticsearch';
 import type { Logger, SharedGlobalConfig } from 'kibana/server';
-import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import type { ISearchStrategy } from '../types';
 import type { SearchUsage } from '../collectors';
 import { getDefaultSearchParams, getShardTimeout, shimAbortSignal } from './request_utils';
@@ -61,8 +61,6 @@ export const esSearchStrategyProvider = (
       } catch (e: any) {
         if (e instanceof ResponseError) {
           throw new KbnServerError(e.message, e.statusCode, e.body);
-        } else if (e instanceof ElasticsearchClientError) {
-          throw new KbnServerError(e.message, 500);
         } else {
           throw new KbnServerError(e.message || 'Unknown error', 500);
         }
