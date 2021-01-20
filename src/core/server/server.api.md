@@ -2492,6 +2492,15 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
 }
 
 // @public
+export interface SavedObjectsImportActionRequiredWarning {
+    actionPath: string;
+    buttonLabel?: string;
+    message: string;
+    // (undocumented)
+    type: 'action_required';
+}
+
+// @public
 export interface SavedObjectsImportAmbiguousConflictError {
     // (undocumented)
     destinations: Array<{
@@ -2561,6 +2570,14 @@ export interface SavedObjectsImportFailure {
 }
 
 // @public
+export type SavedObjectsImportHook<T = unknown> = (objects: Array<SavedObject<T>>) => SavedObjectsImportHookResult | Promise<SavedObjectsImportHookResult>;
+
+// @public
+export interface SavedObjectsImportHookResult {
+    warnings?: SavedObjectsImportWarning[];
+}
+
+// @public
 export interface SavedObjectsImportMissingReferencesError {
     // (undocumented)
     references: Array<{
@@ -2589,6 +2606,8 @@ export interface SavedObjectsImportResponse {
     successCount: number;
     // (undocumented)
     successResults?: SavedObjectsImportSuccess[];
+    // (undocumented)
+    warnings: SavedObjectsImportWarning[];
 }
 
 // @public
@@ -2608,6 +2627,13 @@ export interface SavedObjectsImportRetry {
     }>;
     // (undocumented)
     type: string;
+}
+
+// @public
+export interface SavedObjectsImportSimpleWarning {
+    message: string;
+    // (undocumented)
+    type: 'simple';
 }
 
 // @public
@@ -2642,6 +2668,9 @@ export interface SavedObjectsImportUnsupportedTypeError {
     // (undocumented)
     type: 'unsupported_type';
 }
+
+// @public
+export type SavedObjectsImportWarning = SavedObjectsImportSimpleWarning | SavedObjectsImportActionRequiredWarning;
 
 // @public (undocumented)
 export interface SavedObjectsIncrementCounterField {
@@ -2823,6 +2852,7 @@ export interface SavedObjectsTypeManagementDefinition {
     getTitle?: (savedObject: SavedObject<any>) => string;
     icon?: string;
     importableAndExportable?: boolean;
+    onImport?: SavedObjectsImportHook;
 }
 
 // @public

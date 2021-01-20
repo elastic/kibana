@@ -23,6 +23,11 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportError,
+  SavedObjectsImportHook,
+  SavedObjectsImportHookResult,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
 } from './import';
 
 export {
