@@ -102,7 +102,7 @@ describe('TimeComparison', () => {
     });
   });
 
-  describe('Time range is greater than 8 days', () => {
+  describe('Time range is greater than 7 days', () => {
     it('Shows absolute times without year when within the same year', () => {
       const Wrapper = getWrapper({
         start: '2021-01-20T15:00:00.000Z',

@@ -7,9 +7,11 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { px } from '../../style/variables';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './KueryBar';
 import { TimeComparison } from './time_comparison';
+import { useBreakPoints } from '../app/RumDashboard/hooks/useBreakPoints';
 
 const SearchBarFlexGroup = styled(EuiFlexGroup)`
   margin: ${({ theme }) =>
@@ -21,19 +23,32 @@ interface Props {
   showTimeComparison?: boolean;
 }
 
+function getRowDirection(showColumn: boolean) {
+  return showColumn ? 'column' : 'row';
+}
+
 export function SearchBar({ prepend, showTimeComparison = false }: Props) {
+  const { isMedium, isLarge } = useBreakPoints();
   return (
-    <SearchBarFlexGroup alignItems="flexStart" gutterSize="s">
-      <EuiFlexItem grow={3}>
+    <SearchBarFlexGroup gutterSize="s" direction={getRowDirection(isLarge)}>
+      <EuiFlexItem>
         <KueryBar prepend={prepend} />
       </EuiFlexItem>
-      {showTimeComparison && (
-        <EuiFlexItem>
-          <TimeComparison />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={1}>
-        <DatePicker />
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          justifyContent="flexEnd"
+          gutterSize="s"
+          direction={getRowDirection(isMedium)}
+        >
+          {showTimeComparison && (
+            <EuiFlexItem style={{ minWidth: px(300) }}>
+              <TimeComparison />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem>
+            <DatePicker />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </SearchBarFlexGroup>
   );

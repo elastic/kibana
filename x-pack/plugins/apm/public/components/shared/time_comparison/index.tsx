@@ -13,6 +13,7 @@ import { getDateDifference } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { px, unit } from '../../../style/variables';
 import * as urlHelpers from '../../shared/Links/url_helpers';
+import { useBreakPoints } from '../../app/RumDashboard/hooks/useBreakPoints';
 
 const PrependContainer = styled.div`
   display: flex;
@@ -73,6 +74,7 @@ function getSelectOptions({ start, end }: { start?: string; end?: string }) {
 
 export function TimeComparison() {
   const history = useHistory();
+  const { isMedium, isLarge } = useBreakPoints();
   const {
     urlParams: { start, end, comparisonEnabled, comparisonType },
   } = useUrlParams();
@@ -109,6 +111,7 @@ export function TimeComparison() {
 
   return (
     <EuiSelect
+      fullWidth={!isMedium && isLarge}
       data-test-subj="comparisonSelect"
       disabled={selectOptions.length <= 1}
       options={selectOptions}
