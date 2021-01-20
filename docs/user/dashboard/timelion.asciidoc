@@ -1,0 +1,532 @@
+[[create-panels-with-timelion]]
+=== Timelion
+
+Instead of using a visual editor to create charts, you define a graph by chaining functions together, using a timelion specific syntax. This syntax enables some features that classical point series charts don't offer - like drawing data from different indices or data sources into one graph.
+
+[NOTE]
+====
+Timelion app deprecation
+
+*Timelion* is still supported, the *Timelion app* is deprecated in 7.0, replaced by
+dashboard features. In 8.0 and later, the *Timelion app* is removed from {kib}. 
+To prepare for the removal of *Timelion app*, you must migrate *Timelion app* worksheets to a dashboard.
+
+For information on how to migrate *Timelion app* worksheets, refer to the 
+link:https://www.elastic.co/guide/en/kibana/current/release-notes-7.10.0.html#deprecation-v7.10.0[7.10.0 Release Notes].
+====
+
+[float]
+==== Timelion expressions
+
+Timelion functions always start with a dot, followed by the function name, followed by parentheses containing all the parameters to the function.
+
+The `.es` (or `.elasticsearch` if you are a fan of typing long words) function gathers data from {es} and draws it over time. By default the .es function will just count the number of documents, resulting in a graph showing the amount of documents over time.
+
+[float]
+==== Function parameters
+
+Functions can have multiple parameters, and so does the `.es` function. Each parameter has a name, that you can use inside the parentheses to set its value. The parameters also have an order, which is shown by the autocompletion or the documentation (using the Docs button in the top menu).
+
+If you don't specify the parameter name, timelion assigns the values to the parameters in the order, they are listed in the documentation.
+
+The fist parameter of the .es function is the parameter q (for query), which is a Query String used to filter the data for this series. You can also explicitly reference this parameter by its name, and I would always recommend doing so as soon as you are passing more than one parameter to the function. The following two expressions are thus equivalent:
+
+.es(*)
+.es(q=*)
+
+Multiple parameters are separated by comma. The .es function has another parameter called index, that can be used to specify an index pattern for this series, so the query won't be executed again all indexes (or whatever you changed the above mentioned setting to).
+
+.es(q=*, index=logstash-*)
+
+If the value of your parameter contains spaces or commas you have to put the value in single or double quotes. You can omit these quotes otherwise.
+
+.es(q='some query', index=logstash-*)
+
+
+[float]
+==== Tutorial: Create visualizations with Timelion 
+
+You collected data from your operating system using Metricbeat, and you want to visualize and analyze the data on a dashboard. To create panels of the data, use *Timelion* to 
+create a time series visualization, 
+
+[float]
+===== Add the data and create the dashboard
+
+Set up Metricbeat, then create the dashboard.
+
+. To set up Metricbeat, go to {metricbeat-ref}/metricbeat-installation-configuration.html[Metricbeat quick start: installation and configuration]
+
+. From {kib}, open the main menu, then click *Dashboard*.
+
+. On the *Dashboards* page, click *Create dashboard*.
+
+[float]
+===== Open and set up Timelion
+
+Open *Timelion* and change the time range. 
+
+. On the dashboard, click *Create panel*.
+
+. On the *New visualization* window, click *Aggregation based > Timelion*.
+
+. Change the <<set-time-filter,time range>> to *Last 7 days*.
+
+[float]
+[[timelion-tutorial-create-time-series-visualizations]]
+==== Create a time series visualization
+
+To compare the real-time percentage of CPU time spent in user space to the results offset by one hour, create a time series visualization.
+
+[float]
+[[define-the-functions]]
+==== Define the functions
+
+To track the real-time percentage of CPU, enter the following in the *Timelion Expression* field, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
+----------------------------------
+
+[float]
+[[compare-the-data]]
+==== Compare the data
+
+To compare two data sets, add another series, and offset the data back by one hour, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct'),
+.es(offset=-1h,
+    index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
+----------------------------------
+
+[float]
+[[add-label-names]]
+==== Add label names
+
+To easily distinguish between the two data sets, add label names, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(offset=-1h,index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct').label('last hour'),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct').label('current hour')
+----------------------------------
+
+[float]
+[[add-a-title]]
+==== Add a title
+
+To make is easier for unfamiliar users to understand the purpose of the visualization, add a title, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(offset=-1h,
+    index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
+  .label('last hour'),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
+  .label('current hour')
+  .title('CPU usage over time')
+----------------------------------
+
+[float]
+[[change-the-chart-type]]
+==== Change the appearance of the chart lines
+
+To differentiate between the current hour and the last hour, change the appearance of the chart lines, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(offset=-1h,
+    index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
+  .label('last hour')
+  .lines(fill=1,width=0.5),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
+  .label('current hour')
+  .title('CPU usage over time')
+----------------------------------
+
+[float]
+[[change-the-line-colors]]
+==== Change the line colors
+
+*Timelion* supports standard color names, hexadecimal values, or a color schema for grouped data.
+
+To make the first data series stand out, change the line colors, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(offset=-1h,
+    index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
+  .label('last hour')
+  .lines(fill=1,width=0.5)
+  .color(gray),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
+  .label('current hour')
+  .title('CPU usage over time')
+  .color(#1E90FF)
+----------------------------------
+
+[float]
+[[make-adjustments-to-the-legend]]
+==== Adjust the legend
+
+Move the legend to the north west position  with two columns, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(offset=-1h,
+    index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
+  .label('last hour')
+  .lines(fill=1,width=0.5)
+  .color(gray),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
+  .label('current hour')
+  .title('CPU usage over time')
+  .color(#1E90FF)
+  .legend(columns=2, position=nw) <1>
+----------------------------------
+
+[role="screenshot"]
+image::images/timelion-customize04.png[Final time series visualization]
+{nbsp}
+
+[float]
+==== Save the panel
+
+Save and add the panel to the dashboard.
+
+. From the toolbar, click *Save*.
+
+. Enter the *Title* and optional *Description*. 
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
+
+. Click *Save and return*.
+
+[float]
+[[timelion-tutorial-create-visualizations-with-mathematical-functions]]
+=== Visualize the inbound and outbound network traffic
+
+To create a visualization for inbound and outbound network traffic, use mathematical functions.
+
+[float]
+[[mathematical-functions-define-functions]]
+==== Define the functions
+
+To start tracking the inbound and outbound network traffic, enter the following in the *Timelion Expression* field, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.in.bytes)
+----------------------------------
+
+[float]
+[[mathematical-functions-plot-change]]
+==== Plot the rate of change
+
+To easily monitor the inbound traffic, plots the change in values over time, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.in.bytes)
+  .derivative()
+----------------------------------
+
+Add a similar calculation for outbound traffic, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.in.bytes)
+  .derivative(),
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.out.bytes)
+  .derivative()
+  .multiply(-1) <1>
+----------------------------------
+
+<1> `.multiply(-1)` converts the outbound network traffic to a negative value since the outbound network traffic is leaving your machine.
+`.multiply()` multiplies the data series by a number, the result of a data series, or a list of data series. 
+
+[float]
+[[mathematical-functions-convert-data]]
+==== Change the data metric
+
+To make the data easier to analyze, change the data metric from `bytes` to `megabytes`, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.in.bytes)
+  .derivative()
+  .divide(1048576),
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.out.bytes)
+  .derivative()
+  .multiply(-1)
+  .divide(1048576) <1>
+----------------------------------
+
+<1> `.divide()` accepts the same input as `.multiply()`, then divides the data series by the defined divisor.
+
+[float]
+[[mathematical-functions-add-labels]]
+==== Customize and format the visualization
+
+Customize and format the visualization using the following functions, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.in.bytes)
+  .derivative()
+  .divide(1048576)
+  .lines(fill=2, width=1)
+  .color(green)
+  .label("Inbound traffic")         
+  .title("Network traffic (MB/s)"), 
+.es(index=metricbeat*,
+    timefield=@timestamp,
+    metric=max:system.network.out.bytes)
+  .derivative()
+  .multiply(-1)
+  .divide(1048576)
+  .lines(fill=2, width=1)           
+  .color(blue)                     
+  .label("Outbound traffic")
+  .legend(columns=2, position=nw)
+----------------------------------
+
+[role="screenshot"]
+image::images/timelion-math05.png[Final visualization that displays inbound and outbound network traffic]
+{nbsp}
+
+[float]
+==== Save the panel
+
+Save and add the panel to the dashboard.
+
+. From the toolbar, click *Save*.
+
+. Enter the *Title* and optional *Description*. 
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
+
+. Click *Save and return*.
+
+[float]
+[[timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends]]
+=== Detect outliers and discover patterns over time
+
+To easily detect outliers and discover patterns over time, modify the time series data with conditional logic and create a trend with a moving average.
+
+With Timelion conditional logic, you can use the following operator values to compare your data:
+
+[horizontal]
+`eq`:: equal
+`ne`:: not equal
+`lt`:: less than
+`lte`:: less than or equal to
+`gt`:: greater than
+`gte`:: greater than or equal to
+
+[float]
+[[conditional-define-functions]]
+==== Define the functions
+
+To chart the maximum value of `system.memory.actual.used.bytes`, enter the following in the *Timelion Expression* field, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+----------------------------------
+
+[float]
+[[conditional-track-memory]]
+==== Track used memory
+
+To track the amount of memory used, create two thresholds, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes'),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .if(gt,                             <1>
+      11300000000,                    <2>
+      .es(index=metricbeat-*,
+          timefield='@timestamp',
+          metric='max:system.memory.actual.used.bytes'),
+      null)
+    .label('warning')
+    .color('#FFCC11'),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .if(gt,
+      11375000000,
+      .es(index=metricbeat-*,
+          timefield='@timestamp',
+          metric='max:system.memory.actual.used.bytes'),
+      null)
+  .label('severe')
+  .color('red')
+----------------------------------
+
+<1> `if()` compares each point to a number. When the condition is `true`, adjust the styling. When the condition is `false`, use the default styling.
+
+<2> *Timelion* conditional logic for the _greater than_ operator. In this example, the warning threshold is 11.3GB (`11300000000`), 
+and the severe threshold is 11.375GB (`11375000000`). If the threshold values are too high or low for your machine, adjust the values.
+
+[float]
+[[conditional-determine-trend]]
+==== Determine the trend
+
+To determine the trend, create a new data series, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes'),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .if(gt,11300000000,
+      .es(index=metricbeat-*,
+          timefield='@timestamp',
+          metric='max:system.memory.actual.used.bytes'),
+      null)
+      .label('warning')
+      .color('#FFCC11'),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .if(gt,11375000000,
+      .es(index=metricbeat-*,
+          timefield='@timestamp',
+          metric='max:system.memory.actual.used.bytes'),
+      null).
+      label('severe')
+      .color('red'),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .mvavg(10) <1>
+----------------------------------
+
+<1> `mvavg()` calculates the moving average over a specified period of time. 
+In this example, `.mvavg(10)` creates a moving average with a window of 10 data points.
+
+[float]
+[[conditional-format-visualization]]
+==== Customize and format the visualization
+
+Customize and format the visualization using the following functions, then click *Update*:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .label('max memory')                    <1>
+  .title('Memory consumption over time'), <2>
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .if(gt,
+      11300000000,
+      .es(index=metricbeat-*,
+          timefield='@timestamp',
+          metric='max:system.memory.actual.used.bytes'),
+      null)
+    .label('warning')
+    .color('#FFCC11')                 <3>
+    .lines(width=5),                  <4>
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .if(gt,
+      11375000000,
+      .es(index=metricbeat-*,
+          timefield='@timestamp',
+          metric='max:system.memory.actual.used.bytes'),
+      null)
+    .label('severe')
+    .color('red')
+    .lines(width=5),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='max:system.memory.actual.used.bytes')
+  .mvavg(10)
+  .label('mvavg')
+  .lines(width=2)
+  .color(#5E5E5E)
+  .legend(columns=4, position=nw)    <5>
+----------------------------------
+
+[role="screenshot"]
+image::images/timelion-conditional04.png[Final visualization that displays outliers and patterns over time]
+{nbsp}
+
+[float]
+==== Save the panel
+
+Save and add the panel to the dashboard.
+
+. From the toolbar, click *Save*.
+
+. Enter the *Title* and optional *Description*. 
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
+
+. Click *Save and return*.
+
+For more information about *Timelion* conditions, refer to https://www.elastic.co/blog/timeseries-if-then-else-with-timelion[I have but one .condition()].

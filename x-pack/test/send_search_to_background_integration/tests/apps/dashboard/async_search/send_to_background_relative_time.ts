@@ -24,13 +24,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const find = getService('find');
   const dashboardExpect = getService('dashboardExpect');
-  const queryBar = getService('queryBar');
   const browser = getService('browser');
   const sendToBackground = getService('sendToBackground');
 
   describe('send to background with relative time', () => {
     before(async () => {
-      await PageObjects.common.sleep(5000); // this part was copied from `x-pack/test/functional/apps/dashboard/_async_dashboard.ts` and this was sleep was needed because of flakiness
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
@@ -56,9 +54,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Saves and restores a session with relative time ranges', async () => {
       await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.timePicker.pauseAutoRefresh(); // sample data has auto-refresh on
-      await queryBar.submitQuery();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       await checkSampleDashboardLoaded();

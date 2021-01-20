@@ -13,20 +13,22 @@ jest.mock('../lib/../../../../package.json', () => ({
 describe('getEsNames()', () => {
   test('works as expected', () => {
     const base = 'XYZ';
-    const version = '1.2.3';
-    const esNames = getEsNames(base);
+    const kibanaVersion = '1.2.3';
+    const esNames = getEsNames(base, kibanaVersion);
     expect(esNames.base).toEqual(base);
-    expect(esNames.alias).toEqual(`${base}-event-log-${version}`);
+    expect(esNames.alias).toEqual(`${base}-event-log-${kibanaVersion}`);
     expect(esNames.ilmPolicy).toEqual(`${base}-event-log-policy`);
     expect(esNames.indexPattern).toEqual(`${base}-event-log-*`);
-    expect(esNames.indexPatternWithVersion).toEqual(`${base}-event-log-${version}-*`);
-    expect(esNames.initialIndex).toEqual(`${base}-event-log-${version}-000001`);
-    expect(esNames.indexTemplate).toEqual(`${base}-event-log-${version}-template`);
+    expect(esNames.indexPatternWithVersion).toEqual(`${base}-event-log-${kibanaVersion}-*`);
+    expect(esNames.initialIndex).toEqual(`${base}-event-log-${kibanaVersion}-000001`);
+    expect(esNames.indexTemplate).toEqual(`${base}-event-log-${kibanaVersion}-template`);
   });
 
   test('ilm policy name does not contain dot prefix', () => {
     const base = '.XYZ';
-    const esNames = getEsNames(base);
+    const kibanaVersion = '1.2.3';
+
+    const esNames = getEsNames(base, kibanaVersion);
     expect(esNames.ilmPolicy).toEqual('XYZ-event-log-policy');
   });
 });

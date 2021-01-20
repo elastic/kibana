@@ -12,7 +12,7 @@ import 'angular-route';
 import '../index.scss';
 import { upperFirst } from 'lodash';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import { AppMountContext } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import {
   createTopNavDirective,
@@ -218,7 +218,7 @@ function createLocalI18nModule() {
     .directive('i18nId', i18nDirective);
 }
 
-function createHrefModule(core: AppMountContext['core']) {
+function createHrefModule(core: CoreStart) {
   const name: string = 'kbnHref';
   angular.module('monitoring/href', []).directive(name, function () {
     return {
