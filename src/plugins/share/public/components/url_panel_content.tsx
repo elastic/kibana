@@ -205,11 +205,7 @@ export class UrlPanelContent extends Component<Props, State> {
     // Get the application route, after the hash, and remove the #.
     const parsedAppUrl = parseUrl(parsedUrl.hash.slice(1), true);
 
-    const query = {
-      // Add global state to the URL so that the iframe doesn't just show the time range
-      // default.
-      _g: parsedAppUrl.query._g,
-    };
+    const query: Record<string, string> = {};
 
     if (this.state.anonymousAccessParameters && this.state.usePublicUrl) {
       Object.assign(query, this.state.anonymousAccessParameters);
@@ -220,9 +216,14 @@ export class UrlPanelContent extends Component<Props, State> {
       auth: parsedUrl.auth,
       host: parsedUrl.host,
       pathname: parsedUrl.pathname,
+      query,
       hash: formatUrl({
         pathname: parsedAppUrl.pathname,
-        query,
+        query: {
+          // Add global state to the URL so that the iframe doesn't just show the time range
+          // default.
+          _g: parsedAppUrl.query._g,
+        },
       }),
     });
 
