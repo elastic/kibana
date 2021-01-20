@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, find } from 'lodash';
+import { find } from 'lodash';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
+import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
+import { LegacyRequest } from '../../types';
 
 /**
  * Augment the {@clusters} with their cluster state's from the {@code response}.
@@ -15,11 +18,14 @@ import { checkParam } from '../error_missing_required';
  * @param  {Array} clusters Array of clusters to be augmented
  * @return {Array} Always {@code clusters}.
  */
-export function handleResponse(response, clusters) {
-  const hits = get(response, 'hits.hits', []);
+export function handleResponse(
+  response: ElasticsearchResponse,
+  clusters: ElasticsearchModifiedSource[]
+) {
+  const hits = response.hits?.hits ?? [];
 
   hits.forEach((hit) => {
-    const currentCluster = get(hit, '_source', {});
+    const currentCluster = hit._source;
 
     if (currentCluster) {
       const cluster = find(clusters, { cluster_uuid: currentCluster.cluster_uuid });
@@ -39,7 +45,11 @@ export function handleResponse(response, clusters) {
  *
  * If there is no cluster state available for any cluster, then it will be returned without any cluster state information.
  */
-export function getClustersState(req, esIndexPattern, clusters) {
+export function getClustersState(
+  req: LegacyRequest,
+  esIndexPattern: string,
+  clusters: ElasticsearchModifiedSource[]
+) {
   checkParam(esIndexPattern, 'esIndexPattern in cluster/getClustersHealth');
 
   const clusterUuids = clusters

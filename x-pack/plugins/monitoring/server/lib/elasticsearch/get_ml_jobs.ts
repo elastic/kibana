@@ -4,22 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Bluebird from 'bluebird';
-import { includes, get } from 'lodash';
+import { includes } from 'lodash';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
+// @ts-ignore
 import { createQuery } from '../create_query';
+// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 import { ML_SUPPORTED_LICENSES } from '../../../common/constants';
+import { ElasticsearchResponse, ElasticsearchSource } from '../../../common/types/es';
+import { LegacyRequest } from '../../types';
 
 /*
  * Get a listing of jobs along with some metric data to use for the listing
  */
-export function handleResponse(response) {
-  const hits = get(response, 'hits.hits', []);
-  return hits.map((hit) => get(hit, '_source.job_stats'));
+export function handleResponse(response: ElasticsearchResponse) {
+  const hits = response.hits?.hits;
+  return hits?.map((hit) => hit._source.job_stats) ?? [];
 }
 
-export function getMlJobs(req, esIndexPattern) {
+export function getMlJobs(req: LegacyRequest, esIndexPattern: string) {
   checkParam(esIndexPattern, 'esIndexPattern in getMlJobs');
 
   const config = req.server.config();
@@ -56,8 +60,12 @@ export function getMlJobs(req, esIndexPattern) {
  * cardinality isn't guaranteed to be accurate is the issue
  * but it will be as long as the precision threshold is >= the actual value
  */
-export function getMlJobsForCluster(req, esIndexPattern, cluster) {
-  const license = get(cluster, 'license', {});
+export function getMlJobsForCluster(
+  req: LegacyRequest,
+  esIndexPattern: string,
+  cluster: ElasticsearchSource
+) {
+  const license = cluster.license ?? {};
 
   if (license.status === 'active' && includes(ML_SUPPORTED_LICENSES, license.type)) {
     // ML is supported
@@ -80,11 +88,11 @@ export function getMlJobsForCluster(req, esIndexPattern, cluster) {
 
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
-    return callWithRequest(req, 'search', params).then((response) => {
-      return get(response, 'aggregations.jobs_count.value', 0);
+    return callWithRequest(req, 'search', params).then((response: ElasticsearchResponse) => {
+      return response.aggregations.jobs_count.value ?? 0;
     });
   }
 
   // ML is not supported
-  return Bluebird.resolve(null);
+  return Promise.resolve(null);
 }
