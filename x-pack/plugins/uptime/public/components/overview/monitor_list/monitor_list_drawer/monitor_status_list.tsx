@@ -40,12 +40,16 @@ export const MonitorStatusList = ({ summaryPings }: MonitorStatusListProps) => {
   return (
     <>
       <EuiFlexGroup style={{ maxWidth: 1000 }}>
-        <EuiFlexItem>
-          <MonitorStatusRow locationNames={downChecks} status={STATUS.DOWN} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <MonitorStatusRow locationNames={absUpChecks} status={STATUS.UP} />
-        </EuiFlexItem>
+        {downChecks.size > 0 && (
+          <EuiFlexItem>
+            <MonitorStatusRow locationNames={downChecks} status={STATUS.DOWN} />
+          </EuiFlexItem>
+        )}
+        {absUpChecks.size > 0 && (
+          <EuiFlexItem>
+            <MonitorStatusRow locationNames={absUpChecks} status={STATUS.UP} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {(downChecks.has(UNNAMED_LOCATION) || upChecks.has(UNNAMED_LOCATION)) && (
         <>
