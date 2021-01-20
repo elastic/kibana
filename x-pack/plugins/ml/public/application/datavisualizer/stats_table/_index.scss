@@ -1,5 +1,6 @@
-@import 'components/field_data_expanded_row/number_content';
+@import 'components/field_data_expanded_row/index';
 @import 'components/field_count_stats/index';
+@import 'components/field_data_row/index';
 
 .mlDataVisualizerFieldExpandedRow {
   padding-left: $euiSize * 4;
