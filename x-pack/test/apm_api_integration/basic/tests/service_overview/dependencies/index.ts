@@ -13,7 +13,7 @@ import { isFiniteNumber } from '../../../../../../plugins/apm/common/utils/is_fi
 import { APIReturnType } from '../../../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { ENVIRONMENT_ALL } from '../../../../../../plugins/apm/common/environment_filter_values';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import archives from '../../../../common/archives_metadata';
+import archives from '../../../../common/fixtures/es_archiver/archives_metadata';
 import { apmDependenciesMapping, createServiceDependencyDocs } from './es_utils';
 
 const round = (num: Maybe<number>): string => (isFiniteNumber(num) ? num.toPrecision(4) : '');
