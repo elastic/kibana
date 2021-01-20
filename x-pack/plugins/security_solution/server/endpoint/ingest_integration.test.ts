@@ -25,11 +25,14 @@ import { Subject } from 'rxjs';
 import { ILicense } from '../../../licensing/common/types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { ProtectionModes } from '../../common/endpoint/types';
+import { getExceptionListClientMock } from '../../../lists/server/services/exception_lists/exception_list_client.mock';
+import { ExceptionListClient } from '../../../lists/server';
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
   let req: KibanaRequest;
   let ctx: RequestHandlerContext;
+  const exceptionListClient: ExceptionListClient = getExceptionListClientMock();
   const maxTimelineImportExportSize = createMockConfig().maxTimelineImportExportSize;
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
@@ -63,7 +66,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
-        endpointAppContextMock.alerts
+        endpointAppContextMock.alerts,
+        exceptionListClient
       );
       const policyConfig = createNewPackagePolicyMock(); // policy config without manifest
       const newPolicyConfig = await callback(policyConfig, ctx, req); // policy config WITH manifest
@@ -140,7 +144,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
-        endpointAppContextMock.alerts
+        endpointAppContextMock.alerts,
+        exceptionListClient
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
@@ -167,7 +172,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
-        endpointAppContextMock.alerts
+        endpointAppContextMock.alerts,
+        exceptionListClient
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
@@ -188,11 +194,38 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
-        endpointAppContextMock.alerts
+        endpointAppContextMock.alerts,
+        exceptionListClient
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
 
+      expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
+      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
+      expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
+        lastComputed!.toEndpointFormat()
+      );
+    });
+
+    test('policy creation succeeds even if endpoint exception list creation fails', async () => {
+      const mockError = new Error('error creating endpoint list');
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+      const manifestManager = getManifestManagerMock();
+      const lastComputed = await manifestManager.getLastComputedManifest();
+      exceptionListClient.createEndpointList = jest.fn().mockRejectedValue(mockError);
+      const callback = getPackagePolicyCreateCallback(
+        logger,
+        manifestManager,
+        endpointAppContextMock.appClientFactory,
+        maxTimelineImportExportSize,
+        endpointAppContextMock.security,
+        endpointAppContextMock.alerts,
+        exceptionListClient
+      );
+      const policyConfig = createNewPackagePolicyMock();
+      const newPolicyConfig = await callback(policyConfig, ctx, req);
+
+      expect(exceptionListClient.createEndpointList).toHaveBeenCalled();
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
       expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
       expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
