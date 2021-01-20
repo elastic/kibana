@@ -122,7 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         expect(body.authenticationsSuccess!).to.eql(expectedResult.authSuccess);
         expect(body.authenticationsSuccessHistogram!).to.eql(expectedResult.authSuccessHistogram);
-        expect(body.authenticationsFailure!).to.eql(expectedResult.authSuccess);
+        expect(body.authenticationsFailure!).to.eql(expectedResult.authFailure);
         expect(body.authenticationsFailureHistogram!).to.eql(expectedResult.authFailureHistogram);
       });
 
@@ -234,7 +234,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         expect(body.authenticationsSuccess!).to.eql(expectedResult.authSuccess);
         expect(body.authenticationsSuccessHistogram!).to.eql(expectedResult.authSuccessHistogram);
-        expect(body.authenticationsFailure!).to.eql(expectedResult.authSuccess);
+        expect(body.authenticationsFailure!).to.eql(expectedResult.authFailure);
         expect(body.authenticationsFailureHistogram!).to.eql(expectedResult.authFailureHistogram);
       });
 
