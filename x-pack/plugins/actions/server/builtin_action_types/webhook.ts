@@ -205,7 +205,7 @@ export async function executor(
         );
       }
       return errorResultInvalid(actionId, message);
-    } else if (error.isAxiosError) {
+    } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);
       return errorResultRequestFailed(actionId, message);
