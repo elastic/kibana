@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import React, { BaseSyntheticEvent, useCallback, useMemo } from 'react';
+import React, { BaseSyntheticEvent, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { LegendColorPicker, Position } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
@@ -34,51 +34,47 @@ export const useColorPicker = (
     id: string,
     event: BaseSyntheticEvent
   ) => void
-): LegendColorPicker =>
-  useMemo(
-    () => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
-      const selectedSeries = series.filter((s) => s.id === seriesIdentifier.specId);
-      // allow the user to change colors only for groupBy terms
-      if (!selectedSeries[0].isSplitByTerms) {
-        return null;
-      }
-      let seriesName = selectedSeries[0].label.toString();
-      if (selectedSeries[0].labelFormatted) {
-        seriesName = labelDateFormatter(selectedSeries[0].labelFormatted);
-      }
+): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
+  const selectedSeries = series.filter((s) => s.id === seriesIdentifier.specId);
+  // allow the user to change colors only for groupBy terms
+  if (!selectedSeries.length || !selectedSeries[0].isSplitByTerms) {
+    return null;
+  }
+  let seriesName = selectedSeries[0].label.toString();
+  if (selectedSeries[0].labelFormatted) {
+    seriesName = labelDateFormatter(selectedSeries[0].labelFormatted);
+  }
 
-      const handleChange = (newColor: string | null, event: BaseSyntheticEvent) => {
-        if (newColor) {
-          onChange(newColor);
-        }
-        setColor(newColor, seriesName, seriesIdentifier.specId, event);
-        // must be called after onChange
-        onClose();
-      };
+  const handleChange = (newColor: string | null, event: BaseSyntheticEvent) => {
+    if (newColor) {
+      onChange(newColor);
+    }
+    setColor(newColor, seriesName, seriesIdentifier.specId, event);
+    // must be called after onChange
+    onClose();
+  };
 
-      // rule doesn't know this is inside a functional component
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const handleOutsideClick = useCallback(() => {
-        onClose?.();
-      }, [onClose]);
+  // rule doesn't know this is inside a functional component
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const handleOutsideClick = useCallback(() => {
+    onClose?.();
+  }, [onClose]);
 
-      return (
-        <I18nProvider>
-          <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
-            <EuiWrappingPopover
-              isOpen
-              ownFocus
-              display="block"
-              button={anchor}
-              anchorPosition={getAnchorPosition(legendPosition)}
-              closePopover={onClose}
-              panelPaddingSize="s"
-            >
-              <ColorPicker color={color} onChange={handleChange} label={seriesName} />
-            </EuiWrappingPopover>
-          </EuiOutsideClickDetector>
-        </I18nProvider>
-      );
-    },
-    [legendPosition, series, setColor]
+  return (
+    <I18nProvider>
+      <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
+        <EuiWrappingPopover
+          isOpen
+          ownFocus
+          display="block"
+          button={anchor}
+          anchorPosition={getAnchorPosition(legendPosition)}
+          closePopover={onClose}
+          panelPaddingSize="s"
+        >
+          <ColorPicker color={color} onChange={handleChange} label={seriesName} />
+        </EuiWrappingPopover>
+      </EuiOutsideClickDetector>
+    </I18nProvider>
   );
+};
