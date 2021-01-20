@@ -32,6 +32,7 @@
     "plugins/security/**/*",
     "plugins/encrypted_saved_objects/**/*",
     "plugins/beats_management/**/*",
+    "plugins/cloud/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -197,6 +198,9 @@
     },
     {
       "path": "./plugins/beats_management/tsconfig.json"
+    },
+    {
+      "path": "./plugins/cloud/tsconfig.json"
     },
   ]
 }

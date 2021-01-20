@@ -50,6 +50,7 @@
     { "path": "../plugins/spaces/tsconfig.json" },
     { "path": "../plugins/security/tsconfig.json" },
     { "path": "../plugins/encrypted_saved_objects/tsconfig.json" },
-    { "path": "../plugins/beats_management/tsconfig.json" }
+    { "path": "../plugins/beats_management/tsconfig.json" },
+    { "path": "../plugins/cloud/tsconfig.json" },
   ]
 }
