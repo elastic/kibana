@@ -25,7 +25,7 @@ following requirements must be present:
 and some form of entity identifier. An entity identifier is a `text` or `number`
 field that consistently identifies the entity to be tracked. The data in this index should be dynamic
 (updated) so that there are entity movements to alert upon.
-- *Boundary index/index pattern data*: An index containing `geo_shape` data, such as boundary data, bounding box data, etc.
+- *Boundary index/index pattern data*: An index containing `geo_shape` data, such as boundary data and bounding box data.
 This data is presumed to be static (not updated). Shape data matching the query is
 harvested once when the alert is created and anytime after when alert is re-enabled
 after disablement
