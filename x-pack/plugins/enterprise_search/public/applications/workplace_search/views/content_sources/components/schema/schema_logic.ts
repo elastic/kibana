@@ -324,7 +324,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       const emptyReindexJob = {
         percentageComplete: 100,
         numDocumentsWithErrors: 0,
-        activeReindexJobId: 0,
+        activeReindexJobId: '',
         isActive: false,
       };
 
