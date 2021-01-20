@@ -195,6 +195,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               showEventsSelect={false}
               showSelectAllCheckbox={showCheckboxes}
               sort={sort}
+              tabType={tabType}
               timelineId={id}
             />
 

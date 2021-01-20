@@ -143,8 +143,9 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
 
   const timelineQuerySortField = useMemo(
     () =>
-      sort.map(({ columnId, sortDirection }) => ({
+      sort.map(({ columnId, columnType, sortDirection }) => ({
         field: columnId,
+        type: columnType,
         direction: sortDirection as Direction,
       })),
     [sort]

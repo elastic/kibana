@@ -11,6 +11,7 @@ import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const log = getService('log');
   const browser = getService('browser');
@@ -18,80 +19,97 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const objectRemover = new ObjectRemover(supertest);
 
   describe('Home page', function () {
-    before(async () => {
-      await pageObjects.common.navigateToApp('triggersActions');
-    });
+    describe('Loads the app with limited privileges', () => {
+      before(async () => {
+        await security.testUser.setRoles(['alerts_and_actions_role'], true);
+      });
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
 
-    after(async () => {
-      await objectRemover.removeAll();
-    });
-
-    it('Loads the app', async () => {
-      await log.debug('Checking for section heading to say Triggers and Actions.');
-
-      const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
-      expect(headingText).to.be('Alerts and Actions');
-    });
-
-    describe('Connectors tab', () => {
-      it('renders the connectors tab', async () => {
-        // Navigate to the connectors tab
-        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        // Verify url
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain(`/connectors`);
-
-        // Verify content
-        await testSubjects.existOrFail('actionsList');
+      it('Loads the Alerts page', async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+        const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
+        expect(headingText).to.be('Alerts and Actions');
       });
     });
 
-    describe('Alerts tab', () => {
-      it('renders the alerts tab', async () => {
-        // Navigate to the alerts tab
-        await pageObjects.triggersActionsUI.changeTabs('alertsTab');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        // Verify url
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain(`/alerts`);
-
-        // Verify content
-        await testSubjects.existOrFail('alertsList');
+    describe('Loads the app', () => {
+      before(async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
       });
 
-      it('navigates to an alert details page', async () => {
-        const { body: createdAction } = await supertest
-          .post(`/api/actions/action`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestActionData())
-          .expect(200);
-        objectRemover.add(createdAction.id, 'action', 'actions');
+      after(async () => {
+        await objectRemover.removeAll();
+      });
 
-        const { body: createdAlert } = await supertest
-          .post(`/api/alerts/alert`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestAlertData())
-          .expect(200);
-        objectRemover.add(createdAlert.id, 'alert', 'alerts');
+      it('Loads the Alerts page', async () => {
+        await log.debug('Checking for section heading to say Triggers and Actions.');
 
-        // refresh to see alert
-        await browser.refresh();
+        const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
+        expect(headingText).to.be('Alerts and Actions');
+      });
 
-        await pageObjects.header.waitUntilLoadingHasFinished();
+      describe('Connectors tab', () => {
+        it('renders the connectors tab', async () => {
+          // Navigate to the connectors tab
+          await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
 
-        // Verify content
-        await testSubjects.existOrFail('alertsList');
+          await pageObjects.header.waitUntilLoadingHasFinished();
 
-        // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdAlert.name);
+          // Verify url
+          const url = await browser.getCurrentUrl();
+          expect(url).to.contain(`/connectors`);
 
-        // Verify url
-        expect(await browser.getCurrentUrl()).to.contain(`/alert/${createdAlert.id}`);
+          // Verify content
+          await testSubjects.existOrFail('actionsList');
+        });
+      });
+
+      describe('Alerts tab', () => {
+        it('renders the alerts tab', async () => {
+          // Navigate to the alerts tab
+          await pageObjects.triggersActionsUI.changeTabs('alertsTab');
+
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
+          // Verify url
+          const url = await browser.getCurrentUrl();
+          expect(url).to.contain(`/alerts`);
+
+          // Verify content
+          await testSubjects.existOrFail('alertsList');
+        });
+
+        it('navigates to an alert details page', async () => {
+          const { body: createdAction } = await supertest
+            .post(`/api/actions/action`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestActionData())
+            .expect(200);
+          objectRemover.add(createdAction.id, 'action', 'actions');
+
+          const { body: createdAlert } = await supertest
+            .post(`/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+          objectRemover.add(createdAlert.id, 'alert', 'alerts');
+
+          // refresh to see alert
+          await browser.refresh();
+
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
+          // Verify content
+          await testSubjects.existOrFail('alertsList');
+
+          // click on first alert
+          await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdAlert.name);
+
+          // Verify url
+          expect(await browser.getCurrentUrl()).to.contain(`/alert/${createdAlert.id}`);
+        });
       });
     });
   });

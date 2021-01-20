@@ -7,13 +7,14 @@
     "Firewall rules may be modified by system administrators. Verify that the firewall configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
   ],
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-gcp*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "GCP Firewall Rule Modification",
   "note": "The GCP Filebeat module must be enabled to use this rule.",
-  "query": "event.dataset:googlecloud.audit and event.action:v*.compute.firewalls.patch",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:v*.compute.firewalls.patch",
   "references": [
     "https://cloud.google.com/vpc/docs/firewalls"
   ],
@@ -46,5 +47,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

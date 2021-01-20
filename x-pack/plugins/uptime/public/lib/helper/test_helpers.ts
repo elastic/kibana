@@ -21,12 +21,49 @@ export function mockMoment() {
   jest.spyOn(moment.prototype, 'fromNow').mockImplementation(function (this: Moment) {
     return `15 minutes ago`;
   });
+
+  // use static locale string to avoid issues
+  jest.spyOn(moment.prototype, 'toLocaleString').mockImplementation(function (this: Moment) {
+    return `Thu May 09 2019 10:15:11 GMT-0400`;
+  });
+}
+
+export function mockMomentTimezone() {
+  jest.mock('moment-timezone', () => {
+    return function () {
+      return { tz: { guess: () => 'America/New_York' } };
+    };
+  });
+}
+
+export function mockDate() {
+  // use static date string to avoid CI timing issues
+  jest.spyOn(Date.prototype, 'toString').mockImplementation(function (this: Date) {
+    return `Tue, 01 Jan 2019 00:00:00 GMT`;
+  });
+}
+
+export function mockDataPlugin() {
+  jest.mock('../../../../../../src/plugins/data/public', () => {
+    return function () {
+      return {
+        esKuery: {
+          fromKueryExpression: () => 'an ast',
+          toElasticsearchQuery: () => 'an es query',
+        },
+      };
+    };
+  });
 }
 
 export function mockReduxHooks(response?: any) {
   jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
 
   jest.spyOn(redux, 'useSelector').mockReturnValue(response);
+}
+
+export function mockDispatch() {
+  jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
 }
 
 export function mockReactRouterDomHooks({ useParamsResponse }: { useParamsResponse: any }) {

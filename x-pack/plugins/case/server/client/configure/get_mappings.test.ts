@@ -27,7 +27,7 @@ describe('get_mappings', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseMappingsSavedObject: mockCaseMappings,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.getMappings({
         actionsClient: actionsMock,
         caseClient: caseClient.client,
@@ -41,7 +41,7 @@ describe('get_mappings', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseMappingsSavedObject: [],
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.getMappings({
         actionsClient: actionsMock,
         caseClient: caseClient.client,

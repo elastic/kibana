@@ -7,17 +7,33 @@
 import { act, fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
+import {
+  mockApmPluginContextValue,
+  MockApmPluginContextWrapper,
+} from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../utils/testHelpers';
 import { CustomLinkToolbar } from './CustomLinkToolbar';
 
+function getMockAPMContext({ canSave }: { canSave: boolean }) {
+  return ({
+    ...mockApmPluginContextValue,
+    core: {
+      ...mockApmPluginContextValue.core,
+      application: { capabilities: { apm: { save: canSave }, ml: {} } },
+    },
+  } as unknown) as ApmPluginContextValue;
+}
+
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
     <MemoryRouter>
-      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+      <MockApmPluginContextWrapper value={getMockAPMContext({ canSave: true })}>
+        {children}
+      </MockApmPluginContextWrapper>
     </MemoryRouter>
   );
 }

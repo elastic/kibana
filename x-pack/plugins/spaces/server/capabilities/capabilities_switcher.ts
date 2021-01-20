@@ -5,8 +5,8 @@
  */
 import _ from 'lodash';
 import { Capabilities, CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
+import { Space } from '../../../../../src/plugins/spaces_oss/common';
 import { KibanaFeature } from '../../../../plugins/features/server';
-import { Space } from '../../common/model/space';
 import { SpacesServiceStart } from '../spaces_service';
 import { PluginsStart } from '../plugin';
 

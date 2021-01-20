@@ -65,6 +65,8 @@ export function getCentroidFeatures(featureCollection: FeatureCollection): Featu
         }
       }
       centroidGeometry = turfCenterOfMass(polygon(largestPolygon)).geometry;
+    } else if (feature.geometry.type === GEO_JSON_TYPE.GEOMETRY_COLLECTION) {
+      throw new Error('Should not have features with geometrycollection');
     }
 
     if (centroidGeometry) {

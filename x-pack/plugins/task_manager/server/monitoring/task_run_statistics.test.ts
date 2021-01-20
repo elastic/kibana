@@ -523,16 +523,34 @@ describe('Task Run Statistics', () => {
           }
         });
 
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.RanOutOfCapacity)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.RanOutOfCapacity)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
+      const timing = {
+        start: 0,
+        stop: 0,
+      };
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
+      events$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.PoolFilled, timing })));
+      events$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.PoolFilled, timing })));
+      events$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.PoolFilled, timing })));
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.RanOutOfCapacity, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.RanOutOfCapacity, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
     });
   });
 });

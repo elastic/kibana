@@ -22,6 +22,7 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters,
 |  [getSearchContext](./kibana-plugin-plugins-expressions-server.executioncontext.getsearchcontext.md) | <code>() =&gt; ExecutionContextSearch</code> | Get search context of the expression. |
 |  [getSearchSessionId](./kibana-plugin-plugins-expressions-server.executioncontext.getsearchsessionid.md) | <code>() =&gt; string &#124; undefined</code> | Search context in which expression should operate. |
 |  [inspectorAdapters](./kibana-plugin-plugins-expressions-server.executioncontext.inspectoradapters.md) | <code>InspectorAdapters</code> | Adapters for <code>inspector</code> plugin. |
+|  [isSyncColorsEnabled](./kibana-plugin-plugins-expressions-server.executioncontext.issynccolorsenabled.md) | <code>() =&gt; boolean</code> | Returns the state (true\|false) of the sync colors across panels switch. |
 |  [types](./kibana-plugin-plugins-expressions-server.executioncontext.types.md) | <code>Record&lt;string, ExpressionType&gt;</code> | A map of available expression types. |
 |  [variables](./kibana-plugin-plugins-expressions-server.executioncontext.variables.md) | <code>Record&lt;string, unknown&gt;</code> | Context variables that can be consumed using <code>var</code> and <code>var_set</code> functions. |
 

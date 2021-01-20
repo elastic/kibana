@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import React, { FC } from 'react';
@@ -15,7 +14,6 @@ import {
   EuiPageBody,
   EuiPageContentHeader,
   EuiPanel,
-  EuiTabbedContent,
   EuiSpacer,
   EuiTitle,
   EuiFlexGroup,
@@ -25,8 +23,7 @@ import { FindFileStructureResponse } from '../../../../../../common/types/file_d
 
 import { FileContents } from '../file_contents';
 import { AnalysisSummary } from '../analysis_summary';
-// @ts-ignore
-import { FieldsStats } from '../fields_stats';
+import { FieldsStatsGrid } from '../fields_stats_grid';
 
 interface Props {
   data: string;
@@ -45,16 +42,6 @@ export const ResultsView: FC<Props> = ({
   showExplanationFlyout,
   disableButtons,
 }) => {
-  const tabs = [
-    {
-      id: 'file-stats',
-      name: i18n.translate('xpack.ml.fileDatavisualizer.resultsView.fileStatsTabName', {
-        defaultMessage: 'File stats',
-      }),
-      content: <FieldsStats results={results} />,
-    },
-  ];
-
   return (
     <EuiPage data-test-subj="mlPageFileDataVisResults">
       <EuiPageBody>
@@ -103,7 +90,16 @@ export const ResultsView: FC<Props> = ({
           <EuiSpacer size="m" />
 
           <EuiPanel data-test-subj="mlFileDataVisFileStatsPanel">
-            <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />
+            <EuiTitle size="s">
+              <h2 data-test-subj="mlFileDataVisStatsTitle">
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.resultsView.fileStatsName"
+                  defaultMessage="File stats"
+                />
+              </h2>
+            </EuiTitle>
+
+            <FieldsStatsGrid results={results} />
           </EuiPanel>
         </div>
       </EuiPageBody>

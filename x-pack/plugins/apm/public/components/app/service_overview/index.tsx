@@ -16,9 +16,10 @@ import { LatencyChart } from '../../shared/charts/latency_chart';
 import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
 import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
 import { SearchBar } from '../../shared/search_bar';
+import { UserExperienceCallout } from '../transaction_overview/user_experience_callout';
 import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
-import { ServiceOverviewInstancesTable } from './service_overview_instances_table';
+import { ServiceOverviewInstancesChartAndTable } from './service_overview_instances_chart_and_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
 import { useShouldUseMobileLayout } from './use_should_use_mobile_layout';
@@ -51,6 +52,7 @@ export function ServiceOverview({
     'xpack.apm.serviceOverview.searchBar.transactionTypeLabel',
     { defaultMessage: 'Type: {transactionType}', values: { transactionType } }
   );
+  const isRumAgent = isRumAgentName(agentName);
 
   return (
     <AnnotationsContextProvider>
@@ -58,6 +60,11 @@ export function ServiceOverview({
         <SearchBar prepend={transactionTypeLabel} />
         <EuiPage>
           <EuiFlexGroup direction="column" gutterSize="s">
+            {isRumAgent && (
+              <EuiFlexItem>
+                <UserExperienceCallout serviceName={serviceName} />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiPanel>
                 <LatencyChart height={200} />
@@ -87,7 +94,7 @@ export function ServiceOverview({
                 gutterSize="s"
                 responsive={false}
               >
-                {!isRumAgentName(agentName) && (
+                {!isRumAgent && (
                   <EuiFlexItem grow={3}>
                     <TransactionErrorRateChart
                       height={chartHeight}
@@ -111,20 +118,31 @@ export function ServiceOverview({
                 <EuiFlexItem grow={3}>
                   <TransactionBreakdownChart showAnnotations={false} />
                 </EuiFlexItem>
-                <EuiFlexItem grow={7}>
-                  <EuiPanel>
-                    <ServiceOverviewDependenciesTable
-                      serviceName={serviceName}
-                    />
-                  </EuiPanel>
-                </EuiFlexItem>
+                {!isRumAgent && (
+                  <EuiFlexItem grow={7}>
+                    <EuiPanel>
+                      <ServiceOverviewDependenciesTable
+                        serviceName={serviceName}
+                      />
+                    </EuiPanel>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiPanel>
-                <ServiceOverviewInstancesTable serviceName={serviceName} />
-              </EuiPanel>
-            </EuiFlexItem>
+            {!isRumAgent && (
+              <EuiFlexItem>
+                <EuiFlexGroup
+                  direction={rowDirection}
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  <ServiceOverviewInstancesChartAndTable
+                    chartHeight={chartHeight}
+                    serviceName={serviceName}
+                  />
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPage>
       </ChartPointerEventContextProvider>
