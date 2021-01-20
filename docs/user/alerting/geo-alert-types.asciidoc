@@ -18,7 +18,7 @@ See <<kibana-feature-privileges, feature privileges>> for more information on co
 [float]
 === Requirements to create a geo alert
 
-In order to create either a <<alert-type-tracking-threshold>> or a <<alert-type-tracking-containment>> alert, the
+To create either a <<alert-type-tracking-threshold>> or a <<alert-type-tracking-containment>> alert, the
 following requirements must be present:
 
 - *Trackable index/index pattern data*: An index containing a `geo_point` field, `date` field,
