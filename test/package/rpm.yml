@@ -1,5 +1,5 @@
 - name: test kibana rpm package
-  hosts: all
+  hosts: rpm
   roles:
     - upgrade_yum_packages
     - install_kibana_rpm
