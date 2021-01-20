@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React, { useState } from 'react';
@@ -23,15 +12,11 @@ import { EuiButton, EuiFieldText } from '@elastic/eui';
 import type { DocLinksStart } from 'src/core/public';
 import { IndexPattern, IndexPatternField, DataPublicPluginStart } from '../../../data/public';
 import { createKibanaReactContext, toMountPoint } from '../../../kibana_react/public';
-import { FieldFormatEditor } from './field_format_editor';
-
-// eslint-disable-next-line
-import type { RuntimeFieldStart } from '../../../../../x-pack/plugins/runtime_fields/public';
+// import { FieldFormatEditor } from './field_format_editor';
 
 export const indexPatternFieldEditorFlyoutContent = (
   docLinks: DocLinksStart,
-  uiSettings: IUiSettingsClient,
-  RuntimeFields?: RuntimeFieldStart['RuntimeFieldEditor']
+  uiSettings: IUiSettingsClient
 ) => (
   openFlyout: OverlayStart['openFlyout'],
   indexPattern: IndexPattern,
@@ -46,7 +31,6 @@ export const indexPatternFieldEditorFlyoutContent = (
         <Content
           indexPattern={indexPattern}
           indexPatternField={indexPatternField}
-          RuntimeFields={RuntimeFields}
           docLinks={docLinks}
           onSave={async () => {
             await indexPatternsService.updateSavedObject(indexPattern);
@@ -63,36 +47,16 @@ const Content = ({
   indexPatternField,
   indexPattern,
   onSave,
-  RuntimeFields,
   docLinks,
 }: {
   indexPatternField?: IndexPatternField;
   indexPattern: IndexPattern;
   onSave: () => void;
-  RuntimeFields?: RuntimeFieldStart['RuntimeFieldEditor'];
   docLinks: DocLinksStart;
 }) => {
   const isNewField = !!indexPatternField?.name;
   let getrf: any;
   const [fieldName, setFieldName] = useState<string>(indexPatternField?.name || '');
-  // const defaultValue = indexPatternField.runtimeField ? { indexPatternField.runtimeField : undefined;
-  // console.log('RuntimeFields', RuntimeFields);
-  // const [getRuntimeField, setGetRuntimeField] = useState<any>();
-  const runtimeContent = RuntimeFields && (
-    <RuntimeFields
-      defaultValue={
-        indexPatternField?.runtimeField && {
-          name: indexPatternField?.name,
-          ...indexPatternField!.runtimeField,
-        }
-      }
-      onChange={async (rf) => {
-        // console.log('a', a++);
-        getrf = rf.submit;
-      }}
-      docLinks={docLinks}
-    />
-  );
 
   return (
     <>
@@ -104,8 +68,8 @@ const Content = ({
           setFieldName(e.target.value);
         }}
       />
-      {runtimeContent}
       <hr />
+      {/**
       <FieldFormatEditor
         fieldType={indexPatternField?.type || 'keyword'}
         fieldFormat={indexPattern.getFormatterForField(indexPatternField)}
@@ -115,6 +79,7 @@ const Content = ({
         onChange={() => {}}
         onError={() => {}}
       />
+      */}
       <EuiButton
         disabled={!fieldName}
         onClick={async () => {
@@ -123,7 +88,7 @@ const Content = ({
             data: { script, type },
           } = await getrf();
           if (!field) {
-            indexPattern.saveRuntimeField(fieldName, {
+            indexPattern.addRuntimeField(fieldName, {
               type,
               script,
             });

@@ -5,3 +5,5 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
+
+export * from './indexed_fields_table_component';

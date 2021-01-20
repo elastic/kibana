@@ -5,5 +5,5 @@
   "ui": true,
   "requiredPlugins": [],
   "optionalPlugins": ["runtimeFields"],
-  "requiredBundles": ["kibanaReact", "data"]
+  "requiredBundles": ["kibanaReact"]
 }

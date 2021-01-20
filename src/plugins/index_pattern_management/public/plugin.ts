@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { IndexPatternFieldEditorStart } from 'src/plugins/index_pattern_field_editor/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import {
   IndexPatternManagementService,
@@ -25,6 +26,7 @@ export interface IndexPatternManagementSetupDependencies {
 
 export interface IndexPatternManagementStartDependencies {
   data: DataPublicPluginStart;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export type IndexPatternManagementSetup = IndexPatternManagementServiceSetup;
