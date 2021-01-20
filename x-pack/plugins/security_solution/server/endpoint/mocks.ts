@@ -6,6 +6,7 @@
 
 import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import { listMock } from '../../../lists/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
 import { alertsMock } from '../../../alerts/server/mocks';
 import { xpackMocks } from '../../../../mocks';
@@ -79,6 +80,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
       ReturnType<FleetStartContract['registerExternalCallback']>,
       Parameters<FleetStartContract['registerExternalCallback']>
     >(),
+    exceptionListsClient: listMock.getExceptionListClient(),
   };
 };
 
