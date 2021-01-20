@@ -321,6 +321,11 @@ export {
   SavedObjectsImporter,
   ISavedObjectsImporter,
   SavedObjectsImportError,
+  SavedObjectsImportHook,
+  SavedObjectsImportHookResult,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
 } from './saved_objects';
 
 export {
