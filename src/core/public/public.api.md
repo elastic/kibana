@@ -563,6 +563,7 @@ export interface DocLinksStart {
             createPipeline: string;
             createTransformRequest: string;
             executeWatchActionModes: string;
+            indexExists: string;
             openIndex: string;
             putComponentTemplate: string;
             painlessExecute: string;
