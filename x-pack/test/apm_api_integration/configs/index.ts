@@ -13,7 +13,6 @@ const apmFtrConfigs = {
   },
   trial: {
     license: 'trial' as const,
-    testFiles: [], // require.resolve('../trial/tests')],
   },
 };
 
