@@ -13,7 +13,7 @@ import { getDateDifference } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { px, unit } from '../../../style/variables';
 import * as urlHelpers from '../../shared/Links/url_helpers';
-import { useBreakPoints } from '../../app/RumDashboard/hooks/useBreakPoints';
+import { useBreakPoints } from '../../../hooks/use_break_points';
 
 const PrependContainer = styled.div`
   display: flex;

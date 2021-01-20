@@ -11,7 +11,7 @@ import { px } from '../../style/variables';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './KueryBar';
 import { TimeComparison } from './time_comparison';
-import { useBreakPoints } from '../app/RumDashboard/hooks/useBreakPoints';
+import { useBreakPoints } from '../../hooks/use_break_points';
 
 const SearchBarFlexGroup = styled(EuiFlexGroup)`
   margin: ${({ theme }) =>
