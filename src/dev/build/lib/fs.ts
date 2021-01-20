@@ -161,7 +161,7 @@ export async function copyAll(
   destination: string,
   options: CopyAllOptions = {}
 ) {
-  const { select = ['**/*'], dot = false, time = Date.now() } = options;
+  const { select = ['**/*'], dot = false, time = new Date() } = options;
 
   assertAbsolute(sourceDir);
   assertAbsolute(destination);
