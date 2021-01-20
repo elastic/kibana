@@ -2369,7 +2369,7 @@ export class SearchSource {
     removeField<K extends keyof SearchSourceFields>(field: K): this;
     serialize(): {
         searchSourceJSON: string;
-        references: import("src/core/server").SavedObjectReference[];
+        references: import("../../../../../core/types").SavedObjectReference[];
     };
     setField<K extends keyof SearchSourceFields>(field: K, value: SearchSourceFields[K]): this;
     setFields(newFields: SearchSourceFields): this;

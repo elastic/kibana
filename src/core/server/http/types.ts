@@ -250,7 +250,10 @@ export interface HttpServiceSetup {
    * @example
    * ```ts
    *  // my-plugin.ts
-   *  deps.http.registerRouteHandlerContext(
+   *  interface MyRequestHandlerContext extends RequestHandlerContext {
+   *    myApp: { search(id: string): Promise<Result> };
+   *  }
+   *  deps.http.registerRouteHandlerContext<MyRequestHandlerContext, 'myApp'>(
    *    'myApp',
    *    (context, req) => {
    *     async function search (id: string) {
@@ -261,6 +264,8 @@ export interface HttpServiceSetup {
    *  );
    *
    * // my-route-handler.ts
+   *  import type { MyRequestHandlerContext } from './my-plugin.ts';
+   *  const router = createRouter<MyRequestHandlerContext>();
    *  router.get({ path: '/', validate: false }, async (context, req, res) => {
    *    const response = await context.myApp.search(...);
    *    return res.ok(response);
