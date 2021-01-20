@@ -5,7 +5,7 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-import numeral from '@elastic/numeral';
+
 import { ReplaySubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { CoreService } from '../../types';
