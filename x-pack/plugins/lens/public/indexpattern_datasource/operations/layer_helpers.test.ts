@@ -2175,7 +2175,7 @@ describe('state_helpers', () => {
       expect(errors).toHaveLength(1);
     });
 
-    it('should consider incompleteColumns before layer columns', () => {
+    it('should ignore incompleteColumns when checking for errors', () => {
       const savedRef = jest.fn().mockReturnValue(['error 1']);
       const incompleteRef = jest.fn();
       operationDefinitionMap.testReference.getErrorMessage = savedRef;
@@ -2197,9 +2197,9 @@ describe('state_helpers', () => {
           col1: { operationType: 'testIncompleteReference' },
         },
       });
-      expect(savedRef).not.toHaveBeenCalled();
-      expect(incompleteRef).toHaveBeenCalled();
-      expect(errors).toBeUndefined();
+      expect(savedRef).toHaveBeenCalled();
+      expect(incompleteRef).not.toHaveBeenCalled();
+      expect(errors).toHaveLength(1);
 
       delete operationDefinitionMap.testIncompleteReference;
     });

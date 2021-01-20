@@ -867,11 +867,7 @@ export function updateLayerIndexPattern(
 export function getErrorMessages(layer: IndexPatternLayer): string[] | undefined {
   const errors: string[] = [];
   Object.entries(layer.columns).forEach(([columnId, column]) => {
-    // If we're transitioning to another operation, check for "new" incompleteColumns rather
-    // than "old" saved operation on the layer
-    const columnFinalRef =
-      layer.incompleteColumns?.[columnId]?.operationType || column.operationType;
-    const def = operationDefinitionMap[columnFinalRef];
+    const def = operationDefinitionMap[column.operationType];
     if (def.getErrorMessage) {
       errors.push(...(def.getErrorMessage(layer, columnId) ?? []));
     }
