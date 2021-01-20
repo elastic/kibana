@@ -71,11 +71,9 @@ export function registerEnginesRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.name}/details`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: `/as/engines/:name/details`,
+    })
   );
   router.get(
     {
@@ -86,10 +84,8 @@ export function registerEnginesRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.name}/overview_metrics`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: `/as/engines/:name/overview_metrics`,
+    })
   );
 }
