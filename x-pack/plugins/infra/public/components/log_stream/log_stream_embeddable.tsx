@@ -17,7 +17,7 @@ import {
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
 import { datemathToEpochMillis } from '../../utils/datemath';
-import LogStream from './log_stream';
+import { LazyLogStreamWrapper } from './lazy_log_stream_wrapper';
 
 export const LOG_STREAM_EMBEDDABLE = 'LOG_STREAM_EMBEDDABLE';
 
@@ -76,7 +76,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
         <EuiThemeProvider>
           <KibanaContextProvider services={this.services}>
             <div style={{ width: '100%' }}>
-              <LogStream
+              <LazyLogStreamWrapper
                 startTimestamp={startTimestamp}
                 endTimestamp={endTimestamp}
                 height="100%"
