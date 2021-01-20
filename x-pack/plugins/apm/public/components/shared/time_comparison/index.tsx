@@ -21,35 +21,54 @@ const PrependContainer = styled.div`
   background-color: ${({ theme }) => theme.eui.euiGradientMiddle};
   padding: 0 ${px(unit)};
 `;
-function getSelectOptions({
-  showYesterdayOption,
-  showWeekOption,
+
+function formatPreviousPeriodDates({
+  momentStart,
+  momentEnd,
 }: {
-  showYesterdayOption: boolean;
-  showWeekOption: boolean;
+  momentStart: moment.Moment;
+  momentEnd: moment.Moment;
 }) {
-  return [
-    ...(showYesterdayOption
-      ? [
-          {
-            value: 'yesterday',
-            text: i18n.translate('xpack.apm.timeComparison.select.yesterday', {
-              defaultMessage: 'Yesterday',
-            }),
-          },
-        ]
-      : []),
-    ...(showWeekOption
-      ? [
-          {
-            value: 'week',
-            text: i18n.translate('xpack.apm.timeComparison.select.weekAgo', {
-              defaultMessage: 'A week ago',
-            }),
-          },
-        ]
-      : []),
-  ];
+  const isDifferentYears = momentStart.get('year') !== momentEnd.get('year');
+  const dateFormat = isDifferentYears ? 'DD/MM/YY' : 'DD/MM';
+  return `${momentStart.format(dateFormat)} - ${momentEnd.format(dateFormat)}`;
+}
+
+function getSelectOptions({ start, end }: { start?: string; end?: string }) {
+  const momentStart = moment(start);
+  const momentEnd = moment(end);
+  const dateDiff = getDateDifference(momentStart, momentEnd, 'days');
+
+  const selectOptions = [];
+
+  // shows Yesterday when date diff is less than 1 day
+  if (dateDiff < 1) {
+    selectOptions.push({
+      value: 'yesterday',
+      text: i18n.translate('xpack.apm.timeComparison.select.yesterday', {
+        defaultMessage: 'Yesterday',
+      }),
+    });
+  }
+
+  // shows A week ago when date diff is less than or equals to 7 day
+  if (dateDiff <= 7) {
+    selectOptions.push({
+      value: 'week',
+      text: i18n.translate('xpack.apm.timeComparison.select.weekAgo', {
+        defaultMessage: 'A week ago',
+      }),
+    });
+  }
+
+  // shows previous period when date diff is greater than 7 days
+  if (dateDiff > 7) {
+    selectOptions.push({
+      value: 'previousPeriod',
+      text: formatPreviousPeriodDates({ momentStart, momentEnd }),
+    });
+  }
+  return selectOptions;
 }
 
 export function TimeComparison() {
@@ -57,32 +76,21 @@ export function TimeComparison() {
   const {
     urlParams: { start, end, comparisonEnabled, comparisonType },
   } = useUrlParams();
-  const dateDiff = getDateDifference(moment(start), moment(end), 'days');
 
-  const selectOptions = getSelectOptions({
-    showYesterdayOption: dateDiff < 1,
-    showWeekOption: dateDiff <= 7,
-  });
+  const selectOptions = getSelectOptions({ start, end });
 
   // Sets default values
-  if (
-    comparisonEnabled === undefined &&
-    comparisonType === undefined &&
-    selectOptions.length !== 0
-  ) {
+  if (comparisonEnabled === undefined || comparisonType === undefined) {
     urlHelpers.replace(history, {
       query: {
-        comparisonEnabled: 'true',
-        comparisonType: selectOptions[0].value,
+        comparisonEnabled:
+          comparisonEnabled !== undefined
+            ? Boolean(comparisonEnabled).toString()
+            : 'true',
+        comparisonType: comparisonType
+          ? comparisonType
+          : selectOptions[0].value,
       },
-    });
-    return null;
-  }
-
-  // Disables comparison when selectOptions is empty
-  if (comparisonEnabled === true && selectOptions.length === 0) {
-    urlHelpers.replace(history, {
-      query: { comparisonEnabled: 'false' },
     });
     return null;
   }
@@ -94,10 +102,7 @@ export function TimeComparison() {
   // Replaces type when current one is no longer available in the select options
   if (selectOptions.length !== 0 && !isSelectedComparisonTypeAvailable) {
     urlHelpers.replace(history, {
-      query: {
-        comparisonEnabled: 'true',
-        comparisonType: selectOptions[0].value,
-      },
+      query: { comparisonType: selectOptions[0].value },
     });
     return null;
   }
@@ -120,7 +125,6 @@ export function TimeComparison() {
         prepend={
           <PrependContainer>
             <EuiCheckbox
-              disabled={selectOptions.length === 0}
               id="comparison"
               label={i18n.translate('xpack.apm.timeComparison.label', {
                 defaultMessage: 'Comparison',

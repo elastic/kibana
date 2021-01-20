@@ -30,6 +30,9 @@ function getWrapper(params?: IUrlParams) {
 
 describe('TimeComparison', () => {
   const spy = jest.spyOn(urlHelpers, 'replace');
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
   describe('Time range is between 0 - 24 hours', () => {
     it('sets default values', () => {
       const Wrapper = getWrapper({
@@ -100,35 +103,40 @@ describe('TimeComparison', () => {
   });
 
   describe('Time range is greater than 8 days', () => {
-    it('disables comparison', () => {
+    it('Shows absolute times without year when within the same year', () => {
       const Wrapper = getWrapper({
         start: '2021-01-20T15:00:00.000Z',
         end: '2021-01-28T15:00:00.000Z',
         comparisonEnabled: true,
-        comparisonType: 'week',
-      });
-      render(<TimeComparison />, {
-        wrapper: Wrapper,
-      });
-      expect(spy).toHaveBeenCalledWith(expect.anything(), {
-        query: { comparisonEnabled: 'false' },
-      });
-    });
-    it('disables comparison', () => {
-      const Wrapper = getWrapper({
-        start: '2021-01-20T15:00:00.000Z',
-        end: '2021-01-28T15:00:00.000Z',
-        comparisonEnabled: false,
-        comparisonType: 'week',
+        comparisonType: 'previousPeriod',
       });
       const component = render(<TimeComparison />, {
         wrapper: Wrapper,
       });
-      expectTextsNotInDocument(component, ['Yesterday', 'A week ago']);
+      expect(spy).not.toHaveBeenCalled();
+      expectTextsInDocument(component, ['20/01 - 28/01']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
           .selectedIndex
-      ).toEqual(-1);
+      ).toEqual(0);
+    });
+
+    it('Shows absolute times with year when on different year', () => {
+      const Wrapper = getWrapper({
+        start: '2020-12-20T15:00:00.000Z',
+        end: '2021-01-28T15:00:00.000Z',
+        comparisonEnabled: true,
+        comparisonType: 'previousPeriod',
+      });
+      const component = render(<TimeComparison />, {
+        wrapper: Wrapper,
+      });
+      expect(spy).not.toHaveBeenCalled();
+      expectTextsInDocument(component, ['20/12/20 - 28/01/21']);
+      expect(
+        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
+          .selectedIndex
+      ).toEqual(0);
     });
   });
 });
