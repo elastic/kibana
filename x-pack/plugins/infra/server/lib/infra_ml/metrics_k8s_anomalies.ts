@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
 import { InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
-import { fetchMlJob } from './common';
-import { getJobId, metricsK8SJobTypes } from '../../../common/infra_ml';
+import { fetchMlJob, MappedAnomalyHit } from './common';
+import { getJobId, metricsK8SJobTypes, ANOMALY_THRESHOLD } from '../../../common/infra_ml';
 import { Sort, Pagination } from '../../../common/http_api/infra_ml';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
 import { InsufficientAnomalyMlJobsConfigured, isMlPrivilegesError } from './errors';
@@ -17,18 +16,6 @@ import {
   metricsK8sAnomaliesResponseRT,
   createMetricsK8sAnomaliesQuery,
 } from './queries/metrics_k8s_anomalies';
-
-interface MappedAnomalyHit {
-  id: string;
-  anomalyScore: number;
-  typical: number;
-  actual: number;
-  jobId: string;
-  startTime: number;
-  influencers: string[];
-  duration: number;
-  categoryId?: string;
-}
 
 async function getCompatibleAnomaliesJobIds(
   spaceId: string,
@@ -73,13 +60,14 @@ async function getCompatibleAnomaliesJobIds(
 }
 
 export async function getMetricK8sAnomalies(
-  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  context: Required<InfraRequestHandlerContext>,
   sourceId: string,
   startTime: number,
   endTime: number,
   metric: 'memory_usage' | 'network_in' | 'network_out' | undefined,
   sort: Sort,
-  pagination: Pagination
+  pagination: Pagination,
+  scoreThreshold: ANOMALY_THRESHOLD = ANOMALY_THRESHOLD.MAJOR
 ) {
   const finalizeMetricsK8sAnomaliesSpan = startTracingSpan('get metrics k8s entry anomalies');
 
@@ -87,10 +75,10 @@ export async function getMetricK8sAnomalies(
     jobIds,
     timing: { spans: jobSpans },
   } = await getCompatibleAnomaliesJobIds(
-    context.infra.spaceId,
+    context.spaceId,
     sourceId,
     metric,
-    context.infra.mlAnomalyDetectors
+    context.mlAnomalyDetectors
   );
 
   if (jobIds.length === 0) {
@@ -105,12 +93,13 @@ export async function getMetricK8sAnomalies(
     hasMoreEntries,
     timing: { spans: fetchLogEntryAnomaliesSpans },
   } = await fetchMetricK8sAnomalies(
-    context.infra.mlSystem,
+    context.mlSystem,
     jobIds,
     startTime,
     endTime,
     sort,
-    pagination
+    pagination,
+    scoreThreshold
   );
 
   const data = anomalies.map((anomaly) => {
@@ -161,7 +150,8 @@ async function fetchMetricK8sAnomalies(
   startTime: number,
   endTime: number,
   sort: Sort,
-  pagination: Pagination
+  pagination: Pagination,
+  scoreThreshold: ANOMALY_THRESHOLD
 ) {
   // We'll request 1 extra entry on top of our pageSize to determine if there are
   // more entries to be fetched. This avoids scenarios where the client side can't
@@ -173,7 +163,14 @@ async function fetchMetricK8sAnomalies(
 
   const results = decodeOrThrow(metricsK8sAnomaliesResponseRT)(
     await mlSystem.mlAnomalySearch(
-      createMetricsK8sAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination),
+      createMetricsK8sAnomaliesQuery(
+        jobIds,
+        startTime,
+        endTime,
+        sort,
+        expandedPagination,
+        scoreThreshold
+      ),
       jobIds
     )
   );

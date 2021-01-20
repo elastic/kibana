@@ -144,7 +144,7 @@ export class InfraServerPlugin {
     ]);
 
     initInfraServer(this.libs);
-    registerAlertTypes(plugins.alerts, this.libs);
+    registerAlertTypes(plugins.alerts, this.libs, plugins.ml);
 
     core.http.registerRouteHandlerContext(
       'infra',

@@ -5,6 +5,7 @@
  */
 
 import * as rt from 'io-ts';
+import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
   createJobIdsFilters,
@@ -29,14 +30,15 @@ export const createMetricsHostsAnomaliesQuery = (
   startTime: number,
   endTime: number,
   sort: Sort,
-  pagination: Pagination
+  pagination: Pagination,
+  scoreThreshold: ANOMALY_THRESHOLD
 ) => {
   const { field } = sort;
   const { pageSize } = pagination;
 
   const filters = [
     ...createJobIdsFilters(jobIds),
-    ...createAnomalyScoreFilter(50),
+    ...createAnomalyScoreFilter(scoreThreshold),
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];

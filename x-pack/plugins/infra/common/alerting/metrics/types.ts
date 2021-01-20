@@ -3,14 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import * as rt from 'io-ts';
+import { ANOMALY_THRESHOLD } from '../../infra_ml';
 import { ItemTypeRT } from '../../inventory_models/types';
 
 // TODO: Have threshold and inventory alerts import these types from this file instead of from their
 // local directories
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
+export const METRIC_ANOMALY_ALERT_TYPE_ID = 'metrics.alert.anomaly';
 
 export enum Comparator {
   GT = '>',
@@ -31,6 +32,15 @@ export enum Aggregators {
   CARDINALITY = 'cardinality',
   P95 = 'p95',
   P99 = 'p99',
+}
+
+export interface MetricAnomalyParams {
+  nodeType: 'hosts' | 'k8s';
+  metric: 'memory_usage' | 'network_in' | 'network_out';
+  alertInterval: string;
+  sourceId?: string;
+  threshold: Exclude<ANOMALY_THRESHOLD, ANOMALY_THRESHOLD.LOW>;
+  filterQuery: string | undefined;
 }
 
 // Alert Preview API

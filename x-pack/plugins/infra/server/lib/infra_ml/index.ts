@@ -7,3 +7,4 @@
 export * from './errors';
 export * from './metrics_hosts_anomalies';
 export * from './metrics_k8s_anomalies';
+export { MappedAnomalyHit } from './common';

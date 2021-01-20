@@ -50,7 +50,7 @@ export const initGetK8sAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
           hasMoreEntries,
           timing,
         } = await getMetricK8sAnomalies(
-          requestContext,
+          requestContext.infra,
           sourceId,
           startTime,
           endTime,
