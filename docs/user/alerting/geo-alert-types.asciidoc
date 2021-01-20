@@ -114,7 +114,7 @@ as well as 2 Kuery bars used to provide additional filtering context for each of
 image::images/alert-types-tracking-containment-conditions.png[Five clauses define the condition to detect]
 
 Index (Entity):: This clause requires an *index or index pattern*, a *time field* that will be used for the *time window*, and a *`geo_point` field* for tracking.
-When Entity:: This clause specifies which crossing option should be tracked. The values
+When Entity:: This clause specifies which crossing option to track. The values
 *Entered*, *Exited*, and *Crossed* can be selected to indicate which crossing conditions
 should trigger an alert. *Entered* alerts on entry into a boundary, *Exited* alerts on exit
 from a boundary, and *Crossed* alerts on all boundary crossings whether they be entrances
