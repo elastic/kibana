@@ -7,8 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { setMockValues } from '../__mocks__/kea.mock';
-import { rerender } from '../__mocks__';
+import { setMockValues, rerender } from '../__mocks__';
 
 import { EnterpriseSearch } from './';
 import { SetupGuide } from './components/setup_guide';

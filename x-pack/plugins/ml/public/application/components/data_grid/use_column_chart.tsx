@@ -25,7 +25,7 @@ const BAR_COLOR_BLUR = euiPaletteColorBlind({ rotations: 2 })[10];
 const MAX_CHART_COLUMNS = 20;
 
 type XScaleType = 'ordinal' | 'time' | 'linear' | undefined;
-const getXScaleType = (kbnFieldType: KBN_FIELD_TYPES | undefined): XScaleType => {
+export const getXScaleType = (kbnFieldType: KBN_FIELD_TYPES | undefined): XScaleType => {
   switch (kbnFieldType) {
     case KBN_FIELD_TYPES.BOOLEAN:
     case KBN_FIELD_TYPES.IP:
@@ -71,7 +71,7 @@ interface NumericDataItem {
   doc_count: number;
 }
 
-interface NumericChartData {
+export interface NumericChartData {
   data: NumericDataItem[];
   id: string;
   interval: number;
@@ -81,11 +81,13 @@ interface NumericChartData {
 
 export const isNumericChartData = (arg: any): arg is NumericChartData => {
   return (
+    typeof arg === 'object' &&
     arg.hasOwnProperty('data') &&
     arg.hasOwnProperty('id') &&
     arg.hasOwnProperty('interval') &&
     arg.hasOwnProperty('stats') &&
-    arg.hasOwnProperty('type')
+    arg.hasOwnProperty('type') &&
+    arg.type === 'numeric'
   );
 };
 
@@ -96,28 +98,30 @@ export interface OrdinalDataItem {
 }
 
 export interface OrdinalChartData {
-  type: 'ordinal' | 'boolean';
   cardinality: number;
   data: OrdinalDataItem[];
   id: string;
+  type: 'ordinal' | 'boolean';
 }
 
 export const isOrdinalChartData = (arg: any): arg is OrdinalChartData => {
   return (
+    typeof arg === 'object' &&
     arg.hasOwnProperty('data') &&
     arg.hasOwnProperty('cardinality') &&
     arg.hasOwnProperty('id') &&
-    arg.hasOwnProperty('type')
+    arg.hasOwnProperty('type') &&
+    (arg.type === 'ordinal' || arg.type === 'boolean')
   );
 };
 
-interface UnsupportedChartData {
+export interface UnsupportedChartData {
   id: string;
   type: 'unsupported';
 }
 
 export const isUnsupportedChartData = (arg: any): arg is UnsupportedChartData => {
-  return arg.hasOwnProperty('type') && arg.type === 'unsupported';
+  return typeof arg === 'object' && arg.hasOwnProperty('type') && arg.type === 'unsupported';
 };
 
 export type ChartDataItem = NumericDataItem | OrdinalDataItem;
