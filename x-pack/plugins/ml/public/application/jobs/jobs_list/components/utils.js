@@ -19,10 +19,10 @@ import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/state
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
 
-export function loadFullJob(jobId) {
+export function loadFullJob(jobId, excludeGenerated = false) {
   return new Promise((resolve, reject) => {
     ml.jobs
-      .jobs([jobId])
+      .jobs([jobId], excludeGenerated)
       .then((jobs) => {
         if (jobs.length) {
           resolve(jobs[0]);
@@ -35,24 +35,6 @@ export function loadFullJob(jobId) {
       });
   });
 }
-
-export function loadClonableJob(jobId) {
-  return new Promise((resolve, reject) => {
-    ml.jobs
-      .jobs([jobId], true)
-      .then((jobs) => {
-        if (jobs.length) {
-          resolve(jobs[0]);
-        } else {
-          throw new Error(`Could not find job ${jobId}`);
-        }
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
-}
-
 export function isStartable(jobs) {
   return jobs.some(
     (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSING
@@ -197,33 +179,39 @@ function showResults(resp, action) {
 
 export async function cloneJob(jobId) {
   try {
-    const [job, originalJob] = await Promise.all([loadClonableJob(jobId), loadFullJob(jobId)]);
-    if (job.custom_settings && originalJob?.custom_settings?.created_by) {
+    const [cloneableJob, originalJob] = await Promise.all([
+      loadFullJob(jobId, true),
+      loadFullJob(jobId, false),
+    ]);
+    if (cloneableJob.custom_settings && originalJob?.custom_settings?.created_by) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
-      job.custom_settings.created_by = originalJob?.custom_settings?.created_by;
+      cloneableJob.custom_settings.created_by = originalJob?.custom_settings?.created_by;
 
-      mlJobService.tempJobCloningObjects.job = job;
+      mlJobService.tempJobCloningObjects.job = cloneableJob;
 
       if (
-        job.data_counts.earliest_record_timestamp !== undefined &&
-        job.data_counts.latest_record_timestamp !== undefined &&
-        job.data_counts.latest_bucket_timestamp !== undefined
+        cloneableJob.data_counts.earliest_record_timestamp !== undefined &&
+        cloneableJob.data_counts.latest_record_timestamp !== undefined &&
+        cloneableJob.data_counts.latest_bucket_timestamp !== undefined
       ) {
         // if the job has run before, use the earliest and latest record timestamp
         // as the cloned job's time range
-        let start = job.data_counts.earliest_record_timestamp;
-        let end = job.data_counts.latest_record_timestamp;
+        let start = cloneableJob.data_counts.earliest_record_timestamp;
+        let end = cloneableJob.data_counts.latest_record_timestamp;
 
-        if (job.datafeed_config.aggregations !== undefined) {
+        if (cloneableJob.datafeed_config.aggregations !== undefined) {
           // if the datafeed uses aggregations the earliest and latest record timestamps may not be the same
           // as the start and end of the data in the index.
-          const bucketSpanMs = parseInterval(job.analysis_config.bucket_span).asMilliseconds();
+          const bucketSpanMs = parseInterval(
+            cloneableJob.analysis_config.bucket_span
+          ).asMilliseconds();
           // round down to the start of the nearest bucket
           start =
-            Math.floor(job.data_counts.earliest_record_timestamp / bucketSpanMs) * bucketSpanMs;
+            Math.floor(cloneableJob.data_counts.earliest_record_timestamp / bucketSpanMs) *
+            bucketSpanMs;
           // use latest_bucket_timestamp and add two bucket spans minus one ms
-          end = job.data_counts.latest_bucket_timestamp + bucketSpanMs * 2 - 1;
+          end = cloneableJob.data_counts.latest_bucket_timestamp + bucketSpanMs * 2 - 1;
         }
 
         mlJobService.tempJobCloningObjects.start = start;
@@ -231,13 +219,13 @@ export async function cloneJob(jobId) {
       }
     } else {
       // otherwise use the tempJobCloningObjects
-      mlJobService.tempJobCloningObjects.job = job;
+      mlJobService.tempJobCloningObjects.job = cloneableJob;
     }
-    mlJobService.tempJobCloningObjects.job = job;
+    mlJobService.tempJobCloningObjects.job = cloneableJob;
 
-    if (job.calendars) {
+    if (cloneableJob.calendars) {
       mlJobService.tempJobCloningObjects.calendars = await mlCalendarService.fetchCalendarsByIds(
-        job.calendars
+        cloneableJob.calendars
       );
     }
 
