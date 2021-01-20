@@ -43,10 +43,20 @@ export class IndexPattern implements IIndexPattern {
   public id?: string;
   public title: string = '';
   public fieldFormatMap: Record<string, any>;
+  /**
+   * Only used by rollup indices, used by rollup specific endpoint to load field list
+   */
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
   public timeFieldName: string | undefined;
+  /**
+   * @deprecated
+   * Deprecated. used by time range index patterns
+   */
   public intervalName: string | undefined;
+  /**
+   * Type is used to identify rollup index patterns
+   */
   public type: string | undefined;
   public formatHit: {
     (hit: Record<string, any>, type?: string): any;
@@ -55,14 +65,15 @@ export class IndexPattern implements IIndexPattern {
   public formatField: FormatFieldFn;
   public flattenHit: (hit: Record<string, any>, deep?: boolean) => Record<string, any>;
   public metaFields: string[];
-  // savedObject version
+  /**
+   * SavedObject version
+   */
   public version: string | undefined;
   public sourceFilters?: SourceFilter[];
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
-  // make private once manual field refresh is removed
-  public fieldAttrs: FieldAttrs;
+  private fieldAttrs: FieldAttrs;
   /**
    * prevents errors when index pattern exists before indices
    */
@@ -184,6 +195,9 @@ export class IndexPattern implements IIndexPattern {
     };
   }
 
+  /**
+   * Create static representation of index pattern
+   */
   public toSpec(): IndexPatternSpec {
     return {
       id: this.id,
