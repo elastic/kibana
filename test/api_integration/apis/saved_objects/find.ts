@@ -258,8 +258,6 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(400)
             .then((resp) => {
-              // eslint-disable-next-line no-console
-              console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
                 error: 'Bad Request',
                 message: 'This type dashboard is not allowed: Bad Request',
@@ -274,8 +272,6 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(400)
             .then((resp) => {
-              // eslint-disable-next-line no-console
-              console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
                 error: 'Bad Request',
                 message:
@@ -522,8 +518,6 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(400)
             .then((resp) => {
-              // eslint-disable-next-line no-console
-              console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
                 error: 'Bad Request',
                 message: 'This type dashboard is not allowed: Bad Request',
