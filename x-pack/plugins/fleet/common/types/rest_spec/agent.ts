@@ -62,6 +62,7 @@ export interface PostAgentCheckinResponse {
 export interface PostAgentEnrollRequest {
   body: {
     type: AgentType;
+    // TODO deprecated should be removed in 8.0.0
     shared_id?: string;
     metadata: {
       local: Record<string, any>;
