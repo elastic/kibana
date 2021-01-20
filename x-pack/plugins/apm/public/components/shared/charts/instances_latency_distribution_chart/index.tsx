@@ -37,7 +37,7 @@ export function InstancesLatencyDistributionChart({
   items = [],
   status,
 }: InstancesLatencyDistributionChartProps) {
-  const isEmpty = items.length === 0;
+  const hasData = items.length > 0;
 
   const theme = useTheme();
   const chartTheme = {
@@ -63,7 +63,7 @@ export function InstancesLatencyDistributionChart({
           })}
         </h2>
       </EuiTitle>
-      <ChartContainer hasData={!isEmpty} height={height} status={status}>
+      <ChartContainer hasData={hasData} height={height} status={status}>
         <Chart id="instances-latency-distribution">
           <Settings
             legendPosition={Position.Bottom}
