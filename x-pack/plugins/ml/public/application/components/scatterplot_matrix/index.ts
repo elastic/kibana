@@ -5,4 +5,5 @@
  */
 
 export { LEGEND_TYPES } from './scatterplot_matrix_vega_lite_spec';
-export { ScatterplotMatrix, ScatterplotMatrixProps } from './scatterplot_matrix';
+export { ScatterplotMatrix } from './scatterplot_matrix';
+export type { ScatterplotMatrixViewProps as ScatterplotMatrixProps } from './scatterplot_matrix_view';
