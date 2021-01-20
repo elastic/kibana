@@ -25,7 +25,6 @@ import { PainlessError } from './painless_error';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
 
-
 describe('PainlessError', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,8 +38,8 @@ describe('PainlessError', () => {
     });
     const component = mount(e.getErrorMessage(startMock.application));
 
-    const scriptElem = findTestSubject(component, 'painlessScript').getDOMNode()
-    
+    const scriptElem = findTestSubject(component, 'painlessScript').getDOMNode();
+
     const failedShards = e.attributes?.failed_shards![0];
     const script = failedShards!.reason.script;
     expect(scriptElem.textContent).toBe(`Error executing Painless script: '${script}'`);
@@ -51,5 +50,4 @@ describe('PainlessError', () => {
 
     expect(component.find('EuiButton').length).toBe(1);
   });
-
 });
