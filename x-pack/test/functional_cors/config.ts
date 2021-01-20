@@ -10,17 +10,9 @@ import type { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { kbnTestConfig } from '@kbn/test';
 import { pageObjects } from '../functional/page_objects';
 
-function getPort() {
-  if (process.env.CI && process.env.TEST_CORS_SERVER_PORT) {
-    return parseInt(process.env.TEST_CORS_SERVER_PORT, 10);
-  }
-
-  if (process.env.CI) {
-    throw new Error('expected TEST_CORS_SERVER_PORT environment variable to be defined');
-  }
-
-  return 5699;
-}
+const pluginPort = process.env.TEST_CORS_SERVER_PORT
+  ? parseInt(process.env.TEST_CORS_SERVER_PORT, 10)
+  : 5699;
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
@@ -38,7 +30,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   };
 
   const { protocol, hostname } = kbnTestConfig.getUrlParts();
-  const pluginPort = getPort();
   const originUrl = Url.format({
     protocol,
     hostname,
