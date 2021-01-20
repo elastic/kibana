@@ -7,8 +7,13 @@ import { createHash } from 'crypto';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
+import { isEmpty, partition } from 'lodash';
+import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
-import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  TimestampOverrideOrUndefined,
+  Privilege,
+} from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger, SavedObjectsClientContract } from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
@@ -34,6 +39,7 @@ import { parseScheduleDates } from '../../../../common/detection_engine/parse_sc
 import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
 import { ShardError } from '../../types';
+import { RuleStatusService } from './rule_status_service';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -57,10 +63,80 @@ export const shorthandMap = {
   },
 };
 
+export const hasReadIndexPrivileges = async (
+  privileges: Privilege,
+  logger: Logger,
+  buildRuleMessage: BuildRuleMessage,
+  ruleStatusService: RuleStatusService
+): Promise<boolean> => {
+  const indexNames = Object.keys(privileges.index);
+  const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
+    indexNames,
+    (indexName) => privileges.index[indexName].read
+  );
+
+  if (indexesWithReadPrivileges.length > 0 && indexesWithNoReadPrivileges.length > 0) {
+    // some indices have read privileges others do not.
+    // set a partial failure status
+    const errorString = `Missing required read privileges on the following indices: ${JSON.stringify(
+      indexesWithNoReadPrivileges
+    )}`;
+    logger.error(buildRuleMessage(errorString));
+    await ruleStatusService.partialFailure(errorString);
+    return true;
+  } else if (
+    indexesWithReadPrivileges.length === 0 &&
+    indexesWithNoReadPrivileges.length === indexNames.length
+  ) {
+    // none of the indices had read privileges so set the status to failed
+    // since we can't search on any indices we do not have read privileges on
+    const errorString = `This rule may not have the required read privileges to the following indices: ${JSON.stringify(
+      indexesWithNoReadPrivileges
+    )}`;
+    logger.error(buildRuleMessage(errorString));
+    await ruleStatusService.partialFailure(errorString);
+    return true;
+  }
+  return false;
+};
+
+export const hasTimestampFields = async (
+  wroteStatus: boolean,
+  timestampField: string,
+  // any is derived from here
+  // node_modules/@elastic/elasticsearch/api/kibana.d.ts
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  timestampFieldCapsResponse: ApiResponse<Record<string, any>, Context>,
+  ruleStatusService: RuleStatusService,
+  logger: Logger,
+  buildRuleMessage: BuildRuleMessage
+): Promise<boolean> => {
+  if (
+    !wroteStatus &&
+    (isEmpty(timestampFieldCapsResponse.body.fields) ||
+      timestampFieldCapsResponse.body.fields[timestampField] == null ||
+      timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null)
+  ) {
+    // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
+    // partial failure
+    const errorString = `The following indices are missing the ${
+      timestampField === '@timestamp' ? 'timestamp field "@timestamp"' : 'timestamp override field'
+    } "${timestampField}": ${JSON.stringify(
+      isEmpty(timestampFieldCapsResponse.body.fields)
+        ? timestampFieldCapsResponse.body.indices
+        : timestampFieldCapsResponse.body.fields[timestampField].unmapped.indices
+    )}`;
+    logger.error(buildRuleMessage(errorString));
+    await ruleStatusService.partialFailure(errorString);
+    return true;
+  }
+  return wroteStatus;
+};
+
 export const checkPrivileges = async (
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   indices: string[]
-) =>
+): Promise<Privilege> =>
   services.callCluster('transport.request', {
     path: '/_security/user/_has_privileges',
     method: 'POST',
@@ -606,7 +682,15 @@ export const createSearchAfterReturnTypeFromResponse = ({
   timestampOverride: TimestampOverrideOrUndefined;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
-    success: searchResult._shards.failed === 0,
+    success:
+      searchResult._shards.failed === 0 ||
+      searchResult._shards.failures?.every((failure) => {
+        return (
+          failure.reason?.reason === 'No mapping found for [@timestamp] in order to sort on' ||
+          failure.reason?.reason ===
+            `No mapping found for [${timestampOverride}] in order to sort on`
+        );
+      }),
     lastLookBackDate: lastValidDate({ searchResult, timestampOverride }),
   });
 };

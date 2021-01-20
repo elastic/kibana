@@ -22,11 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           url.format({
             pathname: `/api/apm/services/opbeans-java/metadata/icons`,
-            query: {
-              start,
-              end,
-              uiFilters: '{}',
-            },
+            query: { start, end },
           })
         );
 
@@ -43,11 +39,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           url.format({
             pathname: `/api/apm/services/opbeans-java/metadata/icons`,
-            query: {
-              start,
-              end,
-              uiFilters: '{}',
-            },
+            query: { start, end },
           })
         );
 
@@ -65,11 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           url.format({
             pathname: `/api/apm/services/opbeans-python/metadata/icons`,
-            query: {
-              start,
-              end,
-              uiFilters: '{}',
-            },
+            query: { start, end },
           })
         );
 

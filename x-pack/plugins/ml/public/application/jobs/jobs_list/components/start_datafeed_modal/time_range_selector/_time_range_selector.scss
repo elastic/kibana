@@ -1,3 +1,4 @@
+// stylelint-disable selector-no-qualifying-type
 // SASSTODO: Looks like this could use a rewrite. Needs selectors
 .time-range-selector {
   .time-range-section-container {
@@ -9,7 +10,7 @@
   }
   .time-range-section {
     flex: 50%;
-    padding: 0px $euiSizeS;
+    padding: 0 $euiSizeS;
     border-right: $euiBorderThin;
   }
 
@@ -47,12 +48,12 @@
         display: block;
       }
     }
-    & > li.has-body.active  {
+    & > li.has-body.active {
       & > a {
-        border-radius: $euiBorderRadius $euiBorderRadius 0px 0px;
+        border-radius: $euiBorderRadius $euiBorderRadius 0 0;
       }
       .react-datepicker {
-        border-radius: 0px 0px $euiBorderRadius $euiBorderRadius;
+        border-radius: 0 0 $euiBorderRadius $euiBorderRadius;
         border-top: none;
       }
     }

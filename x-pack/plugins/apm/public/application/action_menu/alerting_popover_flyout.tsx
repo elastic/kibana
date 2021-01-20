@@ -21,7 +21,7 @@ const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
 });
 const transactionDurationLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.transactionDuration',
-  { defaultMessage: 'Transaction duration' }
+  { defaultMessage: 'Latency' }
 );
 const transactionErrorRateLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.transactionErrorRate',
@@ -112,7 +112,7 @@ export function AlertingPopoverAndFlyout({
       ],
     },
 
-    // transaction duration panel
+    // latency panel
     {
       id: CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID,
       title: transactionDurationLabel,

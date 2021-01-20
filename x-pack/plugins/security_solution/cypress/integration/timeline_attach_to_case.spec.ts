@@ -18,8 +18,7 @@ import { createTimeline } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
 import { createCase } from '../tasks/api_calls/cases';
 
-// https://github.com/elastic/kibana/issues/86959
-describe.skip('attach timeline to case', () => {
+describe('attach timeline to case', () => {
   context('without cases created', () => {
     beforeEach(() => {
       cleanKibana();

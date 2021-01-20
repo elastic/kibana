@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
-
-import { mockHttpValues } from '../../../__mocks__';
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: mockHttpValues },
-}));
-const { http } = mockHttpValues;
-
-jest.mock('../../../shared/flash_messages', () => ({
-  flashAPIErrors: jest.fn(),
-}));
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+  expectedAsyncError,
+} from '../../../__mocks__';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'some-engine' } },
@@ -24,6 +18,10 @@ jest.mock('../engine', () => ({
 import { EngineOverviewLogic } from './';
 
 describe('EngineOverviewLogic', () => {
+  const { mount, unmount } = new LogicMounter(EngineOverviewLogic);
+  const { http } = mockHttpValues;
+  const { flashAPIErrors } = mockFlashMessageHelpers;
+
   const mockEngineMetrics = {
     apiLogsUnavailable: true,
     documentCount: 10,
@@ -45,8 +43,6 @@ describe('EngineOverviewLogic', () => {
     totalQueries: 0,
     timeoutId: null,
   };
-
-  const { mount, unmount } = new LogicMounter(EngineOverviewLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -106,12 +102,9 @@ describe('EngineOverviewLogic', () => {
         const promise = Promise.reject('An error occurred');
         http.get.mockReturnValue(promise);
 
-        try {
-          EngineOverviewLogic.actions.pollForOverviewMetrics();
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        EngineOverviewLogic.actions.pollForOverviewMetrics();
+        await expectedAsyncError(promise);
+
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occurred');
       });
     });

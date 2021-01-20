@@ -6,7 +6,6 @@
 
 import { StartServicesAccessor } from 'src/core/public';
 import { ManagementSetup, ManagementApp } from '../../../../../src/plugins/management/public';
-import { SecurityLicense } from '../../../security/public';
 import { SpacesManager } from '../spaces_manager';
 import { PluginsStart } from '../plugin';
 import { spacesManagementApp } from './spaces_management_app';
@@ -15,15 +14,14 @@ interface SetupDeps {
   management: ManagementSetup;
   getStartServices: StartServicesAccessor<PluginsStart>;
   spacesManager: SpacesManager;
-  securityLicense?: SecurityLicense;
 }
 
 export class ManagementService {
   private registeredSpacesManagementApp?: ManagementApp;
 
-  public setup({ getStartServices, management, spacesManager, securityLicense }: SetupDeps) {
+  public setup({ getStartServices, management, spacesManager }: SetupDeps) {
     this.registeredSpacesManagementApp = management.sections.section.kibana.registerApp(
-      spacesManagementApp.create({ getStartServices, spacesManager, securityLicense })
+      spacesManagementApp.create({ getStartServices, spacesManager })
     );
   }
 
