@@ -18,7 +18,7 @@
  */
 
 import { KibanaResponseFactory } from 'kibana/server';
-import { KbnError, KibanaServerError } from '../common';
+import { KbnError } from '../common';
 
 export class KbnServerError extends KbnError {
   public errBody?: Record<string, any>;
@@ -26,14 +26,6 @@ export class KbnServerError extends KbnError {
     super(message);
     this.errBody = errBody;
   }
-}
-
-export function getErrorResponseInfo(err: any): KibanaServerError {
-  return {
-    statusCode: err.statusCode ?? 500,
-    message: err.message,
-    attributes: err.errBody,
-  };
 }
 
 export function reportServerError(res: KibanaResponseFactory, err: KbnServerError) {

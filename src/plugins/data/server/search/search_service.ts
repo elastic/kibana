@@ -29,7 +29,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { catchError, first, map } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import {
@@ -73,7 +73,8 @@ import {
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { SessionService, IScopedSessionService, ISessionService } from './session';
-import { KbnServerError, getErrorResponseInfo } from '../../../kibana_utils/server';
+import { KbnServerError } from '../../../kibana_utils/server';
+import { registerBsearchRoute } from './routes/bsearch';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
@@ -150,34 +151,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       )
     );
 
-    bfetch.addBatchProcessingRoute<
-      { request: IKibanaSearchResponse; options?: ISearchOptions },
-      any
-    >('/internal/bsearch', (request) => {
-      const search = this.asScopedProvider(this.coreStart!)(request);
-
-      return {
-        onBatchItem: async ({ request: requestData, options }) => {
-          return search
-            .search(requestData, options)
-            .pipe(
-              first(),
-              map((response) => {
-                return {
-                  ...response,
-                  ...{
-                    rawResponse: shimHitsTotal(response.rawResponse),
-                  },
-                };
-              }),
-              catchError((err) => {
-                throw getErrorResponseInfo(err);
-              })
-            )
-            .toPromise();
-        },
-      };
-    });
+    registerBsearchRoute(bfetch, core.getStartServices(), this.asScopedProvider);
 
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
