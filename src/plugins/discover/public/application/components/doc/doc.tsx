@@ -35,7 +35,7 @@ export interface DocProps {
   indexPatternService: IndexPatternsContract;
 }
 
-const indexExistsLink = docLinks.links.apis.indexExists;
+const indexExistsLink = getDocLinks().links.apis.indexExists;
 
 export function Doc(props: DocProps) {
   const [reqState, hit, indexPattern] = useEsDocSearch(props);
