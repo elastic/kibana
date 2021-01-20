@@ -2,14 +2,13 @@
 [[geo-alert-types]]
 == Geo alert types
 
-experimental[] Two additional stack alerts are available for use by {kib} platinum license users:
+experimental[] Two additional stack alerts are available:
 <<alert-type-tracking-threshold>> and <<alert-type-tracking-containment>>. To enable,
 add the following configuration to your `kibana.yml`:
 
-```
+```yml
 xpack.stack_alerts.enableGeoAlerting: true
 ```
-
 
 As with other stack alerts, you need `all` access to the *Stack Alerts* feature
 to be able to create and edit either of the geo alerts.
@@ -18,23 +17,23 @@ See <<kibana-feature-privileges, feature privileges>> for more information on co
 [float]
 === Requirements to create a geo alert
 
-To create either a <<alert-type-tracking-threshold>> or a <<alert-type-tracking-containment>> alert, the
+To create either a *Tracking threshold* or a *Tracking containment* alert, the
 following requirements must be present:
 
-- *Trackable index/index pattern data*: An index containing a `geo_point` field, `date` field,
-and some form of entity identifier. An entity identifier is a `text` or `number`
-field that consistently identifies the entity to be tracked. The data in this index should be dynamic
-(updated) so that there are entity movements to alert upon.
-- *Boundary index/index pattern data*: An index containing `geo_shape` data, such as boundary data and bounding box data.
-This data is presumed to be static (not updated). Shape data matching the query is
+- *Trackable index or index pattern data*: An index containing a `geo_point` field, `date` field,
+and some form of entity identifier. An entity identifier is a `keyword` or `number`
+field that consistently identifies the entity to be tracked. The data in this index should be dynamically
+updating so that there are entity movements to alert upon.
+- *Boundary index or index pattern data*: An index containing `geo_shape` data, such as boundary data and bounding box data.
+This data is presumed to be static (not updating). Shape data matching the query is
 harvested once when the alert is created and anytime after when the alert is re-enabled
 after disablement.
 
 By design, older document locations (determined by `date`) are
 compared with newer document locations to determine if a boundary has been crossed
-in the current monitoring interval. This means there is a requirement that monitored
-data should be somewhat "real time", meaning the dates of new documents aren't older
-than the current time minus the amount of the interval. If data older than
+in the current monitoring interval. The monitored data should be somewhat "real time",
+meaning the dates of new documents aren’t older than the current time minus the amount
+of the interval. If data older than
 `now - <current interval>` is ingested, it won't trigger an alert.
 
 [float]
@@ -87,7 +86,7 @@ is consistently indexed 5-10 minutes following its original timestamp, a *Delaye
 offset* of `10 minutes` would ensure that alertable instances are still captured.
 Index (Entity):: This clause requires an *index or index pattern*, a *time field* that will be used for the *time window*, and a *`geo_point` field* for tracking.
 By:: This clause specifies the field to use in the previously provided
-*index or index pattern* for tracking Entities. An entity is a `text`
+*index or index pattern* for tracking Entities. An entity is a `keyword`
 or `number` field that consistently identifies the entity to be tracked. 
 When Entity:: This clause specifies which crossing option to track. The values
 *Entered*, *Exited*, and *Crossed* can be selected to indicate which crossing conditions
