@@ -27,7 +27,7 @@ field that consistently identifies the entity to be tracked. The data in this in
 (updated) so that there are entity movements to alert upon.
 - *Boundary index/index pattern data*: An index containing `geo_shape` data, such as boundary data and bounding box data.
 This data is presumed to be static (not updated). Shape data matching the query is
-harvested once when the alert is created and anytime after when alert is re-enabled
+harvested once when the alert is created and anytime after when the alert is re-enabled
 after disablement
 
 By design, older document locations (determined by `date`) are
