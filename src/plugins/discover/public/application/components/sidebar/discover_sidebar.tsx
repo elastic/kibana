@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -101,6 +91,10 @@ export interface DiscoverSidebarProps {
    */
   setIndexPattern: (id: string) => void;
   /**
+   * If on, fields are read from the fields API, not from source
+   */
+  useNewFieldsApi?: boolean;
+  /**
    * Metric tracking function
    * @param metricType
    * @param eventName
@@ -127,9 +121,11 @@ export function DiscoverSidebar({
   setFieldFilter,
   setIndexPattern,
   trackUiMetric,
+  useNewFieldsApi = false,
   useFlyout = false,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
+
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
@@ -154,13 +150,10 @@ export function DiscoverSidebar({
     selected: selectedFields,
     popular: popularFields,
     unpopular: unpopularFields,
-  } = useMemo(() => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter), [
-    fields,
-    columns,
-    popularLimit,
-    fieldCounts,
-    fieldFilter,
-  ]);
+  } = useMemo(
+    () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
+    [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
+  );
 
   const fieldTypes = useMemo(() => {
     const result = ['any'];
@@ -173,6 +166,27 @@ export function DiscoverSidebar({
     }
     return result;
   }, [fields]);
+
+  const multiFields = useMemo(() => {
+    if (!useNewFieldsApi || !fields) {
+      return undefined;
+    }
+    const map = new Map<string, Array<{ field: IndexPatternField; isSelected: boolean }>>();
+    fields.forEach((field) => {
+      const parent = field.spec?.subType?.multi?.parent;
+      if (!parent) {
+        return;
+      }
+      const multiField = {
+        field,
+        isSelected: selectedFields.includes(field),
+      };
+      const value = map.get(parent) ?? [];
+      value.push(multiField);
+      map.set(parent, value);
+    });
+    return map;
+  }, [fields, useNewFieldsApi, selectedFields]);
 
   if (!selectedIndexPattern || !fields) {
     return null;
@@ -278,6 +292,7 @@ export function DiscoverSidebar({
                                 getDetails={getDetailsByField}
                                 selected={true}
                                 trackUiMetric={trackUiMetric}
+                                multiFields={multiFields?.get(field.name)}
                               />
                             </li>
                           );
@@ -338,6 +353,7 @@ export function DiscoverSidebar({
                                 onAddFilter={onAddFilter}
                                 getDetails={getDetailsByField}
                                 trackUiMetric={trackUiMetric}
+                                multiFields={multiFields?.get(field.name)}
                               />
                             </li>
                           );
@@ -366,6 +382,7 @@ export function DiscoverSidebar({
                             onAddFilter={onAddFilter}
                             getDetails={getDetailsByField}
                             trackUiMetric={trackUiMetric}
+                            multiFields={multiFields?.get(field.name)}
                           />
                         </li>
                       );
