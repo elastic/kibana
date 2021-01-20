@@ -131,7 +131,13 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
   }
 
   const colorPicker = (
-    <ColorPicker disableTrash={true} onChange={props.onChange} name="color" value={model.color} />
+    <ColorPicker
+      disabled={model.split_mode === 'terms'}
+      disableTrash={true}
+      onChange={props.onChange}
+      name="color"
+      value={model.color}
+    />
   );
 
   return (

@@ -143,7 +143,7 @@ class TimeseriesVisualization extends Component {
   };
 
   render() {
-    const { model, visData, onBrush } = this.props;
+    const { model, visData, onBrush, uiState } = this.props;
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
@@ -164,6 +164,7 @@ class TimeseriesVisualization extends Component {
 
     seriesModel.forEach((seriesGroup) => {
       const isStackedWithinSeries = seriesGroup.stacked === STACKED_OPTIONS.STACKED_WITHIN_SERIES;
+      const isSplitByTerms = seriesGroup.split_mode === 'terms';
       const hasSeparateAxis = Boolean(seriesGroup.separate_axis);
       const groupId = hasSeparateAxis || isStackedWithinSeries ? seriesGroup.id : mainAxisGroupId;
       const domain = hasSeparateAxis
@@ -193,6 +194,7 @@ class TimeseriesVisualization extends Component {
           seriesDataRow.groupId = groupId;
           seriesDataRow.yScaleType = yScaleType;
           seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
+          seriesDataRow.isSplitByTerms = isSplitByTerms;
         });
 
       if (isCustomDomain) {
@@ -223,6 +225,7 @@ class TimeseriesVisualization extends Component {
     return (
       <div className="tvbVis">
         <TimeSeries
+          uiState={uiState}
           series={series}
           yAxis={yAxis}
           onBrush={onBrush}

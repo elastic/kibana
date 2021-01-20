@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
@@ -32,7 +32,7 @@ import {
   TooltipType,
   StackMode,
 } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, keys } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
 import { activeCursor$ } from '../../lib/active_cursor';
 import { getUISettings, getChartsSetup } from '../../../../services';
@@ -41,6 +41,7 @@ import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
+import { useColorPicker } from './utils/use_color_picker';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -69,6 +70,7 @@ export const TimeSeries = ({
   onBrush,
   xAxisFormatter,
   annotations,
+  uiState,
 }) => {
   const chartRef = useRef();
 
@@ -110,12 +112,46 @@ export const TimeSeries = ({
     onBrush(min, max);
   };
 
+  useEffect(() => {
+    const fn = () => {
+      uiState?.emit?.('reload');
+    };
+    uiState?.on?.('change', fn);
+
+    return () => {
+      uiState?.off?.('change', fn);
+    };
+  }, [uiState]);
+
+  const setColor = useCallback(
+    (newColor, seriesLabel, event) => {
+      if (event.key && event.key !== keys.ENTER) {
+        return;
+      }
+
+      const colors = uiState?.get('vis.colors') || {};
+      if (colors[seriesLabel] === newColor || !newColor) {
+        delete colors[seriesLabel];
+      } else {
+        colors[seriesLabel] = newColor;
+      }
+
+      if (uiState?.set) {
+        uiState.setSilent('vis.colors', null);
+        uiState.set('vis.colors', colors);
+        uiState.emit('colorChanged');
+      }
+    },
+    [uiState]
+  );
+
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
         showLegend={legend}
         showLegendExtra={true}
         legendPosition={legendPosition}
+        legendColorPicker={useColorPicker(legendPosition, series, setColor)}
         onBrushEnd={onBrushEndListener}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
@@ -188,10 +224,14 @@ export const TimeSeries = ({
           const isStacked = stack !== STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
           // Only use color mapping if there is no color from the server
-          const finalColor = color ?? colors.mappedColors.mapping[label];
+          const overwriteColors = uiState.get ? uiState.get('vis.colors', {}) : {};
+          let finalColor = color ?? colors.mappedColors.mapping[label];
           let seriesName = label.toString();
           if (labelFormatted) {
             seriesName = labelDateFormatter(labelFormatted);
+          }
+          if (Object.keys(overwriteColors).includes(seriesName)) {
+            finalColor = overwriteColors[seriesName];
           }
           if (bars?.show) {
             return (

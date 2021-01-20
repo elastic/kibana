@@ -28,10 +28,12 @@ export type PanelSchema = TypeOf<typeof panel>;
 export type VisPayload = TypeOf<typeof visPayloadSchema>;
 export type FieldObject = TypeOf<typeof fieldObject>;
 
-interface PanelData {
+export interface PanelData {
   id: string;
   label: string;
   data: Array<[number, number]>;
+  labelFormatted?: string;
+  isSplitByTerms?: boolean;
 }
 
 // series data is not fully typed yet

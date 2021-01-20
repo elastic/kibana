@@ -40,14 +40,23 @@ export interface ColorPickerProps {
   value: string | null;
   disableTrash?: boolean;
   onChange: (props: ColorProps) => void;
+  disabled?: boolean;
 }
 
-export function ColorPicker({ name, value, disableTrash = false, onChange }: ColorPickerProps) {
+export function ColorPicker({
+  name,
+  value,
+  disableTrash = false,
+  onChange,
+  disabled = false,
+}: ColorPickerProps) {
   const initialColorValue = value?.includes('rgba')
     ? value.replace(COMMAS_NUMS_ONLY_RE, '')
     : value;
   const [color, setColor] = useState(initialColorValue || '');
-
+  if (disabled) {
+    return null;
+  }
   const handleColorChange: EuiColorPickerProps['onChange'] = (text: string, { rgba, hex }) => {
     setColor(text);
     const part: ColorProps = {};
