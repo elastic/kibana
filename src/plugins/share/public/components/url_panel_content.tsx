@@ -251,19 +251,13 @@ export class UrlPanelContent extends Component<Props, State> {
       return url;
     }
 
-    let anonAccessParams = '?';
+    const parsedUrl = new URL(url);
 
-    for (const [key, value] of Object.entries(this.state.anonymousAccessParameters)) {
-      anonAccessParams += `${key}=${value}`;
+    for (const [name, value] of Object.entries(this.state.anonymousAccessParameters)) {
+      parsedUrl.searchParams.set(name, value);
     }
 
-    const urlHasQueryString = url.indexOf('?') !== -1;
-
-    if (urlHasQueryString) {
-      return url.replace('?', `${anonAccessParams}&`);
-    }
-
-    return `${url}${anonAccessParams}`;
+    return parsedUrl.toString();
   };
 
   private getUrlParamExtensions = (url: string): string => {
