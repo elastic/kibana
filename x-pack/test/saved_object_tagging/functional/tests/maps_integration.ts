@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows to select tags for a new map', async () => {
-        await PageObjects.maps.saveMap('my-new-map', false, ['tag-1', 'tag-3']);
+        await PageObjects.maps.saveMap('my-new-map', true, ['tag-1', 'tag-3']);
 
         await PageObjects.maps.gotoMapListingPage();
         await selectFilterTags('tag-1');
@@ -127,7 +127,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows to select tags for an existing map', async () => {
         await listingTable.clickItemLink('map', 'map 4 (tag-1)');
 
-        await PageObjects.maps.saveMap('map 4 (tag-1)', false, ['tag-3']);
+        await PageObjects.maps.saveMap('map 4 (tag-1)', true, ['tag-3']);
 
         await PageObjects.maps.gotoMapListingPage();
         await selectFilterTags('tag-3');
