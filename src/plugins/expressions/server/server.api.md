@@ -937,8 +937,8 @@ export type UnmappedTypeStrings = 'date' | 'filter';
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/expressions/common/ast/types.ts:40:3 - (ae-forgotten-export) The symbol "ExpressionAstFunctionDebug" needs to be exported by the entry point index.d.ts
-// src/plugins/expressions/common/expression_types/specs/error.ts:31:5 - (ae-forgotten-export) The symbol "ErrorLike" needs to be exported by the entry point index.d.ts
+// src/plugins/expressions/common/ast/types.ts:29:3 - (ae-forgotten-export) The symbol "ExpressionAstFunctionDebug" needs to be exported by the entry point index.d.ts
+// src/plugins/expressions/common/expression_types/specs/error.ts:20:5 - (ae-forgotten-export) The symbol "ErrorLike" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
