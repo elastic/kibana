@@ -54,17 +54,24 @@ export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexAc
     ): GenericValidationResult<IndexActionParams> => {
       const errors = {
         documents: new Array<string>(),
+        indexRawData: new Array<string>(),
       };
       const validationResult = { errors };
-      if (!actionParams.documents?.length || Object.keys(actionParams.documents[0]).length === 0) {
-        errors.documents.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredDocumentJson',
-            {
-              defaultMessage: 'Document is required and should be a valid JSON object.',
-            }
-          )
-        );
+      if (!actionParams.indexRawData) {
+        // only require a document if raw isn't checked
+        if (
+          !actionParams.documents?.length ||
+          Object.keys(actionParams.documents[0]).length === 0
+        ) {
+          errors.documents.push(
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredDocumentJson',
+              {
+                defaultMessage: 'Document is required and should be a valid JSON object.',
+              }
+            )
+          );
+        }
       }
       return validationResult;
     },

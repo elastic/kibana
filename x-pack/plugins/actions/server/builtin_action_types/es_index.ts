@@ -10,6 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import { renderMustacheObject } from '../lib/mustache_renderer';
 
 export type ESIndexActionType = ActionType<ActionTypeConfigType, {}, ActionParamsType, unknown>;
 export type ESIndexActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -37,6 +38,7 @@ export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 //   eventually: https://github.com/elastic/kibana/projects/26#card-24087404
 const ParamsSchema = schema.object({
   documents: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
+  indexRawData: schema.boolean({ defaultValue: false }),
 });
 
 export const ActionTypeId = '.index';
@@ -53,7 +55,22 @@ export function getActionType({ logger }: { logger: Logger }): ESIndexActionType
       params: ParamsSchema,
     },
     executor: curry(executor)({ logger }),
+    renderParameterTemplates,
   };
+}
+
+function renderParameterTemplates(
+  params: ActionParamsType,
+  variables: Record<string, unknown>
+): ActionParamsType {
+  const { documents = [], indexRawData } = renderMustacheObject<ActionParamsType>(
+    params,
+    variables
+  );
+  if (indexRawData) {
+    documents.push(variables);
+  }
+  return { documents, indexRawData };
 }
 
 // action executor
