@@ -98,9 +98,9 @@ function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ) {
-  let url: URL;
+  const configuredUrl = configObject.url;
   try {
-    url = new URL(configObject.url);
+    new URL(configuredUrl);
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
       defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
@@ -111,7 +111,7 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureUriAllowed(url.toString());
+    configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',
