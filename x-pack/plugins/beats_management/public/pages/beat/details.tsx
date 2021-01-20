@@ -29,7 +29,7 @@ import { TagBadge } from '../../components/tag';
 import { ConfigView } from '../../components/tag/config_view/index';
 import { AppPageProps } from '../../frontend_types';
 
-interface PageProps extends AppPageProps {
+export interface PageProps extends AppPageProps {
   beat: CMBeat;
   intl: InjectedIntl;
 }
