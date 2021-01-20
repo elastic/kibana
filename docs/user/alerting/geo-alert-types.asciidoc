@@ -49,7 +49,7 @@ image::images/alert-types-tracking-select.png[Choosing a tracking alert type]
 
 Depending on the specific requirements for the alert, either tracking or containment
 might be appropriate. Select <<alert-type-tracking-threshold>> if the alert is more
-focused upon generating an alert when an entity crosses a boundary and you desire the
+focused on generating an alert when an entity crosses a boundary, and you desire the
 ability to highlight lines of crossing on a custom map. Select  
 <<alert-type-tracking-containment>> if an entity should send out constant alerts
 while contained within a boundary (this feature is optional) or if the alert is generally
