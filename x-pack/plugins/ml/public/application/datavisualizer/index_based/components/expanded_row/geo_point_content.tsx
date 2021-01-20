@@ -6,7 +6,7 @@
 
 import React, { FC, useEffect, useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { ExamplesList } from '../../../index_based/components/field_data_row/examples_list';
 import { FieldVisConfig } from '../../../stats_table/types';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
@@ -18,6 +18,7 @@ import { ES_GEO_FIELD_TYPE } from '../../../../../../../maps/common/constants';
 import { LayerDescriptor } from '../../../../../../../maps/common/descriptor_types';
 import { useMlKibana } from '../../../../contexts/kibana';
 import { DocumentStatsTable } from '../../../stats_table/components/field_data_expanded_row/document_stats';
+import { ExpandedRowContent } from '../../../stats_table/components/field_data_expanded_row/expanded_row_content';
 
 export const GeoPointContent: FC<{
   config: FieldVisConfig;
@@ -61,7 +62,7 @@ export const GeoPointContent: FC<{
 
   if (stats?.examples === undefined) return null;
   return (
-    <EuiFlexGroup data-test-subj={'mlDVIndexBasedMapContent'} gutterSize={'xl'}>
+    <ExpandedRowContent dataTestSubj={'mlDVIndexBasedMapContent'}>
       <DocumentStatsTable config={config} />
 
       <EuiFlexItem>
@@ -70,6 +71,6 @@ export const GeoPointContent: FC<{
       <EuiFlexItem className={'mlDataVisualizerMapWrapper'}>
         <MlEmbeddedMapComponent layerList={layerList} />
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </ExpandedRowContent>
   );
 };

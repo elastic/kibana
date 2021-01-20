@@ -6,13 +6,14 @@
 
 import React, { FC, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { Feature, Point } from 'geojson';
 import type { FieldDataRowProps } from '../../../../stats_table/types/field_data_row';
 import { DocumentStatsTable } from '../../../../stats_table/components/field_data_expanded_row/document_stats';
 import { TopValues } from '../../../../index_based/components/field_data_row/top_values';
 import { MlEmbeddedMapComponent } from '../../../../../components/ml_embedded_map';
 import { convertWKTGeoToLonLat, getGeoPointsLayer } from './format_utils';
+import { ExpandedRowContent } from '../../../../stats_table/components/field_data_expanded_row/expanded_row_content';
 
 export const DEFAULT_GEO_REGEX = RegExp('(?<lat>.+) (?<lon>.+)');
 
@@ -58,7 +59,7 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
     }
   }, [config]);
   return (
-    <EuiFlexGroup data-test-subj={'mlDVGeoPointContent'} gutterSize={'xl'}>
+    <ExpandedRowContent dataTestSubj={'mlDVGeoPointContent'}>
       <DocumentStatsTable config={config} />
       {formattedResults && Array.isArray(formattedResults.stats!.topValues) && (
         <EuiFlexItem>
@@ -73,6 +74,6 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
           <MlEmbeddedMapComponent layerList={formattedResults.layerList} />
         </EuiFlexItem>
       )}
-    </EuiFlexGroup>
+    </ExpandedRowContent>
   );
 };
