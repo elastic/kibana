@@ -22,7 +22,7 @@ export interface DiscoverSearchSessionManagerDeps {
 }
 
 /**
- * Helps with state management of search session and {@link SEARCH_SESSION_ID_QUERY_PARAM} from the URL
+ * Helps with state management of search session and {@link SEARCH_SESSION_ID_QUERY_PARAM} in the URL
  */
 export class DiscoverSearchSessionManager {
   /**
@@ -73,7 +73,10 @@ export class DiscoverSearchSessionManager {
     }
   }
 
-  hasSearchSessionIdInURL() {
+  /**
+   * If there is a {@link SEARCH_SESSION_ID_QUERY_PARAM} currently in the URL
+   */
+  hasSearchSessionIdInURL(): boolean {
     return !!this.getSearchSessionIdFromURL();
   }
 
