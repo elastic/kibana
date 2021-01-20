@@ -6,77 +6,51 @@
  * Public License, v 1.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { getStats } from './get_stats';
 
-const mockSavedObjects = [
-  {
-    _source: {
-      visualization: {
+const mockVisualizations = {
+  saved_objects: [
+    {
+      attributes: {
         visState:
           '{"type": "table","aggs": [{ "schema": "metric" }, { "schema": "bucket" }, { "schema": "split", "enabled": true }], "params": { "row": true }}',
       },
     },
-  },
-  {
-    _source: {
-      visualization: {
+    {
+      attributes: {
         visState:
           '{"type": "table","aggs": [{ "schema": "metric" }, { "schema": "bucket" }, { "schema": "split", "enabled": false }], "params": { "row": true }}',
       },
     },
-  },
-  {
-    _source: {
-      visualization: {
+    {
+      attributes: {
         visState:
           '{"type": "table","aggs": [{ "schema": "metric" }, { "schema": "split", "enabled": true }], "params": { "row": false }}',
       },
     },
-  },
-  {
-    _source: {
-      visualization: {
+    {
+      attributes: {
         visState: '{"type": "table","aggs": [{ "schema": "metric" }, { "schema": "bucket" }]}',
       },
     },
-  },
-  {
-    _source: {
-      visualization: { visState: '{"type": "histogram"}' },
+    {
+      attributes: { visState: '{"type": "histogram"}' },
     },
-  },
-];
+  ],
+};
 
 describe('vis_type_table getStats', () => {
-  const mockIndex = '';
-  const mockSearch = jest.fn();
-
-  const getMockCallCluster = (hits: unknown[]) =>
-    ({
-      search: mockSearch as unknown,
-    } as ElasticsearchClient);
-
-  test('Returns undefined when no results found', async () => {
-    mockSearch.mockResolvedValueOnce({ body: { hits: { hits: [] } } });
-    const result = await getStats(getMockCallCluster(undefined as any), mockIndex);
-    expect(result).toBeUndefined();
-    expect(mockSearch).toHaveBeenCalledWith({
-      size: 10000,
-      index: mockIndex,
-      ignoreUnavailable: true,
-      filterPath: ['hits.hits._source.visualization'],
-      body: {
-        query: {
-          bool: { filter: { term: { type: 'visualization' } } },
-        },
-      },
-    });
-  });
+  const mockSoClient = ({
+    find: jest.fn().mockResolvedValue(mockVisualizations),
+  } as unknown) as SavedObjectsClientContract;
 
   test('Returns stats from saved objects for table vis only', async () => {
-    mockSearch.mockResolvedValueOnce({ body: { hits: { hits: mockSavedObjects } } });
-    const result = await getStats(getMockCallCluster(undefined as any), mockIndex);
+    const result = await getStats(mockSoClient);
+    expect(mockSoClient.find).toHaveBeenCalledWith({
+      type: 'visualization',
+      perPage: 10000,
+    });
     expect(result).toEqual({
       total: 4,
       total_split: 3,

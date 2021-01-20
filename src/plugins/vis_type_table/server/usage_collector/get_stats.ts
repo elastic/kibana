@@ -6,13 +6,12 @@
  * Public License, v 1.
  */
 
-import { get } from 'lodash';
-import { ElasticsearchClient } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
-import { SavedVisState } from 'src/plugins/visualizations/common';
+import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
+import {
+  SavedVisState,
+  VisualizationSavedObjectAttributes,
+} from 'src/plugins/visualizations/common';
 import { TableVisParams, VIS_TYPE_TABLE } from '../../common';
-
-type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
 
 export interface VisTypeTableUsage {
   /**
@@ -43,36 +42,16 @@ export interface VisTypeTableUsage {
  * Parse the response data into telemetry payload
  */
 export async function getStats(
-  esClient: ElasticsearchClient,
-  index: string
+  soClient: SavedObjectsClientContract | ISavedObjectsRepository
 ): Promise<VisTypeTableUsage | undefined> {
-  const searchParams = {
-    size: 10000, // elasticsearch index.max_result_window default value
-    index,
-    ignoreUnavailable: true,
-    filterPath: ['hits.hits._source.visualization'],
-    body: {
-      query: {
-        bool: { filter: { term: { type: 'visualization' } } },
-      },
-    },
-  };
-  const { body: esResponse } = await esClient.search<ESResponse>(searchParams);
-  const size = get(esResponse, 'hits.hits.length', 0);
-  if (size < 1) {
-    return;
-  }
+  const visualizations = await soClient.find<VisualizationSavedObjectAttributes>({
+    type: 'visualization',
+    perPage: 10000,
+  });
 
-  const tableVisualizations = esResponse.hits.hits
-    .map((hit) => {
-      const visualization = get(hit, '_source.visualization', { visState: '{}' });
-      const visState: SavedVisState<TableVisParams> = JSON.parse(visualization.visState);
-      return {
-        type: visState.type || '_na_',
-        visState,
-      };
-    })
-    .filter((vis) => vis.type === VIS_TYPE_TABLE);
+  const tableVisualizations = visualizations.saved_objects
+    .map<SavedVisState<TableVisParams>>(({ attributes }) => JSON.parse(attributes.visState))
+    .filter(({ type }) => type === VIS_TYPE_TABLE);
 
   const defaultStats = {
     total: tableVisualizations.length,
@@ -87,13 +66,13 @@ export async function getStats(
     },
   };
 
-  return tableVisualizations.reduce((acc, { visState }) => {
-    const hasSplitAgg = visState.aggs.find((agg) => agg.schema === 'split');
+  return tableVisualizations.reduce((acc, { aggs, params }) => {
+    const hasSplitAgg = aggs.find((agg) => agg.schema === 'split');
 
     if (hasSplitAgg) {
       acc.total_split += 1;
 
-      const isSplitRow = visState.params.row;
+      const isSplitRow = params.row;
       const isSplitEnabled = hasSplitAgg.enabled;
 
       const container = isSplitRow ? acc.split_rows : acc.split_columns;

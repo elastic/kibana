@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, PluginConfigDescriptor } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { configSchema, ConfigSchema } from '../config';
@@ -22,13 +22,10 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   ],
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) => ({
+export const plugin = () => ({
   setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
     if (plugins.usageCollection) {
-      registerVisTypeTableUsageCollector(
-        plugins.usageCollection,
-        initializerContext.config.legacy.globalConfig$
-      );
+      registerVisTypeTableUsageCollector(plugins.usageCollection);
     }
   },
   start() {},

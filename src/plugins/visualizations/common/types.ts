@@ -6,6 +6,7 @@
  * Public License, v 1.
  */
 
+import { SavedObjectAttributes } from 'kibana/server';
 import { AggConfigOptions } from 'src/plugins/data/common';
 
 export interface VisParams {
@@ -17,4 +18,15 @@ export interface SavedVisState<TVisParams = VisParams> {
   type: string;
   params: TVisParams;
   aggs: AggConfigOptions[];
+}
+
+export interface VisualizationSavedObjectAttributes extends SavedObjectAttributes {
+  description: string;
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: string;
+  };
+  title: string;
+  version: number;
+  visState: string;
+  uiStateJSON: string;
 }

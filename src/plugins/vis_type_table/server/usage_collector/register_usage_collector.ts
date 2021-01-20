@@ -6,16 +6,11 @@
  * Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { getStats, VisTypeTableUsage } from './get_stats';
 
-export function registerVisTypeTableUsageCollector(
-  collectorSet: UsageCollectionSetup,
-  config: Observable<{ kibana: { index: string } }>
-) {
+export function registerVisTypeTableUsageCollector(collectorSet: UsageCollectionSetup) {
   const collector = collectorSet.makeUsageCollector<VisTypeTableUsage | undefined>({
     type: 'vis_type_table',
     isReady: () => true,
@@ -31,10 +26,7 @@ export function registerVisTypeTableUsageCollector(
         enabled: { type: 'long' },
       },
     },
-    fetch: async ({ esClient }) => {
-      const index = (await config.pipe(first()).toPromise()).kibana.index;
-      return await getStats(esClient, index);
-    },
+    fetch: ({ soClient }) => getStats(soClient),
   });
   collectorSet.registerCollector(collector);
 }

@@ -10,7 +10,6 @@ jest.mock('./get_stats', () => ({
   getStats: jest.fn().mockResolvedValue({ somestat: 1 }),
 }));
 
-import { of } from 'rxjs';
 import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
@@ -18,12 +17,9 @@ import { registerVisTypeTableUsageCollector } from './register_usage_collector';
 import { getStats } from './get_stats';
 
 describe('registerVisTypeTableUsageCollector', () => {
-  const mockIndex = 'mock_index';
-  const mockConfig = of({ kibana: { index: mockIndex } });
-
   it('Usage collector configs fit the shape', () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
-    registerVisTypeTableUsageCollector(mockCollectorSet, mockConfig);
+    registerVisTypeTableUsageCollector(mockCollectorSet);
     expect(mockCollectorSet.makeUsageCollector).toBeCalledTimes(1);
     expect(mockCollectorSet.registerCollector).toBeCalledTimes(1);
     expect(mockCollectorSet.makeUsageCollector).toHaveBeenCalledWith({
@@ -49,12 +45,12 @@ describe('registerVisTypeTableUsageCollector', () => {
 
   it('Usage collector config.fetch calls getStats', async () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
-    registerVisTypeTableUsageCollector(mockCollectorSet, mockConfig);
+    registerVisTypeTableUsageCollector(mockCollectorSet);
     const usageCollector = mockCollectorSet.makeUsageCollector.mock.results[0].value;
     const mockCollectorFetchContext = createCollectorFetchContextMock();
     const fetchResult = await usageCollector.fetch(mockCollectorFetchContext);
     expect(getStats).toBeCalledTimes(1);
-    expect(getStats).toBeCalledWith(mockCollectorFetchContext.esClient, mockIndex);
+    expect(getStats).toBeCalledWith(mockCollectorFetchContext.soClient);
     expect(fetchResult).toEqual({ somestat: 1 });
   });
 });
