@@ -38,7 +38,7 @@ export async function runDockerGenerator(
   log: ToolingLog,
   build: Build,
   flags: {
-    architecture: string;
+    architecture?: string;
     context: boolean;
     image: boolean;
     ubi: boolean;
@@ -55,7 +55,8 @@ export async function runDockerGenerator(
   const imageTag = 'docker.elastic.co/kibana/kibana';
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
-  const artifactTarball = `kibana${imageFlavor}-${version}-linux-${artifactArchitecture}.tar.gz`;
+  const artifactPrefix = `kibana${imageFlavor}-${version}-linux`;
+  const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDate = new Date().toISOString();
   // That would produce oss, default and default-ubi7
@@ -69,6 +70,7 @@ export async function runDockerGenerator(
     `kibana${imageFlavor}${ubiImageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
   );
   const scope: TemplateContext = {
+    artifactPrefix,
     artifactTarball,
     imageFlavor,
     version,

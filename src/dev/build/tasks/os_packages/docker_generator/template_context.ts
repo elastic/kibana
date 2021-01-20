@@ -18,6 +18,7 @@
  */
 
 export interface TemplateContext {
+  artifactPrefix: string;
   artifactTarball: string;
   imageFlavor: string;
   version: string;
