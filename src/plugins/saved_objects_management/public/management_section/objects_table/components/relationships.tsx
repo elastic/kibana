@@ -156,6 +156,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
           { defaultMessage: 'Type of the saved object' }
         ),
         sortable: false,
+        'data-test-subj': 'relationshipsObjectType',
       },
       {
         field: 'id',
@@ -168,6 +169,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
           { defaultMessage: 'Id of the saved object' }
         ),
         sortable: false,
+        'data-test-subj': 'relationshipsObjectId',
       },
       relationshipColumn,
       {
@@ -180,6 +182,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
           { defaultMessage: 'Error encountered with the relation' }
         ),
         sortable: false,
+        'data-test-subj': 'relationshipsError',
       },
     ];
 

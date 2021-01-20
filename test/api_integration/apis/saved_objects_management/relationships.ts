@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
     invalidRelations: schema.arrayOf(invalidRelationSchema),
   });
 
-  describe('TOTO relationships', () => {
+  describe('relationships', () => {
     before(async () => {
       await esArchiver.load('management/saved_objects/relationships');
     });

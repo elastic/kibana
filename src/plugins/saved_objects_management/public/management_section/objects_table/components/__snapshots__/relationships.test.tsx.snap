@@ -401,6 +401,7 @@ exports[`Relationships should render invalid relations 1`] = `
       columns={
         Array [
           Object {
+            "data-test-subj": "relationshipsObjectType",
             "description": "Type of the saved object",
             "field": "type",
             "name": "Type",
@@ -408,6 +409,7 @@ exports[`Relationships should render invalid relations 1`] = `
             "width": "150px",
           },
           Object {
+            "data-test-subj": "relationshipsObjectId",
             "description": "Id of the saved object",
             "field": "id",
             "name": "Id",
@@ -424,6 +426,7 @@ exports[`Relationships should render invalid relations 1`] = `
             "width": "125px",
           },
           Object {
+            "data-test-subj": "relationshipsError",
             "description": "Error encountered with the relation",
             "field": "error",
             "name": "Error",
