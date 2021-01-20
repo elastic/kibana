@@ -33,7 +33,8 @@ export function getActionType({
   alertsService,
 }: GetActionTypeParams): CaseActionType {
   return {
-    id: '.case',
+    // introducing a change here to see if it triggers an integration test failure
+    id: '.case_v2',
     minimumLicenseRequired: 'basic',
     name: i18n.NAME,
     validate: {
