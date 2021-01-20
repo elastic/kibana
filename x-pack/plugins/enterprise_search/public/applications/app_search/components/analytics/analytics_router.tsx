@@ -46,7 +46,7 @@ interface Props {
   engineBreadcrumb: BreadcrumbTrail;
 }
 export const AnalyticsRouter: React.FC<Props> = ({ engineBreadcrumb }) => {
-  const { generatePath } = useValues(EngineLogic);
+  const { generateEnginePath } = useValues(EngineLogic);
 
   const ANALYTICS_BREADCRUMB = [...engineBreadcrumb, ANALYTICS_TITLE];
 
@@ -80,7 +80,7 @@ export const AnalyticsRouter: React.FC<Props> = ({ engineBreadcrumb }) => {
         <QueryDetail breadcrumbs={ANALYTICS_BREADCRUMB} />
       </Route>
       <Route exact path={ENGINE_ANALYTICS_QUERY_DETAILS_PATH}>
-        <Redirect to={generatePath(ENGINE_ANALYTICS_PATH)} />
+        <Redirect to={generateEnginePath(ENGINE_ANALYTICS_PATH)} />
       </Route>
       <Route>
         <NotFound breadcrumbs={ANALYTICS_BREADCRUMB} product={APP_SEARCH_PLUGIN} />

@@ -52,7 +52,7 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
   }),
   listeners: ({ actions }) => ({
     getDocumentDetails: async ({ documentId }) => {
-      const { engineName, generatePath } = EngineLogic.values;
+      const { engineName, generateEnginePath } = EngineLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
 
       try {
@@ -66,11 +66,11 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
         // error that will prevent the page from loading, so redirect to the documents page and
         // show the error
         flashAPIErrors(e, { isQueued: true });
-        navigateToUrl(generatePath(ENGINE_DOCUMENTS_PATH));
+        navigateToUrl(generateEnginePath(ENGINE_DOCUMENTS_PATH));
       }
     },
     deleteDocument: async ({ documentId }) => {
-      const { engineName, generatePath } = EngineLogic.values;
+      const { engineName, generateEnginePath } = EngineLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
 
       const CONFIRM_DELETE = i18n.translate(
@@ -90,7 +90,7 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
           const { http } = HttpLogic.values;
           await http.delete(`/api/app_search/engines/${engineName}/documents/${documentId}`);
           setQueuedSuccessMessage(DELETE_SUCCESS);
-          navigateToUrl(generatePath(ENGINE_DOCUMENTS_PATH));
+          navigateToUrl(generateEnginePath(ENGINE_DOCUMENTS_PATH));
         } catch (e) {
           flashAPIErrors(e);
         }

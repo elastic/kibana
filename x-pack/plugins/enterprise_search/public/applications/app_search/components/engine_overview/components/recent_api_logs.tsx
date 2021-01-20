@@ -23,7 +23,7 @@ import { RECENT_API_EVENTS } from '../../api_logs/constants';
 import { VIEW_API_LOGS } from '../constants';
 
 export const RecentApiLogs: React.FC = () => {
-  const { generatePath } = useValues(EngineLogic);
+  const { generateEnginePath } = useValues(EngineLogic);
 
   return (
     <EuiPageContent>
@@ -34,7 +34,7 @@ export const RecentApiLogs: React.FC = () => {
           </EuiTitle>
         </EuiPageContentHeaderSection>
         <EuiPageContentHeaderSection>
-          <EuiButtonTo to={generatePath(ENGINE_API_LOGS_PATH)} size="s">
+          <EuiButtonTo to={generateEnginePath(ENGINE_API_LOGS_PATH)} size="s">
             {VIEW_API_LOGS}
           </EuiButtonTo>
         </EuiPageContentHeaderSection>

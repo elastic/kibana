@@ -10,7 +10,7 @@ export const mockEngineValues = {
   engineName: 'some-engine',
   // Note: using getters allows us to use `this`, which lets tests
   // override engineName and still generate correct engine names
-  get generatePath() {
+  get generateEnginePath() {
     return jest.fn((path, pathParams = {}) =>
       generatePath(path, { engineName: this.engineName, ...pathParams })
     );

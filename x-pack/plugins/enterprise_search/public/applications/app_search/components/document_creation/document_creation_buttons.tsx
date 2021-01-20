@@ -33,8 +33,8 @@ interface Props {
 export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) => {
   const { openDocumentCreation } = useActions(DocumentCreationLogic);
 
-  const { generatePath } = useValues(EngineLogic);
-  const crawlerLink = generatePath(ENGINE_CRAWLER_PATH);
+  const { generateEnginePath } = useValues(EngineLogic);
+  const crawlerLink = generateEnginePath(ENGINE_CRAWLER_PATH);
 
   return (
     <>

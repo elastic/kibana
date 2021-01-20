@@ -16,7 +16,7 @@ interface EngineValues {
   dataLoading: boolean;
   engine: Partial<EngineDetails>;
   engineName: string;
-  generatePath: Function;
+  generateEnginePath: Function;
   isMetaEngine: boolean;
   isSampleEngine: boolean;
   hasSchemaConflicts: boolean;
@@ -78,7 +78,7 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     ],
   },
   selectors: ({ selectors }) => ({
-    generatePath: [
+    generateEnginePath: [
       () => [selectors.engineName],
       (engineName) => {
         const generateEnginePath = (path: string, pathParams: object = {}) => {

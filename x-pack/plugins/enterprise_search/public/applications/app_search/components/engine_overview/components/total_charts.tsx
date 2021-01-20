@@ -28,7 +28,7 @@ import { AnalyticsChart, convertToChartData } from '../../analytics';
 import { EngineOverviewLogic } from '../';
 
 export const TotalCharts: React.FC = () => {
-  const { generatePath } = useValues(EngineLogic);
+  const { generateEnginePath } = useValues(EngineLogic);
   const { startDate, queriesPerDay, operationsPerDay } = useValues(EngineOverviewLogic);
 
   return (
@@ -45,7 +45,7 @@ export const TotalCharts: React.FC = () => {
               </EuiText>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
-              <EuiButtonTo to={generatePath(ENGINE_ANALYTICS_PATH)} size="s">
+              <EuiButtonTo to={generateEnginePath(ENGINE_ANALYTICS_PATH)} size="s">
                 {VIEW_ANALYTICS}
               </EuiButtonTo>
             </EuiPageContentHeaderSection>
@@ -74,7 +74,7 @@ export const TotalCharts: React.FC = () => {
               </EuiText>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
-              <EuiButtonTo to={generatePath(ENGINE_API_LOGS_PATH)} size="s">
+              <EuiButtonTo to={generateEnginePath(ENGINE_API_LOGS_PATH)} size="s">
                 {VIEW_API_LOGS}
               </EuiButtonTo>
             </EuiPageContentHeaderSection>
