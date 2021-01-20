@@ -72,19 +72,17 @@ export const Overview: React.FC = () => {
 
   const DocumentSummary = () => {
     let totalDocuments = 0;
-    const tableContent =
-      summary &&
-      summary.map((item, index) => {
-        totalDocuments += item.count;
-        return (
-          item.count > 0 && (
-            <EuiTableRow key={index}>
-              <EuiTableRowCell>{item.type}</EuiTableRowCell>
-              <EuiTableRowCell>{item.count.toLocaleString('en-US')}</EuiTableRowCell>
-            </EuiTableRow>
-          )
-        );
-      });
+    const tableContent = summary?.map((item, index) => {
+      totalDocuments += item.count;
+      return (
+        item.count > 0 && (
+          <EuiTableRow key={index} data-test-subj="DocumentSummaryRow">
+            <EuiTableRowCell>{item.type}</EuiTableRowCell>
+            <EuiTableRowCell>{item.count.toLocaleString('en-US')}</EuiTableRowCell>
+          </EuiTableRow>
+        )
+      );
+    });
 
     const emptyState = (
       <>
