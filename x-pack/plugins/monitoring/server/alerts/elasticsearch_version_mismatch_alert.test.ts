@@ -157,9 +157,15 @@ describe('ElasticsearchVersionMismatchAlert', () => {
       });
     });
 
-    it('should not fire actions if there is no legacy alert', async () => {
+    it('should not fire actions if there is no mismatch', async () => {
       (fetchElasticsearchVersions as jest.Mock).mockImplementation(() => {
-        return [];
+        return [
+          {
+            versions: ['8.0.0'],
+            clusterUuid,
+            ccs,
+          },
+        ];
       });
       const alert = new ElasticsearchVersionMismatchAlert();
       const type = alert.getAlertType();

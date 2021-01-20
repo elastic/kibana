@@ -166,9 +166,15 @@ describe('ClusterHealthAlert', () => {
       });
     });
 
-    it('should not fire actions if there is no legacy alert', async () => {
+    it('should not fire actions if the cluster health is green', async () => {
       (fetchClusterHealth as jest.Mock).mockImplementation(() => {
-        return [];
+        return [
+          {
+            health: AlertClusterHealthType.Green,
+            clusterUuid,
+            ccs,
+          },
+        ];
       });
       const alert = new ClusterHealthAlert();
       const type = alert.getAlertType();

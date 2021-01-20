@@ -112,12 +112,6 @@ export class BaseAlert {
   }
 
   public isEnabled(licenseService: MonitoringLicenseService) {
-    // if (this.alertOptions.legacy) {
-    //   const watcherFeature = licenseService.getWatcherFeature();
-    //   if (!watcherFeature.isAvailable || !watcherFeature.isEnabled) {
-    //     return false;
-    //   }
-    // }
     return true;
   }
 

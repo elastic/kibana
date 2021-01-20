@@ -23,7 +23,11 @@ jest.mock('moment', () => {
     };
   };
   moment.duration = () => ({ humanize: () => 'HUMANIZED_DURATION' });
-  moment.utc = () => '';
+  moment.utc = () => ({
+    add: () => ({
+      isAfter: () => false,
+    }),
+  });
   return moment;
 });
 
@@ -186,9 +190,16 @@ describe('LicenseExpirationAlert', () => {
       });
     });
 
-    it('should not fire actions if there is no legacy alert', async () => {
+    it('should not fire actions if the license is not expired', async () => {
       (fetchLicenses as jest.Mock).mockImplementation(() => {
-        return [];
+        return [
+          {
+            status: 'active',
+            type: 'gold',
+            expiryDateMS: 1,
+            clusterUuid,
+          },
+        ];
       });
       const alert = new LicenseExpirationAlert();
       const type = alert.getAlertType();

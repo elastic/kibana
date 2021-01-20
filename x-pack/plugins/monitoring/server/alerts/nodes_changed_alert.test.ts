@@ -195,9 +195,28 @@ describe('NodesChangedAlert', () => {
       });
     });
 
-    it('should not fire actions if there is no legacy alert', async () => {
+    it('should not fire actions if no nodes have changed', async () => {
       (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
-        return [];
+        return [
+          {
+            recentNodes: [
+              {
+                nodeUuid,
+                nodeEphemeralId,
+                nodeName,
+              },
+            ],
+            priorNodes: [
+              {
+                nodeUuid,
+                nodeEphemeralId,
+                nodeName,
+              },
+            ],
+            clusterUuid,
+            ccs,
+          },
+        ];
       });
       const alert = new NodesChangedAlert();
       const type = alert.getAlertType();

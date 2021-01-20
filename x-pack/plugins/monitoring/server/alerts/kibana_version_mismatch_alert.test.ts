@@ -159,9 +159,15 @@ describe('KibanaVersionMismatchAlert', () => {
       });
     });
 
-    it('should not fire actions if there is no legacy alert', async () => {
+    it('should not fire actions if there is no mismatch', async () => {
       (fetchKibanaVersions as jest.Mock).mockImplementation(() => {
-        return [];
+        return [
+          {
+            versions: ['8.0.0'],
+            clusterUuid,
+            ccs,
+          },
+        ];
       });
       const alert = new KibanaVersionMismatchAlert();
       const type = alert.getAlertType();
