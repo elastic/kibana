@@ -130,7 +130,11 @@ describe('MetricsService', () => {
           event_loop_delay: 50,
         },
         os: {
-          load: [10, 20, 30],
+          load: {
+            '1m': 10,
+            '5m': 20,
+            '15m': 30,
+          },
         },
       };
       const secondMetrics = {
@@ -140,9 +144,16 @@ describe('MetricsService', () => {
           event_loop_delay: 100,
         },
         os: {
-          load: [20, 30, 40],
+          load: {
+            '1m': 20,
+            '5m': 30,
+            '15m': 40,
+          },
         },
       };
+
+      const opsLogger = logger.get('metrics', 'ops');
+
       mockOpsCollector.collect
         .mockResolvedValueOnce(firstMetrics)
         .mockResolvedValueOnce(secondMetrics);
@@ -155,20 +166,111 @@ describe('MetricsService', () => {
         await new Promise((resolve) => process.nextTick(resolve));
         return emission;
       };
-      expect(loggingSystemMock.collect(logger).info).toMatchSnapshot();
+      expect(loggingSystemMock.collect(opsLogger).debug[1]).toMatchInlineSnapshot(`
+        Array [
+          "memory: 100.0B uptime: 0:00:01 load: [10.00,20.00,30.00] delay: 50.000",
+          Object {
+            "category": Array [
+              "process",
+              "host",
+            ],
+            "ecs": Object {
+              "version": "1.7.0",
+            },
+            "host": Object {
+              "os": Object {
+                "load": Object {
+                  "15m": 30,
+                  "1m": 10,
+                  "5m": 20,
+                },
+              },
+            },
+            "kind": "metric",
+            "process": Object {
+              "eventLoopDelay": 50,
+              "memory": Object {
+                "heap": Object {
+                  "usedInBytes": 100,
+                },
+              },
+              "uptime": 1,
+            },
+          },
+        ]
+      `);
       await nextEmission();
-      expect(loggingSystemMock.collect(logger).info).toMatchSnapshot();
+      expect(loggingSystemMock.collect(opsLogger).debug[3]).toMatchInlineSnapshot(`
+        Array [
+          "memory: 200.0B uptime: 0:00:03 load: [20.00,30.00,40.00] delay: 100.000",
+          Object {
+            "category": Array [
+              "process",
+              "host",
+            ],
+            "ecs": Object {
+              "version": "1.7.0",
+            },
+            "host": Object {
+              "os": Object {
+                "load": Object {
+                  "15m": 40,
+                  "1m": 20,
+                  "5m": 30,
+                },
+              },
+            },
+            "kind": "metric",
+            "process": Object {
+              "eventLoopDelay": 100,
+              "memory": Object {
+                "heap": Object {
+                  "usedInBytes": 200,
+                },
+              },
+              "uptime": 3,
+            },
+          },
+        ]
+      `);
     });
 
-    it('logs default metrics if they are missing or malformed', async () => {
+    it('omits metrics from log message if they are missing or malformed', async () => {
+      const opsLogger = logger.get('metrics', 'ops');
       mockOpsCollector.collect.mockResolvedValueOnce({ secondMetrics: 'metrics' });
       await metricsService.setup({ http: httpMock });
       await metricsService.start();
-      expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(opsLogger).debug[1]).toMatchInlineSnapshot(`
         Array [
-          Array [
-            "memory: 0.0B uptime: 0:00:00 load: [] delay: 0.000",
-          ],
+          "   ",
+          Object {
+            "category": Array [
+              "process",
+              "host",
+            ],
+            "ecs": Object {
+              "version": "1.7.0",
+            },
+            "host": Object {
+              "os": Object {
+                "load": Object {
+                  "15m": undefined,
+                  "1m": undefined,
+                  "5m": undefined,
+                },
+              },
+            },
+            "kind": "metric",
+            "process": Object {
+              "eventLoopDelay": undefined,
+              "memory": Object {
+                "heap": Object {
+                  "usedInBytes": undefined,
+                },
+              },
+              "uptime": undefined,
+            },
+          },
         ]
       `);
     });

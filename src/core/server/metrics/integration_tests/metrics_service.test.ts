@@ -6,11 +6,10 @@
  * Public License, v 1.
  */
 
-import numeral from '@elastic/numeral';
-import { OpsMetrics } from '..';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { InternalCoreSetup } from '../../internal_types';
 import { Root } from '../../root';
+import { OpsMetrics } from '../types';
 
 const otherTestSettings = {
   ops: {
@@ -24,64 +23,173 @@ const otherTestSettings = {
         layout: {
           highlight: false,
           kind: 'pattern',
-          pattern: '%message',
+          pattern: '%message|%meta',
         },
       },
     },
+    root: {
+      appenders: ['custom-console', 'default'],
+      level: 'warn',
+    },
     loggers: [
       {
-        context: 'metrics',
+        context: 'metrics.ops',
         appenders: ['custom-console'],
-        level: 'info',
+        level: 'debug',
       },
     ],
   },
+  plugins: {
+    initialize: false,
+  },
 };
-
-function extractTestMetricsOfInterest({ process, os }: Partial<OpsMetrics>) {
-  const memoryLogEntryinMB = numeral(process?.memory?.heap?.used_in_bytes ?? 0).format('0.0b');
-  const uptimeLogEntry = numeral((process?.uptime_in_millis ?? 0) / 1000).format('00:00:00');
-  const loadLogEntry = [...Object.values(os?.load ?? [])]
-    .map((val: number) => {
-      return numeral(val).format('0.00');
-    })
-    .join(' ');
-  const delayLogEntry = numeral(process?.event_loop_delay ?? 0).format('0.000');
-  return `memory: ${memoryLogEntryinMB} uptime: ${uptimeLogEntry} load: [${loadLogEntry}] delay: ${delayLogEntry}`;
-}
 
 describe('metrics service', () => {
   let root: Root;
   let coreSetup: InternalCoreSetup;
   let mockConsoleLog: jest.SpyInstance;
-  let testData: Partial<OpsMetrics>;
+  let testData: OpsMetrics;
+
+  beforeAll(async () => {
+    mockConsoleLog = jest.spyOn(global.console, 'log');
+    mockConsoleLog.mockClear();
+  });
+
+  afterEach(() => {
+    mockConsoleLog.mockClear();
+  });
+
+  afterAll(async () => {
+    mockConsoleLog.mockRestore();
+    if (root) {
+      await root.shutdown();
+    }
+  });
 
   describe('setup', () => {
-    beforeAll(async () => {
-      mockConsoleLog = jest.spyOn(global.console, 'log');
-      mockConsoleLog.mockClear();
+    it('returns ops interval and getOpsMetrics$ observable', async () => {
       root = kbnTestServer.createRoot({ ...otherTestSettings });
       coreSetup = await root.setup();
-    });
-
-    afterAll(async () => {
-      await root.shutdown();
-      mockConsoleLog.mockRestore();
-    });
-
-    it('returns ops interval and getOpsMetrics$ observable', async () => {
       expect(coreSetup.metrics).toHaveProperty(
         'collectionInterval',
         otherTestSettings.ops.interval
       );
       expect(coreSetup.metrics).toHaveProperty('getOpsMetrics$');
+      await root.shutdown();
     });
+  });
 
-    it('logs memory, uptime, load and delay ops metrics', async () => {
+  describe('ops metrics logging configuration', () => {
+    it('does not log with logging set to quiet', async () => {
+      root = kbnTestServer.createRoot({ logging: { quiet: true } });
+      coreSetup = await root.setup();
+
       coreSetup.metrics.getOpsMetrics$().subscribe((opsMetrics) => {
         testData = opsMetrics;
       });
-      expect(mockConsoleLog).toHaveBeenLastCalledWith(extractTestMetricsOfInterest(testData));
+
+      expect(mockConsoleLog).not.toHaveBeenCalled();
+      await root.shutdown();
+    });
+
+    it('logs at the correct level and with the correct context', async () => {
+      const testSettings = {
+        ops: {
+          interval: 500,
+        },
+        logging: {
+          silent: true, // set "true" in kbnTestServer
+          appenders: {
+            'custom-console': {
+              kind: 'console',
+              layout: {
+                highlight: false,
+                kind: 'pattern',
+                pattern: '%level|%logger',
+              },
+            },
+          },
+          root: {
+            appenders: ['custom-console', 'default'],
+            level: 'warn',
+          },
+          loggers: [
+            {
+              context: 'metrics.ops',
+              appenders: ['custom-console'],
+              level: 'debug',
+            },
+          ],
+        },
+        plugins: {
+          initialize: false,
+        },
+      };
+      root = kbnTestServer.createRoot({ ...testSettings });
+      coreSetup = await root.setup();
+
+      coreSetup.metrics.getOpsMetrics$().subscribe((opsMetrics) => {
+        testData = opsMetrics;
+      });
+
+      expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+      const [level, logger] = mockConsoleLog.mock.calls[0][0].split('|');
+      expect(level).toBe('DEBUG');
+      expect(logger).toBe('metrics.ops');
+
+      await root.shutdown();
+    });
+  });
+  describe('ops metrics logging content', () => {
+    it('logs memory, uptime, load and delay ops metrics in the message', async () => {
+      root = kbnTestServer.createRoot({ ...otherTestSettings });
+      coreSetup = await root.setup();
+
+      coreSetup.metrics.getOpsMetrics$().subscribe((opsMetrics) => {
+        testData = opsMetrics;
+      });
+      const expectedArray = ['memory:', 'uptime:', 'load:', 'delay:'];
+
+      expect(testData).toBeTruthy();
+      expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+      const [message] = mockConsoleLog.mock.calls[0][0].split('|');
+
+      const messageParts = message.split(' ');
+      const testParts = [messageParts[0], messageParts[2], messageParts[4], messageParts[6]];
+      // the contents of the message are variable based on the process environment,
+      // so we are only performing assertions against parts of the string
+      expect(testParts).toEqual(expect.arrayContaining(expectedArray));
+
+      await root.shutdown();
+    });
+
+    it('logs structured data in the log meta', async () => {
+      root = kbnTestServer.createRoot({ ...otherTestSettings });
+      coreSetup = await root.setup();
+
+      coreSetup.metrics.getOpsMetrics$().subscribe((opsMetrics) => {
+        testData = opsMetrics;
+      });
+      const [, meta] = mockConsoleLog.mock.calls[0][0].split('|');
+      expect(Object.keys(JSON.parse(meta).host.os.load)).toEqual(['1m', '5m', '15m']);
+      expect(Object.keys(JSON.parse(meta).process)).toEqual(expect.arrayContaining(['uptime']));
+
+      await root.shutdown();
+    });
+
+    it('logs ECS fields in the log meta', async () => {
+      root = kbnTestServer.createRoot({ ...otherTestSettings });
+      coreSetup = await root.setup();
+
+      coreSetup.metrics.getOpsMetrics$().subscribe((opsMetrics) => {
+        testData = opsMetrics;
+      });
+      const [, meta] = mockConsoleLog.mock.calls[0][0].split('|');
+      expect(JSON.parse(meta).kind).toBe('metric');
+      expect(JSON.parse(meta).ecs.version).toBe('1.7.0');
+      expect(JSON.parse(meta).category).toEqual(expect.arrayContaining(['process', 'host']));
+
+      await root.shutdown();
     });
   });
 });
