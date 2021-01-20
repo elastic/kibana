@@ -193,7 +193,7 @@ export function LayerPanel(
 
           <EuiSpacer size="m" />
 
-          {groups.map((group, groupIndex) => {
+          {groups.map((group) => {
             const newId = generateId();
             const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
 
@@ -223,8 +223,7 @@ export function LayerPanel(
               >
                 <>
                   <ReorderProvider
-                    id={group.groupId}
-                    key={group.groupId}
+                    id={`${layerId}-${group.groupId}`}
                     className={'lnsLayerPanel__group'}
                   >
                     {group.accessors.map((accessorConfig) => {
