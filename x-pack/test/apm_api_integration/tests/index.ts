@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../common/ftr_provider_context';
 export default function apmApiIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
-  describe('APM API tests', () => {
+  describe('APM API tests', function () {
     this.tags('ciGroup1');
     loadTestFile(require.resolve('./alerts/chart_preview'));
 
