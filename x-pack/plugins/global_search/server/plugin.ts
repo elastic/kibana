@@ -14,7 +14,7 @@ import { registerRoutes } from './routes';
 import {
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
-  RouteHandlerGlobalSearchContext,
+  GlobalSearchRequestHandlerContext,
 } from './types';
 import { GlobalSearchConfigType } from './config';
 
@@ -50,9 +50,9 @@ export class GlobalSearchPlugin
 
     registerRoutes(core.http.createRouter());
 
-    core.http.registerRouteHandlerContext(
+    core.http.registerRouteHandlerContext<GlobalSearchRequestHandlerContext, 'globalSearch'>(
       'globalSearch',
-      (_, req): RouteHandlerGlobalSearchContext => {
+      (_, req) => {
         return {
           find: (term, options) => this.searchServiceStart!.find(term, options, req),
           getSearchableTypes: () => this.searchServiceStart!.getSearchableTypes(req),

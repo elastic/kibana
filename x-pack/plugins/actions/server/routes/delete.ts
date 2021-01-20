@@ -13,14 +13,14 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
-import { RequestHandlerContextActionsPlugin } from '../types';
+import { ActionsRequestHandlerContext } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
 export const deleteActionRoute = (
-  router: IRouter<RequestHandlerContextActionsPlugin>,
+  router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.delete(

@@ -18,10 +18,12 @@
  */
 
 import _ from 'lodash';
-import { IRouter } from 'kibana/server';
+import { IRouter, RequestHandlerContext } from 'kibana/server';
 import type { DataApiRequestHandlerContext } from '../../../data/server';
 
-export function validateEsRoute(router: IRouter<{ search: DataApiRequestHandlerContext }>) {
+export function validateEsRoute(
+  router: IRouter<RequestHandlerContext & { search: DataApiRequestHandlerContext }>
+) {
   router.get(
     {
       path: '/api/timelion/validate/es',

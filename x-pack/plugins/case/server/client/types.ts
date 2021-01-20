@@ -23,8 +23,7 @@ import {
   AlertServiceContract,
 } from '../services';
 import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
-
-import type { DepsHandlerContext } from '../types';
+import type { CasesRequestHandlerContext } from '../types';
 
 export interface CaseClientCreate {
   theCase: CasePostRequest;
@@ -54,7 +53,7 @@ export interface CaseClientFactoryArguments {
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
-  context?: DepsHandlerContext;
+  context?: Omit<CasesRequestHandlerContext, 'case'>;
 }
 
 export interface ConfigureFields {

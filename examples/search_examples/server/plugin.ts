@@ -23,6 +23,7 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  RequestHandlerContext,
 } from 'src/core/server';
 
 import type { DataApiRequestHandlerContext } from 'src/plugins/data/server';
@@ -55,7 +56,9 @@ export class SearchExamplesPlugin
     deps: SearchExamplesPluginSetupDeps
   ) {
     this.logger.debug('search_examples: Setup');
-    const router = core.http.createRouter<{ search: DataApiRequestHandlerContext }>();
+    const router = core.http.createRouter<
+      RequestHandlerContext & { search: DataApiRequestHandlerContext }
+    >();
 
     core.getStartServices().then(([_, depsStart]) => {
       const myStrategy = mySearchStrategyProvider(depsStart.data);

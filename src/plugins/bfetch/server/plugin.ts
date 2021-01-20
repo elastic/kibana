@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import {
+import type {
   CoreStart,
   PluginInitializerContext,
   CoreSetup,
@@ -26,6 +26,7 @@ import {
   KibanaRequest,
   RouteMethod,
   RequestHandler,
+  RequestHandlerContext,
 } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { Subject } from 'rxjs';
@@ -93,7 +94,7 @@ export interface BfetchServerSetup {
     P,
     Q,
     B,
-    Context extends object = object,
+    Context extends RequestHandlerContext = RequestHandlerContext,
     Method extends RouteMethod = any
   >(
     streamHandler: StreamingRequestHandler<Response, P, Q, B, Method>

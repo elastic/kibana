@@ -46,7 +46,7 @@ export interface ActionsApiRequestHandlerContext {
   listTypes: ActionTypeRegistry['list'];
 }
 
-export interface RequestHandlerContextActionsPlugin extends RequestHandlerContext {
+export interface ActionsRequestHandlerContext extends RequestHandlerContext {
   actions: ActionsApiRequestHandlerContext;
 }
 

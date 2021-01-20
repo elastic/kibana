@@ -45,7 +45,10 @@ export class ListPlugin
 
     initSavedObjects(core.savedObjects);
 
-    core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
+    core.http.registerRouteHandlerContext<ListsRequestHandlerContext, 'lists'>(
+      'lists',
+      this.createRouteHandlerContext()
+    );
     const router = core.http.createRouter<ListsRequestHandlerContext>();
     initRoutes(router, config);
 

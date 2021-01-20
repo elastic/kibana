@@ -19,10 +19,7 @@ import { ApiRoutes } from './routes';
 import { License, IndexDataEnricher } from './services';
 import { isEsError, handleEsError, parseEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch';
-import type {
-  IndexManagementApiRequestHandlerContext,
-  IndexManagementRequestHandlerContext,
-} from './types';
+import type { IndexManagementRequestHandlerContext } from './types';
 
 export interface IndexManagementPluginSetup {
   indexDataEnricher: {
@@ -85,9 +82,9 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
       ],
     });
 
-    http.registerRouteHandlerContext(
+    http.registerRouteHandlerContext<IndexManagementRequestHandlerContext, 'dataManagement'>(
       'dataManagement',
-      async (ctx, request): Promise<IndexManagementApiRequestHandlerContext> => {
+      async (ctx, request) => {
         this.dataManagementESClient =
           this.dataManagementESClient ?? (await getCustomEsClient(getStartServices));
 

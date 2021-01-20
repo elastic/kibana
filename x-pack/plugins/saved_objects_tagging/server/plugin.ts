@@ -17,7 +17,7 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/s
 import { SecurityPluginSetup } from '../../security/server';
 import { savedObjectsTaggingFeature } from './features';
 import { tagType } from './saved_objects';
-import type { ITagsRequestHandlerContext, TagsHandlerContext } from './types';
+import type { TagsHandlerContext } from './types';
 import { TagsRequestHandlerContext } from './request_handler_context';
 import { registerRoutes } from './routes';
 import { createTagUsageCollector } from './usage';
@@ -44,9 +44,9 @@ export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
     const router = http.createRouter<TagsHandlerContext>();
     registerRoutes({ router });
 
-    http.registerRouteHandlerContext(
+    http.registerRouteHandlerContext<TagsHandlerContext, 'tags'>(
       'tags',
-      async (context, req, res): Promise<ITagsRequestHandlerContext> => {
+      async (context, req, res) => {
         return new TagsRequestHandlerContext(req, context.core, security);
       }
     );

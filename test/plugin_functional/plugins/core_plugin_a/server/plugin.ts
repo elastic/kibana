@@ -17,17 +17,21 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import type { Plugin, CoreSetup, RequestHandlerContext } from 'kibana/server';
 
-export interface PluginARequestContext {
+export interface PluginAApiRequestContext {
   ping: () => Promise<string>;
+}
+
+interface PluginARequstHandlerContext extends RequestHandlerContext {
+  pluginA: PluginAApiRequestContext;
 }
 
 export class CorePluginAPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
-    core.http.registerRouteHandlerContext(
+    core.http.registerRouteHandlerContext<PluginARequstHandlerContext, 'pluginA'>(
       'pluginA',
-      (context): PluginARequestContext => {
+      (context) => {
         return {
           ping: () =>
             context.core.elasticsearch.legacy.client.callAsInternalUser('ping') as Promise<string>,

@@ -15,7 +15,6 @@ import type {
   Dependencies,
   LicenseStatus,
   RouteDependencies,
-  WatcherContext,
   WatcherRequestHandlerContext,
 } from './types';
 
@@ -79,9 +78,9 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
       ],
     });
 
-    http.registerRouteHandlerContext(
+    http.registerRouteHandlerContext<WatcherRequestHandlerContext, 'watcher'>(
       'watcher',
-      async (ctx, request): Promise<WatcherContext> => {
+      async (ctx, request) => {
         this.watcherESClient = this.watcherESClient ?? (await getCustomEsClient(getStartServices));
         return {
           client: this.watcherESClient.asScoped(request),

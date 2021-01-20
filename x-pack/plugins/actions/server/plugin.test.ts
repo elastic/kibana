@@ -73,7 +73,10 @@ describe('Actions Plugin', () => {
         });
 
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
-        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
+        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
+          string,
+          Function
+        ];
         expect(handler[0]).toEqual('actions');
 
         const actionsContextHandler = ((await handler[1](
@@ -101,7 +104,10 @@ describe('Actions Plugin', () => {
         await plugin.setup(coreSetup as any, pluginsSetup);
 
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
-        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
+        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
+          string,
+          Function
+        ];
         expect(handler[0]).toEqual('actions');
 
         const actionsContextHandler = ((await handler[1](

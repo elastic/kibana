@@ -18,7 +18,7 @@ import {
 
 import { Index } from '../../index_management/server';
 import { PLUGIN } from '../common/constants';
-import { Dependencies } from './types';
+import type { Dependencies, CcrRequestHandlerContext } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { elasticsearchJsPlugin } from './client/elasticsearch_ccr';
@@ -126,12 +126,15 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
       ],
     });
 
-    http.registerRouteHandlerContext('crossClusterReplication', async (ctx, request) => {
-      this.ccrEsClient = this.ccrEsClient ?? (await getCustomEsClient(getStartServices));
-      return {
-        client: this.ccrEsClient.asScoped(request),
-      };
-    });
+    http.registerRouteHandlerContext<CcrRequestHandlerContext, 'crossClusterReplication'>(
+      'crossClusterReplication',
+      async (ctx, request) => {
+        this.ccrEsClient = this.ccrEsClient ?? (await getCustomEsClient(getStartServices));
+        return {
+          client: this.ccrEsClient.asScoped(request),
+        };
+      }
+    );
 
     registerApiRoutes({
       router: http.createRouter(),

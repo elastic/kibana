@@ -45,7 +45,7 @@ import {
   ActionTypeConfig,
   ActionTypeSecrets,
   ActionTypeParams,
-  RequestHandlerContextActionsPlugin,
+  ActionsRequestHandlerContext,
 } from './types';
 
 import { getActionsConfigurationUtilities } from './actions_config';
@@ -228,7 +228,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     }
 
     this.kibanaIndexConfig.subscribe((config) => {
-      core.http.registerRouteHandlerContext(
+      core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
         'actions',
         this.createRouteHandlerContext(core, config.kibana.index)
       );
@@ -243,7 +243,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     });
 
     // Routes
-    const router = core.http.createRouter<RequestHandlerContextActionsPlugin>();
+    const router = core.http.createRouter<ActionsRequestHandlerContext>();
     createActionRoute(router, this.licenseState);
     deleteActionRoute(router, this.licenseState);
     getActionRoute(router, this.licenseState);
@@ -448,7 +448,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private createRouteHandlerContext = (
     core: CoreSetup<ActionsPluginsStart>,
     defaultKibanaIndex: string
-  ): IContextProvider<RequestHandlerContextActionsPlugin['actions']> => {
+  ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
       isESOUsingEphemeralEncryptionKey,

@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import { IRouter } from 'kibana/server';
+import type { IRouter, RequestHandlerContext } from 'kibana/server';
 import { DataApiRequestHandlerContext } from 'src/plugins/data/server';
 import { registerServerSearchRoute } from './server_search_route';
 
-export function registerRoutes(router: IRouter<{ search: DataApiRequestHandlerContext }>) {
+export function registerRoutes(
+  router: IRouter<RequestHandlerContext & { search: DataApiRequestHandlerContext }>
+) {
   registerServerSearchRoute(router);
 }

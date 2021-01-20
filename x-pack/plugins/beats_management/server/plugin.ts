@@ -10,11 +10,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginStart } from '../../licensing/server';
 import { BeatsManagementConfigType } from '../common';
-import type {
-  BeatsManagementApiRequestHandlerContext,
-  BeatsManagementRequestHandlerContext,
-  CMServerLibs,
-} from './lib/types';
+import type { BeatsManagementRequestHandlerContext, CMServerLibs } from './lib/types';
 import { registerRoutes } from './routes';
 import { compose } from './lib/compose/kibana';
 import { INDEX_NAMES } from '../common/constants';
@@ -43,9 +39,9 @@ export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDep
     const router = core.http.createRouter<BeatsManagementRequestHandlerContext>();
     registerRoutes(router);
 
-    core.http.registerRouteHandlerContext(
+    core.http.registerRouteHandlerContext<BeatsManagementRequestHandlerContext, 'beatsManagement'>(
       'beatsManagement',
-      (_, req): BeatsManagementApiRequestHandlerContext => {
+      (_, req) => {
         return this.beatsLibs!;
       }
     );

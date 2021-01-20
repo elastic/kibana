@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
-import { Dependencies } from './types';
+import { Dependencies, RollupHandlerContext } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { registerRollupUsageCollector } from './collectors';
@@ -81,12 +81,15 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       ],
     });
 
-    http.registerRouteHandlerContext('rollup', async (context, request) => {
-      this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
-      return {
-        client: this.rollupEsClient.asScoped(request),
-      };
-    });
+    http.registerRouteHandlerContext<RollupHandlerContext, 'rollup'>(
+      'rollup',
+      async (context, request) => {
+        this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
+        return {
+          client: this.rollupEsClient.asScoped(request),
+        };
+      }
+    );
 
     registerApiRoutes({
       router: http.createRouter(),

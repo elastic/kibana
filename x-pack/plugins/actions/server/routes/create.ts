@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
-import { ActionResult, RequestHandlerContextActionsPlugin } from '../types';
+import { ActionResult, ActionsRequestHandlerContext } from '../types';
 import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
 
@@ -18,7 +18,7 @@ export const bodySchema = schema.object({
 });
 
 export const createActionRoute = (
-  router: IRouter<RequestHandlerContextActionsPlugin>,
+  router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.post(

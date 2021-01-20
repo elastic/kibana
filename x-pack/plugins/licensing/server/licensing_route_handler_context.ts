@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import type { ILicense } from '../common/types';
-import type { LicensingPluginStart, LicensingApiRequestHandlerContext } from './types';
+import type { LicensingPluginStart, LicensingRequestHandlerContext } from './types';
 
 /**
  * Create a route handler context for access to Kibana license information.
@@ -19,7 +19,7 @@ import type { LicensingPluginStart, LicensingApiRequestHandlerContext } from './
 export function createRouteHandlerContext(
   license$: Observable<ILicense>,
   getStartServices: StartServicesAccessor<{}, LicensingPluginStart>
-): IContextProvider<LicensingApiRequestHandlerContext> {
+): IContextProvider<LicensingRequestHandlerContext, 'licensing'> {
   return async function licensingRouteHandlerContext() {
     const [, , { featureUsage }] = await getStartServices();
     const license = await license$.pipe(take(1)).toPromise();

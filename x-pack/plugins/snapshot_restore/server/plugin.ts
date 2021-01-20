@@ -19,11 +19,7 @@ import { ApiRoutes } from './routes';
 import { wrapEsError } from './lib';
 import { isEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch_sr';
-import {
-  Dependencies,
-  SnapshotRestoreRequestHandlerContext,
-  SnapshotRestoreContext,
-} from './types';
+import type { Dependencies, SnapshotRestoreRequestHandlerContext } from './types';
 import { SnapshotRestoreConfig } from './config';
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
@@ -88,9 +84,9 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       ],
     });
 
-    http.registerRouteHandlerContext(
+    http.registerRouteHandlerContext<SnapshotRestoreRequestHandlerContext, 'snapshotRestore'>(
       'snapshotRestore',
-      async (ctx, request): Promise<SnapshotRestoreContext> => {
+      async (ctx, request) => {
         this.snapshotRestoreESClient =
           this.snapshotRestoreESClient ?? (await getCustomEsClient(getStartServices));
         return {

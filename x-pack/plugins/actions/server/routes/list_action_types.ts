@@ -7,10 +7,10 @@
 import { IRouter } from 'kibana/server';
 import { ILicenseState, verifyApiAccess } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
-import { RequestHandlerContextActionsPlugin } from '../types';
+import { ActionsRequestHandlerContext } from '../types';
 
 export const listActionTypesRoute = (
-  router: IRouter<RequestHandlerContextActionsPlugin>,
+  router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(

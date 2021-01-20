@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RequestHandler, RouteMethod } from 'src/core/server';
+import type { RequestHandler, RouteMethod, RequestHandlerContext } from 'src/core/server';
 import { ErrorIndexPatternNotFound } from '../../error';
 
 interface ErrorResponseBody {
@@ -40,7 +40,13 @@ interface ErrorWithData {
  * }
  * ```
  */
-export const handleErrors = <P, Q, B, Context extends object, Method extends RouteMethod>(
+export const handleErrors = <
+  P,
+  Q,
+  B,
+  Context extends RequestHandlerContext,
+  Method extends RouteMethod
+>(
   handler: RequestHandler<P, Q, B, Context, Method>
 ): RequestHandler<P, Q, B, Context, Method> => async (context, request, response) => {
   try {

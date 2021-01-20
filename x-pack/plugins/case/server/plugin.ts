@@ -35,7 +35,7 @@ import {
 } from './services';
 import { createCaseClient } from './client';
 import { registerConnectors } from './connectors';
-import type { CaseRequestContext, CasesRequestHandlerContext, DepsHandlerContext } from './types';
+import type { CasesRequestHandlerContext } from './types';
 
 function createConfig$(context: PluginInitializerContext) {
   return context.config.create<ConfigType>().pipe(map((config) => config));
@@ -85,7 +85,7 @@ export class CasePlugin {
     this.userActionService = await new CaseUserActionService(this.log).setup();
     this.alertsService = new AlertService();
 
-    core.http.registerRouteHandlerContext<CaseRequestContext, DepsHandlerContext>(
+    core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'case'>(
       APP_ID,
       this.createRouteHandlerContext({
         core,
@@ -160,7 +160,7 @@ export class CasePlugin {
     connectorMappingsService: ConnectorMappingsServiceSetup;
     userActionService: CaseUserActionServiceSetup;
     alertsService: AlertServiceContract;
-  }): IContextProvider<CaseRequestContext, DepsHandlerContext> => {
+  }): IContextProvider<CasesRequestHandlerContext, 'case'> => {
     return async (context, request) => {
       const [{ savedObjects }] = await core.getStartServices();
       return {

@@ -5,13 +5,14 @@
  */
 
 import { Observable } from 'rxjs';
-import {
+import type {
   ISavedObjectTypeRegistry,
   ILegacyScopedClusterClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
   Capabilities,
   IRouter,
+  RequestHandlerContext,
 } from 'src/core/server';
 import {
   GlobalSearchBatchedResults,
@@ -25,9 +26,17 @@ import { SearchServiceSetup, SearchServiceStart } from './services';
 export type GlobalSearchPluginSetup = Pick<SearchServiceSetup, 'registerResultProvider'>;
 export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find' | 'getSearchableTypes'>;
 
-export type GlobalSearchRouter = IRouter<{
+/**
+ * @internal
+ */
+export interface GlobalSearchRequestHandlerContext extends RequestHandlerContext {
   globalSearch: RouteHandlerGlobalSearchContext;
-}>;
+}
+
+/**
+ * @internal
+ */
+export type GlobalSearchRouter = IRouter<GlobalSearchRequestHandlerContext>;
 /**
  * globalSearch route handler context.
  *

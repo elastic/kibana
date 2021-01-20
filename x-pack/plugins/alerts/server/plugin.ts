@@ -34,7 +34,7 @@ import {
   ServiceStatus,
   SavedObjectsBulkGetObject,
 } from '../../../../src/core/server';
-import type { AlertingRequestHandlerContext, AlertingApiRequestHandlerContext } from './types';
+import type { AlertingRequestHandlerContext } from './types';
 
 import {
   aggregateAlertRoute,
@@ -255,7 +255,10 @@ export class AlertingPlugin {
 
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
 
-    core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
+    core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(
+      'alerting',
+      this.createRouteHandlerContext(core)
+    );
 
     // Routes
     const router = core.http.createRouter<AlertingRequestHandlerContext>();
@@ -392,7 +395,7 @@ export class AlertingPlugin {
 
   private createRouteHandlerContext = (
     core: CoreSetup
-  ): IContextProvider<AlertingApiRequestHandlerContext> => {
+  ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
     const { alertTypeRegistry, alertsClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();

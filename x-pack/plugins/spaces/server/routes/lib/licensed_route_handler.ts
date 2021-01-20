@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { RequestHandler } from 'kibana/server';
+import type { RequestHandler, RequestHandlerContext } from 'kibana/server';
 import type { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
 
 export const createLicensedRouteHandler = <
   P,
   Q,
   B,
-  Context extends { licensing: LicensingApiRequestHandlerContext }
+  Context extends RequestHandlerContext & { licensing: LicensingApiRequestHandlerContext }
 >(
   handler: RequestHandler<P, Q, B, Context>
 ) => {

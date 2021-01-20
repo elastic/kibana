@@ -27,14 +27,4 @@ export interface CasesRequestHandlerContext extends RequestHandlerContext {
 /**
  * @internal
  */
-export interface DepsHandlerContext extends RequestHandlerContext {
-  // TODO: Remove when triggers_ui do not import case's types.
-  // PR https://github.com/elastic/kibana/pull/84587.
-  securitySolution: AppRequestContext;
-  actions: ActionsApiRequestHandlerContext;
-}
-
-/**
- * @internal
- */
 export type CasesRouter = IRouter<CasesRequestHandlerContext>;

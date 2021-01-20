@@ -19,7 +19,6 @@ import {
 import { SpacesPluginStart } from '../../spaces/server';
 
 import type {
-  EventLogApiRequestHandlerContext,
   EventLogRequestHandlerContext,
   IEventLogConfig,
   IEventLogService,
@@ -98,7 +97,10 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       event: { provider: PROVIDER },
     });
 
-    core.http.registerRouteHandlerContext('eventLog', this.createRouteHandlerContext());
+    core.http.registerRouteHandlerContext<EventLogRequestHandlerContext, 'eventLog'>(
+      'eventLog',
+      this.createRouteHandlerContext()
+    );
 
     // Routes
     const router = core.http.createRouter<EventLogRequestHandlerContext>();
@@ -169,7 +171,10 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     this.systemLogger.debug('shutdown: finished');
   }
 
-  private createRouteHandlerContext = (): IContextProvider<EventLogApiRequestHandlerContext> => {
+  private createRouteHandlerContext = (): IContextProvider<
+    EventLogRequestHandlerContext,
+    'eventLog'
+  > => {
     return async (context, request) => {
       return {
         getEventLogClient: () => this.eventLogClientService!.getClient(request),

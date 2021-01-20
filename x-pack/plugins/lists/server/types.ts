@@ -18,7 +18,7 @@ import type { SpacesPluginStart } from '../../spaces/server';
 import { ListClient } from './services/lists/list_client';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';
 
-export type ContextProvider = IContextProvider<ListsApiRequestHandlerContext>;
+export type ContextProvider = IContextProvider<ListsRequestHandlerContext, 'lists'>;
 export type ListsPluginStart = void;
 export interface PluginsStart {
   security: SecurityPluginStart | undefined | null;

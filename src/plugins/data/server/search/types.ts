@@ -18,12 +18,13 @@
  */
 
 import { Observable } from 'rxjs';
-import {
+import type {
   IRouter,
   IScopedClusterClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
   KibanaRequest,
+  RequestHandlerContext,
 } from 'src/core/server';
 import {
   ISearchOptions,
@@ -121,7 +122,7 @@ export interface DataApiRequestHandlerContext extends ISearchClient {
 /**
  * @internal
  */
-export interface DataRequestHandlerContext {
+export interface DataRequestHandlerContext extends RequestHandlerContext {
   search: DataApiRequestHandlerContext;
 }
 

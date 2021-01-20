@@ -64,7 +64,7 @@ import { EndpointAppContextService } from './endpoint/endpoint_app_context_servi
 import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
-import type { AppRequestContext, SecuritySolutionPluginRouter } from './types';
+import type { SecuritySolutionRequestHandlerContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import { securitySolutionIndexFieldsProvider } from './search_strategy/index_fields';
@@ -168,13 +168,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       config: (): Promise<ConfigType> => Promise.resolve(config),
     };
 
-    const router: SecuritySolutionPluginRouter = core.http.createRouter();
-    core.http.registerRouteHandlerContext(
-      APP_ID,
-      (context, request, response): AppRequestContext => ({
-        getAppClient: () => this.appClientFactory.create(request),
-      })
-    );
+    const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
+    core.http.registerRouteHandlerContext<
+      SecuritySolutionRequestHandlerContext,
+      'securitySolution'
+    >(APP_ID, (context, request, response) => ({
+      getAppClient: () => this.appClientFactory.create(request),
+    }));
 
     this.appClientFactory.setup({
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
