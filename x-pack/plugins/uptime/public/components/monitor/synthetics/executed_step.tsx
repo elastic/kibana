@@ -14,6 +14,13 @@ import { StatusBadge } from './status_badge';
 import { Ping } from '../../../../common/runtime_types';
 import { StepDetailLink } from '../../common/step_detail_link';
 import { VIEW_PERFORMANCE } from './translations';
+import { euiStyled } from '../../../../../observability/public';
+
+const TitleContainer = euiStyled(EuiFlexItem)`
+ &&& {
+    flex-basis: 325px
+ };
+`;
 
 const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
 
@@ -28,7 +35,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup })
     <>
       <div style={{ padding: '8px' }}>
         <EuiFlexGroup>
-          <EuiFlexItem grow={false} style={{ flexBasis: 325 }}>
+          <TitleContainer grow={false}>
             <EuiText grow={false}>
               <strong>
                 <FormattedMessage
@@ -45,7 +52,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup })
             <div>
               <StatusBadge status={step.synthetics?.payload?.status} />
             </div>
-          </EuiFlexItem>
+          </TitleContainer>
           {step.synthetics?.step?.index && checkGroup && (
             <EuiFlexItem grow={false}>
               <StepDetailLink checkGroupId={checkGroup} stepIndex={step.synthetics.step.index!}>
