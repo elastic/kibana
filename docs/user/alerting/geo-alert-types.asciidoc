@@ -29,11 +29,11 @@ This data is presumed to be static (not updating). Shape data matching the query
 harvested once when the alert is created and anytime after when the alert is re-enabled
 after disablement.
 
-By design, older document locations (determined by `date`) are
-compared with newer document locations to determine if a boundary has been crossed
-in the current monitoring interval. The monitored data should be somewhat "real time",
-meaning the dates of new documents aren’t older than the current time minus the amount
-of the interval. If data older than
+By design, current interval entity locations (_current_ is determined by `date` in
+the *Tracked index or index pattern*) are queried to determine if they are contained
+within any monitored boundaries. Entity
+data should be somewhat "real time", meaning the dates of new documents aren’t older
+than the current time minus the amount of the interval. If data older than
 `now - <current interval>` is ingested, it won't trigger an alert.
 
 [float]
