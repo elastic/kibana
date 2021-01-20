@@ -6,3 +6,4 @@
 
 export { RELEVANCE_TUNING_TITLE } from './constants';
 export { RelevanceTuning } from './relevance_tuning';
+export { RelevanceTuningLogic } from './relevance_tuning_logic';
