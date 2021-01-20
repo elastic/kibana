@@ -14,7 +14,8 @@ import { SessionsMgmtConfigSchema } from '../';
 import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
 import type { SearchSessionSavedObjectAttributes } from '../../../../common';
 import { SearchSessionStatus } from '../../../../common/search';
-import { ACTION, UISession } from '../components/actions';
+import { ACTION } from '../components/actions';
+import { UISession } from '../types';
 
 type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 
