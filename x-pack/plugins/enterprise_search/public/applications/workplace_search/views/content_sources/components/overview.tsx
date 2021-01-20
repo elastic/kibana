@@ -55,7 +55,6 @@ export const Overview: React.FC = () => {
   const {
     id,
     summary,
-    documentCount,
     activities,
     groups,
     details,
