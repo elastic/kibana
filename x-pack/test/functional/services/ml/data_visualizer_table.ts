@@ -246,7 +246,8 @@ export function MachineLearningDataVisualizerTableProvider(
     public async assertNumberFieldContents(
       fieldName: string,
       docCountFormatted: string,
-      topValuesCount: number
+      topValuesCount: number,
+      checkDistributionPreviewExist = true
     ) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
@@ -257,7 +258,9 @@ export function MachineLearningDataVisualizerTableProvider(
       await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlTopValues'));
       await this.assertTopValuesContents(fieldName, topValuesCount);
 
-      await this.assertDistributionPreviewExist(fieldName);
+      if (checkDistributionPreviewExist) {
+        await this.assertDistributionPreviewExist(fieldName);
+      }
 
       await this.ensureDetailsClosed(fieldName);
     }
@@ -319,6 +322,20 @@ export function MachineLearningDataVisualizerTableProvider(
       } else if (fieldType === ML_JOB_FIELD_TYPES.TEXT) {
         await this.assertTextFieldContents(fieldName, docCountFormatted, exampleCount);
       }
+    }
+
+    public async ensureNumRowsPerPage(n: 10 | 25 | 100) {
+      const paginationButton = 'mlDataVisualizerTable > tablePaginationPopoverButton';
+      await retry.tryForTime(10000, async () => {
+        await testSubjects.existOrFail(paginationButton);
+        await testSubjects.click(paginationButton);
+        await testSubjects.click(`tablePagination-${n}-rows`);
+
+        const visibleTexts = await testSubjects.getVisibleText(paginationButton);
+
+        const [, pagination] = visibleTexts.split(': ');
+        expect(pagination).to.eql(n.toString());
+      });
     }
   })();
 }
