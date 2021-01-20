@@ -16,8 +16,8 @@ import { SavedObject } from '../../../../src/core/server';
  * source object, up to 3 deep. Going deeper than 3 causes a bit too much churn
  * in the tests.
  */
-function flatKeys(source: any) {
-  const recursivelyFlatKeys = (obj: any, path: string[] = [], depth = 0): string[] => {
+function flatKeys(source: Record<string, unknown>) {
+  const recursivelyFlatKeys = (obj: unknown, path: string[] = [], depth = 0): string[] => {
     return depth < 3 && _.isObject(obj)
       ? Object.entries(obj).reduce(
           (acc, [k, v]) => [...acc, ...recursivelyFlatKeys(v, [...path, k], depth + 1)],
