@@ -46,7 +46,12 @@ export const commonMapping: SavedObjectsType['mappings'] = {
       type: 'keyword',
     },
     name: {
-      type: 'keyword',
+      fields: {
+        keyword: {
+          type: 'keyword',
+        },
+      },
+      type: 'text',
     },
     tags: {
       type: 'keyword',

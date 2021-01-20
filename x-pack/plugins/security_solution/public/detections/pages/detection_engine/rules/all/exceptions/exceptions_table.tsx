@@ -31,6 +31,7 @@ import { AllExceptionListsColumns, getAllExceptionListsColumns } from './columns
 import { useAllExceptionLists } from './use_all_exception_lists';
 import { ReferenceErrorModal } from '../../../../../components/value_lists_management_modal/reference_error_modal';
 import { patchRule } from '../../../../../containers/detection_engine/rules/api';
+import { ExceptionsSearchBar } from './exceptions_search_bar';
 
 // Known lost battle with Eui :(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -236,28 +237,24 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       );
     }, []);
 
-    const handleSearch = useCallback((search: string) => {
-      const searchTerm = search.trim();
-      const regex = searchTerm.split(/\s+(?=([^"]*"[^"]*")*[^"]*$)/);
-      const formattedFilter = regex
-        .filter((regexResult) => regexResult != null)
-        .reduce<ExceptionListFilter>(
-          (filter, term) => {
-            const [qualifier, value] = term.split(':');
+    const handleSearch = useCallback(
+      ({ query, queryText }: EuiSearchBarProps['onChange']): void => {
+        try {
+          const fieldClause = query.getSimpleFieldClause();
 
-            if (value == null) {
-              filter.name = searchTerm;
-            } else if (value != null && Object.keys(filter).includes(qualifier)) {
-              return set(qualifier, value, filter);
-            }
+          if (fieldClause == null) {
+            setFilters({ name: queryText });
+          } else {
+            const { field, value } = fieldClause;
 
-            return filter;
-          },
-          { name: null, list_id: null, created_by: null }
-        );
-
-      setFilters(formattedFilter);
-    }, []);
+            setFilters({ [field]: value });
+          }
+        } catch {
+          setFilters({ name: queryText });
+        }
+      },
+      []
+    );
 
     const handleCloseReferenceErrorModal = useCallback((): void => {
       setDeletingListIds([]);
@@ -357,15 +354,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
               title={i18n.ALL_EXCEPTIONS}
               subtitle={<LastUpdatedAt showUpdating={loading} updatedAt={lastUpdated} />}
             >
-              <EuiFieldSearch
-                data-test-subj="exceptionsHeaderSearch"
-                aria-label={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
-                placeholder={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
-                onSearch={handleSearch}
-                disabled={initLoading}
-                incremental={false}
-                fullWidth
-              />
+              <ExceptionsSearchBar onSearch={handleSearch} />
             </HeaderSection>
 
             {loadingTableInfo && !initLoading && !showReferenceErrorModal && (
