@@ -40,7 +40,7 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
-  'Vagrantfile',
+  'test/package/Vagrantfile',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',

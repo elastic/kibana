@@ -1,0 +1,5 @@
+- name: upgrade apt packages
+  become: yes
+  apt:
+    name: '*'
+    state: latest

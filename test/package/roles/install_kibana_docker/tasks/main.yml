@@ -1,0 +1,18 @@
+- name: load kibana
+  become: yes
+  docker_image:
+    name: kibana
+    load_path: /packages/kibana-{{ kibana_version }}-docker-image.tar.gz
+    source: load
+    state: present
+
+- name: start kibana
+  become: yes
+  community.general.docker_container:
+    name: kibana
+    image: docker.elastic.co/kibana/kibana:{{ kibana_version }}
+    container_default_behavior: no_defaults
+    network_mode: host
+    env:
+      SERVER_HOST: 0.0.0.0
+      ELASTICSEARCH_HOSTS: http://192.168.50.1

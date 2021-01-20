@@ -1,0 +1,31 @@
+- name: install dependencies
+  become: yes
+  apt:
+    name:
+      - libnss3
+      - fonts-liberation
+      - libfontconfig
+    state: latest
+
+- name: install kibana from local file
+  become: yes
+  apt:
+    deb: /packages/kibana-{{ kibana_version }}-amd64.deb
+    state: present
+
+- name: copy kibana configuration
+  become: yes
+  copy:
+    src: files/kibana.yml
+    dest: /etc/kibana/kibana.yml
+  register: config
+
+- name: start kibana
+  become: yes
+  systemd:
+    state: started
+    name: kibana
+    daemon_reload: yes
+
+- name: wait for http server
+  wait_for: host=localhost port=5601 timeout=60
