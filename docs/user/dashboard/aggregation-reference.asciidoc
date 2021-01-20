@@ -1,31 +1,125 @@
 [[aggregation-reference]]
-== Aggregation reference
+== Supported features by panel type
 
-{kib} supports many types of {ref}/search-aggregations.html[{es} aggregations] that you can use to build complex summaries of your data. 
+Each panel type in {kib} supports different features and {ref}/search-aggregations.html[{es} aggregations].
+This reference can help simplify the comparison if you need a specific feature.
 
-By using a series of {es} aggregations to extract and process your data, you can create panels that tell a 
-story about the trends, patterns, and outliers in your data.
+
+[float]
+[[chart-types]]
+=== Supported panel types by editor
+
+[options="header"]
+|===
+
+| Type | Aggregation-based | Lens | TSVB | Timelion | Vega
+
+| Table
+^| X
+^| X
+^| X
+|
+|
+
+| Table with summary row
+^| X
+|
+|
+|
+|
+
+| Bar, line, and area charts
+^| X
+^| X
+^| X
+^| X
+^| X
+
+| Percentage bar or area chart
+|
+^| X
+^| X
+|
+^| X
+
+| Split bar, line, and area charts
+^| X
+|
+|
+|
+^| X
+
+| Pie and donut charts
+^| X
+^| X
+|
+|
+^| X
+
+| Sunburst chart
+^| X
+^| X
+|
+|
+|
+
+| Heat map
+^| X
+|
+|
+|
+^| X
+
+| Gauge and Goal
+^| X
+|
+^| X
+|
+|
+
+| Markdown
+|
+|
+^| X
+|
+|
+
+| Metric
+^| X
+^| X
+^| X
+|
+^| X
+
+| Tag cloud
+^| X
+|
+|
+|
+^| X
+
+|===
 
 [float]
 [[bucket-aggregations]]
 === Bucket aggregations
 
-For information about Elasticsearch bucket aggregations, refer to {ref}/search-aggregations-bucket.html[Bucket aggregations].
+Vega supports all bucket aggregations because it allows custom queries.
+
+For information about {es} bucket aggregations, refer to {ref}/search-aggregations-bucket.html[Bucket aggregations].
 
 [options="header"]
 |===
 
-| Type | Visualizations | Data table | Markdown | Lens | TSVB 
+| Type | Agg-based | Markdown | Lens | TSVB
 
 | Histogram
 ^| X
 ^| X
-^| X
-| 
+^| X 
 | 
 
 | Date histogram
-^| X
 ^| X
 ^| X
 ^| X
@@ -34,33 +128,28 @@ For information about Elasticsearch bucket aggregations, refer to {ref}/search-a
 | Date range
 ^| X
 ^| X
-^| X
 | 
 | 
 
 | Filter
 ^| X
 ^| X
-^| X
-| 
+|
 ^| X
 
 | Filters
 ^| X
 ^| X
 ^| X
-| 
 ^| X
 
 | GeoHash grid
-^| X
 ^| X
 ^| X
 | 
 | 
 
 | IP range
-^| X
 ^| X
 ^| X
 | 
@@ -71,17 +160,14 @@ For information about Elasticsearch bucket aggregations, refer to {ref}/search-a
 ^| X
 ^| X
 | 
-| 
 
 | Terms
 ^| X
 ^| X
 ^| X
 ^| X
-^| X
 
 | Significant terms
-^| X
 ^| X
 ^| X
 |
@@ -93,15 +179,16 @@ For information about Elasticsearch bucket aggregations, refer to {ref}/search-a
 [[metrics-aggregations]]
 === Metrics aggregations
 
-For information about Elasticsearch metrics aggregations, refer to {ref}/search-aggregations-metrics.html[Metrics aggregations].
+Vega supports all metric aggregations because it allows custom queries.
+
+For information about {es} metrics aggregations, refer to {ref}/search-aggregations-metrics.html[Metrics aggregations].
 
 [options="header"]
 |===
 
-| Type | Visualizations | Data table | Markdown | Lens | TSVB
+| Type | Agg-based | Markdown | Lens | TSVB
 
 | Average
-^| X
 ^| X
 ^| X
 ^| X
@@ -112,10 +199,8 @@ For information about Elasticsearch metrics aggregations, refer to {ref}/search-
 ^| X
 ^| X
 ^| X
-^| X
 
 | Unique count (Cardinality)
-^| X
 ^| X
 ^| X
 ^| X
@@ -126,10 +211,8 @@ For information about Elasticsearch metrics aggregations, refer to {ref}/search-
 ^| X
 ^| X
 ^| X
-^| X
 
 | Min
-^| X
 ^| X
 ^| X
 ^| X
@@ -138,12 +221,10 @@ For information about Elasticsearch metrics aggregations, refer to {ref}/search-
 | Percentiles
 ^| X
 ^| X
-^| X
 | 
 ^| X
 
 | Percentiles Rank
-^| X
 ^| X
 ^| X
 | 
@@ -152,12 +233,10 @@ For information about Elasticsearch metrics aggregations, refer to {ref}/search-
 | Top hit 
 ^| X
 ^| X
-^| X
 | 
 ^| X
 
 | Value count 
-| 
 | 
 | 
 | 
@@ -169,15 +248,16 @@ For information about Elasticsearch metrics aggregations, refer to {ref}/search-
 [[pipeline-aggregations]]
 === Pipeline aggregations
 
-For information about Elasticsearch pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
+Vega supports all pipeline aggregations because it allows custom queries.
+
+For information about {es} pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
 
 [options="header"]
 |===
 
-| Type | Visualizations | Data table | Markdown | Lens | TSVB
+| Type | Agg-based | Markdown | Lens | TSVB
 
 | Avg bucket  
-^| X
 ^| X
 ^| X
 | 
@@ -186,12 +266,10 @@ For information about Elasticsearch pipeline aggregations, refer to {ref}/search
 | Derivative  
 ^| X
 ^| X
-^| X
 | 
 ^| X
 
 | Max bucket   
-^| X
 ^| X
 ^| X
 | 
@@ -200,33 +278,28 @@ For information about Elasticsearch pipeline aggregations, refer to {ref}/search
 | Min bucket   
 ^| X
 ^| X
-^| X
 | 
 ^| X
 
 | Sum bucket  
 ^| X
 ^| X
-^| X
-^| 
+| 
 ^| X
  
 | Moving average  
 ^| X
 ^| X
-^| X
-^| 
+| 
 ^| X
 
 | Cumulative sum 
 ^| X
 ^| X
-^| X
-^| 
+| 
 ^| X
 
 | Bucket script 
-| 
 | 
 | 
 | 
@@ -235,8 +308,49 @@ For information about Elasticsearch pipeline aggregations, refer to {ref}/search
 | Serial differencing 
 ^| X
 ^| X
-^| X
 | 
+^| X
+
+|===
+
+[float]
+[[other-features]]
+=== Other features
+
+This comparison is meant for users who are not sure about which {kib} panel type to
+build their advanced visualization.
+
+[options="header"]
+|===
+
+| Type | Agg-based | Lens | TSVB | Timelion | Vega
+
+| Math on aggregated data
+|
+|
+^| X
+^| X
+^| X
+
+| Visualize two indices
+|
+^| X
+^| X
+^| X
+^| X
+
+| Math across indices
+|
+|
+|
+^| X
+^| X
+
+| Fully custom {es} queries
+|
+|
+|
+|
 ^| X
 
 |===

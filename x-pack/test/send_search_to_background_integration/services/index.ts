@@ -9,5 +9,5 @@ import { SendToBackgroundProvider } from './send_to_background';
 
 export const services = {
   ...functionalServices,
-  sendToBackground: SendToBackgroundProvider,
+  searchSessions: SendToBackgroundProvider,
 };

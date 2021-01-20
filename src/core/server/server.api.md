@@ -680,6 +680,20 @@ export interface CoreUsageStats {
     // (undocumented)
     'apiCalls.savedObjectsImport.total'?: number;
     // (undocumented)
+    'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolve.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolve.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolve.total'?: number;
+    // (undocumented)
     'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no'?: number;
     // (undocumented)
     'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes'?: number;
@@ -2033,6 +2047,7 @@ export type SafeRouteMethod = 'get' | 'options';
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
+    coreMigrationVersion?: string;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectError" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -2116,6 +2131,7 @@ export interface SavedObjectsBaseOptions {
 export interface SavedObjectsBulkCreateObject<T = unknown> {
     // (undocumented)
     attributes: T;
+    coreMigrationVersion?: string;
     // (undocumented)
     id?: string;
     initialNamespaces?: string[];
@@ -2206,6 +2222,7 @@ export class SavedObjectsClient {
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
+    resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObjectsResolveResponse<T>>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
@@ -2276,6 +2293,7 @@ export interface SavedObjectsCoreFieldMapping {
 
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
+    coreMigrationVersion?: string;
     id?: string;
     initialNamespaces?: string[];
     migrationVersion?: SavedObjectsMigrationVersion;
@@ -2474,6 +2492,15 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
 }
 
 // @public
+export interface SavedObjectsImportActionRequiredWarning {
+    actionPath: string;
+    buttonLabel?: string;
+    message: string;
+    // (undocumented)
+    type: 'action_required';
+}
+
+// @public
 export interface SavedObjectsImportAmbiguousConflictError {
     // (undocumented)
     destinations: Array<{
@@ -2543,6 +2570,14 @@ export interface SavedObjectsImportFailure {
 }
 
 // @public
+export type SavedObjectsImportHook<T = unknown> = (objects: Array<SavedObject<T>>) => SavedObjectsImportHookResult | Promise<SavedObjectsImportHookResult>;
+
+// @public
+export interface SavedObjectsImportHookResult {
+    warnings?: SavedObjectsImportWarning[];
+}
+
+// @public
 export interface SavedObjectsImportMissingReferencesError {
     // (undocumented)
     references: Array<{
@@ -2571,6 +2606,8 @@ export interface SavedObjectsImportResponse {
     successCount: number;
     // (undocumented)
     successResults?: SavedObjectsImportSuccess[];
+    // (undocumented)
+    warnings: SavedObjectsImportWarning[];
 }
 
 // @public
@@ -2590,6 +2627,13 @@ export interface SavedObjectsImportRetry {
     }>;
     // (undocumented)
     type: string;
+}
+
+// @public
+export interface SavedObjectsImportSimpleWarning {
+    message: string;
+    // (undocumented)
+    type: 'simple';
 }
 
 // @public
@@ -2624,6 +2668,9 @@ export interface SavedObjectsImportUnsupportedTypeError {
     // (undocumented)
     type: 'unsupported_type';
 }
+
+// @public
+export type SavedObjectsImportWarning = SavedObjectsImportSimpleWarning | SavedObjectsImportActionRequiredWarning;
 
 // @public (undocumented)
 export interface SavedObjectsIncrementCounterField {
@@ -2682,6 +2729,11 @@ export interface SavedObjectsRawDoc {
     _source: SavedObjectsRawDocSource;
 }
 
+// @public
+export interface SavedObjectsRawDocParseOptions {
+    namespaceTreatment?: 'strict' | 'lax';
+}
+
 // @public (undocumented)
 export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions {
     refresh?: boolean;
@@ -2712,6 +2764,7 @@ export class SavedObjectsRepository {
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<string | SavedObjectsIncrementCounterField>, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject<T>>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
+    resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObjectsResolveResponse<T>>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
@@ -2729,13 +2782,21 @@ export interface SavedObjectsResolveImportErrorsOptions {
     retries: SavedObjectsImportRetry[];
 }
 
+// @public (undocumented)
+export interface SavedObjectsResolveResponse<T = unknown> {
+    outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
+    // (undocumented)
+    saved_object: SavedObject<T>;
+}
+
 // @public
 export class SavedObjectsSerializer {
     // @internal
     constructor(registry: ISavedObjectTypeRegistry);
     generateRawId(namespace: string | undefined, type: string, id: string): string;
-    isRawSavedObject(rawDoc: SavedObjectsRawDoc): boolean;
-    rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc;
+    generateRawLegacyUrlAliasId(namespace: string, type: string, id: string): string;
+    isRawSavedObject(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): boolean;
+    rawToSavedObject(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): SavedObjectSanitizedDoc;
     savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
     }
 
@@ -2770,6 +2831,7 @@ export interface SavedObjectStatusMeta {
 // @public (undocumented)
 export interface SavedObjectsType {
     convertToAliasScript?: string;
+    convertToMultiNamespaceTypeVersion?: string;
     hidden: boolean;
     indexPattern?: string;
     management?: SavedObjectsTypeManagementDefinition;
@@ -2790,6 +2852,7 @@ export interface SavedObjectsTypeManagementDefinition {
     getTitle?: (savedObject: SavedObject<any>) => string;
     icon?: string;
     importableAndExportable?: boolean;
+    onImport?: SavedObjectsImportHook;
 }
 
 // @public
@@ -3058,9 +3121,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 
 // Warnings were encountered during analysis:
 //
-// src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:274:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:274:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:277:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/http/router/response.ts:306:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:263:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:263:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
 
 ```

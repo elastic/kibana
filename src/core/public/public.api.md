@@ -1027,6 +1027,7 @@ export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
+    coreMigrationVersion?: string;
     // (undocumented)
     error?: SavedObjectError;
     id: string;
@@ -1144,6 +1145,7 @@ export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
 // @public (undocumented)
 export interface SavedObjectsCreateOptions {
+    coreMigrationVersion?: string;
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
     overwrite?: boolean;
@@ -1196,6 +1198,15 @@ export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObject
     perPage: number;
     // (undocumented)
     total: number;
+}
+
+// @public
+export interface SavedObjectsImportActionRequiredWarning {
+    actionPath: string;
+    buttonLabel?: string;
+    message: string;
+    // (undocumented)
+    type: 'action_required';
 }
 
 // @public
@@ -1257,6 +1268,8 @@ export interface SavedObjectsImportResponse {
     successCount: number;
     // (undocumented)
     successResults?: SavedObjectsImportSuccess[];
+    // (undocumented)
+    warnings: SavedObjectsImportWarning[];
 }
 
 // @public
@@ -1276,6 +1289,13 @@ export interface SavedObjectsImportRetry {
     }>;
     // (undocumented)
     type: string;
+}
+
+// @public
+export interface SavedObjectsImportSimpleWarning {
+    message: string;
+    // (undocumented)
+    type: 'simple';
 }
 
 // @public
@@ -1310,6 +1330,9 @@ export interface SavedObjectsImportUnsupportedTypeError {
     // (undocumented)
     type: 'unsupported_type';
 }
+
+// @public
+export type SavedObjectsImportWarning = SavedObjectsImportSimpleWarning | SavedObjectsImportActionRequiredWarning;
 
 // @public
 export interface SavedObjectsMigrationVersion {
@@ -1356,9 +1379,11 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
 
 // @public
 export class SimpleSavedObject<T = unknown> {
-    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
+    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, }: SavedObject<T>);
     // (undocumented)
     attributes: T;
+    // (undocumented)
+    coreMigrationVersion: SavedObject<T>['coreMigrationVersion'];
     // (undocumented)
     delete(): Promise<{}>;
     // (undocumented)
@@ -1502,6 +1527,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:175:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:164:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```
