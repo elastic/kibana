@@ -38,7 +38,7 @@ export const myType: SavedObjectsType = {
   },
   migrations: {
     '2.0.0': migrations.migrateToV2,
-    '2.1.0': migrations.migrateToV2_1,
+    '2.1.0': migrations.migrateToV2_1
   },
 };
 
