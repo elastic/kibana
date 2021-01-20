@@ -75,6 +75,7 @@ export function getLoggingConfiguration(config: LegacyLoggingConfig, opsInterval
     },
     includes: {
       request: ['headers', 'payload'],
+      response: ['headers', 'payload'],
     },
     reporters: {
       logReporter: [loggerStream],

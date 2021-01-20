@@ -12,11 +12,9 @@ import _ from 'lodash';
 import queryString from 'query-string';
 import numeral from '@elastic/numeral';
 import chalk from 'chalk';
-// @ts-expect-error missing type def
-import stringify from 'json-stringify-safe';
 import { inspect } from 'util';
 
-import { applyFiltersToKeys } from './utils';
+import { applyFiltersToKeys, getResponsePayloadBytes } from './utils';
 import { getLogEventData } from './metadata';
 import { LegacyLoggingConfig } from './schema';
 import {
@@ -100,15 +98,10 @@ export abstract class BaseLogFormat extends Stream.Transform {
         referer: source.referer,
       };
 
-      const contentLength =
-        event.responsePayload === 'object'
-          ? stringify(event.responsePayload).length
-          : String(event.responsePayload).length;
-
       data.res = {
         statusCode: event.statusCode,
         responseTime: event.responseTime,
-        contentLength,
+        contentLength: getResponsePayloadBytes(event.responseHeaders, event.responsePayload),
       };
 
       const query = queryString.stringify(event.query, { sort: false });
@@ -122,7 +115,9 @@ export abstract class BaseLogFormat extends Stream.Transform {
       data.message += levelColor(data.res.statusCode);
       data.message += ' ';
       data.message += chalk.gray(data.res.responseTime + 'ms');
-      data.message += chalk.gray(' - ' + numeral(contentLength).format('0.0b'));
+      if (data.res.contentLength) {
+        data.message += chalk.gray(' - ' + numeral(data.res.contentLength).format('0.0b'));
+      }
     } else if (isOpsEvent(event)) {
       _.defaults(data, _.pick(event, ['pid', 'os', 'proc', 'load']));
       data.message = chalk.gray('memory: ');
