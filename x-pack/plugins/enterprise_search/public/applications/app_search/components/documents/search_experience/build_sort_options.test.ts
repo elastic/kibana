@@ -15,12 +15,12 @@ describe('buildSortOptions', () => {
       },
       [
         {
-          name: 'Relevance ASC',
+          name: 'Relevance (asc)',
           value: 'id',
           direction: 'desc',
         },
         {
-          name: 'Relevance DESC',
+          name: 'Relevance (desc)',
           value: 'id',
           direction: 'asc',
         },
@@ -29,12 +29,12 @@ describe('buildSortOptions', () => {
 
     expect(sortOptions).toEqual([
       {
-        name: 'Relevance ASC',
+        name: 'Relevance (asc)',
         value: 'id',
         direction: 'desc',
       },
       {
-        name: 'Relevance DESC',
+        name: 'Relevance (desc)',
         value: 'id',
         direction: 'asc',
       },
