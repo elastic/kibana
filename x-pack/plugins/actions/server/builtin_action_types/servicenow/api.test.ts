@@ -240,7 +240,7 @@ describe('api', () => {
     test('it returns the fields correctly', async () => {
       const res = await api.getChoices({
         externalService,
-        params: { field: 'priority' },
+        params: { fields: ['priority'] },
       });
       expect(res).toEqual(serviceNowChoices);
     });

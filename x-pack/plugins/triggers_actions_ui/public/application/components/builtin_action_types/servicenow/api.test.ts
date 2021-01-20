@@ -14,26 +14,31 @@ const choicesResponse = {
       dependent_value: '',
       label: '1 - Critical',
       value: '1',
+      element: 'priority',
     },
     {
       dependent_value: '',
       label: '2 - High',
       value: '2',
+      element: 'priority',
     },
     {
       dependent_value: '',
       label: '3 - Moderate',
       value: '3',
+      element: 'priority',
     },
     {
       dependent_value: '',
       label: '4 - Low',
       value: '4',
+      element: 'priority',
     },
     {
       dependent_value: '',
       label: '5 - Planning',
       value: '5',
+      element: 'priority',
     },
   ],
 };
@@ -51,12 +56,12 @@ describe('ServiceNow API', () => {
         http,
         signal: abortCtrl.signal,
         connectorId: 'test',
-        field: 'priority',
+        fields: ['priority'],
       });
 
       expect(res).toEqual(choicesResponse);
       expect(http.post).toHaveBeenCalledWith('/api/actions/action/test/_execute', {
-        body: '{"params":{"subAction":"getChoices","subActionParams":{"field":"priority"}}}',
+        body: '{"params":{"subAction":"getChoices","subActionParams":{"fields":["priority"]}}}',
         signal: abortCtrl.signal,
       });
     });

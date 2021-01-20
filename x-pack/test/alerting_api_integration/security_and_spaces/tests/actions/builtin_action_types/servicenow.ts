@@ -364,7 +364,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                   status: 'error',
                   retry: false,
                   message:
-                    'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subActionParams.field]: expected value of type [string] but got [undefined]',
+                    'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subActionParams.field]: expected value of type [array] but got [undefined]',
                 });
               });
           });

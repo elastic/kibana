@@ -8,8 +8,9 @@ import { mount } from 'enzyme';
 import { act } from '@testing-library/react';
 
 import { ActionConnector } from '../../../../types';
-import { useGetChoices, Choice } from './use_get_choices';
+import { useGetChoices } from './use_get_choices';
 import ServiceNowParamsFields from './servicenow_sir_params';
+import { Choice } from './types';
 
 jest.mock('./use_get_choices');
 jest.mock('../../../../common/lib/kibana');
@@ -54,62 +55,86 @@ const defaultProps = {
   messageVariables: [],
 };
 
-const categoriesResponse = {
+const choicesResponse = {
   isLoading: false,
   choices: [
     {
       dependent_value: '',
       label: 'Priviledge Escalation',
       value: 'Priviledge Escalation',
+      element: 'category',
     },
     {
       dependent_value: '',
       label: 'Criminal activity/investigation',
       value: 'Criminal activity/investigation',
+      element: 'category',
     },
     {
       dependent_value: '',
       label: 'Denial of Service',
       value: 'Denial of Service',
+      element: 'category',
     },
-  ],
-};
-
-const subcategoriesResponse = {
-  isLoading: false,
-  choices: [
     {
       dependent_value: 'Denial of Service',
       label: 'Inbound or outbound',
       value: '12',
+      element: 'subcategory',
     },
     {
       dependent_value: 'Denial of Service',
       label: 'Single or distributed (DoS or DDoS)',
       value: '26',
+      element: 'subcategory',
     },
     {
       dependent_value: 'Denial of Service',
       label: 'Inbound DDos',
       value: 'inbound_ddos',
+      element: 'subcategory',
+    },
+    {
+      dependent_value: '',
+      label: '1 - Critical',
+      value: '1',
+      element: 'priority',
+    },
+    {
+      dependent_value: '',
+      label: '2 - High',
+      value: '2',
+      element: 'priority',
+    },
+    {
+      dependent_value: '',
+      label: '3 - Moderate',
+      value: '3',
+      element: 'priority',
+    },
+    {
+      dependent_value: '',
+      label: '4 - Low',
+      value: '4',
+      element: 'priority',
+    },
+    {
+      dependent_value: '',
+      label: '5 - Planning',
+      value: '5',
+      element: 'priority',
     },
   ],
 };
 
 describe('ServiceNowParamsFields renders', () => {
-  let onSuccessCategories = (choices: Choice[]) => {};
-  let onSuccessSubcategories = (choices: Choice[]) => {};
+  let onChoicesSuccess = (choices: Choice[]) => {};
 
   beforeEach(() => {
     jest.clearAllMocks();
     useGetChoicesMock.mockImplementation((args) => {
-      if (args.field === 'category') {
-        onSuccessCategories = args.onSuccess;
-        return categoriesResponse;
-      } else {
-        onSuccessSubcategories = args.onSuccess;
-        return subcategoriesResponse;
-      }
+      onChoicesSuccess = args.onSuccess;
+      return choicesResponse;
     });
   });
 
@@ -120,6 +145,7 @@ describe('ServiceNowParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="dest_ipInput"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="malware_urlInput"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="malware_hashInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="categorySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeTruthy();
@@ -176,11 +202,7 @@ describe('ServiceNowParamsFields renders', () => {
   test('it transforms the categories to options correctly', async () => {
     const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
     act(() => {
-      onSuccessCategories(categoriesResponse.choices);
-    });
-
-    act(() => {
-      onSuccessSubcategories(subcategoriesResponse.choices);
+      onChoicesSuccess(choicesResponse.choices);
     });
 
     wrapper.update();
@@ -197,11 +219,7 @@ describe('ServiceNowParamsFields renders', () => {
   test('it transforms the subcategories to options correctly', async () => {
     const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
     act(() => {
-      onSuccessCategories(categoriesResponse.choices);
-    });
-
-    act(() => {
-      onSuccessSubcategories(subcategoriesResponse.choices);
+      onChoicesSuccess(choicesResponse.choices);
     });
 
     wrapper.update();
@@ -221,6 +239,37 @@ describe('ServiceNowParamsFields renders', () => {
     ]);
   });
 
+  test('it transforms the priorities to options correctly', async () => {
+    const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
+    act(() => {
+      onChoicesSuccess(choicesResponse.choices);
+    });
+
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('options')).toEqual([
+      {
+        text: '1 - Critical',
+        value: '1',
+      },
+      {
+        text: '2 - High',
+        value: '2',
+      },
+      {
+        text: '3 - Moderate',
+        value: '3',
+      },
+      {
+        text: '4 - Low',
+        value: '4',
+      },
+      {
+        text: '5 - Planning',
+        value: '5',
+      },
+    ]);
+  });
+
   describe('UI updates', () => {
     const changeEvent = { target: { value: 'Bug' } } as React.ChangeEvent<HTMLSelectElement>;
     const simpleFields = [
@@ -230,6 +279,7 @@ describe('ServiceNowParamsFields renders', () => {
       { dataTestSubj: '[data-test-subj="dest_ipInput"]', key: 'dest_ip' },
       { dataTestSubj: '[data-test-subj="malware_urlInput"]', key: 'malware_url' },
       { dataTestSubj: '[data-test-subj="malware_hashInput"]', key: 'malware_hash' },
+      { dataTestSubj: '[data-test-subj="prioritySelect"]', key: 'priority' },
       { dataTestSubj: '[data-test-subj="categorySelect"]', key: 'category' },
       { dataTestSubj: '[data-test-subj="subcategorySelect"]', key: 'subcategory' },
     ];

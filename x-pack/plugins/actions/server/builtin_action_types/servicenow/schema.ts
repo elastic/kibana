@@ -80,7 +80,7 @@ export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
 export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
 export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
 export const ExecutorSubActionGetChoicesParamsSchema = schema.object({
-  field: schema.string(),
+  fields: schema.arrayOf(schema.string()),
 });
 
 // Executor parameters for ServiceNow Incident Management (IM)

@@ -80,7 +80,7 @@ export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
 export type ExternalServiceParams = Record<string, unknown>;
 
 export interface ExternalService {
-  getChoices: (field: string) => Promise<GetChoicesResponse>;
+  getChoices: (fields: string[]) => Promise<GetChoicesResponse>;
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
   getFields: () => Promise<GetCommonFieldsResponse>;
   createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
@@ -140,6 +140,7 @@ export interface ExternalServiceChoices {
   value: string;
   label: string;
   dependent_value: string;
+  element: string;
 }
 
 export type GetCommonFieldsResponse = ExternalServiceFields[];

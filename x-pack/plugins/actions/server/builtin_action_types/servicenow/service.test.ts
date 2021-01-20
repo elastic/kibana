@@ -443,13 +443,13 @@ describe('ServiceNow service', () => {
       requestMock.mockImplementation(() => ({
         data: { result: serviceNowChoices },
       }));
-      await service.getChoices('priority');
+      await service.getChoices(['priority', 'category']);
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
         url:
-          'https://dev102283.service-now.com/api/now/v2/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority&sysparm_fields=label,value,dependent_value',
+          'https://dev102283.service-now.com/api/now/v2/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
       });
     });
 
@@ -457,7 +457,7 @@ describe('ServiceNow service', () => {
       requestMock.mockImplementation(() => ({
         data: { result: serviceNowChoices },
       }));
-      const res = await service.getChoices('priority');
+      const res = await service.getChoices(['priority']);
       expect(res).toEqual(serviceNowChoices);
     });
 
@@ -475,13 +475,13 @@ describe('ServiceNow service', () => {
         data: { result: serviceNowChoices },
       }));
 
-      await service.getChoices('priority');
+      await service.getChoices(['priority', 'category']);
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
         url:
-          'https://dev102283.service-now.com/api/now/v2/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority&sysparm_fields=label,value,dependent_value',
+          'https://dev102283.service-now.com/api/now/v2/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
       });
     });
 
@@ -489,7 +489,7 @@ describe('ServiceNow service', () => {
       requestMock.mockImplementation(() => {
         throw new Error('An error has occurred');
       });
-      await expect(service.getChoices('priority')).rejects.toThrow(
+      await expect(service.getChoices(['priority'])).rejects.toThrow(
         '[Action][ServiceNow]: Unable to get choices. Error: An error has occurred'
       );
     });

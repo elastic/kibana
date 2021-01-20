@@ -77,7 +77,7 @@ const getChoicesHandler = async ({
   externalService,
   params,
 }: GetChoicesHandlerArgs): Promise<GetChoicesResponse> => {
-  const res = await externalService.getChoices(params.field);
+  const res = await externalService.getChoices(params.fields);
   return res;
 };
 

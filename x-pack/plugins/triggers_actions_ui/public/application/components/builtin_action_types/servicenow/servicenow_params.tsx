@@ -12,21 +12,21 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
-  EuiSelectOption,
 } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
-import { ServiceNowIMActionParams } from './types';
+import { ServiceNowIMActionParams, Choice, Options } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
-import { useGetChoices, Choice } from './use_get_choices';
+import { useGetChoices } from './use_get_choices';
 import * as i18n from './translations';
 
-interface Options {
-  urgency: EuiSelectOption[];
-  severity: EuiSelectOption[];
-  impact: EuiSelectOption[];
-}
+const useGetChoicesFields = ['urgency', 'severity', 'impact'];
+const defaultOptions: Options = {
+  urgency: [],
+  severity: [],
+  impact: [],
+};
 
 const ServiceNowParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowIMActionParams>
@@ -47,11 +47,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
     [actionParams.subActionParams]
   );
 
-  const [options, setOptions] = useState<Options>({
-    urgency: [],
-    severity: [],
-    impact: [],
-  });
+  const [options, setOptions] = useState<Options>(defaultOptions);
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -76,38 +72,26 @@ const ServiceNowParamsFields: React.FunctionComponent<
     [editSubActionProperty]
   );
 
-  const onOptionSuccess = (key: string, choices: Choice[]) =>
-    setOptions((prevOptions) => ({
-      ...prevOptions,
-      [key]: choices.map((choice) => ({ value: choice.value, text: choice.label })),
-    }));
+  const onChoicesSuccess = (choices: Choice[]) =>
+    setOptions(
+      choices.reduce(
+        (acc, choice) => ({
+          ...acc,
+          [choice.element]: [
+            ...(acc[choice.element] != null ? acc[choice.element] : []),
+            { value: choice.value, text: choice.label },
+          ],
+        }),
+        defaultOptions
+      )
+    );
 
-  const onUrgencySuccess = (choices: Choice[]) => onOptionSuccess('urgency', choices);
-  const onSeveritySuccess = (choices: Choice[]) => onOptionSuccess('severity', choices);
-  const onImpactSuccess = (choices: Choice[]) => onOptionSuccess('impact', choices);
-
-  const { isLoading: isLoadingUrgencies } = useGetChoices({
+  const { isLoading: isLoadingChoices } = useGetChoices({
     http,
     toastNotifications: toasts,
     actionConnector,
-    field: 'urgency',
-    onSuccess: onUrgencySuccess,
-  });
-
-  const { isLoading: isLoadingSeverities } = useGetChoices({
-    http,
-    toastNotifications: toasts,
-    actionConnector,
-    field: 'severity',
-    onSuccess: onSeveritySuccess,
-  });
-
-  const { isLoading: isLoadingImpacts } = useGetChoices({
-    http,
-    toastNotifications: toasts,
-    actionConnector,
-    field: 'impact',
-    onSuccess: onImpactSuccess,
+    fields: useGetChoicesFields,
+    onSuccess: onChoicesSuccess,
   });
 
   useEffect(() => {
@@ -153,8 +137,8 @@ const ServiceNowParamsFields: React.FunctionComponent<
           fullWidth
           data-test-subj="urgencySelect"
           hasNoInitialSelection
-          isLoading={isLoadingUrgencies}
-          disabled={isLoadingUrgencies}
+          isLoading={isLoadingChoices}
+          disabled={isLoadingChoices}
           options={options.urgency}
           value={incident.urgency ?? ''}
           onChange={(e) => editSubActionProperty('urgency', e.target.value)}
@@ -168,8 +152,8 @@ const ServiceNowParamsFields: React.FunctionComponent<
               fullWidth
               data-test-subj="severitySelect"
               hasNoInitialSelection
-              isLoading={isLoadingSeverities}
-              disabled={isLoadingSeverities}
+              isLoading={isLoadingChoices}
+              disabled={isLoadingChoices}
               options={options.severity}
               value={incident.severity ?? ''}
               onChange={(e) => editSubActionProperty('severity', e.target.value)}
@@ -182,8 +166,8 @@ const ServiceNowParamsFields: React.FunctionComponent<
               fullWidth
               data-test-subj="impactSelect"
               hasNoInitialSelection
-              isLoading={isLoadingImpacts}
-              disabled={isLoadingImpacts}
+              isLoading={isLoadingChoices}
+              disabled={isLoadingChoices}
               options={options.impact}
               value={incident.impact ?? ''}
               onChange={(e) => editSubActionProperty('impact', e.target.value)}

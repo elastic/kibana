@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiSelectOption } from '@elastic/eui';
 import { UserConfiguredActionConnector } from '../../../../types';
 import {
   ExecutorSubActionPushParamsIM,
@@ -34,3 +35,13 @@ export interface ServiceNowSecrets {
   username: string;
   password: string;
 }
+
+export interface Choice {
+  value: string;
+  label: string;
+  element: string;
+  dependent_value: string;
+}
+
+export type Fields = Record<string, Choice[]>;
+export type Options = Record<string, EuiSelectOption[]>;

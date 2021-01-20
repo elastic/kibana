@@ -8,8 +8,9 @@ import { mount } from 'enzyme';
 import { act } from '@testing-library/react';
 
 import { ActionConnector } from '../../../../types';
-import { useGetChoices, Choice } from './use_get_choices';
+import { useGetChoices } from './use_get_choices';
 import ServiceNowParamsFields from './servicenow_params';
+import { Choice } from './types';
 
 jest.mock('./use_get_choices');
 jest.mock('../../../../common/lib/kibana');
@@ -52,45 +53,43 @@ const defaultProps = {
 
 const useGetChoicesResponse = {
   isLoading: false,
-  choices: [
-    {
-      dependent_value: '',
-      label: '1 - Critical',
-      value: '1',
-    },
-    {
-      dependent_value: '',
-      label: '2 - High',
-      value: '2',
-    },
-    {
-      dependent_value: '',
-      label: '3 - Moderate',
-      value: '3',
-    },
-    {
-      dependent_value: '',
-      label: '4 - Low',
-      value: '4',
-    },
-  ],
+  choices: ['severity', 'urgency', 'impact']
+    .map((element) => [
+      {
+        dependent_value: '',
+        label: '1 - Critical',
+        value: '1',
+        element,
+      },
+      {
+        dependent_value: '',
+        label: '2 - High',
+        value: '2',
+        element,
+      },
+      {
+        dependent_value: '',
+        label: '3 - Moderate',
+        value: '3',
+        element,
+      },
+      {
+        dependent_value: '',
+        label: '4 - Low',
+        value: '4',
+        element,
+      },
+    ])
+    .flat(),
 };
 
 describe('ServiceNowParamsFields renders', () => {
-  let onSuccessUrgency = (choices: Choice[]) => {};
-  let onSuccessSeverity = (choices: Choice[]) => {};
-  let onSuccessImpact = (choices: Choice[]) => {};
+  let onChoices = (choices: Choice[]) => {};
 
   beforeEach(() => {
     jest.clearAllMocks();
     useGetChoicesMock.mockImplementation((args) => {
-      if (args.field === 'urgency') {
-        onSuccessUrgency = args.onSuccess;
-      } else if (args.field === 'severity') {
-        onSuccessSeverity = args.onSuccess;
-      } else if (args.field === 'impact') {
-        onSuccessImpact = args.onSuccess;
-      }
+      onChoices = args.onSuccess;
       return useGetChoicesResponse;
     });
   });
@@ -155,9 +154,7 @@ describe('ServiceNowParamsFields renders', () => {
   test('it transforms the urgencies to options correctly', async () => {
     const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
     act(() => {
-      onSuccessUrgency(useGetChoicesResponse.choices);
-      onSuccessSeverity(useGetChoicesResponse.choices);
-      onSuccessImpact(useGetChoicesResponse.choices);
+      onChoices(useGetChoicesResponse.choices);
     });
 
     wrapper.update();
@@ -172,9 +169,7 @@ describe('ServiceNowParamsFields renders', () => {
   test('it transforms the severities to options correctly', async () => {
     const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
     act(() => {
-      onSuccessUrgency(useGetChoicesResponse.choices);
-      onSuccessSeverity(useGetChoicesResponse.choices);
-      onSuccessImpact(useGetChoicesResponse.choices);
+      onChoices(useGetChoicesResponse.choices);
     });
 
     wrapper.update();
@@ -189,9 +184,7 @@ describe('ServiceNowParamsFields renders', () => {
   test('it transforms the impacts to options correctly', async () => {
     const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
     act(() => {
-      onSuccessUrgency(useGetChoicesResponse.choices);
-      onSuccessSeverity(useGetChoicesResponse.choices);
-      onSuccessImpact(useGetChoicesResponse.choices);
+      onChoices(useGetChoicesResponse.choices);
     });
 
     wrapper.update();

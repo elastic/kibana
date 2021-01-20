@@ -37,16 +37,19 @@ const getChoicesResponse = [
     dependent_value: '',
     label: 'Priviledge Escalation',
     value: 'Priviledge Escalation',
+    element: 'category',
   },
   {
     dependent_value: '',
     label: 'Criminal activity/investigation',
     value: 'Criminal activity/investigation',
+    element: 'category',
   },
   {
     dependent_value: '',
     label: 'Denial of Service',
     value: 'Denial of Service',
+    element: 'category',
   },
 ];
 
@@ -66,7 +69,7 @@ describe('useGetChoices', () => {
         http: services.http,
         actionConnector,
         toastNotifications: services.notifications.toasts,
-        field: 'priority',
+        fields: ['priority'],
         onSuccess,
       })
     );
@@ -85,7 +88,7 @@ describe('useGetChoices', () => {
         http: services.http,
         actionConnector: undefined,
         toastNotifications: services.notifications.toasts,
-        field: 'priority',
+        fields: ['priority'],
         onSuccess,
       })
     );
@@ -102,7 +105,7 @@ describe('useGetChoices', () => {
         http: services.http,
         actionConnector,
         toastNotifications: services.notifications.toasts,
-        field: 'priority',
+        fields: ['priority'],
         onSuccess,
       })
     );
@@ -123,7 +126,7 @@ describe('useGetChoices', () => {
         http: services.http,
         actionConnector,
         toastNotifications: services.notifications.toasts,
-        field: 'priority',
+        fields: ['priority'],
         onSuccess,
       })
     );
@@ -132,7 +135,7 @@ describe('useGetChoices', () => {
 
     expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
       text: 'An error occurred',
-      title: 'Unable to get choices for field priority',
+      title: 'Unable to get choices',
     });
   });
 
@@ -146,14 +149,14 @@ describe('useGetChoices', () => {
         http: services.http,
         actionConnector,
         toastNotifications: services.notifications.toasts,
-        field: 'priority',
+        fields: ['priority'],
         onSuccess,
       })
     );
 
     expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
       text: 'An error occurred',
-      title: 'Unable to get choices for field priority',
+      title: 'Unable to get choices',
     });
   });
 });

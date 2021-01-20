@@ -11,16 +11,16 @@ export async function getChoices({
   http,
   signal,
   connectorId,
-  field,
+  fields,
 }: {
   http: HttpSetup;
   signal: AbortSignal;
   connectorId: string;
-  field: string;
+  fields: string[];
 }): Promise<Record<string, any>> {
   return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
     body: JSON.stringify({
-      params: { subAction: 'getChoices', subActionParams: { field } },
+      params: { subAction: 'getChoices', subActionParams: { fields } },
     }),
     signal,
   });

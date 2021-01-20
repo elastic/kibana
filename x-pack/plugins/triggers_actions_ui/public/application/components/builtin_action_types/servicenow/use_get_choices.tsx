@@ -4,17 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, ToastsApi } from 'kibana/public';
 import { ActionConnector } from '../../../../types';
 import { getChoices } from './api';
+import { Choice } from './types';
 import * as i18n from './translations';
-
-export interface Choice {
-  value: string;
-  label: string;
-  dependent_value: string;
-}
 
 export interface UseGetChoicesProps {
   http: HttpSetup;
@@ -23,7 +18,7 @@ export interface UseGetChoicesProps {
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
   actionConnector?: ActionConnector;
-  field: string;
+  fields: string[];
   onSuccess?: (choices: Choice[]) => void;
 }
 
@@ -36,13 +31,12 @@ export const useGetChoices = ({
   http,
   actionConnector,
   toastNotifications,
-  field,
+  fields,
   onSuccess,
 }: UseGetChoicesProps): UseGetChoices => {
   const [isLoading, setIsLoading] = useState(false);
   const [choices, setChoices] = useState<Choice[]>([]);
   const abortCtrl = useRef(new AbortController());
-  const errorTitle = useMemo(() => i18n.CHOICES_API_ERROR(field), [field]);
 
   useEffect(() => {
     let didCancel = false;
@@ -60,7 +54,7 @@ export const useGetChoices = ({
           http,
           signal: abortCtrl.current.signal,
           connectorId: actionConnector.id,
-          field,
+          fields,
         });
 
         if (!didCancel) {
@@ -68,7 +62,7 @@ export const useGetChoices = ({
           setChoices(res.data ?? []);
           if (res.status && res.status === 'error') {
             toastNotifications.addDanger({
-              title: errorTitle,
+              title: i18n.CHOICES_API_ERROR,
               text: `${res.serviceMessage ?? res.message}`,
             });
           } else if (onSuccess) {
@@ -79,7 +73,7 @@ export const useGetChoices = ({
         if (!didCancel) {
           setIsLoading(false);
           toastNotifications.addDanger({
-            title: errorTitle,
+            title: i18n.CHOICES_API_ERROR,
             text: error.message,
           });
         }
@@ -95,7 +89,7 @@ export const useGetChoices = ({
       abortCtrl.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [http, actionConnector, toastNotifications, field, errorTitle]);
+  }, [http, actionConnector, toastNotifications, fields]);
 
   return {
     choices,

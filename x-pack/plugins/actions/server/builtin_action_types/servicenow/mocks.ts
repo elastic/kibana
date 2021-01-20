@@ -39,26 +39,31 @@ export const serviceNowChoices = [
     dependent_value: '',
     label: '1 - Critical',
     value: '1',
+    element: 'priority',
   },
   {
     dependent_value: '',
     label: '2 - High',
     value: '2',
+    element: 'priority',
   },
   {
     dependent_value: '',
     label: '3 - Moderate',
     value: '3',
+    element: 'priority',
   },
   {
     dependent_value: '',
     label: '4 - Low',
     value: '4',
+    element: 'priority',
   },
   {
     dependent_value: '',
     label: '5 - Planning',
     value: '5',
+    element: 'priority',
   },
 ];
 

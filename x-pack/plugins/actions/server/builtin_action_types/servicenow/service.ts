@@ -43,8 +43,13 @@ export const createExternalService = (
     return `${urlWithoutTrailingSlash}/nav_to.do?uri=${table}.do?sys_id=${id}`;
   };
 
-  const getChoicesURL = (field: string) =>
-    `${choicesUrl}?sysparm_query=name=task^ORname=${table}^element=${field}&sysparm_fields=label,value,dependent_value`;
+  const getChoicesURL = (fields: string[]) => {
+    const elements = fields
+      .slice(1)
+      .reduce((acc, field) => `${acc}^ORelement=${field}`, `element=${fields[0]}`);
+
+    return `${choicesUrl}?sysparm_query=name=task^ORname=${table}^${elements}&sysparm_fields=label,value,dependent_value,element`;
+  };
 
   const checkInstance = (res: AxiosResponse) => {
     if (res.status === 200 && res.data.result == null) {
@@ -164,11 +169,11 @@ export const createExternalService = (
     }
   };
 
-  const getChoices = async (field: string) => {
+  const getChoices = async (fields: string[]) => {
     try {
       const res = await request({
         axios: axiosInstance,
-        url: getChoicesURL(field),
+        url: getChoicesURL(fields),
         logger,
         proxySettings,
       });

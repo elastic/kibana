@@ -16,12 +16,22 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
-import { ServiceNowSIRActionParams } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 
 import * as i18n from './translations';
-import { useGetChoices, Choice } from './use_get_choices';
+import { useGetChoices } from './use_get_choices';
+import { ServiceNowSIRActionParams, Fields, Choice } from './types';
+
+const useGetChoicesFields = ['category', 'subcategory', 'priority'];
+const defaultFields: Fields = {
+  category: [],
+  subcategory: [],
+  priority: [],
+};
+
+const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
+  choices.map((choice) => ({ value: choice.value, text: choice.label }));
 
 const ServiceNowParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowSIRActionParams>
@@ -42,8 +52,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
     [actionParams.subActionParams]
   );
 
-  const [categories, setCategories] = useState<EuiSelectOption[]>([]);
-  const [subcategories, setSubcategories] = useState<Choice[]>([]);
+  const [choices, setChoices] = useState<Fields>(defaultFields);
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -68,32 +77,37 @@ const ServiceNowParamsFields: React.FunctionComponent<
     [editSubActionProperty]
   );
 
-  const onCategorySuccess = (choices: Choice[]) =>
-    setCategories(choices.map((choice) => ({ value: choice.value, text: choice.label })));
-  const onSubcategorySuccess = (choices: Choice[]) => setSubcategories(choices);
+  const onChoicesSuccess = (values: Choice[]) => {
+    setChoices(
+      values.reduce(
+        (acc, value) => ({
+          ...acc,
+          [value.element]: [...(acc[value.element] != null ? acc[value.element] : []), value],
+        }),
+        defaultFields
+      )
+    );
+  };
 
-  const { isLoading: isLoadingCategories } = useGetChoices({
+  const { isLoading: isLoadingChoices } = useGetChoices({
     http,
     toastNotifications: toasts,
     actionConnector,
-    field: 'category',
-    onSuccess: onCategorySuccess,
+    fields: useGetChoicesFields,
+    onSuccess: onChoicesSuccess,
   });
 
-  const { isLoading: isLoadingSubCategories } = useGetChoices({
-    http,
-    toastNotifications: toasts,
-    actionConnector,
-    field: 'subcategory',
-    onSuccess: onSubcategorySuccess,
-  });
+  const categoryOptions = useMemo(() => choicesToEuiOptions(choices.category), [choices.category]);
+  const priorityOptions = useMemo(() => choicesToEuiOptions(choices.priority), [choices.priority]);
 
-  const subcategoriesOptions = useMemo(
+  const subcategoryOptions = useMemo(
     () =>
-      subcategories
-        .filter((subcategory) => subcategory.dependent_value === incident.category)
-        .map((subcategory) => ({ value: subcategory.value, text: subcategory.label })),
-    [incident.category, subcategories]
+      choicesToEuiOptions(
+        choices.subcategory.filter(
+          (subcategory) => subcategory.dependent_value === incident.category
+        )
+      ),
+    [choices.subcategory, incident.category]
   );
 
   useEffect(() => {
@@ -193,6 +207,28 @@ const ServiceNowParamsFields: React.FunctionComponent<
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
+      <EuiFormRow fullWidth label={i18n.PRIORITY_LABEL}>
+        <EuiSelect
+          fullWidth
+          data-test-subj="prioritySelect"
+          hasNoInitialSelection
+          isLoading={isLoadingChoices}
+          disabled={isLoadingChoices}
+          options={priorityOptions}
+          value={incident.priority ?? undefined}
+          onChange={(e) => {
+            editAction(
+              'subActionParams',
+              {
+                incident: { ...incident, priority: e.target.value },
+                comments,
+              },
+              index
+            );
+          }}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow fullWidth label={i18n.CATEGORY_LABEL}>
@@ -200,9 +236,9 @@ const ServiceNowParamsFields: React.FunctionComponent<
               fullWidth
               data-test-subj="categorySelect"
               hasNoInitialSelection
-              isLoading={isLoadingCategories}
-              disabled={isLoadingCategories}
-              options={categories}
+              isLoading={isLoadingChoices}
+              disabled={isLoadingChoices}
+              options={categoryOptions}
               value={incident.category ?? undefined}
               onChange={(e) => {
                 editAction(
@@ -223,9 +259,9 @@ const ServiceNowParamsFields: React.FunctionComponent<
               fullWidth
               data-test-subj="subcategorySelect"
               hasNoInitialSelection
-              isLoading={isLoadingCategories || isLoadingSubCategories}
-              disabled={isLoadingCategories || isLoadingSubCategories}
-              options={subcategoriesOptions}
+              isLoading={isLoadingChoices}
+              disabled={isLoadingChoices}
+              options={subcategoryOptions}
               // Needs an empty string instead of undefined to select the blank option when changing categories
               value={incident.subcategory ?? ''}
               onChange={(e) => editSubActionProperty('subcategory', e.target.value)}

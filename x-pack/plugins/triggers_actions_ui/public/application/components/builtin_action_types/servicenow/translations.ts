@@ -175,14 +175,12 @@ export const MALWARE_HASH_LABEL = i18n.translate(
   }
 );
 
-export const CHOICES_API_ERROR = (field: string) =>
-  i18n.translate(
-    'xpack.triggersActionsUI.components.builtinActionTypes.jira.unableToGetChoicesMessage',
-    {
-      values: { field },
-      defaultMessage: 'Unable to get choices for field {field}',
-    }
-  );
+export const CHOICES_API_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.unableToGetChoicesMessage',
+  {
+    defaultMessage: 'Unable to get choices',
+  }
+);
 
 export const CATEGORY_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.categoryTitle',
@@ -216,5 +214,12 @@ export const IMPACT_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.impactSelectFieldLabel',
   {
     defaultMessage: 'Impact',
+  }
+);
+
+export const PRIORITY_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.prioritySelectFieldLabel',
+  {
+    defaultMessage: 'Priority',
   }
 );
