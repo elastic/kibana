@@ -5,7 +5,6 @@
  */
 
 import '../__mocks__/shallow_useeffect.mock';
-import '../__mocks__/kea.mock';
 import '../__mocks__/enterprise_search_url.mock';
 import { setMockValues, setMockActions } from '../__mocks__';
 
