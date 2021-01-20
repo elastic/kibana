@@ -81,7 +81,7 @@ context for each of the indices.
 image::images/alert-types-tracking-threshold-conditions.png[Five clauses define the condition to detect]
 
 
-Delayed evaluation offset:: If a data source is laggy or intermittent, a user may supply
+Delayed evaluation offset:: If a data source lags or is intermittent, you may supply
 an optional value to evaluate alert conditions following a fixed delay. For instance, if data
 is consistently indexed 5-10 minutes following its original timestamp, a *Delayed evaluation
 offset* of `10 minutes` would ensure that alertable instances are still captured.
