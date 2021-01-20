@@ -196,31 +196,29 @@ export const Overview: React.FC = () => {
     );
   };
 
-  const GroupsSummary = () => {
-    return !groups.length ? null : (
-      <>
-        <EuiText>
-          <h4>Group Access</h4>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {groups.map((group, index) => (
-            <EuiFlexItem key={index}>
-              <EuiPanelTo
-                to={getGroupPath(group.id)}
-                data-test-subj="SourceGroupLink"
-                className="euiPanel--inset"
-              >
-                <EuiText size="s" className="eui-textTruncate">
-                  <strong>{group.name}</strong>
-                </EuiText>
-              </EuiPanelTo>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </>
-    );
-  };
+  const groupsSummary = (
+    <>
+      <EuiText>
+        <h4>Group Access</h4>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="GroupsSummary">
+        {groups.map((group, index) => (
+          <EuiFlexItem key={index}>
+            <EuiPanelTo
+              to={getGroupPath(group.id)}
+              data-test-subj="SourceGroupLink"
+              className="euiPanel--inset"
+            >
+              <EuiText size="s" className="eui-textTruncate">
+                <strong>{group.name}</strong>
+              </EuiText>
+            </EuiPanelTo>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </>
+  );
 
   const detailsSummary = (
     <>
@@ -431,9 +429,7 @@ export const Overview: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="m" direction="column">
-            <EuiFlexItem>
-              <GroupsSummary />
-            </EuiFlexItem>
+            <EuiFlexItem>{groups.length > 0 && groupsSummary}</EuiFlexItem>
             {details.length > 0 && <EuiFlexItem>{detailsSummary}</EuiFlexItem>}
             {!custom && serviceTypeSupportsPermissions && (
               <>
