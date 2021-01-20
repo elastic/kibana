@@ -165,6 +165,10 @@ export class MapsPlugin
     // unregisters the OSS alias
     plugins.visualizations.unRegisterAlias(PLUGIN_ID_OSS);
 
+    if (!core.application.capabilities.maps.save) {
+      plugins.visualizations.unRegisterAlias(APP_ID);
+    }
+
     return {
       createLayerDescriptors,
       registerLayerWizard,
