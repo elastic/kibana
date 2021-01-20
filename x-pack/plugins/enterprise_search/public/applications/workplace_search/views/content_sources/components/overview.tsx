@@ -33,8 +33,6 @@ import {
   DOCUMENT_PERMISSIONS_DOCS_URL,
   ENT_SEARCH_LICENSE_MANAGEMENT,
   EXTERNAL_IDENTITIES_DOCS_URL,
-  SOURCE_CONTENT_PATH,
-  getContentSourcePath,
   getGroupPath,
 } from '../../../routes';
 
@@ -45,7 +43,7 @@ import { CredentialItem } from '../../../components/shared/credential_item';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { LicenseBadge } from '../../../components/shared/license_badge';
 import { Loading } from '../../../../shared/loading';
-import { EuiButtonEmptyTo, EuiPanelTo } from '../../../../shared/react_router_helpers';
+import { EuiPanelTo } from '../../../../shared/react_router_helpers';
 
 import aclImage from '../../../assets/supports_acl.svg';
 import { SourceLogic } from '../source_logic';
@@ -63,7 +61,6 @@ export const Overview: React.FC = () => {
     details,
     custom,
     accessToken,
-    key,
     licenseSupportsPermissions,
     serviceTypeSupportsPermissions,
     indexPermissions,
@@ -105,24 +102,9 @@ export const Overview: React.FC = () => {
     return (
       <div className="content-section">
         <div className="section-header">
-          <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h4>Content summary</h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            {totalDocuments > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmptyTo
-                  to={getContentSourcePath(SOURCE_CONTENT_PATH, id, isOrganization)}
-                  data-test-subj="ManageSourceContentLink"
-                  size="s"
-                >
-                  Manage
-                </EuiButtonEmptyTo>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <EuiTitle size="xs">
+            <h4>Content summary</h4>
+          </EuiTitle>
         </div>
         <EuiSpacer size="s" />
         {!summary && <ComponentLoader text="Loading summary details..." />}
@@ -388,9 +370,9 @@ export const Overview: React.FC = () => {
         </h6>
       </EuiText>
       <EuiSpacer size="s" />
-      <CredentialItem label="Access Token" value={accessToken} testSubj="AccessToken" />
+      <CredentialItem label="ID" value={id} testSubj="ContentSourceId" />
       <EuiSpacer size="s" />
-      <CredentialItem label="Key" value={key} testSubj="ContentSourceKey" />
+      <CredentialItem label="Access Token" value={accessToken} testSubj="AccessToken" />
     </EuiPanel>
   );
 
