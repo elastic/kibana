@@ -59,6 +59,7 @@ describe('engine routes', () => {
 
     describe('hasValidData', () => {
       it('should correctly validate that the response has data', () => {
+        mockRequestHandler.createRequest.mockClear();
         const response = {
           meta: {
             page: {
@@ -73,6 +74,7 @@ describe('engine routes', () => {
       });
 
       it('should correctly validate that a response does not have data', () => {
+        mockRequestHandler.createRequest.mockClear();
         const response = {};
 
         mockRouter.callRoute(mockRequest);
@@ -125,10 +127,8 @@ describe('engine routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({ params: { name: 'some-engine' } });
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/details',
+        path: '/as/engines/:name/details',
       });
     });
   });
@@ -150,10 +150,8 @@ describe('engine routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({ params: { name: 'some-engine' } });
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/overview_metrics',
+        path: '/as/engines/:name/overview_metrics',
       });
     });
   });

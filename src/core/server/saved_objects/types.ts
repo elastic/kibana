@@ -9,6 +9,7 @@
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
+import { SavedObjectsImportHook } from './import/types';
 
 export {
   SavedObjectsImportResponse,
@@ -20,6 +21,9 @@ export {
   SavedObjectsImportUnknownError,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportWarning,
 } from './import/types';
 
 import { SavedObject } from '../../types';
@@ -281,4 +285,46 @@ export interface SavedObjectsTypeManagementDefinition {
    *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
    */
   getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
+  /**
+   * An optional {@link SavedObjectsImportHook | import hook} to use when importing given type.
+   *
+   * Import hooks are executed during the savedObjects import process and allow to interact
+   * with the imported objects. See the {@link SavedObjectsImportHook | hook documentation}
+   * for more info.
+   *
+   * @example
+   * Registering a hook displaying a warning about a specific type of object
+   * ```ts
+   * // src/plugins/my_plugin/server/plugin.ts
+   * import { myType } from './saved_objects';
+   *
+   * export class Plugin() {
+   *   setup: (core: CoreSetup) => {
+   *     core.savedObjects.registerType({
+   *        ...myType,
+   *        management: {
+   *          ...myType.management,
+   *          onImport: (objects) => {
+   *            if(someActionIsNeeded(objects)) {
+   *              return {
+   *                 warnings: [
+   *                   {
+   *                     type: 'action_required',
+   *                     message: 'Objects need to be manually enabled after import',
+   *                     actionPath: '/app/my-app/require-activation',
+   *                   },
+   *                 ]
+   *              }
+   *            }
+   *            return {};
+   *          }
+   *        },
+   *     });
+   *   }
+   * }
+   * ```
+   *
+   * @remark messages returned in the warnings are user facing and must be translated.
+   */
+  onImport?: SavedObjectsImportHook;
 }
