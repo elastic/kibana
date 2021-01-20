@@ -124,7 +124,7 @@ export const getContentSourcePath = (
 export const getGroupPath = (groupId: string): string => generatePath(GROUP_PATH, { groupId });
 export const getGroupSourcePrioritizationPath = (groupId: string): string =>
   `${GROUPS_PATH}/${groupId}/source_prioritization`;
-export const getSourcesPath = (path: string, isOrganization: boolean): string =>
+export const getSourcesPath = (path: string, isOrganization?: boolean): string =>
   isOrganization ? path : `${PERSONAL_PATH}${path}`;
 export const getReindexJobRoute = (
   sourceId: string,

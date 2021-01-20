@@ -17,7 +17,7 @@ import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import {
-  asDuration,
+  asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
@@ -107,7 +107,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
           <SparkPlot
             color="euiColorVis1"
             series={latency?.timeseries}
-            valueLabel={asDuration(latency?.value)}
+            valueLabel={asMillisecondDuration(latency?.value)}
           />
         );
       },

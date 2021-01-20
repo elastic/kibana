@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart, ScopedHistory } from 'src/core/public';
+import type { NotificationsStart, ScopedHistory, DocLinksStart } from 'src/core/public';
 import { RoleMapping } from '../../../../common/model';
 import { RuleEditorPanel } from './rule_editor_panel';
 import {
@@ -32,7 +32,6 @@ import {
 import { RolesAPIClient } from '../../roles';
 import { validateRoleMappingForSave } from './services/role_mapping_validation';
 import { MappingInfoPanel } from './mapping_info_panel';
-import { DocumentationLinksService } from '../documentation_links';
 import { RoleMappingsAPIClient } from '../role_mappings_api_client';
 
 interface State {
@@ -54,7 +53,7 @@ interface Props {
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   notifications: NotificationsStart;
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
   history: ScopedHistory;
 }
 
@@ -163,7 +162,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
               values={{
                 learnMoreLink: (
                   <EuiLink
-                    href={this.props.docLinks.getRoleMappingDocUrl()}
+                    href={this.props.docLinks.links.security.mappingRoles}
                     external={true}
                     target="_blank"
                   >
@@ -180,7 +179,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
         {!this.state.hasCompatibleRealms && (
           <>
             <EuiSpacer size="s" />
-            <NoCompatibleRealms docLinks={this.props.docLinks} />
+            <NoCompatibleRealms />
           </>
         )}
       </Fragment>

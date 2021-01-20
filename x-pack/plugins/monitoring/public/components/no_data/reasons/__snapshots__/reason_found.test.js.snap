@@ -162,29 +162,21 @@ Array [
 
 exports[`ReasonFound should load ExplainExportersCloud component 1`] = `
 Array [
-  <h2
-    class="euiTitle euiTitle--large"
-  >
-    Your monitoring data is not available here.
-  </h2>,
   <span
     class="euiTextColor euiTextColor--subdued"
   >
     <div
-      class="euiSpacer euiSpacer--l"
-    />
-    <div
       class="euiText euiText--medium"
     >
       <p>
-        Please return to your 
+        Configure monitoring through 
         <a
           class="euiLink euiLink--primary"
           href="https://cloud.elastic.co/deployments"
           rel="noopener"
           target="_blank"
         >
-          cloud dashboard.
+          Elasticsearch Service Console
           <span
             aria-label="External link"
             class="euiLink__externalIcon"
@@ -196,14 +188,33 @@ Array [
             (opens in a new tab or window)
           </span>
         </a>
-         For more information on Monitoring in Elastic Cloud, please see 
+         Go to 
+        <a
+          class="euiLink euiLink--primary"
+          href="https://cloud.elastic.co/deployments"
+          rel="noopener"
+          target="_blank"
+        >
+          Logs and metrics
+          <span
+            aria-label="External link"
+            class="euiLink__externalIcon"
+            data-euiicon-type="popout"
+          />
+          <span
+            class="euiScreenReaderOnly"
+          >
+            (opens in a new tab or window)
+          </span>
+        </a>
+         section for a deployment to configure monitoring. For more information visit 
         <a
           class="euiLink euiLink--primary"
           href="https://www.elastic.co/guide/en/cloud/current/ec-enable-monitoring.html"
           rel="noopener"
           target="_blank"
         >
-          the documentation.
+          the documentation page.
           <span
             aria-label="External link"
             class="euiLink__externalIcon"

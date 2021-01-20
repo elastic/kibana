@@ -19,19 +19,25 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
-import { enableCorrelations } from '../../../../common/ui_settings_keys';
+import { isActivePlatinumLicense } from '../../../../common/license_check';
+import { enableSignificantTerms } from '../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { LatencyCorrelations } from './LatencyCorrelations';
 import { ErrorCorrelations } from './ErrorCorrelations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { createHref } from '../../shared/Links/url_helpers';
+import { useLicenseContext } from '../../../context/license/use_license_context';
 
 export function Correlations() {
   const { uiSettings } = useApmPluginContext().core;
   const { urlParams } = useUrlParams();
+  const license = useLicenseContext();
   const history = useHistory();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  if (!uiSettings.get(enableCorrelations)) {
+  if (
+    !uiSettings.get(enableSignificantTerms) ||
+    !isActivePlatinumLicense(license)
+  ) {
     return null;
   }
 
