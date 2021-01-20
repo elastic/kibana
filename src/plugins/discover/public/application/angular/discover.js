@@ -186,7 +186,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($route, $scope, $timeout, Promise) {
+function discoverController($route, $scope, Promise) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
@@ -736,20 +736,20 @@ function discoverController($route, $scope, $timeout, Promise) {
     $route.reload();
   };
 
-  $scope.onSkipBottomButtonClick = function () {
+  $scope.onSkipBottomButtonClick = async () => {
     // show all the Rows
     $scope.minimumVisibleRows = $scope.hits;
 
     // delay scrolling to after the rows have been rendered
     const bottomMarker = document.getElementById('discoverBottomMarker');
-    $timeout(() => {
-      bottomMarker.focus();
-      // The anchor tag is not technically empty (it's a hack to make Safari scroll)
-      // so the browser will show a highlight: remove the focus once scrolled
-      $timeout(() => {
-        bottomMarker.blur();
-      }, 0);
-    }, 0);
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    while ($scope.rows.length !== document.getElementsByClassName('kbnDocTable__row').length) {
+      await wait(50);
+    }
+    bottomMarker.focus();
+    await wait(50);
+    bottomMarker.blur();
   };
 
   $scope.newQuery = function () {
