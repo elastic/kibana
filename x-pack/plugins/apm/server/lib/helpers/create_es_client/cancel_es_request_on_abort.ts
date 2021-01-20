@@ -15,13 +15,7 @@ export function cancelEsRequestOnAbort<T extends TransportRequestPromise<any>>(
     promise.abort();
   });
 
-  // using .catch() here means unsubscribe will be called
-  // after it has thrown an error, so we use .then(onSuccess, onFailure)
-  // syntax
-  promise.then(
-    () => subscription.unsubscribe(),
-    () => subscription.unsubscribe()
-  );
+  promise.finally(() => subscription.unsubscribe());
 
   return promise;
 }

@@ -15,11 +15,11 @@ function formatObj(obj: Record<string, any>) {
 
 export async function callAsyncWithDebug<T>({
   cb,
-  getMessage,
+  getDebugMessage,
   debug,
 }: {
   cb: () => Promise<T>;
-  getMessage: () => { body: string; title: string };
+  getDebugMessage: () => { body: string; title: string };
   debug: boolean;
 }) {
   if (!debug) {
@@ -42,7 +42,7 @@ export async function callAsyncWithDebug<T>({
     const diff = process.hrtime(startTime);
     const duration = `${Math.round(diff[0] * 1000 + diff[1] / 1e6)}ms`;
 
-    const { title, body } = getMessage();
+    const { title, body } = getDebugMessage();
 
     console.log(
       chalk.bold[highlightColor](`=== Debug: ${title} (${duration}) ===`)
@@ -59,16 +59,18 @@ export async function callAsyncWithDebug<T>({
   return res;
 }
 
-export const getSearchDebugBody = (params: Record<string, any>) =>
-  `GET ${params.index}/_search\n${formatObj(params.body)}`;
-
-export const getDefaultDebugBody = (
+export const getDebugBody = (
   params: Record<string, any>,
   operationName: string
-) =>
-  `${chalk.bold('ES operation:')} ${operationName}\n${chalk.bold(
+) => {
+  if (operationName === 'search') {
+    return `GET ${params.index}/_search\n${formatObj(params.body)}`;
+  }
+
+  return `${chalk.bold('ES operation:')} ${operationName}\n${chalk.bold(
     'ES query:'
   )}\n${formatObj(params)}`;
+};
 
 export const getDebugTitle = (request: KibanaRequest) =>
   `${request.route.method.toUpperCase()} ${request.route.path}`;

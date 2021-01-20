@@ -25,7 +25,7 @@ import { unpackProcessorEvents } from './unpack_processor_events';
 import {
   callAsyncWithDebug,
   getDebugTitle,
-  getSearchDebugBody,
+  getDebugBody,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
@@ -99,8 +99,8 @@ export function createApmEventClient({
 
           return unwrapEsResponse(searchPromise);
         },
-        getMessage: () => ({
-          body: getSearchDebugBody(searchParams),
+        getDebugMessage: () => ({
+          body: getDebugBody(searchParams, 'search'),
           title: getDebugTitle(request),
         }),
         debug,

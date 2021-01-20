@@ -14,8 +14,8 @@ import {
 } from '../../../../../../../typings/elasticsearch';
 import {
   callAsyncWithDebug,
+  getDebugBody,
   getDebugTitle,
-  getDefaultDebugBody,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
@@ -43,9 +43,9 @@ export function createInternalESClient({
   }) {
     return callAsyncWithDebug({
       cb: () => unwrapEsResponse(cancelEsRequestOnAbort(cb(), request)),
-      getMessage: () => ({
+      getDebugMessage: () => ({
         title: getDebugTitle(request),
-        body: getDefaultDebugBody(params, operationName),
+        body: getDebugBody(params, operationName),
       }),
       debug: context.params.query._debug,
     });
