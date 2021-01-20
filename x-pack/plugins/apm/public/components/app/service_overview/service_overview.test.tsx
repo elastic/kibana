@@ -23,7 +23,9 @@ import { ServiceOverview } from './';
 import { waitFor } from '@testing-library/dom';
 import * as callApmApiModule from '../../../services/rest/createCallApmApi';
 import * as useApmServiceContextHooks from '../../../context/apm_service/use_apm_service_context';
+import { EnvironmentsContext } from '../../../context/environments/environments_context';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -44,17 +46,25 @@ function Wrapper({ children }: { children?: ReactNode }) {
   return (
     <MemoryRouter keyLength={0}>
       <KibanaReactContext.Provider>
-        <MockApmPluginContextWrapper value={value}>
-          <MockUrlParamsContextProvider
-            params={{
-              rangeFrom: 'now-15m',
-              rangeTo: 'now',
-              latencyAggregationType: LatencyAggregationType.avg,
-            }}
-          >
-            {children}
-          </MockUrlParamsContextProvider>
-        </MockApmPluginContextWrapper>
+        <EnvironmentsContext.Provider
+          value={{
+            selectedEnvironment: ENVIRONMENT_ALL.value,
+            availableEnvironments: ['production'],
+            status: FETCH_STATUS.SUCCESS,
+          }}
+        >
+          <MockApmPluginContextWrapper value={value}>
+            <MockUrlParamsContextProvider
+              params={{
+                rangeFrom: 'now-15m',
+                rangeTo: 'now',
+                latencyAggregationType: LatencyAggregationType.avg,
+              }}
+            >
+              {children}
+            </MockUrlParamsContextProvider>
+          </MockApmPluginContextWrapper>
+        </EnvironmentsContext.Provider>
       </KibanaReactContext.Provider>
     </MemoryRouter>
   );

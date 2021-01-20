@@ -11,7 +11,7 @@ import { RumOverview } from '../RumDashboard';
 import { CsmSharedContextProvider } from './CsmSharedContext';
 import { MainFilters } from './Panels/MainFilters';
 import { DatePicker } from '../../shared/DatePicker';
-import { EnvironmentProvider } from '../../../context/environments/environment_context';
+import { EnvironmentsContextProvider } from '../../../context/environments/environments_context';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'User Experience',
@@ -20,7 +20,7 @@ export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
 export function RumHome() {
   return (
     <CsmSharedContextProvider>
-      <EnvironmentProvider>
+      <EnvironmentsContextProvider>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle>
@@ -42,7 +42,7 @@ export function RumHome() {
           </EuiFlexItem>
         </EuiFlexGroup>
         <RumOverview />
-      </EnvironmentProvider>
+      </EnvironmentsContextProvider>
     </CsmSharedContextProvider>
   );
 }

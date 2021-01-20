@@ -11,25 +11,22 @@ import { useEnvironmentsFetcher } from '../../hooks/use_environments_fetcher';
 import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import { useUrlParams } from '../url_params_context/use_url_params';
 
-export const EnvironmentContext = React.createContext<{
-  status: FETCH_STATUS;
-  availableEnvironments: undefined | string[];
-  selectedEnvironment: string;
-}>({
-  status: FETCH_STATUS.NOT_INITIATED,
-  availableEnvironments: undefined,
-  selectedEnvironment: ENVIRONMENT_ALL.value,
-});
+export const EnvironmentsContext = React.createContext<
+  | {
+      status: FETCH_STATUS;
+      availableEnvironments: undefined | string[];
+      selectedEnvironment: string;
+    }
+  | undefined
+>(undefined);
 
-export function EnvironmentProvider({
+export function EnvironmentsContextProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const { uiFilters, urlParams } = useUrlParams();
-
   const { environment } = uiFilters;
-
   const { start, end } = urlParams;
 
   const { serviceName } = useParams<{ serviceName?: string }>();
@@ -48,6 +45,5 @@ export function EnvironmentProvider({
     };
   }, [environments, environment, status]);
 
-  // render rest of application and pass down license via context
-  return <EnvironmentContext.Provider value={value} children={children} />;
+  return <EnvironmentsContext.Provider value={value} children={children} />;
 }

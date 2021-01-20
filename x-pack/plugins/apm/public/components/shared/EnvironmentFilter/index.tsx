@@ -14,7 +14,7 @@ import {
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-import { useEnvironments } from '../../../context/environments/use_enviroments';
+import { useEnvironmentsContext } from '../../../context/environments/use_enviroments_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 function updateEnvironmentUrl(
@@ -63,7 +63,10 @@ export function EnvironmentFilter() {
   const history = useHistory();
   const location = useLocation();
 
-  const { availableEnvironments, selectedEnvironment } = useEnvironments();
+  const {
+    availableEnvironments,
+    selectedEnvironment,
+  } = useEnvironmentsContext();
 
   // Set the min-width so we don't see as much collapsing of the select during
   // the loading state. 200px is what is looks like if "production" is

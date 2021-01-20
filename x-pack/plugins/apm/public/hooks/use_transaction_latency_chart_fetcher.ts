@@ -12,7 +12,7 @@ import { useApmServiceContext } from '../context/apm_service/use_apm_service_con
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
 import { useTheme } from './use_theme';
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
-import { useEnvironments } from '../context/environments/use_enviroments';
+import { useEnvironmentsContext } from '../context/environments/use_enviroments_context';
 
 export function useTransactionLatencyChartsFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
@@ -23,7 +23,10 @@ export function useTransactionLatencyChartsFetcher() {
     uiFilters,
   } = useUrlParams();
 
-  const { availableEnvironments, selectedEnvironment } = useEnvironments();
+  const {
+    availableEnvironments,
+    selectedEnvironment,
+  } = useEnvironmentsContext();
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {

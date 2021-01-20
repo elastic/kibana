@@ -23,6 +23,7 @@ import {
 } from '../../../utils/testHelpers';
 import { fromQuery } from '../../shared/Links/url_helpers';
 import { TransactionOverview } from './';
+import { EnvironmentsContextProvider } from '../../../context/environments/environments_context';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -65,9 +66,11 @@ function setup({
       <MockApmPluginContextWrapper>
         <Router history={history}>
           <UrlParamsProvider>
-            <ApmServiceContextProvider>
-              <TransactionOverview serviceName="opbeans-python" />
-            </ApmServiceContextProvider>
+            <EnvironmentsContextProvider>
+              <ApmServiceContextProvider>
+                <TransactionOverview serviceName="opbeans-python" />
+              </ApmServiceContextProvider>
+            </EnvironmentsContextProvider>
           </UrlParamsProvider>
         </Router>
       </MockApmPluginContextWrapper>

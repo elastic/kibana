@@ -5,8 +5,12 @@
  */
 
 import { useContext } from 'react';
-import { EnvironmentContext } from './environment_context';
+import { EnvironmentsContext } from './environments_context';
 
-export function useEnvironments() {
-  return useContext(EnvironmentContext);
+export function useEnvironmentsContext() {
+  const context = useContext(EnvironmentsContext);
+  if (!context) {
+    throw new Error('EnvironmentContext not found');
+  }
+  return context;
 }
