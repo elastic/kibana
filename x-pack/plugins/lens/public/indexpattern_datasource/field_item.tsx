@@ -237,6 +237,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         closePopover={() => setOpen(false)}
         anchorPosition="rightUp"
         panelClassName="lnsFieldItem__fieldPanel"
+        initialFocus=".lnsFieldItem__fieldPanel"
       >
         <FieldItemPopoverContents
           {...state}
@@ -635,13 +636,20 @@ const DragToWorkspaceButton = ({
   dropOntoWorkspace,
   isEnabled,
 }: {
-  field: Dragging;
+  field: {
+    indexPatternId: string;
+    id: string;
+    field: IndexPatternField;
+  };
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   isEnabled: boolean;
 }) => {
   const buttonTitle = isEnabled
     ? i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
-        defaultMessage: 'Add field to workspace',
+        defaultMessage: 'Add {field} to workspace',
+        values: {
+          field: field.field.name,
+        },
       })
     : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceDisabled', {
         defaultMessage:
@@ -658,7 +666,6 @@ const DragToWorkspaceButton = ({
           onClick={() => {
             dropOntoWorkspace(field);
           }}
-          title={buttonTitle}
         />
       </EuiToolTip>
     </EuiFlexItem>
