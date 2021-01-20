@@ -19,6 +19,7 @@ import { Layout, SideNav, SideNavLink } from '../shared/layout';
 import { EngineNav, EngineRouter } from './components/engine';
 
 import {
+  CREATE_ENGINES_PATH,
   ROOT_PATH,
   SETUP_GUIDE_PATH,
   SETTINGS_PATH,
@@ -29,6 +30,7 @@ import {
   LIBRARY_PATH,
 } from './routes';
 
+import { CreateEngine } from './components/create_engine';
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from '../shared/not_found';
@@ -56,7 +58,10 @@ export const AppSearchUnconfigured: React.FC = () => (
 
 export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
   const { initializeAppData } = useActions(AppLogic);
-  const { hasInitialized } = useValues(AppLogic);
+  const {
+    hasInitialized,
+    myRole: { canManageEngines },
+  } = useValues(AppLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   useEffect(() => {
@@ -71,6 +76,11 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
       {process.env.NODE_ENV === 'development' && (
         <Route path={LIBRARY_PATH}>
           <Library />
+        </Route>
+      )}
+      {canManageEngines && (
+        <Route path={CREATE_ENGINES_PATH}>
+          <CreateEngine />
         </Route>
       )}
       <Route path={ENGINE_PATH}>

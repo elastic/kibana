@@ -16,6 +16,7 @@ import { Switch, Redirect, useParams } from 'react-router-dom';
 import { Loading } from '../../../shared/loading';
 import { EngineOverview } from '../engine_overview';
 import { AnalyticsRouter } from '../analytics';
+import { CreateEngine } from '../create_engine';
 
 import { EngineRouter } from './engine_router';
 
@@ -92,5 +93,21 @@ describe('EngineRouter', () => {
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(AnalyticsRouter)).toHaveLength(1);
+  });
+
+  describe('CreateEngine', () => {
+    it('renders when user canManageEngines is true', () => {
+      setMockValues({ ...values, myRole: { canManageEngines: true } });
+      const wrapper = shallow(<EngineRouter />);
+
+      expect(wrapper.find(CreateEngine)).toHaveLength(1);
+    });
+
+    it('does not render when user canManageEngines is false', () => {
+      setMockValues({ ...values, myRole: { canManageEngines: false } });
+      const wrapper = shallow(<EngineRouter />);
+
+      expect(wrapper.find(CreateEngine)).toHaveLength(0);
+    });
   });
 });
