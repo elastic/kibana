@@ -31,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 
 import { shortenUrl } from '../lib/url_shortener';
 import { UrlParamExtension } from '../types';
+import { SecurityOssPluginStart } from '../../../security_oss/public';
 
 interface Props {
   allowShortUrl: boolean;
@@ -41,7 +42,7 @@ interface Props {
   basePath: string;
   post: HttpStart['post'];
   urlParamExtensions?: UrlParamExtension[];
-  anonymousAccessParams?: () => Promise<boolean>;
+  anonymousAccess?: SecurityOssPluginStart['anonymousAccess'];
 }
 
 export enum ExportUrlAsType {
@@ -59,11 +60,11 @@ interface State {
   exportUrlAs: ExportUrlAsType;
   useShortUrl: boolean;
   usePublicUrl: boolean;
-  anonymousAccessIsAvailable: boolean;
   isCreatingShortUrl: boolean;
   url?: string;
   shortUrlErrorMsg?: string;
   urlParams?: UrlParams;
+  anonymousAccessParameters: Record<string, string> | null;
 }
 
 export class UrlPanelContent extends Component<Props, State> {
@@ -79,9 +80,9 @@ export class UrlPanelContent extends Component<Props, State> {
       exportUrlAs: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
       useShortUrl: false,
       usePublicUrl: false,
-      anonymousAccessIsAvailable: false,
       isCreatingShortUrl: false,
       url: '',
+      anonymousAccessParameters: null,
     };
   }
 
@@ -97,18 +98,22 @@ export class UrlPanelContent extends Component<Props, State> {
 
     window.addEventListener('hashchange', this.resetUrl, false);
 
-    if (this.props.anonymousAccessParams) {
-      this.props.anonymousAccessParams().then((result) => {
+    if (this.props.anonymousAccess) {
+      (async () => {
+        const anonymousAccessParameters = await this.props.anonymousAccess!.getAccessURLParameters();
+
         if (!this.mounted) {
           return;
         }
 
-        if (result) {
-          this.setState({
-            anonymousAccessIsAvailable: true,
-          });
+        if (!anonymousAccessParameters) {
+          return;
         }
-      });
+
+        this.setState({
+          anonymousAccessParameters,
+        });
+      })();
     }
   }
 
@@ -178,10 +183,11 @@ export class UrlPanelContent extends Component<Props, State> {
   };
 
   private updateUrlParams = (url: string) => {
-    const embedUrl = this.props.isEmbedded ? this.makeUrlEmbeddable(url) : url;
-    const extendUrl = this.state.urlParams ? this.getUrlParamExtensions(embedUrl) : embedUrl;
+    url = this.props.isEmbedded ? this.makeUrlEmbeddable(url) : url;
+    url = this.state.urlParams ? this.getUrlParamExtensions(url) : url;
+    url = this.addUrlAnonymousAccessParameters(url);
 
-    return extendUrl;
+    return url;
   };
 
   private getSavedObjectUrl = () => {
@@ -199,6 +205,16 @@ export class UrlPanelContent extends Component<Props, State> {
     // Get the application route, after the hash, and remove the #.
     const parsedAppUrl = parseUrl(parsedUrl.hash.slice(1), true);
 
+    const query = {
+      // Add global state to the URL so that the iframe doesn't just show the time range
+      // default.
+      _g: parsedAppUrl.query._g,
+    };
+
+    if (this.state.anonymousAccessParameters && this.state.usePublicUrl) {
+      Object.assign(query, this.state.anonymousAccessParameters);
+    }
+
     const formattedUrl = formatUrl({
       protocol: parsedUrl.protocol,
       auth: parsedUrl.auth,
@@ -206,11 +222,7 @@ export class UrlPanelContent extends Component<Props, State> {
       pathname: parsedUrl.pathname,
       hash: formatUrl({
         pathname: parsedAppUrl.pathname,
-        query: {
-          // Add global state to the URL so that the iframe doesn't just show the time range
-          // default.
-          _g: parsedAppUrl.query._g,
-        },
+        query,
       }),
     });
 
@@ -232,6 +244,26 @@ export class UrlPanelContent extends Component<Props, State> {
     }
 
     return `${url}${embedParam}`;
+  };
+
+  private addUrlAnonymousAccessParameters = (url: string): string => {
+    if (!this.state.anonymousAccessParameters || !this.state.usePublicUrl) {
+      return url;
+    }
+
+    let anonAccessParams = '?';
+
+    for (const [key, value] of Object.entries(this.state.anonymousAccessParameters)) {
+      anonAccessParams += `${key}=${value}`;
+    }
+
+    const urlHasQueryString = url.indexOf('?') !== -1;
+
+    if (urlHasQueryString) {
+      return url.replace('?', `${anonAccessParams}&`);
+    }
+
+    return `${url}${anonAccessParams}`;
   };
 
   private getUrlParamExtensions = (url: string): string => {
@@ -458,7 +490,7 @@ export class UrlPanelContent extends Component<Props, State> {
   };
 
   private renderPublicUrlSwitch = () => {
-    if (!this.state.anonymousAccessIsAvailable) {
+    if (!this.state.anonymousAccessParameters) {
       return null;
     }
 

@@ -16,6 +16,7 @@ import { HttpStart } from 'kibana/public';
 
 import { UrlPanelContent } from './url_panel_content';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
+import { SecurityOssPluginStart } from '../../../security_oss/public';
 
 interface Props {
   allowEmbed: boolean;
@@ -29,6 +30,7 @@ interface Props {
   basePath: string;
   post: HttpStart['post'];
   embedUrlParamExtensions?: UrlParamExtension[];
+  anonymousAccess?: SecurityOssPluginStart['anonymousAccess'];
 }
 
 export class ShareContextMenu extends Component<Props> {
@@ -49,8 +51,6 @@ export class ShareContextMenu extends Component<Props> {
     const panels: EuiContextMenuPanelDescriptor[] = [];
     const menuItems: ShareContextMenuPanelItem[] = [];
 
-    const anonymousAccessParams = async () => true;
-
     const permalinkPanel = {
       id: panels.length + 1,
       title: i18n.translate('share.contextMenu.permalinkPanelTitle', {
@@ -64,7 +64,7 @@ export class ShareContextMenu extends Component<Props> {
           basePath={this.props.basePath}
           post={this.props.post}
           shareableUrl={this.props.shareableUrl}
-          anonymousAccessParams={anonymousAccessParams}
+          anonymousAccess={this.props.anonymousAccess}
         />
       ),
     };
@@ -94,7 +94,7 @@ export class ShareContextMenu extends Component<Props> {
             post={this.props.post}
             shareableUrl={this.props.shareableUrl}
             urlParamExtensions={this.props.embedUrlParamExtensions}
-            anonymousAccessParams={anonymousAccessParams}
+            anonymousAccess={this.props.anonymousAccess}
           />
         ),
       };

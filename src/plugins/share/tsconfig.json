@@ -7,9 +7,10 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "index.ts"],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../../plugins/kibana_utils/tsconfig.json" }
+    { "path": "../kibana_utils/tsconfig.json" },
+    { "path": "../security_oss/tsconfig.json" }
   ]
 }
