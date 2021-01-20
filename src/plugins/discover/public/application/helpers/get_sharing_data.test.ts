@@ -26,7 +26,6 @@ describe('getSharingData', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "searchSource": Object {
-          "fieldsFromSource": Array [],
           "index": "the-index-pattern-id",
         },
       }
