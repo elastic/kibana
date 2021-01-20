@@ -32,13 +32,9 @@ export function registerAnalyticsRoutes({
         query: schema.object(queriesSchema),
       },
     },
-    async (context, request, response) => {
-      const { engineName } = request.params;
-
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${engineName}/analytics/queries`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/analytics/queries',
+    })
   );
 
   router.get(
@@ -52,12 +48,8 @@ export function registerAnalyticsRoutes({
         query: schema.object(querySchema),
       },
     },
-    async (context, request, response) => {
-      const { engineName, query } = request.params;
-
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${engineName}/analytics/query/${query}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/analytics/query/:query',
+    })
   );
 }

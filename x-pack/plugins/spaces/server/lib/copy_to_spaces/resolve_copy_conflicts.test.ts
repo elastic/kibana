@@ -109,6 +109,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
           success: true,
           successCount: filteredObjects.length,
           successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
+          warnings: [],
         };
 
         return response;
@@ -209,6 +210,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
           success: true,
           successCount: filteredObjects.length,
           successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
+          warnings: [],
         });
       },
     });
