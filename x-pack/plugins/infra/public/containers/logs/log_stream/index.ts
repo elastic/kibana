@@ -15,6 +15,7 @@ import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { LogSourceConfigurationProperties } from '../log_source';
 import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
+import { useFetchLogEntriesBefore } from './use_fetch_log_entries_before';
 
 interface LogStreamProps {
   sourceId: string;
@@ -50,12 +51,6 @@ const INITIAL_STATE: LogStreamState = {
   // Assume there are pages available until the API proves us wrong
   hasMoreBefore: true,
   hasMoreAfter: true,
-};
-
-const EMPTY_DATA = {
-  entries: [],
-  topCursor: null,
-  bottomCursor: null,
 };
 
 const LOG_ENTRIES_CHUNK_SIZE = 200;
@@ -126,44 +121,47 @@ export function useLogStream({
     [sourceId, startTimestamp, endTimestamp, query]
   );
 
-  const [previousEntriesPromise, fetchPreviousEntries] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'creation',
-      createPromise: () => {
-        if (state.topCursor === null) {
-          throw new Error(
-            'useLogState: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
-          );
-        }
+  const {
+    fetchLogEntriesBefore,
+    isRequestRunning: isLogEntriesBeforeRequestRunning,
+    isResponsePartial: isLogEntriesBeforeResponsePartial,
+    logEntriesBeforeSearchResponse$,
+  } = useFetchLogEntriesBefore({
+    sourceId,
+    startTimestamp,
+    endTimestamp,
+    query: parsedQuery,
+  });
 
-        if (!state.hasMoreBefore) {
-          return Promise.resolve({ data: EMPTY_DATA });
-        }
-
-        return fetchLogEntries(
-          {
-            sourceId,
-            startTimestamp,
-            endTimestamp,
-            query: serializedQuery,
-            before: state.topCursor,
-          },
-          services.http.fetch
-        );
-      },
-      onResolve: ({ data }) => {
-        if (!data.entries.length) {
-          return;
-        }
+  useSubscription(logEntriesBeforeSearchResponse$, {
+    next: ({ response: { data, isPartial } }) => {
+      if (data != null && !isPartial) {
         setState((prevState) => ({
+          ...prevState,
           entries: [...data.entries, ...prevState.entries],
           hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
           topCursor: data.topCursor ?? prevState.topCursor,
         }));
-      },
+      }
     },
-    [sourceId, startTimestamp, endTimestamp, query, state.topCursor]
-  );
+    error: (err) => {
+      console.error(err);
+    },
+  });
+
+  const fetchPreviousEntries = useCallback(() => {
+    if (state.topCursor === null) {
+      throw new Error(
+        'useLogState: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+      );
+    }
+
+    if (!state.hasMoreBefore) {
+      return;
+    }
+
+    fetchLogEntriesBefore(state.topCursor, LOG_ENTRIES_CHUNK_SIZE);
+  }, [fetchLogEntriesBefore, state.topCursor, state.hasMoreBefore]);
 
   const {
     fetchLogEntriesAfter,
@@ -213,19 +211,19 @@ export function useLogStream({
   );
 
   const pageLoadingState = useMemo<LoadingState>(() => {
-    if (previousEntriesPromise.state === 'pending' || isLogEntriesAfterRequestRunning) {
+    if (isLogEntriesBeforeRequestRunning || isLogEntriesAfterRequestRunning) {
       return 'loading';
     }
 
     if (
-      previousEntriesPromise.state === 'rejected' ||
+      (!isLogEntriesBeforeRequestRunning && isLogEntriesBeforeResponsePartial) ||
       (!isLogEntriesAfterRequestRunning && isLogEntriesAfterResponsePartial)
     ) {
       return 'error';
     }
 
     if (
-      previousEntriesPromise.state === 'resolved' ||
+      (!isLogEntriesBeforeRequestRunning && !isLogEntriesBeforeResponsePartial) ||
       (!isLogEntriesAfterRequestRunning && !isLogEntriesAfterResponsePartial)
     ) {
       return 'success';
@@ -235,7 +233,8 @@ export function useLogStream({
   }, [
     isLogEntriesAfterRequestRunning,
     isLogEntriesAfterResponsePartial,
-    previousEntriesPromise.state,
+    isLogEntriesBeforeRequestRunning,
+    isLogEntriesBeforeResponsePartial,
   ]);
 
   return {

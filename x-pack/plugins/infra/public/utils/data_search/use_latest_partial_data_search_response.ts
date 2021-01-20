@@ -7,31 +7,17 @@
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/public';
-import { useLatest } from '../use_observable';
-import { handleDataSearchResponse, ResponseProjection } from './handle_data_search_response';
-import { DataSearchRequestDescriptor, DataSearchResponseDescriptor } from './types';
+import { useOperator } from '../use_observable';
+import { flattenDataSearchResponseDescriptor } from './flatten_data_search_response';
+import { ParsedDataSearchRequestDescriptor, ParsedDataSearchResponseDescriptor } from './types';
 import { useDataSearchResponseState } from './use_data_search_response_state';
-import { useFlattenedResponse } from './use_flattened_response';
 
-export const useLatestPartialDataSearchResponse = <
-  Request extends IKibanaSearchRequest,
-  RawResponse,
-  Response,
-  InitialResponse
->(
-  requests$: Observable<DataSearchRequestDescriptor<Request, RawResponse>>,
-  initialResponse: InitialResponse,
-  projectResponse: ResponseProjection<RawResponse, Response>
+export const useLatestPartialDataSearchResponse = <Request extends IKibanaSearchRequest, Response>(
+  requests$: Observable<ParsedDataSearchRequestDescriptor<Request, Response>>
 ) => {
-  const latestInitialResponse = useLatest(initialResponse);
-  const latestProjectResponse = useLatest(projectResponse);
-
   const latestResponse$: Observable<
-    DataSearchResponseDescriptor<Request, Response | InitialResponse>
-  > = useFlattenedResponse(
-    requests$,
-    switchMap(handleDataSearchResponse(latestInitialResponse, latestProjectResponse))
-  );
+    ParsedDataSearchResponseDescriptor<Request, Response>
+  > = useOperator(requests$, flattenLatestDataSearchResponse);
 
   const {
     cancelRequest,
@@ -53,3 +39,5 @@ export const useLatestPartialDataSearchResponse = <
     total,
   };
 };
+
+const flattenLatestDataSearchResponse = switchMap(flattenDataSearchResponseDescriptor);

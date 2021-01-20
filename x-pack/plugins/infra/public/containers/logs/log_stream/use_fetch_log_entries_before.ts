@@ -23,7 +23,7 @@ import {
 } from '../../../utils/data_search';
 import { useOperator } from '../../../utils/use_observable';
 
-export const useFetchLogEntriesAfter = ({
+export const useFetchLogEntriesBefore = ({
   columnOverrides,
   endTimestamp,
   highlightPhrase,
@@ -39,8 +39,8 @@ export const useFetchLogEntriesAfter = ({
   startTimestamp: number;
 }) => {
   const {
-    search: fetchLogEntriesAfter,
-    requests$: rawLogEntriesAfterSearchRequests$,
+    search: fetchLogEntriesBefore,
+    requests$: rawLogEntriesBeforeSearchRequests$,
   } = useDataSearch({
     getRequest: useCallback(
       (cursor: LogEntryCursor, size: number) => {
@@ -48,7 +48,7 @@ export const useFetchLogEntriesAfter = ({
           ? {
               request: {
                 params: logEntriesSearchRequestParamsRT.encode({
-                  after: cursor,
+                  before: cursor,
                   columns: columnOverrides,
                   endTimestamp,
                   highlightPhrase,
@@ -66,12 +66,12 @@ export const useFetchLogEntriesAfter = ({
     ),
   });
 
-  const logEntriesAfterSearchRequests$ = useOperator(
-    rawLogEntriesAfterSearchRequests$,
+  const logEntriesBeforeSearchRequests$ = useOperator(
+    rawLogEntriesBeforeSearchRequests$,
     parseLogEntriesSearchResponses
   );
-  const logEntriesAfterSearchResponse$ = useOperator(
-    logEntriesAfterSearchRequests$,
+  const logEntriesBeforeSearchResponse$ = useOperator(
+    logEntriesBeforeSearchRequests$,
     flattenLogEntriesSearchResponse
   );
 
@@ -81,15 +81,15 @@ export const useFetchLogEntriesAfter = ({
     isResponsePartial,
     loaded,
     total,
-  } = useDataSearchResponseState(logEntriesAfterSearchResponse$);
+  } = useDataSearchResponseState(logEntriesBeforeSearchResponse$);
 
   return {
     cancelRequest,
-    fetchLogEntriesAfter,
+    fetchLogEntriesBefore,
     isRequestRunning,
     isResponsePartial,
     loaded,
-    logEntriesAfterSearchResponse$,
+    logEntriesBeforeSearchResponse$,
     total,
   };
 };

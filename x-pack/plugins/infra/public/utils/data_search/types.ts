@@ -19,7 +19,17 @@ export interface DataSearchRequestDescriptor<Request extends IKibanaSearchReques
   abortController: AbortController;
 }
 
-export interface NormalizedKibanaSearchResponse<ResponseData> {
+export interface ParsedDataSearchRequestDescriptor<
+  Request extends IKibanaSearchRequest,
+  ResponseData
+> {
+  request: Request;
+  options: ISearchOptions;
+  response$: Observable<ParsedKibanaSearchResponse<ResponseData>>;
+  abortController: AbortController;
+}
+
+export interface ParsedKibanaSearchResponse<ResponseData> {
   total?: number;
   loaded?: number;
   isRunning: boolean;
@@ -28,9 +38,12 @@ export interface NormalizedKibanaSearchResponse<ResponseData> {
   errors: SearchStrategyError[];
 }
 
-export interface DataSearchResponseDescriptor<Request extends IKibanaSearchRequest, Response> {
+export interface ParsedDataSearchResponseDescriptor<
+  Request extends IKibanaSearchRequest,
+  Response
+> {
   request: Request;
   options: ISearchOptions;
-  response: NormalizedKibanaSearchResponse<Response>;
+  response: ParsedKibanaSearchResponse<Response>;
   abortController: AbortController;
 }

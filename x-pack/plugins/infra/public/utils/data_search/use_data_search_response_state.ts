@@ -8,14 +8,14 @@ import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/public';
 import { useObservableState } from '../use_observable';
-import { DataSearchResponseDescriptor } from './types';
+import { ParsedDataSearchResponseDescriptor } from './types';
 
 export const useDataSearchResponseState = <
   Request extends IKibanaSearchRequest,
   Response,
   InitialResponse
 >(
-  response$: Observable<DataSearchResponseDescriptor<Request, Response | InitialResponse>>
+  response$: Observable<ParsedDataSearchResponseDescriptor<Request, Response | InitialResponse>>
 ) => {
   const { latestValue } = useObservableState(response$, undefined);
 

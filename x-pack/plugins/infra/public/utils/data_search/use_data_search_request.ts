@@ -6,7 +6,7 @@
 
 import { useCallback } from 'react';
 import { Subject } from 'rxjs';
-import { shareReplay, tap } from 'rxjs/operators';
+import { share, tap } from 'rxjs/operators';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -75,7 +75,7 @@ export const useDataSearch = <
                 abortController.abort();
               }
             }),
-            shareReplay(1)
+            share()
           ),
       };
 
