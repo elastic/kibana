@@ -297,6 +297,7 @@ export class FleetPlugin
 
     const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
     if (fleetServerEnabled) {
+      // We need licence to be initialized before using the SO service.
       await this.licensing$.pipe(first()).toPromise();
       await runFleetServerMigration();
     }
