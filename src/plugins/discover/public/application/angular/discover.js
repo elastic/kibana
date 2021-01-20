@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -64,6 +53,7 @@ import {
   DEFAULT_COLUMNS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
   SEARCH_ON_PAGE_LOAD_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
@@ -77,6 +67,7 @@ const services = getServices();
 
 const {
   core,
+  capabilities,
   chrome,
   data,
   history: getHistory,
@@ -106,8 +97,8 @@ app.config(($routeProvider) => {
     requireUICapability: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
       $injector.invoke($route.current.params.id ? getSavedSearchBreadcrumbs : getRootBreadcrumbs),
-    badge: (uiCapabilities) => {
-      if (uiCapabilities.discover.save) {
+    badge: () => {
+      if (capabilities.discover.save) {
         return undefined;
       }
 
@@ -184,7 +175,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($element, $route, $scope, $timeout, Promise, uiCapabilities) {
+function discoverController($element, $route, $scope, $timeout, Promise) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
@@ -196,6 +187,8 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     $scope.searchSource,
     toastNotifications
   );
+  $scope.useNewFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
+
   //used for functional testing
   $scope.fetchCounter = 0;
 
@@ -307,7 +300,8 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
         nextIndexPattern,
         $scope.state.columns,
         $scope.state.sort,
-        config.get(MODIFY_COLUMNS_ON_SWITCH)
+        config.get(MODIFY_COLUMNS_ON_SWITCH),
+        $scope.useNewFieldsApi
       );
       await setAppState(nextAppState);
     }
@@ -341,7 +335,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
-  $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
+  $scope.showSaveQuery = capabilities.discover.saveQuery;
   $scope.showTimeCol =
     !config.get('doc_table:hideTimeColumn', false) && $scope.indexPattern.timeFieldName;
 
@@ -414,19 +408,33 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
 
   setBreadcrumbsTitle(savedSearch, chrome);
 
+  function removeSourceFromColumns(columns) {
+    return columns.filter((col) => col !== '_source');
+  }
+
+  function getDefaultColumns() {
+    const columns = [...savedSearch.columns];
+
+    if ($scope.useNewFieldsApi) {
+      return removeSourceFromColumns(columns);
+    }
+    if (columns.length > 0) {
+      return columns;
+    }
+    return [...config.get(DEFAULT_COLUMNS_SETTING)];
+  }
+
   function getStateDefaults() {
     const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
     const sort = getSortArray(savedSearch.sort, $scope.indexPattern);
+    const columns = getDefaultColumns();
 
     const defaultState = {
       query,
       sort: !sort.length
         ? getDefaultSort($scope.indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
         : sort,
-      columns:
-        savedSearch.columns.length > 0
-          ? savedSearch.columns
-          : config.get(DEFAULT_COLUMNS_SETTING).slice(),
+      columns,
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
@@ -738,10 +746,14 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
 
   $scope.updateDataSource = () => {
-    updateSearchSource($scope.searchSource, {
-      indexPattern: $scope.indexPattern,
+    const { indexPattern, searchSource, useNewFieldsApi } = $scope;
+    const { columns, sort } = $scope.state;
+    updateSearchSource(searchSource, {
+      indexPattern,
       services,
-      sort: $scope.state.sort,
+      sort,
+      columns,
+      useNewFieldsApi,
     });
     return Promise.resolve();
   };
@@ -769,20 +781,20 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
 
   $scope.addColumn = function addColumn(columnName) {
-    if (uiCapabilities.discover.save) {
-      const { indexPattern } = $scope;
+    const { indexPattern, useNewFieldsApi } = $scope;
+    if (capabilities.discover.save) {
       popularizeField(indexPattern, columnName, indexPatterns);
     }
-    const columns = columnActions.addColumn($scope.state.columns, columnName);
+    const columns = columnActions.addColumn($scope.state.columns, columnName, useNewFieldsApi);
     setAppState({ columns });
   };
 
   $scope.removeColumn = function removeColumn(columnName) {
-    if (uiCapabilities.discover.save) {
-      const { indexPattern } = $scope;
+    const { indexPattern, useNewFieldsApi } = $scope;
+    if (capabilities.discover.save) {
       popularizeField(indexPattern, columnName, indexPatterns);
     }
-    const columns = columnActions.removeColumn($scope.state.columns, columnName);
+    const columns = columnActions.removeColumn($scope.state.columns, columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const sort = $scope.state.sort.length
       ? $scope.state.sort.filter((subArr) => subArr[0] !== columnName)

@@ -3,53 +3,47 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Logger } from 'kibana/server';
-import { isNumber } from 'lodash';
+import { compact } from 'lodash';
+import { Logger } from 'src/core/server';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
+import { maybe } from '../../../../common/utils/maybe';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { anomalySeriesFetcher } from './fetcher';
-import { getMlBucketSize } from './get_ml_bucket_size';
-import { anomalySeriesTransform } from './transform';
 import { getMLJobIds } from '../../service_map/get_service_anomalies';
-import { getLatencyTimeseries } from '../get_latency_charts';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
+import { ANOMALY_THRESHOLD } from '../../../../../ml/common';
 
 export async function getAnomalySeries({
   serviceName,
   transactionType,
   transactionName,
-  latencyTimeseries,
   setup,
   logger,
 }: {
   serviceName: string;
-  transactionType: string | undefined;
-  transactionName: string | undefined;
-  latencyTimeseries: PromiseReturnType<
-    typeof getLatencyTimeseries
-  >['latencyTimeseries'];
+  transactionType: string;
+  transactionName?: string;
   setup: Setup & SetupTimeRange;
   logger: Logger;
 }) {
-  const timeseriesDates = latencyTimeseries?.map(({ x }) => x);
+  const { uiFilters, start, end, ml } = setup;
+  const { environment } = uiFilters;
 
-  /*
-   * don't fetch:
-   * - anomalies for transaction details page
-   * - anomalies without a type
-   * - timeseries is empty
-   */
-  if (transactionName || !transactionType || !timeseriesDates?.length) {
-    return;
+  // don't fetch anomalies if the ML plugin is not setup
+  if (!ml) {
+    return undefined;
   }
 
-  const { uiFilters, start, end } = setup;
-  const { environment } = uiFilters;
+  // don't fetch anomalies if requested for a specific transaction name
+  // as ML results are not partitioned by transaction name
+  if (!!transactionName) {
+    return undefined;
+  }
 
   // don't fetch anomalies when no specific environment is selected
   if (environment === ENVIRONMENT_ALL.value) {
-    return;
+    return undefined;
   }
 
   // don't fetch anomalies if unknown uiFilters are applied
@@ -60,48 +54,77 @@ export async function getAnomalySeries({
     .some((uiFilterName) => !knownFilters.includes(uiFilterName));
 
   if (hasUnknownFiltersApplied) {
-    return;
+    return undefined;
   }
 
-  // don't fetch anomalies if the ML plugin is not setup
-  if (!setup.ml) {
-    return;
-  }
+  const { intervalString } = getBucketSize({ start, end });
 
-  // don't fetch anomalies if required license is not satisfied
-  const mlCapabilities = await setup.ml.mlSystem.mlCapabilities();
-  if (!mlCapabilities.isPlatinumOrTrialLicense) {
-    return;
-  }
+  // move the start back with one bucket size, to ensure to get anomaly data in the beginning
+  // this is required because ML has a minimum bucket size (default is 900s) so if our buckets
+  // are smaller, we might have several null buckets in the beginning
+  const mlStart = start - 900 * 1000;
 
-  const mlJobIds = await getMLJobIds(setup.ml.anomalyDetectors, environment);
+  const [anomaliesResponse, jobIds] = await Promise.all([
+    anomalySeriesFetcher({
+      serviceName,
+      transactionType,
+      intervalString,
+      ml,
+      start: mlStart,
+      end,
+    }),
+    getMLJobIds(ml.anomalyDetectors, environment),
+  ]);
 
-  const jobId = mlJobIds[0];
+  const scoreSeriesCollection = anomaliesResponse?.aggregations?.job_id.buckets
+    .filter((bucket) => jobIds.includes(bucket.key as string))
+    .map((bucket) => {
+      const dateBuckets = bucket.ml_avg_response_times.buckets;
 
-  const mlBucketSize = await getMlBucketSize({ setup, jobId, logger });
-  if (!isNumber(mlBucketSize)) {
-    return;
-  }
+      return {
+        jobId: bucket.key as string,
+        anomalyScore: compact(
+          dateBuckets.map((dateBucket) => {
+            const metrics = maybe(dateBucket.anomaly_score.top[0])?.metrics;
+            const score = metrics?.record_score;
 
-  const { intervalString, bucketSize } = getBucketSize({ start, end });
+            if (
+              !metrics ||
+              !isFiniteNumber(score) ||
+              score < ANOMALY_THRESHOLD.CRITICAL
+            ) {
+              return null;
+            }
 
-  const esResponse = await anomalySeriesFetcher({
-    serviceName,
-    transactionType,
-    intervalString,
-    mlBucketSize,
-    setup,
-    jobId,
-    logger,
-  });
+            const anomalyStart = Date.parse(metrics.timestamp as string);
+            const anomalyEnd =
+              anomalyStart + (metrics.bucket_span as number) * 1000;
 
-  if (esResponse && mlBucketSize > 0) {
-    return anomalySeriesTransform(
-      esResponse,
-      mlBucketSize,
-      bucketSize,
-      timeseriesDates,
-      jobId
+            return {
+              x0: anomalyStart,
+              x: anomalyEnd,
+              y: score,
+            };
+          })
+        ),
+        anomalyBoundaries: dateBuckets
+          .filter(
+            (dateBucket) =>
+              dateBucket.lower.value !== null && dateBucket.upper.value !== null
+          )
+          .map((dateBucket) => ({
+            x: dateBucket.key,
+            y0: dateBucket.lower.value as number,
+            y: dateBucket.upper.value as number,
+          })),
+      };
+    });
+
+  if ((scoreSeriesCollection?.length ?? 0) > 1) {
+    logger.warn(
+      `More than one ML job was found for ${serviceName} for environment ${environment}. Only showing results from ${scoreSeriesCollection?.[0].jobId}`
     );
   }
+
+  return scoreSeriesCollection?.[0];
 }

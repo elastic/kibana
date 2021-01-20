@@ -24,9 +24,14 @@ import {
 interface Props {
   sourcesSubNav?: React.ReactNode;
   groupsSubNav?: React.ReactNode;
+  settingsSubNav?: React.ReactNode;
 }
 
-export const WorkplaceSearchNav: React.FC<Props> = ({ sourcesSubNav, groupsSubNav }) => (
+export const WorkplaceSearchNav: React.FC<Props> = ({
+  sourcesSubNav,
+  groupsSubNav,
+  settingsSubNav,
+}) => (
   <SideNav product={WORKPLACE_SEARCH_PLUGIN}>
     <SideNavLink to="/" isRoot>
       {NAV.OVERVIEW}
@@ -43,7 +48,7 @@ export const WorkplaceSearchNav: React.FC<Props> = ({ sourcesSubNav, groupsSubNa
     <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${SECURITY_PATH}`)}>
       {NAV.SECURITY}
     </SideNavLink>
-    <SideNavLink isExternal to={getWorkplaceSearchUrl(ORG_SETTINGS_PATH)}>
+    <SideNavLink subNav={settingsSubNav} to={ORG_SETTINGS_PATH}>
       {NAV.SETTINGS}
     </SideNavLink>
     <EuiSpacer />

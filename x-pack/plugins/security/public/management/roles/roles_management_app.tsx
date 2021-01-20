@@ -12,7 +12,6 @@ import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { SecurityLicense } from '../../../common/licensing';
 import { PluginStartDependencies } from '../../plugin';
-import { DocumentationLinksService } from './documentation_links';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
@@ -97,7 +96,7 @@ export const rolesManagementApp = Object.freeze({
               notifications={notifications}
               fatalErrors={fatalErrors}
               license={license}
-              docLinks={new DocumentationLinksService(docLinks)}
+              docLinks={docLinks}
               uiCapabilities={application.capabilities}
               indexPatterns={data.indexPatterns}
               history={history}

@@ -28,7 +28,7 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing') =>
     failOnStatusCode: false,
   });
 
-export const createCustomRuleActivated = (rule: CustomRule, ruleId = 'rule_testing') =>
+export const createCustomRuleActivated = (rule: CustomRule, ruleId = '1') =>
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
@@ -51,7 +51,7 @@ export const createCustomRuleActivated = (rule: CustomRule, ruleId = 'rule_testi
     failOnStatusCode: false,
   });
 
-export const deleteCustomRule = (ruleId = 'rule_testing') => {
+export const deleteCustomRule = (ruleId = '1') => {
   cy.request({
     method: 'DELETE',
     url: `api/detection_engine/rules?rule_id=${ruleId}`,

@@ -26,6 +26,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         search: [],
         index_pattern: [],
         map: [],
+        lens: [],
       },
       elasticsearch: {
         ingest_pipeline: [],

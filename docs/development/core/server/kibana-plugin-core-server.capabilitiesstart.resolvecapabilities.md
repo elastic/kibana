@@ -9,7 +9,7 @@ Resolve the [Capabilities](./kibana-plugin-core-server.capabilities.md) to be us
 <b>Signature:</b>
 
 ```typescript
-resolveCapabilities(request: KibanaRequest): Promise<Capabilities>;
+resolveCapabilities(request: KibanaRequest, options?: ResolveCapabilitiesOptions): Promise<Capabilities>;
 ```
 
 ## Parameters
@@ -17,6 +17,7 @@ resolveCapabilities(request: KibanaRequest): Promise<Capabilities>;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  request | <code>KibanaRequest</code> |  |
+|  options | <code>ResolveCapabilitiesOptions</code> |  |
 
 <b>Returns:</b>
 
