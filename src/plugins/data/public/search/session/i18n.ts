@@ -8,6 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+/**
+ * Message to display in case storing
+ * session session is disabled due to turned off capability
+ */
 export const noSearchSessionStorageCapabilityMessage = i18n.translate(
   'data.searchSessionIndicator.noCapability',
   {

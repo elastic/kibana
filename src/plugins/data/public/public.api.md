@@ -1827,7 +1827,7 @@ export enum METRIC_TYPES {
 
 // Warning: (ae-missing-release-tag) "noSearchSessionStorageCapabilityMessage" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public (undocumented)
+// @public
 export const noSearchSessionStorageCapabilityMessage: string;
 
 // Warning: (ae-missing-release-tag) "OptionedParamType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

@@ -4,6 +4,8 @@
 
 ## noSearchSessionStorageCapabilityMessage variable
 
+Message to display in case storing session session is disabled due to turned off capability
+
 <b>Signature:</b>
 
 ```typescript
