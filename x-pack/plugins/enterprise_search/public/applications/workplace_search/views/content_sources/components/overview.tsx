@@ -119,14 +119,10 @@ export const Overview: React.FC = () => {
                 {tableContent}
                 <EuiTableRow>
                   <EuiTableRowCell>
-                    {summary ? <strong>Total documents</strong> : 'Documents'}
+                    <strong>Total documents</strong>
                   </EuiTableRowCell>
                   <EuiTableRowCell>
-                    {summary ? (
-                      <strong>{totalDocuments.toLocaleString('en-US')}</strong>
-                    ) : (
-                      parseInt(documentCount, 10).toLocaleString('en-US')
-                    )}
+                    <strong>{totalDocuments.toLocaleString('en-US')}</strong>
                   </EuiTableRowCell>
                 </EuiTableRow>
               </EuiTableBody>
