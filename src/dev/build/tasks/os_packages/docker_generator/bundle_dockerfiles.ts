@@ -15,11 +15,9 @@ import { dockerfileTemplate } from './templates';
 import { TemplateContext } from './template_context';
 
 export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: TemplateContext) {
-  log.info(
-    `Generating kibana${scope.imageFlavor}${scope.ubiImageFlavor} docker build context bundle`
-  );
+  log.info(`Generating kibana${scope.ubiImageFlavor} docker build context bundle`);
 
-  const dockerFilesDirName = `kibana${scope.imageFlavor}${scope.ubiImageFlavor}-${scope.version}-docker-build-context`;
+  const dockerFilesDirName = `kibana${scope.ubiImageFlavor}-${scope.version}-docker-build-context`;
   const dockerFilesBuildDir = resolve(scope.dockerBuildDir, dockerFilesDirName);
   const dockerFilesOutputDir = config.resolveFromTarget(`${dockerFilesDirName}.tar.gz`);
 

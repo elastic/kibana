@@ -53,7 +53,7 @@ export const CreateDockerPackage: Task = {
   description: 'Creating docker package',
 
   async run(config, log, build) {
-    // Builds Docker targets for default and oss
+    // Builds Docker target
     await runDockerGenerator(config, log, build);
   },
 };
@@ -62,7 +62,7 @@ export const CreateDockerUbiPackage: Task = {
   description: 'Creating docker ubi package',
 
   async run(config, log, build) {
-    // Builds Docker target default with ubi7 base image
+    // Builds Docker target with ubi7 base image
     await runDockerGeneratorForUBI(config, log, build);
   },
 };

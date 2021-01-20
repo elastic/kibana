@@ -15,8 +15,6 @@ export function readCliArgs(argv: string[]) {
   const unknownFlags: string[] = [];
   const flags = getopts(argv, {
     boolean: [
-      'oss',
-      'no-oss',
       'skip-archives',
       'skip-os-packages',
       'rpm',
@@ -43,7 +41,6 @@ export function readCliArgs(argv: string[]) {
       rpm: null,
       deb: null,
       docker: null,
-      oss: null,
       'version-qualifier': '',
     },
     unknown: (flag) => {
@@ -89,8 +86,6 @@ export function readCliArgs(argv: string[]) {
   const buildOptions: BuildOptions = {
     isRelease: Boolean(flags.release),
     versionQualifier: flags['version-qualifier'],
-    buildOssDist: flags.oss !== false,
-    buildDefaultDist: !flags.oss,
     downloadFreshNode: !Boolean(flags['skip-node-download']),
     createArchives: !Boolean(flags['skip-archives']),
     createRpmPackage: isOsPackageDesired('rpm'),

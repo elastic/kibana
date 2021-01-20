@@ -8,7 +8,6 @@
 
 export interface TemplateContext {
   artifactTarball: string;
-  imageFlavor: string;
   version: string;
   license: string;
   artifactsDir: string;

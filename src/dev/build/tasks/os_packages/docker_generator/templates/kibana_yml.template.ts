@@ -8,9 +8,7 @@
 
 import dedent from 'dedent';
 
-import { TemplateContext } from '../template_context';
-
-function generator({ imageFlavor }: TemplateContext) {
+function generator() {
   return dedent(`
   #
   # ** THIS IS AN AUTO-GENERATED FILE **
@@ -20,7 +18,7 @@ function generator({ imageFlavor }: TemplateContext) {
   server.name: kibana
   server.host: "0.0.0.0"
   elasticsearch.hosts: [ "http://elasticsearch:9200" ]
-  ${!imageFlavor ? 'monitoring.ui.container.elasticsearch.enabled: true' : ''}
+  monitoring.ui.container.elasticsearch.enabled: true
   `);
 }
 

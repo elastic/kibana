@@ -12,7 +12,6 @@ import { TemplateContext } from '../template_context';
 
 function generator({
   imageTag,
-  imageFlavor,
   version,
   dockerTargetFilename,
   baseOSImage,
@@ -53,10 +52,10 @@ function generator({
 
   retry_docker_pull ${baseOSImage}
 
-  echo "Building: kibana${imageFlavor}${ubiImageFlavor}-docker"; \\
-  docker build -t ${imageTag}${imageFlavor}${ubiImageFlavor}:${version} -f Dockerfile . || exit 1;
+  echo "Building: kibana${ubiImageFlavor}-docker"; \\
+  docker build -t ${imageTag}${ubiImageFlavor}:${version} -f Dockerfile . || exit 1;
 
-  docker save ${imageTag}${imageFlavor}${ubiImageFlavor}:${version} | gzip -c > ${dockerTargetFilename}
+  docker save ${imageTag}${ubiImageFlavor}:${version} | gzip -c > ${dockerTargetFilename}
 
   exit 0
   `);

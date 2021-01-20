@@ -34,25 +34,23 @@ export async function runDockerGenerator(
   const ubiImageFlavor = ubi ? `-${ubiVersionTag}` : '';
 
   // General docker var config
-  const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
-  const imageFlavor = build.isOss() ? '-oss' : '';
+  const license = 'Elastic License';
   const imageTag = 'docker.elastic.co/kibana/kibana';
   const version = config.getBuildVersion();
-  const artifactTarball = `kibana${imageFlavor}-${version}-linux-x86_64.tar.gz`;
+  const artifactTarball = `kibana-${version}-linux-x86_64.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDate = new Date().toISOString();
-  // That would produce oss, default and default-ubi7
+  // That would produce default and default-ubi7
   const dockerBuildDir = config.resolveFromRepo(
     'build',
     'kibana-docker',
-    build.isOss() ? `oss` : `default${ubiImageFlavor}`
+    `default${ubiImageFlavor}`
   );
   const dockerTargetFilename = config.resolveFromTarget(
-    `kibana${imageFlavor}${ubiImageFlavor}-${version}-docker-image.tar.gz`
+    `kibana${ubiImageFlavor}-${version}-docker-image.tar.gz`
   );
   const scope: TemplateContext = {
     artifactTarball,
-    imageFlavor,
     version,
     license,
     artifactsDir,
@@ -116,10 +114,5 @@ export async function runDockerGenerator(
 }
 
 export async function runDockerGeneratorForUBI(config: Config, log: ToolingLog, build: Build) {
-  // Only run ubi docker image build for default distribution
-  if (build.isOss()) {
-    return;
-  }
-
   await runDockerGenerator(config, log, build, true);
 }
