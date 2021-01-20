@@ -23,5 +23,6 @@
     { "path": "./plugins/encrypted_saved_objects/tsconfig.json" },
     { "path": "./plugins/beats_management/tsconfig.json" },
     { "path": "./plugins/cloud/tsconfig.json" },
+    { "path": "./plugins/saved_objects_tagging/tsconfig.json" },
   ]
 }
