@@ -94,7 +94,7 @@ def functionalXpack(Map params = [:]) {
     kibanaPipeline.buildXpack(10)
 
     if (config.ciGroups) {
-      def ciGroups = 1..11
+      def ciGroups = 1..13
       tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it) })
     }
 

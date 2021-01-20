@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { ITileLayerArguments, TileLayer } from '../tile_layer/tile_layer';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Kibana cors', function () {
-    this.tags('ciGroup12');
-    loadTestFile(require.resolve('./cors'));
-  });
+export class VectorTileLayer extends TileLayer {
+  static type: string;
+  constructor(args: ITileLayerArguments);
 }
