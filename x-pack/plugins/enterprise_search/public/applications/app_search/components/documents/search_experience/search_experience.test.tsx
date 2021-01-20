@@ -14,7 +14,7 @@ import { useLocalStorage } from '../../../../shared/use_local_storage';
 
 import React from 'react';
 // @ts-expect-error types are not available for this package yet
-import { SearchProvider } from '@elastic/react-search-ui';
+import { SearchProvider, Facet } from '@elastic/react-search-ui';
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { CustomizationCallout } from './customization_callout';
@@ -86,6 +86,15 @@ describe('SearchExperience', () => {
       expect(wrapper.find(CustomizationCallout).exists()).toBe(false);
       expect(wrapper.find('[data-test-subj="customize"]').exists()).toBe(true);
     });
+  });
+
+  it('renders Facet components for filter fields', () => {
+    setFieldsInLocalStorage({
+      filterFields: ['a', 'b', 'c'],
+      sortFields: [],
+    });
+    const wrapper = shallow(<SearchExperience />);
+    expect(wrapper.find(Facet).length).toBe(3);
   });
 
   describe('customization modal', () => {
