@@ -295,7 +295,9 @@ export class SavedMap {
     const prevTags = this._tags;
     this._attributes.title = newTitle;
     this._attributes.description = newDescription;
-    this._tags = newTags;
+    if (newTags) {
+      this._tags = newTags;
+    }
     this._syncAttributesWithStore();
 
     let updatedMapEmbeddableInput: MapEmbeddableInput;
