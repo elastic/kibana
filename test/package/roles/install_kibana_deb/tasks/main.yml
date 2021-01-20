@@ -26,6 +26,3 @@
     state: started
     name: kibana
     daemon_reload: yes
-
-- name: wait for http server
-  wait_for: host=localhost port=5601 timeout=60

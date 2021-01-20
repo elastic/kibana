@@ -3,3 +3,4 @@
   yum:
     name: '*'
     state: latest
+    update_cache: yes

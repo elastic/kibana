@@ -4,3 +4,4 @@
     - upgrade_yum_packages
     - install_kibana_rpm
     - assert_keystore
+    - assert_kibana_listening

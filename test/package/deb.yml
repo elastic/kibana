@@ -4,3 +4,4 @@
     - upgrade_apt_packages
     - install_kibana_deb
     - assert_keystore
+    - assert_kibana_listening

@@ -4,3 +4,4 @@
     - upgrade_apt_packages
     - install_docker
     - install_kibana_docker
+    - assert_kibana_listening
