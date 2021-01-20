@@ -16697,7 +16697,6 @@
     "xpack.savedObjectsTagging.uiApi.table.columnTagsName": "标签",
     "xpack.savedObjectsTagging.validation.color.errorInvalid": "标签颜色必须为有效的十六进制颜色",
     "xpack.savedObjectsTagging.validation.description.errorTooLong": "标签描述不能超过 {length} 个字符。",
-    "xpack.savedObjectsTagging.validation.name.errorInvalidCharacters": "标签名称只能包含 a-z、0-9、_、-、:。",
     "xpack.savedObjectsTagging.validation.name.errorTooLong": "标签名称不能超过 {length} 个字符",
     "xpack.savedObjectsTagging.validation.name.errorTooShort": "标签名称必须至少有 {length} 个字符",
     "xpack.searchProfiler.advanceTimeDescription": "将迭代器推进至下一文档所用时间。",
