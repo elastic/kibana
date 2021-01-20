@@ -5,5 +5,5 @@
   "ui": true,
   "requiredPlugins": ["management"],
   "optionalPlugins": ["home", "usageCollection"],
-  "requiredBundles": ["kibanaReact", "home"]
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "home"]
 }

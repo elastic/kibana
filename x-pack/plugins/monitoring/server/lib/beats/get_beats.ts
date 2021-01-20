@@ -14,7 +14,8 @@ import { createBeatsQuery } from './create_beats_query';
 import { calculateRate } from '../calculate_rate';
 // @ts-ignore
 import { getDiffCalculation } from './_beats_stats';
-import { ElasticsearchResponse, LegacyRequest } from '../../types';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
 
 interface Beat {
   uuid: string | undefined;
