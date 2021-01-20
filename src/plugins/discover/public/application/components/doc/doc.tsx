@@ -11,7 +11,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent, EuiPage } from '@elastic/eui';
 import { IndexPatternsContract } from 'src/plugins/data/public';
 import { ElasticRequestState, useEsDocSearch } from './use_es_doc_search';
-import { getDocLinks } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 
 export interface DocProps {
@@ -33,8 +33,8 @@ export interface DocProps {
    */
   indexPatternService: IndexPatternsContract;
 }
-
-const indexExistsLink = getDocLinks().links.apis.indexExists;
+const { docLinks } = getServices();
+const indexExistsLink = docLinks.links.apis.indexExists;
 
 export function Doc(props: DocProps) {
   const [reqState, hit, indexPattern] = useEsDocSearch(props);
