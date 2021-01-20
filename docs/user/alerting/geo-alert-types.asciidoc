@@ -11,7 +11,7 @@ xpack.stack_alerts.enableGeoAlerting: true
 ```
 
 
-As with other stack alerts, users will need `all` access to the *Stack Alerts* feature
+As with other stack alerts, you need `all` access to the *Stack Alerts* feature
 to be able to create and edit either of the geo alerts.
 See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to this feature. 
 
