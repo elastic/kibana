@@ -251,7 +251,7 @@ describe('core deprecations', () => {
 
     it('does not warn when other events are configured', () => {
       const { messages } = applyCoreDeprecations({
-        logging: { events: { metrics: '*' } },
+        logging: { events: { log: '*' } },
       });
       expect(messages).toEqual([]);
     });
