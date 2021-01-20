@@ -77,14 +77,8 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
       exceptionReferenceModalInitialState
     );
-    const [filters, setFilters] = useState<ExceptionListFilter>({
-      name: null,
-      list_id: null,
-      created_by: null,
-    });
     const [loadingExceptions, exceptions, pagination, refreshExceptions] = useExceptionLists({
       errorMessage: i18n.ERROR_EXCEPTION_LISTS,
-      filterOptions: filters,
       http,
       namespaceTypes: ['single', 'agnostic'],
       notifications,
