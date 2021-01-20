@@ -56,7 +56,10 @@ function disabledActionTypeErrorMessage(actionType: string) {
   });
 }
 
-function isAllowed({ allowedHosts }: ActionsConfigType, hostname: string | null): boolean {
+function isAllowed(
+  { allowedHosts }: ActionsConfigType,
+  hostname: string | null | undefined
+): boolean {
   const allowed = new Set(allowedHosts);
   if (allowed.has(AllowedHosts.Any)) return true;
   if (hostname && allowed.has(hostname)) return true;
