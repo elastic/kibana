@@ -86,7 +86,7 @@ export const Overview: React.FC = () => {
     const emptyState = (
       <>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="l" className="euiPanel--inset">
+        <EuiPanel paddingSize="l" className="euiPanel--inset" data-test-subj="EmptyDocumentSummary">
           <EuiEmptyPrompt
             title={<h2>No content yet</h2>}
             iconType="documents"
@@ -135,7 +135,7 @@ export const Overview: React.FC = () => {
     const emptyState = (
       <>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="l" className="euiPanel--inset">
+        <EuiPanel paddingSize="l" className="euiPanel--inset" data-test-subj="EmptyActivitySummary">
           <EuiEmptyPrompt
             title={<h2>There is no recent activity</h2>}
             iconType="clock"
@@ -276,7 +276,7 @@ export const Overview: React.FC = () => {
         <h4>Document-level permissions</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiPanel className="euiPanel--inset">
+      <EuiPanel className="euiPanel--inset" data-test-subj="DocumentPermissionsDisabled">
         <EuiText size="s">
           <EuiFlexGroup wrap gutterSize="m" alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
@@ -324,7 +324,7 @@ export const Overview: React.FC = () => {
   );
 
   const permissionsStatus = (
-    <EuiPanel>
+    <EuiPanel data-test-subj="PermissionsStatus">
       <EuiText size="s">
         <h6>
           <EuiTextColor color="subdued">Status</EuiTextColor>
@@ -417,11 +417,11 @@ export const Overview: React.FC = () => {
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" direction="column">
             <EuiFlexItem>
-              <DocumentSummary />
+              <DocumentSummary data-test-subj="DocumentSummary" />
             </EuiFlexItem>
             {!isFederatedSource && (
               <EuiFlexItem>
-                <ActivitySummary />
+                <ActivitySummary data-test-subj="ActivitySummary" />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -447,7 +447,10 @@ export const Overview: React.FC = () => {
                 <EuiFlexItem>{sourceStatus}</EuiFlexItem>
                 <EuiFlexItem>{credentials}</EuiFlexItem>
                 <EuiFlexItem>
-                  <DocumentationCallout title="Getting started with custom sources?">
+                  <DocumentationCallout
+                    data-test-subj="DocumentationCallout"
+                    title="Getting started with custom sources?"
+                  >
                     <p>
                       <EuiLink target="_blank" href={CUSTOM_SOURCE_DOCS_URL}>
                         Learn more
