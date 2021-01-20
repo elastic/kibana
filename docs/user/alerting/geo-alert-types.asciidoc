@@ -86,7 +86,7 @@ an optional value to evaluate alert conditions following a fixed delay. For inst
 is consistently indexed 5-10 minutes following its original timestamp, a *Delayed evaluation
 offset* of `10 minutes` would ensure that alertable instances are still captured.
 Index (Entity):: This clause requires an *index or index pattern*, a *time field* that will be used for the *time window*, and a *`geo_point` field* for tracking.
-By:: This clause specifies the field to be used in the previously provided
+By:: This clause specifies the field to use in the previously provided
 *index or index pattern* for tracking Entities. An entity is a `text`
 or `number` field that consistently identifies the entity to be tracked. 
 When Entity:: This clause specifies which crossing option to track. The values
