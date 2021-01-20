@@ -68,6 +68,7 @@ export function DashboardPicker(props: DashboardPickerProps) {
 
   return (
     <EuiComboBox
+      data-test-subj="dashboardPickerInput"
       placeholder={i18n.translate('presentationUtil.dashboardPicker.searchDashboardPlaceholder', {
         defaultMessage: 'Search dashboards...',
       })}
