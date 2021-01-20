@@ -121,7 +121,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
 
   const colorPicker = (
     <ColorPicker
-      disabled={model.split_mode === 'terms'}
+      hide={model.split_mode === 'terms'}
       disableTrash={true}
       onChange={props.onChange}
       name="color"
