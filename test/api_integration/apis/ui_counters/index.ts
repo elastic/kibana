@@ -6,8 +6,10 @@
  * Public License, v 1.
  */
 
-export default function ({ loadTestFile }) {
-  describe('UI Metric', () => {
-    loadTestFile(require.resolve('./ui_metric'));
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('UI Counters', () => {
+    loadTestFile(require.resolve('./ui_counters'));
   });
 }
