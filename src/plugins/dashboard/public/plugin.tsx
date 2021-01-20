@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import * as React from 'react';
@@ -84,6 +73,7 @@ import { PlaceholderEmbeddableFactory } from './application/embeddable/placehold
 import { UrlGeneratorState } from '../../share/public';
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
+import { replaceUrlHashQuery } from '../../kibana_utils/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -250,6 +240,19 @@ export class DashboardPlugin
         },
       ],
       getHistory: () => this.currentHistory!,
+      onBeforeNavLinkSaved: (newNavLink: string) => {
+        // Do not save SEARCH_SESSION_ID into nav link, because of possible edge cases
+        // that could lead to session restoration failure.
+        // see: https://github.com/elastic/kibana/issues/87149
+        if (newNavLink.includes(DashboardConstants.SEARCH_SESSION_ID)) {
+          newNavLink = replaceUrlHashQuery(newNavLink, (query) => {
+            delete query[DashboardConstants.SEARCH_SESSION_ID];
+            return query;
+          });
+        }
+
+        return newNavLink;
+      },
     });
 
     const dashboardContainerFactory = new DashboardContainerFactoryDefinition(getStartServices);
