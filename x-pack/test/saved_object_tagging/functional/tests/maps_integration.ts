@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const PageObjects = getPageObjects(['maps', 'tagManagement', 'common']);
+  const PageObjects = getPageObjects(['maps', 'tagManagement', 'common', 'visualize']);
 
   /**
    * Select tags in the searchbar's tag filter.
@@ -91,6 +91,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.click('mapSaveButton');
         await testSubjects.setValue('savedObjectTitle', 'map-with-new-tag');
+        await PageObjects.visualize.setSaveModalValues('map-with-new-tag', {
+          addToDashboard: false,
+          saveAsNew: true,
+        });
 
         await testSubjects.click('savedObjectTagSelector');
         await testSubjects.click(`tagSelectorOption-action__create`);
