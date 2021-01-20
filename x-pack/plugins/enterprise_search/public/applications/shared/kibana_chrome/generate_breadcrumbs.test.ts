@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setMockValues } from '../../__mocks__/kea.mock';
-import { mockKibanaValues, mockHistory } from '../../__mocks__';
+import { setMockValues, mockKibanaValues, mockHistory } from '../../__mocks__';
 
 jest.mock('../react_router_helpers', () => ({
   letBrowserHandleEvent: jest.fn(() => false),
