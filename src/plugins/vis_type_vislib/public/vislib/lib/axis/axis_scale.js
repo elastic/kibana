@@ -7,7 +7,7 @@
  */
 
 import d3 from 'd3';
-import { range, isNumber, reduce, times } from 'lodash';
+import { isNumber, reduce, times } from 'lodash';
 import moment from 'moment';
 
 import { InvalidLogScaleValues } from '../../errors';
@@ -38,18 +38,8 @@ export class AxisScale {
     });
   }
 
-  getDomainExtent(data) {
+  getTimeDomain(data) {
     return [this.minExtent(data), this.maxExtent(data)];
-  }
-
-  getOrdinalDomain(values = []) {
-    if (this.ordered?.interval !== undefined) {
-      const [min, max] = this.getDomainExtent(values);
-      const valuesInterval = Math.ceil((max - min) / values.length);
-      return range(min, max + valuesInterval, valuesInterval);
-    }
-
-    return values;
   }
 
   minExtent(data) {
@@ -148,8 +138,8 @@ export class AxisScale {
 
   getExtents() {
     if (this.axisConfig.get('type') === 'category') {
-      if (this.axisConfig.isTimeDomain()) return this.getDomainExtent(this.values);
-      if (this.axisConfig.isOrdinal()) return this.getOrdinalDomain(this.values);
+      if (this.axisConfig.isTimeDomain()) return this.getTimeDomain(this.values);
+      if (this.axisConfig.isOrdinal()) return this.values;
     }
 
     const min = this.axisConfig.get('scale.min', this.getYMin());
