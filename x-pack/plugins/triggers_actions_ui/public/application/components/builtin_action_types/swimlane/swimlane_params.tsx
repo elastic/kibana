@@ -7,11 +7,12 @@ import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
-import { SwimlaneActionParams } from '../types';
+import { SwimlaneActionParams } from './types';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 
 const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneActionParams>> = ({
+  actionConnector,
   actionParams,
   editAction,
   index,

@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { lazy } from 'react';
-import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
 import {
   SwimlaneActionConnector,
   SwimlaneConfig,
   SwimlaneSecrets,
   SwimlaneActionParams,
-} from '../types';
+} from './types';
 import swimlaneSvg from './swimlane.svg';
+import * as i18n from './translations';
 
 export function getActionType(): ActionTypeModel<
   SwimlaneConfig,
@@ -22,18 +22,8 @@ export function getActionType(): ActionTypeModel<
   return {
     id: '.swimlane',
     iconClass: swimlaneSvg,
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.selectMessageText',
-      {
-        defaultMessage: 'Create record in Swimlane',
-      }
-    ),
-    actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.actionTypeTitle',
-      {
-        defaultMessage: 'Create Swimlane Record',
-      }
-    ),
+    selectMessage: i18n.SW_SELECT_MESSAGE_TEXT,
+    actionTypeTitle: i18n.SW_ACTION_TYPE_TITLE,
     validateConnector: (action: SwimlaneActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
@@ -43,24 +33,10 @@ export function getActionType(): ActionTypeModel<
       };
       validationResult.errors = errors;
       if (!action.secrets.apiToken) {
-        errors.apiToken.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredApiTokenText',
-            {
-              defaultMessage: 'An API token is required.',
-            }
-          )
-        );
+        errors.apiToken.push(i18n.SW_REQUIRED_API_TOKEN_TEXT);
       }
       if (!action.config.appId) {
-        errors.appId.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAppIdText',
-            {
-              defaultMessage: 'An AppId is required.',
-            }
-          )
-        );
+        errors.appId.push(i18n.SW_REQUIRED_APP_ID_TEXT);
       }
       return validationResult;
     },
@@ -75,15 +51,8 @@ export function getActionType(): ActionTypeModel<
         comments: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (!actionParams.alertName?.length) {
-        errors.alertName.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAlertName',
-            {
-              defaultMessage: 'AlertName is required.',
-            }
-          )
-        );
+      if (!actionParams.subActionParams.alertName?.length) {
+        errors.alertName.push(i18n.SW_REQUIRED_ALERT_NAME);
       }
       return validationResult;
     },

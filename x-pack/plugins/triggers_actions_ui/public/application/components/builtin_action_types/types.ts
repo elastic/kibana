@@ -38,20 +38,6 @@ export interface PagerDutyActionParams {
   class?: string;
 }
 
-export interface SwimlaneActionParams {
-  alertName: string;
-  caseId: string;
-  caseName: string;
-  alertSource: string;
-  comments: string;
-  severity: string;
-}
-
-export interface SwimlaneFieldMap {
-  key: string;
-  name: string;
-}
-
 export interface IndexActionParams {
   documents: Array<Record<string, any>>;
 }
@@ -116,30 +102,6 @@ export interface PagerDutySecrets {
 export type PagerDutyActionConnector = UserConfiguredActionConnector<
   PagerDutyConfig,
   PagerDutySecrets
->;
-
-export interface SwimlaneConfig {
-  apiUrl: string;
-  appId: string;
-  mappings: SwimlaneMappingConfig;
-}
-
-export interface SwimlaneMappingConfig {
-  alertSourceKeyName: string;
-  severityKeyName: string;
-  caseNameKeyName: string;
-  caseIdKeyName: string;
-  alertNameKeyName: string;
-  commentsKeyName: string;
-}
-
-export interface SwimlaneSecrets {
-  apiToken: string;
-}
-
-export type SwimlaneActionConnector = UserConfiguredActionConnector<
-  SwimlaneConfig,
-  SwimlaneSecrets
 >;
 
 export interface SlackSecrets {

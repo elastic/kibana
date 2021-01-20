@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useCallback, useMemo } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiCallOut,
   EuiFieldText,
@@ -12,17 +12,23 @@ import {
   EuiSpacer,
   EuiText,
   EuiHorizontalRule,
+  EuiComboBox,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import * as i18n from './translations';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { SwimlaneActionConnector, SwimlaneConfig, SwimlaneFieldMap } from '../types';
+import { SwimlaneActionConnector, SwimlaneConfig, SwimlaneFieldMap } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { getApplication } from './api';
 
 const SwimlaneActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<SwimlaneActionConnector>
-> = ({ errors, action, editActionConfig, editActionSecrets, readOnly }) => {
-  const { apiToken } = action.secrets;
+> = ({ consumer, errors, action, editActionConfig, editActionSecrets, readOnly }) => {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+
   const { docLinks } = useKibana().services;
   const defaultNames: SwimlaneFieldMap[] = useMemo(
     () => [
@@ -36,6 +42,12 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
     []
   );
 
+  const { apiToken } = useMemo(() => {
+    const secrets = action.secrets ?? {};
+
+    return secrets;
+  }, [action.secrets]);
+
   const { mappings, apiUrl, appId } = useMemo(() => {
     const config = action.config ?? {};
 
@@ -43,7 +55,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
       config.mappings ??
       (Object.assign(
         {},
-        ...defaultNames.map((s) => ({ [s.key]: s.name }))
+        ...defaultNames.map((s) => ({ [s.key]: { key: s.name, id: '' } }))
       ) as SwimlaneConfig['mappings']);
 
     return config;
@@ -56,19 +68,112 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
     },
     [editActionConfig, mappings]
   );
+  //
+  // const editProperties = useCallback(
+  //   (key: string, value: unknown) => {
+  //     if()
+  //   },
+  //   [editActionConfig]
+  // );
+
+  // const fields = useMemo(()=>{
+  //   if (!(apiToken && appId && apiUrl)) {
+  //     return;
+  //   }
+  //
+  // }, [apiToken, appId, apiUrl]);
+
+  // const [selectedOptions, setSelected] = useState([]);
+  const [isLoading, setLoading] = useState(false);
+  const [options, setOptions] = useState([] as Array<{ label: string; value: string }>);
+  // const { isLoading: isLoadingApplication, application } = useGetApplication({
+  //   http,
+  //   toastNotifications: toasts,
+  //   actionConnector: this,
+  //   id: appId,
+  // });
+
+  // const fieldOptions: EuiSelectOption[] = useMemo(() => {
+  //   return application?.fields.map((f) => ({ value: f.id, text: f.key }));
+  // }, [application]);
+  //
+  // const onFocus = () => {
+  //   this.refs.
+  //   useGetApplication({
+  //     http,
+  //     toastNotifications: toasts,
+  //     actionConnector: this,
+  //     id: appId,
+  //   });
+  // };
+  const abortCtrl = useRef(new AbortController());
+
+  const onSearchChange = useCallback(
+    (searchValue) => {
+      setLoading(true);
+      setOptions([]);
+
+      const didCancel = false;
+
+      const fetchData = async () => {
+        if (!apiToken || !apiUrl || !appId) {
+          setLoading(false);
+          return;
+        }
+
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+
+        try {
+          const res = await getApplication({
+            http,
+            signal: abortCtrl.current.signal,
+            connectorId: action.id,
+            id: appId,
+          });
+          if (!didCancel) {
+            setLoading(false);
+            const application = res.data?.application;
+            if (application?.fields) {
+              const applicationFields = application.fields;
+              const fieldMap = applicationFields.map((f: { id: string; key: string }) => ({
+                value: f.id,
+                label: f.key,
+              }));
+              setOptions(fieldMap);
+            }
+            if (res.status && res.status === 'error') {
+              toasts.addDanger({
+                title: i18n.SW_GET_APPLICATION_API_ERROR(appId),
+                text: `${res.serviceMessage ?? res.message}`,
+              });
+            }
+          }
+        } catch (error) {
+          if (!didCancel) {
+            setLoading(false);
+            toasts.addDanger({
+              title: i18n.SW_GET_APPLICATION_API_ERROR(appId),
+              text: error.message,
+            });
+          }
+        }
+      };
+
+      abortCtrl.current.abort();
+      fetchData();
+    },
+    [toasts, action, appId, apiToken, http, apiUrl]
+  );
+
+  useEffect(() => {
+    // Simulate initial load.
+    onSearchChange('');
+  }, [onSearchChange]);
 
   return (
     <Fragment>
-      <EuiFormRow
-        id="apiUrl"
-        fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.apiUrlTextFieldLabel',
-          {
-            defaultMessage: 'API URL',
-          }
-        )}
-      >
+      <EuiFormRow id="apiUrl" fullWidth label={i18n.SW_API_URL_TEXT_FIELD_LABEL}>
         <EuiFieldText
           fullWidth
           name="apiUrl"
@@ -85,16 +190,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        id="appId"
-        fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.appIdTextFieldLabel',
-          {
-            defaultMessage: 'Application Id',
-          }
-        )}
-      >
+      <EuiFormRow id="appId" fullWidth label={i18n.SW_APP_ID_TEXT_FIELD_LABEL}>
         <EuiFieldText
           fullWidth
           name="appId"
@@ -127,12 +223,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
         }
         error={errors.apiToken}
         isInvalid={errors.apiToken.length > 0 && apiToken !== undefined}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.apiTokenTextFieldLabel',
-          {
-            defaultMessage: 'API Token',
-          }
-        )}
+        label={i18n.SW_API_TOKEN_TEXT_FIELD_LABEL}
       >
         <Fragment>
           {getEncryptedFieldNotifyLabel(!action.id)}
@@ -156,38 +247,19 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
       </EuiFormRow>
       <EuiHorizontalRule />
       <EuiText>
-        <h2>
-          {i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.mappingTitleTextFieldLabel',
-            {
-              defaultMessage: 'Field Mappings',
-            }
-          )}
-        </h2>
-        <p>
-          {i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.mappingDescriptionTextFieldLabel',
-            {
-              defaultMessage: 'Used to specify the field names in the Swimlane Application',
-            }
-          )}
-        </p>
+        <h2>{i18n.SW_MAPPING_TITLE_TEXT_FIELD_LABEL}</h2>
+        <p>{i18n.SW_MAPPING_DESCRIPTION_TEXT_FIELD_LABEL}</p>
       </EuiText>
       <EuiSpacer size="s" />
       <EuiFormRow
         id="alertSourceKeyName"
         fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertSourceKeyNameTextFieldLabel',
-          {
-            defaultMessage: 'Source Key',
-          }
-        )}
+        label={i18n.SW_ALERT_SOURCE_KEY_NAME_TEXT_FIELD_LABEL}
       >
         <EuiFieldText
           fullWidth
           // name="alertSourceKeyName"
-          value={mappings.alertSourceKeyName || 'alert-source'}
+          value={mappings.alertSourceKeyName.fieldKey || 'alert-source'}
           readOnly={readOnly}
           data-test-subj="swimlanealertSourceKeyNameInput"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,20 +267,11 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        id="severityKeyName"
-        fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.severityKeyNameTextFieldLabel',
-          {
-            defaultMessage: 'Severity Key',
-          }
-        )}
-      >
+      <EuiFormRow id="severityKeyName" fullWidth label={i18n.SW_SEVERITY_KEY_NAME_TEXT_FIELD_LABEL}>
         <EuiFieldText
           fullWidth
           // name="severityKeyName"
-          value={mappings.severityKeyName || 'severity'}
+          value={mappings.severityKeyName.fieldKey || 'severity'}
           readOnly={readOnly}
           data-test-subj="swimlaneSeverityKeyNameInput"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -219,17 +282,12 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
       <EuiFormRow
         id="alertNameKeyName"
         fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertNameKeyNameTextFieldLabel',
-          {
-            defaultMessage: 'Alert Name Key',
-          }
-        )}
+        label={i18n.SW_ALERT_NAME_KEY_NAME_TEXT_FIELD_LABEL}
       >
         <EuiFieldText
           fullWidth
           name="alertNameKeyName"
-          value={mappings.alertNameKeyName || 'alert-name'}
+          value={mappings.alertNameKeyName.fieldKey || 'alert-name'}
           readOnly={readOnly}
           data-test-subj="swimlaneCaseIdKeyNameInput"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -237,20 +295,11 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        id="caseIdKeyName"
-        fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.caseIdKeyNameTextFieldLabel',
-          {
-            defaultMessage: 'Case ID Key',
-          }
-        )}
-      >
+      <EuiFormRow id="caseIdKeyName" fullWidth label={i18n.SW_CASE_ID_KEY_NAME_TEXT_FIELD_LABEL}>
         <EuiFieldText
           fullWidth
           name="caseIdKeyName"
-          value={mappings.caseIdKeyName || 'ext-case-id'}
+          value={mappings.caseIdKeyName.fieldKey || 'ext-case-id'}
           readOnly={readOnly}
           data-test-subj="swimlaneCaseIdKeyNameInput"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -266,40 +315,31 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
       <EuiFormRow
         id="caseNameKeyName"
         fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.caseNameKeyNameTextFieldLabel',
-          {
-            defaultMessage: 'Case Name Key',
-          }
-        )}
+        label={i18n.SW_CASE_NAME_KEY_NAME_TEXT_FIELD_LABEL}
       >
-        <EuiFieldText
+        <EuiComboBox
           fullWidth
-          name="caseNameKeyName"
-          value={mappings.caseNameKeyName}
-          readOnly={readOnly}
-          required={false}
+          isLoading={isLoading}
+          isDisabled={isLoading}
+          // name="caseNameKeyName"
+          // value={mappings.caseNameKeyName.fieldKey}
+          options={options}
+          singleSelection={true}
+          // readOnly={readOnly}
+          // required={false}
           data-test-subj="swimlaneCaseNameKeyNameInput"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editMappings('caseNameKeyName', e.target.value);
-          }}
+          onSearchChange={onSearchChange}
+          // onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          //   editMappings('caseNameKeyName', e.target.value);
+          // }}
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        id="commentsKeyName"
-        fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.commentsKeyNameTextFieldLabel',
-          {
-            defaultMessage: 'Comments Key',
-          }
-        )}
-      >
+      <EuiFormRow id="commentsKeyName" fullWidth label={i18n.SW_COMMENTS_KEY_NAME_TEXT_FIELD_LABEL}>
         <EuiFieldText
           fullWidth
           name="commentsKeyName"
-          value={mappings.commentsKeyName}
+          value={mappings.commentsKeyName.fieldKey}
           readOnly={readOnly}
           required={false}
           data-test-subj="swimlaneCaseIdKeyNameInput"
@@ -334,10 +374,7 @@ function getEncryptedFieldNotifyLabel(isCreate: boolean) {
         size="s"
         iconType="iInCircle"
         data-test-subj="reenterValuesMessage"
-        title={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.reenterValueLabel',
-          { defaultMessage: 'This key is encrypted. Please reenter a value for this field.' }
-        )}
+        title={i18n.SW_REENTER_VALUE_LABEL}
       />
       <EuiSpacer size="m" />
     </Fragment>
