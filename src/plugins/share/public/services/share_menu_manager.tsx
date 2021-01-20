@@ -64,6 +64,7 @@ export class ShareMenuManager {
     basePath,
     embedUrlParamExtensions,
     anonymousAccess,
+    showPublicUrlSwitch,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     post: HttpStart['post'];
@@ -101,6 +102,7 @@ export class ShareMenuManager {
             basePath={basePath}
             embedUrlParamExtensions={embedUrlParamExtensions}
             anonymousAccess={anonymousAccess}
+            showPublicUrlSwitch={showPublicUrlSwitch}
           />
         </EuiWrappingPopover>
       </I18nProvider>

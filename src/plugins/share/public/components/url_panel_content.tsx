@@ -28,6 +28,7 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import type { Capabilities } from 'src/core/public';
 
 import { shortenUrl } from '../lib/url_shortener';
 import { UrlParamExtension } from '../types';
@@ -43,6 +44,7 @@ interface Props {
   post: HttpStart['post'];
   urlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: SecurityOssPluginStart['anonymousAccess'];
+  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => Promise<boolean>;
 }
 
 export enum ExportUrlAsType {
@@ -65,6 +67,7 @@ interface State {
   shortUrlErrorMsg?: string;
   urlParams?: UrlParams;
   anonymousAccessParameters: Record<string, string> | null;
+  showPublicUrlSwitch: boolean;
 }
 
 export class UrlPanelContent extends Component<Props, State> {
@@ -83,6 +86,7 @@ export class UrlPanelContent extends Component<Props, State> {
       isCreatingShortUrl: false,
       url: '',
       anonymousAccessParameters: null,
+      showPublicUrlSwitch: false,
     };
   }
 
@@ -114,6 +118,28 @@ export class UrlPanelContent extends Component<Props, State> {
           anonymousAccessParameters,
         });
       })();
+
+      if (this.props.showPublicUrlSwitch) {
+        (async () => {
+          const anonymousUserCapabilities = await this.props.anonymousAccess!.getCapabilities();
+
+          if (!this.mounted) {
+            return;
+          }
+
+          const showPublicUrlSwitch = await this.props.showPublicUrlSwitch!(
+            anonymousUserCapabilities
+          );
+
+          if (!this.mounted) {
+            return;
+          }
+
+          this.setState({
+            showPublicUrlSwitch,
+          });
+        })();
+      }
     }
   }
 
@@ -478,7 +504,7 @@ export class UrlPanelContent extends Component<Props, State> {
   };
 
   private renderPublicUrlSwitch = () => {
-    if (!this.state.anonymousAccessParameters) {
+    if (!this.state.anonymousAccessParameters || !this.state.showPublicUrlSwitch) {
       return null;
     }
 
