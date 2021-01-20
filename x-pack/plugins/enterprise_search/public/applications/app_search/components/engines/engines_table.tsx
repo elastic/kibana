@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { useValues, useActions } from 'kea';
+import { generatePath } from 'react-router-dom';
+import { useActions } from 'kea';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -13,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { ENGINE_PATH } from '../../routes';
-import { EngineLogic } from '../engine';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
 import { UNIVERSAL_LANGUAGE } from '../../constants';
@@ -39,7 +39,6 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
   pagination: { totalEngines, pageIndex, onPaginate },
 }) => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
-  const { generatePath } = useValues(EngineLogic);
 
   const engineLinkProps = (engineName: string) => ({
     to: generatePath(ENGINE_PATH, { engineName }),

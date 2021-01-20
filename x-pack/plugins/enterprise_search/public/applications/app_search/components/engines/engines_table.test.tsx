@@ -5,8 +5,7 @@
  */
 
 import '../../../__mocks__/enterprise_search_url.mock';
-import { setMockValues, mockTelemetryActions, mountWithIntl } from '../../../__mocks__';
-import { mockEngineValues } from '../../__mocks__';
+import { mockTelemetryActions, mountWithIntl } from '../../../__mocks__';
 
 import React from 'react';
 import { EuiBasicTable, EuiPagination, EuiButtonEmpty } from '@elastic/eui';
@@ -38,7 +37,6 @@ describe('EnginesTable', () => {
     pagination,
   };
 
-  setMockValues(mockEngineValues);
   const wrapper = mountWithIntl(<EnginesTable {...props} />);
   const table = wrapper.find(EuiBasicTable);
 

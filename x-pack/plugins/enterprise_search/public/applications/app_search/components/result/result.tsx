@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { useValues } from 'kea';
+import { generatePath } from 'react-router-dom';
 import classNames from 'classnames';
 
 import './result.scss';
@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 
 import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
-import { EngineLogic } from '../engine';
 
 import { Schema } from '../../../shared/types';
 import { FieldValue, Result as ResultType } from './types';
@@ -53,7 +52,6 @@ export const Result: React.FC<Props> = ({
     if (schemaForTypeHighlights) return schemaForTypeHighlights[fieldName];
   };
 
-  const { generatePath } = useValues(EngineLogic);
   const documentLink = generatePath(ENGINE_DOCUMENT_DETAIL_PATH, {
     engineName: resultMeta.engine,
     documentId: resultMeta.id,
