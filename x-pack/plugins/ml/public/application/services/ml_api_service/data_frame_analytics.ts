@@ -47,11 +47,12 @@ interface DeleteDataFrameAnalyticsWithIndexResponse {
 }
 
 export const dataFrameAnalytics = {
-  getDataFrameAnalytics(analyticsId?: string) {
+  getDataFrameAnalytics(analyticsId?: string, excludeGenerated?: boolean) {
     const analyticsIdString = analyticsId !== undefined ? `/${analyticsId}` : '';
     return http<GetDataFrameAnalyticsResponse>({
       path: `${basePath()}/data_frame/analytics${analyticsIdString}`,
       method: 'GET',
+      query: { excludeGenerated },
     });
   },
   getDataFrameAnalyticsStats(analyticsId?: string) {
