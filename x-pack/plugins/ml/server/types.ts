@@ -15,6 +15,8 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import type { MlLicense } from '../common/license';
 import type { ResolveMlCapabilities } from '../common/types/capabilities';
 import type { RouteGuard } from './lib/route_guard';
+import { AlertingPlugin } from '../../alerts/server';
+import { ActionsPlugin } from '../../actions/server';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -44,6 +46,8 @@ export interface PluginsSetup {
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
+  alerts?: AlertingPlugin['setup'];
+  actions?: ActionsPlugin['setup'];
 }
 
 export interface PluginsStart {

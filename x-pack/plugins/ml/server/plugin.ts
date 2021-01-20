@@ -57,6 +57,7 @@ import {
   savedObjectClientsFactory,
 } from './saved_objects';
 import { RouteGuard } from './lib/route_guard';
+import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -124,6 +125,12 @@ export class MlServerPlugin
       },
     });
     registerKibanaSettings(coreSetup);
+
+    if (plugins.alerts) {
+      registerMlAlerts({
+        alerts: plugins.alerts,
+      });
+    }
 
     this.mlLicense.setup(plugins.licensing.license$, [
       (mlLicense: MlLicense) => initSampleDataSets(mlLicense, plugins),
