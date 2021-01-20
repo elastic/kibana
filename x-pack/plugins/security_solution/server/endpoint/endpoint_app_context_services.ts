@@ -9,6 +9,7 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
 } from 'src/core/server';
+import { ExceptionListClient } from '../../../lists/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import {
   AgentService,
@@ -90,6 +91,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
   licenseService: LicenseService;
+  exceptionListsClient: ExceptionListClient | undefined;
 };
 
 /**
@@ -122,7 +124,8 @@ export class EndpointAppContextService {
           dependencies.config.maxTimelineImportExportSize,
           dependencies.security,
           dependencies.alerts,
-          dependencies.licenseService
+          dependencies.licenseService,
+          dependencies.exceptionListsClient
         )
       );
 
