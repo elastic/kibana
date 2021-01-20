@@ -40,7 +40,7 @@ than the current time minus the amount of the interval. If data older than
 [float]
 === Creating a geo alert
 Both *threshold* and *containment* alerts can be created by clicking the *Create*
-button in the <<alert-management, alert management UI>>, this will open a form for
+button in the <<alert-management, alert management UI>>.
 entering alerting details. Complete the <<defining-alerts-general-details, general alert details>>,
 then select either *Tracking threshold* or *Tracking containment*.
 
