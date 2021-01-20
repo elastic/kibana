@@ -1,0 +1,10 @@
+{
+  "ml.upgrade_job_snapshot": {
+    "url_params": {
+      "job_id": "",
+      "snapshot_id": "",
+      "timeout": "",
+      "wait_for_completion_timeout": "__flag__"
+    }
+  }
+}
