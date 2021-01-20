@@ -10,7 +10,7 @@
 - name: install kibana from local file
   become: yes
   yum:
-    name: /packages/kibana-8.0.0-SNAPSHOT-x86_64.rpm
+    name: /packages/kibana-{{ kibana_version }}-x86_64.rpm
     state: present
     disable_gpg_check: yes
 
