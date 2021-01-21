@@ -25,9 +25,12 @@ The first time a newer {kib} starts, it will first perform an upgrade migration 
 
 When several {kib} instances are connected to the same {es} cluster and upgraded, all {kib} instances will participate in the upgrade migration in parallel.
 
-NOTE: Prior to 6.5.0, saved objects were stored directly in an index named `.kibana`. After upgrading to version 7.12+, {kib} will migrate this index into `.kibana_{kibana_version}_001` and set `.kibana` up as alias to this index. +
-Prior to 7.4.0, task manager tasks were stored directly in an index name `.kibana_task_manager`. After upgrading to version 7.12+, {kib} will migrate this index into `.kibana_task_manager_{kibana_version}_001` and set `.kibana_task_manager` up as an index alias. +
-Prior to 7.12, saved objects and task manager tasks were stored in `.kibana_N` and `.kibana_task_manager_N` where N is a number that's increased every time an upgrade migration was performed. After upgrading to version 7.12+, {kib} will migrate these indices into `.kibana_{kibana_version}_001` and `.kibana_task_manager_{kibana_version}_001` respectively.
+[NOTE]
+====
+ - Prior to 6.5.0, saved objects were stored directly in an index named `.kibana`. After upgrading to version 7.12+, {kib} will migrate this index into `.kibana_{kibana_version}_001` and set `.kibana` up as alias to this index. +
+ - Prior to 7.4.0, task manager tasks were stored directly in an index name `.kibana_task_manager`. After upgrading to version 7.12+, {kib} will migrate this index into `.kibana_task_manager_{kibana_version}_001` and set `.kibana_task_manager` up as an index alias. +
+ - Prior to 7.12.0, saved objects and task manager tasks were stored in `.kibana_N` and `.kibana_task_manager_N` where N is a number that's increased every time an upgrade migration was performed. After upgrading to version 7.12+, {kib} will migrate these indices into `.kibana_{kibana_version}_001` and `.kibana_task_manager_{kibana_version}_001` respectively.
+====
 
 [float]
 [[preventing-migration-failures]]
