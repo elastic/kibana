@@ -21,7 +21,7 @@ export const getDashboardListItem = (
   timeRestore: boolean
 ) => {
   let url = application.getUrlForApp(DashboardConstants.DASHBOARDS_ID, {
-    path: `/#${createDashboardEditUrl(id)}`,
+    path: `#${createDashboardEditUrl(id)}`,
   });
   const queryState: QueryState = {};
   const timeRange = queryService.timefilter.timefilter.getTime();

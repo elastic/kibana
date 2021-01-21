@@ -41,7 +41,7 @@ describe('listing item link', () => {
       DASHBOARD_ID,
       true
     );
-    expect(url).toMatchInlineSnapshot(`"/app/dashboards/#/view/${DASHBOARD_ID}"`);
+    expect(url).toMatchInlineSnapshot(`"/app/dashboards#/view/${DASHBOARD_ID}"`);
   });
 
   test('creates a link to a dashboard with the timerange query if time is not saved on the dashboard', async () => {
@@ -53,7 +53,7 @@ describe('listing item link', () => {
       false
     );
     expect(url).toMatchInlineSnapshot(
-      `"/app/dashboards/#/view/${DASHBOARD_ID}?_g=(time:(from:now-7d,to:now))"`
+      `"/app/dashboards#/view/${DASHBOARD_ID}?_g=(time:(from:now-7d,to:now))"`
     );
   });
 
@@ -69,7 +69,7 @@ describe('listing item link', () => {
       false
     );
     expect(url).toMatchInlineSnapshot(
-      `"/app/dashboards/#/view/${DASHBOARD_ID}?_g=(time:(from:'2021-01-05T11:45:53.375Z',to:'2021-01-21T11:46:00.990Z'))"`
+      `"/app/dashboards#/view/${DASHBOARD_ID}?_g=(time:(from:'2021-01-05T11:45:53.375Z',to:'2021-01-21T11:46:00.990Z'))"`
     );
   });
 });
