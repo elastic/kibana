@@ -191,7 +191,7 @@ type TimingColourPalette = {
   [K in Timings]: string;
 };
 
-export const SAFE_PALETTE = euiPaletteColorBlind({ rotations: 2 });
+const SAFE_PALETTE = euiPaletteColorBlind({ rotations: 2 });
 
 const buildTimingPalette = (): TimingColourPalette => {
   const palette = Object.values(Timings).reduce<Partial<TimingColourPalette>>((acc, value) => {
