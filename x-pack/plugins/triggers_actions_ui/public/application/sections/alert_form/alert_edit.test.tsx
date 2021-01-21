@@ -18,16 +18,15 @@ import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import AlertEdit from './alert_edit';
 import { useKibana } from '../../../common/lib/kibana';
+import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const err = new Error() as any;
-err.body = {};
-err.body.message = 'Fail message';
 jest.mock('../../lib/alert_api', () => ({
-  updateAlert: jest.fn().mockRejectedValue(err),
+  loadAlertTypes: jest.fn(),
+  updateAlert: jest.fn().mockRejectedValue({ body: { message: 'Fail message' } }),
   alertingFrameworkHealth: jest.fn(() => ({ isSufficientlySecure: true })),
 }));
 
@@ -60,6 +59,32 @@ describe('alert_edit', () => {
       },
     };
 
+    const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
+    const alertTypes = [
+      {
+        id: 'my-alert-type',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        minimumLicenseRequired: 'basic',
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers: {
+          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          test: { read: true, all: true },
+        },
+        actionVariables: {
+          context: [],
+          state: [],
+          params: [],
+        },
+      },
+    ];
     const alertType = {
       id: 'my-alert-type',
       iconClass: 'test',
@@ -85,7 +110,7 @@ describe('alert_edit', () => {
       },
       actionConnectorFields: null,
     });
-
+    loadAlertTypes.mockResolvedValue(alertTypes);
     const alert: Alert = {
       id: 'ab5661e0-197e-45ee-b477-302d89193b5e',
       params: {
