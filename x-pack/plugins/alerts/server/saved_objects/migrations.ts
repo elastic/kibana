@@ -11,11 +11,9 @@ import {
 } from '../../../../../src/core/server';
 import { RawAlert } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import {
-  APP_ID as SIEM_APP_ID,
-  SERVER_APP_ID as SIEM_SERVER_APP_ID,
-} from '../../../security_solution/common/constants';
 
+const SIEM_APP_ID = 'securitySolution';
+const SIEM_SERVER_APP_ID = 'siem';
 export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
 
 type AlertMigration = (

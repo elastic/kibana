@@ -15,6 +15,7 @@ export {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectsRawDoc,
+  SavedObjectsRawDocParseOptions,
   SavedObjectsRawDocSource,
 } from './types';
 export { SavedObjectsSerializer } from './serializer';
