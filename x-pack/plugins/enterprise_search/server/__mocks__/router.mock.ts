@@ -68,7 +68,14 @@ export class MockRouter {
   public validateRoute = (request: MockRouterRequest) => {
     if (!this.payload) throw new Error('Cannot validate wihout a payload type specified.');
 
-    const [config] = this.router[this.method].mock.calls[0];
+    // @ts-ignore
+    const configForMethodAndPath = this.router[this.method].mock.calls.find(
+      // @ts-ignore
+      ([config]) => config.path === this.path
+    );
+    if (!configForMethodAndPath)
+      throw new Error(`No route registered for ${this.method} & ${this.path}`);
+    const [config] = configForMethodAndPath;
     const validate = config.validate as RouteValidatorConfig<{}, {}, {}>;
 
     const payloadValidation = validate[this.payload] as { validate(request: KibanaRequest): void };
