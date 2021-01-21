@@ -211,7 +211,6 @@ export class UrlPanelContent extends Component<Props, State> {
   private updateUrlParams = (url: string) => {
     url = this.props.isEmbedded ? this.makeUrlEmbeddable(url) : url;
     url = this.state.urlParams ? this.getUrlParamExtensions(url) : url;
-    url = this.addUrlAnonymousAccessParameters(url);
 
     return url;
   };
@@ -306,13 +305,18 @@ export class UrlPanelContent extends Component<Props, State> {
   };
 
   private setUrl = () => {
-    let url;
+    let url: string | undefined;
+
     if (this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
       url = this.getSavedObjectUrl();
     } else if (this.state.useShortUrl) {
       url = this.shortUrlCache;
     } else {
       url = this.getSnapshotUrl();
+    }
+
+    if (url) {
+      url = this.addUrlAnonymousAccessParameters(url);
     }
 
     if (this.props.isEmbedded) {
