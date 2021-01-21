@@ -339,7 +339,7 @@ export class SavedMap {
         });
         return;
       }
-      this._getStateTransfer().navigateToWithEmbeddablePackage(this._originatingApp, {
+      await this._getStateTransfer().navigateToWithEmbeddablePackage(this._originatingApp, {
         state: {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
@@ -348,7 +348,7 @@ export class SavedMap {
       });
       return;
     } else if (dashboardId) {
-      this._getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
+      await this._getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
         state: {
           type: MAP_SAVED_OBJECT_TYPE,
           input: updatedMapEmbeddableInput,
