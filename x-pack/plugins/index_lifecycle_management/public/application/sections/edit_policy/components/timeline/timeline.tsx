@@ -63,8 +63,8 @@ const i18nTexts = {
     defaultMessage: 'Cold phase',
   }),
   deleteIcon: {
-    toolTipContent: i18n.translate('xpack.indexLifecycleMgmt.timeline.delteIconToolTipContent', {
-      defaultMessage: 'Policy deletes the index after lifecycle phases',
+    toolTipContent: i18n.translate('xpack.indexLifecycleMgmt.timeline.deleteIconToolTipContent', {
+      defaultMessage: 'Policy deletes the index after lifecycle phases complete.',
     }),
   },
 };
