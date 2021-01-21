@@ -28,6 +28,16 @@
             "title": { "type": "text" }
           }
         },
+        "test-export-transform-error": {
+          "properties": {
+            "title": { "type": "text" }
+          }
+        },
+        "test-export-invalid-transform": {
+          "properties": {
+            "title": { "type": "text" }
+          }
+        },
         "apm-telemetry": {
           "properties": {
             "has_any_services": {

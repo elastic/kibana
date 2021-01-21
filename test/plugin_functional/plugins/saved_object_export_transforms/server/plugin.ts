@@ -89,6 +89,51 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
         getTitle: (obj) => obj.attributes.title,
       },
     });
+
+    /////////////
+    /////////////
+    // example of a SO type that will throw an object-transform-error
+    savedObjects.registerType({
+      name: 'test-export-transform-error',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        getTitle: (obj) => obj.attributes.title,
+        onExport: (ctx, objs) => {
+          throw new Error('Error during transform');
+        },
+      },
+    });
+
+    // example of a SO type that will throw an invalid-transform-error
+    savedObjects.registerType({
+      name: 'test-export-invalid-transform',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        getTitle: (obj) => obj.attributes.title,
+        onExport: (ctx, objs) => {
+          return objs.map((obj) => ({
+            ...obj,
+            id: `${obj.id}-mutated`,
+          }));
+        },
+      },
+    });
   }
 
   public start() {}

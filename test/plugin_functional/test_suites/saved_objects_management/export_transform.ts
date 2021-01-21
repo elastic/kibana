@@ -94,5 +94,47 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           ]);
         });
     });
+
+    it('returns a 400 when the type causes a transform error', async () => {
+      await supertest
+        .post('/api/saved_objects/_export')
+        .set('kbn-xsrf', 'true')
+        .send({
+          type: ['test-export-transform-error'],
+          excludeExportDetails: true,
+        })
+        .expect(400)
+        .then((resp) => {
+          const { attributes, ...error } = resp.body;
+          expect(error).to.eql({
+            error: 'Bad Request',
+            message: 'Error transforming objects to export',
+            statusCode: 400,
+          });
+          expect(attributes.cause).to.eql('Error during transform');
+          expect(attributes.objects.map((obj: any) => obj.id)).to.eql(['type_4-obj_1']);
+        });
+    });
+
+    it('returns a 400 when the type causes an invalid transform', async () => {
+      await supertest
+        .post('/api/saved_objects/_export')
+        .set('kbn-xsrf', 'true')
+        .send({
+          type: ['test-export-invalid-transform'],
+          excludeExportDetails: true,
+        })
+        .expect(400)
+        .then((resp) => {
+          expect(resp.body).to.eql({
+            error: 'Bad Request',
+            message: 'Invalid transform performed on objects to export',
+            statusCode: 400,
+            attributes: {
+              objectKeys: ['test-export-invalid-transform|type_3-obj_1'],
+            },
+          });
+        });
+    });
   });
 }
