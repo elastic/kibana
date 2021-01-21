@@ -308,6 +308,7 @@ export const ActionForm = ({
                 key={`action-form-action-at-${index}`}
                 actionTypeRegistry={actionTypeRegistry}
                 emptyActionsIds={emptyActionsIds}
+                connectors={connectors}
                 onDeleteConnector={() => {
                   const updatedActions = actions.filter(
                     (_item: AlertAction, i: number) => i !== index
@@ -329,6 +330,9 @@ export const ActionForm = ({
                       .filter((idx: number) => idx >= 0),
                   });
                   setAddModalVisibility(true);
+                }}
+                onSelectAltConnector={(altConnectorId: string) => {
+                  setActionIdByIndex(altConnectorId, index);
                 }}
               />
             );
