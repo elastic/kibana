@@ -85,7 +85,7 @@ describe('SourceContent', () => {
     expect(wrapper.find(ComponentLoader)).toHaveLength(1);
   });
 
-  describe('emptyt states', () => {
+  describe('empty states', () => {
     beforeEach(() => {
       setMockValues({ ...mockValues, contentMeta: DEFAULT_META });
     });
