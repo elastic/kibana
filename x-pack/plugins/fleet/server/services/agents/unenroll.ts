@@ -11,13 +11,23 @@ import * as APIKeyService from '../api_keys';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 import { getAgent, getAgents, listAllAgents } from './crud';
 
-export async function unenrollAgent(soClient: SavedObjectsClientContract, agentId: string) {
-  const now = new Date().toISOString();
+async function agentCanUnenroll(soClient: SavedObjectsClientContract, agentId: string) {
   const agent = await getAgent(soClient, agentId);
-  if (!agent.policy_id) throw new Error(`Cannot find agent ${agentId}`);
+  if (!agent.policy_id) {
+    throw new Error(`${agentId} is not enrolled in a policy`);
+  }
   const agentPolicy = await agentPolicyService.get(soClient, agent.policy_id, false);
-  if (agentPolicy?.is_managed) throw new Error('Cannot unenroll from a managed agent policy');
+  if (agentPolicy?.is_managed) {
+    throw new Error(`Cannot unenroll ${agentId} from a managed agent policy ${agent.policy_id}`);
+  }
 
+  return true;
+}
+
+export async function unenrollAgent(soClient: SavedObjectsClientContract, agentId: string) {
+  await agentCanUnenroll(soClient, agentId);
+
+  const now = new Date().toISOString();
   await createAgentAction(soClient, {
     agent_id: agentId,
     created_at: now,
@@ -38,7 +48,6 @@ export async function unenrollAgents(
         kuery: string;
       }
 ) {
-  // Filter to agents that do not already unenrolled, or unenrolling
   const agents =
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
@@ -48,9 +57,17 @@ export async function unenrollAgents(
             showInactive: false,
           })
         ).agents;
-  const agentsToUpdate = agents.filter(
+
+  // Filter to agents that are not already unenrolled, or unenrolling
+  const agentsEnrolled = agents.filter(
     (agent) => !agent.unenrollment_started_at && !agent.unenrolled_at
   );
+  // And which are allowed to unenroll
+  const settled = await Promise.allSettled(
+    agentsEnrolled.map((agent) => agentCanUnenroll(soClient, agent.id).then((_) => agent))
+  );
+  const agentsToUpdate = agentsEnrolled.filter((_, index) => settled[index].status === 'fulfilled');
+
   const now = new Date().toISOString();
 
   // Create unenroll action for each agent
