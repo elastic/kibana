@@ -7,10 +7,8 @@
 import { Type } from '@kbn/config-schema';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import {
-  IRouter,
   kibanaResponseFactory,
   RequestHandler,
-  RequestHandlerContext,
   RouteConfig,
 } from '../../../../../../src/core/server';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
@@ -22,6 +20,7 @@ import {
   SAMLLogin,
 } from '../../authentication';
 import { defineCommonRoutes } from './common';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
@@ -29,10 +28,10 @@ import { routeDefinitionParamsMock } from '../index.mock';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 
 describe('Common authentication routes', () => {
-  let router: jest.Mocked<IRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   let license: jest.Mocked<SecurityLicense>;
-  let mockContext: RequestHandlerContext;
+  let mockContext: SecurityRequestHandlerContext;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
@@ -44,13 +43,13 @@ describe('Common authentication routes', () => {
       licensing: {
         license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
       },
-    } as unknown) as RequestHandlerContext;
+    } as unknown) as SecurityRequestHandlerContext;
 
     defineCommonRoutes(routeParamsMock);
   });
 
   describe('logout', () => {
-    let routeHandler: RequestHandler<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
     let routeConfig: RouteConfig<any, any, any, any>;
 
     const mockRequest = httpServerMock.createKibanaRequest({
@@ -151,7 +150,7 @@ describe('Common authentication routes', () => {
   });
 
   describe('me', () => {
-    let routeHandler: RequestHandler<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
     let routeConfig: RouteConfig<any, any, any, any>;
 
     const mockRequest = httpServerMock.createKibanaRequest({
@@ -185,7 +184,7 @@ describe('Common authentication routes', () => {
   });
 
   describe('login', () => {
-    let routeHandler: RequestHandler<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
     let routeConfig: RouteConfig<any, any, any, any>;
     beforeEach(() => {
       const [acsRouteConfig, acsRouteHandler] = router.post.mock.calls.find(
@@ -645,7 +644,7 @@ describe('Common authentication routes', () => {
   });
 
   describe('acknowledge access agreement', () => {
-    let routeHandler: RequestHandler<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
     let routeConfig: RouteConfig<any, any, any, any>;
     beforeEach(() => {
       const [acsRouteConfig, acsRouteHandler] = router.post.mock.calls.find(

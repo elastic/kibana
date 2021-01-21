@@ -57,6 +57,8 @@ function wrapper({ children }: { children?: ReactNode }) {
                 rangeTo: 'now',
                 start: 'mystart',
                 end: 'myend',
+                comparisonEnabled: true,
+                comparisonType: 'yesterday',
               }}
             >
               {children}
