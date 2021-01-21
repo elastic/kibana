@@ -54,12 +54,12 @@ export function insertNewColumn({
 
   const baseOptions = { indexPattern, previousColumn: layer.columns[columnId] };
 
-  if (operationDefinition.input === 'none') {
+  if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
     if (field) {
       throw new Error(`Can't create operation ${op} with the provided field ${field.name}`);
     }
     const possibleOperation = operationDefinition.getPossibleOperation();
-    const isBucketed = Boolean(possibleOperation.isBucketed);
+    const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
     return updateDefaultLabels(
       addOperationFn(layer, operationDefinition.buildColumn({ ...baseOptions, layer }), columnId),
@@ -300,7 +300,7 @@ export function replaceColumn({
       });
     }
 
-    if (operationDefinition.input === 'none') {
+    if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
       let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
       newColumn = copyCustomLabel(newColumn, previousColumn);
 
@@ -798,24 +798,16 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
 
   const [direct, referenceBased] = _.partition(
     entries,
-    ([, col]) => operationDefinitionMap[col.operationType].input !== 'fullReference'
+    ([, col]) =>
+      operationDefinitionMap[col.operationType].input !== 'fullReference' &&
+      operationDefinitionMap[col.operationType].input !== 'managedReference'
   );
-  // If a reference has another reference as input, put it last in sort order
-  referenceBased.sort(([idA, a], [idB, b]) => {
-    if ('references' in a && a.references.includes(idB)) {
-      return 1;
-    }
-    if ('references' in b && b.references.includes(idA)) {
-      return -1;
-    }
-    return 0;
-  });
   const [aggregations, metrics] = _.partition(direct, ([, col]) => col.isBucketed);
 
   return aggregations
     .map(([id]) => id)
     .concat(metrics.map(([id]) => id))
-    .concat(referenceBased.map(([id]) => id));
+    .concat(topologicalSort(referenceBased));
 }
 
 // Splits existing columnOrder into the three categories
@@ -964,4 +956,30 @@ export function isColumnValidAsReference({
     (!validation.specificOperations || validation.specificOperations.includes(operationType)) &&
     validation.validateMetadata(column)
   );
+}
+
+function topologicalSort(columns: Array<[string, IndexPatternColumn]>) {
+  const allNodes: Record<string, string[]> = {};
+  columns.forEach(([id, col]) => {
+    allNodes[id] = 'references' in col ? col.references : [];
+  });
+  // remove real metric references
+  columns.forEach(([id]) => {
+    allNodes[id] = allNodes[id].filter((refId) => !!allNodes[refId]);
+  });
+  const ordered: string[] = [];
+
+  while (ordered.length < columns.length) {
+    Object.keys(allNodes).forEach((id) => {
+      if (allNodes[id].length === 0) {
+        ordered.push(id);
+        delete allNodes[id];
+        Object.keys(allNodes).forEach((k) => {
+          allNodes[k] = allNodes[k].filter((i) => i !== id);
+        });
+      }
+    });
+  }
+
+  return ordered;
 }

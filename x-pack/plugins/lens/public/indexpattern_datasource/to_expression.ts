@@ -38,7 +38,7 @@ function getExpressionForLayer(
     const expressions: ExpressionAstFunction[] = [];
     columnEntries.forEach(([colId, col]) => {
       const def = operationDefinitionMap[col.operationType];
-      if (def.input === 'fullReference') {
+      if (def.input === 'fullReference' || def.input === 'managedReference') {
         expressions.push(...def.toExpression(layer, colId, indexPattern));
       } else {
         aggs.push(
@@ -50,8 +50,12 @@ function getExpressionForLayer(
       }
     });
 
-    const idMap = columnEntries.reduce((currentIdMap, [colId, column], index) => {
-      const esAggsId = `col-${columnEntries.length === 1 ? 0 : index}-${colId}`;
+    const aggColumnEntries = columnEntries.filter(([, col]) => {
+      const def = operationDefinitionMap[col.operationType];
+      return !(def.input === 'fullReference' || def.input === 'managedReference');
+    });
+    const idMap = aggColumnEntries.reduce((currentIdMap, [colId, column], index) => {
+      const esAggsId = `col-${aggColumnEntries.length === 1 ? 0 : index}-${colId}`;
       const suffix = getEsAggsSuffix(column);
       return {
         ...currentIdMap,

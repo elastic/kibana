@@ -34,6 +34,8 @@ import {
   MovingAverageIndexPatternColumn,
 } from './calculations';
 import { countOperation, CountIndexPatternColumn } from './count';
+import { mathOperation, MathIndexPatternColumn } from './math';
+import { formulaOperation, FormulaIndexPatternColumn } from './formula';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
 import { OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
@@ -65,7 +67,9 @@ export type IndexPatternColumn =
   | CumulativeSumIndexPatternColumn
   | CounterRateIndexPatternColumn
   | DerivativeIndexPatternColumn
-  | MovingAverageIndexPatternColumn;
+  | MovingAverageIndexPatternColumn
+  | MathIndexPatternColumn
+  | FormulaIndexPatternColumn;
 
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
 
@@ -92,6 +96,8 @@ const internalOperationDefinitions = [
   counterRateOperation,
   derivativeOperation,
   movingAverageOperation,
+  mathOperation,
+  formulaOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -124,6 +130,7 @@ export interface ParamEditorProps<C> {
   http: HttpSetup;
   dateRange: DateRange;
   data: DataPublicPluginStart;
+  operationDefinitionMap: Record<string, GenericOperationDefinition>;
 }
 
 export interface HelpProps<C> {
@@ -314,6 +321,7 @@ export interface RequiredReference {
   // operation types. The main use case is Cumulative Sum, where we need to only take the
   // sum of Count or sum of Sum.
   specificOperations?: OperationType[];
+  multi?: boolean;
 }
 
 // Full reference uses one or more reference operations which are visible to the user
@@ -330,8 +338,9 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
    * The type of UI that is shown in the editor for this function:
    * - full: List of sub-functions and fields
    * - field: List of fields, selects first operation per field
+   * - hidden: Do not allow to use operation directly
    */
-  selectionStyle: 'full' | 'field';
+  selectionStyle: 'full' | 'field' | 'hidden';
 
   /**
    * Builds the column object for the given parameters. Should include default p
@@ -357,10 +366,32 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
   ) => ExpressionAstFunction[];
 }
 
+interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
+  input: 'managedReference';
+  /**
+   * Builds the column object for the given parameters. Should include default p
+   */
+  buildColumn: (arg: BaseBuildColumnArgs) => ReferenceBasedIndexPatternColumn & C;
+  /**
+   * Returns the meta data of the operation if applied. Undefined
+   * if the operation can't be added with these fields.
+   */
+  getPossibleOperation: () => OperationMetadata | undefined;
+  /**
+   * A chain of expression functions which will transform the table
+   */
+  toExpression: (
+    layer: IndexPatternLayer,
+    columnId: string,
+    indexPattern: IndexPattern
+  ) => ExpressionAstFunction[];
+}
+
 interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
   field: FieldBasedOperationDefinition<C>;
   none: FieldlessOperationDefinition<C>;
   fullReference: FullReferenceOperationDefinition<C>;
+  managedReference: ManagedReferenceOperationDefinition<C>;
 }
 
 /**
@@ -386,7 +417,8 @@ export type OperationType = typeof internalOperationDefinitions[number]['type'];
 export type GenericOperationDefinition =
   | OperationDefinition<IndexPatternColumn, 'field'>
   | OperationDefinition<IndexPatternColumn, 'none'>
-  | OperationDefinition<IndexPatternColumn, 'fullReference'>;
+  | OperationDefinition<IndexPatternColumn, 'fullReference'>
+  | OperationDefinition<IndexPatternColumn, 'managedReference'>;
 
 /**
  * List of all available operation definitions

@@ -91,6 +91,10 @@ type OperationFieldTuple =
   | {
       type: 'fullReference';
       operationType: OperationType;
+    }
+  | {
+      type: 'managedReference';
+      operationType: OperationType;
     };
 
 /**
@@ -171,6 +175,14 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
       if (validOperation) {
         addToMap(
           { type: 'fullReference', operationType: operationDefinition.type },
+          validOperation
+        );
+      }
+    } else if (operationDefinition.input === 'managedReference') {
+      const validOperation = operationDefinition.getPossibleOperation();
+      if (validOperation) {
+        addToMap(
+          { type: 'managedReference', operationType: operationDefinition.type },
           validOperation
         );
       }

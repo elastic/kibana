@@ -22,7 +22,7 @@ export function math(): ExpressionFunctionDefinition<'math', Input, Arguments, n
 
   return {
     name: 'math',
-    type: 'number',
+    type: undefined,
     inputTypes: ['number', 'datatable'],
     help,
     args: {
@@ -54,9 +54,9 @@ export function math(): ExpressionFunctionDefinition<'math', Input, Arguments, n
           }
           throw errors.tooManyResults();
         }
-        if (isNaN(result)) {
-          throw errors.executionFailed();
-        }
+        // if (isNaN(result)) {
+        //   throw errors.executionFailed();
+        // }
         return result;
       } catch (e) {
         if (isDatatable(input) && input.rows.length === 0) {
