@@ -80,14 +80,16 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
                   size="m"
                 />
               </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-                className={classNames('eui-textTruncate', 'mlTopValuesPercentLabelContainer')}
-              >
-                <EuiText size="xs" textAlign="left" color="subdued">
-                  {getPercentLabel(value.doc_count, progressBarMax)}
-                </EuiText>
-              </EuiFlexItem>
+              {progressBarMax !== undefined && (
+                <EuiFlexItem
+                  grow={false}
+                  className={classNames('eui-textTruncate', 'mlTopValuesPercentLabelContainer')}
+                >
+                  <EuiText size="xs" textAlign="left" color="subdued">
+                    {getPercentLabel(value.doc_count, progressBarMax)}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           ))}
         {isTopValuesSampled === true && (

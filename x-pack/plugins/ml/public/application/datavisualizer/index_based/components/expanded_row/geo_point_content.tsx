@@ -19,7 +19,7 @@ import { DocumentStatsTable } from '../../../stats_table/components/field_data_e
 import { ExpandedRowContent } from '../../../stats_table/components/field_data_expanded_row/expanded_row_content';
 
 export interface CombinedQuery {
-  searchString: string;
+  searchString: string | { [key: string]: any };
   searchQueryLanguage: string;
 }
 export const GeoPointContent: FC<{
