@@ -26,10 +26,12 @@ export function createMetricAnomalyAlertType(): AlertTypeModel<AlertTypeParams> 
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.anomaly.defaultActionMessage',
       {
-        defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
+        defaultMessage: `\\{\\{alertName\\}\\} is in a state of \\{\\{context.alertState\\}\\}
 
-Reason:
-\\{\\{context.reason\\}\\}
+\\{\\{metric\\}\\} was \\{\\{summary\\}\\} than normal at \\{\\{timestamp\\}\\}
+
+Typical value: \\{\\{typical\\}\\}
+Actual value: \\{\\{actual\\}\\}
 `,
       }
     ),

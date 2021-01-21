@@ -15,15 +15,7 @@ import {
 import { METRIC_ANOMALY_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { InfraBackendLibs } from '../../infra_types';
 import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
-import {
-  groupActionVariableDescription,
-  alertStateActionVariableDescription,
-  reasonActionVariableDescription,
-  timestampActionVariableDescription,
-  valueActionVariableDescription,
-  metricActionVariableDescription,
-  thresholdActionVariableDescription,
-} from '../common/messages';
+import { alertStateActionVariableDescription } from '../common/messages';
 import { RecoveredActionGroupId } from '../../../../../alerts/common';
 
 export type MetricAnomalyAllowedActionGroups = typeof FIRED_ACTIONS_ID;
@@ -68,13 +60,49 @@ export const registerMetricAnomalyAlertType = (
   executor: createMetricAnomalyExecutor(libs, ml),
   actionVariables: {
     context: [
-      { name: 'group', description: groupActionVariableDescription },
       { name: 'alertState', description: alertStateActionVariableDescription },
-      { name: 'reason', description: reasonActionVariableDescription },
-      { name: 'timestamp', description: timestampActionVariableDescription },
-      { name: 'value', description: valueActionVariableDescription },
-      { name: 'metric', description: metricActionVariableDescription },
-      { name: 'threshold', description: thresholdActionVariableDescription },
+      {
+        name: 'metric',
+        description: i18n.translate('xpack.infra.metrics.alerting.anomalyMetricDescription', {
+          defaultMessage: 'The metric name in the specified condition.',
+        }),
+      },
+      {
+        name: 'timestamp',
+        description: i18n.translate('xpack.infra.metrics.alerting.anomalyTimestampDescription', {
+          defaultMessage: 'A timestamp of when the anomaly was detected.',
+        }),
+      },
+      {
+        name: 'anomalyScore',
+        description: i18n.translate('xpack.infra.metrics.alerting.anomalyScoreDescription', {
+          defaultMessage: 'The exact severity score of the detected anomaly.',
+        }),
+      },
+      {
+        name: 'actual',
+        description: i18n.translate('xpack.infra.metrics.alerting.anomalyActualDescription', {
+          defaultMessage: 'The actual value of the monitored metric at the time of the anomaly.',
+        }),
+      },
+      {
+        name: 'typical',
+        description: i18n.translate('xpack.infra.metrics.alerting.anomalyTypicalDescription', {
+          defaultMessage: 'The typical value of the monitored metric at the time of the anomaly.',
+        }),
+      },
+      {
+        name: 'summary',
+        description: i18n.translate('xpack.infra.metrics.alerting.anomalySummaryDescription', {
+          defaultMessage: 'A description of the anomaly, e.g. "2x higher."',
+        }),
+      },
+      {
+        name: 'influencers',
+        description: i18n.translate('xpack.infra.metrics.alerting.anomalyInfluencersDescription', {
+          defaultMessage: 'A list of node names that influenced the anomaly.',
+        }),
+      },
     ],
   },
 });

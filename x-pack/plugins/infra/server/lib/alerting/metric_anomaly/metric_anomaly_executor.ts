@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { first } from 'lodash';
 import moment from 'moment';
 import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import { MappedAnomalyHit } from '../../infra_ml';
@@ -71,14 +72,22 @@ export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPlugi
     filterQuery,
   });
 
-  const shouldAlertFire = data.some(
-    (anomaly: MappedAnomalyHit) => anomaly.anomalyScore >= threshold
-  );
+  const shouldAlertFire = data.length > 0;
 
   if (shouldAlertFire) {
+    const { startTime: anomalyStartTime, anomalyScore, actual, typical, influencers } = first(
+      data as MappedAnomalyHit[]
+    )!;
+
     alertInstance.scheduleActions(FIRED_ACTIONS_ID, {
       alertState: AlertStates.ALERT,
-      timestamp: moment().toISOString(),
+      timestamp: moment(anomalyStartTime).toISOString(),
+      anomalyScore,
+      actual,
+      typical,
+      metric: metricNameMap[metric],
+      summary: generateSummaryMessage(actual, typical),
+      influencers: influencers.join(', '),
     });
   }
 };
@@ -88,5 +97,38 @@ export const FIRED_ACTIONS: ActionGroup<typeof FIRED_ACTIONS_ID> = {
   id: FIRED_ACTIONS_ID,
   name: i18n.translate('xpack.infra.metrics.alerting.anomaly.fired', {
     defaultMessage: 'Fired',
+  }),
+};
+
+const generateSummaryMessage = (actual: number, typical: number) => {
+  const differential = (Math.max(actual, typical) / Math.min(actual, typical))
+    .toFixed(1)
+    .replace('.0', '');
+  if (actual > typical) {
+    return i18n.translate('xpack.infra.metrics.alerting.anomaly.summaryHigher', {
+      defaultMessage: '{differential}x higher',
+      values: {
+        differential,
+      },
+    });
+  } else {
+    return i18n.translate('xpack.infra.metrics.alerting.anomaly.summaryLower', {
+      defaultMessage: '{differential}x lower',
+      values: {
+        differential,
+      },
+    });
+  }
+};
+
+const metricNameMap = {
+  memory_usage: i18n.translate('xpack.infra.metrics.alerting.anomaly.memoryUsage', {
+    defaultMessage: 'Memory usage',
+  }),
+  network_in: i18n.translate('xpack.infra.metrics.alerting.anomaly.networkIn', {
+    defaultMessage: 'Network in',
+  }),
+  network_out: i18n.translate('xpack.infra.metrics.alerting.anomaly.networkOut', {
+    defaultMessage: 'Network out',
   }),
 };

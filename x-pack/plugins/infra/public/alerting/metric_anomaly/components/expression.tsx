@@ -207,7 +207,7 @@ export const Expression: React.FC<Props> = (props) => {
             customAggTypesOptions={{
               memory_usage: {
                 text: i18n.translate('xpack.infra.metrics.alertFlyout.anomalyJobs.memoryUsage', {
-                  defaultMessage: 'Memory Usage',
+                  defaultMessage: 'Memory usage',
                 }),
                 fieldRequired: false,
                 value: 'memory_usage',
@@ -215,7 +215,7 @@ export const Expression: React.FC<Props> = (props) => {
               },
               network_in: {
                 text: i18n.translate('xpack.infra.metrics.alertFlyout.anomalyJobs.networkIn', {
-                  defaultMessage: 'Network In',
+                  defaultMessage: 'Network in',
                 }),
                 fieldRequired: false,
                 validNormalizedTypes: [],
@@ -223,7 +223,7 @@ export const Expression: React.FC<Props> = (props) => {
               },
               network_out: {
                 text: i18n.translate('xpack.infra.metrics.alertFlyout.anomalyJobs.networkOut', {
-                  defaultMessage: 'Network Out',
+                  defaultMessage: 'Network out',
                 }),
                 fieldRequired: false,
                 validNormalizedTypes: [],
