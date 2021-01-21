@@ -675,7 +675,7 @@ export const Page: FC = () => {
             <IndexBasedDataVisualizerExpandedRow
               item={item}
               indexPattern={currentIndexPattern}
-              combinedQuery={{ searchQueryLanguage, searchString, searchQuery }}
+              combinedQuery={{ searchQueryLanguage, searchString }}
             />
           );
         }

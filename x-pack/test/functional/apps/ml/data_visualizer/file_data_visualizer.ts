@@ -115,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
     {
       suiteSuffix: 'with a file containing geo field',
       filePath: path.join(__dirname, 'files_to_import', 'geo_file.csv'),
-      indexName: 'user-import_1',
+      indexName: 'user-import_2',
       createIndexPattern: false,
       fieldTypeFilters: [ML_JOB_FIELD_TYPES.GEO_POINT],
       fieldNameFilters: ['Coordinates'],

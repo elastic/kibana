@@ -317,7 +317,7 @@ export function MachineLearningDataVisualizerTableProvider(
       await this.assertFieldDocCount(fieldName, docCountFormatted);
       await this.ensureDetailsOpen(fieldName);
 
-      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlFieldDataTopValues'));
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlFieldDataExamplesList'));
       await this.assertTopValuesContents(fieldName, topValuesCount);
       await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlEmbeddedMapContent'));
 

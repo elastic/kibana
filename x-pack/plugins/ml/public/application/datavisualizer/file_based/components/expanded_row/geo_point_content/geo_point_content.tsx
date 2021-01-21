@@ -10,10 +10,10 @@ import { EuiFlexItem } from '@elastic/eui';
 import { Feature, Point } from 'geojson';
 import type { FieldDataRowProps } from '../../../../stats_table/types/field_data_row';
 import { DocumentStatsTable } from '../../../../stats_table/components/field_data_expanded_row/document_stats';
-import { TopValues } from '../../../../index_based/components/field_data_row/top_values';
 import { MlEmbeddedMapComponent } from '../../../../../components/ml_embedded_map';
 import { convertWKTGeoToLonLat, getGeoPointsLayer } from './format_utils';
 import { ExpandedRowContent } from '../../../../stats_table/components/field_data_expanded_row/expanded_row_content';
+import { ExamplesList } from '../../../../index_based/components/field_data_row/examples_list';
 
 export const DEFAULT_GEO_REGEX = RegExp('(?<lat>.+) (?<lon>.+)');
 
@@ -26,14 +26,14 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
       const geoPointsFeatures: Array<Feature<Point>> = [];
 
       // reformatting the top values from POINT (-2.359207 51.37837) to (-2.359207, 51.37837)
-      const formattedTopValues = [];
+      const formattedExamples = [];
 
       for (let i = 0; i < stats.topValues.length; i++) {
         const value = stats.topValues[i];
         const coordinates = convertWKTGeoToLonLat(value.key);
         if (coordinates) {
           const formattedGeoPoint = `(${coordinates.lat}, ${coordinates.lon})`;
-          formattedTopValues.push({ key: formattedGeoPoint, doc_count: value.doc_count });
+          formattedExamples.push(coordinates);
 
           geoPointsFeatures.push({
             type: 'Feature',
@@ -52,7 +52,7 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
 
       if (geoPointsFeatures.length > 0) {
         return {
-          stats: { ...stats, topValues: formattedTopValues },
+          examples: formattedExamples,
           layerList: [getGeoPointsLayer(geoPointsFeatures)],
         };
       }
@@ -61,9 +61,9 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'mlDVGeoPointContent'}>
       <DocumentStatsTable config={config} />
-      {formattedResults && Array.isArray(formattedResults.stats!.topValues) && (
+      {formattedResults && Array.isArray(formattedResults.examples) && (
         <EuiFlexItem>
-          <TopValues stats={formattedResults.stats} barColor="secondary" />
+          <ExamplesList examples={formattedResults.examples} />
         </EuiFlexItem>
       )}
       {formattedResults && Array.isArray(formattedResults.layerList) && (

@@ -19,7 +19,7 @@ import {
   OtherContent,
   TextContent,
 } from '../../../stats_table/components/field_data_expanded_row';
-import { GeoPointContent } from './geo_point_content';
+import { CombinedQuery, GeoPointContent } from './geo_point_content';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 
 export const IndexBasedDataVisualizerExpandedRow = ({
@@ -29,7 +29,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
 }: {
   item: FieldVisConfig;
   indexPattern: IndexPattern | undefined;
-  combinedQuery: any;
+  combinedQuery: CombinedQuery;
 }) => {
   const config = item;
   const { loading, type, existsInDocs, fieldName } = config;

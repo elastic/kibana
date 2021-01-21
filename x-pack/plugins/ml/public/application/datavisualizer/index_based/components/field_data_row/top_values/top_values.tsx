@@ -20,9 +20,10 @@ import classNames from 'classnames';
 import { kibanaFieldFormat } from '../../../../../formatters/kibana_field_format';
 import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 import { ExpandedRowFieldHeader } from '../../../../stats_table/components/expanded_row_field_header';
+import { FieldVisStats } from '../../../../stats_table/types';
 
 interface Props {
-  stats: any;
+  stats: FieldVisStats | undefined;
   fieldFormat?: any;
   barColor?: 'primary' | 'secondary' | 'danger' | 'subdued' | 'accent';
   compressed?: boolean;
@@ -38,6 +39,7 @@ function getPercentLabel(docCount: number, topValuesSampleSize: number): string 
 }
 
 export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed }) => {
+  if (stats === undefined) return null;
   const {
     topValues,
     topValuesSampleSize,
@@ -54,7 +56,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
 
       <div data-test-subj="mlFieldDataTopValues" className={'mlFieldDataTopValuesContainer'}>
         {Array.isArray(topValues) &&
-          topValues.map((value: any) => (
+          topValues.map((value) => (
             <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
               <EuiFlexItem
                 grow={false}

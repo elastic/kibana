@@ -5,12 +5,18 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import uuid from 'uuid';
+
+import { htmlIdGenerator } from '@elastic/eui';
 import { LayerDescriptor } from '../../../../../maps/common/descriptor_types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MapEmbeddable, MapEmbeddableInput } from '../../../../../maps/public/embeddable';
+import {
+  MapEmbeddable,
+  MapEmbeddableInput,
+  MapEmbeddableOutput,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../maps/public/embeddable';
 import { MAP_SAVED_OBJECT_TYPE, RenderTooltipContentParams } from '../../../../../maps/public';
 import {
+  EmbeddableFactory,
   ErrorEmbeddable,
   isErrorEmbeddable,
   ViewMode,
@@ -26,7 +32,7 @@ export function MlEmbeddedMapComponent({
   mapEmbeddableInput?: MapEmbeddableInput;
   renderTooltipContent?: (params: RenderTooltipContentParams) => JSX.Element;
 }) {
-  const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
+  const [embeddable, setEmbeddable] = useState<ErrorEmbeddable | MapEmbeddable | undefined>();
 
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
   const baseLayers = useRef<LayerDescriptor[]>();
@@ -42,7 +48,9 @@ export function MlEmbeddedMapComponent({
     throw new Error('Maps start plugin not found');
   }
 
-  const factory: any = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+  const factory:
+    | EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput, MapEmbeddable>
+    | undefined = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   // Update the layer list  with updated geo points upon refresh
   useEffect(() => {
@@ -65,7 +73,7 @@ export function MlEmbeddedMapComponent({
         throw new Error('Map embeddable not found.');
       }
       const input: MapEmbeddableInput = {
-        id: uuid.v4(),
+        id: htmlIdGenerator()(),
         attributes: { title: '' },
         filters: [],
         hidePanelTitles: true,
@@ -95,7 +103,7 @@ export function MlEmbeddedMapComponent({
         },
       };
 
-      const embeddableObject: any = await factory.create(input);
+      const embeddableObject = await factory.create(input);
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
         const basemapLayerDescriptor = mapsPlugin
