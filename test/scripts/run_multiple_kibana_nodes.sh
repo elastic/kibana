@@ -19,7 +19,8 @@
 
 #
 # Script to run multiple kibana nodes in parallel on the same machine.
-# Make sure to run the script from kibana root directory.
+# Make sure to run the script from kibana root directory. Some functions depend on the jq command-line utility
+# being installed.
 #
 # bash test/scripts/run_multiple_kibana_nodes.sh <function> [options]
 # functions:
