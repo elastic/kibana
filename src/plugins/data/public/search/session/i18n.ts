@@ -15,6 +15,6 @@ import { i18n } from '@kbn/i18n';
 export const noSearchSessionStorageCapabilityMessage = i18n.translate(
   'data.searchSessionIndicator.noCapability',
   {
-    defaultMessage: "You don't have permissions to send to background.",
+    defaultMessage: "You don't have permissions to create search sessions.",
   }
 );

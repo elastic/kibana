@@ -285,7 +285,7 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     }
   });
 
-  data.search.session.setupStorage(
+  data.search.session.enableStorage(
     createSearchSessionRestorationDataProvider({
       appStateContainer,
       data,

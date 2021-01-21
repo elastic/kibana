@@ -160,7 +160,7 @@ export const useDashboardStateManager = (
       stateManager.isNew()
     );
 
-    searchSession.setupStorage(
+    searchSession.enableStorage(
       createSessionRestorationDataProvider({
         data: dataPlugin,
         getDashboardTitle: () => dashboardTitle,

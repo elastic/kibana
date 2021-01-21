@@ -113,7 +113,7 @@ describe('Session service', () => {
       sessionId,
     });
 
-    sessionService.setupStorage({
+    sessionService.enableStorage({
       getName: async () => 'Name',
       getUrlGeneratorData: async () => ({
         urlGeneratorId: 'id',
@@ -157,7 +157,7 @@ describe('Session service', () => {
     expect(sessionService.isCurrentSession(sessionId)).toBeTruthy();
   });
 
-  test('setupStorage() enables storage capabilities', async () => {
+  test('enableStorage() enables storage capabilities', async () => {
     sessionService.start();
     await expect(() => sessionService.save()).rejects.toThrowErrorMatchingInlineSnapshot(
       `"No info provider for current session"`
@@ -165,7 +165,7 @@ describe('Session service', () => {
 
     expect(sessionService.isSessionStorageReady()).toBe(false);
 
-    sessionService.setupStorage({
+    sessionService.enableStorage({
       getName: async () => 'Name',
       getUrlGeneratorData: async () => ({
         urlGeneratorId: 'id',
@@ -184,7 +184,7 @@ describe('Session service', () => {
 
   test('can provide config for search session indicator', () => {
     expect(sessionService.getSearchSessionIndicatorUiConfig().isDisabled().disabled).toBe(false);
-    sessionService.setupStorage(
+    sessionService.enableStorage(
       {
         getName: async () => 'Name',
         getUrlGeneratorData: async () => ({
@@ -202,5 +202,16 @@ describe('Session service', () => {
 
     sessionService.clear();
     expect(sessionService.getSearchSessionIndicatorUiConfig().isDisabled().disabled).toBe(false);
+  });
+
+  test('save() throws in case getUrlGeneratorData returns throws', async () => {
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getUrlGeneratorData: async () => {
+        throw new Error('Haha');
+      },
+    });
+    sessionService.start();
+    await expect(() => sessionService.save()).rejects.toMatchInlineSnapshot(`[Error: Haha]`);
   });
 });

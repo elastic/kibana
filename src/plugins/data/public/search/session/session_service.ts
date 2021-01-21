@@ -277,12 +277,12 @@ export class SessionService {
 
   /**
    * Provide an info about current session which is needed for storing a search session.
-   * To opt-into "Search session indicator" UI app has to call {@link setupStorage}.
+   * To opt-into "Search session indicator" UI app has to call {@link enableStorage}.
    *
    * @param searchSessionInfoProvider - info provider for saving a search session
    * @param searchSessionIndicatorUiConfig - config for "Search session indicator" UI
    */
-  public setupStorage<ID extends UrlGeneratorId = UrlGeneratorId>(
+  public enableStorage<ID extends UrlGeneratorId = UrlGeneratorId>(
     searchSessionInfoProvider: SearchSessionInfoProvider<ID>,
     searchSessionIndicatorUiConfig?: SearchSessionIndicatorUiConfig
   ) {
@@ -291,7 +291,7 @@ export class SessionService {
   }
 
   /**
-   * If the current app explicitly called {@link setupStorage} and provided all configuration needed
+   * If the current app explicitly called {@link enableStorage} and provided all configuration needed
    * for storing its search sessions
    */
   public isSessionStorageReady(): boolean {
