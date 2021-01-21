@@ -362,33 +362,38 @@ export class UrlPanelContent extends Component<Props, State> {
         basePath: this.props.basePath,
         post: this.props.post,
       });
-      if (this.mounted) {
-        this.shortUrlCache = shortUrl;
-        this.setState(
-          {
-            isCreatingShortUrl: false,
-            useShortUrl: true,
-          },
-          this.setUrl
-        );
+
+      if (!this.mounted) {
+        return;
       }
+
+      this.shortUrlCache = shortUrl;
+      this.setState(
+        {
+          isCreatingShortUrl: false,
+          useShortUrl: true,
+        },
+        this.setUrl
+      );
     } catch (fetchError) {
-      if (this.mounted) {
-        this.shortUrlCache = undefined;
-        this.setState(
-          {
-            useShortUrl: false,
-            isCreatingShortUrl: false,
-            shortUrlErrorMsg: i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
-              defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
-              values: {
-                errorMessage: fetchError.message,
-              },
-            }),
-          },
-          this.setUrl
-        );
+      if (!this.mounted) {
+        return;
       }
+
+      this.shortUrlCache = undefined;
+      this.setState(
+        {
+          useShortUrl: false,
+          isCreatingShortUrl: false,
+          shortUrlErrorMsg: i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
+            defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
+            values: {
+              errorMessage: fetchError.message,
+            },
+          }),
+        },
+        this.setUrl
+      );
     }
   };
 
