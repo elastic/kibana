@@ -306,7 +306,7 @@ export const ScatterplotMatrixView: FC<ScatterplotMatrixViewProps> = ({
             )}
           </EuiFlexGroup>
 
-          <div id={htmlId} className="mlScatterplotMatrix" />
+          <div id={htmlId} className="mlScatterplotMatrix" data-test-subj="mlScatterplotMatrix" />
         </>
       )}
     </>
