@@ -72,6 +72,8 @@ export const formatFields = (theData: unknown, theType: string): ConnectorField[
       return normalizeResilientFields(theData as ResilientGetFieldsResponse);
     case ConnectorTypes.serviceNowIM:
       return normalizeServiceNowFields(theData as ServiceNowGetFieldsResponse);
+    case ConnectorTypes.serviceNowSIR:
+      return normalizeServiceNowFields(theData as ServiceNowGetFieldsResponse);
     default:
       return [];
   }
@@ -97,10 +99,11 @@ const getPreferredFields = (theType: string) => {
   } else if (theType === ConnectorTypes.resilient) {
     title = 'name';
     description = 'description';
-  } else if (theType === ConnectorTypes.serviceNowIM) {
+  } else if (theType === ConnectorTypes.serviceNowIM || theType === ConnectorTypes.serviceNowSIR) {
     title = 'short_description';
     description = 'description';
   }
+
   return { title, description };
 };
 

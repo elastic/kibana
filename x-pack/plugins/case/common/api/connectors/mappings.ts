@@ -18,6 +18,7 @@ import {
 } from '../../../../actions/server/builtin_action_types/resilient/types';
 import {
   PushToServiceApiParamsITSM as ServiceNowITSMPushToServiceApiParams,
+  PushToServiceApiParamsSIR as ServiceNowSIRPushToServiceApiParams,
   ServiceNowITSMIncident,
 } from '../../../../actions/server/builtin_action_types/servicenow/types';
 import { ResilientFieldsRT } from './resilient';
@@ -36,12 +37,14 @@ export {
   JiraPushToServiceApiParams,
   ResilientPushToServiceApiParams,
   ServiceNowITSMPushToServiceApiParams,
+  ServiceNowSIRPushToServiceApiParams,
 };
 export type Incident = JiraIncident | ResilientIncident | ServiceNowITSMIncident;
 export type PushToServiceApiParams =
   | JiraPushToServiceApiParams
   | ResilientPushToServiceApiParams
-  | ServiceNowITSMPushToServiceApiParams;
+  | ServiceNowITSMPushToServiceApiParams
+  | ServiceNowSIRPushToServiceApiParams;
 
 const ActionTypeRT = rt.union([
   rt.literal('append'),
