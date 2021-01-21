@@ -56,7 +56,7 @@ describe('getSource', () => {
       expect(source.cloneDescriptor().type).toBe(SOURCE_TYPES.ES_GEO_GRID);
     });
 
-    test('cluster source AbstractESSourceDescriptor properties should mirrow document source AbstractESSourceDescriptor properties', async () => {
+    test('cluster source AbstractESSourceDescriptor properties should mirror document source AbstractESSourceDescriptor properties', async () => {
       const blendedVectorLayer = new BlendedVectorLayer({
         source: new ESSearchSource({
           ...documentSourceDescriptor,
