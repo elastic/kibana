@@ -18,7 +18,7 @@ export const getVisualizeListItem = (
 ) => {
   // for visualizations the editApp is undefined
   let url = application.getUrlForApp(editApp ?? 'visualize', {
-    path: editApp ? editUrl : `/#${editUrl}`,
+    path: editApp ? editUrl : `#${editUrl}`,
   });
   const queryState: QueryState = {};
   const timeRange = getQueryService().timefilter.timefilter.getTime();

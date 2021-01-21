@@ -43,20 +43,18 @@ describe('listing item link', () => {
   test('creates a link to classic visualization if editApp is not defined', async () => {
     const editUrl = 'edit/id';
     const url = getVisualizeListItem(application, undefined, editUrl);
-    expect(url).toMatchInlineSnapshot(
-      `"/app/visualize/#${editUrl}?_g=(time:(from:now-7d,to:now))"`
-    );
+    expect(url).toMatchInlineSnapshot(`"/app/visualize#${editUrl}?_g=(time:(from:now-7d,to:now))"`);
   });
 
   test('creates a link for the app given if editApp is defined', async () => {
-    const editUrl = '/#/edit/id';
+    const editUrl = '#/edit/id';
     const editApp = 'lens';
     const url = getVisualizeListItem(application, editApp, editUrl);
     expect(url).toMatchInlineSnapshot(`"/app/${editApp}${editUrl}?_g=(time:(from:now-7d,to:now))"`);
   });
 
   test('propagates the correct time on the query', async () => {
-    const editUrl = '/#/edit/id';
+    const editUrl = '#/edit/id';
     const editApp = 'lens';
     getQueryService().timefilter.timefilter.setTime({
       from: '2021-01-05T11:45:53.375Z',
