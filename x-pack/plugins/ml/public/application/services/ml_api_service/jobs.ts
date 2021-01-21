@@ -48,6 +48,15 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
+  jobsForExport(jobIds: string[]) {
+    const body = JSON.stringify({ jobIds });
+    return httpService.http<CombinedJobWithStats[]>({
+      path: `${basePath()}/jobs/jobs_for_export`,
+      method: 'POST',
+      body,
+    });
+  },
+
   jobs(jobIds: string[], excludeGenerated?: boolean) {
     const body = JSON.stringify({ jobIds, excludeGenerated });
     return httpService.http<CombinedJobWithStats[]>({

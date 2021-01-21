@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { TimeRange } from 'src/plugins/data/common/query/timefilter/types';
-import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { CombinedJob, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { Calendar } from '../../../common/types/calendars';
 
 export interface ExistingJobsAndGroups {

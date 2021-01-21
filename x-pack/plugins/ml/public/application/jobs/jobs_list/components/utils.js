@@ -35,6 +35,24 @@ export function loadFullJob(jobId, excludeGenerated = false) {
       });
   });
 }
+
+export function loadJobForExport(jobId) {
+  return new Promise((resolve, reject) => {
+    ml.jobs
+      .jobsForExport([jobId])
+      .then((jobs) => {
+        if (jobs.length) {
+          resolve(jobs[0]);
+        } else {
+          throw new Error(`Could not find job ${jobId}`);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
 export function isStartable(jobs) {
   return jobs.some(
     (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSING
@@ -180,38 +198,42 @@ function showResults(resp, action) {
 export async function cloneJob(jobId) {
   try {
     const [cloneableJob, originalJob] = await Promise.all([
-      loadFullJob(jobId, true),
+      loadJobForExport(jobId),
       loadFullJob(jobId, false),
     ]);
-    if (cloneableJob.custom_settings && originalJob?.custom_settings?.created_by) {
+    if (originalJob?.custom_settings?.created_by !== undefined) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
-      cloneableJob.custom_settings.created_by = originalJob?.custom_settings?.created_by;
+      // cloneableJob.custom_settings.created_by = originalJob?.custom_settings?.created_by;
+
+      if (cloneableJob.custom_settings === undefined) {
+        cloneableJob.custom_settings = originalJob?.custom_settings;
+      }
 
       mlJobService.tempJobCloningObjects.job = cloneableJob;
 
       if (
-        cloneableJob.data_counts.earliest_record_timestamp !== undefined &&
-        cloneableJob.data_counts.latest_record_timestamp !== undefined &&
-        cloneableJob.data_counts.latest_bucket_timestamp !== undefined
+        originalJob.data_counts.earliest_record_timestamp !== undefined &&
+        originalJob.data_counts.latest_record_timestamp !== undefined &&
+        originalJob.data_counts.latest_bucket_timestamp !== undefined
       ) {
         // if the job has run before, use the earliest and latest record timestamp
         // as the cloned job's time range
-        let start = cloneableJob.data_counts.earliest_record_timestamp;
-        let end = cloneableJob.data_counts.latest_record_timestamp;
+        let start = originalJob.data_counts.earliest_record_timestamp;
+        let end = originalJob.data_counts.latest_record_timestamp;
 
-        if (cloneableJob.datafeed_config.aggregations !== undefined) {
+        if (originalJob.datafeed_config.aggregations !== undefined) {
           // if the datafeed uses aggregations the earliest and latest record timestamps may not be the same
           // as the start and end of the data in the index.
           const bucketSpanMs = parseInterval(
-            cloneableJob.analysis_config.bucket_span
+            originalJob.analysis_config.bucket_span
           ).asMilliseconds();
           // round down to the start of the nearest bucket
           start =
-            Math.floor(cloneableJob.data_counts.earliest_record_timestamp / bucketSpanMs) *
+            Math.floor(originalJob.data_counts.earliest_record_timestamp / bucketSpanMs) *
             bucketSpanMs;
           // use latest_bucket_timestamp and add two bucket spans minus one ms
-          end = cloneableJob.data_counts.latest_bucket_timestamp + bucketSpanMs * 2 - 1;
+          end = originalJob.data_counts.latest_bucket_timestamp + bucketSpanMs * 2 - 1;
         }
 
         mlJobService.tempJobCloningObjects.start = start;
@@ -221,11 +243,9 @@ export async function cloneJob(jobId) {
       // otherwise use the tempJobCloningObjects
       mlJobService.tempJobCloningObjects.job = cloneableJob;
     }
-    mlJobService.tempJobCloningObjects.job = cloneableJob;
-
-    if (cloneableJob.calendars) {
+    if (originalJob.calendars) {
       mlJobService.tempJobCloningObjects.calendars = await mlCalendarService.fetchCalendarsByIds(
-        cloneableJob.calendars
+        originalJob.calendars
       );
     }
 

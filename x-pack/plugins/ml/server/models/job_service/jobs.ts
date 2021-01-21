@@ -18,6 +18,8 @@ import {
   AuditMessage,
   DatafeedWithStats,
   CombinedJobWithStats,
+  CombinedJob,
+  Datafeed,
 } from '../../../common/types/anomaly_detection_jobs';
 import {
   MlJobsResponse,
@@ -255,6 +257,41 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     });
 
     return { jobs, jobsMap };
+  }
+
+  async function createJobsListForExport(jobIds: string[] = []) {
+    const jobs: CombinedJob[] = [];
+    const datafeeds: { [id: string]: Datafeed } = {};
+
+    const jobIdsString = jobIds.join();
+
+    const [{ body: jobResults }, { body: datafeedResults }] = await Promise.all([
+      mlClient.getJobs<MlJobsResponse>(
+        jobIds.length > 0 ? { job_id: jobIdsString, exclude_generated: true } : undefined
+      ),
+      mlClient.getDatafeeds<MlDatafeedsResponse>({ exclude_generated: true }),
+    ]);
+
+    if (datafeedResults && datafeedResults.datafeeds) {
+      datafeedResults.datafeeds.forEach((datafeed) => {
+        datafeeds[datafeed.job_id] = datafeed;
+      });
+    }
+
+    // create jobs objects containing job stats, datafeeds, datafeed stats and calendars
+    if (jobResults && jobResults.jobs) {
+      jobResults.jobs.forEach((job) => {
+        const tempJob = job as CombinedJob;
+
+        const datafeed = datafeeds[job.job_id];
+        if (datafeed !== undefined) {
+          tempJob.datafeed_config = datafeed;
+        }
+
+        jobs.push(tempJob);
+      });
+    }
+    return jobs;
   }
 
   async function createFullJobsList(jobIds: string[] = [], excludeGenerated = false) {
@@ -509,6 +546,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     forceStopAndCloseJob,
     jobsSummary,
     jobsWithTimerange,
+    createJobsListForExport,
     createFullJobsList,
     deletingJobTasks,
     jobsExist,
