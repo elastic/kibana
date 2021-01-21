@@ -108,12 +108,12 @@ function getSaveConfig(action: NavAction) {
  */
 function getViewConfig(action: NavAction) {
   return {
-    id: 'view',
-    label: i18n.translate('dashboard.topNave.viewButtonAriaLabel', {
-      defaultMessage: 'view',
+    id: 'cancel',
+    label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
+      defaultMessage: 'cancel',
     }),
     description: i18n.translate('dashboard.topNave.viewConfigDescription', {
-      defaultMessage: 'Return to view mode',
+      defaultMessage: 'Switch to view-only mode',
     }),
     testId: 'dashboardViewOnlyMode',
     run: action,

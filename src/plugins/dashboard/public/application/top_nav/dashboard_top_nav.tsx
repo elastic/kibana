@@ -45,7 +45,7 @@ import { ShowShareModal } from './show_share_modal';
 import { PanelToolbar } from './panel_toolbar';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import { OverlayRef } from '../../../../../core/public';
-import { getNewDashboardTitle, unsavedChangesRetainedStrings } from '../../dashboard_strings';
+import { getNewDashboardTitle } from '../../dashboard_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardContainer } from '..';
 
@@ -176,17 +176,6 @@ export function DashboardTopNav({
         const { getFullEditPath, title, id } = savedDashboard;
         chrome.recentlyAccessed.add(getFullEditPath(newMode === ViewMode.EDIT), title, id);
       }
-      if (
-        newMode === ViewMode.VIEW &&
-        dashboardStateManager.getIsEditMode() &&
-        dashboardStateManager.isDirty
-      ) {
-        core.notifications.toasts.addSuccess({
-          title: unsavedChangesRetainedStrings.getTitle(),
-          text: unsavedChangesRetainedStrings.getText(),
-        });
-      }
-
       dashboardStateManager.switchViewMode(newMode);
       dashboardStateManager.restorePanels();
     },
@@ -196,7 +185,6 @@ export function DashboardTopNav({
       dashboardStateManager,
       allowByValueEmbeddables,
       chrome.recentlyAccessed,
-      core.notifications.toasts,
     ]
   );
 

@@ -666,6 +666,7 @@
     "dashboard.topNav.showCloneModal.dashboardCopyTitle": "{title} 副本",
     "dashboard.topNave.addButtonAriaLabel": "库",
     "dashboard.topNave.addConfigDescription": "将现有可视化添加到仪表板",
+    "dashboard.topNave.cancelButtonAriaLabel": "取消",
     "dashboard.topNave.addNewButtonAriaLabel": "创建面板",
     "dashboard.topNave.addNewConfigDescription": "在此仪表板上创建新的面板",
     "dashboard.topNave.cloneButtonAriaLabel": "克隆",
