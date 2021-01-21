@@ -63,13 +63,15 @@ object PullRequestCi : BuildType({
   }
 
   features {
-    commitStatusPublisher {
-      enabled = isReportingEnabled()
-      vcsRootExtId = "${Kibana.id}"
-      publisher = github {
-        githubUrl = "https://api.github.com"
-        authType = personalToken {
-          token = "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b"
+    if(isReportingEnabled()) {
+      commitStatusPublisher {
+        enabled = true
+        vcsRootExtId = "${Kibana.id}"
+        publisher = github {
+          githubUrl = "https://api.github.com"
+          authType = personalToken {
+            token = "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b"
+          }
         }
       }
     }
