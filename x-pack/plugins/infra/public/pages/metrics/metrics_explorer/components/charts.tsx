@@ -8,6 +8,7 @@ import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
 import { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
@@ -17,7 +18,6 @@ import {
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { NoData } from '../../../../components/empty_states/no_data';
 import { MetricsExplorerChart } from './chart';
-import { SourceQuery } from '../../../../graphql/types';
 
 type StringOrNull = string | null;
 
@@ -30,7 +30,7 @@ interface Props {
   onFilter: (filter: string) => void;
   onTimeChange: (start: string, end: string) => void;
   data: MetricsExplorerResponse | null;
-  source: SourceQuery.Query['source']['configuration'] | undefined;
+  source: InfraSourceConfiguration | undefined;
   timeRange: MetricsExplorerTimeOptions;
 }
 export const MetricsExplorerCharts = ({

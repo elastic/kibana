@@ -7,6 +7,7 @@
 import { encode } from 'rison-node';
 import uuid from 'uuid';
 import { set } from '@elastic/safer-lodash-set';
+import { InfraSourceConfiguration } from '../../../../../../common/http_api/source_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import {
@@ -19,15 +20,14 @@ import {
 } from '../../hooks/use_metrics_explorer_options';
 import { metricToFormat } from './metric_to_format';
 import { InfraFormatterType } from '../../../../../lib/lib';
-import { SourceQuery } from '../../../../../graphql/types';
 import { createMetricLabel } from './create_metric_label';
 import { LinkDescriptor } from '../../../../../hooks/use_link_props';
 
 /*
- We've recently changed the default index pattern in Metrics UI from `metricbeat-*` to 
+ We've recently changed the default index pattern in Metrics UI from `metricbeat-*` to
  `metrics-*,metricbeat-*`. There is a bug in TSVB when there is an empty index in the pattern
  the field dropdowns are not populated correctly. This index pattern is a temporary fix.
- See: https://github.com/elastic/kibana/issues/73987 
+ See: https://github.com/elastic/kibana/issues/73987
 */
 const TSVB_WORKAROUND_INDEX_PATTERN = 'metric*';
 
@@ -142,7 +142,7 @@ const createTSVBIndexPattern = (alias: string) => {
 };
 
 export const createTSVBLink = (
-  source: SourceQuery.Query['source']['configuration'] | undefined,
+  source: InfraSourceConfiguration | undefined,
   options: MetricsExplorerOptions,
   series: MetricsExplorerSeries,
   timeRange: MetricsExplorerTimeOptions,

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraLogEntryHighlightFields } from '../../graphql/types';
 import {
   LogEntry,
   LogColumn,
@@ -14,12 +13,53 @@ import {
   LogMessageFieldPart,
 } from '../../../common/http_api';
 
-export type LogEntryHighlightColumn = InfraLogEntryHighlightFields.Columns;
-export type LogEntryHighlightMessageColumn = InfraLogEntryHighlightFields.InfraLogEntryMessageColumnInlineFragment;
-export type LogEntryHighlightFieldColumn = InfraLogEntryHighlightFields.InfraLogEntryFieldColumnInlineFragment;
+export interface InfraLogMessageFieldSegmentInlineFragment {
+  field: string;
+  value: string;
+}
 
-export type LogEntryHighlightMessageSegment = InfraLogEntryHighlightFields.Message | {};
-export type LogEntryHighlightFieldMessageSegment = InfraLogEntryHighlightFields.InfraLogMessageFieldSegmentInlineFragment;
+export interface InfraLogMessageConstantSegmentInlineFragment {
+  constant: string;
+}
+
+type Message =
+  | InfraLogMessageFieldSegmentInlineFragment
+  | InfraLogMessageConstantSegmentInlineFragment;
+
+export interface InfraLogEntryTimestampColumnInlineFragment {
+  columnId: string;
+  timestamp: number;
+}
+
+export interface InfraLogEntryMessageColumnInlineFragment {
+  columnId: string;
+  message: Message[];
+}
+
+export interface InfraLogEntryFieldColumnInlineFragment {
+  columnId: string;
+  field: string;
+  value: string;
+}
+
+export type LogEntryHighlightColumn =
+  | InfraLogEntryTimestampColumnInlineFragment
+  | InfraLogEntryMessageColumnInlineFragment
+  | InfraLogEntryFieldColumnInlineFragment;
+
+export interface LogEntryHighlightMessageColumn {
+  columnId: string;
+  message: Message[];
+}
+
+export interface LogEntryHighlightFieldColumn {
+  columnId: string;
+  field: string;
+  value: string;
+}
+
+export type LogEntryHighlightMessageSegment = Message | {};
+export type LogEntryHighlightFieldMessageSegment = InfraLogMessageFieldSegmentInlineFragment;
 
 export interface LogEntryHighlightsMap {
   [entryId: string]: LogEntry[];

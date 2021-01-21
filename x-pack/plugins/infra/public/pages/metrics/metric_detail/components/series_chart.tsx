@@ -13,14 +13,14 @@ import {
   BarSeriesStyle,
   AreaSeriesStyle,
 } from '@elastic/charts';
-import { InfraDataSeries } from '../../../../graphql/types';
+import { NodeDetailsDataSeries } from '../../../../../common/http_api/node_details_api';
 import { InventoryVisType } from '../../../../../common/inventory_models/types';
 
 interface Props {
   id: string;
   name: string;
   color: string | null;
-  series: InfraDataSeries;
+  series: NodeDetailsDataSeries;
   type: InventoryVisType;
   stack: boolean | undefined;
 }
@@ -59,7 +59,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
   );
 };
 
-export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
+export const BarChart = ({ id, color, series, name, stack }: Props) => {
   const style: RecursivePartial<BarSeriesStyle> = {
     rectBorder: {
       stroke: color || void 0,

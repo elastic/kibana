@@ -5,9 +5,57 @@
  */
 
 import { TimeKey } from '../time';
-import { InfraLogEntry } from '../graphql/types';
 
-export type LogEntry = InfraLogEntry;
+export interface InfraLogMessageConstantSegment {
+  constant: string;
+}
+
+export interface InfraLogMessageFieldSegment {
+  field: string;
+  value: string;
+  highlights: string[];
+}
+
+export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
+
+export interface InfraLogEntryTimestampColumn {
+  columnId: string;
+  timestamp: number;
+}
+
+export interface InfraLogEntryMessageColumn {
+  columnId: string;
+  message: InfraLogMessageSegment[];
+}
+
+export interface InfraLogEntryMessageColumn {
+  columnId: string;
+  message: InfraLogMessageSegment[];
+}
+
+export interface InfraLogEntryFieldColumn {
+  columnId: string;
+  field: string;
+  value: string;
+  highlights: string[];
+}
+
+export type InfraLogEntryColumn =
+  | InfraLogEntryTimestampColumn
+  | InfraLogEntryMessageColumn
+  | InfraLogEntryFieldColumn;
+
+export interface InfraTimeKey {
+  time: number;
+  tiebreaker: number;
+}
+
+export interface LogEntry {
+  key: InfraTimeKey;
+  gid: string;
+  source: string;
+  columns: InfraLogEntryColumn[];
+}
 
 export interface LogEntryOrigin {
   id: string;

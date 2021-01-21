@@ -7,14 +7,17 @@
 import React, { useContext } from 'react';
 
 import { IIndexPattern } from 'src/plugins/data/public';
-import { SourceQuery, UpdateSourceInput } from '../../graphql/types';
+import {
+  InfraSavedSourceConfiguration,
+  InfraSourceConfiguration,
+} from '../../../common/http_api/source_api';
 import { RendererFunction } from '../../utils/typed_react';
 import { Source } from '../source';
 
 interface WithSourceProps {
   children: RendererFunction<{
-    configuration?: SourceQuery.Query['source']['configuration'];
-    create: (sourceProperties: UpdateSourceInput) => Promise<any> | undefined;
+    configuration?: InfraSourceConfiguration;
+    create: (sourceProperties: InfraSavedSourceConfiguration) => Promise<any> | undefined;
     createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
     exists?: boolean;
     hasFailed: boolean;
@@ -25,7 +28,7 @@ interface WithSourceProps {
     metricAlias?: string;
     metricIndicesExist?: boolean;
     sourceId: string;
-    update: (sourceProperties: UpdateSourceInput) => Promise<any> | undefined;
+    update: (sourceProperties: InfraSavedSourceConfiguration) => Promise<any> | undefined;
     version?: string;
   }>;
 }

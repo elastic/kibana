@@ -5,12 +5,12 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { InfraSourceConfiguration } from '../../../common/http_api/source_api';
 
 import { useIndicesConfigurationFormState } from './indices_configuration_form_state';
 import { useLogColumnsConfigurationFormState } from './log_columns_configuration_form_state';
-import { SourceConfiguration } from '../../utils/source_configuration';
 
-export const useSourceConfigurationFormState = (configuration?: SourceConfiguration) => {
+export const useSourceConfigurationFormState = (configuration?: InfraSourceConfiguration) => {
   const indicesConfigurationFormState = useIndicesConfigurationFormState({
     initialFormState: useMemo(
       () =>

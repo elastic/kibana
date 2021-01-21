@@ -8,7 +8,7 @@ import DateMath from '@elastic/datemath';
 import { isEqual } from 'lodash';
 import { useEffect, useState, useCallback } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { SourceQuery } from '../../../../../common/graphql/types';
+import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
 import {
   MetricsExplorerResponse,
   metricsExplorerResponseRT,
@@ -24,7 +24,7 @@ function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOpt
 
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
-  source: SourceQuery.Query['source']['configuration'] | undefined,
+  source: InfraSourceConfiguration | undefined,
   derivedIndexPattern: IIndexPattern,
   timerange: MetricsExplorerTimeOptions,
   afterKey: string | null | Record<string, string | null>,

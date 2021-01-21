@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SourceConfigurationFields } from '../graphql/types';
+import {
+  InfraSavedSourceConfigurationColumn,
+  InfraSavedSourceConfigurationFields,
+  InfraSourceConfigurationMessageColumn,
+  InfraSourceConfigurationTimestampColumn,
+} from '../../common/http_api/source_api';
 
-export type SourceConfiguration = SourceConfigurationFields.Fragment;
-
-export type LogColumnConfiguration = SourceConfigurationFields.LogColumns;
-export type FieldLogColumnConfiguration = SourceConfigurationFields.InfraSourceFieldLogColumnInlineFragment;
-export type MessageLogColumnConfiguration = SourceConfigurationFields.InfraSourceMessageLogColumnInlineFragment;
-export type TimestampLogColumnConfiguration = SourceConfigurationFields.InfraSourceTimestampLogColumnInlineFragment;
+export type LogColumnConfiguration = InfraSavedSourceConfigurationColumn;
+export type FieldLogColumnConfiguration = InfraSavedSourceConfigurationFields;
+export type MessageLogColumnConfiguration = InfraSourceConfigurationMessageColumn;
+export type TimestampLogColumnConfiguration = InfraSourceConfigurationTimestampColumn;
 
 export const isFieldLogColumnConfiguration = (
   logColumnConfiguration: LogColumnConfiguration
