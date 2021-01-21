@@ -8,16 +8,23 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 function ndjsonToObject(input: string) {
   return input.split('\n').map((str) => JSON.parse(str));
 }
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('export', () => {
+    let KIBANA_VERSION: string;
+
+    before(async () => {
+      KIBANA_VERSION = await getKibanaVersion(getService);
+    });
+
     describe('with kibana index', () => {
       describe('basic amount of saved objects', () => {
         before(() => esArchiver.load('saved_objects/basic'));
@@ -312,6 +319,7 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                   id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                   migrationVersion: objects[0].migrationVersion,
+                  coreMigrationVersion: KIBANA_VERSION,
                   references: [
                     {
                       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -371,6 +379,7 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                   id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                   migrationVersion: objects[0].migrationVersion,
+                  coreMigrationVersion: KIBANA_VERSION,
                   references: [
                     {
                       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -435,6 +444,7 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                   id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                   migrationVersion: objects[0].migrationVersion,
+                  coreMigrationVersion: KIBANA_VERSION,
                   references: [
                     {
                       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -524,10 +534,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
-            ignore: [404],
-          })
+          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
       );
 
       it('should return empty response', async () => {

@@ -90,6 +90,7 @@ export class KibanaMigrator {
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaConfig = kibanaConfig;
+    this.kibanaVersion = kibanaVersion;
     this.savedObjectsConfig = savedObjectsConfig;
     this.typeRegistry = typeRegistry;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
@@ -177,7 +178,7 @@ export class KibanaMigrator {
               transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
                 migrateRawDocs(
                   this.serializer,
-                  this.documentMigrator.migrate,
+                  this.documentMigrator.migrateAndConvert,
                   rawDocs,
                   new MigrationLogger(this.log)
                 ),
@@ -192,6 +193,7 @@ export class KibanaMigrator {
           client: createMigrationEsClient(this.client, this.log, this.migrationsRetryDelay),
           documentMigrator: this.documentMigrator,
           index,
+          kibanaVersion: this.kibanaVersion,
           log: this.log,
           mappingProperties: indexMap[index].typeMappings,
           pollInterval: this.savedObjectsConfig.pollInterval,
