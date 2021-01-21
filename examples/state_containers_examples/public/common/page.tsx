@@ -7,39 +7,20 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 'react-router-dom';
-
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
-
-import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
-import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { Start as InspectorStartContract } from '../../../src/plugins/inspector/public';
-import {
-  AppMountParameters,
-  CoreStart,
-  SavedObjectsStart,
-  IUiSettingsClient,
-  OverlayStart,
-} from '../../../src/core/public';
-import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
-import { TodoEmbeddableExample } from './todo_embeddable_example';
-import { ListContainerExample } from './list_container_example';
-import { EmbeddablePanelExample } from './embeddable_panel_example';
-import { EmbeddableExamplesStart } from '../../embeddable_examples/public/plugin';
+import { CoreStart } from '../../../../src/core/public';
 
 interface PageDef {
   title: string;
   id: string;
-  component: React.ReactNode;
 }
 
-type NavProps = RouteComponentProps & {
+interface NavProps {
   navigateToApp: CoreStart['application']['navigateToApp'];
   pages: PageDef[];
-};
+}
 
-const Page = withRouter(({ history, navigateToApp, pages }: NavProps) => {
+const SideNav: React.FC<NavProps> = ({ navigateToApp, pages }: NavProps) => {
   const navItems = pages.map((page) => ({
     id: page.id,
     name: page.title,
@@ -58,7 +39,7 @@ const Page = withRouter(({ history, navigateToApp, pages }: NavProps) => {
       ]}
     />
   );
-});
+};
 
 interface Props {
   navigateToApp: CoreStart['application']['navigateToApp'];
@@ -71,7 +52,19 @@ export const StateContainersExamplesPage: React.FC<Props> = ({
   return (
     <EuiPage>
       <EuiPageSideBar>
-        <Page navigateToApp={navigateToApp} pages={pages} />
+        <SideNav
+          navigateToApp={navigateToApp}
+          pages={[
+            {
+              title: 'Example 1',
+              id: 'example1',
+            },
+            {
+              title: 'Example 2',
+              id: 'example2',
+            },
+          ]}
+        />
       </EuiPageSideBar>
       {children}
     </EuiPage>

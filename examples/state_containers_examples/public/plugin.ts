@@ -23,11 +23,16 @@ export class StateContainersExamplesPlugin implements Plugin {
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderApp, History } = await import('./todo/app');
-        return renderApp(params, {
-          appInstanceId: '1',
-          appTitle: 'Routing with browser history',
-          historyType: History.Browser,
-        });
+        const [coreStart] = await core.getStartServices();
+        return renderApp(
+          params,
+          {
+            appInstanceId: '1',
+            appTitle: 'Routing with browser history',
+            historyType: History.Browser,
+          },
+          { navigateToApp: coreStart.application.navigateToApp }
+        );
       },
     });
     core.application.register({
@@ -36,11 +41,16 @@ export class StateContainersExamplesPlugin implements Plugin {
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderApp, History } = await import('./todo/app');
-        return renderApp(params, {
-          appInstanceId: '2',
-          appTitle: 'Routing with hash history',
-          historyType: History.Hash,
-        });
+        const [coreStart] = await core.getStartServices();
+        return renderApp(
+          params,
+          {
+            appInstanceId: '2',
+            appTitle: 'Routing with hash history',
+            historyType: History.Hash,
+          },
+          { navigateToApp: coreStart.application.navigateToApp }
+        );
       },
     });
 
@@ -100,7 +110,7 @@ export class StateContainersExamplesPlugin implements Plugin {
       appId: PLUGIN_ID,
       title: 'Sync state from a query bar with the url',
       description: `Shows how to use data.syncQueryStateWitUrl in combination  with state container utilities from kibana_utils to
-      show a query bar that stores state in the url and is kept in  sync. 
+      show a query bar that stores state in the url and is kept in  sync.
       `,
       links: [
         {
