@@ -226,14 +226,13 @@ export class IndexPatternsService {
   getFieldsForIndexPattern = async (
     indexPattern: IndexPattern | IndexPatternSpec,
     options?: GetFieldsOptions
-  ) => {
-    return this.getFieldsForWildcard({
+  ) =>
+    this.getFieldsForWildcard({
       type: indexPattern.type,
       rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
       ...options,
       patternList: indexPattern.patternListActive,
     });
-  };
 
   /**
    * Refresh field list for a given index pattern

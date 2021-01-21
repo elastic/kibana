@@ -42,7 +42,7 @@ type Action =
   | { type: 'SET_INCLUDING_SYSTEM_INDICES'; payload: boolean }
   | {
       type: 'SET_SELECTED_PATTERNS';
-      payload: { selectedPatterns: string[]; patternError: boolean };
+      payload: string[];
     }
   | { type: 'SET_INDEX_PATTERN_NAME'; payload: string }
   | {
@@ -66,7 +66,8 @@ const dataFetchReducer = (state: StepIndexPatternState, action: Action): StepInd
     case 'SET_SELECTED_PATTERNS':
       return {
         ...state,
-        ...action.payload,
+        selectedPatterns: action.payload,
+        patternError: state.selectedPatterns.length > 0 && action.payload.length === 0,
       };
     case 'SET_INDEX_PATTERN_NAME':
       return {
@@ -244,10 +245,7 @@ export const useIndexPattern = (
     });
     dispatch({
       type: 'SET_SELECTED_PATTERNS',
-      payload: {
-        selectedPatterns: wildcardArray,
-        patternError: !wildcardArray.length,
-      },
+      payload: wildcardArray,
     });
   }, []);
 
