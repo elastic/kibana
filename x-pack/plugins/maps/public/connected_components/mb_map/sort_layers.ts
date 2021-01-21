@@ -28,6 +28,10 @@ export function getIsTextLayer(mbLayer: MbLayer) {
   });
 }
 
+export function isGlDrawLayer(mbLayerId: string) {
+  return mbLayerId.startsWith('gl-draw');
+}
+
 function doesMbLayerBelongToMapLayerAndClass(
   mapLayer: ILayer,
   mbLayer: MbLayer,
@@ -117,6 +121,16 @@ export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerL
     moveMapLayer(mbMap, mbLayers, spatialFiltersLayer, LAYER_CLASS.ANY);
   }
   let beneathMbLayerId = getBottomMbLayerId(mbLayers, spatialFiltersLayer, LAYER_CLASS.ANY);
+
+  // Ensure gl-draw layers are on top of any map layer
+  const glDrawLayer = ({
+    ownsMbLayerId: (mbLayerId: string) => {
+      return isGlDrawLayer(mbLayerId);
+    },
+  } as unknown) as ILayer;
+  moveMapLayer(mbMap, mbLayers, glDrawLayer, LAYER_CLASS.ANY, beneathMbLayerId);
+  const glDrawBottomMbLayerId = getBottomMbLayerId(mbLayers, glDrawLayer, LAYER_CLASS.ANY);
+  if (glDrawBottomMbLayerId) beneathMbLayerId = glDrawBottomMbLayerId;
 
   // Sort map layer labels
   [...layerList]
