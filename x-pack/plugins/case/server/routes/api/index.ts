@@ -5,6 +5,7 @@
  */
 
 import { initDeleteCasesApi } from './cases/delete_cases';
+import { initConvertCaseToCollectionApi } from './cases/convert_case';
 import { initFindCasesApi } from '././cases/find_cases';
 import { initGetCaseApi } from './cases/get_case';
 import { initPatchCasesApi } from './cases/patch_cases';
@@ -30,6 +31,7 @@ import { initPostCaseConfigure } from './cases/configure/post_configure';
 import { initPostPushToService } from './cases/configure/post_push_to_service';
 
 import { RouteDeps } from './types';
+import { initGetSubCaseApi } from './cases/sub_case/get_sub_case';
 
 export function initCaseApi(deps: RouteDeps) {
   // Cases
@@ -40,6 +42,10 @@ export function initCaseApi(deps: RouteDeps) {
   initPostCaseApi(deps);
   initPushCaseUserActionApi(deps);
   initGetAllUserActionsApi(deps);
+  initConvertCaseToCollectionApi(deps);
+  // Sub cases
+  initGetSubCaseApi(deps);
+
   // Comments
   initDeleteCommentApi(deps);
   initDeleteAllCommentsApi(deps);

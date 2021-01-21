@@ -112,16 +112,16 @@ interface GetUserArgs {
   response?: KibanaResponseFactory;
 }
 
-interface CaseServiceDeps {
-  authentication: SecurityPluginSetup['authc'] | null;
-}
-
 // TODO: split this up into comments, case, sub case, possibly more?
 export interface CaseServiceSetup {
   deleteCase(args: GetCaseArgs): Promise<{}>;
   deleteComment(args: GetCommentArgs): Promise<{}>;
+  deleteSubCase(client: SavedObjectsClientContract, id: string): Promise<{}>;
   findCases(args: FindCasesArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>>;
-  // TODO: refactor these because they use the same parameters and implementation
+  findSubCases(
+    client: SavedObjectsClientContract,
+    caseId: string
+  ): Promise<SavedObjectsFindResponse<SubCaseAttributes>>;
   getAllCaseComments(args: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>>;
   getCase(args: GetCaseArgs): Promise<SavedObject<ESCaseAttributes>>;
   getSubCase(args: GetCaseArgs): Promise<SavedObject<SubCaseAttributes>>;
@@ -148,272 +148,319 @@ export interface CaseServiceSetup {
   patchSubCase(args: PatchSubCase): Promise<SavedObjectsUpdateResponse<SubCaseAttributes>>;
 }
 
-export class CaseService {
-  constructor(private readonly log: Logger) {}
-  public setup = async ({ authentication }: CaseServiceDeps): Promise<CaseServiceSetup> => ({
-    createSubCase: async (
-      client: SavedObjectsClientContract,
-      createdAt: string,
-      caseId: string
-    ): Promise<SavedObject<SubCaseAttributes>> => {
-      try {
-        this.log.debug(`Attempting to POST a new sub case`);
-        return await client.create(SUB_CASE_SAVED_OBJECT, transformNewSubCase(createdAt), {
-          references: [
-            {
-              type: CASE_SAVED_OBJECT,
-              name: `associated-${CASE_SAVED_OBJECT}`,
-              id: caseId,
-            },
-          ],
-        });
-      } catch (error) {
-        this.log.debug(`Error on POST a new sub case: ${error}`);
-        throw error;
-      }
-    },
-    getMostRecentSubCase: async (client: SavedObjectsClientContract, caseId: string) => {
-      try {
-        this.log.debug(`Attempting to find most recent sub case for caseID: ${caseId}`);
-        const subCases: SavedObjectsFindResponse<SubCaseAttributes> = await client.find({
-          perPage: 1,
-          sortField: 'created_at',
-          sortOrder: 'desc',
-          type: SUB_CASE_SAVED_OBJECT,
-          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-        });
-        if (subCases.saved_objects.length <= 0) {
-          return;
-        }
+export class CaseService implements CaseServiceSetup {
+  constructor(
+    private readonly log: Logger,
+    private readonly authentication?: SecurityPluginSetup['authc']
+  ) {}
 
-        return subCases.saved_objects[0];
-      } catch (error) {
-        this.log.debug(`Error finding the most recent sub case for case: ${caseId}`);
-        throw error;
-      }
-    },
-    deleteCase: async ({ client, id: caseId }: GetCaseArgs) => {
-      try {
-        this.log.debug(`Attempting to GET case ${caseId}`);
-        return await client.delete(CASE_SAVED_OBJECT, caseId);
-      } catch (error) {
-        this.log.debug(`Error on GET case ${caseId}: ${error}`);
-        throw error;
-      }
-    },
-    deleteComment: async ({ client, commentId }: GetCommentArgs) => {
-      try {
-        this.log.debug(`Attempting to GET comment ${commentId}`);
-        return await client.delete(CASE_COMMENT_SAVED_OBJECT, commentId);
-      } catch (error) {
-        this.log.debug(`Error on GET comment ${commentId}: ${error}`);
-        throw error;
-      }
-    },
-    getCase: async ({ client, id: caseId }: GetCaseArgs) => {
-      try {
-        this.log.debug(`Attempting to GET case ${caseId}`);
-        return await client.get(CASE_SAVED_OBJECT, caseId);
-      } catch (error) {
-        this.log.debug(`Error on GET case ${caseId}: ${error}`);
-        throw error;
-      }
-    },
-    getSubCase: async ({ client, id }: GetCaseArgs) => {
-      try {
-        this.log.debug(`Attempting to GET sub case ${id}`);
-        return await client.get(SUB_CASE_SAVED_OBJECT, id);
-      } catch (error) {
-        this.log.debug(`Error on GET sub case ${id}: ${error}`);
-        throw error;
-      }
-    },
-    getCases: async ({ client, caseIds }: GetCasesArgs) => {
-      try {
-        this.log.debug(`Attempting to GET cases ${caseIds.join(', ')}`);
-        return await client.bulkGet(
-          caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
-        );
-      } catch (error) {
-        this.log.debug(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
-        throw error;
-      }
-    },
-    getComment: async ({ client, commentId }: GetCommentArgs) => {
-      try {
-        this.log.debug(`Attempting to GET comment ${commentId}`);
-        return await client.get(CASE_COMMENT_SAVED_OBJECT, commentId);
-      } catch (error) {
-        this.log.debug(`Error on GET comment ${commentId}: ${error}`);
-        throw error;
-      }
-    },
-    findCases: async ({ client, options }: FindCasesArgs) => {
-      try {
-        this.log.debug(`Attempting to GET all cases`);
-        return await client.find({ ...options, type: CASE_SAVED_OBJECT });
-      } catch (error) {
-        this.log.debug(`Error on GET cases: ${error}`);
-        throw error;
-      }
-    },
-    getAllCaseComments: async ({ client, id, options }: FindCommentsArgs) => {
-      try {
-        this.log.debug(`Attempting to GET all comments for case ${id}`);
-        return await client.find({
-          type: CASE_COMMENT_SAVED_OBJECT,
-          hasReferenceOperator: 'OR',
-          hasReference: [
-            { type: CASE_SAVED_OBJECT, id },
-            { type: SUB_CASE_SAVED_OBJECT, id },
-          ],
-          // spread the options after so the caller can override the default behavior if they want
-          ...options,
-        });
-      } catch (error) {
-        this.log.debug(`Error on GET all comments for case ${id}: ${error}`);
-        throw error;
-      }
-    },
-    getReporters: async ({ client }: ClientArgs) => {
-      try {
-        this.log.debug(`Attempting to GET all reporters`);
-        return await readReporters({ client });
-      } catch (error) {
-        this.log.debug(`Error on GET all reporters: ${error}`);
-        throw error;
-      }
-    },
-    getTags: async ({ client }: ClientArgs) => {
-      try {
-        this.log.debug(`Attempting to GET all cases`);
-        return await readTags({ client });
-      } catch (error) {
-        this.log.debug(`Error on GET cases: ${error}`);
-        throw error;
-      }
-    },
-    getUser: async ({ request, response }: GetUserArgs) => {
-      try {
-        this.log.debug(`Attempting to authenticate a user`);
-        if (authentication != null) {
-          const user = authentication.getCurrentUser(request);
-          if (!user) {
-            return {
-              username: null,
-              full_name: null,
-              email: null,
-            };
-          }
-          return user;
-        }
-        return {
-          username: null,
-          full_name: null,
-          email: null,
-        };
-      } catch (error) {
-        this.log.debug(`Error on GET cases: ${error}`);
-        throw error;
-      }
-    },
-    postNewCase: async ({ client, attributes }: PostCaseArgs) => {
-      try {
-        this.log.debug(`Attempting to POST a new case`);
-        return await client.create(CASE_SAVED_OBJECT, { ...attributes });
-      } catch (error) {
-        this.log.debug(`Error on POST a new case: ${error}`);
-        throw error;
-      }
-    },
-    postNewComment: async ({ client, attributes, references }: PostCommentArgs) => {
-      try {
-        this.log.debug(`Attempting to POST a new comment`);
-        return await client.create(CASE_COMMENT_SAVED_OBJECT, attributes, { references });
-      } catch (error) {
-        this.log.debug(`Error on POST a new comment: ${error}`);
-        throw error;
-      }
-    },
-    patchCase: async ({ client, caseId, updatedAttributes, version }: PatchCaseArgs) => {
-      try {
-        this.log.debug(`Attempting to UPDATE case ${caseId}`);
-        return await client.update(
-          CASE_SAVED_OBJECT,
-          caseId,
-          { ...updatedAttributes },
-          { version }
-        );
-      } catch (error) {
-        this.log.debug(`Error on UPDATE case ${caseId}: ${error}`);
-        throw error;
-      }
-    },
-    patchCases: async ({ client, cases }: PatchCasesArgs) => {
-      try {
-        this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
-        return await client.bulkUpdate(
-          cases.map((c) => ({
-            type: CASE_SAVED_OBJECT,
-            id: c.caseId,
-            attributes: c.updatedAttributes,
-            version: c.version,
-          }))
-        );
-      } catch (error) {
-        this.log.debug(`Error on UPDATE case ${cases.map((c) => c.caseId).join(', ')}: ${error}`);
-        throw error;
-      }
-    },
-    patchComment: async ({ client, commentId, updatedAttributes, version }: UpdateCommentArgs) => {
-      try {
-        this.log.debug(`Attempting to UPDATE comment ${commentId}`);
-        return await client.update(
-          CASE_COMMENT_SAVED_OBJECT,
-          commentId,
+  public async createSubCase(
+    client: SavedObjectsClientContract,
+    createdAt: string,
+    caseId: string
+  ): Promise<SavedObject<SubCaseAttributes>> {
+    try {
+      this.log.debug(`Attempting to POST a new sub case`);
+      return client.create(SUB_CASE_SAVED_OBJECT, transformNewSubCase(createdAt), {
+        references: [
           {
-            ...updatedAttributes,
+            type: CASE_SAVED_OBJECT,
+            name: `associated-${CASE_SAVED_OBJECT}`,
+            id: caseId,
           },
-          { version }
-        );
-      } catch (error) {
-        this.log.debug(`Error on UPDATE comment ${commentId}: ${error}`);
-        throw error;
+        ],
+      });
+    } catch (error) {
+      this.log.debug(`Error on POST a new sub case: ${error}`);
+      throw error;
+    }
+  }
+
+  public async getMostRecentSubCase(client: SavedObjectsClientContract, caseId: string) {
+    try {
+      this.log.debug(`Attempting to find most recent sub case for caseID: ${caseId}`);
+      const subCases: SavedObjectsFindResponse<SubCaseAttributes> = await client.find({
+        perPage: 1,
+        sortField: 'created_at',
+        sortOrder: 'desc',
+        type: SUB_CASE_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+      });
+      if (subCases.saved_objects.length <= 0) {
+        return;
       }
-    },
-    patchComments: async ({ client, comments }: PatchComments) => {
-      try {
-        this.log.debug(
-          `Attempting to UPDATE comments ${comments.map((c) => c.commentId).join(', ')}`
-        );
-        return await client.bulkUpdate(
-          comments.map((c) => ({
-            type: CASE_COMMENT_SAVED_OBJECT,
-            id: c.commentId,
-            attributes: c.updatedAttributes,
-            version: c.version,
-          }))
-        );
-      } catch (error) {
-        this.log.debug(
-          `Error on UPDATE comments ${comments.map((c) => c.commentId).join(', ')}: ${error}`
-        );
-        throw error;
+
+      return subCases.saved_objects[0];
+    } catch (error) {
+      this.log.debug(`Error finding the most recent sub case for case: ${caseId}`);
+      throw error;
+    }
+  }
+
+  public async deleteSubCase(client: SavedObjectsClientContract, id: string) {
+    try {
+      this.log.debug(`Attempting to DELETE sub case ${id}`);
+      return await client.delete(SUB_CASE_SAVED_OBJECT, id);
+    } catch (error) {
+      this.log.debug(`Error on DELETE sub case ${id}: ${error}`);
+      throw error;
+    }
+  }
+
+  public async deleteCase({ client, id: caseId }: GetCaseArgs) {
+    try {
+      this.log.debug(`Attempting to DELETE case ${caseId}`);
+      return await client.delete(CASE_SAVED_OBJECT, caseId);
+    } catch (error) {
+      this.log.debug(`Error on DELETE case ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+  public async deleteComment({ client, commentId }: GetCommentArgs) {
+    try {
+      this.log.debug(`Attempting to GET comment ${commentId}`);
+      return await client.delete(CASE_COMMENT_SAVED_OBJECT, commentId);
+    } catch (error) {
+      this.log.debug(`Error on GET comment ${commentId}: ${error}`);
+      throw error;
+    }
+  }
+  public async getCase({
+    client,
+    id: caseId,
+  }: GetCaseArgs): Promise<SavedObject<ESCaseAttributes>> {
+    try {
+      this.log.debug(`Attempting to GET case ${caseId}`);
+      return await client.get(CASE_SAVED_OBJECT, caseId);
+    } catch (error) {
+      this.log.debug(`Error on GET case ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+  public async getSubCase({ client, id }: GetCaseArgs): Promise<SavedObject<SubCaseAttributes>> {
+    try {
+      this.log.debug(`Attempting to GET sub case ${id}`);
+      return await client.get(SUB_CASE_SAVED_OBJECT, id);
+    } catch (error) {
+      this.log.debug(`Error on GET sub case ${id}: ${error}`);
+      throw error;
+    }
+  }
+  public async getCases({
+    client,
+    caseIds,
+  }: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>> {
+    try {
+      this.log.debug(`Attempting to GET cases ${caseIds.join(', ')}`);
+      return await client.bulkGet(
+        caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
+      );
+    } catch (error) {
+      this.log.debug(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
+      throw error;
+    }
+  }
+  public async getComment({
+    client,
+    commentId,
+  }: GetCommentArgs): Promise<SavedObject<CommentAttributes>> {
+    try {
+      this.log.debug(`Attempting to GET comment ${commentId}`);
+      return await client.get(CASE_COMMENT_SAVED_OBJECT, commentId);
+    } catch (error) {
+      this.log.debug(`Error on GET comment ${commentId}: ${error}`);
+      throw error;
+    }
+  }
+  public async findCases({
+    client,
+    options,
+  }: FindCasesArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
+    try {
+      this.log.debug(`Attempting to GET all cases`);
+      return await client.find({ ...options, type: CASE_SAVED_OBJECT });
+    } catch (error) {
+      this.log.debug(`Error on GET cases: ${error}`);
+      throw error;
+    }
+  }
+
+  public async findSubCases(
+    client: SavedObjectsClientContract,
+    caseId: string
+  ): Promise<SavedObjectsFindResponse<SubCaseAttributes>> {
+    try {
+      this.log.debug(`Attempting to GET sub cases for case collection id ${caseId}`);
+      return client.find({
+        type: SUB_CASE_SAVED_OBJECT,
+        hasReference: [
+          {
+            type: CASE_SAVED_OBJECT,
+            id: caseId,
+          },
+        ],
+      });
+    } catch (error) {
+      this.log.debug(`Error on GET all sub cases for case collection ids ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  public async getAllCaseComments({
+    client,
+    id,
+    options,
+  }: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
+    try {
+      this.log.debug(`Attempting to GET all comments for case ${id}`);
+      return await client.find({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        hasReferenceOperator: 'OR',
+        hasReference: [
+          { type: CASE_SAVED_OBJECT, id },
+          { type: SUB_CASE_SAVED_OBJECT, id },
+        ],
+        // spread the options after so the caller can override the default behavior if they want
+        ...options,
+      });
+    } catch (error) {
+      this.log.debug(`Error on GET all comments for case ${id}: ${error}`);
+      throw error;
+    }
+  }
+  public async getReporters({ client }: ClientArgs) {
+    try {
+      this.log.debug(`Attempting to GET all reporters`);
+      return await readReporters({ client });
+    } catch (error) {
+      this.log.debug(`Error on GET all reporters: ${error}`);
+      throw error;
+    }
+  }
+  public async getTags({ client }: ClientArgs) {
+    try {
+      this.log.debug(`Attempting to GET all cases`);
+      return await readTags({ client });
+    } catch (error) {
+      this.log.debug(`Error on GET cases: ${error}`);
+      throw error;
+    }
+  }
+  public async getUser({ request, response }: GetUserArgs) {
+    try {
+      this.log.debug(`Attempting to authenticate a user`);
+      if (this.authentication != null) {
+        const user = this.authentication.getCurrentUser(request);
+        if (!user) {
+          return {
+            username: null,
+            full_name: null,
+            email: null,
+          };
+        }
+        return user;
       }
-    },
-    patchSubCase: async ({ client, subCaseId, updatedAttributes, version }: PatchSubCase) => {
-      try {
-        this.log.debug(`Attempting to UPDATE sub case ${subCaseId}`);
-        return await client.update(
-          CASE_SAVED_OBJECT,
-          subCaseId,
-          { ...updatedAttributes },
-          { version }
-        );
-      } catch (error) {
-        this.log.debug(`Error on UPDATE sub case ${subCaseId}: ${error}`);
-        throw error;
-      }
-    },
-  });
+      return {
+        username: null,
+        full_name: null,
+        email: null,
+      };
+    } catch (error) {
+      this.log.debug(`Error on GET cases: ${error}`);
+      throw error;
+    }
+  }
+  public async postNewCase({ client, attributes }: PostCaseArgs) {
+    try {
+      this.log.debug(`Attempting to POST a new case`);
+      return await client.create(CASE_SAVED_OBJECT, { ...attributes });
+    } catch (error) {
+      this.log.debug(`Error on POST a new case: ${error}`);
+      throw error;
+    }
+  }
+  public async postNewComment({ client, attributes, references }: PostCommentArgs) {
+    try {
+      this.log.debug(`Attempting to POST a new comment`);
+      return await client.create(CASE_COMMENT_SAVED_OBJECT, attributes, { references });
+    } catch (error) {
+      this.log.debug(`Error on POST a new comment: ${error}`);
+      throw error;
+    }
+  }
+  public async patchCase({ client, caseId, updatedAttributes, version }: PatchCaseArgs) {
+    try {
+      this.log.debug(`Attempting to UPDATE case ${caseId}`);
+      return await client.update(CASE_SAVED_OBJECT, caseId, { ...updatedAttributes }, { version });
+    } catch (error) {
+      this.log.debug(`Error on UPDATE case ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+  public async patchCases({ client, cases }: PatchCasesArgs) {
+    try {
+      this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
+      return await client.bulkUpdate(
+        cases.map((c) => ({
+          type: CASE_SAVED_OBJECT,
+          id: c.caseId,
+          attributes: c.updatedAttributes,
+          version: c.version,
+        }))
+      );
+    } catch (error) {
+      this.log.debug(`Error on UPDATE case ${cases.map((c) => c.caseId).join(', ')}: ${error}`);
+      throw error;
+    }
+  }
+  public async patchComment({ client, commentId, updatedAttributes, version }: UpdateCommentArgs) {
+    try {
+      this.log.debug(`Attempting to UPDATE comment ${commentId}`);
+      return await client.update(
+        CASE_COMMENT_SAVED_OBJECT,
+        commentId,
+        {
+          ...updatedAttributes,
+        },
+        { version }
+      );
+    } catch (error) {
+      this.log.debug(`Error on UPDATE comment ${commentId}: ${error}`);
+      throw error;
+    }
+  }
+  public async patchComments({ client, comments }: PatchComments) {
+    try {
+      this.log.debug(
+        `Attempting to UPDATE comments ${comments.map((c) => c.commentId).join(', ')}`
+      );
+      return await client.bulkUpdate(
+        comments.map((c) => ({
+          type: CASE_COMMENT_SAVED_OBJECT,
+          id: c.commentId,
+          attributes: c.updatedAttributes,
+          version: c.version,
+        }))
+      );
+    } catch (error) {
+      this.log.debug(
+        `Error on UPDATE comments ${comments.map((c) => c.commentId).join(', ')}: ${error}`
+      );
+      throw error;
+    }
+  }
+  public async patchSubCase({ client, subCaseId, updatedAttributes, version }: PatchSubCase) {
+    try {
+      this.log.debug(`Attempting to UPDATE sub case ${subCaseId}`);
+      return await client.update(
+        CASE_SAVED_OBJECT,
+        subCaseId,
+        { ...updatedAttributes },
+        { version }
+      );
+    } catch (error) {
+      this.log.debug(`Error on UPDATE sub case ${subCaseId}: ${error}`);
+      throw error;
+    }
+  }
 }

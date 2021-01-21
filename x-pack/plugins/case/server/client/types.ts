@@ -8,6 +8,7 @@ import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { ActionsClient } from '../../../actions/server';
 import {
   CaseClientPostRequest,
+  CaseConvertRequest,
   CaseResponse,
   CasesPatchRequest,
   CasesResponse,
@@ -26,12 +27,13 @@ import {
   AlertServiceContract,
 } from '../services';
 import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
+
+// TODO: Remove unused types
 export interface CaseClientCreate {
   theCase: CaseClientPostRequest;
 }
 
 export interface CaseClientUpdate {
-  caseClient: CaseClient;
   cases: CasesPatchRequest;
 }
 
@@ -42,7 +44,6 @@ export interface CaseClientAddComment {
 }
 
 export interface CaseClientAddInternalComment {
-  caseClient: CaseClient;
   caseId: string;
   comment: InternalCommentRequest;
 }
@@ -69,13 +70,17 @@ export interface ConfigureFields {
   connectorType: string;
 }
 export interface CaseClient {
-  addComment: (args: CaseClientAddComment) => Promise<CombinedCaseResponse>;
-  addCommentFromRule: (args: CaseClientAddInternalComment) => Promise<CombinedCaseResponse>;
-  create: (args: CaseClientCreate) => Promise<CaseResponse>;
-  getFields: (args: ConfigureFields) => Promise<GetFieldsResponse>;
-  getMappings: (args: MappingsClient) => Promise<ConnectorMappingsAttributes[]>;
-  update: (args: CaseClientUpdate) => Promise<CasesResponse>;
-  updateAlertsStatus: (args: CaseClientUpdateAlertsStatus) => Promise<void>;
+  addComment: (caseId: string, comment: CommentRequest) => Promise<CombinedCaseResponse>;
+  addCommentFromRule: (
+    caseId: string,
+    comment: InternalCommentRequest
+  ) => Promise<CombinedCaseResponse>;
+  create(theCase: CaseClientPostRequest): Promise<CaseResponse>;
+  convertCaseToCollection(caseInfo: CaseConvertRequest): Promise<CasesResponse>;
+  getFields(args: ConfigureFields): Promise<GetFieldsResponse>;
+  getMappings(args: MappingsClient): Promise<ConnectorMappingsAttributes[]>;
+  update(cases: CasesPatchRequest): Promise<CasesResponse>;
+  updateAlertsStatus(args: CaseClientUpdateAlertsStatus): Promise<void>;
 }
 
 export interface MappingsClient {

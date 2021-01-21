@@ -4,15 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaseClientUpdateAlertsStatus, CaseClientFactoryArguments } from '../types';
+import { KibanaRequest } from 'src/core/server';
+import { CaseStatuses } from '../../../common/api';
+import { AlertServiceContract } from '../../services';
 
-export const updateAlertsStatus = ({
+interface UpdateAlertsStatusArgs {
+  alertsService: AlertServiceContract;
+  request: KibanaRequest;
+  ids: string[];
+  status: CaseStatuses;
+  indices: Set<string>;
+}
+
+// TODO: remove this file
+export const updateAlertsStatus = async ({
   alertsService,
   request,
-}: CaseClientFactoryArguments) => async ({
   ids,
   status,
   indices,
-}: CaseClientUpdateAlertsStatus): Promise<void> => {
+}: UpdateAlertsStatusArgs): Promise<void> => {
   await alertsService.updateAlertsStatus({ ids, status, indices, request });
 };

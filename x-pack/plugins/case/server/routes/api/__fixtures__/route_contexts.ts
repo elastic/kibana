@@ -23,13 +23,13 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   const log = loggingSystemMock.create().get('case');
   const esClientMock = elasticsearchServiceMock.createClusterClient();
 
-  const caseServicePlugin = new CaseService(log);
+  const caseService = new CaseService(
+    log,
+    badAuth ? authenticationMock.createInvalid() : authenticationMock.create()
+  );
   const caseConfigureServicePlugin = new CaseConfigureService(log);
   const connectorMappingsServicePlugin = new ConnectorMappingsService(log);
 
-  const caseService = await caseServicePlugin.setup({
-    authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
-  });
   const caseConfigureService = await caseConfigureServicePlugin.setup();
   const alertsService = new AlertService();
   alertsService.initialize(esClientMock);

@@ -9,6 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
 import { flattenCaseSavedObject, transformNewCase } from '../../routes/api/utils';
 
 import {
@@ -17,6 +18,7 @@ import {
   CaseResponseRt,
   CaseResponse,
   CaseClientPostRequestRt,
+  CaseClientPostRequest,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import {
@@ -24,15 +26,29 @@ import {
   transformCaseConnectorToEsConnector,
 } from '../../routes/api/cases/helpers';
 
-import { CaseClientCreate, CaseClientFactoryArguments } from '../types';
+import {
+  CaseConfigureServiceSetup,
+  CaseServiceSetup,
+  CaseUserActionServiceSetup,
+} from '../../services';
 
-export const create = ({
+interface CreateCaseArgs {
+  caseConfigureService: CaseConfigureServiceSetup;
+  caseService: CaseServiceSetup;
+  request: KibanaRequest;
+  savedObjectsClient: SavedObjectsClientContract;
+  userActionService: CaseUserActionServiceSetup;
+  theCase: CaseClientPostRequest;
+}
+
+export const create = async ({
   savedObjectsClient,
   caseService,
   caseConfigureService,
   userActionService,
   request,
-}: CaseClientFactoryArguments) => async ({ theCase }: CaseClientCreate): Promise<CaseResponse> => {
+  theCase,
+}: CreateCaseArgs): Promise<CaseResponse> => {
   const query = pipe(
     excess(CaseClientPostRequestRt).decode(theCase),
     fold(throwErrors(Boom.badRequest), identity)

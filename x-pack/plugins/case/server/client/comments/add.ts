@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { KibanaRequest, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import {
   decodeComment,
   flattenCombinedCaseSavedObject,
@@ -36,14 +36,11 @@ import {
 } from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
-import {
-  CaseClientAddComment,
-  CaseClientAddInternalComment,
-  CaseClientFactoryArguments,
-} from '../types';
+import { CaseClientAddComment, CaseClientFactoryArguments } from '../types';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
-import { CaseServiceSetup } from '../../services';
+import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
 import { CombinedCase } from './combined_case';
+import { CaseClientImpl } from '..';
 
 async function getSubCase({
   caseService,
@@ -69,23 +66,30 @@ function isUserOrAlertComment(comment: InternalCommentRequest): comment is Comme
   return comment.type === CommentType.user || comment.type === CommentType.alert;
 }
 
-export const addCommentFromRule = ({
+interface AddCommentFromRuleArgs {
+  caseClient: CaseClientImpl;
+  caseId: string;
+  comment: InternalCommentRequest;
+  savedObjectsClient: SavedObjectsClientContract;
+  caseService: CaseServiceSetup;
+  userActionService: CaseUserActionServiceSetup;
+}
+
+export const addCommentFromRule = async ({
   savedObjectsClient,
   caseService,
   userActionService,
-  request,
-}: CaseClientFactoryArguments) => async ({
   caseClient,
   caseId,
   comment,
-}: CaseClientAddInternalComment): Promise<CombinedCaseResponse> => {
+}: AddCommentFromRuleArgs): Promise<CombinedCaseResponse> => {
   const query = pipe(
     InternalCommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
   if (isUserOrAlertComment(comment)) {
-    return caseClient.addComment({ caseClient, caseId, comment });
+    return caseClient.addComment(caseId, comment);
   }
 
   decodeComment(comment);
@@ -261,16 +265,25 @@ async function getCombinedCase(
   }
 }
 
-export const addComment = ({
+interface AddCommentArgs {
+  caseClient: CaseClientImpl;
+  caseId: string;
+  comment: CommentRequest;
+  savedObjectsClient: SavedObjectsClientContract;
+  caseService: CaseServiceSetup;
+  userActionService: CaseUserActionServiceSetup;
+  request: KibanaRequest;
+}
+
+export const addComment = async ({
   savedObjectsClient,
   caseService,
   userActionService,
   request,
-}: CaseClientFactoryArguments) => async ({
   caseClient,
   caseId,
   comment,
-}: CaseClientAddComment): Promise<CombinedCaseResponse> => {
+}: AddCommentArgs): Promise<CombinedCaseResponse> => {
   const query = pipe(
     CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)

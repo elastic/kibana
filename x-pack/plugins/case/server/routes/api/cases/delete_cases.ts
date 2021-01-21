@@ -6,10 +6,70 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { SavedObjectsClientContract } from 'src/core/server';
+import { CaseType } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
 import { CASES_URL } from '../../../../common/constants';
+import { CaseServiceSetup } from '../../../services';
+
+// TODO: move this to the service layer
+async function unremovableCases({
+  caseService,
+  client,
+  ids,
+  force,
+}: {
+  caseService: CaseServiceSetup;
+  client: SavedObjectsClientContract;
+  ids: string[];
+  force: boolean | undefined;
+}): Promise<string[]> {
+  // if the force flag was included then we can skip checking whether the cases are collections and go ahead
+  // and delete them
+  if (force) {
+    return [];
+  }
+
+  const cases = await caseService.getCases({ caseIds: ids, client });
+  const parentCases = cases.saved_objects.filter(
+    (caseObj) => caseObj.attributes.type === CaseType.parent
+  );
+
+  return parentCases.map((parentCase) => parentCase.id);
+}
+
+// TODO: move this to the service layer
+async function deleteSubCases({
+  caseService,
+  client,
+  caseIds,
+}: {
+  caseService: CaseServiceSetup;
+  client: SavedObjectsClientContract;
+  caseIds: string[];
+}) {
+  const subCasesForCaseIds = await Promise.all(
+    caseIds.map((id) => caseService.findSubCases(client, id))
+  );
+
+  const commentsForSubCases = await Promise.all(
+    caseIds.map((id) => caseService.getAllCaseComments({ client, id }))
+  );
+
+  await Promise.all(
+    commentsForSubCases
+      .flatMap((comment) => comment.saved_objects)
+      .map((commentSO) => caseService.deleteComment({ client, commentId: commentSO.id }))
+  );
+
+  await Promise.all(
+    subCasesForCaseIds
+      .flatMap((subCase) => subCase.saved_objects)
+      .map((subCaseSO) => caseService.deleteSubCase(client, subCaseSO.id))
+  );
+}
 
 export function initDeleteCasesApi({ caseService, router, userActionService }: RouteDeps) {
   router.delete(
@@ -18,12 +78,26 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
       validate: {
         query: schema.object({
           ids: schema.arrayOf(schema.string()),
+          force: schema.maybe(schema.boolean()),
         }),
       },
     },
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
+        const unremovable = await unremovableCases({
+          caseService,
+          client,
+          ids: request.query.ids,
+          force: request.query.force,
+        });
+
+        if (unremovable.length > 0) {
+          return response.badRequest({
+            body: `Case IDs: [${unremovable.join(' ,')}] are not removable`,
+          });
+        }
+
         await Promise.all(
           request.query.ids.map((id) =>
             caseService.deleteCase({
@@ -55,6 +129,9 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
             )
           );
         }
+
+        await deleteSubCases({ caseService, client, caseIds: request.query.ids });
+
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const deleteDate = new Date().toISOString();

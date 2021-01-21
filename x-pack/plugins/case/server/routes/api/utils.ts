@@ -82,6 +82,7 @@ export const transformNewCase = ({
   ...newCase,
   closed_at: null,
   closed_by: null,
+  converted_by: null,
   connector,
   created_at: createdDate,
   created_by: { email, full_name, username },
@@ -122,7 +123,6 @@ export const transformNewComment = ({
 
     return {
       associationType,
-      // TODO: if this is an alert group, reduce to an array of ids
       alertIds: ids,
       index: comment.index,
       ruleId: comment.ruleId,
@@ -137,7 +137,6 @@ export const transformNewComment = ({
   } else {
     return {
       associationType,
-      // TODO: if this is an alert group, reduce to an array of ids
       ...comment,
       created_at: createdDate,
       created_by: { email, full_name, username },

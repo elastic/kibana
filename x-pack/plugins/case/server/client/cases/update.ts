@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { KibanaRequest, SavedObjectsClientContract, SavedObjectsFindResponse } from 'kibana/server';
 import { flattenCaseSavedObject } from '../../routes/api/utils';
 
 import {
@@ -21,6 +21,9 @@ import {
   CasePatchRequest,
   CasesResponse,
   CaseStatuses,
+  CasesPatchRequest,
+  CasesUpdateRequest,
+  CasesUpdateRequestRt,
 } from '../../../common/api';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import {
@@ -29,18 +32,28 @@ import {
 } from '../../routes/api/cases/helpers';
 
 import { CaseClientUpdate, CaseClientFactoryArguments } from '../types';
+import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
+import { CaseClientImpl } from '..';
 
-export const update = ({
+interface UpdateArgs {
+  savedObjectsClient: SavedObjectsClientContract;
+  caseService: CaseServiceSetup;
+  userActionService: CaseUserActionServiceSetup;
+  request: KibanaRequest;
+  caseClient: CaseClientImpl;
+  cases: CasesUpdateRequest;
+}
+
+export const update = async ({
   savedObjectsClient,
   caseService,
   userActionService,
   request,
-}: CaseClientFactoryArguments) => async ({
   caseClient,
   cases,
-}: CaseClientUpdate): Promise<CasesResponse> => {
+}: UpdateArgs): Promise<CasesResponse> => {
   const query = pipe(
-    excess(CasesPatchRequestRt).decode(cases),
+    excess(CasesUpdateRequestRt).decode(cases),
     fold(throwErrors(Boom.badRequest), identity)
   );
 

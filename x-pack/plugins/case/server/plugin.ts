@@ -28,6 +28,7 @@ import {
   caseConnectorMappingsSavedObjectType,
   caseSavedObjectType,
   caseUserActionSavedObjectType,
+  subCaseSavedObjectType,
 } from './saved_object_types';
 import {
   CaseConfigureService,
@@ -76,6 +77,7 @@ export class CasePlugin {
     core.savedObjects.registerType(caseConfigureSavedObjectType);
     core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
     core.savedObjects.registerType(caseSavedObjectType);
+    core.savedObjects.registerType(subCaseSavedObjectType);
     core.savedObjects.registerType(caseUserActionSavedObjectType);
 
     this.log.debug(
@@ -84,9 +86,10 @@ export class CasePlugin {
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    this.caseService = await new CaseService(this.log).setup({
-      authentication: plugins.security != null ? plugins.security.authc : null,
-    });
+    this.caseService = new CaseService(
+      this.log,
+      plugins.security != null ? plugins.security.authc : undefined
+    );
     this.caseConfigureService = await new CaseConfigureService(this.log).setup();
     this.connectorMappingsService = await new ConnectorMappingsService(this.log).setup();
     this.userActionService = await new CaseUserActionService(this.log).setup();
