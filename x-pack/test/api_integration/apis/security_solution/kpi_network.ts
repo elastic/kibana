@@ -203,9 +203,9 @@ export default function ({ getService }: FtrProviderContext) {
       const expectedResult = {
         networkEvents: 665,
         uniqueFlowId: 124,
-        uniqueSourcePrivateIps: null,
+        uniqueSourcePrivateIps: 0,
         uniqueSourcePrivateIpsHistogram: null,
-        uniqueDestinationPrivateIps: null,
+        uniqueDestinationPrivateIps: 0,
         uniqueDestinationPrivateIpsHistogram: null,
         dnsQueries: 0,
         tlsHandshakes: 1,
@@ -302,7 +302,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            defaultIndex: ['filebeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
           })

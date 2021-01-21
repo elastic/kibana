@@ -181,6 +181,19 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
   }
 
+  public async resolve<T>(type: string, id: string, options?: SavedObjectsBaseOptions) {
+    const resolveResult = await this.options.baseClient.resolve<T>(type, id, options);
+    const object = await this.handleEncryptedAttributesInResponse(
+      resolveResult.saved_object,
+      undefined as unknown,
+      getDescriptorNamespace(this.options.baseTypeRegistry, type, options?.namespace)
+    );
+    return {
+      ...resolveResult,
+      saved_object: object,
+    };
+  }
+
   public async update<T>(
     type: string,
     id: string,

@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IRouter } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
+import type { LogstashPluginRouter } from '../types';
 import { registerClusterLoadRoute } from './cluster';
 import {
   registerPipelineDeleteRoute,
@@ -13,7 +13,7 @@ import {
 } from './pipeline';
 import { registerPipelinesListRoute, registerPipelinesDeleteRoute } from './pipelines';
 
-export function registerRoutes(router: IRouter, security?: SecurityPluginSetup) {
+export function registerRoutes(router: LogstashPluginRouter, security?: SecurityPluginSetup) {
   registerClusterLoadRoute(router);
 
   registerPipelineDeleteRoute(router);

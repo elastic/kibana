@@ -14,7 +14,8 @@ import { createApmQuery } from './create_apm_query';
 import { calculateRate } from '../calculate_rate';
 // @ts-ignore
 import { getDiffCalculation } from './_apm_stats';
-import { LegacyRequest, ElasticsearchResponse, ElasticsearchResponseHit } from '../../types';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
 
 export function handleResponse(response: ElasticsearchResponse, start: number, end: number) {
   const initial = { ids: new Set(), beats: [] };
