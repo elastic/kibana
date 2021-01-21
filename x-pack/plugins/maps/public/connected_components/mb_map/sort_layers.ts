@@ -122,7 +122,7 @@ export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerL
   }
   let beneathMbLayerId = getBottomMbLayerId(mbLayers, spatialFiltersLayer, LAYER_CLASS.ANY);
 
-  // Ensure gl-draw layers are on top of any map layer
+  // Ensure gl-draw layers are on top of all layerList layers
   const glDrawLayer = ({
     ownsMbLayerId: (mbLayerId: string) => {
       return isGlDrawLayer(mbLayerId);
