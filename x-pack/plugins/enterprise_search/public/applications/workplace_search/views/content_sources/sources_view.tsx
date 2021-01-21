@@ -22,8 +22,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { clearFlashMessages } from '../../../shared/flash_messages';
-
 import { Loading } from '../../../shared/loading';
 import { SourceIcon } from '../../components/shared/source_icon';
 
@@ -31,28 +29,13 @@ import { EXTERNAL_IDENTITIES_DOCS_URL, DOCUMENT_PERMISSIONS_DOCS_URL } from '../
 
 import { SourcesLogic } from './sources_logic';
 
-const POLLING_INTERVAL = 10000;
-
 interface SourcesViewProps {
   children: React.ReactNode;
 }
 
 export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
-  const { initializeSources, pollForSourceStatusChanges, resetPermissionsModal } = useActions(
-    SourcesLogic
-  );
-
+  const { resetPermissionsModal } = useActions(SourcesLogic);
   const { dataLoading, permissionsModal } = useValues(SourcesLogic);
-
-  useEffect(() => {
-    initializeSources();
-    const pollingInterval = window.setInterval(pollForSourceStatusChanges, POLLING_INTERVAL);
-
-    return () => {
-      clearFlashMessages();
-      clearInterval(pollingInterval);
-    };
-  }, []);
 
   if (dataLoading) return <Loading />;
 
