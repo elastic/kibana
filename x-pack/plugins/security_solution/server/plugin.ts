@@ -355,6 +355,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.policyWatcher = new PolicyWatcher(
         plugins.fleet!.packagePolicyService,
         core.savedObjects,
+        core.elasticsearch,
         this.logger
       );
       this.policyWatcher.start(licenseService);
@@ -374,6 +375,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerIngestCallback,
       savedObjectsStart: core.savedObjects,
       licenseService,
+      exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
     });
 
     this.telemetryEventsSender.start(core, plugins.telemetry, plugins.taskManager);
