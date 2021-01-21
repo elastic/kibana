@@ -297,6 +297,36 @@ export default function ({ getService }: FtrProviderContext) {
     },
   };
 
+  const sampleLogTestData: TestData = {
+    suiteTitle: 'geo point field',
+    sourceIndexOrSavedSearch: 'ft_module_sample_logs',
+    fieldNameFilters: ['geo.coordinates'],
+    fieldTypeFilters: [ML_JOB_FIELD_TYPES.GEO_POINT],
+    expected: {
+      totalDocCountFormatted: '408',
+      metricFields: [],
+      // only testing the geo_point fields
+      nonMetricFields: [
+        {
+          fieldName: 'geo.coordinates',
+          type: ML_JOB_FIELD_TYPES.GEO_POINT,
+          existsInDocs: true,
+          aggregatable: true,
+          loading: false,
+          docCountFormatted: '408 (100%)',
+          exampleCount: 10,
+        },
+      ],
+      emptyFields: [],
+      visibleMetricFieldsCount: 4,
+      totalMetricFieldsCount: 5,
+      populatedFieldsCount: 35,
+      totalFieldsCount: 36,
+      fieldNameFiltersResultCount: 1,
+      fieldTypeFiltersResultCount: 1,
+    },
+  };
+
   function runTests(testData: TestData) {
     it(`${testData.suiteTitle} loads the source data in the data visualizer`, async () => {
       await ml.testExecution.logTestStep(
@@ -331,6 +361,8 @@ export default function ({ getService }: FtrProviderContext) {
         `${testData.suiteTitle} displays elements in the data visualizer table correctly`
       );
       await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
+
+      await ml.dataVisualizerTable.ensureNumRowsPerPage(50);
 
       await ml.dataVisualizerTable.assertSearchPanelExist();
       await ml.dataVisualizerTable.assertSampleSizeInputExists();
@@ -411,7 +443,10 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('ml/module_sample_logs');
+
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded('ft_module_sample_logs', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -446,6 +481,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       runTests(farequoteLuceneSearchTestData);
+    });
+
+    describe('with module_sample_logs ', function () {
+      // Run tests on full farequote index.
+      it(`${sampleLogTestData.suiteTitle} loads the data visualizer selector page`, async () => {
+        // Start navigation from the base of the ML app.
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToDataVisualizer();
+      });
+      runTests(sampleLogTestData);
     });
   });
 }
