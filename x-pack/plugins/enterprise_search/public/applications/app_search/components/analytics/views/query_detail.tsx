@@ -15,7 +15,7 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_c
 import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_breadcrumbs';
 
 import { AnalyticsLayout } from '../analytics_layout';
-import { AnalyticsLogic, AnalyticsCards } from '../';
+import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../';
 
 const QUERY_DETAIL_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetail.title',
@@ -28,7 +28,7 @@ interface Props {
 export const QueryDetail: React.FC<Props> = ({ breadcrumbs }) => {
   const { query } = useParams() as { query: string };
 
-  const { totalQueriesForQuery } = useValues(AnalyticsLogic);
+  const { totalQueriesForQuery, queriesPerDayForQuery, startDate } = useValues(AnalyticsLogic);
 
   return (
     <AnalyticsLayout isQueryView title={`"${query}"`}>
@@ -49,6 +49,20 @@ export const QueryDetail: React.FC<Props> = ({ breadcrumbs }) => {
         ]}
       />
       <EuiSpacer />
+
+      <AnalyticsChart
+        lines={[
+          {
+            id: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetail.chartTooltip',
+              { defaultMessage: 'Queries per day' }
+            ),
+            data: convertToChartData({ startDate, data: queriesPerDayForQuery }),
+          },
+        ]}
+      />
+      <EuiSpacer />
+
       <p>TODO: Query detail page</p>
     </AnalyticsLayout>
   );

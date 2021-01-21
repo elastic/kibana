@@ -36,6 +36,7 @@ describe('AnalyticsLogic', () => {
     queriesPerDay: [],
     queriesNoResultsPerDay: [],
     clicksPerDay: [],
+    queriesPerDayForQuery: [],
     startDate: '',
   };
 
@@ -154,6 +155,7 @@ describe('AnalyticsLogic', () => {
           allTags: ['some-tag'],
           startDate: '1970-01-01',
           totalQueriesForQuery: 50,
+          queriesPerDayForQuery: [25, 0, 25],
           // TODO: Replace this with ...MOCK_QUERY_RESPONSE once all data is set
         });
       });

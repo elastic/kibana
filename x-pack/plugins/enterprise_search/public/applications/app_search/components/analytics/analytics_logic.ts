@@ -104,6 +104,12 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
         onQueryDataLoad: (_, { totalQueriesForQuery }) => totalQueriesForQuery,
       },
     ],
+    queriesPerDayForQuery: [
+      [],
+      {
+        onQueryDataLoad: (_, { queriesPerDayForQuery }) => queriesPerDayForQuery,
+      },
+    ],
     startDate: [
       '',
       {
