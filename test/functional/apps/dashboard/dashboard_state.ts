@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
     'tileMap',
     'visChart',
+    'share',
     'timePicker',
   ]);
   const testSubjects = getService('testSubjects');
@@ -191,6 +192,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
     });
 
+    const getUrlFromShare = async () => {
+      await PageObjects.share.clickShareTopNavButton();
+      const sharedUrl = await PageObjects.share.getSharedUrl();
+      await PageObjects.share.clickShareTopNavButton();
+      return sharedUrl;
+    };
+
     describe('Directly modifying url updates dashboard state', () => {
       it('for query parameter', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -205,6 +213,99 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.get(newUrl.toString(), false);
         const newQuery = await queryBar.getQueryString();
         expect(newQuery).to.equal('hi');
+      });
+
+      it('for panel size parameters', async function () {
+        await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
+        const currentUrl = await getUrlFromShare();
+        const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
+        const newUrl = currentUrl.replace(
+          `w:${DEFAULT_PANEL_WIDTH}`,
+          `w:${DEFAULT_PANEL_WIDTH * 2}`
+        );
+        await browser.get(newUrl.toString(), false);
+        await retry.try(async () => {
+          const newPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
+          if (newPanelDimensions.length < 0) {
+            throw new Error('No panel dimensions...');
+          }
+
+          await PageObjects.dashboard.waitForRenderComplete();
+          // Add a "margin" of error  - because of page margins, it won't be a straight doubling of width.
+          const marginOfError = 10;
+          expect(newPanelDimensions[0].width).to.be.lessThan(
+            currentPanelDimensions[0].width * 2 + marginOfError
+          );
+          expect(newPanelDimensions[0].width).to.be.greaterThan(
+            currentPanelDimensions[0].width * 2 - marginOfError
+          );
+        });
+      });
+
+      it('when removing a panel', async function () {
+        await PageObjects.dashboard.waitForRenderComplete();
+        const currentUrl = await getUrlFromShare();
+        const newUrl = currentUrl.replace(/panels:\!\(.*\),query/, 'panels:!(),query');
+        await browser.get(newUrl.toString(), false);
+
+        await retry.try(async () => {
+          const newPanelCount = await PageObjects.dashboard.getPanelCount();
+          expect(newPanelCount).to.be(0);
+        });
+      });
+
+      describe('for embeddable config color parameters on a visualization', () => {
+        it('updates a pie slice color on a soft refresh', async function () {
+          await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
+          await PageObjects.visChart.openLegendOptionColors(
+            '80,000',
+            `[data-title="${PIE_CHART_VIS_NAME}"]`
+          );
+          await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
+          const currentUrl = await getUrlFromShare();
+          const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
+          await browser.get(newUrl.toString(), false);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.try(async () => {
+            const allPieSlicesColor = await pieChart.getAllPieSliceStyles('80,000');
+            let whitePieSliceCounts = 0;
+            allPieSlicesColor.forEach((style) => {
+              if (style.indexOf('rgb(255, 255, 255)') > 0) {
+                whitePieSliceCounts++;
+              }
+            });
+
+            expect(whitePieSliceCounts).to.be(1);
+          });
+        });
+
+        it('and updates the pie slice legend color', async function () {
+          await retry.try(async () => {
+            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#FFFFFF');
+            expect(colorExists).to.be(true);
+          });
+        });
+
+        it('resets a pie slice color to the original when removed', async function () {
+          const currentUrl = await getUrlFromShare();
+          const newUrl = currentUrl.replace('vis:(colors:(%2780,000%27:%23FFFFFF))', '');
+          await browser.get(newUrl.toString(), false);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.try(async () => {
+            const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
+            // The default green color that was stored with the visualization before any dashboard overrides.
+            expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(0);
+          });
+        });
+
+        it('resets the legend color as well', async function () {
+          await retry.try(async () => {
+            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#57c17b');
+            expect(colorExists).to.be(true);
+          });
+        });
       });
     });
   });
