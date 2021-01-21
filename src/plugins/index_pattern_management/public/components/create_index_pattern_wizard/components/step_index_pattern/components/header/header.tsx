@@ -104,19 +104,14 @@ export const Header: React.FC<HeaderProps> = ({
   }, [checkIndices, isPatternInvalid]);
 
   const isNextDisabled = useMemo(() => patternErrorMessage.length > 0 || isNextStepDisabled, [
-    patternError,
+    patternErrorMessage.length,
     isNextStepDisabled,
   ]);
 
   const titleErrorMessage = useMemo(() => {
     return titleError ? 'Index pattern title exists' : false;
   }, [titleError]);
-  console.log('RETURN header.tsx', {
-    titleError,
-    titleErrorMessage,
-    patternError,
-    patternErrorMessage,
-  });
+
   return (
     <div {...rest}>
       <EuiTitle size="s">

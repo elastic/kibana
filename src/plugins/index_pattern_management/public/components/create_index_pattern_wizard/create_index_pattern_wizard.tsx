@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { DocLinksStart } from 'src/core/public';
-import { StepIndexPattern } from './components/step_index_pattern/step_index_pattern_hook';
+import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
 import { LoadingState } from './components/loading_state';
@@ -47,7 +47,7 @@ type Action =
   | { type: 'GO_TO_IP_STEP' }
   | {
       type: 'GO_TO_TIME_FIELD_STEP';
-      payload: { step: number; patternList: string[]; selectedTimeField?: string };
+      payload: { step: number; patternList: string[]; title: string; selectedTimeField?: string };
     }
   | { type: 'SET_ALL_INDICES'; payload: MatchedItem[] }
   | { type: 'SET_DOC_LINKS'; payload: DocLinksStart }
@@ -154,7 +154,6 @@ export const CreateIndexPatternWizard = (props: RouteComponentProps) => {
   );
 
   const fetchData = useCallback(async () => {
-    console.log('fetchData', { http, indexPatternCreationType: state.indexPatternCreationType });
     if (!http || state.indexPatternCreationType === null) {
       return;
     }
@@ -263,12 +262,15 @@ export const CreateIndexPatternWizard = (props: RouteComponentProps) => {
     setBreadcrumbs(getCreateBreadcrumbs());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const goToTimeFieldStep = useCallback((patternList: string[], selectedTimeField?: string) => {
-    dispatch({
-      type: 'GO_TO_TIME_FIELD_STEP',
-      payload: { step: 2, patternList, selectedTimeField },
-    });
-  }, []);
+  const goToTimeFieldStep = useCallback(
+    (patternList: string[], title: string, selectedTimeField?: string) => {
+      dispatch({
+        type: 'GO_TO_TIME_FIELD_STEP',
+        payload: { step: 2, patternList, title, selectedTimeField },
+      });
+    },
+    []
+  );
   const goToIndexPatternStep = useCallback(() => {
     dispatch({ type: 'GO_TO_IP_STEP' });
   }, []);
@@ -292,7 +294,6 @@ export const CreateIndexPatternWizard = (props: RouteComponentProps) => {
     );
   }, [state.docLinks, state.indexPatternCreationType]);
   const renderContent = useMemo(() => {
-    // console.log('renderContent!', state);
     if (state.isInitiallyLoadingIndices || !state.indexPatternCreationType) {
       return <LoadingState />;
     }
@@ -326,6 +327,7 @@ export const CreateIndexPatternWizard = (props: RouteComponentProps) => {
             goToPreviousStep={goToIndexPatternStep}
             indexPatternCreationType={state.indexPatternCreationType}
             patternList={state.patternList}
+            title={state.title}
             selectedTimeField={state.selectedTimeField}
           />
         </EuiPageContent>
@@ -345,6 +347,7 @@ export const CreateIndexPatternWizard = (props: RouteComponentProps) => {
     state.patternList,
     state.selectedTimeField,
     state.step,
+    state.title,
   ]);
 
   return (

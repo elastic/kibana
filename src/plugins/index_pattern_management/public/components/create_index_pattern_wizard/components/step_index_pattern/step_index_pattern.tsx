@@ -6,231 +6,69 @@
  * Public License, v 1.
  */
 
-import React, { Component } from 'react';
-import { EuiSpacer, EuiCallOut, EuiSwitchEvent } from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
+import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { indexPatterns, IndexPatternAttributes } from '../../../../../../../plugins/data/public';
-import { getIndices, getMatchedIndices, canAppendWildcard, ensureMinimumTime } from '../../lib';
+import { indexPatterns } from '../../../../../../data/public';
+import { IndexPatternCreationConfig } from '../../../../service/creation';
+import { getMatchedIndices } from '../../lib';
+import { MatchedItem } from '../../types';
+import { Header } from './components/header';
+import { IndicesList } from './components/indices_list';
 import { LoadingIndices } from './components/loading_indices';
 import { StatusMessage } from './components/status_message';
-import { IndicesList } from './components/indices_list';
-import { Header } from './components/header';
-import { context as contextType } from '../../../../../../kibana_react/public';
-import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
-import { MatchedItem } from '../../types';
-import { IndexPatternManagmentContextValue } from '../../../../types';
+import { useIndexPattern } from './use_index_pattern';
+import { canPreselectTimeField } from './utils';
 
 interface StepIndexPatternProps {
   allIndices: MatchedItem[];
+  goToNextStep: (selectedPatterns: string[], title: string, timestampField?: string) => void;
   indexPatternCreationType: IndexPatternCreationConfig;
-  goToNextStep: (selectedPatterns: string[], timestampField?: string) => void;
-  initialQuery?: string;
+  initialQuery?: string[];
   showSystemIndices: boolean;
 }
 
-interface StepIndexPatternState {
-  appendedWildcard: boolean;
-  exactMatchedIndices: MatchedItem[];
-  existingIndexPatterns: string[];
-  titleError: boolean;
-  indexPatternName: string;
-  isIncludingSystemIndices: boolean;
-  isLoadingIndices: boolean;
-  partialMatchedIndices: MatchedItem[];
-  selectedPatterns: string[];
-  patternError: boolean;
-  title: string;
-}
-
-export const canPreselectTimeField = (indices: MatchedItem[]) => {
-  const preselectStatus = indices.reduce(
-    (
-      { canPreselect, timeFieldName }: { canPreselect: boolean; timeFieldName?: string },
-      matchedItem
-    ) => {
-      const dataStreamItem = matchedItem.item;
-      const dataStreamTimestampField = dataStreamItem.timestamp_field;
-      const isDataStream = !!dataStreamItem.timestamp_field;
-      const timestampFieldMatches =
-        timeFieldName === undefined || timeFieldName === dataStreamTimestampField;
-
-      return {
-        canPreselect: canPreselect && isDataStream && timestampFieldMatches,
-        timeFieldName: dataStreamTimestampField || timeFieldName,
-      };
-    },
-    {
-      canPreselect: true,
-      timeFieldName: undefined,
-    }
+const ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
+const characterList = ILLEGAL_CHARACTERS.slice(0, ILLEGAL_CHARACTERS.length - 1).join(', ');
+export const StepIndexPattern = ({
+  allIndices,
+  indexPatternCreationType,
+  goToNextStep,
+  initialQuery,
+  showSystemIndices,
+}: StepIndexPatternProps) => {
+  const ip = useIndexPattern(indexPatternCreationType);
+  const {
+    exactMatchedIndices,
+    titleError,
+    isIncludingSystemIndices,
+    isLoadingIndices,
+    partialMatchedIndices,
+    selectedPatterns,
+    patternError,
+    title,
+  } = useMemo(() => ip.state, [ip.state]);
+  const matchedIndices = useMemo(
+    () =>
+      getMatchedIndices(
+        allIndices,
+        partialMatchedIndices,
+        exactMatchedIndices,
+        isIncludingSystemIndices
+      ),
+    [allIndices, exactMatchedIndices, isIncludingSystemIndices, partialMatchedIndices]
   );
 
-  return preselectStatus.canPreselect ? preselectStatus.timeFieldName : undefined;
-};
-const combineIndices = (a: MatchedItem[], b: MatchedItem[]): MatchedItem[] => {
-  const newIndices = b.filter((idx) => a.every((idxOg) => idxOg.name !== idx.name));
-  return [...a, ...newIndices];
-};
-
-export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndexPatternState> {
-  static contextType = contextType;
-
-  public readonly context!: IndexPatternManagmentContextValue;
-
-  state = {
-    appendedWildcard: false,
-    exactMatchedIndices: [],
-    existingIndexPatterns: [],
-    titleError: false,
-    indexPatternName: '',
-    isIncludingSystemIndices: false,
-    isLoadingIndices: false,
-    partialMatchedIndices: [],
-    selectedPatterns: [],
-    patternError: false,
-    title: '',
-  };
-
-  ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
-
-  constructor(props: StepIndexPatternProps, context: IndexPatternManagmentContextValue) {
-    super(props, context);
-    const {
-      indexPatternCreationType,
-      // initialQuery
-    } = this.props;
-
-    // this.state.query =
-    //   initialQuery || context.services.uiSettings.get(UI_SETTINGS.INDEXPATTERN_PLACEHOLDER);
-    this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
-  }
-
-  lastQuery: string[] = [];
-
-  async UNSAFE_componentWillMount() {
-    this.fetchExistingIndexPatterns();
-    if (this.state.selectedPatterns) {
-      this.lastQuery = this.state.selectedPatterns;
-      this.fetchIndices(this.state.selectedPatterns);
+  useEffect(() => {
+    ip.setIndexPatternName(indexPatternCreationType.getIndexPatternName());
+    if (initialQuery) {
+      ip.onQueryChanged(initialQuery);
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  fetchExistingIndexPatterns = async () => {
-    const {
-      savedObjects,
-    } = await this.context.services.savedObjects.client.find<IndexPatternAttributes>({
-      type: 'index-pattern',
-      fields: ['title'],
-      perPage: 10000,
-    });
-
-    const existingIndexPatterns = savedObjects.map((obj) =>
-      obj && obj.attributes ? obj.attributes.title : ''
-    ) as string[];
-
-    this.setState({ ...this.state, existingIndexPatterns });
-  };
-
-  fetchIndices = async (wildcardArray: string[]) => {
-    const { indexPatternCreationType } = this.props;
-
-    this.setState({ ...this.state, isLoadingIndices: true, titleError: false });
-    let exactMatchedIndices: MatchedItem[] = [];
-    let partialMatchedIndices: MatchedItem[] = [];
-    await Promise.all(
-      wildcardArray.map(async (query) => {
-        if (query.endsWith('*')) {
-          const exactMatchedIndices2 = await ensureMinimumTime(
-            getIndices(
-              this.context.services.http,
-              (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
-              query,
-              this.state.isIncludingSystemIndices
-            )
-          );
-          exactMatchedIndices = combineIndices(exactMatchedIndices, exactMatchedIndices2);
-        } else {
-          const [partialMatchedIndices2, exactMatchedIndices2] = await ensureMinimumTime([
-            getIndices(
-              this.context.services.http,
-              (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
-              `${query}*`,
-              this.state.isIncludingSystemIndices
-            ),
-            getIndices(
-              this.context.services.http,
-              (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
-              query,
-              this.state.isIncludingSystemIndices
-            ),
-          ]);
-          exactMatchedIndices = combineIndices(exactMatchedIndices, exactMatchedIndices2);
-          partialMatchedIndices = combineIndices(partialMatchedIndices, partialMatchedIndices2);
-        }
-      })
-    );
-
-    // If the search changed, discard this state
-    if (JSON.stringify(wildcardArray) !== JSON.stringify(this.lastQuery)) {
-      return;
-    }
-    console.log('fetchIndices setState', {
-      ...this.state,
-      partialMatchedIndices,
-      exactMatchedIndices,
-      isLoadingIndices: false,
-    });
-    this.setState({
-      ...this.state,
-      partialMatchedIndices,
-      exactMatchedIndices,
-      isLoadingIndices: false,
-    });
-  };
-
-  onTitleChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { existingIndexPatterns } = this.state;
-    console.log('onTitleChanged', existingIndexPatterns);
-    if ((existingIndexPatterns as string[]).includes(e.target.value)) {
-      return this.setState({
-        ...this.state,
-        title: e.target.value,
-        titleError: true,
-      });
-    }
-    this.setState({
-      ...this.state,
-      title: e.target.value,
-    });
-  };
-
-  onQueryChanged = (patterns: string[]) => {
-    const wildcardArray = patterns.map((pat) => {
-      let q = pat;
-      if (q.length === 1 && canAppendWildcard(q)) {
-        q += '*';
-      }
-      return q;
-    });
-
-    this.lastQuery = wildcardArray;
-    console.log('onQueryChanged setState', {
-      ...this.state,
-      selectedPatterns: wildcardArray,
-      patternError: !wildcardArray.length,
-    });
-    this.setState({
-      ...this.state,
-      selectedPatterns: wildcardArray,
-      patternError: !wildcardArray.length,
-    });
-    this.fetchIndices(wildcardArray);
-  };
-
-  renderLoadingState() {
-    const { isLoadingIndices } = this.state;
-
+  const renderLoadingState = useMemo(() => {
     if (!isLoadingIndices) {
       return null;
     }
@@ -242,44 +80,34 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         <EuiSpacer />
       </>
     );
-  }
-
-  renderStatusMessage(matchedIndices: {
-    allIndices: MatchedItem[];
-    exactMatchedIndices: MatchedItem[];
-    partialMatchedIndices: MatchedItem[];
-  }) {
-    const { indexPatternCreationType } = this.props;
-    const { titleError, isIncludingSystemIndices, isLoadingIndices, selectedPatterns } = this.state;
-
+  }, [isLoadingIndices]);
+  const renderStatusMessage = useMemo(
+    () =>
+      isLoadingIndices || titleError ? null : (
+        <StatusMessage
+          matchedIndices={matchedIndices}
+          showSystemIndices={indexPatternCreationType.getShowSystemIndices()}
+          isIncludingSystemIndices={isIncludingSystemIndices}
+          query={selectedPatterns}
+        />
+      ),
+    [
+      indexPatternCreationType,
+      titleError,
+      isIncludingSystemIndices,
+      isLoadingIndices,
+      matchedIndices,
+      selectedPatterns,
+    ]
+  );
+  const renderList = useMemo(() => {
     if (isLoadingIndices || titleError) {
       return null;
     }
 
-    return (
-      <StatusMessage
-        matchedIndices={matchedIndices}
-        showSystemIndices={indexPatternCreationType.getShowSystemIndices()}
-        isIncludingSystemIndices={isIncludingSystemIndices}
-        query={selectedPatterns}
-      />
-    );
-  }
-
-  renderList({
-    visibleIndices,
-    allIndices,
-  }: {
-    visibleIndices: MatchedItem[];
-    allIndices: MatchedItem[];
-  }) {
-    const { selectedPatterns, isLoadingIndices, titleError } = this.state;
-
-    if (isLoadingIndices || titleError) {
-      return null;
-    }
-
-    const indicesToList = selectedPatterns.length ? visibleIndices : allIndices;
+    const indicesToList = selectedPatterns.length
+      ? matchedIndices.visibleIndices
+      : matchedIndices.allIndices;
     return (
       <IndicesList
         data-test-subj="createIndexPatternStep1IndicesList"
@@ -287,11 +115,8 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         indices={indicesToList}
       />
     );
-  }
-
-  renderIndexPatternExists() {
-    const { titleError, title } = this.state;
-
+  }, [matchedIndices, selectedPatterns, isLoadingIndices, titleError]);
+  const renderIndexPatternExists = useMemo(() => {
     if (!titleError) {
       return null;
     }
@@ -309,76 +134,55 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         color="warning"
       />
     );
-  }
-
-  renderHeader({ exactMatchedIndices: indices }: { exactMatchedIndices: MatchedItem[] }) {
-    const { goToNextStep, indexPatternCreationType } = this.props;
-    const {
-      titleError,
-      isIncludingSystemIndices,
-      selectedPatterns,
-      patternError,
-      title,
-    } = this.state;
-    const characterList = this.ILLEGAL_CHARACTERS.slice(0, this.ILLEGAL_CHARACTERS.length - 1).join(
-      ', '
-    );
+  }, [title, titleError]);
+  const renderHeader = useMemo(() => {
+    const indices = matchedIndices.exactMatchedIndices;
     const checkIndices = indexPatternCreationType.checkIndicesForErrors(indices);
 
     const isNextStepDisabled =
       indices.length === 0 || patternError || titleError || title.length === 0;
-    console.log('renderHeader', {
-      titleError,
-      patternError,
-      isNextStepDisabled,
-    });
     return (
       <Header
         characterList={characterList}
         checkIndices={checkIndices}
         data-test-subj="createIndexPatternStep1Header"
-        goToNextStep={() => goToNextStep(selectedPatterns, canPreselectTimeField(indices))}
+        goToNextStep={() => goToNextStep(selectedPatterns, title, canPreselectTimeField(indices))}
         isIncludingSystemIndices={isIncludingSystemIndices}
         isNextStepDisabled={isNextStepDisabled}
-        onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
-        onQueryChanged={this.onQueryChanged}
-        onTitleChanged={this.onTitleChanged}
+        onChangeIncludingSystemIndices={ip.onChangeIncludingSystemIndices}
+        onQueryChanged={ip.onQueryChanged}
+        onTitleChanged={ip.onTitleChanged}
         patternError={patternError}
         selectedPatterns={selectedPatterns}
-        showSystemIndices={this.props.showSystemIndices}
+        showSystemIndices={showSystemIndices}
         title={title}
         titleError={titleError}
       />
     );
-  }
+  }, [
+    goToNextStep,
+    indexPatternCreationType,
+    ip.onChangeIncludingSystemIndices,
+    ip.onQueryChanged,
+    ip.onTitleChanged,
+    isIncludingSystemIndices,
+    matchedIndices.exactMatchedIndices,
+    patternError,
+    selectedPatterns,
+    showSystemIndices,
+    title,
+    titleError,
+  ]);
 
-  onChangeIncludingSystemIndices = (event: EuiSwitchEvent) => {
-    this.setState({ ...this.state, isIncludingSystemIndices: event.target.checked }, () =>
-      this.fetchIndices(this.state.selectedPatterns)
-    );
-  };
-
-  render() {
-    const { allIndices } = this.props;
-    const { partialMatchedIndices, exactMatchedIndices, isIncludingSystemIndices } = this.state;
-
-    const matchedIndices = getMatchedIndices(
-      allIndices,
-      partialMatchedIndices,
-      exactMatchedIndices,
-      isIncludingSystemIndices
-    );
-
-    return (
-      <>
-        {this.renderHeader(matchedIndices)}
-        <EuiSpacer />
-        {this.renderLoadingState()}
-        {this.renderIndexPatternExists()}
-        {this.renderStatusMessage(matchedIndices)}
-        <EuiSpacer />
-        {this.renderList(matchedIndices)}
-      </>
-    );
-  }
-}
+  return (
+    <>
+      {renderHeader}
+      <EuiSpacer />
+      {renderLoadingState}
+      {renderIndexPatternExists}
+      {renderStatusMessage}
+      <EuiSpacer />
+      {renderList}
+    </>
+  );
+};

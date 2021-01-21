@@ -21,7 +21,6 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
 
   useEffect(() => {
     data.indexPatterns.get(props.match.params.id).then((ip: IndexPattern) => {
-      console.log('ip', ip);
       setIndexPattern(ip);
       setBreadcrumbs(getEditBreadcrumbs(ip));
     });

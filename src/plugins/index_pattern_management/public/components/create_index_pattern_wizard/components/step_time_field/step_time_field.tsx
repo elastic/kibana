@@ -28,11 +28,11 @@ import { IndexPatternManagmentContextValue } from '../../../../types';
 import { IndexPatternCreationConfig } from '../../../..';
 
 interface StepTimeFieldProps {
-  indexPattern?: string;
-  patternList: string[];
-  goToPreviousStep: () => void;
   createIndexPattern: (selectedTimeField: string | undefined, indexPatternId: string) => void;
+  goToPreviousStep: () => void;
   indexPatternCreationType: IndexPatternCreationConfig;
+  patternList: string[];
+  title: string;
   selectedTimeField?: string;
 }
 
@@ -95,13 +95,13 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
   }
 
   fetchTimeFields = async () => {
-    const { indexPattern: pattern } = this.props;
+    const { patternList } = this.props;
     const { getFetchForWildcardOptions } = this.props.indexPatternCreationType;
 
     this.setState({ isFetchingTimeFields: true });
     const fields = await ensureMinimumTime(
       this.context.services.data.indexPatterns.getFieldsForWildcard({
-        pattern,
+        patternList,
         ...getFetchForWildcardOptions(),
       })
     );
@@ -140,7 +140,6 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
   createIndexPattern = async () => {
     const { createIndexPattern } = this.props;
     const { selectedTimeField, indexPatternId } = this.state;
-    console.log('indexPatternId', indexPatternId);
     this.setState({ isCreating: true });
     try {
       await createIndexPattern(selectedTimeField, indexPatternId);
@@ -198,7 +197,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
       );
     }
 
-    const { indexPattern, goToPreviousStep } = this.props;
+    const { title, goToPreviousStep } = this.props;
 
     const timeFieldOptions =
       timeFields.length > 0
@@ -231,10 +230,9 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
         <EuiSpacer size="m" />
       </>
     ) : null;
-
     return (
       <>
-        <Header indexPattern={indexPattern} indexPatternName={indexPatternName} />
+        <Header indexPattern={title} indexPatternName={indexPatternName} />
         <EuiSpacer size="m" />
         <TimeField
           isVisible={showTimeField}

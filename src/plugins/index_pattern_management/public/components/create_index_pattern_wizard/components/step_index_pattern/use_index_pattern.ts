@@ -125,7 +125,7 @@ const initialState = {
 export const useIndexPattern = (
   indexPatternCreationType: IndexPatternCreationConfig
 ): UseIndexPattern => {
-  const { http, uiSettings, savedObjects } = useKibana().services;
+  const { http, savedObjects } = useKibana().services;
   const [state, dispatch] = useReducer(dataFetchReducer, initialState);
 
   const setExistingTitles = useCallback(

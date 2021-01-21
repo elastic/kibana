@@ -59,7 +59,6 @@ export const registerUpdateIndexPatternRoute = (
       handleErrors(async (ctx, req, res) => {
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        console.log('ROUTE update_index_pattern MYSTERY HIT');
         const [, , { indexPatterns }] = await getStartServices();
         const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
           savedObjectsClient,

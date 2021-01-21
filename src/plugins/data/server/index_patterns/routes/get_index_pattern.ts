@@ -41,7 +41,6 @@ export const registerGetIndexPatternRoute = (
         );
         const id = req.params.id;
         const indexPattern = await indexPatternsService.get(id);
-        console.log('ROUTE get_index_pattern MYSTERY HIT');
         return res.ok({
           headers: {
             'content-type': 'application/json',
