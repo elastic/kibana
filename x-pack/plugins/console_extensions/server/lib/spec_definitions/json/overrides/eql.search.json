@@ -1,0 +1,16 @@
+{
+  "eql.search": {
+    "data_autocomplete_rules": {
+      "event_category_field": "",
+      "fetch_size": 1000,
+      "filter": "",
+      "keep_alive": "",
+      "keep_on_completion": true,
+      "query": "",
+      "size": 10,
+      "tiebreaker_field": "",
+      "timestamp_field": "",
+      "wait_for_completion_timeout": ""
+    }
+  }
+}

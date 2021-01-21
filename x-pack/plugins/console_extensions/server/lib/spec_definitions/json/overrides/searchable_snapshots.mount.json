@@ -1,0 +1,8 @@
+{
+  "searchable_snapshots.mount": {
+    "data_autocomplete_rules": {
+      "wait_for_completion": false,
+      "master_timeout": ""
+    }
+  }
+}
