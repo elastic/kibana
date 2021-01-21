@@ -157,16 +157,5 @@ describe('metrics service', () => {
       expect(Object.keys(JSON.parse(meta).host.os.load)).toEqual(['1m', '5m', '15m']);
       expect(Object.keys(JSON.parse(meta).process)).toEqual(expect.arrayContaining(['uptime']));
     });
-
-    it('logs ECS fields in the log meta', async () => {
-      root = kbnTestServer.createRoot({ ...otherTestSettings });
-      coreSetup = await root.setup();
-
-      const [, meta] = mockConsoleLog.mock.calls[0][0].split('|');
-      expect(JSON.parse(meta).event.kind).toBe('metric');
-      expect(JSON.parse(meta).ecs.version).toBe('1.7.0');
-      expect(JSON.parse(meta).event.category).toEqual(expect.arrayContaining(['process', 'host']));
-      expect(JSON.parse(meta).event.type).toBe('info');
-    });
   });
 });

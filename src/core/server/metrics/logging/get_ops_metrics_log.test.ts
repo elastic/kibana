@@ -119,4 +119,11 @@ describe('getEcsOpsMetricsLog', () => {
       }
     `);
   });
+
+  it('logs ECS fields in the log meta', () => {
+    const logMeta = getEcsOpsMetricsLog(createBaseOpsMetrics());
+    expect(logMeta.event.kind).toBe('metric');
+    expect(logMeta.event.category).toEqual(expect.arrayContaining(['process', 'host']));
+    expect(logMeta.event.type).toBe('info');
+  });
 });
