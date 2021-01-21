@@ -16,7 +16,7 @@ import {
   Datatable,
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
-import { DragContextState } from './drag_drop';
+import { DragContextState, Dragging } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
@@ -217,6 +217,8 @@ export interface DatasourceDataPanelProps<T = unknown> {
   query: Query;
   dateRange: DateRange;
   filters: Filter[];
+  dropOntoWorkspace: (field: Dragging) => void;
+  hasSuggestionForField: (field: Dragging) => boolean;
 }
 
 interface SharedDimensionProps {
