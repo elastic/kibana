@@ -130,7 +130,9 @@ export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerL
   } as unknown) as ILayer;
   moveMapLayer(mbMap, mbLayers, glDrawLayer, LAYER_CLASS.ANY, beneathMbLayerId);
   const glDrawBottomMbLayerId = getBottomMbLayerId(mbLayers, glDrawLayer, LAYER_CLASS.ANY);
-  if (glDrawBottomMbLayerId) beneathMbLayerId = glDrawBottomMbLayerId;
+  if (glDrawBottomMbLayerId) {
+    beneathMbLayerId = glDrawBottomMbLayerId;
+  }
 
   // Sort map layer labels
   [...layerList]
