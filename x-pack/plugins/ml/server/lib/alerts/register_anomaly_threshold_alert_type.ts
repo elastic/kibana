@@ -4,24 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { ML_ALERT_TYPES, ML_ALERT_TYPES_CONFIG } from '../../../common/constants/alerts';
+import {
+  ML_ALERT_TYPES,
+  ML_ALERT_TYPES_CONFIG,
+  mlAnomalyThresholdAlertParams,
+} from '../../../common/constants/alerts';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { PLUGIN_ID } from '../../../common/constants/app';
-
-const paramsSchema = schema.object({
-  serviceName: schema.string(),
-  transactionType: schema.string(),
-  windowSize: schema.number(),
-  windowUnit: schema.string(),
-  threshold: schema.number(),
-  aggregationType: schema.oneOf([
-    schema.literal('avg'),
-    schema.literal('95th'),
-    schema.literal('99th'),
-  ]),
-  environment: schema.string(),
-});
+import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 
 const alertTypeConfig = ML_ALERT_TYPES_CONFIG[ML_ALERT_TYPES.ANOMALY_THRESHOLD];
 
@@ -36,13 +26,13 @@ export function registerAnomalyThresholdAlertType({ alerts }: RegisterAlertParam
     actionGroups: alertTypeConfig.actionGroups,
     defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
     validate: {
-      params: paramsSchema,
+      params: mlAnomalyThresholdAlertParams,
     },
     actionVariables: {
       context: [],
     },
     producer: PLUGIN_ID,
-    minimumLicenseRequired: 'platinum',
+    minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     executor: async ({ services, params }) => {},
   });
 }

@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { ActionGroup } from '../../../alerts/common';
 import { MINIMUM_FULL_LICENSE } from '../license';
 import { PLUGIN_ID } from './app';
@@ -44,3 +45,21 @@ export const ML_ALERT_TYPES_CONFIG: Record<
     producer: PLUGIN_ID,
   },
 };
+
+export const mlAnomalyThresholdAlertParams = schema.object({
+  jobSelection: schema.object(
+    {
+      jobIds: schema.maybe(schema.arrayOf(schema.string())),
+      groupIds: schema.maybe(schema.arrayOf(schema.string())),
+    },
+    {
+      validate: (v) => {
+        if (!v.jobIds?.length && !v.groupIds?.length) {
+          return 'List of job ids or group ids is required';
+        }
+      },
+    }
+  ),
+});
+
+export type MlAnomalyThresholdAlertParams = TypeOf<typeof mlAnomalyThresholdAlertParams>;

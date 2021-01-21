@@ -4,24 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
-
-export interface AlertParams {
-  windowSize: number;
-  windowUnit: string;
-  threshold: number;
-  serviceName: string;
-  environment: string;
-}
+import React, { FC, useCallback } from 'react';
+import { JobSelectorControl, JobSelectorControlProps } from './job_selector';
+import { useMlKibana } from '../application/contexts/kibana';
+import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
+import { HttpService } from '../application/services/http_service';
+import { MlAnomalyThresholdAlertParams } from '../../common/constants/alerts';
 
 interface Props {
-  alertParams: AlertParams;
+  alertParams: MlAnomalyThresholdAlertParams;
   setAlertParams: (key: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
 }
 
-const MlAlertThresholdAlertTrigger: FC<Props> = () => {
-  return <div />;
+const MlAlertThresholdAlertTrigger: FC<Props> = ({
+  alertParams,
+  setAlertParams,
+  setAlertProperty,
+}) => {
+  const {
+    services: { http },
+  } = useMlKibana();
+  const adJobsApiService = jobsApiProvider(new HttpService(http));
+
+  const onSelectionChange: JobSelectorControlProps['onSelectionChange'] = useCallback((update) => {
+    setAlertParams('jobSelection', update);
+  }, []);
+
+  return (
+    <>
+      <JobSelectorControl
+        jobSelection={alertParams.jobSelection}
+        adJobsApiService={adJobsApiService}
+        onSelectionChange={onSelectionChange}
+      />
+    </>
+  );
 };
 
 // Default export is required for React.lazy loading
