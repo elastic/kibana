@@ -51,7 +51,7 @@ describe('createPluginInitializerContext', () => {
     env = Env.createDefault(REPO_ROOT, getEnvOptions());
     const config$ = rawConfigServiceMock.create({ rawConfig: {} });
     server = new Server(config$, env, logger);
-    await server.setupCoreConfig();
+    server.setupCoreConfig();
     coreContext = { coreId, env, logger, configService: server.configService };
   });
 

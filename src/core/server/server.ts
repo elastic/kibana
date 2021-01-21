@@ -300,7 +300,7 @@ export class Server {
     );
   }
 
-  public async setupCoreConfig() {
+  public setupCoreConfig() {
     const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
       pathConfig,
       cspConfig,
@@ -325,7 +325,7 @@ export class Server {
       if (descriptor.deprecations) {
         this.configService.addDeprecationProvider(descriptor.path, descriptor.deprecations);
       }
-      await this.configService.setSchema(descriptor.path, descriptor.schema);
+      this.configService.setSchema(descriptor.path, descriptor.schema);
     }
   }
 }

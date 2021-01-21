@@ -282,7 +282,6 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   config: {
     legacy: { globalConfig$: Observable<SharedGlobalConfig> };
     create: <T = ConfigSchema>() => Observable<T>;
-    createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
   };
 }
 

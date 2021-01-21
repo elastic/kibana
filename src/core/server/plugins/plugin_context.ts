@@ -108,9 +108,6 @@ export function createPluginInitializerContext(
       create<T>() {
         return coreContext.configService.atPath<T>(pluginManifest.configPath).pipe(shareReplay(1));
       },
-      createIfExists() {
-        return coreContext.configService.optionalAtPath(pluginManifest.configPath);
-      },
     },
   };
 }
