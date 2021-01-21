@@ -22,7 +22,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { FlashMessagesLogic } from '../../../shared/flash_messages';
+import { clearFlashMessages } from '../../../shared/flash_messages';
 
 import { Loading } from '../../../shared/loading';
 import { SourceIcon } from '../../components/shared/source_icon';
@@ -49,7 +49,7 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
     const pollingInterval = window.setInterval(pollForSourceStatusChanges, POLLING_INTERVAL);
 
     return () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
       clearInterval(pollingInterval);
     };
   }, []);

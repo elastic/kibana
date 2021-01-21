@@ -48,6 +48,7 @@ else
 fi
 
 tc_set_env FLEET_PACKAGE_REGISTRY_PORT 6104 # Any unused port is fine, used by ingest manager tests
+tc_set_env TEST_CORS_SERVER_PORT 6105 # Any unused port is fine, used by ingest manager tests
 
 if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
   echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
