@@ -57,7 +57,7 @@ export class SavedObjectsExportError extends Error {
    */
   static invalidTransformError(objectKeys: string[]) {
     return new SavedObjectsExportError(
-      'object-transform-error',
+      'invalid-transform-error',
       'Invalid transform performed on objects to export',
       {
         objectKeys,

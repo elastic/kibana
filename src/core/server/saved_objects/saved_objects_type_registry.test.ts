@@ -47,7 +47,7 @@ describe('SavedObjectTypeRegistry', () => {
       }).toThrowErrorMatchingInlineSnapshot(`"Type 'typeA' is already registered"`);
     });
 
-    it('throws when `management.onExport` is specified but `management.importableAndExportable` is not or false', () => {
+    it('throws when `management.onExport` is specified but `management.importableAndExportable` is undefined or false', () => {
       expect(() => {
         registry.registerType(
           createType({
@@ -85,6 +85,8 @@ describe('SavedObjectTypeRegistry', () => {
         );
       }).not.toThrow();
     });
+
+    // TODO: same test with 'onImport'
   });
 
   describe('#getType', () => {

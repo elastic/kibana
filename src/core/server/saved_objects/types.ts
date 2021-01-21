@@ -325,9 +325,11 @@ export interface SavedObjectsTypeManagementDefinition {
    * An optional export transform function that can be used transform the objects of the registered type during
    * the export process.
    *
-   * It can be used to either mutates the exported objects, or add new objects to the export list.
+   * It can be used to either mutate the exported objects, or add additional objects (of any type) to the export list.
    *
    * See {@link SavedObjectsExportTransform | the transform type documentation} for more info and examples.
+   *
+   * @remarks `importableAndExportable` must be `true` to specify this property.
    */
   onExport?: SavedObjectsExportTransform;
   /**
@@ -369,7 +371,8 @@ export interface SavedObjectsTypeManagementDefinition {
    * }
    * ```
    *
-   * @remark messages returned in the warnings are user facing and must be translated.
+   * @remarks messages returned in the warnings are user facing and must be translated.
+   * @remarks `importableAndExportable` must be `true` to specify this property.
    */
   onImport?: SavedObjectsImportHook;
 }
