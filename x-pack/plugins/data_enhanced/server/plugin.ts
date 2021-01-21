@@ -75,7 +75,7 @@ export class EnhancedDataServerPlugin
     });
 
     const router = core.http.createRouter<DataEnhancedRequestHandlerContext>();
-    registerSessionRoutes(router);
+    registerSessionRoutes(router, this.logger);
 
     this.sessionService.setup(core, {
       taskManager: deps.taskManager,

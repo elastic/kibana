@@ -4,6 +4,11 @@
 
 ## IndexPatternSpec.intervalName property
 
+> Warning: This API is now obsolete.
+> 
+> Deprecated. Was used by time range based index patterns
+> 
+
 <b>Signature:</b>
 
 ```typescript

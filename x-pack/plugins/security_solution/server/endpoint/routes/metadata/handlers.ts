@@ -75,13 +75,15 @@ export const getMetadataListRequestHandler = function (
 
       const unenrolledAgentIds = await findAllUnenrolledAgentIds(
         agentService,
-        context.core.savedObjects.client
+        context.core.savedObjects.client,
+        context.core.elasticsearch.client.asCurrentUser
       );
 
       const statusIDs = request?.body?.filters?.host_status?.length
         ? await findAgentIDsByStatus(
             agentService,
             context.core.savedObjects.client,
+            context.core.elasticsearch.client.asCurrentUser,
             request.body?.filters?.host_status
           )
         : undefined;
@@ -205,6 +207,7 @@ async function findAgent(
       ?.getAgentService()
       ?.getAgent(
         metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
         hostMetadata.elastic.agent.id
       );
   } catch (e) {
@@ -279,6 +282,7 @@ export async function enrichHostMetadata(
       ?.getAgentService()
       ?.getAgentStatusById(
         metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
         elasticAgentId
       );
     hostStatus = HOST_STATUS_MAPPING.get(status!) || HostStatus.ERROR;
@@ -301,6 +305,7 @@ export async function enrichHostMetadata(
       ?.getAgentService()
       ?.getAgent(
         metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
         elasticAgentId
       );
     const agentPolicy = await metadataRequestContext.endpointAppContextService

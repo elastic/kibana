@@ -299,6 +299,17 @@ export function DimensionEditor(props: DimensionEditorProps) {
     }
   );
 
+  // Need to workout early on the error to decide whether to show this or an help text
+  const fieldErrorMessage =
+    (selectedOperationDefinition?.input !== 'fullReference' ||
+      (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field')) &&
+    getErrorMessage(
+      selectedColumn,
+      Boolean(incompleteOperation),
+      selectedOperationDefinition?.input,
+      currentFieldIsInvalid
+    );
+
   return (
     <div id={columnId}>
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
@@ -342,6 +353,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   existingFields={state.existingFields}
                   selectionStyle={selectedOperationDefinition.selectionStyle}
                   dateRange={dateRange}
+                  labelAppend={selectedOperationDefinition?.getHelpMessage?.({
+                    data: props.data,
+                    uiSettings: props.uiSettings,
+                    currentColumn: state.layers[layerId].columns[columnId],
+                  })}
                   {...services}
                 />
               );
@@ -360,12 +376,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
             })}
             fullWidth
             isInvalid={Boolean(incompleteOperation || currentFieldIsInvalid)}
-            error={getErrorMessage(
-              selectedColumn,
-              Boolean(incompleteOperation),
-              selectedOperationDefinition?.input,
-              currentFieldIsInvalid
-            )}
+            error={fieldErrorMessage}
+            labelAppend={
+              !fieldErrorMessage &&
+              selectedOperationDefinition?.getHelpMessage?.({
+                data: props.data,
+                uiSettings: props.uiSettings,
+                currentColumn: state.layers[layerId].columns[columnId],
+              })
+            }
           >
             <FieldSelect
               fieldIsInvalid={currentFieldIsInvalid}
