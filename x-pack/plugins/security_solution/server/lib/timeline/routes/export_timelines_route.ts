@@ -5,7 +5,7 @@
  */
 
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
-import { IRouter } from '../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 import { ConfigType } from '../../../config';
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 
@@ -19,7 +19,7 @@ import { buildFrameworkRequest } from './utils/common';
 import { SetupPlugins } from '../../../plugin';
 
 export const exportTimelinesRoute = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {
