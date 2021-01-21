@@ -8,7 +8,7 @@
 
 import { Plugin, CoreSetup } from 'kibana/server';
 
-export class SavedObjectExportHooksPlugin implements Plugin {
+export class SavedObjectExportTransformsPlugin implements Plugin {
   public setup({ savedObjects, getStartServices }: CoreSetup, deps: {}) {
     const savedObjectStartContractPromise = getStartServices().then(
       ([{ savedObjects: savedObjectsStart }]) => savedObjectsStart

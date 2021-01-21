@@ -6,6 +6,6 @@
  * Public License, v 1.
  */
 
-import { SavedObjectExportHooksPlugin } from './plugin';
+import { SavedObjectExportTransformsPlugin } from './plugin';
 
-export const plugin = () => new SavedObjectExportHooksPlugin();
+export const plugin = () => new SavedObjectExportTransformsPlugin();
