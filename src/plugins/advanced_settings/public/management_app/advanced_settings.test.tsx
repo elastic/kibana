@@ -9,7 +9,7 @@
 import React from 'react';
 import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
-import { mountWithI18nProvider } from '@kbn/test/jest';
+import { mountWithI18nProvider, shallowWithI18nProvider } from '@kbn/test/jest';
 import dedent from 'dedent';
 import {
   PublicUiSettingsParams,
@@ -17,9 +17,10 @@ import {
   UiSettingsType,
 } from '../../../../core/public';
 import { FieldSetting } from './types';
-import { AdvancedSettingsComponent } from './advanced_settings';
+import { AdvancedSettings } from './advanced_settings';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../core/public/mocks';
 import { ComponentRegistry } from '../component_registry';
+import { Search } from './components/search';
 
 jest.mock('./components/field', () => ({
   Field: () => {
@@ -222,10 +223,30 @@ function mockConfig() {
 }
 
 describe('AdvancedSettings', () => {
+  const defaultQuery = 'test:string:setting';
+  const mockHistory = {
+    listen: jest.fn(),
+  } as any;
+  const locationSpy = jest.spyOn(window, 'location', 'get');
+
+  afterAll(() => {
+    locationSpy.mockRestore();
+  });
+
+  const mockQuery = (query = defaultQuery) => {
+    locationSpy.mockImplementation(
+      () =>
+        ({
+          search: `?query=${query}`,
+        } as any)
+    );
+  };
+
   it('should render specific setting if given setting key', async () => {
+    mockQuery();
     const component = mountWithI18nProvider(
-      <AdvancedSettingsComponent
-        queryText="test:string:setting"
+      <AdvancedSettings
+        history={mockHistory}
         enableSaving={true}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
@@ -238,16 +259,16 @@ describe('AdvancedSettings', () => {
       component
         .find('Field')
         .filterWhere(
-          (n: ReactWrapper) =>
-            (n.prop('setting') as Record<string, string>).name === 'test:string:setting'
+          (n: ReactWrapper) => (n.prop('setting') as Record<string, string>).name === defaultQuery
         )
     ).toHaveLength(1);
   });
 
   it('should render read-only when saving is disabled', async () => {
+    mockQuery();
     const component = mountWithI18nProvider(
-      <AdvancedSettingsComponent
-        queryText="test:string:setting"
+      <AdvancedSettings
+        history={mockHistory}
         enableSaving={false}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
@@ -260,10 +281,31 @@ describe('AdvancedSettings', () => {
       component
         .find('Field')
         .filterWhere(
-          (n: ReactWrapper) =>
-            (n.prop('setting') as Record<string, string>).name === 'test:string:setting'
+          (n: ReactWrapper) => (n.prop('setting') as Record<string, string>).name === defaultQuery
         )
         .prop('enableSaving')
     ).toBe(false);
+  });
+
+  it('should render unfiltered with query parsing error', async () => {
+    const badQuery = 'category:(accessibility))';
+    mockQuery(badQuery);
+    const { toasts } = notificationServiceMock.createStartContract();
+    const getComponent = () =>
+      shallowWithI18nProvider(
+        <AdvancedSettings
+          history={mockHistory}
+          enableSaving={false}
+          toasts={toasts}
+          dockLinks={docLinksServiceMock.createStartContract().links}
+          uiSettings={mockConfig().core.uiSettings}
+          componentRegistry={new ComponentRegistry().start}
+        />
+      );
+
+    expect(getComponent).not.toThrow();
+    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
+    const component = getComponent();
+    expect(component.find(Search).prop('query').text).toEqual('');
   });
 });

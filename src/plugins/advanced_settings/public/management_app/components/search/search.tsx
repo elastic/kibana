@@ -12,11 +12,18 @@ import { EuiSearchBar, EuiFormErrorText, Query } from '@elastic/eui';
 
 import { getCategoryName } from '../../lib';
 
+export const CATEGORY_FIELD = 'category';
+
 interface SearchProps {
   categories: string[];
   query: Query;
   onQueryChange: ({ query }: { query: Query }) => void;
 }
+
+export const parseErrorMsg = i18n.translate(
+  'advancedSettings.searchBar.unableToParseQueryErrorMessage',
+  { defaultMessage: 'Unable to parse query' }
+);
 
 export class Search extends PureComponent<SearchProps> {
   private categories: Array<{ value: string; name: string }> = [];
@@ -67,7 +74,7 @@ export class Search extends PureComponent<SearchProps> {
     const filters = [
       {
         type: 'field_value_selection' as const,
-        field: 'category',
+        field: CATEGORY_FIELD,
         name: i18n.translate('advancedSettings.categorySearchLabel', {
           defaultMessage: 'Category',
         }),
@@ -78,10 +85,6 @@ export class Search extends PureComponent<SearchProps> {
 
     let queryParseError;
     if (!this.state.isSearchTextValid) {
-      const parseErrorMsg = i18n.translate(
-        'advancedSettings.searchBar.unableToParseQueryErrorMessage',
-        { defaultMessage: 'Unable to parse query' }
-      );
       queryParseError = (
         <EuiFormErrorText>{`${parseErrorMsg}. ${this.state.parseErrorMessage}`}</EuiFormErrorText>
       );
