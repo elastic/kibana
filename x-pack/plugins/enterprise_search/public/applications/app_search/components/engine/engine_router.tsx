@@ -17,7 +17,6 @@ import { AppLogic } from '../../app_logic';
 // TODO: Uncomment and add more routes as we migrate them
 import {
   ENGINES_PATH,
-  ENGINE_PATH,
   ENGINE_ANALYTICS_PATH,
   ENGINE_DOCUMENTS_PATH,
   ENGINE_DOCUMENT_DETAIL_PATH,
@@ -86,14 +85,14 @@ export const EngineRouter: React.FC = () => {
   return (
     <Switch>
       {canViewEngineAnalytics && (
-        <Route path={ENGINE_PATH + ENGINE_ANALYTICS_PATH}>
+        <Route path={ENGINE_ANALYTICS_PATH}>
           <AnalyticsRouter engineBreadcrumb={engineBreadcrumb} />
         </Route>
       )}
-      <Route path={ENGINE_PATH + ENGINE_DOCUMENT_DETAIL_PATH}>
+      <Route path={ENGINE_DOCUMENT_DETAIL_PATH}>
         <DocumentDetail engineBreadcrumb={engineBreadcrumb} />
       </Route>
-      <Route path={ENGINE_PATH + ENGINE_DOCUMENTS_PATH}>
+      <Route path={ENGINE_DOCUMENTS_PATH}>
         <Documents engineBreadcrumb={engineBreadcrumb} />
       </Route>
       <Route>

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import pMap from 'p-map';
 import { getAgent, listAgents } from './crud';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
@@ -14,9 +14,10 @@ import { AgentStatusKueryHelper } from '../../../common/services';
 
 export async function getAgentStatusById(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentStatus> {
-  const agent = await getAgent(soClient, agentId);
+  const agent = await getAgent(soClient, esClient, agentId);
   return AgentStatusKueryHelper.getAgentStatus(agent);
 }
 
@@ -36,6 +37,7 @@ function joinKuerys(...kuerys: Array<string | undefined>) {
 
 export async function getAgentStatusForAgentPolicy(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agentPolicyId?: string,
   filterKuery?: string
 ) {
@@ -48,7 +50,7 @@ export async function getAgentStatusForAgentPolicy(
       AgentStatusKueryHelper.buildKueryForUpdatingAgents(),
     ],
     (kuery) =>
-      listAgents(soClient, {
+      listAgents(soClient, esClient, {
         showInactive: false,
         perPage: 0,
         page: 1,

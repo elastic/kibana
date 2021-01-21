@@ -20,10 +20,10 @@ interface ConstructorDependencies {
   config: ConfigType;
   log: Logger;
 }
-interface RequestParams<ResponseBody> {
+interface RequestParams {
   path: string;
   params?: object;
-  hasValidData?: (body?: ResponseBody) => boolean;
+  hasValidData?: Function;
 }
 interface ErrorResponse {
   message: string;
@@ -32,7 +32,7 @@ interface ErrorResponse {
   };
 }
 export interface IEnterpriseSearchRequestHandler {
-  createRequest(requestParams?: object): RequestHandler<unknown, unknown, unknown>;
+  createRequest(requestParams?: RequestParams): RequestHandler<unknown, unknown, unknown>;
 }
 
 /**
@@ -53,11 +53,7 @@ export class EnterpriseSearchRequestHandler {
     this.enterpriseSearchUrl = config.host as string;
   }
 
-  createRequest<ResponseBody>({
-    path,
-    params = {},
-    hasValidData = () => true,
-  }: RequestParams<ResponseBody>) {
+  createRequest({ path, params = {}, hasValidData = () => true }: RequestParams) {
     return async (
       _context: RequestHandlerContext,
       request: KibanaRequest<unknown, unknown, unknown>,
