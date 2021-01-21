@@ -70,6 +70,7 @@ export enum MimeType {
   Stylesheet = 'stylesheet',
   Media = 'media',
   Font = 'font',
+  XHR = 'xhr',
   Other = 'other',
 }
 
@@ -143,6 +144,9 @@ export const MimeTypesMap: Record<string, MimeType> = {
   'application/font-woff2': MimeType.Font,
   'application/vnd.ms-fontobject': MimeType.Font,
   'application/font-sfnt': MimeType.Font,
+
+  // XHR
+  'application/json': MimeType.XHR,
 };
 
 export type NetworkItem = NetworkEvent;
@@ -174,7 +178,9 @@ export interface ExtraSeriesConfig {
   colour: string;
 }
 
-export type SidebarItem = Pick<NetworkItem, 'url' | 'status' | 'method'>;
+export type SidebarItem = Pick<NetworkItem, 'url' | 'status' | 'method'> & {
+  isHighlighted: boolean;
+};
 export type SidebarItems = SidebarItem[];
 
 export interface LegendItem {

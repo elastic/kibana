@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
 import { IWaterfallContext } from '../context/waterfall_chart';
 import {
@@ -14,19 +14,16 @@ import {
   WaterfallChartSidebarContainerFlexGroup,
   WaterfallChartSidebarFlexItem,
 } from './styles';
-import { RenderFilter, WaterfallChartProps } from './waterfall_chart';
+import { WaterfallChartProps } from './waterfall_chart';
 
 interface SidebarProps {
-  renderFilter: RenderFilter;
   items: Required<IWaterfallContext>['sidebarItems'];
   render: Required<WaterfallChartProps>['renderSidebarItem'];
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ items, render, renderFilter }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
   return (
     <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
-      {renderFilter()}
-      <EuiHorizontalRule margin="s" />
       <WaterfallChartSidebarContainer height={items.length * FIXED_AXIS_HEIGHT}>
         <WaterfallChartSidebarContainerInnerPanel paddingSize="none">
           <WaterfallChartSidebarContainerFlexGroup
@@ -34,13 +31,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, render, renderFilter })
             gutterSize="none"
             responsive={false}
           >
-            {items.map((item, index) => {
-              return (
-                <WaterfallChartSidebarFlexItem key={index}>
-                  {render(item, index)}
-                </WaterfallChartSidebarFlexItem>
-              );
-            })}
+            {items.map((item, index) => (
+              <WaterfallChartSidebarFlexItem key={index} isHighlighted={item.isHighlighted}>
+                {render(item, index)}
+              </WaterfallChartSidebarFlexItem>
+            ))}
           </WaterfallChartSidebarContainerFlexGroup>
         </WaterfallChartSidebarContainerInnerPanel>
       </WaterfallChartSidebarContainer>

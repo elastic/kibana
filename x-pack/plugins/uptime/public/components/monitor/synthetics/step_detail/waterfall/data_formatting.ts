@@ -54,8 +54,17 @@ const getFriendlyTooltipValue = ({
   }
   return `${label}: ${formatValueForDisplay(value)}ms`;
 };
+const isHighlightedItem = (item: NetworkItem, query: string, activeFilters: string[]) => {
+  if (!query && activeFilters.length === 0) {
+    return true;
+  }
+  return (
+    (query && item.url?.includes(query)) ||
+    (activeFilters.length > 0 && activeFilters.includes(MimeTypesMap[item.mimeType!]))
+  );
+};
 
-export const getSeriesAndDomain = (items: NetworkItems) => {
+export const getSeriesAndDomain = (items: NetworkItems, query: string, activeFilters: string[]) => {
   const getValueForOffset = (item: NetworkItem) => {
     return item.requestSentTime;
   };
@@ -77,15 +86,16 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
     }
   };
 
-  const t0 = performance.now();
-
   const series = items.reduce<WaterfallData>((acc, item, index) => {
+    const isHighlighted = isHighlightedItem(item, query, activeFilters);
+
     if (!item.timings) {
       acc.push({
         x: index,
         y0: 0,
         y: 0,
         config: {
+          isHighlighted,
           showTooltip: false,
         },
       });
@@ -112,6 +122,7 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
           y,
           config: {
             colour,
+            isHighlighted,
             showTooltip: true,
             tooltipProps: {
               value: getFriendlyTooltipValue({
@@ -138,6 +149,7 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
         y0: hasTotal ? currentOffset : 0,
         y: hasTotal ? currentOffset + item.timings.total : 0,
         config: {
+          isHighlighted,
           colour: hasTotal ? mimeTypeColour : '',
           showTooltip: hasTotal,
           tooltipProps: hasTotal
@@ -156,19 +168,21 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
     return acc;
   }, []);
 
-  const t1 = performance.now();
-  console.log(`Call to doSomething took ${t1 - t0} milliseconds.`);
-
   const yValues = series.map((serie) => serie.y);
   const domain = { min: 0, max: Math.max(...yValues) };
 
   return { series, domain };
 };
 
-export const getSidebarItems = (items: NetworkItems): SidebarItems => {
+export const getSidebarItems = (
+  items: NetworkItems,
+  query: string,
+  activeFilters: string[]
+): SidebarItems => {
   return items.map((item) => {
+    const isHighlighted = isHighlightedItem(item, query, activeFilters);
     const { url, status, method } = item;
-    return { url, status, method };
+    return { url, status, method, isHighlighted };
   });
 };
 

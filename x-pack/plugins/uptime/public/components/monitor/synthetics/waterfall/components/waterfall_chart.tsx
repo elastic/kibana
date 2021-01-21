@@ -31,6 +31,7 @@ import {
   WaterfallChartFixedAxisContainer,
   WaterfallChartChartContainer,
   WaterfallChartTooltip,
+  WaterfallChartTopContainer,
 } from './styles';
 import { WaterfallData } from '../types';
 import { BAR_HEIGHT, CANVAS_MAX_ITEMS, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
@@ -115,7 +116,7 @@ export const WaterfallChart = ({
     <WaterfallChartOuterContainer height={height}>
       <>
         <WaterfallChartFixedTopContainer>
-          <EuiFlexGroup gutterSize="none" responsive={false}>
+          <WaterfallChartTopContainer gutterSize="none" responsive={false}>
             {shouldRenderSidebar && (
               <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
                 <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false} />
@@ -157,7 +158,15 @@ export const WaterfallChart = ({
                 </Chart>
               </WaterfallChartFixedAxisContainer>
             </EuiFlexItem>
-          </EuiFlexGroup>
+          </WaterfallChartTopContainer>
+          {renderFilter && (
+            <WaterfallChartFixedTopContainerSidebarCover borderRadius="none" hasShadow={false}>
+              <EuiFlexGroup gutterSize="none" responsive={false}>
+                <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>{renderFilter()}</EuiFlexItem>
+                <EuiFlexItem grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true} />
+              </EuiFlexGroup>
+            </WaterfallChartFixedTopContainerSidebarCover>
+          )}
         </WaterfallChartFixedTopContainer>
         <EuiFlexGroup
           gutterSize="none"
@@ -165,13 +174,7 @@ export const WaterfallChart = ({
           style={{ paddingTop: '10px' }}
           ref={chartWrapperDivRef}
         >
-          {shouldRenderSidebar && (
-            <Sidebar
-              renderFilter={renderFilter}
-              items={sidebarItems!}
-              render={renderSidebarItem!}
-            />
-          )}
+          {shouldRenderSidebar && <Sidebar items={sidebarItems!} render={renderSidebarItem!} />}
           <EuiFlexItem grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}>
             {chartsToDisplay.map((chartData, ind) => (
               <WaterfallChartChartContainer

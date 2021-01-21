@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFieldSearch } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
 import { SidebarItem, LegendItem, NetworkItems } from './types';
 import {
@@ -14,7 +14,7 @@ import {
   MiddleTruncatedText,
   RenderItem,
 } from '../../waterfall';
-import { FILTER_REQUESTS_LABEL } from '../../waterfall/components/translations';
+import { WaterfallFilter } from './waterfall_filter';
 
 export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
   const { status } = item;
@@ -54,42 +54,30 @@ interface Props {
 
 export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
   const [query, setQuery] = useState<string>('');
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
-  const [networkData, setNetworkData] = useState<NetworkItems>(data);
+  const [networkData] = useState<NetworkItems>(data);
 
   const { series, domain } = useMemo(() => {
-    return getSeriesAndDomain(networkData);
-  }, [networkData]);
+    return getSeriesAndDomain(networkData, query, activeFilters);
+  }, [networkData, query, activeFilters]);
 
   const sidebarItems = useMemo(() => {
-    return getSidebarItems(networkData);
-  }, [networkData]);
+    return getSidebarItems(networkData, query, activeFilters);
+  }, [networkData, query, activeFilters]);
 
   const legendItems = getLegendItems();
 
   const renderFilter = () => {
     return (
-      <EuiFieldSearch
-        placeholder={FILTER_REQUESTS_LABEL}
-        onChange={(evt) => {
-          setQuery(evt.target.value);
-        }}
-        value={query}
+      <WaterfallFilter
+        query={query}
+        setQuery={setQuery}
+        activeFilters={activeFilters}
+        setActiveFilters={setActiveFilters}
       />
     );
   };
-
-  useEffect(() => {
-    if (query) {
-      setNetworkData(
-        networkData.filter((networkItem) => {
-          return networkItem.url?.includes(query);
-        })
-      );
-    } else {
-      setNetworkData(data);
-    }
-  }, [query]);
 
   return (
     <WaterfallProvider
@@ -104,6 +92,14 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
         tickFormat={(d: number) => `${Number(d).toFixed(0)} ms`}
         domain={domain}
         barStyleAccessor={(datum) => {
+          if (!datum.datum.config.isHighlighted) {
+            return {
+              rect: {
+                fill: datum.datum.config.colour,
+                opacity: '0.1',
+              },
+            };
+          }
           return datum.datum.config.colour;
         }}
         renderSidebarItem={renderSidebarItem}

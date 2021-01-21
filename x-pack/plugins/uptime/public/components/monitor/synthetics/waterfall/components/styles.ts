@@ -36,6 +36,9 @@ export const WaterfallChartFixedTopContainer = euiStyled.div`
   position: sticky;
   top: 0;
   z-index: ${(props) => props.theme.eui.euiZLevel4};
+`;
+
+export const WaterfallChartTopContainer = euiStyled(EuiFlexGroup)`
   border-bottom: ${(props) => `1px solid ${props.theme.eui.euiColorLightShade}`};
 `;
 
@@ -73,6 +76,7 @@ export const WaterfallChartSidebarFlexItem = euiStyled(EuiFlexItem)`
   min-width: 0;
   padding-left: ${(props) => props.theme.eui.paddingSizes.m};
   padding-right: ${(props) => props.theme.eui.paddingSizes.m};
+  opacity: ${(props) => (props.isHighlighted ? 1 : 0.4)};
 `;
 
 interface WaterfallChartChartContainer {
