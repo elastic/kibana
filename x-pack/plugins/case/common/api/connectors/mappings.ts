@@ -7,7 +7,6 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
 import * as rt from 'io-ts';
-import { ElasticUser } from '../../../../security_solution/public/cases/containers/types';
 import {
   PushToServiceApiParams as JiraPushToServiceApiParams,
   Incident as JiraIncident,
@@ -23,6 +22,13 @@ import {
 import { ResilientFieldsRT } from './resilient';
 import { ServiceNowFieldsRT } from './servicenow';
 import { JiraFieldsRT } from './jira';
+
+// Formerly imported from security_solution
+export interface ElasticUser {
+  readonly email?: string | null;
+  readonly fullName?: string | null;
+  readonly username?: string | null;
+}
 
 export {
   JiraPushToServiceApiParams,
