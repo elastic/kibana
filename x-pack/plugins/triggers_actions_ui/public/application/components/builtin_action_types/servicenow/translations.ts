@@ -176,7 +176,7 @@ export const MALWARE_HASH_LABEL = i18n.translate(
 );
 
 export const CHOICES_API_ERROR = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.unableToGetChoicesMessage',
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.unableToGetChoicesMessage',
   {
     defaultMessage: 'Unable to get choices',
   }

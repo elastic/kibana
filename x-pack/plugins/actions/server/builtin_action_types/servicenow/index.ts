@@ -100,7 +100,7 @@ export function getServiceNowSIRActionType(
 }
 
 // action executor
-const supportedSubActions: string[] = ['getFields', 'pushToService', 'getChoices'];
+const supportedSubActions: string[] = ['getFields', 'pushToService', 'getChoices', 'getIncident'];
 async function executor(
   {
     logger,
