@@ -32,6 +32,7 @@ export interface MigrationOpts {
   scrollDuration: string;
   client: MigrationEsClient;
   index: string;
+  kibanaVersion: string;
   log: Logger;
   mappingProperties: SavedObjectsTypeMappingDefinitions;
   documentMigrator: VersionedTransformer;
@@ -54,6 +55,7 @@ export interface Context {
   source: Index.FullIndexInfo;
   dest: Index.FullIndexInfo;
   documentMigrator: VersionedTransformer;
+  kibanaVersion: string;
   log: SavedObjectsMigrationLogger;
   batchSize: number;
   pollInterval: number;
@@ -78,6 +80,7 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
     alias,
     source,
     dest,
+    kibanaVersion: opts.kibanaVersion,
     log: new MigrationLogger(log),
     batchSize: opts.batchSize,
     documentMigrator: opts.documentMigrator,

@@ -50,7 +50,7 @@ const getFriendlyTooltipValue = ({
   let label = FriendlyTimingLabels[timing];
   if (timing === Timings.Receive && mimeType) {
     const formattedMimeType: MimeType = MimeTypesMap[mimeType];
-    label += ` (${FriendlyMimetypeLabels[formattedMimeType]})`;
+    label += ` (${FriendlyMimetypeLabels[formattedMimeType] || mimeType})`;
   }
   return `${label}: ${formatValueForDisplay(value)}ms`;
 };
