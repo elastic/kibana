@@ -12,7 +12,7 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { HttpLogic } from '../../../shared/http';
 
 import { ENGINE_DOCUMENTS_PATH } from '../../routes';
-import { EngineLogic } from '../engine';
+import { EngineLogic, generateEnginePath } from '../engine';
 
 import { FieldDetails } from './types';
 
@@ -52,7 +52,7 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
   }),
   listeners: ({ actions }) => ({
     getDocumentDetails: async ({ documentId }) => {
-      const { engineName, generateEnginePath } = EngineLogic.values;
+      const { engineName } = EngineLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
 
       try {
@@ -70,7 +70,7 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
       }
     },
     deleteDocument: async ({ documentId }) => {
-      const { engineName, generateEnginePath } = EngineLogic.values;
+      const { engineName } = EngineLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
 
       const CONFIRM_DELETE = i18n.translate(
