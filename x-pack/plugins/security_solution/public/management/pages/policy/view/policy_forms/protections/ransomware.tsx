@@ -36,6 +36,7 @@ import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 import { AppAction } from '../../../../../../common/store/actions';
 import { SupportedVersionNotice } from './supported_version';
+import { RadioFlexGroup } from './malware';
 
 const OSes: Immutable<RansomwareProtectionOSes[]> = [OS.windows, OS.mac];
 const protection = 'ransomware';
@@ -190,45 +191,44 @@ export const Ransomware = React.memo(() => {
           />
         </ConfigFormHeading>
         <EuiSpacer size="xs" />
-        <EuiFlexGroup>
-          {radios.map((radio) => {
-            return (
-              <EuiFlexItem>
-                <ProtectionRadio
-                  protectionMode={radio.id}
-                  key={radio.protection + radio.id}
-                  label={radio.label}
-                />
-              </EuiFlexItem>
-            );
-          })}
-          <EuiFlexItem grow={2} />
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-
-        <>
-          <ConfigFormHeading>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyDetailsConfig.userNotification"
-              defaultMessage="User Notification"
+        <RadioFlexGroup>
+          <EuiFlexItem className="no-right-margin-radio" grow={1}>
+            <ProtectionRadio
+              protectionMode={radios[0].id}
+              key={radios[0].protection + radios[0].id}
+              label={radios[0].label}
             />
-          </ConfigFormHeading>
-          <SupportedVersionNotice optionName="ransomware" />
-          <EuiSpacer size="s" />
-          <EuiCheckbox
-            data-test-subj="ransomwareUserNotificationCheckbox"
-            id="xpack.securitySolution.endpoint.policyDetail.ransomware.userNotification"
-            onChange={handleUserNotificationCheckbox}
-            checked={userNotificationSelected}
-            disabled={selected === ProtectionModes.off}
-            label={i18n.translate(
-              'xpack.securitySolution.endpoint.policyDetail.ransomware.notifyUser',
-              {
-                defaultMessage: 'Notify User',
-              }
-            )}
+          </EuiFlexItem>
+          <EuiFlexItem className="no-horizontal-margin-radio" grow={3}>
+            <ProtectionRadio
+              protectionMode={radios[1].id}
+              key={radios[1].protection + radios[1].id}
+              label={radios[1].label}
+            />
+          </EuiFlexItem>
+        </RadioFlexGroup>
+        <EuiSpacer size="m" />
+        <ConfigFormHeading>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policyDetailsConfig.userNotification"
+            defaultMessage="User Notification"
           />
-        </>
+        </ConfigFormHeading>
+        <SupportedVersionNotice optionName="ransomware" />
+        <EuiSpacer size="s" />
+        <EuiCheckbox
+          data-test-subj="ransomwareUserNotificationCheckbox"
+          id="xpack.securitySolution.endpoint.policyDetail.ransomware.userNotification"
+          onChange={handleUserNotificationCheckbox}
+          checked={userNotificationSelected}
+          disabled={selected === ProtectionModes.off}
+          label={i18n.translate(
+            'xpack.securitySolution.endpoint.policyDetail.ransomware.notifyUser',
+            {
+              defaultMessage: 'Notify User',
+            }
+          )}
+        />
         {userNotificationSelected && (
           <>
             <EuiSpacer size="s" />
