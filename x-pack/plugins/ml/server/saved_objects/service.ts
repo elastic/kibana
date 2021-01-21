@@ -124,12 +124,16 @@ export function jobSavedObjectServiceFactory(
     await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, job.id, { force: true });
   }
 
-  async function _forceDeleteJob(jobType: JobType, jobId: string, namespace: string) {
+  async function _forceDeleteJob(jobType: JobType, jobId: string, jobNamespace: string) {
     const id = savedObjectId({
       job_id: jobId,
       datafeed_id: null,
       type: jobType,
     });
+
+    // * space cannot be used in a delete call, so use undefined which
+    // is the same as default
+    const namespace = jobNamespace === '*' ? undefined : jobNamespace;
 
     await internalSavedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, {
       namespace,
