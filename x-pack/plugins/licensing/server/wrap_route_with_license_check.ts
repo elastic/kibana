@@ -4,26 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  RequestHandler,
-  RequestHandlerContext,
-  KibanaRequest,
-  RouteMethod,
-  KibanaResponseFactory,
-} from 'src/core/server';
+import { RequestHandler, KibanaRequest, RouteMethod, KibanaResponseFactory } from 'src/core/server';
 
 import { ILicense } from '../common/types';
+import type { LicensingRequestHandlerContext } from './types';
 
 export type CheckLicense = (
   license: ILicense
 ) => { valid: false; message: string } | { valid: true; message: null };
 
-export function wrapRouteWithLicenseCheck<P, Q, B>(
+export function wrapRouteWithLicenseCheck<P, Q, B, Context extends LicensingRequestHandlerContext>(
   checkLicense: CheckLicense,
-  handler: RequestHandler<P, Q, B>
-): RequestHandler<P, Q, B> {
+  handler: RequestHandler<P, Q, B, Context>
+): RequestHandler<P, Q, B, Context> {
   return async (
-    context: RequestHandlerContext,
+    context: Context,
     request: KibanaRequest<P, Q, B, RouteMethod>,
     response: KibanaResponseFactory
   ) => {
