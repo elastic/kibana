@@ -44,6 +44,7 @@ describe('set signal status', () => {
       const { securitySolution, ...contextWithoutSecuritySolution } = context;
       const response = await server.inject(
         getSetSignalStatusByQueryRequest(),
+        // @ts-expect-error
         contextWithoutSecuritySolution
       );
       expect(response.status).toEqual(404);
