@@ -11,7 +11,6 @@ import {
   ActionTypeModel,
   ConnectorValidationResult,
 } from '../../../../types';
-import { serviceNowITSMConfiguration, serviceNowSIRConfiguration } from './config';
 import logo from './logo.svg';
 import {
   ServiceNowActionConnector,
@@ -68,10 +67,10 @@ export function getServiceNowITSMActionType(): ActionTypeModel<
   ServiceNowITSMActionParams
 > {
   return {
-    id: serviceNowITSMConfiguration.id,
+    id: '.servicenow',
     iconClass: logo,
-    selectMessage: serviceNowITSMConfiguration.desc,
-    actionTypeTitle: serviceNowITSMConfiguration.name,
+    selectMessage: i18n.SERVICENOW_DESC,
+    actionTypeTitle: i18n.SERVICENOW_TITLE,
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),
     validateParams: (
@@ -103,10 +102,10 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
   ServiceNowSIRActionParams
 > {
   return {
-    id: serviceNowSIRConfiguration.id,
+    id: '.servicenow-sir',
     iconClass: logo,
-    selectMessage: serviceNowSIRConfiguration.desc,
-    actionTypeTitle: serviceNowSIRConfiguration.name,
+    selectMessage: i18n.SERVICENOW_SIR_TITLE,
+    actionTypeTitle: i18n.SERVICENOW_SIR_TITLE,
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),
     validateParams: (actionParams: ServiceNowSIRActionParams): GenericValidationResult<unknown> => {

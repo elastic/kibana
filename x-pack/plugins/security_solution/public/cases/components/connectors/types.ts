@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { ActionType } from '../../../../../triggers_actions_ui/public';
 
 import {
   ActionType as ThirdPartySupportedActions,
@@ -25,7 +24,8 @@ export interface ThirdPartyField {
   defaultActionType: ThirdPartySupportedActions;
 }
 
-export interface ConnectorConfiguration extends ActionType {
+export interface ConnectorConfiguration {
+  name: string;
   logo: string;
 }
 
