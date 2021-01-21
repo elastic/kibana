@@ -11,10 +11,9 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import { createHashHistory } from 'history';
 import { TodoAppPage } from './todo';
-import { StateContainersExamplesPage } from '../common/page';
+import { StateContainersExamplesPage, ExampleLink } from '../common/example_page';
 
 export interface AppOptions {
-  appInstanceId: string;
   appTitle: string;
   historyType: History;
 }
@@ -26,34 +25,18 @@ export enum History {
 
 export interface Deps {
   navigateToApp: CoreStart['application']['navigateToApp'];
+  exampleLinks: ExampleLink[];
 }
 
 export const renderApp = (
   { appBasePath, element, history: platformHistory }: AppMountParameters,
-  { appInstanceId, appTitle, historyType }: AppOptions,
-  { navigateToApp }: Deps
+  { appTitle, historyType }: AppOptions,
+  { navigateToApp, exampleLinks }: Deps
 ) => {
   const history = historyType === History.Browser ? platformHistory : createHashHistory();
   ReactDOM.render(
-    <StateContainersExamplesPage navigateToApp={navigateToApp}>
-      <TodoAppPage
-        history={history}
-        appInstanceId={appInstanceId}
-        appTitle={appTitle}
-        appBasePath={appBasePath}
-        isInitialRoute={() => {
-          const stripTrailingSlash = (path: string) =>
-            path.charAt(path.length - 1) === '/' ? path.substr(0, path.length - 1) : path;
-          const currentAppUrl = stripTrailingSlash(history.createHref(history.location));
-          if (historyType === History.Browser) {
-            // browser history
-            return currentAppUrl === '' && !history.location.search && !history.location.hash;
-          } else {
-            // hashed history
-            return currentAppUrl === '#' && !history.location.search;
-          }
-        }}
-      />
+    <StateContainersExamplesPage navigateToApp={navigateToApp} exampleLinks={exampleLinks}>
+      <TodoAppPage history={history} appTitle={appTitle} appBasePath={appBasePath} />
     </StateContainersExamplesPage>,
     element
   );

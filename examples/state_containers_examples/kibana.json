@@ -6,5 +6,5 @@
   "ui": true,
   "requiredPlugins": ["navigation", "data", "developerExamples"],
   "optionalPlugins": [],
-  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+  "requiredBundles": ["kibanaUtils"]
 }

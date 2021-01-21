@@ -10,29 +10,29 @@ import React, { PropsWithChildren } from 'react';
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 import { CoreStart } from '../../../../src/core/public';
 
-interface PageDef {
+export interface ExampleLink {
   title: string;
-  id: string;
+  appId: string;
 }
 
 interface NavProps {
   navigateToApp: CoreStart['application']['navigateToApp'];
-  pages: PageDef[];
+  exampleLinks: ExampleLink[];
 }
 
-const SideNav: React.FC<NavProps> = ({ navigateToApp, pages }: NavProps) => {
-  const navItems = pages.map((page) => ({
-    id: page.id,
-    name: page.title,
-    onClick: () => navigateToApp(page.id),
-    'data-test-subj': page.id,
+const SideNav: React.FC<NavProps> = ({ navigateToApp, exampleLinks }: NavProps) => {
+  const navItems = exampleLinks.map((example) => ({
+    id: example.appId,
+    name: example.title,
+    onClick: () => navigateToApp(example.appId),
+    'data-test-subj': example.appId,
   }));
 
   return (
     <EuiSideNav
       items={[
         {
-          name: 'State containers & state sync examples',
+          name: 'State management examples',
           id: 'home',
           items: [...navItems],
         },
@@ -43,28 +43,18 @@ const SideNav: React.FC<NavProps> = ({ navigateToApp, pages }: NavProps) => {
 
 interface Props {
   navigateToApp: CoreStart['application']['navigateToApp'];
+  exampleLinks: ExampleLink[];
 }
 
 export const StateContainersExamplesPage: React.FC<Props> = ({
   navigateToApp,
   children,
+  exampleLinks,
 }: PropsWithChildren<Props>) => {
   return (
     <EuiPage>
       <EuiPageSideBar>
-        <SideNav
-          navigateToApp={navigateToApp}
-          pages={[
-            {
-              title: 'Example 1',
-              id: 'example1',
-            },
-            {
-              title: 'Example 2',
-              id: 'example2',
-            },
-          ]}
-        />
+        <SideNav navigateToApp={navigateToApp} exampleLinks={exampleLinks} />
       </EuiPageSideBar>
       {children}
     </EuiPage>
