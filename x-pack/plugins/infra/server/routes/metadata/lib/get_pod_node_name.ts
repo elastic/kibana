@@ -5,14 +5,14 @@
  */
 
 import { first, get } from 'lodash';
-import { RequestHandlerContext } from 'src/core/server';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { findInventoryFields } from '../../../../common/inventory_models';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 
 export const getPodNodeName = async (
   framework: KibanaFramework,
-  requestContext: RequestHandlerContext,
+  requestContext: InfraPluginRequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
   nodeType: 'host' | 'pod' | 'container',

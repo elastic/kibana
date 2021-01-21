@@ -12,7 +12,7 @@ import { featuresPluginMock } from '../../features/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogMock } from '../../event_log/server/mocks';
-import { ActionType } from './types';
+import { ActionType, ActionsApiRequestHandlerContext } from './types';
 import { ActionsConfig } from './config';
 import {
   ActionsPlugin,
@@ -48,6 +48,83 @@ describe('Actions Plugin', () => {
         usageCollection: usageCollectionPluginMock.createSetupContract(),
         features: featuresPluginMock.createSetup(),
       };
+    });
+
+    it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
+      // coreMock.createSetup doesn't support Plugin generics
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await plugin.setup(coreSetup as any, pluginsSetup);
+      expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
+      expect(context.logger.get().warn).toHaveBeenCalledWith(
+        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+      );
+    });
+
+    describe('routeHandlerContext.getActionsClient()', () => {
+      it('should not throw error when ESO plugin not using a generated key', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await plugin.setup(coreSetup as any, {
+          ...pluginsSetup,
+          encryptedSavedObjects: {
+            ...pluginsSetup.encryptedSavedObjects,
+            usingEphemeralEncryptionKey: false,
+          },
+        });
+
+        expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
+        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
+          string,
+          Function
+        ];
+        expect(handler[0]).toEqual('actions');
+
+        const actionsContextHandler = ((await handler[1](
+          ({
+            core: {
+              savedObjects: {
+                client: {},
+              },
+              elasticsearch: {
+                legacy: {
+                  client: jest.fn(),
+                },
+              },
+            },
+          } as unknown) as RequestHandlerContext,
+          httpServerMock.createKibanaRequest(),
+          httpServerMock.createResponseFactory()
+        )) as unknown) as ActionsApiRequestHandlerContext;
+        actionsContextHandler!.getActionsClient();
+      });
+
+      it('should throw error when ESO plugin using a generated key', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await plugin.setup(coreSetup as any, pluginsSetup);
+
+        expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
+        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
+          string,
+          Function
+        ];
+        expect(handler[0]).toEqual('actions');
+
+        const actionsContextHandler = ((await handler[1](
+          ({
+            core: {
+              savedObjects: {
+                client: {},
+              },
+            },
+          } as unknown) as RequestHandlerContext,
+          httpServerMock.createKibanaRequest(),
+          httpServerMock.createResponseFactory()
+        )) as unknown) as ActionsApiRequestHandlerContext;
+        expect(() => actionsContextHandler!.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
+          `"Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+        );
+      });
     });
 
     describe('registerType()', () => {
@@ -154,6 +231,35 @@ describe('Actions Plugin', () => {
         const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(true);
+      });
+
+      it('should not throw error when ESO plugin not using a generated key', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await plugin.setup(coreSetup as any, {
+          ...pluginsSetup,
+          encryptedSavedObjects: {
+            ...pluginsSetup.encryptedSavedObjects,
+            usingEphemeralEncryptionKey: false,
+          },
+        });
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+        await pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest());
+      });
+
+      it('should throw error when ESO plugin using generated key', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await plugin.setup(coreSetup as any, pluginsSetup);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+        expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
+        await expect(
+          pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest())
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+        );
       });
     });
 

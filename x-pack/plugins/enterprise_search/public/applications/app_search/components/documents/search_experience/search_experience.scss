@@ -25,4 +25,12 @@
     background-color: $euiPageBackgroundColor;
     padding: $euiSizeL;
   }
+
+  .documentsSearchExperience__facet {
+    line-height: 0;
+
+    .euiCheckbox__label {
+      @include euiTextTruncate;
+    }
+  }
 }
