@@ -10,6 +10,7 @@ import supertest from 'supertest';
 import { ReportingCore } from '../..';
 import { createMockReportingCore, createMockLevelLogger } from '../../test_helpers';
 import { registerDiagnoseScreenshot } from './screenshot';
+import type { ReportingRequestHandlerContext } from '../../types';
 
 jest.mock('../../export_types/png/lib/generate_png');
 
@@ -44,7 +45,11 @@ describe('POST /diagnose/screenshot', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext(reportingSymbol, 'reporting', () => ({}));
+    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+      reportingSymbol,
+      'reporting',
+      () => ({})
+    );
 
     const mockSetupDeps = ({
       elasticsearch: {
