@@ -170,12 +170,16 @@ describe('MetricsService', () => {
         Array [
           "memory: 100.0B uptime: 0:00:01 load: [10.00,20.00,30.00] delay: 50.000",
           Object {
-            "category": Array [
-              "process",
-              "host",
-            ],
             "ecs": Object {
               "version": "1.7.0",
+            },
+            "event": Object {
+              "category": Array [
+                "process",
+                "host",
+              ],
+              "kind": "metric",
+              "type": "info",
             },
             "host": Object {
               "os": Object {
@@ -186,7 +190,6 @@ describe('MetricsService', () => {
                 },
               },
             },
-            "kind": "metric",
             "process": Object {
               "eventLoopDelay": 50,
               "memory": Object {
@@ -204,12 +207,16 @@ describe('MetricsService', () => {
         Array [
           "memory: 200.0B uptime: 0:00:03 load: [20.00,30.00,40.00] delay: 100.000",
           Object {
-            "category": Array [
-              "process",
-              "host",
-            ],
             "ecs": Object {
               "version": "1.7.0",
+            },
+            "event": Object {
+              "category": Array [
+                "process",
+                "host",
+              ],
+              "kind": "metric",
+              "type": "info",
             },
             "host": Object {
               "os": Object {
@@ -220,7 +227,6 @@ describe('MetricsService', () => {
                 },
               },
             },
-            "kind": "metric",
             "process": Object {
               "eventLoopDelay": 100,
               "memory": Object {
@@ -242,14 +248,18 @@ describe('MetricsService', () => {
       await metricsService.start();
       expect(loggingSystemMock.collect(opsLogger).debug[1]).toMatchInlineSnapshot(`
         Array [
-          "   ",
+          "",
           Object {
-            "category": Array [
-              "process",
-              "host",
-            ],
             "ecs": Object {
               "version": "1.7.0",
+            },
+            "event": Object {
+              "category": Array [
+                "process",
+                "host",
+              ],
+              "kind": "metric",
+              "type": "info",
             },
             "host": Object {
               "os": Object {
@@ -260,7 +270,6 @@ describe('MetricsService', () => {
                 },
               },
             },
-            "kind": "metric",
             "process": Object {
               "eventLoopDelay": undefined,
               "memory": Object {
