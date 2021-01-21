@@ -36,7 +36,6 @@ export async function getTimeseriesDataForTransactionGroups({
   transactionNames,
   esFilter,
   searchAggregatedTransactions,
-  size,
   numBuckets,
   transactionType,
   latencyAggregationType,
@@ -48,7 +47,6 @@ export async function getTimeseriesDataForTransactionGroups({
   transactionNames: string[];
   esFilter: ESFilter[];
   searchAggregatedTransactions: boolean;
-  size: number;
   numBuckets: number;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
@@ -84,7 +82,7 @@ export async function getTimeseriesDataForTransactionGroups({
         transaction_groups: {
           terms: {
             field: TRANSACTION_NAME,
-            size,
+            // size, TODO: check it
           },
           aggs: {
             timeseries: {

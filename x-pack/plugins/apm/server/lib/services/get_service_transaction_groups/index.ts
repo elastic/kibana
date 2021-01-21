@@ -16,9 +16,7 @@ import { mergeTransactionGroupData } from './merge_transaction_group_data';
 export async function getServiceTransactionGroups({
   serviceName,
   setup,
-  size,
   numBuckets,
-  pageIndex,
   sortDirection,
   sortField,
   searchAggregatedTransactions,
@@ -27,8 +25,6 @@ export async function getServiceTransactionGroups({
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
-  size: number;
-  pageIndex: number;
   numBuckets: number;
   sortDirection: 'asc' | 'desc';
   sortField: ServiceOverviewTransactionGroupSortField;
@@ -48,10 +44,8 @@ export async function getServiceTransactionGroups({
     end,
     serviceName,
     esFilter,
-    pageIndex,
     sortField,
     sortDirection,
-    size,
     searchAggregatedTransactions,
     transactionType,
     latencyAggregationType,
@@ -67,7 +61,6 @@ export async function getServiceTransactionGroups({
     numBuckets,
     searchAggregatedTransactions,
     serviceName,
-    size,
     transactionNames,
     transactionType,
     latencyAggregationType,

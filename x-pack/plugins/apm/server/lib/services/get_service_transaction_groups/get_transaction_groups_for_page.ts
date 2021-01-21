@@ -46,8 +46,6 @@ export async function getTransactionGroupsForPage({
   esFilter,
   sortField,
   sortDirection,
-  pageIndex,
-  size,
   transactionType,
   latencyAggregationType,
 }: {
@@ -59,8 +57,6 @@ export async function getTransactionGroupsForPage({
   esFilter: ESFilter[];
   sortField: ServiceOverviewTransactionGroupSortField;
   sortDirection: 'asc' | 'desc';
-  pageIndex: number;
-  size: number;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
@@ -151,7 +147,7 @@ export async function getTransactionGroupsForPage({
     transactionGroupsWithImpact,
     sortField,
     [sortDirection]
-  ).slice(pageIndex * size, pageIndex * size + size);
+  );
 
   return {
     transactionGroups: sortedAndSlicedTransactionGroups,

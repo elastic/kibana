@@ -81,90 +81,14 @@ function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
   }
 }
 
-export function ServiceOverviewTransactionsTable(props: Props) {
-  const { serviceName } = props;
-  const { transactionType } = useApmServiceContext();
-  const {
-    uiFilters,
-    urlParams: { start, end, latencyAggregationType },
-  } = useUrlParams();
-
-  const [tableOptions, setTableOptions] = useState<{
-    pageIndex: number;
-    sort: {
-      direction: SortDirection;
-      field: SortField;
-    };
-  }>({
-    pageIndex: 0,
-    sort: DEFAULT_SORT,
-  });
-
-  const {
-    data = {
-      totalItemCount: 0,
-      items: [],
-      tableOptions: {
-        pageIndex: 0,
-        sort: DEFAULT_SORT,
-      },
-    },
-    status,
-  } = useFetcher(() => {
-    if (!start || !end || !latencyAggregationType || !transactionType) {
-      return;
-    }
-
-    return callApmApi({
-      endpoint:
-        'GET /api/apm/services/{serviceName}/transactions/groups/overview',
-      params: {
-        path: { serviceName },
-        query: {
-          start,
-          end,
-          uiFilters: JSON.stringify(uiFilters),
-          size: PAGE_SIZE,
-          numBuckets: 20,
-          pageIndex: tableOptions.pageIndex,
-          sortField: tableOptions.sort.field,
-          sortDirection: tableOptions.sort.direction,
-          transactionType,
-          latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-        },
-      },
-    }).then((response) => {
-      return {
-        items: response.transactionGroups,
-        totalItemCount: response.totalTransactionGroups,
-        tableOptions: {
-          pageIndex: tableOptions.pageIndex,
-          sort: {
-            field: tableOptions.sort.field,
-            direction: tableOptions.sort.direction,
-          },
-        },
-      };
-    });
-  }, [
-    serviceName,
-    start,
-    end,
-    uiFilters,
-    tableOptions.pageIndex,
-    tableOptions.sort.field,
-    tableOptions.sort.direction,
-    transactionType,
-    latencyAggregationType,
-  ]);
-
-  const {
-    items,
-    totalItemCount,
-    tableOptions: { pageIndex, sort },
-  } = data;
-
-  const columns: Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> = [
+function getColumns({
+  serviceName,
+  latencyAggregationType,
+}: {
+  serviceName: string;
+  latencyAggregationType?: string;
+}): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
+  return [
     {
       field: 'name',
       name: i18n.translate(
@@ -258,6 +182,90 @@ export function ServiceOverviewTransactionsTable(props: Props) {
       },
     },
   ];
+}
+
+export function ServiceOverviewTransactionsTable(props: Props) {
+  const { serviceName } = props;
+  const { transactionType } = useApmServiceContext();
+  const {
+    uiFilters,
+    urlParams: { start, end, latencyAggregationType },
+  } = useUrlParams();
+
+  const [tableOptions, setTableOptions] = useState<{
+    pageIndex: number;
+    sort: {
+      direction: SortDirection;
+      field: SortField;
+    };
+  }>({
+    pageIndex: 0,
+    sort: DEFAULT_SORT,
+  });
+
+  const {
+    data = {
+      totalItemCount: 0,
+      items: [],
+      tableOptions: {
+        pageIndex: 0,
+        sort: DEFAULT_SORT,
+      },
+    },
+    status,
+  } = useFetcher(() => {
+    if (!start || !end || !latencyAggregationType || !transactionType) {
+      return;
+    }
+
+    return callApmApi({
+      endpoint:
+        'GET /api/apm/services/{serviceName}/transactions/groups/overview',
+      params: {
+        path: { serviceName },
+        query: {
+          start,
+          end,
+          uiFilters: JSON.stringify(uiFilters),
+          numBuckets: 20,
+          sortField: tableOptions.sort.field,
+          sortDirection: tableOptions.sort.direction,
+          transactionType,
+          latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+        },
+      },
+    }).then((response) => {
+      return {
+        items: response.transactionGroups,
+        totalItemCount: response.totalTransactionGroups,
+        tableOptions: {
+          pageIndex: tableOptions.pageIndex,
+          sort: {
+            field: tableOptions.sort.field,
+            direction: tableOptions.sort.direction,
+          },
+        },
+      };
+    });
+  }, [
+    serviceName,
+    start,
+    end,
+    uiFilters,
+    tableOptions.pageIndex,
+    tableOptions.sort.field,
+    tableOptions.sort.direction,
+    transactionType,
+    latencyAggregationType,
+  ]);
+
+  const {
+    items,
+    totalItemCount,
+    tableOptions: { pageIndex, sort },
+  } = data;
+
+  const columns = getColumns({ serviceName, latencyAggregationType });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -300,7 +308,10 @@ export function ServiceOverviewTransactionsTable(props: Props) {
             >
               <EuiBasicTable
                 columns={columns}
-                items={items}
+                items={items.slice(
+                  pageIndex * PAGE_SIZE,
+                  (pageIndex + 1) * PAGE_SIZE
+                )}
                 pagination={{
                   pageIndex,
                   pageSize: PAGE_SIZE,
