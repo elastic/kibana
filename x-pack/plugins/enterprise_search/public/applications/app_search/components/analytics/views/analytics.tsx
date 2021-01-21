@@ -61,10 +61,12 @@ export const Analytics: React.FC = () => {
           {
             id: TOTAL_QUERIES_NO_RESULTS,
             data: convertToChartData({ startDate, data: queriesNoResultsPerDay }),
+            isDashed: true,
           },
           {
             id: TOTAL_CLICKS,
             data: convertToChartData({ startDate, data: clicksPerDay }),
+            isDashed: true,
           },
         ]}
       />
