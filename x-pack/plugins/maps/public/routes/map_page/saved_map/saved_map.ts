@@ -45,6 +45,7 @@ import { copyPersistentState } from '../../../reducers/util';
 import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
+import { whenLicenseInitialized } from '../../../licensed_features';
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
@@ -87,6 +88,8 @@ export class SavedMap {
   }
 
   async whenReady() {
+    await whenLicenseInitialized();
+
     if (!this._mapEmbeddableInput) {
       this._attributes = {
         title: '',
@@ -289,8 +292,12 @@ export class SavedMap {
 
     const prevTitle = this._attributes.title;
     const prevDescription = this._attributes.description;
+    const prevTags = this._tags;
     this._attributes.title = newTitle;
     this._attributes.description = newDescription;
+    if (newTags) {
+      this._tags = newTags;
+    }
     this._syncAttributesWithStore();
 
     let updatedMapEmbeddableInput: MapEmbeddableInput;
@@ -313,6 +320,7 @@ export class SavedMap {
       // Error toast displayed by wrapAttributes
       this._attributes.title = prevTitle;
       this._attributes.description = prevDescription;
+      this._tags = prevTags;
       return;
     }
 

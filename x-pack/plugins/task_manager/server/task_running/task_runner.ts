@@ -13,7 +13,6 @@
 import { Logger } from 'src/core/server';
 import apm from 'elastic-apm-node';
 import { performance } from 'perf_hooks';
-import Joi from 'joi';
 import { identity, defaults, flow } from 'lodash';
 
 import { Middleware } from '../lib/middleware';
@@ -36,7 +35,6 @@ import {
   FailedRunResult,
   FailedTaskResult,
   TaskDefinition,
-  validateRunResult,
   TaskStatus,
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -311,20 +309,9 @@ export class TaskManagerRunner implements TaskRunner {
   private validateResult(
     result?: SuccessfulRunResult | FailedRunResult | void
   ): Result<SuccessfulRunResult, FailedRunResult> {
-    const { error } = Joi.validate(result, validateRunResult);
-
-    if (error) {
-      this.logger.warn(`Invalid task result for ${this}: ${error.message}`);
-      return asErr({
-        error: new Error(`Invalid task result for ${this}: ${error.message}`),
-        state: {},
-      });
-    }
-    if (!result) {
-      return asOk(EMPTY_RUN_RESULT);
-    }
-
-    return isFailedRunResult(result) ? asErr({ ...result, error: result.error }) : asOk(result);
+    return isFailedRunResult(result)
+      ? asErr({ ...result, error: result.error })
+      : asOk(result || EMPTY_RUN_RESULT);
   }
 
   private shouldTryToScheduleRetry(): boolean {
