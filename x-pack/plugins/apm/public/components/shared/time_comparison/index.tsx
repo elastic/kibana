@@ -86,10 +86,7 @@ export function TimeComparison() {
   if (comparisonEnabled === undefined || comparisonType === undefined) {
     urlHelpers.replace(history, {
       query: {
-        comparisonEnabled:
-          comparisonEnabled !== undefined
-            ? Boolean(comparisonEnabled).toString()
-            : 'true',
+        comparisonEnabled: comparisonEnabled === false ? 'false' : 'true',
         comparisonType: comparisonType
           ? comparisonType
           : selectOptions[0].value,
