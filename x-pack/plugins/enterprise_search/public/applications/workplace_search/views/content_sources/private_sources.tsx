@@ -26,17 +26,6 @@ import { AppLogic } from '../../app_logic';
 import { SourcesView } from './sources_view';
 import { SourcesLogic } from './sources_logic';
 
-// TODO: Remove this after links in Kibana sidenav
-interface SidebarLink {
-  title: string;
-  path?: string;
-  disabled?: boolean;
-  iconType?: string;
-  otherActivePath?: string;
-  dataTestSubj?: string;
-  onClick?(): void;
-}
-
 const PRIVATE_LINK_TITLE = 'Add a private content source';
 const PRIVATE_HEADER_TITLE = 'My private content sources';
 const PRIVATE_HEADER_DESCRIPTION = 'Private content sources are available only to you.';
@@ -61,16 +50,8 @@ export const PrivateSources: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const sidebarLinks = [] as SidebarLink[];
   const hasConfiguredConnectors = serviceTypes.some(({ configured }) => configured);
   const canAddSources = canCreatePersonalSources && hasConfiguredConnectors;
-  if (canAddSources) {
-    sidebarLinks.push({
-      title: PRIVATE_LINK_TITLE,
-      iconType: 'plusInCircle',
-      path: getSourcesPath(ADD_SOURCE_PATH, false),
-    });
-  }
 
   const headerAction = (
     <EuiButtonTo
