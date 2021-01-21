@@ -8,13 +8,8 @@
 
 import { flatten } from 'lodash';
 import { ShallowPromise } from '@kbn/utility-types';
-import { pick } from '@kbn/std';
-import type { CoreId, PluginOpaqueId } from '../server';
-
-/**
- * Make all properties in T optional, except for the properties whose keys are in the union K
- */
-type PartialExceptFor<T, K extends keyof T> = Partial<T> & Pick<T, K>;
+import { pick } from 'lodash';
+import type { CoreId, PluginOpaqueId, RequestHandler, RequestHandlerContext } from '../..';
 
 /**
  * A function that returns a context value for a specific key of given context type.
@@ -30,15 +25,13 @@ type PartialExceptFor<T, K extends keyof T> = Partial<T> & Pick<T, K>;
  * @public
  */
 export type IContextProvider<
-  THandler extends HandlerFunction<any>,
-  TContextName extends keyof HandlerContextType<THandler>
+  Context extends RequestHandlerContext,
+  ContextName extends keyof Context
 > = (
   // context.core will always be available, but plugin contexts are typed as optional
-  context: PartialExceptFor<HandlerContextType<THandler>, 'core'>,
-  ...rest: HandlerParameters<THandler>
-) =>
-  | Promise<HandlerContextType<THandler>[TContextName]>
-  | HandlerContextType<THandler>[TContextName];
+  context: Omit<Context, ContextName>,
+  ...rest: HandlerParameters<RequestHandler>
+) => Promise<Context[ContextName]> | Context[ContextName];
 
 /**
  * A function that accepts a context object and an optional number of additional arguments. Used for the generic types
@@ -142,7 +135,7 @@ export type HandlerParameters<T extends HandlerFunction<any>> = T extends (
  *
  * @public
  */
-export interface IContextContainer<THandler extends HandlerFunction<any>> {
+export interface IContextContainer<THandler extends RequestHandler> {
   /**
    * Register a new context provider.
    *
@@ -157,10 +150,10 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
    * @param provider - A {@link IContextProvider} to be called each time a new context is created.
    * @returns The {@link IContextContainer} for method chaining.
    */
-  registerContext<TContextName extends keyof HandlerContextType<THandler>>(
+  registerContext<Context extends RequestHandlerContext, ContextName extends keyof Context>(
     pluginOpaqueId: PluginOpaqueId,
-    contextName: TContextName,
-    provider: IContextProvider<THandler, TContextName>
+    contextName: ContextName,
+    provider: IContextProvider<Context, ContextName>
   ): this;
 
   /**
@@ -178,21 +171,21 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
 }
 
 /** @internal */
-export class ContextContainer<THandler extends HandlerFunction<any>>
+export class ContextContainer<THandler extends RequestHandler>
   implements IContextContainer<THandler> {
   /**
    * Used to map contexts to their providers and associated plugin. In registration order which is tightly coupled to
    * plugin load order.
    */
   private readonly contextProviders = new Map<
-    keyof HandlerContextType<THandler>,
+    string,
     {
-      provider: IContextProvider<THandler, keyof HandlerContextType<THandler>>;
+      provider: IContextProvider<any, any>;
       source: symbol;
     }
   >();
   /** Used to keep track of which plugins registered which contexts for dependency resolution. */
-  private readonly contextNamesBySource: Map<symbol, Array<keyof HandlerContextType<THandler>>>;
+  private readonly contextNamesBySource: Map<symbol, string[]>;
 
   /**
    * @param pluginDependencies - A map of plugins to an array of their dependencies.
@@ -201,16 +194,18 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
     private readonly pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>,
     private readonly coreId: CoreId
   ) {
-    this.contextNamesBySource = new Map<symbol, Array<keyof HandlerContextType<THandler>>>([
-      [coreId, []],
-    ]);
+    this.contextNamesBySource = new Map<symbol, string[]>([[coreId, []]]);
   }
 
-  public registerContext = <TContextName extends keyof HandlerContextType<THandler>>(
+  public registerContext = <
+    Context extends RequestHandlerContext,
+    ContextName extends keyof Context
+  >(
     source: symbol,
-    contextName: TContextName,
-    provider: IContextProvider<THandler, TContextName>
+    name: ContextName,
+    provider: IContextProvider<Context, ContextName>
   ): this => {
+    const contextName = name as string;
     if (this.contextProviders.has(contextName)) {
       throw new Error(`Context provider for ${contextName} has already been registered.`);
     }
@@ -234,6 +229,7 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
 
     return (async (...args: HandlerParameters<THandler>) => {
       const context = await this.buildContext(source, ...args);
+      // @ts-expect-error requires explicit handler arity
       return handler(context, ...args);
     }) as (...args: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
   };
@@ -242,9 +238,7 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
     source: symbol,
     ...contextArgs: HandlerParameters<THandler>
   ): Promise<HandlerContextType<THandler>> {
-    const contextsToBuild: ReadonlySet<keyof HandlerContextType<THandler>> = new Set(
-      this.getContextNamesForSource(source)
-    );
+    const contextsToBuild = new Set(this.getContextNamesForSource(source));
 
     return [...this.contextProviders]
       .sort(sortByCoreFirst(this.coreId))
@@ -256,18 +250,17 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
         // registered that provider.
         const exposedContext = pick(resolvedContext, [
           ...this.getContextNamesForSource(providerSource),
-        ]) as PartialExceptFor<HandlerContextType<THandler>, 'core'>;
+        ]);
 
         return {
           ...resolvedContext,
+          // @ts-expect-error requires explicit provider arity
           [contextName]: await provider(exposedContext, ...contextArgs),
         };
       }, Promise.resolve({}) as Promise<HandlerContextType<THandler>>);
   }
 
-  private getContextNamesForSource(
-    source: symbol
-  ): ReadonlySet<keyof HandlerContextType<THandler>> {
+  private getContextNamesForSource(source: symbol): ReadonlySet<string> {
     if (source === this.coreId) {
       return this.getContextNamesForCore();
     } else {
