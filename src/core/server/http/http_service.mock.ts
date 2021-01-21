@@ -89,6 +89,7 @@ const createInternalSetupContractMock = () => {
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
+    // @ts-expect-error tsc cannot infer ContextName and uses never
     registerRouteHandlerContext: jest.fn(),
     registerOnPreResponse: jest.fn(),
     createRouter: jest.fn().mockImplementation(() => mockRouter.create({})),
@@ -125,6 +126,7 @@ const createSetupContractMock = () => {
     basePath: internalMock.basePath,
     csp: CspConfig.DEFAULT,
     createRouter: jest.fn(),
+    // @ts-expect-error tsc cannot infer ContextName and uses never
     registerRouteHandlerContext: jest.fn(),
     auth: {
       get: internalMock.auth.get,
