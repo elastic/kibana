@@ -17,7 +17,6 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { CloudSetup } from '../../cloud/server';
-import { ElasticsearchSource } from '../common/types/es';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -114,29 +113,6 @@ export interface LegacyServer {
         name: string
       ) => {
         callWithRequest: (req: any, endpoint: string, params: any) => Promise<any>;
-      };
-    };
-  };
-}
-
-export interface ElasticsearchResponse {
-  hits?: {
-    hits: ElasticsearchResponseHit[];
-    total: {
-      value: number;
-    };
-  };
-}
-
-export interface ElasticsearchResponseHit {
-  _source: ElasticsearchSource;
-  inner_hits?: {
-    [field: string]: {
-      hits?: {
-        hits: ElasticsearchResponseHit[];
-        total: {
-          value: number;
-        };
       };
     };
   };

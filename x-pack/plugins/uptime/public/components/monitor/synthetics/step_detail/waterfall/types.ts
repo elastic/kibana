@@ -112,6 +112,7 @@ export const FriendlyMimetypeLabels = {
 export const MimeTypesMap: Record<string, MimeType> = {
   'text/html': MimeType.Html,
   'application/javascript': MimeType.Script,
+  'application/json': MimeType.Script,
   'text/javascript': MimeType.Script,
   'text/css': MimeType.Stylesheet,
   // Images
@@ -131,6 +132,7 @@ export const MimeTypesMap: Record<string, MimeType> = {
   'audio/x-pn-wav': MimeType.Media,
   'audio/webm': MimeType.Media,
   'video/webm': MimeType.Media,
+  'video/mp4': MimeType.Media,
   'audio/ogg': MimeType.Media,
   'video/ogg': MimeType.Media,
   'application/ogg': MimeType.Media,

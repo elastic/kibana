@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FieldVisConfig } from './field_vis_config';
 export { FieldHistogramRequestConfig, FieldRequestConfig } from './request';
