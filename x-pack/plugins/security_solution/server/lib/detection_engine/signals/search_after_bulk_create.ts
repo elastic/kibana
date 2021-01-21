@@ -139,7 +139,6 @@ export const searchAfterAndBulkCreate = async ({
         }
 
         if (hasSortId) {
-          // only execute search if we have something to sort on or if it is the first search
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
             searchAfterSortId: sortId,
@@ -186,14 +185,6 @@ export const searchAfterAndBulkCreate = async ({
           buildRuleMessage(`searchResult.hit.hits.length: ${mergedSearchResults.hits.hits.length}`)
         );
 
-        // search results yielded zero hits so exit
-        // with search_after, these two values can be different when
-        // searching with the last sortId of a consecutive search_after
-        // yields zero hits, but there were hits using the previous
-        // sortIds.
-        // e.g. totalHits was 156, index 50 of 100 results, do another search-after
-        // this time with a new sortId, index 22 of the remaining 56, get another sortId
-        // search with that sortId, total is still 156 but the hits.hits array is empty.
         if (totalHits === 0 || mergedSearchResults.hits.hits.length === 0) {
           logger.debug(
             buildRuleMessage(
