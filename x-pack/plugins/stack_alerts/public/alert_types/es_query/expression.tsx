@@ -10,14 +10,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import 'brace/theme/github';
 import { XJsonMode } from '@kbn/ace';
-import { isEmpty } from 'lodash';
 
 import {
   EuiButtonEmpty,
   EuiCodeEditor,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonIcon,
   EuiSpacer,
   EuiFormRow,
   EuiCallOut,
@@ -105,7 +101,6 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
   const [currentAlertParams, setCurrentAlertParams] = useState<EsQueryAlertParams>(
     getDefaultParams()
   );
-  const [hasThresholdExpression, setHasThresholdExpression] = useState(true);
   const [runResult, setRunResult] = useState<string | null>(null);
 
   const hasExpressionErrors = !!Object.keys(errors).find(
@@ -126,9 +121,6 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     setAlertProperty('params', getDefaultParams());
 
     setXJson(esQuery ?? DEFAULT_VALUES.QUERY);
-    if (!isEmpty(alertParams)) {
-      setHasThresholdExpression(!!threshold && !!thresholdComparator);
-    }
 
     if (index && index.length > 0) {
       await refreshEsFields();
@@ -298,6 +290,28 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
       )}
 
       <EuiSpacer />
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
+            defaultMessage="When number of matches"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <ThresholdExpression
+        thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
+        threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
+        errors={errors}
+        display="fullWidth"
+        popupPosition={'upLeft'}
+        onChangeSelectedThreshold={(selectedThresholds) =>
+          setParam('threshold', selectedThresholds)
+        }
+        onChangeSelectedThresholdComparator={(selectedThresholdComparator) =>
+          setParam('thresholdComparator', selectedThresholdComparator)
+        }
+      />
       <ForLastExpression
         popupPosition={'upLeft'}
         timeWindowSize={timeWindowSize}
@@ -312,88 +326,6 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         }
       />
       <EuiSpacer />
-      {hasThresholdExpression ? (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
-                    defaultMessage="When number of matches"
-                  />
-                </h5>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.removeCondition', {
-                  defaultMessage: 'Remove condition',
-                })}
-                color={'danger'}
-                iconType={'trash'}
-                onClick={() => {
-                  setParam('threshold', undefined);
-                  setParam('thresholdComparator', undefined);
-                  setHasThresholdExpression(false);
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiText color="subdued" size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.stackAlerts.esQuery.ui.conditionDescription"
-                defaultMessage="Get a single alert when the number of matches meets the defined conditions. Remove
-                    this condition to receive an alert for every document that matches the query."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <ThresholdExpression
-            thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
-            threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
-            errors={errors}
-            display="fullWidth"
-            popupPosition={'upLeft'}
-            onChangeSelectedThreshold={(selectedThresholds) =>
-              setParam('threshold', selectedThresholds)
-            }
-            onChangeSelectedThresholdComparator={(selectedThresholdComparator) =>
-              setParam('thresholdComparator', selectedThresholdComparator)
-            }
-          />
-          <EuiSpacer />
-        </>
-      ) : (
-        <>
-          <EuiButtonEmpty
-            color={'primary'}
-            iconSide={'left'}
-            flush={'left'}
-            iconType={'plusInCircleFilled'}
-            onClick={() => {
-              setParam('threshold', DEFAULT_VALUES.THRESHOLD);
-              setParam('thresholdComparator', DEFAULT_VALUES.THRESHOLD_COMPARATOR);
-              setHasThresholdExpression(true);
-            }}
-          >
-            <FormattedMessage
-              id="xpack.stackAlerts.esQuery.ui.addConditionButton"
-              defaultMessage="Add condition"
-            />
-          </EuiButtonEmpty>
-          <EuiText color="subdued" size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.stackAlerts.esQuery.ui.addConditionDescription"
-                defaultMessage="By adding a condition, you will get a single alert when the number of query matches meets the condition. Otherwise, you will get an alert for every document that matches your query."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer />
-        </>
-      )}
     </Fragment>
   );
 };

@@ -17,14 +17,13 @@ import {
 } from './alert_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
-import {
-  searchAfter,
-  searchAfterCount,
-  ExecuteEsQueryAlertParams,
-  HandleSearchAfterResultsResponse,
-} from './search_after';
+import { parseDuration } from '../../../../alerts/server';
+import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
+import { shimHitsTotal } from '../../../../../../src/plugins/data/server';
 
 export const ES_QUERY_ID = '.es-query';
+
+const DEFAULT_MAX_HITS_PER_EXECUTION = 1000;
 
 const ActionGroupId = 'query matched';
 const ConditionMetAlertInstanceId = 'query matched';
@@ -54,6 +53,13 @@ export function getAlertType(
     }
   );
 
+  const actionVariableContextHitsLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextHitsLabel',
+    {
+      defaultMessage: 'The query matches that met the threshold condition.',
+    }
+  );
+
   const actionVariableContextMessageLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextMessageLabel',
     {
@@ -65,6 +71,21 @@ export function getAlertType(
     'xpack.stackAlerts.esQuery.actionVariableContextTitleLabel',
     {
       defaultMessage: 'A pre-constructed title for the alert.',
+    }
+  );
+
+  const actionVariableContextThresholdLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextThresholdLabel',
+    {
+      defaultMessage:
+        "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
+    }
+  );
+
+  const actionVariableContextThresholdComparatorLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextThresholdComparatorLabel',
+    {
+      defaultMessage: 'A comparison function to use to determine if the threshold as been met.',
     }
   );
 
@@ -98,9 +119,14 @@ export function getAlertType(
         { name: 'title', description: actionVariableContextTitleLabel },
         { name: 'date', description: actionVariableContextDateLabel },
         { name: 'value', description: actionVariableContextValueLabel },
+        { name: 'hits', description: actionVariableContextHitsLabel },
         { name: 'conditions', description: actionVariableContextConditionsLabel },
       ],
-      params: alertParamsVariables,
+      params: [
+        ...alertParamsVariables,
+        { name: 'threshold', description: actionVariableContextThresholdLabel },
+        { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
+      ],
     },
     minimumLicenseRequired: 'basic',
     executor,
@@ -117,140 +143,99 @@ export function getAlertType(
     >
   ) {
     const { alertId, name, services, params, state } = options;
-    const sortId = state.sortId;
+    const previousTimestamp = state.latestTimestamp;
 
     const callCluster = services.callCluster;
-    const buildLogMessage = (({ id, alertName }: { alertName: string; id: string }) => (
-      ...messages: string[]
-    ) => [...messages, `name: "${alertName}"`, `id: "${id}"`].join(' '))({
-      id: alertId,
-      alertName: name,
-    });
-    // parameter validation
-    const compareFn = params.thresholdComparator
-      ? ComparatorFns.get(params.thresholdComparator)
-      : null;
-    if (params.thresholdComparator && compareFn == null) {
+    const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
+
+    const compareFn = ComparatorFns.get(params.thresholdComparator);
+    if (compareFn == null) {
       throw new Error(getInvalidComparatorError(params.thresholdComparator));
     }
 
-    // determine what type of alert:
-    // - if threshold and thresholdComparator exists, we will see if the number of
-    // unique query matches meets the threshold condition. if it does, this will generate
-    // a single alert instance
-    //
-    // - if threshold and thresholdComparator are not defined exist, alert will generate
-    // an alert instance for each matching document
-    const thresholdAlert: boolean = !!params.threshold && !!params.thresholdComparator;
+    logger.info('EXECUTING SEARCH ALERT');
+    logger.info(JSON.stringify(params));
+    logger.info(`previousTimestamp: ${previousTimestamp}`);
 
-    const handleSearchAfterResults = (
-      searchResult: SearchResponse<unknown>
-    ): HandleSearchAfterResultsResponse => {
-      logger.info(
-        `alert ${ES_QUERY_ID}:${alertId} "${name}" query has ${searchResult.hits.hits.length} alert instances`
-      );
+    // During each alert execution, we run the configured query, get a hit count
+    // (hits.total) and retrieve up to DEFAULT_MAX_HITS_PER_EXECUTION hits. We
+    // evaluate the threshold condition using the value of hits.total. If the threshold
+    // condition is met, the hits are counted toward the query match and we update
+    // the alert state with the timestamp of the latest hit. In the next execution
+    // of the alert, the latestTimestamp will be used to gate the query in order to
+    // avoid counting a document multiple times.
 
-      searchResult.hits.hits.forEach((hit) => {
-        // doc id as instance id
-        const instanceId = hit._id;
-        const baseContext: EsQueryAlertActionContext = {
-          date: new Date(date).toISOString(),
-          value: searchResult.hits.hits.length,
-          conditions: `document with id '${instanceId}' matched query "${params.esQuery}"`,
-        };
+    let timestamp: string | undefined = previousTimestamp;
+    const filter = timestamp
+      ? {
+          bool: {
+            filter: [
+              parsedQuery.query,
+              {
+                bool: {
+                  must_not: [
+                    { bool: { filter: [{ range: { [params.timeField]: { lte: timestamp } } }] } },
+                  ],
+                },
+              },
+            ],
+          },
+        }
+      : parsedQuery.query;
 
-        const actionContext = addMessages(options, baseContext, params);
-        const alertInstance = options.services.alertInstanceFactory(instanceId);
-        alertInstance.scheduleActions(ActionGroupId, actionContext);
-        // logger.info(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
-        logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
-      });
+    const query = buildSortedEventsQuery({
+      index: params.index,
+      from: dateStart,
+      to: dateEnd,
+      filter,
+      size: DEFAULT_MAX_HITS_PER_EXECUTION,
+      sortOrder: 'desc',
+      searchAfterSortId: undefined,
+      timeField: params.timeField,
+    });
 
-      if (searchResult._shards.failed !== 0) {
-        logger.warn(
-          `alert ${ES_QUERY_ID}:${alertId} "${name}" had shard failures during alert execution - some alert instances may be missing.`
-        );
-      }
+    let searchResult: SearchResponse<unknown> = await callCluster('search', query);
+    // Needed until https://github.com/elastic/kibana/issues/26356 is resolved
+    searchResult = shimHitsTotal(searchResult);
 
-      return {
-        numResultsHandled: searchResult.hits.hits.length,
-        advanceSortId: true,
-      };
-    };
-
-    const handleSearchAfterCountResults = (
-      searchResult: SearchResponse<unknown>
-    ): HandleSearchAfterResultsResponse => {
-      let numResultsHandled: number = 0;
-
+    if (searchResult.hits.hits.length > 0) {
       const numMatches = searchResult.hits.total;
       logger.info(`alert ${ES_QUERY_ID}:${alertId} "${name}" query has ${numMatches} matches`);
       logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query has ${numMatches} matches`);
 
       // apply the alert condition
-      const conditionMet = !!(
-        compareFn &&
-        params.threshold &&
-        compareFn(numMatches, params.threshold)
-      );
+      const conditionMet = compareFn(numMatches, params.threshold);
 
       if (conditionMet) {
-        numResultsHandled += numMatches;
         const humanFn = `number of matching documents is ${getHumanReadableComparator(
-          params.thresholdComparator!
-        )} ${params.threshold!.join(' and ')}`;
+          params.thresholdComparator
+        )} ${params.threshold.join(' and ')}`;
 
         const baseContext: EsQueryAlertActionContext = {
-          date: new Date(date).toISOString(),
+          date: new Date().toISOString(),
           value: numMatches,
           conditions: humanFn,
+          hits: searchResult.hits.hits,
         };
 
         const actionContext = addMessages(options, baseContext, params);
         const alertInstance = options.services.alertInstanceFactory(ConditionMetAlertInstanceId);
         alertInstance.scheduleActions(ActionGroupId, actionContext);
-        logger.info(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+        // logger.info(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
         logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+
+        // update the timestamp based on the current search results
+        const lastTimestamp = searchResult.hits.hits[0]?.sort;
+        if (lastTimestamp != null && lastTimestamp.length !== 0) {
+          timestamp = lastTimestamp[0];
+        }
       } else {
         logger.info('ALERT CONDITION NOT MATCHED');
       }
-
-      return {
-        numResultsHandled,
-        advanceSortId: conditionMet,
-      };
-    };
-
-    logger.info('EXECUTING SEARCH ALERT');
-    logger.info(JSON.stringify(params));
-
-    const date = Date.now();
-
-    const queryParams: ExecuteEsQueryAlertParams = {
-      ...params,
-      date,
-    };
-
-    const lastSortId = thresholdAlert
-      ? await searchAfterCount({
-          logger,
-          callCluster,
-          previousSortId: sortId,
-          query: queryParams,
-          buildLogMessage,
-          handleSearchAfterResults: handleSearchAfterCountResults,
-        })
-      : await searchAfter({
-          logger,
-          callCluster,
-          previousSortId: sortId,
-          query: queryParams,
-          buildLogMessage,
-          handleSearchAfterResults,
-        });
+    }
 
     return {
-      sortId: lastSortId,
+      latestTimestamp: timestamp,
     };
   }
 }
@@ -262,4 +247,51 @@ function getInvalidComparatorError(comparator: string) {
       comparator,
     },
   });
+}
+
+function getInvalidWindowSizeError(windowValue: string) {
+  return i18n.translate('xpack.stackAlerts.esQuery.invalidWindowSizeErrorMessage', {
+    defaultMessage: 'invalid format for windowSize: "{windowValue}"',
+    values: {
+      windowValue,
+    },
+  });
+}
+
+function getInvalidQueryError(query: string) {
+  return i18n.translate('xpack.stackAlerts.esQuery.invalidQueryErrorMessage', {
+    defaultMessage: 'invalid query specified: "{query}" - query must be JSON',
+    values: {
+      query,
+    },
+  });
+}
+
+function getSearchParams(queryParams: EsQueryAlertParams) {
+  const date = Date.now();
+  const { esQuery, timeWindowSize, timeWindowUnit } = queryParams;
+
+  let parsedQuery;
+  try {
+    parsedQuery = JSON.parse(esQuery);
+  } catch (err) {
+    throw new Error(getInvalidQueryError(esQuery));
+  }
+
+  if (parsedQuery && !parsedQuery.query) {
+    throw new Error(getInvalidQueryError(esQuery));
+  }
+
+  const window = `${timeWindowSize}${timeWindowUnit}`;
+  let timeWindow: number;
+  try {
+    timeWindow = parseDuration(window);
+  } catch (err) {
+    throw new Error(getInvalidWindowSizeError(window));
+  }
+
+  const dateStart = new Date(date - timeWindow).toISOString();
+  const dateEnd = new Date(date).toISOString();
+
+  return { parsedQuery, dateStart, dateEnd };
 }

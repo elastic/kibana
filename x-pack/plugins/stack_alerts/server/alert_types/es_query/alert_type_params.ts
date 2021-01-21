@@ -13,7 +13,7 @@ import { AlertTypeState } from '../../../../alerts/server';
 // alert type parameters
 export type EsQueryAlertParams = TypeOf<typeof EsQueryAlertParamsSchema>;
 export interface EsQueryAlertState extends AlertTypeState {
-  sortId: string | undefined;
+  latestTimestamp: string | undefined;
 }
 
 export const EsQueryAlertParamsSchemaProperties = {
@@ -22,8 +22,8 @@ export const EsQueryAlertParamsSchemaProperties = {
   esQuery: schema.string({ minLength: 1 }),
   timeWindowSize: schema.number({ min: 1 }),
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
-  threshold: schema.maybe(schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 })),
-  thresholdComparator: schema.maybe(schema.string({ validate: validateComparator })),
+  threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
+  thresholdComparator: schema.string({ validate: validateComparator }),
 };
 
 export const EsQueryAlertParamsSchema = schema.object(EsQueryAlertParamsSchemaProperties, {
@@ -40,16 +40,14 @@ function validateParams(anyParams: unknown): string | undefined {
     threshold,
   }: EsQueryAlertParams = anyParams as EsQueryAlertParams;
 
-  if (threshold && thresholdComparator) {
-    if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
-      return i18n.translate('xpack.stackAlerts.esQuery.invalidThreshold2ErrorMessage', {
-        defaultMessage:
-          '[threshold]: must have two elements for the "{thresholdComparator}" comparator',
-        values: {
-          thresholdComparator,
-        },
-      });
-    }
+  if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
+    return i18n.translate('xpack.stackAlerts.esQuery.invalidThreshold2ErrorMessage', {
+      defaultMessage:
+        '[threshold]: must have two elements for the "{thresholdComparator}" comparator',
+      values: {
+        thresholdComparator,
+      },
+    });
   }
 
   try {

@@ -14,6 +14,7 @@ describe('expression params validation', () => {
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
       timeWindowSize: 1,
       timeWindowUnit: 's',
+      threshold: [0],
     };
     expect(validateExpression(initialParams).errors.index.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.index[0]).toBe('Index is required.');
@@ -25,6 +26,7 @@ describe('expression params validation', () => {
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
       timeWindowSize: 1,
       timeWindowUnit: 's',
+      threshold: [0],
     };
     expect(validateExpression(initialParams).errors.timeField.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.timeField[0]).toBe('Time field is required.');
@@ -36,6 +38,7 @@ describe('expression params validation', () => {
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n`,
       timeWindowSize: 1,
       timeWindowUnit: 's',
+      threshold: [0],
     };
     expect(validateExpression(initialParams).errors.esQuery.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.esQuery[0]).toBe('Query must be valid JSON.');
@@ -47,6 +50,7 @@ describe('expression params validation', () => {
       esQuery: `{\n  \"aggs\":{\n    \"match_all\" : {}\n  }\n}`,
       timeWindowSize: 1,
       timeWindowUnit: 's',
+      threshold: [0],
     };
     expect(validateExpression(initialParams).errors.esQuery.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.esQuery[0]).toBe(
@@ -54,30 +58,17 @@ describe('expression params validation', () => {
     );
   });
 
-  test('if thresholdComparator defined but no threshold0 property should return proper error message', () => {
+  test('if threshold0 property is not set should return proper error message', () => {
     const initialParams: EsQueryAlertParams = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      threshold: [],
       timeWindowSize: 1,
       timeWindowUnit: 's',
-      thresholdComparator: '>',
+      thresholdComparator: '<',
     };
     expect(validateExpression(initialParams).errors.threshold0.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold0[0]).toBe('Threshold0 is required.');
-  });
-
-  test('if threshold defined but no thresholdComparator property should return proper error message', () => {
-    const initialParams: EsQueryAlertParams = {
-      index: ['test'],
-      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-      timeWindowSize: 1,
-      timeWindowUnit: 's',
-      threshold: [1],
-    };
-    expect(validateExpression(initialParams).errors.thresholdComparator.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.thresholdComparator[0]).toBe(
-      'Threshold Comparator is required.'
-    );
   });
 
   test('if threshold1 property is needed by thresholdComparator but not set should return proper error message', () => {

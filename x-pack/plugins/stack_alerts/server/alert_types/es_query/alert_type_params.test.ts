@@ -14,6 +14,8 @@ const DefaultParams: Writable<Partial<EsQueryAlertParams>> = {
   esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
   timeWindowSize: 5,
   timeWindowUnit: 'm',
+  thresholdComparator: '>',
+  threshold: [0],
 };
 
 describe('alertType Params validate()', () => {
@@ -23,13 +25,7 @@ describe('alertType Params validate()', () => {
     params = { ...DefaultParams };
   });
 
-  it('passes for minimal valid input', async () => {
-    expect(validate()).toBeTruthy();
-  });
-
-  it('passes for maximal valid input', async () => {
-    params.thresholdComparator = '>';
-    params.threshold = [0];
+  it('passes for valid input', async () => {
     expect(validate()).toBeTruthy();
   });
 

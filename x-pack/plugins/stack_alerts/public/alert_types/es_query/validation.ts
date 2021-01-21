@@ -58,21 +58,11 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
       );
     }
   }
-  if (thresholdComparator && (!threshold || threshold.length === 0 || threshold[0] === undefined)) {
+  if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
     errors.threshold0.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold0Text', {
         defaultMessage: 'Threshold0 is required.',
       })
-    );
-  }
-  if (threshold && threshold.length > 0 && threshold[0] != null && !thresholdComparator) {
-    errors.thresholdComparator.push(
-      i18n.translate(
-        'xpack.stackAlerts.esQuery.ui.validation.error.requiredThresholdComparatorText',
-        {
-          defaultMessage: 'Threshold Comparator is required.',
-        }
-      )
     );
   }
   if (

@@ -23,9 +23,11 @@ export interface EsQueryAlertActionContext extends AlertInstanceContext {
   // the date the alert was run as an ISO date
   date: string;
   // the value that met the threshold
-  value?: number;
+  value: number;
   // threshold conditions
   conditions: string;
+  // query matches
+  hits: unknown[];
 }
 
 export function addMessages(
