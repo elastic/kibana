@@ -15,6 +15,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';
 import type { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_oss/public';
+import { getVisualizeListItem } from './get_visualize_list_item_link';
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {
@@ -85,13 +86,7 @@ export const getTableColumns = (
       // In case an error occurs i.e. the vis has wrong type, we render the vis but without the link
       !error ? (
         <EuiLink
-          onClick={() => {
-            if (editApp) {
-              application.navigateToApp(editApp, { path: editUrl });
-            } else if (editUrl) {
-              history.push(editUrl);
-            }
-          }}
+          href={getVisualizeListItem(application, editApp, editUrl)}
           data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
         >
           {field}
