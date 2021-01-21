@@ -86,12 +86,16 @@ describe('getEcsOpsMetricsLog', () => {
     const logMeta = getEcsOpsMetricsLog(createBaseOpsMetrics());
     expect(logMeta).toMatchInlineSnapshot(`
       Object {
-        "category": Array [
-          "process",
-          "host",
-        ],
         "ecs": Object {
           "version": "1.7.0",
+        },
+        "event": Object {
+          "category": Array [
+            "process",
+            "host",
+          ],
+          "kind": "metric",
+          "type": "info",
         },
         "host": Object {
           "os": Object {
@@ -102,7 +106,6 @@ describe('getEcsOpsMetricsLog', () => {
             },
           },
         },
-        "kind": "metric",
         "message": "memory: 1.0B load: [1.00,1.00,1.00] delay: 1.000",
         "process": Object {
           "eventLoopDelay": 1,

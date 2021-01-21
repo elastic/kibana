@@ -185,9 +185,10 @@ describe('metrics service', () => {
         testData = opsMetrics;
       });
       const [, meta] = mockConsoleLog.mock.calls[0][0].split('|');
-      expect(JSON.parse(meta).kind).toBe('metric');
+      expect(JSON.parse(meta).event.kind).toBe('metric');
       expect(JSON.parse(meta).ecs.version).toBe('1.7.0');
-      expect(JSON.parse(meta).category).toEqual(expect.arrayContaining(['process', 'host']));
+      expect(JSON.parse(meta).event.category).toEqual(expect.arrayContaining(['process', 'host']));
+      expect(JSON.parse(meta).event.type).toBe('info');
 
       await root.shutdown();
     });

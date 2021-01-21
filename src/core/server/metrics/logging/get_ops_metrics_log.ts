@@ -54,8 +54,11 @@ export function getEcsOpsMetricsLog({ process, os }: Partial<OpsMetrics>): LogMe
   const meta: EcsOpsMetricsEvent = {
     ecs: { version: '1.7.0' },
     message: `${processMemoryUsedInBytesMsg}${uptimeValMsg}${loadValsMsg}${eventLoopDelayValMsg}`,
-    kind: 'metric',
-    category: ['process', 'host'],
+    event: {
+      kind: 'metric',
+      category: ['process', 'host'],
+      type: 'info',
+    },
     process: {
       uptime: uptimeVal,
     },

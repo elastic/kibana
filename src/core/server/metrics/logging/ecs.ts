@@ -30,12 +30,17 @@ export interface EcsOpsMetricsEvent {
   labels?: Record<string, unknown>;
   message?: string;
   tags?: string[];
-  kind?: string;
-  category?: string[];
   // other fields
   process?: EcsProcessField;
+  event?: EcsEventField;
 }
 
 interface EcsProcessField {
   uptime?: number;
+}
+
+interface EcsEventField {
+  kind?: string;
+  category?: string[];
+  type?: string;
 }
