@@ -117,6 +117,8 @@ export const searchAfterAndBulkCreate = async ({
             backupSortId = lastSortId[0];
             hasBackupSortId = true;
           } else {
+            // TODO: This comment does not seem to match the code; this is the first loop and the first search, so how could the initial search result be known?
+            // answer: these were previously not blocking searches, and so the "second" search actually executed first TLDR outdated comment
             // if no sort id on backup search and the initial search result was also empty
             logger.debug(buildRuleMessage('backupSortIds was empty on searchResultB'));
             hasBackupSortId = false;
@@ -124,6 +126,7 @@ export const searchAfterAndBulkCreate = async ({
 
           mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResultB]);
 
+          // TODO again, on the first loop this is the FIRST search and toReturn is default values
           // merge the search result from the secondary search with the first
           toReturn = mergeReturns([
             toReturn,
@@ -165,6 +168,7 @@ export const searchAfterAndBulkCreate = async ({
             }),
           ]);
 
+          // TODO it's unclear why hits are guaranteed here; the type appears to be identical to the previous result which has more guards
           // we are guaranteed to have searchResult hits at this point
           // because we check before if the totalHits or
           // searchResult.hits.hits.length is 0
