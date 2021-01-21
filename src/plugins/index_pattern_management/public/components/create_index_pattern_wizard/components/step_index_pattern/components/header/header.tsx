@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiTitle,
@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiButton,
+  EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiSwitchEvent,
@@ -28,31 +29,38 @@ import { containsIllegalCharacters } from '../../../../lib';
 import { indexPatterns } from '../../../../../../../../data/public';
 
 interface HeaderProps {
-  isInputInvalid: boolean;
   characterList: string;
-  errors: any;
+  checkIndices?: string[];
   goToNextStep: (selectedPatterns: string[]) => void;
   isIncludingSystemIndices: boolean;
   isNextStepDisabled: boolean;
   onChangeIncludingSystemIndices: (event: EuiSwitchEvent) => void;
   onQueryChanged: (patterns: string[]) => void;
+  onTitleChanged: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  patternError: boolean;
   selectedPatterns: string[];
   showSystemIndices?: boolean;
+  title: string;
+  titleError: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   characterList,
-  errors,
+  checkIndices,
   goToNextStep,
   isIncludingSystemIndices,
-  isInputInvalid,
   isNextStepDisabled,
   onChangeIncludingSystemIndices,
   onQueryChanged,
+  onTitleChanged,
+  patternError,
   selectedPatterns,
   showSystemIndices = false,
+  title,
+  titleError,
   ...rest
 }) => {
+  const [isPatternInvalid, setIsPatternInvalid] = useState(patternError);
   const selectedOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () => selectedPatterns.map((label) => ({ label })),
     [selectedPatterns]
@@ -73,6 +81,42 @@ export const Header: React.FC<HeaderProps> = ({
     },
     [onQueryChanged, selectedPatterns]
   );
+  const onSearchChange = useCallback(
+    (searchValue) => {
+      if (containsIllegalCharacters(searchValue, indexPatterns.ILLEGAL_CHARACTERS)) {
+        return setIsPatternInvalid(true);
+      }
+      if (isPatternInvalid) {
+        return setIsPatternInvalid(false);
+      }
+    },
+    [isPatternInvalid]
+  );
+  const patternErrorMessage = useMemo(() => {
+    const errorsArr = [];
+    if (isPatternInvalid) {
+      errorsArr.push('This is a bad pattern');
+    }
+    if (checkIndices) {
+      errorsArr.push(...checkIndices);
+    }
+    return errorsArr;
+  }, [checkIndices, isPatternInvalid]);
+
+  const isNextDisabled = useMemo(() => patternErrorMessage.length > 0 || isNextStepDisabled, [
+    patternError,
+    isNextStepDisabled,
+  ]);
+
+  const titleErrorMessage = useMemo(() => {
+    return titleError ? 'Index pattern title exists' : false;
+  }, [titleError]);
+  console.log('RETURN header.tsx', {
+    titleError,
+    titleErrorMessage,
+    patternError,
+    patternErrorMessage,
+  });
   return (
     <div {...rest}>
       <EuiTitle size="s">
@@ -84,21 +128,57 @@ export const Header: React.FC<HeaderProps> = ({
         </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="flexEnd">
         <EuiFlexItem>
-          <EuiForm isInvalid={isInputInvalid}>
+          <EuiForm isInvalid={patternError || titleError}>
             <EuiFormRow
               fullWidth
               label={
                 <FormattedMessage
                   id="indexPatternManagement.createIndexPattern.step.indexPatternLabel"
-                  defaultMessage="Index pattern name"
+                  defaultMessage="Index pattern title"
                 />
               }
-              isInvalid={isInputInvalid}
-              error={errors}
+              isInvalid={titleError}
+              error={titleErrorMessage}
+              helpText={
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.step.indexPattern.descriptiveTitle"
+                  defaultMessage="A descriptive title for the index pattern"
+                />
+              }
+            >
+              <EuiFieldText
+                name="indexPatternTitle"
+                placeholder={i18n.translate(
+                  'indexPatternManagement.createIndexPattern.step.indexPatternTitle',
+                  {
+                    defaultMessage: 'My Index Pattern',
+                  }
+                )}
+                value={title}
+                isInvalid={titleError}
+                onChange={onTitleChanged}
+                data-test-subj="createIndexPatternNameInput"
+                fullWidth
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.step.indexPatternList"
+                  defaultMessage="Index pattern list"
+                />
+              }
+              isInvalid={patternError}
+              error={patternErrorMessage}
               helpText={
                 <>
+                  <FormattedMessage
+                    id="indexPatternManagement.createIndexPattern.step.indexPattern.instruction"
+                    defaultMessage="Press enter after each pattern to add to the pattern list."
+                  />{' '}
                   <FormattedMessage
                     id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
                     defaultMessage="Use an asterisk ({asterisk}) to match multiple indices."
@@ -115,10 +195,11 @@ export const Header: React.FC<HeaderProps> = ({
               <EuiComboBox
                 data-test-subj="createIndexPatternNameInput"
                 fullWidth
-                isInvalid={isInputInvalid}
+                isInvalid={isPatternInvalid}
                 noSuggestions
                 onChange={onChange}
                 onCreateOption={onCreateOption}
+                onSearchChange={onSearchChange}
                 placeholder={i18n.translate(
                   'indexPatternManagement.createIndexPattern.step.indexPatternPlaceholder',
                   {
@@ -154,7 +235,7 @@ export const Header: React.FC<HeaderProps> = ({
               iconSide="right"
               iconType="arrowRight"
               onClick={() => goToNextStep(selectedPatterns)}
-              isDisabled={isNextStepDisabled}
+              isDisabled={isNextDisabled}
               data-test-subj="createIndexPatternGoToStep2Button"
             >
               <FormattedMessage

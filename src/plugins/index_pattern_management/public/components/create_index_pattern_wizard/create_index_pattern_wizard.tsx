@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { DocLinksStart } from 'src/core/public';
-import { StepIndexPattern } from './components/step_index_pattern';
+import { StepIndexPattern } from './components/step_index_pattern/step_index_pattern_hook';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
 import { LoadingState } from './components/loading_state';
@@ -59,13 +59,13 @@ export class CreateIndexPatternWizard extends Component<
     const type = new URLSearchParams(props.location.search).get('type') || undefined;
 
     this.state = {
-      step: 1,
-      indexPattern: '',
       allIndices: [],
-      remoteClustersExist: false,
-      isInitiallyLoadingIndices: true,
-      toasts: [],
+      indexPattern: '',
       indexPatternCreationType: context.services.indexPatternManagementStart.creation.getType(type),
+      isInitiallyLoadingIndices: true,
+      remoteClustersExist: false,
+      step: 1,
+      toasts: [],
       docLinks: context.services.docLinks,
     };
   }

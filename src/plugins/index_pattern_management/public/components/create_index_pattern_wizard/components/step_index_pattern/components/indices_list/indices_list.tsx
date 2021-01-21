@@ -142,36 +142,44 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     );
   }
 
-  highlightIndexName(indexName: string, query: string) {
-    const queryIdx = indexName.indexOf(query);
-    if (!query || queryIdx === -1) {
-      return indexName;
+  highlightIndexName(indexName: string, patternList: string[]) {
+    let queryWithoutWildcard: string | null = null;
+    let queryIdx: number | null = null;
+    const matchedPattern = patternList.find((query) => {
+      const queryWithoutWildcard2 = query.endsWith('*') ? query.substr(0, query.length - 1) : query;
+      const queryIdx2 = indexName.indexOf(queryWithoutWildcard2);
+      if (!queryWithoutWildcard2 || queryIdx2 === -1) {
+        return false;
+      }
+      queryWithoutWildcard = queryWithoutWildcard2;
+      queryIdx = queryIdx2;
+
+      return true;
+    });
+
+    if (matchedPattern && queryWithoutWildcard != null && queryIdx != null) {
+      const preStr = indexName.substr(0, queryIdx);
+      const postStr = indexName.substr(queryIdx + matchedPattern.length);
+
+      return (
+        <span>
+          {preStr}
+          <strong>{queryWithoutWildcard}</strong>
+          {postStr}
+        </span>
+      );
     }
-
-    const preStr = indexName.substr(0, queryIdx);
-    const postStr = indexName.substr(queryIdx + query.length);
-
-    return (
-      <span>
-        {preStr}
-        <strong>{query}</strong>
-        {postStr}
-      </span>
-    );
+    return indexName;
   }
 
   render() {
-    const { indices, query: fakeIt, ...rest } = this.props;
-    const query = fakeIt.length ? fakeIt[0] : '';
-    const queryWithoutWildcard = query.endsWith('*') ? query.substr(0, query.length - 1) : query;
+    const { indices, query, ...rest } = this.props;
 
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {
       return (
         <EuiTableRow key={key}>
-          <EuiTableRowCell>
-            {this.highlightIndexName(index.name, queryWithoutWildcard)}
-          </EuiTableRowCell>
+          <EuiTableRowCell>{this.highlightIndexName(index.name, query)}</EuiTableRowCell>
           <EuiTableRowCell>
             {index.tags.map((tag: Tag) => {
               return (
