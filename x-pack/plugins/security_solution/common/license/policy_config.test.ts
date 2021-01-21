@@ -213,4 +213,13 @@ describe('policy_config and licenses', () => {
       expect(['', DefaultMalwareMessage]).toContain(retPolicy.mac.popup.ransomware.message);
     });
   });
+
+  describe('policyFactoryWithoutPaidFeatures for gold and below license', () => {
+    it('preserves non license-gated features', () => {
+      const policy = policyFactory(); // what we will modify, and should be reset
+      policy.windows.events.file = false;
+      const retPolicy = policyFactoryWithoutPaidFeatures(policy);
+      expect(retPolicy.windows.events.file).toBeFalsy();
+    });
+  });
 });

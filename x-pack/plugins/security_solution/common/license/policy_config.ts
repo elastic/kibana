@@ -84,20 +84,6 @@ export const unsetPolicyFeaturesAboveLicenseLevel = (
     return policy;
   }
 
-  const defaults = policyFactoryWithoutPaidFeatures();
   // set any license-gated features back to the defaults
-  policy.windows.popup.malware.enabled = defaults.windows.popup.malware.enabled;
-  policy.mac.popup.malware.enabled = defaults.mac.popup.malware.enabled;
-  policy.windows.popup.malware.message = defaults.windows.popup.malware.message;
-  policy.mac.popup.malware.message = defaults.mac.popup.malware.message;
-
-  // Ransomware options defaults off for gold and below licenses
-  policy.windows.ransomware.mode = defaults.windows.ransomware.mode;
-  policy.mac.ransomware.mode = defaults.mac.ransomware.mode;
-  policy.windows.popup.ransomware.enabled = defaults.windows.popup.ransomware.enabled;
-  policy.mac.popup.ransomware.enabled = defaults.mac.popup.ransomware.enabled;
-  policy.windows.popup.ransomware.message = defaults.windows.popup.ransomware.message;
-  policy.mac.popup.ransomware.message = defaults.mac.popup.ransomware.message;
-
-  return policy;
+  return policyFactoryWithoutPaidFeatures(policy);
 };

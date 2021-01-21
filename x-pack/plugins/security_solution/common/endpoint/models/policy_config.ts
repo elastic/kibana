@@ -84,27 +84,20 @@ export const policyFactory = (): PolicyConfig => {
 };
 
 /**
- * Return a new default `PolicyConfig` for gold and below license
+ * Strips paid features from an existing or new `PolicyConfig` for gold and below license
  */
-export const policyFactoryWithoutPaidFeatures = (): PolicyConfig => {
+export const policyFactoryWithoutPaidFeatures = (
+  policy: PolicyConfig = policyFactory()
+): PolicyConfig => {
   return {
+    ...policy,
     windows: {
-      events: {
-        dll_and_driver_load: true,
-        dns: true,
-        file: true,
-        network: true,
-        process: true,
-        registry: true,
-        security: true,
-      },
-      malware: {
-        mode: ProtectionModes.prevent,
-      },
+      ...policy.windows,
       ransomware: {
         mode: ProtectionModes.off,
       },
       popup: {
+        ...policy.windows.popup,
         malware: {
           message: '',
           enabled: true,
@@ -113,27 +106,15 @@ export const policyFactoryWithoutPaidFeatures = (): PolicyConfig => {
           message: '',
           enabled: false,
         },
-      },
-      logging: {
-        file: 'info',
-      },
-      antivirus_registration: {
-        enabled: false,
       },
     },
     mac: {
-      events: {
-        process: true,
-        file: true,
-        network: true,
-      },
-      malware: {
-        mode: ProtectionModes.prevent,
-      },
+      ...policy.mac,
       ransomware: {
         mode: ProtectionModes.off,
       },
       popup: {
+        ...policy.mac.popup,
         malware: {
           message: '',
           enabled: true,
@@ -142,19 +123,6 @@ export const policyFactoryWithoutPaidFeatures = (): PolicyConfig => {
           message: '',
           enabled: false,
         },
-      },
-      logging: {
-        file: 'info',
-      },
-    },
-    linux: {
-      events: {
-        process: true,
-        file: true,
-        network: true,
-      },
-      logging: {
-        file: 'info',
       },
     },
   };
