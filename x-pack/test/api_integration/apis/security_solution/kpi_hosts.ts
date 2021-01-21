@@ -227,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            defaultIndex: ['filebeat-*'],
+            defaultIndex: ['auditbeat-*'],
             docValueFields: [],
             inspect: false,
           })
@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            defaultIndex: ['filebeat-*'],
+            defaultIndex: ['auditbeat-*'],
             docValueFields: [],
             inspect: false,
           })
