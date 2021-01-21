@@ -52,11 +52,11 @@ describe('metrics service', () => {
 
   beforeAll(async () => {
     mockConsoleLog = jest.spyOn(global.console, 'log');
-    mockConsoleLog.mockClear();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     mockConsoleLog.mockClear();
+    await root.shutdown();
   });
 
   afterAll(async () => {
@@ -75,7 +75,6 @@ describe('metrics service', () => {
         otherTestSettings.ops.interval
       );
       expect(coreSetup.metrics).toHaveProperty('getOpsMetrics$');
-      await root.shutdown();
     });
   });
 
@@ -84,12 +83,7 @@ describe('metrics service', () => {
       root = kbnTestServer.createRoot({ logging: { quiet: true } });
       coreSetup = await root.setup();
 
-      coreSetup.metrics.getOpsMetrics$().subscribe((opsMetrics) => {
-        testData = opsMetrics;
-      });
-
       expect(mockConsoleLog).not.toHaveBeenCalled();
-      await root.shutdown();
     });
 
     it('logs at the correct level and with the correct context', async () => {
@@ -128,16 +122,10 @@ describe('metrics service', () => {
       root = kbnTestServer.createRoot({ ...testSettings });
       coreSetup = await root.setup();
 
-      coreSetup.metrics.getOpsMetrics$().subscribe((opsMetrics) => {
-        testData = opsMetrics;
-      });
-
       expect(mockConsoleLog).toHaveBeenCalledTimes(1);
       const [level, logger] = mockConsoleLog.mock.calls[0][0].split('|');
       expect(level).toBe('DEBUG');
       expect(logger).toBe('metrics.ops');
-
-      await root.shutdown();
     });
   });
   describe('ops metrics logging content', () => {
@@ -159,38 +147,26 @@ describe('metrics service', () => {
       // the contents of the message are variable based on the process environment,
       // so we are only performing assertions against parts of the string
       expect(testParts).toEqual(expect.arrayContaining(expectedArray));
-
-      await root.shutdown();
     });
 
     it('logs structured data in the log meta', async () => {
       root = kbnTestServer.createRoot({ ...otherTestSettings });
       coreSetup = await root.setup();
 
-      coreSetup.metrics.getOpsMetrics$().subscribe((opsMetrics) => {
-        testData = opsMetrics;
-      });
       const [, meta] = mockConsoleLog.mock.calls[0][0].split('|');
       expect(Object.keys(JSON.parse(meta).host.os.load)).toEqual(['1m', '5m', '15m']);
       expect(Object.keys(JSON.parse(meta).process)).toEqual(expect.arrayContaining(['uptime']));
-
-      await root.shutdown();
     });
 
     it('logs ECS fields in the log meta', async () => {
       root = kbnTestServer.createRoot({ ...otherTestSettings });
       coreSetup = await root.setup();
 
-      coreSetup.metrics.getOpsMetrics$().subscribe((opsMetrics) => {
-        testData = opsMetrics;
-      });
       const [, meta] = mockConsoleLog.mock.calls[0][0].split('|');
       expect(JSON.parse(meta).event.kind).toBe('metric');
       expect(JSON.parse(meta).ecs.version).toBe('1.7.0');
       expect(JSON.parse(meta).event.category).toEqual(expect.arrayContaining(['process', 'host']));
       expect(JSON.parse(meta).event.type).toBe('info');
-
-      await root.shutdown();
     });
   });
 });
