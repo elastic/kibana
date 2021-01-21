@@ -63,13 +63,15 @@ describe('useGetChoices', () => {
     jest.clearAllMocks();
   });
 
+  const fields = ['priority'];
+
   it('init', async () => {
     const { result, waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
       useGetChoices({
         http: services.http,
         actionConnector,
         toastNotifications: services.notifications.toasts,
-        fields: ['priority'],
+        fields,
         onSuccess,
       })
     );
@@ -88,7 +90,7 @@ describe('useGetChoices', () => {
         http: services.http,
         actionConnector: undefined,
         toastNotifications: services.notifications.toasts,
-        fields: ['priority'],
+        fields,
         onSuccess,
       })
     );
@@ -105,7 +107,7 @@ describe('useGetChoices', () => {
         http: services.http,
         actionConnector,
         toastNotifications: services.notifications.toasts,
-        fields: ['priority'],
+        fields,
         onSuccess,
       })
     );
@@ -126,7 +128,7 @@ describe('useGetChoices', () => {
         http: services.http,
         actionConnector,
         toastNotifications: services.notifications.toasts,
-        fields: ['priority'],
+        fields,
         onSuccess,
       })
     );
@@ -149,7 +151,7 @@ describe('useGetChoices', () => {
         http: services.http,
         actionConnector,
         toastNotifications: services.notifications.toasts,
-        fields: ['priority'],
+        fields,
         onSuccess,
       })
     );

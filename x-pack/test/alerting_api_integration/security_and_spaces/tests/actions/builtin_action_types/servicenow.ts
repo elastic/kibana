@@ -401,14 +401,14 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         });
 
         describe('getChoices', () => {
-          it('should handle creating an incident without comments', async () => {
+          it('should get choices', async () => {
             const { body: result } = await supertest
               .post(`/api/actions/action/${simulatedActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
                 params: {
                   subAction: 'getChoices',
-                  subActionParams: { field: 'priority' },
+                  subActionParams: { fields: ['priority'] },
                 },
               })
               .expect(200);

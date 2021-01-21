@@ -93,6 +93,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
     http,
     toastNotifications: toasts,
     actionConnector,
+    // Not having a memoized fields variable will cause infinitive API calls.
     fields: useGetChoicesFields,
     onSuccess: onChoicesSuccess,
   });
