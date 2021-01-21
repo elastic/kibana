@@ -32,13 +32,20 @@
       },
       "technique": [
         {
-          "id": "T1169",
-          "name": "Sudo",
-          "reference": "https://attack.mitre.org/techniques/T1169/"
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "reference": "https://attack.mitre.org/techniques/T1548/",
+          "subtechnique": [
+            {
+              "id": "T1548.003",
+              "name": "Sudo and Sudo Caching",
+              "reference": "https://attack.mitre.org/techniques/T1548/003/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

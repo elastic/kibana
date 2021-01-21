@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { deepFreeze } from '@kbn/std';
@@ -169,6 +158,7 @@ export class DocLinksService {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
           timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#timelion-deprecation`,
           lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
+          lensPanels: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#create-panels-with-lens`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
         },
         observability: {
@@ -189,7 +179,7 @@ export class DocLinksService {
           teamsAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/teams-action-type.html`,
         },
         maps: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-maps.html`,
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/maps.html`,
         },
         monitoring: {
           alertsKibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html`,
@@ -200,10 +190,13 @@ export class DocLinksService {
           apiKeyServiceSettings: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
           clusterPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-cluster`,
           elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
+          elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}get-started-enable-security.html`,
           indicesPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-indices`,
           kibanaTLS: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/configuring-tls.html`,
           kibanaPrivileges: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-privileges.html`,
           mappingRoles: `${ELASTICSEARCH_DOCS}mapping-roles.html`,
+          mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
+          runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
         },
         watcher: {
           jiraAction: `${ELASTICSEARCH_DOCS}actions-jira.html`,
@@ -216,8 +209,9 @@ export class DocLinksService {
         },
         apis: {
           createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
-          createSnapshotLifecylePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
+          createSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           createRoleMapping: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html`,
+          createRoleMappingTemplates: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html#_role_templates`,
           createApiKey: `${ELASTICSEARCH_DOCS}security-api-create-api-key.html`,
           createPipeline: `${ELASTICSEARCH_DOCS}put-pipeline-api.html`,
           createTransformRequest: `${ELASTICSEARCH_DOCS}put-transform.html#put-transform-request-body`,
@@ -339,12 +333,38 @@ export interface DocLinksStart {
     readonly ml: Record<string, string>;
     readonly transforms: Record<string, string>;
     readonly visualize: Record<string, string>;
-    readonly apis: Record<string, string>;
+    readonly apis: Readonly<{
+      createIndex: string;
+      createSnapshotLifecyclePolicy: string;
+      createRoleMapping: string;
+      createRoleMappingTemplates: string;
+      createApiKey: string;
+      createPipeline: string;
+      createTransformRequest: string;
+      executeWatchActionModes: string;
+      openIndex: string;
+      putComponentTemplate: string;
+      painlessExecute: string;
+      putComponentTemplateMetadata: string;
+      putWatch: string;
+      updateTransform: string;
+    }>;
     readonly observability: Record<string, string>;
     readonly alerting: Record<string, string>;
     readonly maps: Record<string, string>;
     readonly monitoring: Record<string, string>;
-    readonly security: Record<string, string>;
+    readonly security: Readonly<{
+      apiKeyServiceSettings: string;
+      clusterPrivileges: string;
+      elasticsearchSettings: string;
+      elasticsearchEnableSecurity: string;
+      indicesPrivileges: string;
+      kibanaTLS: string;
+      kibanaPrivileges: string;
+      mappingRoles: string;
+      mappingRolesFieldRules: string;
+      runAsPrivilege: string;
+    }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;
   };

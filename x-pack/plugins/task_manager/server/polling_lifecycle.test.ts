@@ -26,6 +26,7 @@ describe('TaskPollingLifecycle', () => {
       index: 'foo',
       max_attempts: 9,
       poll_interval: 6000000,
+      version_conflict_threshold: 80,
       max_poll_inactivity_cycles: 10,
       request_capacity: 1000,
       monitored_aggregated_stats_refresh_rate: 5000,
@@ -120,7 +121,12 @@ describe('TaskPollingLifecycle', () => {
   describe('claimAvailableTasks', () => {
     test('should claim Available Tasks when there are available workers', () => {
       const logger = mockLogger();
-      const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
+      const claim = jest.fn(() =>
+        Promise.resolve({
+          docs: [],
+          stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
+        })
+      );
 
       const availableWorkers = 1;
 
@@ -131,7 +137,12 @@ describe('TaskPollingLifecycle', () => {
 
     test('should not claim Available Tasks when there are no available workers', () => {
       const logger = mockLogger();
-      const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
+      const claim = jest.fn(() =>
+        Promise.resolve({
+          docs: [],
+          stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
+        })
+      );
 
       const availableWorkers = 0;
 

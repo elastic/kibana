@@ -9,7 +9,6 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 interface Props {
-  alertTypeName: string;
   setAlertParams: (key: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
   defaults: Record<string, any>;
@@ -20,14 +19,7 @@ interface Props {
 export function ServiceAlertTrigger(props: Props) {
   const { serviceName } = useParams<{ serviceName?: string }>();
 
-  const {
-    fields,
-    setAlertParams,
-    setAlertProperty,
-    alertTypeName,
-    defaults,
-    chartPreview,
-  } = props;
+  const { fields, setAlertParams, defaults, chartPreview } = props;
 
   const params: Record<string, any> = {
     ...defaults,
@@ -36,17 +28,6 @@ export function ServiceAlertTrigger(props: Props) {
 
   useEffect(() => {
     // we only want to run this on mount to set default values
-
-    const alertName = params.serviceName
-      ? `${alertTypeName} | ${params.serviceName}`
-      : alertTypeName;
-    setAlertProperty('name', alertName);
-
-    const tags = ['apm'];
-    if (params.serviceName) {
-      tags.push(`service.name:${params.serviceName}`.toLowerCase());
-    }
-    setAlertProperty('tags', tags);
     Object.keys(params).forEach((key) => {
       setAlertParams(key, params[key]);
     });

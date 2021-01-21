@@ -14,7 +14,7 @@ export const Setup: React.FunctionComponent<{
 }> = ({ fleet, notifications }) => {
   React.useEffect(() => {
     const defaultText = i18n.translate('xpack.securitySolution.endpoint.ingestToastMessage', {
-      defaultMessage: 'Ingest Manager failed during its setup.',
+      defaultMessage: 'Fleet failed during its setup.',
     });
 
     const title = i18n.translate('xpack.securitySolution.endpoint.ingestToastTitle', {

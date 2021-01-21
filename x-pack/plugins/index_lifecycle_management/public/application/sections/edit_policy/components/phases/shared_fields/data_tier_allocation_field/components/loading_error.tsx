@@ -21,6 +21,8 @@ export const LoadingError: FunctionComponent<Props> = ({
 }) => {
   return (
     <>
+      <EuiSpacer size="s" />
+
       <EuiCallOut
         title={
           <FormattedMessage

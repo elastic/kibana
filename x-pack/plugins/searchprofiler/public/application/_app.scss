@@ -37,19 +37,19 @@ $headerHeightOffset: $euiHeaderHeightCompensation * 3;
   flex-shrink: 1;
 }
 
-  .prfDevTool__main {
-    height: 100%;
-    order: 2;
-    margin-left: $euiSize;
-    display: flex;
-    overflow: hidden;
-    flex-direction: column;
+.prfDevTool__main {
+  height: 100%;
+  order: 2;
+  margin-left: $euiSize;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
 
-    // Make only the tab content scroll
-    .search-profiler-tabs {
-      flex-shrink: 0;
-    }
+  // Make only the tab content scroll
+  .search-profiler-tabs {
+    flex-shrink: 0;
   }
+}
 
 @include euiPanel('.prfDevTool__main');
 
@@ -63,4 +63,3 @@ $headerHeightOffset: $euiHeaderHeightCompensation * 3;
     margin: $euiSize 0;
   }
 }
-

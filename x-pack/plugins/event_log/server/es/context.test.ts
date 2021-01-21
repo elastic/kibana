@@ -25,6 +25,7 @@ describe('createEsContext', () => {
       logger,
       clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test0',
+      kibanaVersion: '1.2.3',
     });
 
     expect(context.initialized).toBeFalsy();
@@ -38,6 +39,7 @@ describe('createEsContext', () => {
       logger,
       clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test-index',
+      kibanaVersion: '1.2.3',
     });
 
     const esNames = context.esNames;
@@ -57,6 +59,7 @@ describe('createEsContext', () => {
       logger,
       clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test1',
+      kibanaVersion: '1.2.3',
     });
     clusterClient.callAsInternalUser.mockResolvedValue(false);
 
@@ -74,6 +77,7 @@ describe('createEsContext', () => {
       logger,
       clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test2',
+      kibanaVersion: '1.2.3',
     });
     clusterClient.callAsInternalUser.mockResolvedValue(true);
     context.initialize();
@@ -98,6 +102,7 @@ describe('createEsContext', () => {
       logger,
       clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test2',
+      kibanaVersion: '1.2.3',
     });
     context.initialize();
     const success = await context.waitTillReady();

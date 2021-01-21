@@ -18,6 +18,11 @@ const {
 
 export const stringifyUrlParams = (params: Partial<UptimeUrlParams>, ignoreEmpty = false) => {
   if (ignoreEmpty) {
+    // We don't want to encode this values because they are often set to Date.now(), the relative
+    // values in dateRangeStart are better for a URL.
+    delete params.absoluteDateRangeStart;
+    delete params.absoluteDateRangeEnd;
+
     Object.keys(params).forEach((key: string) => {
       // @ts-ignore
       const val = params[key];

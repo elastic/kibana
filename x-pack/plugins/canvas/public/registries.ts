@@ -40,8 +40,24 @@ export function initRegistries() {
   });
 }
 
-export function populateRegistries(setupRegistries: SetupRegistries) {
-  register(registries, setupRegistries);
+export async function populateRegistries(setupRegistries: SetupRegistries) {
+  // Our setup registries could contain definitions or a function that would
+  // return a promise of definitions.
+  // We need to call all the fns and then wait for all of the promises to be resolved
+  const resolvedRegistries: Record<string, any[]> = {};
+  const promises = Object.entries(setupRegistries).map(async ([key, specs]) => {
+    const resolved = await (
+      await Promise.all(specs.map((fn) => (typeof fn === 'function' ? fn() : fn)))
+    ).flat();
+
+    resolvedRegistries[key] = resolved;
+  });
+
+  // Now, wait for all of the promise registry promises to resolve and our resolved registry will be ready
+  // and we can proceeed
+  await Promise.all(promises);
+
+  register(registries, resolvedRegistries);
 }
 
 export function destroyRegistries() {

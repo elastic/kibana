@@ -34,7 +34,7 @@ export const getAllExceptionListsColumns = (
     width: '15%',
     render: (value: ExceptionListInfo['list_id']) => (
       <EuiToolTip position="left" content={value}>
-        <>{value}</>
+        <p data-test-subj="exceptionsTableListId">{value}</p>
       </EuiToolTip>
     ),
   },
@@ -120,6 +120,8 @@ export const getAllExceptionListsColumns = (
         onClick={onDelete({ id, listId, namespaceType })}
         aria-label="Delete exception list"
         iconType="trash"
+        isDisabled={listId === 'endpoint_list'}
+        data-test-subj="exceptionsTableDeleteButton"
       />
     ),
   },

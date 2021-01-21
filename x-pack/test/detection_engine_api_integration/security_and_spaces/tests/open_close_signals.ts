@@ -166,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(everySignalClosed).to.eql(true);
         });
 
-        it('should NOT be able to close signals with t1 analyst user', async () => {
+        it('should be able to close signals with t1 analyst user', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
@@ -182,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .auth(ROLES.t1_analyst, 'changeme')
             .send(setSignalStatus({ signalIds, status: 'closed' }))
-            .expect(403);
+            .expect(200);
 
           // query for the signals with the superuser
           // to allow a check that the signals were NOT closed with t1 analyst
@@ -199,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
               _source: {
                 signal: { status },
               },
-            }) => status === 'open'
+            }) => status === 'closed'
           );
           expect(everySignalOpen).to.eql(true);
         });

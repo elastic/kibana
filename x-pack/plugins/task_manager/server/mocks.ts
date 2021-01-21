@@ -22,6 +22,7 @@ const createStartMock = () => {
     schedule: jest.fn(),
     runNow: jest.fn(),
     ensureScheduled: jest.fn(),
+    removeIfExists: jest.fn(),
   };
   return mock;
 };

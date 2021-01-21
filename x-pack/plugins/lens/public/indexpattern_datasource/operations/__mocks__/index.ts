@@ -43,6 +43,7 @@ export const {
   isReferenced,
   resetIncomplete,
   isOperationAllowedAsReference,
+  canTransition,
 } = actualHelpers;
 
 export const { adjustTimeScaleLabelSuffix, DEFAULT_TIME_SCALE } = actualTimeScaleUtils;
