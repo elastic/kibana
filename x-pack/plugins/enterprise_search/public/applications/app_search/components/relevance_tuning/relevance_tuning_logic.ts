@@ -6,10 +6,13 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+import { cloneDeep, isEmpty } from 'lodash';
 
 import { HttpLogic } from '../../../shared/http';
 import { Schema, SchemaConflicts } from '../../../shared/types';
 import { flashAPIErrors } from '../../../shared/flash_messages';
+
+import { Result } from '../result/types';
 import { EngineLogic } from '../engine';
 
 import { SearchSettings } from './types';
@@ -24,12 +27,13 @@ interface RelevanceTuningActions {
   setSearchSettings(searchSettings: SearchSettings): { searchSettings: SearchSettings };
   setFilterValue(value: string): string;
   setSearchQuery(value: string): string;
-  setSearchResults(searchResults: object[]): object[];
+  setSearchResults(searchResults: Result[]): Result[];
   setResultsLoading(resultsLoading: boolean): boolean;
   clearSearchResults(): void;
   resetSearchSettingsState(): void;
   dismissSchemaConflictCallout(): void;
   initializeRelevanceTuning(): void;
+  getSearchResults(): void;
 }
 
 interface RelevanceTuningValues {
@@ -46,13 +50,22 @@ interface RelevanceTuningValues {
   query: string;
   unsavedChanges: boolean;
   dataLoading: boolean;
-  searchResults: object[] | null;
+  searchResults: Result[] | null;
   resultsLoading: boolean;
 }
 
 // If the user hasn't entered a filter, then we can skip filtering the array entirely
 const filterIfTerm = (array: string[], filterTerm: string): string[] => {
   return filterTerm === '' ? array : array.filter((item) => item.includes(filterTerm));
+};
+
+const removeBoostStateProps = (searchSettings: Partial<SearchSettings>) => {
+  const updatedSettings = cloneDeep(searchSettings);
+  const { boosts } = updatedSettings;
+  const keys = Object.keys(boosts || {});
+  keys.forEach((key) => (boosts || {})[key].forEach((boost) => delete boost.newBoost));
+
+  return updatedSettings;
 };
 
 export const RelevanceTuningLogic = kea<
@@ -70,6 +83,7 @@ export const RelevanceTuningLogic = kea<
     resetSearchSettingsState: true,
     dismissSchemaConflictCallout: true,
     initializeRelevanceTuning: true,
+    getSearchResults: true,
   }),
   reducers: () => ({
     searchSettings: [
@@ -169,6 +183,35 @@ export const RelevanceTuningLogic = kea<
       try {
         const response = await http.get(url);
         actions.onInitializeRelevanceTuning(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    getSearchResults: async (_, breakpoint) => {
+      await breakpoint(250);
+
+      const { engineName } = EngineLogic.values;
+      const { http } = HttpLogic.values;
+      const query = values.query;
+      const { search_fields: searchFields, boosts } = removeBoostStateProps(values.searchSettings);
+      if (!query) {
+        return actions.clearSearchResults();
+      }
+      actions.setResultsLoading(true);
+      const url = `/api/app_search/engines/${engineName}/search_settings_search`;
+
+      try {
+        const response = await http.post(url, {
+          query: {
+            query,
+          },
+          body: JSON.stringify({
+            boosts: isEmpty(boosts) ? undefined : boosts,
+            search_fields: searchFields,
+          }),
+        });
+
+        actions.setSearchResults(response.results);
       } catch (e) {
         flashAPIErrors(e);
       }

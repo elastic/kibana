@@ -41,7 +41,18 @@ describe('RelevanceTuningLogic', () => {
     schema,
     schemaConflicts,
   };
-  const searchResults = [{}, {}];
+  const searchResults = [
+    {
+      id: {
+        raw: '1',
+      },
+      _meta: {
+        id: '1',
+        score: 100,
+        engine: 'my-engine',
+      },
+    },
+  ];
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -205,9 +216,9 @@ describe('RelevanceTuningLogic', () => {
 
     describe('initializeRelevanceTuning', () => {
       it('should make an API call and set state based on the response', async () => {
+        mount();
         const promise = Promise.resolve(relevanceTuningProps);
         http.get.mockReturnValueOnce(promise);
-        mount();
         jest.spyOn(RelevanceTuningLogic.actions, 'onInitializeRelevanceTuning');
 
         RelevanceTuningLogic.actions.initializeRelevanceTuning();
@@ -220,17 +231,141 @@ describe('RelevanceTuningLogic', () => {
           relevanceTuningProps
         );
       });
+
+      it('handles errors', async () => {
+        mount();
+        const promise = Promise.reject('error');
+        http.get.mockReturnValueOnce(promise);
+
+        RelevanceTuningLogic.actions.initializeRelevanceTuning();
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
     });
 
-    it('handles errors', async () => {
-      const promise = Promise.reject('error');
-      http.get.mockReturnValueOnce(promise);
-      mount();
+    // Debouncing with kea's `breakpoint` is challenging. It uses a timeout,
+    // which we don't have access to, so we need to use fake timers. Additionally,
+    // it awaits a promise we don't have access to. To handle that situation,
+    // we use the waitATick function.
+    describe('getSearchResults', () => {
+      const waitATick = () => {
+        let promiseResolve: any;
+        const promise = new Promise((resolve) => (promiseResolve = resolve));
+        setTimeout(() => promiseResolve());
+        jest.runAllTimers();
+        return promise;
+      };
 
-      RelevanceTuningLogic.actions.initializeRelevanceTuning();
-      await expectedAsyncError(promise);
+      beforeAll(() => {
+        jest.useFakeTimers();
+      });
 
-      expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      afterAll(() => {
+        jest.useRealTimers();
+      });
+
+      it('should make an API call and set state based on the response', async () => {
+        mount({
+          query: 'foo',
+          searchSettings: {
+            boosts: {
+              foo: [
+                {
+                  type: 'value' as BoostType,
+                  factor: 5,
+                  newBoost: true, // This should be deleted before sent to the server
+                },
+              ],
+            },
+            search_fields: {},
+          },
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');
+        jest.spyOn(RelevanceTuningLogic.actions, 'setResultsLoading');
+
+        const promise = Promise.resolve({
+          results: searchResults,
+        });
+        http.post.mockReturnValueOnce(promise);
+        RelevanceTuningLogic.actions.getSearchResults();
+
+        await waitATick();
+        await waitATick();
+        await promise;
+
+        expect(RelevanceTuningLogic.actions.setResultsLoading).toHaveBeenCalledWith(true);
+        expect(http.post).toHaveBeenCalledWith(
+          '/api/app_search/engines/test-engine/search_settings_search',
+          {
+            body: '{"boosts":{"foo":[{"type":"value","factor":5}]},"search_fields":{}}',
+            query: {
+              query: 'foo',
+            },
+          }
+        );
+        expect(RelevanceTuningLogic.actions.setSearchResults).toHaveBeenCalledWith(searchResults);
+      });
+
+      it("won't send boosts if on the API call if there are none", async () => {
+        mount({
+          query: 'foo',
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');
+
+        const promise = Promise.resolve({
+          results: searchResults,
+        });
+        http.post.mockReturnValueOnce(promise);
+        RelevanceTuningLogic.actions.getSearchResults();
+
+        await waitATick();
+        await waitATick();
+        await promise;
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/api/app_search/engines/test-engine/search_settings_search',
+          {
+            body: '{}',
+            query: {
+              query: 'foo',
+            },
+          }
+        );
+      });
+
+      it('will call clearSearchResults if there is no query', async () => {
+        mount({
+          query: '',
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');
+        jest.spyOn(RelevanceTuningLogic.actions, 'setResultsLoading');
+        jest.spyOn(RelevanceTuningLogic.actions, 'clearSearchResults');
+
+        RelevanceTuningLogic.actions.getSearchResults();
+        await waitATick();
+        await waitATick();
+
+        expect(RelevanceTuningLogic.actions.clearSearchResults).toHaveBeenCalled();
+        expect(RelevanceTuningLogic.actions.setSearchResults).not.toHaveBeenCalled();
+        expect(RelevanceTuningLogic.actions.setResultsLoading).not.toHaveBeenCalled();
+      });
+
+      it('handles errors', async () => {
+        mount({
+          query: 'foo',
+        });
+
+        const promise = Promise.reject('error');
+        http.post.mockReturnValueOnce(promise);
+        RelevanceTuningLogic.actions.getSearchResults();
+
+        await waitATick();
+        await waitATick();
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
     });
   });
 
