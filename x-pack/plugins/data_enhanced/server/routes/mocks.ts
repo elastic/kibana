@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import type { DataRequestHandlerContext } from '../../../../../src/plugins/data/server';
 import { coreMock } from '../../../../../src/core/server/mocks';
 
 export function createSearchRequestHandlerContext() {
@@ -22,5 +22,5 @@ export function createSearchRequestHandlerContext() {
         update: jest.fn(),
       },
     },
-  } as unknown) as jest.Mocked<RequestHandlerContext>;
+  } as unknown) as jest.Mocked<DataRequestHandlerContext>;
 }

@@ -632,16 +632,19 @@ describe('editor_frame', () => {
         );
       });
 
+      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
+        .setState;
+
+      mockDatasource.renderDataPanel.mockClear();
+
       const updatedState = {
         title: 'shazm',
       };
-      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
-        .setState;
       act(() => {
         setDatasourceState(updatedState);
       });
 
-      expect(mockDatasource.renderDataPanel).toHaveBeenCalledTimes(2);
+      expect(mockDatasource.renderDataPanel).toHaveBeenCalledTimes(1);
       expect(mockDatasource.renderDataPanel).toHaveBeenLastCalledWith(
         expect.any(Element),
         expect.objectContaining({
