@@ -139,8 +139,19 @@ export const PrivateSources: React.FC = () => {
     </>
   );
 
+  const PAGE_TITLE = canCreatePersonalSources
+    ? PRIVATE_CAN_CREATE_PAGE_TITLE
+    : PRIVATE_VIEW_ONLY_PAGE_TITLE;
+  const PAGE_DESCRIPTION = canCreatePersonalSources
+    ? PRIVATE_CAN_CREATE_PAGE_DESCRIPTION
+    : PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION;
+
+  const pageHeader = <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />;
+
   return (
     <SourcesView>
+      {/* TODO: Figure out with design how to make this look better w/o 2 ViewContentHeaders */}
+      {pageHeader}
       {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
       {canAddSources && sourcesHeader}
       {canCreatePersonalSources && privateSources}
