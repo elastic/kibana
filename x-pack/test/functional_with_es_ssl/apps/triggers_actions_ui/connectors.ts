@@ -20,7 +20,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const comboBox = getService('comboBox');
 
-  describe('Connectors', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/88796
+  describe.skip('Connectors', function () {
     before(async () => {
       await alerting.actions.createAction({
         name: `slack-${Date.now()}`,

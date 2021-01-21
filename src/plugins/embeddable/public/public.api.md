@@ -915,11 +915,11 @@ export const withEmbeddableSubscription: <I extends EmbeddableInput, O extends E
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/embeddable/common/types.ts:44:3 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
-// src/plugins/embeddable/common/types.ts:59:3 - (ae-forgotten-export) The symbol "TimeRange" needs to be exported by the entry point index.d.ts
-// src/plugins/embeddable/common/types.ts:64:3 - (ae-forgotten-export) The symbol "Query" needs to be exported by the entry point index.d.ts
-// src/plugins/embeddable/common/types.ts:69:3 - (ae-forgotten-export) The symbol "Filter" needs to be exported by the entry point index.d.ts
-// src/plugins/embeddable/public/lib/triggers/triggers.ts:46:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/common/types.ts:33:3 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/common/types.ts:48:3 - (ae-forgotten-export) The symbol "TimeRange" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/common/types.ts:53:3 - (ae-forgotten-export) The symbol "Query" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/common/types.ts:58:3 - (ae-forgotten-export) The symbol "Filter" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/public/lib/triggers/triggers.ts:35:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
