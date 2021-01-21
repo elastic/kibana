@@ -58,7 +58,7 @@ describe('health check', () => {
   it('renders children if keys are enabled', async () => {
     useKibanaMock().services.http.get = jest
       .fn()
-      .mockResolvedValue({ isSufficientlySecure: true, hasPermanentEncryptionKey: true });
+      .mockResolvedValue({ isSufficientlySecure: true, isESOAvailable: true });
     const { queryByText } = render(
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
@@ -73,9 +73,9 @@ describe('health check', () => {
   });
 
   test('renders warning if keys are disabled', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockImplementationOnce(async () => ({
+    useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       isSufficientlySecure: false,
-      hasPermanentEncryptionKey: true,
+      isESOAvailable: true,
     }));
     const { queryAllByText } = render(
       <HealthContextProvider>
@@ -100,64 +100,6 @@ describe('health check', () => {
 
     expect(action.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/configuring-tls.html"`
-    );
-  });
-
-  test('renders warning if encryption key is ephemeral', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockImplementationOnce(async () => ({
-      isSufficientlySecure: true,
-      hasPermanentEncryptionKey: false,
-    }));
-    const { queryByText, queryByRole } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
-    );
-    await act(async () => {
-      // wait for useEffect to run
-    });
-
-    const description = queryByRole(/banner/i);
-    expect(description!.textContent).toMatchInlineSnapshot(
-      `"To create an alert, set a value for xpack.encryptedSavedObjects.encryptionKey in your kibana.yml file. Learn how.(opens in a new tab or window)"`
-    );
-
-    const action = queryByText(/Learn/i);
-    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how.(opens in a new tab or window)"`);
-    expect(action!.getAttribute('href')).toMatchInlineSnapshot(
-      `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alert-action-settings-kb.html#general-alert-action-settings"`
-    );
-  });
-
-  test('renders warning if encryption key is ephemeral and keys are disabled', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockImplementationOnce(async () => ({
-      isSufficientlySecure: false,
-      hasPermanentEncryptionKey: false,
-    }));
-
-    const { queryByText } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
-    );
-    await act(async () => {
-      // wait for useEffect to run
-    });
-
-    const description = queryByText(/Transport Layer Security/i);
-
-    expect(description!.textContent).toMatchInlineSnapshot(
-      `"You must enable Transport Layer Security between Kibana and Elasticsearch and configure an encryption key in your kibana.yml file. Learn how(opens in a new tab or window)"`
-    );
-
-    const action = queryByText(/Learn/i);
-    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how(opens in a new tab or window)"`);
-    expect(action!.getAttribute('href')).toMatchInlineSnapshot(
-      `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alerting-getting-started.html#alerting-setup-prerequisites"`
     );
   });
 });

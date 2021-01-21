@@ -26,7 +26,10 @@ jest.mock('../../../lib/action_connector_api', () => ({
 jest.mock('../../../lib/alert_api', () => ({
   loadAlerts: jest.fn(),
   loadAlertTypes: jest.fn(),
-  health: jest.fn(() => ({ isSufficientlySecure: true, hasPermanentEncryptionKey: true })),
+  alertingFrameworkHealth: jest.fn(() => ({ isSufficientlySecure: true })),
+}));
+jest.mock('../../../../common/lib/health_api', () => ({
+  triggersActionsUiHealth: jest.fn(() => ({ isESOAvailable: true })),
 }));
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
