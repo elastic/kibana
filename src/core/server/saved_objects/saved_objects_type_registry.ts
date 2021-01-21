@@ -32,6 +32,7 @@ export class SavedObjectTypeRegistry {
     if (this.types.has(type.name)) {
       throw new Error(`Type '${type.name}' is already registered`);
     }
+    validateType(type);
     this.types.set(type.name, deepFreeze(type));
   }
 
@@ -116,3 +117,13 @@ export class SavedObjectTypeRegistry {
     return this.types.get(type)?.management?.importableAndExportable ?? false;
   }
 }
+
+const validateType = ({ name, management }: SavedObjectsType) => {
+  if (management) {
+    if (management.onExport && !management.importableAndExportable) {
+      throw new Error(
+        `Type ${name}: 'management.importableAndExportable' must be 'true' when specifying 'management.onExport'`
+      );
+    }
+  }
+};

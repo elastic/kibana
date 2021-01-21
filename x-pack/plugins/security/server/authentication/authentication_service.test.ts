@@ -120,6 +120,23 @@ describe('AuthenticationService', () => {
           .authenticate;
       });
 
+      it('returns error if license is not available.', async () => {
+        const mockResponse = httpServerMock.createLifecycleResponseFactory();
+
+        mockSetupAuthenticationParams.license.isLicenseAvailable.mockReturnValue(false);
+
+        await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
+
+        expect(mockResponse.customError).toHaveBeenCalledTimes(1);
+        expect(mockResponse.customError).toHaveBeenCalledWith({
+          body: 'License is not available.',
+          statusCode: 503,
+          headers: { 'Retry-After': '30' },
+        });
+        expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
+        expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
+      });
+
       it('replies with no credentials when security is disabled in elasticsearch', async () => {
         const mockRequest = httpServerMock.createKibanaRequest();
         const mockResponse = httpServerMock.createLifecycleResponseFactory();

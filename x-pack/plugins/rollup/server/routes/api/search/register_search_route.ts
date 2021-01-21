@@ -28,7 +28,7 @@ export const registerSearchRoute = ({
     license.guardApiRoute(async (context, request, response) => {
       try {
         const requests = request.body.map(({ index, query }: { index: string; query?: any }) =>
-          context.rollup!.client.callAsCurrentUser('rollup.search', {
+          context.rollup.client.callAsCurrentUser('rollup.search', {
             index,
             rest_total_hits_as_int: true,
             body: query,
