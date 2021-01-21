@@ -341,7 +341,7 @@ The metrics that are logged are a subset of the data collected and are formatted
 
 | Ops formatted log property | Location in metrics service | Log units
 | :------------------------- | :-------------------------- | :-------------------------- |
-| memory | process.memory.heap.used_in_bytes | MB |
+| memory | process.memory.heap.used_in_bytes | [depends on the value](http://numeraljs.com/#format), typically MB or GB |
 | uptime  | process.uptime_in_millis | HH:mm:ss |
 | load  | os.load | [ "load for the last 1 min" "load for the last 5 min" "load for the last 15 min"] |
 | delay | process.event_loop_delay | ms |
