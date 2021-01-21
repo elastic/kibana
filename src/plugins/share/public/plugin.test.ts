@@ -59,7 +59,10 @@ describe('SharePlugin', () => {
       expect(registryMock.start).toHaveBeenCalled();
       expect(managerMock.start).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ getShareMenuItems: expect.any(Function) })
+        expect.objectContaining({
+          getShareMenuItems: expect.any(Function),
+        }),
+        expect.anything()
       );
       expect(start.toggleShareContextMenu).toBeDefined();
     });
