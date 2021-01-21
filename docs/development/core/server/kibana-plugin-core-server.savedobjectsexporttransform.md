@@ -6,6 +6,8 @@
 
 Transformation function used to mutate the exported objects of the associated type.
 
+A type's export transform function will be executed once per user-initiated export, for all objects of that type.
+
 <b>Signature:</b>
 
 ```typescript
