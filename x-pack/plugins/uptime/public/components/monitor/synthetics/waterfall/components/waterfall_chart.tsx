@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   Axis,
   BarSeries,
@@ -19,7 +19,6 @@ import {
   TooltipInfo,
   TooltipType,
 } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 // NOTE: The WaterfallChart has a hard requirement that consumers / solutions are making use of KibanaReactContext, and useKibana etc
 // can therefore be accessed.
@@ -38,6 +37,7 @@ import { BAR_HEIGHT, CANVAS_MAX_ITEMS, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from 
 import { Sidebar } from './sidebar';
 import { Legend } from './legend';
 import { useBarCharts } from './use_bar_charts';
+import { NetworkRequestsTotal } from './network_requests_total';
 
 const Tooltip = (tooltipInfo: TooltipInfo) => {
   const { data, renderTooltipItem } = useWaterfallContext();
@@ -117,14 +117,7 @@ export const WaterfallChart = ({
             {shouldRenderSidebar && (
               <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
                 <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false}>
-                  <EuiText size="xs">
-                    <h3>
-                      {i18n.translate('xpack.uptime.synthetics.waterfall.requestsTotalMessage', {
-                        defaultMessage: 'Network requests: {count}',
-                        values: { count: total > eventsCount ? `${eventsCount}/${total}` : total },
-                      })}
-                    </h3>
-                  </EuiText>
+                  <NetworkRequestsTotal total={total} eventsCount={eventsCount} />
                 </WaterfallChartFixedTopContainerSidebarCover>
               </EuiFlexItem>
             )}
