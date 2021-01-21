@@ -6,6 +6,7 @@
  * Public License, v 1.
  */
 
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { KibanaResponseFactory } from 'kibana/server';
 import { KbnError } from '../common';
 
@@ -17,6 +18,24 @@ export class KbnServerError extends KbnError {
   }
 }
 
+/**
+ * Formats any error thrown into a standardized `KbnServerError`.
+ * @param e `Error` or `ElasticsearchClientError`
+ * @returns `KbnServerError`
+ */
+export function getKbnServerError(e: any) {
+  return new KbnServerError(
+    e.message ?? 'Unknown error',
+    e.statusCode ?? 500,
+    e instanceof ResponseError ? e.body : undefined
+  );
+}
+
+/**
+ *
+ * @param res Formats a `KbnServerError` into a server error response
+ * @param err
+ */
 export function reportServerError(res: KibanaResponseFactory, err: KbnServerError) {
   return res.customError({
     statusCode: err.statusCode ?? 500,

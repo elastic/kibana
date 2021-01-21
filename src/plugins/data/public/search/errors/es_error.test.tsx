@@ -23,6 +23,6 @@ describe('EsError', () => {
     const esError = new EsError(error);
 
     expect(typeof esError.attributes).toEqual('object');
-    expect(esError).toEqual(error.attributes);
+    expect(esError.attributes).toEqual(error.attributes);
   });
 });

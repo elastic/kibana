@@ -149,7 +149,7 @@ describe('ES search strategy', () => {
       expect(e).toBeInstanceOf(KbnServerError);
       expect(e.statusCode).toBe(404);
       expect(e.message).toBe(errResponse.message);
-      expect(e.attributes).toBe(indexNotFoundException);
+      expect(e.errBody).toBe(indexNotFoundException);
       done();
     }
   });
@@ -167,7 +167,7 @@ describe('ES search strategy', () => {
       expect(e).toBeInstanceOf(KbnServerError);
       expect(e.statusCode).toBe(500);
       expect(e.message).toBe(errResponse.message);
-      expect(e.attributes).toBe(undefined);
+      expect(e.errBody).toBe(undefined);
       done();
     }
   });
@@ -185,7 +185,7 @@ describe('ES search strategy', () => {
       expect(e).toBeInstanceOf(KbnServerError);
       expect(e.statusCode).toBe(500);
       expect(e.message).toBe(errResponse.message);
-      expect(e.attributes).toBe(undefined);
+      expect(e.errBody).toBe(undefined);
       done();
     }
   });
@@ -202,7 +202,7 @@ describe('ES search strategy', () => {
       expect(e).toBeInstanceOf(KbnServerError);
       expect(e.message).toBe('Unsupported index pattern type banana');
       expect(e.statusCode).toBe(400);
-      expect(e.attributes).toBe(undefined);
+      expect(e.errBody).toBe(undefined);
       done();
     }
   });

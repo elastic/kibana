@@ -10,13 +10,12 @@ import { from, Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 import type { SearchResponse } from 'elasticsearch';
 import type { Logger, SharedGlobalConfig } from 'kibana/server';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import type { ISearchStrategy } from '../types';
 import type { SearchUsage } from '../collectors';
 import { getDefaultSearchParams, getShardTimeout, shimAbortSignal } from './request_utils';
 import { toKibanaSearchResponse } from './response_utils';
 import { searchUsageObserver } from '../collectors/usage';
-import { KbnServerError } from '../../../../kibana_utils/server';
+import { getKbnServerError, KbnServerError } from '../../../../kibana_utils/server';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -49,11 +48,7 @@ export const esSearchStrategyProvider = (
         const { body } = await shimAbortSignal(promise, abortSignal);
         return toKibanaSearchResponse(body);
       } catch (e: any) {
-        if (e instanceof ResponseError) {
-          throw new KbnServerError(e.message, e.statusCode, e.body);
-        } else {
-          throw new KbnServerError(e.message || 'Unknown error', 500);
-        }
+        throw getKbnServerError(e);
       }
     };
 

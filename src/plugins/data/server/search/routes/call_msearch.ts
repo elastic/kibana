@@ -11,10 +11,9 @@ import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
 import { shimHitsTotal } from './shim_hits_total';
-import { KbnServerError } from '../../../../kibana_utils/server';
+import { getKbnServerError } from '../../../../kibana_utils/server';
 import { getShardTimeout, getDefaultSearchParams, shimAbortSignal } from '..';
 
 /** @internal */
@@ -85,11 +84,7 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
         },
       };
     } catch (e: any) {
-      if (e instanceof ResponseError) {
-        throw new KbnServerError(e.message, e.statusCode, e.body);
-      } else {
-        throw new KbnServerError(e.message || 'Unknown error', 500);
-      }
+      throw getKbnServerError(e);
     }
   };
 }
