@@ -174,11 +174,6 @@ export class DashboardStateManager {
 
     this.stateContainerChangeSub = this.stateContainer.state$.subscribe(() => {
       this.isDirty = this.checkIsDirty();
-
-      // Session storage keys seems to disappear in some functional tests. This will temporarily prevent that.
-      if (this.appState.panels.length && !this.getUnsavedPanelState().panels?.length) {
-        this.setUnsavedPanels(this.appState.panels);
-      }
       this.changeListeners.forEach((listener) => listener({ dirty: this.isDirty }));
     });
 
