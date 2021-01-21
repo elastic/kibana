@@ -203,7 +203,7 @@ With *Lens*, you can:
   style="width: 100%; margin: auto; display: block;"
   class="vidyard-player-embed"
   src="https://play.vidyard.com/8SAFKR2tDTwGbNcynK8Bb2.jpg"
-  data-uuid="ZWSdKk4waG1bKf7oRa6Dvq"
+  data-uuid="8SAFKR2tDTwGbNcynK8Bb2"
   data-v="4"
   data-type="inline"
 />
