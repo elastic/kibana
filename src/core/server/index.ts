@@ -320,6 +320,8 @@ export {
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
   SavedObjectsExportError,
+  SavedObjectsExportTransform,
+  SavedObjectsExportTransformContext,
   SavedObjectsImporter,
   ISavedObjectsImporter,
   SavedObjectsImportError,
