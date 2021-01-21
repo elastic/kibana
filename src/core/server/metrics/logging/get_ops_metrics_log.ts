@@ -19,7 +19,7 @@ import { OpsMetrics } from '..';
 export function getEcsOpsMetricsLog({ process, os }: Partial<OpsMetrics>): LogMeta {
   const processMemoryUsedInBytes = process?.memory?.heap?.used_in_bytes;
   const processMemoryUsedInBytesMsg = processMemoryUsedInBytes
-    ? `memory: ${numeral(processMemoryUsedInBytes).format('0.0b')}`
+    ? `memory: ${numeral(processMemoryUsedInBytes).format('0.0b')} `
     : '';
 
   // ECS process.uptime is in seconds:
@@ -28,7 +28,7 @@ export function getEcsOpsMetricsLog({ process, os }: Partial<OpsMetrics>): LogMe
     : undefined;
 
   // HH:mm:ss message format for backward compatibility
-  const uptimeValMsg = uptimeVal ? `uptime: ${numeral(uptimeVal).format('00:00:00')}` : '';
+  const uptimeValMsg = uptimeVal ? `uptime: ${numeral(uptimeVal).format('00:00:00')} ` : '';
 
   // Event loop delay is in ms
   const eventLoopDelayVal = process?.event_loop_delay;
@@ -47,13 +47,13 @@ export function getEcsOpsMetricsLog({ process, os }: Partial<OpsMetrics>): LogMe
     loadVals.length > 0
       ? `load: [${loadVals.map((val: number) => {
           return numeral(val).format('0.00');
-        })}]`
+        })}] `
       : '';
 
   // ECS fields
   const meta: EcsOpsMetricsEvent = {
     ecs: { version: '1.7.0' },
-    message: `${processMemoryUsedInBytesMsg} ${uptimeValMsg} ${loadValsMsg} ${eventLoopDelayValMsg}`,
+    message: `${processMemoryUsedInBytesMsg}${uptimeValMsg}${loadValsMsg}${eventLoopDelayValMsg}`,
     kind: 'metric',
     category: ['process', 'host'],
     process: {

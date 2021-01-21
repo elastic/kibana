@@ -74,7 +74,7 @@ describe('getEcsOpsMetricsLog', () => {
       os: {},
     } as unknown) as Partial<OpsMetrics>;
     const logMeta = getEcsOpsMetricsLog(missingMetrics);
-    expect(logMeta.message).toMatchInlineSnapshot(`"   "`);
+    expect(logMeta.message).toMatchInlineSnapshot(`""`);
   });
 
   it('specifies correct ECS version', () => {
@@ -103,7 +103,7 @@ describe('getEcsOpsMetricsLog', () => {
           },
         },
         "kind": "metric",
-        "message": "memory: 1.0B  load: [1.00,1.00,1.00] delay: 1.000",
+        "message": "memory: 1.0B load: [1.00,1.00,1.00] delay: 1.000",
         "process": Object {
           "eventLoopDelay": 1,
           "memory": Object {
