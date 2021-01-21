@@ -5,13 +5,11 @@
  */
 
 import {
-  EuiButtonIcon,
   EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
 } from '@elastic/eui';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -53,8 +51,6 @@ const MIME_FILTERS = [
 ];
 
 export const WaterfallFilter = ({ query, setQuery, activeFilters, setActiveFilters }: Props) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const [value, setValue] = useState(query);
 
   const toggleFilters = (val: string) => {
@@ -70,9 +66,10 @@ export const WaterfallFilter = ({ query, setQuery, activeFilters, setActiveFilte
   );
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
-      <EuiFlexItem>
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem grow={2}>
         <EuiFieldSearch
+          fullWidth
           placeholder={FILTER_REQUESTS_LABEL}
           onChange={(evt) => {
             setValue(evt.target.value);
@@ -80,32 +77,21 @@ export const WaterfallFilter = ({ query, setQuery, activeFilters, setActiveFilte
           value={query}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={
-            <EuiButtonIcon
-              color={activeFilters.length > 0 ? 'primary' : 'text'}
-              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-              iconType={'filter'}
-            />
-          }
-          isOpen={isPopoverOpen}
-          closePopover={() => setIsPopoverOpen(false)}
-          anchorPosition="rightCenter"
-        >
-          <EuiFilterGroup>
-            {MIME_FILTERS.map(({ label, mimeType }) => (
-              <EuiFilterButton
-                hasActiveFilters={activeFilters.includes(mimeType)}
-                onClick={() => toggleFilters(mimeType)}
-                key={label}
-              >
-                {label}
-              </EuiFilterButton>
-            ))}
-          </EuiFilterGroup>
-        </EuiPopover>
+      <EuiFlexItem grow={3}>
+        <EuiFilterGroup>
+          {MIME_FILTERS.map(({ label, mimeType }) => (
+            <EuiFilterButton
+              hasActiveFilters={activeFilters.includes(mimeType)}
+              onClick={() => toggleFilters(mimeType)}
+              key={label}
+              withNext={true}
+            >
+              {label}
+            </EuiFilterButton>
+          ))}
+        </EuiFilterGroup>
       </EuiFlexItem>
+      <EuiFlexItem grow={3} />
     </EuiFlexGroup>
   );
 };
