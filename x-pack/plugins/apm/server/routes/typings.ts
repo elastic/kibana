@@ -14,6 +14,7 @@ import {
 import { Observable } from 'rxjs';
 import { RequiredKeys } from 'utility-types';
 import { ObservabilityPluginSetup } from '../../../observability/server';
+import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { MlPluginSetup } from '../../../ml/server';
 import { FetchOptions } from '../../common/fetch_options';
@@ -64,9 +65,16 @@ export interface Route<
   handler: RouteHandler<TRouteParamsRT, TReturn>;
 }
 
+/**
+ * @internal
+ */
+export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
+  licensing: LicensingApiRequestHandlerContext;
+}
+
 export type APMRequestHandlerContext<
   TRouteParams = {}
-> = RequestHandlerContext & {
+> = ApmPluginRequestHandlerContext & {
   params: TRouteParams & { query: { _debug: boolean } };
   config: APMConfig;
   logger: Logger;

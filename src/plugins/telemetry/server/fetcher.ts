@@ -169,6 +169,9 @@ export class FetcherTask {
     updateTelemetrySavedObject(this.internalRepository!, {
       reportFailureCount: 0,
       lastReported: this.lastReported,
+    }).catch((err) => {
+      err.message = `Failed to update the telemetry saved object: ${err.message}`;
+      this.logger.debug(err);
     });
   }
 
@@ -176,6 +179,9 @@ export class FetcherTask {
     updateTelemetrySavedObject(this.internalRepository!, {
       reportFailureCount: failureCount + 1,
       reportFailureVersion: this.currentKibanaVersion,
+    }).catch((err) => {
+      err.message = `Failed to update the telemetry saved object: ${err.message}`;
+      this.logger.debug(err);
     });
   }
 

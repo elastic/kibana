@@ -83,6 +83,7 @@ export const PostAgentEnrollRequestBodyJSONSchema = {
   type: 'object',
   properties: {
     type: { type: 'string', enum: ['EPHEMERAL', 'PERMANENT', 'TEMPORARY'] },
+    // TODO deprecated should be removed in 8.0.0
     shared_id: { type: 'string' },
     metadata: {
       type: 'object',
