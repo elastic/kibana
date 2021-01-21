@@ -127,6 +127,12 @@ export class IndexPatternsService {
     return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
   };
 
+  /**
+   * Find and load index patterns by title
+   * @param search
+   * @param size
+   * @returns IndexPattern[]
+   */
   find = async (search: string, size: number = 10): Promise<IndexPattern[]> => {
     const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
@@ -206,6 +212,7 @@ export class IndexPatternsService {
   /**
    * Get field list by providing { pattern }
    * @param options
+   * @returns FieldSpec[]
    */
   getFieldsForWildcard = async (options: GetFieldsOptions) => {
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
@@ -221,6 +228,7 @@ export class IndexPatternsService {
   /**
    * Get field list by providing an index patttern (or spec)
    * @param options
+   * @returns FieldSpec[]
    */
   getFieldsForIndexPattern = async (
     indexPattern: IndexPattern | IndexPatternSpec,
@@ -266,6 +274,7 @@ export class IndexPatternsService {
    * @param id
    * @param title
    * @param options
+   * @returns Record<string, FieldSpec>
    */
   private refreshFieldSpecMap = async (
     fields: IndexPatternFieldMap,
@@ -307,7 +316,9 @@ export class IndexPatternsService {
 
   /**
    * Converts field array to map
-   * @param fields
+   * @param fields: FieldSpec[]
+   * @param fieldAttrs: FieldAttrs
+   * @returns Record<string, FieldSpec>
    */
   fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: FieldAttrs) =>
     fields.reduce<IndexPatternFieldMap>((collector, field) => {
@@ -322,6 +333,7 @@ export class IndexPatternsService {
   /**
    * Converts index pattern saved object to index pattern spec
    * @param savedObject
+   * @returns IndexPatternSpec
    */
 
   savedObjectToSpec = (savedObject: SavedObject<IndexPatternAttributes>): IndexPatternSpec => {
@@ -442,6 +454,7 @@ export class IndexPatternsService {
    * Create a new index pattern instance
    * @param spec
    * @param skipFetchFields
+   * @returns IndexPattern
    */
   async create(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
