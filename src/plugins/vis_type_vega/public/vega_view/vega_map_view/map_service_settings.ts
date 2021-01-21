@@ -6,23 +6,25 @@
  * Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { EMSClient, TMSService } from '@elastic/ems-client';
+import type { EMSClient, TMSService } from '@elastic/ems-client';
 import { TmsTileLayers } from './tms_tile_layers';
-import { MapsLegacyConfig } from '../../../../maps_legacy/config';
+import type { MapsLegacyConfig } from '../../../../maps_legacy/config';
 import { getUISettings } from '../../services';
 
 const hasUserConfiguredTmsService = (config: MapsLegacyConfig) => Boolean(config.tilemap?.url);
 
 export class MapServiceSettings {
-  public readonly hasUserConfiguredTmsLayer = hasUserConfiguredTmsService(this.config);
-  public readonly isRetina = window.devicePixelRatio === 2;
-  private readonly emsClient: EMSClient;
-  private readonly uiSettingsValues = {
-    isDarkMode: getUISettings().get('theme:darkMode'),
-  };
+  public config!: MapsLegacyConfig;
+  private emsClient!: EMSClient;
+  private isDarkMode!: boolean;
 
-  constructor(public config: MapsLegacyConfig, appVersion: string) {
-    this.emsClient = new EMSClient({
+  public async initialize(config: MapsLegacyConfig, appVersion: string) {
+    const emsClientModule = await import('@elastic/ems-client');
+
+    this.isDarkMode = getUISettings().get('theme:darkMode');
+    this.config = config;
+
+    this.emsClient = new emsClientModule.EMSClient({
       language: i18n.getLocale(),
       appVersion,
       appName: 'kibana',
@@ -36,11 +38,15 @@ export class MapServiceSettings {
     });
   }
 
+  public get hasUserConfiguredTmsLayer() {
+    return hasUserConfiguredTmsService(this.config);
+  }
+
   public get defaultTmsLayer() {
     if (this.hasUserConfiguredTmsLayer) {
       return TmsTileLayers.userConfigured;
     }
-    return this.uiSettingsValues.isDarkMode ? TmsTileLayers.dark : TmsTileLayers.desaturated;
+    return this.isDarkMode ? TmsTileLayers.dark : TmsTileLayers.desaturated;
   }
 
   public getTmsService(tmsTileLayer: TmsTileLayers | string = TmsTileLayers.desaturated) {

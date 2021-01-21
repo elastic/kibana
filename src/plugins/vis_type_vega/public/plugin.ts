@@ -23,7 +23,7 @@ import {
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import { IServiceSettings } from '../../maps_legacy/public';
+import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
 import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
@@ -45,7 +45,7 @@ export interface VegaPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   inspector: InspectorSetup;
   data: DataPublicPluginSetup;
-  mapsLegacy: any;
+  mapsLegacy: MapsLegacyPluginSetup;
 }
 
 /** @internal */
@@ -56,6 +56,7 @@ export interface VegaPluginStartDependencies {
 /** @internal */
 export class VegaPlugin implements Plugin<Promise<void>, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
+  mapServiceSettings = new MapServiceSettings();
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
@@ -69,11 +70,9 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
       emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
-    setUISettings(core.uiSettings);
 
-    setMapServiceSettings(
-      new MapServiceSettings(mapsLegacy.config, this.initializerContext.env.packageInfo.version)
-    );
+    setUISettings(core.uiSettings);
+    setMapServiceSettings(this.mapServiceSettings);
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
@@ -82,6 +81,11 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       },
       getServiceSettings: mapsLegacy.getServiceSettings,
     };
+
+    await this.mapServiceSettings.initialize(
+      mapsLegacy.config,
+      this.initializerContext.env.packageInfo.version
+    );
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 

@@ -166,6 +166,7 @@ export class VegaMapView extends VegaBaseView {
 
     if (shouldShowUserConfiguredLayer) {
       const { url, options } = this.mapServiceSettings.config.tilemap;
+
       initTmsRasterLayer({
         id: userConfiguredLayerId,
         map: mapBoxInstance,
