@@ -6,7 +6,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -37,13 +36,6 @@ import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 import { AppAction } from '../../../../../../common/store/actions';
 import { SupportedVersionNotice } from './supported_version';
-
-const ProtectionRadioGroup = styled.div`
-  display: flex;
-  .policyDetailsProtectionRadio {
-    margin-right: ${(props) => props.theme.eui.euiSizeXXL};
-  }
-`;
 
 const OSes: Immutable<RansomwareProtectionOSes[]> = [OS.windows, OS.mac];
 const protection = 'ransomware';
