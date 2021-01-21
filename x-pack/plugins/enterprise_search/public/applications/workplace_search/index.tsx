@@ -79,7 +79,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         {errorConnecting ? <ErrorState /> : <Overview />}
       </Route>
       <Route path={PERSONAL_SOURCES_PATH}>
-        {/* TODO: replace layout with EuiPage and EuiPageBody similar to overview.tsx MVP */}
+        {/* TODO: replace Layout with PrivateSourcesLayout (needs to be created) */}
         <Layout navigation={<></>} restrictWidth readOnlyMode={readOnlyMode}>
           <SourcesRouter />
         </Layout>
