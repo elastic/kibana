@@ -3,6 +3,7 @@ package builds
 import builds.default.DefaultSavedObjectFieldMetrics
 import dependsOn
 import getProjectBranch
+import isReportingEnabled
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.commitStatusPublisher
 import vcs.Kibana
@@ -62,12 +63,15 @@ object PullRequestCi : BuildType({
   }
 
   features {
-    commitStatusPublisher {
-      vcsRootExtId = "${Kibana.id}"
-      publisher = github {
-        githubUrl = "https://api.github.com"
-        authType = personalToken {
-          token = "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b"
+    if(isReportingEnabled()) {
+      commitStatusPublisher {
+        enabled = true
+        vcsRootExtId = "${Kibana.id}"
+        publisher = github {
+          githubUrl = "https://api.github.com"
+          authType = personalToken {
+            token = "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b"
+          }
         }
       }
     }

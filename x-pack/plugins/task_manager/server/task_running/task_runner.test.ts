@@ -10,10 +10,10 @@ import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskManagerRunner, TaskRunResult } from '../task_running';
 import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent, TaskRun } from '../task_events';
-import { ConcreteTaskInstance, TaskStatus, TaskDefinition, SuccessfulRunResult } from '../task';
+import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import moment from 'moment';
-import { TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwUnrecoverableError } from './errors';
 
@@ -39,24 +39,6 @@ describe('TaskManagerRunner', () => {
     expect(runner.id).toEqual('foo');
     expect(runner.taskType).toEqual('bar');
     expect(runner.toString()).toEqual('bar "foo"');
-  });
-
-  test('warns if the task returns an unexpected result', async () => {
-    await allowsReturnType(undefined);
-    await allowsReturnType({});
-    await allowsReturnType({
-      runAt: new Date(),
-    });
-    await allowsReturnType({
-      error: new Error('Dang it!'),
-    });
-    await allowsReturnType({
-      state: { shazm: true },
-    });
-    await disallowsReturnType('hm....');
-    await disallowsReturnType({
-      whatIsThis: '?!!?',
-    });
   });
 
   test('queues a reattempt if the task fails', async () => {
@@ -1121,7 +1103,7 @@ describe('TaskManagerRunner', () => {
 
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
-    definitions?: Record<string, Omit<TaskDefinition, 'type'>>;
+    definitions?: TaskDefinitionRegistry;
     onTaskEvent?: (event: TaskEvent<unknown, unknown>) => void;
   }
 
@@ -1195,35 +1177,5 @@ describe('TaskManagerRunner', () => {
       store,
       instance,
     };
-  }
-
-  async function testReturn(result: unknown, shouldBeValid: boolean) {
-    const { runner, logger } = testOpts({
-      definitions: {
-        bar: {
-          title: 'Bar!',
-          createTaskRunner: () => ({
-            run: async () => result as SuccessfulRunResult,
-          }),
-        },
-      },
-    });
-
-    await runner.run();
-
-    if (shouldBeValid) {
-      expect(logger.warn).not.toHaveBeenCalled();
-    } else {
-      expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(logger.warn.mock.calls[0][0]).toMatch(/invalid task result/i);
-    }
-  }
-
-  function allowsReturnType(result: unknown) {
-    return testReturn(result, true);
-  }
-
-  function disallowsReturnType(result: unknown) {
-    return testReturn(result, false);
   }
 });
