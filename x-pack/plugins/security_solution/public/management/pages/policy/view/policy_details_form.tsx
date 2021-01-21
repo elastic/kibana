@@ -34,7 +34,7 @@ export const PolicyDetailsForm = memo(() => {
 
       <EuiSpacer size="xs" />
       <MalwareProtections />
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="m" />
       {isPlatinumPlus && <Ransomware />}
       <EuiSpacer size="l" />
 
@@ -49,14 +49,14 @@ export const PolicyDetailsForm = memo(() => {
 
       <EuiSpacer size="xs" />
       <WindowsEvents />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <MacEvents />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <LinuxEvents />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <AntivirusRegistrationForm />
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <EuiButtonEmpty data-test-subj="advancedPolicyButton" onClick={handleAdvancedPolicyClick}>
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.advanced.show"

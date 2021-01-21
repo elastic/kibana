@@ -25,7 +25,6 @@ import {
 import { cloneDeep } from 'lodash';
 import { APP_ID } from '../../../../../../../common/constants';
 import { SecurityPageName } from '../../../../../../app/types';
-
 import {
   Immutable,
   OperatingSystem,
@@ -36,8 +35,8 @@ import { ConfigForm, ConfigFormHeading } from '../../components/config_form';
 import { policyConfig } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
-import { popupVersionsMap } from './popup_options_to_versions';
 import { AppAction } from '../../../../../../common/store/actions';
+import { SupportedVersionNotice } from './supported_version';
 
 const ProtectionRadioGroup = styled.div`
   display: flex;
@@ -94,25 +93,6 @@ const ProtectionRadio = React.memo(
 );
 
 ProtectionRadio.displayName = 'ProtectionRadio';
-
-const SupportedVersionNotice = ({ optionName }: { optionName: string }) => {
-  const version = popupVersionsMap.get(optionName);
-  if (!version) {
-    return null;
-  }
-
-  return (
-    <EuiText color="subdued" size="xs">
-      <i>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.policyDetails.supportedVersion"
-          defaultMessage="Agent version {version}"
-          values={{ version }}
-        />
-      </i>
-    </EuiText>
-  );
-};
 
 /** The Ransomware Protections form for policy details
  *  which will configure for all relevant OSes.
@@ -218,17 +198,21 @@ export const Ransomware = React.memo(() => {
           />
         </ConfigFormHeading>
         <EuiSpacer size="xs" />
-        <ProtectionRadioGroup>
+        <EuiFlexGroup>
           {radios.map((radio) => {
             return (
-              <ProtectionRadio
-                protectionMode={radio.id}
-                key={radio.protection + radio.id}
-                label={radio.label}
-              />
+              <EuiFlexItem>
+                <ProtectionRadio
+                  protectionMode={radio.id}
+                  key={radio.protection + radio.id}
+                  label={radio.label}
+                />
+              </EuiFlexItem>
             );
           })}
-        </ProtectionRadioGroup>
+          <EuiFlexItem grow={2} />
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
         <>
           <ConfigFormHeading>
