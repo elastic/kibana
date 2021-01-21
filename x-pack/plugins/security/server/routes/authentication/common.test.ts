@@ -20,7 +20,7 @@ import {
   SAMLLogin,
 } from '../../authentication';
 import { defineCommonRoutes } from './common';
-import type { SecurityRequestHandlerContext, SecurityPluginRouter } from '../../types';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
@@ -28,7 +28,7 @@ import { routeDefinitionParamsMock } from '../index.mock';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 
 describe('Common authentication routes', () => {
-  let router: jest.Mocked<SecurityPluginRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   let license: jest.Mocked<SecurityLicense>;
   let mockContext: SecurityRequestHandlerContext;

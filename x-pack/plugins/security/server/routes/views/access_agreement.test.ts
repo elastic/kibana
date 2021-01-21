@@ -16,7 +16,7 @@ import type { AuthenticationProvider } from '../../../common/model';
 import { ConfigType } from '../../config';
 import { Session } from '../../session_management';
 import { defineAccessAgreementRoutes } from './access_agreement';
-import type { SecurityPluginRouter, SecurityRequestHandlerContext } from '../../types';
+import type { SecurityRouter, SecurityRequestHandlerContext } from '../../types';
 
 import { httpResourcesMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { sessionMock } from '../../session_management/session.mock';
@@ -24,7 +24,7 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Access agreement view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;
-  let router: jest.Mocked<SecurityPluginRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   let config: ConfigType;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
   let license: jest.Mocked<SecurityLicense>;

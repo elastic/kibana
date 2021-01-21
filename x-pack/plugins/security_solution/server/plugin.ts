@@ -169,12 +169,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
-    core.http.registerRouteHandlerContext<
-      SecuritySolutionRequestHandlerContext,
-      'securitySolution'
-    >(APP_ID, (context, request, response) => ({
-      getAppClient: () => this.appClientFactory.create(request),
-    }));
+    core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
+      APP_ID,
+      (context, request, response) => ({
+        getAppClient: () => this.appClientFactory.create(request),
+      })
+    );
 
     this.appClientFactory.setup({
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,

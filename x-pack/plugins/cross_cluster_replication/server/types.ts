@@ -41,4 +41,4 @@ export interface CcrRequestHandlerContext extends RequestHandlerContext {
 /**
  * @internal
  */
-export type CcrPluginRouter = IRouter<CcrRequestHandlerContext>;
+type CcrPluginRouter = IRouter<CcrRequestHandlerContext>;

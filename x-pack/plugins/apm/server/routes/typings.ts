@@ -68,13 +68,13 @@ export interface Route<
 /**
  * @internal
  */
-export interface AplPluginRequestHandlerContext extends RequestHandlerContext {
+export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
 }
 
 export type APMRequestHandlerContext<
   TRouteParams = {}
-> = AplPluginRequestHandlerContext & {
+> = ApmPluginRequestHandlerContext & {
   params: TRouteParams & { query: { _debug: boolean } };
   config: APMConfig;
   logger: Logger;

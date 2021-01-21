@@ -12,14 +12,14 @@ import {
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Session } from '../../session_management';
 import { defineSessionInfoRoutes } from './info';
-import type { SecurityRequestHandlerContext, SecurityPluginRouter } from '../../types';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { sessionMock } from '../../session_management/session.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Info session routes', () => {
-  let router: jest.Mocked<SecurityPluginRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();

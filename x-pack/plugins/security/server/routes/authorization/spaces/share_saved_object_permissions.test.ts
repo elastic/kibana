@@ -16,10 +16,10 @@ import { routeDefinitionParamsMock } from '../../index.mock';
 import { RouteDefinitionParams } from '../..';
 import { DeeplyMockedKeys } from '@kbn/utility-types/target/jest';
 import { CheckPrivileges } from '../../../authorization/types';
-import type { SecurityRequestHandlerContext, SecurityPluginRouter } from '../../../types';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../../types';
 
 describe('Share Saved Object Permissions', () => {
-  let router: jest.Mocked<SecurityPluginRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   let routeParamsMock: DeeplyMockedKeys<RouteDefinitionParams>;
 
   const mockContext = ({
@@ -30,7 +30,7 @@ describe('Share Saved Object Permissions', () => {
 
   beforeEach(() => {
     routeParamsMock = routeDefinitionParamsMock.create();
-    router = routeParamsMock.router as jest.Mocked<SecurityPluginRouter>;
+    router = routeParamsMock.router as jest.Mocked<SecurityRouter>;
 
     defineShareSavedObjectPermissionRoutes(routeParamsMock);
   });

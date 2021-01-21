@@ -12,11 +12,11 @@ import {
 import { defineSessionExtendRoutes } from './extend';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import type { SecurityRequestHandlerContext, SecurityPluginRouter } from '../../types';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Extend session routes', () => {
-  let router: jest.Mocked<SecurityPluginRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;

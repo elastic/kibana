@@ -17,7 +17,7 @@ import { SecurityLicense } from '../../../common/licensing';
 import { LoginSelectorProvider } from '../../../common/login_state';
 import { ConfigType } from '../../config';
 import { defineLoginRoutes } from './login';
-import type { SecurityPluginRouter, SecurityRequestHandlerContext } from '../../types';
+import type { SecurityRouter, SecurityRequestHandlerContext } from '../../types';
 
 import {
   coreMock,
@@ -28,7 +28,7 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Login view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;
-  let router: jest.Mocked<SecurityPluginRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   let license: jest.Mocked<SecurityLicense>;
   let config: ConfigType;
   beforeEach(() => {

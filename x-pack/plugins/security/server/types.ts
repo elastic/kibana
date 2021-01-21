@@ -16,4 +16,4 @@ export interface SecurityRequestHandlerContext extends RequestHandlerContext {
 /**
  * @internal
  */
-export type SecurityPluginRouter = IRouter<SecurityRequestHandlerContext>;
+export type SecurityRouter = IRouter<SecurityRequestHandlerContext>;

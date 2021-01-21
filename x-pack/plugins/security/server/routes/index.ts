@@ -12,7 +12,7 @@ import type { AuthorizationServiceSetup } from '../authorization';
 import type { ConfigType } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session } from '../session_management';
-import type { SecurityPluginRouter } from '../types';
+import type { SecurityRouter } from '../types';
 
 import { defineAuthenticationRoutes } from './authentication';
 import { defineAuthorizationRoutes } from './authorization';
@@ -27,7 +27,7 @@ import { defineViewRoutes } from './views';
  * Describes parameters used to define HTTP routes.
  */
 export interface RouteDefinitionParams {
-  router: SecurityPluginRouter;
+  router: SecurityRouter;
   basePath: IBasePath;
   httpResources: HttpResources;
   logger: Logger;

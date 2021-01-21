@@ -41,7 +41,7 @@ import { createApmApi } from './routes/create_apm_api';
 import { apmIndices, apmTelemetry } from './saved_objects';
 import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
 import { uiSettings } from './ui_settings';
-import type { AplPluginRequestHandlerContext } from './routes/typings';
+import type { ApmPluginRequestHandlerContext } from './routes/typings';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
@@ -49,7 +49,7 @@ export interface APMPluginSetup {
   createApmEventClient: (params: {
     debug?: boolean;
     request: KibanaRequest;
-    context: AplPluginRequestHandlerContext;
+    context: ApmPluginRequestHandlerContext;
   }) => Promise<ReturnType<typeof createApmEventClient>>;
 }
 
@@ -166,7 +166,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       }: {
         debug?: boolean;
         request: KibanaRequest;
-        context: AplPluginRequestHandlerContext;
+        context: ApmPluginRequestHandlerContext;
       }) => {
         const [indices, includeFrozen] = await Promise.all([
           boundGetApmIndices(),
