@@ -9,12 +9,12 @@ Constructs a new instance of the `PainlessError` class
 <b>Signature:</b>
 
 ```typescript
-constructor(err: IEsError);
+constructor(err: KibanaServerError);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  err | <code>IEsError</code> |  |
+|  err | <code>KibanaServerError</code> |  |
 
