@@ -27,6 +27,12 @@ import { SourcesView } from './sources_view';
 import { SourcesLogic } from './sources_logic';
 
 const PRIVATE_LINK_TITLE = 'Add a private content source';
+const PRIVATE_CAN_CREATE_PAGE_TITLE = 'Manage private content sources';
+const PRIVATE_VIEW_ONLY_PAGE_TITLE = 'Review Group Sources';
+const PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION =
+  'Review the status of all sources shared with your Group.';
+const PRIVATE_CAN_CREATE_PAGE_DESCRIPTION =
+  'Review the status of all connected private sources, and manage private sources for your account.';
 const PRIVATE_HEADER_TITLE = 'My private content sources';
 const PRIVATE_HEADER_DESCRIPTION = 'Private content sources are available only to you.';
 const PRIVATE_SHARED_SOURCES_TITLE = 'Shared content sources';
