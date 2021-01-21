@@ -48,11 +48,6 @@ export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
 export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
-  private readonly isESOAvailable: boolean;
-
-  constructor({ isESOAvailable }: { isESOAvailable: boolean }) {
-    this.isESOAvailable = isESOAvailable;
-  }
 
   public initialize(actionExecutorContext: ActionExecutorContext) {
     if (this.isInitialized) {
@@ -70,12 +65,6 @@ export class ActionExecutor {
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
-    }
-
-    if (!this.isESOAvailable) {
-      throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-      );
     }
 
     const {

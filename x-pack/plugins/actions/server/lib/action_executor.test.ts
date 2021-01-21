@@ -16,7 +16,7 @@ import { ActionType } from '../types';
 import { actionsMock, actionsClientMock } from '../mocks';
 import { pick } from 'lodash';
 
-const actionExecutor = new ActionExecutor({ isESOAvailable: true });
+const actionExecutor = new ActionExecutor();
 const services = actionsMock.createServices();
 
 const actionsClient = actionsClientMock.create();
@@ -307,25 +307,6 @@ test('should not throws an error if actionType is preconfigured', async () => {
     },
     params: { foo: true },
   });
-});
-
-test('throws an error when passing isESOAvailable with value of false', async () => {
-  const customActionExecutor = new ActionExecutor({ isESOAvailable: false });
-  customActionExecutor.initialize({
-    logger: loggingSystemMock.create().get(),
-    spaces: spacesMock,
-    getActionsClientWithRequest,
-    getServices: () => services,
-    actionTypeRegistry,
-    encryptedSavedObjectsClient,
-    eventLogger: eventLoggerMock.create(),
-    preconfiguredActions: [],
-  });
-  await expect(
-    customActionExecutor.execute(executeParams)
-  ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Unable to execute action because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
-  );
 });
 
 test('does not log warning when alert executor succeeds', async () => {

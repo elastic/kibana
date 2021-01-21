@@ -23,6 +23,18 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
+const err = new Error() as any;
+err.body = {};
+err.body.message = 'Fail message';
+jest.mock('../../lib/alert_api', () => ({
+  updateAlert: jest.fn().mockRejectedValue(err),
+  alertingFrameworkHealth: jest.fn(() => ({ isSufficientlySecure: true })),
+}));
+
+jest.mock('../../../common/lib/health_api', () => ({
+  triggersActionsUiHealth: jest.fn(() => ({ isESOAvailable: true })),
+}));
+
 describe('alert_edit', () => {
   let wrapper: ReactWrapper<any>;
   let mockedCoreSetup: ReturnType<typeof coreMock.createSetup>;
@@ -47,12 +59,6 @@ describe('alert_edit', () => {
         execute: true,
       },
     };
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.http.get = jest.fn().mockResolvedValue({
-      isSufficientlySecure: true,
-      hasPermanentEncryptionKey: true,
-    });
 
     const alertType = {
       id: 'my-alert-type',
@@ -145,19 +151,15 @@ describe('alert_edit', () => {
     });
   }
 
-  it('renders alert add flyout', async () => {
+  it('renders alert edit flyout', async () => {
     await setup();
     expect(wrapper.find('[data-test-subj="editAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveEditedAlertButton"]').exists()).toBeTruthy();
   });
 
   it('displays a toast message on save for server errors', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockResolvedValue([]);
     await setup();
-    const err = new Error() as any;
-    err.body = {};
-    err.body.message = 'Fail message';
-    useKibanaMock().services.http.put = jest.fn().mockRejectedValue(err);
+
     await act(async () => {
       wrapper.find('[data-test-subj="saveEditedAlertButton"]').first().simulate('click');
     });

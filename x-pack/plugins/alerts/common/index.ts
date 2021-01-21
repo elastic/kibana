@@ -18,7 +18,6 @@ export * from './alert_notify_when_type';
 
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
-  hasPermanentEncryptionKey: boolean;
   alertingFrameworkHeath: AlertsHealth;
 }
 

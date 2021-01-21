@@ -27,7 +27,6 @@ describe('execute()', () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry,
-      isESOAvailable: true,
       preconfiguredActions: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -86,7 +85,6 @@ describe('execute()', () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      isESOAvailable: true,
       preconfiguredActions: [
         {
           id: '123',
@@ -157,30 +155,10 @@ describe('execute()', () => {
     );
   });
 
-  test('throws when passing isESOAvailable with false as a value', async () => {
-    const executeFn = createExecutionEnqueuerFunction({
-      taskManager: mockTaskManager,
-      isESOAvailable: false,
-      actionTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredActions: [],
-    });
-    await expect(
-      executeFn(savedObjectsClient, {
-        id: '123',
-        params: { baz: false },
-        spaceId: 'default',
-        apiKey: null,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to execute action because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
-    );
-  });
-
   test('should ensure action type is enabled', async () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOAvailable: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       preconfiguredActions: [],
     });
@@ -210,7 +188,6 @@ describe('execute()', () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOAvailable: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       preconfiguredActions: [
         {

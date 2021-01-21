@@ -58,7 +58,7 @@ beforeEach(() => {
   actionTypeRegistryParams = {
     licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
-    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOAvailable: true })),
+    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: mockedLicenseState,
     preconfiguredActions: [],
@@ -405,7 +405,7 @@ describe('create()', () => {
     const localActionTypeRegistryParams = {
       licensing: licensingMock.createSetup(),
       taskManager: mockTaskManager,
-      taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOAvailable: true })),
+      taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
       actionsConfigUtils: localConfigUtils,
       licenseState: licenseStateMock.create(),
       preconfiguredActions: [],

@@ -11,8 +11,9 @@
     "features",
     "kibanaUtils",
     "licensing",
-    "taskManager"
+    "taskManager",
+    "encryptedSavedObjects"
   ],
-  "optionalPlugins": ["usageCollection", "spaces", "security", "encryptedSavedObjects"],
+  "optionalPlugins": ["usageCollection", "spaces", "security"],
   "extraPublicDirs": ["common", "common/parse_duration"]
 }

@@ -82,44 +82,6 @@ describe('healthRoute', () => {
     `);
   });
 
-  it('evaluates whether Encrypted Saved Objects is not available', async () => {
-    const router = httpServiceMock.createRouter();
-
-    const licenseState = licenseStateMock.create();
-    healthRoute(router, licenseState);
-    const [, handler] = router.get.mock.calls[0];
-
-    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
-    esClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
-
-    const [context, req, res] = mockHandlerArguments(
-      { esClient, alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
-      {},
-      ['ok']
-    );
-
-    expect(await handler(context, req, res)).toStrictEqual({
-      body: {
-        alertingFrameworkHeath: {
-          decryptionHealth: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          executionHealth: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          readHealth: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-        },
-        hasPermanentEncryptionKey: false,
-        isSufficientlySecure: true,
-      },
-    });
-  });
-
   it('evaluates missing security info from the usage api to mean that the security plugin is disbled', async () => {
     const router = httpServiceMock.createRouter();
 
@@ -153,7 +115,6 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        hasPermanentEncryptionKey: true,
         isSufficientlySecure: true,
       },
     });
@@ -192,7 +153,6 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        hasPermanentEncryptionKey: true,
         isSufficientlySecure: true,
       },
     });
@@ -231,7 +191,6 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        hasPermanentEncryptionKey: true,
         isSufficientlySecure: false,
       },
     });
@@ -272,7 +231,6 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        hasPermanentEncryptionKey: true,
         isSufficientlySecure: false,
       },
     });
@@ -313,7 +271,6 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        hasPermanentEncryptionKey: true,
         isSufficientlySecure: true,
       },
     });

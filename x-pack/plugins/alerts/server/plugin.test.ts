@@ -24,34 +24,6 @@ describe('Alerting Plugin', () => {
     let coreSetup: ReturnType<typeof coreMock.createSetup>;
     let pluginsSetup: jest.Mocked<AlertingPluginsSetup>;
 
-    it('should log warning when Encrypted Saved Objects plugin is not available', async () => {
-      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
-        healthCheck: {
-          interval: '5m',
-        },
-        invalidateApiKeysTask: {
-          interval: '5m',
-          removalDelay: '1h',
-        },
-      });
-      plugin = new AlertingPlugin(context);
-
-      const setupMocks = coreMock.createSetup();
-      // need await to test number of calls of setupMocks.status.set, becuase it is under async function which awaiting core.getStartServices()
-      await plugin.setup(setupMocks, {
-        licensing: licensingMock.createSetup(),
-        taskManager: taskManagerMock.createSetup(),
-        eventLog: eventLogServiceMock.create(),
-        actions: actionsMock.createSetup(),
-        statusService: statusServiceMock.createSetupContract(),
-      });
-
-      expect(setupMocks.status.set).toHaveBeenCalledTimes(1);
-      expect(context.logger.get().warn).toHaveBeenCalledWith(
-        'APIs are disabled because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
-      );
-    });
-
     describe('registerType()', () => {
       let setup: PluginSetupContract;
       const sampleAlertType: AlertType<never, never, never, never, 'default'> = {
@@ -65,6 +37,17 @@ describe('Alerting Plugin', () => {
       };
 
       beforeEach(async () => {
+        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+          healthCheck: {
+            interval: '5m',
+          },
+          invalidateApiKeysTask: {
+            interval: '5m',
+            removalDelay: '1h',
+          },
+        });
+        plugin = new AlertingPlugin(context);
+
         coreSetup = coreMock.createSetup();
         pluginsSetup = {
           taskManager: taskManagerMock.createSetup(),
@@ -105,42 +88,7 @@ describe('Alerting Plugin', () => {
 
   describe('start()', () => {
     describe('getAlertsClientWithRequest()', () => {
-      it('throws error when encryptedSavedObjects plugin is not available', async () => {
-        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
-          healthCheck: {
-            interval: '5m',
-          },
-          invalidateApiKeysTask: {
-            interval: '5m',
-            removalDelay: '1h',
-          },
-        });
-        const plugin = new AlertingPlugin(context);
-
-        plugin.setup(coreMock.createSetup(), {
-          licensing: licensingMock.createSetup(),
-          taskManager: taskManagerMock.createSetup(),
-          eventLog: eventLogServiceMock.create(),
-          actions: actionsMock.createSetup(),
-          statusService: statusServiceMock.createSetupContract(),
-        });
-
-        const startContract = plugin.start(coreMock.createStart(), {
-          actions: actionsMock.createStart(),
-          features: mockFeatures(),
-          licensing: licensingMock.createStart(),
-          eventLog: eventLogMock.createStart(),
-          taskManager: taskManagerMock.createStart(),
-        });
-
-        expect(() =>
-          startContract.getAlertsClientWithRequest({} as KibanaRequest)
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create alerts client because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
-        );
-      });
-
-      it(`doesn't throw error when encryptedSavedObjects plugin is available`, async () => {
+      it(`should start without errors with all deps defined`, async () => {
         const context = coreMock.createPluginInitializerContext<AlertsConfig>({
           healthCheck: {
             interval: '5m',

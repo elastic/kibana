@@ -114,7 +114,7 @@ export interface PluginStartContract {
 
 export interface ActionsPluginsSetup {
   taskManager: TaskManagerSetupContract;
-  encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   licensing: LicensingPluginSetup;
   eventLog: IEventLogService;
   usageCollection?: UsageCollectionSetup;
@@ -122,7 +122,7 @@ export interface ActionsPluginsSetup {
   features: FeaturesPluginSetup;
 }
 export interface ActionsPluginsStart {
-  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
   licensing: LicensingPluginStart;
   spaces?: SpacesPluginStart;
@@ -146,7 +146,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private security?: SecurityPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
-  private isESOAvailable: boolean = false;
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
@@ -164,15 +163,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     plugins: ActionsPluginsSetup
   ): Promise<PluginSetupContract> {
     this.licenseState = new LicenseState(plugins.licensing.license$);
-    this.isESOAvailable = !!plugins.encryptedSavedObjects;
 
-    if (!this.isESOAvailable) {
-      this.logger.warn(
-        'APIs are disabled because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
-      );
-    } else {
-      setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects!);
-    }
+    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     plugins.features.registerKibanaFeature(ACTIONS_FEATURE);
 
@@ -182,9 +174,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       event: { provider: EVENT_LOG_PROVIDER },
     });
 
-    const actionExecutor = new ActionExecutor({
-      isESOAvailable: this.isESOAvailable,
-    });
+    const actionExecutor = new ActionExecutor();
 
     // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
@@ -275,7 +265,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       actionTypeRegistry,
       taskRunnerFactory,
       kibanaIndexConfig,
-      isESOAvailable,
       preconfiguredActions,
       instantiateAuthorization,
       getUnsecuredSavedObjectsClient,
@@ -287,12 +276,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       request: KibanaRequest,
       authorizationContext?: ActionExecutionSource<unknown>
     ) => {
-      if (!isESOAvailable) {
-        throw new Error(
-          `Unable to create actions client because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-        );
-      }
-
       const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
         core.savedObjects,
         request
@@ -315,7 +298,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         executionEnqueuer: createExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
-          isESOAvailable,
           preconfiguredActions,
         }),
         auditLogger: this.security?.audit.asScoped(request),
@@ -347,48 +329,42 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         : undefined;
     };
 
-    if (!this.isESOAvailable) {
-      this.logger.warn(
-        'APIs are disabled because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
-      );
-    } else {
-      const encryptedSavedObjectsClient = plugins.encryptedSavedObjects!.getClient({
-        includedHiddenTypes,
-      });
+    const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
+      includedHiddenTypes,
+    });
 
-      actionExecutor!.initialize({
-        logger,
-        eventLogger: this.eventLogger!,
-        spaces: plugins.spaces?.spacesService,
-        getActionsClientWithRequest,
-        getServices: this.getServicesFactory(
-          getScopedSavedObjectsClientWithoutAccessToActions,
-          core.elasticsearch
-        ),
-        encryptedSavedObjectsClient,
-        actionTypeRegistry: actionTypeRegistry!,
-        preconfiguredActions,
-        proxySettings:
-          this.actionsConfig && this.actionsConfig.proxyUrl
-            ? {
-                proxyUrl: this.actionsConfig.proxyUrl,
-                proxyHeaders: this.actionsConfig.proxyHeaders,
-                proxyRejectUnauthorizedCertificates: this.actionsConfig
-                  .proxyRejectUnauthorizedCertificates,
-              }
-            : undefined,
-      });
+    actionExecutor!.initialize({
+      logger,
+      eventLogger: this.eventLogger!,
+      spaces: plugins.spaces?.spacesService,
+      getActionsClientWithRequest,
+      getServices: this.getServicesFactory(
+        getScopedSavedObjectsClientWithoutAccessToActions,
+        core.elasticsearch
+      ),
+      encryptedSavedObjectsClient,
+      actionTypeRegistry: actionTypeRegistry!,
+      preconfiguredActions,
+      proxySettings:
+        this.actionsConfig && this.actionsConfig.proxyUrl
+          ? {
+              proxyUrl: this.actionsConfig.proxyUrl,
+              proxyHeaders: this.actionsConfig.proxyHeaders,
+              proxyRejectUnauthorizedCertificates: this.actionsConfig
+                .proxyRejectUnauthorizedCertificates,
+            }
+          : undefined,
+    });
 
-      taskRunnerFactory!.initialize({
-        logger,
-        actionTypeRegistry: actionTypeRegistry!,
-        encryptedSavedObjectsClient,
-        basePathService: core.http.basePath,
-        spaceIdToNamespace,
-        getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
-          this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
-      });
-    }
+    taskRunnerFactory!.initialize({
+      logger,
+      actionTypeRegistry: actionTypeRegistry!,
+      encryptedSavedObjectsClient,
+      basePathService: core.http.basePath,
+      spaceIdToNamespace,
+      getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
+        this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
+    });
 
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
 
@@ -457,7 +433,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'actions'> => {
     const {
       actionTypeRegistry,
-      isESOAvailable,
       preconfiguredActions,
       actionExecutor,
       instantiateAuthorization,
@@ -468,11 +443,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       const [{ savedObjects }, { taskManager }] = await core.getStartServices();
       return {
         getActionsClient: () => {
-          if (!isESOAvailable) {
-            throw new Error(
-              `Unable to create actions client because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-            );
-          }
           return new ActionsClient({
             unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
               excludedWrappers: ['security'],
@@ -488,7 +458,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
-              isESOAvailable,
               preconfiguredActions,
             }),
             auditLogger: security?.audit.asScoped(request),

@@ -14,16 +14,21 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { DocLinksStart } from 'kibana/public';
-import { AlertingFrameworkHealth } from '../../types';
-import { health } from '../lib/alert_api';
+import { alertingFrameworkHealth } from '../lib/alert_api';
 import './health_check.scss';
 import { useHealthContext } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
 import { CenterJustifiedSpinner } from './center_justified_spinner';
+import { triggersActionsUiHealth } from '../../common/lib/health_api';
 
 interface Props {
   inFlyout?: boolean;
   waitForCheck: boolean;
+}
+
+interface HealthStatus {
+  isESOAvailable: boolean;
+  isSufficientlySecure: boolean;
 }
 
 export const HealthCheck: React.FunctionComponent<Props> = ({
@@ -33,12 +38,23 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
 }) => {
   const { http, docLinks } = useKibana().services;
   const { setLoadingHealthCheck } = useHealthContext();
-  const [alertingHealth, setAlertingHealth] = React.useState<Option<AlertingFrameworkHealth>>(none);
+  const [alertingHealth, setAlertingHealth] = React.useState<Option<HealthStatus>>(none);
 
   React.useEffect(() => {
     (async function () {
       setLoadingHealthCheck(true);
-      setAlertingHealth(some(await health({ http })));
+      const healthStatus: HealthStatus = {
+        isSufficientlySecure: false,
+        isESOAvailable: false,
+      };
+      healthStatus.isESOAvailable = (await triggersActionsUiHealth({ http })).isESOAvailable;
+      if (healthStatus.isESOAvailable) {
+        healthStatus.isSufficientlySecure = (
+          await alertingFrameworkHealth({ http })
+        ).isSufficientlySecure;
+      }
+
+      setAlertingHealth(some(healthStatus));
       setLoadingHealthCheck(false);
     })();
   }, [http, setLoadingHealthCheck]);
@@ -58,11 +74,9 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
           <Fragment>{children}</Fragment>
         ),
       (healthCheck) => {
-        return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
+        return healthCheck?.isSufficientlySecure && healthCheck?.isESOAvailable ? (
           <Fragment>{children}</Fragment>
-        ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (
-          <TlsAndEncryptionError docLinks={docLinks} className={className} />
-        ) : !healthCheck.hasPermanentEncryptionKey ? (
+        ) : !healthCheck.isESOAvailable ? (
           <EncryptionError docLinks={docLinks} className={className} />
         ) : (
           <TlsError docLinks={docLinks} className={className} />
@@ -76,49 +90,6 @@ interface PromptErrorProps {
   docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'>;
   className?: string;
 }
-
-const TlsAndEncryptionError = ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-  className,
-}: PromptErrorProps) => (
-  <EuiEmptyPrompt
-    iconType="watchesApp"
-    data-test-subj="actionNeededEmptyPrompt"
-    className={className}
-    titleSize="xs"
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionErrorTitle"
-          defaultMessage="Additional setup required"
-        />
-      </h2>
-    }
-    body={
-      <div className={`${className}__body`}>
-        <p role="banner">
-          {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionError', {
-            defaultMessage:
-              'You must enable Transport Layer Security between Kibana and Elasticsearch and configure an encryption key in your kibana.yml file. ',
-          })}
-          <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alerting-getting-started.html#alerting-setup-prerequisites`}
-            external
-            target="_blank"
-          >
-            {i18n.translate(
-              'xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionErrorAction',
-              {
-                defaultMessage: 'Learn how',
-              }
-            )}
-          </EuiLink>
-        </p>
-      </div>
-    }
-  />
-);
 
 const EncryptionError = ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
