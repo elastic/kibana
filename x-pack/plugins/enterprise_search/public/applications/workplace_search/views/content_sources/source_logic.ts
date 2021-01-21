@@ -15,7 +15,7 @@ import {
   flashAPIErrors,
   setSuccessMessage,
   setQueuedSuccessMessage,
-  FlashMessagesLogic,
+  clearFlashMessages,
 } from '../../../shared/flash_messages';
 
 import { DEFAULT_META } from '../../../shared/constants';
@@ -246,7 +246,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       }
     },
     removeContentSource: async ({ sourceId, successCallback }) => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? `/api/workplace_search/org/sources/${sourceId}`
@@ -292,7 +292,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       );
     },
     resetSourceState: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });

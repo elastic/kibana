@@ -10,10 +10,10 @@ import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskManagerRunner, TaskRunResult } from '../task_running';
 import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent, TaskRun } from '../task_events';
-import { ConcreteTaskInstance, TaskStatus, TaskDefinition, SuccessfulRunResult } from '../task';
+import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import moment from 'moment';
-import { TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwUnrecoverableError } from './errors';
 
@@ -39,24 +39,6 @@ describe('TaskManagerRunner', () => {
     expect(runner.id).toEqual('foo');
     expect(runner.taskType).toEqual('bar');
     expect(runner.toString()).toEqual('bar "foo"');
-  });
-
-  test('warns if the task returns an unexpected result', async () => {
-    await allowsReturnType(undefined);
-    await allowsReturnType({});
-    await allowsReturnType({
-      runAt: new Date(),
-    });
-    await allowsReturnType({
-      error: new Error('Dang it!'),
-    });
-    await allowsReturnType({
-      state: { shazm: true },
-    });
-    await disallowsReturnType('hm....');
-    await disallowsReturnType({
-      whatIsThis: '?!!?',
-    });
   });
 
   test('queues a reattempt if the task fails', async () => {
@@ -684,9 +666,7 @@ describe('TaskManagerRunner', () => {
 
     store.update = sinon
       .stub()
-      .throws(
-        SavedObjectsErrorHelpers.decorateConflictError(new Error('repo error')).output.payload
-      );
+      .throws(SavedObjectsErrorHelpers.decorateConflictError(new Error('repo error')));
 
     expect(await runner.markTaskAsRunning()).toEqual(false);
   });
@@ -717,15 +697,126 @@ describe('TaskManagerRunner', () => {
 
     store.update = sinon
       .stub()
-      .throws(SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id').output.payload);
+      .throws(SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id'));
 
-    return expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(`
-              Object {
-                "error": "Not Found",
-                "message": "Saved object [type/id] not found",
-                "statusCode": 404,
-              }
-            `);
+    return expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
+      `[Error: Saved object [type/id] not found]`
+    );
+  });
+
+  test(`it tries to increment a task's attempts when markTaskAsRunning fails for unexpected reasons`, async () => {
+    const id = _.random(1, 20).toString();
+    const initialAttempts = _.random(1, 3);
+    const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
+    const timeoutMinutes = 1;
+    const getRetryStub = sinon.stub().returns(nextRetry);
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        schedule: undefined,
+      },
+      definitions: {
+        bar: {
+          title: 'Bar!',
+          timeout: `${timeoutMinutes}m`,
+          getRetry: getRetryStub,
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
+      },
+    });
+
+    store.update = sinon.stub();
+    store.update.onFirstCall().throws(SavedObjectsErrorHelpers.createBadRequestError('type'));
+    store.update.onSecondCall().resolves();
+
+    await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
+      `[Error: type: Bad Request]`
+    );
+
+    sinon.assert.calledWith(store.update, {
+      ...mockInstance({
+        id,
+        attempts: initialAttempts + 1,
+        schedule: undefined,
+      }),
+      status: TaskStatus.Idle,
+      startedAt: null,
+      retryAt: null,
+      ownerId: null,
+    });
+  });
+
+  test(`it doesnt try to increment a task's attempts when markTaskAsRunning fails for version conflict`, async () => {
+    const id = _.random(1, 20).toString();
+    const initialAttempts = _.random(1, 3);
+    const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
+    const timeoutMinutes = 1;
+    const getRetryStub = sinon.stub().returns(nextRetry);
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        schedule: undefined,
+      },
+      definitions: {
+        bar: {
+          title: 'Bar!',
+          timeout: `${timeoutMinutes}m`,
+          getRetry: getRetryStub,
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
+      },
+    });
+
+    store.update = sinon.stub();
+    store.update.onFirstCall().throws(SavedObjectsErrorHelpers.createConflictError('type', 'id'));
+    store.update.onSecondCall().resolves();
+
+    await expect(runner.markTaskAsRunning()).resolves.toMatchInlineSnapshot(`false`);
+
+    sinon.assert.calledOnce(store.update);
+  });
+
+  test(`it doesnt try to increment a task's attempts when markTaskAsRunning fails due to Saved Object not being found`, async () => {
+    const id = _.random(1, 20).toString();
+    const initialAttempts = _.random(1, 3);
+    const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
+    const timeoutMinutes = 1;
+    const getRetryStub = sinon.stub().returns(nextRetry);
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        schedule: undefined,
+      },
+      definitions: {
+        bar: {
+          title: 'Bar!',
+          timeout: `${timeoutMinutes}m`,
+          getRetry: getRetryStub,
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
+      },
+    });
+
+    store.update = sinon.stub();
+    store.update
+      .onFirstCall()
+      .throws(SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id'));
+    store.update.onSecondCall().resolves();
+
+    await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
+      `[Error: Saved object [type/id] not found]`
+    );
+
+    sinon.assert.calledOnce(store.update);
   });
 
   test('uses getRetry (returning true) to set retryAt when defined', async () => {
@@ -1121,7 +1212,7 @@ describe('TaskManagerRunner', () => {
 
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
-    definitions?: Record<string, Omit<TaskDefinition, 'type'>>;
+    definitions?: TaskDefinitionRegistry;
     onTaskEvent?: (event: TaskEvent<unknown, unknown>) => void;
   }
 
@@ -1132,12 +1223,8 @@ describe('TaskManagerRunner', () => {
     };
   }
 
-  function testOpts(opts: TestOpts) {
-    const callCluster = sinon.stub();
-    const createTaskRunner = sinon.stub();
-    const logger = mockLogger();
-
-    const instance = Object.assign(
+  function mockInstance(instance: Partial<ConcreteTaskInstance> = {}) {
+    return Object.assign(
       {
         id: 'foo',
         taskType: 'bar',
@@ -1155,8 +1242,16 @@ describe('TaskManagerRunner', () => {
         user: 'example',
         ownerId: null,
       },
-      opts.instance || {}
+      instance
     );
+  }
+
+  function testOpts(opts: TestOpts) {
+    const callCluster = sinon.stub();
+    const createTaskRunner = sinon.stub();
+    const logger = mockLogger();
+
+    const instance = mockInstance(opts.instance);
 
     const store = {
       update: sinon.stub(),
@@ -1195,35 +1290,5 @@ describe('TaskManagerRunner', () => {
       store,
       instance,
     };
-  }
-
-  async function testReturn(result: unknown, shouldBeValid: boolean) {
-    const { runner, logger } = testOpts({
-      definitions: {
-        bar: {
-          title: 'Bar!',
-          createTaskRunner: () => ({
-            run: async () => result as SuccessfulRunResult,
-          }),
-        },
-      },
-    });
-
-    await runner.run();
-
-    if (shouldBeValid) {
-      expect(logger.warn).not.toHaveBeenCalled();
-    } else {
-      expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(logger.warn.mock.calls[0][0]).toMatch(/invalid task result/i);
-    }
-  }
-
-  function allowsReturnType(result: unknown) {
-    return testReturn(result, true);
-  }
-
-  function disallowsReturnType(result: unknown) {
-    return testReturn(result, false);
   }
 });
