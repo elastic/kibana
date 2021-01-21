@@ -12,7 +12,11 @@ import {
   QueryRulesBulkSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/query_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
-import { IRouter, RouteConfig, RequestHandler } from '../../../../../../../../src/core/server';
+import type { RouteConfig, RequestHandler } from '../../../../../../../../src/core/server';
+import type {
+  SecuritySolutionPluginRouter,
+  SecuritySolutionRequestHandlerContext,
+} from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
@@ -23,9 +27,15 @@ import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_act
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
 type Config = RouteConfig<unknown, unknown, QueryRulesBulkSchemaDecoded, 'delete' | 'post'>;
-type Handler = RequestHandler<unknown, unknown, QueryRulesBulkSchemaDecoded, 'delete' | 'post'>;
+type Handler = RequestHandler<
+  unknown,
+  unknown,
+  QueryRulesBulkSchemaDecoded,
+  SecuritySolutionRequestHandlerContext,
+  'delete' | 'post'
+>;
 
-export const deleteRulesBulkRoute = (router: IRouter) => {
+export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
   const config: Config = {
     validate: {
       body: buildRouteValidation<typeof queryRulesBulkSchema, QueryRulesBulkSchemaDecoded>(
