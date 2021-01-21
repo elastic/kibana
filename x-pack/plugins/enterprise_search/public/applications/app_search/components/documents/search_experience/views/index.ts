@@ -9,3 +9,4 @@ export { SortingView } from './sorting_view';
 export { ResultView } from './result_view';
 export { ResultsPerPageView } from './results_per_page_view';
 export { PagingView } from './paging_view';
+export { MultiCheckboxFacetsView } from './multi_checkbox_facets_view';

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { Readable } from 'stream';
@@ -22,6 +11,7 @@ import { SavedObject, SavedObjectsClientContract, SavedObjectsImportRetry } from
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import {
   SavedObjectsImportFailure,
+  SavedObjectsImportHook,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
 } from './types';
@@ -35,6 +25,7 @@ import {
   createSavedObjects,
   getImportIdMapForRetries,
   checkConflicts,
+  executeImportHooks,
 } from './lib';
 
 /**
@@ -49,6 +40,8 @@ export interface ResolveSavedObjectsImportErrorsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   /** The registry of all known saved object types */
   typeRegistry: ISavedObjectTypeRegistry;
+  /** List of registered import hooks */
+  importHooks: Record<string, SavedObjectsImportHook[]>;
   /** saved object import references to retry */
   retries: SavedObjectsImportRetry[];
   /** if specified, will import in given namespace */
@@ -69,6 +62,7 @@ export async function resolveSavedObjectsImportErrors({
   retries,
   savedObjectsClient,
   typeRegistry,
+  importHooks,
   namespace,
   createNewCopies,
 }: ResolveSavedObjectsImportErrorsOptions): Promise<SavedObjectsImportResponse> {
@@ -157,6 +151,7 @@ export async function resolveSavedObjectsImportErrors({
 
   // Bulk create in two batches, overwrites and non-overwrites
   let successResults: SavedObjectsImportSuccess[] = [];
+  let successObjects: SavedObject[] = [];
   const accumulatedErrors = [...errorAccumulator];
   const bulkCreateObjects = async (
     objects: Array<SavedObject<{ title?: string }>>,
@@ -173,6 +168,7 @@ export async function resolveSavedObjectsImportErrors({
     const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
       createSavedObjectsParams
     );
+    successObjects = [...successObjects, ...createdObjects];
     errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
     successCount += createdObjects.length;
     successResults = [
@@ -211,9 +207,15 @@ export async function resolveSavedObjectsImportErrors({
     };
   });
 
+  const warnings = await executeImportHooks({
+    objects: successObjects,
+    importHooks,
+  });
+
   return {
     successCount,
     success: errorAccumulator.length === 0,
+    warnings,
     ...(successResults.length && { successResults }),
     ...(errorResults.length && { errors: errorResults }),
   };

@@ -258,3 +258,11 @@ export const exampleResult = {
     },
   ],
 };
+
+export const mostRecentIndexJob = {
+  isActive: true,
+  hasErrors: true,
+  percentageComplete: 50,
+  activeReindexJobId: '123',
+  numDocumentsWithErrors: 1,
+};
