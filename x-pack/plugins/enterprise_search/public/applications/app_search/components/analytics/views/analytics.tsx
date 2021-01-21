@@ -16,10 +16,18 @@ import {
   TOTAL_CLICKS,
 } from '../constants';
 import { AnalyticsLayout } from '../analytics_layout';
-import { AnalyticsLogic, AnalyticsCards } from '../';
+import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../';
 
 export const Analytics: React.FC = () => {
-  const { totalQueries, totalQueriesNoResults, totalClicks } = useValues(AnalyticsLogic);
+  const {
+    totalQueries,
+    totalQueriesNoResults,
+    totalClicks,
+    queriesPerDay,
+    queriesNoResultsPerDay,
+    clicksPerDay,
+    startDate,
+  } = useValues(AnalyticsLogic);
 
   return (
     <AnalyticsLayout isAnalyticsView title={ANALYTICS_TITLE}>
@@ -43,6 +51,25 @@ export const Analytics: React.FC = () => {
         ]}
       />
       <EuiSpacer />
+
+      <AnalyticsChart
+        lines={[
+          {
+            id: TOTAL_QUERIES,
+            data: convertToChartData({ startDate, data: queriesPerDay }),
+          },
+          {
+            id: TOTAL_QUERIES_NO_RESULTS,
+            data: convertToChartData({ startDate, data: queriesNoResultsPerDay }),
+          },
+          {
+            id: TOTAL_CLICKS,
+            data: convertToChartData({ startDate, data: clicksPerDay }),
+          },
+        ]}
+      />
+      <EuiSpacer />
+
       <p>TODO: Analytics overview</p>
     </AnalyticsLayout>
   );
