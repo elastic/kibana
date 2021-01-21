@@ -175,19 +175,19 @@ describe('core lifecycle handlers', () => {
       });
 
       destructiveMethods.forEach((method) => {
-        ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
+        ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
           { path: testPath, validate: false },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
         );
-        ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
+        ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
           { path: allowlistedTestPath, validate: false },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
         );
-        ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
+        ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
           { path: xsrfDisabledTestPath, validate: false, options: { xsrfRequired: false } },
           (context, req, res) => {
             return res.ok({ body: 'ok' });

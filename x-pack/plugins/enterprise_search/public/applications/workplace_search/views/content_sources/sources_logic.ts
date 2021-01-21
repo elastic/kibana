@@ -15,7 +15,7 @@ import { HttpLogic } from '../../../shared/http';
 import {
   flashAPIErrors,
   setQueuedSuccessMessage,
-  FlashMessagesLogic,
+  clearFlashMessages,
 } from '../../../shared/flash_messages';
 
 import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } from '../../types';
@@ -233,7 +233,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       );
     },
     resetFlashMessages: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });
