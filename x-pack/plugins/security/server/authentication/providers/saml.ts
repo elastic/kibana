@@ -353,13 +353,19 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/authenticate`.
-      result = await this.options.client.callAsInternalUser('shield.samlAuthenticate', {
-        body: {
-          ids: !isIdPInitiatedLogin ? [stateRequestId] : [],
-          content: samlResponse,
-          ...(providerRealm ? { realm: providerRealm } : {}),
-        },
-      });
+      // We can replace generic `transport.request` with a dedicated API method call once
+      // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+      result = (
+        await this.options.client.asInternalUser.transport.request({
+          method: 'POST',
+          path: '/_security/saml/authenticate',
+          body: {
+            ids: !isIdPInitiatedLogin ? [stateRequestId] : [],
+            content: samlResponse,
+            ...(providerRealm ? { realm: providerRealm } : {}),
+          },
+        })
+      ).body as any;
     } catch (err) {
       this.logger.debug(`Failed to log in with SAML response: ${err.message}`);
 
@@ -554,12 +560,15 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
-      const { id: requestId, redirect, realm } = await this.options.client.callAsInternalUser(
-        'shield.samlPrepare',
-        {
+      // We can replace generic `transport.request` with a dedicated API method call once
+      // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+      const { id: requestId, redirect, realm } = (
+        await this.options.client.asInternalUser.transport.request({
+          method: 'POST',
+          path: '/_security/saml/prepare',
           body: preparePayload,
-        }
-      );
+        })
+      ).body as any;
 
       this.logger.debug('Redirecting to Identity Provider with SAML request.');
 
@@ -583,9 +592,15 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // This operation should be performed on behalf of the user with a privilege that normal
     // user usually doesn't have `cluster:admin/xpack/security/saml/logout`.
-    const { redirect } = await this.options.client.callAsInternalUser('shield.samlLogout', {
-      body: { token: accessToken, refresh_token: refreshToken },
-    });
+    // We can replace generic `transport.request` with a dedicated API method call once
+    // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+    const { redirect } = (
+      await this.options.client.asInternalUser.transport.request({
+        method: 'POST',
+        path: '/_security/saml/logout',
+        body: { token: accessToken, refresh_token: refreshToken },
+      })
+    ).body as any;
 
     this.logger.debug('User session has been successfully invalidated.');
 
@@ -606,13 +621,19 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // This operation should be performed on behalf of the user with a privilege that normal
     // user usually doesn't have `cluster:admin/xpack/security/saml/invalidate`.
-    const { redirect } = await this.options.client.callAsInternalUser('shield.samlInvalidate', {
-      // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
-      body: {
-        queryString: request.url.search ? request.url.search.slice(1) : '',
-        ...invalidatePayload,
-      },
-    });
+    // We can replace generic `transport.request` with a dedicated API method call once
+    // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+    const { redirect } = (
+      await this.options.client.asInternalUser.transport.request({
+        method: 'POST',
+        path: '/_security/saml/invalidate',
+        // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
+        body: {
+          queryString: request.url.search ? request.url.search.slice(1) : '',
+          ...invalidatePayload,
+        },
+      })
+    ).body as any;
 
     this.logger.debug('User session has been successfully invalidated.');
 

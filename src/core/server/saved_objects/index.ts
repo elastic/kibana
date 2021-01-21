@@ -38,6 +38,8 @@ export {
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportResultDetails,
   SavedObjectsExportError,
+  SavedObjectsExportTransformContext,
+  SavedObjectsExportTransform,
 } from './export';
 
 export {

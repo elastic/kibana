@@ -37,9 +37,9 @@ export declare class IndexPattern implements IIndexPattern
 |  [sourceFilters](./kibana-plugin-plugins-data-server.indexpattern.sourcefilters.md) |  | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-server.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-server.indexpattern.title.md) |  | <code>string</code> |  |
-|  [type](./kibana-plugin-plugins-data-server.indexpattern.type.md) |  | <code>string &#124; undefined</code> |  |
-|  [typeMeta](./kibana-plugin-plugins-data-server.indexpattern.typemeta.md) |  | <code>TypeMeta</code> |  |
-|  [version](./kibana-plugin-plugins-data-server.indexpattern.version.md) |  | <code>string &#124; undefined</code> |  |
+|  [type](./kibana-plugin-plugins-data-server.indexpattern.type.md) |  | <code>string &#124; undefined</code> | Type is used to identify rollup index patterns |
+|  [typeMeta](./kibana-plugin-plugins-data-server.indexpattern.typemeta.md) |  | <code>TypeMeta</code> | Only used by rollup indices, used by rollup specific endpoint to load field list |
+|  [version](./kibana-plugin-plugins-data-server.indexpattern.version.md) |  | <code>string &#124; undefined</code> | SavedObject version |
 
 ## Methods
 
@@ -66,5 +66,5 @@ export declare class IndexPattern implements IIndexPattern
 |  [setFieldAttrs(fieldName, attrName, value)](./kibana-plugin-plugins-data-server.indexpattern.setfieldattrs.md) |  |  |
 |  [setFieldCount(fieldName, count)](./kibana-plugin-plugins-data-server.indexpattern.setfieldcount.md) |  |  |
 |  [setFieldCustomLabel(fieldName, customLabel)](./kibana-plugin-plugins-data-server.indexpattern.setfieldcustomlabel.md) |  |  |
-|  [toSpec()](./kibana-plugin-plugins-data-server.indexpattern.tospec.md) |  |  |
+|  [toSpec()](./kibana-plugin-plugins-data-server.indexpattern.tospec.md) |  | Create static representation of index pattern |
 

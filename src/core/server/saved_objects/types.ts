@@ -9,6 +9,7 @@
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
+import { SavedObjectsExportTransform } from './export';
 import { SavedObjectsImportHook } from './import/types';
 
 export {
@@ -286,6 +287,17 @@ export interface SavedObjectsTypeManagementDefinition {
    */
   getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
   /**
+   * An optional export transform function that can be used transform the objects of the registered type during
+   * the export process.
+   *
+   * It can be used to either mutate the exported objects, or add additional objects (of any type) to the export list.
+   *
+   * See {@link SavedObjectsExportTransform | the transform type documentation} for more info and examples.
+   *
+   * @remarks `importableAndExportable` must be `true` to specify this property.
+   */
+  onExport?: SavedObjectsExportTransform;
+  /**
    * An optional {@link SavedObjectsImportHook | import hook} to use when importing given type.
    *
    * Import hooks are executed during the savedObjects import process and allow to interact
@@ -324,7 +336,8 @@ export interface SavedObjectsTypeManagementDefinition {
    * }
    * ```
    *
-   * @remark messages returned in the warnings are user facing and must be translated.
+   * @remarks messages returned in the warnings are user facing and must be translated.
+   * @remarks `importableAndExportable` must be `true` to specify this property.
    */
   onImport?: SavedObjectsImportHook;
 }
