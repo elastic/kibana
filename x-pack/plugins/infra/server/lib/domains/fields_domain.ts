@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../types';
 import { FieldsAdapter } from '../adapters/fields';
 import { InfraSourceIndexField, InfraSources } from '../sources';
 
@@ -15,7 +15,7 @@ export class InfraFieldsDomain {
   ) {}
 
   public async getFields(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     indexType: 'LOGS' | 'METRICS' | 'ANY'
   ): Promise<InfraSourceIndexField[]> {

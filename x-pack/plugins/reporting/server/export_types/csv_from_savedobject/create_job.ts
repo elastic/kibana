@@ -6,7 +6,6 @@
 
 import { notFound, notImplemented } from '@hapi/boom';
 import { get } from 'lodash';
-import { RequestHandlerContext } from 'src/core/server';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { CsvFromSavedObjectRequest } from '../../routes/generate_from_savedobject_immediate';
 import { CreateJobFnFactory } from '../../types';
@@ -18,10 +17,11 @@ import {
   SavedObjectServiceError,
   VisObjectAttributesJSON,
 } from './types';
+import type { ReportingRequestHandlerContext } from '../../types';
 
 export type ImmediateCreateJobFn = (
   jobParams: JobParamsPanelCsv,
-  context: RequestHandlerContext,
+  context: ReportingRequestHandlerContext,
   req: CsvFromSavedObjectRequest
 ) => Promise<JobPayloadPanelCsv>;
 
