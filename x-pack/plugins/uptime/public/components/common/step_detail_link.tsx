@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { ReactRouterEuiButtonEmpty } from './react_router_helpers';
+import { ReactRouterEuiButton } from './react_router_helpers';
 
 interface StepDetailLinkProps {
   /**
@@ -22,14 +22,14 @@ export const StepDetailLink: FC<StepDetailLinkProps> = ({ children, checkGroupId
   const to = `/journey/${checkGroupId}/step/${stepIndex}`;
 
   return (
-    <ReactRouterEuiButtonEmpty
+    <ReactRouterEuiButton
       data-test-subj={`step-detail-link`}
       to={to}
       size="s"
-      iconType="apmTrace"
-      iconSide="right"
+      fill
+      fullWidth={false}
     >
       {children}
-    </ReactRouterEuiButtonEmpty>
+    </ReactRouterEuiButton>
   );
 };

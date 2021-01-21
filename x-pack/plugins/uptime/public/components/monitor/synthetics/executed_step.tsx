@@ -14,13 +14,6 @@ import { StatusBadge } from './status_badge';
 import { Ping } from '../../../../common/runtime_types';
 import { StepDetailLink } from '../../common/step_detail_link';
 import { VIEW_PERFORMANCE } from './translations';
-import { euiStyled } from '../../../../../observability/public';
-
-const TitleContainer = euiStyled(EuiFlexItem)`
- &&& {
-    flex-basis: 325px
- };
-`;
 
 const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
 
@@ -35,7 +28,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup })
     <>
       <div style={{ padding: '8px' }}>
         <EuiFlexGroup>
-          <TitleContainer grow={false}>
+          <EuiFlexItem grow={false}>
             <EuiText grow={false}>
               <strong>
                 <FormattedMessage
@@ -52,14 +45,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup })
             <div>
               <StatusBadge status={step.synthetics?.payload?.status} />
             </div>
-          </TitleContainer>
-          {step.synthetics?.step?.index && checkGroup && (
-            <EuiFlexItem grow={false}>
-              <StepDetailLink checkGroupId={checkGroup} stepIndex={step.synthetics.step.index!}>
-                {VIEW_PERFORMANCE}
-              </StepDetailLink>
-            </EuiFlexItem>
-          )}
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <div>
@@ -73,6 +59,14 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup })
               />
             </EuiFlexItem>
             <EuiFlexItem>
+              {step.synthetics?.step?.index && checkGroup && (
+                <span>
+                  <StepDetailLink checkGroupId={checkGroup} stepIndex={step.synthetics.step.index!}>
+                    {VIEW_PERFORMANCE}
+                  </StepDetailLink>
+                  <EuiSpacer size="s" />
+                </span>
+              )}
               <CodeBlockAccordion
                 id={step.synthetics?.step?.name + String(index)}
                 buttonContent={i18n.translate(
