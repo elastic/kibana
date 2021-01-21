@@ -25,16 +25,11 @@ export const ExceptionsSearchBar = React.memo<ExceptionListsTableSearchProps>(({
       },
       type: {
         type: 'string',
-        validate: (value: string) => {
-          if (value !== 'agnostic' && value !== 'single') {
-            throw new Error('unknown type (possible values: single, agnostic)');
-          }
-        },
       },
       list_id: {
         type: 'string',
       },
-      tag: {
+      tags: {
         type: 'string',
       },
     },

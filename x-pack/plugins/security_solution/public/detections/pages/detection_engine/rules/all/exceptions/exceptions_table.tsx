@@ -18,7 +18,7 @@ import { History } from 'history';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
 import { NamespaceType } from '../../../../../../../../lists/common';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import { useApi, useExceptionLists } from '../../../../../../shared_imports';
+import { ExceptionListFilter, useApi, useExceptionLists } from '../../../../../../shared_imports';
 import { FormatUrl } from '../../../../../../common/components/link_to';
 import { HeaderSection } from '../../../../../../common/components/header_section';
 import { Loader } from '../../../../../../common/components/loader';
@@ -37,11 +37,6 @@ import { ExceptionsSearchBar } from './exceptions_search_bar';
 const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
 
 export type Func = () => Promise<void>;
-export interface ExceptionListFilter {
-  name?: string | null;
-  list_id?: string | null;
-  created_by?: string | null;
-}
 
 interface ExceptionListsTableProps {
   history: History;
@@ -77,8 +72,10 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
       exceptionReferenceModalInitialState
     );
+    const [filters, setFilters] = useState<ExceptionListFilter | undefined>(undefined);
     const [loadingExceptions, exceptions, pagination, refreshExceptions] = useExceptionLists({
       errorMessage: i18n.ERROR_EXCEPTION_LISTS,
+      filterOptions: filters,
       http,
       namespaceTypes: ['single', 'agnostic'],
       notifications,
@@ -234,14 +231,21 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       ({ query, queryText }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]): void => {
         try {
           const fieldClauses = query?.ast.getFieldClauses();
-
+          const filterOptions = {
+            name: null,
+            list_id: null,
+            created_by: null,
+            type: null,
+            tags: null,
+          };
           if (fieldClauses != null && fieldClauses.length > 0) {
-            const filtersReduced = fieldClauses.reduce<Record<string, string>>(
+            const filtersReduced = fieldClauses.reduce<Record<string, string | null>>(
               (acc, { field, value }) => {
                 acc[field] = `${value}`;
+
                 return acc;
               },
-              {}
+              filterOptions
             );
 
             setFilters(filtersReduced);

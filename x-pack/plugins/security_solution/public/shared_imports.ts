@@ -50,6 +50,7 @@ export {
   updateExceptionListItem,
   fetchExceptionListById,
   addExceptionList,
+  ExceptionListFilter,
   ExceptionListIdentifiers,
   ExceptionList,
   Pagination,
