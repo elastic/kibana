@@ -6,11 +6,6 @@
  * Public License, v 1.
  */
 
-import { PluginFunctionalProviderContext } from '../../services';
+import { SavedObjectExportTransformsPlugin } from './plugin';
 
-export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
-  describe('Saved Objects Management', function () {
-    loadTestFile(require.resolve('./export_transform'));
-    loadTestFile(require.resolve('./import_warnings'));
-  });
-}
+export const plugin = () => new SavedObjectExportTransformsPlugin();
