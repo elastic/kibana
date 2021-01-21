@@ -8,11 +8,11 @@ import * as rt from 'io-ts';
 
 export const ServiceNowSIRFieldsRT = rt.type({
   category: rt.union([rt.string, rt.null]),
-  destIP: rt.union([rt.string, rt.null]),
+  destIp: rt.union([rt.string, rt.null]),
   malwareHash: rt.union([rt.string, rt.null]),
   malwareUrl: rt.union([rt.string, rt.null]),
   priority: rt.union([rt.string, rt.null]),
-  sourceIP: rt.union([rt.string, rt.null]),
+  sourceIp: rt.union([rt.string, rt.null]),
   subcategory: rt.union([rt.string, rt.null]),
 });
 

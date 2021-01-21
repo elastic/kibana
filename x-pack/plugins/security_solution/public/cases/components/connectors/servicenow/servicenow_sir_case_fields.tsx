@@ -41,11 +41,11 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
 > = ({ isEdit = true, fields, connector, onChange }) => {
   const {
     category = null,
-    destIP = null,
+    destIp = null,
     malwareHash = null,
     malwareUrl = null,
     priority = null,
-    sourceIP = null,
+    sourceIp = null,
     subcategory = null,
   } = fields ?? {};
 
@@ -96,19 +96,19 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
 
   const listItems = useMemo(
     () => [
-      ...(destIP != null && destIP.length > 0
+      ...(destIp != null && destIp.length > 0
         ? [
             {
               title: i18n.DEST_IP,
-              description: destIP,
+              description: destIp,
             },
           ]
         : []),
-      ...(sourceIP != null && sourceIP.length > 0
+      ...(sourceIp != null && sourceIp.length > 0
         ? [
             {
               title: i18n.SOURCE_IP,
-              description: sourceIP,
+              description: sourceIp,
             },
           ]
         : []),
@@ -157,12 +157,12 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
     [
       category,
       categoryOptions,
-      destIP,
+      destIp,
       malwareHash,
       malwareUrl,
       priority,
       priorityOptions,
-      sourceIP,
+      sourceIp,
       subcategory,
       subcategoryOptions,
     ]
@@ -170,7 +170,7 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
 
   // We need to set them up at initialization
   useEffect(() => {
-    onChange({ category, destIP, malwareHash, malwareUrl, priority, sourceIP, subcategory });
+    onChange({ category, destIp, malwareHash, malwareUrl, priority, sourceIp, subcategory });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -181,9 +181,9 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
           <EuiFormRow fullWidth label={i18n.DEST_IP}>
             <EuiFieldText
               fullWidth
-              value={destIP ?? ''}
+              value={destIp ?? ''}
               data-test-subj="destIPInput"
-              onChange={(e) => onChangeCb('destIP', e.target.value)}
+              onChange={(e) => onChangeCb('destIp', e.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -191,9 +191,9 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
           <EuiFormRow fullWidth label={i18n.SOURCE_IP}>
             <EuiFieldText
               fullWidth
-              value={sourceIP ?? ''}
+              value={sourceIp ?? ''}
               data-test-subj="sourceIPInput"
-              onChange={(e) => onChangeCb('sourceIP', e.target.value)}
+              onChange={(e) => onChangeCb('sourceIp', e.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>

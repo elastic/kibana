@@ -58,8 +58,8 @@ export const params = {
   [ConnectorTypes.serviceNowSIR]: {
     ...basicParams,
     category: 'Denial of Service',
-    destIP: '192.68.1.1',
-    sourceIP: '192.68.1.2',
+    destIp: '192.68.1.1',
+    sourceIp: '192.68.1.2',
     malwareHash: '098f6bcd4621d373cade4e832627b4f6',
     malwareUrl: 'https://attack.com',
     priority: '1',

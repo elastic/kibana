@@ -14,8 +14,8 @@ import { EuiSelect } from '@elastic/eui';
 describe('ServiceNowSIR Fields', () => {
   const fields = {
     category: 'Denial of Service',
-    destIP: '192.68.1.1',
-    sourceIP: '192.68.1.2',
+    destIp: '192.68.1.1',
+    sourceIp: '192.68.1.2',
     malwareHash: '098f6bcd4621d373cade4e832627b4f6',
     malwareUrl: 'https://attack.com',
     priority: '1',
@@ -29,6 +29,7 @@ describe('ServiceNowSIR Fields', () => {
 
   it('all params fields are rendered - isEdit: true', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('value')).toEqual('1');
     expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toEqual('1');
     expect(wrapper.find('[data-test-subj="urgencySelect"]').first().prop('value')).toEqual('2');
     expect(wrapper.find('[data-test-subj="impactSelect"]').first().prop('value')).toEqual('3');
