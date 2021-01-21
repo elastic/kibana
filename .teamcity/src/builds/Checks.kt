@@ -8,7 +8,7 @@ object Checks : BuildType({
   name = "Checks"
   description = "Executes Various Checks"
 
-  kibanaAgent(4)
+  kibanaAgent(8)
 
   val checkScripts = mapOf(
     "Quick Commit Checks" to ".ci/teamcity/checks/commit.sh",
