@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
@@ -36,25 +25,68 @@ describe('SavedObjectTypeRegistry', () => {
     registry = new SavedObjectTypeRegistry();
   });
 
-  it('allows to register types', () => {
-    registry.registerType(createType({ name: 'typeA' }));
-    registry.registerType(createType({ name: 'typeB' }));
-    registry.registerType(createType({ name: 'typeC' }));
-
-    expect(
-      registry
-        .getAllTypes()
-        .map((type) => type.name)
-        .sort()
-    ).toEqual(['typeA', 'typeB', 'typeC']);
-  });
-
-  it('throws when trying to register the same type twice', () => {
-    registry.registerType(createType({ name: 'typeA' }));
-    registry.registerType(createType({ name: 'typeB' }));
-    expect(() => {
+  describe('#registerType', () => {
+    it('allows to register types', () => {
       registry.registerType(createType({ name: 'typeA' }));
-    }).toThrowErrorMatchingInlineSnapshot(`"Type 'typeA' is already registered"`);
+      registry.registerType(createType({ name: 'typeB' }));
+      registry.registerType(createType({ name: 'typeC' }));
+
+      expect(
+        registry
+          .getAllTypes()
+          .map((type) => type.name)
+          .sort()
+      ).toEqual(['typeA', 'typeB', 'typeC']);
+    });
+
+    it('throws when trying to register the same type twice', () => {
+      registry.registerType(createType({ name: 'typeA' }));
+      registry.registerType(createType({ name: 'typeB' }));
+      expect(() => {
+        registry.registerType(createType({ name: 'typeA' }));
+      }).toThrowErrorMatchingInlineSnapshot(`"Type 'typeA' is already registered"`);
+    });
+
+    it('throws when `management.onExport` is specified but `management.importableAndExportable` is undefined or false', () => {
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeA',
+            management: {
+              onExport: (ctx, objs) => objs,
+            },
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.onExport'"`
+      );
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeA',
+            management: {
+              importableAndExportable: false,
+              onExport: (ctx, objs) => objs,
+            },
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.onExport'"`
+      );
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeA',
+            management: {
+              importableAndExportable: true,
+              onExport: (ctx, objs) => objs,
+            },
+          })
+        );
+      }).not.toThrow();
+    });
+
+    // TODO: same test with 'onImport'
   });
 
   describe('#getType', () => {

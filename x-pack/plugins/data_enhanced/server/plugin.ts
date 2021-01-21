@@ -21,6 +21,7 @@ import {
   eqlSearchStrategyProvider,
 } from './search';
 import { getUiSettings } from './ui_settings';
+import type { DataEnhancedRequestHandlerContext } from './type';
 
 interface SetupDependencies {
   data: DataPluginSetup;
@@ -61,7 +62,10 @@ export class EnhancedDataServerPlugin
       eqlSearchStrategyProvider(this.logger)
     );
 
-    this.sessionService = new SearchSessionService(this.logger);
+    this.sessionService = new SearchSessionService(
+      this.logger,
+      this.initializerContext.config.create()
+    );
 
     deps.data.__enhance({
       search: {
@@ -70,8 +74,8 @@ export class EnhancedDataServerPlugin
       },
     });
 
-    const router = core.http.createRouter();
-    registerSessionRoutes(router);
+    const router = core.http.createRouter<DataEnhancedRequestHandlerContext>();
+    registerSessionRoutes(router, this.logger);
 
     this.sessionService.setup(core, {
       taskManager: deps.taskManager,
@@ -81,7 +85,6 @@ export class EnhancedDataServerPlugin
   public start(core: CoreStart, { taskManager }: StartDependencies) {
     this.sessionService.start(core, {
       taskManager,
-      config$: this.initializerContext.config.create(),
     });
   }
 

@@ -20,5 +20,3 @@ export const jsonArrayRT: rt.Type<JsonArray> = rt.recursion('JsonArray', () =>
 export const jsonObjectRT: rt.Type<JsonObject> = rt.recursion('JsonObject', () =>
   rt.record(rt.string, jsonValueRT)
 );
-
-export { JsonValue, JsonArray, JsonObject };
