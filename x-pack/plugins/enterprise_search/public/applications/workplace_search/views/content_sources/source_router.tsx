@@ -53,7 +53,7 @@ export const SourceRouter: React.FC = () => {
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
-    initializeSource(sourceId, history);
+    initializeSource(sourceId);
   }, []);
 
   if (dataLoading) return <Loading />;
