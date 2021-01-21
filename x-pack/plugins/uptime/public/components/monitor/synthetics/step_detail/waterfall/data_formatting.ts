@@ -197,7 +197,7 @@ const buildTimingPalette = (): TimingColourPalette => {
   const palette = Object.values(Timings).reduce<Partial<TimingColourPalette>>((acc, value) => {
     switch (value) {
       case Timings.Blocked:
-        acc[value] = SAFE_PALETTE[6];
+        acc[value] = SAFE_PALETTE[16];
         break;
       case Timings.Dns:
         acc[value] = SAFE_PALETTE[0];
