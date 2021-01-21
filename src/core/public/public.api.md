@@ -1027,6 +1027,7 @@ export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
+    coreMigrationVersion?: string;
     // (undocumented)
     error?: SavedObjectError;
     id: string;
@@ -1144,6 +1145,7 @@ export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
 // @public (undocumented)
 export interface SavedObjectsCreateOptions {
+    coreMigrationVersion?: string;
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
     overwrite?: boolean;
@@ -1377,9 +1379,11 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
 
 // @public
 export class SimpleSavedObject<T = unknown> {
-    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
+    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, }: SavedObject<T>);
     // (undocumented)
     attributes: T;
+    // (undocumented)
+    coreMigrationVersion: SavedObject<T>['coreMigrationVersion'];
     // (undocumented)
     delete(): Promise<{}>;
     // (undocumented)

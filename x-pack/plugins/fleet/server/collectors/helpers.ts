@@ -5,11 +5,14 @@
  */
 
 import { CoreSetup } from 'kibana/server';
-import { SavedObjectsClient } from '../../../../../src/core/server';
+import { ElasticsearchClient, SavedObjectsClient } from '../../../../../src/core/server';
 
-export async function getInternalSavedObjectsClient(core: CoreSetup) {
+export async function getInternalClients(
+  core: CoreSetup
+): Promise<[SavedObjectsClient, ElasticsearchClient]> {
   return core.getStartServices().then(async ([coreStart]) => {
     const savedObjectsRepo = coreStart.savedObjects.createInternalRepository();
-    return new SavedObjectsClient(savedObjectsRepo);
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    return [new SavedObjectsClient(savedObjectsRepo), esClient];
   });
 }

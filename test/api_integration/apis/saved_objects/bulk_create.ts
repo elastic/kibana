@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -21,6 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
       attributes: {
         title: 'An existing visualization',
       },
+      coreMigrationVersion: '1.2.3',
     },
     {
       type: 'dashboard',
@@ -32,6 +34,12 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('_bulk_create', () => {
+    let KIBANA_VERSION: string;
+
+    before(async () => {
+      KIBANA_VERSION = await getKibanaVersion(getService);
+    });
+
     describe('with kibana index', () => {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
@@ -65,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
                   migrationVersion: {
                     dashboard: resp.body.saved_objects[1].migrationVersion.dashboard,
                   },
+                  coreMigrationVersion: KIBANA_VERSION,
                   references: [],
                   namespaces: ['default'],
                 },
@@ -112,6 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
                   migrationVersion: {
                     visualization: resp.body.saved_objects[0].migrationVersion.visualization,
                   },
+                  coreMigrationVersion: KIBANA_VERSION, // updated from 1.2.3 to the latest kibana version
                 },
                 {
                   type: 'dashboard',
@@ -126,6 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
                   migrationVersion: {
                     dashboard: resp.body.saved_objects[1].migrationVersion.dashboard,
                   },
+                  coreMigrationVersion: KIBANA_VERSION,
                 },
               ],
             });
