@@ -6,8 +6,9 @@
 
 import {
   IContextProvider,
+  IRouter,
   LegacyAPICaller,
-  RequestHandler,
+  RequestHandlerContext,
   SavedObjectsClientContract,
 } from 'kibana/server';
 
@@ -17,7 +18,7 @@ import type { SpacesPluginStart } from '../../spaces/server';
 import { ListClient } from './services/lists/list_client';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';
 
-export type ContextProvider = IContextProvider<RequestHandler<unknown, unknown, unknown>, 'lists'>;
+export type ContextProvider = IContextProvider<ListsRequestHandlerContext, 'lists'>;
 export type ListsPluginStart = void;
 export interface PluginsStart {
   security: SecurityPluginStart | undefined | null;
@@ -40,15 +41,26 @@ export interface ListPluginSetup {
   getListClient: GetListClientType;
 }
 
-export type ContextProviderReturn = Promise<{
+/**
+ * @public
+ */
+export interface ListsApiRequestHandlerContext {
   getListClient: () => ListClient;
   getExceptionListClient: () => ExceptionListClient;
-}>;
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    lists?: {
-      getExceptionListClient: () => ExceptionListClient;
-      getListClient: () => ListClient;
-    };
-  }
 }
+
+/**
+ * @internal
+ */
+export interface ListsRequestHandlerContext extends RequestHandlerContext {
+  lists?: ListsApiRequestHandlerContext;
+}
+
+/**
+ * @internal
+ */
+export type ListsPluginRouter = IRouter<ListsRequestHandlerContext>;
+/**
+ * @internal
+ */
+export type ContextProviderReturn = Promise<ListsApiRequestHandlerContext>;

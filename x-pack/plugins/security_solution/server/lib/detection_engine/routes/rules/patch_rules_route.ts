@@ -11,7 +11,7 @@ import {
   PatchRulesSchemaDecoded,
   patchRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -25,7 +25,7 @@ import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_s
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
 
-export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
+export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.patch(
     {
       path: DETECTION_ENGINE_RULES_URL,
