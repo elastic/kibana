@@ -9,28 +9,6 @@ import moment from 'moment-timezone';
 import * as helpers from './helpers';
 
 describe('url_params_context helpers', () => {
-  describe('getParsedDate', () => {
-    describe('given undefined', () => {
-      it('returns undefined', () => {
-        expect(helpers.getParsedDate(undefined)).toBeUndefined();
-      });
-    });
-
-    describe('given a parsable date', () => {
-      it('returns the parsed date', () => {
-        expect(helpers.getParsedDate('1970-01-01T00:00:00.000Z')).toEqual(
-          '1970-01-01T00:00:00.000Z'
-        );
-      });
-    });
-
-    describe('given a non-parsable date', () => {
-      it('returns null', () => {
-        expect(helpers.getParsedDate('nope')).toEqual(null);
-      });
-    });
-  });
-
   describe('getDateRange', () => {
     describe('when rangeFrom and rangeTo are not changed', () => {
       it('returns the previous state', () => {
@@ -48,6 +26,43 @@ describe('url_params_context helpers', () => {
         ).toEqual({
           start: '1970-01-01T00:00:00.000Z',
           end: '1971-01-01T00:00:00.000Z',
+        });
+      });
+    });
+
+    describe('when rangeFrom or rangeTo are falsy', () => {
+      it('returns the previous state', () => {
+        jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
+        expect(
+          helpers.getDateRange({
+            state: {
+              start: '1972-01-01T00:00:00.000Z',
+              end: '1973-01-01T00:00:00.000Z',
+            },
+            rangeFrom: '',
+            rangeTo: 'now',
+          })
+        ).toEqual({
+          start: '1972-01-01T00:00:00.000Z',
+          end: '1973-01-01T00:00:00.000Z',
+        });
+      });
+    });
+
+    describe('when the start or end are invalid', () => {
+      it('returns the previous state', () => {
+        expect(
+          helpers.getDateRange({
+            state: {
+              start: '1972-01-01T00:00:00.000Z',
+              end: '1973-01-01T00:00:00.000Z',
+            },
+            rangeFrom: 'nope',
+            rangeTo: 'now',
+          })
+        ).toEqual({
+          start: '1972-01-01T00:00:00.000Z',
+          end: '1973-01-01T00:00:00.000Z',
         });
       });
     });

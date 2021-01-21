@@ -14,12 +14,11 @@ import React, {
 import { withRouter } from 'react-router-dom';
 import { uniqueId, mapValues } from 'lodash';
 import { IUrlParams } from './types';
-import { getParsedDate } from './helpers';
+import { getDateRange } from './helpers';
 import { resolveUrlParams } from './resolve_url_params';
 import { UIFilters } from '../../../typings/ui_filters';
 import {
   localUIFilterNames,
-
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server/lib/ui_filters/local_ui_filters/config';
 import { pickKeys } from '../../../common/utils/pick_keys';
@@ -79,8 +78,7 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
       (timeRange: TimeRange) => {
         refUrlParams.current = {
           ...refUrlParams.current,
-          start: getParsedDate(timeRange.rangeFrom),
-          end: getParsedDate(timeRange.rangeTo, { roundUp: true }),
+          ...getDateRange({ state: {}, ...timeRange }),
         };
 
         forceUpdate(uniqueId());
