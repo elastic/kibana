@@ -66,7 +66,7 @@ export const SchemaFieldsTable: React.FC = () => {
       </EuiTableBody>
     </EuiTable>
   ) : (
-    <p>
+    <p data-test-subj="NoResultsMessage">
       {i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.contentSource.schema.filter.noResults.message',
         {
