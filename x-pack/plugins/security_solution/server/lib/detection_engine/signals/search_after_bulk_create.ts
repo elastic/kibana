@@ -106,7 +106,7 @@ export const searchAfterAndBulkCreate = async ({
             services,
             logger,
             filter,
-            pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
+            pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
             timestampOverride: ruleParams.timestampOverride,
             excludeDocsWithTimestampOverride: true,
           });
@@ -149,7 +149,7 @@ export const searchAfterAndBulkCreate = async ({
             services,
             logger,
             filter,
-            pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
+            pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
             timestampOverride: ruleParams.timestampOverride,
             excludeDocsWithTimestampOverride: false,
           });
