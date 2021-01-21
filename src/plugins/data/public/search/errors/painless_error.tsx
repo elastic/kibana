@@ -14,10 +14,11 @@ import { ApplicationStart } from 'kibana/public';
 import { IEsError, isEsError } from './types';
 import { EsError } from './es_error';
 import { getRootCause } from './utils';
+import { KibanaServerError } from '../../../../kibana_utils/public';
 
 export class PainlessError extends EsError {
   painlessStack?: string;
-  constructor(err: IEsError) {
+  constructor(err: KibanaServerError) {
     super(err);
   }
 

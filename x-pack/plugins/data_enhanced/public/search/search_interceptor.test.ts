@@ -9,10 +9,16 @@ import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
-import { ISessionService, SearchTimeoutError, SearchSessionState } from 'src/plugins/data/public';
+import {
+  ISessionService,
+  SearchTimeoutError,
+  SearchSessionState,
+  PainlessError,
+} from 'src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { bfetchPluginMock } from '../../../../../src/plugins/bfetch/public/mocks';
 import { BehaviorSubject } from 'rxjs';
+import * as xpackResourceNotFoundException from '../../common/search/test_data/search_phase_execution_exception.json';
 
 const timeTravel = (msToRun = 0) => {
   jest.advanceTimersByTime(msToRun);
@@ -96,6 +102,33 @@ describe('EnhancedSearchInterceptor', () => {
       uiSettings: mockCoreSetup.uiSettings,
       usageCollector: mockUsageCollector,
       session: sessionService,
+    });
+  });
+
+  describe('errors', () => {
+    test('Should throw Painless error on server error with OSS format', async () => {
+      const mockResponse: any = {
+        statusCode: 400,
+        message: 'search_phase_execution_exception',
+        attributes: xpackResourceNotFoundException.error,
+      };
+      fetchMock.mockRejectedValueOnce(mockResponse);
+      const response = searchInterceptor.search({
+        params: {},
+      });
+      await expect(response.toPromise()).rejects.toThrow(PainlessError);
+    });
+
+    test('Renders a PainlessError', async () => {
+      searchInterceptor.showError(
+        new PainlessError({
+          statusCode: 400,
+          message: 'search_phase_execution_exception',
+          attributes: xpackResourceNotFoundException.error,
+        })
+      );
+      expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
+      expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();
     });
   });
 

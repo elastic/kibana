@@ -11,7 +11,7 @@ import { KibanaServerError } from '../../../../kibana_utils/common';
 
 export function getFailedShards(err: KibanaServerError<any>): FailedShard | undefined {
   const errorInfo = err.attributes;
-  const failedShards = errorInfo?.failed_shards;
+  const failedShards = errorInfo?.failed_shards || errorInfo?.caused_by?.failed_shards;
   return failedShards ? failedShards[0] : undefined;
 }
 
