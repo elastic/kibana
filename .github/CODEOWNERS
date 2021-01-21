@@ -309,25 +309,24 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/es-ui
 
 # Endpoint
-/x-pack/plugins/endpoint/ @elastic/endpoint-app-team @elastic/siem
-/x-pack/test/endpoint_api_integration_no_ingest/ @elastic/endpoint-app-team @elastic/siem
-/x-pack/test/security_solution_endpoint/ @elastic/endpoint-app-team @elastic/siem
-/x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-app-team @elastic/siem
-/x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/endpoint-app-team @elastic/siem
-/x-pack/test/plugin_functional/test_suites/resolver/ @elastic/endpoint-app-team @elastic/siem
-#CC# /x-pack/legacy/plugins/siem/ @elastic/siem
-#CC# /x-pack/plugins/siem/ @elastic/siem
-#CC# /x-pack/plugins/security_solution/ @elastic/siem
+/x-pack/plugins/endpoint/ @elastic/endpoint-app-team @elastic/security-solution
+/x-pack/test/endpoint_api_integration_no_ingest/ @elastic/endpoint-app-team @elastic/security-solution
+/x-pack/test/security_solution_endpoint/ @elastic/endpoint-app-team @elastic/security-solution
+/x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-app-team @elastic/security-solution
+/x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/endpoint-app-team @elastic/security-solution
+/x-pack/test/plugin_functional/test_suites/resolver/ @elastic/endpoint-app-team @elastic/security-solution
+#CC# /x-pack/legacy/plugins/siem/ @elastic/security-solution
+#CC# /x-pack/plugins/siem/ @elastic/security-solution
+#CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution
-/x-pack/plugins/security_solution/ @elastic/siem @elastic/endpoint-app-team
-/x-pack/test/detection_engine_api_integration @elastic/siem @elastic/endpoint-app-team
-/x-pack/test/lists_api_integration @elastic/siem @elastic/endpoint-app-team
-/x-pack/test/api_integration/apis/security_solution @elastic/siem @elastic/endpoint-app-team
-/x-pack/plugins/case @elastic/siem @elastic/endpoint-app-team
-/x-pack/plugins/lists @elastic/siem @elastic/endpoint-app-team
-#CC# /x-pack/plugins/security_solution/ @elastic/siem
-#CC# /x-pack/plugins/security_solution/ @elastic/kibana-security
+/x-pack/plugins/security_solution/ @elastic/security-solution @elastic/endpoint-app-team
+/x-pack/test/detection_engine_api_integration @elastic/security-solution @elastic/endpoint-app-team
+/x-pack/test/lists_api_integration @elastic/security-solution @elastic/endpoint-app-team
+/x-pack/test/api_integration/apis/security_solution @elastic/security-solution @elastic/endpoint-app-team
+/x-pack/plugins/case @elastic/security-solution @elastic/endpoint-app-team
+/x-pack/plugins/lists @elastic/security-solution @elastic/endpoint-app-team
+#CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
