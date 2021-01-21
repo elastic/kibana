@@ -5,25 +5,29 @@
  */
 
 import { useCallback } from 'react';
-import { exhaustMap, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { exhaustMap } from 'rxjs/operators';
+import { IKibanaSearchRequest } from '../../../../../../../src/plugins/data/public';
 import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_sources';
-import { LogEntryCursor } from '../../../../common/log_entry';
+import { LogEntryBeforeCursor } from '../../../../common/log_entry';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
   logEntriesSearchRequestParamsRT,
+  LogEntriesSearchResponsePayload,
   logEntriesSearchResponsePayloadRT,
   LOG_ENTRIES_SEARCH_STRATEGY,
 } from '../../../../common/search_strategies/log_entries/log_entries';
 import { JsonObject } from '../../../../common/typed_json';
 import {
   flattenDataSearchResponseDescriptor,
-  parseDataSearchResponses,
+  normalizeDataSearchResponses,
+  ParsedDataSearchRequestDescriptor,
   useDataSearch,
   useDataSearchResponseState,
 } from '../../../utils/data_search';
 import { useOperator } from '../../../utils/use_observable';
 
-export const useFetchLogEntriesBefore = ({
+export const useLogEntriesBeforeRequest = ({
   columnOverrides,
   endTimestamp,
   highlightPhrase,
@@ -40,10 +44,10 @@ export const useFetchLogEntriesBefore = ({
 }) => {
   const {
     search: fetchLogEntriesBefore,
-    requests$: rawLogEntriesBeforeSearchRequests$,
+    requests$: logEntriesBeforeSearchRequests$,
   } = useDataSearch({
     getRequest: useCallback(
-      (cursor: LogEntryCursor, size: number) => {
+      (cursor: LogEntryBeforeCursor['before'], size: number) => {
         return !!sourceId
           ? {
               request: {
@@ -64,15 +68,23 @@ export const useFetchLogEntriesBefore = ({
       },
       [columnOverrides, endTimestamp, highlightPhrase, query, sourceId, startTimestamp]
     ),
+    parseResponses: parseLogEntriesBeforeSearchResponses,
   });
 
-  const logEntriesBeforeSearchRequests$ = useOperator(
-    rawLogEntriesBeforeSearchRequests$,
-    parseLogEntriesSearchResponses
-  );
+  return {
+    fetchLogEntriesBefore,
+    logEntriesBeforeSearchRequests$,
+  };
+};
+
+export const useLogEntriesBeforeResponse = <Request extends IKibanaSearchRequest>(
+  logEntriesBeforeSearchRequests$: Observable<
+    ParsedDataSearchRequestDescriptor<Request, LogEntriesSearchResponsePayload['data'] | null>
+  >
+) => {
   const logEntriesBeforeSearchResponse$ = useOperator(
     logEntriesBeforeSearchRequests$,
-    flattenLogEntriesSearchResponse
+    flattenLogEntriesBeforeSearchResponse
   );
 
   const {
@@ -85,6 +97,50 @@ export const useFetchLogEntriesBefore = ({
 
   return {
     cancelRequest,
+    isRequestRunning,
+    isResponsePartial,
+    loaded,
+    logEntriesBeforeSearchRequests$,
+    logEntriesBeforeSearchResponse$,
+    total,
+  };
+};
+
+export const useFetchLogEntriesBefore = ({
+  columnOverrides,
+  endTimestamp,
+  highlightPhrase,
+  query,
+  sourceId,
+  startTimestamp,
+}: {
+  columnOverrides?: LogSourceColumnConfiguration[];
+  endTimestamp: number;
+  highlightPhrase?: string;
+  query?: JsonObject;
+  sourceId: string;
+  startTimestamp: number;
+}) => {
+  const { fetchLogEntriesBefore, logEntriesBeforeSearchRequests$ } = useLogEntriesBeforeRequest({
+    columnOverrides,
+    endTimestamp,
+    highlightPhrase,
+    query,
+    sourceId,
+    startTimestamp,
+  });
+
+  const {
+    cancelRequest,
+    isRequestRunning,
+    isResponsePartial,
+    loaded,
+    logEntriesBeforeSearchResponse$,
+    total,
+  } = useLogEntriesBeforeResponse(logEntriesBeforeSearchRequests$);
+
+  return {
+    cancelRequest,
     fetchLogEntriesBefore,
     isRequestRunning,
     isResponsePartial,
@@ -94,8 +150,9 @@ export const useFetchLogEntriesBefore = ({
   };
 };
 
-const parseLogEntriesSearchResponses = map(
-  parseDataSearchResponses(null, decodeOrThrow(logEntriesSearchResponsePayloadRT))
+export const parseLogEntriesBeforeSearchResponses = normalizeDataSearchResponses(
+  null,
+  decodeOrThrow(logEntriesSearchResponsePayloadRT)
 );
 
-const flattenLogEntriesSearchResponse = exhaustMap(flattenDataSearchResponseDescriptor);
+const flattenLogEntriesBeforeSearchResponse = exhaustMap(flattenDataSearchResponseDescriptor);

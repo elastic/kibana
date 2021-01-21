@@ -5,23 +5,105 @@
  */
 
 import { useCallback } from 'react';
-import { exhaustMap, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { exhaustMap } from 'rxjs/operators';
+import { IKibanaSearchRequest } from '../../../../../../../src/plugins/data/public';
 import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_sources';
-import { LogEntryCursor } from '../../../../common/log_entry';
+import { LogEntryAfterCursor } from '../../../../common/log_entry';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
   logEntriesSearchRequestParamsRT,
+  LogEntriesSearchResponsePayload,
   logEntriesSearchResponsePayloadRT,
   LOG_ENTRIES_SEARCH_STRATEGY,
 } from '../../../../common/search_strategies/log_entries/log_entries';
 import { JsonObject } from '../../../../common/typed_json';
 import {
   flattenDataSearchResponseDescriptor,
-  parseDataSearchResponses,
+  normalizeDataSearchResponses,
+  ParsedDataSearchRequestDescriptor,
   useDataSearch,
   useDataSearchResponseState,
 } from '../../../utils/data_search';
 import { useOperator } from '../../../utils/use_observable';
+
+export const useLogEntriesAfterRequest = ({
+  columnOverrides,
+  endTimestamp,
+  highlightPhrase,
+  query,
+  sourceId,
+  startTimestamp,
+}: {
+  columnOverrides?: LogSourceColumnConfiguration[];
+  endTimestamp: number;
+  highlightPhrase?: string;
+  query?: JsonObject;
+  sourceId: string;
+  startTimestamp: number;
+}) => {
+  const { search: fetchLogEntriesAfter, requests$: logEntriesAfterSearchRequests$ } = useDataSearch(
+    {
+      getRequest: useCallback(
+        (cursor: LogEntryAfterCursor['after'], size: number) => {
+          return !!sourceId
+            ? {
+                request: {
+                  params: logEntriesSearchRequestParamsRT.encode({
+                    after: cursor,
+                    columns: columnOverrides,
+                    endTimestamp,
+                    highlightPhrase,
+                    query,
+                    size,
+                    sourceId,
+                    startTimestamp,
+                  }),
+                },
+                options: { strategy: LOG_ENTRIES_SEARCH_STRATEGY },
+              }
+            : null;
+        },
+        [columnOverrides, endTimestamp, highlightPhrase, query, sourceId, startTimestamp]
+      ),
+      parseResponses: parseLogEntriesAfterSearchResponses,
+    }
+  );
+
+  return {
+    fetchLogEntriesAfter,
+    logEntriesAfterSearchRequests$,
+  };
+};
+
+export const useLogEntriesAfterResponse = <Request extends IKibanaSearchRequest>(
+  logEntriesAfterSearchRequests$: Observable<
+    ParsedDataSearchRequestDescriptor<Request, LogEntriesSearchResponsePayload['data'] | null>
+  >
+) => {
+  const logEntriesAfterSearchResponse$ = useOperator(
+    logEntriesAfterSearchRequests$,
+    flattenLogEntriesAfterSearchResponse
+  );
+
+  const {
+    cancelRequest,
+    isRequestRunning,
+    isResponsePartial,
+    loaded,
+    total,
+  } = useDataSearchResponseState(logEntriesAfterSearchResponse$);
+
+  return {
+    cancelRequest,
+    isRequestRunning,
+    isResponsePartial,
+    loaded,
+    logEntriesAfterSearchRequests$,
+    logEntriesAfterSearchResponse$,
+    total,
+  };
+};
 
 export const useFetchLogEntriesAfter = ({
   columnOverrides,
@@ -38,50 +120,23 @@ export const useFetchLogEntriesAfter = ({
   sourceId: string;
   startTimestamp: number;
 }) => {
-  const {
-    search: fetchLogEntriesAfter,
-    requests$: rawLogEntriesAfterSearchRequests$,
-  } = useDataSearch({
-    getRequest: useCallback(
-      (cursor: LogEntryCursor, size: number) => {
-        return !!sourceId
-          ? {
-              request: {
-                params: logEntriesSearchRequestParamsRT.encode({
-                  after: cursor,
-                  columns: columnOverrides,
-                  endTimestamp,
-                  highlightPhrase,
-                  query,
-                  size,
-                  sourceId,
-                  startTimestamp,
-                }),
-              },
-              options: { strategy: LOG_ENTRIES_SEARCH_STRATEGY },
-            }
-          : null;
-      },
-      [columnOverrides, endTimestamp, highlightPhrase, query, sourceId, startTimestamp]
-    ),
+  const { fetchLogEntriesAfter, logEntriesAfterSearchRequests$ } = useLogEntriesAfterRequest({
+    columnOverrides,
+    endTimestamp,
+    highlightPhrase,
+    query,
+    sourceId,
+    startTimestamp,
   });
-
-  const logEntriesAfterSearchRequests$ = useOperator(
-    rawLogEntriesAfterSearchRequests$,
-    parseLogEntriesSearchResponses
-  );
-  const logEntriesAfterSearchResponse$ = useOperator(
-    logEntriesAfterSearchRequests$,
-    flattenLogEntriesSearchResponse
-  );
 
   const {
     cancelRequest,
     isRequestRunning,
     isResponsePartial,
     loaded,
+    logEntriesAfterSearchResponse$,
     total,
-  } = useDataSearchResponseState(logEntriesAfterSearchResponse$);
+  } = useLogEntriesAfterResponse(logEntriesAfterSearchRequests$);
 
   return {
     cancelRequest,
@@ -94,8 +149,9 @@ export const useFetchLogEntriesAfter = ({
   };
 };
 
-const parseLogEntriesSearchResponses = map(
-  parseDataSearchResponses(null, decodeOrThrow(logEntriesSearchResponsePayloadRT))
+export const parseLogEntriesAfterSearchResponses = normalizeDataSearchResponses(
+  null,
+  decodeOrThrow(logEntriesSearchResponsePayloadRT)
 );
 
-const flattenLogEntriesSearchResponse = exhaustMap(flattenDataSearchResponseDescriptor);
+const flattenLogEntriesAfterSearchResponse = exhaustMap(flattenDataSearchResponseDescriptor);

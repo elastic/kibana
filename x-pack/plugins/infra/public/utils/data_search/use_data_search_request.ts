@@ -5,7 +5,7 @@
  */
 
 import { useCallback } from 'react';
-import { Subject } from 'rxjs';
+import { OperatorFunction, Subject } from 'rxjs';
 import { share, tap } from 'rxjs/operators';
 import {
   IKibanaSearchRequest,
@@ -14,7 +14,7 @@ import {
 } from '../../../../../../src/plugins/data/public';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { tapUnsubscribe, useObservable } from '../use_observable';
-import { DataSearchRequestDescriptor } from './types';
+import { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';
 
 export type DataSearchRequestFactory<Args extends any[], Request extends IKibanaSearchRequest> = (
   ...args: Args
@@ -26,18 +26,27 @@ export type DataSearchRequestFactory<Args extends any[], Request extends IKibana
   | null
   | undefined;
 
+type ParseResponsesOperator<RawResponse, Response> = OperatorFunction<
+  IKibanaSearchResponse<RawResponse>,
+  ParsedKibanaSearchResponse<Response>
+>;
+
 export const useDataSearch = <
   RequestFactoryArgs extends any[],
-  Request extends IKibanaSearchRequest,
-  RawResponse
+  RequestParams,
+  Request extends IKibanaSearchRequest<RequestParams>,
+  RawResponse,
+  Response
 >({
   getRequest,
+  parseResponses,
 }: {
   getRequest: DataSearchRequestFactory<RequestFactoryArgs, Request>;
+  parseResponses: ParseResponsesOperator<RawResponse, Response>;
 }) => {
   const { services } = useKibanaContextForPlugin();
   const requests$ = useObservable(
-    () => new Subject<DataSearchRequestDescriptor<Request, RawResponse>>(),
+    () => new Subject<ParsedDataSearchRequestDescriptor<Request, Response>>(),
     []
   );
 
@@ -75,6 +84,7 @@ export const useDataSearch = <
                 abortController.abort();
               }
             }),
+            parseResponses,
             share()
           ),
       };
@@ -83,7 +93,7 @@ export const useDataSearch = <
 
       return newRequestDescriptor;
     },
-    [getRequest, services.data.search, requests$]
+    [getRequest, services.data.search, parseResponses, requests$]
   );
 
   return {

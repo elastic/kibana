@@ -5,16 +5,17 @@
  */
 
 import { useCallback } from 'react';
-import { map } from 'rxjs/operators';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   logEntrySearchRequestParamsRT,
   logEntrySearchResponsePayloadRT,
   LOG_ENTRY_SEARCH_STRATEGY,
 } from '../../../common/search_strategies/log_entries/log_entry';
-import { useDataSearch, useLatestPartialDataSearchResponse } from '../../utils/data_search';
-import { parseDataSearchResponses } from '../../utils/data_search/parse_data_search_responses';
-import { useOperator } from '../../utils/use_observable';
+import {
+  normalizeDataSearchResponses,
+  useDataSearch,
+  useLatestPartialDataSearchResponse,
+} from '../../utils/data_search';
 
 export const useLogEntry = ({
   sourceId,
@@ -34,12 +35,8 @@ export const useLogEntry = ({
           }
         : null;
     }, [sourceId, logEntryId]),
+    parseResponses: parseLogEntrySearchResponses,
   });
-
-  const parsedLogEntrySearchRequests$ = useOperator(
-    logEntrySearchRequests$,
-    parseLogEntrySearchResponses
-  );
 
   const {
     cancelRequest,
@@ -49,7 +46,7 @@ export const useLogEntry = ({
     latestResponseErrors,
     loaded,
     total,
-  } = useLatestPartialDataSearchResponse(parsedLogEntrySearchRequests$);
+  } = useLatestPartialDataSearchResponse(logEntrySearchRequests$);
 
   return {
     cancelRequest,
@@ -63,6 +60,7 @@ export const useLogEntry = ({
   };
 };
 
-const parseLogEntrySearchResponses = map(
-  parseDataSearchResponses(null, decodeOrThrow(logEntrySearchResponsePayloadRT))
+const parseLogEntrySearchResponses = normalizeDataSearchResponses(
+  null,
+  decodeOrThrow(logEntrySearchResponsePayloadRT)
 );

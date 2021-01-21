@@ -47,3 +47,12 @@ export interface ParsedDataSearchResponseDescriptor<
   response: ParsedKibanaSearchResponse<Response>;
   abortController: AbortController;
 }
+
+export type ParsedDataSearchResponseDescriptorOfRequest<
+  ParsedRequestDescriptor extends ParsedDataSearchRequestDescriptor<any, any>
+> = ParsedRequestDescriptor extends ParsedDataSearchRequestDescriptor<
+  infer Request,
+  infer ResponseData
+>
+  ? ParsedDataSearchResponseDescriptor<Request, ResponseData>
+  : never;

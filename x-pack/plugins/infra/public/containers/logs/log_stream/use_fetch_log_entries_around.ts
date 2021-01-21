@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineLatest } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { useCallback } from 'react';
+import { combineLatest, Observable, Subject } from 'rxjs';
+import { last, map, startWith, switchMap } from 'rxjs/operators';
 import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_sources';
+import { LogEntryCursor } from '../../../../common/log_entry';
 import { JsonObject } from '../../../../common/typed_json';
-import { useObservable, useSubscription } from '../../../utils/use_observable';
-import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
-import { useFetchLogEntriesBefore } from './use_fetch_log_entries_before';
+import { flattenDataSearchResponseDescriptor } from '../../../utils/data_search';
+import { useObservable, useObservableState, useSubscription } from '../../../utils/use_observable';
+import { useLogEntriesAfterRequest } from './use_fetch_log_entries_after';
+import { useLogEntriesBeforeRequest } from './use_fetch_log_entries_before';
 
 export const useFetchLogEntriesAround = ({
   columnOverrides,
@@ -27,12 +30,7 @@ export const useFetchLogEntriesAround = ({
   sourceId: string;
   startTimestamp: number;
 }) => {
-  const {
-    fetchLogEntriesBefore,
-    isRequestRunning: isLogEntriesBeforeRequestRunning,
-    isResponsePartial: isLogEntriesBeforeResponsePartial,
-    logEntriesBeforeSearchResponse$,
-  } = useFetchLogEntriesBefore({
+  const { fetchLogEntriesBefore } = useLogEntriesBeforeRequest({
     columnOverrides,
     endTimestamp,
     highlightPhrase,
@@ -41,12 +39,7 @@ export const useFetchLogEntriesAround = ({
     startTimestamp,
   });
 
-  const {
-    fetchLogEntriesAfter,
-    isRequestRunning: isLogEntriesAfterRequestRunning,
-    isResponsePartial: isLogEntriesAfterResponsePartial,
-    logEntriesAfterSearchResponse$,
-  } = useFetchLogEntriesAfter({
+  const { fetchLogEntriesAfter } = useLogEntriesAfterRequest({
     columnOverrides,
     endTimestamp,
     highlightPhrase,
@@ -55,31 +48,143 @@ export const useFetchLogEntriesAround = ({
     startTimestamp,
   });
 
-  // TODO: make result flattening and transformation more composable
+  type LogEntriesBeforeRequest = NonNullable<ReturnType<typeof fetchLogEntriesBefore>>;
+  type LogEntriesAfterRequest = NonNullable<ReturnType<typeof fetchLogEntriesAfter>>;
 
-  const combinedLogEntriesSearchResponse$ = useObservable(
-    (inputs$) =>
-      inputs$.pipe(
-        switchMap(([beforeResponse$, afterResponse$]) =>
-          combineLatest([beforeResponse$, afterResponse$])
-        ),
-        map(([a, b]) => [a, b] as const)
-      ),
-    [logEntriesBeforeSearchResponse$, logEntriesAfterSearchResponse$] as const
+  const logEntriesAroundSearchRequests$ = useObservable(
+    () => new Subject<[LogEntriesBeforeRequest, Observable<LogEntriesAfterRequest>]>(),
+    []
   );
 
-  useSubscription(combinedLogEntriesSearchResponse$, {
-    next: ([a, b]) => {
-      console.log('combined next', a, b);
+  const fetchLogEntriesAround = useCallback(
+    (cursor: LogEntryCursor, size: number) => {
+      const logEntriesBeforeSearchRequest = fetchLogEntriesBefore(cursor, Math.floor(size / 2));
+
+      if (logEntriesBeforeSearchRequest == null) {
+        return;
+      }
+
+      const logEntriesAfterSearchRequest$ = flattenDataSearchResponseDescriptor(
+        logEntriesBeforeSearchRequest
+      ).pipe(
+        last(), // in the future we could start earlier if we receive partial results already
+        map((lastBeforeSearchResponse) => {
+          const cursorAfter = lastBeforeSearchResponse.response.data?.bottomCursor ?? {
+            time: cursor.time - 1,
+            tiebreaker: 0,
+          };
+
+          const logEntriesAfterSearchRequest = fetchLogEntriesAfter(
+            cursorAfter,
+            Math.ceil(size / 2)
+          );
+
+          if (logEntriesAfterSearchRequest == null) {
+            throw new Error('Failed to create request: no request args given');
+          }
+
+          return logEntriesAfterSearchRequest;
+        })
+      );
+
+      logEntriesAroundSearchRequests$.next([
+        logEntriesBeforeSearchRequest,
+        logEntriesAfterSearchRequest$,
+      ]);
+    },
+    [fetchLogEntriesAfter, fetchLogEntriesBefore, logEntriesAroundSearchRequests$]
+  );
+
+  const logEntriesAroundSearchResponses$ = useObservable(
+    (inputs$) =>
+      inputs$.pipe(
+        switchMap(([currentSearchRequests$]) =>
+          currentSearchRequests$.pipe(
+            switchMap(([beforeRequest, afterRequest$]) => {
+              const beforeResponse$ = flattenDataSearchResponseDescriptor(beforeRequest);
+              const afterResponse$ = afterRequest$.pipe(
+                switchMap(flattenDataSearchResponseDescriptor),
+                startWith(undefined) // emit "before" response even if "after" hasn't started yet
+              );
+              return combineLatest([beforeResponse$, afterResponse$]);
+            }),
+            map(([beforeResponse, afterResponse]) => {
+              const loadedBefore = beforeResponse.response.loaded;
+              const loadedAfter = afterResponse?.response.loaded;
+              const totalBefore = beforeResponse.response.total;
+              const totalAfter = afterResponse?.response.total;
+
+              return {
+                before: beforeResponse,
+                after: afterResponse,
+                combined: {
+                  isRunning:
+                    (beforeResponse.response.isRunning || afterResponse?.response.isRunning) ??
+                    false,
+                  isPartial:
+                    (beforeResponse.response.isPartial || afterResponse?.response.isPartial) ??
+                    false,
+                  loaded:
+                    loadedBefore != null || loadedAfter != null
+                      ? (loadedBefore ?? 0) + (loadedAfter ?? 0)
+                      : undefined,
+                  total:
+                    totalBefore != null || totalAfter != null
+                      ? (totalBefore ?? 0) + (totalAfter ?? 0)
+                      : undefined,
+                  entries: [
+                    ...(beforeResponse.response.data?.entries ?? []),
+                    ...(afterResponse?.response.data?.entries ?? []),
+                  ],
+                  errors: [
+                    ...(beforeResponse.response.errors ?? []),
+                    ...(afterResponse?.response.errors ?? []),
+                  ],
+                  hasMoreBefore: beforeResponse.response.data?.hasMoreBefore,
+                  hasMoreAfter: afterResponse?.response.data?.hasMoreAfter,
+                  topCursor: beforeResponse.response.data?.topCursor,
+                  bottomCursor: afterResponse?.response.data?.bottomCursor,
+                },
+              };
+            })
+          )
+        )
+      ),
+    [logEntriesAroundSearchRequests$]
+  );
+
+  const {
+    latestValue: {
+      before: latestBeforeResponse,
+      after: latestAfterResponse,
+      combined: latestCombinedResponse,
+    },
+  } = useObservableState(logEntriesAroundSearchResponses$, initialCombinedResponse);
+
+  useSubscription(logEntriesAroundSearchResponses$, {
+    next: ({ before, after, combined }) => {
+      console.log('combined next', before, after, combined);
     },
   });
 
-  // return {
-  //   cancelRequest,
-  //   fetchLogEntriesAround,
-  //   isRequestRunning,
-  //   isResponsePartial,
-  //   loaded,
-  //   total,
-  // };
+  const cancelRequest = useCallback(() => {
+    latestBeforeResponse?.abortController.abort();
+    latestAfterResponse?.abortController.abort();
+  }, [latestBeforeResponse, latestAfterResponse]);
+
+  return {
+    cancelRequest,
+    fetchLogEntriesAround,
+    isRequestRunning: latestCombinedResponse?.isRunning ?? false,
+    isResponsePartial: latestCombinedResponse?.isPartial ?? false,
+    loaded: latestCombinedResponse?.loaded,
+    logEntriesAroundSearchResponses$,
+    total: latestCombinedResponse?.total,
+  };
 };
+
+const initialCombinedResponse = {
+  before: undefined,
+  after: undefined,
+  combined: undefined,
+} as const;

@@ -9,12 +9,10 @@ import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
 import { esKuery } from '../../../../../../../src/plugins/data/public';
 import { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useSubscription } from '../../../utils/use_observable';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { LogSourceConfigurationProperties } from '../log_source';
 import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
+import { useFetchLogEntriesAround } from './use_fetch_log_entries_around';
 import { useFetchLogEntriesBefore } from './use_fetch_log_entries_before';
 
 interface LogStreamProps {
@@ -32,16 +30,6 @@ interface LogStreamState {
   bottomCursor: LogEntryCursor | null;
   hasMoreBefore: boolean;
   hasMoreAfter: boolean;
-}
-
-type LoadingState = 'uninitialized' | 'loading' | 'success' | 'error';
-
-interface LogStreamReturn extends LogStreamState {
-  fetchEntries: () => void;
-  fetchPreviousEntries: () => void;
-  fetchNextEntries: () => void;
-  loadingState: LoadingState;
-  pageLoadingState: LoadingState;
 }
 
 const INITIAL_STATE: LogStreamState = {
@@ -62,8 +50,7 @@ export function useLogStream({
   query,
   center,
   columns,
-}: LogStreamProps): LogStreamReturn {
-  const { services } = useKibanaContextForPlugin();
+}: LogStreamProps) {
   const [state, setState] = useSetState<LogStreamState>(INITIAL_STATE);
 
   // Ensure the pagination keeps working when the timerange gets extended
@@ -86,51 +73,47 @@ export function useLogStream({
     return query ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query)) : undefined;
   }, [query]);
 
-  const serializedQuery = useMemo(() => {
-    return parsedQuery ? JSON.stringify(parsedQuery) : undefined;
-  }, [parsedQuery]);
+  const {
+    fetchLogEntriesAround,
+    isRequestRunning: isLogEntriesAroundRequestRunning,
+    logEntriesAroundSearchResponses$,
+  } = useFetchLogEntriesAround({
+    sourceId,
+    startTimestamp,
+    endTimestamp,
+    query: parsedQuery,
+    columnOverrides: columns,
+  });
 
-  // Callbacks
-  const [entriesPromise, fetchEntries] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'creation',
-      createPromise: () => {
-        setState(INITIAL_STATE);
-        const fetchPosition = center ? { center } : { before: 'last' };
-
-        return fetchLogEntries(
-          {
-            sourceId,
-            startTimestamp,
-            endTimestamp,
-            query: serializedQuery,
-            columns,
-            ...fetchPosition,
-          },
-          services.http.fetch
-        );
-      },
-      onResolve: ({ data }) => {
+  useSubscription(logEntriesAroundSearchResponses$, {
+    next: ({ before, after, combined }) => {
+      // if (data != null && !isPartial) {
+      if ((before.response.data != null || after?.response.data != null) && !combined.isPartial) {
         setState((prevState) => ({
-          ...data,
-          hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
-          hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
+          ...prevState,
+          entries: combined.entries,
+          hasMoreAfter: combined.hasMoreAfter ?? prevState.hasMoreAfter,
+          hasMoreBefore: combined.hasMoreAfter ?? prevState.hasMoreAfter,
+          bottomCursor: combined.bottomCursor,
+          topCursor: combined.topCursor,
         }));
-      },
+      }
     },
-    [sourceId, startTimestamp, endTimestamp, query]
-  );
+    error: (err) => {
+      console.error(err);
+    },
+  });
 
   const {
     fetchLogEntriesBefore,
     isRequestRunning: isLogEntriesBeforeRequestRunning,
-    isResponsePartial: isLogEntriesBeforeResponsePartial,
     logEntriesBeforeSearchResponse$,
   } = useFetchLogEntriesBefore({
     sourceId,
     startTimestamp,
     endTimestamp,
     query: parsedQuery,
+    columnOverrides: columns,
   });
 
   useSubscription(logEntriesBeforeSearchResponse$, {
@@ -166,13 +149,13 @@ export function useLogStream({
   const {
     fetchLogEntriesAfter,
     isRequestRunning: isLogEntriesAfterRequestRunning,
-    isResponsePartial: isLogEntriesAfterResponsePartial,
     logEntriesAfterSearchResponse$,
   } = useFetchLogEntriesAfter({
     sourceId,
     startTimestamp,
     endTimestamp,
     query: parsedQuery,
+    columnOverrides: columns,
   });
 
   useSubscription(logEntriesAfterSearchResponse$, {
@@ -205,59 +188,39 @@ export function useLogStream({
     fetchLogEntriesAfter(state.bottomCursor, LOG_ENTRIES_CHUNK_SIZE);
   }, [fetchLogEntriesAfter, state.bottomCursor, state.hasMoreAfter]);
 
-  const loadingState = useMemo<LoadingState>(
-    () => convertPromiseStateToLoadingState(entriesPromise.state),
-    [entriesPromise.state]
+  const fetchEntries = useCallback(() => {
+    setState(INITIAL_STATE);
+
+    if (center) {
+      fetchLogEntriesAround(center, LOG_ENTRIES_CHUNK_SIZE);
+    } else {
+      fetchLogEntriesBefore('last', LOG_ENTRIES_CHUNK_SIZE);
+    }
+  }, [center, fetchLogEntriesAround, fetchLogEntriesBefore, setState]);
+
+  const isReloading = useMemo(
+    () =>
+      isLogEntriesAroundRequestRunning ||
+      (state.bottomCursor == null && state.topCursor == null && isLogEntriesBeforeRequestRunning),
+    [
+      isLogEntriesAroundRequestRunning,
+      isLogEntriesBeforeRequestRunning,
+      state.bottomCursor,
+      state.topCursor,
+    ]
   );
 
-  const pageLoadingState = useMemo<LoadingState>(() => {
-    if (isLogEntriesBeforeRequestRunning || isLogEntriesAfterRequestRunning) {
-      return 'loading';
-    }
-
-    if (
-      (!isLogEntriesBeforeRequestRunning && isLogEntriesBeforeResponsePartial) ||
-      (!isLogEntriesAfterRequestRunning && isLogEntriesAfterResponsePartial)
-    ) {
-      return 'error';
-    }
-
-    if (
-      (!isLogEntriesBeforeRequestRunning && !isLogEntriesBeforeResponsePartial) ||
-      (!isLogEntriesAfterRequestRunning && !isLogEntriesAfterResponsePartial)
-    ) {
-      return 'success';
-    }
-
-    return 'uninitialized';
-  }, [
-    isLogEntriesAfterRequestRunning,
-    isLogEntriesAfterResponsePartial,
-    isLogEntriesBeforeRequestRunning,
-    isLogEntriesBeforeResponsePartial,
-  ]);
+  const isLoadingMore = useMemo(
+    () => isLogEntriesBeforeRequestRunning || isLogEntriesAfterRequestRunning,
+    [isLogEntriesAfterRequestRunning, isLogEntriesBeforeRequestRunning]
+  );
 
   return {
     ...state,
     fetchEntries,
-    fetchPreviousEntries,
     fetchNextEntries,
-    loadingState,
-    pageLoadingState,
+    fetchPreviousEntries,
+    isLoadingMore,
+    isReloading,
   };
-}
-
-function convertPromiseStateToLoadingState(
-  state: 'uninitialized' | 'pending' | 'resolved' | 'rejected'
-): LoadingState {
-  switch (state) {
-    case 'uninitialized':
-      return 'uninitialized';
-    case 'pending':
-      return 'loading';
-    case 'resolved':
-      return 'success';
-    case 'rejected':
-      return 'error';
-  }
 }
