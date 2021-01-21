@@ -105,6 +105,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.header.clickDashboard();
 
+        // The following tests require a fresh dashboard.
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+
         const inViewMode = await PageObjects.dashboard.getIsInViewMode();
         if (inViewMode) await PageObjects.dashboard.switchToEditMode();
         await dashboardAddPanel.addSavedSearch(searchName);
