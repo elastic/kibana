@@ -15,16 +15,16 @@ to be able to create and edit either of the geo alerts.
 See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to this feature. 
 
 [float]
-=== Requirements to create a geo alert
+=== Geo alert requirements
 
 To create either a *Tracking threshold* or a *Tracking containment* alert, the
 following requirements must be present:
 
-- *Trackable index or index pattern data*: An index containing a `geo_point` field, `date` field,
+- *Tracks index or index pattern*: An index containing a `geo_point` field, `date` field,
 and some form of entity identifier. An entity identifier is a `keyword` or `number`
 field that consistently identifies the entity to be tracked. The data in this index should be dynamically
 updating so that there are entity movements to alert upon.
-- *Boundary index or index pattern data*: An index containing `geo_shape` data, such as boundary data and bounding box data.
+- *Boundaries index or index pattern*: An index containing `geo_shape` data, such as boundary data and bounding box data.
 This data is presumed to be static (not updating). Shape data matching the query is
 harvested once when the alert is created and anytime after when the alert is re-enabled
 after disablement.
@@ -40,19 +40,16 @@ than the current time minus the amount of the interval. If data older than
 === Creating a geo alert
 Both *threshold* and *containment* alerts can be created by clicking the *Create*
 button in the <<alert-management, alert management UI>>.
-Complete the <<defining-alerts-general-details, general alert details>>, and
-then select either *Tracking threshold* or *Tracking containment*.
-
-[role="screenshot"]
-image::images/alert-types-tracking-select.png[Choosing a tracking alert type]
-
-Depending on the specific requirements for the alert, either tracking or containment
-might be appropriate. Select <<alert-type-tracking-threshold>> if the alert is more
-focused on generating an alert when an entity crosses a boundary, and you desire the
-ability to highlight lines of crossing on a custom map. Select  
+Complete the <<defining-alerts-general-details, general alert details>>.
+Select <<alert-type-tracking-threshold>> to generate an alert when an entity crosses a boundary, and you desire the
+ability to highlight lines of crossing on a custom map.
+Select
 <<alert-type-tracking-containment>> if an entity should send out constant alerts
 while contained within a boundary (this feature is optional) or if the alert is generally
 just more focused around activity when an entity exists within a shape.
+
+[role="screenshot"]
+image::images/alert-types-tracking-select.png[Choosing a tracking alert type]
 
 [NOTE]
 ==================================================
