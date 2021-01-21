@@ -41,16 +41,11 @@ export function MlEmbeddedMapComponent({
     services: { embeddable: embeddablePlugin, maps: mapsPlugin },
   } = useMlKibana();
 
-  if (!embeddablePlugin) {
-    throw new Error('Embeddable start plugin not found');
-  }
-  if (!mapsPlugin) {
-    throw new Error('Maps start plugin not found');
-  }
-
   const factory:
     | EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput, MapEmbeddable>
-    | undefined = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+    | undefined = embeddablePlugin
+    ? embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE)
+    : undefined;
 
   // Update the layer list  with updated geo points upon refresh
   useEffect(() => {
@@ -70,7 +65,9 @@ export function MlEmbeddedMapComponent({
   useEffect(() => {
     async function setupEmbeddable() {
       if (!factory) {
-        throw new Error('Map embeddable not found.');
+        // eslint-disable-next-line no-console
+        console.error('Map embeddable not found.');
+        return;
       }
       const input: MapEmbeddableInput = {
         id: htmlIdGenerator()(),
@@ -141,6 +138,17 @@ export function MlEmbeddedMapComponent({
       embeddable.render(embeddableRoot.current);
     }
   }, [embeddable, embeddableRoot]);
+
+  if (!embeddablePlugin) {
+    // eslint-disable-next-line no-console
+    console.error('Embeddable start plugin not found');
+    return null;
+  }
+  if (!mapsPlugin) {
+    // eslint-disable-next-line no-console
+    console.error('Maps start plugin not found');
+    return null;
+  }
 
   return (
     <div
