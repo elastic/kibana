@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { KibanaRequest } from 'src/core/server';
 import { CancellationToken } from '../../../common';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
@@ -12,6 +12,7 @@ import { RunTaskFnFactory } from '../../types';
 import { createGenerateCsv } from '../csv/generate_csv';
 import { getGenerateCsvParams } from './lib/get_csv_job';
 import { JobPayloadPanelCsv } from './types';
+import type { ReportingRequestHandlerContext } from '../../types';
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
@@ -20,7 +21,7 @@ import { JobPayloadPanelCsv } from './types';
 export type ImmediateExecuteFn = (
   jobId: null,
   job: JobPayloadPanelCsv,
-  context: RequestHandlerContext,
+  context: ReportingRequestHandlerContext,
   req: KibanaRequest
 ) => Promise<TaskRunResult>;
 

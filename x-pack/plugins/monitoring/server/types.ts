@@ -4,10 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
-import { IRouter, ILegacyClusterClient, Logger, ILegacyCustomClusterClient } from 'kibana/server';
+import type {
+  IRouter,
+  ILegacyClusterClient,
+  Logger,
+  ILegacyCustomClusterClient,
+  RequestHandlerContext,
+} from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
-import { PluginStartContract as ActionsPluginsStartContact } from '../../actions/server';
+import type {
+  PluginStartContract as ActionsPluginsStartContact,
+  ActionsApiRequestHandlerContext,
+} from '../../actions/server';
+import type { AlertingApiRequestHandlerContext } from '../../alerts/server';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
@@ -42,6 +52,11 @@ export interface PluginsSetup {
   cloud?: CloudSetup;
 }
 
+export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerContext {
+  actions?: ActionsApiRequestHandlerContext;
+  alerting?: AlertingApiRequestHandlerContext;
+}
+
 export interface PluginsStart {
   alerts: AlertingPluginStartContract;
   actions: ActionsPluginsStartContact;
@@ -53,7 +68,7 @@ export interface MonitoringCoreConfig {
 
 export interface RouteDependencies {
   cluster: ILegacyCustomClusterClient;
-  router: IRouter;
+  router: IRouter<RequestHandlerContextMonitoringPlugin>;
   licenseService: MonitoringLicenseService;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   logger: Logger;
@@ -66,7 +81,7 @@ export interface MonitoringCore {
 }
 
 export interface LegacyShimDependencies {
-  router: IRouter;
+  router: IRouter<RequestHandlerContextMonitoringPlugin>;
   instanceUuid: string;
   esDataClient: ILegacyClusterClient;
   kibanaStatsCollector: any;
