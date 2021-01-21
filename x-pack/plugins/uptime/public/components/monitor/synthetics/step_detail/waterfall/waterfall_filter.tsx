@@ -61,7 +61,7 @@ export const WaterfallFilter = ({ query, setQuery, activeFilters, setActiveFilte
     () => {
       setQuery(value);
     },
-    50,
+    250,
     [value]
   );
 
@@ -74,7 +74,7 @@ export const WaterfallFilter = ({ query, setQuery, activeFilters, setActiveFilte
           onChange={(evt) => {
             setValue(evt.target.value);
           }}
-          value={query}
+          value={value}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={3}>

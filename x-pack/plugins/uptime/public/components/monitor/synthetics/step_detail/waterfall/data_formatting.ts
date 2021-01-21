@@ -107,12 +107,12 @@ export const getSeriesAndDomain = (items: NetworkItems, query: string, activeFil
 
     let currentOffset = offsetValue - zeroOffset;
 
-    let valueFound = false;
+    let timingValueFound = false;
 
     TIMING_ORDER.forEach((timing) => {
       const value = getValue(item.timings, timing);
       if (value && value >= 0) {
-        valueFound = true;
+        timingValueFound = true;
         const colour = timing === Timings.Receive ? mimeTypeColour : colourPalette[timing];
         const y = currentOffset + value;
 
@@ -141,7 +141,7 @@ export const getSeriesAndDomain = (items: NetworkItems, query: string, activeFil
     /* if no specific timing values are found, use the total time
      * if total time is not available use 0, set showTooltip to false,
      * and omit tooltip props */
-    if (!valueFound) {
+    if (!timingValueFound) {
       const total = item.timings.total;
       const hasTotal = total !== -1;
       acc.push({
