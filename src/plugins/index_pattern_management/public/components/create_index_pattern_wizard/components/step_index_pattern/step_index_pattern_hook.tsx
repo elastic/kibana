@@ -25,7 +25,7 @@ interface StepIndexPatternProps {
   allIndices: MatchedItem[];
   goToNextStep: (selectedPatterns: string[], timestampField?: string) => void;
   indexPatternCreationType: IndexPatternCreationConfig;
-  initialQuery?: string;
+  initialQuery?: string[];
   showSystemIndices: boolean;
 }
 

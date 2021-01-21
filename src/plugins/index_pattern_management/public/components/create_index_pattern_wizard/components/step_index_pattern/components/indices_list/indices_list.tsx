@@ -143,7 +143,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
   }
 
   highlightIndexName(indexName: string, patternList: string[]) {
-    let queryWithoutWildcard: string | null = null;
+    let queryWithoutWildcard: string = '';
     let queryIdx: number | null = null;
     const matchedPattern = patternList.find((query) => {
       const queryWithoutWildcard2 = query.endsWith('*') ? query.substr(0, query.length - 1) : query;
@@ -157,9 +157,9 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
       return true;
     });
 
-    if (matchedPattern && queryWithoutWildcard != null && queryIdx != null) {
+    if (matchedPattern && queryWithoutWildcard.length > 0 && queryIdx != null) {
       const preStr = indexName.substr(0, queryIdx);
-      const postStr = indexName.substr(queryIdx + matchedPattern.length);
+      const postStr = indexName.substr(queryIdx + queryWithoutWildcard.length);
 
       return (
         <span>

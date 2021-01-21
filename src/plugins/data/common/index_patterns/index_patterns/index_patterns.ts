@@ -480,8 +480,15 @@ export class IndexPatternsService {
    * @param skipFetchFields Whether to skip field refresh step.
    */
 
-  async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
-    const indexPattern = await this.create(spec, skipFetchFields);
+  async createAndSave(
+    spec: Omit<IndexPatternSpec, 'patternListActive'>,
+    override = false,
+    skipFetchFields = false
+  ) {
+    const patternListActive = await this.apiClient.validatePatternListActive({
+      patternList: spec.patternList,
+    });
+    const indexPattern = await this.create({ ...spec, patternListActive }, skipFetchFields);
     await this.createSavedObject(indexPattern, override);
     await this.setDefault(indexPattern.id!);
     return indexPattern;

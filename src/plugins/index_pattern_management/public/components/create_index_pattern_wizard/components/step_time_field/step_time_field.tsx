@@ -28,7 +28,8 @@ import { IndexPatternManagmentContextValue } from '../../../../types';
 import { IndexPatternCreationConfig } from '../../../..';
 
 interface StepTimeFieldProps {
-  indexPattern: string;
+  indexPattern?: string;
+  patternList: string[];
   goToPreviousStep: () => void;
   createIndexPattern: (selectedTimeField: string | undefined, indexPatternId: string) => void;
   indexPatternCreationType: IndexPatternCreationConfig;
