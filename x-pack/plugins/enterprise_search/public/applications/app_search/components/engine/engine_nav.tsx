@@ -174,8 +174,7 @@ export const EngineNav: React.FC = () => {
       )}
       {canManageEngineRelevanceTuning && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(ENGINE_RELEVANCE_TUNING_PATH))}
+          to={generateEnginePath(ENGINE_RELEVANCE_TUNING_PATH)}
           data-test-subj="EngineRelevanceTuningLink"
         >
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">

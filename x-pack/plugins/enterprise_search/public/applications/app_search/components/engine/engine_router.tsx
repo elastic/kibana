@@ -23,7 +23,7 @@ import {
   // ENGINE_SCHEMA_PATH,
   // ENGINE_CRAWLER_PATH,
   // META_ENGINE_SOURCE_ENGINES_PATH,
-  // ENGINE_RELEVANCE_TUNING_PATH,
+  ENGINE_RELEVANCE_TUNING_PATH,
   // ENGINE_SYNONYMS_PATH,
   // ENGINE_CURATIONS_PATH,
   // ENGINE_RESULT_SETTINGS_PATH,
@@ -37,6 +37,7 @@ import { Loading } from '../../../shared/loading';
 import { EngineOverview } from '../engine_overview';
 import { AnalyticsRouter } from '../analytics';
 import { DocumentDetail, Documents } from '../documents';
+import { RelevanceTuning } from '../relevance_tuning';
 
 import { EngineLogic } from './';
 
@@ -94,6 +95,9 @@ export const EngineRouter: React.FC = () => {
       </Route>
       <Route path={ENGINE_DOCUMENTS_PATH}>
         <Documents engineBreadcrumb={engineBreadcrumb} />
+      </Route>
+      <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
+        <RelevanceTuning engineBreadcrumb={engineBreadcrumb} />
       </Route>
       <Route>
         <SetPageChrome trail={[...engineBreadcrumb, OVERVIEW_TITLE]} />
