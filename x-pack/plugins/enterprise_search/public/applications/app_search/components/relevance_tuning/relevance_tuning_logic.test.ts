@@ -208,6 +208,21 @@ describe('RelevanceTuningLogic', () => {
         });
       });
     });
+
+    describe('setSearchSettingsResponse', () => {
+      it('should set state', () => {
+        mount({
+          unsavedChanges: true,
+        });
+        RelevanceTuningLogic.actions.setSearchSettingsResponse(searchSettings);
+
+        expect(RelevanceTuningLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          searchSettings,
+          unsavedChanges: false,
+        });
+      });
+    });
   });
 
   describe('listeners', () => {

@@ -34,6 +34,7 @@ interface RelevanceTuningActions {
   dismissSchemaConflictCallout(): void;
   initializeRelevanceTuning(): void;
   getSearchResults(): void;
+  setSearchSettingsResponse(searchSettings: SearchSettings): { searchSettings: SearchSettings };
 }
 
 interface RelevanceTuningValues {
@@ -84,6 +85,9 @@ export const RelevanceTuningLogic = kea<
     dismissSchemaConflictCallout: true,
     initializeRelevanceTuning: true,
     getSearchResults: true,
+    setSearchSettingsResponse: (searchSettings: SearchSettings) => ({
+      searchSettings,
+    }),
   }),
   reducers: () => ({
     searchSettings: [
@@ -91,6 +95,7 @@ export const RelevanceTuningLogic = kea<
       {
         onInitializeRelevanceTuning: (_, { searchSettings }) => searchSettings,
         setSearchSettings: (_, { searchSettings }) => searchSettings,
+        setSearchSettingsResponse: (_, { searchSettings }) => searchSettings,
       },
     ],
     schema: [
@@ -127,6 +132,7 @@ export const RelevanceTuningLogic = kea<
       false,
       {
         setSearchSettings: () => true,
+        setSearchSettingsResponse: () => false,
       },
     ],
 
