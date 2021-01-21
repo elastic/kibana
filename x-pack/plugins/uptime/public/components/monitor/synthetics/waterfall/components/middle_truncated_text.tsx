@@ -6,6 +6,8 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import { FIXED_AXIS_HEIGHT } from './constants';
 
 const OuterContainer = styled.div`
   width: 100%;
@@ -13,7 +15,7 @@ const OuterContainer = styled.div`
   position: relative;
 `;
 
-const InnerContainer = styled.div`
+const InnerContainer = styled.span`
   position: absolute;
   top: 0;
   bottom: 0;
@@ -28,10 +30,12 @@ const FirstChunk = styled.span`
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  line-height: ${FIXED_AXIS_HEIGHT}px;
 `;
 
 const LastChunk = styled.span`
   flex-shrink: 0;
+  line-height: ${FIXED_AXIS_HEIGHT}px;
 `;
 
 export const getChunks = (text: string) => {
@@ -51,11 +55,18 @@ export const MiddleTruncatedText = ({ text }: { text: string }) => {
   }, [text]);
 
   return (
-    <OuterContainer>
-      <InnerContainer>
-        <FirstChunk>{chunks.first}</FirstChunk>
-        <LastChunk>{chunks.last}</LastChunk>
-      </InnerContainer>
-    </OuterContainer>
+    <>
+      <OuterContainer>
+        <EuiScreenReaderOnly>
+          <span data-test-subj="middleTruncatedTextSROnly">{text}</span>
+        </EuiScreenReaderOnly>
+        <EuiToolTip content={text} position="top" data-test-subj="middleTruncatedTextToolTip">
+          <InnerContainer aria-hidden={true}>
+            <FirstChunk>{chunks.first}</FirstChunk>
+            <LastChunk>{chunks.last}</LastChunk>
+          </InnerContainer>
+        </EuiToolTip>
+      </OuterContainer>
+    </>
   );
 };

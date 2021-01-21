@@ -30,7 +30,6 @@ test('should sort groups by containing enabled alert types first and then by nam
           alertTypeItem: {
             id: 'my-alert-type',
             iconClass: 'test',
-            name: 'test-alert',
             description: 'Alert when testing',
             documentationUrl: 'https://localhost.local/docs',
             validate: () => {
@@ -52,7 +51,6 @@ test('should sort groups by containing enabled alert types first and then by nam
           alertTypeItem: {
             id: 'my-alert-type',
             iconClass: 'test',
-            name: 'test-alert',
             description: 'Alert when testing',
             documentationUrl: 'https://localhost.local/docs',
             validate: () => {
@@ -69,7 +67,6 @@ test('should sort groups by containing enabled alert types first and then by nam
           alertTypeItem: {
             id: 'disabled-alert-type',
             iconClass: 'test',
-            name: 'test-alert',
             description: 'Alert when testing',
             documentationUrl: 'https://localhost.local/docs',
             validate: () => {
@@ -91,7 +88,6 @@ test('should sort groups by containing enabled alert types first and then by nam
           alertTypeItem: {
             id: 'my-alert-type',
             iconClass: 'test',
-            name: 'test-alert',
             description: 'Alert when testing',
             documentationUrl: 'https://localhost.local/docs',
             validate: () => {
@@ -130,7 +126,6 @@ test('should sort alert types by enabled first and then by name', async () => {
       alertTypeItem: {
         id: 'my-alert-type',
         iconClass: 'test',
-        name: 'test-alert',
         description: 'Alert when testing',
         documentationUrl: 'https://localhost.local/docs',
         validate: () => {
@@ -147,7 +142,6 @@ test('should sort alert types by enabled first and then by name', async () => {
       alertTypeItem: {
         id: 'my-alert-type',
         iconClass: 'test',
-        name: 'test-alert',
         description: 'Alert when testing',
         documentationUrl: 'https://localhost.local/docs',
         validate: () => {
@@ -164,7 +158,6 @@ test('should sort alert types by enabled first and then by name', async () => {
       alertTypeItem: {
         id: 'disabled-alert-type',
         iconClass: 'test',
-        name: 'test-alert',
         description: 'Alert when testing',
         documentationUrl: 'https://localhost.local/docs',
         validate: () => {

@@ -24,7 +24,7 @@ import { EuiSuperSelect } from '@elastic/eui';
 import moment from 'moment';
 import { SummarizedCopyToSpaceResult } from '../index';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
-import { Space } from '../../../common/model/space';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { CopyStatusIndicator } from './copy_status_indicator';
 import { ImportRetry } from '../types';
 

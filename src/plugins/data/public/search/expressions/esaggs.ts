@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { get } from 'lodash';
@@ -49,11 +38,11 @@ export function getFunctionDefinition({
     ...getEsaggsMeta(),
     async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
       const {
-        addFilters,
         aggs,
         deserializeFieldFormat,
         indexPatterns,
         searchSource,
+        getNow,
       } = await getStartDependencies();
 
       const indexPattern = await indexPatterns.create(args.index.value, true);
@@ -64,7 +53,6 @@ export function getFunctionDefinition({
 
       return await handleEsaggsRequest(input, args, {
         abortSignal: (abortSignal as unknown) as AbortSignal,
-        addFilters,
         aggs: aggConfigs,
         deserializeFieldFormat,
         filters: get(input, 'filters', undefined),
@@ -77,6 +65,7 @@ export function getFunctionDefinition({
         searchSourceService: searchSource,
         timeFields: args.timeFields,
         timeRange: get(input, 'timeRange', undefined),
+        getNow,
       });
     },
   });
@@ -104,13 +93,13 @@ export function getEsaggs({
   return getFunctionDefinition({
     getStartDependencies: async () => {
       const [, , self] = await getStartServices();
-      const { fieldFormats, indexPatterns, query, search } = self;
+      const { fieldFormats, indexPatterns, search, nowProvider } = self;
       return {
-        addFilters: query.filterManager.addFilters.bind(query.filterManager),
         aggs: search.aggs,
         deserializeFieldFormat: fieldFormats.deserialize.bind(fieldFormats),
         indexPatterns,
         searchSource: search.searchSource,
+        getNow: () => nowProvider.get(),
       };
     },
   });

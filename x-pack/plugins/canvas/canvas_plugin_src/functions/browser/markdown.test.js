@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
-import { testTable } from '../common/__tests__/fixtures/test_tables';
-import { fontStyle } from '../common/__tests__/fixtures/test_styles';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { testTable } from '../common/__fixtures__/test_tables';
+import { fontStyle } from '../common/__fixtures__/test_styles';
 import { markdown } from './markdown';
 
 describe('markdown', () => {

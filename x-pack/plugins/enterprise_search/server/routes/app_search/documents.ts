@@ -8,6 +8,28 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../plugin';
 
+export function registerDocumentsRoutes({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/api/app_search/engines/{engineName}/documents',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+        }),
+        body: schema.object({
+          documents: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: `/as/engines/:engineName/documents/new`,
+    })
+  );
+}
+
 export function registerDocumentRoutes({
   router,
   enterpriseSearchRequestHandler,
@@ -22,11 +44,9 @@ export function registerDocumentRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/documents/${request.params.documentId}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: `/as/engines/:engineName/documents/:documentId`,
+    })
   );
   router.delete(
     {
@@ -38,10 +58,8 @@ export function registerDocumentRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/documents/${request.params.documentId}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: `/as/engines/:engineName/documents/:documentId`,
+    })
   );
 }

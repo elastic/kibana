@@ -5,5 +5,5 @@
  */
 
 export { DocumentCreationButtons } from './document_creation_buttons';
-export { DocumentCreationModal } from './document_creation_modal';
+export { DocumentCreationFlyout } from './document_creation_flyout';
 export { DocumentCreationLogic } from './document_creation_logic';

@@ -12,9 +12,6 @@ import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 export function getAlertType(): AlertTypeModel<GeoThresholdAlertParams> {
   return {
     id: '.geo-threshold',
-    name: i18n.translate('xpack.stackAlerts.geoThreshold.name.trackingThreshold', {
-      defaultMessage: 'Tracking threshold',
-    }),
     description: i18n.translate('xpack.stackAlerts.geoThreshold.descriptionText', {
       defaultMessage: 'Alert when an entity enters or leaves a geo boundary.',
     }),

@@ -27,7 +27,7 @@ type IngestErrorHandler = (
   params: IngestErrorHandlerParams
 ) => IKibanaResponse | Promise<IKibanaResponse>;
 interface IngestErrorHandlerParams {
-  error: IngestManagerError | Boom | Error;
+  error: IngestManagerError | Boom.Boom | Error;
   response: KibanaResponseFactory;
   request?: KibanaRequest;
   context?: RequestHandlerContext;

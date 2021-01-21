@@ -5,14 +5,19 @@
  */
 import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_query/filters/meta_filter';
 
-import { TimelineId, TimelineType, TimelineStatus } from '../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+} from '../../../common/types/timeline';
 
 import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
 import { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_query';
 import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
-import { TimelineModel, TimelineTabs } from '../../timelines/store/timeline/model';
+import { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 
 export interface MockedProvidedQuery {
@@ -2145,6 +2150,7 @@ export const mockTimelineModel: TimelineModel = {
   sort: [
     {
       columnId: '@timestamp',
+      columnType: 'number',
       sortDirection: Direction.desc,
     },
   ],
@@ -2179,7 +2185,7 @@ export const mockTimelineResult: TimelineResult = {
   templateTimelineId: null,
   templateTimelineVersion: null,
   savedQueryId: null,
-  sort: [{ columnId: '@timestamp', sortDirection: 'desc' }],
+  sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: 'desc' }],
   version: '1',
 };
 
@@ -2197,7 +2203,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
   timeline: {
     activeTab: TimelineTabs.query,
     columns: [
-      { columnHeaderType: 'not-filtered', id: '@timestamp', width: 190 },
+      { columnHeaderType: 'not-filtered', id: '@timestamp', type: 'number', width: 190 },
       { columnHeaderType: 'not-filtered', id: 'message', width: 180 },
       { columnHeaderType: 'not-filtered', id: 'event.category', width: 180 },
       { columnHeaderType: 'not-filtered', id: 'event.action', width: 180 },
@@ -2249,7 +2255,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     selectedEventIds: {},
     show: false,
     showCheckboxes: false,
-    sort: [{ columnId: '@timestamp', sortDirection: Direction.desc }],
+    sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
     status: TimelineStatus.draft,
     title: '',
     timelineType: TimelineType.default,

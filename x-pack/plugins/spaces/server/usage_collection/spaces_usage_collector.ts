@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyCallAPIOptions } from 'src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 import { take } from 'rxjs/operators';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
 import { PluginsSetup } from '../plugin';
 import { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
-
-type CallCluster = <T = unknown>(
-  endpoint: string,
-  clientParams: Record<string, unknown>,
-  options?: LegacyCallAPIOptions
-) => Promise<T>;
 
 interface SpacesAggregationResponse {
   hits: {
@@ -37,7 +31,7 @@ interface SpacesAggregationResponse {
  * @return {UsageData}
  */
 async function getSpacesUsage(
-  callCluster: CallCluster,
+  esClient: ElasticsearchClient,
   kibanaIndex: string,
   features: PluginsSetup['features'],
   spacesAvailable: boolean
@@ -50,7 +44,7 @@ async function getSpacesUsage(
 
   let resp: SpacesAggregationResponse | undefined;
   try {
-    resp = await callCluster<SpacesAggregationResponse>('search', {
+    ({ body: resp } = await esClient.search({
       index: kibanaIndex,
       body: {
         track_total_hits: true,
@@ -72,7 +66,7 @@ async function getSpacesUsage(
         },
         size: 0,
       },
-    });
+    }));
   } catch (err) {
     if (err.status === 404) {
       return null;
@@ -208,14 +202,14 @@ export function getSpacesUsageCollector(
       'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes': { type: 'long' },
       'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no': { type: 'long' },
     },
-    fetch: async ({ callCluster }: CollectorFetchContext) => {
+    fetch: async ({ esClient }: CollectorFetchContext) => {
       const { licensing, kibanaIndexConfig$, features, usageStatsServicePromise } = deps;
       const license = await licensing.license$.pipe(take(1)).toPromise();
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 
       const kibanaIndex = (await kibanaIndexConfig$.pipe(take(1)).toPromise()).kibana.index;
 
-      const usageData = await getSpacesUsage(callCluster, kibanaIndex, features, available);
+      const usageData = await getSpacesUsage(esClient, kibanaIndex, features, available);
       const usageStats = await getUsageStats(usageStatsServicePromise, available);
 
       return {

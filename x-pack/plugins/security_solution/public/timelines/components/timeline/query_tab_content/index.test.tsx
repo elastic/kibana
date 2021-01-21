@@ -17,7 +17,7 @@ import { QueryTabContentComponent, Props as QueryTabContentComponentProps } from
 import { Sort } from '../body/sort';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { TimelineId, TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
@@ -67,6 +67,7 @@ describe('Timeline', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
+      columnType: 'number',
       sortDirection: Direction.desc,
     },
   ];
@@ -111,6 +112,8 @@ describe('Timeline', () => {
       status: TimelineStatus.active,
       timerangeKind: 'absolute',
       updateEventTypeAndIndexesName: jest.fn(),
+      activeTab: TimelineTabs.query,
+      show: true,
     };
   });
 
@@ -142,7 +145,9 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
     });
 
     test('it does render the timeline table when the source is loading with no events', () => {
@@ -159,7 +164,9 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
@@ -170,7 +177,9 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
@@ -181,7 +190,9 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 

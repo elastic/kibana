@@ -56,6 +56,11 @@ describe('ExplorerChartsContainer', () => {
   const kibanaContextMock = {
     services: {
       application: { navigateToApp: jest.fn() },
+      http: {
+        basePath: {
+          get: jest.fn(),
+        },
+      },
       share: {
         urlGenerators: { getUrlGenerator: jest.fn() },
       },

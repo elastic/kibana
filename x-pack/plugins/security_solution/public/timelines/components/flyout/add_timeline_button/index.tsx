@@ -55,6 +55,7 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
           id="timelineSettingsPopover"
           isOpen={showActions}
           closePopover={onClosePopover}
+          ownFocus
           repositionOnScroll
         >
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">

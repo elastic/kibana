@@ -38,7 +38,7 @@ import {
   MITRE_TACTIC,
   REFERENCE_URLS_INPUT,
   REFRESH_BUTTON,
-  RISK_INPUT,
+  DEFAULT_RISK_SCORE_INPUT,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
@@ -91,7 +91,7 @@ export const fillAboutRule = (
   cy.get(SEVERITY_DROPDOWN).click({ force: true });
   cy.get(`#${rule.severity.toLowerCase()}`).click();
 
-  cy.get(RISK_INPUT).clear({ force: true }).type(`${rule.riskScore}`, { force: true });
+  cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${rule.riskScore}`, { force: true });
 
   rule.tags.forEach((tag) => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
@@ -169,7 +169,7 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
     cy.get(COMBO_BOX_INPUT).type(`${rule.riskOverride}{enter}`);
   });
 
-  cy.get(RISK_INPUT).clear({ force: true }).type(`${rule.riskScore}`, { force: true });
+  cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${rule.riskScore}`, { force: true });
 
   rule.tags.forEach((tag) => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
@@ -247,7 +247,8 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
 
-  cy.get(CUSTOM_QUERY_INPUT).type(rule.customQuery!);
+  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
+  cy.get(TIMELINE(rule.timeline.id!)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)

@@ -12,6 +12,7 @@ import { BrowserFields } from '../../../../../../common/containers/source';
 import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
+  getRowRendererClassName,
 } from '../../../../../../common/components/accessibility/helpers';
 import { TimelineItem } from '../../../../../../../common/search_strategy/timeline';
 import { getRowRenderer } from '../../renderers/get_row_renderer';
@@ -59,28 +60,44 @@ export const StatefulRowRenderer = ({
     rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
   });
 
+  const rowRenderer = useMemo(() => getRowRenderer(event.ecs, rowRenderers), [
+    event.ecs,
+    rowRenderers,
+  ]);
+
   const content = useMemo(
-    () => (
-      <EuiFocusTrap clickOutsideDisables={true} disabled={focusOwnership !== 'owned'}>
-        <EuiScreenReaderOnly data-test-subj="eventRendererScreenReaderOnly">
-          <p>{i18n.YOU_ARE_IN_AN_EVENT_RENDERER(ariaRowindex)}</p>
-        </EuiScreenReaderOnly>
-        <div onKeyDown={onKeyDown}>
-          {getRowRenderer(event.ecs, rowRenderers).renderRow({
-            browserFields,
-            data: event.ecs,
-            timelineId,
-          })}
+    () =>
+      rowRenderer && (
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+        <div className={getRowRendererClassName(ariaRowindex)} role="dialog" onFocus={onFocus}>
+          <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
+            <EuiFocusTrap clickOutsideDisables={true} disabled={focusOwnership !== 'owned'}>
+              <EuiScreenReaderOnly data-test-subj="eventRendererScreenReaderOnly">
+                <p>{i18n.YOU_ARE_IN_AN_EVENT_RENDERER(ariaRowindex)}</p>
+              </EuiScreenReaderOnly>
+              <div onKeyDown={onKeyDown}>
+                {rowRenderer.renderRow({
+                  browserFields,
+                  data: event.ecs,
+                  timelineId,
+                })}
+              </div>
+            </EuiFocusTrap>
+          </EuiOutsideClickDetector>
         </div>
-      </EuiFocusTrap>
-    ),
-    [ariaRowindex, browserFields, event.ecs, focusOwnership, onKeyDown, rowRenderers, timelineId]
+      ),
+    [
+      ariaRowindex,
+      browserFields,
+      event.ecs,
+      focusOwnership,
+      onFocus,
+      onKeyDown,
+      onOutsideClick,
+      rowRenderer,
+      timelineId,
+    ]
   );
 
-  return (
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-    <div role="dialog" onFocus={onFocus}>
-      <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>{content}</EuiOutsideClickDetector>
-    </div>
-  );
+  return content;
 };

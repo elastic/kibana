@@ -8,7 +8,7 @@ import { ajaxErrorHandlersProvider } from '../lib/ajax_error_handler';
 import { Legacy } from '../legacy_shims';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 import { showInternalMonitoringToast } from '../lib/internal_monitoring_toasts';
-import { showSecurityToast } from '../alerts/lib/security_toasts';
+import { showAlertsToast } from '../alerts/lib/alerts_toast';
 
 function formatClusters(clusters) {
   return clusters.map(formatCluster);
@@ -94,7 +94,7 @@ export function monitoringClustersProvider($injector) {
       if (clusters.length) {
         try {
           const [{ data }] = await Promise.all([ensureAlertsEnabled(), ensureMetricbeatEnabled()]);
-          showSecurityToast(data);
+          showAlertsToast(data);
           once = true;
         } catch (_err) {
           // Intentionally swallow the error as this will retry the next page load

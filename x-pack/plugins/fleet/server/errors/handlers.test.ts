@@ -162,7 +162,7 @@ describe('defaultIngestErrorHandler', () => {
 
   describe('Boom', () => {
     it('500: constructor - one arg', async () => {
-      const error = new Boom('bam');
+      const error = new Boom.Boom('bam');
       const response = httpServerMock.createResponseFactory();
 
       await defaultIngestErrorHandler({ error, response });
@@ -181,7 +181,7 @@ describe('defaultIngestErrorHandler', () => {
     });
 
     it('custom: constructor - 2 args', async () => {
-      const error = new Boom('Problem doing something', {
+      const error = new Boom.Boom('Problem doing something', {
         statusCode: 456,
       });
       const response = httpServerMock.createResponseFactory();

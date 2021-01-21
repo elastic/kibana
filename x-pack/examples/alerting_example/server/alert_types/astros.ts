@@ -38,7 +38,14 @@ function getCraftFilter(craft: string) {
     craft === Craft.OuterSpace ? true : craft === person.craft;
 }
 
-export const alertType: AlertType = {
+export const alertType: AlertType<
+  { outerSpaceCapacity: number; craft: string; op: string },
+  { peopleInSpace: number },
+  { craft: string },
+  never,
+  'default',
+  'hasLandedBackOnEarth'
+> = {
   id: 'example.people-in-space',
   name: 'People In Space Right Now',
   actionGroups: [{ id: 'default', name: 'default' }],

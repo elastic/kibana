@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import {
@@ -31,6 +20,8 @@ import { Lifecycle } from '../lifecycle';
 import { Test, Suite } from '../../fake_mocha_types';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
+
+type SnapshotUpdateState = 'all' | 'new' | 'none';
 
 interface SnapshotContext {
   snapshotState: ISnapshotState;
@@ -94,13 +85,31 @@ const modifyStackTracePrepareOnce = once(() => {
   };
 });
 
-export function decorateSnapshotUi(lifecycle: Lifecycle, updateSnapshots: boolean) {
+export function decorateSnapshotUi({
+  lifecycle,
+  updateSnapshots,
+  isCi,
+}: {
+  lifecycle: Lifecycle;
+  updateSnapshots: boolean;
+  isCi: boolean;
+}) {
   let snapshotStatesByFilePath: Record<
     string,
     { snapshotState: ISnapshotState; testsInFile: Test[] }
   > = {};
 
   registered = true;
+
+  let updateSnapshot: SnapshotUpdateState;
+
+  if (isCi) {
+    // make sure snapshots that have not been committed
+    // are not written to file on CI, passing the test
+    updateSnapshot = 'none';
+  } else {
+    updateSnapshot = updateSnapshots ? 'all' : 'new';
+  }
 
   modifyStackTracePrepareOnce();
 
@@ -120,7 +129,7 @@ export function decorateSnapshotUi(lifecycle: Lifecycle, updateSnapshots: boolea
     const { file, snapshotTitle } = getSnapshotMeta(currentTest);
 
     if (!snapshotStatesByFilePath[file]) {
-      snapshotStatesByFilePath[file] = getSnapshotState(file, currentTest, updateSnapshots);
+      snapshotStatesByFilePath[file] = getSnapshotState(file, currentTest, updateSnapshot);
     }
 
     testContext = {
@@ -178,7 +187,7 @@ function recursivelyGetTestsFromSuite(suite: Suite): Test[] {
   return suite.tests.concat(flatten(suite.suites.map((s) => recursivelyGetTestsFromSuite(s))));
 }
 
-function getSnapshotState(file: string, test: Test, updateSnapshots: boolean) {
+function getSnapshotState(file: string, test: Test, updateSnapshot: SnapshotUpdateState) {
   const dirname = path.dirname(file);
   const filename = path.basename(file);
 
@@ -195,7 +204,7 @@ function getSnapshotState(file: string, test: Test, updateSnapshots: boolean) {
   const snapshotState = new SnapshotState(
     path.join(dirname + `/__snapshots__/` + filename.replace(path.extname(filename), '.snap')),
     {
-      updateSnapshot: updateSnapshots ? 'all' : 'new',
+      updateSnapshot,
       // @ts-expect-error
       getPrettier: () => prettier,
       getBabelTraverse: () => babelTraverse,

@@ -9,15 +9,14 @@ import { IfStatement } from './if_statement';
 import { Queue } from './queue';
 
 export function makeStatement(pipelineGraphVertex, pipelineStage) {
-  const klass = pipelineGraphVertex.constructor.name;
-  switch (klass) {
-    case 'PluginVertex':
+  switch (pipelineGraphVertex.typeString) {
+    case 'plugin':
       return PluginStatement.fromPipelineGraphVertex(pipelineGraphVertex, pipelineStage);
-    case 'IfVertex':
+    case 'if':
       return IfStatement.fromPipelineGraphVertex(pipelineGraphVertex, pipelineStage);
-    case 'QueueVertex':
+    case 'queue':
       return Queue.fromPipelineGraphVertex(pipelineGraphVertex, pipelineStage);
     default:
-      throw new Error(`Unknown vertex class: ${klass}`);
+      throw new Error(`Unknown vertex class: ${pipelineGraphVertex.typeString}`);
   }
 }

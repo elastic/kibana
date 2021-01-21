@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
-import { IRouter, ILegacyClusterClient, Logger } from 'kibana/server';
+import { IRouter, ILegacyClusterClient, Logger, ILegacyCustomClusterClient } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
 import { PluginStartContract as ActionsPluginsStartContact } from '../../actions/server';
@@ -52,9 +52,11 @@ export interface MonitoringCoreConfig {
 }
 
 export interface RouteDependencies {
+  cluster: ILegacyCustomClusterClient;
   router: IRouter;
   licenseService: MonitoringLicenseService;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
+  logger: Logger;
 }
 
 export interface MonitoringCore {
@@ -81,107 +83,36 @@ export interface LegacyRequest {
   payload: {
     [key: string]: any;
   };
+  params: {
+    [key: string]: string;
+  };
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;
   getAlertsClient: () => any;
   getActionsClient: () => any;
-  server: {
-    config: () => {
-      get: (key: string) => string | undefined;
-    };
-    newPlatform: {
-      setup: {
-        plugins: PluginsSetup;
-      };
-    };
-    plugins: {
-      monitoring: {
-        info: MonitoringLicenseService;
-      };
-      elasticsearch: {
-        getCluster: (
-          name: string
-        ) => {
-          callWithRequest: (req: any, endpoint: string, params: any) => Promise<any>;
-        };
-      };
-    };
-  };
+  server: LegacyServer;
 }
 
-export interface ElasticsearchResponse {
-  hits?: {
-    hits: ElasticsearchResponseHit[];
-    total: {
-      value: number;
+export interface LegacyServer {
+  route: (params: any) => void;
+  config: () => {
+    get: (key: string) => string | undefined;
+  };
+  newPlatform: {
+    setup: {
+      plugins: PluginsSetup;
     };
   };
-}
-
-export interface ElasticsearchResponseHit {
-  _source: ElasticsearchSource;
-  inner_hits?: {
-    [field: string]: {
-      hits?: {
-        hits: ElasticsearchResponseHit[];
-        total: {
-          value: number;
-        };
-      };
+  plugins: {
+    monitoring: {
+      info: MonitoringLicenseService;
     };
-  };
-}
-
-export interface ElasticsearchSource {
-  timestamp: string;
-  beats_stats?: {
-    timestamp?: string;
-    beat?: {
-      uuid?: string;
-      name?: string;
-      type?: string;
-      version?: string;
-      host?: string;
-    };
-    metrics?: {
-      beat?: {
-        memstats?: {
-          memory_alloc?: number;
-        };
-        info?: {
-          uptime?: {
-            ms?: number;
-          };
-        };
-        handles?: {
-          limit?: {
-            hard?: number;
-            soft?: number;
-          };
-        };
-      };
-      libbeat?: {
-        config?: {
-          reloads?: number;
-        };
-        output?: {
-          type?: string;
-          write?: {
-            bytes?: number;
-            errors?: number;
-          };
-          read?: {
-            errors?: number;
-          };
-        };
-        pipeline?: {
-          events?: {
-            total?: number;
-            published?: number;
-            dropped?: number;
-          };
-        };
+    elasticsearch: {
+      getCluster: (
+        name: string
+      ) => {
+        callWithRequest: (req: any, endpoint: string, params: any) => Promise<any>;
       };
     };
   };

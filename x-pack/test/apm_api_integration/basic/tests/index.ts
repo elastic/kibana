@@ -25,6 +25,8 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
       loadTestFile(require.resolve('./services/throughput'));
       loadTestFile(require.resolve('./services/top_services'));
       loadTestFile(require.resolve('./services/transaction_types'));
+      loadTestFile(require.resolve('./services/service_details'));
+      loadTestFile(require.resolve('./services/service_icons'));
     });
 
     describe('Service overview', function () {
@@ -65,10 +67,6 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
 
     describe('Metrics', function () {
       loadTestFile(require.resolve('./metrics_charts/metrics_charts'));
-    });
-
-    describe('Correlations', function () {
-      loadTestFile(require.resolve('./correlations/slow_transactions'));
     });
   });
 }

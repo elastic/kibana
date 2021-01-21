@@ -48,11 +48,11 @@ export function LatencyChart({ height }: Props) {
   const latencyFormatter = getDurationFormatter(latencyMaxY);
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h2>
@@ -100,7 +100,7 @@ export function LatencyChart({ height }: Props) {
           id="latencyChart"
           timeseries={latencyTimeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-          anomalySeries={anomalyTimeseries}
+          anomalyTimeseries={anomalyTimeseries}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

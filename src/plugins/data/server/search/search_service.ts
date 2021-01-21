@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -73,6 +62,7 @@ import {
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { SessionService, IScopedSessionService, ISessionService } from './session';
+import { KbnServerError } from '../../../kibana_utils/server';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
@@ -305,7 +295,26 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private cancel = (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => {
     const strategy = this.getSearchStrategy(options.strategy);
-    return strategy.cancel ? strategy.cancel(id, options, deps) : Promise.resolve();
+    if (!strategy.cancel) {
+      throw new KbnServerError(
+        `Search strategy ${options.strategy} doesn't support cancellations`,
+        400
+      );
+    }
+    return strategy.cancel(id, options, deps);
+  };
+
+  private extend = (
+    id: string,
+    keepAlive: string,
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
+  ) => {
+    const strategy = this.getSearchStrategy(options.strategy);
+    if (!strategy.extend) {
+      throw new KbnServerError(`Search strategy ${options.strategy} does not support extend`, 400);
+    }
+    return strategy.extend(id, keepAlive, options, deps);
   };
 
   private getSearchStrategy = <
@@ -317,7 +326,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.logger.debug(`Get strategy ${name}`);
     const strategy = this.searchStrategies[name];
     if (!strategy) {
-      throw new Error(`Search strategy ${name} not found`);
+      throw new KbnServerError(`Search strategy ${name} not found`, 404);
     }
     return strategy;
   };
@@ -337,6 +346,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         search: (searchRequest, options = {}) =>
           this.search(scopedSession, searchRequest, options, deps),
         cancel: (id, options = {}) => this.cancel(id, options, deps),
+        extend: (id, keepAlive, options = {}) => this.extend(id, keepAlive, options, deps),
       };
     };
   };

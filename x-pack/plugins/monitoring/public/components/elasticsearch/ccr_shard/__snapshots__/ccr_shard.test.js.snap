@@ -2,50 +2,46 @@
 
 exports[`CcrShard that is renders an exception properly 1`] = `
 <EuiPanel>
-  <EuiTitle
-    color="danger"
-    size="s"
-  >
-    <h3>
-      <EuiTextColor
-        color="danger"
-      >
-        <FormattedMessage
-          defaultMessage="Errors"
-          id="xpack.monitoring.elasticsearch.ccrShard.errorsTableTitle"
-          values={Object {}}
-        />
-      </EuiTextColor>
-    </h3>
-  </EuiTitle>
-  <EuiSpacer
-    size="s"
-  />
-  <EuiBasicTable
-    columns={
-      Array [
-        Object {
-          "field": "exception.type",
-          "name": "Type",
-        },
-        Object {
-          "field": "exception.reason",
-          "name": "Reason",
-          "width": "75%",
-        },
-      ]
+  <Status
+    formattedLeader="leader on remote"
+    oldestStat={
+      Object {
+        "failed_read_requests": 0,
+        "operations_written": 2976,
+      }
     }
-    items={
-      Array [
-        Object {
-          "reason": "not sure but something happened",
-          "type": "something_is_wrong",
-        },
-      ]
+    stat={
+      Object {
+        "failed_read_requests": 0,
+        "follower_global_checkpoint": 3049,
+        "follower_index": "follower",
+        "follower_max_seq_no": 3049,
+        "last_requested_seq_no": 3049,
+        "leader_global_checkpoint": 3049,
+        "leader_index": "leader",
+        "leader_max_seq_no": 3049,
+        "mapping_version": 2,
+        "number_of_concurrent_reads": 1,
+        "number_of_concurrent_writes": 0,
+        "number_of_failed_bulk_operations": 0,
+        "number_of_queued_writes": 0,
+        "number_of_successful_bulk_operations": 3050,
+        "number_of_successful_fetches": 3050,
+        "operations_received": 3050,
+        "operations_written": 3050,
+        "read_exceptions": Array [
+          Object {
+            "reason": "not sure but something happened",
+            "type": "something_is_wrong",
+          },
+        ],
+        "shard_id": 0,
+        "time_since_last_read_millis": 9402,
+        "total_fetch_time_millis": 44128980,
+        "total_index_time_millis": 41827,
+        "total_transferred_bytes": 234156,
+      }
     }
-    noItemsMessage="No items found"
-    responsive={true}
-    tableLayout="fixed"
   />
 </EuiPanel>
 `;
@@ -59,44 +55,50 @@ exports[`CcrShard that it renders normally 1`] = `
   }
 >
   <EuiPageBody>
-    <Status
-      formattedLeader="leader on remote"
-      oldestStat={
-        Object {
-          "failed_read_requests": 0,
-          "operations_written": 2976,
+    <EuiPanel>
+      <Status
+        formattedLeader="leader on remote"
+        oldestStat={
+          Object {
+            "failed_read_requests": 0,
+            "operations_written": 2976,
+          }
         }
-      }
-      stat={
-        Object {
-          "failed_read_requests": 0,
-          "follower_global_checkpoint": 3049,
-          "follower_index": "follower",
-          "follower_max_seq_no": 3049,
-          "last_requested_seq_no": 3049,
-          "leader_global_checkpoint": 3049,
-          "leader_index": "leader",
-          "leader_max_seq_no": 3049,
-          "mapping_version": 2,
-          "number_of_concurrent_reads": 1,
-          "number_of_concurrent_writes": 0,
-          "number_of_failed_bulk_operations": 0,
-          "number_of_queued_writes": 0,
-          "number_of_successful_bulk_operations": 3050,
-          "number_of_successful_fetches": 3050,
-          "operations_received": 3050,
-          "operations_written": 3050,
-          "read_exceptions": Array [],
-          "shard_id": 0,
-          "time_since_last_read_millis": 9402,
-          "total_fetch_time_millis": 44128980,
-          "total_index_time_millis": 41827,
-          "total_transferred_bytes": 234156,
+        stat={
+          Object {
+            "failed_read_requests": 0,
+            "follower_global_checkpoint": 3049,
+            "follower_index": "follower",
+            "follower_max_seq_no": 3049,
+            "last_requested_seq_no": 3049,
+            "leader_global_checkpoint": 3049,
+            "leader_index": "leader",
+            "leader_max_seq_no": 3049,
+            "mapping_version": 2,
+            "number_of_concurrent_reads": 1,
+            "number_of_concurrent_writes": 0,
+            "number_of_failed_bulk_operations": 0,
+            "number_of_queued_writes": 0,
+            "number_of_successful_bulk_operations": 3050,
+            "number_of_successful_fetches": 3050,
+            "operations_received": 3050,
+            "operations_written": 3050,
+            "read_exceptions": Array [],
+            "shard_id": 0,
+            "time_since_last_read_millis": 9402,
+            "total_fetch_time_millis": 44128980,
+            "total_index_time_millis": 41827,
+            "total_transferred_bytes": 234156,
+          }
         }
-      }
-    />
+      />
+    </EuiPanel>
     <EuiSpacer
-      size="s"
+      size="m"
+    />
+    <AlertsCallout />
+    <EuiSpacer
+      size="m"
     />
     <EuiFlexGroup
       wrap={true}

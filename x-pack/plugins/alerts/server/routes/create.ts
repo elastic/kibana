@@ -16,7 +16,13 @@ import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { validateDurationSchema } from '../lib';
 import { handleDisabledApiKeysError } from './lib/error_handler';
-import { Alert, AlertNotifyWhenType, BASE_ALERT_API_PATH, validateNotifyWhenType } from '../types';
+import {
+  Alert,
+  AlertNotifyWhenType,
+  AlertTypeParams,
+  BASE_ALERT_API_PATH,
+  validateNotifyWhenType,
+} from '../types';
 import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 export const bodySchema = schema.object({
@@ -65,7 +71,9 @@ export const createAlertRoute = (router: IRouter, licenseState: ILicenseState) =
         const alert = req.body;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
         try {
-          const alertRes: Alert = await alertsClient.create({ data: { ...alert, notifyWhen } });
+          const alertRes: Alert<AlertTypeParams> = await alertsClient.create<AlertTypeParams>({
+            data: { ...alert, notifyWhen },
+          });
           return res.ok({
             body: alertRes,
           });

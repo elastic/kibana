@@ -53,6 +53,7 @@ export const readPrivileges = async (
             'delete_index',
             'index',
             'manage',
+            'maintenance',
             'manage_follow_index',
             'manage_ilm',
             'manage_leader_index',

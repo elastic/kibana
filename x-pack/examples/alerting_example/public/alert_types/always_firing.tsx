@@ -32,7 +32,6 @@ import {
 export function getAlertType(): AlertTypeModel {
   return {
     id: 'example.always-firing',
-    name: 'Always Fires',
     description: 'Alert when called',
     iconClass: 'bolt',
     documentationUrl: null,
@@ -134,8 +133,10 @@ export const AlwaysFiringExpression: React.FunctionComponent<
 };
 
 interface TShirtSelectorProps {
-  actionGroup?: ActionGroupWithCondition<number>;
-  setTShirtThreshold: (actionGroup: ActionGroupWithCondition<number>) => void;
+  actionGroup?: ActionGroupWithCondition<number, AlwaysFiringActionGroupIds>;
+  setTShirtThreshold: (
+    actionGroup: ActionGroupWithCondition<number, AlwaysFiringActionGroupIds>
+  ) => void;
 }
 const TShirtSelector = ({ actionGroup, setTShirtThreshold }: TShirtSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);

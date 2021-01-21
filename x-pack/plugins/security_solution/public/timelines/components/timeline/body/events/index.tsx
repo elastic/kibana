@@ -12,6 +12,7 @@ import {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { OnRowSelected } from '../../events';
 import { EventsTbody } from '../../styles';
@@ -42,6 +43,7 @@ interface Props {
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
+  tabType?: TimelineTabs;
 }
 
 const EventsComponent: React.FC<Props> = ({
@@ -63,6 +65,7 @@ const EventsComponent: React.FC<Props> = ({
   rowRenderers,
   selectedEventIds,
   showCheckboxes,
+  tabType,
 }) => (
   <EventsTbody data-test-subj="events">
     {data.map((event, i) => (
@@ -77,7 +80,7 @@ const EventsComponent: React.FC<Props> = ({
         eventIdToNoteIds={eventIdToNoteIds}
         isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
         isEventViewer={isEventViewer}
-        key={`${event._id}_${event._index}`}
+        key={`${id}_${tabType}_${event._id}_${event._index}`}
         lastFocusedAriaColindex={lastFocusedAriaColindex}
         loadingEventIds={loadingEventIds}
         onRowSelected={onRowSelected}
@@ -86,6 +89,7 @@ const EventsComponent: React.FC<Props> = ({
         onRuleChange={onRuleChange}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}
+        tabType={tabType}
         timelineId={id}
       />
     ))}

@@ -8,12 +8,12 @@ import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../plugins/ui_actions_enhanced/public';
-import { ChartActionContext } from '../../../../../../src/plugins/embeddable/public';
-import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
 import {
+  ChartActionContext,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/ui_actions/public';
+} from '../../../../../../src/plugins/embeddable/public';
+import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
 
 export type ActionContext = ChartActionContext;
 
@@ -23,8 +23,7 @@ export type Config = {
 
 const SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN = 'SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN';
 
-export class DashboardHelloWorldDrilldown
-  implements Drilldown<Config, typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER> {
+export class DashboardHelloWorldDrilldown implements Drilldown<Config, ActionContext> {
   public readonly id = SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN;
 
   public readonly order = 6;
@@ -33,7 +32,7 @@ export class DashboardHelloWorldDrilldown
 
   public readonly euiIcon = 'cheer';
 
-  supportedTriggers(): Array<typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER> {
+  supportedTriggers(): string[] {
     return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
   }
 

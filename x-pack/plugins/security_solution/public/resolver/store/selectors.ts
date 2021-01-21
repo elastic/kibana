@@ -132,11 +132,6 @@ export const currentRelatedEventData = composeSelectors(
   dataSelectors.currentRelatedEventData
 );
 
-/**
- * A counter indicating how many times a user has requested new data for resolver.
- */
-export const refreshCount = composeSelectors(dataStateSelector, dataSelectors.refreshCount);
-
 export const timeRangeFilters = composeSelectors(dataStateSelector, dataSelectors.timeRangeFilters);
 
 /**
@@ -364,16 +359,6 @@ export const isLoadingNodeEventsInCategory = composeSelectors(
 export const isLoadingMoreNodeEventsInCategory = composeSelectors(
   dataStateSelector,
   dataSelectors.isLoadingMoreNodeEventsInCategory
-);
-
-export const eventsInCategoryResultIsStale = composeSelectors(
-  dataStateSelector,
-  dataSelectors.eventsInCategoryResultIsStale
-);
-
-export const currentRelatedEventIsStale = composeSelectors(
-  dataStateSelector,
-  dataSelectors.currentRelatedEventIsStale
 );
 
 /**

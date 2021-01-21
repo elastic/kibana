@@ -10,7 +10,7 @@ import { EuiButton } from '@elastic/eui';
 
 import { CURRENT_MAJOR_VERSION } from '../../../../../common/version';
 
-import { DocumentCreationButtons, DocumentCreationModal } from '../document_creation';
+import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 import { EmptyEngineOverview } from './engine_overview_empty';
 
 describe('EmptyEngineOverview', () => {
@@ -32,6 +32,6 @@ describe('EmptyEngineOverview', () => {
 
   it('renders document creation components', () => {
     expect(wrapper.find(DocumentCreationButtons)).toHaveLength(1);
-    expect(wrapper.find(DocumentCreationModal)).toHaveLength(1);
+    expect(wrapper.find(DocumentCreationFlyout)).toHaveLength(1);
   });
 });

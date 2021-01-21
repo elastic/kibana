@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../types';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
@@ -13,7 +13,6 @@ import {
   ensureInstalledDefaultPackages,
   ensurePackagesCompletedInstall,
 } from './epm/packages/install';
-import { ensureDefaultIndices } from './epm/kibana/index_pattern/install';
 import {
   packageToPackagePolicy,
   PackagePolicy,
@@ -40,13 +39,15 @@ export interface SetupStatus {
 
 export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
-  return awaitIfPending(async () => createSetupSideEffects(soClient, callCluster));
+  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient, callCluster));
 }
 
 async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
   const [
@@ -57,8 +58,7 @@ async function createSetupSideEffects(
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
-    agentPolicyService.ensureDefaultAgentPolicy(soClient),
-    ensureDefaultIndices(callCluster),
+    agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const defaultSettings = createDefaultSettings();
@@ -111,6 +111,7 @@ async function createSetupSideEffects(
       if (!isInstalled) {
         await addPackageToAgentPolicy(
           soClient,
+          esClient,
           callCluster,
           installedPackage,
           agentPolicyWithPackagePolicies,
@@ -127,6 +128,7 @@ async function createSetupSideEffects(
 
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser,
   options?: { forceRecreate?: boolean }
 ) {
@@ -139,7 +141,16 @@ export async function setupFleet(
       cluster: ['monitor', 'manage_api_key'],
       indices: [
         {
-          names: ['logs-*', 'metrics-*', 'traces-*', '.ds-logs-*', '.ds-metrics-*', '.ds-traces-*'],
+          names: [
+            'logs-*',
+            'metrics-*',
+            'traces-*',
+            '.ds-logs-*',
+            '.ds-metrics-*',
+            '.ds-traces-*',
+            '.logs-endpoint.diagnostic.collection-*',
+            '.ds-.logs-endpoint.diagnostic.collection-*',
+          ],
           privileges: ['write', 'create_index', 'indices:admin/auto_create'],
         },
       ],
@@ -182,7 +193,7 @@ export async function setupFleet(
 
   await Promise.all(
     agentPolicies.map((agentPolicy) => {
-      return generateEnrollmentAPIKey(soClient, {
+      return generateEnrollmentAPIKey(soClient, esClient, {
         name: `Default`,
         agentPolicyId: agentPolicy.id,
       });
@@ -202,6 +213,7 @@ function generateRandomPassword() {
 
 async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser,
   packageToInstall: Installation,
   agentPolicy: AgentPolicy,
@@ -220,7 +232,7 @@ async function addPackageToAgentPolicy(
     agentPolicy.namespace
   );
 
-  await packagePolicyService.create(soClient, callCluster, newPackagePolicy, {
+  await packagePolicyService.create(soClient, esClient, callCluster, newPackagePolicy, {
     bumpRevision: false,
   });
 }

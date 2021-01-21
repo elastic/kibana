@@ -25,4 +25,20 @@ describe('suffix formatter', () => {
     expect(convertMock).toHaveBeenCalledWith(12345);
     expect(formatFactory).toHaveBeenCalledWith({ id: 'nestedFormatter', params: nestedParams });
   });
+
+  it('should not add suffix to empty strings', () => {
+    const convertMock = jest.fn((x) => '');
+    const formatFactory = jest.fn(() => ({ convert: convertMock }));
+    const SuffixFormatter = getSuffixFormatter((formatFactory as unknown) as FormatFactory);
+    const nestedParams = { abc: 123 };
+    const formatterInstance = new SuffixFormatter({
+      unit: 'h',
+      id: 'nestedFormatter',
+      params: nestedParams,
+    });
+
+    const result = formatterInstance.convert(12345);
+
+    expect(result).toEqual('');
+  });
 });

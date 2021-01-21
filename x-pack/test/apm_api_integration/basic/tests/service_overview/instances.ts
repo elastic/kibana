@@ -10,7 +10,7 @@ import { pick, sortBy } from 'lodash';
 import { isFiniteNumber } from '../../../../../plugins/apm/common/utils/is_finite_number';
 import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import archives from '../../../common/archives_metadata';
+import archives from '../../../common/fixtures/es_archiver/archives_metadata';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -125,7 +125,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 "value": 0.941324615478516,
               },
               "throughput": Object {
-                "value": 75,
+                "value": 2.5,
               },
             }
           `);
@@ -201,7 +201,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 "value": 70518.9328358209,
               },
               "throughput": Object {
-                "value": 134,
+                "value": 4.46666666666667,
               },
             }
           `);

@@ -6,7 +6,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -137,7 +136,6 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
 
   return (
     <ServiceAlertTrigger
-      alertTypeName={ALERT_TYPES_CONFIG[AlertType.TransactionErrorRate].name}
       fields={fields}
       defaults={defaultParams}
       setAlertParams={setAlertParams}

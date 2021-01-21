@@ -63,7 +63,13 @@ export function TransactionActionMenu({ transaction }: Props) {
         isOpen={isActionPopoverOpen}
         anchorPosition="downRight"
         button={
-          <ActionMenuButton onClick={() => setIsActionPopoverOpen(true)} />
+          <ActionMenuButton
+            onClick={() =>
+              setIsActionPopoverOpen(
+                (prevIsActionPopoverOpen) => !prevIsActionPopoverOpen
+              )
+            }
+          />
         }
       >
         <div>

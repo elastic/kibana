@@ -7,6 +7,7 @@ import {
   ServiceConnectorCaseParams,
   ServiceConnectorCommentParams,
   ConnectorMappingsAttributes,
+  ConnectorTypes,
 } from '../../../../../common/api/connectors';
 export const updateUser = {
   updatedAt: '2020-03-13T08:34:53.450Z',
@@ -24,16 +25,36 @@ export const comment: ServiceConnectorCommentParams = {
   ...entity,
 };
 export const defaultPipes = ['informationCreated'];
-export const params = {
+const basicParams = {
   comments: [comment],
   description: 'a description',
-  impact: '3',
-  savedObjectId: '1231231231232',
-  severity: '1',
   title: 'a title',
-  urgency: '2',
-  ...entity,
-} as ServiceConnectorCaseParams;
+  savedObjectId: '1231231231232',
+  externalId: null,
+};
+export const params = {
+  [ConnectorTypes.jira]: {
+    ...basicParams,
+    issueType: '10003',
+    priority: 'Highest',
+    parent: '5002',
+    ...entity,
+  } as ServiceConnectorCaseParams,
+  [ConnectorTypes.resilient]: {
+    ...basicParams,
+    incidentTypes: ['10003'],
+    severityCode: '1',
+    ...entity,
+  } as ServiceConnectorCaseParams,
+  [ConnectorTypes.servicenow]: {
+    ...basicParams,
+    impact: '3',
+    severity: '1',
+    urgency: '2',
+    ...entity,
+  } as ServiceConnectorCaseParams,
+  [ConnectorTypes.none]: {},
+};
 export const mappings: ConnectorMappingsAttributes[] = [
   {
     source: 'title',

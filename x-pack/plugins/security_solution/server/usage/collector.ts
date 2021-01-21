@@ -78,12 +78,12 @@ export const registerCollector: RegisterCollector = ({
       },
     },
     isReady: () => kibanaIndex.length > 0,
-    fetch: async ({ callCluster }: CollectorFetchContext): Promise<UsageData> => {
+    fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
       const [detections, endpoints] = await Promise.allSettled([
         fetchDetectionsUsage(
           kibanaIndex,
-          callCluster,
+          esClient,
           ml,
           (savedObjectsClient as unknown) as SavedObjectsClientContract
         ),

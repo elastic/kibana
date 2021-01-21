@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JsonObject } from '../../../infra/common/typed_json';
+import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
 import { AlertType, SanitizedAlert } from '../../common';
 
 export type AlertNavigationHandler = (

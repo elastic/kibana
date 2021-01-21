@@ -11,10 +11,9 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { AppLeaveHandler } from '../../../../../../../src/core/public';
-import { TimelineId, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { timelineActions } from '../../store/timeline';
-import { TimelineTabs } from '../../store/timeline/model';
 import { FlyoutBottomBar } from './bottom_bar';
 import { Pane } from './pane';
 import { getTimelineShowStatusByIdSelector } from './selectors';
@@ -33,7 +32,7 @@ interface OwnProps {
 const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const dispatch = useDispatch();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
+  const { activeTab, show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
     getTimelineShowStatus(state, timelineId)
   );
 
@@ -78,7 +77,6 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
       }
     });
   }, [dispatch, onAppLeave, show, timelineStatus, updated]);
-
   return (
     <>
       <EuiFocusTrap disabled={!show}>
@@ -86,9 +84,7 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
           <Pane timelineId={timelineId} />
         </Visible>
       </EuiFocusTrap>
-      <Visible show={!show}>
-        <FlyoutBottomBar timelineId={timelineId} />
-      </Visible>
+      <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
     </>
   );
 };

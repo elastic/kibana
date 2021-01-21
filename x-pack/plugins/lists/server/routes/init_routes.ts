@@ -22,6 +22,7 @@ import {
   deleteListIndexRoute,
   deleteListItemRoute,
   deleteListRoute,
+  exportExceptionListRoute,
   exportListItemRoute,
   findEndpointListItemRoute,
   findExceptionListItemRoute,
@@ -76,6 +77,7 @@ export const initRoutes = (router: IRouter, config: ConfigType): void => {
   updateExceptionListRoute(router);
   deleteExceptionListRoute(router);
   findExceptionListRoute(router);
+  exportExceptionListRoute(router);
 
   // exception list items
   createExceptionListItemRoute(router);

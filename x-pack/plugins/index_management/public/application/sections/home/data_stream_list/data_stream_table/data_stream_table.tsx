@@ -70,6 +70,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     render: (health: DataStream['health']) => {
       return <DataHealth health={health} />;
     },
+    width: '100px',
   });
 
   if (includeStats) {
@@ -90,12 +91,14 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     });
 
     columns.push({
-      field: 'storageSize',
+      field: 'storageSizeBytes',
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
         defaultMessage: 'Storage size',
       }),
       truncateText: true,
       sortable: true,
+      render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
+        dataStream.storageSize,
     });
   }
 
@@ -229,6 +232,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             defaultMessage="No data streams found"
           />
         }
+        tableLayout={'auto'}
       />
     </>
   );

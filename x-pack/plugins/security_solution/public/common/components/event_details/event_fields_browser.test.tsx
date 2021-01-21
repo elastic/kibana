@@ -13,6 +13,7 @@ import { timelineActions } from '../../../timelines/store/timeline';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -48,6 +49,7 @@ describe('EventFieldsBrowser', () => {
               data={mockDetailItemData}
               eventId={mockDetailItemDataId}
               timelineId="test"
+              timelineTabType={TimelineTabs.query}
             />
           </TestProviders>
         );
@@ -66,6 +68,7 @@ describe('EventFieldsBrowser', () => {
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
             timelineId="test"
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -89,6 +92,7 @@ describe('EventFieldsBrowser', () => {
             data={mockDetailItemData}
             eventId={eventId}
             timelineId="test"
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -108,6 +112,7 @@ describe('EventFieldsBrowser', () => {
             data={mockDetailItemData}
             eventId={eventId}
             timelineId="test"
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -127,6 +132,7 @@ describe('EventFieldsBrowser', () => {
             data={mockDetailItemData}
             eventId={eventId}
             timelineId="test"
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -158,6 +164,7 @@ describe('EventFieldsBrowser', () => {
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
             timelineId="test"
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -182,6 +189,7 @@ describe('EventFieldsBrowser', () => {
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
             timelineId="test"
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -196,6 +204,7 @@ describe('EventFieldsBrowser', () => {
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
             timelineId="test"
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -220,6 +229,7 @@ describe('EventFieldsBrowser', () => {
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
             timelineId="test"
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -238,6 +248,7 @@ describe('EventFieldsBrowser', () => {
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
             timelineId="test"
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );

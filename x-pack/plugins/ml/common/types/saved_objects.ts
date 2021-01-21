@@ -21,7 +21,7 @@ export interface SyncSavedObjectResponse {
 export interface CanDeleteJobResponse {
   [jobId: string]: {
     canDelete: boolean;
-    canUntag: boolean;
+    canRemoveFromSpace: boolean;
   };
 }
 
@@ -41,5 +41,5 @@ export interface DeleteJobCheckResponse {
 
 export interface DeleteJobPermission {
   canDelete: boolean;
-  canUntag: boolean;
+  canRemoveFromSpace: boolean;
 }

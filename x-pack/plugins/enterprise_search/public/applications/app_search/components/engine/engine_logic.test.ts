@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
-
-import { mockHttpValues } from '../../../__mocks__';
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: mockHttpValues },
-}));
-const { http } = mockHttpValues;
+import { LogicMounter, mockHttpValues, expectedAsyncError } from '../../../__mocks__';
 
 import { EngineLogic } from './';
 
 describe('EngineLogic', () => {
+  const { mount } = new LogicMounter(EngineLogic);
+  const { http } = mockHttpValues;
+
   const mockEngineData = {
     name: 'some-engine',
     type: 'default',
@@ -44,25 +41,6 @@ describe('EngineLogic', () => {
     hasSchemaConflicts: false,
     hasUnconfirmedSchemaFields: false,
     engineNotFound: false,
-  };
-
-  const mount = (values?: object) => {
-    if (!values) {
-      resetContext({});
-    } else {
-      resetContext({
-        defaults: {
-          enterprise_search: {
-            app_search: {
-              engine_logic: {
-                ...values,
-              },
-            },
-          },
-        },
-      });
-    }
-    EngineLogic.mount();
   };
 
   beforeEach(() => {
@@ -111,7 +89,7 @@ describe('EngineLogic', () => {
           const mockReindexJob = {
             percentageComplete: 50,
             numDocumentsWithErrors: 2,
-            activeReindexJobId: 123,
+            activeReindexJobId: '123',
           };
           EngineLogic.actions.setIndexingStatus(mockReindexJob);
 
@@ -153,6 +131,18 @@ describe('EngineLogic', () => {
         });
       });
 
+      describe('engineName', () => {
+        it('should be reset to an empty string', () => {
+          mount({ engineName: 'hello-world' });
+          EngineLogic.actions.clearEngine();
+
+          expect(EngineLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            engineName: '',
+          });
+        });
+      });
+
       describe('dataLoading', () => {
         it('should be set to true', () => {
           mount({ dataLoading: false });
@@ -161,6 +151,18 @@ describe('EngineLogic', () => {
           expect(EngineLogic.values).toEqual({
             ...DEFAULT_VALUES,
             dataLoading: true,
+          });
+        });
+      });
+
+      describe('engineNotFound', () => {
+        it('should be set to false', () => {
+          mount({ engineNotFound: true });
+          EngineLogic.actions.clearEngine();
+
+          expect(EngineLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            engineNotFound: false,
           });
         });
       });
@@ -186,12 +188,9 @@ describe('EngineLogic', () => {
         const promise = Promise.reject('An error occured');
         http.get.mockReturnValue(promise);
 
-        try {
-          EngineLogic.actions.initializeEngine();
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        EngineLogic.actions.initializeEngine();
+        await expectedAsyncError(promise);
+
         expect(EngineLogic.actions.setEngineNotFound).toHaveBeenCalledWith(true);
       });
     });

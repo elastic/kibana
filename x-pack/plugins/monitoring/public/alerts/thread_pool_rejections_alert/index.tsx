@@ -28,7 +28,6 @@ export function createThreadPoolRejectionsAlertType(
 ): AlertTypeModel {
   return {
     id: alertId,
-    name: threadPoolAlertDetails.label,
     description: threadPoolAlertDetails.description,
     iconClass: 'bell',
     documentationUrl(docLinks) {

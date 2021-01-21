@@ -20,6 +20,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     clickEmptyPromptIndexTemplateLink: () => void;
     clickIncludeStatsSwitch: () => void;
     toggleViewFilterAt: (index: number) => void;
+    sortTableOnStorageSize: () => void;
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
@@ -90,6 +91,14 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     component.update();
     act(() => {
       find('filterItem').at(index).simulate('click');
+    });
+    component.update();
+  };
+
+  const sortTableOnStorageSize = () => {
+    const { find, component } = testBed;
+    act(() => {
+      find('tableHeaderCell_storageSizeBytes_3.tableHeaderSortButton').simulate('click');
     });
     component.update();
   };
@@ -205,6 +214,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       clickEmptyPromptIndexTemplateLink,
       clickIncludeStatsSwitch,
       toggleViewFilterAt,
+      sortTableOnStorageSize,
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,
@@ -238,6 +248,7 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   health: 'green',
   indexTemplateName: 'indexTemplate',
   storageSize: '1b',
+  storageSizeBytes: 1,
   maxTimeStamp: 420,
   privileges: {
     delete_index: true,

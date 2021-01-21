@@ -4,15 +4,10 @@
 
 ## App.mount property
 
-A mount function called when the user navigates to this app's route. May have signature of [AppMount](./kibana-plugin-core-public.appmount.md) or [AppMountDeprecated](./kibana-plugin-core-public.appmountdeprecated.md)<!-- -->.
+A mount function called when the user navigates to this app's route.
 
 <b>Signature:</b>
 
 ```typescript
-mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
+mount: AppMount<HistoryLocationState>;
 ```
-
-## Remarks
-
-When function has two arguments, it will be called with a [context](./kibana-plugin-core-public.appmountcontext.md) as the first argument. This behavior is \*\*deprecated\*\*, and consumers should instead use [CoreSetup.getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->.
-

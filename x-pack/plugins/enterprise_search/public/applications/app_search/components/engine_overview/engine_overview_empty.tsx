@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { DOCS_PREFIX } from '../../routes';
-import { DocumentCreationButtons, DocumentCreationModal } from '../document_creation';
+import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 
 export const EmptyEngineOverview: React.FC = () => {
   return (
@@ -42,7 +42,7 @@ export const EmptyEngineOverview: React.FC = () => {
       </EuiPageHeader>
       <EuiPageContentBody>
         <DocumentCreationButtons />
-        <DocumentCreationModal />
+        <DocumentCreationFlyout />
       </EuiPageContentBody>
     </>
   );

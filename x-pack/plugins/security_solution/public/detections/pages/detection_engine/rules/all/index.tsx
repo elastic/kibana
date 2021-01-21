@@ -20,12 +20,12 @@ interface AllRulesProps {
   hasNoPermissions: boolean;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
-  refetchPrePackagedRulesStatus: () => void;
+  refetchPrePackagedRulesStatus: () => Promise<void>;
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
-  setRefreshRulesData: (refreshRule: (refreshPrePackagedRule?: boolean) => void) => void;
+  setRefreshRulesData: (refreshRule: () => Promise<void>) => void;
 }
 
 export enum AllRulesTabs {

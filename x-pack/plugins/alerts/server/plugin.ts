@@ -33,6 +33,7 @@ import {
   ILegacyClusterClient,
   StatusServiceSetup,
   ServiceStatus,
+  SavedObjectsBulkGetObject,
 } from '../../../../src/core/server';
 
 import {
@@ -102,9 +103,18 @@ export interface PluginSetupContract {
     Params extends AlertTypeParams = AlertTypeParams,
     State extends AlertTypeState = AlertTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
-    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+    ActionGroupIds extends string = never,
+    RecoveryActionGroupId extends string = never
   >(
-    alertType: AlertType<Params, State, InstanceState, InstanceContext>
+    alertType: AlertType<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >
   ): void;
 }
 
@@ -273,8 +283,19 @@ export class AlertingPlugin {
         Params extends AlertTypeParams = AlertTypeParams,
         State extends AlertTypeState = AlertTypeState,
         InstanceState extends AlertInstanceState = AlertInstanceState,
-        InstanceContext extends AlertInstanceContext = AlertInstanceContext
-      >(alertType: AlertType<Params, State, InstanceState, InstanceContext>) {
+        InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+        ActionGroupIds extends string = never,
+        RecoveryActionGroupId extends string = never
+      >(
+        alertType: AlertType<
+          Params,
+          State,
+          InstanceState,
+          InstanceContext,
+          ActionGroupIds,
+          RecoveryActionGroupId
+        >
+      ) {
         if (!(alertType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${alertType.minimumLicenseRequired}" is not a valid license type`);
         }
@@ -350,7 +371,10 @@ export class AlertingPlugin {
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
       const client = getAlertsClientWithRequest(request);
-      return (type: string, id: string) => client.get({ id });
+      return (objects?: SavedObjectsBulkGetObject[]) =>
+        objects
+          ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
+          : Promise.resolve([]);
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);

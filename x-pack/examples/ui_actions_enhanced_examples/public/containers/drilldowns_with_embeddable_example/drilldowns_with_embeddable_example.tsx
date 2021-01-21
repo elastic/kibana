@@ -18,10 +18,12 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { SampleMlJob, SampleApp1ClickContext } from '../../triggers';
-import { EmbeddableRoot } from '../../../../../../src/plugins/embeddable/public';
+import {
+  EmbeddableRoot,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../../src/plugins/embeddable/public';
 import { ButtonEmbeddable } from '../../embeddables/button_embeddable';
 import { useUiActions } from '../../context';
-import { VALUE_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
 
 export const job: SampleMlJob = {
   job_id: '123',

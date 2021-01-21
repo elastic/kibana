@@ -16,8 +16,8 @@ import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
   showBadge: boolean;
-  showOnlyCount: boolean;
-  stateFilter: (state: AlertState) => boolean;
+  showOnlyCount?: boolean;
+  stateFilter?: (state: AlertState) => boolean;
 }
 export const AlertsStatus: React.FC<Props> = (props: Props) => {
   const { alerts, showBadge = false, showOnlyCount = false, stateFilter = () => true } = props;
