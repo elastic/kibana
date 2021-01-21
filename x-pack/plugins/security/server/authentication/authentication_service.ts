@@ -118,8 +118,20 @@ export class AuthenticationService {
     });
 
     http.registerAuth(async (request, response, t) => {
-      // If security is disabled continue with no user credentials and delete the client cookie as well.
+      if (!license.isLicenseAvailable()) {
+        this.logger.error('License is not available, authentication is not possible.');
+        return response.customError({
+          body: 'License is not available.',
+          statusCode: 503,
+          headers: { 'Retry-After': '30' },
+        });
+      }
+
+      // If security is disabled, then continue with no user credentials.
       if (!license.isEnabled()) {
+        this.logger.debug(
+          'Current license does not support any security features, authentication is not needed.'
+        );
         return t.authenticated();
       }
 
