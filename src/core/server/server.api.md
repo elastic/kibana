@@ -2079,6 +2079,7 @@ export interface SavedObjectExportBaseOptions {
     excludeExportDetails?: boolean;
     includeReferencesDeep?: boolean;
     namespace?: string;
+    request: KibanaRequest;
 }
 
 // @public
@@ -2403,8 +2404,9 @@ export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOp
 export class SavedObjectsExporter {
     // (undocumented)
     #private;
-    constructor({ savedObjectsClient, exportSizeLimit, }: {
+    constructor({ savedObjectsClient, typeRegistry, exportSizeLimit, }: {
         savedObjectsClient: SavedObjectsClientContract;
+        typeRegistry: ISavedObjectTypeRegistry;
         exportSizeLimit: number;
     });
     exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<import("stream").Readable>;
@@ -2418,8 +2420,10 @@ export class SavedObjectsExportError extends Error {
     readonly attributes?: Record<string, any> | undefined;
     // (undocumented)
     static exportSizeExceeded(limit: number): SavedObjectsExportError;
+    static invalidTransformError(objectKeys: string[]): SavedObjectsExportError;
     // (undocumented)
     static objectFetchError(objects: SavedObject[]): SavedObjectsExportError;
+    static objectTransformError(objects: SavedObject[], cause: Error): SavedObjectsExportError;
     // (undocumented)
     readonly type: string;
 }
@@ -2432,6 +2436,14 @@ export interface SavedObjectsExportResultDetails {
         id: string;
         type: string;
     }>;
+}
+
+// @public
+export type SavedObjectsExportTransform = <T = unknown>(context: SavedObjectsExportTransformContext, objects: Array<SavedObject<T>>) => SavedObject[] | Promise<SavedObject[]>;
+
+// @public
+export interface SavedObjectsExportTransformContext {
+    request: KibanaRequest;
 }
 
 // @public
@@ -2852,6 +2864,7 @@ export interface SavedObjectsTypeManagementDefinition {
     getTitle?: (savedObject: SavedObject<any>) => string;
     icon?: string;
     importableAndExportable?: boolean;
+    onExport?: SavedObjectsExportTransform;
     onImport?: SavedObjectsImportHook;
 }
 
