@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['discover', 'common', 'timePicker', 'header']);
-  const sendToBackground = getService('sendToBackground');
+  const searchSessions = getService('searchSessions');
 
   describe('discover async search', () => {
     before(async () => {
@@ -38,13 +38,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const savedSessionURL = url + `&searchSessionId=${fakeSearchSessionId}`;
       await browser.navigateTo(savedSessionURL);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await sendToBackground.expectState('restored');
+      await searchSessions.expectState('restored');
       await testSubjects.existOrFail('discoverNoResultsError'); // expect error because of fake searchSessionId
       const searchSessionId1 = await getSearchSessionId();
       expect(searchSessionId1).to.be(fakeSearchSessionId);
       await queryBar.clickQuerySubmitButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await sendToBackground.expectState('completed');
+      await searchSessions.expectState('completed');
       const searchSessionId2 = await getSearchSessionId();
       expect(searchSessionId2).not.to.be(searchSessionId1);
 
@@ -57,7 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       url = await browser.getCurrentUrl();
       expect(url).to.contain('searchSessionId');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await sendToBackground.expectState('restored');
+      await searchSessions.expectState('restored');
       expect(await getSearchSessionId()).to.be(fakeSearchSessionId);
     });
   });
