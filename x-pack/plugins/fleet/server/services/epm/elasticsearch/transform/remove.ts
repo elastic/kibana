@@ -31,7 +31,7 @@ export const deleteTransforms = async (
       // get the index the transform
       const transformResponse: {
         count: number;
-        transforms: Array<{
+        transforms?: Array<{
           dest: {
             index: string;
           };
@@ -39,6 +39,7 @@ export const deleteTransforms = async (
       } = await callCluster('transport.request', {
         method: 'GET',
         path: `/_transform/${transformId}`,
+        ignore: [404],
       });
 
       await stopTransforms([transformId], callCluster);
