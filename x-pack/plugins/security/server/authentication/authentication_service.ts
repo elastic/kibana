@@ -84,8 +84,12 @@ export class AuthenticationService {
       }
 
       if (!this.authenticator) {
-        this.logger.error('Authenticator is not initialized yet.');
-        return response.internalError();
+        this.logger.error('Authentication sub-system is not fully initialized yet.');
+        return response.customError({
+          body: 'Authentication sub-system is not fully initialized yet.',
+          statusCode: 503,
+          headers: { 'Retry-After': '30' },
+        });
       }
 
       let authenticationResult;
@@ -157,12 +161,8 @@ export class AuthenticationService {
       license: this.license,
     });
 
-    const getCurrentUser = (request: KibanaRequest) => {
-      if (!this.license.isEnabled()) {
-        return null;
-      }
-      return http.auth.get<AuthenticatedUser>(request).state ?? null;
-    };
+    const getCurrentUser = (request: KibanaRequest) =>
+      http.auth.get<AuthenticatedUser>(request).state ?? null;
 
     this.authenticator = new Authenticator({
       legacyAuditLogger,

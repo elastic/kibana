@@ -300,12 +300,6 @@ describe('AuthenticationService', () => {
         getCurrentUser = service.start(mockStartAuthenticationParams).getCurrentUser;
       });
 
-      it('returns `null` if Security is disabled', () => {
-        mockSetupAuthenticationParams.license.isEnabled.mockReturnValue(false);
-
-        expect(getCurrentUser(httpServerMock.createKibanaRequest())).toBe(null);
-      });
-
       it('returns user from the auth state.', () => {
         const mockUser = mockAuthenticatedUser();
 

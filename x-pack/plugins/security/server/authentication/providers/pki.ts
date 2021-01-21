@@ -272,6 +272,8 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
 
     let result: { access_token: string; authentication: AuthenticationInfo };
     try {
+      // We can replace generic `transport.request` with a dedicated API method call once
+      // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
       result = (
         await this.options.client.asInternalUser.transport.request({
           method: 'POST',

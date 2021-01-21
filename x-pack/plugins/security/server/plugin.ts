@@ -12,6 +12,7 @@ import { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
 import {
   CoreSetup,
   CoreStart,
+  KibanaRequest,
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
@@ -30,6 +31,7 @@ import { AnonymousAccessService, AnonymousAccessServiceStart } from './anonymous
 import { ConfigSchema, ConfigType, createConfig } from './config';
 import { defineRoutes } from './routes';
 import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
+import { AuthenticatedUser } from '../common/model';
 import { setupSavedObjects } from './saved_objects';
 import { AuditService, SecurityAuditLogger, AuditServiceSetup } from './audit';
 import { SecurityFeatureUsageService, SecurityFeatureUsageServiceStart } from './feature_usage';
@@ -56,7 +58,7 @@ export interface SecurityPluginSetup {
   /**
    * @deprecated Use `authc` methods from the `SecurityServiceStart` contract instead.
    */
-  authc: Pick<AuthenticationServiceStart, 'getCurrentUser'>;
+  authc: { getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null };
   /**
    * @deprecated Use `authz` methods from the `SecurityServiceStart` contract instead.
    */

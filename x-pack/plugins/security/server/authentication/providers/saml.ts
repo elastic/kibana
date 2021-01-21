@@ -343,6 +343,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/authenticate`.
+      // We can replace generic `transport.request` with a dedicated API method call once
+      // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
       result = (
         await this.options.client.asInternalUser.transport.request({
           method: 'POST',
@@ -545,6 +547,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
+      // We can replace generic `transport.request` with a dedicated API method call once
+      // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
       const { id: requestId, redirect } = (
         await this.options.client.asInternalUser.transport.request({
           method: 'POST',
@@ -575,6 +579,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // This operation should be performed on behalf of the user with a privilege that normal
     // user usually doesn't have `cluster:admin/xpack/security/saml/logout`.
+    // We can replace generic `transport.request` with a dedicated API method call once
+    // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
     const { redirect } = (
       await this.options.client.asInternalUser.transport.request({
         method: 'POST',
@@ -598,6 +604,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // This operation should be performed on behalf of the user with a privilege that normal
     // user usually doesn't have `cluster:admin/xpack/security/saml/invalidate`.
+    // We can replace generic `transport.request` with a dedicated API method call once
+    // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
     const { redirect } = (
       await this.options.client.asInternalUser.transport.request({
         method: 'POST',
