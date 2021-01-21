@@ -29,12 +29,7 @@ import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { fromExpression } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
-import {
-  DataPublicPluginStart,
-  esFilters,
-  IFieldType,
-  IIndexPattern,
-} from '../../../../../../../src/plugins/data/public';
+import { esFilters, IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
@@ -55,6 +50,25 @@ function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
   return core;
 }
 
+function getDefaultProps() {
+  return {
+    activeDatasourceId: 'mock',
+    datasourceStates: {},
+    datasourceMap: {},
+    framePublicAPI: createMockFramePublicAPI(),
+    activeVisualizationId: 'vis',
+    visualizationState: {},
+    dispatch: () => {},
+    ExpressionRenderer: createExpressionRendererMock(),
+    core: createCoreStartWithPermissions(),
+    plugins: {
+      uiActions: uiActionsPluginMock.createStartContract(),
+      data: dataPluginMock.createStartContract(),
+    },
+    getSuggestionForField: () => undefined,
+  };
+}
+
 describe('workspace_panel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
   let mockVisualization2: jest.Mocked<Visualization>;
@@ -62,21 +76,18 @@ describe('workspace_panel', () => {
 
   let expressionRendererMock: jest.Mock<React.ReactElement, [ReactExpressionRendererProps]>;
   let uiActionsMock: jest.Mocked<UiActionsStart>;
-  let dataMock: jest.Mocked<DataPublicPluginStart>;
   let trigger: jest.Mocked<TriggerContract>;
 
   let instance: ReactWrapper<WorkspacePanelProps>;
 
   beforeEach(() => {
+    // These are used in specific tests to assert function calls
     trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract>;
     uiActionsMock = uiActionsPluginMock.createStartContract();
-    dataMock = dataPluginMock.createStartContract();
     uiActionsMock.getTrigger.mockReturnValue(trigger);
     mockVisualization = createMockVisualization();
     mockVisualization2 = createMockVisualization();
-
     mockDatasource = createMockDatasource('a');
-
     expressionRendererMock = createExpressionRendererMock();
   });
 
@@ -87,23 +98,14 @@ describe('workspace_panel', () => {
   it('should render an explanatory text if no visualization is active', () => {
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
-        datasourceStates={{}}
-        datasourceMap={{}}
-        framePublicAPI={createMockFramePublicAPI()}
+        {...getDefaultProps()}
         activeVisualizationId={null}
         visualizationMap={{
           vis: mockVisualization,
         }}
-        visualizationState={{}}
-        dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={createCoreStartWithPermissions()}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
       />
     );
-
     expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
@@ -111,20 +113,10 @@ describe('workspace_panel', () => {
   it('should render an explanatory text if the visualization does not produce an expression', () => {
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
-        datasourceStates={{}}
-        datasourceMap={{}}
-        framePublicAPI={createMockFramePublicAPI()}
-        activeVisualizationId="vis"
+        {...getDefaultProps()}
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => null },
         }}
-        visualizationState={{}}
-        dispatch={() => {}}
-        ExpressionRenderer={expressionRendererMock}
-        core={createCoreStartWithPermissions()}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
       />
     );
 
@@ -135,20 +127,10 @@ describe('workspace_panel', () => {
   it('should render an explanatory text if the datasource does not produce an expression', () => {
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
-        datasourceStates={{}}
-        datasourceMap={{}}
-        framePublicAPI={createMockFramePublicAPI()}
-        activeVisualizationId="vis"
+        {...getDefaultProps()}
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
-        visualizationState={{}}
-        dispatch={() => {}}
-        ExpressionRenderer={expressionRendererMock}
-        core={createCoreStartWithPermissions()}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
       />
     );
 
@@ -166,7 +148,7 @@ describe('workspace_panel', () => {
 
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
+        {...getDefaultProps()}
         datasourceStates={{
           mock: {
             state: {},
@@ -177,16 +159,10 @@ describe('workspace_panel', () => {
           mock: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
-        visualizationState={{}}
-        dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={createCoreStartWithPermissions()}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
       />
     );
 
@@ -204,10 +180,11 @@ describe('workspace_panel', () => {
     };
     mockDatasource.toExpression.mockReturnValue('datasource');
     mockDatasource.getLayers.mockReturnValue(['first']);
+    const props = getDefaultProps();
 
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
+        {...props}
         datasourceStates={{
           mock: {
             state: {},
@@ -218,16 +195,11 @@ describe('workspace_panel', () => {
           mock: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
-        visualizationState={{}}
-        dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={createCoreStartWithPermissions()}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
+        plugins={{ ...props.plugins, uiActions: uiActionsMock }}
       />
     );
 
@@ -251,7 +223,7 @@ describe('workspace_panel', () => {
 
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
+        {...getDefaultProps()}
         datasourceStates={{
           mock: {
             state: {},
@@ -262,16 +234,11 @@ describe('workspace_panel', () => {
           mock: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
-        visualizationState={{}}
         dispatch={dispatch}
         ExpressionRenderer={expressionRendererMock}
-        core={createCoreStartWithPermissions()}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
       />
     );
 
@@ -298,7 +265,7 @@ describe('workspace_panel', () => {
 
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
+        {...getDefaultProps()}
         datasourceStates={{
           mock: {
             state: {},
@@ -314,16 +281,10 @@ describe('workspace_panel', () => {
           mock2: mockDatasource2,
         }}
         framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
-        visualizationState={{}}
-        dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={createCoreStartWithPermissions()}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
       />
     );
 
@@ -382,7 +343,7 @@ describe('workspace_panel', () => {
     await act(async () => {
       instance = mount(
         <WorkspacePanel
-          activeDatasourceId={'mock'}
+          {...getDefaultProps()}
           datasourceStates={{
             mock: {
               state: {},
@@ -393,16 +354,10 @@ describe('workspace_panel', () => {
             mock: mockDatasource,
           }}
           framePublicAPI={framePublicAPI}
-          activeVisualizationId="vis"
           visualizationMap={{
             vis: { ...mockVisualization, toExpression: () => 'vis' },
           }}
-          visualizationState={{}}
-          dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
-          core={createCoreStartWithPermissions()}
-          plugins={{ uiActions: uiActionsMock, data: dataMock }}
-          getSuggestionForField={() => undefined}
         />
       );
     });
@@ -439,7 +394,7 @@ describe('workspace_panel', () => {
     await act(async () => {
       instance = mount(
         <WorkspacePanel
-          activeDatasourceId={'mock'}
+          {...getDefaultProps()}
           datasourceStates={{
             mock: {
               state: {},
@@ -450,16 +405,10 @@ describe('workspace_panel', () => {
             mock: mockDatasource,
           }}
           framePublicAPI={framePublicAPI}
-          activeVisualizationId="vis"
           visualizationMap={{
             vis: { ...mockVisualization, toExpression: () => 'vis' },
           }}
-          visualizationState={{}}
-          dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
-          core={createCoreStartWithPermissions()}
-          plugins={{ uiActions: uiActionsMock, data: dataMock }}
-          getSuggestionForField={() => undefined}
         />
       );
     });
@@ -494,7 +443,7 @@ describe('workspace_panel', () => {
     };
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
+        {...getDefaultProps()}
         datasourceStates={{
           mock: {
             // define a layer with an indexpattern not available
@@ -506,16 +455,9 @@ describe('workspace_panel', () => {
           mock: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
-        visualizationState={{}}
-        dispatch={() => {}}
-        ExpressionRenderer={expressionRendererMock}
-        core={createCoreStartWithPermissions()}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
       />
     );
 
@@ -532,7 +474,7 @@ describe('workspace_panel', () => {
 
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
+        {...getDefaultProps()}
         datasourceStates={{
           mock: {
             // define a layer with an indexpattern not available
@@ -548,16 +490,11 @@ describe('workspace_panel', () => {
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
-        visualizationState={{}}
-        dispatch={() => {}}
-        ExpressionRenderer={expressionRendererMock}
         // Use cannot navigate to the management page
         core={createCoreStartWithPermissions({
           navLinks: { management: false },
           management: { kibana: { indexPatterns: true } },
         })}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
       />
     );
 
@@ -575,7 +512,7 @@ describe('workspace_panel', () => {
 
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
+        {...getDefaultProps()}
         datasourceStates={{
           mock: {
             // define a layer with an indexpattern not available
@@ -587,20 +524,14 @@ describe('workspace_panel', () => {
           mock: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
-        visualizationState={{}}
-        dispatch={() => {}}
-        ExpressionRenderer={expressionRendererMock}
         // user can go to management, but indexPatterns management is not accessible
         core={createCoreStartWithPermissions({
           navLinks: { management: true },
           management: { kibana: { indexPatterns: false } },
         })}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
       />
     );
 
@@ -621,7 +552,7 @@ describe('workspace_panel', () => {
 
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
+        {...getDefaultProps()}
         datasourceStates={{
           mock: {
             state: {},
@@ -632,16 +563,9 @@ describe('workspace_panel', () => {
           mock: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
-        visualizationState={{}}
-        dispatch={() => {}}
-        ExpressionRenderer={expressionRendererMock}
-        core={createCoreStartWithPermissions()}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
       />
     );
 
@@ -663,7 +587,7 @@ describe('workspace_panel', () => {
 
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
+        {...getDefaultProps()}
         datasourceStates={{
           mock: {
             state: {},
@@ -674,16 +598,9 @@ describe('workspace_panel', () => {
           mock: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
         visualizationMap={{
           vis: mockVisualization,
         }}
-        visualizationState={{}}
-        dispatch={() => {}}
-        ExpressionRenderer={expressionRendererMock}
-        core={createCoreStartWithPermissions()}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
       />
     );
 
@@ -707,7 +624,7 @@ describe('workspace_panel', () => {
 
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
+        {...getDefaultProps()}
         datasourceStates={{
           mock: {
             state: {},
@@ -718,16 +635,9 @@ describe('workspace_panel', () => {
           mock: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
         visualizationMap={{
           vis: mockVisualization,
         }}
-        visualizationState={{}}
-        dispatch={() => {}}
-        ExpressionRenderer={expressionRendererMock}
-        core={createCoreStartWithPermissions()}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
       />
     );
 
@@ -748,7 +658,7 @@ describe('workspace_panel', () => {
 
     instance = mount(
       <WorkspacePanel
-        activeDatasourceId={'mock'}
+        {...getDefaultProps()}
         datasourceStates={{
           mock: {
             state: {},
@@ -759,16 +669,9 @@ describe('workspace_panel', () => {
           mock: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
-        visualizationState={{}}
-        dispatch={() => {}}
-        ExpressionRenderer={expressionRendererMock}
-        core={createCoreStartWithPermissions()}
-        plugins={{ uiActions: uiActionsMock, data: dataMock }}
-        getSuggestionForField={() => undefined}
       />
     );
 
@@ -787,7 +690,7 @@ describe('workspace_panel', () => {
     await act(async () => {
       instance = mount(
         <WorkspacePanel
-          activeDatasourceId={'mock'}
+          {...getDefaultProps()}
           datasourceStates={{
             mock: {
               state: {},
@@ -798,16 +701,10 @@ describe('workspace_panel', () => {
             mock: mockDatasource,
           }}
           framePublicAPI={framePublicAPI}
-          activeVisualizationId="vis"
           visualizationMap={{
             vis: { ...mockVisualization, toExpression: () => 'vis' },
           }}
-          visualizationState={{}}
-          dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
-          core={createCoreStartWithPermissions()}
-          plugins={{ uiActions: uiActionsMock, data: dataMock }}
-          getSuggestionForField={() => undefined}
         />
       );
     });
@@ -832,7 +729,7 @@ describe('workspace_panel', () => {
     await act(async () => {
       instance = mount(
         <WorkspacePanel
-          activeDatasourceId={'mock'}
+          {...getDefaultProps()}
           datasourceStates={{
             mock: {
               state: {},
@@ -843,16 +740,10 @@ describe('workspace_panel', () => {
             mock: mockDatasource,
           }}
           framePublicAPI={framePublicAPI}
-          activeVisualizationId="vis"
           visualizationMap={{
             vis: { ...mockVisualization, toExpression: () => 'vis' },
           }}
-          visualizationState={{}}
-          dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
-          core={createCoreStartWithPermissions()}
-          plugins={{ uiActions: uiActionsMock, data: dataMock }}
-          getSuggestionForField={() => undefined}
         />
       );
     });
@@ -900,7 +791,7 @@ describe('workspace_panel', () => {
           dropTargetsByOrder={undefined}
         >
           <WorkspacePanel
-            activeDatasourceId={'mock'}
+            {...getDefaultProps()}
             datasourceStates={{
               mock: {
                 state: {},
@@ -911,16 +802,11 @@ describe('workspace_panel', () => {
               mock: mockDatasource,
             }}
             framePublicAPI={frame}
-            activeVisualizationId={'vis'}
             visualizationMap={{
               vis: mockVisualization,
               vis2: mockVisualization2,
             }}
-            visualizationState={{}}
             dispatch={mockDispatch}
-            ExpressionRenderer={expressionRendererMock}
-            core={createCoreStartWithPermissions()}
-            plugins={{ uiActions: uiActionsMock, data: dataMock }}
             getSuggestionForField={mockGetSuggestionForField}
           />
         </ChildDragDropProvider>

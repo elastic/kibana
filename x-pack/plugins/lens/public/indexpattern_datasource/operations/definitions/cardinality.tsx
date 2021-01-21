@@ -71,8 +71,21 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     );
   },
   filterable: true,
+
+  operationParams: [
+    { name: 'kql', type: 'string', required: false },
+    { name: 'lucene', type: 'string', required: false },
+  ],
   getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
-  buildColumn({ field, previousColumn }) {
+  buildColumn({ field, previousColumn }, columnParams) {
+    let filter = previousColumn?.filter;
+    if (columnParams) {
+      if ('kql' in columnParams) {
+        filter = { query: columnParams.kql ?? '', language: 'kuery' };
+      } else if ('lucene' in columnParams) {
+        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
+      }
+    }
     return {
       label: ofName(field.displayName),
       dataType: 'number',
@@ -80,7 +93,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       scale: SCALE,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
-      filter: previousColumn?.filter,
+      filter,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },

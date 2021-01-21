@@ -7,6 +7,7 @@
 
 import type { OperationMetadata } from '../../types';
 import {
+  copyColumn,
   insertNewColumn,
   replaceColumn,
   updateColumnParam,
@@ -23,7 +24,7 @@ import type { IndexPattern, IndexPatternLayer } from '../types';
 import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../id_generator';
-import { createMockedReferenceOperation } from './mocks';
+import { createMockedFullReference, createMockedManagedReference } from './mocks';
 
 jest.mock('../operations');
 jest.mock('../../id_generator');
@@ -89,11 +90,127 @@ describe('state_helpers', () => {
     (generateId as jest.Mock).mockImplementation(() => `id${++count}`);
 
     // @ts-expect-error we are inserting an invalid type
-    operationDefinitionMap.testReference = createMockedReferenceOperation();
+    operationDefinitionMap.testReference = createMockedFullReference();
+    // @ts-expect-error we are inserting an invalid type
+    operationDefinitionMap.managedReference = createMockedManagedReference();
   });
 
   afterEach(() => {
     delete operationDefinitionMap.testReference;
+    delete operationDefinitionMap.managedReference;
+  });
+
+  describe('copyColumn', () => {
+    it('should recursively modify a formula and update the math ast', () => {
+      const source = {
+        dataType: 'number' as const,
+        isBucketed: false,
+        label: 'Formula',
+        operationType: 'formula' as const,
+        params: {
+          formula: 'moving_average(sum(bytes), window=5)',
+          isFormulaBroken: false,
+        },
+        references: ['formulaX1'],
+      };
+      const math = {
+        customLabel: true,
+        dataType: 'number' as const,
+        isBucketed: false,
+        label: 'math',
+        operationType: 'math' as const,
+        params: { tinymathAst: 'formulaX2' },
+        references: ['formulaX2'],
+      };
+      const sum = {
+        customLabel: true,
+        dataType: 'number' as const,
+        isBucketed: false,
+        label: 'formulaX0',
+        operationType: 'sum' as const,
+        scale: 'ratio' as const,
+        sourceField: 'bytes',
+      };
+      const movingAvg = {
+        customLabel: true,
+        dataType: 'number' as const,
+        isBucketed: false,
+        label: 'formulaX2',
+        operationType: 'moving_average' as const,
+        params: { window: 5 },
+        references: ['formulaX0'],
+      };
+      expect(
+        copyColumn({
+          layer: {
+            indexPatternId: '',
+            columnOrder: [],
+            columns: {
+              source,
+              formulaX0: sum,
+              formulaX1: math,
+              formulaX2: movingAvg,
+              formulaX3: {
+                ...math,
+                label: 'formulaX3',
+                references: ['formulaX2'],
+                params: { tinymathAst: 'formulaX2' },
+              },
+            },
+          },
+          targetId: 'copy',
+          sourceColumn: source,
+          shouldDeleteSource: false,
+          indexPattern,
+          sourceColumnId: 'source',
+        })
+      ).toEqual({
+        indexPatternId: '',
+        columnOrder: [
+          'source',
+          'formulaX0',
+          'formulaX1',
+          'formulaX2',
+          'formulaX3',
+          'copyX0',
+          'copyX1',
+          'copyX2',
+          'copyX3',
+          'copy',
+        ],
+        columns: {
+          source,
+          formulaX0: sum,
+          formulaX1: math,
+          formulaX2: movingAvg,
+          formulaX3: {
+            ...math,
+            label: 'formulaX3',
+            references: ['formulaX2'],
+            params: { tinymathAst: 'formulaX2' },
+          },
+          copy: expect.objectContaining({ ...source, references: ['copyX3'] }),
+          copyX0: expect.objectContaining({ ...sum, label: 'copyX0' }),
+          copyX1: expect.objectContaining({
+            ...math,
+            label: 'copyX1',
+            references: ['copyX0'],
+            params: { tinymathAst: 'copyX0' },
+          }),
+          copyX2: expect.objectContaining({
+            ...movingAvg,
+            label: 'copyX2',
+            references: ['copyX1'],
+          }),
+          copyX3: expect.objectContaining({
+            ...math,
+            label: 'copyX3',
+            references: ['copyX2'],
+            params: { tinymathAst: 'copyX2' },
+          }),
+        },
+      });
+    });
   });
 
   describe('insertNewColumn', () => {
@@ -195,7 +312,7 @@ describe('state_helpers', () => {
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2'] }));
     });
 
-    it('should insert a metric after buckets, but before references', () => {
+    it('should insert a metric after references', () => {
       const layer: IndexPatternLayer = {
         indexPatternId: '1',
         columnOrder: ['col1'],
@@ -231,7 +348,7 @@ describe('state_helpers', () => {
           field: documentField,
           visualizationGroups: [],
         })
-      ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
+      ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col3', 'col2'] }));
     });
 
     it('should insert new buckets at the end of previous buckets', () => {
@@ -1074,7 +1191,7 @@ describe('state_helpers', () => {
             referenceIds: ['id1'],
           })
         );
-        expect(result.columnOrder).toEqual(['id1', 'col1']);
+        expect(result.columnOrder).toEqual(['col1', 'id1']);
         expect(result.columns).toEqual(
           expect.objectContaining({
             id1: expectedColumn,
@@ -1196,7 +1313,7 @@ describe('state_helpers', () => {
           op: 'testReference',
         });
 
-        expect(result.columnOrder).toEqual(['id1', 'col1']);
+        expect(result.columnOrder).toEqual(['col1', 'id1']);
         expect(result.columns).toEqual({
           id1: expect.objectContaining({
             operationType: 'average',
@@ -1459,7 +1576,7 @@ describe('state_helpers', () => {
           })
         ).toEqual(
           expect.objectContaining({
-            columnOrder: ['id1', 'output'],
+            columnOrder: ['output', 'id1'],
             columns: {
               id1: expect.objectContaining({
                 sourceField: 'timestamp',
@@ -2051,58 +2168,78 @@ describe('state_helpers', () => {
       ).toEqual(['col1', 'col3', 'col2']);
     });
 
-    it('should correctly sort references to other references', () => {
+    it('does not topologically sort formulas, but keeps the relative order', () => {
       expect(
         getColumnOrder({
-          columnOrder: [],
           indexPatternId: '',
+          columnOrder: [],
           columns: {
-            bucket: {
-              label: 'Top values of category',
-              dataType: 'string',
+            count: {
+              label: 'count',
+              dataType: 'number',
+              operationType: 'count',
+              isBucketed: false,
+              scale: 'ratio',
+              sourceField: 'Records',
+              customLabel: true,
+            },
+            date: {
+              label: 'timestamp',
+              dataType: 'date',
+              operationType: 'date_histogram',
+              sourceField: 'timestamp',
               isBucketed: true,
-
-              // Private
-              operationType: 'terms',
-              sourceField: 'category',
+              scale: 'interval',
               params: {
-                size: 5,
-                orderBy: {
-                  type: 'alphabetical',
-                },
-                orderDirection: 'asc',
+                interval: 'auto',
               },
             },
-            metric: {
-              label: 'Average of bytes',
+            formula: {
+              label: 'Formula',
               dataType: 'number',
+              operationType: 'formula',
               isBucketed: false,
-
-              // Private
-              operationType: 'average',
-              sourceField: 'bytes',
+              scale: 'ratio',
+              params: {
+                formula: 'count() + count()',
+                isFormulaBroken: false,
+              },
+              references: ['math'],
             },
-            ref2: {
-              label: 'Ref2',
+            countX0: {
+              label: 'countX0',
               dataType: 'number',
+              operationType: 'count',
               isBucketed: false,
-
-              // @ts-expect-error only for testing
-              operationType: 'testReference',
-              references: ['ref1'],
+              scale: 'ratio',
+              sourceField: 'Records',
+              customLabel: true,
             },
-            ref1: {
-              label: 'Ref',
+            math: {
+              label: 'math',
               dataType: 'number',
+              operationType: 'math',
               isBucketed: false,
-
-              // @ts-expect-error only for testing
-              operationType: 'testReference',
-              references: ['bucket'],
+              scale: 'ratio',
+              params: {
+                tinymathAst: {
+                  type: 'function',
+                  name: 'add',
+                  // @ts-expect-error String args are not valid tinymath, but signals something unique to Lens
+                  args: ['countX0', 'count'],
+                  location: {
+                    min: 0,
+                    max: 17,
+                  },
+                  text: 'count() + count()',
+                },
+              },
+              references: ['countX0', 'count'],
+              customLabel: true,
             },
           },
         })
-      ).toEqual(['bucket', 'metric', 'ref1', 'ref2']);
+      ).toEqual(['date', 'count', 'formula', 'countX0', 'math']);
     });
   });
 
@@ -2459,7 +2596,8 @@ describe('state_helpers', () => {
           },
         },
         'col1',
-        indexPattern
+        indexPattern,
+        operationDefinitionMap
       );
     });
   });

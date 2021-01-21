@@ -52,7 +52,15 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     }
   },
   getDefaultLabel: (column) => adjustTimeScaleLabelSuffix(countLabel, undefined, column.timeScale),
-  buildColumn({ field, previousColumn }) {
+  buildColumn({ field, previousColumn }, columnParams) {
+    let filter = previousColumn?.filter;
+    if (columnParams) {
+      if ('kql' in columnParams) {
+        filter = { query: columnParams.kql ?? '', language: 'kuery' };
+      } else if ('lucene' in columnParams) {
+        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
+      }
+    }
     return {
       label: adjustTimeScaleLabelSuffix(countLabel, undefined, previousColumn?.timeScale),
       dataType: 'number',
@@ -61,7 +69,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       scale: 'ratio',
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
-      filter: previousColumn?.filter,
+      filter,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&

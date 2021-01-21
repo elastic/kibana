@@ -31,6 +31,7 @@ const defaultProps = {
     ...createMockedIndexPattern(),
     hasRestrictions: false,
   } as IndexPattern,
+  operationDefinitionMap: {},
 };
 
 describe('percentile', () => {
@@ -178,6 +179,23 @@ describe('percentile', () => {
       expect(percentileColumn.params.percentile).toEqual(95);
       expect(percentileColumn.label).toEqual('95th percentile of test');
     });
+
+    it('should create a percentile from formula', () => {
+      const indexPattern = createMockedIndexPattern();
+      const bytesField = indexPattern.fields.find(({ name }) => name === 'bytes')!;
+      bytesField.displayName = 'test';
+      const percentileColumn = percentileOperation.buildColumn(
+        {
+          indexPattern,
+          field: bytesField,
+          layer: { columns: {}, columnOrder: [], indexPatternId: '' },
+        },
+        { percentile: 75 }
+      );
+      expect(percentileColumn.dataType).toEqual('number');
+      expect(percentileColumn.params.percentile).toEqual(75);
+      expect(percentileColumn.label).toEqual('75th percentile of test');
+    });
   });
 
   describe('isTransferable', () => {
@@ -202,7 +220,8 @@ describe('percentile', () => {
               percentile: 95,
             },
           },
-          indexPattern
+          indexPattern,
+          {}
         )
       ).toBeTruthy();
     });

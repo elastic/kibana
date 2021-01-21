@@ -89,8 +89,16 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         : (layer.columns[thisColumnId] as T),
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
-    buildColumn: ({ field, previousColumn }) =>
-      ({
+    buildColumn: ({ field, previousColumn }, columnParams) => {
+      let filter = previousColumn?.filter;
+      if (columnParams) {
+        if ('kql' in columnParams) {
+          filter = { query: columnParams.kql ?? '', language: 'kuery' };
+        } else if ('lucene' in columnParams) {
+          filter = { query: columnParams.lucene ?? '', language: 'lucene' };
+        }
+      }
+      return {
         label: labelLookup(field.displayName, previousColumn),
         dataType: 'number',
         operationType: type,
@@ -98,9 +106,10 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         isBucketed: false,
         scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
-        filter: previousColumn?.filter,
+        filter,
         params: getFormatFromPreviousColumn(previousColumn),
-      } as T),
+      } as T;
+    },
     onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,

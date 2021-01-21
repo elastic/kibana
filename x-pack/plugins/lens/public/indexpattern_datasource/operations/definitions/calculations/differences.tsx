@@ -52,7 +52,7 @@ export const derivativeOperation: OperationDefinition<
   selectionStyle: 'full',
   requiredReferences: [
     {
-      input: ['field'],
+      input: ['field', 'managedReference'],
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
@@ -71,7 +71,15 @@ export const derivativeOperation: OperationDefinition<
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'derivative');
   },
-  buildColumn: ({ referenceIds, previousColumn, layer }) => {
+  buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
+    let filter = previousColumn?.filter;
+    if (columnParams) {
+      if ('kql' in columnParams) {
+        filter = { query: columnParams.kql ?? '', language: 'kuery' };
+      } else if ('lucene' in columnParams) {
+        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
+      }
+    }
     const ref = layer.columns[referenceIds[0]];
     return {
       label: ofName(ref?.label, previousColumn?.timeScale),
@@ -81,7 +89,7 @@ export const derivativeOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
-      filter: previousColumn?.filter,
+      filter,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },
