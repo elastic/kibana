@@ -22,6 +22,7 @@ import {
   PushToServiceApiParams,
   ResilientPushToServiceApiParams,
   ServiceNowITSMPushToServiceApiParams,
+  ServiceNowSIRFieldsType,
   SimpleComment,
   Transformer,
   TransformerArgs,
@@ -39,11 +40,14 @@ export const mapIncident = async (
   const defaultPipes = externalId ? ['informationUpdated'] : ['informationCreated'];
   let currentIncident: ExternalServiceParams | undefined;
   const service = serviceFormatter(connectorType, params);
+
   if (service == null) {
     throw new Error(`Invalid service`);
   }
+
   const thirdPartyName = service.thirdPartyName;
   let incident: Partial<PushToServiceApiParams['incident']> = service.incident;
+
   if (externalId) {
     try {
       currentIncident = ((await actionsClient.execute({
@@ -59,11 +63,13 @@ export const mapIncident = async (
       );
     }
   }
+
   const fields = prepareFieldsForTransformation({
     defaultPipes,
     mappings,
     params,
   });
+
   const transformedFields = transformFields<
     ServiceConnectorCaseParams,
     ExternalServiceParams,
@@ -73,6 +79,7 @@ export const mapIncident = async (
     fields,
     currentIncident,
   });
+
   incident = { ...incident, ...transformedFields, externalId };
   let comments: SimpleComment[] = [];
   if (caseComments && Array.isArray(caseComments) && caseComments.length > 0) {
@@ -114,6 +121,28 @@ export const serviceFormatter = (
       } = params as ServiceNowITSMPushToServiceApiParams['incident'];
       return {
         incident: { severity, urgency, impact },
+        thirdPartyName: 'ServiceNow',
+      };
+    case ConnectorTypes.serviceNowSIR:
+      const {
+        destIp,
+        sourceIp,
+        category,
+        subcategory,
+        malwareHash,
+        malwareUrl,
+        priority: sirPriority,
+      } = params as ServiceNowSIRFieldsType;
+      return {
+        incident: {
+          dest_ip: destIp,
+          source_ip: sourceIp,
+          category,
+          subcategory,
+          malware_hash: malwareHash,
+          malware_url: malwareUrl,
+          priority: sirPriority,
+        },
         thirdPartyName: 'ServiceNow',
       };
     default:
@@ -160,6 +189,7 @@ export const FIELD_INFORMATION = (
       });
   }
 };
+
 export const transformers: Record<string, Transformer> = {
   informationCreated: ({ value, date, user, ...rest }: TransformerArgs): TransformerArgs => ({
     value: `${value} ${FIELD_INFORMATION('create', date, user)}`,
@@ -178,6 +208,7 @@ export const transformers: Record<string, Transformer> = {
     ...rest,
   }),
 };
+
 export const prepareFieldsForTransformation = ({
   defaultPipes,
   mappings,
