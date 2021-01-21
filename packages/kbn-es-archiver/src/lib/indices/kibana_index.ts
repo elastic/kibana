@@ -76,7 +76,8 @@ export async function migrateKibanaIndex({
  */
 async function fetchKibanaIndices(client: Client) {
   const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
-  const isKibanaIndex = (index: string) => /^\.kibana(:?_\d*)?$/.test(index);
+  const isKibanaIndex = (index: string) =>
+    /^\.kibana(:?_\d*)?$/.test(index) || /^\.kibana_(pre)*\d+\.\d+\.\d+_\d\d\d$/.test(index);
   return kibanaIndices.map((x: { index: string }) => x.index).filter(isKibanaIndex);
 }
 
