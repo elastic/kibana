@@ -16,6 +16,7 @@ export const getVisualizeListItem = (
   editApp: string | undefined,
   editUrl: string
 ) => {
+  // for visualizations the editApp is undefined
   let url = application.getUrlForApp(editApp ?? 'visualize', {
     path: editApp ? editUrl : `/#${editUrl}`,
   });

@@ -73,7 +73,6 @@ const renderItemTypeIcon = (item: VisualizationListItem) => {
 
 export const getTableColumns = (
   application: ApplicationStart,
-  history: History,
   taggingApi?: SavedObjectsTaggingApi
 ) => [
   {

@@ -94,9 +94,8 @@ export const VisualizeListing = () => {
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
-  const tableColumns = useMemo(() => getTableColumns(application, history, savedObjectsTagging), [
+  const tableColumns = useMemo(() => getTableColumns(application, savedObjectsTagging), [
     application,
-    history,
     savedObjectsTagging,
   ]);
 
