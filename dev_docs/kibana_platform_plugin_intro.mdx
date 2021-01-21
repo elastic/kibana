@@ -11,7 +11,7 @@ From an end user perspective, Kibana is a tool for interacting with Elasticsearc
 to visualize and analyze data.
 
 From a developer perspective, Kibana is a platform that provides a set of tools to build not only the UI you see in Kibana today, but
-almost any UI that can be dreamt up. The platform provides developers the ability to build applications, or inject extra functionality into 
+a wide variety of applications that can be used to explore, visualize, and act upon data in Elasticsearch. The platform provides developers the ability to build applications, or inject extra functionality into 
 already existing applications. Did you know that almost everything you see in the
 Kibana UI is built inside a plugin? If you removed all plugins from Kibana, you'd be left with an empty navigation menu, and a set of
 developer tools. The Kibana platform is a blank canvas, just waiting for a developer to come along and create something!
@@ -20,11 +20,12 @@ developer tools. The Kibana platform is a blank canvas, just waiting for a devel
 
 ## Plugins vs The Platform
 
-The core platform provides the most basic and fundamental tools neccessary for building a plugin. The Core platform is not a plugin itself, although
+The core platform provides the most basic and fundamental tools neccessary for building a plugin, like creating saved objects,
+routing, application registration, and notifications. The Core platform is not a plugin itself, although
 there are some plugins that provide platform functionality. For example, the 
 <DocLink id="kibDataPlugin" text="data plugin"/> provides basic utilities to search, query, and filter data in Elasticsearch. 
 This code is not part of Core, but is still fundamental for building a plugin,
- and we strongly encourage using this service over querying Elasticsearch directly.
+ and we strongly encourage using this service over querying Elasticsearch directly. 
 
 <DocCallOut title="Three kinds of public services">
 We currently have three kinds of public services:
@@ -40,7 +41,7 @@ Two common questions we encounter are:
 
 We don't have great answers to those questions today. Currently, the best answers we have are:
 
-1. Platform plugins are _usually_ plugins that are managed by the Platform Team, but we are starting to see some exceptions.
+1. Platform plugins are _usually_ plugins that are managed by the Platform Group, but we are starting to see some exceptions.
 2. `core` code contains the most fundamental and stable services needed for plugin development. Everything else goes in a plugin.
 
 We will continue to focus on adding clarity around these types of services and what developers can expect from each.
@@ -63,7 +64,7 @@ In reality, our plugin model ended up being used like micro-services. Plugins ar
  with the encapsulation
  they desire, without the need to build a plugin.
 
-Another side affect of having many small plugins is that common code often ends up extracted into another plugin. Use case specific utilities are exported,
+Another side effect of having many small plugins is that common code often ends up extracted into another plugin. Use case specific utilities are exported,
  that are not meant to be used in a general manner. This makes our definition of "platform code" a bit trickier to define. We'd like to say "The platform is made up of 
  every publically exposed service", but in today's world, that wouldn't be a very accurate picture.
 
@@ -117,10 +118,10 @@ plugins/
 
 ```
 import type { PluginInitializerContext } from 'kibana/server';
-import { MyPlugin } from './plugin';
+import { DemoPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new MyPlugin(initializerContext);
+  return new DemoPlugin(initializerContext);
 }
 ```
 
@@ -133,7 +134,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
  ```ts
 import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
 
-export class MyPlugin implements Plugin {
+export class DemoPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
@@ -162,7 +163,7 @@ export class MyPlugin implements Plugin {
 ```ts
 import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
 
-export class MyPlugin implements Plugin {
+export class DemoPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
@@ -209,7 +210,7 @@ a plugin just accesses it off of the first argument:
 ```ts
 import type { CoreSetup } from 'kibana/server';
 
-export class MyPlugin {
+export class DemoPlugin {
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     // handler is called when '/path' resource is requested with `GET` method
@@ -221,6 +222,39 @@ export class MyPlugin {
 Unlike core, capabilities exposed by plugins are not automatically injected into all plugins.
 Instead, if a plugin wishes to use the public interface provided by another plugin, it must first declare that plugin as a
  dependency in it’s kibana.json manifest file.
+
+** foobar plugin.ts: **
+
+```
+import type { Plugin } from 'kibana/server';
+export interface FoobarPluginSetup { [1]
+  getFoo(): string;
+}
+
+export interface FoobarPluginStart { [1]
+  getBar(): string;
+}
+
+export class MyPlugin implements Plugin<FoobarPluginSetup, FoobarPluginStart> {
+  public setup(): FoobarPluginSetup {
+    return {
+      getFoo() {
+        return 'foo';
+      },
+    };
+  }
+
+  public start(): FoobarPluginStart {
+    return {
+      getBar() {
+        return 'bar';
+      },
+    };
+  }
+}
+```
+[1]  We highly encourage plugin authors to explicitly declare public interfaces for their plugins.
+
 
 ** demo kibana.json**
 
@@ -247,7 +281,7 @@ interface DemoStartPlugins {
   foobar: FoobarPluginStart;
 }
 
-export class AnotherPlugin {
+export class DemoPlugin {
   public setup(core: CoreSetup, plugins: DemoSetupPlugins) { [2]
     const { foobar } = plugins;
     foobar.getFoo(); // 'foo'
