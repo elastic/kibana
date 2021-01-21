@@ -6,9 +6,17 @@
  * Public License, v 1.
  */
 
-import { TimeRange, Filter, Query, RefreshInterval } from '../../data/public';
+import {
+  TimeRange,
+  Filter,
+  Query,
+  esFilters,
+  QueryState,
+  RefreshInterval,
+} from '../../data/public';
+import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { UrlGeneratorsDefinition } from '../../share/public';
-import { propagateUrlQueries } from './application/utils/get_visualize_list_item_link';
+import { STATE_STORAGE_KEY, GLOBAL_STATE_STORAGE_KEY } from '../common/constants';
 
 export const VISUALIZE_APP_URL_GENERATOR = 'VISUALIZE_APP_URL_GENERATOR';
 
@@ -82,15 +90,26 @@ export const createVisualizeUrlGenerator = (
     const appBasePath = startServices.appBasePath;
     const mode = visualizationId ? `edit/${visualizationId}` : `create`;
 
-    let url = propagateUrlQueries(
-      `${appBasePath}#/${mode}`,
-      useHash,
-      query,
-      filters,
-      timeRange,
-      vis,
-      refreshInterval
-    );
+    const appState: {
+      query?: Query;
+      filters?: Filter[];
+      vis?: unknown;
+    } = {};
+    const queryState: QueryState = {};
+
+    if (query) appState.query = query;
+    if (filters && filters.length)
+      appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
+    if (vis) appState.vis = vis;
+
+    if (timeRange) queryState.time = timeRange;
+    if (filters && filters.length)
+      queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
+    if (refreshInterval) queryState.refreshInterval = refreshInterval;
+
+    let url = `${appBasePath}#/${mode}`;
+    url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, queryState, { useHash }, url);
+    url = setStateToKbnUrl(STATE_STORAGE_KEY, appState, { useHash }, url);
 
     if (indexPatternId) {
       url = `${url}&indexPattern=${indexPatternId}`;
