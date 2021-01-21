@@ -160,7 +160,7 @@ export const EditIndexPattern = withRouter(
           <div>
             <FormattedMessage
               id="indexPatternManagement.editIndexPattern.indexPatternLists.patternList"
-              defaultMessage="Index Alias Collection: "
+              defaultMessage="Index Pattern List: "
             />
             <PatternList
               patternList={indexPattern.patternList}
