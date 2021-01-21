@@ -10,7 +10,7 @@
       "size": 10,
       "tiebreaker_field": "",
       "timestamp_field": "",
-      "wait_for_completion_timeout": "__flag__"
+      "wait_for_completion_timeout": ""
     }
   }
 }
