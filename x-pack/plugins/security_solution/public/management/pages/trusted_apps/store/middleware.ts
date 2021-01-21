@@ -116,10 +116,10 @@ const updateCreationDialogIfNeeded = (
   const newEntry = getCreationDialogFormEntry(store.getState());
   const shouldShow = isCreationDialogLocation(store.getState());
 
-  if (shouldShow) {
+  if (shouldShow && !newEntry) {
     store.dispatch({
       type: 'trustedAppCreationDialogStarted',
-      payload: { entry: newEntry || defaultNewTrustedApp() },
+      payload: { entry: defaultNewTrustedApp() },
     });
   } else if (!shouldShow && newEntry) {
     store.dispatch({
@@ -272,10 +272,13 @@ export const retrieveListOfPoliciesIfNeeded = async (
   { getState, dispatch }: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
   trustedAppsService: TrustedAppsService
 ) => {
-  const currentPoliciesState = policiesState(getState());
+  const currentState = getState();
+  const currentPoliciesState = policiesState(currentState);
   const isLoading = isLoadingResourceState(currentPoliciesState);
+  const isPageActive = trustedAppsListPageActive(currentState);
+  const isCreateFlow = isCreationDialogLocation(currentState);
 
-  if (!isLoading) {
+  if (isPageActive && isCreateFlow && !isLoading) {
     dispatch({
       type: 'trustedAppsPoliciesStateChanged',
       payload: {
@@ -326,6 +329,7 @@ export const createTrustedAppsPageMiddleware = (
 
     if (action.type === 'userChangedUrl') {
       updateCreationDialogIfNeeded(store);
+      retrieveListOfPoliciesIfNeeded(store, trustedAppsService);
     }
 
     if (action.type === 'trustedAppCreationDialogConfirmed') {
@@ -334,10 +338,6 @@ export const createTrustedAppsPageMiddleware = (
 
     if (action.type === 'trustedAppDeletionDialogConfirmed') {
       await submitDeletionIfNeeded(store, trustedAppsService);
-    }
-
-    if (action.type === 'trustedAppCreationDialogStarted') {
-      retrieveListOfPoliciesIfNeeded(store, trustedAppsService);
     }
   };
 };
