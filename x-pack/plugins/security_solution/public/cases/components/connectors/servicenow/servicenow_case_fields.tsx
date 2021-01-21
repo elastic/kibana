@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
 
@@ -14,27 +14,24 @@ import {
   ConnectorTypes,
   ServiceNowIMFieldsType,
 } from '../../../../../../case/common/api/connectors';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ConnectorCard } from '../card';
+import { useGetChoices } from './use_get_choices';
+import { Options, Choice } from './types';
 
-const selectOptions = [
-  {
-    value: '1',
-    text: i18n.SEVERITY_HIGH,
-  },
-  {
-    value: '2',
-    text: i18n.SEVERITY_MEDIUM,
-  },
-  {
-    value: '3',
-    text: i18n.SEVERITY_LOW,
-  },
-];
+const useGetChoicesFields = ['urgency', 'severity', 'impact'];
+const defaultOptions: Options = {
+  urgency: [],
+  severity: [],
+  impact: [],
+};
 
 const ServiceNowFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<ServiceNowIMFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
   const { severity = null, urgency = null, impact = null } = fields ?? {};
+  const { http, notifications } = useKibana().services;
+  const [options, setOptions] = useState<Options>(defaultOptions);
 
   const listItems = useMemo(
     () => [
@@ -42,7 +39,7 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
         ? [
             {
               title: i18n.URGENCY,
-              description: selectOptions.find((option) => `${option.value}` === urgency)?.text,
+              description: options.urgency.find((option) => `${option.value}` === urgency)?.text,
             },
           ]
         : []),
@@ -50,7 +47,7 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
         ? [
             {
               title: i18n.SEVERITY,
-              description: selectOptions.find((option) => `${option.value}` === severity)?.text,
+              description: options.severity.find((option) => `${option.value}` === severity)?.text,
             },
           ]
         : []),
@@ -58,13 +55,35 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
         ? [
             {
               title: i18n.IMPACT,
-              description: selectOptions.find((option) => `${option.value}` === impact)?.text,
+              description: options.impact.find((option) => `${option.value}` === impact)?.text,
             },
           ]
         : []),
     ],
-    [urgency, severity, impact]
+    [urgency, options.urgency, options.severity, options.impact, severity, impact]
   );
+
+  const onChoicesSuccess = (choices: Choice[]) =>
+    setOptions(
+      choices.reduce(
+        (acc, choice) => ({
+          ...acc,
+          [choice.element]: [
+            ...(acc[choice.element] != null ? acc[choice.element] : []),
+            { value: choice.value, text: choice.label },
+          ],
+        }),
+        defaultOptions
+      )
+    );
+
+  const { isLoading: isLoadingChoices } = useGetChoices({
+    http,
+    toastNotifications: notifications.toasts,
+    connector,
+    fields: useGetChoicesFields,
+    onSuccess: onChoicesSuccess,
+  });
 
   // We need to set them up at initialization
   useEffect(() => {
@@ -88,8 +107,10 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
         <EuiSelect
           fullWidth
           data-test-subj="urgencySelect"
-          options={selectOptions}
+          options={options.urgency}
           value={urgency ?? undefined}
+          isLoading={isLoadingChoices}
+          disabled={isLoadingChoices}
           hasNoInitialSelection
           onChange={(e) => onChangeCb('urgency', e.target.value)}
         />
@@ -101,8 +122,10 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
             <EuiSelect
               fullWidth
               data-test-subj="severitySelect"
-              options={selectOptions}
+              options={options.severity}
               value={severity ?? undefined}
+              isLoading={isLoadingChoices}
+              disabled={isLoadingChoices}
               hasNoInitialSelection
               onChange={(e) => onChangeCb('severity', e.target.value)}
             />
@@ -113,8 +136,10 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
             <EuiSelect
               fullWidth
               data-test-subj="impactSelect"
-              options={selectOptions}
+              options={options.impact}
               value={impact ?? undefined}
+              isLoading={isLoadingChoices}
+              disabled={isLoadingChoices}
               hasNoInitialSelection
               onChange={(e) => onChangeCb('impact', e.target.value)}
             />
