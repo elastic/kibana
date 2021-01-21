@@ -23,7 +23,7 @@ import d3 from 'd3';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { ValuesType } from 'utility-types';
-import { useTheme } from '../../../../../../observability/public';
+import { useTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import type { IUrlParams } from '../../../../context/url_params_context/types';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
