@@ -199,7 +199,7 @@ export const Ransomware = React.memo(() => {
               label={radios[0].label}
             />
           </EuiFlexItem>
-          <EuiFlexItem className="no-horizontal-margin-radio" grow={3}>
+          <EuiFlexItem className="no-horizontal-margin-radio" grow={4}>
             <ProtectionRadio
               protectionMode={radios[1].id}
               key={radios[1].protection + radios[1].id}
