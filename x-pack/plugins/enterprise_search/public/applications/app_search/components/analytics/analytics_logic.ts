@@ -80,6 +80,12 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
         onAnalyticsDataLoad: (_, { totalClicks }) => totalClicks,
       },
     ],
+    totalQueriesForQuery: [
+      0,
+      {
+        onQueryDataLoad: (_, { totalQueriesForQuery }) => totalQueriesForQuery,
+      },
+    ],
   }),
   listeners: ({ actions }) => ({
     loadAnalyticsData: async () => {
