@@ -8,7 +8,7 @@
 
 import { Plugin, CoreSetup } from 'kibana/server';
 
-export class SavedObjectHooksPlugin implements Plugin {
+export class SavedObjectImportWarningsPlugin implements Plugin {
   public setup({ savedObjects }: CoreSetup, deps: {}) {
     savedObjects.registerType({
       name: 'test_import_warning_1',

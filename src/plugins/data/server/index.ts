@@ -235,6 +235,8 @@ export {
   SearchUsage,
   SessionService,
   ISessionService,
+  DataApiRequestHandlerContext,
+  DataRequestHandlerContext,
 } from './search';
 
 // Search namespace
