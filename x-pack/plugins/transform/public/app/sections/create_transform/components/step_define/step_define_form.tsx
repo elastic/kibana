@@ -104,12 +104,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       : stepDefineForm.latestFunctionConfig.requestPayload
   );
 
-  const pivotPreviewProps = {
-    ...usePivotData(indexPattern.title, pivotQuery, validationStatus, requestPayload),
-    dataTestSubj: 'transformPivotPreview',
-    toastNotifications,
-  };
-
   const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, indexPattern.title);
   const copyToClipboardSourceDescription = i18n.translate(
     'xpack.transform.indexPreview.copyClipboardTooltip',
@@ -122,9 +116,24 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const copyToClipboardPivotDescription = i18n.translate(
     'xpack.transform.pivotPreview.copyClipboardTooltip',
     {
-      defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
+      defaultMessage: 'Copy Dev Console statement of the transform preview to the clipboard.',
     }
   );
+
+  const pivotPreviewProps = {
+    ...usePivotData(indexPattern.title, pivotQuery, validationStatus, requestPayload),
+    dataTestSubj: 'transformPivotPreview',
+    title: i18n.translate('xpack.transform.pivotPreview.transformPreviewTitle', {
+      defaultMessage: 'Transform preview',
+    }),
+    toastNotifications,
+    ...(stepDefineForm.transformFunction === TRANSFORM_FUNCTION.LATEST
+      ? {
+          copyToClipboard: copyToClipboardPivot,
+          copyToClipboardDescription: copyToClipboardPivotDescription,
+        }
+      : {}),
+  };
 
   const applySourceChangesHandler = () => {
     const sourceConfig = JSON.parse(advancedEditorSourceConfig);
@@ -377,12 +386,21 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
           </EuiFlexGroup>
         ) : null}
         {stepDefineForm.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
-          <LatestFunctionForm latestFunctionService={stepDefineForm.latestFunctionConfig} />
+          <LatestFunctionForm
+            copyToClipboard={copyToClipboardPivot}
+            copyToClipboardDescription={copyToClipboardPivotDescription}
+            latestFunctionService={stepDefineForm.latestFunctionConfig}
+          />
         ) : null}
       </EuiForm>
       <EuiSpacer size="m" />
-      <DataGrid {...pivotPreviewProps} />
-      <EuiSpacer size="m" />
+      {(stepDefineForm.transformFunction !== TRANSFORM_FUNCTION.LATEST ||
+        stepDefineForm.latestFunctionConfig.sortFieldOptions.length > 0) && (
+        <>
+          <DataGrid {...pivotPreviewProps} />
+          <EuiSpacer size="m" />
+        </>
+      )}
     </div>
   );
 });

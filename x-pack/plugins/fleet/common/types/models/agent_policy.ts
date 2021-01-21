@@ -80,3 +80,37 @@ export interface FullAgentPolicyKibanaConfig {
   protocol: string;
   path?: string;
 }
+
+// Generated from Fleet Server schema.json
+
+/**
+ * A policy that an Elastic Agent is attached to
+ */
+export interface FleetServerPolicy {
+  /**
+   * Date/time the policy revision was created
+   */
+  '@timestamp'?: string;
+  /**
+   * The ID of the policy
+   */
+  policy_id: string;
+  /**
+   * The revision index of the policy
+   */
+  revision_idx: number;
+  /**
+   * The coordinator index of the policy
+   */
+  coordinator_idx: number;
+  /**
+   * The opaque payload.
+   */
+  data: {
+    [k: string]: unknown;
+  };
+  /**
+   * True when this policy is the default policy to start Fleet Server
+   */
+  default_fleet_server: boolean;
+}

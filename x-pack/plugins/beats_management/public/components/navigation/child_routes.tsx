@@ -6,7 +6,7 @@
 import React, { FC } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-interface RouteConfig {
+export interface RouteConfig {
   path: string;
   component: React.ComponentType<any>;
   routes?: RouteConfig[];
