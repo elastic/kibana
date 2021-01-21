@@ -42,9 +42,8 @@ import { ML_APP_URL_GENERATOR } from '../common/constants/ml_url_generator';
 import { isFullLicense, isMlEnabled } from '../common/license';
 
 import { setDependencyCache } from './application/util/dependency_cache';
-import { registerFeature } from './register_feature';
+import { registerFeature } from './register_helper';
 // Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
-import { getSearchDeepLinks } from './ml_url_generator/search_deep_links';
 import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
 
 export interface MlStartDependencies {
@@ -71,7 +70,7 @@ export interface MlSetupDependencies {
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
-  private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private urlGenerator: undefined | UrlGeneratorContract<typeof ML_APP_URL_GENERATOR>;
 
   constructor(private initializerContext: PluginInitializerContext) {}
@@ -86,7 +85,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       euiIconType: PLUGIN_ICON_SOLUTION,
       appRoute: '/app/ml',
       category: DEFAULT_APP_CATEGORIES.kibana,
-      updater$: this.appUpdater,
+      updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const kibanaVersion = this.initializerContext.env.packageInfo.version;
@@ -134,29 +133,23 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         });
       } else {
         // if ml is disabled in elasticsearch, disable ML in kibana
-        this.appUpdater.next(() => ({
+        this.appUpdater$.next(() => ({
           status: AppStatus.inaccessible,
         }));
       }
 
       // register various ML plugin features which require a full license
-      const { registerEmbeddables, registerManagementSection, registerMlUiActions } = await import(
-        './register_helper'
-      );
+      const {
+        registerEmbeddables,
+        registerManagementSection,
+        registerMlUiActions,
+        registerSearchLinks,
+      } = await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
       const fullLicense = isFullLicense(license);
       if (mlEnabled) {
-        this.appUpdater.next(() => ({
-          meta: {
-            keywords: [
-              i18n.translate('xpack.ml.keyword.ml', {
-                defaultMessage: 'ML',
-              }),
-            ],
-            searchDeepLinks: getSearchDeepLinks(fullLicense),
-          },
-        }));
+        registerSearchLinks(this.appUpdater$, fullLicense);
 
         if (fullLicense) {
           const canManageMLJobs =

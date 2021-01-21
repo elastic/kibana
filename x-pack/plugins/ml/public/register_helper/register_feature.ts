@@ -8,8 +8,8 @@ import { i18n } from '@kbn/i18n';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { PLUGIN_ID } from '../common/constants/app';
+} from '../../../../../src/plugins/home/public';
+import { PLUGIN_ID } from '../../common/constants/app';
 
 export const registerFeature = (home: HomePublicPluginSetup) => {
   // register ML for the kibana home screen.
