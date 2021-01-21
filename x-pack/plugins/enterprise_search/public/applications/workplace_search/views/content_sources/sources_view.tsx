@@ -113,7 +113,7 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
 
   return (
     <>
-      {!!permissionsModal && permissionsModal.additionalConfiguration && (
+      {permissionsModal?.additionalConfiguration && (
         <PermissionsModal
           addedSourceName={permissionsModal.addedSourceName}
           serviceType={permissionsModal.serviceType}
