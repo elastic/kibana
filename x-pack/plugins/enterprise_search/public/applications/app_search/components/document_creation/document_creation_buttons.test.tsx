@@ -5,6 +5,7 @@
  */
 
 import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
+import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -14,16 +15,13 @@ import { EuiCardTo } from '../../../shared/react_router_helpers';
 import { DocumentCreationButtons } from './';
 
 describe('DocumentCreationButtons', () => {
-  const values = {
-    engineName: 'test-engine',
-  };
   const actions = {
     openDocumentCreation: jest.fn(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockValues(values);
+    setMockValues(mockEngineValues);
     setMockActions(actions);
   });
 
@@ -57,6 +55,6 @@ describe('DocumentCreationButtons', () => {
   it('renders the crawler button with a link to the crawler page', () => {
     const wrapper = shallow(<DocumentCreationButtons />);
 
-    expect(wrapper.find(EuiCardTo).prop('to')).toEqual('/engines/test-engine/crawler');
+    expect(wrapper.find(EuiCardTo).prop('to')).toEqual('/engines/some-engine/crawler');
   });
 });
