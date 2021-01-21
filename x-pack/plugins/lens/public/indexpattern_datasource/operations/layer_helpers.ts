@@ -866,7 +866,7 @@ export function updateLayerIndexPattern(
  */
 export function getErrorMessages(
   layer: IndexPatternLayer,
-  indexPattern?: IndexPattern
+  indexPattern: IndexPattern
 ): string[] | undefined {
   const errors: string[] = Object.entries(layer.columns)
     .flatMap(([columnId, column]) => {
