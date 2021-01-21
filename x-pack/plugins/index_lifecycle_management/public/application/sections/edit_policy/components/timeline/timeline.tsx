@@ -196,12 +196,7 @@ export const Timeline: FunctionComponent = () => {
                   data-test-subj="ilmTimelineDeletePhase"
                   className="ilmTimeline__deleteIconContainer"
                 >
-                  <EuiIconTip
-                    size="l"
-                    color="danger"
-                    type="trash"
-                    content={i18nTexts.deleteIcon.toolTipContent}
-                  />
+                  <EuiIconTip type="trash" content={i18nTexts.deleteIcon.toolTipContent} />
                 </div>
               </EuiFlexItem>
             )}

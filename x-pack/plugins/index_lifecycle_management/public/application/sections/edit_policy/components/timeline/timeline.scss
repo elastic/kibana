@@ -1,5 +1,11 @@
 $ilmTimelineBarHeight: $euiSizeS;
 
+/*
+* For theming we need to shade or tint to get the right color from the base EUI color
+*/
+$ilmDeletePhaseBackgroundColor: tintOrShade($euiColorVis5_behindText, 80%,80%);
+$ilmDeletePhaseColor: shadeOrTint($euiColorVis5, 40%, 40%);
+
 .ilmTimeline {
   overflow: hidden;
   width: 100%;
@@ -41,7 +47,11 @@ $ilmTimelineBarHeight: $euiSizeS;
     /*
     * Create a bit of space between the timeline and the delete icon
     */
-    padding-left: $euiSizeM;
+    padding: $euiSizeM;
+    margin-left: $euiSizeM;
+    background-color: $ilmDeletePhaseBackgroundColor;
+    color: $ilmDeletePhaseColor;
+    border-radius: calc(#{$euiSizeS} / 2);
   }
 
   &__colorBar {
