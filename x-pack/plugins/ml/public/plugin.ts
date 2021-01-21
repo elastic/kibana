@@ -44,6 +44,7 @@ import { isFullLicense, isMlEnabled } from '../common/license';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
 // Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
+import { getSearchDeepLinks } from './ml_url_generator/search_deep_links';
 import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
 
 export interface MlStartDependencies {
@@ -143,13 +144,29 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         './register_helper'
       );
 
-      if (isMlEnabled(license) && isFullLicense(license)) {
-        const canManageMLJobs = capabilities.management?.insightsAndAlerting?.jobsListLink ?? false;
-        if (canManageMLJobs && pluginsSetup.management !== undefined) {
-          registerManagementSection(pluginsSetup.management, core).enable();
+      const mlEnabled = isMlEnabled(license);
+      const fullLicense = isFullLicense(license);
+      if (mlEnabled) {
+        this.appUpdater.next(() => ({
+          meta: {
+            keywords: [
+              i18n.translate('xpack.ml.keyword.ml', {
+                defaultMessage: 'ML',
+              }),
+            ],
+            searchDeepLinks: getSearchDeepLinks(fullLicense),
+          },
+        }));
+
+        if (fullLicense) {
+          const canManageMLJobs =
+            capabilities.management?.insightsAndAlerting?.jobsListLink ?? false;
+          if (canManageMLJobs && pluginsSetup.management !== undefined) {
+            registerManagementSection(pluginsSetup.management, core).enable();
+          }
+          registerEmbeddables(pluginsSetup.embeddable, core);
+          registerMlUiActions(pluginsSetup.uiActions, core);
         }
-        registerEmbeddables(pluginsSetup.embeddable, core);
-        registerMlUiActions(pluginsSetup.uiActions, core);
       }
     });
 
