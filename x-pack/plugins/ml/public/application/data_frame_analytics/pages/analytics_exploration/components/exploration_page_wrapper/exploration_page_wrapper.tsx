@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 
 import { getAnalysisType, getDependentVar } from '../../../../../../../common/util/analytics_utils';
 
+import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
+
 import {
   defaultSearchQuery,
   getScatterplotMatrixLegendType,
@@ -102,6 +104,14 @@ export const ExplorationPageWrapper: FC<Props> = ({
     language: pageUrlState.queryLanguage,
   };
 
+  const resultsField = jobConfig?.dest.results_field ?? '';
+  const scatterplotFieldOptions = useScatterplotFieldOptions(
+    indexPattern,
+    jobConfig?.analyzed_fields.includes,
+    jobConfig?.analyzed_fields.excludes,
+    resultsField
+  );
+
   if (indexPatternErrorMessage !== undefined) {
     return (
       <EuiPanel grow={false}>
@@ -190,10 +200,10 @@ export const ExplorationPageWrapper: FC<Props> = ({
         jobConfig !== undefined &&
         isInitialized === true &&
         typeof jobConfig?.id === 'string' &&
-        jobConfig?.analyzed_fields.includes.length > 1 &&
+        scatterplotFieldOptions.length > 1 &&
         typeof jobConfig?.analysis !== 'undefined' && (
           <ExpandableSectionSplom
-            fields={jobConfig?.analyzed_fields.includes}
+            fields={scatterplotFieldOptions}
             index={jobConfig?.dest.index}
             color={
               jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
