@@ -240,7 +240,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                         'xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage',
                         {
                           defaultMessage:
-                            'A policy name cannot start with an underscore and cannot contain a question mark or a space.',
+                            'A policy name cannot start with an underscore and cannot contain a comma or a space.',
                         }
                       ),
                       validations: policyNameValidations,

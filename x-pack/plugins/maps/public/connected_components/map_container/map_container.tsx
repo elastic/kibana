@@ -25,6 +25,7 @@ import { getIndexPatternsFromIds } from '../../index_pattern_util';
 import { ES_GEO_FIELD_TYPE, RawValue } from '../../../common/constants';
 import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
 import { FLYOUT_STATE } from '../../reducers/ui';
+import { MapSettings } from '../../reducers/map';
 import { MapSettingsPanel } from '../map_settings_panel';
 import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
@@ -36,7 +37,6 @@ const RENDER_COMPLETE_EVENT = 'renderComplete';
 
 interface Props {
   addFilters: ((filters: Filter[]) => Promise<void>) | null;
-  backgroundColor: string;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
@@ -44,7 +44,6 @@ interface Props {
   cancelAllInFlightRequests: () => void;
   exitFullScreen: () => void;
   flyoutDisplay: FLYOUT_STATE;
-  hideToolbarOverlay: boolean;
   isFullScreen: boolean;
   indexPatternIds: string[];
   mapInitError: string | null | undefined;
@@ -53,6 +52,7 @@ interface Props {
   triggerRefreshTimer: () => void;
   title?: string;
   description?: string;
+  settings: MapSettings;
 }
 
 interface State {
@@ -245,7 +245,7 @@ export class MapContainer extends Component<Props, State> {
       >
         <EuiFlexItem
           className="mapMapWrapper"
-          style={{ backgroundColor: this.props.backgroundColor }}
+          style={{ backgroundColor: this.props.settings.backgroundColor }}
         >
           <MBMap
             addFilters={addFilters}
@@ -255,7 +255,7 @@ export class MapContainer extends Component<Props, State> {
             geoFields={this.state.geoFields}
             renderTooltipContent={renderTooltipContent}
           />
-          {!this.props.hideToolbarOverlay && (
+          {!this.props.settings.hideToolbarOverlay && (
             <ToolbarOverlay
               addFilters={addFilters}
               geoFields={this.state.geoFields}

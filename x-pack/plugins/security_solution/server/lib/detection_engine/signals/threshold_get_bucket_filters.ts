@@ -10,7 +10,11 @@ import { Filter } from 'src/plugins/data/common';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { ThresholdQueryBucket } from './types';
 import { BuildRuleMessage } from './rule_messages';
@@ -20,7 +24,7 @@ interface GetThresholdBucketFiltersParams {
   from: string;
   to: string;
   indexPattern: string[];
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   ruleId: string;
   bucketByField: string;

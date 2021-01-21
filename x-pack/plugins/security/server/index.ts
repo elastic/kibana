@@ -24,7 +24,7 @@ import {
 // functions or removal of exports should be considered as a breaking change.
 export type {
   CreateAPIKeyResult,
-  InvalidateAPIKeyParams,
+  InvalidateAPIKeysParams,
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
 } from './authentication';

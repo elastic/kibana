@@ -22,6 +22,7 @@ export const buildTimelineDetailsQuery = (
       },
     },
     fields: ['*'],
+    _source: ['signal.*'],
   },
   size: 1,
 });

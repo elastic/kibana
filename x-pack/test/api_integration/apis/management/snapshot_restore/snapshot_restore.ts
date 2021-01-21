@@ -24,6 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   } = registerEsHelpers(getService);
 
   describe('Snapshot Lifecycle Management', function () {
+    this.tags(['skipCloud']); // file system repositories are not supported in cloud
+
     before(async () => {
       try {
         await createRepository(REPO_NAME);

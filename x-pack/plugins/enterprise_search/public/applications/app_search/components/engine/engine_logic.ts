@@ -64,12 +64,14 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       '',
       {
         setEngineName: (_, { engineName }) => engineName,
+        clearEngine: () => '',
       },
     ],
     engineNotFound: [
       false,
       {
         setEngineNotFound: (_, { notFound }) => notFound,
+        clearEngine: () => false,
       },
     ],
   },

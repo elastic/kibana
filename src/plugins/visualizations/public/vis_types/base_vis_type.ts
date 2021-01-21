@@ -1,32 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { defaultsDeep } from 'lodash';
-import { ISchemas } from 'src/plugins/vis_default_editor/public';
+
 import { VisParams } from '../types';
 import { VisType, VisTypeOptions, VisGroups } from './types';
+import { Schemas } from './schemas';
 
 interface CommonBaseVisTypeOptions<TVisParams>
   extends Pick<
       VisType<TVisParams>,
       | 'description'
-      | 'editor'
       | 'getInfoMessage'
       | 'getSupportedTriggers'
       | 'hierarchicalData'
@@ -90,7 +79,6 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly options;
   public readonly visualization;
   public readonly visConfig;
-  public readonly editor;
   public readonly editorConfig;
   public hidden;
   public readonly requestHandler;
@@ -102,6 +90,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly inspectorAdapters;
   public readonly toExpressionAst;
   public readonly getInfoMessage;
+  public readonly schemas;
 
   constructor(opts: BaseVisTypeOptions<TVisParams>) {
     if (!opts.icon && !opts.image) {
@@ -117,7 +106,6 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.image = opts.image;
     this.visualization = opts.visualization;
     this.visConfig = defaultsDeep({}, opts.visConfig, { defaults: {} });
-    this.editor = opts.editor;
     this.editorConfig = defaultsDeep({}, opts.editorConfig, { collections: {} });
     this.options = defaultsDeep({}, opts.options, defaultOptions);
     this.stage = opts.stage ?? 'production';
@@ -133,10 +121,8 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
     this.getInfoMessage = opts.getInfoMessage;
-  }
 
-  public get schemas(): ISchemas {
-    return this.editorConfig?.schemas ?? [];
+    this.schemas = new Schemas(this.editorConfig?.schemas ?? []);
   }
 
   public get requiresSearch(): boolean {

@@ -17,7 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const comboBox = getService('comboBox');
   const supertest = getService('supertest');
 
-  describe('Connectors', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/88796
+  describe.skip('Connectors', function () {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
@@ -256,6 +257,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
       expect(searchResultsBeforeEdit.length).to.eql(1);
 
+      expect(await testSubjects.exists('preConfiguredTitleMessage')).to.be(true);
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
       expect(await testSubjects.exists('preconfiguredBadge')).to.be(true);

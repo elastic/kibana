@@ -10,13 +10,17 @@ import { act } from '@testing-library/react';
 
 import { useForm, Form, FormHook } from '../../../shared_imports';
 import { Title } from './title';
+import { schema, FormProps } from './schema';
 
 describe('Title', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
-    const { form } = useForm<{ title: string }>({
+    const { form } = useForm<FormProps>({
       defaultValue: { title: 'My title' },
+      schema: {
+        title: schema.title,
+      },
     });
 
     globalForm = form;

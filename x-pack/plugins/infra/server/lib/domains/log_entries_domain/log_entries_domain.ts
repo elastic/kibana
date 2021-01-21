@@ -5,7 +5,7 @@
  */
 
 import { RequestHandlerContext } from 'src/core/server';
-import { JsonObject } from '../../../../common/typed_json';
+import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/common';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,

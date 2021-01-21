@@ -33,13 +33,7 @@
         "name": "Execution",
         "reference": "https://attack.mitre.org/tactics/TA0002/"
       },
-      "technique": [
-        {
-          "id": "T1117",
-          "name": "Regsvr32",
-          "reference": "https://attack.mitre.org/techniques/T1117/"
-        }
-      ]
+      "technique": []
     },
     {
       "framework": "MITRE ATT&CK",
@@ -52,11 +46,18 @@
         {
           "id": "T1218",
           "name": "Signed Binary Proxy Execution",
-          "reference": "https://attack.mitre.org/techniques/T1218/"
+          "reference": "https://attack.mitre.org/techniques/T1218/",
+          "subtechnique": [
+            {
+              "id": "T1218.010",
+              "name": "Regsvr32",
+              "reference": "https://attack.mitre.org/techniques/T1218/010/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 5
+  "version": 6
 }

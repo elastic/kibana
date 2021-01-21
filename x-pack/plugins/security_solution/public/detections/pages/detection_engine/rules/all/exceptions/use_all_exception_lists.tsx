@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
+import { Rule } from '../../../../../containers/detection_engine/rules';
 import { ExceptionListSchema } from '../../../../../../../../lists/common';
-
 import { fetchRules } from '../../../../../containers/detection_engine/rules/api';
-
 export interface ExceptionListInfo extends ExceptionListSchema {
-  rules: Array<{ name: string; id: string }>;
+  rules: Rule[];
 }
 
-export type UseAllExceptionListsReturn = [boolean, ExceptionListInfo[]];
+export type UseAllExceptionListsReturn = [
+  boolean,
+  ExceptionListInfo[],
+  Record<string, ExceptionListInfo>
+];
 
 /**
  * Hook for preparing exception lists table info. For now, we need to do a table scan
@@ -30,7 +34,46 @@ export const useAllExceptionLists = ({
   exceptionLists: ExceptionListSchema[];
 }): UseAllExceptionListsReturn => {
   const [loading, setLoading] = useState(true);
-  const [exceptionsListInfo, setExceptionsListInfo] = useState<ExceptionListInfo[]>([]);
+  const [exceptions, setExceptions] = useState<ExceptionListInfo[]>([]);
+  const [exceptionsListsInfo, setExceptionsListInfo] = useState<Record<string, ExceptionListInfo>>(
+    {}
+  );
+
+  const handleExceptionsInfo = useCallback(
+    (rules: Rule[]): Record<string, ExceptionListInfo> => {
+      const listsSkeleton = exceptionLists.reduce<Record<string, ExceptionListInfo>>(
+        (acc, { id, ...rest }) => {
+          acc[id] = {
+            ...rest,
+            id,
+            rules: [],
+          };
+
+          return acc;
+        },
+        {}
+      );
+
+      return rules.reduce<Record<string, ExceptionListInfo>>((acc, rule) => {
+        const ruleExceptionLists = rule.exceptions_list;
+
+        if (ruleExceptionLists != null && ruleExceptionLists.length > 0) {
+          ruleExceptionLists.forEach((ex) => {
+            const list = acc[ex.id];
+            if (list != null) {
+              acc[ex.id] = {
+                ...list,
+                rules: [...list.rules, rule],
+              };
+            }
+          });
+        }
+
+        return acc;
+      }, listsSkeleton);
+    },
+    [exceptionLists]
+  );
 
   useEffect(() => {
     let isSubscribed = true;
@@ -45,19 +88,6 @@ export const useAllExceptionLists = ({
       try {
         setLoading(true);
 
-        const listsSkeleton = exceptionLists.reduce<Record<string, ExceptionListInfo>>(
-          (acc, { id, ...rest }) => {
-            acc[id] = {
-              ...rest,
-              id,
-              rules: [],
-            };
-
-            return acc;
-          },
-          {}
-        );
-
         const { data: rules } = await fetchRules({
           pagination: {
             page: 1,
@@ -67,29 +97,14 @@ export const useAllExceptionLists = ({
           signal: abortCtrl.signal,
         });
 
-        const updatedLists = rules.reduce<Record<string, ExceptionListInfo>>((acc, rule) => {
-          const exceptions = rule.exceptions_list;
-
-          if (exceptions != null && exceptions.length > 0) {
-            exceptions.forEach((ex) => {
-              const list = acc[ex.id];
-              if (list != null) {
-                acc[ex.id] = {
-                  ...list,
-                  rules: [...list.rules, { id: rule.id, name: rule.name }],
-                };
-              }
-            });
-          }
-
-          return acc;
-        }, listsSkeleton);
+        const updatedLists = handleExceptionsInfo(rules);
 
         const lists = Object.keys(updatedLists).map<ExceptionListInfo>(
           (listKey) => updatedLists[listKey]
         );
 
-        setExceptionsListInfo(lists);
+        setExceptions(lists);
+        setExceptionsListInfo(updatedLists);
 
         if (isSubscribed) {
           setLoading(false);
@@ -107,7 +122,7 @@ export const useAllExceptionLists = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [exceptionLists.length, exceptionLists]);
+  }, [exceptionLists.length, handleExceptionsInfo]);
 
-  return [loading, exceptionsListInfo];
+  return [loading, exceptions, exceptionsListsInfo];
 };

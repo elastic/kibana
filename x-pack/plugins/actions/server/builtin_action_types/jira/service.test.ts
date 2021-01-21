@@ -583,6 +583,19 @@ describe('Jira service', () => {
         '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: Could not get capabilities'
       );
     });
+
+    test('it should throw an auth error', async () => {
+      requestMock.mockImplementation(() => {
+        const error = new Error('An error has occurred');
+        // @ts-ignore this can happen!
+        error.response = { data: 'Unauthorized' };
+        throw error;
+      });
+
+      await expect(service.getCapabilities()).rejects.toThrow(
+        '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: Unauthorized'
+      );
+    });
   });
 
   describe('getIssueTypes', () => {

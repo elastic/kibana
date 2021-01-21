@@ -123,7 +123,13 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
           values: { noLoc: statusMessage },
         }
       ),
-      locTooltip: upsMessage + downMessage,
+      locTooltip: (
+        <>
+          <span>{upsMessage}</span>
+          <EuiSpacer size="xs" />
+          <span>{downMessage}</span>
+        </>
+      ),
     };
   }
 

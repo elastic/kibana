@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KibanaRequest, RequestHandlerContext, SavedObjectsClientContract } from 'src/core/server';
+import {
+  ElasticsearchClient,
+  KibanaRequest,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 import uuid from 'uuid';
 import { AuthenticatedUser } from '../../../security/server';
 import {
@@ -47,6 +52,7 @@ function getDataset(st: string) {
 class PackagePolicyService {
   public async create(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     callCluster: CallESAsCurrentUser,
     packagePolicy: NewPackagePolicy,
     options?: { id?: string; user?: AuthenticatedUser; bumpRevision?: boolean }
@@ -116,10 +122,16 @@ class PackagePolicyService {
     );
 
     // Assign it to the given agent policy
-    await agentPolicyService.assignPackagePolicies(soClient, packagePolicy.policy_id, [newSo.id], {
-      user: options?.user,
-      bumpRevision: options?.bumpRevision ?? true,
-    });
+    await agentPolicyService.assignPackagePolicies(
+      soClient,
+      esClient,
+      packagePolicy.policy_id,
+      [newSo.id],
+      {
+        user: options?.user,
+        bumpRevision: options?.bumpRevision ?? true,
+      }
+    );
 
     return {
       id: newSo.id,
@@ -130,6 +142,7 @@ class PackagePolicyService {
 
   public async bulkCreate(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     packagePolicies: NewPackagePolicy[],
     agentPolicyId: string,
     options?: { user?: AuthenticatedUser; bumpRevision?: boolean }
@@ -167,6 +180,7 @@ class PackagePolicyService {
     // Assign it to the given agent policy
     await agentPolicyService.assignPackagePolicies(
       soClient,
+      esClient,
       agentPolicyId,
       newSos.map((newSo) => newSo.id),
       {
@@ -252,6 +266,7 @@ class PackagePolicyService {
 
   public async update(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     id: string,
     packagePolicy: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser }
@@ -308,7 +323,7 @@ class PackagePolicyService {
     );
 
     // Bump revision of associated agent policy
-    await agentPolicyService.bumpRevision(soClient, packagePolicy.policy_id, {
+    await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
       user: options?.user,
     });
 
@@ -317,6 +332,7 @@ class PackagePolicyService {
 
   public async delete(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     ids: string[],
     options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean }
   ): Promise<DeletePackagePoliciesResponse> {
@@ -331,6 +347,7 @@ class PackagePolicyService {
         if (!options?.skipUnassignFromAgentPolicies) {
           await agentPolicyService.unassignPackagePolicies(
             soClient,
+            esClient,
             packagePolicy.policy_id,
             [packagePolicy.id],
             {
@@ -437,7 +454,7 @@ async function _compilePackagePolicyInput(
   pkgInfo: PackageInfo,
   input: PackagePolicyInput
 ) {
-  if (!input.enabled || !pkgInfo.policy_templates?.[0].inputs) {
+  if ((!input.enabled || !pkgInfo.policy_templates?.[0]?.inputs?.length) ?? 0 > 0) {
     return undefined;
   }
 

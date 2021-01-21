@@ -1,6 +1,6 @@
 ---
 id: kibDataPlugin
-slug: /kibana-dev-guide/services/data-plugin
+slug: /kibana-dev-docs/services/data-plugin
 title: Data services
 image: https://source.unsplash.com/400x175/?Search
 summary: The data plugin contains services for searching, querying and filtering.
@@ -20,7 +20,7 @@ It is wired into the `TopNavMenu` component, but can be used independently.
 
 ### Fetch Query Suggestions
 
-The `getQuerySuggestions` function helps to construct a query. 
+The `getQuerySuggestions` function helps to construct a query.
 KQL suggestion functions are registered in X-Pack, so this API does not return results in OSS.
 
 ```.ts
@@ -37,7 +37,7 @@ KQL suggestion functions are registered in X-Pack, so this API does not return r
 ### Fetch Value Suggestions
 
 The `getValueSuggestions` function returns suggestions for field values.
-This is helpful when you want to provide a user with options, for example when constructing a filter. 
+This is helpful when you want to provide a user with options, for example when constructing a filter.
 
 ```.ts
 
@@ -56,7 +56,81 @@ Coming soon.
 
 ## Index Patterns
 
-Coming soon.
+The Index Patterns API provides a consistent method of structuring and formatting documents
+and field lists across the various Kibana apps. Its typically used in conjunction with
+SearchSource for composing queries.
+
+### Index Patterns API
+
+- Get list of index patterns
+- Get default index pattern and examine fields
+- Get index pattern by id
+- Find index pattern by title
+- Create index pattern
+- Create index pattern and save it
+- Modify index pattern and save it
+- Delete index pattern
+
+#### Get list of index pattern titles and ids
+
+```
+const idsAndTitles = await data.indexPatterns.getIdsWithTitle();
+idsAndTitles.forEach(({id, title}) => console.log(`Index pattern id: ${id} title: ${title}`));
+```
+
+#### Get default index pattern and examine fields
+
+```
+const defaultIndexPattern = await data.indexPatterns.getDefault();
+defaultIndexPattern.fields.forEach(({name}) => { console.log(name); })
+```
+
+#### Get index pattern by id
+
+```
+const id = 'xxxxxx-xxx-xxxxxx';
+const indexPattern = await data.indexPatterns.get(id);
+```
+
+#### Find index pattern by title
+
+```
+const title = 'kibana-*';
+const [indexPattern] = await data.indexPatterns.find(title);
+```
+
+#### Create index pattern
+
+```
+const indexPattern = await data.indexPatterns.create({ title: 'kibana-*' });
+```
+
+#### Create index pattern and save it immediately
+
+```
+const indexPattern = await data.indexPatterns.createAndSave({ title: 'kibana-*' });
+```
+
+#### Create index pattern, modify, and save
+
+```
+const indexPattern = await data.indexPatterns.create({ title: 'kibana-*' });
+indexPattern.setFieldCustomLabel('customer_name', 'Customer Name');
+data.indexPatterns.createSavedObject(indexPattern);
+```
+
+#### Modify index pattern and save it
+
+```
+indexPattern.setFieldCustomLabel('customer_name', 'Customer Name');
+await data.indexPatterns.updateSavedObject(indexPattern);
+```
+
+#### Delete index pattern
+
+```
+await data.indexPatterns.delete(indexPatternId);
+```
 
 ### Index Patterns HTTP API
 
@@ -79,7 +153,7 @@ Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
 
 ### Index Patterns API
 
-Index Patterns CURD API allows you to create, retrieve and delete index patterns. I also
+Index Patterns REST API allows you to create, retrieve and delete index patterns. I also
 exposes an update endpoint which allows you to update specific fields without changing
 the rest of the index pattern object.
 
@@ -146,7 +220,7 @@ The endpoint returns the created index pattern object.
 
 #### Fetch an index pattern by ID
 
-Retrieve and index pattern by its ID.
+Retrieve an index pattern by its ID.
 
 ```
 GET /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
@@ -477,7 +551,7 @@ It contains sub-services for each of those configurations:
 
         // Constuct the query portion of the search request
         const query = data.query.getEsQuery(indexPattern);
-        
+
         // Construct a request
         const request = {
             params: {
@@ -522,7 +596,7 @@ The `SearchSource` API is a convenient way to construct and run an Elasticsearch
 #### Default Search Strategy
 
 One benefit of using the low-level search API, is partial response support in X-Pack, allowing for a better and more responsive user experience.
-In OSS only the final result is returned. 
+In OSS only the final result is returned.
 
 ```.ts
     import { isCompleteResponse } from '../plugins/data/public';
@@ -538,8 +612,8 @@ In OSS only the final result is returned.
             }
         },
         error: (e: Error) => {
-            // Show customized toast notifications. 
-            // You may choose to handle errors differently if you prefer. 
+            // Show customized toast notifications.
+            // You may choose to handle errors differently if you prefer.
             data.search.showError(e);
         },
     });

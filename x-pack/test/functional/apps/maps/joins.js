@@ -81,7 +81,7 @@ export default function ({ getPageObjects, getService }) {
 
     it('should decorate feature properties with join property', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-      expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(4);
+      expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(8);
 
       mapboxStyle.sources.n1t6f.data.features.forEach(({ properties }) => {
         if (properties.name === 'tango') {
@@ -130,7 +130,17 @@ export default function ({ getPageObjects, getService }) {
         return feature.properties.__kbn_isvisibleduetojoin__;
       });
 
-      expect(visibilitiesOfFeatures).to.eql([false, true, true, true]);
+      expect(visibilitiesOfFeatures).to.eql([
+        false,
+        true,
+        true,
+        true,
+        // geo centroids for above features
+        false,
+        true,
+        true,
+        true,
+      ]);
     });
 
     describe('query bar', () => {
@@ -196,7 +206,17 @@ export default function ({ getPageObjects, getService }) {
           return feature.properties.__kbn_isvisibleduetojoin__;
         });
 
-        expect(visibilitiesOfFeatures).to.eql([false, true, false, false]);
+        expect(visibilitiesOfFeatures).to.eql([
+          false,
+          true,
+          false,
+          false,
+          // geo centroids for above features
+          false,
+          true,
+          false,
+          false,
+        ]);
       });
     });
 
