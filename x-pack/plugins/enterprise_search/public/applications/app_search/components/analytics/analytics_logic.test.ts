@@ -29,6 +29,9 @@ describe('AnalyticsLogic', () => {
     dataLoading: true,
     analyticsUnavailable: false,
     allTags: [],
+    totalQueries: 0,
+    totalQueriesNoResults: 0,
+    totalClicks: 0,
   };
 
   const MOCK_TOP_QUERIES = [
@@ -120,6 +123,9 @@ describe('AnalyticsLogic', () => {
           dataLoading: false,
           analyticsUnavailable: false,
           allTags: ['some-tag'],
+          totalClicks: 1000,
+          totalQueries: 5000,
+          totalQueriesNoResults: 500,
           // TODO: more state will get set here in future PRs
         });
       });
