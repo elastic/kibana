@@ -125,11 +125,6 @@ function taskRunner(
             { savedObjects, http },
             { encryptedSavedObjects, security },
           ] = await coreStartServices;
-          if (!encryptedSavedObjects) {
-            throw new Error(
-              `Unable to run task because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-            );
-          }
           const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
             includedHiddenTypes: ['api_key_pending_invalidation'],
           });

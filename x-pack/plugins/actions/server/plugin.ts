@@ -272,6 +272,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
+    const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
+      includedHiddenTypes,
+    });
+
     const getActionsClientWithRequest = async (
       request: KibanaRequest,
       authorizationContext?: ActionExecutionSource<unknown>
@@ -323,16 +327,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
       core.savedObjects.getScopedClient(request);
 
-    const spaceIdToNamespace = (spaceId?: string) => {
-      return plugins.spaces && spaceId
-        ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
-        : undefined;
-    };
-
-    const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes,
-    });
-
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
@@ -355,6 +349,12 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             }
           : undefined,
     });
+
+    const spaceIdToNamespace = (spaceId?: string) => {
+      return plugins.spaces && spaceId
+        ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
+        : undefined;
+    };
 
     taskRunnerFactory!.initialize({
       logger,

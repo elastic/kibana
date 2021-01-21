@@ -50,41 +50,6 @@ describe('Actions Plugin', () => {
       };
     });
 
-    describe('routeHandlerContext.getActionsClient()', () => {
-      it('should not throw error when ESO plugin is available', async () => {
-        // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await plugin.setup(coreSetup as any, {
-          ...pluginsSetup,
-          encryptedSavedObjects: {
-            ...pluginsSetup.encryptedSavedObjects!,
-          },
-        });
-
-        expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
-        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
-        expect(handler[0]).toEqual('actions');
-
-        const actionsContextHandler = ((await handler[1](
-          ({
-            core: {
-              savedObjects: {
-                client: {},
-              },
-              elasticsearch: {
-                legacy: {
-                  client: jest.fn(),
-                },
-              },
-            },
-          } as unknown) as RequestHandlerContext,
-          httpServerMock.createKibanaRequest(),
-          httpServerMock.createResponseFactory()
-        )) as unknown) as RequestHandlerContext['actions'];
-        actionsContextHandler!.getActionsClient();
-      });
-    });
-
     describe('registerType()', () => {
       let setup: PluginSetupContract;
       const sampleActionType: ActionType = {
@@ -189,20 +154,6 @@ describe('Actions Plugin', () => {
         const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(true);
-      });
-
-      it('should not throw error when ESO plugin is available', async () => {
-        // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await plugin.setup(coreSetup as any, {
-          ...pluginsSetup,
-          encryptedSavedObjects: {
-            ...pluginsSetup.encryptedSavedObjects!,
-          },
-        });
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
-
-        await pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest());
       });
     });
 
