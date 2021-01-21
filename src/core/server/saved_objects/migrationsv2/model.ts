@@ -707,6 +707,9 @@ export const createInitialState = ({
   migrationVersionPerType: SavedObjectsMigrationVersion;
   indexPrefix: string;
 }): InitState => {
+  // Convert the kibanaVersion to lower case so that it's valid for using in an
+  // index name. This is necessary for pre-release builds like `8.0.0-SNAPSHOT`
+  const kibanaVersionLc = kibanaVersion.toLowerCase();
   const outdatedDocumentsQuery = {
     bool: {
       should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
@@ -736,10 +739,10 @@ export const createInitialState = ({
     indexPrefix,
     legacyIndex: indexPrefix,
     currentAlias: indexPrefix,
-    versionAlias: `${indexPrefix}_${kibanaVersion}`,
-    versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
-    tempIndex: `${indexPrefix}_${kibanaVersion}_reindex_temp`,
-    kibanaVersion,
+    versionAlias: `${indexPrefix}_${kibanaVersionLc}`,
+    versionIndex: `${indexPrefix}_${kibanaVersionLc}_001`,
+    tempIndex: `${indexPrefix}_${kibanaVersionLc}_reindex_temp`,
+    kibanaVersion: kibanaVersionLc,
     preMigrationScript: Option.fromNullable(preMigrationScript),
     targetIndexMappings: targetMappings,
     tempIndexMappings: reindexTargetMappings,
