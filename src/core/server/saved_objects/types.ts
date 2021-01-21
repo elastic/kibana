@@ -10,6 +10,7 @@ import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
 import { SavedObjectsExportTransform } from './export';
+import { SavedObjectsImportHook } from './import/types';
 
 export {
   SavedObjectsImportResponse,
@@ -21,6 +22,9 @@ export {
   SavedObjectsImportUnknownError,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportWarning,
 } from './import/types';
 
 import { SavedObject } from '../../types';
@@ -239,6 +243,41 @@ export interface SavedObjectsType {
    */
   migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
   /**
+   * If defined, objects of this type will be converted to multi-namespace objects when migrating to this version.
+   *
+   * Requirements:
+   *
+   *  1. This string value must be a valid semver version
+   *  2. This type must have previously specified {@link SavedObjectsNamespaceType | `namespaceType: 'single'`}
+   *  3. This type must also specify {@link SavedObjectsNamespaceType | `namespaceType: 'multiple'`}
+   *
+   * Example of a single-namespace type in 7.10:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   hidden: false,
+   *   namespaceType: 'single',
+   *   mappings: {...}
+   * }
+   * ```
+   *
+   * Example after converting to a multi-namespace type in 7.11:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   hidden: false,
+   *   namespaceType: 'multiple',
+   *   mappings: {...},
+   *   convertToMultiNamespaceTypeVersion: '7.11.0'
+   * }
+   * ```
+   *
+   * Note: a migration function can be optionally specified for the same version.
+   */
+  convertToMultiNamespaceTypeVersion?: string;
+  /**
    * An optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type.
    */
   management?: SavedObjectsTypeManagementDefinition;
@@ -291,4 +330,46 @@ export interface SavedObjectsTypeManagementDefinition {
    * See {@link SavedObjectsExportTransform | the transform type documentation} for more info and examples.
    */
   onExport?: SavedObjectsExportTransform;
+  /**
+   * An optional {@link SavedObjectsImportHook | import hook} to use when importing given type.
+   *
+   * Import hooks are executed during the savedObjects import process and allow to interact
+   * with the imported objects. See the {@link SavedObjectsImportHook | hook documentation}
+   * for more info.
+   *
+   * @example
+   * Registering a hook displaying a warning about a specific type of object
+   * ```ts
+   * // src/plugins/my_plugin/server/plugin.ts
+   * import { myType } from './saved_objects';
+   *
+   * export class Plugin() {
+   *   setup: (core: CoreSetup) => {
+   *     core.savedObjects.registerType({
+   *        ...myType,
+   *        management: {
+   *          ...myType.management,
+   *          onImport: (objects) => {
+   *            if(someActionIsNeeded(objects)) {
+   *              return {
+   *                 warnings: [
+   *                   {
+   *                     type: 'action_required',
+   *                     message: 'Objects need to be manually enabled after import',
+   *                     actionPath: '/app/my-app/require-activation',
+   *                   },
+   *                 ]
+   *              }
+   *            }
+   *            return {};
+   *          }
+   *        },
+   *     });
+   *   }
+   * }
+   * ```
+   *
+   * @remark messages returned in the warnings are user facing and must be translated.
+   */
+  onImport?: SavedObjectsImportHook;
 }
