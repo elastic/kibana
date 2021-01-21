@@ -5,6 +5,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+import { generatePath } from 'react-router-dom';
 
 import { HttpLogic } from '../../../shared/http';
 
@@ -15,6 +16,7 @@ interface EngineValues {
   dataLoading: boolean;
   engine: Partial<EngineDetails>;
   engineName: string;
+  generateEnginePath: Function;
   isMetaEngine: boolean;
   isSampleEngine: boolean;
   hasSchemaConflicts: boolean;
@@ -76,6 +78,15 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     ],
   },
   selectors: ({ selectors }) => ({
+    generateEnginePath: [
+      () => [selectors.engineName],
+      (engineName) => {
+        const generateEnginePath = (path: string, pathParams: object = {}) => {
+          return generatePath(path, { engineName, ...pathParams });
+        };
+        return generateEnginePath;
+      },
+    ],
     isMetaEngine: [() => [selectors.engine], (engine) => engine?.type === 'meta'],
     isSampleEngine: [() => [selectors.engine], (engine) => !!engine?.sample],
     hasSchemaConflicts: [
