@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Top transaction groups when data is loaded returns the correct buckets (when ignoring samples) 1`] = `
+exports[`APM specs (basic) Transactions Top transaction groups when data is loaded returns the correct buckets (when ignoring samples) 1`] = `
 Array [
   Object {
     "averageResponseTime": 2722.75,

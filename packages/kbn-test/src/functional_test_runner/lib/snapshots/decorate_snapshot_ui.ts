@@ -73,6 +73,8 @@ export function decorateSnapshotUi({
   isCi: boolean;
 }) {
   globalState.registered = true;
+  globalState.snapshots.length = 0;
+  globalState.currentTest = null;
 
   if (isCi) {
     // make sure snapshots that have not been committed
@@ -119,7 +121,7 @@ export function decorateSnapshotUi({
         }
       });
 
-      if (!globalState.updateSnapshot) {
+      if (globalState.updateSnapshot !== 'all') {
         unused.push(...snapshotState.getUncheckedKeys());
       } else {
         snapshotState.removeUncheckedKeys();
