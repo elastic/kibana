@@ -290,8 +290,10 @@ describe('sources routes', () => {
       it('correctly', () => {
         const request = {
           body: {
-            content_source: {
-              name: 'foo',
+            query: {
+              content_source: {
+                name: 'foo',
+              },
             },
           },
         };
@@ -627,8 +629,10 @@ describe('sources routes', () => {
       it('correctly', () => {
         const request = {
           body: {
-            content_source: {
-              name: 'foo',
+            query: {
+              content_source: {
+                name: 'foo',
+              },
             },
           },
         };
