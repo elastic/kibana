@@ -6,7 +6,6 @@
  * Public License, v 1.
  */
 
-// @ts-ignore
 import fetch from 'node-fetch';
 
 import { IRouter } from 'kibana/server';
@@ -35,7 +34,7 @@ export async function sendTelemetryOptInStatus(
 
   await fetch(optInStatusUrl, {
     method: 'post',
-    body: optInStatus,
+    body: JSON.stringify(optInStatus),
     headers: { 'X-Elastic-Stack-Version': currentKibanaVersion },
   });
 }
