@@ -7,10 +7,12 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { HttpLogic } from '../../../shared/http';
 import { Schema, SchemaConflicts } from '../../../shared/types';
+import { flashAPIErrors } from '../../../shared/flash_messages';
+import { EngineLogic } from '../engine';
 
 import { SearchSettings } from './types';
-
 interface RelevanceTuningProps {
   searchSettings: SearchSettings;
   schema: Schema;
@@ -27,6 +29,7 @@ interface RelevanceTuningActions {
   clearSearchResults(): void;
   resetSearchSettingsState(): void;
   dismissSchemaConflictCallout(): void;
+  initializeRelevanceTuning(): void;
 }
 
 interface RelevanceTuningValues {
@@ -66,6 +69,7 @@ export const RelevanceTuningLogic = kea<
     clearSearchResults: true,
     resetSearchSettingsState: true,
     dismissSchemaConflictCallout: true,
+    initializeRelevanceTuning: true,
   }),
   reducers: () => ({
     searchSettings: [
@@ -154,5 +158,20 @@ export const RelevanceTuningLogic = kea<
       () => [selectors.schema],
       (schema: Schema): boolean => Object.keys(schema).length >= 2,
     ],
+  }),
+  listeners: ({ actions, values }) => ({
+    initializeRelevanceTuning: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      const url = `/api/app_search/engines/${engineName}/search_settings/details`;
+
+      try {
+        const response = await http.get(url);
+        actions.onInitializeRelevanceTuning(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
   }),
 });

@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+  expectedAsyncError,
+} from '../../../__mocks__';
 
 import { BoostType } from './types';
 
 import { RelevanceTuningLogic } from './relevance_tuning_logic';
+
+jest.mock('../engine', () => ({
+  EngineLogic: { values: { engineName: 'test-engine' } },
+}));
 
 describe('RelevanceTuningLogic', () => {
   const { mount } = new LogicMounter(RelevanceTuningLogic);
@@ -187,6 +196,41 @@ describe('RelevanceTuningLogic', () => {
           showSchemaConflictCallout: false,
         });
       });
+    });
+  });
+
+  describe('listeners', () => {
+    const { http } = mockHttpValues;
+    const { flashAPIErrors } = mockFlashMessageHelpers;
+
+    describe('initializeRelevanceTuning', () => {
+      it('should make an API call and set state based on the response', async () => {
+        const promise = Promise.resolve(relevanceTuningProps);
+        http.get.mockReturnValueOnce(promise);
+        mount();
+        jest.spyOn(RelevanceTuningLogic.actions, 'onInitializeRelevanceTuning');
+
+        RelevanceTuningLogic.actions.initializeRelevanceTuning();
+        await promise;
+
+        expect(http.get).toHaveBeenCalledWith(
+          '/api/app_search/engines/test-engine/search_settings/details'
+        );
+        expect(RelevanceTuningLogic.actions.onInitializeRelevanceTuning).toHaveBeenCalledWith(
+          relevanceTuningProps
+        );
+      });
+    });
+
+    it('handles errors', async () => {
+      const promise = Promise.reject('error');
+      http.get.mockReturnValueOnce(promise);
+      mount();
+
+      RelevanceTuningLogic.actions.initializeRelevanceTuning();
+      await expectedAsyncError(promise);
+
+      expect(flashAPIErrors).toHaveBeenCalledWith('error');
     });
   });
 
