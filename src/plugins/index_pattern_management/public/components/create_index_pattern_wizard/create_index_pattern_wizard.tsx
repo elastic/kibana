@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { DocLinksStart } from 'src/core/public';
-import { StepIndexPattern } from './components/step_index_pattern/step_index_pattern';
+import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
 import { LoadingState } from './components/loading_state';
