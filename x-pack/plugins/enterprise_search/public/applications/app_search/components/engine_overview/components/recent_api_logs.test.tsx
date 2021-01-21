@@ -5,6 +5,7 @@
  */
 
 import { setMockValues } from '../../../../__mocks__/kea.mock';
+import { mockEngineValues } from '../../../__mocks__';
 
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
@@ -18,9 +19,7 @@ describe('RecentApiLogs', () => {
 
   beforeAll(() => {
     jest.clearAllMocks();
-    setMockValues({
-      engineName: 'some-engine',
-    });
+    setMockValues(mockEngineValues);
     wrapper = shallow(<RecentApiLogs />);
   });
 

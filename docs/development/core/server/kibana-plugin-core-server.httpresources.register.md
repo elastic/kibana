@@ -9,5 +9,5 @@ To register a route handler executing passed function to form response.
 <b>Signature:</b>
 
 ```typescript
-register: <P, Q, B>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B>) => void;
+register: <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B, Context>) => void;
 ```

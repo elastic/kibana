@@ -130,6 +130,9 @@ export {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectsNamespaceType,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
 } from './saved_objects';
 
 export {
