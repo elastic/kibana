@@ -10,6 +10,7 @@ import supertest from 'supertest';
 import { ReportingCore } from '../..';
 import { createMockReportingCore, createMockLevelLogger } from '../../test_helpers';
 import { registerDiagnoseConfig } from './config';
+import type { ReportingRequestHandlerContext } from '../../types';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -25,7 +26,11 @@ describe('POST /diagnose/config', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext(reportingSymbol, 'reporting', () => ({}));
+    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+      reportingSymbol,
+      'reporting',
+      () => ({})
+    );
 
     mockSetupDeps = ({
       elasticsearch: {
