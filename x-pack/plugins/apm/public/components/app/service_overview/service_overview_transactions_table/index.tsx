@@ -12,7 +12,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ValuesType } from 'utility-types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
@@ -39,6 +39,8 @@ import { ServiceOverviewTableContainer } from '../service_overview_table_contain
 type ServiceTransactionGroupItem = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/overview'>['transactionGroups']
 >;
+
+type TransactionGroupMetrics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/metrics'>;
 
 interface Props {
   serviceName: string;
@@ -84,9 +86,11 @@ function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
 function getColumns({
   serviceName,
   latencyAggregationType,
+  transactionsMetricsData,
 }: {
   serviceName: string;
   latencyAggregationType?: string;
+  transactionsMetricsData: TransactionGroupMetrics;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
@@ -119,12 +123,15 @@ function getColumns({
       field: 'latency',
       name: getLatencyAggregationTypeLabel(latencyAggregationType),
       width: px(unit * 10),
-      render: (_, { latency }) => {
+      render: (_, { latency, name }) => {
+        const timeseries = transactionsMetricsData
+          ? transactionsMetricsData[name]?.latency.timeseries
+          : undefined;
         return (
           <SparkPlot
             color="euiColorVis1"
             compact
-            series={latency.timeseries ?? undefined}
+            series={timeseries}
             valueLabel={asMillisecondDuration(latency.value)}
           />
         );
@@ -137,12 +144,15 @@ function getColumns({
         { defaultMessage: 'Throughput' }
       ),
       width: px(unit * 10),
-      render: (_, { throughput }) => {
+      render: (_, { throughput, name }) => {
+        const timeseries = transactionsMetricsData
+          ? transactionsMetricsData[name]?.throughput.timeseries
+          : undefined;
         return (
           <SparkPlot
             color="euiColorVis0"
             compact
-            series={throughput.timeseries ?? undefined}
+            series={timeseries}
             valueLabel={asTransactionRate(throughput.value)}
           />
         );
@@ -157,12 +167,15 @@ function getColumns({
         }
       ),
       width: px(unit * 8),
-      render: (_, { errorRate }) => {
+      render: (_, { errorRate, name }) => {
+        const timeseries = transactionsMetricsData
+          ? transactionsMetricsData[name]?.errorRate.timeseries
+          : undefined;
         return (
           <SparkPlot
             color="euiColorVis7"
             compact
-            series={errorRate.timeseries ?? undefined}
+            series={timeseries}
             valueLabel={asPercent(errorRate.value, 1)}
           />
         );
@@ -265,7 +278,47 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     tableOptions: { pageIndex, sort },
   } = data;
 
-  const columns = getColumns({ serviceName, latencyAggregationType });
+  const transactionNames = useMemo(() => items.map(({ name }) => name), [
+    items,
+  ]);
+
+  const {
+    data: transactionsMetricsData,
+    status: transactionsMetricsStatus,
+  } = useFetcher(() => {
+    if (transactionNames.length && start && end && transactionType) {
+      return callApmApi({
+        endpoint:
+          'GET /api/apm/services/{serviceName}/transactions/groups/metrics',
+        params: {
+          path: { serviceName },
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters),
+            numBuckets: 20,
+            transactionType,
+            latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+            transactionNames: transactionNames.join(),
+          },
+        },
+      });
+    }
+  }, [
+    serviceName,
+    start,
+    end,
+    uiFilters,
+    transactionType,
+    latencyAggregationType,
+    transactionNames,
+  ]);
+
+  const columns = getColumns({
+    serviceName,
+    latencyAggregationType,
+    transactionsMetricsData,
+  });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -319,7 +372,10 @@ export function ServiceOverviewTransactionsTable(props: Props) {
                   pageSizeOptions: [PAGE_SIZE],
                   hidePerPageOptions: true,
                 }}
-                loading={status === FETCH_STATUS.LOADING}
+                loading={
+                  status === FETCH_STATUS.LOADING ||
+                  transactionsMetricsStatus === FETCH_STATUS.LOADING
+                }
                 onChange={(newTableOptions: {
                   page?: {
                     index: number;

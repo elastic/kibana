@@ -15,6 +15,7 @@ import {
   Settings,
 } from '@elastic/charts';
 import { merge } from 'lodash';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { useChartTheme } from '../../../../../../observability/public';
 import { px, unit } from '../../../../style/variables';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -38,7 +39,7 @@ export function SparkPlot({
   compact,
 }: {
   color: Color;
-  series?: Array<{ x: number; y: number | null }> | null;
+  series?: Coordinate[] | null;
   valueLabel: React.ReactNode;
   compact?: boolean;
 }) {
@@ -57,18 +58,18 @@ export function SparkPlot({
 
   const colorValue = theme.eui[color];
 
+  const chartSize = {
+    height: px(24),
+    width: compact ? px(unit * 3) : px(unit * 4),
+  };
+
   return (
     <EuiFlexGroup gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>
         {!series || series.every((point) => point.y === null) ? (
-          <EuiIcon type="visLine" color="subdued" />
+          <EuiIcon type="visLine" color="subdued" style={chartSize} />
         ) : (
-          <Chart
-            size={{
-              height: px(24),
-              width: compact ? px(unit * 3) : px(unit * 4),
-            }}
-          >
+          <Chart size={chartSize}>
             <Settings
               theme={sparkplotChartTheme}
               showLegend={false}

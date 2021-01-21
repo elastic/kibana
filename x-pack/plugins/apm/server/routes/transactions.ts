@@ -23,6 +23,7 @@ import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../common/latency_aggregation_types';
+import { getServiceTransactionGroupsMetrics } from '../lib/services/get_service_transaction_groups_metrics';
 
 /**
  * Returns a list of transactions grouped by name
@@ -111,6 +112,53 @@ export const transactionGroupsOverviewRoute = createRoute({
       searchAggregatedTransactions,
       sortDirection,
       sortField,
+      transactionType,
+      numBuckets,
+      latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+    });
+  },
+});
+
+export const transactionGroupsMetricsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups/metrics',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([
+      rangeRt,
+      uiFiltersRt,
+      t.type({
+        transactionNames: t.string,
+        numBuckets: toNumberRt,
+        transactionType: t.string,
+        latencyAggregationType: latencyAggregationTypeRt,
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    const {
+      path: { serviceName },
+      query: {
+        transactionNames,
+        latencyAggregationType,
+        numBuckets,
+        transactionType,
+      },
+    } = context.params;
+
+    return getServiceTransactionGroupsMetrics({
+      setup,
+      serviceName,
+      transactionNames: transactionNames.split(','),
+      searchAggregatedTransactions,
       transactionType,
       numBuckets,
       latencyAggregationType: latencyAggregationType as LatencyAggregationType,

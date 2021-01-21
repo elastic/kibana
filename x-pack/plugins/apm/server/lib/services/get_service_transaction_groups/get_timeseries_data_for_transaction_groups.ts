@@ -82,7 +82,7 @@ export async function getTimeseriesDataForTransactionGroups({
         transaction_groups: {
           terms: {
             field: TRANSACTION_NAME,
-            // size, TODO: check it
+            size: 500,
           },
           aggs: {
             timeseries: {
