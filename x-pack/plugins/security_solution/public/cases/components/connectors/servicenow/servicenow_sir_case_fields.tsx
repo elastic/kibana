@@ -182,7 +182,7 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
             <EuiFieldText
               fullWidth
               value={destIp ?? ''}
-              data-test-subj="destIPInput"
+              data-test-subj="destIpInput"
               onChange={(e) => onChangeCb('destIp', e.target.value)}
             />
           </EuiFormRow>
@@ -192,7 +192,7 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
             <EuiFieldText
               fullWidth
               value={sourceIp ?? ''}
-              data-test-subj="sourceIPInput"
+              data-test-subj="sourceIpInput"
               onChange={(e) => onChangeCb('sourceIp', e.target.value)}
             />
           </EuiFormRow>

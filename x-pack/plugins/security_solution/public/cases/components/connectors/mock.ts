@@ -20,3 +20,70 @@ export const issues = [
   { id: 'cameraId', title: 'Camera Task', key: 'cameraKey' },
   { id: 'tvId', title: 'TV Task', key: 'tvKey' },
 ];
+
+export const choices = [
+  {
+    dependent_value: '',
+    label: 'Priviledge Escalation',
+    value: 'Priviledge Escalation',
+    element: 'category',
+  },
+  {
+    dependent_value: '',
+    label: 'Criminal activity/investigation',
+    value: 'Criminal activity/investigation',
+    element: 'category',
+  },
+  {
+    dependent_value: '',
+    label: 'Denial of Service',
+    value: 'Denial of Service',
+    element: 'category',
+  },
+  {
+    dependent_value: 'Denial of Service',
+    label: 'Inbound or outbound',
+    value: '12',
+    element: 'subcategory',
+  },
+  {
+    dependent_value: 'Denial of Service',
+    label: 'Single or distributed (DoS or DDoS)',
+    value: '26',
+    element: 'subcategory',
+  },
+  {
+    dependent_value: 'Denial of Service',
+    label: 'Inbound DDos',
+    value: 'inbound_ddos',
+    element: 'subcategory',
+  },
+  ...['severity', 'urgency', 'impact', 'priority']
+    .map((element) => [
+      {
+        dependent_value: '',
+        label: '1 - Critical',
+        value: '1',
+        element,
+      },
+      {
+        dependent_value: '',
+        label: '2 - High',
+        value: '2',
+        element,
+      },
+      {
+        dependent_value: '',
+        label: '3 - Moderate',
+        value: '3',
+        element,
+      },
+      {
+        dependent_value: '',
+        label: '4 - Low',
+        value: '4',
+        element,
+      },
+    ])
+    .flat(),
+];

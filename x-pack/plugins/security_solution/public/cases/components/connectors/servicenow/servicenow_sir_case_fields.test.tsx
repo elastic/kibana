@@ -6,20 +6,32 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import Fields from './servicenow_sir_case_fields';
-import { connector } from '../mock';
-import { waitFor } from '@testing-library/dom';
+import { waitFor, act } from '@testing-library/react';
 import { EuiSelect } from '@elastic/eui';
+
+import { connector, choices as mockChoices } from '../mock';
+import { Choice } from './types';
+import Fields from './servicenow_sir_case_fields';
+
+let onChoicesSuccess = (c: Choice[]) => {};
+
+jest.mock('../../../../common/lib/kibana');
+jest.mock('./use_get_choices', () => ({
+  useGetChoices: (args: { onSuccess: () => void }) => {
+    onChoicesSuccess = args.onSuccess;
+    return { isLoading: false, mockChoices };
+  },
+}));
 
 describe('ServiceNowSIR Fields', () => {
   const fields = {
-    category: 'Denial of Service',
     destIp: '192.68.1.1',
     sourceIp: '192.68.1.2',
     malwareHash: '098f6bcd4621d373cade4e832627b4f6',
     malwareUrl: 'https://attack.com',
     priority: '1',
-    subcategory: '20',
+    category: 'Denial of Service',
+    subcategory: '26',
   };
   const onChange = jest.fn();
 
@@ -29,31 +41,141 @@ describe('ServiceNowSIR Fields', () => {
 
   it('all params fields are rendered - isEdit: true', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('value')).toEqual('1');
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toEqual('1');
-    expect(wrapper.find('[data-test-subj="urgencySelect"]').first().prop('value')).toEqual('2');
-    expect(wrapper.find('[data-test-subj="impactSelect"]').first().prop('value')).toEqual('3');
+    expect(wrapper.find('[data-test-subj="destIpInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="sourceIpInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="malwareUrlInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="malwareHashInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="categorySelect"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeTruthy();
   });
 
   test('all params fields are rendered - isEdit: false', () => {
     const wrapper = mount(
       <Fields isEdit={false} fields={fields} onChange={onChange} connector={connector} />
     );
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+    wrapper.update();
+
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(0).text()).toEqual(
-      'Urgency: Medium'
+      'Destination IP: 192.68.1.1'
     );
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(1).text()).toEqual(
-      'Severity: High'
+      'Source IP: 192.68.1.2'
     );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual('Impact: Low');
+    expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual(
+      'Malware URL: https://attack.com'
+    );
+    expect(wrapper.find('[data-test-subj="card-list-item"]').at(3).text()).toEqual(
+      'Malware Hash: 098f6bcd4621d373cade4e832627b4f6'
+    );
+    expect(wrapper.find('[data-test-subj="card-list-item"]').at(4).text()).toEqual(
+      'Priority: 1 - Critical'
+    );
+    expect(wrapper.find('[data-test-subj="card-list-item"]').at(5).text()).toEqual(
+      'Category: Denial of Service'
+    );
+    expect(wrapper.find('[data-test-subj="card-list-item"]').at(6).text()).toEqual(
+      'Subcategory: Single or distributed (DoS or DDoS)'
+    );
+  });
+
+  test('it transforms the categories to options correctly', async () => {
+    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="categorySelect"]').first().prop('options')).toEqual([
+      { value: 'Priviledge Escalation', text: 'Priviledge Escalation' },
+      {
+        value: 'Criminal activity/investigation',
+        text: 'Criminal activity/investigation',
+      },
+      { value: 'Denial of Service', text: 'Denial of Service' },
+    ]);
+  });
+
+  test('it transforms the subcategories to options correctly', async () => {
+    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').first().prop('options')).toEqual([
+      {
+        text: 'Inbound or outbound',
+        value: '12',
+      },
+      {
+        text: 'Single or distributed (DoS or DDoS)',
+        value: '26',
+      },
+      {
+        text: 'Inbound DDos',
+        value: 'inbound_ddos',
+      },
+    ]);
+  });
+
+  test('it transforms the priorities to options correctly', async () => {
+    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('options')).toEqual([
+      {
+        text: '1 - Critical',
+        value: '1',
+      },
+      {
+        text: '2 - High',
+        value: '2',
+      },
+      {
+        text: '3 - Moderate',
+        value: '3',
+      },
+      {
+        text: '4 - Low',
+        value: '4',
+      },
+    ]);
   });
 
   describe('onChange calls', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
 
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+    wrapper.update();
+
     expect(onChange).toHaveBeenCalledWith(fields);
 
-    const testers = ['severity', 'urgency', 'impact'];
+    const inputs = ['destIp', 'sourceIp', 'malwareHash', 'malwareUrl'];
+    inputs.forEach((subj) =>
+      test(`${subj.toUpperCase()}`, async () => {
+        await waitFor(() => {
+          wrapper
+            .find(`[data-test-subj="${subj}Input"] input`)
+            .first()
+            .simulate('change', { target: { value: 'new value' } });
+          expect(onChange).toHaveBeenCalledWith({
+            ...fields,
+            [subj]: 'new value',
+          });
+        });
+      })
+    );
+
+    const testers = ['priority', 'category', 'subcategory'];
     testers.forEach((subj) =>
       test(`${subj.toUpperCase()}`, async () => {
         await waitFor(() => {

@@ -8,17 +8,18 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionConnector } from '../../../containers/types';
+import { choices } from '../mock';
 import { useGetChoices, UseGetChoices, UseGetChoicesProps } from './use_get_choices';
-import { getChoices } from './api';
+import * as api from './api';
 
 jest.mock('./api');
 jest.mock('../../../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const getChoicesMock = getChoices as jest.Mock;
 const onSuccess = jest.fn();
+const fields = ['priority'];
 
-const actionConnector = {
+const connector = {
   secrets: {
     username: 'user',
     password: 'pass',
@@ -32,30 +33,8 @@ const actionConnector = {
   },
 } as ActionConnector;
 
-const getChoicesResponse = [
-  {
-    dependent_value: '',
-    label: 'Priviledge Escalation',
-    value: 'Priviledge Escalation',
-  },
-  {
-    dependent_value: '',
-    label: 'Criminal activity/investigation',
-    value: 'Criminal activity/investigation',
-  },
-  {
-    dependent_value: '',
-    label: 'Denial of Service',
-    value: 'Denial of Service',
-  },
-];
-
 describe('useGetChoices', () => {
   const { services } = useKibanaMock();
-  getChoicesMock.mockResolvedValue({
-    data: getChoicesResponse,
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -64,9 +43,9 @@ describe('useGetChoices', () => {
     const { result, waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
       useGetChoices({
         http: services.http,
-        actionConnector,
+        connector,
         toastNotifications: services.notifications.toasts,
-        field: 'priority',
+        fields,
         onSuccess,
       })
     );
@@ -75,7 +54,7 @@ describe('useGetChoices', () => {
 
     expect(result.current).toEqual({
       isLoading: false,
-      choices: getChoicesResponse,
+      choices,
     });
   });
 
@@ -83,9 +62,9 @@ describe('useGetChoices', () => {
     const { result } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
       useGetChoices({
         http: services.http,
-        actionConnector: undefined,
+        connector: undefined,
         toastNotifications: services.notifications.toasts,
-        field: 'priority',
+        fields,
         onSuccess,
       })
     );
@@ -100,30 +79,34 @@ describe('useGetChoices', () => {
     const { waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
       useGetChoices({
         http: services.http,
-        actionConnector,
+        connector,
         toastNotifications: services.notifications.toasts,
-        field: 'priority',
+        fields,
         onSuccess,
       })
     );
 
     await waitForNextUpdate();
 
-    expect(onSuccess).toHaveBeenCalledWith(getChoicesResponse);
+    expect(onSuccess).toHaveBeenCalledWith(choices);
   });
 
   it('it displays an error when service fails', async () => {
-    getChoicesMock.mockResolvedValue({
-      status: 'error',
-      serviceMessage: 'An error occurred',
-    });
+    const spyOnGetChoices = jest.spyOn(api, 'getChoices');
+    spyOnGetChoices.mockResolvedValue(
+      Promise.resolve({
+        actionId: 'test',
+        status: 'error',
+        serviceMessage: 'An error occurred',
+      })
+    );
 
     const { waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
       useGetChoices({
         http: services.http,
-        actionConnector,
+        connector,
         toastNotifications: services.notifications.toasts,
-        field: 'priority',
+        fields,
         onSuccess,
       })
     );
@@ -132,28 +115,29 @@ describe('useGetChoices', () => {
 
     expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
       text: 'An error occurred',
-      title: 'Unable to get choices for field priority',
+      title: 'Unable to get choices',
     });
   });
 
   it('it displays an error when http throws an error', async () => {
-    getChoicesMock.mockImplementation(() => {
+    const spyOnGetChoices = jest.spyOn(api, 'getChoices');
+    spyOnGetChoices.mockImplementation(() => {
       throw new Error('An error occurred');
     });
 
     renderHook<UseGetChoicesProps, UseGetChoices>(() =>
       useGetChoices({
         http: services.http,
-        actionConnector,
+        connector,
         toastNotifications: services.notifications.toasts,
-        field: 'priority',
+        fields,
         onSuccess,
       })
     );
 
     expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
       text: 'An error occurred',
-      title: 'Unable to get choices for field priority',
+      title: 'Unable to get choices',
     });
   });
 });

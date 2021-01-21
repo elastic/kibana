@@ -6,11 +6,23 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import Fields from './servicenow_case_fields';
-import { connector } from '../mock';
-import { waitFor } from '@testing-library/dom';
+import { waitFor, act } from '@testing-library/react';
 import { EuiSelect } from '@elastic/eui';
+import { mount } from 'enzyme';
+
+import { connector, choices as mockChoices } from '../mock';
+import { Choice } from './types';
+import Fields from './servicenow_case_fields';
+
+let onChoicesSuccess = (c: Choice[]) => {};
+
+jest.mock('../../../../common/lib/kibana');
+jest.mock('./use_get_choices', () => ({
+  useGetChoices: (args: { onSuccess: () => void }) => {
+    onChoicesSuccess = args.onSuccess;
+    return { isLoading: false, mockChoices };
+  },
+}));
 
 describe('ServiceNowIM Fields', () => {
   const fields = { severity: '1', urgency: '2', impact: '3' };
@@ -22,22 +34,46 @@ describe('ServiceNowIM Fields', () => {
 
   it('all params fields are rendered - isEdit: true', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toEqual('1');
-    expect(wrapper.find('[data-test-subj="urgencySelect"]').first().prop('value')).toEqual('2');
-    expect(wrapper.find('[data-test-subj="impactSelect"]').first().prop('value')).toEqual('3');
+    expect(wrapper.find('[data-test-subj="severitySelect"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="urgencySelect"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="impactSelect"]').exists()).toBeTruthy();
   });
 
-  test('all params fields are rendered - isEdit: false', () => {
+  it('all params fields are rendered - isEdit: false', () => {
     const wrapper = mount(
       <Fields isEdit={false} fields={fields} onChange={onChange} connector={connector} />
     );
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(0).text()).toEqual(
-      'Urgency: Medium'
+      'Urgency: 2 - High'
     );
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(1).text()).toEqual(
-      'Severity: High'
+      'Severity: 1 - Critical'
     );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual('Impact: Low');
+    expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual(
+      'Impact: 3 - Moderate'
+    );
+  });
+
+  it('it transforms the options correctly', async () => {
+    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+
+    wrapper.update();
+    const testers = ['severity', 'urgency', 'impact'];
+    testers.forEach((subj) =>
+      expect(wrapper.find(`[data-test-subj="${subj}Select"]`).first().prop('options')).toEqual([
+        { value: '1', text: '1 - Critical' },
+        { value: '2', text: '2 - High' },
+        { value: '3', text: '3 - Moderate' },
+        { value: '4', text: '4 - Low' },
+      ])
+    );
   });
 
   describe('onChange calls', () => {
