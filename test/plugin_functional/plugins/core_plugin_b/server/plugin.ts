@@ -6,19 +6,17 @@
  * Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup, RequestHandlerContext } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { PluginARequestContext } from '../../core_plugin_a/server';
+import { PluginAApiRequestContext } from '../../core_plugin_a/server';
 
-declare module 'kibana/server' {
-  interface RequestHandlerContext {
-    pluginA?: PluginARequestContext;
-  }
+interface PluginBContext extends RequestHandlerContext {
+  pluginA: PluginAApiRequestContext;
 }
 
 export class CorePluginBPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<PluginBContext>();
     router.get({ path: '/core_plugin_b', validate: false }, async (context, req, res) => {
       if (!context.pluginA) return res.internalError({ body: 'pluginA is disabled' });
       const response = await context.pluginA.ping();

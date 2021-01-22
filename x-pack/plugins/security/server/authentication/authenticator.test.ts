@@ -43,7 +43,7 @@ function getMockOptions({
     legacyAuditLogger: securityAuditLoggerMock.create(),
     audit: auditServiceMock.create(),
     getCurrentUser: jest.fn(),
-    clusterClient: elasticsearchServiceMock.createLegacyClusterClient(),
+    clusterClient: elasticsearchServiceMock.createClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
     license: licenseMock.create(),
     loggers: loggingSystemMock.create(),
@@ -54,9 +54,7 @@ function getMockOptions({
       { isTLSEnabled: false }
     ),
     session: sessionMock.create(),
-    getFeatureUsageService: jest
-      .fn()
-      .mockReturnValue(securityFeatureUsageServiceMock.createStartContract()),
+    featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
   };
 }
 
@@ -1881,9 +1879,7 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.update).not.toHaveBeenCalled();
-      expect(
-        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
-      ).not.toHaveBeenCalled();
+      expect(mockOptions.featureUsageService.recordPreAccessAgreementUsage).not.toHaveBeenCalled();
     });
 
     it('fails if cannot retrieve user session', async () => {
@@ -1896,12 +1892,10 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.update).not.toHaveBeenCalled();
-      expect(
-        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
-      ).not.toHaveBeenCalled();
+      expect(mockOptions.featureUsageService.recordPreAccessAgreementUsage).not.toHaveBeenCalled();
     });
 
-    it('fails if license doesn allow access agreement acknowledgement', async () => {
+    it('fails if license does not allow access agreement acknowledgement', async () => {
       mockOptions.license.getFeatures.mockReturnValue({
         allowAccessAgreement: false,
       } as SecurityLicenseFeatures);
@@ -1913,9 +1907,7 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.update).not.toHaveBeenCalled();
-      expect(
-        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
-      ).not.toHaveBeenCalled();
+      expect(mockOptions.featureUsageService.recordPreAccessAgreementUsage).not.toHaveBeenCalled();
     });
 
     it('properly acknowledges access agreement for the authenticated user', async () => {
@@ -1937,9 +1929,9 @@ describe('Authenticator', () => {
         }
       );
 
-      expect(
-        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
-      ).toHaveBeenCalledTimes(1);
+      expect(mockOptions.featureUsageService.recordPreAccessAgreementUsage).toHaveBeenCalledTimes(
+        1
+      );
     });
   });
 });
