@@ -32,7 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when(
-    'Throughput when data is loaded retjurns the service throughput ',
+    'Throughput when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
       let throughputResponse: {

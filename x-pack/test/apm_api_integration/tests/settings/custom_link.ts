@@ -17,7 +17,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
 
   const archiveName = 'apm_8.0.0';
 
-  registry.when('Custom links with a basic license', { config: 'trial', archives: [] }, () => {
+  registry.when('Custom links with a basic license', { config: 'basic', archives: [] }, () => {
     it('returns a 403 forbidden', async () => {
       const customLink = {
         url: 'https://elastic.co',
