@@ -27,7 +27,7 @@ describe('ActionContext', () => {
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(`"alert '[alert-name]' matched query"`);
     expect(context.message).toEqual(
-      `alert '[alert-name]' is active':
+      `alert '[alert-name]' is active:
 
 - Value: 42
 - Conditions Met: count greater than 4 over 5m
@@ -54,7 +54,7 @@ describe('ActionContext', () => {
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(`"alert '[alert-name]' matched query"`);
     expect(context.message).toEqual(
-      `alert '[alert-name]' is active':
+      `alert '[alert-name]' is active:
 
 - Value: 4
 - Conditions Met: count between 4 and 5 over 5m
