@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, CoreSetup, LegacyAPICaller } from 'kibana/server';
+import {
+  Logger,
+  CoreSetup,
+  LegacyAPICaller,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBaseOptions,
+} from 'kibana/server';
 import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../task_manager/server';
+import { ActionResult } from '../types';
 import { getTotalCount, getInUseTotalCount } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
@@ -39,7 +46,7 @@ function registerActionsTelemetryTask(
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
-      timeout: '10s',
+      timeout: '5m',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
     },
   });
@@ -66,11 +73,21 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
         client.callAsInternalUser(...args)
       );
     };
+    const actionsBulkGet = (
+      objects?: SavedObjectsBulkGetObject[],
+      options?: SavedObjectsBaseOptions
+    ) => {
+      return core
+        .getStartServices()
+        .then(([{ savedObjects }]) =>
+          savedObjects.createInternalRepository(['action']).bulkGet<ActionResult>(objects, options)
+        );
+    };
     return {
       async run() {
         return Promise.all([
           getTotalCount(callCluster, kibanaIndex),
-          getInUseTotalCount(callCluster, kibanaIndex),
+          getInUseTotalCount(callCluster, actionsBulkGet, kibanaIndex),
         ])
           .then(([totalAggegations, totalInUse]) => {
             return {
@@ -78,8 +95,8 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
                 runs: (state.runs || 0) + 1,
                 count_total: totalAggegations.countTotal,
                 count_by_type: totalAggegations.countByType,
-                count_active_total: totalInUse.total,
-                count_active_by_type: totalInUse.connectorIds,
+                count_active_total: totalInUse.countTotal,
+                count_active_by_type: totalInUse.countByType,
               },
               runAt: getNextMidnight(),
             };
@@ -97,5 +114,5 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
 }
 
 function getNextMidnight() {
-  return moment().add(10, 's').startOf('s').toDate();
+  return moment().add(1, 'd').startOf('d').toDate();
 }

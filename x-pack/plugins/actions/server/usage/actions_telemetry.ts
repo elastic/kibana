@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import {
+  LegacyAPICaller,
+  SavedObjectsBaseOptions,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
+} from 'kibana/server';
+import { ActionResult } from '../types';
 
 export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: string) {
   const scriptedMetric = {
@@ -71,8 +77,12 @@ export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: s
 
 export async function getInUseTotalCount(
   callCluster: LegacyAPICaller,
+  actionsBulkGet: (
+    objects?: SavedObjectsBulkGetObject[] | undefined,
+    options?: SavedObjectsBaseOptions | undefined
+  ) => Promise<SavedObjectsBulkResponse<ActionResult<Record<string, unknown>>>>,
   kibanaIndex: string
-): Promise<{ total: number; connectorIds: Record<string, number> }> {
+): Promise<{ countTotal: number; countByType: Record<string, number> }> {
   const scriptedMetric = {
     scripted_metric: {
       init_script: 'state.connectorIds = new HashMap(); state.total = 0;',
@@ -152,7 +162,28 @@ export async function getInUseTotalCount(
     },
   });
 
-  return actionResults.aggregations.refs.actionRefIds.value;
+  const bulkFilter = Object.entries(
+    actionResults.aggregations.refs.actionRefIds.value.connectorIds
+  ).map(([key]) => ({
+    id: key,
+    type: 'action',
+    fields: ['id', 'actionTypeId'],
+  }));
+  const actions = await actionsBulkGet(bulkFilter);
+  const countByType = actions.saved_objects.reduce(
+    (actionTypeCount: Record<string, number>, action) => {
+      const hasFirstSymbolDot = action.attributes.actionTypeId.startsWith('.');
+      const alertTypeId = hasFirstSymbolDot
+        ? action.attributes.actionTypeId.replace('.', '__')
+        : action.attributes.actionTypeId;
+      const currentCount =
+        actionTypeCount[alertTypeId] !== undefined ? actionTypeCount[alertTypeId] : 0;
+      actionTypeCount[alertTypeId] = currentCount + 1;
+      return actionTypeCount;
+    },
+    {}
+  );
+  return { countTotal: actionResults.aggregations.refs.actionRefIds.value.total, countByType };
 }
 
 // TODO: Implement executions count telemetry with eventLog, when it will write to index
