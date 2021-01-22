@@ -5,14 +5,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { BeatsManagementRouter } from '../../lib/types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { ReturnTypeBulkCreate } from '../../../common/return_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
 const DEFAULT_NUM_TOKENS = 1;
 
-export const registerCreateTokenRoute = (router: IRouter) => {
+export const registerCreateTokenRoute = (router: BeatsManagementRouter) => {
   // TODO: write to Kibana audit log file
   router.post(
     {
