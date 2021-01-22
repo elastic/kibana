@@ -43,9 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
       const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
       const minLabel = 1;
-      const maxLabel = 3500;
+      const maxLabel = 7000;
       const numberOfLabels = 10;
-      log.debug('labels: ', labels);
       expect(labels.length).to.be.greaterThan(numberOfLabels);
       expect(labels[0]).to.eql(minLabel);
       expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
@@ -56,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
       const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
       const minLabel = 1;
-      const maxLabel = 3500;
+      const maxLabel = 7000;
       const numberOfLabels = 10;
       expect(labels.length).to.be.greaterThan(numberOfLabels);
       expect(labels[0]).to.eql(minLabel);
@@ -68,17 +67,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
       await PageObjects.visEditor.clickGo();
       const labels = await PageObjects.visChart.getYAxisLabels();
-      log.debug('labels: ', labels);
       const expectedLabels = [
         '0',
-        '500',
         '1,000',
-        '1,500',
         '2,000',
-        '2,500',
         '3,000',
-        '3,500',
         '4,000',
+        '5,000',
+        '6,000',
+        '7,000',
+        '8,000',
+        '9,000',
       ];
 
       expect(labels).to.eql(expectedLabels);
@@ -88,17 +87,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
       await PageObjects.visEditor.clickGo();
       const labels = await PageObjects.visChart.getYAxisLabels();
-      log.debug('labels: ', labels);
       const expectedLabels = [
         '0',
-        '500',
         '1,000',
-        '1,500',
         '2,000',
-        '2,500',
         '3,000',
-        '3,500',
         '4,000',
+        '5,000',
+        '6,000',
+        '7,000',
+        '8,000',
+        '9,000',
       ];
       expect(labels).to.eql(expectedLabels);
     });
@@ -111,14 +110,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug(labels);
       const expectedLabels = [
         '0',
-        '500',
         '1,000',
-        '1,500',
         '2,000',
-        '2,500',
         '3,000',
-        '3,500',
         '4,000',
+        '5,000',
+        '6,000',
+        '7,000',
+        '8,000',
+        '9,000',
       ];
       expect(labels).to.eql(expectedLabels);
     });
@@ -127,17 +127,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
       await PageObjects.visEditor.clickGo();
       const labels = await PageObjects.visChart.getYAxisLabels();
-      log.debug('labels: ', labels);
       const expectedLabels = [
         '0',
-        '500',
         '1,000',
-        '1,500',
         '2,000',
-        '2,500',
         '3,000',
-        '3,500',
         '4,000',
+        '5,000',
+        '6,000',
+        '7,000',
+        '8,000',
+        '9,000',
       ];
       expect(labels).to.eql(expectedLabels);
     });
