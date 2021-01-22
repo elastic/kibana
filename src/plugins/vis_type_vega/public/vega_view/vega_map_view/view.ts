@@ -10,10 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { throttle } from 'lodash';
 import { Map, Style, NavigationControl, MapboxOptions } from 'mapbox-gl';
 
-// @ts-ignore
-// eslint-disable-next-line import/no-extraneous-dependencies
-import Vsi from 'vega-spec-injector';
-
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
 import { TmsTileLayers } from './tms_tile_layers';
@@ -23,12 +19,11 @@ import type { MapServiceSettings } from './map_service_settings';
 import {
   defaultMapConfig,
   defaultMabBoxStyle,
-  defaultProjection,
   userConfiguredLayerId,
   vegaLayerId,
 } from './constants';
 
-import { validateZoomSettings } from './validataion_helper';
+import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
 
 // @ts-ignore
 import { vega } from '../../lib/vega';
@@ -57,16 +52,6 @@ export class VegaMapView extends VegaBaseView {
       center: [longitude, latitude],
       scrollZoom: scrollWheelZoom,
     };
-  }
-
-  private initVegaView(): vega.View {
-    const vsi = new Vsi();
-
-    vsi.overrideField(this._parser.spec, 'autosize', 'none');
-    vsi.addToList(this._parser.spec, 'signals', ['zoom', 'latitude', 'longitude']);
-    vsi.addToList(this._parser.spec, 'projections', [defaultProjection]);
-
-    return new vega.View(vega.parse(this._parser.spec), this._vegaViewConfig);
   }
 
   private async initMapContainer(vegaView: vega.View) {
@@ -187,7 +172,10 @@ export class VegaMapView extends VegaBaseView {
       await this.mapServiceSettings.initialize();
     }
 
-    const vegaView = this.initVegaView();
+    const vegaView = new vega.View(
+      vega.parse(injectMapPropsIntoSpec(this._parser.spec)),
+      this._vegaViewConfig
+    );
 
     this.setDebugValues(vegaView, this._parser.spec, this._parser.vlspec);
     this.setView(vegaView);
