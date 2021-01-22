@@ -50,12 +50,7 @@ export class VegaMapView extends VegaBaseView {
 
   private getMapParams(defaults: { maxZoom: number; minZoom: number }): Partial<MapboxOptions> {
     const { longitude, latitude, scrollWheelZoom } = this._parser.mapConfig;
-    const zoomSettings = validateZoomSettings(
-      this._parser.mapConfig,
-      defaults.minZoom,
-      defaults.maxZoom,
-      this.onWarn
-    );
+    const zoomSettings = validateZoomSettings(this._parser.mapConfig, defaults, this.onWarn);
 
     return {
       ...zoomSettings,

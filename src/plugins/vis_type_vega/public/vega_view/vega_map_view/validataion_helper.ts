@@ -7,19 +7,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VegaBaseView } from '../vega_base_view';
 
 export function validateZoomSettings(
   mapConfig: {
     maxZoom: number;
     minZoom: number;
-    zoom: number;
+    zoom?: number;
   },
-  limitMinZ: number,
-  limitMaxZ: number,
-  onWarn: VegaBaseView['onWarn']
+  limits: {
+    maxZoom: number;
+    minZoom: number;
+  },
+  onWarn: (message: any) => void
 ) {
-  let { maxZoom, minZoom, zoom } = mapConfig;
+  const DEFAULT_ZOOM = 3;
+
+  let { maxZoom, minZoom, zoom = DEFAULT_ZOOM } = mapConfig;
 
   const validate = (
     name: string,
@@ -50,8 +53,8 @@ export function validateZoomSettings(
     return value;
   };
 
-  minZoom = validate('minZoom', minZoom, limitMinZ, limitMinZ, limitMaxZ);
-  maxZoom = validate('maxZoom', maxZoom, limitMaxZ, limitMinZ, limitMaxZ);
+  minZoom = validate('minZoom', minZoom, limits.minZoom, limits.minZoom, limits.maxZoom);
+  maxZoom = validate('maxZoom', maxZoom, limits.maxZoom, limits.minZoom, limits.maxZoom);
 
   if (minZoom > maxZoom) {
     onWarn(
@@ -66,7 +69,7 @@ export function validateZoomSettings(
     [minZoom, maxZoom] = [maxZoom, minZoom];
   }
 
-  zoom = validate('zoom', zoom, 3, minZoom, maxZoom);
+  zoom = validate('zoom', zoom, DEFAULT_ZOOM, minZoom, maxZoom);
 
   return {
     zoom,
