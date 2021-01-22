@@ -796,6 +796,34 @@ describe('edit button', () => {
   });
 });
 
+describe('refresh button', () => {
+  it('should render alert details when clicked', () => {
+    const alert = mockAlert();
+    const alertType: AlertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
+      enabledInLicense: true,
+    };
+
+    expect(
+      shallow(
+        <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
+      )
+        .find(EuiButtonEmpty)
+        .find('[name="refresh"]')
+        .first()
+        .exists()
+    ).toBeTruthy();
+  });
+});
+
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
   return {
     id: uuid.v4(),
