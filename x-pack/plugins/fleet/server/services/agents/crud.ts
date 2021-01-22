@@ -10,7 +10,7 @@ import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../co
 import { AgentSOAttributes, Agent, AgentEventSOAttributes, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery, findAllSOs } from '../saved_object';
 import { savedObjectToAgent } from './saved_objects';
-import { appContextService } from '../../services';
+import { appContextService, agentPolicyService } from '../../services';
 
 const ACTIVE_AGENT_CONDITION = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true`;
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
@@ -149,6 +149,18 @@ export async function getAgents(soClient: SavedObjectsClientContract, agentIds: 
   );
   const agents = agentSOs.saved_objects.map(savedObjectToAgent);
   return agents;
+}
+
+export async function getAgentPolicyForAgent(
+  soClient: SavedObjectsClientContract,
+  agentId: string
+) {
+  const agent = await getAgent(soClient, agentId);
+  if (!agent.policy_id) {
+    throw new Error(`${agentId} is not enrolled in a policy`);
+  }
+  const agentPolicy = await agentPolicyService.get(soClient, agent.policy_id, false);
+  return agentPolicy;
 }
 
 export async function getAgentByAccessAPIKeyId(

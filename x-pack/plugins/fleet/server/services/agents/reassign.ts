@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes } from '../../types';
 import { agentPolicyService } from '../agent_policy';
-import { getAgent, getAgents, listAllAgents } from './crud';
+import { getAgentPolicyForAgent, getAgents, listAllAgents } from './crud';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 
 export async function reassignAgent(
@@ -22,14 +22,7 @@ export async function reassignAgent(
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
 
-  const agent = await getAgent(soClient, agentId);
-  if (!agent.policy_id) {
-    throw new Error(`Cannot find agent ${agentId}`);
-  }
-  const agentPolicy = await agentPolicyService.get(soClient, agent.policy_id);
-  if (agentPolicy?.is_managed) {
-    throw new Error(`Cannot reassign an agent from managed agent policy ${agentPolicy?.id}`);
-  }
+  await reassignAgentIsAllowed(soClient, agentId);
 
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
     policy_id: newAgentPolicyId,
@@ -41,6 +34,13 @@ export async function reassignAgent(
     created_at: new Date().toISOString(),
     type: 'INTERNAL_POLICY_REASSIGN',
   });
+}
+
+async function reassignAgentIsAllowed(soClient: SavedObjectsClientContract, agentId: string) {
+  const agentPolicy = await getAgentPolicyForAgent(soClient, agentId);
+  if (agentPolicy?.is_managed) {
+    throw new Error(`Cannot reassign an agent from managed agent policy ${agentPolicy?.id}`);
+  }
 }
 
 export async function reassignAgents(

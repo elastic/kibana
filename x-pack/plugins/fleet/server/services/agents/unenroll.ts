@@ -6,26 +6,21 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AgentSOAttributes } from '../../types';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { agentPolicyService } from '../agent_policy';
 import * as APIKeyService from '../api_keys';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
-import { getAgent, getAgents, listAllAgents } from './crud';
+import { getAgent, getAgentPolicyForAgent, getAgents, listAllAgents } from './crud';
 
-async function agentCanUnenroll(soClient: SavedObjectsClientContract, agentId: string) {
-  const agent = await getAgent(soClient, agentId);
-  if (!agent.policy_id) {
-    throw new Error(`${agentId} is not enrolled in a policy`);
-  }
-  const agentPolicy = await agentPolicyService.get(soClient, agent.policy_id, false);
+async function unenrollAgentIsAllowed(soClient: SavedObjectsClientContract, agentId: string) {
+  const agentPolicy = await getAgentPolicyForAgent(soClient, agentId);
   if (agentPolicy?.is_managed) {
-    throw new Error(`Cannot unenroll ${agentId} from a managed agent policy ${agent.policy_id}`);
+    throw new Error(`Cannot unenroll ${agentId} from a managed agent policy ${agentPolicy.id}`);
   }
 
   return true;
 }
 
 export async function unenrollAgent(soClient: SavedObjectsClientContract, agentId: string) {
-  await agentCanUnenroll(soClient, agentId);
+  await unenrollAgentIsAllowed(soClient, agentId);
 
   const now = new Date().toISOString();
   await createAgentAction(soClient, {
@@ -64,7 +59,7 @@ export async function unenrollAgents(
   );
   // And which are allowed to unenroll
   const settled = await Promise.allSettled(
-    agentsEnrolled.map((agent) => agentCanUnenroll(soClient, agent.id).then((_) => agent))
+    agentsEnrolled.map((agent) => unenrollAgentIsAllowed(soClient, agent.id).then((_) => agent))
   );
   const agentsToUpdate = agentsEnrolled.filter((_, index) => settled[index].status === 'fulfilled');
 
