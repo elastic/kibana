@@ -10,6 +10,15 @@ import { useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import {
+  ENGINE_ANALYTICS_TOP_QUERIES_PATH,
+  ENGINE_ANALYTICS_TOP_QUERIES_NO_RESULTS_PATH,
+  ENGINE_ANALYTICS_TOP_QUERIES_NO_CLICKS_PATH,
+  ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH,
+} from '../../../routes';
+import { generateEnginePath } from '../../engine';
+
 import {
   ANALYTICS_TITLE,
   TOTAL_QUERIES,
@@ -22,7 +31,7 @@ import {
   RECENT_QUERIES,
 } from '../constants';
 import { AnalyticsLayout } from '../analytics_layout';
-import { AnalyticsSection } from '../components';
+import { AnalyticsSection, AnalyticsTable } from '../components';
 import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../';
 
 export const Analytics: React.FC = () => {
@@ -34,6 +43,10 @@ export const Analytics: React.FC = () => {
     queriesNoResultsPerDay,
     clicksPerDay,
     startDate,
+    topQueries,
+    topQueriesNoResults,
+    topQueriesWithClicks,
+    topQueriesNoClicks,
   } = useValues(AnalyticsLogic);
 
   return (
@@ -95,12 +108,14 @@ export const Analytics: React.FC = () => {
         <EuiTitle size="s">
           <h3>{TOP_QUERIES}</h3>
         </EuiTitle>
-        TODO
+        <AnalyticsTable items={topQueries.slice(0, 10)} hasClicks />
+        <ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_PATH)} />
         <EuiSpacer />
         <EuiTitle size="s">
           <h3>{TOP_QUERIES_NO_RESULTS}</h3>
         </EuiTitle>
-        TODO
+        <AnalyticsTable items={topQueriesNoResults.slice(0, 10)} />
+        <ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_NO_RESULTS_PATH)} />
       </AnalyticsSection>
       <EuiSpacer size="xl" />
 
@@ -119,12 +134,14 @@ export const Analytics: React.FC = () => {
         <EuiTitle size="s">
           <h3>{TOP_QUERIES_WITH_CLICKS}</h3>
         </EuiTitle>
-        TODO
+        <AnalyticsTable items={topQueriesWithClicks.slice(0, 10)} hasClicks />
+        <ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH)} />
         <EuiSpacer />
         <EuiTitle size="s">
           <h3>{TOP_QUERIES_NO_CLICKS}</h3>
         </EuiTitle>
-        TODO
+        <AnalyticsTable items={topQueriesNoClicks.slice(0, 10)} />
+        <ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_NO_CLICKS_PATH)} />
       </AnalyticsSection>
       <EuiSpacer size="xl" />
 
@@ -140,3 +157,11 @@ export const Analytics: React.FC = () => {
     </AnalyticsLayout>
   );
 };
+
+export const ViewAllButton: React.FC<{ to: string }> = ({ to }) => (
+  <EuiButtonTo to={to} size="s" fullWidth>
+    {i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.table.viewAllButtonLabel', {
+      defaultMessage: 'View all',
+    })}
+  </EuiButtonTo>
+);

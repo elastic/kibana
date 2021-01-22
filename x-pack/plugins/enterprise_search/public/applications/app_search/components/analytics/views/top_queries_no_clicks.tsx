@@ -5,14 +5,19 @@
  */
 
 import React from 'react';
+import { useValues } from 'kea';
 
 import { TOP_QUERIES_NO_CLICKS } from '../constants';
 import { AnalyticsLayout } from '../analytics_layout';
+import { AnalyticsTable } from '../components';
+import { AnalyticsLogic } from '../';
 
 export const TopQueriesNoClicks: React.FC = () => {
+  const { topQueriesNoClicks } = useValues(AnalyticsLogic);
+
   return (
     <AnalyticsLayout isAnalyticsView title={TOP_QUERIES_NO_CLICKS}>
-      <p>TODO: Top queries with no clicks</p>
+      <AnalyticsTable items={topQueriesNoClicks} hasClicks />
     </AnalyticsLayout>
   );
 };

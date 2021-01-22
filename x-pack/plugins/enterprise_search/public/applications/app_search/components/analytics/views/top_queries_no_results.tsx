@@ -5,14 +5,19 @@
  */
 
 import React from 'react';
+import { useValues } from 'kea';
 
 import { TOP_QUERIES_NO_RESULTS } from '../constants';
 import { AnalyticsLayout } from '../analytics_layout';
+import { AnalyticsTable } from '../components';
+import { AnalyticsLogic } from '../';
 
 export const TopQueriesNoResults: React.FC = () => {
+  const { topQueriesNoResults } = useValues(AnalyticsLogic);
+
   return (
     <AnalyticsLayout isAnalyticsView title={TOP_QUERIES_NO_RESULTS}>
-      <p>TODO: Top queries with no results</p>
+      <AnalyticsTable items={topQueriesNoResults} hasClicks />
     </AnalyticsLayout>
   );
 };
