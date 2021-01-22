@@ -62,7 +62,6 @@ export interface PostAgentCheckinResponse {
 export interface PostAgentEnrollRequest {
   body: {
     type: AgentType;
-    shared_id?: string;
     metadata: {
       local: Record<string, any>;
       user_provided: Record<string, any>;
