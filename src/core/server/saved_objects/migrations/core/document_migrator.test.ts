@@ -207,7 +207,7 @@ describe('DocumentMigrator', () => {
     });
 
     it('coerces the current Kibana version if it has a hyphen', () => {
-      const invalidDefinition = {
+      const validDefinition = {
         kibanaVersion: '3.2.0-SNAPSHOT',
         typeRegistry: createRegistry({
           name: 'foo',
@@ -217,7 +217,7 @@ describe('DocumentMigrator', () => {
         minimumConvertVersion: '0.0.0',
         log: mockLogger,
       };
-      expect(() => new DocumentMigrator(invalidDefinition)).not.toThrowError();
+      expect(() => new DocumentMigrator(validDefinition)).not.toThrowError();
     });
 
     it('validates convertToMultiNamespaceTypeVersion is not used on a patch version', () => {
