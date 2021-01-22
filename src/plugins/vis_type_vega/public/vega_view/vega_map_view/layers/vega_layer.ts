@@ -7,12 +7,11 @@
  */
 
 import type { Map, CustomLayerInterface } from 'mapbox-gl';
+import type { VegaBaseView } from '../../vega_base_view';
+import type { LayerParameters } from './types';
 
 // @ts-ignore
 import { vega } from '../../lib/vega';
-
-import { VegaBaseView } from '../../vega_base_view';
-import { LayerParameters } from './types';
 
 export interface VegaLayerContext {
   vegaParser: VegaBaseView['_parser'];

@@ -7,35 +7,39 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { EMSClient, TMSService } from '@elastic/ems-client';
+import { getUISettings } from '../../services';
 import { TmsTileLayers } from './tms_tile_layers';
 import type { MapsLegacyConfig } from '../../../../maps_legacy/config';
-import { getUISettings } from '../../services';
+
+type EmsClientConfig = ConstructorParameters<typeof EMSClient>[0];
 
 const hasUserConfiguredTmsService = (config: MapsLegacyConfig) => Boolean(config.tilemap?.url);
 
+const initEmsClientAsync = async (config: Partial<EmsClientConfig>) => {
+  /**
+   * Build optimization: '@elastic/ems-client' should be loaded from a separate chunk
+   */
+  const emsClientModule = await import('@elastic/ems-client');
+
+  return new emsClientModule.EMSClient({
+    language: i18n.getLocale(),
+    appName: 'kibana',
+    // Wrap to avoid errors passing window fetch
+    fetchFunction(input: RequestInfo, init?: RequestInit) {
+      return fetch(input, init);
+    },
+    ...config,
+  } as EmsClientConfig);
+};
+
 export class MapServiceSettings {
-  public config!: MapsLegacyConfig;
-  private emsClient!: EMSClient;
+  private emsClient?: EMSClient;
   private isDarkMode!: boolean;
 
-  public async initialize(config: MapsLegacyConfig, appVersion: string) {
-    const emsClientModule = await import('@elastic/ems-client');
+  constructor(public config: MapsLegacyConfig, private appVersion: string) {}
 
-    this.isDarkMode = getUISettings().get('theme:darkMode');
-    this.config = config;
-
-    this.emsClient = new emsClientModule.EMSClient({
-      language: i18n.getLocale(),
-      appVersion,
-      appName: 'kibana',
-      fileApiUrl: config.emsFileApiUrl,
-      tileApiUrl: config.emsTileApiUrl,
-      landingPageUrl: config.emsLandingPageUrl,
-      // Wrap to avoid errors passing window fetch
-      fetchFunction(input: RequestInfo, init?: RequestInit) {
-        return fetch(input, init);
-      },
-    });
+  public get isInitialized() {
+    return Boolean(this.emsClient);
   }
 
   public get hasUserConfiguredTmsLayer() {
@@ -49,8 +53,19 @@ export class MapServiceSettings {
     return this.isDarkMode ? TmsTileLayers.dark : TmsTileLayers.desaturated;
   }
 
+  public async initialize() {
+    this.isDarkMode = getUISettings().get('theme:darkMode');
+
+    this.emsClient = await initEmsClientAsync({
+      appVersion: this.appVersion,
+      fileApiUrl: this.config.emsFileApiUrl,
+      tileApiUrl: this.config.emsTileApiUrl,
+      landingPageUrl: this.config.emsLandingPageUrl,
+    });
+  }
+
   public getTmsService(tmsTileLayer: TmsTileLayers | string = TmsTileLayers.desaturated) {
-    return this.emsClient.findTMSServiceById(tmsTileLayer);
+    return this.emsClient?.findTMSServiceById(tmsTileLayer);
   }
 
   public getAttributionsForTmsService(tmsService: TMSService) {

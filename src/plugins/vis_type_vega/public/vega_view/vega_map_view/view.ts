@@ -9,19 +9,19 @@
 import { i18n } from '@kbn/i18n';
 import { throttle } from 'lodash';
 import { Map, Style, NavigationControl, MapboxOptions } from 'mapbox-gl';
+
 // @ts-ignore
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Vsi from 'vega-spec-injector';
-import { VegaBaseView } from '../vega_base_view';
-import { MapServiceSettings } from './map_service_settings';
 
+import { VegaBaseView } from '../vega_base_view';
+import type { MapServiceSettings } from './map_service_settings';
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { TmsTileLayers } from './tms_tile_layers';
 import { getMapServiceSettings } from '../../services';
 
 import {
-  defaultTileSize,
-  defaultZoom,
+  defaultMapConfig,
   defaultMabBoxStyle,
   defaultProjection,
   userConfiguredLayerId,
@@ -75,8 +75,8 @@ export class VegaMapView extends VegaBaseView {
     let style: Style = defaultMabBoxStyle;
     let customAttribution: MapboxOptions['customAttribution'] = [];
     const zoomSettings = {
-      minZoom: defaultZoom.minZoom,
-      maxZoom: defaultZoom.maxZoom,
+      minZoom: defaultMapConfig.minZoom,
+      maxZoom: defaultMapConfig.maxZoom,
     };
 
     if (this.mapStyle !== TmsTileLayers.userConfigured) {
@@ -91,8 +91,8 @@ export class VegaMapView extends VegaBaseView {
         );
         return;
       }
-      zoomSettings.maxZoom = (await tmsService.getMaxZoom()) ?? defaultZoom.maxZoom;
-      zoomSettings.minZoom = (await tmsService.getMinZoom()) ?? defaultZoom.minZoom;
+      zoomSettings.maxZoom = (await tmsService.getMaxZoom()) ?? defaultMapConfig.maxZoom;
+      zoomSettings.minZoom = (await tmsService.getMinZoom()) ?? defaultMapConfig.minZoom;
       customAttribution = await this.mapServiceSettings.getAttributionsForTmsService(tmsService);
       style = (await tmsService.getVectorStyleSheet()) as Style;
     } else {
@@ -167,9 +167,9 @@ export class VegaMapView extends VegaBaseView {
         map: mapBoxInstance,
         context: {
           tiles: [url!],
-          maxZoom: options.maxZoom ?? defaultZoom.maxZoom,
-          minZoom: options.minZoom ?? defaultZoom.minZoom,
-          tileSize: options.tileSize ?? defaultTileSize,
+          maxZoom: options.maxZoom ?? defaultMapConfig.maxZoom,
+          minZoom: options.minZoom ?? defaultMapConfig.minZoom,
+          tileSize: options.tileSize ?? defaultMapConfig.tileSize,
         },
       });
     }
@@ -187,6 +187,10 @@ export class VegaMapView extends VegaBaseView {
   }
 
   public async _initViewCustomizations() {
+    if (!this.mapServiceSettings.isInitialized) {
+      await this.mapServiceSettings.initialize();
+    }
+
     const vegaView = this.initVegaView();
 
     this.setDebugValues(vegaView, this._parser.spec, this._parser.vlspec);

@@ -56,7 +56,6 @@ export interface VegaPluginStartDependencies {
 /** @internal */
 export class VegaPlugin implements Plugin<Promise<void>, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
-  mapServiceSettings = new MapServiceSettings();
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
@@ -72,7 +71,10 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     });
 
     setUISettings(core.uiSettings);
-    setMapServiceSettings(this.mapServiceSettings);
+
+    setMapServiceSettings(
+      new MapServiceSettings(mapsLegacy.config, this.initializerContext.env.packageInfo.version)
+    );
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
@@ -81,11 +83,6 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       },
       getServiceSettings: mapsLegacy.getServiceSettings,
     };
-
-    await this.mapServiceSettings.initialize(
-      mapsLegacy.config,
-      this.initializerContext.env.packageInfo.version
-    );
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 

@@ -8,7 +8,6 @@
 import { validateZoomSettings } from './validataion_helper';
 
 type ValidateZoomSettingsParams = Parameters<typeof validateZoomSettings>;
-
 type MapConfig = ValidateZoomSettingsParams[0];
 type Limits = ValidateZoomSettingsParams[1];
 type OnWarn = ValidateZoomSettingsParams[2];

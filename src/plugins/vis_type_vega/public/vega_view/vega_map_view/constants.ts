@@ -10,13 +10,11 @@ import { TmsTileLayers } from './tms_tile_layers';
 
 export const vegaLayerId = 'vega';
 export const userConfiguredLayerId = TmsTileLayers.userConfigured;
-
-export const defaultZoom = {
+export const defaultMapConfig = {
   maxZoom: 20,
   minZoom: 0,
+  tileSize: 256,
 };
-
-export const defaultTileSize = 256;
 
 export const defaultMabBoxStyle = {
   /**
