@@ -14,11 +14,11 @@ import { Map, Style, NavigationControl, MapboxOptions } from 'mapbox-gl';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Vsi from 'vega-spec-injector';
 
-import { VegaBaseView } from '../vega_base_view';
-import type { MapServiceSettings } from './map_service_settings';
 import { initTmsRasterLayer, initVegaLayer } from './layers';
+import { VegaBaseView } from '../vega_base_view';
 import { TmsTileLayers } from './tms_tile_layers';
 import { getMapServiceSettings } from '../../services';
+import type { MapServiceSettings } from './map_service_settings';
 
 import {
   defaultMapConfig,
@@ -66,9 +66,7 @@ export class VegaMapView extends VegaBaseView {
     vsi.addToList(this._parser.spec, 'signals', ['zoom', 'latitude', 'longitude']);
     vsi.addToList(this._parser.spec, 'projections', [defaultProjection]);
 
-    const vegaView = new vega.View(vega.parse(this._parser.spec), this._vegaViewConfig);
-
-    return vegaView;
+    return new vega.View(vega.parse(this._parser.spec), this._vegaViewConfig);
   }
 
   private async initMapContainer(vegaView: vega.View) {
@@ -178,9 +176,7 @@ export class VegaMapView extends VegaBaseView {
       id: vegaLayerId,
       map: mapBoxInstance,
       context: {
-        vegaParser: this._parser,
         vegaView,
-        addDestroyHandler: this._addDestroyHandler,
         updateVegaView: throttle(this.updateVegaView, 8),
       },
     });

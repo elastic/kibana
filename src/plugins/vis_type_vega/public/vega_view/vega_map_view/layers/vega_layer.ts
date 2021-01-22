@@ -7,16 +7,13 @@
  */
 
 import type { Map, CustomLayerInterface } from 'mapbox-gl';
-import type { VegaBaseView } from '../../vega_base_view';
 import type { LayerParameters } from './types';
 
 // @ts-ignore
 import { vega } from '../../lib/vega';
 
 export interface VegaLayerContext {
-  vegaParser: VegaBaseView['_parser'];
-  vegaView: any;
-  addDestroyHandler: VegaBaseView['_addDestroyHandler'];
+  vegaView: vega.View;
   updateVegaView: (map: Map, view: vega.View) => void;
 }
 
@@ -37,8 +34,8 @@ export function initVegaLayer({
       vegaContainer.style.top = '0px';
       vegaContainer.style.width = mapCanvas.style.width;
       vegaContainer.style.height = mapCanvas.style.height;
-      mapContainer.appendChild(vegaContainer);
 
+      mapContainer.appendChild(vegaContainer);
       vegaView.initialize(vegaContainer);
     },
     render() {
