@@ -25,6 +25,7 @@ import {
 import { AppLogic } from '../../../app_logic';
 
 import { FLYOUT_ARIA_LABEL_ID, FLYOUT_CANCEL_BUTTON, FLYOUT_CONTINUE_BUTTON } from '../constants';
+import { Errors } from '../creation_response_components';
 import { DocumentCreationLogic } from '../';
 
 import './paste_json_text.scss';
@@ -55,11 +56,11 @@ export const FlyoutBody: React.FC = () => {
   const { configuredLimits } = useValues(AppLogic);
   const maxDocumentByteSize = configuredLimits?.engine?.maxDocumentByteSize;
 
-  const { textInput } = useValues(DocumentCreationLogic);
+  const { textInput, errors } = useValues(DocumentCreationLogic);
   const { setTextInput } = useActions(DocumentCreationLogic);
 
   return (
-    <EuiFlyoutBody>
+    <EuiFlyoutBody banner={<Errors />}>
       <EuiText color="subdued">
         <p>
           {i18n.translate(
@@ -76,6 +77,7 @@ export const FlyoutBody: React.FC = () => {
       <EuiTextArea
         value={textInput}
         onChange={(e) => setTextInput(e.target.value)}
+        isInvalid={errors.length > 0}
         aria-label={i18n.translate(
           'xpack.enterpriseSearch.appSearch.documentCreation.pasteJsonText.label',
           { defaultMessage: 'Paste JSON here' }
@@ -89,8 +91,8 @@ export const FlyoutBody: React.FC = () => {
 };
 
 export const FlyoutFooter: React.FC = () => {
-  const { textInput } = useValues(DocumentCreationLogic);
-  const { closeDocumentCreation } = useActions(DocumentCreationLogic);
+  const { textInput, isUploading } = useValues(DocumentCreationLogic);
+  const { onSubmitJson, closeDocumentCreation } = useActions(DocumentCreationLogic);
 
   return (
     <EuiFlyoutFooter>
@@ -99,7 +101,7 @@ export const FlyoutFooter: React.FC = () => {
           <EuiButtonEmpty onClick={closeDocumentCreation}>{FLYOUT_CANCEL_BUTTON}</EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill isDisabled={!textInput.length}>
+          <EuiButton fill onClick={onSubmitJson} isLoading={isUploading} isDisabled={!textInput}>
             {FLYOUT_CONTINUE_BUTTON}
           </EuiButton>
         </EuiFlexItem>

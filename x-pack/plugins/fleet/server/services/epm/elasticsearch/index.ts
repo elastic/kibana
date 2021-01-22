@@ -11,5 +11,6 @@ import { RegistryDataStream } from '../../../types';
  * {type}-{dataset}
  */
 export function getRegistryDataStreamAssetBaseName(dataStream: RegistryDataStream): string {
-  return `${dataStream.type}-${dataStream.dataset}`;
+  const baseName = `${dataStream.type}-${dataStream.dataset}`;
+  return dataStream.hidden ? `.${baseName}` : baseName;
 }

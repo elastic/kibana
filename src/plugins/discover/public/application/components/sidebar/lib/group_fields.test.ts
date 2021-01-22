@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { groupFields } from './group_fields';
@@ -69,7 +58,8 @@ describe('group_fields', function () {
       ['currency'],
       5,
       fieldCounts,
-      fieldFilterState
+      fieldFilterState,
+      false
     );
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -118,6 +108,80 @@ describe('group_fields', function () {
       }
     `);
   });
+  it('should group fields in selected, popular, unpopular group if they contain multifields', function () {
+    const category = {
+      name: 'category',
+      type: 'string',
+      esTypes: ['text'],
+      count: 1,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    };
+    const currency = {
+      name: 'currency',
+      displayName: 'currency',
+      kbnFieldType: {
+        esTypes: ['string', 'text', 'keyword', '_type', '_id'],
+        filterable: true,
+        name: 'string',
+        sortable: true,
+      },
+      spec: {
+        esTypes: ['text'],
+        name: 'category',
+      },
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    };
+    const currencyKeyword = {
+      name: 'currency.keyword',
+      displayName: 'currency.keyword',
+      type: 'string',
+      esTypes: ['keyword'],
+      kbnFieldType: {
+        esTypes: ['string', 'text', 'keyword', '_type', '_id'],
+        filterable: true,
+        name: 'string',
+        sortable: true,
+      },
+      spec: {
+        aggregatable: true,
+        esTypes: ['keyword'],
+        name: 'category.keyword',
+        readFromDocValues: true,
+        searchable: true,
+        shortDotsEnable: false,
+        subType: {
+          multi: {
+            parent: 'currency',
+          },
+        },
+      },
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: false,
+    };
+    const fieldsToGroup = [category, currency, currencyKeyword];
+
+    const fieldFilterState = getDefaultFieldFilter();
+
+    const actual = groupFields(
+      fieldsToGroup as any,
+      ['currency'],
+      5,
+      fieldCounts,
+      fieldFilterState,
+      true
+    );
+    expect(actual.popular).toEqual([category]);
+    expect(actual.selected).toEqual([currency]);
+    expect(actual.unpopular).toEqual([]);
+  });
 
   it('should sort selected fields by columns order ', function () {
     const fieldFilterState = getDefaultFieldFilter();
@@ -127,7 +191,8 @@ describe('group_fields', function () {
       ['customer_birth_date', 'currency', 'unknown'],
       5,
       fieldCounts,
-      fieldFilterState
+      fieldFilterState,
+      false
     );
     expect(actual1.selected.map((field) => field.name)).toEqual([
       'customer_birth_date',
@@ -140,7 +205,8 @@ describe('group_fields', function () {
       ['currency', 'customer_birth_date', 'unknown'],
       5,
       fieldCounts,
-      fieldFilterState
+      fieldFilterState,
+      false
     );
     expect(actual2.selected.map((field) => field.name)).toEqual([
       'currency',

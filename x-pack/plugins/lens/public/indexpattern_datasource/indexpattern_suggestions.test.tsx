@@ -1876,7 +1876,7 @@ describe('IndexPattern Data Source suggestions', () => {
       expect(suggestions.length).toBe(6);
     });
 
-    it('returns an only metric version of a given table', () => {
+    it('returns an only metric version of a given table, but does not include current state as reduced', () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
@@ -1953,6 +1953,21 @@ describe('IndexPattern Data Source suggestions', () => {
       };
 
       const suggestions = getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state));
+      expect(suggestions).not.toContainEqual(
+        expect.objectContaining({
+          table: expect.objectContaining({
+            changeType: 'reduced',
+            columns: [
+              expect.objectContaining({
+                operation: expect.objectContaining({ label: 'field2' }),
+              }),
+              expect.objectContaining({
+                operation: expect.objectContaining({ label: 'Average of field1' }),
+              }),
+            ],
+          }),
+        })
+      );
       expect(suggestions).toContainEqual(
         expect.objectContaining({
           table: expect.objectContaining({

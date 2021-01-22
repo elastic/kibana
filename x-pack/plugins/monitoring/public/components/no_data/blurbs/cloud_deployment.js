@@ -4,45 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { EuiTitle, EuiText, EuiTextColor, EuiLink, EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import { EuiText, EuiTextColor, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const CloudDeployment = () => {
   return (
-    <Fragment>
-      <EuiTitle size="l">
-        <h2>
+    <EuiTextColor color="subdued">
+      <EuiText>
+        <p>
           <FormattedMessage
-            id="xpack.monitoring.noData.blurbs.cloudDeploymentTitle"
-            defaultMessage="Your monitoring data is not available here."
+            id="xpack.monitoring.noData.blurbs.cloudDeploymentDescription"
+            defaultMessage="Configure monitoring through "
           />
-        </h2>
-      </EuiTitle>
-      <EuiTextColor color="subdued">
-        <EuiSpacer />
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.monitoring.noData.blurbs.cloudDeploymentDescription"
-              defaultMessage="Please return to your "
-            />
-            <EuiLink href="https://cloud.elastic.co/deployments" target="_blank">
-              cloud dashboard.
-            </EuiLink>{' '}
-            <FormattedMessage
-              id="xpack.monitoring.noData.blurbs.cloudDeploymentDescriptionMore"
-              defaultMessage="For more information on Monitoring in Elastic Cloud, please see "
-            />
-            <EuiLink
-              href="https://www.elastic.co/guide/en/cloud/current/ec-enable-monitoring.html"
-              target="_blank"
-            >
-              the documentation.
-            </EuiLink>
-          </p>
-        </EuiText>
-      </EuiTextColor>
-    </Fragment>
+          <EuiLink href="https://cloud.elastic.co/deployments" target="_blank">
+            Elasticsearch Service Console
+          </EuiLink>{' '}
+          <FormattedMessage
+            id="xpack.monitoring.noData.blurbs.cloudDeploymentDescription2"
+            defaultMessage="Go to "
+          />
+          <EuiLink href="https://cloud.elastic.co/deployments" target="_blank">
+            Logs and metrics
+          </EuiLink>{' '}
+          <FormattedMessage
+            id="xpack.monitoring.noData.blurbs.cloudDeploymentDescription3"
+            defaultMessage="section for a deployment to configure monitoring. For more information visit "
+          />
+          <EuiLink
+            href="https://www.elastic.co/guide/en/cloud/current/ec-enable-monitoring.html"
+            target="_blank"
+          >
+            the documentation page.
+          </EuiLink>
+        </p>
+      </EuiText>
+    </EuiTextColor>
   );
 };

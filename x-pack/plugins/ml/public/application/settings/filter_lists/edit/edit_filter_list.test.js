@@ -8,6 +8,18 @@ jest.mock('../../../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
 
+jest.mock('../../../components/help_menu', () => ({
+  HelpMenu: () => <div id="mockHelpMenu" />,
+}));
+
+jest.mock('../../../util/dependency_cache', () => ({
+  getDocLinks: () => ({
+    links: {
+      ml: { customRules: jest.fn() },
+    },
+  }),
+}));
+
 // Define the required mocks used for loading, saving and validating the filter list.
 jest.mock('./utils', () => ({
   isValidFilterListId: () => true,

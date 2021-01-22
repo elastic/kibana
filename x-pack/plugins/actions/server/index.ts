@@ -14,14 +14,39 @@ import { ActionsConfigType } from './types';
 export type ActionsClient = PublicMethodsOf<ActionsClientClass>;
 export type ActionsAuthorization = PublicMethodsOf<ActionsAuthorizationClass>;
 
-export {
+export type {
   ActionsPlugin,
   ActionResult,
   ActionTypeExecutorOptions,
   ActionType,
   PreConfiguredAction,
+  ActionsApiRequestHandlerContext,
 } from './types';
-export { PluginSetupContract, PluginStartContract } from './plugin';
+
+export type {
+  EmailActionTypeId,
+  EmailActionParams,
+  IndexActionTypeId,
+  IndexActionParams,
+  PagerDutyActionTypeId,
+  PagerDutyActionParams,
+  ServerLogActionTypeId,
+  ServerLogActionParams,
+  SlackActionTypeId,
+  SlackActionParams,
+  WebhookActionTypeId,
+  WebhookActionParams,
+  ServiceNowActionTypeId,
+  ServiceNowActionParams,
+  JiraActionTypeId,
+  JiraActionParams,
+  ResilientActionTypeId,
+  ResilientActionParams,
+  TeamsActionTypeId,
+  TeamsActionParams,
+} from './builtin_action_types';
+
+export type { PluginSetupContract, PluginStartContract } from './plugin';
 
 export { asSavedObjectExecutionSource, asHttpRequestExecutionSource } from './lib';
 

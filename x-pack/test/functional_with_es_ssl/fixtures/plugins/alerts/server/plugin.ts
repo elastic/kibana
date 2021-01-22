@@ -17,7 +17,7 @@ export interface AlertingExampleDeps {
   features: FeaturesPluginSetup;
 }
 
-export const noopAlertType: AlertType = {
+export const noopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
   id: 'test.noop',
   name: 'Test: Noop',
   actionGroups: [{ id: 'default', name: 'Default' }],
@@ -33,7 +33,9 @@ export const alwaysFiringAlertType: AlertType<
     globalStateValue: boolean;
     groupInSeriesIndex: number;
   },
-  { instanceStateValue: boolean; globalStateValue: boolean; groupInSeriesIndex: number }
+  { instanceStateValue: boolean; globalStateValue: boolean; groupInSeriesIndex: number },
+  never,
+  'default' | 'other'
 > = {
   id: 'test.always-firing',
   name: 'Always Firing',
@@ -61,7 +63,7 @@ export const alwaysFiringAlertType: AlertType<
   },
 };
 
-export const failingAlertType: AlertType = {
+export const failingAlertType: AlertType<never, never, never, never, 'default' | 'other'> = {
   id: 'test.failing',
   name: 'Test: Failing',
   actionGroups: [

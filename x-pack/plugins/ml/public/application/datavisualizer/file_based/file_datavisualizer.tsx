@@ -10,6 +10,8 @@ import { IUiSettingsClient } from 'kibana/public';
 import { useTimefilter } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { getIndexPatternsContract } from '../../util/index_utils';
+import { HelpMenu } from '../../components/help_menu';
+import { useMlKibana } from '../../contexts/kibana';
 
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_datavisualizer_view/index';
@@ -21,10 +23,15 @@ export interface FileDataVisualizerPageProps {
 export const FileDataVisualizerPage: FC<FileDataVisualizerPageProps> = ({ kibanaConfig }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const indexPatterns = getIndexPatternsContract();
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const helpLink = docLinks.links.ml.guide;
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
       <FileDataVisualizerView indexPatterns={indexPatterns} kibanaConfig={kibanaConfig} />
+      <HelpMenu docLink={helpLink} />
     </Fragment>
   );
 };

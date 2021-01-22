@@ -12,6 +12,7 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
+  ASSETS_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   AGENT_ACTION_SAVED_OBJECT_TYPE,
@@ -27,6 +28,7 @@ import {
   migrateSettingsToV7100,
   migrateAgentActionToV7100,
 } from './migrations/to_v7_10_0';
+import { migrateAgentToV7120 } from './migrations/to_v7_12_0';
 
 /*
  * Saved object types and mappings
@@ -66,7 +68,6 @@ const getSavedObjectTypes = (
     },
     mappings: {
       properties: {
-        shared_id: { type: 'keyword' },
         type: { type: 'keyword' },
         active: { type: 'boolean' },
         enrolled_at: { type: 'date' },
@@ -92,6 +93,7 @@ const getSavedObjectTypes = (
     },
     migrations: {
       '7.10.0': migrateAgentToV7100,
+      '7.12.0': migrateAgentToV7120,
     },
   },
   [AGENT_ACTION_SAVED_OBJECT_TYPE]: {
@@ -304,10 +306,36 @@ const getSavedObjectTypes = (
             type: { type: 'keyword' },
           },
         },
+        package_assets: {
+          type: 'nested',
+          properties: {
+            id: { type: 'keyword' },
+            type: { type: 'keyword' },
+          },
+        },
         install_started_at: { type: 'date' },
         install_version: { type: 'keyword' },
         install_status: { type: 'keyword' },
         install_source: { type: 'keyword' },
+      },
+    },
+  },
+  [ASSETS_SAVED_OBJECT_TYPE]: {
+    name: ASSETS_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        package_name: { type: 'keyword' },
+        package_version: { type: 'keyword' },
+        install_source: { type: 'keyword' },
+        asset_path: { type: 'keyword' },
+        media_type: { type: 'keyword' },
+        data_utf8: { type: 'text', index: false },
+        data_base64: { type: 'binary' },
       },
     },
   },
@@ -358,7 +386,6 @@ export function registerEncryptedSavedObjects(
     type: AGENT_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['default_api_key']),
     attributesToExcludeFromAAD: new Set([
-      'shared_id',
       'type',
       'active',
       'enrolled_at',

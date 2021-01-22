@@ -16,6 +16,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { SecurityPluginSetup } from '../../security/server';
 
 import { registerRoutes } from './routes';
+import type { LogstashRequestHandlerContext } from './types';
 
 interface SetupDeps {
   licensing: LicensingPluginSetup;
@@ -55,9 +56,12 @@ export class LogstashPlugin implements Plugin {
   start(core: CoreStart) {
     const esClient = core.elasticsearch.legacy.createClient('logstash');
 
-    this.coreSetup!.http.registerRouteHandlerContext('logstash', async (context, request) => {
-      return { esClient: esClient.asScoped(request) };
-    });
+    this.coreSetup!.http.registerRouteHandlerContext<LogstashRequestHandlerContext, 'logstash'>(
+      'logstash',
+      async (context, request) => {
+        return { esClient: esClient.asScoped(request) };
+      }
+    );
   }
   stop() {
     if (this.esClient) {

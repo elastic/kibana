@@ -56,7 +56,6 @@ interface PopoverItem {
 export function ServiceIcons({ serviceName }: Props) {
   const {
     urlParams: { start, end },
-    uiFilters,
   } = useUrlParams();
   const [
     selectedIconPopover,
@@ -70,33 +69,31 @@ export function ServiceIcons({ serviceName }: Props) {
           endpoint: 'GET /api/apm/services/{serviceName}/metadata/icons',
           params: {
             path: { serviceName },
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: { start, end },
           },
         });
       }
     },
-    [serviceName, start, end, uiFilters]
+    [serviceName, start, end]
   );
 
   const { data: details, status: detailsFetchStatus } = useFetcher(
     (callApmApi) => {
       if (selectedIconPopover && serviceName && start && end) {
         return callApmApi({
+          isCachable: true,
           endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
           params: {
             path: { serviceName },
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: { start, end },
           },
         });
       }
     },
-    [selectedIconPopover, serviceName, start, end, uiFilters]
+    [selectedIconPopover, serviceName, start, end]
   );
 
-  const isLoading =
-    !icons &&
-    (iconsFetchStatus === FETCH_STATUS.LOADING ||
-      iconsFetchStatus === FETCH_STATUS.PENDING);
+  const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
 
   if (isLoading) {
     return <EuiLoadingSpinner data-test-subj="loading" />;
@@ -143,8 +140,10 @@ export function ServiceIcons({ serviceName }: Props) {
                 icon={item.icon}
                 detailsFetchStatus={detailsFetchStatus}
                 title={item.title}
-                onOpen={() => {
-                  setSelectedIconPopover(item.key);
+                onClick={() => {
+                  setSelectedIconPopover((prevSelectedIconPopover) =>
+                    item.key === prevSelectedIconPopover ? null : item.key
+                  );
                 }}
                 onClose={() => {
                   setSelectedIconPopover(null);

@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger } from 'src/core/server';
-import {
-  KibanaRequest,
-  KibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-} from 'src/core/server';
+import { KibanaRequest, KibanaResponseFactory, RequestHandler } from 'src/core/server';
+import type { CcrRequestHandlerContext } from '../types';
 
 import { LicensingPluginSetup } from '../../../licensing/server';
 import { LicenseType } from '../../../licensing/common/types';
@@ -59,11 +55,11 @@ export class License {
     });
   }
 
-  guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B>) {
+  guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B, CcrRequestHandlerContext>) {
     const license = this;
 
     return function licenseCheck(
-      ctx: RequestHandlerContext,
+      ctx: CcrRequestHandlerContext,
       request: KibanaRequest<P, Q, B>,
       response: KibanaResponseFactory
     ) {

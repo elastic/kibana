@@ -60,6 +60,15 @@ import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
 
+declare global {
+  interface Window {
+    /**
+     * Flag used to enable debugState on elastic charts
+     */
+    _echDebugStateFlag?: boolean;
+  }
+}
+
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
   InferPropType<typeof BarSeries> &
@@ -508,6 +517,7 @@ export function XYChart({
   return (
     <Chart>
       <Settings
+        debugState={window._echDebugStateFlag ?? false}
         showLegend={
           legend.isVisible && !legend.showSingleSeries
             ? chartHasMoreThanOneSeries

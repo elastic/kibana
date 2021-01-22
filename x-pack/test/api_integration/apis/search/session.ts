@@ -119,8 +119,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { idMapping } = resp.body.attributes;
 
-        expect(Object.values(idMapping)).to.contain(id1);
-        expect(Object.values(idMapping)).to.contain(id2);
+        const idMappings = Object.values(idMapping).map((value: any) => value.id);
+        expect(idMappings).to.contain(id1);
+        expect(idMappings).to.contain(id2);
       });
     });
   });

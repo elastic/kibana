@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import archives_metadata from '../../../common/archives_metadata';
+import url from 'url';
+import archives_metadata from '../../../common/fixtures/es_archiver/archives_metadata';
 import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -16,15 +17,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const metadata = archives_metadata[archiveName];
 
   // url parameters
-  const start = encodeURIComponent(metadata.start);
-  const end = encodeURIComponent(metadata.end);
-  const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'testing' }));
+  const { start, end } = metadata;
+  const uiFilters = JSON.stringify({ environment: 'testing' });
 
   describe('Throughput', () => {
     describe('when data is not loaded ', () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transactions/charts/throughput?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          url.format({
+            pathname: `/api/apm/services/opbeans-node/transactions/charts/throughput`,
+            query: {
+              start,
+              end,
+              uiFilters,
+              transactionType: 'request',
+            },
+          })
         );
 
         expect(response.status).to.be(200);
@@ -41,7 +49,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       before(async () => {
         response = await supertest.get(
-          `/api/apm/services/opbeans-node/transactions/charts/throughput?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          url.format({
+            pathname: `/api/apm/services/opbeans-node/transactions/charts/throughput`,
+            query: {
+              start,
+              end,
+              uiFilters,
+              transactionType: 'request',
+            },
+          })
         );
       });
 

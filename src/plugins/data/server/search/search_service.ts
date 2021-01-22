@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -32,12 +21,13 @@ import {
 import { catchError, first, map } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import {
+import type {
   ISearchSetup,
   ISearchStart,
   ISearchStrategy,
   SearchEnhancements,
   SearchStrategyDependencies,
+  DataRequestHandlerContext,
 } from './types';
 
 import { AggsService } from './aggs';
@@ -74,12 +64,6 @@ import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { SessionService, IScopedSessionService, ISessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    search?: ISearchClient & { session: IScopedSessionService };
-  }
-}
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -123,7 +107,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<DataRequestHandlerContext>();
     const routeDependencies = {
       getStartServices: core.getStartServices,
       globalConfig$: this.initializerContext.config.legacy.globalConfig$,
@@ -135,11 +119,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       this.coreStart = coreStart;
     });
 
-    core.http.registerRouteHandlerContext('search', async (context, request) => {
-      const search = this.asScopedProvider(this.coreStart!)(request);
-      const session = this.sessionService.asScopedProvider(this.coreStart!)(request);
-      return { ...search, session };
-    });
+    core.http.registerRouteHandlerContext<DataRequestHandlerContext, 'search'>(
+      'search',
+      async (context, request) => {
+        const search = this.asScopedProvider(this.coreStart!)(request);
+        const session = this.sessionService.asScopedProvider(this.coreStart!)(request);
+        return { ...search, session };
+      }
+    );
 
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
@@ -315,6 +302,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return strategy.cancel(id, options, deps);
   };
 
+  private extend = (
+    id: string,
+    keepAlive: string,
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
+  ) => {
+    const strategy = this.getSearchStrategy(options.strategy);
+    if (!strategy.extend) {
+      throw new KbnServerError(`Search strategy ${options.strategy} does not support extend`, 400);
+    }
+    return strategy.extend(id, keepAlive, options, deps);
+  };
+
   private getSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
@@ -344,6 +344,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         search: (searchRequest, options = {}) =>
           this.search(scopedSession, searchRequest, options, deps),
         cancel: (id, options = {}) => this.cancel(id, options, deps),
+        extend: (id, keepAlive, options = {}) => this.extend(id, keepAlive, options, deps),
       };
     };
   };

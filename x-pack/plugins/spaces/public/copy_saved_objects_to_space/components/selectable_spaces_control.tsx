@@ -8,8 +8,8 @@ import './selectable_spaces_control.scss';
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSelectable, EuiSelectableOption, EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { SpaceAvatar } from '../../space_avatar';
-import { Space } from '../../../common/model/space';
 
 interface Props {
   spaces: Space[];

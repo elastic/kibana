@@ -15,11 +15,11 @@ import {
   LegacyClusterClient,
   SharedGlobalConfig,
   IContextProvider,
-  RequestHandler,
 } from 'src/core/server';
 import { SpacesPluginStart } from '../../spaces/server';
 
-import {
+import type {
+  EventLogRequestHandlerContext,
   IEventLogConfig,
   IEventLogService,
   IEventLogger,
@@ -31,6 +31,7 @@ import { EventLogService } from './event_log_service';
 import { createEsContext, EsContext } from './es';
 import { EventLogClientService } from './event_log_start_service';
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
+import { findByIdsRoute } from './routes/find_by_ids';
 
 export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
@@ -54,12 +55,14 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
   private globalConfig$: Observable<SharedGlobalConfig>;
   private eventLogClientService?: EventLogClientService;
   private savedObjectProviderRegistry: SavedObjectProviderRegistry;
+  private kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(private readonly context: PluginInitializerContext) {
     this.systemLogger = this.context.logger.get();
     this.config$ = this.context.config.create<IEventLogConfig>();
     this.globalConfig$ = this.context.config.legacy.globalConfig$;
     this.savedObjectProviderRegistry = new SavedObjectProviderRegistry();
+    this.kibanaVersion = this.context.env.packageInfo.version;
   }
 
   async setup(core: CoreSetup): Promise<IEventLogService> {
@@ -77,6 +80,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       clusterClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.legacy.client),
+      kibanaVersion: this.kibanaVersion,
     });
 
     this.eventLogService = new EventLogService({
@@ -93,12 +97,16 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       event: { provider: PROVIDER },
     });
 
-    core.http.registerRouteHandlerContext('eventLog', this.createRouteHandlerContext());
+    core.http.registerRouteHandlerContext<EventLogRequestHandlerContext, 'eventLog'>(
+      'eventLog',
+      this.createRouteHandlerContext()
+    );
 
     // Routes
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<EventLogRequestHandlerContext>();
     // Register routes
     findRoute(router, this.systemLogger);
+    findByIdsRoute(router, this.systemLogger);
 
     return this.eventLogService;
   }
@@ -135,7 +143,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
 
     this.savedObjectProviderRegistry.registerDefaultProvider((request) => {
       const client = core.savedObjects.getScopedClient(request);
-      return client.get.bind(client);
+      return client.bulkGet.bind(client);
     });
 
     this.eventLogClientService = new EventLogClientService({
@@ -164,7 +172,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
   }
 
   private createRouteHandlerContext = (): IContextProvider<
-    RequestHandler<unknown, unknown, unknown>,
+    EventLogRequestHandlerContext,
     'eventLog'
   > => {
     return async (context, request) => {

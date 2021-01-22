@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test/jest';
-import { Space } from '../../common/model/space';
+import { Space } from '../../../../../src/plugins/spaces_oss/common';
 import { SpaceSelector } from './space_selector';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 
