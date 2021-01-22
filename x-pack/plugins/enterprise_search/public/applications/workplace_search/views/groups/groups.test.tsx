@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../__mocks__/kea.mock';
 import '../../../__mocks__/shallow_useeffect.mock';
-
 import { setMockActions, setMockValues } from '../../../__mocks__';
 import { groups } from '../../__mocks__/groups.mock';
+import { mockMeta } from '../../__mocks__/meta.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -34,15 +33,6 @@ const openNewGroupModal = jest.fn();
 const resetGroups = jest.fn();
 const setFilterValue = jest.fn();
 const setActivePage = jest.fn();
-
-const mockMeta = {
-  ...DEFAULT_META,
-  page: {
-    current: 1,
-    total_results: 50,
-    total_pages: 5,
-  },
-};
 
 const mockSuccessMessage = {
   type: 'success',

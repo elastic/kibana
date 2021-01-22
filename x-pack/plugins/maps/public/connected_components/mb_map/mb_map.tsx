@@ -18,6 +18,7 @@ import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 // @ts-expect-error
 import { DrawControl } from './draw_control';
+import { ScaleControl } from './scale_control';
 // @ts-expect-error
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
@@ -55,6 +56,7 @@ interface Props {
   spatialFiltersLayer: ILayer;
   goto?: Goto | null;
   inspectorAdapters: Adapters;
+  isFullScreen: boolean;
   scrollZoom: boolean;
   extentChanged: (mapExtentState: MapExtentState) => void;
   onMapReady: (mapExtentState: MapExtentState) => void;
@@ -330,7 +332,7 @@ export class MBMap extends Component<Props, State> {
       this.props.layerList,
       this.props.spatialFiltersLayer
     );
-    this.props.layerList.forEach((layer) => layer.syncLayerWithMB(this.state.mbMap));
+    this.props.layerList.forEach((layer) => layer.syncLayerWithMB(this.state.mbMap!));
     syncLayerOrder(this.state.mbMap, this.props.spatialFiltersLayer, this.props.layerList);
   };
 
@@ -381,6 +383,7 @@ export class MBMap extends Component<Props, State> {
   render() {
     let drawControl;
     let tooltipControl;
+    let scaleControl;
     if (this.state.mbMap) {
       drawControl = <DrawControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />;
       tooltipControl = !this.props.settings.disableTooltipControl ? (
@@ -394,6 +397,9 @@ export class MBMap extends Component<Props, State> {
           renderTooltipContent={this.props.renderTooltipContent}
         />
       ) : null;
+      scaleControl = this.props.settings.showScaleControl ? (
+        <ScaleControl mbMap={this.state.mbMap} isFullScreen={this.props.isFullScreen} />
+      ) : null;
     }
     return (
       <div
@@ -403,6 +409,7 @@ export class MBMap extends Component<Props, State> {
         data-test-subj="mapContainer"
       >
         {drawControl}
+        {scaleControl}
         {tooltipControl}
       </div>
     );

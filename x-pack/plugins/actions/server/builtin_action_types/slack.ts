@@ -70,7 +70,7 @@ export function getActionType({
     }),
     validate: {
       secrets: schema.object(secretsSchemaProps, {
-        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
+        validate: curry(validateActionTypeConfig)(configurationUtilities),
       }),
       params: ParamsSchema,
     },
@@ -88,13 +88,13 @@ function renderParameterTemplates(
   };
 }
 
-function valdiateActionTypeConfig(
+function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   secretsObject: ActionTypeSecretsType
 ) {
-  let url: URL;
+  const configuredUrl = secretsObject.webhookUrl;
   try {
-    url = new URL(secretsObject.webhookUrl);
+    new URL(configuredUrl);
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.slack.slackConfigurationErrorNoHostname', {
       defaultMessage: 'error configuring slack action: unable to parse host name from webhookUrl',
@@ -102,7 +102,7 @@ function valdiateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureHostnameAllowed(url.hostname);
+    configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
       defaultMessage: 'error configuring slack action: {message}',
