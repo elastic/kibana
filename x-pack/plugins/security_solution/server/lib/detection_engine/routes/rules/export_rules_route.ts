@@ -11,7 +11,7 @@ import {
   ExportRulesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/export_rules_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { ConfigType } from '../../../../config';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
@@ -19,7 +19,7 @@ import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
 import { transformError, buildSiemResponse } from '../utils';
 
-export const exportRulesRoute = (router: IRouter, config: ConfigType) => {
+export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_export`,
