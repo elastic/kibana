@@ -5,3 +5,4 @@
  */
 
 export { AnalyticsTable } from './analytics_table';
+export { RecentQueriesTable } from './recent_queries_table';
