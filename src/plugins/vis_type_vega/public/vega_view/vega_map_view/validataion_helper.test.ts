@@ -8,15 +8,16 @@
 import { validateZoomSettings } from './validataion_helper';
 
 type ValidateZoomSettingsParams = Parameters<typeof validateZoomSettings>;
-type MapConfig = ValidateZoomSettingsParams[0];
-type Limits = ValidateZoomSettingsParams[1];
-type OnWarn = ValidateZoomSettingsParams[2];
+
+type MapConfigType = ValidateZoomSettingsParams[0];
+type LimitsType = ValidateZoomSettingsParams[1];
+type OnWarnType = ValidateZoomSettingsParams[2];
 
 describe('vega_map_view/validation_helper', () => {
   describe('validateZoomSettings', () => {
-    let mapConfig: MapConfig;
-    let limits: Limits;
-    let onWarn: OnWarn;
+    let mapConfig: MapConfigType;
+    let limits: LimitsType;
+    let onWarn: OnWarnType;
 
     beforeEach(() => {
       onWarn = jest.fn();
@@ -40,7 +41,7 @@ describe('vega_map_view/validation_helper', () => {
     });
 
     test('should return default interval in case if mapConfig not provided', () => {
-      mapConfig = {} as MapConfig;
+      mapConfig = {} as MapConfigType;
       expect(validateZoomSettings(mapConfig, limits, onWarn)).toEqual({
         maxZoom: 15,
         minZoom: 2,

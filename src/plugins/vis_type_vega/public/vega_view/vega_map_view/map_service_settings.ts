@@ -72,11 +72,9 @@ export class MapServiceSettings {
     return tmsService.getAttributions().map(({ label, url }) => {
       const anchorTag = document.createElement('a');
 
-      anchorTag.setAttribute('rel', 'noreferrer noopener');
-      if (url.startsWith('http://') || url.startsWith('https://')) {
-        anchorTag.setAttribute('href', url);
-      }
       anchorTag.textContent = label;
+      anchorTag.setAttribute('rel', 'noreferrer noopener');
+      anchorTag.setAttribute('href', url);
 
       return anchorTag.outerHTML;
     });

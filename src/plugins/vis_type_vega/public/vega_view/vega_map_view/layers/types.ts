@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { Map } from 'mapbox-gl';
+import type { Map } from 'mapbox-gl';
 
 export interface LayerParameters<TContext extends Record<string, any> = {}> {
   id: string;
