@@ -101,7 +101,8 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
   const [currentAlertParams, setCurrentAlertParams] = useState<EsQueryAlertParams>(
     getDefaultParams()
   );
-  const [runResult, setRunResult] = useState<string | null>(null);
+  const [testQueryResult, setTestQueryResult] = useState<string | null>(null);
+  const [testQueryError, setTestQueryError] = useState<string | null>(null);
 
   const hasExpressionErrors = !!Object.keys(errors).find(
     (errorKey) =>
@@ -147,38 +148,50 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     }
   };
 
-  const onRunQuery = async () => {
+  const onTestQuery = async () => {
     const { errors: validationErrors } = validateExpression(currentAlertParams);
     if (
       Object.keys(validationErrors).every(
         (key) => !validationErrors[key] || !validationErrors[key].length
       )
     ) {
-      const window = `${timeWindowSize}${timeWindowUnit}`;
-      const timeWindow = parseDuration(window);
-      const parsedQuery = JSON.parse(esQuery);
-      const now = Date.now();
-      const { rawResponse } = await data.search
-        .search({
-          params: buildSortedEventsQuery({
-            index,
-            from: new Date(now - timeWindow).toISOString(),
-            to: new Date(now).toISOString(),
-            filter: parsedQuery.query,
-            size: 0,
-            searchAfterSortId: undefined,
-            timeField: timeField ? timeField : '',
-          }),
-        })
-        .toPromise();
+      try {
+        const window = `${timeWindowSize}${timeWindowUnit}`;
+        const timeWindow = parseDuration(window);
+        const parsedQuery = JSON.parse(esQuery);
+        const now = Date.now();
+        const { rawResponse } = await data.search
+          .search({
+            params: buildSortedEventsQuery({
+              index,
+              from: new Date(now - timeWindow).toISOString(),
+              to: new Date(now).toISOString(),
+              filter: parsedQuery.query,
+              size: 0,
+              searchAfterSortId: undefined,
+              timeField: timeField ? timeField : '',
+            }),
+          })
+          .toPromise();
 
-      const hits = rawResponse.hits;
-      setRunResult(
-        i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
-          defaultMessage: 'Query matched {count} documents in the last {window}',
-          values: { count: hits.total, window },
-        })
-      );
+        const hits = rawResponse.hits;
+        setTestQueryError(null);
+        setTestQueryResult(
+          i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
+            defaultMessage: 'Query matched {count} documents in the last {window}',
+            values: { count: hits.total, window },
+          })
+        );
+      } catch (err) {
+        const message = err?.body?.message;
+        setTestQueryResult(null);
+        setTestQueryError(
+          i18n.translate('xpack.stackAlerts.esQuery.ui.queryError', {
+            defaultMessage: 'Error testing query: {message}',
+            values: { message: message ? `${err.message}: ${message}` : err.message },
+          })
+        );
+      }
     }
   };
 
@@ -272,19 +285,30 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
       </EuiFormRow>
       <EuiFormRow>
         <EuiButtonEmpty
+          data-test-subj="testQuery"
           color={'primary'}
           iconSide={'left'}
           flush={'left'}
           iconType={'play'}
-          onClick={onRunQuery}
+          onClick={onTestQuery}
         >
-          <FormattedMessage id="xpack.stackAlerts.esQuery.ui.runQuery" defaultMessage="Run query" />
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.testQuery"
+            defaultMessage="Test query"
+          />
         </EuiButtonEmpty>
       </EuiFormRow>
-      {runResult && (
+      {testQueryResult && (
         <EuiFormRow>
-          <EuiText color="subdued" size="s">
-            <p>{runResult}</p>
+          <EuiText data-test-subj="testQuerySuccess" color="subdued" size="s">
+            <p>{testQueryResult}</p>
+          </EuiText>
+        </EuiFormRow>
+      )}
+      {testQueryError && (
+        <EuiFormRow>
+          <EuiText data-test-subj="testQueryError" color="danger" size="s">
+            <p>{testQueryError}</p>
           </EuiText>
         </EuiFormRow>
       )}
