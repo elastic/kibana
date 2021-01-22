@@ -77,6 +77,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           policy,
           checked: isPolicySelected[policy.id] ? 'on' : undefined,
           disabled: isGlobal,
+          'data-test-subj': `policy-${policy.id}`,
         }))
         .sort(({ label: labelA }, { label: labelB }) => labelA.localeCompare(labelB));
     }, [isGlobal, options, selected]);
