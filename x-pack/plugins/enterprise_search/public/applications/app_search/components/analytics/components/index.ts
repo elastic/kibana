@@ -8,4 +8,5 @@ export { AnalyticsCards } from './analytics_cards';
 export { AnalyticsChart } from './analytics_chart';
 export { AnalyticsHeader } from './analytics_header';
 export { AnalyticsSection } from './analytics_section';
+export { AnalyticsTable } from './analytics_tables';
 export { AnalyticsUnavailable } from './analytics_unavailable';
