@@ -6,50 +6,47 @@
  * Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { History } from 'history';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { Router } from 'react-router-dom';
 
 import {
   EuiFieldText,
-  EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageHeader,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { CoreStart } from 'kibana/public';
+import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 
-import { CoreStart } from '../../../../../src/core/public';
-import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import {
   connectToQueryState,
-  syncQueryStateWithUrl,
   DataPublicPluginStart,
-  IIndexPattern,
-  QueryState,
-  Filter,
   esFilters,
+  Filter,
+  IIndexPattern,
   Query,
-} from '../../../../../src/plugins/data/public';
+  QueryState,
+  syncQueryStateWithUrl,
+} from '../../../../src/plugins/data/public';
 import {
-  BaseState,
   BaseStateContainer,
   createStateContainer,
-  createStateContainerReactHelpers,
   IKbnUrlStateStorage,
-  ReduxLikeStateContainer,
   syncState,
-} from '../../../../../src/plugins/kibana_utils/public';
-import { PLUGIN_ID, PLUGIN_NAME } from '../../../common';
+  useContainerState,
+} from '../../../../src/plugins/kibana_utils/public';
+import { ExampleLink, StateContainersExamplesPage } from '../common/example_page';
 
 interface StateDemoAppDeps {
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
+  navigateToApp: CoreStart['application']['navigateToApp'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
+  exampleLinks: ExampleLink[];
 }
 
 interface AppState {
@@ -61,84 +58,73 @@ const defaultAppState: AppState = {
   name: '',
   filters: [],
 };
-const {
-  Provider: AppStateContainerProvider,
-  useState: useAppState,
-  useContainer: useAppStateContainer,
-} = createStateContainerReactHelpers<ReduxLikeStateContainer<AppState>>();
 
-const App = ({ navigation, data, history, kbnUrlStateStorage }: StateDemoAppDeps) => {
-  const appStateContainer = useAppStateContainer();
-  const appState = useAppState();
+export const App = ({
+  navigation,
+  data,
+  history,
+  kbnUrlStateStorage,
+  exampleLinks,
+  navigateToApp,
+}: StateDemoAppDeps) => {
+  const appStateContainer = useMemo(() => createStateContainer(defaultAppState), []);
+  const appState = useContainerState(appStateContainer);
 
   useGlobalStateSyncing(data.query, kbnUrlStateStorage);
   useAppStateSyncing(appStateContainer, data.query, kbnUrlStateStorage);
 
   const indexPattern = useIndexPattern(data);
   if (!indexPattern)
-    return <div>No index pattern found. Please create an index patter before loading...</div>;
+    return (
+      <div>
+        No index pattern found. Please create an index pattern before trying this example...
+      </div>
+    );
 
-  // Render the application DOM.
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
   return (
-    <Router history={history}>
-      <I18nProvider>
+    <StateContainersExamplesPage navigateToApp={navigateToApp} exampleLinks={exampleLinks}>
+      <Router history={history}>
         <>
-          <navigation.ui.TopNavMenu
-            appName={PLUGIN_ID}
-            showSearchBar={true}
-            indexPatterns={[indexPattern]}
-            useDefaultBehaviors={true}
-            showSaveQuery={true}
-          />
-          <EuiPage restrictWidth="1000px">
-            <EuiPageBody>
-              <EuiPageHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="stateDemo.helloWorldText"
-                      defaultMessage="{name}!"
-                      values={{ name: PLUGIN_NAME }}
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageHeader>
-              <EuiPageContent>
-                <EuiFieldText
-                  placeholder="Additional application state: My name is..."
-                  value={appState.name}
-                  onChange={(e) => appStateContainer.set({ ...appState, name: e.target.value })}
-                  aria-label="My name"
-                />
-              </EuiPageContent>
-            </EuiPageBody>
-          </EuiPage>
+          <EuiPageBody>
+            <EuiPageHeader>
+              <EuiTitle size="l">
+                <h1>Integration with search bar</h1>
+              </EuiTitle>
+            </EuiPageHeader>
+            <EuiText>
+              <p>
+                This examples shows how you can use state containers, state syncing utils and
+                helpers from data plugin to sync your app state and search bar state with the URL.
+              </p>
+            </EuiText>
+
+            <navigation.ui.TopNavMenu
+              appName={'Example'}
+              showSearchBar={true}
+              indexPatterns={[indexPattern]}
+              useDefaultBehaviors={true}
+              showSaveQuery={true}
+            />
+            <EuiPageContent>
+              <EuiText>
+                <p>
+                  In addition to state from query bar also sync your arbitrary application state:
+                </p>
+              </EuiText>
+              <EuiFieldText
+                placeholder="Additional example applications state: My name is..."
+                value={appState.name}
+                onChange={(e) => appStateContainer.set({ ...appState, name: e.target.value })}
+                aria-label="My name"
+              />
+            </EuiPageContent>
+          </EuiPageBody>
         </>
-      </I18nProvider>
-    </Router>
+      </Router>
+    </StateContainersExamplesPage>
   );
 };
-
-export const StateDemoApp = (props: StateDemoAppDeps) => {
-  const appStateContainer = useCreateStateContainer(defaultAppState);
-
-  return (
-    <AppStateContainerProvider value={appStateContainer}>
-      <App {...props} />
-    </AppStateContainerProvider>
-  );
-};
-
-function useCreateStateContainer<State extends BaseState>(
-  defaultState: State
-): ReduxLikeStateContainer<State> {
-  const stateContainerRef = useRef<ReduxLikeStateContainer<State> | null>(null);
-  if (!stateContainerRef.current) {
-    stateContainerRef.current = createStateContainer(defaultState);
-  }
-  return stateContainerRef.current;
-}
 
 function useIndexPattern(data: DataPublicPluginStart) {
   const [indexPattern, setIndexPattern] = useState<IIndexPattern>();
