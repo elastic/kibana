@@ -50,7 +50,7 @@ fun BuildType.addTestSettings() {
 
 fun BuildType.addSlackNotifications(to: String = "#kibana-teamcity-testing") {
   params {
-    param("elastic.slack.enabled", "true")
+    param("elastic.slack.enabled", isReportingEnabled().toString())
     param("elastic.slack.channels", to)
   }
 }

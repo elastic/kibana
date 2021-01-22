@@ -33,8 +33,6 @@ import {
   DOCUMENT_PERMISSIONS_DOCS_URL,
   ENT_SEARCH_LICENSE_MANAGEMENT,
   EXTERNAL_IDENTITIES_DOCS_URL,
-  SOURCE_CONTENT_PATH,
-  getContentSourcePath,
   getGroupPath,
 } from '../../../routes';
 
@@ -45,7 +43,7 @@ import { CredentialItem } from '../../../components/shared/credential_item';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { LicenseBadge } from '../../../components/shared/license_badge';
 import { Loading } from '../../../../shared/loading';
-import { EuiButtonEmptyTo, EuiPanelTo } from '../../../../shared/react_router_helpers';
+import { EuiPanelTo } from '../../../../shared/react_router_helpers';
 
 import aclImage from '../../../assets/supports_acl.svg';
 import { SourceLogic } from '../source_logic';
@@ -57,13 +55,11 @@ export const Overview: React.FC = () => {
   const {
     id,
     summary,
-    documentCount,
     activities,
     groups,
     details,
     custom,
     accessToken,
-    key,
     licenseSupportsPermissions,
     serviceTypeSupportsPermissions,
     indexPermissions,
@@ -75,24 +71,22 @@ export const Overview: React.FC = () => {
 
   const DocumentSummary = () => {
     let totalDocuments = 0;
-    const tableContent =
-      summary &&
-      summary.map((item, index) => {
-        totalDocuments += item.count;
-        return (
-          item.count > 0 && (
-            <EuiTableRow key={index}>
-              <EuiTableRowCell>{item.type}</EuiTableRowCell>
-              <EuiTableRowCell>{item.count.toLocaleString('en-US')}</EuiTableRowCell>
-            </EuiTableRow>
-          )
-        );
-      });
+    const tableContent = summary?.map((item, index) => {
+      totalDocuments += item.count;
+      return (
+        item.count > 0 && (
+          <EuiTableRow key={index} data-test-subj="DocumentSummaryRow">
+            <EuiTableRowCell>{item.type}</EuiTableRowCell>
+            <EuiTableRowCell>{item.count.toLocaleString('en-US')}</EuiTableRowCell>
+          </EuiTableRow>
+        )
+      );
+    });
 
     const emptyState = (
       <>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="l" className="euiPanel--inset">
+        <EuiPanel paddingSize="l" className="euiPanel--inset" data-test-subj="EmptyDocumentSummary">
           <EuiEmptyPrompt
             title={<h2>No content yet</h2>}
             iconType="documents"
@@ -105,24 +99,9 @@ export const Overview: React.FC = () => {
     return (
       <div className="content-section">
         <div className="section-header">
-          <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h4>Content summary</h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            {totalDocuments > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmptyTo
-                  to={getContentSourcePath(SOURCE_CONTENT_PATH, id, isOrganization)}
-                  data-test-subj="ManageSourceContentLink"
-                  size="s"
-                >
-                  Manage
-                </EuiButtonEmptyTo>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <EuiTitle size="xs">
+            <h4>Content summary</h4>
+          </EuiTitle>
         </div>
         <EuiSpacer size="s" />
         {!summary && <ComponentLoader text="Loading summary details..." />}
@@ -139,14 +118,10 @@ export const Overview: React.FC = () => {
                 {tableContent}
                 <EuiTableRow>
                   <EuiTableRowCell>
-                    {summary ? <strong>Total documents</strong> : 'Documents'}
+                    <strong>Total documents</strong>
                   </EuiTableRowCell>
                   <EuiTableRowCell>
-                    {summary ? (
-                      <strong>{totalDocuments.toLocaleString('en-US')}</strong>
-                    ) : (
-                      parseInt(documentCount, 10).toLocaleString('en-US')
-                    )}
+                    <strong>{totalDocuments.toLocaleString('en-US')}</strong>
                   </EuiTableRowCell>
                 </EuiTableRow>
               </EuiTableBody>
@@ -160,7 +135,7 @@ export const Overview: React.FC = () => {
     const emptyState = (
       <>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="l" className="euiPanel--inset">
+        <EuiPanel paddingSize="l" className="euiPanel--inset" data-test-subj="EmptyActivitySummary">
           <EuiEmptyPrompt
             title={<h2>There is no recent activity</h2>}
             iconType="clock"
@@ -220,31 +195,29 @@ export const Overview: React.FC = () => {
     );
   };
 
-  const GroupsSummary = () => {
-    return !groups.length ? null : (
-      <>
-        <EuiText>
-          <h4>Group Access</h4>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {groups.map((group, index) => (
-            <EuiFlexItem key={index}>
-              <EuiPanelTo
-                to={getGroupPath(group.id)}
-                data-test-subj="SourceGroupLink"
-                className="euiPanel--inset"
-              >
-                <EuiText size="s" className="eui-textTruncate">
-                  <strong>{group.name}</strong>
-                </EuiText>
-              </EuiPanelTo>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </>
-    );
-  };
+  const groupsSummary = (
+    <>
+      <EuiText>
+        <h4>Group Access</h4>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="GroupsSummary">
+        {groups.map((group, index) => (
+          <EuiFlexItem key={index}>
+            <EuiPanelTo
+              to={getGroupPath(group.id)}
+              data-test-subj="SourceGroupLink"
+              className="euiPanel--inset"
+            >
+              <EuiText size="s" className="eui-textTruncate">
+                <strong>{group.name}</strong>
+              </EuiText>
+            </EuiPanelTo>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </>
+  );
 
   const detailsSummary = (
     <>
@@ -303,7 +276,7 @@ export const Overview: React.FC = () => {
         <h4>Document-level permissions</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiPanel className="euiPanel--inset">
+      <EuiPanel className="euiPanel--inset" data-test-subj="DocumentPermissionsDisabled">
         <EuiText size="s">
           <EuiFlexGroup wrap gutterSize="m" alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
@@ -351,7 +324,7 @@ export const Overview: React.FC = () => {
   );
 
   const permissionsStatus = (
-    <EuiPanel>
+    <EuiPanel data-test-subj="PermissionsStatus">
       <EuiText size="s">
         <h6>
           <EuiTextColor color="subdued">Status</EuiTextColor>
@@ -388,9 +361,9 @@ export const Overview: React.FC = () => {
         </h6>
       </EuiText>
       <EuiSpacer size="s" />
-      <CredentialItem label="Access Token" value={accessToken} testSubj="AccessToken" />
+      <CredentialItem label="ID" value={id} testSubj="ContentSourceId" />
       <EuiSpacer size="s" />
-      <CredentialItem label="Key" value={key} testSubj="ContentSourceKey" />
+      <CredentialItem label="Access Token" value={accessToken} testSubj="AccessToken" />
     </EuiPanel>
   );
 
@@ -444,20 +417,18 @@ export const Overview: React.FC = () => {
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" direction="column">
             <EuiFlexItem>
-              <DocumentSummary />
+              <DocumentSummary data-test-subj="DocumentSummary" />
             </EuiFlexItem>
             {!isFederatedSource && (
               <EuiFlexItem>
-                <ActivitySummary />
+                <ActivitySummary data-test-subj="ActivitySummary" />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="m" direction="column">
-            <EuiFlexItem>
-              <GroupsSummary />
-            </EuiFlexItem>
+            <EuiFlexItem>{groups.length > 0 && groupsSummary}</EuiFlexItem>
             {details.length > 0 && <EuiFlexItem>{detailsSummary}</EuiFlexItem>}
             {!custom && serviceTypeSupportsPermissions && (
               <>
@@ -476,7 +447,10 @@ export const Overview: React.FC = () => {
                 <EuiFlexItem>{sourceStatus}</EuiFlexItem>
                 <EuiFlexItem>{credentials}</EuiFlexItem>
                 <EuiFlexItem>
-                  <DocumentationCallout title="Getting started with custom sources?">
+                  <DocumentationCallout
+                    data-test-subj="DocumentationCallout"
+                    title="Getting started with custom sources?"
+                  >
                     <p>
                       <EuiLink target="_blank" href={CUSTOM_SOURCE_DOCS_URL}>
                         Learn more

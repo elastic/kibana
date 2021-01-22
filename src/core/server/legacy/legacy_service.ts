@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
@@ -22,6 +11,7 @@ import { first, map, publishReplay, tap } from 'rxjs/operators';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PathConfigType } from '@kbn/utils';
 
+import type { RequestHandlerContext } from 'src/core/server';
 // @ts-expect-error legacy config class
 import { Config as LegacyConfigClass } from '../../../legacy/server/config';
 import { CoreService } from '../../types';
@@ -29,7 +19,14 @@ import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
-import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
+import {
+  BasePathProxyServer,
+  HttpConfig,
+  HttpConfigType,
+  config as httpConfig,
+  IRouter,
+  RequestHandlerContextProvider,
+} from '../http';
 import { Logger } from '../logging';
 import { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig, LegacyVars } from './types';
 import { ExternalUrlConfigType, config as externalUrlConfig } from '../external_url';
@@ -236,11 +233,15 @@ export class LegacyService implements CoreService {
       },
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
-        registerRouteHandlerContext: setupDeps.core.http.registerRouteHandlerContext.bind(
-          null,
-          this.legacyId
-        ),
-        createRouter: () => router,
+        registerRouteHandlerContext: <
+          Context extends RequestHandlerContext,
+          ContextName extends keyof Context
+        >(
+          contextName: ContextName,
+          provider: RequestHandlerContextProvider<Context, ContextName>
+        ) => setupDeps.core.http.registerRouteHandlerContext(this.legacyId, contextName, provider),
+        createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() =>
+          router as IRouter<Context>,
         resources: setupDeps.core.httpResources.createRegistrar(router),
         registerOnPreRouting: setupDeps.core.http.registerOnPreRouting,
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
