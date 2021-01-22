@@ -15,6 +15,7 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_c
 import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_breadcrumbs';
 
 import { AnalyticsLayout } from '../analytics_layout';
+import { AnalyticsSection } from '../components';
 import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../';
 
 const QUERY_DETAIL_TITLE = i18n.translate(
@@ -63,7 +64,18 @@ export const QueryDetail: React.FC<Props> = ({ breadcrumbs }) => {
       />
       <EuiSpacer />
 
-      <p>TODO: Query detail page</p>
+      <AnalyticsSection
+        title={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetail.tableTitle',
+          { defaultMessage: 'Top clicks' }
+        )}
+        subtitle={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetail.tableDescription',
+          { defaultMessage: 'The documents with the most clicks resulting from this query.' }
+        )}
+      >
+        TODO
+      </AnalyticsSection>
     </AnalyticsLayout>
   );
 };

@@ -27,5 +27,6 @@ describe('Analytics overview', () => {
 
     expect(wrapper.find(AnalyticsCards)).toHaveLength(1);
     expect(wrapper.find(AnalyticsChart)).toHaveLength(1);
+    expect(wrapper.find(AnalyticsSection)).toHaveLength(3);
   });
 });
