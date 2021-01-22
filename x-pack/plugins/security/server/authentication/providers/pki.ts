@@ -272,9 +272,15 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
 
     let result: { access_token: string; authentication: AuthenticationInfo };
     try {
-      result = await this.options.client.callAsInternalUser('shield.delegatePKI', {
-        body: { x509_certificate_chain: certificateChain },
-      });
+      // We can replace generic `transport.request` with a dedicated API method call once
+      // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+      result = (
+        await this.options.client.asInternalUser.transport.request({
+          method: 'POST',
+          path: '/_security/delegate_pki',
+          body: { x509_certificate_chain: certificateChain },
+        })
+      ).body as any;
     } catch (err) {
       this.logger.debug(
         `Failed to exchange peer certificate chain to an access token: ${err.message}`
@@ -298,7 +304,8 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Obtains the peer certificate chain. Starts from the leaf peer certificate and iterates up to the top-most available certificate
+   * Obtains the peer certificate chain as an ordered array of base64-encoded (Section 4 of RFC4648 - not base64url-encoded)
+   * DER PKIX certificate values. Starts from the leaf peer certificate and iterates up to the top-most available certificate
    * authority using `issuerCertificate` certificate property. THe iteration is stopped only when we detect circular reference
    * (root/self-signed certificate) or when `issuerCertificate` isn't available (null or empty object). Automatically attempts to
    * renegotiate the TLS connection once if the peer certificate chain is incomplete.
