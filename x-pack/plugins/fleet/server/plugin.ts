@@ -194,7 +194,7 @@ export class FleetPlugin
     this.cloud = deps.cloud;
 
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
-    registerEncryptedSavedObjects(deps.encryptedSavedObjects);
+    //registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
     // TODO: Flesh out privileges

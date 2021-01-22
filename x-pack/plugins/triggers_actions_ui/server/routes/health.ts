@@ -21,7 +21,7 @@ export function healthRoute(
   router: IRouter,
   baseRoute: string,
   isESOAvailable: boolean,
-  isAlertsAvalibale: boolean
+  isAlertsAvailable: boolean
 ) {
   const path = `${baseRoute}/_health`;
   logger.debug(`registering triggers_actions_ui health route GET ${path}`);
@@ -37,7 +37,7 @@ export function healthRoute(
     req: KibanaRequest<unknown, unknown, unknown>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
-    const result = { isESOAvailable, isAlertsAvalibale };
+    const result = { isESOAvailable, isAlertsAvailable };
 
     logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });

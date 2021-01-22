@@ -31,7 +31,7 @@ jest.mock('../../lib/alert_api', () => ({
 }));
 
 jest.mock('../../../common/lib/health_api', () => ({
-  triggersActionsUiHealth: jest.fn(() => ({ isESOAvailable: true })),
+  triggersActionsUiHealth: jest.fn(() => ({ isESOAvailable: true, isAlertsAvailable: true })),
 }));
 
 describe('alert_edit', () => {

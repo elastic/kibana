@@ -56,9 +56,11 @@ describe('health check', () => {
   });
 
   it('renders children if keys are enabled', async () => {
-    useKibanaMock().services.http.get = jest
-      .fn()
-      .mockResolvedValue({ isSufficientlySecure: true, isESOAvailable: true });
+    useKibanaMock().services.http.get = jest.fn().mockResolvedValue({
+      isSufficientlySecure: true,
+      isESOAvailable: true,
+      isAlertsAvailable: true,
+    });
     const { queryByText } = render(
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
@@ -72,10 +74,11 @@ describe('health check', () => {
     expect(queryByText('should render')).toBeInTheDocument();
   });
 
-  test('renders warning if keys are disabled', async () => {
+  test('renders warning if TLS is required', async () => {
     useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       isSufficientlySecure: false,
       isESOAvailable: true,
+      isAlertsAvailable: true,
     }));
     const { queryAllByText } = render(
       <HealthContextProvider>

@@ -216,7 +216,7 @@ const AlertsError = ({
             external
             target="_blank"
           >
-            {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsErrorAction', {
+            {i18n.translate('xpack.triggersActionsUI.components.healthCheck.alertsErrorAction', {
               defaultMessage: 'Learn how to enable Alerts.',
             })}
           </EuiLink>
