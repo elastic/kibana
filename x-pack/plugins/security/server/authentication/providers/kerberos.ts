@@ -5,12 +5,10 @@
  */
 
 import Boom from '@hapi/boom';
-import {
-  LegacyElasticsearchError,
-  LegacyElasticsearchErrorHelpers,
-  KibanaRequest,
-} from '../../../../../../src/core/server';
+import { errors } from '@elastic/elasticsearch';
+import type { KibanaRequest } from '../../../../../../src/core/server';
 import type { AuthenticationInfo } from '../../elasticsearch';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
@@ -153,16 +151,21 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       authentication: AuthenticationInfo;
     };
     try {
-      tokens = await this.options.client.callAsInternalUser('shield.getAccessToken', {
-        body: { grant_type: '_kerberos', kerberos_ticket: kerberosTicket },
-      });
+      tokens = (
+        await this.options.client.asInternalUser.security.getToken<typeof tokens>({
+          body: { grant_type: '_kerberos', kerberos_ticket: kerberosTicket },
+        })
+      ).body;
     } catch (err) {
-      this.logger.debug(`Failed to exchange SPNEGO token for an access token: ${err.message}`);
+      this.logger.debug(
+        `Failed to exchange SPNEGO token for an access token: ${getDetailedErrorMessage(err)}`
+      );
 
       // Check if SPNEGO context wasn't established and we have a response token to return to the client.
-      const challenge = LegacyElasticsearchErrorHelpers.isNotAuthorizedError(err)
-        ? this.getNegotiateChallenge(err)
-        : undefined;
+      const challenge =
+        getErrorStatusCode(err) === 401 && err instanceof errors.ResponseError
+          ? this.getNegotiateChallenge(err)
+          : undefined;
       if (!challenge) {
         return AuthenticationResult.failed(err);
       }
@@ -292,7 +295,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to authenticate request via SPNEGO.');
 
     // Try to authenticate current request with Elasticsearch to see whether it supports SPNEGO.
-    let elasticsearchError: LegacyElasticsearchError;
+    let elasticsearchError: errors.ResponseError;
     try {
       await this.getUser(request, {
         // We should send a fake SPNEGO token to Elasticsearch to make sure Kerberos realm is included
@@ -306,7 +309,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     } catch (err) {
       // Fail immediately if we get unexpected error (e.g. ES isn't available). We should not touch
       // session cookie in this case.
-      if (!LegacyElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
+      if (getErrorStatusCode(err) !== 401 || !(err instanceof errors.ResponseError)) {
         return AuthenticationResult.failed(err);
       }
 
@@ -332,11 +335,14 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * Extracts `Negotiate` challenge from the list of challenges returned with Elasticsearch error if any.
    * @param error Error to extract challenges from.
    */
-  private getNegotiateChallenge(error: LegacyElasticsearchError) {
+  private getNegotiateChallenge(error: errors.ResponseError) {
+    // We extract headers from the original Elasticsearch error and not from the top-level `headers`
+    // property of the Elasticsearch client error since client merges multiple `WWW-Authenticate`
+    // headers into one using comma as a separator. That makes it hard to correctly parse the header
+    // since `WWW-Authenticate` values can also include commas.
     const challenges = ([] as string[]).concat(
-      (error.output.headers as { [key: string]: string })[WWWAuthenticateHeaderName]
+      error.body?.error?.header?.[WWWAuthenticateHeaderName] || []
     );
-
     const negotiateChallenge = challenges.find((challenge) =>
       challenge.toLowerCase().startsWith('negotiate')
     );
