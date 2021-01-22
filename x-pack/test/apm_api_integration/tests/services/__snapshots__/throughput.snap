@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM API tests basic apm_8.0.0 Throughput when data is loaded retjurns the service throughput  has the correct throughput 1`] = `
+exports[`APM API tests basic apm_8.0.0 Throughput when data is loaded has the correct throughput 1`] = `
 Array [
   Object {
     "x": 1607435850000,

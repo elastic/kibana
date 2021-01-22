@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { merge, cloneDeep, isPlainObject } from 'lodash';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { registry } from '../../common/registry';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';
 
@@ -15,8 +16,6 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   const supertestRead = getService('supertestAsApmReadUser');
   const supertestWrite = getService('supertestAsApmAnnotationsWriteUser');
   const es = getService('es');
-
-  const registry = getService('registry');
 
   function expectContainsObj(source: JsonObject, expected: JsonObject) {
     expect(source).to.eql(

@@ -7,13 +7,12 @@ import URL from 'url';
 import expect from '@kbn/expect';
 import { CustomLink } from '../../../../plugins/apm/common/custom_link/custom_link_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { registry } from '../../common/registry';
 
 export default function customLinksTests({ getService }: FtrProviderContext) {
   const supertestRead = getService('supertest');
   const supertestWrite = getService('supertestAsApmWriteUser');
   const log = getService('log');
-
-  const registry = getService('registry');
 
   const archiveName = 'apm_8.0.0';
 

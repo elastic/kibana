@@ -9,10 +9,10 @@ import { pick, uniqBy, sortBy } from 'lodash';
 import url from 'url';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
+import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const registry = getService('registry');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];

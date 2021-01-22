@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { registry } from '../../../common/registry';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
@@ -13,8 +14,6 @@ export default function apiTest({ getService }: FtrProviderContext) {
   const writeUser = getService('supertestAsApmWriteUser');
 
   type SupertestAsUser = typeof noAccessUser | typeof readUser | typeof writeUser;
-
-  const registry = getService('registry');
 
   function getJobs(user: SupertestAsUser) {
     return user.get(`/api/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');

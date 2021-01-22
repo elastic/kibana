@@ -5,11 +5,11 @@
  */
 
 import expect from '@kbn/expect';
+import { registry } from '../../../common/registry';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
   const apmReadUser = getService('supertestAsApmReadUser');
-  const registry = getService('registry');
 
   function getJobs() {
     return apmReadUser.get(`/api/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');

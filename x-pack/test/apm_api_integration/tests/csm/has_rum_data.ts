@@ -6,10 +6,10 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { registry } from '../../common/registry';
 
 export default function rumHasDataApiTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const registry = getService('registry');
 
   registry.when('has_rum_data without data', { config: 'trial', archives: [] }, () => {
     it('returns empty list', async () => {

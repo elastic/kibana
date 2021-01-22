@@ -8,6 +8,7 @@ import { first } from 'lodash';
 import { MetricsChartsByAgentAPIResponse } from '../../../../plugins/apm/server/lib/metrics/get_metrics_chart_data_by_agent';
 import { GenericMetricsChart } from '../../../../plugins/apm/server/lib/metrics/transform_metrics_chart';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { registry } from '../../common/registry';
 
 interface ChartResponse {
   body: MetricsChartsByAgentAPIResponse;
@@ -16,7 +17,6 @@ interface ChartResponse {
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const registry = getService('registry');
 
   registry.when(
     'Metrics charts when data is loaded',

@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../common/ftr_provider_context';
+import { registry } from '../common/registry';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestAsApmWriteUser');
@@ -14,8 +15,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const spaces = getService('spaces');
   const es = getService('legacyEs');
   const log = getService('log');
-
-  const registry = getService('registry');
 
   const start = encodeURIComponent(new Date(Date.now() - 10000).toISOString());
   const end = encodeURIComponent(new Date().toISOString());

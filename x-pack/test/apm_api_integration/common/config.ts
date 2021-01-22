@@ -11,8 +11,8 @@ import path from 'path';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
-import { createTestRegistryProvider } from './test_registry_provider';
 import { APMFtrConfigName } from '../configs';
+import { registry } from './registry';
 
 interface Config {
   name: APMFtrConfigName;
@@ -48,6 +48,8 @@ export function createTestConfig(config: Config) {
 
     const supertestAsApmReadUser = supertestAsApmUser(servers.kibana, ApmUser.apmReadUser);
 
+    registry.init(config.name);
+
     return {
       testFiles: [require.resolve('../tests')],
       servers,
@@ -56,7 +58,6 @@ export function createTestConfig(config: Config) {
       },
       services: {
         ...services,
-        registry: createTestRegistryProvider(config.name),
         supertest: supertestAsApmReadUser,
         supertestAsApmReadUser,
         supertestAsNoAccessUser: supertestAsApmUser(servers.kibana, ApmUser.noAccessUser),

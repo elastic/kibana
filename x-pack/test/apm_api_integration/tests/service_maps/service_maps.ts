@@ -10,12 +10,11 @@ import { isEmpty, uniq } from 'lodash';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { registry } from '../../common/registry';
 
 export default function serviceMapsApiTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestAsApmReadUserWithoutMlAccess = getService('supertestAsApmReadUserWithoutMlAccess');
-
-  const registry = getService('registry');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];

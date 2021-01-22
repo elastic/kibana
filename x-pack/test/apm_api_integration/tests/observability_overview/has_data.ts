@@ -5,10 +5,10 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const registry = getService('registry');
 
   registry.when(
     'Observability overview when data is not loaded',

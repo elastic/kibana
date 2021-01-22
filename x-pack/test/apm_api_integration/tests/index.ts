@@ -5,9 +5,10 @@
  */
 
 import { FtrProviderContext } from '../common/ftr_provider_context';
+import { registry } from '../common/registry';
 
 export default function apmApiIntegrationTests(providerContext: FtrProviderContext) {
-  const { loadTestFile, getService } = providerContext;
+  const { loadTestFile } = providerContext;
 
   describe('APM API tests', function () {
     this.tags('ciGroup1');
@@ -64,6 +65,6 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     loadTestFile(require.resolve('./feature_controls'));
 
-    getService('registry').run();
+    registry.run(providerContext);
   });
 }

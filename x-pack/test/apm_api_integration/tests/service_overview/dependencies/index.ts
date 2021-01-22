@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import url from 'url';
 import { sortBy, pick, last } from 'lodash';
 import { ValuesType } from 'utility-types';
+import { registry } from '../../../common/registry';
 import { Maybe } from '../../../../../plugins/apm/typings/common';
 import { isFiniteNumber } from '../../../../../plugins/apm/common/utils/is_finite_number';
 import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
@@ -20,7 +21,6 @@ const round = (num: Maybe<number>): string => (isFiniteNumber(num) ? num.toPreci
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const registry = getService('registry');
   const es = getService('es');
 
   const archiveName = 'apm_8.0.0';

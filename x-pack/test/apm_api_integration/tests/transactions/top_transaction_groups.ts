@@ -7,6 +7,7 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { registry } from '../../common/registry';
 
 function sortTransactionGroups(items: any[]) {
   return sortBy(items, 'impact');
@@ -14,7 +15,6 @@ function sortTransactionGroups(items: any[]) {
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const registry = getService('registry');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];

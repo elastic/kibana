@@ -6,11 +6,10 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { registry } from '../../common/registry';
 
 export default function rumServicesApiTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-
-  const registry = getService('registry');
 
   registry.when('CSM web core vitals without data', { config: 'trial', archives: [] }, () => {
     it('returns empty list', async () => {
