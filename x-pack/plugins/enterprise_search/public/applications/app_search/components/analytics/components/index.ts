@@ -8,5 +8,6 @@ export { AnalyticsCards } from './analytics_cards';
 export { AnalyticsChart } from './analytics_chart';
 export { AnalyticsHeader } from './analytics_header';
 export { AnalyticsSection } from './analytics_section';
-export { AnalyticsTable, RecentQueriesTable } from './analytics_tables';
+export { AnalyticsSearch } from './analytics_search';
+export { AnalyticsTable, RecentQueriesTable, QueryClicksTable } from './analytics_tables';
 export { AnalyticsUnavailable } from './analytics_unavailable';

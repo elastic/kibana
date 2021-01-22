@@ -15,7 +15,7 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_c
 import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_breadcrumbs';
 
 import { AnalyticsLayout } from '../analytics_layout';
-import { AnalyticsSection } from '../components';
+import { AnalyticsSection, QueryClicksTable } from '../components';
 import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../';
 
 const QUERY_DETAIL_TITLE = i18n.translate(
@@ -29,7 +29,9 @@ interface Props {
 export const QueryDetail: React.FC<Props> = ({ breadcrumbs }) => {
   const { query } = useParams() as { query: string };
 
-  const { totalQueriesForQuery, queriesPerDayForQuery, startDate } = useValues(AnalyticsLogic);
+  const { totalQueriesForQuery, queriesPerDayForQuery, startDate, topClicksForQuery } = useValues(
+    AnalyticsLogic
+  );
 
   return (
     <AnalyticsLayout isQueryView title={`"${query}"`}>
@@ -74,7 +76,7 @@ export const QueryDetail: React.FC<Props> = ({ breadcrumbs }) => {
           { defaultMessage: 'The documents with the most clicks resulting from this query.' }
         )}
       >
-        TODO
+        <QueryClicksTable items={topClicksForQuery} />
       </AnalyticsSection>
     </AnalyticsLayout>
   );

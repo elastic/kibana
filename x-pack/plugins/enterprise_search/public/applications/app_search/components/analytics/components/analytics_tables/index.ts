@@ -6,3 +6,4 @@
 
 export { AnalyticsTable } from './analytics_table';
 export { RecentQueriesTable } from './recent_queries_table';
+export { QueryClicksTable } from './query_clicks_table';
