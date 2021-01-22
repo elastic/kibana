@@ -9,7 +9,7 @@ import { useValues } from 'kea';
 
 import { TOP_QUERIES_WITH_CLICKS } from '../constants';
 import { AnalyticsLayout } from '../analytics_layout';
-import { AnalyticsTable } from '../components';
+import { AnalyticsSearch, AnalyticsTable } from '../components';
 import { AnalyticsLogic } from '../';
 
 export const TopQueriesWithClicks: React.FC = () => {
@@ -17,6 +17,7 @@ export const TopQueriesWithClicks: React.FC = () => {
 
   return (
     <AnalyticsLayout isAnalyticsView title={TOP_QUERIES_WITH_CLICKS}>
+      <AnalyticsSearch />
       <AnalyticsTable items={topQueriesWithClicks} hasClicks />
     </AnalyticsLayout>
   );

@@ -9,7 +9,7 @@ import { useValues } from 'kea';
 
 import { RECENT_QUERIES } from '../constants';
 import { AnalyticsLayout } from '../analytics_layout';
-import { RecentQueriesTable } from '../components';
+import { AnalyticsSearch, RecentQueriesTable } from '../components';
 import { AnalyticsLogic } from '../';
 
 export const RecentQueries: React.FC = () => {
@@ -17,6 +17,7 @@ export const RecentQueries: React.FC = () => {
 
   return (
     <AnalyticsLayout isAnalyticsView title={RECENT_QUERIES}>
+      <AnalyticsSearch />
       <RecentQueriesTable items={recentQueries} />
     </AnalyticsLayout>
   );
