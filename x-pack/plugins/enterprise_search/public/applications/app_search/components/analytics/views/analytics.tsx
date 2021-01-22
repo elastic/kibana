@@ -16,6 +16,7 @@ import {
   ENGINE_ANALYTICS_TOP_QUERIES_NO_RESULTS_PATH,
   ENGINE_ANALYTICS_TOP_QUERIES_NO_CLICKS_PATH,
   ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH,
+  ENGINE_ANALYTICS_RECENT_QUERIES_PATH,
 } from '../../../routes';
 import { generateEnginePath } from '../../engine';
 
@@ -31,7 +32,7 @@ import {
   RECENT_QUERIES,
 } from '../constants';
 import { AnalyticsLayout } from '../analytics_layout';
-import { AnalyticsSection, AnalyticsTable } from '../components';
+import { AnalyticsSection, AnalyticsTable, RecentQueriesTable } from '../components';
 import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../';
 
 export const Analytics: React.FC = () => {
@@ -47,6 +48,7 @@ export const Analytics: React.FC = () => {
     topQueriesNoResults,
     topQueriesWithClicks,
     topQueriesNoClicks,
+    recentQueries,
   } = useValues(AnalyticsLogic);
 
   return (
@@ -152,7 +154,8 @@ export const Analytics: React.FC = () => {
           { defaultMessage: 'A view into queries happening right now.' }
         )}
       >
-        TODO
+        <RecentQueriesTable items={recentQueries.slice(0, 10)} />
+        <ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_RECENT_QUERIES_PATH)} />
       </AnalyticsSection>
     </AnalyticsLayout>
   );

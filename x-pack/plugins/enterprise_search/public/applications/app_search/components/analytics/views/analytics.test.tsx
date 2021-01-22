@@ -10,7 +10,13 @@ import '../../../__mocks__/engine_logic.mock';
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { AnalyticsCards, AnalyticsChart, AnalyticsSection, AnalyticsTable } from '../components';
+import {
+  AnalyticsCards,
+  AnalyticsChart,
+  AnalyticsSection,
+  AnalyticsTable,
+  RecentQueriesTable,
+} from '../components';
 import { Analytics, ViewAllButton } from './analytics';
 
 describe('Analytics overview', () => {
@@ -27,6 +33,7 @@ describe('Analytics overview', () => {
       topQueriesNoResults: [],
       topQueriesNoClicks: [],
       topQueriesWithClicks: [],
+      recentQueries: [],
     });
     const wrapper = shallow(<Analytics />);
 
@@ -34,6 +41,7 @@ describe('Analytics overview', () => {
     expect(wrapper.find(AnalyticsChart)).toHaveLength(1);
     expect(wrapper.find(AnalyticsSection)).toHaveLength(3);
     expect(wrapper.find(AnalyticsTable)).toHaveLength(4);
+    expect(wrapper.find(RecentQueriesTable)).toHaveLength(1);
   });
 
   describe('ViewAllButton', () => {
