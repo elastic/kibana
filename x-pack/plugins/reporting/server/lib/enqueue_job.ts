@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { KibanaRequest } from 'src/core/server';
 import { ReportingCore } from '../';
 import { durationToNumber } from '../../common/schema_utils';
 import { BaseParams, ReportingUser } from '../types';
 import { LevelLogger } from './';
 import { Report } from './store';
+import type { ReportingRequestHandlerContext } from '../types';
 
 export type EnqueueJobFn = (
   exportTypeId: string,
   jobParams: BaseParams,
   user: ReportingUser,
-  context: RequestHandlerContext,
+  context: ReportingRequestHandlerContext,
   request: KibanaRequest
 ) => Promise<Report>;
 
@@ -36,7 +37,7 @@ export function enqueueJobFactory(
     exportTypeId: string,
     jobParams: BaseParams,
     user: ReportingUser,
-    context: RequestHandlerContext,
+    context: ReportingRequestHandlerContext,
     request: KibanaRequest
   ) {
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);

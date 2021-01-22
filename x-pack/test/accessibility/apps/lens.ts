@@ -12,7 +12,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const listingTable = getService('listingTable');
 
-  describe('Lens', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/88926
+  // FLAKY: https://github.com/elastic/kibana/issues/88927
+  // FLAKY: https://github.com/elastic/kibana/issues/88929
+  describe.skip('Lens', () => {
     const lensChartName = 'MyLensChart';
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
