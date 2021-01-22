@@ -44,7 +44,7 @@ export function addMessages(
 
   const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
   const message = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextMessageDescription', {
-    defaultMessage: `alert '{name}' is active':
+    defaultMessage: `alert '{name}' is active:
 
 - Value: {value}
 - Conditions Met: {conditions} over {window}

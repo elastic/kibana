@@ -38,37 +38,29 @@ describe('alertType', () => {
             "name": "value",
           },
           Object {
+            "description": "The documents that met the threshold condition.",
+            "name": "hits",
+          },
+          Object {
             "description": "A string describing the threshold condition.",
             "name": "conditions",
           },
         ],
         "params": Array [
           Object {
-            "description": "index",
+            "description": "The index the query was run against.",
             "name": "index",
           },
           Object {
-            "description": "timeField",
-            "name": "timeField",
-          },
-          Object {
-            "description": "esQuery",
+            "description": "The stringifed ES query.",
             "name": "esQuery",
           },
           Object {
-            "description": "timeWindowSize",
-            "name": "timeWindowSize",
-          },
-          Object {
-            "description": "timeWindowUnit",
-            "name": "timeWindowUnit",
-          },
-          Object {
-            "description": "threshold",
+            "description": "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
             "name": "threshold",
           },
           Object {
-            "description": "thresholdComparator",
+            "description": "A comparison function to use to determine if the threshold as been met.",
             "name": "thresholdComparator",
           },
         ],

@@ -12,7 +12,6 @@ import { ActionContext, EsQueryAlertActionContext, addMessages } from './action_
 import {
   EsQueryAlertParams,
   EsQueryAlertParamsSchema,
-  EsQueryAlertParamsSchemaProperties,
   EsQueryAlertState,
 } from './alert_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
@@ -56,7 +55,7 @@ export function getAlertType(
   const actionVariableContextHitsLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextHitsLabel',
     {
-      defaultMessage: 'The query matches that met the threshold condition.',
+      defaultMessage: 'The documents that met the threshold condition.',
     }
   );
 
@@ -71,6 +70,20 @@ export function getAlertType(
     'xpack.stackAlerts.esQuery.actionVariableContextTitleLabel',
     {
       defaultMessage: 'A pre-constructed title for the alert.',
+    }
+  );
+
+  const actionVariableContextIndexLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextIndexLabel',
+    {
+      defaultMessage: 'The index the query was run against.',
+    }
+  );
+
+  const actionVariableContextQueryLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextQueryLabel',
+    {
+      defaultMessage: 'The stringifed ES query.',
     }
   );
 
@@ -96,15 +109,6 @@ export function getAlertType(
     }
   );
 
-  const alertParamsVariables = Object.keys(EsQueryAlertParamsSchemaProperties).map(
-    (propKey: string) => {
-      return {
-        name: propKey,
-        description: propKey,
-      };
-    }
-  );
-
   return {
     id: ES_QUERY_ID,
     name: alertTypeName,
@@ -123,7 +127,8 @@ export function getAlertType(
         { name: 'conditions', description: actionVariableContextConditionsLabel },
       ],
       params: [
-        ...alertParamsVariables,
+        { name: 'index', description: actionVariableContextIndexLabel },
+        { name: 'esQuery', description: actionVariableContextQueryLabel },
         { name: 'threshold', description: actionVariableContextThresholdLabel },
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
       ],
@@ -194,6 +199,8 @@ export function getAlertType(
       timeField: params.timeField,
     });
 
+    // logger.info(`QUERY RUN: ${JSON.stringify(query)}`);
+
     let searchResult: SearchResponse<unknown> = await callCluster('search', query);
     // Needed until https://github.com/elastic/kibana/issues/26356 is resolved
     searchResult = shimHitsTotal(searchResult);
@@ -220,7 +227,9 @@ export function getAlertType(
 
         const actionContext = addMessages(options, baseContext, params);
         const alertInstance = options.services.alertInstanceFactory(ConditionMetAlertInstanceId);
-        alertInstance.scheduleActions(ActionGroupId, actionContext);
+        alertInstance
+          .replaceState({ latestTimestamp: timestamp })
+          .scheduleActions(ActionGroupId, actionContext);
         // logger.info(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
         logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
 
@@ -232,6 +241,8 @@ export function getAlertType(
       } else {
         logger.info('ALERT CONDITION NOT MATCHED');
       }
+    } else {
+      logger.info('QUERY HAD NO MATCHES');
     }
 
     return {
