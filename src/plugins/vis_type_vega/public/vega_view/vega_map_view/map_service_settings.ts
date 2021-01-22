@@ -34,7 +34,7 @@ const initEmsClientAsync = async (config: Partial<EmsClientConfig>) => {
 
 export class MapServiceSettings {
   private emsClient?: EMSClient;
-  private isDarkMode!: boolean;
+  private isDarkMode: boolean = false;
 
   constructor(public config: MapsLegacyConfig, private appVersion: string) {}
 
@@ -50,7 +50,7 @@ export class MapServiceSettings {
     if (this.hasUserConfiguredTmsLayer) {
       return TmsTileLayers.userConfigured;
     }
-    return this.isDarkMode ? TmsTileLayers.dark : TmsTileLayers.desaturated;
+    return this.isDarkMode ? TmsTileLayers.dark : TmsTileLayers.bright;
   }
 
   public async initialize() {
