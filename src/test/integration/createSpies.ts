@@ -2,6 +2,9 @@ import childProcess = require('child_process');
 import os from 'os';
 import inquirer from 'inquirer';
 import nock from 'nock';
+import { AuthorIdResponse } from '../../services/github/v4/fetchAuthorId';
+import { CommitByAuthorResponse } from '../../services/github/v4/fetchCommitsByAuthor';
+import { GithubConfigOptionsResponse } from '../../services/github/v4/getOptionsFromGithub/query';
 import { commitsWithPullRequestsMock } from '../../services/github/v4/mocks/commitsByAuthorMock';
 import { mockGqlRequest, getNockCallsForScope } from '../nockHelpers';
 import {
@@ -22,19 +25,33 @@ export function createSpies({ commitCount }: { commitCount: number }) {
   // mock inquirer.prompt
   mockInquirerPrompts(commitCount);
 
-  const getDefaultRepoBranchCalls = mockGqlRequest({
-    name: 'DefaultRepoBranch',
-    statusCode: 200,
-    body: { data: { repository: { defaultBranchRef: { name: 'master' } } } },
-  });
+  const getGithubConfigOptionsCalls = mockGqlRequest<GithubConfigOptionsResponse>(
+    {
+      name: 'GithubConfigOptions',
+      statusCode: 200,
+      body: {
+        data: {
+          repository: {
+            ref: null,
+            parent: null,
+            isFork: false,
+            defaultBranchRef: {
+              name: 'master',
+              target: { jsonConfigFile: { edges: [] } },
+            },
+          },
+        },
+      },
+    }
+  );
 
-  const authorIdCalls = mockGqlRequest({
+  const authorIdCalls = mockGqlRequest<AuthorIdResponse>({
     name: 'AuthorId',
     statusCode: 200,
     body: { data: { user: { id: 'sqren_author_id' } } },
   });
 
-  const commitsByAuthorCalls = mockGqlRequest({
+  const commitsByAuthorCalls = mockGqlRequest<CommitByAuthorResponse>({
     name: 'CommitsByAuthor',
     statusCode: 200,
     body: { data: commitsWithPullRequestsMock },
@@ -43,7 +60,7 @@ export function createSpies({ commitCount }: { commitCount: number }) {
   const createPullRequestCalls = mockCreatePullRequest();
 
   return {
-    getDefaultRepoBranchCalls,
+    getGithubConfigOptionsCalls,
     authorIdCalls,
     commitsByAuthorCalls,
     createPullRequestCalls,

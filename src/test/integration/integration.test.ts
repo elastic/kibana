@@ -57,7 +57,7 @@ describe('integration', () => {
     });
 
     it('should make correct API requests', () => {
-      expect(spies.getDefaultRepoBranchCalls).toMatchSnapshot();
+      expect(spies.getGithubConfigOptionsCalls).toMatchSnapshot();
       expect(spies.authorIdCalls).toMatchSnapshot();
       expect(spies.commitsByAuthorCalls).toMatchSnapshot();
     });
@@ -132,7 +132,7 @@ describe('integration', () => {
     });
 
     it('should make correct API requests', () => {
-      expect(spies.getDefaultRepoBranchCalls).toMatchSnapshot();
+      expect(spies.getGithubConfigOptionsCalls).toMatchSnapshot();
       expect(spies.authorIdCalls).toMatchSnapshot();
       expect(spies.commitsByAuthorCalls).toMatchSnapshot();
     });

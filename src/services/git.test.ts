@@ -9,6 +9,10 @@ import {
   getConflictingFiles,
   createBackportBranch,
   pushBackportBranch,
+  getLocalConfigFileCommitDate,
+  isLocalConfigFileUntracked,
+  isLocalConfigFileModified,
+  getUpstreamFromGitRemote,
 } from '../services/git';
 import { ExecError } from '../test/ExecError';
 import { Commit } from '../types/Commit';
@@ -48,6 +52,128 @@ describe('getUnstagedFiles', () => {
     } as ValidConfigOptions;
 
     await expect(await getUnstagedFiles(options)).toEqual([]);
+  });
+});
+
+describe('getLocalConfigFileCommitDate', () => {
+  it('returns a timestamp the file exists', async () => {
+    const res = {
+      stdout: 'Wed Dec 16 10:10:39 2020 -0800\n',
+      stderr: '',
+    };
+    jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
+    expect(await getLocalConfigFileCommitDate()).toEqual(1608142239000);
+  });
+
+  it('returns empty when file does not exists', async () => {
+    const res = { stdout: '', stderr: '' };
+    jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
+    expect(await getLocalConfigFileCommitDate()).toEqual(undefined);
+  });
+
+  it('handles errors', async () => {
+    const err = {
+      killed: false,
+      code: 128,
+      signal: null,
+      cmd: 'any command...',
+      stdout: '',
+      stderr: 'any error',
+    };
+    jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
+    expect(await getLocalConfigFileCommitDate()).toEqual(undefined);
+  });
+});
+
+describe('isLocalConfigFileUntracked', () => {
+  it('returns "false" if file does not exist', async () => {
+    const res = { stdout: '', stderr: '' };
+    jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
+    expect(await isLocalConfigFileUntracked()).toEqual(false);
+  });
+
+  it('returns "true" if file is untracked', async () => {
+    const res = { stdout: '.backportrc.json\n', stderr: '' };
+    jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
+    expect(await isLocalConfigFileUntracked()).toEqual(true);
+  });
+
+  it('handles errors', async () => {
+    const err = {
+      killed: false,
+      code: 128,
+      signal: null,
+      cmd: 'any command...',
+      stdout: '',
+      stderr: 'any error',
+    };
+    jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
+    expect(await isLocalConfigFileUntracked()).toEqual(undefined);
+  });
+});
+
+describe('isLocalConfigFileModified', () => {
+  it('returns "false" if file does not exist', async () => {
+    const res = { stdout: '', stderr: '' };
+    jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
+    expect(await isLocalConfigFileModified()).toEqual(false);
+  });
+
+  it('returns "false" if file is untracked', async () => {
+    const res = { stdout: '', stderr: '' };
+    jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
+    expect(await isLocalConfigFileModified()).toEqual(false);
+  });
+
+  it('returns "true" if file is staged', async () => {
+    const res = { stdout: '.backportrc.json\n', stderr: '' };
+    jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
+    expect(await isLocalConfigFileModified()).toEqual(true);
+  });
+
+  it('handles errors', async () => {
+    const err = {
+      killed: false,
+      code: 128,
+      signal: null,
+      cmd: 'any command...',
+      stdout: '',
+      stderr: 'any error',
+    };
+    jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
+    expect(await isLocalConfigFileModified()).toEqual(undefined);
+  });
+});
+
+describe('getUpstreamFromGitRemote', () => {
+  it('returns first upstream matching pattern', async () => {
+    const res = {
+      stdout:
+        'origin\tgit@github.com:elastic/kibana.git (fetch)\norigin\tgit@github.com:elastic/kibana.git (push)\nsqren\tgit@github.com:sqren/kibana.git (fetch)\nsqren\tgit@github.com:sqren/kibana.git (push)\n',
+      stderr: '',
+    };
+    jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
+    expect(await getUpstreamFromGitRemote()).toEqual('elastic/kibana');
+  });
+
+  it('returns undefined when no remotes exist', async () => {
+    const res = { stdout: '', stderr: '' };
+    jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
+    expect(await getUpstreamFromGitRemote()).toEqual(undefined);
+  });
+
+  it('handles errors', async () => {
+    const err = {
+      killed: false,
+      code: 128,
+      signal: null,
+      cmd: 'git ls-files .backportrc.js*  --exclude-standard --others',
+      stdout: '',
+      stderr:
+        'fatal: not a git repository (or any of the parent directories): .git\n',
+    };
+    jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
+    expect(await getUpstreamFromGitRemote()).toEqual(undefined);
   });
 });
 

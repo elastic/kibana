@@ -51,13 +51,13 @@ export function getTargetBranchesFromLabels({
     .filter((targetBranch) => !existingBranches.includes(targetBranch))
     .filter((targetBranch) => targetBranch !== sourceBranch);
 
-  logger.info('Inputs when calculating target branches:', {
+  logger.verbose('Inputs when calculating target branches:', {
     labels,
     branchLabelMapping,
     existingTargetPullRequests,
   });
 
-  logger.info('Target branches inferred from labels:', targetBranches);
+  logger.verbose('Target branches inferred from labels:', targetBranches);
 
   return uniq(targetBranches);
 }

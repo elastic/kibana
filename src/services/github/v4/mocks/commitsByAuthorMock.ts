@@ -1,6 +1,6 @@
-import { DataResponse } from '../fetchCommitsByAuthor';
+import { CommitByAuthorResponse } from '../fetchCommitsByAuthor';
 
-export const commitsWithPullRequestsMock: DataResponse = {
+export const commitsWithPullRequestsMock: CommitByAuthorResponse = {
   repository: {
     ref: {
       target: {

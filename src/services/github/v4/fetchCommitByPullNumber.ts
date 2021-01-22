@@ -44,9 +44,9 @@ export async function fetchCommitByPullNumber(
     `Loading merge commit from pull request #${options.pullNumber}`
   ).start();
 
-  let res: DataResponse;
+  let res: CommitByPullNumberResponse;
   try {
-    res = await apiRequestV4<DataResponse>({
+    res = await apiRequestV4<CommitByPullNumberResponse>({
       githubApiBaseUrlV4,
       accessToken,
       query,
@@ -107,7 +107,7 @@ export async function fetchCommitByPullNumber(
   };
 }
 
-interface DataResponse {
+interface CommitByPullNumberResponse {
   repository: {
     pullRequest: PullRequestNode;
   };

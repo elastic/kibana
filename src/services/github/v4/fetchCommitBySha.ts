@@ -47,9 +47,9 @@ export async function fetchCommitBySha(
 
   const spinner = ora(`Loading commit "${getShortSha(options.sha)}"`).start();
 
-  let res: DataResponse;
+  let res: CommitsByShaResponse;
   try {
-    res = await apiRequestV4<DataResponse>({
+    res = await apiRequestV4<CommitsByShaResponse>({
       githubApiBaseUrlV4,
       accessToken,
       query,
@@ -116,7 +116,7 @@ export async function fetchCommitBySha(
   };
 }
 
-interface DataResponse {
+interface CommitsByShaResponse {
   repository: {
     object: {
       message: string;

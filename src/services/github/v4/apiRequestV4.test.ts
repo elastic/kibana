@@ -12,7 +12,7 @@ describe('apiRequestV4', () => {
     let res: unknown;
     let commitsByAuthorCalls: ReturnType<typeof mockGqlRequest>;
     beforeEach(async () => {
-      commitsByAuthorCalls = mockGqlRequest({
+      commitsByAuthorCalls = mockGqlRequest<any>({
         name: 'MyQuery',
         statusCode: 200,
         body: { data: { hello: 'world' } },

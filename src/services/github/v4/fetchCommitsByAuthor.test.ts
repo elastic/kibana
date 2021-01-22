@@ -2,7 +2,11 @@ import nock from 'nock';
 import { ValidConfigOptions } from '../../../options/options';
 import { mockGqlRequest } from '../../../test/nockHelpers';
 import { Commit } from '../../../types/Commit';
-import { fetchCommitsByAuthor } from './fetchCommitsByAuthor';
+import { AuthorIdResponse } from './fetchAuthorId';
+import {
+  CommitByAuthorResponse,
+  fetchCommitsByAuthor,
+} from './fetchCommitsByAuthor';
 import { getExistingTargetPullRequests } from './getExistingTargetPullRequests';
 import { commitsWithPullRequestsMock } from './mocks/commitsByAuthorMock';
 import { getCommitsByAuthorMock } from './mocks/getCommitsByAuthorMock';
@@ -37,13 +41,13 @@ describe('fetchCommitsByAuthor', () => {
     let commitsByAuthorCalls: ReturnType<typeof mockGqlRequest>;
 
     beforeEach(async () => {
-      authorIdCalls = mockGqlRequest({
+      authorIdCalls = mockGqlRequest<AuthorIdResponse>({
         name: 'AuthorId',
         statusCode: 200,
         body: { data: authorIdMockData },
       });
 
-      commitsByAuthorCalls = mockGqlRequest({
+      commitsByAuthorCalls = mockGqlRequest<CommitByAuthorResponse>({
         name: 'CommitsByAuthor',
         statusCode: 200,
         body: { data: commitsWithPullRequestsMock },
@@ -152,14 +156,14 @@ describe('fetchCommitsByAuthor', () => {
 
   describe('when a custom github api hostname is supplied', () => {
     it('should be used in gql requests', async () => {
-      const authorIdCalls = mockGqlRequest({
+      const authorIdCalls = mockGqlRequest<AuthorIdResponse>({
         name: 'AuthorId',
         statusCode: 200,
         body: { data: authorIdMockData },
         apiBaseUrl: 'http://localhost/my-custom-api',
       });
 
-      const commitsByAuthorCalls = mockGqlRequest({
+      const commitsByAuthorCalls = mockGqlRequest<CommitByAuthorResponse>({
         name: 'CommitsByAuthor',
         statusCode: 200,
         body: { data: commitsWithPullRequestsMock },
@@ -275,13 +279,13 @@ async function getExistingBackportsByRepoName(
 ) {
   const commitsMock = getCommitsByAuthorMock(repoName1);
 
-  mockGqlRequest({
+  mockGqlRequest<AuthorIdResponse>({
     name: 'AuthorId',
     statusCode: 200,
     body: { data: authorIdMockData },
   });
 
-  mockGqlRequest({
+  mockGqlRequest<CommitByAuthorResponse>({
     name: 'CommitsByAuthor',
     statusCode: 200,
     body: { data: commitsMock },

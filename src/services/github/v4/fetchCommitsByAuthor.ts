@@ -76,10 +76,10 @@ export async function fetchCommitsByAuthor(
   const spinner = ora(
     `Loading commits from branch "${sourceBranch}"...`
   ).start();
-  let res: DataResponse;
+  let res: CommitByAuthorResponse;
   try {
     const authorId = await fetchAuthorId(options);
-    res = await apiRequestV4<DataResponse>({
+    res = await apiRequestV4<CommitByAuthorResponse>({
       githubApiBaseUrlV4,
       accessToken,
       query,
@@ -194,7 +194,7 @@ function isSourcePullRequest({
   );
 }
 
-export interface DataResponse {
+export interface CommitByAuthorResponse {
   repository: {
     ref: {
       target: {

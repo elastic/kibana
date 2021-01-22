@@ -45,10 +45,10 @@ export async function fetchPullRequestBySearchQuery(
   const authorFilter = all ? '' : `author:${author}`;
   const searchQuery = `type:pr is:merged sort:updated-desc repo:${repoOwner}/${repoName} ${authorFilter} ${prFilter} base:${sourceBranch}`;
   const spinner = ora('Loading pull requests...').start();
-  let res: DataResponse;
+  let res: PullRequestBySearchQueryResponse;
 
   try {
-    res = await apiRequestV4<DataResponse>({
+    res = await apiRequestV4<PullRequestBySearchQueryResponse>({
       githubApiBaseUrlV4,
       accessToken,
       query,
@@ -115,7 +115,7 @@ export async function fetchPullRequestBySearchQuery(
   return commits;
 }
 
-export interface DataResponse {
+export interface PullRequestBySearchQueryResponse {
   search: {
     nodes: PullRequestNode[];
   };

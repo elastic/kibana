@@ -1,23 +1,29 @@
 import nock from 'nock';
+import { GithubConfigOptionsResponse } from '../services/github/v4/getOptionsFromGithub/query';
 import * as logger from '../services/logger';
 import { mockGqlRequest } from '../test/nockHelpers';
 import { getOptions } from './options';
 
-function mockGetDefaultRepoBranch({
+function mockGetGithubConfigOptions({
   defaultBranch,
   refName,
 }: {
   defaultBranch: string;
   refName?: 'backport';
 }) {
-  return mockGqlRequest({
-    name: 'DefaultRepoBranch',
+  return mockGqlRequest<GithubConfigOptionsResponse>({
+    name: 'GithubConfigOptions',
     statusCode: 200,
     body: {
       data: {
         repository: {
-          ref: { name: refName },
-          defaultBranchRef: { name: defaultBranch },
+          isFork: false,
+          parent: null,
+          ref: refName ? { name: refName } : null,
+          defaultBranchRef: {
+            name: defaultBranch,
+            target: { jsonConfigFile: { edges: [] } },
+          },
         },
       },
     },
@@ -44,7 +50,7 @@ describe('getOptions', () => {
   });
 
   it('should use the default repository branch as sourceBranch', async () => {
-    const mockCalls = mockGetDefaultRepoBranch({
+    const mockCalls = mockGetGithubConfigOptions({
       defaultBranch: 'my-default-branch',
     });
     const options = await getOptions(defaultArgs);
@@ -66,13 +72,13 @@ describe('getOptions', () => {
       'http://localhost/graphql',
     ];
 
-    mockGetDefaultRepoBranch({ defaultBranch: 'my-default-branch' });
+    mockGetGithubConfigOptions({ defaultBranch: 'my-default-branch' });
     const options = await getOptions(argv);
     expect(options.sourceBranch).toBe('my-source-branch');
   });
 
   it('should ensure that "backport" branch does not exist', async () => {
-    mockGetDefaultRepoBranch({
+    mockGetGithubConfigOptions({
       defaultBranch: 'my-default-branch',
       refName: 'backport',
     });
@@ -82,35 +88,29 @@ describe('getOptions', () => {
     );
   });
 
-  it('should omit upstream', async () => {
-    mockGetDefaultRepoBranch({ defaultBranch: 'my-default-branch' });
-    const options = await getOptions(defaultArgs);
-    //@ts-expect-error
-    expect(options.upstream).toBe(undefined);
-  });
-
   it('should merge config options and module options', async () => {
-    mockGetDefaultRepoBranch({ defaultBranch: 'my-default-branch' });
+    mockGetGithubConfigOptions({ defaultBranch: 'my-default-branch' });
     const myFn = async () => true;
     const options = await getOptions(defaultArgs, { autoFixConflicts: myFn });
     expect(options.autoFixConflicts).toBe(myFn);
   });
 
   it('should call updateLogger', async () => {
-    mockGetDefaultRepoBranch({ defaultBranch: 'my-default-branch' });
+    mockGetGithubConfigOptions({ defaultBranch: 'my-default-branch' });
     await getOptions(defaultArgs);
     expect(logger.updateLogger).toHaveBeenCalledTimes(1);
   });
 
   it('should return options', async () => {
-    mockGetDefaultRepoBranch({ defaultBranch: 'some-branch-name' });
+    mockGetGithubConfigOptions({ defaultBranch: 'some-branch-name' });
     const options = await getOptions(defaultArgs);
 
     expect(options).toEqual({
       accessToken: 'myAccessToken',
       all: false,
-      author: 'sqren',
       assignees: [],
+      author: 'sqren',
+      autoAssign: false,
       ci: false,
       dryRun: false,
       fork: true,
@@ -133,6 +133,7 @@ describe('getOptions', () => {
       ],
       targetBranches: ['6.0', '6.1'],
       targetPRLabels: [],
+      upstream: 'elastic/kibana',
       username: 'sqren',
       verbose: false,
     });

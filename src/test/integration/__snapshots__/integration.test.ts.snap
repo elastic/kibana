@@ -4,23 +4,51 @@ exports[`integration when a single commit is backported should make correct API 
 Array [
   Object {
     "query": "
-    query DefaultRepoBranch($repoOwner: String!, $repoName: String!) {
-      viewer {
-        login
-      }
-      repository(owner: $repoOwner, name: $repoName) {
-        # check whether \\"backport\\" branch exists
-        ref(qualifiedName: \\"refs/heads/backport\\") {
-          name
-        }
-
-        # get default branch
-        defaultBranchRef {
-          name
+  query GithubConfigOptions($repoOwner: String!, $repoName: String!) {
+    repository(owner: $repoOwner, name: $repoName) {
+      isFork
+      ...UpstreamInfo
+      parent {
+        ...UpstreamInfo
+        owner {
+          login
         }
       }
     }
-  ",
+  }
+
+  fragment UpstreamInfo on Repository {
+    id
+    ref(qualifiedName: \\"refs/heads/7.x\\") {
+      name
+    }
+    defaultBranchRef {
+      name
+      target {
+        ...JSONConfigFile
+      }
+    }
+  }
+
+  fragment JSONConfigFile on Commit {
+    jsonConfigFile: history(first: 1, path: \\".backportrc.json\\") {
+      edges {
+        config: node {
+          committedDate
+          file(path: \\".backportrc.json\\") {
+            ... on TreeEntry {
+              object {
+                ... on Blob {
+                  text
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+",
     "variables": Object {
       "repoName": "backport-demo",
       "repoOwner": "backport-org",
@@ -154,23 +182,51 @@ exports[`integration when two commits are backported should make correct API req
 Array [
   Object {
     "query": "
-    query DefaultRepoBranch($repoOwner: String!, $repoName: String!) {
-      viewer {
-        login
-      }
-      repository(owner: $repoOwner, name: $repoName) {
-        # check whether \\"backport\\" branch exists
-        ref(qualifiedName: \\"refs/heads/backport\\") {
-          name
-        }
-
-        # get default branch
-        defaultBranchRef {
-          name
+  query GithubConfigOptions($repoOwner: String!, $repoName: String!) {
+    repository(owner: $repoOwner, name: $repoName) {
+      isFork
+      ...UpstreamInfo
+      parent {
+        ...UpstreamInfo
+        owner {
+          login
         }
       }
     }
-  ",
+  }
+
+  fragment UpstreamInfo on Repository {
+    id
+    ref(qualifiedName: \\"refs/heads/7.x\\") {
+      name
+    }
+    defaultBranchRef {
+      name
+      target {
+        ...JSONConfigFile
+      }
+    }
+  }
+
+  fragment JSONConfigFile on Commit {
+    jsonConfigFile: history(first: 1, path: \\".backportrc.json\\") {
+      edges {
+        config: node {
+          committedDate
+          file(path: \\".backportrc.json\\") {
+            ... on TreeEntry {
+              object {
+                ... on Blob {
+                  text
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+",
     "variables": Object {
       "repoName": "backport-demo",
       "repoOwner": "backport-org",

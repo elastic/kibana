@@ -42,7 +42,7 @@ describe('getProjectConfig', () => {
     it('should return empty config', async () => {
       ((findUp as any) as jest.SpyInstance).mockReturnValueOnce(undefined);
       const projectConfig = await getProjectConfig();
-      expect(projectConfig).toEqual({});
+      expect(projectConfig).toEqual(undefined);
     });
   });
 });

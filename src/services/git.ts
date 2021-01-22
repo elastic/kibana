@@ -74,6 +74,61 @@ export function cloneRepo(
   });
 }
 
+export async function getLocalConfigFileCommitDate() {
+  try {
+    const { stdout } = await exec(
+      'git --no-pager log -1 --format=%cd .backportrc.js*',
+      {}
+    );
+
+    const timestamp = Date.parse(stdout);
+    if (timestamp > 0) {
+      return timestamp;
+    }
+  } catch (e) {
+    return;
+  }
+}
+
+export async function isLocalConfigFileUntracked() {
+  try {
+    // list untracked files
+    const { stdout } = await exec(
+      'git ls-files .backportrc.js*  --exclude-standard --others',
+      {}
+    );
+
+    return !!stdout;
+  } catch (e) {
+    return;
+  }
+}
+
+export async function isLocalConfigFileModified() {
+  try {
+    const { stdout } = await exec(
+      'git  --no-pager diff HEAD --name-only  .backportrc.js*',
+      {}
+    );
+
+    return !!stdout;
+  } catch (e) {
+    return;
+  }
+}
+
+export async function getUpstreamFromGitRemote() {
+  try {
+    const { stdout } = await exec('git remote --verbose', {});
+    const matches = stdout.match(/github.com[:/]{1}(.*).git/);
+    if (matches !== null) {
+      return matches[1];
+    }
+  } catch (e) {
+    return;
+  }
+}
+
 export async function deleteRemote(
   options: ValidConfigOptions,
   remoteName: string

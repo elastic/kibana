@@ -1,7 +1,7 @@
 import { ValidConfigOptions } from '../../../options/options';
 import { apiRequestV4 } from './apiRequestV4';
 
-interface DataResponse {
+export interface AuthorIdResponse {
   user: { id: string };
 }
 
@@ -19,7 +19,7 @@ export async function fetchAuthorId(options: ValidConfigOptions) {
     }
   `;
 
-  const res = await apiRequestV4<DataResponse>({
+  const res = await apiRequestV4<AuthorIdResponse>({
     githubApiBaseUrlV4,
     accessToken,
     query,

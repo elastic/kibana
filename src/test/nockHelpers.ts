@@ -2,7 +2,7 @@ import { URL } from 'url';
 import gql from 'graphql-tag';
 import nock from 'nock';
 
-export function mockGqlRequest({
+export function mockGqlRequest<T>({
   name,
   statusCode,
   body,
@@ -11,7 +11,7 @@ export function mockGqlRequest({
 }: {
   name: string;
   statusCode: number;
-  body?: { data: Record<any, any> } | { errors: any[] };
+  body?: { data: T } | { errors: any[] };
   headers?: any;
   apiBaseUrl?: string;
 }) {

@@ -8,12 +8,31 @@ describe('getOptionsFromConfigFiles', () => {
     res = await getOptionsFromConfigFiles();
   });
 
-  it('should return default config values', () => {
+  it('should return values from (mock) config files incl. default values', () => {
     expect(res).toEqual({
       accessToken: 'myAccessToken',
+      all: false,
+      assignees: [],
+      autoAssign: false,
+      ci: false,
+      dryRun: false,
+      fork: true,
+      gitHostname: 'github.com',
+      githubApiBaseUrlV3: 'https://api.github.com',
+      githubApiBaseUrlV4: 'https://api.github.com/graphql',
+      maxNumber: 10,
+      multipleBranches: true,
+      multipleCommits: false,
+      noVerify: true,
+      prTitle: '[{targetBranch}] {commitMessages}',
+      resetAuthor: false,
+      sourcePRLabels: [],
       targetBranchChoices: ['6.0', '5.9'],
+      targetBranches: [],
+      targetPRLabels: [],
       upstream: 'backport-org/backport-demo',
       username: 'sqren',
+      verbose: false,
     });
   });
 });

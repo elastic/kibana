@@ -11,7 +11,7 @@ export async function readConfigFile(filepath: string) {
     return JSON.parse(configWithoutComments) as ConfigOptions;
   } catch (e) {
     throw new HandledError(
-      `"${filepath}" contains invalid JSON:\n\n${fileContents}\n\nTry validating the file on https://jsonlint.com/`
+      `"${filepath}" contains invalid JSON:\n\n${fileContents}`
     );
   }
 }

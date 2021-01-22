@@ -72,7 +72,7 @@ export async function createPullRequest({
         return existingPR;
       }
     } catch (e) {
-      logger.warn('Could not retrieve existing pull request', e);
+      logger.info('Could not retrieve existing pull request', e);
       // swallow error
     }
 

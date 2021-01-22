@@ -1,6 +1,6 @@
-import { DataResponse } from '../fetchPullRequestBySearchQuery';
+import { PullRequestBySearchQueryResponse } from '../fetchPullRequestBySearchQuery';
 
-export const fetchPullRequestBySearchQueryMock: DataResponse = {
+export const fetchPullRequestBySearchQueryMock: PullRequestBySearchQueryResponse = {
   search: {
     nodes: [
       {

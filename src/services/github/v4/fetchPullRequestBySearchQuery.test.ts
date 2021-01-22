@@ -2,7 +2,10 @@ import nock from 'nock';
 import { ValidConfigOptions } from '../../../options/options';
 import { mockGqlRequest } from '../../../test/nockHelpers';
 import { PromiseReturnType } from '../../../types/PromiseReturnType';
-import { fetchPullRequestBySearchQuery } from './fetchPullRequestBySearchQuery';
+import {
+  fetchPullRequestBySearchQuery,
+  PullRequestBySearchQueryResponse,
+} from './fetchPullRequestBySearchQuery';
 import { fetchPullRequestBySearchQueryMock } from './mocks/fetchPullRequestBySearchQueryMock';
 
 describe('fetchPullRequestBySearchQuery', () => {
@@ -10,7 +13,7 @@ describe('fetchPullRequestBySearchQuery', () => {
   let mockCalls: ReturnType<typeof mockGqlRequest>;
 
   beforeEach(async () => {
-    mockCalls = mockGqlRequest({
+    mockCalls = mockGqlRequest<PullRequestBySearchQueryResponse>({
       name: 'PullRequestBySearchQuery',
       statusCode: 200,
       body: { data: fetchPullRequestBySearchQueryMock },

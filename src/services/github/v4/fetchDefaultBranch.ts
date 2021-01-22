@@ -13,7 +13,7 @@ export async function fetchDefaultBranch(options: ValidConfigOptions) {
     }
   `;
 
-  const res = await apiRequestV4<DataResponse>({
+  const res = await apiRequestV4<DefaultBranchResoonse>({
     githubApiBaseUrlV4,
     accessToken,
     query,
@@ -23,7 +23,7 @@ export async function fetchDefaultBranch(options: ValidConfigOptions) {
   return res.repo.defaultBranchRef.name;
 }
 
-export interface DataResponse {
+export interface DefaultBranchResoonse {
   repo: {
     defaultBranchRef: {
       name: string;

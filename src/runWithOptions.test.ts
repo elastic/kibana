@@ -4,6 +4,8 @@ import { ValidConfigOptions } from './options/options';
 import { runWithOptions } from './runWithOptions';
 import * as childProcess from './services/child-process-promisified';
 import * as fs from './services/fs-promisified';
+import { AuthorIdResponse } from './services/github/v4/fetchAuthorId';
+import { CommitByAuthorResponse } from './services/github/v4/fetchCommitsByAuthor';
 import { commitsWithPullRequestsMock } from './services/github/v4/mocks/commitsByAuthorMock';
 import { mockGqlRequest, getNockCallsForScope } from './test/nockHelpers';
 import { PromiseReturnType } from './types/PromiseReturnType';
@@ -29,11 +31,13 @@ describe('runWithOptions', () => {
       all: false,
       assignees: [],
       author: 'sqren',
+      autoAssign: false,
       autoFixConflicts: undefined,
       branchLabelMapping: undefined,
       ci: false,
       dryRun: false,
       editor: 'code',
+      forceLocalConfig: undefined,
       fork: true,
       gitHostname: 'github.com',
       githubApiBaseUrlV3: 'https://api.github.com',
@@ -47,6 +51,7 @@ describe('runWithOptions', () => {
       prDescription: 'myPrDescription',
       prTitle: 'myPrTitle {targetBranch} {commitMessages}',
       pullNumber: undefined,
+      upstream: 'elastic/kibana',
       repoName: 'kibana',
       repoOwner: 'elastic',
       resetAuthor: false,
@@ -83,13 +88,13 @@ describe('runWithOptions', () => {
         return { promptResult: args[0].choices[0].name };
       }) as any);
 
-    authorIdCalls = mockGqlRequest({
+    authorIdCalls = mockGqlRequest<AuthorIdResponse>({
       name: 'AuthorId',
       statusCode: 200,
       body: { data: { user: { id: 'sqren_author_id' } } },
     });
 
-    commitsByAuthorCalls = mockGqlRequest({
+    commitsByAuthorCalls = mockGqlRequest<CommitByAuthorResponse>({
       name: 'CommitsByAuthor',
       statusCode: 200,
       body: { data: commitsWithPullRequestsMock },

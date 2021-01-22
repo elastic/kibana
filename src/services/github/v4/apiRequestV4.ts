@@ -53,7 +53,7 @@ export async function apiRequestV4<DataResponse>({
     logger.info(`POST ${githubApiBaseUrlV4} (status: ${response.status})`);
     logger.verbose('Query:', query);
     logger.verbose('Variables:', variables);
-    logger.debug('Response headers:', response.headers);
+    logger.verbose('Response headers:', response.headers);
     logger.verbose('Response data:', response.data);
 
     return response.data.data;
@@ -61,7 +61,7 @@ export async function apiRequestV4<DataResponse>({
     logger.info(`POST ${githubApiBaseUrlV4} (status: ${e.response?.status})`);
     logger.info('Query:', query);
     logger.info('Variables:', variables);
-    logger.debug('Response headers:', e.response?.headers);
+    logger.verbose('Response headers:', e.response?.headers);
     logger.info('Response data:', e.response?.data);
 
     if (handleError) {

@@ -1,41 +1,34 @@
-import { fetchDefaultRepoBranchAndPerformStartupChecks } from '../services/github/v4/fetchDefaultRepoBranchAndPerformStartupChecks';
+import { getOptionsFromGithub } from '../services/github/v4/getOptionsFromGithub';
 import { PromiseReturnType } from '../types/PromiseReturnType';
 import { updateLogger } from './../services/logger';
 import { ConfigOptions } from './ConfigOptions';
 import { getOptionsFromCliArgs } from './cliArgs';
 import { getOptionsFromConfigFiles } from './config/config';
-import { getValidatedOptions } from './getValidatedOptions';
+import { parseRequiredOptions } from './parseRequiredOptions';
 
 export type ValidConfigOptions = Readonly<PromiseReturnType<typeof getOptions>>;
 export async function getOptions(
   argv: string[],
   optionsFromModule?: ConfigOptions
 ) {
-  const optionsFromConfig = await getOptionsFromConfigFiles(
-    optionsFromModule?.ci
+  const optionsFromConfigFiles = await getOptionsFromConfigFiles(
+    optionsFromModule
   );
-  const optionsFromCli = getOptionsFromCliArgs(
-    { ...optionsFromConfig, ...optionsFromModule },
-    argv
-  );
+  const optionsFromCliArgs = getOptionsFromCliArgs(argv);
 
   // update logger
-  updateLogger(optionsFromCli);
-
-  // TODO: move `getValidatedOptions` to `getOptionsFromCliArgs`
-  const validatedOptions = getValidatedOptions(optionsFromCli);
+  updateLogger({ ...optionsFromConfigFiles, ...optionsFromCliArgs });
 
   // TODO: make `username` optional by defaulting to `currentUsername`
-  const { defaultBranch } = await fetchDefaultRepoBranchAndPerformStartupChecks(
-    validatedOptions
+  const optionsFromGithub = await getOptionsFromGithub(
+    optionsFromConfigFiles,
+    optionsFromCliArgs
   );
 
-  return {
-    ...validatedOptions,
-
-    // use the default branch as source branch (normally "master") unless an explicit `sourceBranch` has been given
-    sourceBranch: validatedOptions.sourceBranch
-      ? validatedOptions.sourceBranch
-      : defaultBranch,
-  };
+  const parsedOptions = parseRequiredOptions(
+    optionsFromConfigFiles,
+    optionsFromCliArgs,
+    optionsFromGithub
+  );
+  return parsedOptions;
 }

@@ -12,7 +12,7 @@ export async function exec(cmd: string, options: child_process.ExecOptions) {
     logger.verbose(`exec success '${cmd}':`, res);
     return res;
   } catch (e) {
-    logger.info(`exec error '${cmd}':`, e);
+    logger.info(`exec error '${cmd}': ${JSON.stringify(e, null, 2)}`);
     throw e;
   }
 }

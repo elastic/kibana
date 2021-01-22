@@ -4,7 +4,7 @@ import { readConfigFile } from '../config/readConfigFile';
 export async function getProjectConfig() {
   const filepath = await findUp('.backportrc.json');
   if (!filepath) {
-    return {};
+    return;
   }
 
   return readConfigFile(filepath);

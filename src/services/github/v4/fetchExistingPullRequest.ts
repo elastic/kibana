@@ -41,7 +41,7 @@ export async function fetchExistingPullRequest({
 
   const { repoForkOwner, head } = splitHead(prPayload);
 
-  const res = await apiRequestV4<DataResponse>({
+  const res = await apiRequestV4<ExistingPullRequestResponse>({
     githubApiBaseUrlV4,
     accessToken,
     query,
@@ -66,7 +66,7 @@ export async function fetchExistingPullRequest({
   };
 }
 
-interface DataResponse {
+interface ExistingPullRequestResponse {
   repository: {
     name: string;
     ref: {

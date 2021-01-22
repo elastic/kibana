@@ -1,6 +1,8 @@
-import { DataResponse } from '../fetchCommitsByAuthor';
+import { CommitByAuthorResponse } from '../fetchCommitsByAuthor';
 
-export const getCommitsByAuthorMock = (repoName: string): DataResponse => ({
+export const getCommitsByAuthorMock = (
+  repoName: string
+): CommitByAuthorResponse => ({
   repository: {
     ref: {
       target: {
