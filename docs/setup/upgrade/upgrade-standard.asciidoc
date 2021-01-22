@@ -17,7 +17,7 @@ necessary remediation steps as per those instructions.
 
 NOTE: Kibana does not support rolling upgrades. If you're running multiple {kib} instances, all instances should be stopped before upgrading.
 
-Different versions of {kib} running against the same {es} index, such as during a rolling upgrade, can cause data loss. This is because older instances will continue to write saved objects in a different format to the newer instances. To prevent this from happening ensure that all old {kib} instances are shutdown before starting up instances on a newer version.
+Different versions of {kib} running against the same {es} index, such as during a rolling upgrade, can cause data loss. This is because older instances will continue to write saved objects in a different format than the newer instances. To prevent this from happening ensure that all old {kib} instances are shutdown before starting up instances on a newer version.
 
 [float]
 ==== Upgrade using a `deb` or `rpm` package
