@@ -1,0 +1,127 @@
+[role="xpack"]
+[[geo-alert-types]]
+== Geo alert types
+
+experimental[] Two additional stack alerts are available:
+<<alert-type-tracking-threshold>> and <<alert-type-tracking-containment>>. To enable,
+add the following configuration to your `kibana.yml`:
+
+```yml
+xpack.stack_alerts.enableGeoAlerting: true
+```
+
+As with other stack alerts, you need `all` access to the *Stack Alerts* feature
+to be able to create and edit either of the geo alerts.
+See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to this feature. 
+
+[float]
+=== Geo alert requirements
+
+To create either a *Tracking threshold* or a *Tracking containment* alert, the
+following requirements must be present:
+
+- *Tracks index or index pattern*: An index containing a `geo_point` field, `date` field,
+and some form of entity identifier. An entity identifier is a `keyword` or `number`
+field that consistently identifies the entity to be tracked. The data in this index should be dynamically
+updating so that there are entity movements to alert upon.
+- *Boundaries index or index pattern*: An index containing `geo_shape` data, such as boundary data and bounding box data.
+This data is presumed to be static (not updating). Shape data matching the query is
+harvested once when the alert is created and anytime after when the alert is re-enabled
+after disablement.
+
+By design, current interval entity locations (_current_ is determined by `date` in
+the *Tracked index or index pattern*) are queried to determine if they are contained
+within any monitored boundaries. Entity
+data should be somewhat "real time", meaning the dates of new documents aren’t older
+than the current time minus the amount of the interval. If data older than
+`now - <current interval>` is ingested, it won't trigger an alert.
+
+[float]
+=== Creating a geo alert
+Both *threshold* and *containment* alerts can be created by clicking the *Create*
+button in the <<alert-management, alert management UI>>.
+Complete the <<defining-alerts-general-details, general alert details>>.
+Select <<alert-type-tracking-threshold>> to generate an alert when an entity crosses a boundary, and you desire the
+ability to highlight lines of crossing on a custom map.
+Select
+<<alert-type-tracking-containment>> if an entity should send out constant alerts
+while contained within a boundary (this feature is optional) or if the alert is generally
+just more focused around activity when an entity exists within a shape.
+
+[role="screenshot"]
+image::images/alert-types-tracking-select.png[Choosing a tracking alert type]
+
+[NOTE]
+==================================================
+With recent advances in the alerting framework, most of the features
+available in Tracking threshold alerts can be replicated with just
+a little more work in Tracking containment alerts. The capabilities of Tracking
+threshold alerts may be deprecated or folded into Tracking containment alerts
+in the future.
+==================================================
+
+[float]
+[[alert-type-tracking-threshold]]
+=== Tracking threshold
+The Tracking threshold alert type runs an {es} query over indices, comparing the latest
+entity locations with their previous locations. In the event that an entity has crossed a
+boundary from the selected boundary index, an alert may be generated.
+
+[float]
+==== Defining the conditions
+Tracking threshold has a *Delayed evaluation offset* and 4 clauses that define the
+condition to detect, as well as 2 Kuery bars used to provide additional filtering
+context for each of the indices.
+
+[role="screenshot"]
+image::images/alert-types-tracking-threshold-conditions.png[Five clauses define the condition to detect]
+
+
+Delayed evaluation offset:: If a data source lags or is intermittent, you may supply
+an optional value to evaluate alert conditions following a fixed delay. For instance, if data
+is consistently indexed 5-10 minutes following its original timestamp, a *Delayed evaluation
+offset* of `10 minutes` would ensure that alertable instances are still captured.
+Index (entity):: This clause requires an *index or index pattern*, a *time field* that will be used for the *time window*, and a *`geo_point` field* for tracking.
+By:: This clause specifies the field to use in the previously provided
+*index or index pattern* for tracking Entities. An entity is a `keyword`
+or `number` field that consistently identifies the entity to be tracked. 
+When entity:: This clause specifies which crossing option to track. The values
+*Entered*, *Exited*, and *Crossed* can be selected to indicate which crossing conditions
+should trigger an alert. *Entered* alerts on entry into a boundary, *Exited* alerts on exit
+from a boundary, and *Crossed* alerts on all boundary crossings whether they be entrances
+or exits.
+Index (Boundary):: This clause requires an *index or index pattern*, a *`geo_shape` field*
+identifying boundaries, and an optional *Human-readable boundary name* for better alerting
+messages.
+
+[float]
+[[alert-type-tracking-containment]]
+=== Tracking containment
+The Tracking containment alert type runs an {es} query over indices, determining if any
+documents are currently contained within any boundaries from the specified boundary index.
+In the event that an entity is contained within a boundary, an alert may be generated.
+
+[float]
+==== Defining the conditions
+Tracking containment alerts have 3 clauses that define the condition to detect,
+as well as 2 Kuery bars used to provide additional filtering context for each of the indices.
+
+[role="screenshot"]
+image::images/alert-types-tracking-containment-conditions.png[Five clauses define the condition to detect]
+
+Index (entity):: This clause requires an *index or index pattern*, a *time field* that will be used for the *time window*, and a *`geo_point` field* for tracking.
+When entity:: This clause specifies which crossing option to track. The values
+*Entered*, *Exited*, and *Crossed* can be selected to indicate which crossing conditions
+should trigger an alert. *Entered* alerts on entry into a boundary, *Exited* alerts on exit
+from a boundary, and *Crossed* alerts on all boundary crossings whether they be entrances
+or exits.
+Index (Boundary):: This clause requires an *index or index pattern*, a *`geo_shape` field*
+identifying boundaries, and an optional *Human-readable boundary name* for better alerting
+messages.
+
+Conditions for how an alert is tracked can be specified uniquely for each individual action.
+An alert can be triggered either when a containment condition is met or when an entity
+is no longer contained.
+
+[role="screenshot"]
+image::images/alert-types-tracking-containment-action-options.png[Five clauses define the condition to detect]
