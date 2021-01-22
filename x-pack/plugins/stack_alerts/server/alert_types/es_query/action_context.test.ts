@@ -22,6 +22,7 @@ describe('ActionContext', () => {
       date: '2020-01-01T00:00:00.000Z',
       value: 42,
       conditions: 'count greater than 4',
+      hits: [],
     };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(`"alert '[alert-name]' matched query"`);
@@ -48,6 +49,7 @@ describe('ActionContext', () => {
       date: '2020-01-01T00:00:00.000Z',
       value: 4,
       conditions: 'count between 4 and 5',
+      hits: [],
     };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(`"alert '[alert-name]' matched query"`);
