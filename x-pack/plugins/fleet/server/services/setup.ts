@@ -58,8 +58,8 @@ async function createSetupSideEffects(
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
-    updateFleetRoleIfExists(callCluster),
     agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
+    updateFleetRoleIfExists(callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const defaultSettings = createDefaultSettings();
