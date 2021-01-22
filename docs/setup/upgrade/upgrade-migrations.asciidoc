@@ -39,7 +39,12 @@ The first time a newer {kib} starts, it will first perform an upgrade migration 
 `.kibana_task_manager_N` (`.kibana_task_manager` alias)
 |=======================
 
-When several {kib} instances are connected to the same {es} cluster and upgraded, all {kib} instances will participate in the upgrade migration in parallel.
+==== Upgrading multiple {kib} instances
+When upgrading several {kib} instances connected to the same {es} cluster, ensure that all outdated instances are shutdown before starting the upgrade. 
+
+Kibana does not support rolling upgrades. However, once outdated instances are shutdown, all upgraded instances can be started in parallel in which case all instances will participate in the upgrade migration in parallel.
+
+For large deployments with more than 10 {kib} instances and more than 10 000 saved objects, the upgrade downtime can be reduced by bringing up a single {kib} instance and waiting for it to complete the upgrade migration before bringing up the remaining instances.
 
 [float]
 [[preventing-migration-failures]]
@@ -67,8 +72,8 @@ Problems with your {es} cluster can prevent {kib} upgrades from succeeding. Ensu
  * a "green" cluster status
 
 [float]
-===== Running different versions of {kib} connected to the same {es} index
-Kibana does not support rolling upgrades. Stop all {kib} instances before starting a newer version to prevent upgrade failures and data loss.
+===== Different versions of {kib} connected to the same {es} index
+When different versions of {kib} are attempting an upgrade migration in parallel this can lead to migration failures. Ensure that all {kib} instances are running the same version, configuration and plugins.
 
 [float]
 ===== Incompatible `xpack.tasks.index` configuration setting
