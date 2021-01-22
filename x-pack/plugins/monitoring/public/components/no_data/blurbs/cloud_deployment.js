@@ -32,7 +32,7 @@ export const CloudDeployment = () => {
             defaultMessage="section for a deployment to configure monitoring. For more information visit "
           />
           <EuiLink
-            href="https://www.elastic.co/guide/en/cloud/current/ec-enable-monitoring.html"
+            href="https://www.elastic.co/guide/en/cloud/current/ec-enable-logging-and-monitoring.html"
             target="_blank"
           >
             the documentation page.
