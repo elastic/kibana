@@ -33,7 +33,7 @@ import { validateZoomSettings } from './validataion_helper';
 // @ts-ignore
 import { vega } from '../../lib/vega';
 
-import 'mapbox-gl/dist/mapbox-gl.css';
+import './vega_map_view.scss';
 
 export class VegaMapView extends VegaBaseView {
   private mapServiceSettings: MapServiceSettings = getMapServiceSettings();
