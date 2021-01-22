@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('line charts - split chart', function () {
-    const initLineChart = async function () {
+    before(async () => {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickLineChart');
@@ -40,9 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('switch from Rows to Columns');
       await PageObjects.visEditor.clickSplitDirection('Columns');
       await PageObjects.visEditor.clickGo();
-    };
-
-    before(initLineChart);
+    });
 
     afterEach(async () => {
       await inspector.close();
@@ -163,74 +161,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.visualize.loadSavedVisualization(vizName);
       await PageObjects.visChart.waitForVisualization();
-    });
-
-    describe('switch between Y axis scale types', () => {
-      before(initLineChart);
-      const axisId = 'ValueAxis-1';
-
-      it('should show ticks on selecting log scale', async () => {
-        await PageObjects.visEditor.clickMetricsAndAxes();
-        await PageObjects.visEditor.clickYAxisOptions(axisId);
-        await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
-        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
-        const minLabel = 2;
-        const maxLabel = 5000;
-        const numberOfLabels = 10;
-        expect(labels.length).to.be.greaterThan(numberOfLabels);
-        expect(labels[0]).to.eql(minLabel);
-        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
-      });
-
-      it('should show filtered ticks on selecting log scale', async () => {
-        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
-        const minLabel = 2;
-        const maxLabel = 5000;
-        const numberOfLabels = 10;
-        expect(labels.length).to.be.greaterThan(numberOfLabels);
-        expect(labels[0]).to.eql(minLabel);
-        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
-      });
-
-      it('should show ticks on selecting square root scale', async () => {
-        await PageObjects.visEditor.selectYAxisScaleType(axisId, 'square root');
-        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000', '10,000'];
-
-        expect(labels).to.eql(expectedLabels);
-      });
-
-      it('should show filtered ticks on selecting square root scale', async () => {
-        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = ['2,000', '4,000', '6,000', '8,000'];
-        expect(labels).to.eql(expectedLabels);
-      });
-
-      it('should show ticks on selecting linear scale', async () => {
-        await PageObjects.visEditor.selectYAxisScaleType(axisId, 'linear');
-        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        log.debug(labels);
-        const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000', '10,000'];
-        expect(labels).to.eql(expectedLabels);
-      });
-
-      it('should show filtered ticks on selecting linear scale', async () => {
-        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = ['2,000', '4,000', '6,000', '8,000'];
-        expect(labels).to.eql(expectedLabels);
-      });
     });
 
     describe('pipeline aggregations', () => {
