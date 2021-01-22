@@ -21,16 +21,25 @@ Saved objects are stored in two indices:
  
 The index aliases `.kibana` and `.kibana_task_manager` will always point to the most up-to-date version indices.
 
-The first time a newer {kib} starts, it will first perform an upgrade migration before starting plugins or serving HTTP traffic. To prevent losing acknowledged writes old nodes should be shutdown before starting the upgrade. To reduce the likelyhood of old nodes losing acknowledged writes, {kib} 7.12+ will add a write block to the outdated index.
+The first time a newer {kib} starts, it will first perform an upgrade migration before starting plugins or serving HTTP traffic. To prevent losing acknowledged writes old nodes should be shutdown before starting the upgrade. To reduce the likelyhood of old nodes losing acknowledged writes, {kib} 7.12+ will add a write block to the outdated index. Table 1 lists the saved objects indices used by previous versions of {kib}
+
+.Saved object indices and aliases per {kib} version
+[options="header"]
+[cols="a,a,a"]
+|=======================
+|Upgrading from version | Outdated index (alias) | Upgraded index (alias)
+| 6.0.0 through 6.4.x    | `.kibana`     1.3+^.^| `.kibana_7.12.0_001`
+(`.kibana` alias)
+
+`.kibana_task_manager_7.12.0_001` (`.kibana_task_manager` alias)
+| 6.5.0 through 7.3.x    | `.kibana_N` (`.kibana` alias)
+| 7.4.0 through 7.11.x  
+| `.kibana_N` (`.kibana` alias) 
+
+`.kibana_task_manager_N` (`.kibana_task_manager` alias)
+|=======================
 
 When several {kib} instances are connected to the same {es} cluster and upgraded, all {kib} instances will participate in the upgrade migration in parallel.
-
-[NOTE]
-====
- - Prior to 6.5.0, saved objects were stored directly in an index named `.kibana`. After upgrading to version 7.12+, {kib} will migrate this index into `.kibana_{kibana_version}_001` and set `.kibana` up as alias to this index. +
- - Prior to 7.4.0, task manager tasks were stored directly in an index name `.kibana_task_manager`. After upgrading to version 7.12+, {kib} will migrate this index into `.kibana_task_manager_{kibana_version}_001` and set `.kibana_task_manager` up as an index alias. +
- - Prior to 7.12.0, saved objects and task manager tasks were stored in `.kibana_N` and `.kibana_task_manager_N` where N is a number that's increased every time an upgrade migration was performed. After upgrading to version 7.12+, {kib} will migrate these indices into `.kibana_{kibana_version}_001` and `.kibana_task_manager_{kibana_version}_001` respectively.
-====
 
 [float]
 [[preventing-migration-failures]]
