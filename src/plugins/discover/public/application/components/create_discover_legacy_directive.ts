@@ -41,5 +41,7 @@ export function createDiscoverLegacyDirective(reactDirective: any) {
     ['updateQuery', { watchDepth: 'reference' }],
     ['updateSavedQueryId', { watchDepth: 'reference' }],
     ['useNewFieldsApi', { watchDepth: 'reference' }],
+    ['showUnmappedFields', { watchDepth: 'reference' }],
+    ['onChangeUnmappedFields', { watchDepth: 'reference' }],
   ]);
 }

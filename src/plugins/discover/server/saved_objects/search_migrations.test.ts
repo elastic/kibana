@@ -350,4 +350,41 @@ Object {
       testMigrateMatchAllQuery(migrationFn);
     });
   });
+
+  describe('7.12.0', () => {
+    const migrationFn = searchMigrations['7.12.0'];
+
+    describe('migrateExistingSavedSearch', () => {
+      it('should add a new flag to existing saved searches', () => {
+        const migratedDoc = migrationFn(
+          {
+            type: 'search',
+            attributes: {
+              kibanaSavedObjectMeta: {},
+            },
+          },
+          savedObjectMigrationContext
+        );
+        const migratedPre712Flag = migratedDoc.attributes.pre712;
+
+        expect(migratedPre712Flag).toEqual(true);
+      });
+
+      it('should not modify a flag if it already exists', () => {
+        const migratedDoc = migrationFn(
+          {
+            type: 'search',
+            attributes: {
+              kibanaSavedObjectMeta: {},
+              pre712: false,
+            },
+          },
+          savedObjectMigrationContext
+        );
+        const migratedPre712Flag = migratedDoc.attributes.pre712;
+
+        expect(migratedPre712Flag).toEqual(false);
+      });
+    });
+  });
 });

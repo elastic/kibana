@@ -104,6 +104,17 @@ export interface DiscoverSidebarProps {
    * Shows index pattern and a button that displays the sidebar in a flyout
    */
   useFlyout?: boolean;
+
+  /**
+   * callback funtion to change the value of unmapped fields switch
+   * @param value new value to set
+   */
+  onChangeUnmappedFields?: (value: boolean) => void;
+
+  /**
+   * determines whether to show unmapped fields
+   */
+  showUnmappedFields?: boolean;
 }
 
 export function DiscoverSidebar({
@@ -123,6 +134,8 @@ export function DiscoverSidebar({
   trackUiMetric,
   useNewFieldsApi = false,
   useFlyout = false,
+  onChangeUnmappedFields,
+  showUnmappedFields = false,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
@@ -239,6 +252,9 @@ export function DiscoverSidebar({
               onChange={onChangeFieldSearch}
               value={fieldFilter.name}
               types={fieldTypes}
+              useNewFieldsApi={useNewFieldsApi}
+              onChangeUnmappedFields={onChangeUnmappedFields}
+              showUnmappedFields={showUnmappedFields}
             />
           </form>
         </EuiFlexItem>

@@ -209,7 +209,19 @@ export interface DiscoverProps {
    * Function to update the actual savedQuery id
    */
   updateSavedQueryId: (savedQueryId?: string) => void;
+  /**
+   * Use new Fields API. If set to false, fields will be read from _source
+   */
   useNewFieldsApi?: boolean;
+  /**
+   * Show unmapped fields in the UI
+   */
+  showUnmappedFields?: boolean;
+  /**
+   * Callback to change the showUnmappedFields flag value
+   * @param value
+   */
+  onChangeUnmappedFields?: (value: boolean) => void;
 }
 
 export const DocTableLegacyMemoized = React.memo((props: DocTableLegacyProps) => (
@@ -249,6 +261,8 @@ export function DiscoverLegacy({
   updateQuery,
   updateSavedQueryId,
   useNewFieldsApi,
+  showUnmappedFields,
+  onChangeUnmappedFields,
 }: DiscoverProps) {
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
@@ -319,6 +333,8 @@ export function DiscoverLegacy({
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
                 useNewFieldsApi={useNewFieldsApi}
+                showUnmappedFields={showUnmappedFields}
+                onChangeUnmappedFields={onChangeUnmappedFields}
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>

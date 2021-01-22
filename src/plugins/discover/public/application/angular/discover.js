@@ -745,8 +745,14 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     history.push('/');
   };
 
-  const hasUnmappedFields = (indexPattern, columns) => {
+  /*
+  const shouldShowUnmappedFields = () => {
+    const { useNewFieldsApi, opts, indexPattern, state } = $scope;
+    if (!useNewFieldsApi || !opts.savedSearch.pre712) {
+      return false;
+    }
     let hasUnmappedFields = false;
+    const { columns } = state;
     const fieldNames = new Set(indexPattern.fields.map((field) => field.displayName));
     columns.forEach((column) => {
       if (column !== 'Document' && column !== '_source' && !fieldNames.has(column)) {
@@ -754,13 +760,17 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
       }
     });
     return hasUnmappedFields;
+  }; */
+
+  $scope.showUnmappedFields = $scope.useNewFieldsApi && !!$scope.opts.savedSearch.pre712;
+
+  $scope.onChangeUnmappedFields = (value) => {
+    $scope.showUnmappedFieldsInSidebar = value;
   };
 
   $scope.updateDataSource = () => {
-    const { indexPattern, searchSource, useNewFieldsApi } = $scope;
-    const { columns, sort, opts } = $scope.state;
-    const showUnmappedFields =
-      useNewFieldsApi && hasUnmappedFields(indexPattern, opts.savedSearch.columns);
+    const { indexPattern, searchSource, useNewFieldsApi, showUnmappedFields } = $scope;
+    const { columns, sort } = $scope.state;
     updateSearchSource(searchSource, {
       indexPattern,
       services,

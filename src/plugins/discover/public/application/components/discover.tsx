@@ -73,6 +73,8 @@ export function Discover({
   topNavMenu,
   updateQuery,
   updateSavedQueryId,
+  showUnmappedFields,
+  onChangeUnmappedFields,
 }: DiscoverProps) {
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
@@ -137,6 +139,8 @@ export function Discover({
                 setIndexPattern={setIndexPattern}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
+                showUnmappedFields={showUnmappedFields}
+                onChangeUnmappedFields={onChangeUnmappedFields}
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
