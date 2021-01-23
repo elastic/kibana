@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { castArray, groupBy } from 'lodash';
+import callsites from 'callsites';
+import { maybe } from '../../../plugins/apm/common/utils/maybe';
 import { joinByKey } from '../../../plugins/apm/common/utils/join_by_key';
 import { APMFtrConfigName } from '../configs';
 import { FtrProviderContext } from './ftr_provider_context';
@@ -55,14 +57,27 @@ export const registry = {
       throw new Error("Can't add tests when running");
     }
 
+    const frame = maybe(callsites()[1]);
+
+    const file = frame?.getFileName();
+
+    if (!file) {
+      throw new Error('Could not infer file for suite');
+    }
+
     allConditions.forEach((matchedCondition) => {
       callbacks.push({
         ...matchedCondition,
         runs: [
           {
             cb: () => {
-              describe(title, () => {
+              const suite = describe(title, () => {
                 callback(matchedCondition);
+              });
+
+              suite.file = file;
+              suite.eachTest((test) => {
+                test.file = file;
               });
             },
           },
