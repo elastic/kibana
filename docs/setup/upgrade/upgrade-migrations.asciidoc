@@ -1,7 +1,7 @@
 [[upgrade-migrations]]
 === Upgrade migrations
 
-Every time {kib} is upgraded it will perform an upgrade migration to ensure that all saved objects are compatible with the new version.
+Every time {kib} is upgraded it will perform an upgrade migration to ensure that all <<managing-saved-objects,saved objects>> are compatible with the new version.
 
 NOTE: 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant]
 to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
