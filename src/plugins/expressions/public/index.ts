@@ -107,4 +107,5 @@ export {
   ExpressionsServiceSetup,
   ExpressionsServiceStart,
   TablesAdapter,
+  ExpressionsInspectorAdapter,
 } from '../common';
