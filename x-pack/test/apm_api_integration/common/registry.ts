@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { castArray, once, groupBy } from 'lodash';
+import { castArray, groupBy } from 'lodash';
 import { joinByKey } from '../../../plugins/apm/common/utils/join_by_key';
 import { APMFtrConfigName } from '../configs';
 import { FtrProviderContext } from './ftr_provider_context';
@@ -22,31 +22,24 @@ interface RunCondition {
   archives: ArchiveName[];
 }
 
-const onlyOnce = <T extends (...args: any[]) => any>(cb: T): T => {
-  const called: boolean = false;
-
-  return ((...args: any[]) => {
-    if (called) {
-      throw new Error('Function can only be called once');
-    }
-    return cb(...args);
-  }) as T;
-};
-
 const callbacks: Array<
   RunCondition & {
     runs: Array<{
-      cb: (beforeFn: (...args: any[]) => any, afterFn: (...args: any[]) => any) => void;
+      cb: () => void;
     }>;
   }
 > = [];
 
 let configName: APMFtrConfigName | undefined;
 
+let running: boolean = false;
+
 export const registry = {
-  init: onlyOnce((config: APMFtrConfigName) => {
+  init: (config: APMFtrConfigName) => {
     configName = config;
-  }),
+    callbacks.length = 0;
+    running = false;
+  },
   when: (
     title: string,
     conditions: RunCondition | RunCondition[],
@@ -56,6 +49,10 @@ export const registry = {
 
     if (!allConditions.length) {
       throw new Error('At least one condition should be defined');
+    }
+
+    if (running) {
+      throw new Error("Can't add tests when running");
     }
 
     allConditions.forEach((matchedCondition) => {
@@ -73,10 +70,11 @@ export const registry = {
       });
     });
   },
-  run: onlyOnce((context: FtrProviderContext) => {
+  run: (context: FtrProviderContext) => {
     if (!configName) {
       throw new Error(`registry was not init() before running`);
     }
+    running = true;
     const esArchiver = context.getService('esArchiver');
     const logger = context.getService('log');
     const logWithTimer = () => {
@@ -95,6 +93,8 @@ export const registry = {
       runs: a.runs.concat(b.runs),
     }));
 
+    callbacks.length = 0;
+
     const byConfig = groupBy(groups, 'config');
 
     Object.keys(byConfig).forEach((config) => {
@@ -105,7 +105,7 @@ export const registry = {
         groupsForConfig.forEach((group) => {
           const { runs, ...condition } = group;
 
-          const runBefore = once(async () => {
+          const runBefore = async () => {
             const log = logWithTimer();
             for (const archiveName of condition.archives) {
               log(`Loading ${archiveName}`);
@@ -114,9 +114,9 @@ export const registry = {
             if (condition.archives.length) {
               log('Loaded all archives');
             }
-          });
+          };
 
-          const runAfter = once(async () => {
+          const runAfter = async () => {
             const log = logWithTimer();
             for (const archiveName of condition.archives) {
               log(`Unloading ${archiveName}`);
@@ -125,13 +125,13 @@ export const registry = {
             if (condition.archives.length) {
               log('Unloaded all archives');
             }
-          });
+          };
 
           describe(condition.archives.join(',') || 'no data', () => {
             before(runBefore);
 
             runs.forEach((run) => {
-              run.cb(runBefore, runAfter);
+              run.cb();
             });
 
             after(runAfter);
@@ -139,5 +139,7 @@ export const registry = {
         });
       });
     });
-  }),
+
+    running = false;
+  },
 };
