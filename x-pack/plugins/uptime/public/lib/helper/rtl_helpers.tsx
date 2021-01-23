@@ -5,6 +5,7 @@
  */
 
 import React, { ReactElement } from 'react';
+import { of } from 'rxjs';
 import { render as reactTestLibRender, RenderOptions } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
@@ -25,7 +26,7 @@ interface KibanaProps {
   services?: KibanaServices;
 }
 
-interface KibanaProviderOptions<ExtraCore> {
+export interface KibanaProviderOptions<ExtraCore> {
   core?: Partial<CoreStart> & ExtraCore;
   kibanaProps?: KibanaProps;
 }
@@ -52,6 +53,10 @@ const mockCore: () => any = () => {
     application: {
       getUrlForApp: () => '/app/uptime',
       navigateToUrl: jest.fn(),
+    },
+    uiSettings: {
+      get: (key: string) => 'MMM D, YYYY @ HH:mm:ss.SSS',
+      get$: (key: string) => of('MMM D, YYYY @ HH:mm:ss.SSS'),
     },
   };
 

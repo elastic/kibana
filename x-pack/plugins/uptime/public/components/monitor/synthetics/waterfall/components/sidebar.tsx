@@ -13,6 +13,7 @@ import {
   WaterfallChartSidebarContainerInnerPanel,
   WaterfallChartSidebarContainerFlexGroup,
   WaterfallChartSidebarFlexItem,
+  SideBarItemHighlighter,
 } from './styles';
 import { WaterfallChartProps } from './waterfall_chart';
 
@@ -24,7 +25,10 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
   return (
     <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
-      <WaterfallChartSidebarContainer height={items.length * FIXED_AXIS_HEIGHT}>
+      <WaterfallChartSidebarContainer
+        height={items.length * FIXED_AXIS_HEIGHT}
+        data-test-subj="wfSidebarContainer"
+      >
         <WaterfallChartSidebarContainerInnerPanel paddingSize="none">
           <WaterfallChartSidebarContainerFlexGroup
             direction="column"
@@ -32,7 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
             responsive={false}
           >
             {items.map((item, index) => (
-              <WaterfallChartSidebarFlexItem key={index} isHighlighted={item.isHighlighted}>
+              <WaterfallChartSidebarFlexItem key={index}>
                 {render(item, index)}
               </WaterfallChartSidebarFlexItem>
             ))}

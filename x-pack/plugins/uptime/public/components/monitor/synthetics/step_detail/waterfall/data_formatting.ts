@@ -54,17 +54,23 @@ const getFriendlyTooltipValue = ({
   }
   return `${label}: ${formatValueForDisplay(value)}ms`;
 };
-const isHighlightedItem = (item: NetworkItem, query: string, activeFilters: string[]) => {
-  if (!query && activeFilters.length === 0) {
+export const isHighlightedItem = (item: NetworkItem, query?: string, activeFilters?: string[]) => {
+  if (!query && activeFilters?.length === 0) {
     return true;
   }
   return (
     (query && item.url?.includes(query)) ||
-    (activeFilters.length > 0 && activeFilters.includes(MimeTypesMap[item.mimeType!]))
+    (activeFilters &&
+      activeFilters.length > 0 &&
+      activeFilters.includes(MimeTypesMap[item.mimeType!]))
   );
 };
 
-export const getSeriesAndDomain = (items: NetworkItems, query: string, activeFilters: string[]) => {
+export const getSeriesAndDomain = (
+  items: NetworkItems,
+  query?: string,
+  activeFilters?: string[]
+) => {
   const getValueForOffset = (item: NetworkItem) => {
     return item.requestSentTime;
   };

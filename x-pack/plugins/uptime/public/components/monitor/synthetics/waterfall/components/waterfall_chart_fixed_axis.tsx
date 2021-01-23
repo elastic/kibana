@@ -31,7 +31,7 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
 
   return (
     <WaterfallChartFixedAxisContainer>
-      <Chart className="axis-only-chart">
+      <Chart className="axis-only-chart" data-test-subj="axisOnlyChart">
         <Settings
           showLegend={false}
           rotation={90}

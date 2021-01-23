@@ -15,6 +15,7 @@ import {
   RenderItem,
 } from '../../waterfall';
 import { WaterfallFilter } from './waterfall_filter';
+import { SideBarItemHighlighter } from '../../waterfall/components/styles';
 
 export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
   const { status } = item;
@@ -27,7 +28,10 @@ export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
   };
 
   return (
-    <>
+    <SideBarItemHighlighter
+      isHighlighted={item.isHighlighted}
+      data-test-subj={item.isHighlighted ? 'sideBarHighlightedItem' : 'sideBarDimmedItem'}
+    >
       {!status || !isErrorStatusCode(status) ? (
         <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
       ) : (
@@ -40,7 +44,7 @@ export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-    </>
+    </SideBarItemHighlighter>
   );
 };
 

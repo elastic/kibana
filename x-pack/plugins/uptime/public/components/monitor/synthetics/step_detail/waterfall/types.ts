@@ -112,7 +112,6 @@ export const FriendlyMimetypeLabels = {
 export const MimeTypesMap: Record<string, MimeType> = {
   'text/html': MimeType.Html,
   'application/javascript': MimeType.Script,
-  'application/json': MimeType.Script,
   'text/javascript': MimeType.Script,
   'text/css': MimeType.Stylesheet,
   // Images

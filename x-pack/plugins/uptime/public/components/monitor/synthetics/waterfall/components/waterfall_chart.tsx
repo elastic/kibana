@@ -14,6 +14,7 @@ import {
   WaterfallChartFixedTopContainer,
   WaterfallChartFixedTopContainerSidebarCover,
   WaterfallChartTopContainer,
+  RelativeContainer,
 } from './styles';
 import { CHART_LEGEND_PADDING, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
 import { Sidebar } from './sidebar';
@@ -65,7 +66,7 @@ export const WaterfallChart = ({
   const chartsToDisplay = useBarCharts({ data });
 
   return (
-    <>
+    <RelativeContainer>
       <WaterfallChartFixedTopContainer>
         <WaterfallChartTopContainer gutterSize="none" responsive={false}>
           {shouldRenderSidebar && (
@@ -74,7 +75,10 @@ export const WaterfallChart = ({
             </EuiFlexItem>
           )}
 
-          <EuiFlexItem grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}>
+          <EuiFlexItem
+            grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}
+            data-test-subj="axisOnlyWrapper"
+          >
             <WaterfallChartFixedAxis
               domain={domain}
               barStyleAccessor={barStyleAccessor}
@@ -89,11 +93,14 @@ export const WaterfallChart = ({
           </WaterfallChartFixedTopContainerSidebarCover>
         )}
       </WaterfallChartFixedTopContainer>
-      <WaterfallChartOuterContainer height={height}>
+      <WaterfallChartOuterContainer height={height} data-test-subj="waterfallOuterContainer">
         <EuiFlexGroup gutterSize="none" responsive={false} ref={chartWrapperDivRef}>
           {shouldRenderSidebar && <Sidebar items={sidebarItems!} render={renderSidebarItem!} />}
 
-          <EuiFlexItem grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}>
+          <EuiFlexItem
+            grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}
+            data-test-subj="dataOnlyWrapper"
+          >
             {chartsToDisplay.map((chartData, ind) => (
               <WaterfallBarChart
                 index={ind}
@@ -106,8 +113,8 @@ export const WaterfallChart = ({
             ))}
           </EuiFlexItem>
         </EuiFlexGroup>
-        {shouldRenderLegend && <Legend items={legendItems!} render={renderLegendItem!} />}
       </WaterfallChartOuterContainer>
-    </>
+      {shouldRenderLegend && <Legend items={legendItems!} render={renderLegendItem!} />}
+    </RelativeContainer>
   );
 };

@@ -66,7 +66,11 @@ export const WaterfallBarChart = ({
   const theme = useChartTheme();
 
   return (
-    <WaterfallChartChartContainer height={getChartHeight(chartData, index)} chartIndex={index}>
+    <WaterfallChartChartContainer
+      height={getChartHeight(chartData, index)}
+      chartIndex={index}
+      data-test-subj="wfDataOnlyBarChart"
+    >
       <Chart className="data-chart">
         <Settings
           showLegend={false}

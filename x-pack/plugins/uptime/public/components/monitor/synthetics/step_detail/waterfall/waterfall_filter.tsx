@@ -66,10 +66,11 @@ export const WaterfallFilter = ({ query, setQuery, activeFilters, setActiveFilte
   );
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem grow={2}>
         <EuiFieldSearch
           fullWidth
+          data-test-subj="waterfallFilterInput"
           placeholder={FILTER_REQUESTS_LABEL}
           onChange={(evt) => {
             setValue(evt.target.value);
@@ -77,7 +78,7 @@ export const WaterfallFilter = ({ query, setQuery, activeFilters, setActiveFilte
           value={value}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={3}>
+      <EuiFlexItem grow={2}>
         <EuiFilterGroup>
           {MIME_FILTERS.map(({ label, mimeType }) => (
             <EuiFilterButton
