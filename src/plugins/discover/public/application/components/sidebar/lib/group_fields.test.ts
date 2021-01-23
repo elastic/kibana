@@ -215,4 +215,30 @@ describe('group_fields', function () {
       'unknown',
     ]);
   });
+
+  it('excludes unmapped fields if showUnmappedFields set to false', function () {
+    const fieldFilterState = getDefaultFieldFilter();
+    const fieldsWithUnmappedField = [...fields];
+    fieldsWithUnmappedField.push({
+      name: 'unknown_field',
+      type: 'unknown',
+      esTypes: ['unknown'],
+      count: 1,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
+
+    const actual = groupFields(
+      fieldsWithUnmappedField as IndexPatternField[],
+      ['customer_birth_date', 'currency', 'unknown'],
+      5,
+      fieldCounts,
+      fieldFilterState,
+      true,
+      false
+    );
+    expect(actual.unpopular).toEqual([]);
+  });
 });

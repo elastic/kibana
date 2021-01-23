@@ -25,7 +25,7 @@ export function groupFields(
   fieldCounts: Record<string, number>,
   fieldFilterState: FieldFilterState,
   useNewFieldsApi: boolean,
-  showUnmappedFields: boolean
+  showUnmappedFields = true
 ): GroupedFields {
   const result: GroupedFields = {
     selected: [],
