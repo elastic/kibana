@@ -19,12 +19,8 @@
     padding-top: $euiSizeS;
   }
 
-  .kbnDocViewer__multifield_row {
-    &:hover {
-      td {
-        background-color: transparent;
-      }
-    }
+  .kbnDocViewer__multifield_row:hover td {
+    background-color: transparent;
   }
 
   .kbnDocViewer__multifield_title {
