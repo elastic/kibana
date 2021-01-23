@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
+import { GlobalSearchRouter } from '../types';
 
-export const registerInternalSearchableTypesRoute = (router: IRouter) => {
+export const registerInternalSearchableTypesRoute = (router: GlobalSearchRouter) => {
   router.get(
     {
       path: '/internal/global_search/searchable_types',
