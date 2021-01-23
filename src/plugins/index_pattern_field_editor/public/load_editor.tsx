@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { CoreSetup, OverlayRef } from 'src/core/public';
+import { CoreStart, OverlayRef } from 'src/core/public';
 
 import { createKibanaReactContext, toMountPoint, IndexPatternField } from './shared_imports';
 import { LoadEditorResponse } from './types';
@@ -20,11 +20,10 @@ export interface OpenFieldEditorProps {
 }
 
 export const getFieldEditorLoader = (
-  coreSetup: CoreSetup
+  coreStart: CoreStart
 ) => async (): Promise<LoadEditorResponse> => {
   const { FieldEditorFlyoutContent } = await import('./components');
-  const [core] = await coreSetup.getStartServices();
-  const { uiSettings, overlays, docLinks } = core;
+  const { uiSettings, overlays, docLinks } = coreStart;
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({ uiSettings });
 
   let overlayRef: OverlayRef | null = null;

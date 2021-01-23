@@ -14,13 +14,13 @@ import { getFieldEditorLoader } from './load_editor';
 export class IndexPatternFieldEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
-    return {
-      loadEditor: getFieldEditorLoader(core),
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
-    return {};
+    return {
+      loadEditor: getFieldEditorLoader(core),
+    };
   }
 
   public stop() {

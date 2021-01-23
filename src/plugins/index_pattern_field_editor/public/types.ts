@@ -12,12 +12,12 @@ export interface LoadEditorResponse {
   openEditor(props: OpenFieldEditorProps): () => void;
 }
 
-export interface PluginSetup {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginSetup {}
+
+export interface PluginStart {
   loadEditor(): Promise<LoadEditorResponse>;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginStart {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupPlugins {}

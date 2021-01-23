@@ -20,6 +20,8 @@
 
 import { IndexPatternFieldEditorPlugin } from './plugin';
 
+export { PluginStart as IndexPatternFieldEditorStart } from './types';
+
 export function plugin() {
   return new IndexPatternFieldEditorPlugin();
 }
