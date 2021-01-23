@@ -115,6 +115,9 @@ const getSavedObjectTypes = (
         created_at: { type: 'date' },
       },
     },
+    migrations: {
+      '7.10.0': migrateAgentActionToV7100(encryptedSavedObjects),
+    },
   },
   [AGENT_EVENT_SAVED_OBJECT_TYPE]: {
     name: AGENT_EVENT_SAVED_OBJECT_TYPE,
