@@ -40,7 +40,7 @@ import { RESULT_SETTINGS_TITLE } from '../result_settings';
 import { SEARCH_UI_TITLE } from '../search_ui';
 import { API_LOGS_TITLE } from '../api_logs';
 
-import { EngineLogic } from './';
+import { EngineLogic, generateEnginePath } from './';
 import { EngineDetails } from './types';
 
 import './engine_nav.scss';
@@ -64,7 +64,6 @@ export const EngineNav: React.FC = () => {
 
   const {
     engineName,
-    generateEnginePath,
     dataLoading,
     isSampleEngine,
     isMetaEngine,
