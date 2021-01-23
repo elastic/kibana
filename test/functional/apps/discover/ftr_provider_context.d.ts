@@ -5,6 +5,7 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
+
 import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
 import { services } from '../../services';
 import { pageObjects } from '../../page_objects';

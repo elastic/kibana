@@ -5,6 +5,7 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
+
 import { template } from 'lodash';
 import { IndexPattern } from '../../../kibana_services';
 

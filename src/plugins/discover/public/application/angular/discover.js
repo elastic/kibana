@@ -745,25 +745,7 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     history.push('/');
   };
 
-  /*
-  const shouldShowUnmappedFields = () => {
-    const { useNewFieldsApi, opts, indexPattern, state } = $scope;
-    if (!useNewFieldsApi || !opts.savedSearch.pre712) {
-      return false;
-    }
-    let hasUnmappedFields = false;
-    const { columns } = state;
-    const fieldNames = new Set(indexPattern.fields.map((field) => field.displayName));
-    columns.forEach((column) => {
-      if (column !== 'Document' && column !== '_source' && !fieldNames.has(column)) {
-        hasUnmappedFields = true;
-      }
-    });
-    return hasUnmappedFields;
-  }; */
-
   const showUnmappedFieldsDefaultValue = $scope.useNewFieldsApi && !!$scope.opts.savedSearch.pre712;
-
   let showUnmappedFields = showUnmappedFieldsDefaultValue;
 
   const onChangeUnmappedFields = (value) => {
