@@ -762,14 +762,23 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     return hasUnmappedFields;
   }; */
 
-  $scope.showUnmappedFields = $scope.useNewFieldsApi && !!$scope.opts.savedSearch.pre712;
+  const showUnmappedFieldsDefaultValue = $scope.useNewFieldsApi && !!$scope.opts.savedSearch.pre712;
 
-  $scope.onChangeUnmappedFields = (value) => {
-    $scope.showUnmappedFieldsInSidebar = value;
+  let showUnmappedFields = showUnmappedFieldsDefaultValue;
+
+  const onChangeUnmappedFields = (value) => {
+    showUnmappedFields = value;
+    $scope.unmappedFieldsConfig.showUnmappedFields = value;
+  };
+
+  $scope.unmappedFieldsConfig = {
+    showUnmappedFieldsDefaultValue,
+    showUnmappedFields,
+    onChangeUnmappedFields,
   };
 
   $scope.updateDataSource = () => {
-    const { indexPattern, searchSource, useNewFieldsApi, showUnmappedFields } = $scope;
+    const { indexPattern, searchSource, useNewFieldsApi } = $scope;
     const { columns, sort } = $scope.state;
     updateSearchSource(searchSource, {
       indexPattern,

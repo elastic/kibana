@@ -15,7 +15,7 @@ import realHits from 'fixtures/real_hits.js';
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { DiscoverSidebarProps } from './discover_sidebar';
+import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../data/common';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
@@ -130,5 +130,17 @@ describe('discover responsive sidebar', function () {
     findTestSubject(comp, 'field-extension-showDetails').simulate('click');
     findTestSubject(comp, 'plus-extension-gif').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalled();
+  });
+  it('renders sidebar with unmapped fields config', function () {
+    const unmappedFieldsConfig = {
+      onChangeUnmappedFields: jest.fn(),
+      showUnmappedFields: false,
+      showUnmappedFieldsDefaultValue: false,
+    };
+    const componentProps = { ...props, unmappedFieldsConfig };
+    const component = mountWithIntl(<DiscoverSidebarResponsive {...componentProps} />);
+    const discoverSidebar = component.find(DiscoverSidebar);
+    expect(discoverSidebar).toHaveLength(1);
+    expect(discoverSidebar.props().unmappedFieldsConfig).toEqual(unmappedFieldsConfig);
   });
 });

@@ -106,15 +106,25 @@ export interface DiscoverSidebarProps {
   useFlyout?: boolean;
 
   /**
-   * callback funtion to change the value of unmapped fields switch
-   * @param value new value to set
+   * an object containing properties for proper handling of unmapped fields in the UI
    */
-  onChangeUnmappedFields?: (value: boolean) => void;
-
-  /**
-   * determines whether to show unmapped fields
-   */
-  showUnmappedFields?: boolean;
+  unmappedFieldsConfig?: {
+    /**
+     * callback funtction to change the value of `showUnmappedFields` flag
+     * @param value new value to set
+     */
+    onChangeUnmappedFields: (value: boolean) => void;
+    /**
+     * determines whether to display unmapped fields
+     * configurable through the switch in the UI
+     */
+    showUnmappedFields: boolean;
+    /**
+     * determines if we should display an option to toggle showUnmappedFields value in the first place
+     * this value is not configurable through the UI
+     */
+    showUnmappedFieldsDefaultValue: boolean;
+  };
 }
 
 export function DiscoverSidebar({
@@ -134,8 +144,7 @@ export function DiscoverSidebar({
   trackUiMetric,
   useNewFieldsApi = false,
   useFlyout = false,
-  onChangeUnmappedFields,
-  showUnmappedFields = false,
+  unmappedFieldsConfig,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
@@ -158,14 +167,30 @@ export function DiscoverSidebar({
   );
 
   const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
-
   const {
     selected: selectedFields,
     popular: popularFields,
     unpopular: unpopularFields,
   } = useMemo(
-    () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
-    [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
+    () =>
+      groupFields(
+        fields,
+        columns,
+        popularLimit,
+        fieldCounts,
+        fieldFilter,
+        useNewFieldsApi,
+        !!unmappedFieldsConfig?.showUnmappedFields
+      ),
+    [
+      fields,
+      columns,
+      popularLimit,
+      fieldCounts,
+      fieldFilter,
+      useNewFieldsApi,
+      unmappedFieldsConfig?.showUnmappedFields,
+    ]
   );
 
   const fieldTypes = useMemo(() => {
@@ -253,8 +278,8 @@ export function DiscoverSidebar({
               value={fieldFilter.name}
               types={fieldTypes}
               useNewFieldsApi={useNewFieldsApi}
-              onChangeUnmappedFields={onChangeUnmappedFields}
-              showUnmappedFields={showUnmappedFields}
+              onChangeUnmappedFields={unmappedFieldsConfig?.onChangeUnmappedFields}
+              showUnmappedFields={unmappedFieldsConfig?.showUnmappedFieldsDefaultValue}
             />
           </form>
         </EuiFlexItem>
