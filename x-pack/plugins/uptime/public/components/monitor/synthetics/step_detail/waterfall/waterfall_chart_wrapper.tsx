@@ -7,13 +7,20 @@
 import React, { useMemo, useState } from 'react';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
-import { SidebarItem, LegendItem, NetworkItems } from './types';
+import {
+  SidebarItem,
+  LegendItem as LegendItemType,
+  NetworkItems,
+  Timings,
+  MimeTypesMap,
+} from './types';
 import {
   WaterfallProvider,
   WaterfallChart,
   MiddleTruncatedText,
   RenderItem,
 } from '../../waterfall';
+import { LegendItem } from './legend_item';
 
 export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
   const { status } = item;
@@ -43,16 +50,15 @@ export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
   );
 };
 
-export const renderLegendItem: RenderItem<LegendItem> = (item) => {
-  return <EuiHealth color={item.colour}>{item.name}</EuiHealth>;
-};
-
 interface Props {
   data: NetworkItems;
 }
 
 export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
   const [networkData] = useState<NetworkItems>(data);
+
+  const [hiddenLegends, setHiddenLegends] = useState<string[]>([]);
+  const [hoveredLegend, setHoveredLegend] = useState<string | null>(null);
 
   const { series, domain } = useMemo(() => {
     return getSeriesAndDomain(networkData);
@@ -63,6 +69,22 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
   }, [networkData]);
 
   const legendItems = getLegendItems();
+
+  const renderLegendItem: RenderItem<LegendItemType> = (item) => {
+    return (
+      <LegendItem
+        item={item}
+        onHoverToggle={(val: string | null) => setHoveredLegend(val)}
+        onToggle={(val) => {
+          if (val) {
+            setHiddenLegends((prevState) => prevState.filter((legend) => legend !== item.id));
+          } else {
+            setHiddenLegends((prevState) => [...prevState, item.id]);
+          }
+        }}
+      />
+    );
+  };
 
   return (
     <WaterfallProvider
@@ -77,6 +99,27 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
         tickFormat={(d: number) => `${Number(d).toFixed(0)} ms`}
         domain={domain}
         barStyleAccessor={(datum) => {
+          if (hiddenLegends.length > 0 && hiddenLegends.includes(datum.datum.config.timing)) {
+            return {
+              rect: {
+                opacity: 0,
+              },
+            };
+          }
+          if (hoveredLegend && hoveredLegend !== datum.datum.config.timing) {
+            if (
+              hoveredLegend === MimeTypesMap[datum.datum.config.mimeType] &&
+              datum.datum.config.timing === Timings.Receive
+            ) {
+              return datum.datum.config.colour;
+            }
+            return {
+              rect: {
+                opacity: 0.1,
+                fill: datum.datum.config.colour,
+              },
+            };
+          }
           return datum.datum.config.colour;
         }}
         renderSidebarItem={renderSidebarItem}

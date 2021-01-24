@@ -180,7 +180,9 @@ export type SidebarItem = Pick<NetworkItem, 'url' | 'status' | 'method'>;
 export type SidebarItems = SidebarItem[];
 
 export interface LegendItem {
+  id: string;
   name: string;
   colour: string;
+  type: 'timing' | 'mimeType';
 }
 export type LegendItems = LegendItem[];
