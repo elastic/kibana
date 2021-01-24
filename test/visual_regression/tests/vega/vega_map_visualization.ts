@@ -19,6 +19,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('visualize');
     });
 
+    after(async () => {
+      await esArchiver.unload('kibana_sample_data_flights');
+      await esArchiver.unload('visualize');
+    });
+
     it('should show map with vega layer', async function () {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await PageObjects.visualize.openSavedVisualization('VegaMap');

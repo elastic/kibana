@@ -18,7 +18,7 @@ import vegaGraph from './test_utils/vega_graph.json';
 import { VegaParser } from './data_model/vega_parser';
 import { SearchAPI } from './data_model/search_api';
 
-import { setInjectedVars, setData, setNotifications, setMapServiceSettings } from './services';
+import { setInjectedVars, setData, setNotifications } from './services';
 import { coreMock } from '../../../core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 
@@ -65,28 +65,6 @@ describe('VegaVisualizations', () => {
     });
     setData(dataPluginStart);
     setNotifications(coreStart.notifications);
-    setMapServiceSettings({
-      getTmsService: () => ({
-        getVectorStyleSheet: () => ({
-          version: 8,
-          sources: {},
-          layers: [],
-        }),
-        getMaxZoom: () => 20,
-        getMinZoom: () => 0,
-      }),
-      defaultTmsLayer: 'user_configured',
-      getAttributionString: () => '',
-      config: {
-        tilemap: {
-          url: '',
-          options: {
-            maxZoom: 20,
-            minZoom: 0,
-          },
-        },
-      },
-    });
 
     vegaVisualizationDependencies = {
       core: coreMock.createSetup(),
