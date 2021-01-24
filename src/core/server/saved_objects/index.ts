@@ -45,6 +45,7 @@ export {
 export {
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
+  SavedObjectsRawDocParseOptions,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from './serialization';
