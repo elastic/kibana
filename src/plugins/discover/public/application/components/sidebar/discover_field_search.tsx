@@ -27,6 +27,8 @@ import {
   EuiOutsideClickDetector,
   EuiFilterButton,
   EuiSpacer,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -66,6 +68,9 @@ export interface Props {
    */
   onChangeUnmappedFields?: (value: boolean) => void;
 
+  /**
+   * should unmapped fields switch be rendered
+   */
   showUnmappedFields?: boolean;
 }
 
@@ -263,14 +268,29 @@ export function DiscoverFieldSearch({
     return (
       <EuiPopoverFooter>
         {showUnmappedFields ? (
-          <EuiSwitch
-            label={i18n.translate('discover.fieldChooser.filter.showUnmappedFields', {
-              defaultMessage: 'Show unmapped fields',
-            })}
-            checked={values.unmappedFields}
-            onChange={handleUnmappedFieldsChange}
-            data-test-subj="unmappedFieldsSwitch"
-          />
+          <EuiFlexGroup>
+            <EuiFlexItem component="span">
+              <EuiSwitch
+                label={i18n.translate('discover.fieldChooser.filter.showUnmappedFields', {
+                  defaultMessage: 'Show unmapped fields',
+                })}
+                checked={values.unmappedFields}
+                onChange={handleUnmappedFieldsChange}
+                data-test-subj="unmappedFieldsSwitch"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem component="span" grow={false}>
+              <EuiToolTip
+                position="right"
+                content={i18n.translate('discover.fieldChooser.filter.unmappedFieldsWarning', {
+                  defaultMessage:
+                    'Unmapped fields will soon be deprecated. We suggest keeping this switch off.',
+                })}
+              >
+                <EuiIcon type="alert" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ) : null}
         {useNewFieldsApi ? null : (
           <EuiSwitch
