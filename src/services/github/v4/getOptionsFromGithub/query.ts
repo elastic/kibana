@@ -11,45 +11,38 @@ type DefaultBranchRef = {
   };
 };
 
+export type Repository = {
+  ref: Ref;
+  defaultBranchRef: DefaultBranchRef;
+};
+
 export interface GithubConfigOptionsResponse {
-  repository: {
-    ref: Ref;
-  } & (
+  repository:
     | {
         isFork: true;
         defaultBranchRef: null;
-        parent: {
-          id: string;
-          ref: Ref;
-          defaultBranchRef: DefaultBranchRef;
-          owner: { login: string };
-        };
+        parent: Repository;
       }
-    | {
+    | ({
         isFork: false;
-        defaultBranchRef: DefaultBranchRef;
         parent: null;
-      }
-  );
+      } & Repository);
 }
 
 export const query = /* GraphQL */ `
   query GithubConfigOptions($repoOwner: String!, $repoName: String!) {
     repository(owner: $repoOwner, name: $repoName) {
       isFork
-      ...UpstreamInfo
+      ...Repo
       parent {
-        ...UpstreamInfo
-        owner {
-          login
-        }
+        ...Repo
       }
     }
   }
 
-  fragment UpstreamInfo on Repository {
-    id
-    ref(qualifiedName: "refs/heads/7.x") {
+  fragment Repo on Repository {
+    # check to see if a branch named "backport" exists
+    ref(qualifiedName: "refs/heads/backport") {
       name
     }
     defaultBranchRef {

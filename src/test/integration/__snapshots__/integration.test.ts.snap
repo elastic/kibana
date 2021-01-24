@@ -7,19 +7,16 @@ Array [
   query GithubConfigOptions($repoOwner: String!, $repoName: String!) {
     repository(owner: $repoOwner, name: $repoName) {
       isFork
-      ...UpstreamInfo
+      ...Repo
       parent {
-        ...UpstreamInfo
-        owner {
-          login
-        }
+        ...Repo
       }
     }
   }
 
-  fragment UpstreamInfo on Repository {
-    id
-    ref(qualifiedName: \\"refs/heads/7.x\\") {
+  fragment Repo on Repository {
+    # check to see if a branch named \\"backport\\" exists
+    ref(qualifiedName: \\"refs/heads/backport\\") {
       name
     }
     defaultBranchRef {
@@ -185,19 +182,16 @@ Array [
   query GithubConfigOptions($repoOwner: String!, $repoName: String!) {
     repository(owner: $repoOwner, name: $repoName) {
       isFork
-      ...UpstreamInfo
+      ...Repo
       parent {
-        ...UpstreamInfo
-        owner {
-          login
-        }
+        ...Repo
       }
     }
   }
 
-  fragment UpstreamInfo on Repository {
-    id
-    ref(qualifiedName: \\"refs/heads/7.x\\") {
+  fragment Repo on Repository {
+    # check to see if a branch named \\"backport\\" exists
+    ref(qualifiedName: \\"refs/heads/backport\\") {
       name
     }
     defaultBranchRef {
