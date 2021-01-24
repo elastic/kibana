@@ -11,6 +11,7 @@ import { coreMock } from '../../../core/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
 import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '../../index_pattern_field_editor/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,
@@ -59,6 +60,7 @@ const createInstance = async () => {
   const doStart = () =>
     plugin.start(coreMock.createStart(), {
       data: dataPluginMock.createStartContract(),
+      indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     });
 
   return {
