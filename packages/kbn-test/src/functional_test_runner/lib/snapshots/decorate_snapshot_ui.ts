@@ -124,6 +124,10 @@ export function decorateSnapshotUi({
     const unused: string[] = [];
 
     Object.values(globalState.snapshotStates).forEach((state) => {
+      if (globalState.updateSnapshot === 'all') {
+        state.removeUncheckedKeys();
+      }
+
       unused.push(...state.getUncheckedKeys());
 
       state.save();
