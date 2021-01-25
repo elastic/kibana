@@ -100,6 +100,7 @@ export const WaterfallFilter = ({
             <EuiButtonIcon
               iconType="filter"
               onClick={() => setIsPopoverOpen((prevState) => !prevState)}
+              color={activeFilters.length > 0 ? 'primary' : 'text'}
             />
           }
           isOpen={isPopoverOpen}

@@ -56,13 +56,14 @@ export const WaterfallChartFilterContainer = euiStyled.div`
   && {
     padding: 16px;
     z-index: ${(props) => props.theme.eui.euiZLevel5};
+    border-bottom: 0.3px solid ${(props) => props.theme.eui.euiColorLightShade};
   }
 `; // NOTE: border-radius !important is here as the "border" prop isn't working
 
 export const WaterfallChartFixedAxisContainer = euiStyled.div`
   height: ${FIXED_AXIS_HEIGHT}px;
   z-index: ${(props) => props.theme.eui.euiZLevel4};
-  height: 90px;
+  height: 102px;
 `;
 
 interface WaterfallChartSidebarContainer {
@@ -126,8 +127,10 @@ export const WaterfallChartTooltip = euiStyled.div`
 `;
 
 export const NetworkRequestsTotalStyle = euiStyled(EuiText)`
-  line-height: ${FIXED_AXIS_HEIGHT}px;
-  margin-left: ${(props) => props.theme.eui.paddingSizes.m}
+  line-height: 28px;
+  margin-left: ${(props) => props.theme.eui.paddingSizes.m};
+  border-bottom: 0.3px solid ${(props) => props.theme.eui.euiColorLightShade};
+  z-index: ${(props) => props.theme.eui.euiZLevel5};
 `;
 
 export const RelativeContainer = euiStyled.div`

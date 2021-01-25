@@ -13,7 +13,6 @@ import {
   WaterfallChartSidebarContainerInnerPanel,
   WaterfallChartSidebarContainerFlexGroup,
   WaterfallChartSidebarFlexItem,
-  SideBarItemHighlighter,
 } from './styles';
 import { WaterfallChartProps } from './waterfall_chart';
 
