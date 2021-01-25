@@ -17,6 +17,9 @@ import { usePostCase } from '../../containers/use_post_case';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { Case } from '../../containers/types';
+import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { useGetCase } from '../../containers/use_get_case';
+import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -35,6 +38,9 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
   const { connectors } = useConnectors();
   const { connector: configurationConnector } = useCaseConfigure();
   const { caseData, postCase } = usePostCase();
+  const { postPushToService } = usePostPushToService();
+  const { updateCase } = useGetCase(caseData?.id);
+
   const connectorId = useMemo(
     () =>
       connectors.some((connector) => connector.id === configurationConnector.id)
@@ -42,6 +48,8 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
         : 'none',
     [configurationConnector.id, connectors]
   );
+
+  const { fetchCaseUserActions } = useGetCaseUserActions(caseData?.id, connectorId);
 
   const submitCase = useCallback(
     async (
@@ -78,9 +86,22 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
 
   useEffect(() => {
     if (caseData && onSuccess) {
+      const handleUpdateCase = (newCase: Case) => {
+        updateCase(newCase);
+        fetchCaseUserActions(newCase.id);
+      };
+
+      postPushToService({
+        caseId: caseData.id,
+        caseServices: {},
+        connector: caseData.connector,
+        alerts: {},
+        updateCase: handleUpdateCase,
+      });
+
       onSuccess(caseData);
     }
-  }, [caseData, onSuccess]);
+  }, [caseData, fetchCaseUserActions, onSuccess, postPushToService, updateCase]);
 
   return <Form form={form}>{children}</Form>;
 };

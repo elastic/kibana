@@ -84,7 +84,7 @@ export interface UseGetCase extends CaseState {
   updateCase: (newCase: Case) => void;
 }
 
-export const useGetCase = (caseId: string): UseGetCase => {
+export const useGetCase = (caseId?: string): UseGetCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: true,
     isError: false,
@@ -118,7 +118,11 @@ export const useGetCase = (caseId: string): UseGetCase => {
         }
       }
     };
-    fetchData();
+
+    if (caseId) {
+      fetchData();
+    }
+
     return () => {
       didCancel = true;
       abortCtrl.abort();

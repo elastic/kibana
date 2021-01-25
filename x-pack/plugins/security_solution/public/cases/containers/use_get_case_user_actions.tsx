@@ -236,8 +236,8 @@ export const getPushedInfo = (
 };
 
 export const useGetCaseUserActions = (
-  caseId: string,
-  caseConnectorId: string
+  caseId?: string,
+  caseConnectorId?: string
 ): UseGetCaseUserActions => {
   const [caseUserActionsState, setCaseUserActionsState] = useState<CaseUserActionsState>(
     initialData
@@ -302,7 +302,7 @@ export const useGetCaseUserActions = (
   );
 
   useEffect(() => {
-    if (!isEmpty(caseId)) {
+    if (!isEmpty(caseId) && caseId != null) {
       fetchCaseUserActions(caseId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
