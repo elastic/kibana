@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Painless Lab', () => {
+    loadTestFile(require.resolve('./painless_lab'));
+  });
+}
