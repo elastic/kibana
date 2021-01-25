@@ -75,8 +75,8 @@ describe('CreateUserPage', () => {
     fireEvent.click(await findByRole('button', { name: 'Create user' }));
 
     const alert = await findByRole('alert');
-    within(alert).getByText(/Please enter a username/i);
-    within(alert).getByText(/Please enter a password/i);
+    within(alert).getByText(/Enter a username/i);
+    within(alert).getByText(/Enter a password/i);
 
     fireEvent.change(await findByLabelText('Username'), { target: { value: 'existing_username' } });
 
@@ -93,7 +93,7 @@ describe('CreateUserPage', () => {
     });
 
     await findAllByText(
-      /Username must contain only letters, numbers, spaces, punctuation and printable symbols/i
+      /Username must contain only letters, numbers, spaces, punctuation, and symbols/i
     );
 
     fireEvent.change(await findByLabelText('Password'), { target: { value: '111' } });
@@ -101,9 +101,6 @@ describe('CreateUserPage', () => {
     await findAllByText(/Password must be at least 6 characters/i);
 
     fireEvent.change(await findByLabelText('Password'), { target: { value: '123456' } });
-
-    await findAllByText(/Please confirm your password/i);
-
     fireEvent.change(await findByLabelText('Confirm password'), { target: { value: '111' } });
 
     await findAllByText(/Passwords do not match/i);

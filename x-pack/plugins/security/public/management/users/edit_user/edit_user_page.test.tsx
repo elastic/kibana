@@ -343,8 +343,8 @@ describe('EditUserPage', () => {
     const dialog = await findByRole('dialog');
     fireEvent.click(await within(dialog).findByRole('button', { name: 'Change password' }));
 
-    await within(dialog).findByText(/Please enter your current password/i);
-    await within(dialog).findByText(/Please enter a new password/i);
+    await within(dialog).findByText(/Enter your current password/i);
+    await within(dialog).findByText(/Enter a new password/i);
 
     fireEvent.change(await within(dialog).findByLabelText('Current password'), {
       target: { value: 'changeme' },
@@ -359,9 +359,6 @@ describe('EditUserPage', () => {
     fireEvent.change(await within(dialog).findByLabelText('New password'), {
       target: { value: '123456' },
     });
-
-    await within(dialog).findAllByText(/Please confirm your new password/i);
-
     fireEvent.change(await within(dialog).findByLabelText('Confirm password'), {
       target: { value: '111' },
     });
@@ -436,9 +433,7 @@ describe('EditUserPage', () => {
     fireEvent.click(await findByRole('button', { name: 'Delete user' }));
 
     const dialog = getByRole('dialog');
-    fireEvent.click(
-      within(dialog).getByRole('button', { name: 'I understand, permanently delete this user' })
-    );
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete user' }));
 
     expect(coreStart.http.delete).toHaveBeenLastCalledWith('/internal/security/users/jdoe');
     await waitFor(() => {
