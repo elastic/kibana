@@ -15,6 +15,8 @@ interface ChartSplitterProps {
   sort?: GroupBySort;
 }
 
+const CHART_SPLITTER_ID = '__chart_splitter__';
+
 export const ChartSplitter = ({
   splitColumnAccessor,
   splitRowAccessor,
@@ -23,7 +25,7 @@ export const ChartSplitter = ({
   splitColumnAccessor || splitRowAccessor ? (
     <>
       <GroupBy
-        id="__chart_splitter__"
+        id={CHART_SPLITTER_ID}
         by={(spec, datum) => {
           const splitTypeAccessor = splitColumnAccessor || splitRowAccessor;
           if (splitTypeAccessor) {
@@ -36,8 +38,8 @@ export const ChartSplitter = ({
         sort={sort || 'dataIndex'}
       />
       <SmallMultiples
-        splitVertically={splitRowAccessor ? '__chart_splitter__' : undefined}
-        splitHorizontally={splitColumnAccessor ? '__chart_splitter__' : undefined}
+        splitVertically={splitRowAccessor ? CHART_SPLITTER_ID : undefined}
+        splitHorizontally={splitColumnAccessor ? CHART_SPLITTER_ID : undefined}
       />
     </>
   ) : null;
