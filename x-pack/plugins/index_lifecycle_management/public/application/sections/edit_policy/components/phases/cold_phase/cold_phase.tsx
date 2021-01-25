@@ -11,8 +11,6 @@ import { get } from 'lodash';
 
 import { EuiTextColor } from '@elastic/eui';
 
-import { Phases } from '../../../../../../../common/types';
-
 import { useFormData } from '../../../../../../shared_imports';
 
 import { useConfigurationIssues } from '../../../form';
@@ -36,8 +34,6 @@ const i18nTexts = {
   },
 };
 
-const coldProperty: keyof Phases = 'cold';
-
 const formFieldPaths = {
   enabled: '_meta.cold.enabled',
   searchableSnapshot: 'phases.cold.actions.searchable_snapshot.snapshot_repository',
@@ -53,10 +49,10 @@ export const ColdPhase: FunctionComponent = () => {
   const showReplicasField = get(formData, formFieldPaths.searchableSnapshot) == null;
 
   return (
-    <Phase phase={coldProperty}>
-      <SearchableSnapshotField phase={coldProperty} />
+    <Phase phase={'cold'}>
+      <SearchableSnapshotField phase={'cold'} />
 
-      {showReplicasField && <ReplicasField phase={coldProperty} />}
+      {showReplicasField && <ReplicasField phase={'cold'} />}
 
       {/* Freeze section */}
       {!isUsingSearchableSnapshotInHotPhase && (
@@ -92,10 +88,10 @@ export const ColdPhase: FunctionComponent = () => {
       {/* Data tier allocation section */}
       <DataTierAllocationField
         description={i18nTexts.dataTierAllocation.description}
-        phase={coldProperty}
+        phase={'cold'}
       />
 
-      <IndexPriorityField phase={coldProperty} />
+      <IndexPriorityField phase={'cold'} />
     </Phase>
   );
 };

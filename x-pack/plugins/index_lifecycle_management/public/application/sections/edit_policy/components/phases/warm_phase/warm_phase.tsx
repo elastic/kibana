@@ -7,8 +7,6 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { Phases } from '../../../../../../../common/types';
-
 import { useConfigurationIssues } from '../../../form';
 
 import {
@@ -30,28 +28,26 @@ const i18nTexts = {
   },
 };
 
-const warmProperty: keyof Phases = 'warm';
-
 export const WarmPhase: FunctionComponent = () => {
   const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
   return (
-    <Phase phase={warmProperty}>
-      <ReplicasField phase={warmProperty} />
+    <Phase phase={'warm'}>
+      <ReplicasField phase={'warm'} />
 
-      {!isUsingSearchableSnapshotInHotPhase && <ShrinkField phase={warmProperty} />}
+      {!isUsingSearchableSnapshotInHotPhase && <ShrinkField phase={'warm'} />}
 
-      {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase={warmProperty} />}
+      {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase={'warm'} />}
 
-      <ReadonlyField phase={warmProperty} />
+      <ReadonlyField phase={'warm'} />
 
       {/* Data tier allocation section */}
       <DataTierAllocationField
         description={i18nTexts.dataTierAllocation.description}
-        phase={warmProperty}
+        phase={'warm'}
       />
 
-      <IndexPriorityField phase={warmProperty} />
+      <IndexPriorityField phase={'warm'} />
     </Phase>
   );
 };

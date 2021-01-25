@@ -18,8 +18,6 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
-import { Phases } from '../../../../../../../common/types';
-
 import { useFormData, UseField, SelectField, NumericField } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
@@ -43,8 +41,6 @@ import {
 import { Phase } from '../phase';
 import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 
-const hotProperty: keyof Phases = 'hot';
-
 export const HotPhase: FunctionComponent = () => {
   const { license } = useEditPolicyContext();
   const [formData] = useFormData({
@@ -55,7 +51,7 @@ export const HotPhase: FunctionComponent = () => {
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
 
   return (
-    <Phase phase={hotProperty}>
+    <Phase phase={'hot'}>
       <DescribedFormRow
         title={
           <h3>
@@ -164,7 +160,7 @@ export const HotPhase: FunctionComponent = () => {
                           <NumericField
                             field={field}
                             euiFieldProps={{
-                              'data-test-subj': `${hotProperty}-selectedMaxSizeStored`,
+                              'data-test-subj': `hot-selectedMaxSizeStored`,
                               min: 1,
                             }}
                           />
@@ -178,7 +174,7 @@ export const HotPhase: FunctionComponent = () => {
                       path="_meta.hot.customRollover.maxStorageSizeUnit"
                       component={SelectField}
                       componentProps={{
-                        'data-test-subj': `${hotProperty}-selectedMaxSizeStoredUnits`,
+                        'data-test-subj': `hot-selectedMaxSizeStoredUnits`,
                         hasEmptyLabelSpace: true,
                         euiFieldProps: {
                           options: maxSizeStoredUnits,
@@ -201,7 +197,7 @@ export const HotPhase: FunctionComponent = () => {
                       component={NumericField}
                       componentProps={{
                         euiFieldProps: {
-                          'data-test-subj': `${hotProperty}-selectedMaxDocuments`,
+                          'data-test-subj': `hot-selectedMaxDocuments`,
                           min: 1,
                         },
                       }}
@@ -216,7 +212,7 @@ export const HotPhase: FunctionComponent = () => {
                       component={NumericField}
                       componentProps={{
                         euiFieldProps: {
-                          'data-test-subj': `${hotProperty}-selectedMaxAge`,
+                          'data-test-subj': `hot-selectedMaxAge`,
                           min: 1,
                         },
                       }}
@@ -228,7 +224,7 @@ export const HotPhase: FunctionComponent = () => {
                       path="_meta.hot.customRollover.maxAgeUnit"
                       component={SelectField}
                       componentProps={{
-                        'data-test-subj': `${hotProperty}-selectedMaxAgeUnits`,
+                        'data-test-subj': `hot-selectedMaxAgeUnits`,
                         hasEmptyLabelSpace: true,
                         euiFieldProps: {
                           'aria-label': i18n.translate(
@@ -252,13 +248,13 @@ export const HotPhase: FunctionComponent = () => {
       </DescribedFormRow>
       {isUsingRollover && (
         <>
-          {<ForcemergeField phase={hotProperty} />}
-          <ShrinkField phase={hotProperty} />
-          {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase={hotProperty} />}
-          <ReadonlyField phase={hotProperty} />
+          {<ForcemergeField phase={'hot'} />}
+          <ShrinkField phase={'hot'} />
+          {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase={'hot'} />}
+          <ReadonlyField phase={'hot'} />
         </>
       )}
-      <IndexPriorityField phase={hotProperty} />
+      <IndexPriorityField phase={'hot'} />
     </Phase>
   );
 };

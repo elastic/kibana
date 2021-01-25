@@ -8,15 +8,13 @@ import React, { FunctionComponent, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 
-import { Phases } from '../../../../../../../common/types';
-
 import { UseField, NumericField } from '../../../../../../shared_imports';
 import { LearnMoreLink, DescribedFormRow } from '../..';
 import { i18nTexts } from '../../../i18n_texts';
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
 interface Props {
-  phase: 'hot' | 'warm' | ('cold' & keyof Phases);
+  phase: 'hot' | 'warm' | 'cold';
 }
 
 export const IndexPriorityField: FunctionComponent<Props> = ({ phase }) => {
