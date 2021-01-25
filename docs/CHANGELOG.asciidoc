@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.8.14>>
 * <<release-notes-6.8.13>>
 * <<release-notes-6.8.12>>
 * <<release-notes-6.8.11>>
@@ -70,7 +71,7 @@ This section summarizes the changes in each release.
 ////
 // To add a release, copy and paste the following text,  uncomment the relevant
 // sections, and add a link to the new section in the list of releases at the
-// top of the page. Note that release subheads must be floated and sections
+// top of the page. Note that release subheadings must be floated and sections
 // cannot be empty.
 // TEMPLATE:
 
@@ -79,26 +80,39 @@ This section summarizes the changes in each release.
 
 //[float]
 //[[breaking-n.n.n]]
-//=== Breaking Changes
+//=== Breaking changes
 
 //[float]
 //=== Deprecations
 
 //[float]
-//=== New Features
+//=== New features
 
 //[float]
 //=== Enhancements
 
 //[float]
-//=== Bug Fixes
+//=== Bug fixes
 
 //[float]
 //=== Regressions
 
 //[float]
-//=== Known Issues
+//=== Known issues
 ////
+
+[[release-notes-6.8.14]]
+== {kib} 6.8.14
+
+coming::[6.8.14]
+
+The 6.8.14 release fixes one issue. 
+
+[float]
+[[bug-v6.8.14]]
+=== Bug fix
+Reporting::
+* Fixes an issue where a failed request in the headless browser running the screenshot capture would log an obscured error {kibana-pull}88118[#88118]
 
 [[release-notes-6.8.13]]
 == {kib} 6.8.13
