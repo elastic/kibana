@@ -128,8 +128,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Saved search with column changes will not update when the saved object changes', async () => {
-      await PageObjects.discover.removeHeaderColumn('bytes');
       await PageObjects.dashboard.switchToEditMode();
+      await PageObjects.discover.removeHeaderColumn('bytes');
       await PageObjects.dashboard.saveDashboard('Has local edits');
 
       await PageObjects.header.clickDiscover();
