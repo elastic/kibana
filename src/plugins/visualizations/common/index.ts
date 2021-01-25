@@ -6,8 +6,5 @@
  * Public License, v 1.
  */
 
-import { SavedVisState } from '../../common';
-
-declare function updateOldState(oldState: unknown): SavedVisState;
-
-export { updateOldState };
+/** @public types */
+export * from './types';
