@@ -104,8 +104,6 @@ This section summarizes the changes in each release.
 [[release-notes-6.8.14]]
 == {kib} 6.8.14
 
-coming::[6.8.14]
-
 The 6.8.14 release fixes one issue. 
 
 [float]
