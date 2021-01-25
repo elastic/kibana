@@ -25,7 +25,7 @@ describe('vega_map_view/map_service_settings', () => {
       expect(mapServiceSettings instanceof MapServiceSettings).toBeTruthy();
       expect(mapServiceSettings.isInitialized).toBeFalsy();
       expect(mapServiceSettings.hasUserConfiguredTmsLayer).toBeFalsy();
-      expect(mapServiceSettings.defaultTmsLayer).toBe('road_map');
+      expect(mapServiceSettings.defaultTmsLayer).toBe('road_map_desaturated');
     });
 
     test('should be able to set user configured base layer through config', () => {

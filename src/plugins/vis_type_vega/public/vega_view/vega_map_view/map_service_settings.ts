@@ -50,7 +50,7 @@ export class MapServiceSettings {
     if (this.hasUserConfiguredTmsLayer) {
       return TmsTileLayers.userConfigured;
     }
-    return this.isDarkMode ? TmsTileLayers.dark : TmsTileLayers.bright;
+    return this.isDarkMode ? TmsTileLayers.dark : TmsTileLayers.desaturated;
   }
 
   public async initialize() {
