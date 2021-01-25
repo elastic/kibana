@@ -24,4 +24,5 @@ export interface BoostObject {
 export interface SearchSettings {
   boosts: Record<string, Boost[]>;
   search_fields: object;
+  result_fields?: object;
 }

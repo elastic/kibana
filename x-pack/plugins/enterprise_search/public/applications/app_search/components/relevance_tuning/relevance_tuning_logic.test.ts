@@ -227,7 +227,7 @@ describe('RelevanceTuningLogic', () => {
 
   describe('listeners', () => {
     const { http } = mockHttpValues;
-    const { flashAPIErrors } = mockFlashMessageHelpers;
+    const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
 
     describe('initializeRelevanceTuning', () => {
       it('should make an API call and set state based on the response', async () => {
@@ -426,6 +426,50 @@ describe('RelevanceTuningLogic', () => {
         mount();
         RelevanceTuningLogic.actions.onSearchSettingsError();
         expect(scrollToSpy).toHaveBeenCalledWith(0, 0);
+      });
+    });
+
+    describe('updateSearchSettings', () => {
+      it('calls an API endpoint and handles success response', async () => {
+        mount({
+          searchSettings,
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'onSearchSettingsSuccess');
+
+        const promise = Promise.resolve(searchSettings);
+        http.put.mockReturnValueOnce(promise);
+        RelevanceTuningLogic.actions.updateSearchSettings();
+
+        await promise;
+
+        expect(http.put).toHaveBeenCalledWith(
+          '/api/app_search/engines/test-engine/search_settings',
+          {
+            body: JSON.stringify(searchSettings),
+          }
+        );
+        expect(setSuccessMessage).toHaveBeenCalledWith(
+          'Relevance successfully tuned. The changes will impact your results shortly.'
+        );
+        expect(RelevanceTuningLogic.actions.onSearchSettingsSuccess).toHaveBeenCalledWith(
+          searchSettings
+        );
+      });
+
+      it('handles errors', async () => {
+        mount();
+        jest.spyOn(RelevanceTuningLogic.actions, 'onSearchSettingsError');
+        (RelevanceTuningLogic.actions.onSearchSettingsError as jest.Mock).mockImplementationOnce(
+          () => true
+        );
+        const promise = Promise.reject('error');
+        http.put.mockReturnValueOnce(promise);
+
+        RelevanceTuningLogic.actions.updateSearchSettings();
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        expect(RelevanceTuningLogic.actions.onSearchSettingsError).toHaveBeenCalled();
       });
     });
   });

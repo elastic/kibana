@@ -8,9 +8,11 @@
 import { kea, MakeLogicType } from 'kea';
 import { cloneDeep, isEmpty } from 'lodash';
 
+import { i18n } from '@kbn/i18n';
+
 import { HttpLogic } from '../../../shared/http';
 import { Schema, SchemaConflicts } from '../../../shared/types';
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
 
 import { Result } from '../result/types';
 import { EngineLogic } from '../engine';
@@ -37,6 +39,7 @@ interface RelevanceTuningActions {
   setSearchSettingsResponse(searchSettings: SearchSettings): { searchSettings: SearchSettings };
   onSearchSettingsSuccess(searchSettings: SearchSettings): { searchSettings: SearchSettings };
   onSearchSettingsError(): void;
+  updateSearchSettings(): void;
 }
 
 interface RelevanceTuningValues {
@@ -56,6 +59,13 @@ interface RelevanceTuningValues {
   searchResults: Result[] | null;
   resultsLoading: boolean;
 }
+
+const UPDATE_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.relevanceTuning.messages.success',
+  {
+    defaultMessage: 'Relevance successfully tuned. The changes will impact your results shortly.',
+  }
+);
 
 // If the user hasn't entered a filter, then we can skip filtering the array entirely
 const filterIfTerm = (array: string[], filterTerm: string): string[] => {
@@ -92,6 +102,7 @@ export const RelevanceTuningLogic = kea<
     }),
     onSearchSettingsSuccess: (searchSettings) => ({ searchSettings }),
     onSearchSettingsError: () => true,
+    updateSearchSettings: true,
   }),
   reducers: () => ({
     searchSettings: [
@@ -233,6 +244,23 @@ export const RelevanceTuningLogic = kea<
     },
     onSearchSettingsError: () => {
       window.scrollTo(0, 0);
+    },
+    updateSearchSettings: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      const url = `/api/app_search/engines/${engineName}/search_settings`;
+
+      try {
+        const response = await http.put(url, {
+          body: JSON.stringify(removeBoostStateProps(values.searchSettings)),
+        });
+        setSuccessMessage(UPDATE_SUCCESS_MESSAGE);
+        actions.onSearchSettingsSuccess(response);
+      } catch (e) {
+        flashAPIErrors(e);
+        actions.onSearchSettingsError();
+      }
     },
   }),
 });
