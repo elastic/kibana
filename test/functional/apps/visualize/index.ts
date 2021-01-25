@@ -52,6 +52,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       // Test replaced vislib chart types
       loadTestFile(require.resolve('./_area_chart'));
       loadTestFile(require.resolve('./_line_chart_split_series'));
+      loadTestFile(require.resolve('./_line_chart_split_chart'));
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
