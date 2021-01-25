@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash/fp';
 import { KibanaRequest } from 'kibana/server';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { actionsClientMock } from '../../../actions/server/mocks';
@@ -18,6 +19,7 @@ import { CaseClient } from './types';
 import { authenticationMock } from '../routes/api/__fixtures__';
 import { createCaseClient } from '.';
 import { getActions } from '../routes/api/__mocks__/request_responses';
+import type { CasesRequestHandlerContext } from '../types';
 
 export type CaseClientMock = jest.Mocked<CaseClient>;
 export const createCaseClientMock = (): CaseClientMock => ({
@@ -74,6 +76,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     connectorMappingsService,
     userActionService,
     alertsService,
+    context: (omit(omitFromContext, context) as unknown) as CasesRequestHandlerContext,
   });
   return {
     client: caseClient,

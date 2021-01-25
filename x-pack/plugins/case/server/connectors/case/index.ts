@@ -18,12 +18,12 @@ import {
   CaseActionTypeExecutorOptions,
 } from './types';
 import * as i18n from './translations';
+import type { CasesRequestHandlerContext } from '../../types';
 
 import { GetActionTypeParams } from '..';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
-export const CASE_ACTION_TYPE_ID = '.case';
 // action type definition
 export function getActionType({
   logger,
@@ -34,7 +34,7 @@ export function getActionType({
   alertsService,
 }: GetActionTypeParams): CaseActionType {
   return {
-    id: CASE_ACTION_TYPE_ID,
+    id: '.case',
     minimumLicenseRequired: 'basic',
     name: i18n.NAME,
     validate: {
@@ -78,6 +78,8 @@ async function executor(
     connectorMappingsService,
     userActionService,
     alertsService,
+    // TODO: When case connector is enabled we should figure out how to pass the context.
+    context: {} as CasesRequestHandlerContext,
   });
 
   if (!supportedSubActions.includes(subAction)) {

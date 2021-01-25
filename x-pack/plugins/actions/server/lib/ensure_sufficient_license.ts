@@ -6,8 +6,9 @@
 import { ActionType } from '../types';
 import { LICENSE_TYPE } from '../../../licensing/common/types';
 import { ServerLogActionTypeId, IndexActionTypeId } from '../builtin_action_types';
-import { CASE_ACTION_TYPE_ID } from '../../../case/server';
 import { ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
+
+const CASE_ACTION_TYPE_ID = '.case';
 
 const ACTIONS_SCOPED_WITHIN_STACK = new Set([
   ServerLogActionTypeId,

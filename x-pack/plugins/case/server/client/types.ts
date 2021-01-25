@@ -29,6 +29,8 @@ import {
 import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
 
 // TODO: Remove unused types
+import type { CasesRequestHandlerContext } from '../types';
+
 export interface CaseClientCreate {
   theCase: CaseClientPostRequest;
 }
@@ -62,6 +64,7 @@ export interface CaseClientFactoryArguments {
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
+  context?: Omit<CasesRequestHandlerContext, 'case'>;
 }
 
 export interface ConfigureFields {
