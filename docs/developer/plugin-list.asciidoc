@@ -470,6 +470,10 @@ Elastic.
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/osquery/README.md[osquery]
+|A Kibana plugin
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/painless_lab/README.md[painlessLab]
 |This plugin helps users learn how to use the Painless scripting language.
 
