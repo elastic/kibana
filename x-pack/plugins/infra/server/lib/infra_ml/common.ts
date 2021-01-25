@@ -28,6 +28,11 @@ export interface MappedAnomalyHit {
   categoryId?: string;
 }
 
+export interface InfluencerFilter {
+  fieldName: string;
+  fieldValue: string;
+}
+
 export async function fetchMlJob(mlAnomalyDetectors: MlAnomalyDetectors, jobId: string) {
   const finalizeMlGetJobSpan = startTracingSpan('Fetch ml job from ES');
   const {

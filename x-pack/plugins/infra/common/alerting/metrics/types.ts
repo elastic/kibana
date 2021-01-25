@@ -35,19 +35,23 @@ export enum Aggregators {
 }
 
 const metricAnomalyNodeTypeRT = rt.union([rt.literal('hosts'), rt.literal('k8s')]);
-const metricAnomalyMetricTypeRT = rt.union([
+const metricAnomalyMetricRT = rt.union([
   rt.literal('memory_usage'),
   rt.literal('network_in'),
   rt.literal('network_out'),
 ]);
+const metricAnomalyInfluencerFilterRT = rt.type({
+  fieldName: rt.string,
+  fieldValue: rt.string,
+});
 
 export interface MetricAnomalyParams {
   nodeType: rt.TypeOf<typeof metricAnomalyNodeTypeRT>;
-  metric: rt.TypeOf<typeof metricAnomalyMetricTypeRT>;
+  metric: rt.TypeOf<typeof metricAnomalyMetricRT>;
   alertInterval?: string;
   sourceId?: string;
   threshold: Exclude<ANOMALY_THRESHOLD, ANOMALY_THRESHOLD.LOW>;
-  filterQuery: string | undefined;
+  influencerFilter: rt.TypeOf<typeof metricAnomalyInfluencerFilterRT> | undefined;
 }
 
 // Alert Preview API
@@ -103,9 +107,12 @@ const metricAnomalyAlertPreviewRequestParamsRT = rt.intersection([
   baseAlertRequestParamsRT,
   rt.type({
     nodeType: metricAnomalyNodeTypeRT,
-    metric: metricAnomalyMetricTypeRT,
+    metric: metricAnomalyMetricRT,
     threshold: rt.number,
     alertType: rt.literal(METRIC_ANOMALY_ALERT_TYPE_ID),
+  }),
+  rt.partial({
+    influencerFilter: metricAnomalyInfluencerFilterRT,
   }),
 ]);
 export type MetricAnomalyAlertPreviewRequestParams = rt.TypeOf<

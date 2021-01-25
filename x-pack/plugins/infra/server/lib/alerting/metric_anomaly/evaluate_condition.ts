@@ -25,7 +25,7 @@ export const evaluateCondition = async ({
   endTime,
   metric,
   threshold,
-  filterQuery,
+  influencerFilter,
 }: ConditionParams) => {
   const getAnomalies = nodeType === 'k8s' ? getMetricK8sAnomalies : getMetricsHostsAnomalies;
 
@@ -41,8 +41,22 @@ export const evaluateCondition = async ({
     metric,
     { field: 'anomalyScore', direction: 'desc' },
     { pageSize: 100 },
-    threshold
+    threshold,
+    influencerFilter
   );
 
+  // if (influencerFilter) {
+  //   return result.data.filter((anomaly) =>
+  //     anomaly.influencers.some((i) => {
+  //       if (i.influencer_field_name !== influencerFilter.fieldName) return false;
+  //       return i.influencer_field_values.some(value => {
+  //         const { fieldValue } = influencerFilter;
+  //         if (!fieldValue.includes('*')) return value === fieldValue;
+  //         const wildcardMatchComponents = fieldValue.split('*').filter(Boolean);
+
+  //       })
+  //     })
+  //   );
+  // }
   return result;
 };

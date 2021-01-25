@@ -35,7 +35,6 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const {
-        filterQuery,
         lookback,
         sourceId,
         alertType,
@@ -56,7 +55,11 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
       try {
         switch (alertType) {
           case METRIC_THRESHOLD_ALERT_TYPE_ID: {
-            const { groupBy, criteria } = request.body as MetricThresholdAlertPreviewRequestParams;
+            const {
+              groupBy,
+              criteria,
+              filterQuery,
+            } = request.body as MetricThresholdAlertPreviewRequestParams;
             const previewResult = await previewMetricThresholdAlert({
               callCluster,
               params: { criteria, filterQuery, groupBy },
@@ -93,7 +96,11 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
             });
           }
           case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID: {
-            const { nodeType, criteria } = request.body as InventoryAlertPreviewRequestParams;
+            const {
+              nodeType,
+              criteria,
+              filterQuery,
+            } = request.body as InventoryAlertPreviewRequestParams;
             const previewResult = await previewInventoryMetricThresholdAlert({
               callCluster,
               params: { criteria, filterQuery, nodeType },
@@ -136,6 +143,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               nodeType,
               metric,
               threshold,
+              influencerFilter,
             } = request.body as MetricAnomalyAlertPreviewRequestParams;
             const { mlAnomalyDetectors, mlSystem, spaceId } = requestContext.infra;
 
@@ -143,7 +151,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               mlAnomalyDetectors,
               mlSystem,
               spaceId,
-              params: { nodeType, metric, threshold, filterQuery },
+              params: { nodeType, metric, threshold, influencerFilter },
               lookback,
               sourceId: source.id,
               alertInterval,

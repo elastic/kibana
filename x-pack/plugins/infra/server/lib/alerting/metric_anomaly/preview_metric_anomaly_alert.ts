@@ -36,9 +36,8 @@ export const previewMetricAnomalyAlert = async ({
   lookback,
   alertInterval,
   alertThrottle,
-  alertOnNoData,
 }: PreviewMetricAnomalyAlertParams) => {
-  const { metric, threshold, filterQuery, nodeType } = params as MetricAnomalyParams;
+  const { metric, threshold, influencerFilter, nodeType } = params as MetricAnomalyParams;
 
   const alertIntervalInSeconds = getIntervalInSeconds(alertInterval);
   const throttleIntervalInSeconds = getIntervalInSeconds(alertThrottle);
@@ -64,7 +63,7 @@ export const previewMetricAnomalyAlert = async ({
       endTime,
       metric,
       threshold,
-      filterQuery,
+      influencerFilter,
     });
     anomalies = [...anomalies, ...data];
 

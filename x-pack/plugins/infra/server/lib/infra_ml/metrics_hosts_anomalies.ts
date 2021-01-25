@@ -6,7 +6,7 @@
 
 import { InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
-import { fetchMlJob, MappedAnomalyHit } from './common';
+import { fetchMlJob, MappedAnomalyHit, InfluencerFilter } from './common';
 import { getJobId, metricsHostsJobTypes, ANOMALY_THRESHOLD } from '../../../common/infra_ml';
 import { Sort, Pagination } from '../../../common/http_api/infra_ml';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
@@ -67,7 +67,8 @@ export async function getMetricsHostsAnomalies(
   metric: 'memory_usage' | 'network_in' | 'network_out' | undefined,
   sort: Sort,
   pagination: Pagination,
-  scoreThreshold: ANOMALY_THRESHOLD = ANOMALY_THRESHOLD.MAJOR
+  scoreThreshold: ANOMALY_THRESHOLD = ANOMALY_THRESHOLD.MAJOR,
+  influencerFilter: InfluencerFilter | undefined
 ) {
   const finalizeMetricsHostsAnomaliesSpan = startTracingSpan('get metrics hosts entry anomalies');
 
@@ -100,7 +101,8 @@ export async function getMetricsHostsAnomalies(
       endTime,
       sort,
       pagination,
-      scoreThreshold
+      scoreThreshold,
+      influencerFilter
     );
 
     const data = anomalies.map((anomaly) => {
@@ -155,7 +157,8 @@ async function fetchMetricsHostsAnomalies(
   endTime: number,
   sort: Sort,
   pagination: Pagination,
-  scoreThreshold: ANOMALY_THRESHOLD
+  scoreThreshold: ANOMALY_THRESHOLD,
+  influencerFilter: InfluencerFilter | undefined
 ) {
   // We'll request 1 extra entry on top of our pageSize to determine if there are
   // more entries to be fetched. This avoids scenarios where the client side can't
@@ -173,7 +176,8 @@ async function fetchMetricsHostsAnomalies(
         endTime,
         sort,
         expandedPagination,
-        scoreThreshold
+        scoreThreshold,
+        influencerFilter
       ),
       jobIds
     )

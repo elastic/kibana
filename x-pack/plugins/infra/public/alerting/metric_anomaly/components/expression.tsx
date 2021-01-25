@@ -5,7 +5,7 @@
  */
 
 import { debounce, pick } from 'lodash';
-import React, { useCallback, useMemo, useEffect, ChangeEvent } from 'react';
+import React, { useCallback, useState, useMemo, useEffect, ChangeEvent } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiText, EuiFormRow, EuiFieldSearch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +32,7 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 
 import { validateMetricAnomaly } from './validation';
+import { InfluencerFilter } from './influencer_filter';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
@@ -58,7 +59,8 @@ interface Props {
 export const defaultExpression = {
   metric: 'memory_usage' as MetricAnomalyParams['metric'],
   threshold: ANOMALY_THRESHOLD.MAJOR,
-  nodeType: 'host',
+  nodeType: 'hosts',
+  influencerFilter: undefined,
 };
 
 export const Expression: React.FC<Props> = (props) => {
@@ -75,21 +77,28 @@ export const Expression: React.FC<Props> = (props) => {
     createDerivedIndexPattern,
   ]);
 
-  const onFilterChange = useCallback(
-    (filter: any) => {
-      setAlertParams('filterQueryText', filter || '');
-      setAlertParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+  const [influencerFieldName, updateInfluencerFieldName] = useState('host.name');
+  useEffect(() => {
+    if (alertParams.influencerFilter) {
+      setAlertParams('influencerFilter', {
+        ...alertParams.influencerFilter,
+        fieldName: influencerFieldName,
+      });
+    }
+  }, [influencerFieldName, alertParams, setAlertParams]);
+  const updateInfluencerFieldValue = useCallback(
+    (value: string) => {
+      if (value) {
+        setAlertParams('influencerFilter', {
+          ...alertParams.influencerFilter,
+          fieldValue: value,
+        });
+      } else {
+        setAlertParams('influencerFilter', undefined);
+      }
     },
-    [derivedIndexPattern, setAlertParams]
+    [setAlertParams, alertParams]
   );
-
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
-    onFilterChange,
-  ]);
 
   useEffect(() => {
     setAlertParams('alertInterval', alertInterval);
@@ -115,22 +124,6 @@ export const Expression: React.FC<Props> = (props) => {
     },
     [setAlertParams]
   );
-
-  const handleFieldSearchChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
-    [onFilterChange]
-  );
-
-  const preFillAlertFilter = useCallback(() => {
-    const md = metadata;
-    if (md && md.filter) {
-      setAlertParams('filterQueryText', md.filter);
-      setAlertParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(md.filter, derivedIndexPattern) || ''
-      );
-    }
-  }, [metadata, derivedIndexPattern, setAlertParams]);
 
   const prefillNodeType = useCallback(() => {
     const md = metadata;
@@ -167,10 +160,6 @@ export const Expression: React.FC<Props> = (props) => {
 
     if (!alertParams.metric) {
       prefillMetric();
-    }
-
-    if (!alertParams.filterQuery) {
-      preFillAlertFilter();
     }
 
     if (!alertParams.sourceId) {
@@ -251,20 +240,13 @@ export const Expression: React.FC<Props> = (props) => {
         fullWidth
         display="rowCompressed"
       >
-        {(metadata && (
-          <MetricsExplorerKueryBar
-            derivedIndexPattern={derivedIndexPattern}
-            onSubmit={onFilterChange}
-            onChange={debouncedOnFilterChange}
-            value={alertParams.filterQueryText}
-          />
-        )) || (
-          <EuiFieldSearch
-            onChange={handleFieldSearchChange}
-            value={alertParams.filterQueryText}
-            fullWidth
-          />
-        )}
+        <InfluencerFilter
+          nodeType={alertParams.nodeType}
+          fieldName={influencerFieldName}
+          fieldValue={alertParams.influencerFilter?.fieldValue ?? ''}
+          onChangeFieldName={updateInfluencerFieldName}
+          onChangeFieldValue={updateInfluencerFieldValue}
+        />
       </EuiFormRow>
 
       <EuiSpacer size={'m'} />
@@ -278,7 +260,7 @@ export const Expression: React.FC<Props> = (props) => {
           'threshold',
           'nodeType',
           'sourceId',
-          'filterQuery'
+          'influencerFilter'
         )}
         validate={validateMetricAnomaly}
       />
@@ -307,9 +289,9 @@ const getDisplayNameForType = (type: InventoryItemType) => {
 };
 
 export const nodeTypes: { [key: string]: any } = {
-  host: {
+  hosts: {
     text: getDisplayNameForType('host'),
-    value: 'host',
+    value: 'hosts',
   },
   k8s: {
     text: getDisplayNameForType('pod'),
@@ -333,7 +315,7 @@ const getMLMetricFromInventoryMetric = (metric: SnapshotMetricType) => {
 const getMLNodeTypeFromInventoryNodeType = (nodeType: InventoryItemType) => {
   switch (nodeType) {
     case 'host':
-      return 'host';
+      return 'hosts';
     case 'pod':
       return 'k8s';
     default:

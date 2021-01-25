@@ -47,7 +47,7 @@ export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPlugi
   const {
     metric,
     alertInterval,
-    filterQuery,
+    influencerFilter,
     sourceId,
     nodeType,
     threshold,
@@ -69,7 +69,7 @@ export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPlugi
     metric,
     threshold,
     nodeType,
-    filterQuery,
+    influencerFilter,
   });
 
   const shouldAlertFire = data.length > 0;
