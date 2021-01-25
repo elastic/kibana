@@ -13,6 +13,7 @@ node scripts/build_kibana_platform_plugins \
   --scan-dir "$XPACK_DIR/test/alerting_api_integration/plugins" \
   --scan-dir "$XPACK_DIR/test/plugin_api_integration/plugins" \
   --scan-dir "$XPACK_DIR/test/plugin_api_perf/plugins" \
+  --scan-dir "$XPACK_DIR/test/licensing_plugin/plugins" \
   --verbose
 tc_end_block "Build Platform Plugins"
 
