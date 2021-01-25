@@ -68,6 +68,7 @@ describe('metrics service', () => {
 
   describe('setup', () => {
     it('returns ops interval and getOpsMetrics$ observable', async () => {
+      // TODO: remove this test
       root = kbnTestServer.createRoot({ ...otherTestSettings });
       coreSetup = await root.setup();
       expect(coreSetup.metrics).toHaveProperty(
@@ -79,6 +80,7 @@ describe('metrics service', () => {
   });
 
   describe('ops metrics logging configuration', () => {
+    // TODO: remove this test
     it('does not log with logging set to quiet', async () => {
       root = kbnTestServer.createRoot({ logging: { quiet: true } });
       coreSetup = await root.setup();
@@ -129,6 +131,7 @@ describe('metrics service', () => {
     });
   });
   describe('ops metrics logging content', () => {
+    // TODO: remove this test
     it('logs memory, uptime, load and delay ops metrics in the message', async () => {
       root = kbnTestServer.createRoot({ ...otherTestSettings });
       coreSetup = await root.setup();

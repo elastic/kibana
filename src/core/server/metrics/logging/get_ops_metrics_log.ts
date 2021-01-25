@@ -7,7 +7,6 @@
  */
 
 import numeral from '@elastic/numeral';
-import { LogMeta } from '@kbn/logging';
 import { EcsOpsMetricsEvent } from './ecs';
 import { OpsMetrics } from '..';
 
@@ -16,7 +15,7 @@ import { OpsMetrics } from '..';
  *
  * @internal
  */
-export function getEcsOpsMetricsLog({ process, os }: Partial<OpsMetrics>): LogMeta {
+export function getEcsOpsMetricsLog({ process, os }: Partial<OpsMetrics>): EcsOpsMetricsEvent {
   const processMemoryUsedInBytes = process?.memory?.heap?.used_in_bytes;
   const processMemoryUsedInBytesMsg = processMemoryUsedInBytes
     ? `memory: ${numeral(processMemoryUsedInBytes).format('0.0b')} `
@@ -50,8 +49,7 @@ export function getEcsOpsMetricsLog({ process, os }: Partial<OpsMetrics>): LogMe
         })}] `
       : '';
 
-  // ECS fields
-  const meta: EcsOpsMetricsEvent = {
+  return {
     ecs: { version: '1.7.0' },
     message: `${processMemoryUsedInBytesMsg}${uptimeValMsg}${loadValsMsg}${eventLoopDelayValMsg}`,
     event: {
@@ -61,14 +59,7 @@ export function getEcsOpsMetricsLog({ process, os }: Partial<OpsMetrics>): LogMe
     },
     process: {
       uptime: uptimeVal,
-    },
-  };
-
-  // return ECS event with custom fields not yet part of ECS
-  return {
-    ...meta,
-    process: {
-      ...meta.process,
+      // @ts-expect-error custom fields not yet part of ECS
       memory: {
         heap: {
           usedInBytes: processMemoryUsedInBytes,
