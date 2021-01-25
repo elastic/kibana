@@ -12,11 +12,11 @@ import { BaseVisTypeOptions } from '../../../visualizations/public';
 
 import { TableOptions } from '../components/table_vis_options_lazy';
 import { VIS_EVENT_TO_TRIGGER } from '../../../visualizations/public';
+import { TableVisParams, VIS_TYPE_TABLE } from '../../common';
 import { toExpressionAst } from '../to_ast';
-import { TableVisParams } from '../types';
 
 export const tableVisLegacyTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
-  name: 'table',
+  name: VIS_TYPE_TABLE,
   title: i18n.translate('visTypeTable.tableVisTitle', {
     defaultMessage: 'Data table',
   }),
