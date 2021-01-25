@@ -73,9 +73,6 @@ export const schema: FormSchema<FormInternal> = {
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
       },
-      dataTierAllocationEnabled: {
-        label: i18nTexts.editPolicy.allocationLabel,
-      },
       dataTierAllocationType: {
         label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
       },
