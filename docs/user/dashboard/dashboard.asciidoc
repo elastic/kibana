@@ -230,30 +230,6 @@ All panels::
     human-readable dates and numbers, while the *Unformatted* option is for computer use.
 
 [role="screenshot"]
-<<<<<<< HEAD
-image::images/timelion.png[Timelion UI]
-
-NOTE: In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib}. To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
-For migration information, refer to <<deprecation-v7.10.0>>.
-Only *Timelion* app is deprecated. {kib} continues to support *Timelion*
-visualizations in *Dashboard*, *Visualize*, and *Canvas*.
-
-Ready to try out Timelion? For step-by-step tutorials, refer to:
-
-* <<timelion-tutorial-create-time-series-visualizations,Create time series visualizations>>
-* <<timelion-tutorial-create-visualizations-with-mathematical-functions,Create visualizations with mathematical functions>>
-* <<timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends,Create visualizations with conditional logic and tracking trends>>
-
-[float]
-[[save-panels]]
-== Save panels
-
-When you’ve finished making changes, save the panels.
-
-. In the toolbar, click *Save*.
-. Add the *Title* and optional *Description*.
-. Click *Save and return*.
-=======
 image:images/Dashboard_inspect.png[Inspect in dashboard]
 
 [float]
@@ -271,7 +247,6 @@ When you're finished making changes, save the dashboard.
 . To save the time range, select *Store time with dashboard*.
 
 . Click *Save*.
->>>>>>> e3063f69341... [DOCS] Dashboard docs refresh for 7.11 (#85342)
 
 [float]
 [[share-the-dashboard]]
