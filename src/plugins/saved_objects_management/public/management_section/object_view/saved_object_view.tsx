@@ -82,7 +82,7 @@ export class SavedObjectEdition extends Component<
       string,
       boolean
     >;
-    const canView = canViewInApp(capabilities, type);
+    const canView = canViewInApp(capabilities, type) && Boolean(object?.meta.inAppUrl?.path);
     const service = serviceRegistry.get(serviceName)!.service;
 
     return (
