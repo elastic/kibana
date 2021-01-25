@@ -19,8 +19,9 @@ import { BeatsInitialEnrollmentPage } from './walkthrough/initial/beat';
 import { FinishWalkthroughPage } from './walkthrough/initial/finish';
 import { InitialWalkthroughPage } from './walkthrough/initial/index';
 import { InitialTagPage } from './walkthrough/initial/tag';
+import type { RouteConfig } from '../components/navigation/child_routes';
 
-export const routeMap = [
+export const routeMap: RouteConfig[] = [
   { path: '/tag/create/:tagid?', component: TagCreatePage },
   { path: '/tag/edit/:tagid?', component: TagEditPage },
   {

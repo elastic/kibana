@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
-import {
+import type {
   CaseConfigureServiceSetup,
   CaseServiceSetup,
   CaseUserActionServiceSetup,
   ConnectorMappingsServiceSetup,
 } from '../../services';
 
+import type { CasesRouter } from '../../types';
+
 export interface RouteDeps {
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
   connectorMappingsService: ConnectorMappingsServiceSetup;
-  router: IRouter;
+  router: CasesRouter;
   userActionService: CaseUserActionServiceSetup;
 }
 

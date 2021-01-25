@@ -9,7 +9,12 @@ import React from 'react';
 
 import { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
-import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import {
+  EMPTY_FEATURE_COLLECTION,
+  FIELD_ORIGIN,
+  SOURCE_TYPES,
+  VECTOR_SHAPE_TYPE,
+} from '../../../../common/constants';
 import { getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
 import {
   ESGeoLineSourceDescriptor,
@@ -216,6 +221,18 @@ export class ESGeoLineSource extends AbstractESAggSource {
     );
     const totalEntities = _.get(entityResp, 'aggregations.totalEntities.value', 0);
     const areEntitiesTrimmed = entityBuckets.length >= MAX_TRACKS;
+    if (totalEntities === 0) {
+      return {
+        data: EMPTY_FEATURE_COLLECTION,
+        meta: {
+          areResultsTrimmed: false,
+          areEntitiesTrimmed: false,
+          entityCount: 0,
+          numTrimmedTracks: 0,
+          totalEntities: 0,
+        } as ESGeoLineSourceResponseMeta,
+      };
+    }
 
     //
     // Fetch tracks

@@ -19,7 +19,7 @@ import {
   NumberInputOption,
   VisOptionsProps,
 } from '../../../vis_default_editor/public';
-import { TableVisParams } from '../types';
+import { TableVisParams } from '../../common';
 import { totalAggregations } from './utils';
 
 const { tabifyGetColumns } = search;

@@ -153,6 +153,9 @@ function defaultMapping(): IndexMapping {
           },
         },
       },
+      coreMigrationVersion: {
+        type: 'keyword',
+      },
     },
   };
 }
