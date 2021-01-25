@@ -8,10 +8,45 @@ import { KibanaRequest } from 'src/core/server';
 import {
   ENROLLMENT_API_KEYS_INDEX,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_INDEX,
+  AGENT_ACTIONS_INDEX,
+  AGENTS_INDEX,
   FleetServerEnrollmentAPIKey,
+  FleetServerPackage,
 } from '../../common';
 import { listEnrollmentApiKeys, getEnrollmentAPIKey } from './api_keys/enrollment_api_key_so';
 import { appContextService } from './app_context';
+import { getInstallation } from './epm/packages';
+
+export async function isFleetServerSetup() {
+  const pkgInstall = await getInstallation({
+    savedObjectsClient: getInternalUserSOClient(),
+    pkgName: FleetServerPackage,
+  });
+
+  if (!pkgInstall) {
+    return false;
+  }
+
+  const esClient = appContextService.getInternalUserESClient();
+  const indexes = [
+    ENROLLMENT_API_KEYS_INDEX,
+    AGENT_POLICY_INDEX,
+    AGENTS_INDEX,
+    AGENT_ACTIONS_INDEX,
+  ];
+
+  const exists = await Promise.all(
+    indexes.map(async (index) => {
+      const res = await esClient.indices.exists({
+        index,
+      });
+      return res.statusCode !== 404;
+    })
+  );
+
+  return exists.every((exist) => exist === true);
+}
 
 export async function runFleetServerMigration() {
   const logger = appContextService.getLogger();
