@@ -98,7 +98,6 @@ export function getActiveEntriesAndGenerateAlerts(
   allActiveEntriesMap.forEach((locationsArr, entityName) => {
     // Generate alerts
     locationsArr.forEach(({ location, shapeLocationId, dateInShape, docId }) => {
-      const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
       const context = {
         entityId: entityName,
         entityDateTime: dateInShape ? new Date(dateInShape).toISOString() : null,
@@ -106,9 +105,9 @@ export function getActiveEntriesAndGenerateAlerts(
         detectionDateTime: new Date(currIntervalEndTime).toISOString(),
         entityLocation: `POINT (${location[0]} ${location[1]})`,
         containingBoundaryId: shapeLocationId,
-        containingBoundaryName,
+        containingBoundaryName: shapesIdsNamesMap[shapeLocationId] || shapeLocationId,
       };
-      const alertInstanceId = `${entityName}-${containingBoundaryName}`;
+      const alertInstanceId = `${entityName}-${context.containingBoundaryName}`;
       if (shapeLocationId !== OTHER_CATEGORY) {
         alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
       }
@@ -117,6 +116,7 @@ export function getActiveEntriesAndGenerateAlerts(
     const latestLocationsArr = locationsArr.filter(
       (latestEntityLocation) => latestEntityLocation.dateInShape === locationsArr[0].dateInShape
     );
+    // If the latest location is "other", don't carry it through to the next interval
     if (latestLocationsArr[0].shapeLocationId === OTHER_CATEGORY) {
       allActiveEntriesMap.delete(entityName);
     } else {
