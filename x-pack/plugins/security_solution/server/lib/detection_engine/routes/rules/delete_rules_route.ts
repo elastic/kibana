@@ -10,7 +10,7 @@ import {
   QueryRulesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/query_rules_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
 import { getIdError } from './utils';
@@ -20,7 +20,7 @@ import { deleteNotifications } from '../../notifications/delete_notifications';
 import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
-export const deleteRulesRoute = (router: IRouter) => {
+export const deleteRulesRoute = (router: SecuritySolutionPluginRouter) => {
   router.delete(
     {
       path: DETECTION_ENGINE_RULES_URL,

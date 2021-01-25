@@ -79,6 +79,8 @@ export {
   PostAgentCheckinRequest,
   DataType,
   dataTypes,
+  // Fleet Server types
+  FleetServerEnrollmentAPIKey,
 } from '../../common';
 
 export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];

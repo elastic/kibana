@@ -220,8 +220,7 @@ export const postAgentEnrollHandler: RequestHandler<
       {
         userProvided: request.body.metadata.user_provided,
         local: request.body.metadata.local,
-      },
-      request.body.shared_id
+      }
     );
     const body: PostAgentEnrollResponse = {
       action: 'created',
@@ -253,7 +252,7 @@ export const getAgentsHandler: RequestHandler<
       kuery: request.query.kuery,
     });
     const totalInactive = request.query.showInactive
-      ? await AgentService.countInactiveAgents(soClient, {
+      ? await AgentService.countInactiveAgents(soClient, esClient, {
           kuery: request.query.kuery,
         })
       : 0;
@@ -280,8 +279,14 @@ export const putAgentsReassignHandler: RequestHandler<
   TypeOf<typeof PutAgentReassignRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
-    await AgentService.reassignAgent(soClient, request.params.agentId, request.body.policy_id);
+    await AgentService.reassignAgent(
+      soClient,
+      esClient,
+      request.params.agentId,
+      request.body.policy_id
+    );
 
     const body: PutAgentReassignResponse = {};
     return response.ok({ body });
@@ -303,16 +308,19 @@ export const postBulkAgentsReassignHandler: RequestHandler<
   }
 
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     // Reassign by array of IDs
     const result = Array.isArray(request.body.agents)
       ? await AgentService.reassignAgents(
           soClient,
+          esClient,
           { agentIds: request.body.agents },
           request.body.policy_id
         )
       : await AgentService.reassignAgents(
           soClient,
+          esClient,
           { kuery: request.body.agents },
           request.body.policy_id
         );

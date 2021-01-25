@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Error rate when data is loaded returns the transaction error rate has the correct error rate 1`] = `
+exports[`APM specs (basic) Transactions Error rate when data is loaded returns the transaction error rate has the correct error rate 1`] = `
 Array [
   Object {
     "x": 1607435850000,

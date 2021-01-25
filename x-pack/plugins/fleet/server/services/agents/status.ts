@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import pMap from 'p-map';
 import { getAgent, listAgents } from './crud';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
@@ -50,7 +50,7 @@ export async function getAgentStatusForAgentPolicy(
       AgentStatusKueryHelper.buildKueryForUpdatingAgents(),
     ],
     (kuery) =>
-      listAgents(soClient, {
+      listAgents(soClient, esClient, {
         showInactive: false,
         perPage: 0,
         page: 1,
