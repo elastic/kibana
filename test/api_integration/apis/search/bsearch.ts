@@ -80,8 +80,9 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         expect(resp.status).to.be(200);
-        parseBfetchResponse(resp).forEach((responseJson, i) => {
-          expect(responseJson.id).to.be(i);
+        const parsedResponse = parseBfetchResponse(resp);
+        expect(parsedResponse).to.have.length(2);
+        parsedResponse.forEach((responseJson) => {
           expect(responseJson.result.isPartial).to.be(false);
           expect(responseJson.result.isRunning).to.be(false);
           expect(responseJson.result).to.have.property('rawResponse');
