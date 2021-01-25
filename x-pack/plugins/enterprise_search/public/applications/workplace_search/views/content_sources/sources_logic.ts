@@ -73,7 +73,7 @@ interface ISourcesServerResponse {
 }
 
 let pollingInterval: number;
-const POLLING_INTERVAL = 10000;
+export const POLLING_INTERVAL = 10000;
 
 export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>({
   path: ['enterprise_search', 'workplace_search', 'sources_logic'],
@@ -243,7 +243,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   }),
 });
 
-const fetchSourceStatuses = async (isOrganization: boolean) => {
+export const fetchSourceStatuses = async (isOrganization: boolean) => {
   const route = isOrganization
     ? '/api/workplace_search/org/sources/status'
     : '/api/workplace_search/account/sources/status';
