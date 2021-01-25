@@ -57,14 +57,14 @@ export class VisualizationsPlugin
       // https://github.com/elastic/kibana/issues/56143
       [LEGACY_CHARTS_LIBRARY]: {
         name: i18n.translate(
-          'visTypeVislib.advancedSettings.visualization.legacyChartsLibrary.name',
+          'visualizations.advancedSettings.visualization.legacyChartsLibrary.name',
           {
             defaultMessage: 'Legacy charts library',
           }
         ),
         value: false,
         description: i18n.translate(
-          'visTypeVislib.advancedSettings.visualization.legacyChartsLibrary.description',
+          'visualizations.advancedSettings.visualization.legacyChartsLibrary.description',
           {
             defaultMessage:
               'Enables legacy charts library for area, line and bar charts in visualize. Currently, only legacy charts library supports split chart aggregation.',
