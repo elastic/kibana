@@ -560,6 +560,8 @@ describe('rules_notification_alert_type', () => {
           createdItemsCount: 1,
           errors: [],
         });
+        (checkPrivileges as jest.Mock).mockClear();
+
         await alert.executor(payload);
         expect(checkPrivileges).toHaveBeenCalledTimes(0);
         expect(ruleStatusService.success).toHaveBeenCalled();
