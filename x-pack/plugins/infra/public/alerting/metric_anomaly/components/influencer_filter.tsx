@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { first } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiFieldSearch } from '@elastic/eui';
@@ -54,7 +55,16 @@ export const InfluencerFilter = ({
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFieldSearch value={fieldValue} onChange={onUpdateFieldValue} />
+        <EuiFieldSearch
+          value={fieldValue}
+          onChange={onUpdateFieldValue}
+          placeholder={i18n.translate(
+            'xpack.infra.metrics.alertFlyout.anomalyInfluencerFilterPlaceholder',
+            {
+              defaultMessage: '(Any)',
+            }
+          )}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

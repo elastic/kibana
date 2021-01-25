@@ -234,8 +234,9 @@ export const Expression: React.FC<Props> = (props) => {
         label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
           defaultMessage: 'Filter (optional)',
         })}
-        helpText={i18n.translate('xpack.infra.metrics.alertFlyout.filterHelpText', {
-          defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
+        helpText={i18n.translate('xpack.infra.metrics.alertFlyout.anomalyFilterHelpText', {
+          defaultMessage:
+            'Limit the scope of your alert trigger to anomalies influenced by certain node(s).',
         })}
         fullWidth
         display="rowCompressed"
