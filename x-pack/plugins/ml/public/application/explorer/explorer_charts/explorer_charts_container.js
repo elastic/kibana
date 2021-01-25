@@ -205,7 +205,6 @@ export const ExplorerChartsContainerUI = ({
   chartsPerRow,
   seriesToPlot,
   severity,
-  showAnomaliesMap,
   tooManyBuckets,
   kibana,
   errorMessages,
@@ -228,10 +227,7 @@ export const ExplorerChartsContainerUI = ({
   const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
   return (
     <>
-      <ExplorerChartsErrorCallOuts
-        errorMessagesByType={errorMessages}
-        showAnomaliesMap={showAnomaliesMap}
-      />
+      <ExplorerChartsErrorCallOuts errorMessagesByType={errorMessages} />
       <EuiFlexGrid columns={chartsColumns}>
         {seriesToPlot.length > 0 &&
           seriesToPlot.map((series) => (

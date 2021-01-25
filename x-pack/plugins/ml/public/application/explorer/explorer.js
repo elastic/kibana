@@ -45,7 +45,6 @@ import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
-import { ExplorerMapContainer } from './components/explorer_map_container';
 import {
   ExplorerQueryBar,
   getKqlQueryValues,
@@ -270,11 +269,6 @@ export class Explorer extends React.Component {
     const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
     const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
-    const showAnomaliesMap =
-      selectedCells !== undefined &&
-      tableData.anomalies?.length &&
-      typeof tableData.anomalies[0].detector === 'string' &&
-      tableData.anomalies[0].detector.includes('lat_long');
 
     return (
       <ExplorerPage
@@ -337,7 +331,6 @@ export class Explorer extends React.Component {
                 }
               />
             )}
-
             <AnomalyTimeline
               explorerState={this.props.explorerState}
               setSelectedCells={this.props.setSelectedCells}
@@ -412,7 +405,6 @@ export class Explorer extends React.Component {
                 <EuiSpacer size="m" />
               </>
             )}
-            {showAnomaliesMap && <ExplorerMapContainer anomalies={tableData.anomalies} />}
             {loading === false && (
               <EuiPanel>
                 <EuiTitle className="panel-title">
@@ -460,9 +452,7 @@ export class Explorer extends React.Component {
                 <EuiSpacer size="m" />
 
                 <div className="euiText explorer-charts">
-                  {showCharts && (
-                    <ExplorerChartsContainer {...{ ...chartsData, severity, showAnomaliesMap }} />
-                  )}
+                  {showCharts && <ExplorerChartsContainer {...{ ...chartsData, severity }} />}
                 </div>
 
                 <AnomaliesTable

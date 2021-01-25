@@ -11,19 +11,12 @@ import { ExplorerChartSeriesErrorMessages } from './explorer_charts_container_se
 
 interface ExplorerChartsErrorCalloutsProps {
   errorMessagesByType: ExplorerChartSeriesErrorMessages;
-  showAnomaliesMap: boolean;
 }
 
 export const ExplorerChartsErrorCallOuts: FC<ExplorerChartsErrorCalloutsProps> = ({
   errorMessagesByType,
-  showAnomaliesMap,
 }) => {
-  if (
-    !errorMessagesByType ||
-    Object.keys(errorMessagesByType).length === 0 ||
-    showAnomaliesMap === true
-  )
-    return null;
+  if (!errorMessagesByType || Object.keys(errorMessagesByType).length === 0) return null;
   const content = Object.keys(errorMessagesByType).map((errorType) => (
     <EuiCallOut color={'warning'} size="s" key={errorType}>
       <FormattedMessage
