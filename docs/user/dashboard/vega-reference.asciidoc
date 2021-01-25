@@ -214,26 +214,6 @@ on the currently picked range: `"interval": {"%autointerval%": 10}` will
 try to get about 10-15 data points (buckets).
 
 [float]
-[[vega-esmfiles]]
-===== Access Elastic Map Service files
-
-experimental[] Access the Elastic Map Service files via the same mechanism:
-
-[source,yaml]
-----
-url: {
-  // "type" defaults to "elasticsearch" otherwise
-  type: emsfile
-  // Name of the file, exactly as in the Region map visualization
-  name: World Countries
-}
-// The result is a geojson file, get its features to use
-// this data source with the "shape" marks
-// https://vega.github.io/vega/docs/marks/shape/
-format: {property: "features"}
-----
-
-[float]
 [[vega-with-a-map]]
 ==== Vega with a Map
 
@@ -283,7 +263,8 @@ Additionally, you can use `latitude`, `longitude`, and `zoom` signals.
 These signals can be used in the graph, or can be updated to modify the
 position of the map.
 
-experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[data] element to access https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] vector shapes of administrative boundaries in your Vega map by setting `url.data` to `emsFile`:
+experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[data] element to access https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] 
+vector shapes of administrative boundaries in your Vega map by setting `url.data` to `emsFile`:
 
 [source,yaml]
 ----
@@ -330,12 +311,12 @@ then restart {kib}.
 
 [float]
 [[vega-inspector]]
-====== Vega Inspector
+===== Vega Inspector
 Use the contextual *Inspect* tool to gain insights into different elements. 
 
 [float]
 [[inspect-elasticsearch-requests]]
-======= Inspect {es} requests
+====== Inspect {es} requests
 
 *Vega* uses the {ref}/search-search.html[{es} search API] to get documents and aggregation
 results from {es}. To troubleshoot these requests, click *Inspect*, which shows the most recent requests.
@@ -394,7 +375,7 @@ Vega-Lite compilation.
 
 [float]
 [[vega-expression-functions]]
-===== (Vega only) Expression functions which can update the time range and dashboard filters
+===== Expression functions which can update the time range and dashboard filters
 
 {kib} has extended the Vega expression language with these functions:
 

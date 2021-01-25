@@ -6,9 +6,6 @@ and some math.
 
 TIP: With *TSVB*, you can visualize the data from multiple series, but only *Timelion* can perform math across layers.
 
-[role="screenshot"]
-image::visualize/images/tsvb-screenshot.png[TSVB overview]
-
 [float]
 [[tsvb-required-choices]]
 ==== Requirements
