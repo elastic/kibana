@@ -237,7 +237,7 @@ export class UsersGridPage extends Component<Props, State> {
             <EuiPageContentHeaderSection>
               <EuiButton
                 data-test-subj="createUserButton"
-                {...reactRouterNavigate(this.props.history, `/edit/`)}
+                {...reactRouterNavigate(this.props.history, `/create`)}
               >
                 <FormattedMessage
                   id="xpack.security.management.users.createNewUserButtonLabel"
