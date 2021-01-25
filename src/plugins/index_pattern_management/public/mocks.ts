@@ -11,11 +11,13 @@ import { coreMock } from '../../../core/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
 import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '../../index_pattern_field_editor/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,
   IndexPatternManagementPlugin,
 } from './plugin';
+import { IndexPatternManagmentContext } from './types';
 
 const createSetupContract = (): IndexPatternManagementSetup => ({
   creation: {
@@ -59,6 +61,7 @@ const createInstance = async () => {
   const doStart = () =>
     plugin.start(coreMock.createStart(), {
       data: dataPluginMock.createStartContract(),
+      indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     });
 
   return {
@@ -69,13 +72,17 @@ const createInstance = async () => {
 };
 
 const docLinks = {
+  ELASTIC_WEBSITE_URL: 'htts://jestTest.elastic.co',
+  DOC_LINK_VERSION: 'jest',
   links: {
     indexPatterns: {},
     scriptedFields: {},
-  },
+  } as any,
 };
 
-const createIndexPatternManagmentContext = () => {
+const createIndexPatternManagmentContext = (): {
+  [key in keyof IndexPatternManagmentContext]: any;
+} => {
   const {
     chrome,
     application,
@@ -86,6 +93,7 @@ const createIndexPatternManagmentContext = () => {
   } = coreMock.createStart();
   const { http } = coreMock.createSetup();
   const data = dataPluginMock.createStartContract();
+  const indexPatternFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
 
   return {
     chrome,
@@ -97,8 +105,10 @@ const createIndexPatternManagmentContext = () => {
     http,
     docLinks,
     data,
+    indexPatternFieldEditor,
     indexPatternManagementStart: createStartContract(),
     setBreadcrumbs: () => {},
+    getMlCardState: () => 2,
   };
 };
 

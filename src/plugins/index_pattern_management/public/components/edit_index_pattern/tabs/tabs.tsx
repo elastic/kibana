@@ -17,6 +17,7 @@ import {
   EuiFieldSearch,
   EuiSelect,
   EuiSelectOption,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '../../../../../kibana_utils/public';
@@ -62,11 +63,19 @@ const filterPlaceholder = i18n.translate(
   }
 );
 
+const addFieldButtonLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.addFieldButtonLabel',
+  {
+    defaultMessage: 'Add field',
+  }
+);
+
 export function Tabs({ indexPattern, saveIndexPattern, fields, history, location }: TabsProps) {
   const {
     uiSettings,
     indexPatternManagementStart,
     docLinks,
+    indexPatternFieldEditor,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
@@ -96,6 +105,14 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
     );
   }, [indexPattern]);
 
+  const openFieldEditor = useCallback(() => {
+    indexPatternFieldEditor.openEditor({
+      ctx: {
+        indexPattern,
+      },
+    });
+  }, [indexPatternFieldEditor, indexPattern]);
+
   useEffect(() => {
     refreshFilters();
   }, [indexPattern, indexPattern.fields, refreshFilters]);
@@ -120,15 +137,22 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
             />
           </EuiFlexItem>
           {type === TAB_INDEXED_FIELDS && indexedFieldTypes.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiSelect
-                options={indexedFieldTypes}
-                value={indexedFieldTypeFilter}
-                onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
-                data-test-subj="indexedFieldTypeFilterDropdown"
-                aria-label={filterAriaLabel}
-              />
-            </EuiFlexItem>
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiSelect
+                  options={indexedFieldTypes}
+                  value={indexedFieldTypeFilter}
+                  onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
+                  data-test-subj="indexedFieldTypeFilterDropdown"
+                  aria-label={filterAriaLabel}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={openFieldEditor}>
+                  {addFieldButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            </>
           )}
           {type === TAB_SCRIPTED_FIELDS && scriptedFieldLanguages.length > 0 && (
             <EuiFlexItem grow={false}>
@@ -149,6 +173,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       indexedFieldTypes,
       scriptedFieldLanguageFilter,
       scriptedFieldLanguages,
+      openFieldEditor,
     ]
   );
 
