@@ -11,6 +11,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCheckbox,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -62,6 +65,7 @@ export const WaterfallFilter = ({
   setOlyHighlighted,
 }: Props) => {
   const [value, setValue] = useState(query);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const toggleFilters = (val: string) => {
     setActiveFilters((prevState) =>
@@ -79,7 +83,7 @@ export const WaterfallFilter = ({
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
-      <EuiFlexItem grow={2}>
+      <EuiFlexItem>
         <EuiFieldSearch
           fullWidth
           data-test-subj="waterfallFilterInput"
@@ -90,31 +94,42 @@ export const WaterfallFilter = ({
           value={value}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        <EuiFilterGroup>
-          {MIME_FILTERS.map(({ label, mimeType }) => (
-            <EuiFilterButton
-              hasActiveFilters={activeFilters.includes(mimeType)}
-              onClick={() => toggleFilters(mimeType)}
-              key={label}
-              withNext={true}
-            >
-              {label}
-            </EuiFilterButton>
-          ))}
-        </EuiFilterGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={3}>
-        <EuiCheckbox
-          compressed={true}
-          disabled={!(query || activeFilters.length > 0)}
-          id="onlyHighlighted"
-          label="Only show highlighted"
-          checked={onlyHighlighted}
-          onChange={(e) => {
-            setOlyHighlighted(e.target.checked);
-          }}
-        />
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={
+            <EuiButtonIcon
+              iconType="filter"
+              onClick={() => setIsPopoverOpen((prevState) => !prevState)}
+            />
+          }
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+          anchorPosition="rightCenter"
+        >
+          <EuiFilterGroup>
+            {MIME_FILTERS.map(({ label, mimeType }) => (
+              <EuiFilterButton
+                hasActiveFilters={activeFilters.includes(mimeType)}
+                onClick={() => toggleFilters(mimeType)}
+                key={label}
+                withNext={true}
+              >
+                {label}
+              </EuiFilterButton>
+            ))}
+          </EuiFilterGroup>
+          <EuiSpacer size="xs" />
+          <EuiCheckbox
+            compressed={true}
+            disabled={!(query || activeFilters.length > 0)}
+            id="onlyHighlighted"
+            label="Only show highlighted"
+            checked={onlyHighlighted}
+            onChange={(e) => {
+              setOlyHighlighted(e.target.checked);
+            }}
+          />
+        </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

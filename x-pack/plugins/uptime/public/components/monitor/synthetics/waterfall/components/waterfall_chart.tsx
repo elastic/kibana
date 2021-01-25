@@ -16,6 +16,7 @@ import {
   WaterfallChartTopContainer,
   RelativeContainer,
   WaterfallChartFilterContainer,
+  WaterfallChartAxisOnlyContainer,
 } from './styles';
 import { CHART_LEGEND_PADDING, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
 import { Sidebar } from './sidebar';
@@ -73,10 +74,15 @@ export const WaterfallChart = ({
           {shouldRenderSidebar && (
             <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
               <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false} />
+              {renderFilter && (
+                <WaterfallChartFilterContainer borderRadius="none" paddingSize="s">
+                  {renderFilter()}
+                </WaterfallChartFilterContainer>
+              )}
             </EuiFlexItem>
           )}
 
-          <EuiFlexItem
+          <WaterfallChartAxisOnlyContainer
             grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}
             data-test-subj="axisOnlyWrapper"
           >
@@ -85,20 +91,14 @@ export const WaterfallChart = ({
               barStyleAccessor={barStyleAccessor}
               tickFormat={tickFormat}
             />
-          </EuiFlexItem>
+          </WaterfallChartAxisOnlyContainer>
         </WaterfallChartTopContainer>
-
-        {renderFilter && (
-          <WaterfallChartFilterContainer borderRadius="none" paddingSize="s">
-            {renderFilter()}
-          </WaterfallChartFilterContainer>
-        )}
       </WaterfallChartFixedTopContainer>
       <WaterfallChartOuterContainer height={height} data-test-subj="waterfallOuterContainer">
         <EuiFlexGroup gutterSize="none" responsive={false} ref={chartWrapperDivRef}>
           {shouldRenderSidebar && <Sidebar items={sidebarItems!} render={renderSidebarItem!} />}
 
-          <EuiFlexItem
+          <WaterfallChartAxisOnlyContainer
             grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}
             data-test-subj="dataOnlyWrapper"
           >
@@ -112,7 +112,7 @@ export const WaterfallChart = ({
                 tickFormat={tickFormat}
               />
             ))}
-          </EuiFlexItem>
+          </WaterfallChartAxisOnlyContainer>
         </EuiFlexGroup>
       </WaterfallChartOuterContainer>
       {shouldRenderLegend && <Legend items={legendItems!} render={renderLegendItem!} />}
