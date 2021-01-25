@@ -32,7 +32,7 @@ export const routeDefinitionParamsMock = {
       httpResources: httpResourcesMock.createRegistrar(),
       getFeatures: jest.fn(),
       getFeatureUsageService: jest.fn(),
-      session: sessionMock.create(),
+      getSession: jest.fn().mockReturnValue(sessionMock.create()),
       getAuthenticationService: jest.fn().mockReturnValue(authenticationServiceMock.createStart()),
     } as unknown) as DeeplyMockedKeys<RouteDefinitionParams>),
 };
