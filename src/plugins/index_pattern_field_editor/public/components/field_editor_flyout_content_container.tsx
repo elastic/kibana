@@ -56,7 +56,7 @@ export const FieldEditorFlyoutContentContainer = ({ field, onSave, onCancel, doc
   const loadEditor = useCallback(async () => {
     const { FieldEditor } = await import('./field_editor');
 
-    setEditor(FieldEditor);
+    setEditor(() => FieldEditor);
   }, []);
 
   useEffect(() => {
