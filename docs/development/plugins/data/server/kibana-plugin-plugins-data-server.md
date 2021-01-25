@@ -110,6 +110,7 @@
 |  [KibanaContext](./kibana-plugin-plugins-data-server.kibanacontext.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
 |  [Query](./kibana-plugin-plugins-data-server.query.md) |  |
+|  [SearchRequestHandlerContext](./kibana-plugin-plugins-data-server.searchrequesthandlercontext.md) |  |
 |  [TabbedAggRow](./kibana-plugin-plugins-data-server.tabbedaggrow.md) | \* |
 |  [TimeRange](./kibana-plugin-plugins-data-server.timerange.md) |  |
 
