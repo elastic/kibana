@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { AppSearchDeepLink } from 'src/core/public';
+import type { AppSearchDeepLink } from 'src/core/public';
 import { ML_PAGES } from '../../../common/constants/ml_url_generator';
 
 const OVERVIEW_LINK_SEARCH_DEEP_LINK: AppSearchDeepLink = {
