@@ -23,9 +23,20 @@ import {
   EuiTableRowCell,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../shared/licensing';
 import { SecurityLogic, PrivateSourceSection } from '../security_logic';
+import {
+  REMOTE_SOURCES_TOGGLE_TEXT,
+  REMOTE_SOURCES_TABLE_DESCRIPTION,
+  REMOTE_SOURCES_EMPTY_TABLE_TITLE,
+  STANDARD_SOURCES_TOGGLE_TEXT,
+  STANDARD_SOURCES_TABLE_DESCRIPTION,
+  STANDARD_SOURCES_EMPTY_TABLE_TITLE,
+  SOURCE,
+} from '../../../constants';
 
 interface PrivateSourcesTableProps {
   sourceType: 'remote' | 'standard';
@@ -34,21 +45,38 @@ interface PrivateSourcesTableProps {
   updateEnabled(isEnabled: boolean): void;
 }
 
-const REMOTE_TABLE_SUBHEAD =
-  'Remote sources synchronize and store a limited amount of data on disk, with a low impact on storage resources.';
-const STANDARD_TABLE_SUBHEAD =
-  'Standard sources synchronize and store all searchable data on disk, with a directly correlated impact on storage resources.';
-const REMOTE_EMPTY_SUBHEAD = (
-  <>
-    Once configured, remote private sources are <strong>enabled by default</strong>, and users can
-    immediately connect the source from their Personal Dashboard.
-  </>
+const REMOTE_SOURCES_EMPTY_TABLE_DESCRIPTION = (
+  <FormattedMessage
+    id="xpack.enterpriseSearch.workplaceSearch.security.remoteSourcesEmptyTable.description"
+    defaultMessage="Once configured, remote private sources are {enabledStrong}, and users can immediately connect the source from their Personal Dashboard."
+    values={{
+      enabledStrong: (
+        <strong>
+          {i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.security.remoteSourcesEmptyTable.enabledStrong',
+            { defaultMessage: 'enabled by default' }
+          )}
+        </strong>
+      ),
+    }}
+  />
 );
-const STANDARD_EMPTY_SUBHEAD = (
-  <>
-    Once configured, standard private sources <strong>are not enabled by default</strong>, and must
-    be activated before users are allowed to connect the source from their Personal Dashboard.
-  </>
+
+const STANDARD_SOURCES_EMPTY_TABLE_DESCRIPTION = (
+  <FormattedMessage
+    id="xpack.enterpriseSearch.workplaceSearch.security.standardSourcesEmptyTable.description"
+    defaultMessage="Once configured, standard private sources are {notEnabledStrong}, and must be activated before users are allowed to connect the source from their Personal Dashboard."
+    values={{
+      notEnabledStrong: (
+        <strong>
+          {i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.security.standardSourcesEmptyTable.notEnabledStrong',
+            { defaultMessage: 'not enabled by default' }
+          )}
+        </strong>
+      ),
+    }}
+  />
 );
 
 export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
@@ -76,10 +104,14 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
       <EuiSpacer />
       <EuiPanel className="euiPanel--inset euiPanel--noShadow euiPanel--outline">
         <EuiText textAlign="center" color="subdued" size="s">
-          <strong>No {sourceType} private sources configured yet</strong>
+          <strong>
+            {isRemote ? REMOTE_SOURCES_EMPTY_TABLE_TITLE : STANDARD_SOURCES_EMPTY_TABLE_TITLE}
+          </strong>
         </EuiText>
         <EuiText textAlign="center" color="subdued" size="s">
-          {isRemote ? REMOTE_EMPTY_SUBHEAD : STANDARD_EMPTY_SUBHEAD}
+          {isRemote
+            ? REMOTE_SOURCES_EMPTY_TABLE_DESCRIPTION
+            : STANDARD_SOURCES_EMPTY_TABLE_DESCRIPTION}
         </EuiText>
       </EuiPanel>
     </>
@@ -101,10 +133,10 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText size="s">
-          <h4>Enable {sourceType} private sources</h4>
+          <h4>{isRemote ? REMOTE_SOURCES_TOGGLE_TEXT : STANDARD_SOURCES_TOGGLE_TEXT}</h4>
         </EuiText>
         <EuiText color="subdued" size="s">
-          {isRemote ? REMOTE_TABLE_SUBHEAD : STANDARD_TABLE_SUBHEAD}
+          {isRemote ? REMOTE_SOURCES_TABLE_DESCRIPTION : STANDARD_SOURCES_TABLE_DESCRIPTION}
         </EuiText>
         {!hasSources && emptyState}
       </EuiFlexItem>
@@ -116,7 +148,7 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
       <EuiSpacer />
       <EuiTable className={tableClass}>
         <EuiTableHeader>
-          <EuiTableHeaderCell>Source</EuiTableHeaderCell>
+          <EuiTableHeaderCell>{SOURCE}</EuiTableHeaderCell>
           <EuiTableHeaderCell />
         </EuiTableHeader>
         <EuiTableBody>

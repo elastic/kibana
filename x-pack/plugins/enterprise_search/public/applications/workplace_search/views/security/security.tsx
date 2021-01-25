@@ -31,8 +31,19 @@ import { SecurityLogic } from './security_logic';
 
 import { PrivateSourcesTable } from './components/private_sources_table';
 
-const UNSAVED_MESSAGE =
-  'Your private sources settings have not been saved. Are you sure you want to leave?';
+import {
+  SECURITY_UNSAVED_CHANGES_MESSAGE,
+  RESET_BUTTON,
+  SAVE_SETTINGS_BUTTON,
+  SAVE_CHANGES_BUTTON,
+  KEEP_EDITING_BUTTON,
+  PRIVATE_SOURCES,
+  PRIVATE_SOURCES_DESCRIPTION,
+  PRIVATE_SOURCES_TOGGLE_DESCRIPTION,
+  PRIVATE_PLATINUM_LICENSE_CALLOUT,
+  CONFIRM_CHANGES_TEXT,
+  PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT,
+} from '../../constants';
 
 export const Security: React.FC = () => {
   const [confirmModalVisible, setConfirmModalVisibility] = useState(false);
@@ -60,7 +71,7 @@ export const Security: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    window.onbeforeunload = unsavedChanges ? () => UNSAVED_MESSAGE : null;
+    window.onbeforeunload = unsavedChanges ? () => SECURITY_UNSAVED_CHANGES_MESSAGE : null;
     return () => {
       window.onbeforeunload = null;
     };
@@ -81,7 +92,7 @@ export const Security: React.FC = () => {
     <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty disabled={!unsavedChanges} onClick={resetState}>
-          Reset
+          {RESET_BUTTON}
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -91,7 +102,7 @@ export const Security: React.FC = () => {
           fill
           data-test-subj="SaveSettingsButton"
         >
-          Save settings
+          {SAVE_SETTINGS_BUTTON}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -100,9 +111,9 @@ export const Security: React.FC = () => {
   const header = (
     <>
       <ViewContentHeader
-        title="Private sources"
+        title={PRIVATE_SOURCES}
         alignItems="flexStart"
-        description="Private sources are connected by users in your organization to create a personalized search experience."
+        description={PRIVATE_SOURCES_DESCRIPTION}
         action={headerActions}
       />
       <EuiSpacer />
@@ -124,7 +135,7 @@ export const Security: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">
-            <h4>Enable private sources for your organization</h4>
+            <h4>{PRIVATE_SOURCES_TOGGLE_DESCRIPTION}</h4>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -134,7 +145,7 @@ export const Security: React.FC = () => {
   const platinumLicenseCallout = (
     <>
       <EuiSpacer size="s" />
-      <LicenseCallout message="Private sources require a Platinum license." />
+      <LicenseCallout message={PRIVATE_PLATINUM_LICENSE_CALLOUT} />
     </>
   );
 
@@ -160,14 +171,14 @@ export const Security: React.FC = () => {
   const confirmModal = (
     <EuiOverlayMask>
       <EuiConfirmModal
-        title="Confirm changes"
+        title={CONFIRM_CHANGES_TEXT}
         onConfirm={savePrivateSources}
         onCancel={hideConfirmModal}
         buttonColor="primary"
-        cancelButtonText="Keep editing"
-        confirmButtonText="Save changes"
+        cancelButtonText={KEEP_EDITING_BUTTON}
+        confirmButtonText={SAVE_CHANGES_BUTTON}
       >
-        Updates to private source configuration will take effect immediately.
+        {PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT}
       </EuiConfirmModal>
     </EuiOverlayMask>
   );

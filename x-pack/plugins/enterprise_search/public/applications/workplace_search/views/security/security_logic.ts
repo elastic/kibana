@@ -17,6 +17,8 @@ import {
 import { HttpLogic } from '../../../shared/http';
 import { AppLogic } from '../../app_logic';
 
+import { SOURCE_RESTRICTIONS_SUCCESS_MESSAGE } from '../../constants';
+
 export interface PrivateSource {
   id: string;
   name: string;
@@ -152,7 +154,7 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
       try {
         const response = await http.patch(route, { body });
         actions.setSourceRestrictionsUpdated(response);
-        setSuccessMessage('Successfully updated source restrictions.');
+        setSuccessMessage(SOURCE_RESTRICTIONS_SUCCESS_MESSAGE);
         AppLogic.actions.setSourceRestriction(isEnabled);
       } catch (e) {
         flashAPIErrors(e);
