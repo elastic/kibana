@@ -6,8 +6,4 @@
  * Public License, v 1.
  */
 
-import { SavedVisState } from '../../common';
-
-declare function updateOldState(oldState: unknown): SavedVisState;
-
-export { updateOldState };
+export { registerVisTypeTableUsageCollector } from './register_usage_collector';
