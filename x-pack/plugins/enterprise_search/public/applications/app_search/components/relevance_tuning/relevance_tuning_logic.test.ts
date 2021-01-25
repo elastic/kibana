@@ -409,6 +409,25 @@ describe('RelevanceTuningLogic', () => {
         expect(scrollToSpy).toHaveBeenCalledWith(0, 0);
       });
     });
+
+    describe('onSearchSettingsError', () => {
+      let scrollToSpy: any;
+
+      beforeEach(() => {
+        scrollToSpy = jest.spyOn(window, 'scrollTo');
+        scrollToSpy.mockImplementation(jest.fn(() => true));
+      });
+
+      afterEach(() => {
+        scrollToSpy.mockRestore();
+      });
+
+      it('scrolls to the top', () => {
+        mount();
+        RelevanceTuningLogic.actions.onSearchSettingsError();
+        expect(scrollToSpy).toHaveBeenCalledWith(0, 0);
+      });
+    });
   });
 
   describe('selectors', () => {

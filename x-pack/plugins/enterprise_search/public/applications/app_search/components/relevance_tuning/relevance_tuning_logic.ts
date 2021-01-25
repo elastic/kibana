@@ -36,6 +36,7 @@ interface RelevanceTuningActions {
   getSearchResults(): void;
   setSearchSettingsResponse(searchSettings: SearchSettings): { searchSettings: SearchSettings };
   onSearchSettingsSuccess(searchSettings: SearchSettings): { searchSettings: SearchSettings };
+  onSearchSettingsError(): void;
 }
 
 interface RelevanceTuningValues {
@@ -90,6 +91,7 @@ export const RelevanceTuningLogic = kea<
       searchSettings,
     }),
     onSearchSettingsSuccess: (searchSettings) => ({ searchSettings }),
+    onSearchSettingsError: () => true,
   }),
   reducers: () => ({
     searchSettings: [
@@ -227,6 +229,9 @@ export const RelevanceTuningLogic = kea<
     onSearchSettingsSuccess: ({ searchSettings }) => {
       actions.setSearchSettingsResponse(searchSettings);
       actions.getSearchResults();
+      window.scrollTo(0, 0);
+    },
+    onSearchSettingsError: () => {
       window.scrollTo(0, 0);
     },
   }),
