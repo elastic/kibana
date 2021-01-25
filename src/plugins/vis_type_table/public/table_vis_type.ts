@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '../../data/public';
 import { BaseVisTypeOptions } from '../../visualizations/public';
 
+import { TableVisParams, VIS_TYPE_TABLE } from '../common';
 import { TableOptions } from './components/table_vis_options_lazy';
 import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
 import { toExpressionAst } from './to_ast';
-import { TableVisParams } from './types';
 
 export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
-  name: 'table',
+  name: VIS_TYPE_TABLE,
   title: i18n.translate('visTypeTable.tableVisTitle', {
     defaultMessage: 'Data table',
   }),

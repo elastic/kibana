@@ -11,4 +11,5 @@ module.exports = {
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/vis_type_table'],
   testRunner: 'jasmine2',
+  collectCoverageFrom: ['<rootDir>/src/plugins/vis_type_table/**/*.{js,ts,tsx}'],
 };
