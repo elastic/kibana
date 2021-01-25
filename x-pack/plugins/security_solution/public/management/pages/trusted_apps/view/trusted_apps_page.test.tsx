@@ -25,17 +25,11 @@ import {
 } from '../../../../../../fleet/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { isLoadedResourceState } from '../state';
+import { forceHTMLElementOffsetWith } from './components/effected_policy_select/test_utils';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
 }));
-
-// _*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*
-//                DO NOT COMMIT THIS!!!!
-// _*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*
-jest.setTimeout(300000); // FIXME:PT REMOVE BEFORE COMMIT!!
-// _*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*
-// _*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*
 
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
@@ -204,12 +198,11 @@ describe('When on the Trusted Apps Page', () => {
       expect(queryByTestId('addTrustedAppFlyout-createForm')).not.toBeNull();
     });
 
-    it.skip('should have list of policies populated', async () => {
-      // FIXME: test case is failing - but why?
-      // The data (policies) does flow down to the component (use of breakpoints proved that),
-      // but `act()` does not seem to be updating the render result
+    it('should have list of policies populated', async () => {
+      const resetEnv = forceHTMLElementOffsetWith();
       const { getByTestId } = await renderAndClickAddButton();
       expect(getByTestId('policy-abc123'));
+      resetEnv();
     });
 
     it('should initially have the flyout Add button disabled', async () => {
