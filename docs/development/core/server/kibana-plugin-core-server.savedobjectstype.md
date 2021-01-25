@@ -23,7 +23,7 @@ This is only internal for now, and will only be public when we expose the regist
 |  [indexPattern](./kibana-plugin-core-server.savedobjectstype.indexpattern.md) | <code>string</code> | If defined, the type instances will be stored in the given index instead of the default one. |
 |  [management](./kibana-plugin-core-server.savedobjectstype.management.md) | <code>SavedObjectsTypeManagementDefinition</code> | An optional [saved objects management section](./kibana-plugin-core-server.savedobjectstypemanagementdefinition.md) definition for the type. |
 |  [mappings](./kibana-plugin-core-server.savedobjectstype.mappings.md) | <code>SavedObjectsTypeMappingDefinition</code> | The [mapping definition](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) for the type. |
-|  [migrations](./kibana-plugin-core-server.savedobjectstype.migrations.md) | <code>SavedObjectMigrationMap</code> | An optional map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used to migrate the type. |
+|  [migrations](./kibana-plugin-core-server.savedobjectstype.migrations.md) | <code>SavedObjectMigrationMap &#124; (() =&gt; SavedObjectMigrationMap)</code> | An optional map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) or a function returning a map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used to migrate the type. |
 |  [name](./kibana-plugin-core-server.savedobjectstype.name.md) | <code>string</code> | The name of the type, which is also used as the internal id. |
 |  [namespaceType](./kibana-plugin-core-server.savedobjectstype.namespacetype.md) | <code>SavedObjectsNamespaceType</code> | The [namespace type](./kibana-plugin-core-server.savedobjectsnamespacetype.md) for the type. |
 

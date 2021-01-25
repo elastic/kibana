@@ -49,6 +49,7 @@ export const createSampleTrustedApp = (i: number, longTexts?: boolean): TrustedA
     created_by: 'someone',
     os: OPERATING_SYSTEMS[i % 3],
     entries: [],
+    effectScope: { type: 'global' },
   };
 };
 

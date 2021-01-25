@@ -17,13 +17,20 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { ConfigType } from './config';
+import type {
+  Capabilities,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from 'src/core/public';
+import type { ConfigType } from './config';
 import {
   InsecureClusterService,
   InsecureClusterServiceSetup,
   InsecureClusterServiceStart,
 } from './insecure_cluster_service';
+import { AppStateService } from './app_state';
 
 export interface SecurityOssPluginSetup {
   insecureCluster: InsecureClusterServiceSetup;
@@ -31,18 +38,19 @@ export interface SecurityOssPluginSetup {
 
 export interface SecurityOssPluginStart {
   insecureCluster: InsecureClusterServiceStart;
+  anonymousAccess: {
+    getAccessURLParameters: () => Promise<Record<string, string> | null>;
+    getCapabilities: () => Promise<Capabilities>;
+  };
 }
 
 export class SecurityOssPlugin
   implements Plugin<SecurityOssPluginSetup, SecurityOssPluginStart, {}, {}> {
-  private readonly config: ConfigType;
+  private readonly config = this.initializerContext.config.get<ConfigType>();
+  private readonly insecureClusterService = new InsecureClusterService(this.config, localStorage);
+  private readonly appStateService = new AppStateService();
 
-  private insecureClusterService: InsecureClusterService;
-
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = this.initializerContext.config.get<ConfigType>();
-    this.insecureClusterService = new InsecureClusterService(this.config, localStorage);
-  }
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
     return {
@@ -51,8 +59,20 @@ export class SecurityOssPlugin
   }
 
   public start(core: CoreStart) {
+    const appState = this.appStateService.start({ core });
     return {
-      insecureCluster: this.insecureClusterService.start({ core }),
+      insecureCluster: this.insecureClusterService.start({ core, appState }),
+      anonymousAccess: {
+        async getAccessURLParameters() {
+          const { anonymousAccess } = await appState.getState();
+          return anonymousAccess.accessURLParameters;
+        },
+        getCapabilities() {
+          return core.http.get<Capabilities>(
+            '/internal/security_oss/anonymous_access/capabilities'
+          );
+        },
+      },
     };
   }
 }

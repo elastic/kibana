@@ -17,8 +17,10 @@ import { coreMock } from 'src/core/server/mocks';
 import { ConfigSchema } from '../../../config';
 // @ts-ignore
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { INMEM_TRACKING_INTERVAL, MAX_UPDATE_RETRIES } from './constants';
 import { SearchStatus } from './types';
+
+const INMEM_TRACKING_INTERVAL = 10000;
+const MAX_UPDATE_RETRIES = 3;
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -103,12 +105,36 @@ describe('SearchSessionService', () => {
 
   beforeEach(async () => {
     savedObjectsClient = savedObjectsClientMock.create();
+    const config$ = new BehaviorSubject<ConfigSchema>({
+      search: {
+        sessions: {
+          enabled: true,
+          pageSize: 10000,
+          inMemTimeout: moment.duration(1, 'm'),
+          maxUpdateRetries: 3,
+          defaultExpiration: moment.duration(7, 'd'),
+          trackingInterval: moment.duration(10, 's'),
+        },
+      },
+    });
     const mockLogger: any = {
       debug: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
     };
-    service = new SearchSessionService(mockLogger);
+    service = new SearchSessionService(mockLogger, config$);
+    const coreStart = coreMock.createStart();
+    const mockTaskManager = taskManagerMock.createStart();
+    jest.useFakeTimers();
+    await flushPromises();
+    await service.start(coreStart, {
+      taskManager: mockTaskManager,
+    });
+  });
+
+  afterEach(() => {
+    service.stop();
+    jest.useRealTimers();
   });
 
   it('search throws if `name` is not provided', () => {
@@ -411,28 +437,6 @@ describe('SearchSessionService', () => {
   });
 
   describe('Monitor', () => {
-    beforeEach(async () => {
-      jest.useFakeTimers();
-      const config$ = new BehaviorSubject<ConfigSchema>({
-        search: {
-          sendToBackground: {
-            enabled: true,
-          },
-        },
-      });
-      const mockTaskManager = taskManagerMock.createStart();
-      await service.start(coreMock.createStart(), {
-        config$,
-        taskManager: mockTaskManager,
-      });
-      await flushPromises();
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-      service.stop();
-    });
-
     it('schedules the next iteration', async () => {
       const findSpy = jest.fn().mockResolvedValue({ saved_objects: [] });
       createMockInternalSavedObjectClient(findSpy);

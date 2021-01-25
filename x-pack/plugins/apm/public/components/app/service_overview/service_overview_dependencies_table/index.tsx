@@ -13,9 +13,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import {
-  asDuration,
+  ENVIRONMENT_ALL,
+  getNextEnvironmentUrlParam,
+} from '../../../../../common/environment_filter_values';
+import {
+  asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
@@ -40,6 +43,10 @@ interface Props {
 }
 
 export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
+  const {
+    urlParams: { start, end, environment },
+  } = useUrlParams();
+
   const columns: Array<EuiBasicTableColumn<ServiceDependencyItem>> = [
     {
       field: 'name',
@@ -64,7 +71,13 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   {item.type === 'service' ? (
-                    <ServiceOverviewLink serviceName={item.serviceName}>
+                    <ServiceOverviewLink
+                      serviceName={item.serviceName}
+                      environment={getNextEnvironmentUrlParam({
+                        requestedEnvironment: item.environment,
+                        currentEnvironmentUrlParam: environment,
+                      })}
+                    >
                       {item.name}
                     </ServiceOverviewLink>
                   ) : (
@@ -92,7 +105,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           <SparkPlot
             color="euiColorVis1"
             series={latency.timeseries}
-            valueLabel={asDuration(latency.value)}
+            valueLabel={asMillisecondDuration(latency.value)}
           />
         );
       },
@@ -153,10 +166,6 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       sortable: true,
     },
   ];
-
-  const {
-    urlParams: { start, end, environment },
-  } = useUrlParams();
 
   const { data = [], status } = useFetcher(() => {
     if (!start || !end) {

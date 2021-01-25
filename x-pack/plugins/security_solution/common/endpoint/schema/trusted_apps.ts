@@ -57,6 +57,15 @@ const createNewTrustedAppForOsScheme = <O extends OperatingSystem, E extends Con
   schema.object({
     name: schema.string({ minLength: 1, maxLength: 256 }),
     description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
+    effectScope: schema.oneOf([
+      schema.object({
+        type: schema.literal('global'),
+      }),
+      schema.object({
+        type: schema.literal('policy'),
+        policies: schema.arrayOf(schema.string({ minLength: 1 })), // TODO: validate policies
+      }),
+    ]),
     os: osSchema,
     entries: schema.arrayOf(entriesSchema, {
       minSize: 1,

@@ -1,11 +1,13 @@
 package vcs
 
+import getProjectBranch
 import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
+import makeSafeId
 
 object Kibana : GitVcsRoot({
-  id("kibana_master")
+  id("kibana_${makeSafeId(getProjectBranch())}")
 
-  name = "kibana / master"
+  name = "kibana / ${getProjectBranch()}"
   url = "https://github.com/elastic/kibana.git"
-  branch = "refs/heads/master_teamcity"
+  branch = "refs/heads/${getProjectBranch()}"
 })
