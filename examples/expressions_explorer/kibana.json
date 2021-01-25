@@ -1,0 +1,10 @@
+{
+  "id": "expressionsExplorer",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["expressions", "inspector", "uiActions", "developerExamples"],
+  "optionalPlugins": [],
+  "requiredBundles": []
+}
