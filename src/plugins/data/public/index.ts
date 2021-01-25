@@ -307,6 +307,7 @@ import {
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
+  boundsDescendingRaw,
   // expressions utils
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -416,6 +417,7 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    boundsDescendingRaw,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,
