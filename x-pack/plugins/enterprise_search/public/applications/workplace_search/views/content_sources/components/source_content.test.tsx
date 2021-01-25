@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { mockMeta } from '../../../__mocks__/meta.mock';
-import { fullContentSources } from '../../../__mocks__/content_sources.mock';
+import { fullContentSources, contentItems } from '../../../__mocks__/content_sources.mock';
 
 import { DEFAULT_META } from '../../../../shared/constants';
 import { ComponentLoader } from '../../../components/shared/component_loader';
@@ -39,16 +39,7 @@ describe('SourceContent', () => {
   const mockValues = {
     contentSource: fullContentSources[0],
     contentMeta: mockMeta,
-    contentItems: [
-      {
-        id: '1234',
-        last_updated: '2021-01-21',
-      },
-      {
-        id: '1235',
-        last_updated: '2021-01-20',
-      },
-    ],
+    contentItems,
     contentFilterValue: '',
     dataLoading: false,
     sectionLoading: false,
