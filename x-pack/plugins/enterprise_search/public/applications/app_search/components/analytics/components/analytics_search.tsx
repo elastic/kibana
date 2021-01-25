@@ -26,14 +26,22 @@ export const AnalyticsSearch: React.FC = () => {
 
   return (
     <form onSubmit={viewQueryDetails}>
-      <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiFieldSearch value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem>
+          <EuiFieldSearch
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetailSearchPlaceholder',
+              { defaultMessage: 'Go to search term' }
+            )}
+            fullWidth
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton type="submit">
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.analytics.viewDetailsButtonLabel',
+              'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetailSearchButtonLabel',
               { defaultMessage: 'View details' }
             )}
           </EuiButton>
