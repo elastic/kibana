@@ -117,10 +117,8 @@ export class UrlPanelContent extends Component<Props, State> {
         this.setState({
           anonymousAccessParameters,
         });
-      })();
 
-      if (this.props.showPublicUrlSwitch) {
-        (async () => {
+        if (this.props.showPublicUrlSwitch) {
           const anonymousUserCapabilities = await this.props.anonymousAccess!.getCapabilities();
 
           if (!this.mounted) {
@@ -132,8 +130,8 @@ export class UrlPanelContent extends Component<Props, State> {
           this.setState({
             showPublicUrlSwitch,
           });
-        })();
-      }
+        }
+      })();
     }
   }
 
