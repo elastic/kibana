@@ -15,7 +15,7 @@ import { CoreStart, HttpStart } from 'kibana/public';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
-import { SecurityOssPluginStart } from '../../../security_oss/public';
+import type { SecurityOssPluginStart } from '../../../security_oss/public';
 
 export class ShareMenuManager {
   private isOpen = false;
@@ -25,7 +25,7 @@ export class ShareMenuManager {
   start(
     core: CoreStart,
     shareRegistry: ShareMenuRegistryStart,
-    anonymousAccess: SecurityOssPluginStart['anonymousAccess'] | undefined = undefined
+    anonymousAccess?: SecurityOssPluginStart['anonymousAccess']
   ) {
     return {
       /**

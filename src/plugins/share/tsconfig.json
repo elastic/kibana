@@ -7,7 +7,7 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "index.ts"],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },

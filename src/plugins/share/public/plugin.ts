@@ -10,7 +10,7 @@ import './index.scss';
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
-import { SecurityOssPluginSetup, SecurityOssPluginStart } from '../../security_oss/public';
+import type { SecurityOssPluginSetup, SecurityOssPluginStart } from '../../security_oss/public';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
 import { createShortUrlRedirectApp } from './services/short_url_redirect_app';
 import {
@@ -45,7 +45,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       ...this.shareContextMenu.start(
         core,
         this.shareMenuRegistry.start(),
-        plugins.securityOss?.anonymousAccess || undefined
+        plugins.securityOss?.anonymousAccess
       ),
       urlGenerators: this.urlGeneratorsService.start(core),
     };

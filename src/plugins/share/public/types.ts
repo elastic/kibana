@@ -36,7 +36,7 @@ export interface ShareContext {
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
   onClose: () => void;
-  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => Promise<boolean>;
+  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
 }
 
 /**

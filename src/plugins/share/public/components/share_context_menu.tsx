@@ -17,7 +17,7 @@ import type { Capabilities } from 'src/core/public';
 
 import { UrlPanelContent } from './url_panel_content';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
-import { SecurityOssPluginStart } from '../../../security_oss/public';
+import type { SecurityOssPluginStart } from '../../../security_oss/public';
 
 interface Props {
   allowEmbed: boolean;

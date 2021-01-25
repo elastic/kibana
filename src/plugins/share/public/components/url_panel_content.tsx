@@ -32,7 +32,7 @@ import type { Capabilities } from 'src/core/public';
 
 import { shortenUrl } from '../lib/url_shortener';
 import { UrlParamExtension } from '../types';
-import { SecurityOssPluginStart } from '../../../security_oss/public';
+import type { SecurityOssPluginStart } from '../../../security_oss/public';
 
 interface Props {
   allowShortUrl: boolean;
@@ -341,7 +341,7 @@ export class UrlPanelContent extends Component<Props, State> {
     this.createShortUrl();
   };
 
-  private handlePublicUrlChange = async (evt: EuiSwitchEvent) => {
+  private handlePublicUrlChange = () => {
     this.setState(({ usePublicUrl }) => {
       return {
         usePublicUrl: !usePublicUrl,
