@@ -26,8 +26,8 @@ function getAnomalyFeatures(anomalies: AnomalyRecordDoc[], type: 'actual_point' 
       },
       properties: {
         ...(anomaly.entityName ? { [anomaly.entityName]: anomaly.entityValue } : {}),
-        severity: anomaly.severity,
-        [type]: coordinates,
+        severity: Math.floor(anomaly.severity),
+        [type]: coordinates.map((point: number) => point.toFixed(2)),
       },
     };
   });

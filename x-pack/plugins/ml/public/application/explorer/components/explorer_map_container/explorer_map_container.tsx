@@ -5,6 +5,7 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { EmbeddedMapComponent } from './embedded_map';
@@ -24,7 +25,12 @@ export const ExplorerMapContainer: FC<Props> = ({ anomalies }) => {
           buttonContent={
             <EuiTitle className="panel-title">
               <h2>
-                <FormattedMessage id="xpack.ml.explorer.mapTitle" defaultMessage="Anomaly Map" />
+                <FormattedMessage
+                  id="xpack.ml.explorer.mapTitle"
+                  defaultMessage={i18n.translate('xpack.ml.explorer.mapTitle', {
+                    defaultMessage: 'Anomalies map',
+                  })}
+                />
               </h2>
             </EuiTitle>
           }
