@@ -5,8 +5,7 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  IRouter,
+import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
   IScopedClusterClient,
@@ -15,6 +14,7 @@ import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 import { UptimeESClient } from '../../lib';
+import type { UptimeRouter } from '../../../types';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
   params: {
@@ -29,7 +29,7 @@ export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
 ) => Promise<T> | T;
 
 export interface UptimeCoreSetup {
-  router: IRouter;
+  router: UptimeRouter;
 }
 
 export interface UptimeCorePlugins {

@@ -6,10 +6,9 @@
 
 import React, { useEffect } from 'react';
 
-import { History } from 'history';
 import { useActions, useValues } from 'kea';
 import moment from 'moment';
-import { Route, Switch, useHistory, useParams } from 'react-router-dom';
+import { Route, Switch, useParams } from 'react-router-dom';
 
 import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
@@ -46,14 +45,13 @@ import { SourceInfoCard } from './components/source_info_card';
 import { SourceSettings } from './components/source_settings';
 
 export const SourceRouter: React.FC = () => {
-  const history = useHistory() as History;
   const { sourceId } = useParams() as { sourceId: string };
   const { initializeSource } = useActions(SourceLogic);
   const { contentSource, dataLoading } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
-    initializeSource(sourceId, history);
+    initializeSource(sourceId);
   }, []);
 
   if (dataLoading) return <Loading />;

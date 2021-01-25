@@ -5,6 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { Map as MbMap } from 'mapbox-gl';
 import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
@@ -68,7 +69,7 @@ export interface ILayer {
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
   canShowTooltip(): boolean;
-  syncLayerWithMB(mbMap: unknown): void;
+  syncLayerWithMB(mbMap: MbMap): void;
   getLayerTypeIconName(): string;
   isDataLoaded(): boolean;
   getIndexPatternIds(): string[];
@@ -418,7 +419,7 @@ export class AbstractLayer implements ILayer {
     return false;
   }
 
-  syncLayerWithMB(mbMap: unknown) {
+  syncLayerWithMB(mbMap: MbMap) {
     throw new Error('Should implement AbstractLayer#syncLayerWithMB');
   }
 
