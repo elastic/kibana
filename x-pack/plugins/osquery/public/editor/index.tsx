@@ -5,16 +5,17 @@
  */
 
 import React, { useCallback } from 'react';
-import AceEditor from 'react-ace';
+import { EuiCodeEditor } from '@elastic/eui';
+import 'brace/mode/sql';
+import 'brace/theme/tomorrow';
+import 'brace/ext/language_tools';
 
-import 'ace-builds/src-min-noconflict/ext-searchbox';
-import 'ace-builds/src-min-noconflict/ext-language_tools';
-import 'ace-builds/src-noconflict/mode-sql';
-import 'ace-builds/src-noconflict/theme-tomorrow';
+import './osquery_mode';
 
 const EDITOR_SET_OPTIONS = {
-  enableBasicAutocompletion: true,
   // useWorker: false,
+  enableBasicAutocompletion: true,
+  enableLiveAutocompletion: true,
 };
 
 interface OsqueryEditorProps {
@@ -32,9 +33,9 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, on
   );
 
   return (
-    <AceEditor
+    <EuiCodeEditor
       value={defaultValue}
-      mode="sql"
+      mode="osquery"
       theme="tomorrow"
       onChange={handleChange}
       name="osquery_editor"
