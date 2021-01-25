@@ -6,7 +6,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { first, startsWith } from 'lodash';
-import { RequestHandlerContext } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { InfraMetadataInfo } from '../../../../common/http_api/metadata_api';
@@ -17,7 +17,7 @@ import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export const getNodeInfo = async (
   framework: KibanaFramework,
-  requestContext: RequestHandlerContext,
+  requestContext: InfraPluginRequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
   nodeType: InventoryItemType,

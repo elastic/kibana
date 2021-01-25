@@ -3,15 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { AgentSOAttributes } from '../../types';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import * as APIKeyService from '../api_keys';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 import { getAgent, getAgentPolicyForAgent, getAgents, listAllAgents } from './crud';
 
-async function unenrollAgentIsAllowed(soClient: SavedObjectsClientContract, agentId: string) {
-  const agentPolicy = await getAgentPolicyForAgent(soClient, agentId);
+async function unenrollAgentIsAllowed(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentId: string
+) {
+  const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
     throw new Error(`Cannot unenroll ${agentId} from a managed agent policy ${agentPolicy.id}`);
   }
@@ -19,8 +23,12 @@ async function unenrollAgentIsAllowed(soClient: SavedObjectsClientContract, agen
   return true;
 }
 
-export async function unenrollAgent(soClient: SavedObjectsClientContract, agentId: string) {
-  await unenrollAgentIsAllowed(soClient, agentId);
+export async function unenrollAgent(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentId: string
+) {
+  await unenrollAgentIsAllowed(soClient, esClient, agentId);
 
   const now = new Date().toISOString();
   await createAgentAction(soClient, {
@@ -35,6 +43,7 @@ export async function unenrollAgent(soClient: SavedObjectsClientContract, agentI
 
 export async function unenrollAgents(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   options:
     | {
         agentIds: string[];
@@ -47,7 +56,7 @@ export async function unenrollAgents(
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
       : (
-          await listAllAgents(soClient, {
+          await listAllAgents(soClient, esClient, {
             kuery: options.kuery,
             showInactive: false,
           })
@@ -59,7 +68,9 @@ export async function unenrollAgents(
   );
   // And which are allowed to unenroll
   const settled = await Promise.allSettled(
-    agentsEnrolled.map((agent) => unenrollAgentIsAllowed(soClient, agent.id).then((_) => agent))
+    agentsEnrolled.map((agent) =>
+      unenrollAgentIsAllowed(soClient, esClient, agent.id).then((_) => agent)
+    )
   );
   const agentsToUpdate = agentsEnrolled.filter((_, index) => settled[index].status === 'fulfilled');
 
@@ -87,8 +98,12 @@ export async function unenrollAgents(
   );
 }
 
-export async function forceUnenrollAgent(soClient: SavedObjectsClientContract, agentId: string) {
-  const agent = await getAgent(soClient, agentId);
+export async function forceUnenrollAgent(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentId: string
+) {
+  const agent = await getAgent(soClient, esClient, agentId);
 
   await Promise.all([
     agent.access_api_key_id
@@ -107,6 +122,7 @@ export async function forceUnenrollAgent(soClient: SavedObjectsClientContract, a
 
 export async function forceUnenrollAgents(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   options:
     | {
         agentIds: string[];
@@ -120,7 +136,7 @@ export async function forceUnenrollAgents(
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
       : (
-          await listAllAgents(soClient, {
+          await listAllAgents(soClient, esClient, {
             kuery: options.kuery,
             showInactive: false,
           })

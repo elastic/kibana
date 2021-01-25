@@ -39,6 +39,14 @@ export function isErr<T, E>(result: Result<T, E>): result is Err<E> {
   return !isOk(result);
 }
 
+export function tryAsResult<T, E>(fn: () => T): Result<T, E> {
+  try {
+    return asOk(fn());
+  } catch (e) {
+    return asErr(e);
+  }
+}
+
 export async function promiseResult<T, E>(future: Promise<T>): Promise<Result<T, E>> {
   try {
     return asOk(await future);

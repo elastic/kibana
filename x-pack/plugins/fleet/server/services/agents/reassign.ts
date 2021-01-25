@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes } from '../../types';
@@ -14,6 +14,7 @@ import { createAgentAction, bulkCreateAgentActions } from './actions';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agentId: string,
   newAgentPolicyId: string
 ) {
@@ -22,7 +23,7 @@ export async function reassignAgent(
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
 
-  await reassignAgentIsAllowed(soClient, agentId);
+  await reassignAgentIsAllowed(soClient, esClient, agentId);
 
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
     policy_id: newAgentPolicyId,
@@ -36,8 +37,12 @@ export async function reassignAgent(
   });
 }
 
-async function reassignAgentIsAllowed(soClient: SavedObjectsClientContract, agentId: string) {
-  const agentPolicy = await getAgentPolicyForAgent(soClient, agentId);
+async function reassignAgentIsAllowed(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentId: string
+) {
+  const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
     throw new Error(`Cannot reassign an agent from managed agent policy ${agentPolicy?.id}`);
   }
@@ -45,6 +50,7 @@ async function reassignAgentIsAllowed(soClient: SavedObjectsClientContract, agen
 
 export async function reassignAgents(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   options:
     | {
         agentIds: string[];
@@ -64,7 +70,7 @@ export async function reassignAgents(
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
       : (
-          await listAllAgents(soClient, {
+          await listAllAgents(soClient, esClient, {
             kuery: options.kuery,
             showInactive: false,
           })
