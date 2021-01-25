@@ -158,10 +158,6 @@ export function getAlertType(
       throw new Error(getInvalidComparatorError(params.thresholdComparator));
     }
 
-    logger.info('EXECUTING SEARCH ALERT');
-    logger.info(JSON.stringify(params));
-    logger.info(`previousTimestamp: ${previousTimestamp}`);
-
     // During each alert execution, we run the configured query, get a hit count
     // (hits.total) and retrieve up to DEFAULT_MAX_HITS_PER_EXECUTION hits. We
     // evaluate the threshold condition using the value of hits.total. If the threshold
@@ -199,7 +195,7 @@ export function getAlertType(
       timeField: params.timeField,
     });
 
-    // logger.info(`QUERY RUN: ${JSON.stringify(query)}`);
+    logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`);
 
     let searchResult: SearchResponse<unknown> = await callCluster('search', query);
     // Needed until https://github.com/elastic/kibana/issues/26356 is resolved
@@ -207,7 +203,6 @@ export function getAlertType(
 
     if (searchResult.hits.hits.length > 0) {
       const numMatches = searchResult.hits.total;
-      logger.info(`alert ${ES_QUERY_ID}:${alertId} "${name}" query has ${numMatches} matches`);
       logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query has ${numMatches} matches`);
 
       // apply the alert condition
@@ -228,9 +223,9 @@ export function getAlertType(
         const actionContext = addMessages(options, baseContext, params);
         const alertInstance = options.services.alertInstanceFactory(ConditionMetAlertInstanceId);
         alertInstance
-          .replaceState({ latestTimestamp: timestamp })
+          // store the params we would need to recreate the query that led to this alert instance
+          .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })
           .scheduleActions(ActionGroupId, actionContext);
-        // logger.info(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
         logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
 
         // update the timestamp based on the current search results
@@ -238,11 +233,7 @@ export function getAlertType(
         if (lastTimestamp != null && lastTimestamp.length !== 0) {
           timestamp = lastTimestamp[0];
         }
-      } else {
-        logger.info('ALERT CONDITION NOT MATCHED');
       }
-    } else {
-      logger.info('QUERY HAD NO MATCHES');
     }
 
     return {

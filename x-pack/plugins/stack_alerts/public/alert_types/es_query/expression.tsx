@@ -19,8 +19,9 @@ import {
   EuiCallOut,
   EuiText,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
-import { HttpSetup } from 'kibana/public';
+import { DocLinksStart, HttpSetup } from 'kibana/public';
 import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
@@ -62,6 +63,7 @@ const xJsonMode = new XJsonMode();
 
 interface KibanaDeps {
   http: HttpSetup;
+  docLinks: DocLinksStart;
 }
 
 export const EsQueryAlertTypeExpression: React.FunctionComponent<
@@ -86,7 +88,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
   });
 
-  const { http } = useKibana<KibanaDeps>().services;
+  const { http, docLinks } = useKibana<KibanaDeps>().services;
 
   const [esFields, setEsFields] = useState<
     Array<{
@@ -148,13 +150,17 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     }
   };
 
-  const onTestQuery = async () => {
+  const hasValidationErrors = () => {
     const { errors: validationErrors } = validateExpression(currentAlertParams);
-    if (
-      Object.keys(validationErrors).every(
-        (key) => !validationErrors[key] || !validationErrors[key].length
-      )
-    ) {
+    return Object.keys(validationErrors).some(
+      (key) => validationErrors[key] && validationErrors[key].length
+    );
+  };
+
+  const onTestQuery = async () => {
+    if (!hasValidationErrors()) {
+      setTestQueryError(null);
+      setTestQueryResult(null);
       try {
         const window = `${timeWindowSize}${timeWindowUnit}`;
         const timeWindow = parseDuration(window);
@@ -175,7 +181,6 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           .toPromise();
 
         const hits = rawResponse.hits;
-        setTestQueryError(null);
         setTestQueryResult(
           i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
             defaultMessage: 'Query matched {count} documents in the last {window}',
@@ -184,7 +189,6 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         );
       } catch (err) {
         const message = err?.body?.message;
-        setTestQueryResult(null);
         setTestQueryError(
           i18n.translate('xpack.stackAlerts.esQuery.ui.queryError', {
             defaultMessage: 'Error testing query: {message}',
@@ -261,10 +265,15 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         isInvalid={errors.esQuery.length > 0}
         error={errors.esQuery}
         helpText={
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.queryPrompt.help"
-            defaultMessage="Help meeeeee."
-          />
+          <EuiLink
+            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/query-dsl.html`}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.stackAlerts.esQuery.ui.queryPrompt.help"
+              defaultMessage="ES Query DSL documentation."
+            />
+          </EuiLink>
         }
       >
         <EuiCodeEditor
@@ -290,6 +299,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           iconSide={'left'}
           flush={'left'}
           iconType={'play'}
+          disabled={hasValidationErrors()}
           onClick={onTestQuery}
         >
           <FormattedMessage
@@ -312,7 +322,6 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           </EuiText>
         </EuiFormRow>
       )}
-
       <EuiSpacer />
       <EuiTitle size="xs">
         <h5>
