@@ -18,6 +18,7 @@ jest.mock('../engine', () => ({
 
 import { DEFAULT_START_DATE, DEFAULT_END_DATE } from './constants';
 import { AnalyticsLogic } from './';
+import { waitForPromises } from '../../../__mocks__/wait_for_promises';
 
 describe('AnalyticsLogic', () => {
   const { mount } = new LogicMounter(AnalyticsLogic);
@@ -155,13 +156,12 @@ describe('AnalyticsLogic', () => {
       });
 
       it('should make an API call and set state based on the response', async () => {
-        const promise = Promise.resolve(MOCK_ANALYTICS_RESPONSE);
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.resolve(MOCK_ANALYTICS_RESPONSE));
         mount();
         jest.spyOn(AnalyticsLogic.actions, 'onAnalyticsDataLoad');
 
         AnalyticsLogic.actions.loadAnalyticsData();
-        await promise;
+        await waitForPromises();
 
         expect(http.get).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/analytics/queries',
@@ -199,13 +199,12 @@ describe('AnalyticsLogic', () => {
       });
 
       it('calls onAnalyticsUnavailable if analyticsUnavailable is in response', async () => {
-        const promise = Promise.resolve({ analyticsUnavailable: true });
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.resolve({ analyticsUnavailable: true }));
         mount();
         jest.spyOn(AnalyticsLogic.actions, 'onAnalyticsUnavailable');
 
         AnalyticsLogic.actions.loadAnalyticsData();
-        await promise;
+        await waitForPromises();
 
         expect(AnalyticsLogic.actions.onAnalyticsUnavailable).toHaveBeenCalled();
       });
@@ -237,13 +236,12 @@ describe('AnalyticsLogic', () => {
       });
 
       it('should make an API call and set state based on the response', async () => {
-        const promise = Promise.resolve(MOCK_QUERY_RESPONSE);
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.resolve(MOCK_QUERY_RESPONSE));
         mount();
         jest.spyOn(AnalyticsLogic.actions, 'onQueryDataLoad');
 
         AnalyticsLogic.actions.loadQueryData('some-query');
-        await promise;
+        await waitForPromises();
 
         expect(http.get).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/analytics/queries/some-query',
@@ -277,25 +275,23 @@ describe('AnalyticsLogic', () => {
       });
 
       it('calls onAnalyticsUnavailable if analyticsUnavailable is in response', async () => {
-        const promise = Promise.resolve({ analyticsUnavailable: true });
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.resolve({ analyticsUnavailable: true }));
         mount();
         jest.spyOn(AnalyticsLogic.actions, 'onAnalyticsUnavailable');
 
         AnalyticsLogic.actions.loadQueryData('some-query');
-        await promise;
+        await waitForPromises();
 
         expect(AnalyticsLogic.actions.onAnalyticsUnavailable).toHaveBeenCalled();
       });
 
       it('handles errors', async () => {
-        const promise = Promise.reject('error');
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.reject('error'));
         mount();
         jest.spyOn(AnalyticsLogic.actions, 'onAnalyticsUnavailable');
 
         AnalyticsLogic.actions.loadQueryData('some-query');
-        await expectedAsyncError(promise);
+        await expectedAsyncError(waitForPromises());
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
         expect(AnalyticsLogic.actions.onAnalyticsUnavailable).toHaveBeenCalled();
