@@ -63,7 +63,7 @@ describe('request logging', () => {
             },
             loggers: [
               {
-                context: 'http.server.Kibana.response',
+                context: 'http.server.response',
                 appenders: ['test-console'],
                 level: 'debug',
               },
@@ -87,7 +87,7 @@ describe('request logging', () => {
         expect(mockConsoleLog).toHaveBeenCalledTimes(1);
         const [level, logger] = mockConsoleLog.mock.calls[0][0].split('|');
         expect(level).toBe('DEBUG');
-        expect(logger).toBe('http.server.Kibana.response');
+        expect(logger).toBe('http.server.response');
 
         await root.shutdown();
       });
@@ -113,7 +113,7 @@ describe('request logging', () => {
           },
           loggers: [
             {
-              context: 'http.server.Kibana.response',
+              context: 'http.server.response',
               appenders: ['test-console'],
               level: 'debug',
             },

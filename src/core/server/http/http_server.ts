@@ -292,7 +292,7 @@ export class HttpServer {
       this.log.warn(`setupResponseLogging called after stop`);
     }
 
-    const log = this.logger.get('http', 'server', this.name, 'response');
+    const log = this.logger.get('http', 'server', 'response');
 
     const handleResponse = (request: Request) => {
       const { message, ...rest } = getEcsResponseLog(request);

@@ -264,7 +264,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request/response data moving forward, please enable debug logs for the \\"http.server.Kibana.response\\" context in your logging configuration.",
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request/response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration.",
         ]
       `);
     });
@@ -275,7 +275,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request/response data moving forward, please enable debug logs for the \\"http.server.Kibana.response\\" context in your logging configuration.",
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request/response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration.",
         ]
       `);
     });
@@ -286,7 +286,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request/response data moving forward, please enable debug logs for the \\"http.server.Kibana.response\\" context in your logging configuration.",
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request/response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration.",
         ]
       `);
     });
