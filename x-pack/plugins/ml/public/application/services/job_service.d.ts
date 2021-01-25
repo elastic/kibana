@@ -18,6 +18,7 @@ declare interface JobService {
   jobs: CombinedJob[];
   createResultsUrlForJobs: (jobs: any[], target: string, timeRange?: TimeRange) => string;
   tempJobCloningObjects: {
+    datafeed: Datafeed;
     job: any;
     skipTimeRangeStep: boolean;
     start?: number;

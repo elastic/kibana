@@ -37,7 +37,6 @@ import { useMlContext } from '../../../../contexts/ml';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { getTimeBucketsFromCache } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
-import { expandCombinedJobConfig } from '../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
@@ -75,9 +74,9 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   if (mlJobService.tempJobCloningObjects.job !== undefined) {
     // cloning a job
     const clonedJob = mlJobService.cloneJob(mlJobService.tempJobCloningObjects.job);
-    const { job, datafeed } = expandCombinedJobConfig(clonedJob);
+    const datafeed = mlJobService.cloneJob(mlJobService.tempJobCloningObjects.datafeed);
     initCategorizationSettings();
-    jobCreator.cloneFromExistingJob(job, datafeed);
+    jobCreator.cloneFromExistingJob(clonedJob, datafeed);
 
     // if we're not skipping the time range, this is a standard job clone, so wipe the jobId
     if (mlJobService.tempJobCloningObjects.skipTimeRangeStep === false) {
