@@ -13,11 +13,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
 import { asTransactionRate } from '../../../../../common/utils/formatters';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useTransactionThroughputChartsFetcher } from '../../../../hooks/use_transaction_throughput_chart_fetcher';
 import { LatencyChart } from '../latency_chart';
 import { TimeseriesChart } from '../timeseries_chart';
@@ -25,9 +23,6 @@ import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
 
 export function TransactionCharts() {
-  const { urlParams } = useUrlParams();
-  const { transactionType } = urlParams;
-
   const {
     throughputChartsData,
     throughputChartsStatus,
@@ -49,11 +44,16 @@ export function TransactionCharts() {
             <EuiFlexItem style={{ flexShrink: 1 }}>
               <EuiPanel>
                 <EuiTitle size="xs">
-                  <span>{tpmLabel(transactionType)}</span>
+                  <span>
+                    {i18n.translate(
+                      'xpack.apm.metrics.transactionChart.throughputLabel',
+                      { defaultMessage: 'Throughput' }
+                    )}
+                  </span>
                 </EuiTitle>
                 <TimeseriesChart
                   fetchStatus={throughputChartsStatus}
-                  id="requestPerMinutes"
+                  id="transactionsPerMinute"
                   timeseries={throughputTimeseries}
                   yLabelFormat={asTransactionRate}
                 />
@@ -75,20 +75,4 @@ export function TransactionCharts() {
       </AnnotationsContextProvider>
     </>
   );
-}
-
-function tpmLabel(type?: string) {
-  return type === TRANSACTION_REQUEST
-    ? i18n.translate(
-        'xpack.apm.metrics.transactionChart.requestsPerMinuteLabel',
-        {
-          defaultMessage: 'Requests per minute',
-        }
-      )
-    : i18n.translate(
-        'xpack.apm.metrics.transactionChart.transactionsPerMinuteLabel',
-        {
-          defaultMessage: 'Transactions per minute',
-        }
-      );
 }

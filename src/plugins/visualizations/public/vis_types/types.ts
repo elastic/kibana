@@ -1,26 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { IconType } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { Adapters } from 'src/plugins/inspector';
-import { VisEditorConstructor } from 'src/plugins/visualize/public';
 import { IndexPattern, AggGroupNames, AggParam, AggGroupName } from '../../../data/public';
 import { Vis, VisParams, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
 
@@ -140,13 +128,6 @@ export interface VisType<TVisParams = unknown> {
   readonly schemas: ISchemas;
 
   readonly options: VisTypeOptions;
-
-  /**
-   * The editor that should be used to edit visualizations of this type.
-   * If this is not specified the default visualize editor will be used (and should be configured via schemas)
-   * and editorConfig.
-   */
-  readonly editor?: VisEditorConstructor;
 
   // TODO: The following types still need to be refined properly.
   readonly editorConfig: Record<string, any>;

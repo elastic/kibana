@@ -30,15 +30,9 @@
         "name": "Defense Evasion",
         "reference": "https://attack.mitre.org/tactics/TA0005/"
       },
-      "technique": [
-        {
-          "id": "T1064",
-          "name": "Scripting",
-          "reference": "https://attack.mitre.org/techniques/T1064/"
-        }
-      ]
+      "technique": []
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

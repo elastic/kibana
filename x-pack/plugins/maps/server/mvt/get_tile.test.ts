@@ -5,7 +5,7 @@
  */
 
 import { getGridTile, getTile } from './get_tile';
-import { TILE_GRIDAGGS, TILE_SEARCHES } from './__tests__/tile_es_responses';
+import { TILE_GRIDAGGS, TILE_SEARCHES } from './__fixtures__/tile_es_responses';
 import { Logger } from 'src/core/server';
 import {
   ES_GEO_FIELD_TYPE,

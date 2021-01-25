@@ -37,23 +37,8 @@
           "reference": "https://attack.mitre.org/techniques/T1053/"
         }
       ]
-    },
-    {
-      "framework": "MITRE ATT&CK",
-      "tactic": {
-        "id": "TA0002",
-        "name": "Execution",
-        "reference": "https://attack.mitre.org/tactics/TA0002/"
-      },
-      "technique": [
-        {
-          "id": "T1021",
-          "name": "Remote Services",
-          "reference": "https://attack.mitre.org/techniques/T1021/"
-        }
-      ]
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

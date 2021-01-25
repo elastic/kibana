@@ -7,6 +7,7 @@ exports[`Header renders correctly against snapshot 1`] = `
       Object {
         "columnHeaderType": "not-filtered",
         "id": "@timestamp",
+        "type": "number",
         "width": 190,
       }
     }
@@ -17,6 +18,7 @@ exports[`Header renders correctly against snapshot 1`] = `
       Array [
         Object {
           "columnId": "@timestamp",
+          "columnType": "number",
           "sortDirection": "desc",
         },
       ]
@@ -27,6 +29,7 @@ exports[`Header renders correctly against snapshot 1`] = `
         Object {
           "columnHeaderType": "not-filtered",
           "id": "@timestamp",
+          "type": "number",
           "width": 190,
         }
       }
@@ -36,6 +39,7 @@ exports[`Header renders correctly against snapshot 1`] = `
         Array [
           Object {
             "columnId": "@timestamp",
+            "columnType": "number",
             "sortDirection": "desc",
           },
         ]
@@ -47,6 +51,7 @@ exports[`Header renders correctly against snapshot 1`] = `
       Object {
         "columnHeaderType": "not-filtered",
         "id": "@timestamp",
+        "type": "number",
         "width": 190,
       }
     }

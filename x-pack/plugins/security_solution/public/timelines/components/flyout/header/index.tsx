@@ -44,7 +44,7 @@ import {
   startSelector,
   endSelector,
 } from '../../../../common/components/super_date_picker/selectors';
-import { combineQueries } from '../../timeline/helpers';
+import { combineQueries, focusActiveTimelineButton } from '../../timeline/helpers';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
@@ -97,10 +97,10 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     [dataProviders, kqlQuery]
   );
 
-  const handleClose = useCallback(
-    () => dispatch(timelineActions.showTimeline({ id: timelineId, show: false })),
-    [dispatch, timelineId]
-  );
+  const handleClose = useCallback(() => {
+    dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
+    focusActiveTimelineButton();
+  }, [dispatch, timelineId]);
 
   return (
     <StyledPanel

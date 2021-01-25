@@ -1,0 +1,84 @@
+plugins:
+  - stylelint-scss
+rules:
+  color-no-invalid-hex: true
+  function-calc-no-invalid: true
+  string-no-newline: true
+  unit-no-unknown: true
+  property-no-unknown:
+    - true
+    # Used in css modules
+    - ignoreProperties:
+      - composes
+  block-no-empty: true
+  selector-pseudo-class-no-unknown:
+    - true
+    # Used in css modules
+    - ignorePseudoClasses:
+      - local
+      - global
+  selector-pseudo-element-no-unknown: true
+  media-feature-name-no-unknown: true
+  at-rule-no-unknown:
+    - true
+    # Sass related mixins
+    - ignoreAtRules:
+      - include
+      - mixin
+      - if
+      - else
+      - each
+      - extend
+      - function
+      - return
+      - for
+  comment-no-empty: true
+  no-duplicate-at-import-rules: true
+  no-duplicate-selectors: true
+  no-extra-semicolons: true
+  alpha-value-notation: number
+  color-named: never
+  length-zero-no-unit: true
+  no-eol-whitespace: true
+  max-empty-lines: 1
+  # no-descending-specificity: true
+  number-leading-zero: never
+  color-hex-case: upper
+  string-quotes: single
+  indentation: 2
+  declaration-block-no-duplicate-properties:
+    - true
+    # We use some rare duplicate property values for browser variance
+    - ignoreProperties:
+      - font-size
+      - word-break
+      - composes
+      - filter
+      - background
+      - width
+      - transition
+      - display
+
+  # ($var / 2) rather than ($var/2)
+  function-calc-no-unspaced-operator: true
+
+  # something { not something{
+  block-opening-brace-space-before: always
+
+  # TODO: # Allows input[type=search]
+  selector-no-qualifying-type:
+    - true
+    - ignore:
+      - attribute
+
+  # Put a line-break between sections of CSS, but allow quicky one-liners for legibility
+  block-closing-brace-newline-after:
+    - always-multi-line
+    - ignoreAtRules:
+        - if
+        - else
+
+  # camelCase mixin, function, and variable names
+  scss/at-mixin-pattern: "^[a-z][a-zA-Z0-9]+$"
+  scss/at-function-pattern: "^[a-z][a-zA-Z0-9]+$"
+  scss/dollar-variable-pattern: "^[a-z][a-zA-Z0-9]+$"

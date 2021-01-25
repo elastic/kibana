@@ -37,7 +37,9 @@ const AlertCommentEventComponent: React.FC<Props> = ({ alert }) => {
   return ruleId != null && ruleName != null ? (
     <>
       {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
-      <EuiLink onClick={onLinkClick}>{ruleName}</EuiLink>
+      <EuiLink onClick={onLinkClick} data-test-subj={`alert-rule-link-${alert?._id ?? 'deleted'}`}>
+        {ruleName}
+      </EuiLink>
     </>
   ) : (
     <>{i18n.ALERT_RULE_DELETED_COMMENT_LABEL}</>

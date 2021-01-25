@@ -9,6 +9,7 @@ import {
   createMockSavedObjectsRepository,
   mockCaseNoConnectorId,
   mockCases,
+  mockCaseComments,
 } from '../../routes/api/__fixtures__';
 import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
 
@@ -37,7 +38,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.update({
         caseClient: caseClient.client,
         cases: patchCases,
@@ -120,7 +121,7 @@ describe('update', () => {
         ],
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.update({
         caseClient: caseClient.client,
         cases: patchCases,
@@ -156,6 +157,61 @@ describe('update', () => {
       ]);
     });
 
+    test('it change the status of case to in-progress correctly', async () => {
+      const patchCases = {
+        cases: [
+          {
+            id: 'mock-id-4',
+            status: CaseStatuses['in-progress'],
+            version: 'WzUsMV0=',
+          },
+        ],
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      });
+
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
+
+      expect(res).toEqual([
+        {
+          closed_at: null,
+          closed_by: null,
+          comments: [],
+          connector: {
+            id: '123',
+            name: 'My connector',
+            type: ConnectorTypes.jira,
+            fields: {
+              issueType: 'Task',
+              parent: null,
+              priority: 'High',
+            },
+          },
+          created_at: '2019-11-25T22:32:17.947Z',
+          created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
+          description: 'Oh no, a bad meanie going LOLBins all over the place!',
+          id: 'mock-id-4',
+          external_service: null,
+          status: CaseStatuses['in-progress'],
+          tags: ['LOLBins'],
+          title: 'Another bad one',
+          totalComment: 0,
+          updated_at: '2019-11-25T21:54:48.952Z',
+          updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
+          version: 'WzE3LDFd',
+          settings: {
+            syncAlerts: true,
+          },
+        },
+      ]);
+    });
+
     test('it updates a case without a connector.id', async () => {
       const patchCases = {
         cases: [
@@ -171,7 +227,7 @@ describe('update', () => {
         caseSavedObject: [mockCaseNoConnectorId],
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.update({
         caseClient: caseClient.client,
         cases: patchCases,
@@ -227,7 +283,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.update({
         caseClient: caseClient.client,
         cases: patchCases,
@@ -270,6 +326,204 @@ describe('update', () => {
         },
       ]);
     });
+
+    test('it updates alert status when the status is updated and syncAlerts=true', async () => {
+      const patchCases = {
+        cases: [
+          {
+            id: 'mock-id-1',
+            status: CaseStatuses.closed,
+            version: 'WzAsMV0=',
+          },
+        ],
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: [{ ...mockCaseComments[3] }],
+      });
+
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      caseClient.client.updateAlertsStatus = jest.fn();
+
+      await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
+
+      expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
+        ids: ['test-id'],
+        status: 'closed',
+      });
+    });
+
+    test('it does NOT updates alert status when the status is updated and syncAlerts=false', async () => {
+      const patchCases = {
+        cases: [
+          {
+            id: 'mock-id-1',
+            status: CaseStatuses.closed,
+            version: 'WzAsMV0=',
+          },
+        ],
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: [
+          {
+            ...mockCases[0],
+            attributes: { ...mockCases[0].attributes, settings: { syncAlerts: false } },
+          },
+        ],
+        caseCommentSavedObject: [{ ...mockCaseComments[3] }],
+      });
+
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      caseClient.client.updateAlertsStatus = jest.fn();
+
+      await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
+
+      expect(caseClient.client.updateAlertsStatus).not.toHaveBeenCalled();
+    });
+
+    test('it updates alert status when syncAlerts is turned on', async () => {
+      const patchCases = {
+        cases: [
+          {
+            id: 'mock-id-1',
+            settings: { syncAlerts: true },
+            version: 'WzAsMV0=',
+          },
+        ],
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: [
+          {
+            ...mockCases[0],
+            attributes: { ...mockCases[0].attributes, settings: { syncAlerts: false } },
+          },
+        ],
+        caseCommentSavedObject: [{ ...mockCaseComments[3] }],
+      });
+
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      caseClient.client.updateAlertsStatus = jest.fn();
+
+      await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
+
+      expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
+        ids: ['test-id'],
+        status: 'open',
+      });
+    });
+
+    test('it does NOT updates alert status when syncAlerts is turned off', async () => {
+      const patchCases = {
+        cases: [
+          {
+            id: 'mock-id-1',
+            settings: { syncAlerts: false },
+            version: 'WzAsMV0=',
+          },
+        ],
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: [{ ...mockCaseComments[3] }],
+      });
+
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      caseClient.client.updateAlertsStatus = jest.fn();
+
+      await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
+
+      expect(caseClient.client.updateAlertsStatus).not.toHaveBeenCalled();
+    });
+
+    test('it updates alert status for multiple cases', async () => {
+      const patchCases = {
+        cases: [
+          {
+            id: 'mock-id-1',
+            settings: { syncAlerts: true },
+            version: 'WzAsMV0=',
+          },
+          {
+            id: 'mock-id-2',
+            status: CaseStatuses.closed,
+            version: 'WzQsMV0=',
+          },
+        ],
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: [
+          {
+            ...mockCases[0],
+            attributes: { ...mockCases[0].attributes, settings: { syncAlerts: false } },
+          },
+          {
+            ...mockCases[1],
+          },
+        ],
+        caseCommentSavedObject: [{ ...mockCaseComments[3] }, { ...mockCaseComments[4] }],
+      });
+
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      caseClient.client.updateAlertsStatus = jest.fn();
+
+      await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
+
+      expect(caseClient.client.updateAlertsStatus).toHaveBeenNthCalledWith(1, {
+        ids: ['test-id', 'test-id-2'],
+        status: 'open',
+      });
+
+      expect(caseClient.client.updateAlertsStatus).toHaveBeenNthCalledWith(2, {
+        ids: ['test-id', 'test-id-2'],
+        status: 'closed',
+      });
+    });
+
+    test('it does NOT call updateAlertsStatus when there is no comments of type alerts', async () => {
+      const patchCases = {
+        cases: [
+          {
+            id: 'mock-id-1',
+            status: CaseStatuses.closed,
+            version: 'WzAsMV0=',
+          },
+        ],
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      });
+
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      caseClient.client.updateAlertsStatus = jest.fn();
+
+      await caseClient.client.update({
+        caseClient: caseClient.client,
+        cases: patchCases,
+      });
+
+      expect(caseClient.client.updateAlertsStatus).not.toHaveBeenCalled();
+    });
   });
 
   describe('unhappy path', () => {
@@ -293,7 +547,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         // @ts-expect-error
         .update({ cases: patchCases })
@@ -324,7 +578,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         // @ts-expect-error
         .update({ cases: patchCases })
@@ -351,7 +605,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
@@ -381,7 +635,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
@@ -408,7 +662,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);

@@ -147,6 +147,71 @@ describe('hitsToGeoJson', () => {
     });
   });
 
+  it('Should create feature per item when geometry value is a geometry-collection', () => {
+    const hits = [
+      {
+        _id: 'doc1',
+        _index: 'index1',
+        _source: {
+          [geoFieldName]: {
+            type: 'GeometryCollection',
+            geometries: [
+              {
+                type: 'geometrycollection', //explicitly test coercion to proper GeoJson type value
+                geometries: [
+                  {
+                    type: 'point', //explicitly test coercion to proper GeoJson type value
+                    coordinates: [0, 0],
+                  },
+                ],
+              },
+              {
+                type: 'LineString',
+                coordinates: [
+                  [0, 0],
+                  [1, 1],
+                ],
+              },
+            ],
+          },
+          myField: 8,
+        },
+      },
+    ];
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_shape', []);
+    expect(geojson.type).toBe('FeatureCollection');
+    expect(geojson.features.length).toBe(2);
+    expect(geojson.features[0]).toEqual({
+      geometry: {
+        coordinates: [0, 0],
+        type: 'Point',
+      },
+      id: 'index1:doc1:0',
+      properties: {
+        _id: 'doc1',
+        _index: 'index1',
+        myField: 8,
+      },
+      type: 'Feature',
+    });
+    expect(geojson.features[1]).toEqual({
+      geometry: {
+        coordinates: [
+          [0, 0],
+          [1, 1],
+        ],
+        type: 'LineString',
+      },
+      id: 'index1:doc1:1',
+      properties: {
+        _id: 'doc1',
+        _index: 'index1',
+        myField: 8,
+      },
+      type: 'Feature',
+    });
+  });
+
   it('Should convert epoch_millis value from string to integer', () => {
     const hits = [
       {

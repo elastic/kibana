@@ -17,6 +17,7 @@ import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/
 import { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
   IndexPatternDatasource,
@@ -37,7 +38,7 @@ import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
-import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
+import { getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { PLUGIN_ID_OSS } from '../../../../src/plugins/lens_oss/common/constants';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
@@ -45,6 +46,11 @@ import { visualizeFieldAction } from './trigger_actions/visualize_field_actions'
 import { getSearchProvider } from './search_provider';
 
 import { LensAttributeService } from './lens_attribute_service';
+import { LensEmbeddableInput } from './editor_frame_service/embeddable';
+import {
+  EmbeddableComponentProps,
+  getEmbeddableComponent,
+} from './editor_frame_service/embeddable/embeddable_component';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -66,6 +72,31 @@ export interface LensPluginStartDependencies {
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
+}
+
+export interface LensPublicStart {
+  /**
+   * React component which can be used to embed a Lens visualization into another application.
+   * See `x-pack/examples/embedded_lens_example` for exemplary usage.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>;
+  /**
+   * Method which navigates to the Lens editor, loading the state specified by the `input` parameter.
+   * See `x-pack/examples/embedded_lens_example` for exemplary usage.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  navigateToPrefilledEditor: (input: LensEmbeddableInput) => void;
+  /**
+   * Method which returns true if the user has permission to use Lens as defined by application capabilities.
+   */
+  canUseEditor: () => boolean;
 }
 
 export class LensPlugin {
@@ -174,8 +205,9 @@ export class LensPlugin {
     urlForwarding.forwardApp('lens', 'lens');
   }
 
-  start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
-    this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
+  start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {
+    const frameStart = this.editorFrameService.start(core, startDependencies);
+    this.createEditorFrame = frameStart.createInstance;
     // unregisters the OSS alias
     startDependencies.visualizations.unRegisterAlias(PLUGIN_ID_OSS);
     // unregisters the Visualize action and registers the lens one
@@ -186,6 +218,29 @@ export class LensPlugin {
       VISUALIZE_FIELD_TRIGGER,
       visualizeFieldAction(core.application)
     );
+
+    return {
+      EmbeddableComponent: getEmbeddableComponent(startDependencies.embeddable),
+      navigateToPrefilledEditor: (input: LensEmbeddableInput) => {
+        if (input.timeRange) {
+          startDependencies.data.query.timefilter.timefilter.setTime(input.timeRange);
+        }
+        const transfer = new EmbeddableStateTransfer(
+          core.application.navigateToApp,
+          core.application.currentAppId$
+        );
+        transfer.navigateToEditor('lens', {
+          path: getEditPath(undefined),
+          state: {
+            originatingApp: '',
+            valueInput: input,
+          },
+        });
+      },
+      canUseEditor: () => {
+        return Boolean(core.application.capabilities.visualize?.show);
+      },
+    };
   }
 
   stop() {

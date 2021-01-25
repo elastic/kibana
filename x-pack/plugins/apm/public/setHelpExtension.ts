@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
+import { getUpgradeAssistantHref } from './components/shared/Links/kibana';
 
 export function setHelpExtension({ chrome, http }: CoreStart) {
   chrome.setHelpExtension({
@@ -19,7 +20,7 @@ export function setHelpExtension({ chrome, http }: CoreStart) {
       },
       {
         linkType: 'custom',
-        href: http.basePath.prepend('/app/management/stack/upgrade_assistant'),
+        href: getUpgradeAssistantHref(http.basePath),
         content: i18n.translate('xpack.apm.helpMenu.upgradeAssistantLink', {
           defaultMessage: 'Upgrade assistant',
         }),

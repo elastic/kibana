@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Space } from '../../../../../src/plugins/spaces_oss/common';
 import { KibanaFeature } from '../../../../plugins/features/server';
-import { Space } from '../../common/model/space';
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 import { Capabilities, CoreSetup } from 'src/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';

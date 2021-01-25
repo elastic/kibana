@@ -12,10 +12,13 @@ export function handleResponse(response, isCloudEnabled) {
   for (const source of sources) {
     const monitoringSettings = get(response[source], 'xpack.monitoring');
     if (monitoringSettings !== undefined) {
-      const check = findReason(monitoringSettings, {
-        context: `cluster ${source}`,
-        isCloudEnabled,
-      });
+      const check = findReason(
+        monitoringSettings,
+        {
+          context: `cluster ${source}`,
+        },
+        isCloudEnabled
+      );
 
       if (check.found) {
         return check;
