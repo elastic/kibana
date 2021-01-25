@@ -7,7 +7,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { EcsOpsMetricsEvent, EcsEventKind, EcsEventCategory, EcsEventType } from '../../logging';
+import { EcsEvent, EcsEventKind, EcsEventCategory, EcsEventType } from '../../logging';
 import { OpsMetrics } from '..';
 
 const ECS_VERSION = '1.7.0';
@@ -16,7 +16,7 @@ const ECS_VERSION = '1.7.0';
  *
  * @internal
  */
-export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsOpsMetricsEvent {
+export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsEvent {
   const { process, os } = metrics;
   const processMemoryUsedInBytes = process?.memory?.heap?.used_in_bytes;
   const processMemoryUsedInBytesMsg = processMemoryUsedInBytes

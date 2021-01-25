@@ -11,7 +11,7 @@ import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import numeral from '@elastic/numeral';
 import { LogMeta } from '@kbn/logging';
-import { EcsEvent } from './ecs';
+import { EcsEvent } from '../../logging';
 import { getResponsePayloadBytes } from './get_payload_size';
 
 /**
