@@ -25,7 +25,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/agent_policy'
+                      $ref: '#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item'
                   total:
                     type: number
                   page:
@@ -39,9 +39,24 @@ paths:
                   - perPage
       operationId: agent-policy-list
       parameters:
-        - $ref: '#/components/parameters/page_size'
-        - $ref: '#/components/parameters/page_index'
-        - $ref: '#/components/parameters/kuery'
+        - name: perPage
+          in: query
+          description: The number of items to return
+          required: false
+          schema:
+            type: integer
+            default: 50
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: kuery
+          in: query
+          required: false
+          schema:
+            type: string
       description: ''
     post:
       summary: Agent policy - Create
@@ -55,16 +70,53 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/components/schemas/agent_policy'
+                    allOf:
+                      - $ref: '#/paths/~1agent_policies/post/requestBody/content/application~1json/schema'
+                      - type: object
+                        properties:
+                          id:
+                            type: string
+                          status:
+                            type: string
+                            enum:
+                              - active
+                              - inactive
+                          packagePolicies:
+                            oneOf:
+                              - items:
+                                  type: string
+                              - items:
+                                  $ref: '#/paths/~1package_policies~1%7BpackagePolicyId%7D/get/responses/200/content/application~1json/schema/properties/item'
+                            type: array
+                          updated_on:
+                            type: string
+                            format: date-time
+                          updated_by:
+                            type: string
+                          revision:
+                            type: number
+                          agents:
+                            type: number
+                        required:
+                          - id
+                          - status
       operationId: post-agent-policy
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/new_agent_policy'
+              title: NewAgentPolicy
+              type: object
+              properties:
+                name:
+                  type: string
+                namespace:
+                  type: string
+                description:
+                  type: string
       security: []
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
   '/agent_policies/{agentPolicyId}':
     parameters:
       - schema:
@@ -84,7 +136,7 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/components/schemas/agent_policy'
+                    $ref: '#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item'
                 required:
                   - item
       operationId: agent-policy-info
@@ -102,7 +154,7 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/components/schemas/agent_policy'
+                    $ref: '#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item'
                 required:
                   - item
       operationId: put-agent-policy-agentPolicyId
@@ -110,9 +162,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/new_agent_policy'
+              $ref: '#/paths/~1agent_policies/post/requestBody/content/application~1json/schema'
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
   '/agent_policies/{agentPolicyId}/copy':
     parameters:
       - schema:
@@ -132,7 +184,7 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/components/schemas/agent_policy'
+                    $ref: '#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item'
                 required:
                   - item
       requestBody:
@@ -181,7 +233,7 @@ paths:
                   items:
                     type: string
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
     parameters: []
   /agent-status:
     get:
@@ -251,7 +303,7 @@ paths:
                   - action
       operationId: post-fleet-agents-agentId-acks
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
       requestBody:
         content:
           application/json:
@@ -304,7 +356,7 @@ paths:
                         - type
       operationId: post-fleet-agents-agentId-checkin
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
       security:
         - Access API Key: []
       requestBody:
@@ -314,11 +366,55 @@ paths:
               type: object
               properties:
                 local_metadata:
-                  $ref: '#/components/schemas/agent_metadata'
+                  title: AgentMetadata
+                  type: object
                 events:
                   type: array
                   items:
-                    $ref: '#/components/schemas/new_agent_event'
+                    title: NewAgentEvent
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        enum:
+                          - STATE
+                          - ERROR
+                          - ACTION_RESULT
+                          - ACTION
+                      subtype:
+                        type: string
+                        enum:
+                          - RUNNING
+                          - STARTING
+                          - IN_PROGRESS
+                          - CONFIG
+                          - FAILED
+                          - STOPPING
+                          - STOPPED
+                          - DEGRADED
+                          - DATA_DUMP
+                          - ACKNOWLEDGED
+                          - UNKNOWN
+                      timestamp:
+                        type: string
+                      message:
+                        type: string
+                      payload:
+                        type: string
+                      agent_id:
+                        type: string
+                      policy_id:
+                        type: string
+                      stream_id:
+                        type: string
+                      action_id:
+                        type: string
+                    required:
+                      - type
+                      - subtype
+                      - timestamp
+                      - message
+                      - agent_id
   '/agents/{agentId}/events':
     parameters:
       - schema:
@@ -344,7 +440,7 @@ paths:
       responses: {}
       operationId: post-fleet-agents-unenroll
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
       requestBody:
         content:
           application/json:
@@ -369,22 +465,37 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/upgrade_agent'
+                $ref: '#/paths/~1agents~1%7BagentId%7D~1upgrade/post/requestBody/content/application~1json/schema'
         '400':
           description: BAD REQUEST
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/upgrade_agent'
+                $ref: '#/paths/~1agents~1%7BagentId%7D~1upgrade/post/requestBody/content/application~1json/schema'
       operationId: post-fleet-agents-upgrade
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/upgrade_agent'
+              title: UpgradeAgent
+              oneOf:
+                - type: object
+                  properties:
+                    version:
+                      type: string
+                  required:
+                    - version
+                - type: object
+                  properties:
+                    version:
+                      type: string
+                    source_uri:
+                      type: string
+                  required:
+                    - version
   /agents/bulk_upgrade:
     post:
       summary: Fleet - Agent - Bulk Upgrade
@@ -395,22 +506,58 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/bulk_upgrade_agents'
+                $ref: '#/paths/~1agents~1bulk_upgrade/post/requestBody/content/application~1json/schema'
         '400':
           description: BAD REQUEST
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/upgrade_agent'
+                $ref: '#/paths/~1agents~1%7BagentId%7D~1upgrade/post/requestBody/content/application~1json/schema'
       operationId: post-fleet-agents-bulk-upgrade
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/bulk_upgrade_agents'
+              title: BulkUpgradeAgents
+              oneOf:
+                - type: object
+                  properties:
+                    version:
+                      type: string
+                    agents:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - version
+                    - agents
+                - type: object
+                  properties:
+                    version:
+                      type: string
+                    source_uri:
+                      type: string
+                    agents:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - version
+                    - agents
+                - type: object
+                  properties:
+                    version:
+                      type: string
+                    source_uri:
+                      type: string
+                    agents:
+                      type: string
+                  required:
+                    - version
+                    - agents
   /agents/enroll:
     post:
       summary: Fleet - Agent - Enroll
@@ -426,10 +573,78 @@ paths:
                   action:
                     type: string
                   item:
-                    $ref: '#/components/schemas/agent'
+                    title: Agent
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        title: AgentType
+                        enum:
+                          - PERMANENT
+                          - EPHEMERAL
+                          - TEMPORARY
+                      active:
+                        type: boolean
+                      enrolled_at:
+                        type: string
+                      unenrolled_at:
+                        type: string
+                      unenrollment_started_at:
+                        type: string
+                      shared_id:
+                        type: string
+                        deprecated: true
+                      access_api_key_id:
+                        type: string
+                      default_api_key_id:
+                        type: string
+                      policy_id:
+                        type: string
+                      policy_revision:
+                        type: number
+                      last_checkin:
+                        type: string
+                      user_provided_metadata:
+                        $ref: '#/paths/~1agents~1%7BagentId%7D~1checkin/post/requestBody/content/application~1json/schema/properties/local_metadata'
+                      local_metadata:
+                        $ref: '#/paths/~1agents~1%7BagentId%7D~1checkin/post/requestBody/content/application~1json/schema/properties/local_metadata'
+                      id:
+                        type: string
+                      current_error_events:
+                        type: array
+                        items:
+                          title: AgentEvent
+                          allOf:
+                            - type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - $ref: '#/paths/~1agents~1%7BagentId%7D~1checkin/post/requestBody/content/application~1json/schema/properties/events/items'
+                      access_api_key:
+                        type: string
+                      status:
+                        type: string
+                        title: AgentStatus
+                        enum:
+                          - offline
+                          - error
+                          - online
+                          - inactive
+                          - warning
+                      default_api_key:
+                        type: string
+                    required:
+                      - type
+                      - active
+                      - enrolled_at
+                      - id
+                      - current_error_events
+                      - status
       operationId: post-fleet-agents-enroll
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
       requestBody:
         content:
           application/json:
@@ -444,6 +659,7 @@ paths:
                     - TEMPORARY
                 shared_id:
                   type: string
+                  deprecated: true
                 metadata:
                   type: object
                   required:
@@ -451,9 +667,9 @@ paths:
                     - user_provided
                   properties:
                     local:
-                      $ref: '#/components/schemas/agent_metadata'
+                      $ref: '#/paths/~1agents~1%7BagentId%7D~1checkin/post/requestBody/content/application~1json/schema/properties/local_metadata'
                     user_provided:
-                      $ref: '#/components/schemas/agent_metadata'
+                      $ref: '#/paths/~1agents~1%7BagentId%7D~1checkin/post/requestBody/content/application~1json/schema/properties/local_metadata'
               required:
                 - type
                 - metadata
@@ -507,7 +723,7 @@ paths:
                 - admin_username
                 - admin_password
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
   /enrollment-api-keys:
     get:
       summary: Enrollment - List
@@ -521,7 +737,7 @@ paths:
       responses: {}
       operationId: post-fleet-enrollment-api-keys
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
   '/enrollment-api-keys/{keyId}':
     parameters:
       - schema:
@@ -540,7 +756,7 @@ paths:
       responses: {}
       operationId: delete-fleet-enrollment-api-keys-keyId
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
   /epm/categories:
     get:
       summary: EPM - Categories
@@ -578,7 +794,39 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/search_result'
+                  title: SearchResult
+                  type: object
+                  properties:
+                    description:
+                      type: string
+                    download:
+                      type: string
+                    icons:
+                      type: string
+                    name:
+                      type: string
+                    path:
+                      type: string
+                    title:
+                      type: string
+                    type:
+                      type: string
+                    version:
+                      type: string
+                    status:
+                      type: string
+                    savedObject:
+                      type: object
+                  required:
+                    - description
+                    - download
+                    - icons
+                    - name
+                    - path
+                    - title
+                    - type
+                    - version
+                    - status
       operationId: get-epm-list
     parameters: []
   '/epm/packages/{pkgkey}':
@@ -595,7 +843,124 @@ paths:
                 allOf:
                   - properties:
                       response:
-                        $ref: '#/components/schemas/package_info'
+                        title: PackageInfo
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          title:
+                            type: string
+                          version:
+                            type: string
+                          readme:
+                            type: string
+                          description:
+                            type: string
+                          type:
+                            type: string
+                          categories:
+                            type: array
+                            items:
+                              type: string
+                          requirement:
+                            oneOf:
+                              - properties:
+                                  kibana:
+                                    type: object
+                                    properties:
+                                      versions:
+                                        type: string
+                              - properties:
+                                  elasticsearch:
+                                    type: object
+                                    properties:
+                                      versions:
+                                        type: string
+                            type: object
+                          screenshots:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                src:
+                                  type: string
+                                path:
+                                  type: string
+                                title:
+                                  type: string
+                                size:
+                                  type: string
+                                type:
+                                  type: string
+                              required:
+                                - src
+                                - path
+                          icons:
+                            type: array
+                            items:
+                              type: string
+                          assets:
+                            type: array
+                            items:
+                              type: string
+                          internal:
+                            type: boolean
+                          format_version:
+                            type: string
+                          data_streams:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                title:
+                                  type: string
+                                name:
+                                  type: string
+                                release:
+                                  type: string
+                                ingeset_pipeline:
+                                  type: string
+                                vars:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      name:
+                                        type: string
+                                      default:
+                                        type: string
+                                    required:
+                                      - name
+                                      - default
+                                type:
+                                  type: string
+                                package:
+                                  type: string
+                              required:
+                                - title
+                                - name
+                                - release
+                                - ingeset_pipeline
+                                - type
+                                - package
+                          download:
+                            type: string
+                          path:
+                            type: string
+                          removable:
+                            type: boolean
+                        required:
+                          - name
+                          - title
+                          - version
+                          - description
+                          - type
+                          - categories
+                          - requirement
+                          - assets
+                          - format_version
+                          - download
+                          - path
                   - properties:
                       status:
                         type: string
@@ -644,7 +1009,7 @@ paths:
       operationId: post-epm-install-pkgkey
       description: ''
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
     delete:
       summary: EPM - Packages - Delete
       tags: []
@@ -672,7 +1037,7 @@ paths:
                   - response
       operationId: post-epm-delete-pkgkey
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
   '/agents/{agentId}':
     parameters:
       - schema:
@@ -702,14 +1067,14 @@ paths:
       responses: {}
       operationId: put-fleet-agents-agentId
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
     delete:
       summary: Fleet - Agent - Delete
       tags: []
       responses: {}
       operationId: delete-fleet-agents-agentId
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
   '/install/{osType}':
     parameters:
       - schema:
@@ -737,7 +1102,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/package_policy'
+                      $ref: '#/paths/~1package_policies~1%7BpackagePolicyId%7D/get/responses/200/content/application~1json/schema/properties/item'
                   total:
                     type: number
                   page:
@@ -760,9 +1125,66 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/new_package_policy'
+              title: NewPackagePolicy
+              type: object
+              description: ''
+              properties:
+                enabled:
+                  type: boolean
+                package:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    version:
+                      type: string
+                    title:
+                      type: string
+                  required:
+                    - name
+                    - version
+                    - title
+                namespace:
+                  type: string
+                output_id:
+                  type: string
+                inputs:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      enabled:
+                        type: boolean
+                      processors:
+                        type: array
+                        items:
+                          type: string
+                      streams:
+                        type: array
+                        items: {}
+                      config:
+                        type: object
+                      vars:
+                        type: object
+                    required:
+                      - type
+                      - enabled
+                      - streams
+                policy_id:
+                  type: string
+                name:
+                  type: string
+                description:
+                  type: string
+              required:
+                - output_id
+                - inputs
+                - policy_id
+                - name
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
   '/package_policies/{packagePolicyId}':
     get:
       summary: PackagePolicies - Info
@@ -776,7 +1198,21 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/components/schemas/package_policy'
+                    title: PackagePolicy
+                    allOf:
+                      - type: object
+                        properties:
+                          id:
+                            type: string
+                          revision:
+                            type: number
+                          inputs:
+                            type: array
+                            items: {}
+                        required:
+                          - id
+                          - revision
+                      - $ref: '#/paths/~1package_policies/post/requestBody/content/application~1json/schema'
                 required:
                   - item
       operationId: get-packagePolicies-packagePolicyId
@@ -793,7 +1229,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/update_package_policy'
+              title: UpdatePackagePolicy
+              allOf:
+                - type: object
+                  properties:
+                    version:
+                      type: string
+                - $ref: '#/paths/~1package_policies/post/requestBody/content/application~1json/schema'
       responses:
         '200':
           description: OK
@@ -803,14 +1245,14 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/components/schemas/package_policy'
+                    $ref: '#/paths/~1package_policies~1%7BpackagePolicyId%7D/get/responses/200/content/application~1json/schema/properties/item'
                   sucess:
                     type: boolean
                 required:
                   - item
                   - sucess
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/paths/~1setup/post/parameters/0'
   /setup:
     post:
       summary: Ingest Manager - Setup
@@ -836,7 +1278,11 @@ paths:
                     type: string
       operationId: post-setup
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
+        - schema:
+            type: string
+          in: header
+          name: kbn-xsrf
+          required: true
 components:
   securitySchemes:
     basicAuth:
@@ -852,489 +1298,5 @@ components:
       type: apiKey
       in: header
       description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-  parameters:
-    page_size:
-      name: perPage
-      in: query
-      description: The number of items to return
-      required: false
-      schema:
-        type: integer
-        default: 50
-    page_index:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-        default: 1
-    kuery:
-      name: kuery
-      in: query
-      required: false
-      schema:
-        type: string
-    kbn_xsrf:
-      schema:
-        type: string
-      in: header
-      name: kbn-xsrf
-      required: true
-  schemas:
-    new_agent_policy:
-      title: NewAgentPolicy
-      type: object
-      properties:
-        name:
-          type: string
-        namespace:
-          type: string
-        description:
-          type: string
-    new_package_policy:
-      title: NewPackagePolicy
-      type: object
-      description: ''
-      properties:
-        enabled:
-          type: boolean
-        package:
-          type: object
-          properties:
-            name:
-              type: string
-            version:
-              type: string
-            title:
-              type: string
-          required:
-            - name
-            - version
-            - title
-        namespace:
-          type: string
-        output_id:
-          type: string
-        inputs:
-          type: array
-          items:
-            type: object
-            properties:
-              type:
-                type: string
-              enabled:
-                type: boolean
-              processors:
-                type: array
-                items:
-                  type: string
-              streams:
-                type: array
-                items: {}
-              config:
-                type: object
-              vars:
-                type: object
-            required:
-              - type
-              - enabled
-              - streams
-        policy_id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-      required:
-        - output_id
-        - inputs
-        - policy_id
-        - name
-    package_policy:
-      title: PackagePolicy
-      allOf:
-        - type: object
-          properties:
-            id:
-              type: string
-            revision:
-              type: number
-            inputs:
-              type: array
-              items: {}
-          required:
-            - id
-            - revision
-        - $ref: '#/components/schemas/new_package_policy'
-    agent_policy:
-      allOf:
-        - $ref: '#/components/schemas/new_agent_policy'
-        - type: object
-          properties:
-            id:
-              type: string
-            status:
-              type: string
-              enum:
-                - active
-                - inactive
-            packagePolicies:
-              oneOf:
-                - items:
-                    type: string
-                - items:
-                    $ref: '#/components/schemas/package_policy'
-              type: array
-            updated_on:
-              type: string
-              format: date-time
-            updated_by:
-              type: string
-            revision:
-              type: number
-            agents:
-              type: number
-          required:
-            - id
-            - status
-    agent_metadata:
-      title: AgentMetadata
-      type: object
-    new_agent_event:
-      title: NewAgentEvent
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-            - STATE
-            - ERROR
-            - ACTION_RESULT
-            - ACTION
-        subtype:
-          type: string
-          enum:
-            - RUNNING
-            - STARTING
-            - IN_PROGRESS
-            - CONFIG
-            - FAILED
-            - STOPPING
-            - STOPPED
-            - DEGRADED
-            - DATA_DUMP
-            - ACKNOWLEDGED
-            - UNKNOWN
-        timestamp:
-          type: string
-        message:
-          type: string
-        payload:
-          type: string
-        agent_id:
-          type: string
-        policy_id:
-          type: string
-        stream_id:
-          type: string
-        action_id:
-          type: string
-      required:
-        - type
-        - subtype
-        - timestamp
-        - message
-        - agent_id
-    upgrade_agent:
-      title: UpgradeAgent
-      oneOf:
-        - type: object
-          properties:
-            version:
-              type: string
-          required:
-            - version
-        - type: object
-          properties:
-            version:
-              type: string
-            source_uri:
-              type: string
-          required:
-            - version
-    bulk_upgrade_agents:
-      title: BulkUpgradeAgents
-      oneOf:
-        - type: object
-          properties:
-            version:
-              type: string
-            agents:
-              type: array
-              items:
-                type: string
-          required:
-            - version
-            - agents
-        - type: object
-          properties:
-            version:
-              type: string
-            source_uri:
-              type: string
-            agents:
-              type: array
-              items:
-                type: string
-          required:
-            - version
-            - agents
-        - type: object
-          properties:
-            version:
-              type: string
-            source_uri:
-              type: string
-            agents:
-              type: string
-          required:
-            - version
-            - agents
-    agent_type:
-      type: string
-      title: AgentType
-      enum:
-        - PERMANENT
-        - EPHEMERAL
-        - TEMPORARY
-    agent_event:
-      title: AgentEvent
-      allOf:
-        - type: object
-          properties:
-            id:
-              type: string
-          required:
-            - id
-        - $ref: '#/components/schemas/new_agent_event'
-    agent_status:
-      type: string
-      title: AgentStatus
-      enum:
-        - offline
-        - error
-        - online
-        - inactive
-        - warning
-    agent:
-      title: Agent
-      type: object
-      properties:
-        type:
-          $ref: '#/components/schemas/agent_type'
-        active:
-          type: boolean
-        enrolled_at:
-          type: string
-        unenrolled_at:
-          type: string
-        unenrollment_started_at:
-          type: string
-        shared_id:
-          type: string
-        access_api_key_id:
-          type: string
-        default_api_key_id:
-          type: string
-        policy_id:
-          type: string
-        policy_revision:
-          type: number
-        last_checkin:
-          type: string
-        user_provided_metadata:
-          $ref: '#/components/schemas/agent_metadata'
-        local_metadata:
-          $ref: '#/components/schemas/agent_metadata'
-        id:
-          type: string
-        current_error_events:
-          type: array
-          items:
-            $ref: '#/components/schemas/agent_event'
-        access_api_key:
-          type: string
-        status:
-          $ref: '#/components/schemas/agent_status'
-        default_api_key:
-          type: string
-      required:
-        - type
-        - active
-        - enrolled_at
-        - id
-        - current_error_events
-        - status
-    search_result:
-      title: SearchResult
-      type: object
-      properties:
-        description:
-          type: string
-        download:
-          type: string
-        icons:
-          type: string
-        name:
-          type: string
-        path:
-          type: string
-        title:
-          type: string
-        type:
-          type: string
-        version:
-          type: string
-        status:
-          type: string
-        savedObject:
-          type: object
-      required:
-        - description
-        - download
-        - icons
-        - name
-        - path
-        - title
-        - type
-        - version
-        - status
-    package_info:
-      title: PackageInfo
-      type: object
-      properties:
-        name:
-          type: string
-        title:
-          type: string
-        version:
-          type: string
-        readme:
-          type: string
-        description:
-          type: string
-        type:
-          type: string
-        categories:
-          type: array
-          items:
-            type: string
-        requirement:
-          oneOf:
-            - properties:
-                kibana:
-                  type: object
-                  properties:
-                    versions:
-                      type: string
-            - properties:
-                elasticsearch:
-                  type: object
-                  properties:
-                    versions:
-                      type: string
-          type: object
-        screenshots:
-          type: array
-          items:
-            type: object
-            properties:
-              src:
-                type: string
-              path:
-                type: string
-              title:
-                type: string
-              size:
-                type: string
-              type:
-                type: string
-            required:
-              - src
-              - path
-        icons:
-          type: array
-          items:
-            type: string
-        assets:
-          type: array
-          items:
-            type: string
-        internal:
-          type: boolean
-        format_version:
-          type: string
-        data_streams:
-          type: array
-          items:
-            type: object
-            properties:
-              title:
-                type: string
-              name:
-                type: string
-              release:
-                type: string
-              ingeset_pipeline:
-                type: string
-              vars:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                    default:
-                      type: string
-                  required:
-                    - name
-                    - default
-              type:
-                type: string
-              package:
-                type: string
-            required:
-              - title
-              - name
-              - release
-              - ingeset_pipeline
-              - type
-              - package
-        download:
-          type: string
-        path:
-          type: string
-        removable:
-          type: boolean
-      required:
-        - name
-        - title
-        - version
-        - description
-        - type
-        - categories
-        - requirement
-        - assets
-        - format_version
-        - download
-        - path
-    update_package_policy:
-      title: UpdatePackagePolicy
-      allOf:
-        - type: object
-          properties:
-            version:
-              type: string
-        - $ref: '#/components/schemas/new_package_policy'
 security:
   - basicAuth: []

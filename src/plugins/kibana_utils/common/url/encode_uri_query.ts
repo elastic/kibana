@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { ParsedQuery } from 'query-string';
+import { ParsedQuery, parse, stringify } from 'query-string';
 import { transform } from 'lodash';
 
 /**
@@ -32,15 +32,38 @@ export function encodeUriQuery(val: string, pctEncodeSpaces = false) {
 
 export const encodeQuery = (
   query: ParsedQuery,
-  encodeFunction: (val: string, pctEncodeSpaces?: boolean) => string = encodeUriQuery
-) =>
-  transform(query, (result: any, value, key) => {
+  encodeFunction: (val: string, pctEncodeSpaces?: boolean) => string = encodeUriQuery,
+  pctEncodeSpaces = true
+): ParsedQuery =>
+  transform<any, ParsedQuery>(query, (result, value, key) => {
     if (key) {
       const singleValue = Array.isArray(value) ? value.join(',') : value;
 
       result[key] = encodeFunction(
         singleValue === undefined || singleValue === null ? '' : singleValue,
-        true
+        pctEncodeSpaces
       );
     }
   });
+
+/**
+ * Method to help modify url query params.
+ *
+ * @param params
+ * @param key
+ * @param value
+ */
+export const addQueryParam = (params: string, key: string, value?: string) => {
+  const queryParams = parse(params);
+
+  if (value !== undefined) {
+    queryParams[key] = value;
+  } else {
+    delete queryParams[key];
+  }
+
+  return stringify(encodeQuery(queryParams, undefined, false), {
+    sort: false,
+    encode: false,
+  });
+};

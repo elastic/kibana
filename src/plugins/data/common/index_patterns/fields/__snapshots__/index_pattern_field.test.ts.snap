@@ -57,9 +57,16 @@ Object {
       "pattern": "$0,0.[00]",
     },
   },
+  "isMapped": undefined,
   "lang": "lang",
   "name": "name",
   "readFromDocValues": false,
+  "runtimeField": Object {
+    "script": Object {
+      "source": "emit('hello world')",
+    },
+    "type": "keyword",
+  },
   "script": "script",
   "scripted": true,
   "searchable": true,
