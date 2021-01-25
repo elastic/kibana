@@ -154,6 +154,10 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
       type: TooltipType.VerticalCursor,
     };
 
+    const xAxisFormatter = getServices().data.fieldFormats.deserialize(
+      this.props.chartData.yAxisFormat
+    );
+
     return (
       <Chart size="100%">
         <Settings
@@ -169,6 +173,8 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
           position={Position.Left}
           ticks={5}
           title={chartData.yAxisLabel}
+          integersOnly
+          tickFormat={(value) => xAxisFormatter.convert(value)}
         />
         <Axis
           id="discover-histogram-bottom-axis"
