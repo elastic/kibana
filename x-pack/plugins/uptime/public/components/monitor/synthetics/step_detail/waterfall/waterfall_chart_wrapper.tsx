@@ -53,10 +53,11 @@ export const renderLegendItem: RenderItem<LegendItem> = (item) => {
 };
 
 interface Props {
+  total: number;
   data: NetworkItems;
 }
 
-export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
+export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
   const [query, setQuery] = useState<string>('');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [onlyHighlighted, setOlyHighlighted] = useState(false);
@@ -88,6 +89,8 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
 
   return (
     <WaterfallProvider
+      totalNetworkRequests={total}
+      fetchedNetworkRequests={networkData.length}
       data={series}
       sidebarItems={sidebarItems}
       legendItems={legendItems}

@@ -24,6 +24,7 @@ import { Legend } from './legend';
 import { useBarCharts } from './use_bar_charts';
 import { WaterfallBarChart } from './waterfall_bar_chart';
 import { WaterfallChartFixedAxis } from './waterfall_chart_fixed_axis';
+import { NetworkRequestsTotal } from './network_requests_total';
 
 export type RenderItem<I = any> = (item: I, index: number) => JSX.Element;
 export type RenderFilter = () => JSX.Element;
@@ -49,7 +50,13 @@ export const WaterfallChart = ({
   maxHeight = '800px',
   fullHeight = false,
 }: WaterfallChartProps) => {
-  const { data, sidebarItems, legendItems } = useWaterfallContext();
+  const {
+    data,
+    sidebarItems,
+    legendItems,
+    totalNetworkRequests,
+    fetchedNetworkRequests,
+  } = useWaterfallContext();
 
   const chartWrapperDivRef = useRef<HTMLDivElement | null>(null);
 
@@ -74,6 +81,10 @@ export const WaterfallChart = ({
           {shouldRenderSidebar && (
             <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
               <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false} />
+              <NetworkRequestsTotal
+                totalNetworkRequests={totalNetworkRequests}
+                fetchedNetworkRequests={fetchedNetworkRequests}
+              />
               {renderFilter && (
                 <WaterfallChartFilterContainer borderRadius="none" paddingSize="s">
                   {renderFilter()}

@@ -6,12 +6,15 @@
  * Public License, v 1.
  */
 
+import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('inspector', function describeIndexTests() {
@@ -21,6 +24,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickNewSearch();
 
       await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    describe('advanced input JSON', () => {
+      it('should have "missing" property with value 10', async () => {
+        log.debug('Add Max Metric on memory field');
+        await PageObjects.visEditor.clickBucket('Y-axis', 'metrics');
+        await PageObjects.visEditor.selectAggregation('Max', 'metrics');
+        await PageObjects.visEditor.selectField('memory', 'metrics');
+
+        log.debug('Add value to advanced JSON input');
+        await PageObjects.visEditor.toggleAdvancedParams('2');
+        await testSubjects.setValue('codeEditorContainer', '{ "missing": 10 }');
+        await PageObjects.visEditor.clickGo();
+
+        await inspector.open();
+        await inspector.openInspectorRequestsView();
+        const requestTab = await inspector.getOpenRequestDetailRequestButton();
+        await requestTab.click();
+        const requestJSON = JSON.parse(await inspector.getCodeEditorValue());
+
+        expect(requestJSON.aggs['2'].max).property('missing', 10);
+      });
+
+      after(async () => {
+        await inspector.close();
+        await PageObjects.visEditor.removeDimension(2);
+        await PageObjects.visEditor.clickGo();
+      });
     });
 
     describe('inspector table', function indexPatternCreation() {

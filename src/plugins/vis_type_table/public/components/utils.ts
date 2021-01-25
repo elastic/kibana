@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AggTypes } from '../types';
+import { AggTypes } from '../../common';
 
 const totalAggregations = [
   {

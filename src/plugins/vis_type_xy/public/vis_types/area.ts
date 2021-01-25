@@ -6,15 +6,14 @@
  * Public License, v 1.
  */
 
-import React from 'react';
-
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
-import { Position } from '@elastic/charts';
+import { Fit, Position } from '@elastic/charts';
 
 import { AggGroupNames } from '../../../data/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../visualizations/public';
+import { defaultCountLabel, LabelRotation } from '../../../charts/public';
 
 import {
   ChartMode,
@@ -22,32 +21,28 @@ import {
   ScaleType,
   AxisMode,
   ThresholdLineStyle,
-  XyVisTypeDefinition,
   InterpolationMode,
+  XyVisTypeDefinition,
 } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
-import { defaultCountLabel, LabelRotation } from '../../../charts/public';
-import { SplitTooltip } from './split_tooltip';
 
-export const getHistogramVisTypeDefinition = (
+export const getAreaVisTypeDefinition = (
   showElasticChartsOptions = false
 ): XyVisTypeDefinition => ({
-  name: 'histogram',
-  title: i18n.translate('visTypeXy.histogram.histogramTitle', {
-    defaultMessage: 'Vertical bar',
-  }),
-  icon: 'visBarVertical',
-  description: i18n.translate('visTypeXy.histogram.histogramDescription', {
-    defaultMessage: 'Present data in vertical bars on an axis.',
+  name: 'area',
+  title: i18n.translate('visTypeXy.area.areaTitle', { defaultMessage: 'Area' }),
+  icon: 'visArea',
+  description: i18n.translate('visTypeXy.area.areaDescription', {
+    defaultMessage: 'Emphasize the data between an axis and a line.',
   }),
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   visConfig: {
     defaults: {
-      type: ChartType.Histogram,
+      type: ChartType.Area,
       grid: {
         categoryLines: false,
       },
@@ -95,20 +90,19 @@ export const getHistogramVisTypeDefinition = (
       seriesParams: [
         {
           show: true,
-          type: ChartType.Histogram,
+          type: ChartType.Area,
           mode: ChartMode.Stacked,
           data: {
             label: defaultCountLabel,
             id: '1',
           },
-          interpolate: InterpolationMode.Linear,
-          valueAxis: 'ValueAxis-1',
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           showCircles: true,
+          interpolate: InterpolationMode.Linear,
+          valueAxis: 'ValueAxis-1',
         },
       ],
-      radiusRatio: 0,
       addTooltip: true,
       detailedTooltip: true,
       palette: {
@@ -117,11 +111,10 @@ export const getHistogramVisTypeDefinition = (
       },
       addLegend: true,
       legendPosition: Position.Right,
+      fittingFunction: Fit.Linear,
       times: [],
       addTimeMarker: false,
-      labels: {
-        show: false,
-      },
+      radiusRatio: 9,
       thresholdLine: {
         show: false,
         value: 10,
@@ -129,6 +122,7 @@ export const getHistogramVisTypeDefinition = (
         style: ThresholdLineStyle.Full,
         color: euiPaletteColorBlind()[9],
       },
+      labels: {},
     },
   },
   editorConfig: {
@@ -138,17 +132,17 @@ export const getHistogramVisTypeDefinition = (
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('visTypeXy.histogram.metricTitle', {
+        title: i18n.translate('visTypeXy.area.metricsTitle', {
           defaultMessage: 'Y-axis',
         }),
-        min: 1,
         aggFilter: ['!geo_centroid', '!geo_bounds'],
+        min: 1,
         defaults: [{ schema: 'metric', type: 'count' }],
       },
       {
         group: AggGroupNames.Metrics,
         name: 'radius',
-        title: i18n.translate('visTypeXy.histogram.radiusTitle', {
+        title: i18n.translate('visTypeXy.area.radiusTitle', {
           defaultMessage: 'Dot size',
         }),
         min: 0,
@@ -158,7 +152,7 @@ export const getHistogramVisTypeDefinition = (
       {
         group: AggGroupNames.Buckets,
         name: 'segment',
-        title: i18n.translate('visTypeXy.histogram.segmentTitle', {
+        title: i18n.translate('visTypeXy.area.segmentTitle', {
           defaultMessage: 'X-axis',
         }),
         min: 0,
@@ -168,7 +162,7 @@ export const getHistogramVisTypeDefinition = (
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('visTypeXy.histogram.groupTitle', {
+        title: i18n.translate('visTypeXy.area.groupTitle', {
           defaultMessage: 'Split series',
         }),
         min: 0,
@@ -178,18 +172,12 @@ export const getHistogramVisTypeDefinition = (
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('visTypeXy.histogram.splitTitle', {
+        title: i18n.translate('visTypeXy.area.splitTitle', {
           defaultMessage: 'Split chart',
         }),
         min: 0,
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
-        // TODO: Remove when split chart aggs are supported
-        // https://github.com/elastic/kibana/issues/82496
-        ...(showElasticChartsOptions && {
-          disabled: true,
-          tooltip: <SplitTooltip />,
-        }),
       },
     ],
   },
