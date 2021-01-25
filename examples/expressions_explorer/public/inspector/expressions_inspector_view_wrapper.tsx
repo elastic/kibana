@@ -6,7 +6,12 @@
  * Public License, v 1.
  */
 
-export * from './create_error';
-export * from './get_by_alias';
-export * from './tables_adapter';
-export * from './expressions_inspector_adapter';
+import React, { lazy } from 'react';
+
+const ExpressionsInspectorViewComponent = lazy(() => import('./expressions_inspector_view'));
+
+export const getExpressionsInspectorViewComponentWrapper = () => {
+  return (props: any) => {
+    return <ExpressionsInspectorViewComponent adapters={props.adapters} title={props.title} />;
+  };
+};
