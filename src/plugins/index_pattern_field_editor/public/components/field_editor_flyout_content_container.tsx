@@ -6,10 +6,11 @@
  * Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { DocLinksStart } from 'src/core/public';
 
 import { IndexPatternField, IndexPattern } from '../shared_imports';
+import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 
 export interface Props {
@@ -44,11 +45,24 @@ export interface Props {
  * anything about where a field comes from and where it should be persisted.
  */
 export const FieldEditorFlyoutContentContainer = ({ field, onSave, onCancel, docLinks }: Props) => {
+  const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
+
   const saveField = useCallback(async () => {
-    // TODO: here we'll put the logic to save the field to the saved object
+    // TODO: here we will put the logic to update the Kibana saved object
 
     onSave({} as any);
   }, [onSave]);
+
+  const loadEditor = useCallback(async () => {
+    const { FieldEditor } = await import('./field_editor');
+
+    setEditor(FieldEditor);
+  }, []);
+
+  useEffect(() => {
+    // On mount: load the editor asynchronously
+    loadEditor();
+  }, [loadEditor]);
 
   return (
     <FieldEditorFlyoutContent
@@ -56,6 +70,7 @@ export const FieldEditorFlyoutContentContainer = ({ field, onSave, onCancel, doc
       onCancel={onCancel}
       docLinks={docLinks}
       field={field}
+      FieldEditor={Editor}
     />
   );
 };

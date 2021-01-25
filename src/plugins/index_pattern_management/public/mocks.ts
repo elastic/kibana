@@ -80,7 +80,9 @@ const docLinks = {
   } as any,
 };
 
-const createIndexPatternManagmentContext = (): IndexPatternManagmentContext => {
+const createIndexPatternManagmentContext = (): {
+  [key in keyof IndexPatternManagmentContext]: any;
+} => {
   const {
     chrome,
     application,

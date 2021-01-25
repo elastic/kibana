@@ -5,18 +5,11 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-
-import { OpenFieldEditorOptions } from './open_editor';
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginSetup {}
-
-export interface PluginStart {
-  openEditor(options: OpenFieldEditorOptions): void;
-}
+import React from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SetupPlugins {}
+export interface Props {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartPlugins {}
+export const FieldEditor = (props: Props) => {
+  return <div>Placeholder for the future field editor</div>;
+};

@@ -22,6 +22,7 @@ import {
 import { DocLinksStart } from 'src/core/public';
 
 import { IndexPatternField } from '../shared_imports';
+import { Props as FieldEditorProps } from './field_editor/field_editor';
 
 const geti18nTexts = (field?: IndexPatternField) => {
   return {
@@ -61,12 +62,16 @@ export interface Props {
    */
   docLinks: DocLinksStart;
   /**
+   * The Field editor component that contains the form to create or edit a field
+   */
+  FieldEditor: React.ComponentType<FieldEditorProps> | null;
+  /**
    * Optional field to edit
    */
   field?: IndexPatternField;
 }
 
-export const FieldEditorFlyoutContent = ({ field, onSave, onCancel }: Props) => {
+export const FieldEditorFlyoutContent = ({ field, onSave, onCancel, FieldEditor }: Props) => {
   const i18nTexts = geti18nTexts(field);
 
   const onClickSave = useCallback(async () => {
@@ -83,47 +88,34 @@ export const FieldEditorFlyoutContent = ({ field, onSave, onCancel }: Props) => 
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        <div>Here will come the FieldEditor component.</div>
-      </EuiFlyoutBody>
+      <EuiFlyoutBody>{FieldEditor && <FieldEditor />}</EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        {/* {isSubmitted && !isFormValid && (
-          <>
-            <EuiCallOut
-              title={i18nTexts.formErrorsCalloutTitle}
-              color="danger"
-              iconType="cross"
-              data-test-subj="formError"
-            />
-            <EuiSpacer size="m" />
-          </>
-        )} */}
+        {FieldEditor && (
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="cross"
+                flush="left"
+                onClick={onCancel}
+                data-test-subj="closeFlyoutButton"
+              >
+                {i18nTexts.closeButtonLabel}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
 
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="cross"
-              flush="left"
-              onClick={onCancel}
-              data-test-subj="closeFlyoutButton"
-            >
-              {i18nTexts.closeButtonLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              onClick={onClickSave}
-              data-test-subj="saveFieldButton"
-              // disabled={isSubmitted && !isFormValid}
-              fill
-            >
-              {i18nTexts.saveButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="primary"
+                onClick={onClickSave}
+                data-test-subj="saveFieldButton"
+                fill
+              >
+                {i18nTexts.saveButtonLabel}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiFlyoutFooter>
     </>
   );

@@ -66,7 +66,7 @@ const filterPlaceholder = i18n.translate(
 const addFieldButtonLabel = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.addFieldButtonLabel',
   {
-    defaultMessage: 'Search',
+    defaultMessage: 'Add field',
   }
 );
 
@@ -105,14 +105,13 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
     );
   }, [indexPattern]);
 
-  const openFieldEditor = useCallback(async () => {
-    const { openEditor } = await indexPatternFieldEditor.loadEditor();
-    openEditor({
+  const openFieldEditor = useCallback(() => {
+    indexPatternFieldEditor.openEditor({
       ctx: {
-        indexPattern: {} as any,
+        indexPattern,
       },
     });
-  }, [indexPatternFieldEditor]);
+  }, [indexPatternFieldEditor, indexPattern]);
 
   useEffect(() => {
     refreshFilters();

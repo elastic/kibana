@@ -9,7 +9,7 @@
 import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
-import { getFieldEditorLoader } from './load_editor';
+import { getFieldEditorOpener } from './open_editor';
 
 export class IndexPatternFieldEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -19,7 +19,7 @@ export class IndexPatternFieldEditorPlugin
 
   public start(core: CoreStart, plugins: StartPlugins) {
     return {
-      loadEditor: getFieldEditorLoader(core),
+      openEditor: getFieldEditorOpener(core),
     };
   }
 
