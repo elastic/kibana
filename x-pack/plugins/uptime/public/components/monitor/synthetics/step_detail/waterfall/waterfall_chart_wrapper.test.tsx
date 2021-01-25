@@ -25,7 +25,7 @@ describe('waterfall chart wrapper', () => {
 
   it('renders the correct sidebar items', () => {
     const { getAllByTestId } = render(
-      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} />
+      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
     );
 
     const sideBarItems = getAllByTestId('middleTruncatedTextSROnly');
@@ -35,7 +35,7 @@ describe('waterfall chart wrapper', () => {
 
   it('search by query works', () => {
     const { getAllByTestId, getByTestId } = render(
-      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} />
+      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
     );
 
     const filterInput = getByTestId('waterfallFilterInput');
@@ -67,7 +67,7 @@ describe('waterfall chart wrapper', () => {
 
   it('search by mime type works', () => {
     const { getAllByTestId, getByText } = render(
-      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} />
+      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
     );
 
     const sideBarItems = getAllByTestId('middleTruncatedTextSROnly');

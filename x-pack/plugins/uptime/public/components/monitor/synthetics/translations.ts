@@ -12,3 +12,10 @@ export const VIEW_PERFORMANCE = i18n.translate(
     defaultMessage: 'View performance breakdown',
   }
 );
+
+export const OPEN_FILTERS_POPOVER = i18n.translate(
+  'xpack.uptime.pingList.synthetics.waterfall.filters.popover',
+  {
+    defaultMessage: 'Click to open waterfall filters',
+  }
+);

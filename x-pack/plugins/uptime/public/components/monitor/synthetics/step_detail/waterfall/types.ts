@@ -60,10 +60,6 @@ export const TIMING_ORDER = [
   Timings.Receive,
 ] as const;
 
-export type CalculatedTimings = {
-  [K in Timings]?: number;
-};
-
 export enum MimeType {
   Html = 'html',
   Script = 'script',
@@ -152,32 +148,6 @@ export const MimeTypesMap: Record<string, MimeType> = {
 
 export type NetworkItem = NetworkEvent;
 export type NetworkItems = NetworkItem[];
-
-// NOTE: A number will always be present if the property exists, but that number might be -1, which represents no value.
-export interface PayloadTimings {
-  dns_start: number;
-  push_end: number;
-  worker_fetch_start: number;
-  worker_respond_with_settled: number;
-  proxy_end: number;
-  worker_start: number;
-  worker_ready: number;
-  send_end: number;
-  connect_end: number;
-  connect_start: number;
-  send_start: number;
-  proxy_start: number;
-  push_start: number;
-  ssl_end: number;
-  receive_headers_end: number;
-  ssl_start: number;
-  request_time: number;
-  dns_end: number;
-}
-
-export interface ExtraSeriesConfig {
-  colour: string;
-}
 
 export type SidebarItem = Pick<NetworkItem, 'url' | 'status' | 'method'> & {
   isHighlighted: boolean;

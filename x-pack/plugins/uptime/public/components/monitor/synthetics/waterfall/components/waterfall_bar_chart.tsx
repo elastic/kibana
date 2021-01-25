@@ -23,7 +23,7 @@ import { useChartTheme } from '../../../../../hooks/use_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
 import { useWaterfallContext, WaterfallData } from '..';
 
-const getChartHeight = (data: WaterfallData, ind: number): number => {
+const getChartHeight = (data: WaterfallData): number => {
   // We get the last item x(number of bars) and adds 1 to cater for 0 index
   const noOfXBars = new Set(data.map((item) => item.x)).size;
 
@@ -69,7 +69,7 @@ export const WaterfallBarChart = ({
 
   return (
     <WaterfallChartChartContainer
-      height={getChartHeight(chartData, index)}
+      height={getChartHeight(chartData)}
       chartIndex={index}
       data-test-subj="wfDataOnlyBarChart"
     >

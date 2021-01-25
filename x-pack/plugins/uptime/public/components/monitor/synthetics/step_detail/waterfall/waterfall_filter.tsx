@@ -19,6 +19,7 @@ import React, { Dispatch, SetStateAction, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { FILTER_REQUESTS_LABEL } from '../../waterfall/components/translations';
 import { MimeType } from './types';
+import { OPEN_FILTERS_POPOVER } from '../../translations';
 
 interface Props {
   query: string;
@@ -29,7 +30,7 @@ interface Props {
   setOlyHighlighted: (val: boolean) => void;
 }
 
-const MIME_FILTERS = [
+export const MIME_FILTERS = [
   {
     label: 'XHR',
     mimeType: MimeType.XHR,
@@ -86,7 +87,7 @@ export const WaterfallFilter = ({
       <EuiFlexItem>
         <EuiFieldSearch
           fullWidth
-          data-test-subj="waterfallFilterInput"
+          aria-label={FILTER_REQUESTS_LABEL}
           placeholder={FILTER_REQUESTS_LABEL}
           onChange={(evt) => {
             setValue(evt.target.value);
@@ -98,6 +99,7 @@ export const WaterfallFilter = ({
         <EuiPopover
           button={
             <EuiButtonIcon
+              aria-label={OPEN_FILTERS_POPOVER}
               iconType="filter"
               onClick={() => setIsPopoverOpen((prevState) => !prevState)}
               color={activeFilters.length > 0 ? 'primary' : 'text'}
