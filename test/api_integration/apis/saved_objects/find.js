@@ -31,7 +31,7 @@ export default function ({ getService }) {
                 {
                   type: 'visualization',
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  version: 'WzIsMV0=',
+                  version: 'WzE4LDJd',
                   attributes: {
                     title: 'Count of requests',
                   },
@@ -127,7 +127,7 @@ export default function ({ getService }) {
                   {
                     type: 'visualization',
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    version: 'WzIsMV0=',
+                    version: 'WzE4LDJd',
                     attributes: {
                       title: 'Count of requests',
                     },
@@ -163,7 +163,7 @@ export default function ({ getService }) {
                   {
                     type: 'visualization',
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    version: 'WzIsMV0=',
+                    version: 'WzE4LDJd',
                     attributes: {
                       title: 'Count of requests',
                     },
@@ -196,7 +196,7 @@ export default function ({ getService }) {
                     score: 0,
                     type: 'visualization',
                     updated_at: '2017-09-21T18:51:23.794Z',
-                    version: 'WzYsMV0=',
+                    version: 'WzIyLDJd',
                   },
                 ],
               });
@@ -243,7 +243,7 @@ export default function ({ getService }) {
                     ],
                     migrationVersion: resp.body.saved_objects[0].migrationVersion,
                     updated_at: '2017-09-21T18:51:23.794Z',
-                    version: 'WzIsMV0=',
+                    version: 'WzE4LDJd',
                   },
                 ],
               });
@@ -407,12 +407,12 @@ export default function ({ getService }) {
           }));
     });
 
-    describe.skip('without kibana index', () => {
+    describe('without kibana index', () => {
       before(
         async () =>
           // just in case the kibana server has recreated it
           await es.indices.delete({
-            index: '.kibana',
+            index: '.kibana*',
             ignore: [404],
           })
       );

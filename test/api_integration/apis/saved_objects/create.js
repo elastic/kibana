@@ -59,12 +59,12 @@ export default function ({ getService }) {
         async () =>
           // just in case the kibana server has recreated it
           await es.indices.delete({
-            index: '.kibana',
+            index: '.kibana_*',
             ignore: [404],
           })
       );
 
-      it('should return 200 and create kibana index', async () => {
+      it('should return 500 and not auto-create saved objects index', async () => {
         await supertest
           .post(`/api/saved_objects/visualization`)
           .send({
@@ -72,34 +72,16 @@ export default function ({ getService }) {
               title: 'My favorite vis',
             },
           })
-          .expect(200)
+          .expect(500)
           .then((resp) => {
-            // loose uuid validation
-            expect(resp.body)
-              .to.have.property('id')
-              .match(/^[0-9a-f-]{36}$/);
-
-            // loose ISO8601 UTC time with milliseconds validation
-            expect(resp.body)
-              .to.have.property('updated_at')
-              .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-
             expect(resp.body).to.eql({
-              id: resp.body.id,
-              type: 'visualization',
-              migrationVersion: resp.body.migrationVersion,
-              updated_at: resp.body.updated_at,
-              version: resp.body.version,
-              attributes: {
-                title: 'My favorite vis',
-              },
-              references: [],
-              namespaces: ['default'],
+              error: 'Internal Server Error',
+              message: 'An internal server error occurred.',
+              statusCode: 500,
             });
-            expect(resp.body.migrationVersion).to.be.ok();
           });
 
-        expect(await es.indices.exists({ index: '.kibana' })).to.be(true);
+        expect(await es.indices.exists({ index: '.kibana' })).to.be(false);
       });
     });
   });

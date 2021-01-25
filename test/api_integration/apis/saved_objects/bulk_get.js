@@ -99,7 +99,7 @@ export default function ({ getService }) {
         async () =>
           // just in case the kibana server has recreated it
           await es.indices.delete({
-            index: '.kibana',
+            index: '.kibana*',
             ignore: [404],
           })
       );

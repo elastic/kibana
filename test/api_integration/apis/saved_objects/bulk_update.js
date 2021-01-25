@@ -235,12 +235,12 @@ export default function ({ getService }) {
         async () =>
           // just in case the kibana server has recreated it
           await es.indices.delete({
-            index: '.kibana',
+            index: '.kibana*',
             ignore: [404],
           })
       );
 
-      it('should return generic 404', async () => {
+      it('should return 200 with errors', async () => {
         const response = await supertest
           .put(`/api/saved_objects/_bulk_update`)
           .send([
@@ -269,9 +269,9 @@ export default function ({ getService }) {
           id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
           type: 'visualization',
           error: {
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Saved object [visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab] not found',
+            statusCode: 500,
+            error: 'Internal Server Error',
+            message: 'An internal server error occurred',
           },
         });
 
@@ -279,9 +279,9 @@ export default function ({ getService }) {
           id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
           type: 'dashboard',
           error: {
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Saved object [dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab] not found',
+            statusCode: 500,
+            error: 'Internal Server Error',
+            message: 'An internal server error occurred',
           },
         });
       });
