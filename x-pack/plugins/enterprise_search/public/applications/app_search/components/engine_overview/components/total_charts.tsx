@@ -19,24 +19,16 @@ import {
 } from '@elastic/eui';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { ENGINE_ANALYTICS_PATH, ENGINE_API_LOGS_PATH } from '../../../routes';
+import { generateEnginePath } from '../../engine';
 
-import { ENGINE_ANALYTICS_PATH, ENGINE_API_LOGS_PATH, getEngineRoute } from '../../../routes';
 import { TOTAL_QUERIES, TOTAL_API_OPERATIONS } from '../../analytics/constants';
 import { VIEW_ANALYTICS, VIEW_API_LOGS, LAST_7_DAYS } from '../constants';
-
-import { EngineLogic } from '../../engine';
+import { AnalyticsChart, convertToChartData } from '../../analytics';
 import { EngineOverviewLogic } from '../';
 
 export const TotalCharts: React.FC = () => {
-  const { engineName } = useValues(EngineLogic);
-  const engineRoute = getEngineRoute(engineName);
-
-  const {
-    // startDate,
-    // endDate,
-    // queriesPerDay,
-    // operationsPerDay,
-  } = useValues(EngineOverviewLogic);
+  const { startDate, queriesPerDay, operationsPerDay } = useValues(EngineOverviewLogic);
 
   return (
     <EuiFlexGroup>
@@ -52,18 +44,20 @@ export const TotalCharts: React.FC = () => {
               </EuiText>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
-              <EuiButtonTo to={engineRoute + ENGINE_ANALYTICS_PATH} size="s">
+              <EuiButtonTo to={generateEnginePath(ENGINE_ANALYTICS_PATH)} size="s">
                 {VIEW_ANALYTICS}
               </EuiButtonTo>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>
-            TODO: Analytics chart
-            {/* <EngineAnalytics
-              data={[queriesPerDay]}
-              startDate={new Date(startDate)}
-              endDate={new Date(endDate)}
-            /> */}
+            <AnalyticsChart
+              lines={[
+                {
+                  id: TOTAL_QUERIES,
+                  data: convertToChartData({ startDate, data: queriesPerDay }),
+                },
+              ]}
+            />
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiFlexItem>
@@ -79,18 +73,20 @@ export const TotalCharts: React.FC = () => {
               </EuiText>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
-              <EuiButtonTo to={engineRoute + ENGINE_API_LOGS_PATH} size="s">
+              <EuiButtonTo to={generateEnginePath(ENGINE_API_LOGS_PATH)} size="s">
                 {VIEW_API_LOGS}
               </EuiButtonTo>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>
-            TODO: API Logs chart
-            {/* <EngineAnalytics
-              data={[operationsPerDay]}
-              startDate={new Date(startDate)}
-              endDate={new Date(endDate)}
-            /> */}
+            <AnalyticsChart
+              lines={[
+                {
+                  id: TOTAL_API_OPERATIONS,
+                  data: convertToChartData({ startDate, data: operationsPerDay }),
+                },
+              ]}
+            />
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiFlexItem>

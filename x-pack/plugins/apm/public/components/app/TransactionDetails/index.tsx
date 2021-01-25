@@ -113,7 +113,7 @@ export function TransactionDetails({
           <h1>{transactionName}</h1>
         </EuiTitle>
       </ApmHeader>
-      <SearchBar />
+      <SearchBar showTimeComparison />
       <EuiPage>
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>

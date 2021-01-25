@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const useRolloverPath = '_meta.hot.useRollover';
+export const isUsingCustomRolloverPath = '_meta.hot.customRollover.enabled';
 
 export const isUsingDefaultRolloverPath = '_meta.hot.isUsingDefaultRollover';
 

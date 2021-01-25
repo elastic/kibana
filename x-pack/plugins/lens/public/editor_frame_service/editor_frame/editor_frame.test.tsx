@@ -60,6 +60,7 @@ function getDefaultProps() {
     },
     palettes: chartPluginMock.createPaletteRegistry(),
     showNoDataPopover: jest.fn(),
+    searchSessionId: 'sessionId',
   };
 }
 
@@ -264,6 +265,7 @@ describe('editor_frame', () => {
         filters: [],
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         availablePalettes: defaultProps.palettes,
+        searchSessionId: 'sessionId',
       });
     });
 
@@ -630,16 +632,19 @@ describe('editor_frame', () => {
         );
       });
 
+      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
+        .setState;
+
+      mockDatasource.renderDataPanel.mockClear();
+
       const updatedState = {
         title: 'shazm',
       };
-      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
-        .setState;
       act(() => {
         setDatasourceState(updatedState);
       });
 
-      expect(mockDatasource.renderDataPanel).toHaveBeenCalledTimes(2);
+      expect(mockDatasource.renderDataPanel).toHaveBeenCalledTimes(1);
       expect(mockDatasource.renderDataPanel).toHaveBeenLastCalledWith(
         expect.any(Element),
         expect.objectContaining({

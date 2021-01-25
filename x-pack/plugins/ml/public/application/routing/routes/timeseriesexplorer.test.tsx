@@ -44,6 +44,10 @@ jest.mock('../../util/url_state');
 
 jest.mock('../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state');
 
+jest.mock('../../components/help_menu', () => ({
+  HelpMenu: () => <div id="mockHelpMenu" />,
+}));
+
 jest.mock('../../contexts/kibana/kibana_context', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { of } = require('rxjs');
@@ -83,6 +87,11 @@ jest.mock('../../contexts/kibana/kibana_context', () => {
           notifications: {
             toasts: {
               addDanger: () => {},
+            },
+          },
+          docLinks: {
+            links: {
+              ml: { anomalyDetection: jest.fn() },
             },
           },
         },

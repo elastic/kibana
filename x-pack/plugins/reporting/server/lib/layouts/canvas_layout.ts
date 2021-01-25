@@ -64,8 +64,8 @@ export class CanvasLayout extends Layout implements LayoutInstance {
 
   public getViewport() {
     return {
-      height: this.scaledHeight,
-      width: this.scaledWidth,
+      height: this.height,
+      width: this.width,
       zoom: ZOOM,
     };
   }

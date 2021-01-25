@@ -15,6 +15,8 @@ import {
   EuiFilterGroup,
   EuiPanel,
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import useMeasure from 'react-use/lib/useMeasure';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -181,10 +183,10 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
     [http.basePath, state.start, state.end, logStreamQuery]
   );
 
-  const [logsPanelRef, { height: logPanelHeight }] = useMeasure();
+  const [logsPanelRef, { height: logPanelHeight }] = useMeasure<HTMLDivElement>();
 
   const agentVersion = agent.local_metadata?.elastic?.agent?.version;
-  const isLogLevelSelectionAvailable = useMemo(() => {
+  const isLogFeatureAvailable = useMemo(() => {
     if (!agentVersion) {
       return false;
     }
@@ -194,6 +196,31 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
     }
     return semverGte(agentVersionWithPrerelease, '7.11.0');
   }, [agentVersion]);
+
+  if (!isLogFeatureAvailable) {
+    return (
+      <EuiCallOut
+        size="m"
+        color="warning"
+        title={
+          <FormattedMessage
+            id="xpack.fleet.agentLogs.oldAgentWarningTitle"
+            defaultMessage="The Logs view requires Elastic Agent 7.11 or higher. To upgrade an agent, go to the Actions menu, or {downloadLink} a newer version."
+            values={{
+              downloadLink: (
+                <EuiLink href="https://ela.st/download-elastic-agent" external target="_blank">
+                  <FormattedMessage
+                    id="xpack.fleet.agentLogs.downloadLink"
+                    defaultMessage="download"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+      />
+    );
+  }
 
   return (
     <WrapperFlexGroup direction="column" gutterSize="m">
@@ -271,11 +298,9 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
           />
         </EuiPanel>
       </EuiFlexItem>
-      {isLogLevelSelectionAvailable && (
-        <EuiFlexItem grow={false}>
-          <SelectLogLevel agent={agent} />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <SelectLogLevel agent={agent} />
+      </EuiFlexItem>
     </WrapperFlexGroup>
   );
 });

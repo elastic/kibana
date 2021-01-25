@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
-import { Server, ServerRoute } from '@hapi/hapi';
+
+import { Server } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import uuid from 'uuid';
@@ -167,6 +157,8 @@ export class HttpServer {
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
         this.log.debug(`registering route handler for [${route.path}]`);
+        // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
+        const validate = isSafeMethod(route.method) ? undefined : { payload: true };
         const { authRequired, tags, body = {}, timeout } = route.options;
         const { accepts: allow, maxBytes, output, parse } = body;
 
@@ -174,7 +166,7 @@ export class HttpServer {
           xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
         };
 
-        const routeOpts: ServerRoute = {
+        this.server.route({
           handler: route.handler,
           method: route.method,
           path: route.path,
@@ -182,6 +174,11 @@ export class HttpServer {
             auth: this.getAuthOption(authRequired),
             app: kibanaRouteOptions,
             tags: tags ? Array.from(tags) : undefined,
+            // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
+            // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
+            // validation applied in ./http_tools#getServerOptions
+            // (All NP routes are already required to specify their own validation in order to access the payload)
+            validate,
             // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
             payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
               ? {
@@ -197,22 +194,7 @@ export class HttpServer {
               socket: timeout?.idleSocket ?? this.config!.socketTimeout,
             },
           },
-        };
-
-        // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
-        if (!isSafeMethod(route.method)) {
-          // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
-          // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
-          // validation applied in ./http_tools#getServerOptions
-          // (All NP routes are already required to specify their own validation in order to access the payload)
-          // TODO: Move the setting of the validate option back up to being set at `routeOpts` creation-time once
-          // https://github.com/hapijs/hoek/pull/365 is merged and released in @hapi/hoek v9.1.1. At that point I
-          // imagine the ts-error below will go away as well.
-          // @ts-expect-error "Property 'validate' does not exist on type 'RouteOptions'" <-- ehh?!? yes it does!
-          routeOpts.options!.validate = { payload: true };
-        }
-
-        this.server.route(routeOpts);
+        });
       }
     }
 

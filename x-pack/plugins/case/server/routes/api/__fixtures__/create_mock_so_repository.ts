@@ -28,7 +28,7 @@ export const createMockSavedObjectsRepository = ({
   caseCommentSavedObject?: any[];
   caseConfigureSavedObject?: any[];
   caseMappingsSavedObject?: any[];
-}) => {
+} = {}) => {
   const mockSavedObjectsClientContract = ({
     bulkGet: jest.fn((objects: SavedObjectsBulkGetObject[]) => {
       return {
@@ -100,9 +100,12 @@ export const createMockSavedObjectsRepository = ({
       }
 
       if (
-        findArgs.type === CASE_CONFIGURE_SAVED_OBJECT &&
-        caseConfigureSavedObject[0] &&
-        caseConfigureSavedObject[0].id === 'throw-error-find'
+        (findArgs.type === CASE_CONFIGURE_SAVED_OBJECT &&
+          caseConfigureSavedObject[0] &&
+          caseConfigureSavedObject[0].id === 'throw-error-find') ||
+        (findArgs.type === CASE_SAVED_OBJECT &&
+          caseSavedObject[0] &&
+          caseSavedObject[0].id === 'throw-error-find')
       ) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError('Error thrown for testing');
       }

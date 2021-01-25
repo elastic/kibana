@@ -602,46 +602,27 @@ export const updateTimelineColumns = ({
   };
 };
 
-interface UpdateTimelineDescriptionParams {
-  id: string;
+interface UpdateTimelineTitleAndDescriptionParams {
   description: string;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineDescription = ({
-  id,
-  description,
-  timelineById,
-}: UpdateTimelineDescriptionParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      description: description.endsWith(' ') ? `${description.trim()} ` : description.trim(),
-    },
-  };
-};
-
-interface UpdateTimelineTitleParams {
   id: string;
   title: string;
   timelineById: TimelineById;
 }
 
-export const updateTimelineTitle = ({
+export const updateTimelineTitleAndDescription = ({
+  description,
   id,
   title,
   timelineById,
-}: UpdateTimelineTitleParams): TimelineById => {
+}: UpdateTimelineTitleAndDescriptionParams): TimelineById => {
   const timeline = timelineById[id];
 
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      title: title.endsWith(' ') ? `${title.trim()} ` : title.trim(),
+      description: description.trim(),
+      title: title.trim(),
     },
   };
 };

@@ -10,7 +10,6 @@ import {
   timestampSafeVersion,
 } from '../../../../../common/endpoint/models/event';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
-import { ChildrenPaginationCursor } from './children_pagination';
 
 type SearchAfterFields = [number, string];
 
@@ -54,7 +53,7 @@ export interface PaginationFields {
  *
  * @param data Transforms a pagination cursor into a base64 encoded string
  */
-export function urlEncodeCursor(data: PaginationCursor | ChildrenPaginationCursor): string {
+export function urlEncodeCursor(data: PaginationCursor): string {
   const value = JSON.stringify(data);
   return Buffer.from(value, 'utf8')
     .toString('base64')

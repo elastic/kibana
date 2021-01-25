@@ -173,15 +173,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       return {
         ...groupAcc,
         [groupName]: {
-          fields: Object.entries(groupValue.fields ?? {}).reduce<Partial<BrowserField>>(
-            (fieldAcc, [fieldName, fieldValue]) => {
-              if (fieldValue.aggregatable === true) {
-                return { ...fieldAcc, [fieldName]: fieldValue };
-              }
-              return fieldAcc;
-            },
-            {}
-          ),
+          fields: Object.entries(groupValue.fields ?? {}).reduce<
+            Record<string, Partial<BrowserField>>
+          >((fieldAcc, [fieldName, fieldValue]) => {
+            if (fieldValue.aggregatable === true) {
+              fieldAcc[fieldName] = fieldValue;
+            }
+            return fieldAcc;
+          }, {}),
         } as Partial<BrowserField>,
       };
     },

@@ -53,6 +53,7 @@ export class MetricsExpression extends Component {
         fields={this.props.rightFields}
         metrics={this.props.metrics}
         onChange={this.props.onChange}
+        allowMultipleMetrics={true}
       />
     );
   };
@@ -93,7 +94,6 @@ export class MetricsExpression extends Component {
         closePopover={this._closePopover}
         ownFocus
         initialFocus="body" /* avoid initialFocus on Combobox */
-        withTitle
         anchorPosition="leftCenter"
         button={
           <EuiExpression

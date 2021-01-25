@@ -1,52 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React, { Component } from 'react';
 import { debounce } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import {
-  EuiSpacer,
-  Query,
-  EuiInMemoryTable,
-  EuiIcon,
-  EuiConfirmModal,
-  EuiLoadingElastic,
-  EuiOverlayMask,
-  EUI_MODAL_CONFIRM_BUTTON,
-  EuiCheckboxGroup,
-  EuiToolTip,
-  EuiPageContent,
-  EuiSwitch,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiModalHeaderTitle,
-  EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiSpacer, Query, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
@@ -62,7 +27,6 @@ import {
   parseQuery,
   getSavedObjectCounts,
   getRelationships,
-  getSavedObjectLabel,
   fetchExportObjects,
   fetchExportByTypeAndSearch,
   findObjects,
@@ -77,7 +41,14 @@ import {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../../services';
-import { Header, Table, Flyout, Relationships } from './components';
+import {
+  Header,
+  Table,
+  Flyout,
+  Relationships,
+  DeleteConfirmModal,
+  ExportModal,
+} from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 
 interface ExportAllOption {
@@ -530,6 +501,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         newIndexPatternUrl={newIndexPatternUrl}
         allowedTypes={this.props.allowedTypes}
         overlays={this.props.overlays}
+        basePath={this.props.http.basePath}
         search={this.props.search}
       />
     );
@@ -554,113 +526,23 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   renderDeleteConfirmModal() {
     const { isShowingDeleteConfirmModal, isDeleting, selectedSavedObjects } = this.state;
-
     if (!isShowingDeleteConfirmModal) {
       return null;
     }
 
-    let modal;
-
-    if (isDeleting) {
-      // Block the user from interacting with the table while its contents are being deleted.
-      modal = <EuiLoadingElastic size="xl" />;
-    } else {
-      const onCancel = () => {
-        this.setState({ isShowingDeleteConfirmModal: false });
-      };
-
-      const onConfirm = () => {
-        this.delete();
-      };
-
-      modal = (
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
-              defaultMessage="Delete saved objects"
-            />
-          }
-          onCancel={onCancel}
-          onConfirm={onConfirm}
-          buttonColor="danger"
-          cancelButtonText={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            isDeleting ? (
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteProcessButtonLabel"
-                defaultMessage="Deleting…"
-              />
-            ) : (
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
-                defaultMessage="Delete"
-              />
-            )
-          }
-          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        >
-          <p>
-            <FormattedMessage
-              id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-              defaultMessage="This action will delete the following saved objects:"
-            />
-          </p>
-          <EuiInMemoryTable
-            items={selectedSavedObjects}
-            columns={[
-              {
-                field: 'type',
-                name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName',
-                  { defaultMessage: 'Type' }
-                ),
-                width: '50px',
-                render: (type, object) => (
-                  <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
-                    <EuiIcon type={object.meta.icon || 'apps'} />
-                  </EuiToolTip>
-                ),
-              },
-              {
-                field: 'id',
-                name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.idColumnName',
-                  { defaultMessage: 'Id' }
-                ),
-              },
-              {
-                field: 'meta.title',
-                name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
-                  { defaultMessage: 'Title' }
-                ),
-              },
-            ]}
-            pagination={true}
-            sorting={false}
-          />
-        </EuiConfirmModal>
-      );
-    }
-
-    return <EuiOverlayMask>{modal}</EuiOverlayMask>;
+    return (
+      <DeleteConfirmModal
+        isDeleting={isDeleting}
+        onConfirm={() => {
+          this.delete();
+        }}
+        onCancel={() => {
+          this.setState({ isShowingDeleteConfirmModal: false });
+        }}
+        selectedObjects={selectedSavedObjects}
+      />
+    );
   }
-
-  changeIncludeReferencesDeep = () => {
-    this.setState((state) => ({
-      isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
-    }));
-  };
-
-  closeExportAllModal = () => {
-    this.setState({ isShowingExportAllOptionsModal: false });
-  };
 
   renderExportAllOptionsModal() {
     const {
@@ -676,85 +558,26 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiModal onClose={this.closeExportAllModal}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
-                defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
-                values={{
-                  filteredItemCount,
-                }}
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalDescription"
-                  defaultMessage="Select which types to export"
-                />
-              }
-              labelType="legend"
-            >
-              <EuiCheckboxGroup
-                options={exportAllOptions}
-                idToSelectedMap={exportAllSelectedOptions}
-                onChange={(optionId) => {
-                  const newExportAllSelectedOptions = {
-                    ...exportAllSelectedOptions,
-                    ...{
-                      [optionId]: !exportAllSelectedOptions[optionId],
-                    },
-                  };
-
-                  this.setState({
-                    exportAllSelectedOptions: newExportAllSelectedOptions,
-                  });
-                }}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="m" />
-            <EuiSwitch
-              name="includeReferencesDeep"
-              label={
-                <FormattedMessage
-                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                  defaultMessage="Include related objects"
-                />
-              }
-              checked={isIncludeReferencesDeepChecked}
-              onChange={this.changeIncludeReferencesDeep}
-            />
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty onClick={this.closeExportAllModal}>
-                      <FormattedMessage
-                        id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
-                        defaultMessage="Cancel"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton fill onClick={this.onExportAll}>
-                      <FormattedMessage
-                        id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
-                        defaultMessage="Export all"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+      <ExportModal
+        onExport={this.onExportAll}
+        onCancel={() => {
+          this.setState({ isShowingExportAllOptionsModal: false });
+        }}
+        onSelectedOptionsChange={(newOptions) => {
+          this.setState({
+            exportAllSelectedOptions: newOptions,
+          });
+        }}
+        filteredItemCount={filteredItemCount}
+        options={exportAllOptions}
+        selectedOptions={exportAllSelectedOptions}
+        includeReferences={isIncludeReferencesDeepChecked}
+        onIncludeReferenceChange={(newIncludeReferences) => {
+          this.setState({
+            isIncludeReferencesDeepChecked: newIncludeReferences,
+          });
+        }}
+      />
     );
   }
 

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
+import { Action } from '../../../../../../../../src/plugins/ui_actions/public';
 import {
   reactToUiComponent,
   toMountPoint,
@@ -31,7 +31,7 @@ export interface FlyoutEditDrilldownParams {
   start: StartServicesGetter<Pick<StartDependencies, 'uiActionsEnhanced'>>;
 }
 
-export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_EDIT_DRILLDOWN> {
+export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public order = 10;

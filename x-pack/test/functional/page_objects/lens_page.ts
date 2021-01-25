@@ -12,10 +12,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const elasticChart = getService('elasticChart');
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['header', 'timePicker', 'common']);
+  const PageObjects = getPageObjects(['header', 'timePicker', 'common', 'visualize']);
 
   return logWrapper('lensPage', log, {
     /**
@@ -216,6 +217,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async toggleToolbarPopover(buttonTestSub: string) {
+      await testSubjects.click(buttonTestSub);
+    },
+
     /**
      * Open the specified dimension.
      *
@@ -236,6 +241,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async isTopLevelAggregation() {
+      return await testSubjects.isEuiSwitchChecked('indexPattern-nesting-switch');
+    },
     /**
      * Removes the dimension matching a specific test subject
      */
@@ -265,22 +273,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Save the current Lens visualization.
      */
-    async save(title: string, saveAsNew?: boolean, redirectToOrigin?: boolean) {
+    async save(
+      title: string,
+      saveAsNew?: boolean,
+      redirectToOrigin?: boolean,
+      addToDashboard?: boolean,
+      dashboardId?: string
+    ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
-      await testSubjects.setValue('savedObjectTitle', title);
 
-      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
-      if (saveAsNewCheckboxExists) {
-        const state = saveAsNew ? 'check' : 'uncheck';
-        await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
-      }
-
-      const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
-      if (redirectToOriginCheckboxExists) {
-        const state = redirectToOrigin ? 'check' : 'uncheck';
-        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
-      }
+      await PageObjects.visualize.setSaveModalValues(title, {
+        saveAsNew,
+        redirectToOrigin,
+        addToDashboard,
+        dashboardId,
+      });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
       await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
@@ -351,6 +359,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click('lnsChartSwitchPopover');
         await testSubjects.existOrFail('visTypeTitle');
       });
+    },
+
+    async changeAxisSide(newSide: string) {
+      await testSubjects.click(`lnsXY_axisSide_groups_${newSide}`);
     },
 
     /** Counts the visible warnings in the config panel */
@@ -482,6 +494,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return (
         (await (await testSubjects.find('lnsWorkspace')).getVisibleText()) === 'No results found'
       );
+    },
+
+    async getCurrentChartDebugState() {
+      return await elasticChart.getChartDebugData('lnsWorkspace');
     },
 
     /**

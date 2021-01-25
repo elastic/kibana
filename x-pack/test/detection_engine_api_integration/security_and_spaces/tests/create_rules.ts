@@ -204,6 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
+
     describe('missing timestamps', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
@@ -231,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
         const bodyId = body.id;
 
-        await waitForRuleSuccessOrStatus(supertest, bodyId, 'failed');
+        await waitForRuleSuccessOrStatus(supertest, bodyId, 'partial failure');
         await waitForSignalsToBePresent(supertest, 2, [bodyId]);
 
         const { body: statusBody } = await supertest
@@ -242,7 +243,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // set to "failed" for now. Will update this with a partial failure
         // once I figure out the logic
-        expect(statusBody[bodyId].current_status.status).to.eql('failed');
+        expect(statusBody[bodyId].current_status.status).to.eql('partial failure');
       });
     });
   });

@@ -10,10 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiTextColor, EuiOverlayMask } from '@elastic/eui';
 import { useActions, useValues } from 'kea';
 
+import { LogRetentionLogic, LogRetentionOptions } from '../../log_retention';
 import { GenericConfirmationModal } from './generic_confirmation_modal';
-import { LogRetentionLogic } from './log_retention_logic';
-
-import { LogRetentionOptions } from './types';
 
 export const LogRetentionConfirmationModal: React.FC = () => {
   const CANNOT_BE_RECOVERED_TEXT = i18n.translate(

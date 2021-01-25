@@ -34,7 +34,7 @@ async function searchThroughput({
   intervalString,
 }: {
   serviceName: string;
-  transactionType: string | undefined;
+  transactionType: string;
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
@@ -48,15 +48,12 @@ async function searchThroughput({
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
+    { term: { [TRANSACTION_TYPE]: transactionType } },
     ...setup.esFilter,
   ];
 
   if (transactionName) {
     filter.push({ term: { [TRANSACTION_NAME]: transactionName } });
-  }
-
-  if (transactionType) {
-    filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
   }
 
   const field = getTransactionDurationFieldForAggregatedTransactions(
@@ -104,7 +101,7 @@ export async function getThroughputCharts({
   searchAggregatedTransactions,
 }: {
   serviceName: string;
-  transactionType: string | undefined;
+  transactionType: string;
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;

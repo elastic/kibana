@@ -25,6 +25,20 @@ const StyledEuiFlyout = styled(EuiFlyout)`
   z-index: ${({ theme }) => theme.eui.euiZLevel7};
 `;
 
+const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
+  .euiFlyoutBody__overflow {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+
+    .euiFlyoutBody__overflowContent {
+      flex: 1;
+      overflow: hidden;
+      padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 64px`};
+    }
+  }
+`;
+
 interface EventDetailsFlyoutProps {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
@@ -67,7 +81,7 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
       <EuiFlyoutHeader hasBorder>
         <ExpandableEventTitle isAlert={isAlert} loading={loading} />
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <StyledEuiFlyoutBody>
         <ExpandableEvent
           browserFields={browserFields}
           detailsData={detailsData}
@@ -77,7 +91,7 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
           timelineId={timelineId}
           timelineTabType="flyout"
         />
-      </EuiFlyoutBody>
+      </StyledEuiFlyoutBody>
     </StyledEuiFlyout>
   );
 };

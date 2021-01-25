@@ -28,12 +28,13 @@ import {
   CoreStart,
   SavedObjectsServiceStart,
   IContextProvider,
-  RequestHandler,
   ElasticsearchServiceStart,
   ILegacyClusterClient,
   StatusServiceSetup,
   ServiceStatus,
+  SavedObjectsBulkGetObject,
 } from '../../../../src/core/server';
+import type { AlertingRequestHandlerContext } from './types';
 
 import {
   aggregateAlertRoute,
@@ -102,9 +103,18 @@ export interface PluginSetupContract {
     Params extends AlertTypeParams = AlertTypeParams,
     State extends AlertTypeState = AlertTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
-    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+    ActionGroupIds extends string = never,
+    RecoveryActionGroupId extends string = never
   >(
-    alertType: AlertType<Params, State, InstanceState, InstanceContext>
+    alertType: AlertType<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >
   ): void;
 }
 
@@ -245,10 +255,13 @@ export class AlertingPlugin {
 
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
 
-    core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
+    core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(
+      'alerting',
+      this.createRouteHandlerContext(core)
+    );
 
     // Routes
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<AlertingRequestHandlerContext>();
     // Register routes
     aggregateAlertRoute(router, this.licenseState);
     createAlertRoute(router, this.licenseState);
@@ -273,8 +286,19 @@ export class AlertingPlugin {
         Params extends AlertTypeParams = AlertTypeParams,
         State extends AlertTypeState = AlertTypeState,
         InstanceState extends AlertInstanceState = AlertInstanceState,
-        InstanceContext extends AlertInstanceContext = AlertInstanceContext
-      >(alertType: AlertType<Params, State, InstanceState, InstanceContext>) {
+        InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+        ActionGroupIds extends string = never,
+        RecoveryActionGroupId extends string = never
+      >(
+        alertType: AlertType<
+          Params,
+          State,
+          InstanceState,
+          InstanceContext,
+          ActionGroupIds,
+          RecoveryActionGroupId
+        >
+      ) {
         if (!(alertType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${alertType.minimumLicenseRequired}" is not a valid license type`);
         }
@@ -350,7 +374,10 @@ export class AlertingPlugin {
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
       const client = getAlertsClientWithRequest(request);
-      return (type: string, id: string) => client.get({ id });
+      return (objects?: SavedObjectsBulkGetObject[]) =>
+        objects
+          ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
+          : Promise.resolve([]);
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
@@ -368,7 +395,7 @@ export class AlertingPlugin {
 
   private createRouteHandlerContext = (
     core: CoreSetup
-  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'alerting'> => {
+  ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
     const { alertTypeRegistry, alertsClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();

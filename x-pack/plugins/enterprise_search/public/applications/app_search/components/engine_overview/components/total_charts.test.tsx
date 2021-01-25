@@ -5,11 +5,13 @@
  */
 
 import { setMockValues } from '../../../../__mocks__/kea.mock';
+import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { AnalyticsChart } from '../../analytics';
 
 import { TotalCharts } from './total_charts';
 
@@ -19,9 +21,7 @@ describe('TotalCharts', () => {
   beforeAll(() => {
     jest.clearAllMocks();
     setMockValues({
-      engineName: 'some-engine',
       startDate: '1970-01-01',
-      endDate: '1970-01-08',
       queriesPerDay: [0, 1, 2, 3, 5, 10, 50],
       operationsPerDay: [0, 0, 0, 0, 0, 0, 0],
     });
@@ -33,7 +33,7 @@ describe('TotalCharts', () => {
 
     expect(chart.find('h2').text()).toEqual('Total queries');
     expect(chart.find(EuiButtonTo).prop('to')).toEqual('/engines/some-engine/analytics');
-    // TODO: find chart component
+    expect(chart.find(AnalyticsChart)).toHaveLength(1);
   });
 
   it('renders the total API operations chart', () => {
@@ -41,6 +41,6 @@ describe('TotalCharts', () => {
 
     expect(chart.find('h2').text()).toEqual('Total API operations');
     expect(chart.find(EuiButtonTo).prop('to')).toEqual('/engines/some-engine/api-logs');
-    // TODO: find chart component
+    expect(chart.find(AnalyticsChart)).toHaveLength(1);
   });
 });

@@ -28,7 +28,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           app: ['discover', 'kibana'],
           catalogue: ['discover'],
           savedObject: {
-            all: ['search', 'query', 'index-pattern', 'background-session'],
+            all: ['search', 'query', 'index-pattern'],
             read: [],
           },
           ui: ['show', 'save', 'saveQuery'],
@@ -66,6 +66,33 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                     read: [],
                   },
                   ui: ['createShortUrl'],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: i18n.translate('xpack.features.ossFeatures.discoverSearchSessionsFeatureName', {
+            defaultMessage: 'Store Search Sessions',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'store_search_session',
+                  name: i18n.translate(
+                    'xpack.features.ossFeatures.discoverStoreSearchSessionsPrivilegeName',
+                    {
+                      defaultMessage: 'Store Search Sessions',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['search-session'],
+                    read: [],
+                  },
+                  ui: ['storeSearchSession'],
                 },
               ],
             },
@@ -156,7 +183,6 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'lens',
               'map',
               'tag',
-              'background-session',
             ],
           },
           ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
@@ -205,6 +231,33 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                     read: [],
                   },
                   ui: ['createShortUrl'],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: i18n.translate('xpack.features.ossFeatures.dashboardSearchSessionsFeatureName', {
+            defaultMessage: 'Store Search Sessions',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'store_search_session',
+                  name: i18n.translate(
+                    'xpack.features.ossFeatures.dashboardStoreSearchSessionsPrivilegeName',
+                    {
+                      defaultMessage: 'Store Search Sessions',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['search-session'],
+                    read: [],
+                  },
+                  ui: ['storeSearchSession'],
                 },
               ],
             },

@@ -24,7 +24,7 @@ export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
       <p>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.emptyPrompt.emptyDesc"
-          defaultMessage="Receive an alert through email, Slack, or another connector when a trigger is hit."
+          defaultMessage="Receive an alert through email, Slack, or another connector when a condition is met."
         />
       </p>
     }

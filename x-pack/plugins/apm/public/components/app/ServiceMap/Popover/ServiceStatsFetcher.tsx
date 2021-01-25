@@ -56,8 +56,7 @@ export function ServiceStatsFetcher({
     }
   );
 
-  const isLoading =
-    status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   if (isLoading) {
     return <LoadingSpinner />;
