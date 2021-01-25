@@ -7,7 +7,7 @@
 import { extname } from 'path';
 import { Readable } from 'stream';
 
-import { IRouter } from '../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 
 import { TIMELINE_IMPORT_URL } from '../../../../common/constants';
 
@@ -21,7 +21,7 @@ import { ImportTimelinesPayloadSchemaRt } from './schemas/import_timelines_schem
 import { buildFrameworkRequest } from './utils/common';
 
 export const importTimelinesRoute = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {

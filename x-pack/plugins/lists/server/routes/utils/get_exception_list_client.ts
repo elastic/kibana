@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
-
+import type { ListsRequestHandlerContext } from '../../types';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import { ExceptionListClient } from '../../services/exception_lists/exception_list_client';
 
-export const getExceptionListClient = (context: RequestHandlerContext): ExceptionListClient => {
+export const getExceptionListClient = (
+  context: ListsRequestHandlerContext
+): ExceptionListClient => {
   const exceptionLists = context.lists?.getExceptionListClient();
   if (exceptionLists == null) {
     throw new ErrorWithStatusCode('Exception lists is not found as a plugin', 404);

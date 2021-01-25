@@ -29,6 +29,7 @@ import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
 import { TablesAdapter } from '../util/tables_adapter';
+import { ExpressionsInspectorAdapter } from '../util/expressions_inspector_adapter';
 
 /**
  * AbortController is not available in Node until v15, so we
@@ -63,6 +64,7 @@ export interface ExecutionParams {
 const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
   requests: new RequestAdapter(),
   tables: new TablesAdapter(),
+  expression: new ExpressionsInspectorAdapter(),
 });
 
 export class Execution<
@@ -208,6 +210,9 @@ export class Execution<
     this.firstResultFuture.promise
       .then(
         (result) => {
+          if (this.context.inspectorAdapters.expression) {
+            this.context.inspectorAdapters.expression.logAST(this.state.get().ast);
+          }
           this.state.transitions.setResult(result);
         },
         (error) => {

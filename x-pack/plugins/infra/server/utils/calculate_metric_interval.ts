@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { RequestHandlerContext } from 'src/core/server';
 import { findInventoryModel } from '../../common/inventory_models';
 // import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
 import { InventoryItemType } from '../../common/inventory_models/types';
