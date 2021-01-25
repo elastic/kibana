@@ -109,6 +109,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
           success: true,
           successCount: filteredObjects.length,
           successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
+          warnings: [],
         };
 
         return response;
@@ -173,6 +174,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     `);
 
     expect(savedObjectsExporter.exportByObjects).toHaveBeenCalledWith({
+      request: expect.any(Object),
       excludeExportDetails: true,
       includeReferencesDeep: true,
       namespace,
@@ -209,6 +211,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
           success: true,
           successCount: filteredObjects.length,
           successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
+          warnings: [],
         });
       },
     });

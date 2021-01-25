@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 export const ANALYTICS_TITLE = i18n.translate(
@@ -23,6 +24,10 @@ export const TOTAL_API_OPERATIONS = i18n.translate(
 export const TOTAL_QUERIES = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalQueries',
   { defaultMessage: 'Total queries' }
+);
+export const TOTAL_QUERIES_NO_RESULTS = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.analytics.totalQueriesNoResults',
+  { defaultMessage: 'Total queries with no results' }
 );
 export const TOTAL_CLICKS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalClicks',
@@ -51,7 +56,10 @@ export const RECENT_QUERIES = i18n.translate(
   { defaultMessage: 'Recent queries' }
 );
 
-// Moment date format conversions
+// Date formats & dates
 export const SERVER_DATE_FORMAT = 'YYYY-MM-DD';
 export const TOOLTIP_DATE_FORMAT = 'MMMM D, YYYY';
 export const X_AXIS_DATE_FORMAT = 'M/D';
+
+export const DEFAULT_START_DATE = moment().subtract(6, 'days').format(SERVER_DATE_FORMAT);
+export const DEFAULT_END_DATE = moment().format(SERVER_DATE_FORMAT);

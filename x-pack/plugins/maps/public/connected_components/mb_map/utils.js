@@ -5,6 +5,7 @@
  */
 
 import { RGBAImage } from './image_utils';
+import { isGlDrawLayer } from './sort_layers';
 
 export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLayer) {
   const mbStyle = mbMap.getStyle();
@@ -17,7 +18,7 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLa
     }
 
     // ignore gl-draw layers
-    if (mbLayer.id.startsWith('gl-draw')) {
+    if (isGlDrawLayer(mbLayer.id)) {
       return;
     }
 

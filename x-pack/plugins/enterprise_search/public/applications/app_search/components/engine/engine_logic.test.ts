@@ -89,7 +89,7 @@ describe('EngineLogic', () => {
           const mockReindexJob = {
             percentageComplete: 50,
             numDocumentsWithErrors: 2,
-            activeReindexJobId: 123,
+            activeReindexJobId: '123',
           };
           EngineLogic.actions.setIndexingStatus(mockReindexJob);
 

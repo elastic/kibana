@@ -247,6 +247,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async isTopLevelAggregation() {
+      return await testSubjects.isEuiSwitchChecked('indexPattern-nesting-switch');
+    },
     /**
      * Removes the dimension matching a specific test subject
      */
