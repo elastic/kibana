@@ -467,7 +467,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         const isOss = await deployment.isOss();
         // Remove this flag when ci doesn't run on OSS
-        if (isOss) {
+        if (!isOss) {
           // verify Lens opens a visualization
           expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
             'painDate'
