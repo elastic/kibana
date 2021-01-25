@@ -8,7 +8,7 @@
 
 import { IRouter } from './router';
 
-export type RouterMock = jest.Mocked<IRouter>;
+export type RouterMock = jest.Mocked<IRouter<any>>;
 
 function create({ routerPath = '' }: { routerPath?: string } = {}): RouterMock {
   return {
