@@ -15,12 +15,18 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { FormattedRelative } from '@kbn/i18n/react';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { TimelineStatus, TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
+import {
+  TimelineStatus,
+  TimelineTabs,
+  TimelineType,
+  TimelineId,
+} from '../../../../../common/types/timeline';
+import { State } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
@@ -28,7 +34,18 @@ import { AddToFavoritesButton } from '../../timeline/properties/helpers';
 import { AddToCaseButton } from '../add_to_case_button';
 import { AddTimelineButton } from '../add_timeline_button';
 import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
+import { useKibana } from '../../../../common/lib/kibana';
 import { InspectButton } from '../../../../common/components/inspect';
+import { useTimelineKpis } from '../../../containers/kpis';
+import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { TimelineModel } from '../../../../timelines/store/timeline/model';
+import {
+  startSelector,
+  endSelector,
+} from '../../../../common/components/super_date_picker/selectors';
+import { combineQueries } from '../../timeline/helpers';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import * as commonI18n from '../../timeline/properties/translations';
@@ -227,40 +244,111 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
 
 const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
 
-const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => (
-  <StyledTimelineHeader alignItems="center">
-    <EuiFlexItem>
-      <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
-        <RowFlexItem>
-          <TimelineName timelineId={timelineId} />
-          <SaveTimelineButton timelineId={timelineId} initialFocus="title" />
-        </RowFlexItem>
-        <RowFlexItem>
-          <TimelineDescription timelineId={timelineId} />
-          <SaveTimelineButton timelineId={timelineId} initialFocus="description" />
-        </RowFlexItem>
-        <EuiFlexItem>
-          <TimelineStatusInfo timelineId={timelineId} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
+  const { selectedPatterns, indexPattern, docValueFields, browserFields } = useSourcererScope(
+    SourcererScopeName.timeline
+  );
+  const getStartSelector = useMemo(() => startSelector(), []);
+  const getEndSelector = useMemo(() => endSelector(), []);
+  const isActive = useMemo(() => timelineId === TimelineId.active, [timelineId]);
+  const from = useDeepEqualSelector((state) => {
+    if (isActive) {
+      return getStartSelector(state.inputs.timeline);
+    } else {
+      return getStartSelector(state.inputs.global);
+    }
+  });
+  const to = useDeepEqualSelector((state) => {
+    if (isActive) {
+      return getEndSelector(state.inputs.timeline);
+    } else {
+      return getEndSelector(state.inputs.global);
+    }
+  });
+  const { uiSettings } = useKibana().services;
+  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const timeline: TimelineModel = useSelector(
+    (state: State) => getTimeline(state, timelineId) ?? timelineDefaults
+  );
+  const { dataProviders, filters, timelineType, kqlMode } = timeline;
+  const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
+  const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
 
-    <EuiFlexItem grow={1}>
-      <TimelineKPIs processes={10} users={20} hosts={20} sourceIps={30} destinationIps={40} />
-    </EuiFlexItem>
+  // return events on empty search
+  const kqlQueryExpression =
+    isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
+      ? ' '
+      : kqlQueryTimeline;
+  const kqlQuery = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [
+    kqlQueryExpression,
+  ]);
 
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <AddToFavoritesButton timelineId={timelineId} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AddToCaseButton timelineId={timelineId} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </StyledTimelineHeader>
-);
+  const isBlankTimeline: boolean = useMemo(
+    () => isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQuery.query),
+    [dataProviders, filters, kqlQuery]
+  );
+  const combinedQueries = useMemo(
+    () =>
+      combineQueries({
+        config: esQueryConfig,
+        dataProviders,
+        indexPattern,
+        browserFields,
+        filters: filters ? filters : [],
+        kqlQuery,
+        kqlMode,
+      }),
+    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQuery]
+  );
+  const [loading, kpis] = useTimelineKpis({
+    skip: false,
+    defaultIndex: selectedPatterns,
+    docValueFields,
+    timerange: {
+      to,
+      from,
+      interval: '',
+    },
+    isBlankTimeline,
+    filterQuery: combinedQueries?.filterQuery ?? '',
+  });
+
+  return (
+    <StyledTimelineHeader alignItems="center">
+      <EuiFlexItem>
+        <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
+          <RowFlexItem>
+            <TimelineName timelineId={timelineId} />
+            <SaveTimelineButton timelineId={timelineId} initialFocus="title" />
+          </RowFlexItem>
+          <RowFlexItem>
+            <TimelineDescription timelineId={timelineId} />
+            <SaveTimelineButton timelineId={timelineId} initialFocus="description" />
+          </RowFlexItem>
+          <EuiFlexItem>
+            <TimelineStatusInfo timelineId={timelineId} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={1}>
+        <TimelineKPIs kpis={kpis} isLoading={loading} />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <AddToFavoritesButton timelineId={timelineId} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AddToCaseButton timelineId={timelineId} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </StyledTimelineHeader>
+  );
+};
 
 FlyoutHeaderComponent.displayName = 'FlyoutHeaderComponent';
 

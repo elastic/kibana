@@ -52,6 +52,26 @@ export const buildTimelineKpiQuery = ({
             field: 'user.id',
           },
         },
+        destinationIpCount: {
+          cardinality: {
+            field: 'destination.ip',
+          },
+        },
+        hostCount: {
+          cardinality: {
+            field: 'host.id',
+          },
+        },
+        processCount: {
+          cardinality: {
+            field: 'process.entity_id',
+          },
+        },
+        sourceIpCount: {
+          cardinality: {
+            field: 'source.ip',
+          },
+        },
       },
       query: {
         bool: {

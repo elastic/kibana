@@ -28,11 +28,11 @@ export const timelineKpi: SecuritySolutionTimelineFactory<TimelineEventsQueries.
 
     return {
       ...response,
-      destinationIpCount: 0,
+      destinationIpCount: getOr(0, 'aggregations.destinationIpCount.value', response.rawResponse),
       inspect,
-      hostCount: 0,
-      processCount: 0,
-      sourceIpCount: 0,
+      hostCount: getOr(0, 'aggregations.hostCount.value', response.rawResponse),
+      processCount: getOr(0, 'aggregations.processCount.value', response.rawResponse),
+      sourceIpCount: getOr(0, 'aggregations.sourceIpCount.value', response.rawResponse),
       userCount: getOr(0, 'aggregations.userCount.value', response.rawResponse),
     };
   },

@@ -7,38 +7,52 @@
 import React from 'react';
 
 import { EuiStat, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { TimelineKpiStrategyResponse } from '../../../../../common/search_strategy';
+import * as i18n from './translations';
 
 export const TimelineKPIs = React.memo(
-  ({
-    processes,
-    users,
-    hosts,
-    sourceIps,
-    destinationIps,
-  }: {
-    processes: number;
-    users: number;
-    hosts: number;
-    sourceIps: number;
-    destinationIps: number;
-  }) => {
-    //TODO: intl descriptions
+  ({ kpis, isLoading }: { kpis: TimelineKpiStrategyResponse | null; isLoading: boolean }) => {
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup wrap>
         <EuiFlexItem>
-          <EuiStat title={processes} description="Processes" titleSize="s" />
+          <EuiStat
+            title={kpis === null ? '--' : kpis.processCount}
+            description={i18n.PROCESS_KPI_TITLE}
+            titleSize="s"
+            isLoading={isLoading}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiStat title={users} description="Users" titleSize="s" />
+          <EuiStat
+            title={kpis === null ? '--' : kpis.userCount}
+            description={i18n.USER_KPI_TITLE}
+            titleSize="s"
+            isLoading={isLoading}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiStat title={hosts} description="Hosts" titleSize="s" />
+          <EuiStat
+            title={kpis === null ? '--' : kpis.hostCount}
+            description={i18n.HOST_KPI_TITLE}
+            titleSize="s"
+            isLoading={isLoading}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiStat title={sourceIps} description="Source IPs" titleSize="s" />
+          <EuiStat
+            title={kpis === null ? '--' : kpis.sourceIpCount}
+            description={i18n.SOURCE_IP_KPI_TITLE}
+            titleSize="s"
+            isLoading={isLoading}
+          />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiStat title={destinationIps} description="Destination IPs" titleSize="s" />
+        <EuiFlexItem style={{ minWidth: 100 }}>
+          <EuiStat
+            title={kpis === null ? '--' : kpis.destinationIpCount}
+            description={i18n.DESTINATION_IP_KPI_TITLE}
+            titleSize="s"
+            isLoading={isLoading}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
