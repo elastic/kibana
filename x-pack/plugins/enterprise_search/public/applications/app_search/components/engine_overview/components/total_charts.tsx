@@ -20,7 +20,7 @@ import {
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { ENGINE_ANALYTICS_PATH, ENGINE_API_LOGS_PATH } from '../../../routes';
-import { EngineLogic } from '../../engine';
+import { generateEnginePath } from '../../engine';
 
 import { TOTAL_QUERIES, TOTAL_API_OPERATIONS } from '../../analytics/constants';
 import { VIEW_ANALYTICS, VIEW_API_LOGS, LAST_7_DAYS } from '../constants';
@@ -28,7 +28,6 @@ import { AnalyticsChart, convertToChartData } from '../../analytics';
 import { EngineOverviewLogic } from '../';
 
 export const TotalCharts: React.FC = () => {
-  const { generateEnginePath } = useValues(EngineLogic);
   const { startDate, queriesPerDay, operationsPerDay } = useValues(EngineOverviewLogic);
 
   return (
