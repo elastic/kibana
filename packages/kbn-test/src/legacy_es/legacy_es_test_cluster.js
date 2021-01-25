@@ -14,7 +14,7 @@ import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
 import { KIBANA_ROOT } from '../';
-import * as legacyElasticsearch from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 const path = require('path');
 const del = require('del');
 
@@ -102,8 +102,8 @@ export function createLegacyEsTestCluster(options = {}) {
      * Returns an ES Client to the configured cluster
      */
     getClient() {
-      return new legacyElasticsearch.Client({
-        host: this.getUrl(),
+      return new Client({
+        node: this.getUrl(),
       });
     }
 
