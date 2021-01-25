@@ -9,37 +9,39 @@
 import { OpsMetrics } from '..';
 import { getEcsOpsMetricsLog } from './get_ops_metrics_log';
 
-const createBaseOpsMetrics = () => ({
-  collected_at: new Date('2020-01-01 01:00:00'),
-  process: {
-    memory: {
-      heap: { total_in_bytes: 1, used_in_bytes: 1, size_limit: 1 },
-      resident_set_size_in_bytes: 1,
+function createBaseOpsMetrics(): OpsMetrics {
+  return {
+    collected_at: new Date('2020-01-01 01:00:00'),
+    process: {
+      memory: {
+        heap: { total_in_bytes: 1, used_in_bytes: 1, size_limit: 1 },
+        resident_set_size_in_bytes: 1,
+      },
+      event_loop_delay: 1,
+      pid: 1,
+      uptime_in_millis: 1,
     },
-    event_loop_delay: 1,
-    pid: 1,
-    uptime_in_millis: 1,
-  },
-  os: {
-    platform: 'darwin' as const,
-    platformRelease: 'test',
-    load: { '1m': 1, '5m': 1, '15m': 1 },
-    memory: { total_in_bytes: 1, free_in_bytes: 1, used_in_bytes: 1 },
-    uptime_in_millis: 1,
-  },
-  response_times: { avg_in_millis: 1, max_in_millis: 1 },
-  requests: { disconnects: 1, total: 1, statusCodes: { '200': 1 } },
-  concurrent_connections: 1,
-});
+    os: {
+      platform: 'darwin' as const,
+      platformRelease: 'test',
+      load: { '1m': 1, '5m': 1, '15m': 1 },
+      memory: { total_in_bytes: 1, free_in_bytes: 1, used_in_bytes: 1 },
+      uptime_in_millis: 1,
+    },
+    response_times: { avg_in_millis: 1, max_in_millis: 1 },
+    requests: { disconnects: 1, total: 1, statusCodes: { '200': 1 } },
+    concurrent_connections: 1,
+  };
+}
 
-function createMockOpsMetrics(testMetrics: any) {
+function createMockOpsMetrics(testMetrics: Partial<OpsMetrics>): OpsMetrics {
   const base = createBaseOpsMetrics();
   return {
     ...base,
     ...testMetrics,
   };
 }
-const testMetrics = {
+const testMetrics = ({
   process: {
     memory: { heap: { used_in_bytes: 100 } },
     uptime_in_millis: 1500,
@@ -52,7 +54,8 @@ const testMetrics = {
       '15m': 30,
     },
   },
-};
+} as unknown) as Partial<OpsMetrics>;
+
 describe('getEcsOpsMetricsLog', () => {
   it('provides correctly formatted message', () => {
     const result = getEcsOpsMetricsLog(createMockOpsMetrics(testMetrics));
@@ -63,7 +66,7 @@ describe('getEcsOpsMetricsLog', () => {
 
   it('correctly formats process uptime', () => {
     const logMeta = getEcsOpsMetricsLog(createMockOpsMetrics(testMetrics));
-    expect(logMeta.process.uptime).toEqual(1);
+    expect(logMeta.process!.uptime).toEqual(1);
   });
 
   it('excludes values from the message if unavailable', () => {
@@ -72,7 +75,7 @@ describe('getEcsOpsMetricsLog', () => {
       ...baseMetrics,
       process: {},
       os: {},
-    } as unknown) as Partial<OpsMetrics>;
+    } as unknown) as OpsMetrics;
     const logMeta = getEcsOpsMetricsLog(missingMetrics);
     expect(logMeta.message).toMatchInlineSnapshot(`""`);
   });
@@ -122,8 +125,8 @@ describe('getEcsOpsMetricsLog', () => {
 
   it('logs ECS fields in the log meta', () => {
     const logMeta = getEcsOpsMetricsLog(createBaseOpsMetrics());
-    expect(logMeta.event.kind).toBe('metric');
-    expect(logMeta.event.category).toEqual(expect.arrayContaining(['process', 'host']));
-    expect(logMeta.event.type).toBe('info');
+    expect(logMeta.event!.kind).toBe('metric');
+    expect(logMeta.event!.category).toEqual(expect.arrayContaining(['process', 'host']));
+    expect(logMeta.event!.type).toBe('info');
   });
 });

@@ -74,8 +74,8 @@ export class MetricsService
   private async refreshMetrics() {
     this.logger.debug('Refreshing metrics');
     const metrics = await this.metricsCollector!.collect();
-    const { message, ...rest } = getEcsOpsMetricsLog(metrics);
-    this.opsMetricsLogger.debug(message!, rest);
+    const { message, ...meta } = getEcsOpsMetricsLog(metrics);
+    this.opsMetricsLogger.debug(message!, meta);
     this.metricsCollector!.reset();
     this.metrics$.next(metrics);
   }
