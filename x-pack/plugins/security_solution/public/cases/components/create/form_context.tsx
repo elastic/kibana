@@ -6,6 +6,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 
+import { noop } from 'lodash/fp';
 import { schema, FormProps } from './schema';
 import { Form, useForm } from '../../../shared_imports';
 import {
@@ -18,8 +19,6 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { Case } from '../../containers/types';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { useGetCase } from '../../containers/use_get_case';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -39,7 +38,6 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
   const { connector: configurationConnector } = useCaseConfigure();
   const { caseData, postCase } = usePostCase();
   const { postPushToService } = usePostPushToService();
-  const { updateCase } = useGetCase(caseData?.id);
 
   const connectorId = useMemo(
     () =>
@@ -48,8 +46,6 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
         : 'none',
     [configurationConnector.id, connectors]
   );
-
-  const { fetchCaseUserActions } = useGetCaseUserActions(caseData?.id, connectorId);
 
   const submitCase = useCallback(
     async (
@@ -79,29 +75,39 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
     onSubmit: submitCase,
   });
 
-  const { setFieldValue } = form;
+  const { setFieldValue, getFormData } = form;
 
   // Set the selected connector to the configuration connector
   useEffect(() => setFieldValue('connectorId', connectorId), [connectorId, setFieldValue]);
 
   useEffect(() => {
-    if (caseData && onSuccess) {
-      const handleUpdateCase = (newCase: Case) => {
-        updateCase(newCase);
-        fetchCaseUserActions(newCase.id);
-      };
-
-      postPushToService({
-        caseId: caseData.id,
+    const { connectorId: dataConnectorId, fields } = getFormData();
+    const caseConnector = getConnectorById(dataConnectorId, connectors);
+    const connectorToUpdate = caseConnector
+      ? normalizeActionConnector(caseConnector, fields)
+      : getNoneConnector();
+    async function pushCaseToConnector(newCaseData: Case) {
+      await postPushToService({
+        caseId: newCaseData.id,
         caseServices: {},
-        connector: caseData.connector,
+        connector: connectorToUpdate,
         alerts: {},
-        updateCase: handleUpdateCase,
+        updateCase: noop,
       });
-
-      onSuccess(caseData);
+      if (onSuccess) {
+        onSuccess(newCaseData);
+      }
     }
-  }, [caseData, fetchCaseUserActions, onSuccess, postPushToService, updateCase]);
+    if (caseData != null) {
+      if (dataConnectorId !== 'none') {
+        pushCaseToConnector(caseData);
+      } else {
+        if (onSuccess) {
+          onSuccess(caseData);
+        }
+      }
+    }
+  }, [postPushToService, caseData, onSuccess, connectorId, getFormData, connectors]);
 
   return <Form form={form}>{children}</Form>;
 };
