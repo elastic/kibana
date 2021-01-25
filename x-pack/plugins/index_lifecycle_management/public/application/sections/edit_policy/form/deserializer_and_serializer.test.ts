@@ -325,7 +325,7 @@ describe('deserializer and serializer', () => {
 
   it('sets allocate and migrate actions when defined together', () => {
     formInternal.phases.warm!.actions.allocate!.number_of_replicas = 0;
-    formInternal._meta.warm.dataTierAllocationEnabled = false;
+    formInternal._meta.warm.dataTierAllocationType = 'none';
     // This should not be set...
     formInternal._meta.warm.allocationNodeAttribute = 'some:value';
 

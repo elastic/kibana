@@ -192,13 +192,6 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     component.update();
   };
 
-  const createDataAllocationActions = (phase: Phases) => {
-    return {
-      toggleDataAllocation: createFormToggleAction(`${phase}-dataAllocationSwitch`),
-      setDataAllocationType: setDataAllocation(phase),
-    };
-  };
-
   const setSelectedNodeAttribute = (phase: Phases) =>
     createFormSetValueAction(`${phase}-selectedNodeAttrs`);
 
@@ -272,7 +265,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         enable: enable('warm'),
         setMinAgeValue: setMinAgeValue('warm'),
         setMinAgeUnits: setMinAgeUnits('warm'),
-        ...createDataAllocationActions('warm'),
+        setDataAllocation: setDataAllocation('warm'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
         ...createShrinkActions('warm'),
@@ -284,7 +277,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         enable: enable('cold'),
         setMinAgeValue: setMinAgeValue('cold'),
         setMinAgeUnits: setMinAgeUnits('cold'),
-        ...createDataAllocationActions('cold'),
+        setDataAllocation: setDataAllocation('cold'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('cold'),
         setReplicas: setReplicas('cold'),
         setFreeze,

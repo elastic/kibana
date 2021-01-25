@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AllocateAction } from '../../../../common/types';
+import { AllocateAction, MigrateAction } from '../../../../common/types';
 
 export const determineDataTierAllocationType = (
   actions: {
     allocate?: AllocateAction;
+    migrate?: MigrateAction;
   } = {}
 ) => {
-  const { allocate } = actions;
+  const { allocate, migrate } = actions;
+
+  if (migrate?.enabled === false) {
+    return 'none';
+  }
 
   if (!allocate) {
     return 'node_roles';

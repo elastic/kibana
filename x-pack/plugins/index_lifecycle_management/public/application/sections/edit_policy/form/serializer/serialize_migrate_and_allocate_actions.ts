@@ -15,11 +15,7 @@ export const serializeMigrateAndAllocateActions = (
    * Form metadata about what tier allocation strategy to use and custom node
    * allocation information.
    */
-  {
-    dataTierAllocationEnabled,
-    dataTierAllocationType,
-    allocationNodeAttribute,
-  }: DataAllocationMetaFields,
+  { dataTierAllocationType, allocationNodeAttribute }: DataAllocationMetaFields,
   /**
    * The new configuration merged with old configuration to ensure we don't lose
    * any fields.
@@ -47,47 +43,46 @@ export const serializeMigrateAndAllocateActions = (
     }
   }
 
-  if (dataTierAllocationEnabled) {
-    switch (dataTierAllocationType) {
-      case 'node_attrs':
-        if (allocationNodeAttribute) {
-          const [name, value] = allocationNodeAttribute.split(':');
-          actions.allocate = {
-            // copy over any other allocate details like "number_of_replicas"
-            ...actions.allocate,
-            require: {
-              [name]: value,
-            },
-          };
-        } else {
-          // The form has been configured to use node attribute based allocation but no node attribute
-          // was selected. We fall back to what was originally selected in this case. This might be
-          // migrate.enabled: "false"
-          actions.migrate = originalActions.migrate;
-        }
+  switch (dataTierAllocationType) {
+    case 'node_attrs':
+      if (allocationNodeAttribute) {
+        const [name, value] = allocationNodeAttribute.split(':');
+        actions.allocate = {
+          // copy over any other allocate details like "number_of_replicas"
+          ...actions.allocate,
+          require: {
+            [name]: value,
+          },
+        };
+      } else {
+        // The form has been configured to use node attribute based allocation but no node attribute
+        // was selected. We fall back to what was originally selected in this case. This might be
+        // migrate.enabled: "false"
+        actions.migrate = originalActions.migrate;
+      }
 
-        // copy over the original include and exclude values until we can set them in the form.
-        if (!isEmpty(originalActions?.allocate?.include)) {
-          actions.allocate = {
-            ...actions.allocate,
-            include: { ...originalActions?.allocate?.include },
-          };
-        }
+      // copy over the original include and exclude values until we can set them in the form.
+      if (!isEmpty(originalActions?.allocate?.include)) {
+        actions.allocate = {
+          ...actions.allocate,
+          include: { ...originalActions?.allocate?.include },
+        };
+      }
 
-        if (!isEmpty(originalActions?.allocate?.exclude)) {
-          actions.allocate = {
-            ...actions.allocate,
-            exclude: { ...originalActions?.allocate?.exclude },
-          };
-        }
-        break;
-      default:
-    }
-  } else {
-    actions.migrate = {
-      ...originalActions?.migrate,
-      enabled: false,
-    };
+      if (!isEmpty(originalActions?.allocate?.exclude)) {
+        actions.allocate = {
+          ...actions.allocate,
+          exclude: { ...originalActions?.allocate?.exclude },
+        };
+      }
+      break;
+    case 'none':
+      actions.migrate = {
+        ...originalActions?.migrate,
+        enabled: false,
+      };
+      break;
+    default:
   }
 
   if (numberOfReplicas != null) {

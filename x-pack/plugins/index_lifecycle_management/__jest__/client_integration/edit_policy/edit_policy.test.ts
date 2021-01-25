@@ -261,7 +261,7 @@ describe('<EditPolicy />', () => {
       test('setting all values', async () => {
         const { actions } = testBed;
         await actions.warm.enable(true);
-        await actions.warm.setDataAllocationType('node_attrs');
+        await actions.warm.setDataAllocation('node_attrs');
         await actions.warm.setSelectedNodeAttribute('test:123');
         await actions.warm.setReplicas('123');
         await actions.warm.toggleShrink(true);
@@ -336,7 +336,7 @@ describe('<EditPolicy />', () => {
 
       test('preserves include, exclude allocation settings', async () => {
         const { actions } = testBed;
-        await actions.warm.setDataAllocationType('node_attrs');
+        await actions.warm.setDataAllocation('node_attrs');
         await actions.warm.setSelectedNodeAttribute('test:123');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
@@ -403,7 +403,7 @@ describe('<EditPolicy />', () => {
         await actions.cold.enable(true);
         await actions.cold.setMinAgeValue('123');
         await actions.cold.setMinAgeUnits('s');
-        await actions.cold.setDataAllocationType('node_attrs');
+        await actions.cold.setDataAllocation('node_attrs');
         await actions.cold.setSelectedNodeAttribute('test:123');
         await actions.cold.setReplicas('123');
         await actions.cold.setFreeze(true);
@@ -594,8 +594,7 @@ describe('<EditPolicy />', () => {
 
     test('setting node_attr based allocation, but not selecting node attribute', async () => {
       const { actions } = testBed;
-      await actions.warm.toggleDataAllocation(true);
-      await actions.warm.setDataAllocationType('node_attrs');
+      await actions.warm.setDataAllocation('node_attrs');
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
       const warmPhase = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm;
@@ -668,7 +667,7 @@ describe('<EditPolicy />', () => {
       });
       test('detecting use of the "off" allocation type', () => {
         const { find } = testBed;
-        expect(find('cold-dataAllocationSwitch').prop('aria-checked')).toBe(false);
+        expect(find('cold-dataTierAllocationControls.dataTierSelect').text()).toContain('Off');
       });
     });
   });

@@ -102,9 +102,6 @@ export const schema: FormSchema<FormInternal> = {
       minAgeUnit: {
         defaultValue: 'd',
       },
-      dataTierAllocationEnabled: {
-        label: i18nTexts.editPolicy.allocationLabel,
-      },
       dataTierAllocationType: {
         label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
       },

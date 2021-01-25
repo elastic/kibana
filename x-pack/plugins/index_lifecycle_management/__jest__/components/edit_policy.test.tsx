@@ -834,10 +834,11 @@ describe('edit policy', () => {
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
-      // Assert that default and custom options exist
+      // Assert that default, custom and 'none' options exist
       findTestSubject(rendered, 'dataTierSelect').simulate('click');
       expect(findTestSubject(rendered, 'defaultDataAllocationOption').exists()).toBeTruthy();
       expect(findTestSubject(rendered, 'customDataAllocationOption').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'noneDataAllocationOption').exists()).toBeTruthy();
     });
   });
   describe('on cloud', () => {
@@ -873,10 +874,11 @@ describe('edit policy', () => {
         await activatePhase(rendered, 'warm');
         expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
-        // Assert that default and custom options exist
+        // Assert that default, custom and 'none' options exist
         findTestSubject(rendered, 'dataTierSelect').simulate('click');
         expect(findTestSubject(rendered, 'defaultDataAllocationOption').exists()).toBeFalsy();
         expect(findTestSubject(rendered, 'customDataAllocationOption').exists()).toBeTruthy();
+        expect(findTestSubject(rendered, 'noneDataAllocationOption').exists()).toBeTruthy();
       });
     });
 
@@ -896,6 +898,7 @@ describe('edit policy', () => {
         findTestSubject(rendered, 'dataTierSelect').simulate('click');
         expect(findTestSubject(rendered, 'defaultDataAllocationOption').exists()).toBeTruthy();
         expect(findTestSubject(rendered, 'customDataAllocationOption').exists()).toBeTruthy();
+        expect(findTestSubject(rendered, 'noneDataAllocationOption').exists()).toBeTruthy();
         // We should not be showing the call-to-action for users to activate data tiers in cloud
         expect(findTestSubject(rendered, 'cloudDataTierCallout').exists()).toBeFalsy();
       });
