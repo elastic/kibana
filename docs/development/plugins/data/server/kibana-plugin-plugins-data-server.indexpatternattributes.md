@@ -21,6 +21,7 @@ export interface IndexPatternAttributes
 |  [fieldFormatMap](./kibana-plugin-plugins-data-server.indexpatternattributes.fieldformatmap.md) | <code>string</code> |  |
 |  [fields](./kibana-plugin-plugins-data-server.indexpatternattributes.fields.md) | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-server.indexpatternattributes.intervalname.md) | <code>string</code> |  |
+|  [runtimeFieldMap](./kibana-plugin-plugins-data-server.indexpatternattributes.runtimefieldmap.md) | <code>string</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-server.indexpatternattributes.sourcefilters.md) | <code>string</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-server.indexpatternattributes.timefieldname.md) | <code>string</code> |  |
 |  [title](./kibana-plugin-plugins-data-server.indexpatternattributes.title.md) | <code>string</code> |  |
