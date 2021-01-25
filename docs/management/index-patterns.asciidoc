@@ -158,6 +158,9 @@ date values in {es}, you can use a {kib} field formatter to change the display t
 <<field-formatters-geopoint, geopoints>>,
 and <<field-formatters-numeric, numbers>>.
 
+In case you want to customize the displayed field name provided by {es}, you can 
+use *Custom Label* .
+
 A popularity counter keeps track of the fields you use most often.
 The top five most popular fields and their values are displayed in <<discover,*Discover*>>.
 
