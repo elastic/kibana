@@ -8,14 +8,7 @@
 
 import { IFieldFormat } from 'src/plugins/data/public';
 import { SchemaConfig } from 'src/plugins/visualizations/public';
-
-export enum AggTypes {
-  SUM = 'sum',
-  AVG = 'avg',
-  MIN = 'min',
-  MAX = 'max',
-  COUNT = 'count',
-}
+import { TableVisParams } from '../common';
 
 export interface Dimensions {
   buckets: SchemaConfig[];
@@ -42,16 +35,6 @@ export interface TableVisUseUiStateProps {
   sort: TableVisUiState['sort'];
   setSort: (s?: TableVisUiState['sort']) => void;
   setColumnsWidth: (column: ColumnWidthData) => void;
-}
-
-export interface TableVisParams {
-  perPage: number | '';
-  showPartialRows: boolean;
-  showMetricsAtAllLevels: boolean;
-  showToolbar: boolean;
-  showTotal: boolean;
-  totalFunc: AggTypes;
-  percentageCol: string;
 }
 
 export interface TableVisConfig extends TableVisParams {
