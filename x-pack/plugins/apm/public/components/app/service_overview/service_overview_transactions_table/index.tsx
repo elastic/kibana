@@ -285,34 +285,31 @@ export function ServiceOverviewTransactionsTable(props: Props) {
   const {
     data: transactionsMetricsData,
     status: transactionsMetricsStatus,
-  } = useFetcher(() => {
-    if (transactionNames.length && start && end && transactionType) {
-      return callApmApi({
-        endpoint:
-          'GET /api/apm/services/{serviceName}/transactions/groups/metrics',
-        params: {
-          path: { serviceName },
-          query: {
-            start,
-            end,
-            uiFilters: JSON.stringify(uiFilters),
-            numBuckets: 20,
-            transactionType,
-            latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-            transactionNames: transactionNames.join(),
+  } = useFetcher(
+    () => {
+      if (transactionNames.length && start && end && transactionType) {
+        return callApmApi({
+          endpoint:
+            'GET /api/apm/services/{serviceName}/transactions/groups/metrics',
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              numBuckets: 20,
+              transactionType,
+              latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+              transactionNames: transactionNames.join(),
+            },
           },
-        },
-      });
-    }
-  }, [
-    serviceName,
-    start,
-    end,
-    uiFilters,
-    transactionType,
-    latencyAggregationType,
-    transactionNames,
-  ]);
+        });
+      }
+    },
+    // only fetches metrics when transaction names change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [transactionNames]
+  );
 
   const columns = getColumns({
     serviceName,
