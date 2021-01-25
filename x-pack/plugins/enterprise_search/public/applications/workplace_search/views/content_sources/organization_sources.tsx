@@ -27,10 +27,11 @@ const ORG_HEADER_DESCRIPTION =
   'Organization sources are available to the entire organization and can be assigned to specific user groups.';
 
 export const OrganizationSources: React.FC = () => {
-  const { initializeSources, setSourceSearchability } = useActions(SourcesLogic);
+  const { initializeSources, setSourceSearchability, resetSourcesState } = useActions(SourcesLogic);
 
   useEffect(() => {
     initializeSources();
+    return resetSourcesState;
   }, []);
 
   const { dataLoading, contentSources } = useValues(SourcesLogic);
