@@ -11,12 +11,8 @@ import { first } from 'rxjs/operators';
 import { TypeOf, schema } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
-import type { RequestHandlerContext } from 'src/core/server';
 
-import type {
-  PluginStart,
-  DataApiRequestHandlerContext,
-} from '../../../../src/plugins/data/server';
+import type { PluginStart, DataRequestHandlerContext } from '../../../../src/plugins/data/server';
 import { CoreSetup, PluginInitializerContext } from '../../../../src/core/server';
 import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
@@ -71,9 +67,7 @@ export class Plugin {
 
     const logger = this.initializerContext.logger.get('timelion');
 
-    const router = core.http.createRouter<
-      RequestHandlerContext & { search: DataApiRequestHandlerContext }
-    >();
+    const router = core.http.createRouter<DataRequestHandlerContext>();
 
     const deps = {
       configManager,

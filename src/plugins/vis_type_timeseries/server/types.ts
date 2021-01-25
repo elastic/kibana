@@ -6,11 +6,8 @@
  * Public License, v 1.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
-import type { DataApiRequestHandlerContext } from '../../data/server';
+import type { IRouter } from 'src/core/server';
+import type { DataRequestHandlerContext } from '../../data/server';
 
-export interface VisTypeTimeseriesRequestHandlerContext extends RequestHandlerContext {
-  search: DataApiRequestHandlerContext;
-}
-
+export type VisTypeTimeseriesRequestHandlerContext = DataRequestHandlerContext;
 export type VisTypeTimeseriesRouter = IRouter<VisTypeTimeseriesRequestHandlerContext>;

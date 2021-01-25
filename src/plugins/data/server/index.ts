@@ -235,6 +235,7 @@ export {
   SearchUsage,
   SearchSessionService,
   ISearchSessionService,
+  SearchRequestHandlerContext,
   DataRequestHandlerContext,
 } from './search';
 

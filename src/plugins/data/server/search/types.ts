@@ -114,11 +114,13 @@ export interface ISearchStart<
   };
 }
 
+export type SearchRequestHandlerContext = IScopedSearchClient;
+
 /**
  * @internal
  */
 export interface DataRequestHandlerContext extends RequestHandlerContext {
-  search: IScopedSearchClient;
+  search: SearchRequestHandlerContext;
 }
 
 export type DataPluginRouter = IRouter<DataRequestHandlerContext>;
