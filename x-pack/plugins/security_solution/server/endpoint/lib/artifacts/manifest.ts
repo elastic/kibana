@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { mapValues } from 'lodash';
 import semver from 'semver';
 import { validate } from '../../../../common/validate';
 import {
@@ -28,11 +29,15 @@ export interface ManifestDiff {
 }
 
 export class Manifest {
-  private entries: Record<string, ManifestEntry>;
+  private allEntries: Record<string, ManifestEntry>;
+  private defaultEntries: Record<string, ManifestEntry>;
+  private policySpecificEntries: Record<string, Record<string, ManifestEntry>>;
   private version: ManifestVersion;
 
   constructor(version?: Partial<ManifestVersion>) {
-    this.entries = {};
+    this.allEntries = {};
+    this.defaultEntries = {};
+    this.policySpecificEntries = {};
 
     const decodedVersion = {
       schemaVersion: version?.schemaVersion ?? 'v1',
@@ -63,12 +68,11 @@ export class Manifest {
       soVersion: oldManifest.getSavedObjectVersion(),
     });
     artifacts.forEach((artifact) => {
-      const id = getArtifactId(artifact);
-      const existingArtifact = oldManifest.getArtifact(id);
+      const existingArtifact = oldManifest.getArtifact(getArtifactId(artifact));
       if (existingArtifact) {
-        manifest.addEntry(existingArtifact);
+        manifest.addDefaultEntry(existingArtifact);
       } else {
-        manifest.addEntry(artifact);
+        manifest.addDefaultEntry(artifact);
       }
     });
     return manifest;
@@ -95,7 +99,7 @@ export class Manifest {
       } else if (!internalArtifactCompleteSchema.is(compressedArtifact)) {
         throw new Error(`Incomplete artifact detected: ${id}`);
       }
-      this.addEntry(compressedArtifact);
+      this.replaceArtifact(compressedArtifact);
     } catch (err) {
       return err;
     }
@@ -114,21 +118,43 @@ export class Manifest {
     return this.version.semanticVersion;
   }
 
-  public addEntry(artifact: InternalArtifactSchema) {
+  public addDefaultEntry(artifact: InternalArtifactSchema) {
     const entry = new ManifestEntry(artifact);
-    this.entries[entry.getDocId()] = entry;
+    this.allEntries[entry.getDocId()] = entry;
+    this.defaultEntries[entry.getDocId()] = entry;
   }
 
-  public contains(artifactId: string): boolean {
-    return artifactId in this.entries;
+  public addPolicySpecificEntry(policyId: string, artifact: InternalArtifactSchema) {
+    const entry = new ManifestEntry(artifact);
+    this.allEntries[entry.getDocId()] = entry;
+    this.policySpecificEntries[policyId] = this.policySpecificEntries[policyId] || {};
+    this.policySpecificEntries[policyId][entry.getDocId()] = entry;
   }
 
-  public getEntries(): Record<string, ManifestEntry> {
-    return this.entries;
+  public replaceArtifact(artifact: InternalArtifactSchema) {
+    const entry = new ManifestEntry(artifact);
+
+    if (this.containsArtifact(entry.getDocId())) {
+      this.allEntries[entry.getDocId()] = entry;
+      this.defaultEntries[entry.getDocId()] = entry;
+      Object.values(this.policySpecificEntries).forEach((entries) => {
+        if (entry.getDocId() in entries) {
+          entries[entry.getDocId()] = entry;
+        }
+      });
+    }
+  }
+
+  public containsArtifact(artifactId: string): boolean {
+    return artifactId in this.allEntries;
+  }
+
+  public getAllEntries(): Record<string, ManifestEntry> {
+    return this.allEntries;
   }
 
   public getEntry(artifactId: string): ManifestEntry | undefined {
-    return this.entries[artifactId];
+    return this.allEntries[artifactId];
   }
 
   public getArtifact(artifactId: string): InternalArtifactSchema | undefined {
@@ -138,14 +164,14 @@ export class Manifest {
   public diff(manifest: Manifest): ManifestDiff[] {
     const diffs: ManifestDiff[] = [];
 
-    for (const id in manifest.getEntries()) {
-      if (!this.contains(id)) {
+    for (const id in manifest.getAllEntries()) {
+      if (!this.containsArtifact(id)) {
         diffs.push({ type: 'delete', id });
       }
     }
 
-    for (const id in this.entries) {
-      if (!manifest.contains(id)) {
+    for (const id in this.getAllEntries()) {
+      if (!manifest.containsArtifact(id)) {
         diffs.push({ type: 'add', id });
       }
     }
@@ -153,14 +179,15 @@ export class Manifest {
     return diffs;
   }
 
-  public toEndpointFormat(): ManifestSchema {
+  public toPackagePolicyManifest(policyId?: string): ManifestSchema {
+    const entries = (!!policyId && this.policySpecificEntries[policyId]) || this.defaultEntries;
     const manifestObj: ManifestSchema = {
       manifest_version: this.getSemanticVersion(),
       schema_version: this.getSchemaVersion(),
       artifacts: {},
     };
 
-    for (const entry of Object.values(this.entries)) {
+    for (const entry of Object.values(entries)) {
       manifestObj.artifacts[entry.getIdentifier()] = entry.getRecord();
     }
 
@@ -174,7 +201,10 @@ export class Manifest {
 
   public toSavedObject(): InternalManifestSchema {
     return {
-      ids: Object.keys(this.getEntries()),
+      defaultArtifactIds: Object.keys(this.defaultEntries),
+      policySpecificArtifactIds: mapValues(this.policySpecificEntries, (value) =>
+        Object.keys(value)
+      ),
       schemaVersion: this.getSchemaVersion(),
       semanticVersion: this.getSemanticVersion(),
     };

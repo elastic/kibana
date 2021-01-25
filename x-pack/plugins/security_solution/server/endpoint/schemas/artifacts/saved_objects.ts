@@ -59,7 +59,8 @@ export type InternalArtifactCreateSchema = t.TypeOf<typeof internalArtifactCreat
 
 export const internalManifestSchema = t.exact(
   t.type({
-    ids: t.array(identifier),
+    defaultArtifactIds: t.array(identifier),
+    policySpecificArtifactIds: t.record(identifier, t.array(identifier)),
     schemaVersion: manifestSchemaVersion,
     semanticVersion,
   })

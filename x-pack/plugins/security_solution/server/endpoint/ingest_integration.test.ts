@@ -154,7 +154,7 @@ describe('ingest_integration tests ', () => {
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
       expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
       expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
-        lastComputed!.toEndpointFormat()
+        lastComputed!.toPackagePolicyManifest()
       );
     });
 
@@ -204,7 +204,7 @@ describe('ingest_integration tests ', () => {
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
       expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
       expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
-        lastComputed!.toEndpointFormat()
+        lastComputed!.toPackagePolicyManifest()
       );
     });
 
@@ -230,7 +230,7 @@ describe('ingest_integration tests ', () => {
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
       expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
       expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
-        lastComputed!.toEndpointFormat()
+        lastComputed!.toPackagePolicyManifest()
       );
     });
   });

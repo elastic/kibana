@@ -43,7 +43,7 @@ describe('manifest', () => {
     });
 
     test('Empty manifest transforms correctly to expected endpoint format', async () => {
-      expect(emptyManifest.toEndpointFormat()).toStrictEqual({
+      expect(emptyManifest.toPackagePolicyManifest()).toStrictEqual({
         artifacts: {
           'endpoint-exceptionlist-macos-v1': {
             compression_algorithm: 'zlib',
@@ -72,7 +72,7 @@ describe('manifest', () => {
     });
 
     test('Manifest transforms correctly to expected endpoint format', async () => {
-      expect(manifest1.toEndpointFormat()).toStrictEqual({
+      expect(manifest1.toPackagePolicyManifest()).toStrictEqual({
         artifacts: {
           'endpoint-exceptionlist-macos-v1': {
             compression_algorithm: 'zlib',
@@ -182,7 +182,7 @@ describe('manifest', () => {
     });
 
     test('Manifest returns entries map', async () => {
-      const entries = manifest1.getEntries();
+      const entries = manifest1.getAllEntries();
       const keys = Object.keys(entries);
       expect(keys).toEqual([
         'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
@@ -194,7 +194,7 @@ describe('manifest', () => {
     });
 
     test('Manifest returns true if contains artifact', async () => {
-      const found = manifest1.contains(
+      const found = manifest1.containsArtifact(
         'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3'
       );
       expect(found).toEqual(true);
@@ -204,12 +204,12 @@ describe('manifest', () => {
       const oldManifest = new Manifest();
       const manifest = Manifest.fromArtifacts(artifacts, oldManifest);
       expect(
-        manifest.contains(
+        manifest.containsArtifact(
           'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3'
         )
       ).toEqual(true);
       expect(
-        manifest.contains(
+        manifest.containsArtifact(
           'endpoint-exceptionlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3'
         )
       ).toEqual(true);

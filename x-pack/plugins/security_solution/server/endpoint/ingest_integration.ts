@@ -138,7 +138,7 @@ export const getPackagePolicyCreateCallback = (
 
     // Get most recent manifest
     const manifest = await getManifest(logger, manifestManager);
-    const serializedManifest = manifest.toEndpointFormat();
+    const serializedManifest = manifest.toPackagePolicyManifest();
     if (!manifestDispatchSchema.is(serializedManifest)) {
       // This should not happen.
       // But if it does, we log it and return it anyway.
