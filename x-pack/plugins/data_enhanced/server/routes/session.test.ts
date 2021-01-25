@@ -14,17 +14,33 @@ import type {
 } from '../../../../../src/plugins/data/server';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 import { registerSessionRoutes } from './session';
+import { BehaviorSubject } from 'rxjs';
+import { ConfigSchema } from '../../config';
+import moment from 'moment';
 
 describe('registerSessionRoutes', () => {
   let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;
   let mockContext: jest.Mocked<DataRequestHandlerContext>;
   let mockLogger: Logger;
+  const mockConfig$ = new BehaviorSubject<ConfigSchema>({
+    search: {
+      sessions: {
+        enabled: true,
+        pageSize: 10000,
+        inMemTimeout: moment.duration(1, 'm'),
+        maxUpdateRetries: 3,
+        defaultExpiration: moment.duration(7, 'd'),
+        trackingInterval: moment.duration(10, 's'),
+        management: {} as any,
+      },
+    },
+  });
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockLogger = coreMock.createPluginInitializerContext().logger.get();
     mockContext = dataPluginMock.createRequestHandlerContext();
-    registerSessionRoutes(mockCoreSetup.http.createRouter(), mockLogger);
+    registerSessionRoutes(mockCoreSetup.http.createRouter(), mockLogger, mockConfig$);
   });
 
   it('save calls saveSession with sessionId and attributes', async () => {
