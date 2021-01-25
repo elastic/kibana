@@ -18,7 +18,7 @@ export const createGridCell = (
   const content = formatters[columnId]?.convert(rowValue, 'html');
 
   return (
-    <div
+    <span
       /*
        * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
        * which is produced in a safe way.
