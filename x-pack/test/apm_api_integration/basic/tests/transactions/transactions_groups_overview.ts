@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { pick, uniqBy, sortBy } from 'lodash';
+import { pick, sortBy } from 'lodash';
 import url from 'url';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import archives from '../../../common/fixtures/es_archiver/archives_metadata';
