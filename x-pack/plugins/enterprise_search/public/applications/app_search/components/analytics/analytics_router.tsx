@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
-import { useValues } from 'kea';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
@@ -22,7 +21,7 @@ import {
   ENGINE_ANALYTICS_QUERY_DETAILS_PATH,
   ENGINE_ANALYTICS_QUERY_DETAIL_PATH,
 } from '../../routes';
-import { EngineLogic } from '../engine';
+import { generateEnginePath } from '../engine';
 
 import {
   ANALYTICS_TITLE,
@@ -46,8 +45,6 @@ interface Props {
   engineBreadcrumb: BreadcrumbTrail;
 }
 export const AnalyticsRouter: React.FC<Props> = ({ engineBreadcrumb }) => {
-  const { generateEnginePath } = useValues(EngineLogic);
-
   const ANALYTICS_BREADCRUMB = [...engineBreadcrumb, ANALYTICS_TITLE];
 
   return (

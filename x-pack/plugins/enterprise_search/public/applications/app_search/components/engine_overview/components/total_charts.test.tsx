@@ -5,7 +5,7 @@
  */
 
 import { setMockValues } from '../../../../__mocks__/kea.mock';
-import { mockEngineValues } from '../../../__mocks__';
+import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
@@ -21,7 +21,6 @@ describe('TotalCharts', () => {
   beforeAll(() => {
     jest.clearAllMocks();
     setMockValues({
-      ...mockEngineValues,
       startDate: '1970-01-01',
       queriesPerDay: [0, 1, 2, 3, 5, 10, 50],
       operationsPerDay: [0, 0, 0, 0, 0, 0, 0],
