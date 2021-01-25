@@ -18,7 +18,7 @@ import {
   DataFrameAnalyticsStats,
   MapElements,
 } from '../../../common/types/data_frame_analytics';
-import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
+import { INDEX_META_DATA_CREATED_BY } from '../../../../file_upload/common';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
   ExtendAnalyticsMapArgs,

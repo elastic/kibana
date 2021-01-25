@@ -3,5 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { PluginInitializerContext } from 'src/core/server';
+import { FileUploadPlugin } from './plugin';
 
-export { fileDataVisualizerProvider, InputData } from './file_data_visualizer';
+export const plugin = (ctx: PluginInitializerContext) => new FileUploadPlugin(ctx);

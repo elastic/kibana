@@ -5,7 +5,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
+import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants';
 import {
   ImportResponse,
   ImportFailure,
@@ -13,7 +13,8 @@ import {
   Mappings,
   IngestPipelineWrapper,
 } from '../../../common/types/file_datavisualizer';
-import { InputData } from './file_data_visualizer';
+
+export type InputData = any[];
 
 export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   async function importData(
