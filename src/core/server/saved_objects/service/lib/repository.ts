@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { omit, isObject } from 'lodash';
@@ -58,6 +47,7 @@ import {
   SavedObjectsDeleteFromNamespacesResponse,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsResolveResponse,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -66,6 +56,7 @@ import {
   SavedObjectsMigrationVersion,
   MutatingOperationRefreshSetting,
 } from '../../types';
+import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import {
@@ -931,25 +922,7 @@ export class SavedObjectsRepository {
           } as any) as SavedObject<T>;
         }
 
-        const { originId, updated_at: updatedAt } = doc._source;
-        let namespaces = [];
-        if (!this._registry.isNamespaceAgnostic(type)) {
-          namespaces = doc._source.namespaces ?? [
-            SavedObjectsUtils.namespaceIdToString(doc._source.namespace),
-          ];
-        }
-
-        return {
-          id,
-          type,
-          namespaces,
-          ...(originId && { originId }),
-          ...(updatedAt && { updated_at: updatedAt }),
-          version: encodeHitVersion(doc),
-          attributes: doc._source[type],
-          references: doc._source.references || [],
-          migrationVersion: doc._source.migrationVersion,
-        };
+        return this.getSavedObjectFromSource(type, id, doc);
       }),
     };
   }
@@ -989,26 +962,122 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId, updated_at: updatedAt } = body._source;
+    return this.getSavedObjectFromSource(type, id, body);
+  }
 
-    let namespaces: string[] = [];
-    if (!this._registry.isNamespaceAgnostic(type)) {
-      namespaces = body._source.namespaces ?? [
-        SavedObjectsUtils.namespaceIdToString(body._source.namespace),
-      ];
+  /**
+   * Resolves a single object, using any legacy URL alias if it exists
+   *
+   * @param {string} type
+   * @param {string} id
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
+   * @returns {promise} - { saved_object, outcome }
+   */
+  async resolve<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsResolveResponse<T>> {
+    if (!this._allowedTypes.includes(type)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    return {
-      id,
-      type,
-      namespaces,
-      ...(originId && { originId }),
-      ...(updatedAt && { updated_at: updatedAt }),
-      version: encodeHitVersion(body),
-      attributes: body._source[type],
-      references: body._source.references || [],
-      migrationVersion: body._source.migrationVersion,
-    };
+    const namespace = normalizeNamespace(options.namespace);
+    if (namespace === undefined) {
+      // legacy URL aliases cannot exist for the default namespace; just attempt to get the object
+      return this.resolveExactMatch(type, id, options);
+    }
+
+    const rawAliasId = this._serializer.generateRawLegacyUrlAliasId(namespace, type, id);
+    const time = this._getCurrentTime();
+
+    // retrieve the alias, and if it is not disabled, update it
+    const aliasResponse = await this.client.update(
+      {
+        id: rawAliasId,
+        index: this.getIndexForType(LEGACY_URL_ALIAS_TYPE),
+        refresh: false,
+        _source: 'true',
+        body: {
+          script: {
+            source: `
+              if (ctx._source[params.type].disabled != true) {
+                if (ctx._source[params.type].resolveCounter == null) {
+                  ctx._source[params.type].resolveCounter = 1;
+                }
+                else {
+                  ctx._source[params.type].resolveCounter += 1;
+                }
+                ctx._source[params.type].lastResolved = params.time;
+                ctx._source.updated_at = params.time;
+              }
+            `,
+            lang: 'painless',
+            params: {
+              type: LEGACY_URL_ALIAS_TYPE,
+              time,
+            },
+          },
+        },
+      },
+      { ignore: [404] }
+    );
+
+    if (
+      aliasResponse.statusCode === 404 ||
+      aliasResponse.body.get.found === false ||
+      aliasResponse.body.get._source[LEGACY_URL_ALIAS_TYPE]?.disabled === true
+    ) {
+      // no legacy URL alias exists, or one exists but it's disabled; just attempt to get the object
+      return this.resolveExactMatch(type, id, options);
+    }
+    const legacyUrlAlias: LegacyUrlAlias = aliasResponse.body.get._source[LEGACY_URL_ALIAS_TYPE];
+    const objectIndex = this.getIndexForType(type);
+    const bulkGetResponse = await this.client.mget(
+      {
+        body: {
+          docs: [
+            {
+              // attempt to find an exact match for the given ID
+              _id: this._serializer.generateRawId(namespace, type, id),
+              _index: objectIndex,
+            },
+            {
+              // also attempt to find a match for the legacy URL alias target ID
+              _id: this._serializer.generateRawId(namespace, type, legacyUrlAlias.targetId),
+              _index: objectIndex,
+            },
+          ],
+        },
+      },
+      { ignore: [404] }
+    );
+
+    const exactMatchDoc = bulkGetResponse?.body.docs[0];
+    const aliasMatchDoc = bulkGetResponse?.body.docs[1];
+    const foundExactMatch =
+      exactMatchDoc.found && this.rawDocExistsInNamespace(exactMatchDoc, namespace);
+    const foundAliasMatch =
+      aliasMatchDoc.found && this.rawDocExistsInNamespace(aliasMatchDoc, namespace);
+
+    if (foundExactMatch && foundAliasMatch) {
+      return {
+        saved_object: this.getSavedObjectFromSource(type, id, exactMatchDoc),
+        outcome: 'conflict',
+      };
+    } else if (foundExactMatch) {
+      return {
+        saved_object: this.getSavedObjectFromSource(type, id, exactMatchDoc),
+        outcome: 'exactMatch',
+      };
+    } else if (foundAliasMatch) {
+      return {
+        saved_object: this.getSavedObjectFromSource(type, legacyUrlAlias.targetId, aliasMatchDoc),
+        outcome: 'aliasMatch',
+      };
+    }
+    throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   }
 
   /**
@@ -1729,7 +1798,7 @@ export class SavedObjectsRepository {
     if (this._registry.isSingleNamespace(type)) {
       savedObject.namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
     }
-    return omit(savedObject, 'namespace') as SavedObject<T>;
+    return omit(savedObject, ['namespace']) as SavedObject<T>;
   }
 
   /**
@@ -1824,6 +1893,43 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
     return body as SavedObjectsRawDoc;
+  }
+
+  private getSavedObjectFromSource<T>(
+    type: string,
+    id: string,
+    doc: { _seq_no: number; _primary_term: number; _source: SavedObjectsRawDocSource }
+  ): SavedObject<T> {
+    const { originId, updated_at: updatedAt } = doc._source;
+
+    let namespaces: string[] = [];
+    if (!this._registry.isNamespaceAgnostic(type)) {
+      namespaces = doc._source.namespaces ?? [
+        SavedObjectsUtils.namespaceIdToString(doc._source.namespace),
+      ];
+    }
+
+    return {
+      id,
+      type,
+      namespaces,
+      ...(originId && { originId }),
+      ...(updatedAt && { updated_at: updatedAt }),
+      version: encodeHitVersion(doc),
+      attributes: doc._source[type],
+      references: doc._source.references || [],
+      migrationVersion: doc._source.migrationVersion,
+      coreMigrationVersion: doc._source.coreMigrationVersion,
+    };
+  }
+
+  private async resolveExactMatch<T>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions
+  ): Promise<SavedObjectsResolveResponse<T>> {
+    const object = await this.get<T>(type, id, options);
+    return { saved_object: object, outcome: 'exactMatch' };
   }
 }
 

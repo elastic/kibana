@@ -6,7 +6,7 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
-import { FieldVisConfig } from '../../../../../plugins/ml/public/application/datavisualizer/index_based/common';
+import { FieldVisConfig } from '../../../../../plugins/ml/public/application/datavisualizer/stats_table/types';
 
 interface MetricFieldVisConfig extends FieldVisConfig {
   statsMaxDecimalPlaces: number;
