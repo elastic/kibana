@@ -59,9 +59,9 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup })
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              {step.synthetics?.step?.index && checkGroup && (
+              {step.synthetics?.step?.index && (
                 <span>
-                  <StepDetailLink checkGroupId={checkGroup} stepIndex={step.synthetics.step.index!}>
+                  <StepDetailLink checkGroupId={checkGroup} stepIndex={step.synthetics.step.index}>
                     {VIEW_PERFORMANCE}
                   </StepDetailLink>
                   <EuiSpacer size="s" />

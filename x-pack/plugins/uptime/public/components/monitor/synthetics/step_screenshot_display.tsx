@@ -30,7 +30,6 @@ const StepImage = styled(EuiImage)`
       display: none;
     }
     width: ${THUMBNAIL_WIDTH},
-    margin-right: 30px;
     height: ${THUMBNAIL_HEIGHT},
     objectFit: 'cover',
     objectPosition: 'center top',
