@@ -36,6 +36,10 @@ export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
       return testSubjects.exists(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
     }
 
+    public async missingOrFail(): Promise<void> {
+      return testSubjects.missingOrFail(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
+    }
+
     public async expectState(state: SessionStateType) {
       return retry.waitFor(`searchSessions indicator to get into state = ${state}`, async () => {
         const currentState = await (
