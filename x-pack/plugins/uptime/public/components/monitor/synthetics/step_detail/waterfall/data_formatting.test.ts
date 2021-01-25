@@ -174,6 +174,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#dcd4c4",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#dcd4c4",
@@ -187,6 +188,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#54b399",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#54b399",
@@ -200,6 +202,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#da8b45",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#da8b45",
@@ -213,6 +216,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#edc5a2",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#edc5a2",
@@ -226,6 +230,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#d36086",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#d36086",
@@ -239,6 +244,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#b0c9e0",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#b0c9e0",
@@ -252,6 +258,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#ca8eae",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#ca8eae",
@@ -265,6 +272,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#dcd4c4",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#dcd4c4",
@@ -278,6 +286,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#d36086",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#d36086",
@@ -291,6 +300,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#b0c9e0",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#b0c9e0",
@@ -304,6 +314,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#9170b8",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#9170b8",
@@ -331,6 +342,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#dcd4c4",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#dcd4c4",
@@ -344,6 +356,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#54b399",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#54b399",
@@ -357,6 +370,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#da8b45",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#da8b45",
@@ -370,6 +384,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#edc5a2",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#edc5a2",
@@ -383,6 +398,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#d36086",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#d36086",
@@ -396,6 +412,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#b0c9e0",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#b0c9e0",
@@ -409,6 +426,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#ca8eae",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#ca8eae",
@@ -422,6 +440,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#9170b8",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#9170b8",
@@ -449,6 +468,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "",
+              "isHighlighted": true,
               "showTooltip": false,
               "tooltipProps": undefined,
             },
@@ -472,6 +492,7 @@ describe('getSeriesAndDomain', () => {
         "series": Array [
           Object {
             "config": Object {
+              "isHighlighted": true,
               "showTooltip": false,
             },
             "x": 0,

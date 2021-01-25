@@ -15,6 +15,8 @@ import { extractItems, isHighlightedItem } from './data_formatting';
 import 'jest-canvas-mock';
 import { BAR_HEIGHT } from '../../waterfall/components/constants';
 import { MimeType } from './types';
+import { OPEN_FILTERS_POPOVER } from '../../translations';
+import { FILTER_REQUESTS_LABEL } from '../../waterfall/components/translations';
 
 const getHighLightedItems = (query: string, filters: string[]) => {
   return NETWORK_EVENTS.events.filter((item) => isHighlightedItem(item, query, filters));
@@ -34,11 +36,11 @@ describe('waterfall chart wrapper', () => {
   });
 
   it('search by query works', () => {
-    const { getAllByTestId, getByTestId } = render(
+    const { getAllByTestId, getByTestId, getByLabelText } = render(
       <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
     );
 
-    const filterInput = getByTestId('waterfallFilterInput');
+    const filterInput = getByLabelText(FILTER_REQUESTS_LABEL);
 
     const searchText = '.js';
 
@@ -66,7 +68,7 @@ describe('waterfall chart wrapper', () => {
   });
 
   it('search by mime type works', () => {
-    const { getAllByTestId, getByText } = render(
+    const { getAllByTestId, getByLabelText, getAllByText } = render(
       <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
     );
 
@@ -74,10 +76,12 @@ describe('waterfall chart wrapper', () => {
 
     expect(sideBarItems).toHaveLength(5);
 
-    const xhrBtn = getByText('XHR');
+    act(() => {
+      fireEvent.click(getByLabelText(OPEN_FILTERS_POPOVER));
+    });
 
     act(() => {
-      fireEvent.click(xhrBtn);
+      fireEvent.click(getAllByText('XHR')[1]);
     });
 
     // inout has debounce effect so hence the timer

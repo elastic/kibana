@@ -54,7 +54,11 @@ const getFriendlyTooltipValue = ({
   }
   return `${label}: ${formatValueForDisplay(value)}ms`;
 };
-export const isHighlightedItem = (item: NetworkItem, query?: string, activeFilters?: string[]) => {
+export const isHighlightedItem = (
+  item: NetworkItem,
+  query?: string,
+  activeFilters: string[] = []
+) => {
   if (!query && activeFilters?.length === 0) {
     return true;
   }
