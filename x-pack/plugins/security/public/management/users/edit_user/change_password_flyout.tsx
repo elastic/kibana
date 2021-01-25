@@ -63,7 +63,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
         );
         services.notifications!.toasts.addSuccess(
           i18n.translate('xpack.security.management.users.changePasswordFlyout.successMessage', {
-            defaultMessage: "Changed password for user '{username}'",
+            defaultMessage: "Password changed for '{username}'.",
             values: { username },
           })
         );
@@ -75,7 +75,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
             i18n.translate(
               'xpack.security.management.users.changePasswordFlyout.currentPasswordInvalidError',
               {
-                defaultMessage: 'Invalid password. Please try again.',
+                defaultMessage: 'Invalid password.',
               }
             )
           );
@@ -101,7 +101,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
           errors.current_password = i18n.translate(
             'xpack.security.management.users.changePasswordFlyout.currentPasswordRequiredError',
             {
-              defaultMessage: 'Please enter your current password.',
+              defaultMessage: 'Enter your current password.',
             }
           );
         }
@@ -111,7 +111,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
         errors.password = i18n.translate(
           'xpack.security.management.users.changePasswordFlyout.passwordRequiredError',
           {
-            defaultMessage: 'Please enter a new password.',
+            defaultMessage: 'Enter a new password.',
           }
         );
       } else if (values.password.length < 6) {
@@ -125,7 +125,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
         errors.confirm_password = i18n.translate(
           'xpack.security.management.users.changePasswordFlyout.confirmPasswordRequiredError',
           {
-            defaultMessage: 'Please confirm your new password.',
+            defaultMessage: 'Passwords do not match.',
           }
         );
       } else if (values.password !== values.confirm_password) {
@@ -155,7 +155,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
               'xpack.security.management.users.changePasswordFlyout.confirmSystemPasswordButton',
               {
                 defaultMessage:
-                  '{isSubmitting, select, true{Changing password…} other{I understand, change this password}}',
+                  '{isSubmitting, select, true{Changing password…} other{Change password}}',
                 values: { isSubmitting: form.isSubmitting },
               }
             )

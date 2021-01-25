@@ -157,7 +157,7 @@ function renderOption(option: Option) {
           <EuiBadge color={option.color}>
             <FormattedMessage
               id="xpack.security.management.users.roleComboBox.reservedBadge"
-              defaultMessage="built-in"
+              defaultMessage="built in"
             />
           </EuiBadge>
         </EuiFlexItem>

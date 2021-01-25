@@ -118,11 +118,10 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               title={
                 <FormattedMessage
                   id="xpack.security.management.users.editUserPage.reservedUserWarning"
-                  defaultMessage="This user is built-in and can't be updated or deleted."
+                  defaultMessage="This user is built in and can't be updated or deleted."
                 />
               }
               iconType="lock"
-              color="warning"
             />
             <EuiSpacer />
           </>
@@ -202,7 +201,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
                 <EuiDescriptionListDescription>
                   <FormattedMessage
                     id="xpack.security.management.users.editUserPage.changePasswordDescription"
-                    defaultMessage="Once changed, the user will not be able to log in using their previous
+                    defaultMessage="The user will not be able to log in using their previous
                     password."
                   />
                 </EuiDescriptionListDescription>

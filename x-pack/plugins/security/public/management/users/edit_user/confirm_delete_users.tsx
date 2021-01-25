@@ -61,7 +61,7 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
         'xpack.security.management.users.confirmDeleteUsers.confirmButton',
         {
           defaultMessage:
-            '{isLoading, select, true{Deleting {count, plural, one{user} other{users}}…} other{I understand, permanently delete {count, plural, one{this user} other{these users}}}}',
+            '{isLoading, select, true{Deleting {count, plural, one{user} other{users}}…} other{Delete {count, plural, one{user} other{users}}}}',
           values: { count: usernames.length, isLoading: state.loading },
         }
       )}
@@ -73,7 +73,7 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
         <p>
           <FormattedMessage
             id="xpack.security.management.users.confirmDeleteUsers.description"
-            defaultMessage="This action will permanently delete {count, plural, one{the user} other{these users}} and remove access to Elastic{count, plural, one{.} other{:}}"
+            defaultMessage="{count, plural, one{This user} other{These users}} will be permanently deleted and access to Elastic removed{count, plural, one{.} other{:}}"
             values={{ count: usernames.length }}
           />
         </p>

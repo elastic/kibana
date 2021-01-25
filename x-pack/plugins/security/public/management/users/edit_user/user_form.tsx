@@ -122,7 +122,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           errors.username = i18n.translate(
             'xpack.security.management.users.userForm.usernameRequiredError',
             {
-              defaultMessage: 'Please enter a username.',
+              defaultMessage: 'Enter a username.',
             }
           );
         } else if (values.username.length > MAX_NAME_LENGTH) {
@@ -145,7 +145,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             'xpack.security.management.users.userForm.usernameInvalidError',
             {
               defaultMessage:
-                'Username must contain only letters, numbers, spaces, punctuation and printable symbols.',
+                'Username must contain only letters, numbers, spaces, punctuation, and symbols.',
             }
           );
         } else {
@@ -155,8 +155,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
               errors.username = i18n.translate(
                 'xpack.security.management.users.userForm.usernameTakenError',
                 {
-                  defaultMessage:
-                    "User '{username}' already exists. Please choose another username.",
+                  defaultMessage: "User '{username}' already exists.",
                   values: { username: values.username },
                 }
               );
@@ -168,7 +167,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           errors.password = i18n.translate(
             'xpack.security.management.users.userForm.passwordRequiredError',
             {
-              defaultMessage: 'Please enter a password.',
+              defaultMessage: 'Enter a password.',
             }
           );
         } else if (values.password.length < 6) {
@@ -182,7 +181,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           errors.confirm_password = i18n.translate(
             'xpack.security.management.users.userForm.confirmPasswordRequiredError',
             {
-              defaultMessage: 'Please confirm your password.',
+              defaultMessage: 'Passwords do not match.',
             }
           );
         } else if (values.password !== values.confirm_password) {

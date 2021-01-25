@@ -62,7 +62,7 @@ describe('EditUserPage', () => {
       metadata: {
         _reserved: true,
         _deprecated: true,
-        _deprecated_reason: 'Please use [new_user] instead.',
+        _deprecated_reason: 'Use [new_user] instead.',
       },
     });
     coreStart.http.get.mockResolvedValueOnce([]);
@@ -74,7 +74,7 @@ describe('EditUserPage', () => {
     );
 
     await findByText(/User is deprecated/i);
-    await findByText(/Please use .new_user. instead/i);
+    await findByText(/Use .new_user. instead/i);
 
     fireEvent.click(await findByRole('button', { name: 'Back to users' }));
 
@@ -98,7 +98,7 @@ describe('EditUserPage', () => {
       </Providers>
     );
 
-    await findByText(/User is built-in/i);
+    await findByText(/User is built in/i);
 
     fireEvent.click(await findByRole('button', { name: 'Back to users' }));
 
@@ -121,7 +121,7 @@ describe('EditUserPage', () => {
         metadata: {
           _reserved: true,
           _deprecated: true,
-          _deprecated_reason: 'Please use [new_role] instead.',
+          _deprecated_reason: 'Use [new_role] instead.',
         },
       },
     ]);
@@ -132,7 +132,7 @@ describe('EditUserPage', () => {
       </Providers>
     );
 
-    await findByText(/Role .deprecated_role. is deprecated. Please use .new_role. instead/i);
+    await findByText(/Role .deprecated_role. is deprecated. Use .new_role. instead/i);
   });
 
   it('updates user when submitting form and redirects back', async () => {
