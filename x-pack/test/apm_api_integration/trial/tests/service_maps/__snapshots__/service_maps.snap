@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Service Maps with a trial license /api/apm/service-map when there is data returns service map elements filtering by environment not defined 1`] = `
+exports[`APM specs (trial) Service Maps Service Maps with a trial license /api/apm/service-map when there is data returns service map elements filtering by environment not defined 1`] = `
 Object {
   "elements": Array [
     Object {
@@ -514,7 +514,7 @@ Object {
 }
 `;
 
-exports[`Service Maps with a trial license /api/apm/service-map when there is data returns the correct data 3`] = `
+exports[`APM specs (trial) Service Maps Service Maps with a trial license /api/apm/service-map when there is data returns the correct data 3`] = `
 Array [
   Object {
     "data": Object {
@@ -1741,7 +1741,7 @@ Array [
 ]
 `;
 
-exports[`Service Maps with a trial license when there is data with anomalies with the default apm user returns the correct anomaly stats 3`] = `
+exports[`APM specs (trial) Service Maps Service Maps with a trial license when there is data with anomalies with the default apm user returns the correct anomaly stats 3`] = `
 Object {
   "elements": Array [
     Object {

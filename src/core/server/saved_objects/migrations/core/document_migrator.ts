@@ -159,10 +159,11 @@ export class DocumentMigrator implements VersionedTransformer {
    */
   constructor({
     typeRegistry,
-    kibanaVersion,
+    kibanaVersion: rawKibanaVersion,
     minimumConvertVersion = DEFAULT_MINIMUM_CONVERT_VERSION,
     log,
   }: DocumentMigratorOptions) {
+    const kibanaVersion = rawKibanaVersion.split('-')[0]; // coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha) to a regular semver (x.y.z)
     validateMigrationDefinition(typeRegistry, kibanaVersion, minimumConvertVersion);
 
     this.documentMigratorOptions = { typeRegistry, kibanaVersion, log };

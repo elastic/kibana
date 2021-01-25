@@ -5,12 +5,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import type { BeatsManagementRouter } from '../../lib/types';
 import { CMBeat } from '../../../common/domain_types';
 import { ReturnTypeGet } from '../../../common/return_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-export const registerGetBeatRoute = (router: IRouter) => {
+export const registerGetBeatRoute = (router: BeatsManagementRouter) => {
   router.get(
     {
       path: '/api/beats/agent/{beatId}/{token?}',

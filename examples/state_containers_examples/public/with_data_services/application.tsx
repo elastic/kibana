@@ -10,24 +10,26 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginDependencies } from './types';
-import { StateDemoApp } from './components/app';
+import { App } from './app';
 import { createKbnUrlStateStorage } from '../../../../src/plugins/kibana_utils/public/';
+import { ExampleLink } from '../common/example_page';
 
 export const renderApp = (
-  { notifications, http }: CoreStart,
+  { notifications, application }: CoreStart,
   { navigation, data }: AppPluginDependencies,
-  { element, history }: AppMountParameters
+  { element, history }: AppMountParameters,
+  { exampleLinks }: { exampleLinks: ExampleLink[] }
 ) => {
   const kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
 
   ReactDOM.render(
-    <StateDemoApp
-      notifications={notifications}
-      http={http}
+    <App
       navigation={navigation}
       data={data}
       history={history}
       kbnUrlStateStorage={kbnUrlStateStorage}
+      exampleLinks={exampleLinks}
+      navigateToApp={application.navigateToApp}
     />,
     element
   );
