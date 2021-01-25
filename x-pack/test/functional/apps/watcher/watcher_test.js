@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
     before('initialize tests', async () => {
       // There may be system watches if monitoring was previously enabled
       // These cannot be deleted via the UI, so we need to delete via the API
-      await security.testUser.setRoles(['kibana_admin', 'watcher_admin']);
+      await security.testUser.setRoles(['kibana_admin', 'watcher_admin'], false);
       const watches = await esSupertest.get('/.watches/_search');
 
       if (watches.status === 200) {
