@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
-
+import type { ListsPluginRouter } from '../types';
 import { LIST_INDEX } from '../../common/constants';
 import { buildSiemResponse, transformError } from '../siem_server_deps';
 import { validate } from '../../common/shared_imports';
@@ -29,7 +28,7 @@ import { getListClient } from '.';
  *
  * And ensuring they're all gone
  */
-export const deleteListIndexRoute = (router: IRouter): void => {
+export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
   router.delete(
     {
       options: {

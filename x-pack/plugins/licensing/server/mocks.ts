@@ -7,7 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 import {
   LicensingPluginSetup,
   LicensingPluginStart,
-  LicensingRequestHandlerContext,
+  LicensingApiRequestHandlerContext,
 } from './types';
 import { licenseMock } from '../common/licensing.mock';
 import { featureUsageMock } from './services/feature_usage_service.mock';
@@ -49,8 +49,8 @@ const createStartMock = (): jest.Mocked<LicensingPluginStart> => {
 
 const createRequestHandlerContextMock = (
   ...options: Parameters<typeof licenseMock.createLicense>
-): jest.Mocked<LicensingRequestHandlerContext> => {
-  const mock: jest.Mocked<LicensingRequestHandlerContext> = {
+): jest.Mocked<LicensingApiRequestHandlerContext> => {
+  const mock: jest.Mocked<LicensingApiRequestHandlerContext> = {
     license: licenseMock.createLicense(...options),
     featureUsage: featureUsageMock.createStart(),
   };

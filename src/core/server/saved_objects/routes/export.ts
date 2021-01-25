@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import stringify from 'json-stable-stringify';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
-import { IRouter } from '../../http';
+import { IRouter, KibanaRequest } from '../../http';
 import { CoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import {
@@ -78,7 +78,11 @@ const validateOptions = (
     includeReferencesDeep,
     search,
   }: ExportOptions,
-  { exportSizeLimit, supportedTypes }: { exportSizeLimit: number; supportedTypes: string[] }
+  {
+    exportSizeLimit,
+    supportedTypes,
+    request,
+  }: { exportSizeLimit: number; supportedTypes: string[]; request: KibanaRequest }
 ): EitherExportOptions => {
   const hasTypes = (types?.length ?? 0) > 0;
   const hasObjects = (objects?.length ?? 0) > 0;
@@ -106,6 +110,7 @@ const validateOptions = (
       objects: objects!,
       excludeExportDetails,
       includeReferencesDeep,
+      request,
     };
   } else {
     const validationError = validateTypes(types!, supportedTypes);
@@ -118,6 +123,7 @@ const validateOptions = (
       search,
       excludeExportDetails,
       includeReferencesDeep,
+      request,
     };
   }
 };
@@ -165,6 +171,7 @@ export const registerExportRoute = (
       let options: EitherExportOptions;
       try {
         options = validateOptions(cleaned, {
+          request: req,
           exportSizeLimit: maxImportExportSize,
           supportedTypes,
         });

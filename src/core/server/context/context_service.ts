@@ -7,7 +7,7 @@
  */
 
 import { PluginOpaqueId } from '../../server';
-import { IContextContainer, ContextContainer, HandlerFunction } from '../../utils/context';
+import { IContextContainer, ContextContainer, HandlerFunction } from './container';
 import { CoreContext } from '../core_context';
 
 interface SetupDeps {
