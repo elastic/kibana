@@ -8,7 +8,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { transparentize } from 'polished';
 import React from 'react';
 
-import { euiStyled } from '../../../observability/public';
+import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 
 export const LoadingOverlayWrapper: React.FC<
   React.HTMLAttributes<HTMLDivElement> & {
