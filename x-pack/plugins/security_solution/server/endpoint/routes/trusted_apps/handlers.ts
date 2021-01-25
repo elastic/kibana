@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler, RequestHandlerContext } from 'kibana/server';
+import type { RequestHandler } from 'kibana/server';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { ExceptionListClient } from '../../../../../lists/server';
 
@@ -23,7 +24,9 @@ import {
   MissingTrustedAppException,
 } from './service';
 
-const exceptionListClientFromContext = (context: RequestHandlerContext): ExceptionListClient => {
+const exceptionListClientFromContext = (
+  context: SecuritySolutionRequestHandlerContext
+): ExceptionListClient => {
   const exceptionLists = context.lists?.getExceptionListClient();
 
   if (!exceptionLists) {
@@ -35,7 +38,12 @@ const exceptionListClientFromContext = (context: RequestHandlerContext): Excepti
 
 export const getTrustedAppsDeleteRouteHandler = (
   endpointAppContext: EndpointAppContext
-): RequestHandler<DeleteTrustedAppsRequestParams, undefined, undefined> => {
+): RequestHandler<
+  DeleteTrustedAppsRequestParams,
+  unknown,
+  unknown,
+  SecuritySolutionRequestHandlerContext
+> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
@@ -56,7 +64,12 @@ export const getTrustedAppsDeleteRouteHandler = (
 
 export const getTrustedAppsListRouteHandler = (
   endpointAppContext: EndpointAppContext
-): RequestHandler<undefined, GetTrustedAppsListRequest> => {
+): RequestHandler<
+  unknown,
+  GetTrustedAppsListRequest,
+  unknown,
+  SecuritySolutionRequestHandlerContext
+> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
@@ -73,7 +86,12 @@ export const getTrustedAppsListRouteHandler = (
 
 export const getTrustedAppsCreateRouteHandler = (
   endpointAppContext: EndpointAppContext
-): RequestHandler<undefined, undefined, PostTrustedAppCreateRequest> => {
+): RequestHandler<
+  unknown,
+  unknown,
+  PostTrustedAppCreateRequest,
+  SecuritySolutionRequestHandlerContext
+> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
@@ -90,7 +108,12 @@ export const getTrustedAppsCreateRouteHandler = (
 
 export const getTrustedAppsSummaryRouteHandler = (
   endpointAppContext: EndpointAppContext
-): RequestHandler<undefined, undefined, PostTrustedAppCreateRequest> => {
+): RequestHandler<
+  unknown,
+  unknown,
+  PostTrustedAppCreateRequest,
+  SecuritySolutionRequestHandlerContext
+> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {

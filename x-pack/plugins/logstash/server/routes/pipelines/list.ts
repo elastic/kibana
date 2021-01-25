@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { LegacyAPICaller, IRouter } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
+import type { LogstashPluginRouter } from '../../types';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
 import { PipelineListItem } from '../../models/pipeline_list_item';
@@ -20,7 +21,7 @@ async function fetchPipelines(callWithRequest: LegacyAPICaller) {
   return await callWithRequest('transport.request', params);
 }
 
-export function registerPipelinesListRoute(router: IRouter) {
+export function registerPipelinesListRoute(router: LogstashPluginRouter) {
   router.get(
     {
       path: '/api/logstash/pipelines',
