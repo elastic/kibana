@@ -38,6 +38,7 @@ import { SpaceSelectorPageProvider } from './space_selector_page';
 import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
 import { TagManagementPageProvider } from './tag_management_page';
 import { NavigationalSearchProvider } from './navigational_search';
+import { SearchSessionsPageProvider } from './search_sessions_management_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -64,6 +65,7 @@ export const pageObjects = {
   apiKeys: ApiKeysPageProvider,
   licenseManagement: LicenseManagementPageProvider,
   indexManagement: IndexManagementPageProvider,
+  searchSessionsManagement: SearchSessionsPageProvider,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
   tagManagement: TagManagementPageProvider,
   snapshotRestore: SnapshotRestorePageProvider,

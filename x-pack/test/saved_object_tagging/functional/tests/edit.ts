@@ -71,7 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await tagModal.openEdit('tag-2');
       await tagModal.fillForm(
         {
-          name: 'invalid&$%name',
+          name: 'a',
         },
         { submit: true }
       );
@@ -88,7 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await tagModal.openEdit('tag-2');
       await tagModal.fillForm(
         {
-          name: 'invalid&$%name',
+          name: 'a',
           description: 'edited description',
           color: '#FF00CC',
         },
