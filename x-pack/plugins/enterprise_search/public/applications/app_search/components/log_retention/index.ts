@@ -7,3 +7,4 @@
 export { LogRetentionLogic } from './log_retention_logic';
 export * from './types';
 export * from './messaging';
+export * from './components';

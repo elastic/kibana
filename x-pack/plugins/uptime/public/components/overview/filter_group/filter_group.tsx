@@ -15,7 +15,7 @@ import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import { MONITOR_ROUTE } from '../../../../common/constants';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 
-interface PresentationalComponentProps {
+interface Props {
   loading: boolean;
   overviewFilters: OverviewFilters;
 }
@@ -24,10 +24,11 @@ const Container = styled(EuiFilterGroup)`
   margin-bottom: 10px;
 `;
 
-export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
-  overviewFilters,
-  loading,
-}) => {
+function isDisabled<T>(array?: T[]) {
+  return array ? array.length === 0 : true;
+}
+
+export const FilterGroupComponent: React.FC<Props> = ({ overviewFilters, loading }) => {
   const { locations, ports, schemes, tags } = overviewFilters;
 
   const [updatedFieldValues, setUpdatedFieldValues] = useState<{
@@ -51,7 +52,7 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
       onFilterFieldChange,
       fieldName: 'observer.geo.name',
       id: 'location',
-      items: locations,
+      items: locations || [],
       selectedItems: selectedLocations,
       title: filterLabels.LOCATION,
     },
@@ -63,8 +64,8 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
             onFilterFieldChange,
             fieldName: 'url.port',
             id: 'port',
-            disabled: ports.length === 0,
-            items: ports.map((p: number) => p.toString()),
+            disabled: isDisabled(ports),
+            items: ports?.map((p: number) => p.toString()) ?? [],
             selectedItems: selectedPorts,
             title: filterLabels.PORT,
           },
@@ -73,8 +74,8 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
             onFilterFieldChange,
             fieldName: 'monitor.type',
             id: 'scheme',
-            disabled: schemes.length === 0,
-            items: schemes,
+            disabled: isDisabled(schemes),
+            items: schemes ?? [],
             selectedItems: selectedSchemes,
             title: filterLabels.SCHEME,
           },
@@ -83,10 +84,10 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
             onFilterFieldChange,
             fieldName: 'tags',
             id: 'tags',
-            disabled: tags.length === 0,
-            items: tags,
+            disabled: isDisabled(tags),
+            items: tags ?? [],
             selectedItems: selectedTags,
-            title: filterLabels.TAGS,
+            title: filterLabels.TAG,
           },
         ]
       : []),

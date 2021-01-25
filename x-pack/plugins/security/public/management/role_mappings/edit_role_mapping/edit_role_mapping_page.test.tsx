@@ -20,7 +20,7 @@ import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
 import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
 import { RolesAPIClient } from '../../roles';
 import { Role } from '../../../../common/model';
-import { DocumentationLinksService } from '../documentation_links';
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
@@ -30,6 +30,25 @@ import { RoleComboBox } from '../../role_combo_box';
 describe('EditRoleMappingPage', () => {
   const history = scopedHistoryMock.create();
   let rolesAPI: PublicMethodsOf<RolesAPIClient>;
+
+  const renderView = (
+    roleMappingsAPI: ReturnType<typeof roleMappingsAPIClientMock.create>,
+    name?: string
+  ) => {
+    const coreStart = coreMock.createStart();
+    return mountWithIntl(
+      <KibanaContextProvider services={coreStart}>
+        <EditRoleMappingPage
+          name={name}
+          roleMappingsAPI={roleMappingsAPI}
+          rolesAPIClient={rolesAPI}
+          notifications={coreStart.notifications}
+          docLinks={coreStart.docLinks}
+          history={history}
+        />
+      </KibanaContextProvider>
+    );
+  };
 
   beforeEach(() => {
     rolesAPI = rolesAPIClientMock.create();
@@ -50,17 +69,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: true,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <EditRoleMappingPage
-        roleMappingsAPI={roleMappingsAPI}
-        rolesAPIClient={rolesAPI}
-        notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
-        history={history}
-      />
-    );
-
+    const wrapper = renderView(roleMappingsAPI);
     await nextTick();
     wrapper.update();
 
@@ -112,18 +121,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: true,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <EditRoleMappingPage
-        name="foo"
-        roleMappingsAPI={roleMappingsAPI}
-        rolesAPIClient={rolesAPI}
-        notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
-        history={history}
-      />
-    );
-
+    const wrapper = renderView(roleMappingsAPI, 'foo');
     await nextTick();
     wrapper.update();
 
@@ -161,16 +159,7 @@ describe('EditRoleMappingPage', () => {
       hasCompatibleRealms: true,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <EditRoleMappingPage
-        roleMappingsAPI={roleMappingsAPI}
-        rolesAPIClient={rolesAPI}
-        notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
-        history={history}
-      />
-    );
+    const wrapper = renderView(roleMappingsAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
 
@@ -189,16 +178,7 @@ describe('EditRoleMappingPage', () => {
       hasCompatibleRealms: false,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <EditRoleMappingPage
-        roleMappingsAPI={roleMappingsAPI}
-        rolesAPIClient={rolesAPI}
-        notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
-        history={history}
-      />
-    );
+    const wrapper = renderView(roleMappingsAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(NoCompatibleRealms)).toHaveLength(0);
 
@@ -226,18 +206,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: true,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <EditRoleMappingPage
-        name={'foo'}
-        roleMappingsAPI={roleMappingsAPI}
-        rolesAPIClient={rolesAPI}
-        notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
-        history={history}
-      />
-    );
-
+    const wrapper = renderView(roleMappingsAPI, 'foo');
     expect(findTestSubject(wrapper, 'deprecatedRolesAssigned')).toHaveLength(0);
 
     await nextTick();
@@ -267,18 +236,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: false,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <EditRoleMappingPage
-        name={'foo'}
-        roleMappingsAPI={roleMappingsAPI}
-        rolesAPIClient={rolesAPI}
-        notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
-        history={history}
-      />
-    );
-
+    const wrapper = renderView(roleMappingsAPI, 'foo');
     expect(findTestSubject(wrapper, 'roleMappingInlineScriptsDisabled')).toHaveLength(0);
     expect(findTestSubject(wrapper, 'roleMappingStoredScriptsDisabled')).toHaveLength(0);
 
@@ -310,18 +268,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: true,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <EditRoleMappingPage
-        name={'foo'}
-        roleMappingsAPI={roleMappingsAPI}
-        rolesAPIClient={rolesAPI}
-        notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
-        history={history}
-      />
-    );
-
+    const wrapper = renderView(roleMappingsAPI, 'foo');
     expect(findTestSubject(wrapper, 'roleMappingInlineScriptsDisabled')).toHaveLength(0);
     expect(findTestSubject(wrapper, 'roleMappingStoredScriptsDisabled')).toHaveLength(0);
 
@@ -365,18 +312,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: true,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <EditRoleMappingPage
-        name={'foo'}
-        roleMappingsAPI={roleMappingsAPI}
-        rolesAPIClient={rolesAPI}
-        notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
-        history={history}
-      />
-    );
-
+    const wrapper = renderView(roleMappingsAPI, 'foo');
     await nextTick();
     wrapper.update();
 
@@ -421,18 +357,7 @@ describe('EditRoleMappingPage', () => {
       canUseStoredScripts: true,
     });
 
-    const { docLinks, notifications } = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <EditRoleMappingPage
-        name={'foo'}
-        roleMappingsAPI={roleMappingsAPI}
-        rolesAPIClient={rolesAPI}
-        notifications={notifications}
-        docLinks={new DocumentationLinksService(docLinks)}
-        history={history}
-      />
-    );
-
+    const wrapper = renderView(roleMappingsAPI, 'foo');
     await nextTick();
     wrapper.update();
 

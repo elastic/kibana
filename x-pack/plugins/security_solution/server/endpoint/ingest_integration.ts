@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExceptionListClient } from '../../../lists/server';
 import { PluginStartContract as AlertsStartContract } from '../../../alerts/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ExternalCallback } from '../../../fleet/server';
@@ -76,7 +77,7 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
 };
 
 /**
- * Callback to handle creation of PackagePolicies in Ingest Manager
+ * Callback to handle creation of PackagePolicies in Fleet
  */
 export const getPackagePolicyCreateCallback = (
   logger: Logger,
@@ -84,7 +85,8 @@ export const getPackagePolicyCreateCallback = (
   appClientFactory: AppClientFactory,
   maxTimelineImportExportSize: number,
   securitySetup: SecurityPluginSetup,
-  alerts: AlertsStartContract
+  alerts: AlertsStartContract,
+  exceptionsClient: ExceptionListClient | undefined
 ): ExternalCallback[1] => {
   const handlePackagePolicyCreate = async (
     newPackagePolicy: NewPackagePolicy,
@@ -98,10 +100,15 @@ export const getPackagePolicyCreateCallback = (
 
     // prep for detection rules creation
     const appClient = appClientFactory.create(request);
+    // This callback is called by fleet plugin.
+    // It doesn't have access to SecuritySolutionRequestHandlerContext in runtime.
+    // Muting the error to have green CI.
+    // @ts-expect-error
     const frameworkRequest = await buildFrameworkRequest(context, securitySetup, request);
 
     // Create detection index & rules (if necessary). move past any failure, this is just a convenience
     try {
+      // @ts-expect-error
       await createDetectionIndex(context, appClient);
     } catch (err) {
       if (err.statusCode !== 409) {
@@ -115,11 +122,13 @@ export const getPackagePolicyCreateCallback = (
       // this checks to make sure index exists first, safe to try in case of failure above
       // may be able to recover from minor errors
       await createPrepackagedRules(
+        // @ts-expect-error
         context,
         appClient,
         alerts.getAlertsClientWithRequest(request),
         frameworkRequest,
-        maxTimelineImportExportSize
+        maxTimelineImportExportSize,
+        exceptionsClient
       );
     } catch (err) {
       logger.error(

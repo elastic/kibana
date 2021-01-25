@@ -24,13 +24,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const find = getService('find');
   const dashboardExpect = getService('dashboardExpect');
-  const queryBar = getService('queryBar');
   const browser = getService('browser');
-  const sendToBackground = getService('sendToBackground');
+  const searchSessions = getService('searchSessions');
 
   describe('send to background with relative time', () => {
     before(async () => {
-      await PageObjects.common.sleep(5000); // this part was copied from `x-pack/test/functional/apps/dashboard/_async_dashboard.ts` and this was sleep was needed because of flakiness
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
@@ -56,16 +54,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Saves and restores a session with relative time ranges', async () => {
       await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.timePicker.pauseAutoRefresh(); // sample data has auto-refresh on
-      await queryBar.submitQuery();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       await checkSampleDashboardLoaded();
 
-      await sendToBackground.expectState('completed');
-      await sendToBackground.save();
-      await sendToBackground.expectState('backgroundCompleted');
+      await searchSessions.expectState('completed');
+      await searchSessions.save();
+      await searchSessions.expectState('backgroundCompleted');
       const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
         '[Flights] Airline Carrier'
       );
@@ -83,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkSampleDashboardLoaded();
 
       // Check that session is restored
-      await sendToBackground.expectState('restored');
+      await searchSessions.expectState('restored');
     });
   });
 

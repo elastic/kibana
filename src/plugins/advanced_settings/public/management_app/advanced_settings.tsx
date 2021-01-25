@@ -1,50 +1,48 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React, { Component } from 'react';
 import { Subscription } from 'rxjs';
+import { UnregisterCallback } from 'history';
+import { parse } from 'query-string';
+
+import { UiCounterMetricType } from '@kbn/analytics';
 import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
-import { useParams } from 'react-router-dom';
-import { UiCounterMetricType } from '@kbn/analytics';
+import {
+  IUiSettingsClient,
+  DocLinksStart,
+  ToastsStart,
+  ScopedHistory,
+} from '../../../../core/public';
+import { url } from '../../../kibana_utils/public';
+
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
 import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
-import { IUiSettingsClient, DocLinksStart, ToastsStart } from '../../../../core/public/';
 import { ComponentRegistry } from '../';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, SettingsChanges } from './types';
+import { parseErrorMsg } from './components/search/search';
+
+export const QUERY = 'query';
 
 interface AdvancedSettingsProps {
+  history: ScopedHistory;
   enableSaving: boolean;
   uiSettings: IUiSettingsClient;
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   componentRegistry: ComponentRegistry['start'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-}
-
-interface AdvancedSettingsComponentProps extends AdvancedSettingsProps {
-  queryText: string;
 }
 
 interface AdvancedSettingsState {
@@ -55,30 +53,25 @@ interface AdvancedSettingsState {
 
 type GroupedSettings = Record<string, FieldSetting[]>;
 
-export class AdvancedSettingsComponent extends Component<
-  AdvancedSettingsComponentProps,
-  AdvancedSettingsState
-> {
+export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedSettingsState> {
   private settings: FieldSetting[];
   private groupedSettings: GroupedSettings;
   private categoryCounts: Record<string, number>;
   private categories: string[] = [];
   private uiSettingsSubscription?: Subscription;
+  private unregister: UnregisterCallback;
 
-  constructor(props: AdvancedSettingsComponentProps) {
+  constructor(props: AdvancedSettingsProps) {
     super(props);
 
     this.settings = this.initSettings(this.props.uiSettings);
     this.groupedSettings = this.initGroupedSettings(this.settings);
     this.categories = this.initCategories(this.groupedSettings);
     this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
-
-    const parsedQuery = Query.parse(this.props.queryText ? getAriaName(this.props.queryText) : '');
-    this.state = {
-      query: parsedQuery,
-      footerQueryMatched: false,
-      filteredSettings: this.mapSettings(Query.execute(parsedQuery, this.settings)),
-    };
+    this.state = this.getQueryState(undefined, true);
+    this.unregister = this.props.history.listen(({ search }) => {
+      this.setState(this.getQueryState(search));
+    });
   }
 
   init(config: IUiSettingsClient) {
@@ -145,9 +138,48 @@ export class AdvancedSettingsComponent extends Component<
   }
 
   componentWillUnmount() {
-    if (this.uiSettingsSubscription) {
-      this.uiSettingsSubscription.unsubscribe();
+    this.uiSettingsSubscription?.unsubscribe?.();
+    this.unregister?.();
+  }
+
+  private getQuery(queryString: string, intialQuery = false): Query {
+    try {
+      const query = intialQuery ? getAriaName(queryString) : queryString ?? '';
+      return Query.parse(query);
+    } catch ({ message }) {
+      this.props.toasts.addWarning({
+        title: parseErrorMsg,
+        text: message,
+      });
+      return Query.parse('');
     }
+  }
+
+  private getQueryText(search?: string): string {
+    const queryParams = parse(search ?? window.location.search) ?? {};
+    return (queryParams[QUERY] as string) ?? '';
+  }
+
+  private getQueryState(search?: string, intialQuery = false): AdvancedSettingsState {
+    const queryString = this.getQueryText(search);
+    const query = this.getQuery(queryString, intialQuery);
+    const filteredSettings = this.mapSettings(Query.execute(query, this.settings));
+    const footerQueryMatched = Object.keys(filteredSettings).length > 0;
+
+    return {
+      query,
+      filteredSettings,
+      footerQueryMatched,
+    };
+  }
+
+  setUrlQuery(q: string = '') {
+    const search = url.addQueryParam(window.location.search, QUERY, q);
+
+    this.props.history.push({
+      pathname: '', // remove any route query param
+      search,
+    });
   }
 
   mapConfig(config: IUiSettingsClient) {
@@ -178,18 +210,11 @@ export class AdvancedSettingsComponent extends Component<
   }
 
   onQueryChange = ({ query }: { query: Query }) => {
-    this.setState({
-      query,
-      filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
-    });
+    this.setUrlQuery(query.text);
   };
 
   clearQuery = () => {
-    this.setState({
-      query: Query.parse(''),
-      footerQueryMatched: false,
-      filteredSettings: this.groupedSettings,
-    });
+    this.setUrlQuery('');
   };
 
   onFooterQueryMatchChange = (matched: boolean) => {
@@ -255,18 +280,3 @@ export class AdvancedSettingsComponent extends Component<
     );
   }
 }
-
-export const AdvancedSettings = (props: AdvancedSettingsProps) => {
-  const { query } = useParams<{ query: string }>();
-  return (
-    <AdvancedSettingsComponent
-      queryText={query || ''}
-      enableSaving={props.enableSaving}
-      uiSettings={props.uiSettings}
-      dockLinks={props.dockLinks}
-      toasts={props.toasts}
-      componentRegistry={props.componentRegistry}
-      trackUiMetric={props.trackUiMetric}
-    />
-  );
-};

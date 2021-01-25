@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  fireEvent,
-  render,
-  RenderResult,
-  waitFor,
-} from '@testing-library/react';
+import { fireEvent, render, RenderResult } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { CustomLinkOverview } from '.';
@@ -217,31 +212,6 @@ describe('CustomLink', () => {
         fireEvent.submit(component.getByText('Save'));
       });
       expect(saveCustomLinkSpy).toHaveBeenCalledTimes(1);
-    });
-
-    // FLAKY: https://github.com/elastic/kibana/issues/75106
-    it.skip('deletes a custom link', async () => {
-      const mockContext = getMockAPMContext({ canSave: true });
-      const component = render(
-        <LicenseContext.Provider value={goldLicense}>
-          <MockApmPluginContextWrapper value={mockContext}>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
-      expect(component.queryByText('Create link')).not.toBeInTheDocument();
-      const editButtons = component.getAllByLabelText('Edit');
-      expect(editButtons.length).toEqual(2);
-      act(() => {
-        fireEvent.click(editButtons[0]);
-      });
-      await waitFor(() =>
-        expect(component.queryByText('Create link')).toBeInTheDocument()
-      );
-      await act(async () => {
-        fireEvent.click(component.getByText('Delete'));
-      });
-      expect(refetch).toHaveBeenCalled();
     });
 
     describe('Filters', () => {

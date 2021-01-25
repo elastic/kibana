@@ -125,6 +125,7 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     from: 'now-6m',
     immutable: false,
     interval: '5m',
+    index: ['auditbeat-*'],
     rule_id: 'rule-1',
     output_index: '.siem-signals-default',
     max_signals: 100,
