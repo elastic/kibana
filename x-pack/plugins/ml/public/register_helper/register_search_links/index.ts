@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
+export { registerSearchLinks } from './register_search_links';
