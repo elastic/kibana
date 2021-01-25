@@ -20,7 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
 
-  describe('Search search sessions Management UI', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/89069
+  describe.skip('Search search sessions Management UI', () => {
     describe('New search sessions', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');

@@ -13,6 +13,7 @@ import { StepScreenshotDisplay } from './step_screenshot_display';
 import { StatusBadge } from './status_badge';
 import { Ping } from '../../../../common/runtime_types';
 import { StepDetailLink } from '../../common/step_detail_link';
+import { VIEW_PERFORMANCE } from './translations';
 
 const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
 
@@ -26,24 +27,9 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup })
   return (
     <>
       <div style={{ padding: '8px' }}>
-        <div>
-          {step.synthetics?.step?.index && checkGroup ? (
-            <StepDetailLink checkGroupId={checkGroup} stepIndex={step.synthetics.step.index!}>
-              <EuiText>
-                <strong>
-                  <FormattedMessage
-                    id="xpack.uptime.synthetics.executedStep.stepName"
-                    defaultMessage="{stepNumber}. {stepName}"
-                    values={{
-                      stepNumber: index + 1,
-                      stepName: step.synthetics?.step?.name,
-                    }}
-                  />
-                </strong>
-              </EuiText>
-            </StepDetailLink>
-          ) : (
-            <EuiText>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiText grow={false}>
               <strong>
                 <FormattedMessage
                   id="xpack.uptime.synthetics.executedStep.stepName"
@@ -55,12 +41,12 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup })
                 />
               </strong>
             </EuiText>
-          )}
-        </div>
-        <EuiSpacer size="s" />
-        <div>
-          <StatusBadge status={step.synthetics?.payload?.status} />
-        </div>
+            <EuiSpacer size="s" />
+            <div>
+              <StatusBadge status={step.synthetics?.payload?.status} />
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <div>
           <EuiFlexGroup>
@@ -73,6 +59,14 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup })
               />
             </EuiFlexItem>
             <EuiFlexItem>
+              {step.synthetics?.step?.index && (
+                <span>
+                  <StepDetailLink checkGroupId={checkGroup} stepIndex={step.synthetics.step.index}>
+                    {VIEW_PERFORMANCE}
+                  </StepDetailLink>
+                  <EuiSpacer size="s" />
+                </span>
+              )}
               <CodeBlockAccordion
                 id={step.synthetics?.step?.name + String(index)}
                 buttonContent={i18n.translate(
