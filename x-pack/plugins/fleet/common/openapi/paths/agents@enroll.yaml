@@ -30,6 +30,7 @@ post:
                 - TEMPORARY
             shared_id:
               type: string
+              deprecated: true
             metadata:
               type: object
               required:

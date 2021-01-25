@@ -40,10 +40,8 @@ export function registerSettingsRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: '/as/log_settings',
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/log_settings',
+    })
   );
 }

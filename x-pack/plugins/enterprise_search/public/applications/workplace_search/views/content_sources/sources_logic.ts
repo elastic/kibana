@@ -15,7 +15,7 @@ import { HttpLogic } from '../../../shared/http';
 import {
   flashAPIErrors,
   setQueuedSuccessMessage,
-  FlashMessagesLogic,
+  clearFlashMessages,
 } from '../../../shared/flash_messages';
 
 import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } from '../../types';
@@ -76,6 +76,9 @@ interface ISourcesServerResponse {
   privateContentSources?: ContentSourceDetails[];
   serviceTypes: Connector[];
 }
+
+let pollingInterval: number;
+const POLLING_INTERVAL = 10000;
 
 export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>({
   path: ['enterprise_search', 'workplace_search', 'sources_logic'],
@@ -169,6 +172,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
 
       try {
         const response = await HttpLogic.values.http.get(route);
+        actions.pollForSourceStatusChanges();
         actions.onInitializeSources(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -181,18 +185,20 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       }
     },
     // We poll the server and if the status update, we trigger a new fetch of the sources.
-    pollForSourceStatusChanges: async () => {
+    pollForSourceStatusChanges: () => {
       const { isOrganization } = AppLogic.values;
       if (!isOrganization) return;
       const serverStatuses = values.serverStatuses;
 
-      const sourceStatuses = await fetchSourceStatuses(isOrganization);
+      pollingInterval = window.setInterval(async () => {
+        const sourceStatuses = await fetchSourceStatuses(isOrganization);
 
-      sourceStatuses.some((source: ContentSourceStatus) => {
-        if (serverStatuses && serverStatuses[source.id] !== source.status.status) {
-          return actions.initializeSources();
-        }
-      });
+        sourceStatuses.some((source: ContentSourceStatus) => {
+          if (serverStatuses && serverStatuses[source.id] !== source.status.status) {
+            return actions.initializeSources();
+          }
+        });
+      }, POLLING_INTERVAL);
     },
     setSourceSearchability: async ({ sourceId, searchable }) => {
       const { isOrganization } = AppLogic.values;
@@ -233,7 +239,15 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       );
     },
     resetFlashMessages: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
+    },
+    resetSourcesState: () => {
+      clearInterval(pollingInterval);
+    },
+  }),
+  events: () => ({
+    beforeUnmount() {
+      clearInterval(pollingInterval);
     },
   }),
 });
