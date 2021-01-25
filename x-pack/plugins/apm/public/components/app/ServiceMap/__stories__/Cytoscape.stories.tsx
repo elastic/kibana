@@ -7,7 +7,7 @@
 import { EuiCard, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, { ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Cytoscape } from '../Cytoscape';
 import { iconForNode } from '../icons';
 import { Centerer } from './centerer';
