@@ -3,17 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  IRouter,
-  RequestHandlerContext,
-  KibanaRequest,
-  IKibanaResponse,
-  KibanaResponseFactory,
-} from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+import { IRouter } from 'kibana/server';
 import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
 
-import { ActionTypeExecutorResult } from '../types';
+import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../types';
 import { BASE_ACTION_API_PATH } from '../../common';
 import { asHttpRequestExecutionSource } from '../lib/action_execution_source';
 
@@ -25,7 +19,10 @@ const bodySchema = schema.object({
   params: schema.recordOf(schema.string(), schema.any()),
 });
 
-export const executeActionRoute = (router: IRouter, licenseState: ILicenseState) => {
+export const executeActionRoute = (
+  router: IRouter<ActionsRequestHandlerContext>,
+  licenseState: ILicenseState
+) => {
   router.post(
     {
       path: `${BASE_ACTION_API_PATH}/action/{id}/_execute`,
@@ -34,11 +31,7 @@ export const executeActionRoute = (router: IRouter, licenseState: ILicenseState)
         params: paramSchema,
       },
     },
-    router.handleLegacyErrors(async function (
-      context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, TypeOf<typeof bodySchema>>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse> {
+    router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);
 
       if (!context.actions) {

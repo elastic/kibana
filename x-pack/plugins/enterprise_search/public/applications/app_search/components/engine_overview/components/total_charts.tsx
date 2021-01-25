@@ -19,20 +19,15 @@ import {
 } from '@elastic/eui';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { ENGINE_ANALYTICS_PATH, ENGINE_API_LOGS_PATH } from '../../../routes';
+import { generateEnginePath } from '../../engine';
 
-import { ENGINE_ANALYTICS_PATH, ENGINE_API_LOGS_PATH, getEngineRoute } from '../../../routes';
 import { TOTAL_QUERIES, TOTAL_API_OPERATIONS } from '../../analytics/constants';
 import { VIEW_ANALYTICS, VIEW_API_LOGS, LAST_7_DAYS } from '../constants';
-
 import { AnalyticsChart, convertToChartData } from '../../analytics';
-
-import { EngineLogic } from '../../engine';
 import { EngineOverviewLogic } from '../';
 
 export const TotalCharts: React.FC = () => {
-  const { engineName } = useValues(EngineLogic);
-  const engineRoute = getEngineRoute(engineName);
-
   const { startDate, queriesPerDay, operationsPerDay } = useValues(EngineOverviewLogic);
 
   return (
@@ -49,7 +44,7 @@ export const TotalCharts: React.FC = () => {
               </EuiText>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
-              <EuiButtonTo to={engineRoute + ENGINE_ANALYTICS_PATH} size="s">
+              <EuiButtonTo to={generateEnginePath(ENGINE_ANALYTICS_PATH)} size="s">
                 {VIEW_ANALYTICS}
               </EuiButtonTo>
             </EuiPageContentHeaderSection>
@@ -78,7 +73,7 @@ export const TotalCharts: React.FC = () => {
               </EuiText>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
-              <EuiButtonTo to={engineRoute + ENGINE_API_LOGS_PATH} size="s">
+              <EuiButtonTo to={generateEnginePath(ENGINE_API_LOGS_PATH)} size="s">
                 {VIEW_API_LOGS}
               </EuiButtonTo>
             </EuiPageContentHeaderSection>
