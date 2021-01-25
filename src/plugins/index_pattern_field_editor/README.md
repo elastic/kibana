@@ -35,4 +35,4 @@ You can optionally create a field to edit.
 
 ### `userPermissions.editIndexPattern(): boolean`
 
-Convenience method that uses the `core.application.capabilities` api to determine whether the user can edit the index pattern.
+Convenience method that uses the `core.application.capabilities` api to determine whether the user can edit the index pattern. 
