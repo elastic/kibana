@@ -19,7 +19,7 @@ import { SerializedVis, Vis } from './vis';
 import { PersistedState } from './persisted_state';
 import { VisParams } from '../common';
 
-export { Vis, SerializedVis };
+export { Vis, SerializedVis, VisParams };
 
 export interface SavedVisState {
   title: string;
