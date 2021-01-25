@@ -27,9 +27,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start,
               end,
               uiFilters: '{}',
-              size: 5,
               numBuckets: 20,
-              pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
               latencyAggregationType: 'avg',
@@ -59,9 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start,
               end,
               uiFilters: '{}',
-              size: 5,
               numBuckets: 20,
-              pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
               transactionType: 'request',
@@ -82,6 +78,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "APIRestController#order",
             "APIRestController#stats",
             "APIRestController#customerWhoBought",
+            "APIRestController#customer",
+            "APIRestController#topProducts",
+            "APIRestController#orders",
+            "APIRestController#product",
+            "ResourceHttpRequestHandler",
+            "APIRestController#products",
+            "DispatcherServlet#doPost",
           ]
         `);
 
@@ -93,6 +96,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             0.953769516915408,
             0.905498741191481,
             0.894989230293471,
+            0.734894148230161,
+            0.496596820588832,
+            0.465199881087606,
+            0.269203783423923,
+            0.142856373806016,
+            0.0557715877137418,
+            0,
           ]
         `);
 
@@ -115,18 +125,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           }
         `);
-
-        expectSnapshot(
-          firstItem.latency.timeseries.filter(({ y }: any) => y > 0).length
-        ).toMatchInline(`9`);
-
-        expectSnapshot(
-          firstItem.throughput.timeseries.filter(({ y }: any) => y > 0).length
-        ).toMatchInline(`9`);
-
-        expectSnapshot(
-          firstItem.errorRate.timeseries.filter(({ y }: any) => y > 0).length
-        ).toMatchInline(`1`);
       });
 
       it('sorts items in the correct order', async () => {
@@ -137,9 +135,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start,
               end,
               uiFilters: '{}',
-              size: 5,
               numBuckets: 20,
-              pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
               transactionType: 'request',
@@ -163,9 +159,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start,
               end,
               uiFilters: '{}',
-              size: 5,
               numBuckets: 20,
-              pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
               transactionType: 'request',
@@ -189,9 +183,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start,
               end,
               uiFilters: '{}',
-              size: 5,
               numBuckets: 20,
-              pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'latency',
               transactionType: 'request',
@@ -205,64 +197,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const latencies = response.body.transactionGroups.map((group: any) => group.latency.value);
 
         expect(latencies).to.eql(sortBy(latencies.concat()).reverse());
-      });
-
-      it('paginates through the items', async () => {
-        const size = 1;
-
-        const firstPage = await supertest.get(
-          url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/overview`,
-            query: {
-              start,
-              end,
-              uiFilters: '{}',
-              size,
-              numBuckets: 20,
-              pageIndex: 0,
-              sortDirection: 'desc',
-              sortField: 'impact',
-              transactionType: 'request',
-              latencyAggregationType: 'avg',
-            },
-          })
-        );
-
-        expect(firstPage.status).to.eql(200);
-
-        const totalItems = firstPage.body.totalTransactionGroups;
-
-        const pages = Math.floor(totalItems / size);
-
-        const items = await new Array(pages)
-          .fill(undefined)
-          .reduce(async (prevItemsPromise, _, pageIndex) => {
-            const prevItems = await prevItemsPromise;
-
-            const thisPage = await supertest.get(
-              url.format({
-                pathname: '/api/apm/services/opbeans-java/transactions/groups/overview',
-                query: {
-                  start,
-                  end,
-                  uiFilters: '{}',
-                  size,
-                  numBuckets: 20,
-                  pageIndex,
-                  sortDirection: 'desc',
-                  sortField: 'impact',
-                  transactionType: 'request',
-                  latencyAggregationType: 'avg',
-                },
-              })
-            );
-
-            return prevItems.concat(thisPage.body.transactionGroups);
-          }, Promise.resolve([]));
-
-        expect(items.length).to.eql(totalItems);
-
-        expect(uniqBy(items, 'name').length).to.eql(totalItems);
       });
     });
   });

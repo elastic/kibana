@@ -58,6 +58,7 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
       loadTestFile(require.resolve('./transactions/breakdown'));
       loadTestFile(require.resolve('./transactions/distribution'));
       loadTestFile(require.resolve('./transactions/transactions_groups_overview'));
+      loadTestFile(require.resolve('./transactions/transactions_groups_metrics'));
     });
 
     describe('Observability overview', function () {
