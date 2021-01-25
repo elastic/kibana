@@ -17,7 +17,7 @@ Create beautiful maps from your geographical data. With **Maps**, you can:
 * Symbolize features using data values.
 * Focus on only the data that’s important to you.
 
-*Ready to get started?* Watch the https://videos.elastic.co/watch/BYzRDtH4u7RSD8wKhuEW1b[video], and then start your tour of Maps with the <<maps-getting-started, getting started tutorial>>.
+*Ready to get started?* Watch the https://videos.elastic.co/watch/BYzRDtH4u7RSD8wKhuEW1b[video], and then start your tour of **Maps** with the <<maps-getting-started, getting started tutorial>>.
 
 ++++
 <script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
