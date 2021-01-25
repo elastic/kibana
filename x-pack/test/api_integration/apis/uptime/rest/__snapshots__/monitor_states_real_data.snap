@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`monitor states endpoint will fetch monitor state data for the given down filters 1`] = `
+exports[`apis uptime uptime REST endpoints with real-world data monitor states endpoint will fetch monitor state data for the given down filters 1`] = `
 Object {
   "nextPagePagination": "{\\"cursorDirection\\":\\"AFTER\\",\\"sortOrder\\":\\"ASC\\",\\"cursorKey\\":{\\"monitor_id\\":\\"0020-down\\"}}",
   "prevPagePagination": null,

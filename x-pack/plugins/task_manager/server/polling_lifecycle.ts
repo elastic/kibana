@@ -129,10 +129,7 @@ export class TaskPollingLifecycle {
       this.events$,
       config.version_conflict_threshold,
       config.monitored_stats_running_average_window
-    );
-    pollIntervalDelay$.subscribe((delay) => {
-      emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)));
-    });
+    ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
 
     // the task poller that polls for work on fixed intervals and on demand
     const poller$: Observable<
