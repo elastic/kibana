@@ -20,6 +20,7 @@
 
 import { IndexPatternFieldEditorPlugin } from './plugin';
 
+export { OpenFieldEditorOptions } from './open_editor';
 export { PluginStart as IndexPatternFieldEditorStart } from './types';
 
 export function plugin() {
