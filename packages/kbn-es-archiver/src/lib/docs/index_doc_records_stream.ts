@@ -34,7 +34,7 @@ export function createIndexDocRecordsStream(
     });
 
     const resp = await client.bulk({ body }, { requestTimeout: 2 * 60 * 1000 });
-    if (resp.body.errors) {
+    if (resp.errors) {
       throw new Error(`Failed to index all documents: ${JSON.stringify(resp, null, 2)}`);
     }
   }
