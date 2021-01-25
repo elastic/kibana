@@ -24,6 +24,11 @@ interface TestData {
   sourceIndexOrSavedSearch: string;
   fieldNameFilters: string[];
   fieldTypeFilters: string[];
+  minimumRowsPerPage?: 10 | 25 | 50;
+  sampleSizeValidations: Array<{
+    size: number;
+    expected: { field: string; docCountFormatted: string };
+  }>;
   expected: {
     totalDocCountFormatted: string;
     metricFields?: MetricFieldVisConfig[];
@@ -47,6 +52,10 @@ export default function ({ getService }: FtrProviderContext) {
     sourceIndexOrSavedSearch: 'ft_farequote',
     fieldNameFilters: ['airline', '@timestamp'],
     fieldTypeFilters: [ML_JOB_FIELD_TYPES.KEYWORD],
+    sampleSizeValidations: [
+      { size: 1000, expected: { field: 'airline', docCountFormatted: '1000 (100%)' } },
+      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
+    ],
     expected: {
       totalDocCountFormatted: '86,274',
       metricFields: [
@@ -132,6 +141,10 @@ export default function ({ getService }: FtrProviderContext) {
     sourceIndexOrSavedSearch: 'ft_farequote_kuery',
     fieldNameFilters: ['@version'],
     fieldTypeFilters: [ML_JOB_FIELD_TYPES.DATE, ML_JOB_FIELD_TYPES.TEXT],
+    sampleSizeValidations: [
+      { size: 1000, expected: { field: 'airline', docCountFormatted: '1000 (100%)' } },
+      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
+    ],
     expected: {
       totalDocCountFormatted: '34,415',
       metricFields: [
@@ -217,6 +230,10 @@ export default function ({ getService }: FtrProviderContext) {
     sourceIndexOrSavedSearch: 'ft_farequote_lucene',
     fieldNameFilters: ['@version.keyword', 'type'],
     fieldTypeFilters: [ML_JOB_FIELD_TYPES.NUMBER],
+    sampleSizeValidations: [
+      { size: 1000, expected: { field: 'airline', docCountFormatted: '1000 (100%)' } },
+      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
+    ],
     expected: {
       totalDocCountFormatted: '34,416',
       metricFields: [
@@ -302,6 +319,7 @@ export default function ({ getService }: FtrProviderContext) {
     sourceIndexOrSavedSearch: 'ft_module_sample_logs',
     fieldNameFilters: ['geo.coordinates'],
     fieldTypeFilters: [ML_JOB_FIELD_TYPES.GEO_POINT],
+    minimumRowsPerPage: 50,
     expected: {
       totalDocCountFormatted: '408',
       metricFields: [],
@@ -325,6 +343,10 @@ export default function ({ getService }: FtrProviderContext) {
       fieldNameFiltersResultCount: 1,
       fieldTypeFiltersResultCount: 1,
     },
+    sampleSizeValidations: [
+      { size: 1000, expected: { field: 'geo.coordinates', docCountFormatted: '408 (100%)' } },
+      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '408 (100%)' } },
+    ],
   };
 
   function runTests(testData: TestData) {
@@ -362,7 +384,9 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
-      await ml.dataVisualizerTable.ensureNumRowsPerPage(50);
+      if (testData.minimumRowsPerPage) {
+        await ml.dataVisualizerTable.ensureNumRowsPerPage(testData.minimumRowsPerPage);
+      }
 
       await ml.dataVisualizerTable.assertSearchPanelExist();
       await ml.dataVisualizerTable.assertSampleSizeInputExists();
@@ -408,8 +432,14 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} sample size control changes non-metric fields`
       );
-      await ml.dataVisualizerTable.setSampleSizeInputValue(1000, 'airline', '1000 (100%)');
-      await ml.dataVisualizerTable.setSampleSizeInputValue(5000, '@timestamp', '5000 (100%)');
+      for (const sampleSizeCase of testData.sampleSizeValidations) {
+        const { size, expected } = sampleSizeCase;
+        await ml.dataVisualizerTable.setSampleSizeInputValue(
+          size,
+          expected.field,
+          expected.docCountFormatted
+        );
+      }
 
       await ml.testExecution.logTestStep('sets and resets field type filter correctly');
       await ml.dataVisualizerTable.setFieldTypeFilter(
