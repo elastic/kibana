@@ -19,10 +19,10 @@ import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/state
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
 
-export function loadFullJob(jobId, excludeGenerated = false) {
+export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
     ml.jobs
-      .jobs([jobId], excludeGenerated)
+      .jobs([jobId])
       .then((jobs) => {
         if (jobs.length) {
           resolve(jobs[0]);
@@ -201,13 +201,15 @@ export async function cloneJob(jobId) {
       loadJobForExport(jobId),
       loadFullJob(jobId, false),
     ]);
-    if (originalJob?.custom_settings?.created_by !== undefined) {
+    if (cloneableJob !== undefined && originalJob?.custom_settings?.created_by !== undefined) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
       // cloneableJob.custom_settings.created_by = originalJob?.custom_settings?.created_by;
 
       if (cloneableJob.custom_settings === undefined) {
-        cloneableJob.custom_settings = originalJob?.custom_settings;
+        cloneableJob.custom_settings = originalJob.custom_settings;
+      } else {
+        cloneableJob.custom_settings.created_by = originalJob.custom_settings.created_by;
       }
 
       mlJobService.tempJobCloningObjects.job = cloneableJob;
