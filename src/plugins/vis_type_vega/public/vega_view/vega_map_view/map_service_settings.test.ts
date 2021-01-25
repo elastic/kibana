@@ -5,18 +5,29 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
+import { get } from 'lodash';
+import { uiSettingsServiceMock } from 'src/core/public/mocks';
 
 import { MapServiceSettings } from './map_service_settings';
 import { MapsLegacyConfig } from '../../../../maps_legacy/config';
-import { TMSService } from '@elastic/ems-client';
+import { EMSClient, TMSService } from '@elastic/ems-client';
+import { setUISettings } from '../../services';
+
+const getPrivateField = <T>(mapServiceSettings: MapServiceSettings, privateField: string) =>
+  get(mapServiceSettings, privateField) as T;
 
 describe('vega_map_view/map_service_settings', () => {
   describe('MapServiceSettings', () => {
     const appVersion = '99';
     let config: MapsLegacyConfig;
+    let getUiSettingsMockedValue: any;
 
     beforeEach(() => {
       config = {} as MapsLegacyConfig;
+      setUISettings({
+        ...uiSettingsServiceMock.createSetupContract(),
+        get: () => getUiSettingsMockedValue,
+      });
     });
 
     test('should be able to create instance of MapServiceSettings', () => {
@@ -46,6 +57,42 @@ describe('vega_map_view/map_service_settings', () => {
 
       expect(mapServiceSettings.defaultTmsLayer).toBe('user_configured');
       expect(mapServiceSettings.hasUserConfiguredTmsLayer).toBeTruthy();
+    });
+
+    test('should load ems client only on executing initialize method', async () => {
+      const mapServiceSettings = new MapServiceSettings(config, appVersion);
+
+      expect(mapServiceSettings.isInitialized).toBeFalsy();
+      expect(getPrivateField<EMSClient>(mapServiceSettings, 'emsClient')).toBeUndefined();
+
+      await mapServiceSettings.initialize();
+
+      expect(mapServiceSettings.isInitialized).toBeTruthy();
+
+      expect(
+        getPrivateField<EMSClient>(mapServiceSettings, 'emsClient') instanceof EMSClient
+      ).toBeTruthy();
+    });
+
+    test('should set isDarkMode value on executing initialize method', async () => {
+      const mapServiceSettings = new MapServiceSettings(config, appVersion);
+      getUiSettingsMockedValue = true;
+
+      expect(getPrivateField<EMSClient>(mapServiceSettings, 'isDarkMode')).toBeFalsy();
+
+      await mapServiceSettings.initialize();
+
+      expect(getPrivateField<EMSClient>(mapServiceSettings, 'isDarkMode')).toBeTruthy();
+    });
+
+    test('getTmsService method should return TMS service by id', async () => {
+      const mapServiceSettings = new MapServiceSettings(config, appVersion);
+      await mapServiceSettings.initialize();
+      const emsClient = getPrivateField<EMSClient>(mapServiceSettings, 'emsClient');
+      emsClient.findTMSServiceById = jest.fn();
+      await mapServiceSettings.getTmsService('road_map');
+
+      expect(emsClient.findTMSServiceById).toHaveBeenCalledWith('road_map');
     });
 
     test('getAttributionsForTmsService method should return attributes in a correct form', () => {
