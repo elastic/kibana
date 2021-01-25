@@ -112,9 +112,17 @@ export function getActiveEntriesAndGenerateAlerts(
         alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
       }
     });
-    // If the latest location is "other", don't carry it through to the next interval
+    let otherIndex;
     if (locationsArr[0].shapeLocationId === OTHER_CATEGORY) {
       allActiveEntriesMap.delete(entityName);
+    } else if (
+      locationsArr.some(({ shapeLocationId }, index) => {
+        otherIndex = index;
+        return shapeLocationId === OTHER_CATEGORY;
+      })
+    ) {
+      const afterOtherLocationsArr = locationsArr.slice(0, otherIndex);
+      allActiveEntriesMap.set(entityName, afterOtherLocationsArr);
     } else {
       allActiveEntriesMap.set(entityName, locationsArr);
     }

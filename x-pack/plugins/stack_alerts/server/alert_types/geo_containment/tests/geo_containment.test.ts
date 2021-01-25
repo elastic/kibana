@@ -403,7 +403,7 @@ describe('geo_containment', () => {
       expect(allActiveEntriesMap).toEqual(currLocationMap);
     });
 
-    it('should return entity as active entry if "other" not the latest location', () => {
+    it('should return entity as active entry if "other" not the latest location but remove "other" and earlier entries', () => {
       const emptyPrevLocationMap = new Map();
       const currLocationMapWithOther = new Map([...currLocationMap]).set('d', [
         {
@@ -432,7 +432,16 @@ describe('geo_containment', () => {
         emptyShapesIdsNamesMap,
         currentDateTime
       );
-      expect(allActiveEntriesMap).toEqual(currLocationMapWithOther);
+      expect(allActiveEntriesMap).toEqual(
+        new Map([...currLocationMap]).set('d', [
+          {
+            location: [0, 0],
+            shapeLocationId: '123',
+            dateInShape: 'Wed Dec 10 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+            docId: 'docId1',
+          },
+        ])
+      );
     });
   });
 });
