@@ -4690,7 +4690,6 @@
     "visualizations.initializeWithoutIndexPatternErrorMessage": "インデックスパターンなしで集約を初期化しようとしています",
     "visualizations.newVisWizard.aggBasedGroupDescription": "クラシック Visualize ライブラリを使用して、アグリゲーションに基づいてグラフを作成します。",
     "visualizations.newVisWizard.aggBasedGroupTitle": "アグリゲーションに基づく",
-    "visualizations.newVisWizard.basicTitle": "基本",
     "visualizations.newVisWizard.chooseSourceTitle": "ソースの選択",
     "visualizations.newVisWizard.experimentalTitle": "実験的",
     "visualizations.newVisWizard.experimentalTooltip": "このビジュアライゼーションは今後のリリースで変更または削除される可能性があり、SLA のサポート対象になりません。",

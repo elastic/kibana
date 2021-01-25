@@ -4695,7 +4695,6 @@
     "visualizations.initializeWithoutIndexPatternErrorMessage": "正在尝试在不使用索引模式的情况下初始化聚合",
     "visualizations.newVisWizard.aggBasedGroupDescription": "使用我们的经典可视化库，基于聚合创建图表。",
     "visualizations.newVisWizard.aggBasedGroupTitle": "基于聚合",
-    "visualizations.newVisWizard.basicTitle": "基本级",
     "visualizations.newVisWizard.chooseSourceTitle": "选择源",
     "visualizations.newVisWizard.experimentalTitle": "实验性",
     "visualizations.newVisWizard.experimentalTooltip": "未来版本可能会更改或删除此可视化，其不受支持 SLA 的约束。",
