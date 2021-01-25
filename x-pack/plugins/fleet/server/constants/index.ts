@@ -47,4 +47,7 @@ export {
   // Defaults
   DEFAULT_AGENT_POLICY,
   DEFAULT_OUTPUT,
+  // Fleet Server index
+  ENROLLMENT_API_KEYS_INDEX,
+  AGENTS_INDEX,
 } from '../../common';

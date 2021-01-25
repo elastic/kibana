@@ -38,7 +38,7 @@ interface Props {
   isSecurityExampleEnabled: () => boolean;
   showAppliesSettingMessage: boolean;
   enableSaving: boolean;
-  query?: any;
+  query?: { text: string };
   toasts: ToastsStart;
 }
 
@@ -51,32 +51,40 @@ interface State {
 }
 
 export class TelemetryManagementSection extends Component<Props, State> {
-  state: State = {
-    processing: false,
-    showExample: false,
-    showSecurityExample: false,
-    queryMatches: null,
-    enabled: this.props.telemetryService.getIsOptedIn() || false,
-  };
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      processing: false,
+      showExample: false,
+      showSecurityExample: false,
+      queryMatches: props.query ? this.checkQueryMatch(props.query) : null,
+      enabled: this.props.telemetryService.getIsOptedIn() || false,
+    };
+  }
 
   UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const { query } = nextProps;
+    const queryMatches = this.checkQueryMatch(query);
 
-    const searchTerm = (query.text || '').toLowerCase();
-    const searchTermMatches =
-      this.props.telemetryService.getCanChangeOptInStatus() &&
-      SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0);
-
-    if (searchTermMatches !== this.state.queryMatches) {
+    if (queryMatches !== this.state.queryMatches) {
       this.setState(
         {
-          queryMatches: searchTermMatches,
+          queryMatches,
         },
         () => {
-          this.props.onQueryMatchChange(searchTermMatches);
+          this.props.onQueryMatchChange(queryMatches);
         }
       );
     }
+  }
+
+  checkQueryMatch(query?: { text: string }): boolean {
+    const searchTerm = (query?.text ?? '').toLowerCase();
+    return (
+      this.props.telemetryService.getCanChangeOptInStatus() &&
+      SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0)
+    );
   }
 
   render() {
