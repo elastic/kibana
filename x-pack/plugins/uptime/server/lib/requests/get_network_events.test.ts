@@ -158,6 +158,7 @@ describe('getNetworkEvents', () => {
     esClient.search.mockResolvedValueOnce({
       body: {
         hits: {
+          total: { value: 1 },
           hits: mockHits,
         },
       },
@@ -196,6 +197,7 @@ describe('getNetworkEvents', () => {
                 },
               },
               "size": 1000,
+              "track_total_hits": true,
             },
             "index": "heartbeat-8*",
           },
@@ -210,6 +212,7 @@ describe('getNetworkEvents', () => {
     esClient.search.mockResolvedValueOnce({
       body: {
         hits: {
+          total: { value: 1 },
           hits: mockHits,
         },
       },
@@ -222,30 +225,33 @@ describe('getNetworkEvents', () => {
     });
 
     expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "loadEndTime": 3287298.251,
-          "method": "GET",
-          "mimeType": "image/gif",
-          "requestSentTime": 3287154.973,
-          "requestStartTime": 3287155.502,
-          "status": 200,
-          "timestamp": "2020-12-14T10:46:39.183Z",
-          "timings": Object {
-            "blocked": 0.21400000014182297,
-            "connect": -1,
-            "dns": -1,
-            "proxy": -1,
-            "queueing": 0.5289999999149586,
-            "receive": 0.5340000002433953,
-            "send": 0.18799999998009298,
-            "ssl": -1,
-            "total": 143.27800000000934,
-            "wait": 141.81299999972907,
+      Object {
+        "events": Array [
+          Object {
+            "loadEndTime": 3287298.251,
+            "method": "GET",
+            "mimeType": "image/gif",
+            "requestSentTime": 3287154.973,
+            "requestStartTime": 3287155.502,
+            "status": 200,
+            "timestamp": "2020-12-14T10:46:39.183Z",
+            "timings": Object {
+              "blocked": 0.21400000014182297,
+              "connect": -1,
+              "dns": -1,
+              "proxy": -1,
+              "queueing": 0.5289999999149586,
+              "receive": 0.5340000002433953,
+              "send": 0.18799999998009298,
+              "ssl": -1,
+              "total": 143.27800000000934,
+              "wait": 141.81299999972907,
+            },
+            "url": "www.test.com",
           },
-          "url": "www.test.com",
-        },
-      ]
+        ],
+        "total": 1,
+      }
     `);
   });
 });
