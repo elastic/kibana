@@ -20,7 +20,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { mockMeta } from '../../../__mocks__/meta.mock';
+import { meta } from '../../../__mocks__/meta.mock';
 import { fullContentSources, contentItems } from '../../../__mocks__/content_sources.mock';
 
 import { DEFAULT_META } from '../../../../shared/constants';
@@ -38,7 +38,7 @@ describe('SourceContent', () => {
 
   const mockValues = {
     contentSource: fullContentSources[0],
-    contentMeta: mockMeta,
+    contentMeta: meta,
     contentItems,
     contentFilterValue: '',
     dataLoading: false,

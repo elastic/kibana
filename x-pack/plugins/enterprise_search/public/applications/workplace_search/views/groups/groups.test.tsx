@@ -7,7 +7,7 @@
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../__mocks__';
 import { groups } from '../../__mocks__/groups.mock';
-import { mockMeta } from '../../__mocks__/meta.mock';
+import { meta } from '../../__mocks__/meta.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -46,7 +46,7 @@ const mockValues = {
   newGroup: null,
   groupListLoading: false,
   hasFiltersSet: false,
-  groupsMeta: mockMeta,
+  groupsMeta: meta,
   filteredSources: [],
   filteredUsers: [],
   filterValue: '',
