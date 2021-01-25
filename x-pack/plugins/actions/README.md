@@ -69,21 +69,26 @@ Table of Contents
     - [`secrets`](#secrets-6)
     - [`params`](#params-6)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice)
-      - [`subActionParams (getFields)`](#subactionparams-getfields-1)
+      - [`subActionParams (getFields)`](#subactionparams-getfields)
   - [Jira](#jira)
     - [`config`](#config-7)
     - [`secrets`](#secrets-7)
     - [`params`](#params-7)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-1)
+      - [`subActionParams (getIncident)`](#subactionparams-getincident)
       - [`subActionParams (issueTypes)`](#subactionparams-issuetypes)
-      - [`subActionParams (getFields)`](#subactionparams-getfields-2)
-      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-2)
+      - [`subActionParams (fieldsByIssueType)`](#subactionparams-fieldsbyissuetype)
+      - [`subActionParams (issues)`](#subactionparams-issues)
+      - [`subActionParams (issue)`](#subactionparams-issue)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-1)
   - [IBM Resilient](#ibm-resilient)
     - [`config`](#config-8)
     - [`secrets`](#secrets-8)
     - [`params`](#params-8)
-      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-3)
-      - [`subActionParams (getFields)`](#subactionparams-getfields-3)
+      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-2)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-2)
+      - [`subActionParams (incidentTypes)`](#subactionparams-incidenttypes)
+      - [`subActionParams (severity)`](#subactionparams-severity)
 - [Command Line Utility](#command-line-utility)
 - [Developing New Action Types](#developing-new-action-types)
   - [licensing](#licensing)
@@ -526,17 +531,17 @@ The PagerDuty action uses the [V2 Events API](https://v2.developer.pagerduty.com
 
 ### `params`
 
-| Property    | Description                                                                                                                                                                                                                                                                                                             | Type                |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| eventAction | One of `trigger` _(default)_, `resolve`, or `acknowlege`. See [event action](https://v2.developer.pagerduty.com/docs/events-api-v2#event-action) for more details.                                                                                                                                                      | string _(optional)_ |
-| dedupKey    | All actions sharing this key will be associated with the same PagerDuty alert. Used to correlate trigger and resolution. The maximum length is **255** characters. See [alert deduplication](https://v2.developer.pagerduty.com/docs/events-api-v2#alert-de-duplication) for details.                                   | string _(optional)_ |
-| summary     | A text summary of the event, defaults to `No summary provided`. The maximum length is **1024** characters.                                                                                                                                                                                                              | string _(optional)_ |
-| source      | The affected system, preferably a hostname or fully qualified domain name. Defaults to `Kibana Action <action id>`.                                                                                                                                                                                                     | string _(optional)_ |
-| severity    | The perceived severity of on the affected system. This can be one of `critical`, `error`, `warning` or `info`_(default)_.                                                                                                                                                                                               | string _(optional)_ |
-| timestamp   | An [ISO-8601 format date-time](https://v2.developer.pagerduty.com/v2/docs/types#datetime), indicating the time the event was detected or generated.                                                                                                                                                                     | string _(optional)_ |
-| component   | The component of the source machine that is responsible for the event, for example `mysql` or `eth0`.                                                                                                                                                                                                                   | string _(optional)_ |
-| group       | Logical grouping of components of a service, for example `app-stack`.                                                                                                                                                                                                                                                   | string _(optional)_ |
-| class       | The class/type of the event, for example `ping failure` or `cpu load`.                                                                                                                                                                                                                                                  | string _(optional)_ |
+| Property    | Description                                                                                                                                                                                                                                                                           | Type                |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| eventAction | One of `trigger` _(default)_, `resolve`, or `acknowlege`. See [event action](https://v2.developer.pagerduty.com/docs/events-api-v2#event-action) for more details.                                                                                                                    | string _(optional)_ |
+| dedupKey    | All actions sharing this key will be associated with the same PagerDuty alert. Used to correlate trigger and resolution. The maximum length is **255** characters. See [alert deduplication](https://v2.developer.pagerduty.com/docs/events-api-v2#alert-de-duplication) for details. | string _(optional)_ |
+| summary     | A text summary of the event, defaults to `No summary provided`. The maximum length is **1024** characters.                                                                                                                                                                            | string _(optional)_ |
+| source      | The affected system, preferably a hostname or fully qualified domain name. Defaults to `Kibana Action <action id>`.                                                                                                                                                                   | string _(optional)_ |
+| severity    | The perceived severity of on the affected system. This can be one of `critical`, `error`, `warning` or `info`_(default)_.                                                                                                                                                             | string _(optional)_ |
+| timestamp   | An [ISO-8601 format date-time](https://v2.developer.pagerduty.com/v2/docs/types#datetime), indicating the time the event was detected or generated.                                                                                                                                   | string _(optional)_ |
+| component   | The component of the source machine that is responsible for the event, for example `mysql` or `eth0`.                                                                                                                                                                                 | string _(optional)_ |
+| group       | Logical grouping of components of a service, for example `app-stack`.                                                                                                                                                                                                                 | string _(optional)_ |
+| class       | The class/type of the event, for example `ping failure` or `cpu load`.                                                                                                                                                                                                                | string _(optional)_ |
 
 For more details see [PagerDuty v2 event parameters](https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2).
 
@@ -550,9 +555,9 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 
 ### `config`
 
-| Property              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Type                |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| apiUrl                | ServiceNow instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | string              |
+| Property | Description              | Type   |
+| -------- | ------------------------ | ------ |
+| apiUrl   | ServiceNow instance URL. | string |
 
 ### `secrets`
 
@@ -563,24 +568,28 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 
 ### `params`
 
-| Property        | Description                                                                          | Type   |
-| --------------- | ------------------------------------------------------------------------------------ | ------ |
-| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, and `getIncident` | string |
-| subActionParams | The parameters of the sub action                                                     | object |
+| Property        | Description                                                           | Type   |
+| --------------- | --------------------------------------------------------------------- | ------ |
+| subAction       | The sub action to perform. It can be `getFields`, and `pushToService` | string |
+| subActionParams | The parameters of the sub action                                      | object |
 
 #### `subActionParams (pushToService)`
 
-| Property      | Description                                                                                                               | Type                  |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| savedObjectId | The id of the saved object.                                                                                               | string                |
-| title         | The title of the incident.                                                                                                | string _(optional)_   |
-| description   | The description of the incident.                                                                                          | string _(optional)_   |
-| comment       | A comment.                                                                                                                | string _(optional)_   |
-| comments      | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`.             | object[] _(optional)_ |
-| externalId    | The id of the incident in ServiceNow. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
-| severity      | The name of the severity in ServiceNow.                                                                                   | string _(optional)_   |
-| urgency       | The name of the urgency in ServiceNow.                                                                                    | string _(optional)_   |
-| impact        | The name of the impact in ServiceNow.                                                                                     | string _(optional)_   |
+| Property | Description                                                                                                   | Type                  |
+| -------- | ------------------------------------------------------------------------------------------------------------- | --------------------- |
+| incident | The ServiceNow incident.                                                                                      | object                |
+| comments | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`. | object[] _(optional)_ |
+
+The following table describes the properties of the `incident` object.
+
+| Property          | Description                                                                                                               | Type                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| short_description | The title of the incident.                                                                                                | string              |
+| description       | The description of the incident.                                                                                          | string _(optional)_ |
+| externalId        | The id of the incident in ServiceNow. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_ |
+| severity          | The name of the severity in ServiceNow.                                                                                   | string _(optional)_ |
+| urgency           | The name of the urgency in ServiceNow.                                                                                    | string _(optional)_ |
+| impact            | The name of the impact in ServiceNow.                                                                                     | string _(optional)_ |
 
 #### `subActionParams (getFields)`
 
@@ -596,9 +605,9 @@ The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/pla
 
 ### `config`
 
-| Property              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Type                |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| apiUrl                | Jira instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | string              |
+| Property | Description        | Type   |
+| -------- | ------------------ | ------ |
+| apiUrl   | Jira instance URL. | string |
 
 ### `secrets`
 
@@ -609,38 +618,61 @@ The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/pla
 
 ### `params`
 
-| Property        | Description                                                                                                             | Type   |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------- | ------ |
-| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, `getIncident`, `issueTypes`, and `fieldsByIssueType` | string |
-| subActionParams | The parameters of the sub action                                                                                        | object |
+| Property        | Description                                                                                                                                | Type   |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| subAction       | The sub action to perform. It can be `pushToService`, `getIncident`, `issueTypes`, `fieldsByIssueType`, `issues`, `issue`, and `getFields` | string |
+| subActionParams | The parameters of the sub action                                                                                                           | object |
 
 #### `subActionParams (pushToService)`
 
-| Property      | Description                                                                                                      | Type                  |
-| ------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------- |
-| savedObjectId | The id of the saved object                                                                                       | string                |
-| title         | The title of the issue                                                                                           | string _(optional)_   |
-| description   | The description of the issue                                                                                     | string _(optional)_   |
-| externalId    | The id of the issue in Jira. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
-| issueType     | The id of the issue type in Jira.                                                                                | string _(optional)_   |
-| priority      | The name of the priority in Jira. Example: `Medium`.                                                             | string _(optional)_   |
-| labels        | An array of labels.                                                                                              | string[] _(optional)_ |
-| parent        | The parent issue id or key. Only for `Sub-task` issue types.                                                     | string _(optional)_   |
-| comments      | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`     | object[] _(optional)_ |
+| Property | Description                                                                                                   | Type                  |
+| -------- | ------------------------------------------------------------------------------------------------------------- | --------------------- |
+| incident | The Jira incident.                                                                                            | object                |
+| comments | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`. | object[] _(optional)_ |
+
+The following table describes the properties of the `incident` object.
+
+| Property    | Description                                                                                                      | Type                  |
+| ----------- | ---------------------------------------------------------------------------------------------------------------- | --------------------- |
+| summary     | The title of the issue                                                                                           | string                |
+| description | The description of the issue                                                                                     | string _(optional)_   |
+| externalId  | The id of the issue in Jira. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
+| issueType   | The id of the issue type in Jira.                                                                                | string _(optional)_   |
+| priority    | The name of the priority in Jira. Example: `Medium`.                                                             | string _(optional)_   |
+| labels      | An array of labels.                                                                                              | string[] _(optional)_ |
+| parent      | The parent issue id or key. Only for `Sub-task` issue types.                                                     | string _(optional)_   |
+
+#### `subActionParams (getIncident)`
+
+| Property   | Description                 | Type   |
+| ---------- | --------------------------- | ------ |
+| externalId | The id of the issue in Jira | string |
 
 #### `subActionParams (issueTypes)`
 
 No parameters for `issueTypes` sub-action. Provide an empty object `{}`.
 
-#### `subActionParams (getFields)`
-
-No parameters for `getFields` sub-action. Provide an empty object `{}`.
-
-#### `subActionParams (pushToService)`
+#### `subActionParams (fieldsByIssueType)`
 
 | Property | Description                      | Type   |
 | -------- | -------------------------------- | ------ |
 | id       | The id of the issue type in Jira | string |
+
+#### `subActionParams (issues)`
+
+| Property | Description             | Type   |
+| -------- | ----------------------- | ------ |
+| title    | The title to search for | string |
+
+#### `subActionParams (issue)`
+
+| Property | Description                 | Type   |
+| -------- | --------------------------- | ------ |
+| id       | The id of the issue in Jira | string |
+
+#### `subActionParams (getFields)`
+
+No parameters for `getFields` sub-action. Provide an empty object `{}`.
 
 ## IBM Resilient
 
@@ -648,9 +680,9 @@ ID: `.resilient`
 
 ### `config`
 
-| Property              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Type   |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| apiUrl                | IBM Resilient instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | string |
+| Property | Description                 | Type   |
+| -------- | --------------------------- | ------ |
+| apiUrl   | IBM Resilient instance URL. | string |
 
 ### `secrets`
 
@@ -661,19 +693,24 @@ ID: `.resilient`
 
 ### `params`
 
-| Property        | Description                                                                          | Type   |
-| --------------- | ------------------------------------------------------------------------------------ | ------ |
-| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, and `getIncident` | string |
-| subActionParams | The parameters of the sub action                                                     | object |
+| Property        | Description                                                                                        | Type   |
+| --------------- | -------------------------------------------------------------------------------------------------- | ------ |
+| subAction       | The sub action to perform. It can be `pushToService`, `getFields`, `incidentTypes`, and `severity` | string |
+| subActionParams | The parameters of the sub action                                                                   | object |
 
 #### `subActionParams (pushToService)`
 
+| Property | Description                                                                                                   | Type                  |
+| -------- | ------------------------------------------------------------------------------------------------------------- | --------------------- |
+| incident | The IBM Resilient incident.                                                                                   | object                |
+| comments | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`. | object[] _(optional)_ |
+
+The following table describes the properties of the `incident` object.
+
 | Property      | Description                                                                                                                  | Type                  |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| savedObjectId | The id of the saved object                                                                                                   | string                |
-| title         | The title of the incident                                                                                                    | string _(optional)_   |
+| name          | The title of the incident                                                                                                    | string _(optional)_   |
 | description   | The description of the incident                                                                                              | string _(optional)_   |
-| comments      | The comments of the incident. A comment is of the form `{ commentId: string, version: string, comment: string }`             | object[] _(optional)_ |
 | externalId    | The id of the incident in IBM Resilient. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
 | incidentTypes | An array with the ids of IBM Resilient incident types.                                                                       | number[] _(optional)_ |
 | severityCode  | IBM Resilient id of the severity code.                                                                                       | number _(optional)_   |
@@ -681,6 +718,14 @@ ID: `.resilient`
 #### `subActionParams (getFields)`
 
 No parameters for `getFields` sub-action. Provide an empty object `{}`.
+
+#### `subActionParams (incidentTypes)`
+
+No parameters for `incidentTypes` sub-action. Provide an empty object `{}`.
+
+#### `subActionParams (severity)`
+
+No parameters for `severity` sub-action. Provide an empty object `{}`.
 
 # Command Line Utility
 
