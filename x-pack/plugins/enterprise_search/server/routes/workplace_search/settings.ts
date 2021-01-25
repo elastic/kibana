@@ -17,11 +17,9 @@ export function registerOrgSettingsRoute({
       path: '/api/workplace_search/org/settings',
       validate: false,
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: '/ws/org/settings',
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/settings',
+    })
   );
 }
 
@@ -38,12 +36,9 @@ export function registerOrgSettingsCustomizeRoute({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: '/ws/org/settings/customize',
-        body: request.body,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/settings/customize',
+    })
   );
 }
 
@@ -64,12 +59,9 @@ export function registerOrgSettingsOauthApplicationRoute({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: '/ws/org/settings/oauth_application',
-        body: request.body,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/settings/oauth_application',
+    })
   );
 }
 

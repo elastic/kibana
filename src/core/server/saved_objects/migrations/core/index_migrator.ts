@@ -60,13 +60,14 @@ export class IndexMigrator {
  * Determines what action the migration system needs to take (none, patch, migrate).
  */
 async function requiresMigration(context: Context): Promise<boolean> {
-  const { client, alias, documentMigrator, dest, log } = context;
+  const { client, alias, documentMigrator, dest, kibanaVersion, log } = context;
 
   // Have all of our known migrations been run against the index?
   const hasMigrations = await Index.migrationsUpToDate(
     client,
     alias,
-    documentMigrator.migrationVersion
+    documentMigrator.migrationVersion,
+    kibanaVersion
   );
 
   if (!hasMigrations) {
@@ -184,7 +185,7 @@ async function migrateSourceToDest(context: Context) {
     await Index.write(
       client,
       dest.indexName,
-      await migrateRawDocs(serializer, documentMigrator.migrate, docs, log)
+      await migrateRawDocs(serializer, documentMigrator.migrateAndConvert, docs, log)
     );
   }
 }
