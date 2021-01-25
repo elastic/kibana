@@ -13,6 +13,9 @@ import { IndexPatternField, IndexPattern } from '../shared_imports';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 
+export interface FieldEditorContext {
+  indexPattern: IndexPattern;
+}
 export interface Props {
   /**
    * Handler for the "save" footer button
@@ -29,9 +32,7 @@ export interface Props {
   /**
    * The context object specific to where the editor is currently being consumed
    */
-  ctx: {
-    indexPattern: IndexPattern;
-  };
+  ctx: FieldEditorContext;
   /**
    * Optional field to edit
    */

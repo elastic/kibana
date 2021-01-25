@@ -20,9 +20,12 @@
 
 import { IndexPatternFieldEditorPlugin } from './plugin';
 
-export { OpenFieldEditorOptions } from './open_editor';
 export { PluginStart as IndexPatternFieldEditorStart } from './types';
 
 export function plugin() {
   return new IndexPatternFieldEditorPlugin();
 }
+
+// Expose types
+export { OpenFieldEditorOptions } from './open_editor';
+export { FieldEditorContext } from './components/field_editor_flyout_content_container';
