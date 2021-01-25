@@ -200,7 +200,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     () => items.map(({ group_id: groupId }) => groupId),
     [items]
   );
-  const { data: groupIdsErrorMetrics } = useFetcher(
+  const {
+    data: groupIdsErrorMetrics,
+    status: groupIdsErrorMetricsStatus,
+  } = useFetcher(
     () => {
       if (groupIds.length && start && end && transactionType) {
         return callApmApi({
@@ -268,7 +271,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 pageSizeOptions: [PAGE_SIZE],
                 hidePerPageOptions: true,
               }}
-              loading={status === FETCH_STATUS.LOADING}
+              loading={
+                status === FETCH_STATUS.LOADING ||
+                groupIdsErrorMetricsStatus === FETCH_STATUS.LOADING
+              }
               onChange={(newTableOptions: {
                 page?: {
                   index: number;
