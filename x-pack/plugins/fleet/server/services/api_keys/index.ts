@@ -10,7 +10,7 @@ import { EnrollmentAPIKeySOAttributes, EnrollmentAPIKey } from '../../types';
 import { createAPIKey } from './security';
 import { escapeSearchQueryPhrase } from '../saved_object';
 
-export { invalidateAPIKey } from './security';
+export { invalidateAPIKeys } from './security';
 export * from './enrollment_api_key';
 
 export async function generateOutputApiKey(
@@ -24,7 +24,16 @@ export async function generateOutputApiKey(
       cluster: ['monitor'],
       index: [
         {
-          names: ['logs-*', 'metrics-*', 'traces-*', '.ds-logs-*', '.ds-metrics-*', '.ds-traces-*'],
+          names: [
+            'logs-*',
+            'metrics-*',
+            'traces-*',
+            '.ds-logs-*',
+            '.ds-metrics-*',
+            '.ds-traces-*',
+            '.logs-endpoint.diagnostic.collection-*',
+            '.ds-.logs-endpoint.diagnostic.collection-*',
+          ],
           privileges: ['write', 'create_index', 'indices:admin/auto_create'],
         },
       ],

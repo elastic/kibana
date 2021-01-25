@@ -1,34 +1,30 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 function ndjsonToObject(input: string) {
   return input.split('\n').map((str) => JSON.parse(str));
 }
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('export', () => {
+    let KIBANA_VERSION: string;
+
+    before(async () => {
+      KIBANA_VERSION = await getKibanaVersion(getService);
+    });
+
     describe('with kibana index', () => {
       describe('basic amount of saved objects', () => {
         before(() => esArchiver.load('saved_objects/basic'));
@@ -167,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'Bad Request',
+                message: 'Error fetching objects to export',
                 attributes: {
                   objects: [
                     {
@@ -323,6 +319,7 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                   id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                   migrationVersion: objects[0].migrationVersion,
+                  coreMigrationVersion: KIBANA_VERSION,
                   references: [
                     {
                       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -382,6 +379,7 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                   id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                   migrationVersion: objects[0].migrationVersion,
+                  coreMigrationVersion: KIBANA_VERSION,
                   references: [
                     {
                       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -446,6 +444,7 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                   id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                   migrationVersion: objects[0].migrationVersion,
+                  coreMigrationVersion: KIBANA_VERSION,
                   references: [
                     {
                       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -535,10 +534,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
-            ignore: [404],
-          })
+          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
       );
 
       it('should return empty response', async () => {

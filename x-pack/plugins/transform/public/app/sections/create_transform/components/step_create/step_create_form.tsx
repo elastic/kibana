@@ -25,10 +25,7 @@ import {
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-import type {
-  PutTransformsRequestSchema,
-  PutTransformsResponseSchema,
-} from '../../../../../../common/api_schemas/transforms';
+import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
 import {
   isGetTransformsStatsResponseSchema,
   isPutTransformsResponseSchema,
@@ -44,6 +41,10 @@ import { useAppDependencies, useToastNotifications } from '../../../../app_depen
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
 import { DuplicateIndexPatternError } from '../../../../../../../../../src/plugins/data/public';
+import {
+  PutTransformsLatestRequestSchema,
+  PutTransformsPivotRequestSchema,
+} from '../../../../../../common/api_schemas/transforms';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -62,7 +63,7 @@ export function getDefaultStepCreateState(): StepDetailsExposedState {
 export interface StepCreateFormProps {
   createIndexPattern: boolean;
   transformId: string;
-  transformConfig: PutTransformsRequestSchema;
+  transformConfig: PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema;
   overrides: StepDetailsExposedState;
   timeFieldName?: string | undefined;
   onChange(s: StepDetailsExposedState): void;

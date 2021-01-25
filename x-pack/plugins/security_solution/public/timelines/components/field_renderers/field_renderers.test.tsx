@@ -28,6 +28,15 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { AutonomousSystem, FlowTarget } from '../../../../common/search_strategy';
 import { HostEcs } from '../../../../common/ecs/host';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 describe('Field Renderers', () => {
   const mount = useMountAppended();
 

@@ -30,7 +30,7 @@ interface FormatUrlOptions {
   skipSearch: boolean;
 }
 
-type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => string;
+export type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => string;
 
 export const useFormatUrl = (page: SecurityPageName) => {
   const { getUrlForApp } = useKibana().services.application;

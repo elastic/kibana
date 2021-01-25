@@ -9,9 +9,13 @@ import { SearchItems } from '../../../../../hooks/use_search_items';
 
 import { defaultSearch, QUERY_LANGUAGE_KUERY } from './constants';
 import { StepDefineExposedState } from './types';
+import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
+import { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
 
 export function getDefaultStepDefineState(searchItems: SearchItems): StepDefineExposedState {
   return {
+    transformFunction: TRANSFORM_FUNCTION.PIVOT,
+    latestConfig: {} as LatestFunctionConfigUI,
     aggList: {} as PivotAggsConfigDict,
     groupByList: {} as PivotGroupByConfigDict,
     isAdvancedPivotEditorEnabled: false,
@@ -21,5 +25,9 @@ export function getDefaultStepDefineState(searchItems: SearchItems): StepDefineE
     searchQuery: searchItems.savedSearch !== undefined ? searchItems.combinedQuery : defaultSearch,
     sourceConfigUpdated: false,
     valid: false,
+    validationStatus: {
+      isValid: false,
+    },
+    previewRequest: undefined,
   };
 }

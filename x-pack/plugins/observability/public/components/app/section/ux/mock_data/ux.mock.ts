@@ -9,7 +9,7 @@ import { UxFetchDataResponse } from '../../../../../typings';
 export const response: UxFetchDataResponse = {
   appLink: '/app/ux',
   coreWebVitals: {
-    cls: '0.01',
+    cls: 0.01,
     fid: 13.5,
     lcp: 1942.6666666666667,
     tbt: 281.55833333333334,

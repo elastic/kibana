@@ -22,7 +22,7 @@ import {
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  waitForRuleSuccess,
+  waitForRuleSuccessOrStatus,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send([simpleRule])
           .expect(200);
 
-        await waitForRuleSuccess(supertest, body[0].id);
+        await waitForRuleSuccessOrStatus(supertest, body[0].id);
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)

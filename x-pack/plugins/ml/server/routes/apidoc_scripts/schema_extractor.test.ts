@@ -110,6 +110,11 @@ describe('schema_extractor', () => {
         type: 'any',
       },
       {
+        name: 'runtime_mappings',
+        documentation: '',
+        type: 'any',
+      },
+      {
         name: 'scroll_size',
         documentation: '',
         type: 'number',

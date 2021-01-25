@@ -128,16 +128,14 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
     }).toAst();
   },
 
-  paramEditor: ({ state, setState, currentColumn, layerId, data }) => {
-    const indexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
+  paramEditor: ({ layer, columnId, currentColumn, indexPattern, updateLayer, data }) => {
     const filters = currentColumn.params.filters;
 
     const setFilters = (newFilters: Filter[]) =>
-      setState(
+      updateLayer(
         updateColumnParam({
-          state,
-          layerId,
-          currentColumn,
+          layer,
+          columnId,
           paramName: 'filters',
           value: newFilters,
         })

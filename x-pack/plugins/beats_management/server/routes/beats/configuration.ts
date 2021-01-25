@@ -5,12 +5,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { BeatsManagementRouter } from '../../lib/types';
 import { ConfigurationBlock } from '../../../common/domain_types';
 import { ReturnTypeList } from '../../../common/return_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-export const registerGetBeatConfigurationRoute = (router: IRouter) => {
+export const registerGetBeatConfigurationRoute = (router: BeatsManagementRouter) => {
   router.get(
     {
       path: '/api/beats/agent/{beatId}/configuration',

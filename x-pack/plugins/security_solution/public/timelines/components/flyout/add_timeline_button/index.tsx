@@ -17,6 +17,8 @@ interface AddTimelineButtonComponentProps {
   timelineId: string;
 }
 
+export const ADD_TIMELINE_BUTTON_CLASS_NAME = 'add-timeline-button';
+
 const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({ timelineId }) => {
   const [showActions, setShowActions] = useState(false);
   const [showTimelineModal, setShowTimelineModal] = useState(false);
@@ -32,6 +34,7 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
   const PopoverButtonIcon = useMemo(
     () => (
       <EuiButtonIcon
+        className={ADD_TIMELINE_BUTTON_CLASS_NAME}
         data-test-subj="settings-plus-in-circle"
         iconType="plusInCircle"
         color="primary"
@@ -52,6 +55,7 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
           id="timelineSettingsPopover"
           isOpen={showActions}
           closePopover={onClosePopover}
+          ownFocus
           repositionOnScroll
         >
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">

@@ -5,9 +5,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { TagsPluginRouter } from '../../types';
 
-export const registerInternalBulkDeleteRoute = (router: IRouter) => {
+export const registerInternalBulkDeleteRoute = (router: TagsPluginRouter) => {
   router.post(
     {
       path: '/internal/saved_objects_tagging/tags/_bulk_delete',

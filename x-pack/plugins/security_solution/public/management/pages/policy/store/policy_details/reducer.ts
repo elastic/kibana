@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { fullPolicy, isOnPolicyDetailsPage } from './selectors';
+import { fullPolicy, isOnPolicyDetailsPage, license } from './selectors';
 import {
   Immutable,
   PolicyConfig,
@@ -93,6 +93,13 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     };
   }
 
+  if (action.type === 'licenseChanged') {
+    return {
+      ...state,
+      license: action.payload,
+    };
+  }
+
   if (action.type === 'userChangedUrl') {
     const newState: Immutable<PolicyDetailsState> = {
       ...state,
@@ -100,6 +107,7 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     };
     const isCurrentlyOnDetailsPage = isOnPolicyDetailsPage(newState);
     const wasPreviouslyOnDetailsPage = isOnPolicyDetailsPage(state);
+    const currentLicense = license(newState);
 
     if (isCurrentlyOnDetailsPage) {
       // Did user just enter the Detail page? if so, then
@@ -118,6 +126,7 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     return {
       ...initialPolicyDetailsState(),
       location: action.payload,
+      license: currentLicense,
     };
   }
 

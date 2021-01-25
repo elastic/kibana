@@ -17,6 +17,15 @@ import {
   SURICATA_SIGNATURE_ID_FIELD_NAME,
 } from './suricata_signature';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 describe('SuricataSignature', () => {
   const mount = useMountAppended();
 

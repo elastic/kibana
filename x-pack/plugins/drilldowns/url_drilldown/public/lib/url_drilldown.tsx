@@ -12,13 +12,13 @@ import {
   ChartActionContext,
   CONTEXT_MENU_TRIGGER,
   IEmbeddable,
-} from '../../../../../../src/plugins/embeddable/public';
-import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
-import {
-  ROW_CLICK_TRIGGER,
+  EmbeddableInput,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/ui_actions/public';
+} from '../../../../../../src/plugins/embeddable/public';
+import { ROW_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
+import { Query, Filter, TimeRange } from '../../../../../../src/plugins/data/public';
+import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
 import {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UrlDrilldownGlobalScope,
@@ -31,6 +31,15 @@ import {
 import { getPanelVariables, getEventScope, getEventVariableList } from './url_drilldown_scope';
 import { txtUrlDrilldownDisplayName } from './i18n';
 
+interface EmbeddableQueryInput extends EmbeddableInput {
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+}
+
+/** @internal */
+export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
+
 interface UrlDrilldownDeps {
   externalUrl: IExternalUrl;
   getGlobalScope: () => UrlDrilldownGlobalScope;
@@ -39,7 +48,7 @@ interface UrlDrilldownDeps {
   getVariablesHelpDocsLink: () => string;
 }
 
-export type ActionContext = ChartActionContext;
+export type ActionContext = ChartActionContext<EmbeddableWithQueryInput>;
 export type Config = UrlDrilldownConfig;
 export type UrlTrigger =
   | typeof VALUE_CLICK_TRIGGER
@@ -47,14 +56,14 @@ export type UrlTrigger =
   | typeof ROW_CLICK_TRIGGER
   | typeof CONTEXT_MENU_TRIGGER;
 
-export interface ActionFactoryContext extends BaseActionFactoryContext<UrlTrigger> {
-  embeddable?: IEmbeddable;
+export interface ActionFactoryContext extends BaseActionFactoryContext {
+  embeddable?: EmbeddableWithQueryInput;
 }
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;
 
 const URL_DRILLDOWN = 'URL_DRILLDOWN';
 
-export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactoryContext> {
+export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFactoryContext> {
   public readonly id = URL_DRILLDOWN;
 
   constructor(private readonly deps: UrlDrilldownDeps) {}
@@ -95,7 +104,8 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
 
   public readonly createConfig = () => ({
     url: { template: '' },
-    openInNewTab: false,
+    openInNewTab: true,
+    encodeUrl: true,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
@@ -124,7 +134,12 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   };
 
   private buildUrl(config: Config, context: ActionContext): string {
-    const url = urlDrilldownCompileUrl(config.url.template, this.getRuntimeVariables(context));
+    const doEncode = config.encodeUrl ?? true;
+    const url = urlDrilldownCompileUrl(
+      config.url.template,
+      this.getRuntimeVariables(context),
+      doEncode
+    );
     return url;
   }
 

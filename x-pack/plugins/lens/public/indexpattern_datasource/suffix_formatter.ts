@@ -49,6 +49,11 @@ export function getSuffixFormatter(formatFactory: FormatFactory) {
         val
       );
 
+      // do not add suffixes to empty strings
+      if (formattedValue === '') {
+        return '';
+      }
+
       if (suffix) {
         return `${formattedValue}${suffix}`;
       }

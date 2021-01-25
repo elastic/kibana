@@ -132,7 +132,9 @@ export async function getWebCoreVitals({
 
   return {
     coreVitalPages: coreVitalPages?.doc_count ?? 0,
-    cls: cls?.values[pkey]?.toFixed(3) || null,
+    /* Because cls is required in the type UXMetrics, and defined as number | null,
+     * we need to default to null in the case where cls is undefined in order to satisfy the UXMetrics type */
+    cls: cls?.values[pkey] ?? null,
     fid: fid?.values[pkey],
     lcp: lcp?.values[pkey],
     tbt: tbt?.values[pkey] ?? 0,

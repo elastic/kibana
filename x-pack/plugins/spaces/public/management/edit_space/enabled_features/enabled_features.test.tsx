@@ -42,7 +42,6 @@ describe('EnabledFeatures', () => {
             name: 'my space',
             disabledFeatures: ['feature-1', 'feature-2'],
           }}
-          securityEnabled={true}
           onChange={jest.fn()}
           getUrlForApp={getUrlForApp}
         />
@@ -61,7 +60,6 @@ describe('EnabledFeatures', () => {
           name: 'my space',
           disabledFeatures: ['feature-1', 'feature-2'],
         }}
-        securityEnabled={true}
         onChange={changeHandler}
         getUrlForApp={getUrlForApp}
       />
@@ -96,7 +94,6 @@ describe('EnabledFeatures', () => {
           name: 'my space',
           disabledFeatures: [],
         }}
-        securityEnabled={true}
         onChange={changeHandler}
         getUrlForApp={getUrlForApp}
       />
@@ -134,7 +131,6 @@ describe('EnabledFeatures', () => {
           name: 'my space',
           disabledFeatures: [],
         }}
-        securityEnabled={true}
         onChange={changeHandler}
         getUrlForApp={getUrlForApp}
       />
@@ -165,7 +161,6 @@ describe('EnabledFeatures', () => {
           name: 'my space',
           disabledFeatures: ['feature-1', 'feature-2'],
         }}
-        securityEnabled={true}
         onChange={changeHandler}
         getUrlForApp={getUrlForApp}
       />
@@ -194,7 +189,6 @@ describe('EnabledFeatures', () => {
           name: 'my space',
           disabledFeatures: ['feature-1'],
         }}
-        securityEnabled={true}
         onChange={jest.fn()}
         getUrlForApp={getUrlForApp}
       />
@@ -214,7 +208,6 @@ describe('EnabledFeatures', () => {
             name: 'my space',
             disabledFeatures: [],
           }}
-          securityEnabled={true}
           onChange={changeHandler}
           getUrlForApp={getUrlForApp}
         />
@@ -243,7 +236,6 @@ describe('EnabledFeatures', () => {
             name: 'my space',
             disabledFeatures: [],
           }}
-          securityEnabled={true}
           onChange={changeHandler}
           getUrlForApp={getUrlForApp}
         />

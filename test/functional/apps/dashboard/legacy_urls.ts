@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -92,6 +81,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickMarkdownWidget();
         await PageObjects.visEditor.setMarkdownTxt(`[abc](#/dashboard/${testDashboardId})`);
         await PageObjects.visEditor.clickGo();
+
+        await PageObjects.visualize.saveVisualizationExpectSuccess('legacy url markdown');
+
         (await find.byLinkText('abc')).click();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -108,6 +100,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.goBack();
         await PageObjects.visEditor.expectMarkdownTextArea();
         await browser.goForward();
+      });
+
+      it('resolves markdown link from dashboard', async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.clickNewDashboard();
+        await dashboardAddPanel.addVisualization('legacy url markdown');
+        (await find.byLinkText('abc')).click();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setDefaultDataRange();
+
+        await PageObjects.dashboard.waitForRenderComplete();
+        await pieChart.expectPieSliceCount(5);
       });
     });
   });

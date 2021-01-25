@@ -19,6 +19,7 @@ import {
 
 interface Props {
   filterManager: FilterManager;
+  show: boolean;
   showCallOutUnauthorizedMsg: boolean;
   status: TimelineStatusLiteralWithNull;
   timelineId: string;
@@ -26,6 +27,7 @@ interface Props {
 
 const TimelineHeaderComponent: React.FC<Props> = ({
   filterManager,
+  show,
   showCallOutUnauthorizedMsg,
   status,
   timelineId,
@@ -49,7 +51,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         size="s"
       />
     )}
-    <DataProviders timelineId={timelineId} />
+    {show && <DataProviders timelineId={timelineId} />}
 
     <StatefulSearchOrFilter filterManager={filterManager} timelineId={timelineId} />
   </>

@@ -86,6 +86,8 @@
 |  [PANEL\_NOTIFICATION\_TRIGGER](./kibana-plugin-plugins-embeddable-public.panel_notification_trigger.md) |  |
 |  [panelBadgeTrigger](./kibana-plugin-plugins-embeddable-public.panelbadgetrigger.md) |  |
 |  [panelNotificationTrigger](./kibana-plugin-plugins-embeddable-public.panelnotificationtrigger.md) |  |
+|  [SELECT\_RANGE\_TRIGGER](./kibana-plugin-plugins-embeddable-public.select_range_trigger.md) |  |
+|  [VALUE\_CLICK\_TRIGGER](./kibana-plugin-plugins-embeddable-public.value_click_trigger.md) |  |
 |  [withEmbeddableSubscription](./kibana-plugin-plugins-embeddable-public.withembeddablesubscription.md) |  |
 
 ## Type Aliases

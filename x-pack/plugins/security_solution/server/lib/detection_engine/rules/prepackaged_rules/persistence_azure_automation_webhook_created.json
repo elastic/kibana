@@ -5,13 +5,14 @@
   "description": "Identifies when an Azure Automation webhook is created. Azure Automation runbooks can be configured to execute via a webhook. A webhook uses a custom URL passed to Azure Automation along with a data payload specific to the runbook. An adversary may create a webhook in order to trigger a runbook that contains malicious code.",
   "from": "now-25m",
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-azure*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Azure Automation Webhook Created",
   "note": "The Azure Filebeat module must be enabled to use this rule.",
-  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:(MICROSOFT.AUTOMATION/AUTOMATIONACCOUNTS/WEBHOOKS/ACTION or MICROSOFT.AUTOMATION/AUTOMATIONACCOUNTS/WEBHOOKS/WRITE) and event.outcome:Success",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:(MICROSOFT.AUTOMATION/AUTOMATIONACCOUNTS/WEBHOOKS/ACTION or MICROSOFT.AUTOMATION/AUTOMATIONACCOUNTS/WEBHOOKS/WRITE) and event.outcome:(Success or success)",
   "references": [
     "https://powerzure.readthedocs.io/en/latest/Functions/operational.html#create-backdoor",
     "https://github.com/hausec/PowerZure",
@@ -31,5 +32,5 @@
   ],
   "to": "now-25m",
   "type": "query",
-  "version": 1
+  "version": 2
 }

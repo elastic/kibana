@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
-
-import { mockHttpValues } from '../../../__mocks__';
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: mockHttpValues },
-}));
-const { http } = mockHttpValues;
-
-jest.mock('../../../shared/flash_messages', () => ({
-  flashAPIErrors: jest.fn(),
-}));
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+  expectedAsyncError,
+} from '../../../__mocks__';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'some-engine' } },
@@ -24,11 +18,14 @@ jest.mock('../engine', () => ({
 import { EngineOverviewLogic } from './';
 
 describe('EngineOverviewLogic', () => {
+  const { mount, unmount } = new LogicMounter(EngineOverviewLogic);
+  const { http } = mockHttpValues;
+  const { flashAPIErrors } = mockFlashMessageHelpers;
+
   const mockEngineMetrics = {
     apiLogsUnavailable: true,
     documentCount: 10,
     startDate: '1970-01-30',
-    endDate: '1970-01-31',
     operationsPerDay: [0, 0, 0, 0, 0, 0, 0],
     queriesPerDay: [0, 0, 0, 0, 0, 25, 50],
     totalClicks: 50,
@@ -40,17 +37,11 @@ describe('EngineOverviewLogic', () => {
     apiLogsUnavailable: false,
     documentCount: 0,
     startDate: '',
-    endDate: '',
     operationsPerDay: [],
     queriesPerDay: [],
     totalClicks: 0,
     totalQueries: 0,
     timeoutId: null,
-  };
-
-  const mount = () => {
-    resetContext({});
-    EngineOverviewLogic.mount();
   };
 
   beforeEach(() => {
@@ -111,12 +102,9 @@ describe('EngineOverviewLogic', () => {
         const promise = Promise.reject('An error occurred');
         http.get.mockReturnValue(promise);
 
-        try {
-          EngineOverviewLogic.actions.pollForOverviewMetrics();
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        EngineOverviewLogic.actions.pollForOverviewMetrics();
+        await expectedAsyncError(promise);
+
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occurred');
       });
     });
@@ -141,12 +129,9 @@ describe('EngineOverviewLogic', () => {
   });
 
   describe('unmount', () => {
-    let unmount: Function;
-
     beforeEach(() => {
       jest.useFakeTimers();
-      resetContext({});
-      unmount = EngineOverviewLogic.mount();
+      mount();
     });
 
     it('clears existing polling timeouts on unmount', () => {

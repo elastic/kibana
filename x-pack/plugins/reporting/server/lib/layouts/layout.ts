@@ -33,6 +33,8 @@ export abstract class Layout {
     pageSizeParams: PageSizeParams
   ): CustomPageSize | PredefinedPageSize;
 
+  // Return the dimensions unscaled dimensions (before multiplying the zoom factor)
+  // driver.setViewport() Adds a top and left margin to the viewport, and then multiplies by the scaling factor
   public abstract getViewport(itemsCount: number): ViewZoomWidthHeight | null;
 
   public abstract getBrowserZoom(): number;

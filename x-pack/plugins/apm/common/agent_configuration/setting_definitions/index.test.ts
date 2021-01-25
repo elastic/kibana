@@ -87,14 +87,12 @@ describe('filterByAgent', () => {
 
     it('js-base', () => {
       expect(getSettingKeysForAgent('js-base')).toEqual([
-        'recording',
         'transaction_sample_rate',
       ]);
     });
 
     it('rum-js', () => {
       expect(getSettingKeysForAgent('rum-js')).toEqual([
-        'recording',
         'transaction_sample_rate',
       ]);
     });
@@ -149,6 +147,7 @@ describe('filterByAgent', () => {
         'capture_headers',
         'log_level',
         'recording',
+        'sanitize_field_names',
         'span_frames_min_duration',
         'transaction_ignore_urls',
         'transaction_max_spans',

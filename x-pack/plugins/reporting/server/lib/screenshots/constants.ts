@@ -7,6 +7,7 @@
 export const DEFAULT_PAGELOAD_SELECTOR = '.application';
 
 export const CONTEXT_GETNUMBEROFITEMS = 'GetNumberOfItems';
+export const CONTEXT_GETBROWSERDIMENSIONS = 'GetBrowserDimensions';
 export const CONTEXT_INJECTCSS = 'InjectCss';
 export const CONTEXT_WAITFORRENDER = 'WaitForRender';
 export const CONTEXT_GETTIMERANGE = 'GetTimeRange';

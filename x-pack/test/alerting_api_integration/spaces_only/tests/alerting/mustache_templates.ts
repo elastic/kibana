@@ -79,7 +79,8 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       const createdAction = actionResponse.body;
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
-      // from x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts
+      // from x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts,
+      // const EscapableStrings
       const varsTemplate = '{{context.escapableDoubleQuote}} -- {{context.escapableLineFeed}}';
 
       const alertResponse = await supertest
@@ -128,7 +129,8 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       const createdAction = actionResponse.body;
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
-      // from x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts
+      // from x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts,
+      // const EscapableStrings
       const varsTemplate =
         '{{context.escapableBacktic}} -- {{context.escapableBold}} -- {{context.escapableBackticBold}} -- {{context.escapableHtml}}';
 
@@ -161,6 +163,58 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         waitForActionBody(slackSimulatorURL, createdAlert.id)
       );
       expect(body).to.be("back'tic -- `*bold*` -- `'*bold*'` -- &lt;&amp;&gt;");
+    });
+
+    it('should handle context variable object expansion', async () => {
+      const actionResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          name: 'testing context variable expansion',
+          actionTypeId: '.slack',
+          secrets: {
+            webhookUrl: slackSimulatorURL,
+          },
+        });
+      expect(actionResponse.status).to.eql(200);
+      const createdAction = actionResponse.body;
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+
+      // from x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts,
+      // const DeepContextVariables
+      const varsTemplate = '{{context.deep}}';
+
+      const alertResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            name: 'testing context variable expansion',
+            alertTypeId: 'test.patternFiring',
+            params: {
+              pattern: { instance: [true, true] },
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {
+                  message: `message {{alertId}} - ${varsTemplate}`,
+                },
+              },
+            ],
+          })
+        );
+      expect(alertResponse.status).to.eql(200);
+      const createdAlert = alertResponse.body;
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
+
+      const body = await retry.try(async () =>
+        waitForActionBody(slackSimulatorURL, createdAlert.id)
+      );
+      expect(body).to.be(
+        '{"objectA":{"stringB":"B","arrayC":[{"stringD":"D1","numberE":42},{"stringD":"D2","numberE":43}],"objectF":{"stringG":"G","nullG":null}},"stringH":"H","arrayI":[44,45],"nullJ":null}'
+      );
     });
   });
 

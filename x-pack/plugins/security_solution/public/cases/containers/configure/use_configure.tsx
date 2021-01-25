@@ -235,6 +235,13 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
                 });
               }
             }
+            if (res.error != null) {
+              errorToToaster({
+                dispatchToaster,
+                error: new Error(res.error),
+                title: i18n.ERROR_TITLE,
+              });
+            }
           }
           setLoading(false);
         }
@@ -295,7 +302,13 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
                 },
               });
             }
-
+            if (res.error != null) {
+              errorToToaster({
+                dispatchToaster,
+                error: new Error(res.error),
+                title: i18n.ERROR_TITLE,
+              });
+            }
             displaySuccessToast(i18n.SUCCESS_CONFIGURE, dispatchToaster);
             setPersistLoading(false);
           }

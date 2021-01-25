@@ -140,6 +140,7 @@ export const getPieRenderer = (dependencies: {
           paletteService={dependencies.paletteService}
           onClickValue={onClickValue}
           renderMode={handlers.getRenderMode()}
+          syncColors={handlers.isSyncColorsEnabled()}
         />
       </I18nProvider>,
       domNode,

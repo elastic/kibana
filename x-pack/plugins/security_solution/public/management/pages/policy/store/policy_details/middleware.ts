@@ -18,7 +18,7 @@ import {
   sendGetPackagePolicy,
   sendGetFleetAgentStatusForPolicy,
   sendPutPackagePolicy,
-} from '../policy_list/services/ingest';
+} from '../services/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 
@@ -26,7 +26,6 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
   coreStart
 ) => {
   const http = coreStart.http;
-
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();

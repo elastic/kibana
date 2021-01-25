@@ -43,7 +43,7 @@ async function addLinkedIndices(client: ElasticsearchClient, policiesMap: Polici
 
   const response = await client.ilm.explainLifecycle<{
     indices: { [indexName: string]: IndexLifecyclePolicy };
-  }>({ index: '*' }, options);
+  }>({ index: '*,.*' }, options); // '*,.*' will include hidden indices
   const policyExplanation = response.body;
   Object.entries(policyExplanation.indices).forEach(([indexName, { policy }]) => {
     if (policy && policiesMap[policy]) {

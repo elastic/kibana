@@ -21,6 +21,7 @@ import {
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import {
@@ -94,6 +95,7 @@ const valueLabelsOptions: Array<{
   id: string;
   value: 'hide' | 'inside' | 'outside';
   label: string;
+  'data-test-subj': string;
 }> = [
   {
     id: `value_labels_hide`,
@@ -101,6 +103,7 @@ const valueLabelsOptions: Array<{
     label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.auto', {
       defaultMessage: 'Hide',
     }),
+    'data-test-subj': 'lnsXY_valueLabels_hide',
   },
   {
     id: `value_labels_inside`,
@@ -108,6 +111,7 @@ const valueLabelsOptions: Array<{
     label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.inside', {
       defaultMessage: 'Show',
     }),
+    'data-test-subj': 'lnsXY_valueLabels_inside',
   },
 ];
 
@@ -324,9 +328,25 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               {isFittingEnabled ? (
                 <EuiFormRow
                   display="columnCompressed"
-                  label={i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
-                    defaultMessage: 'Missing values',
-                  })}
+                  label={
+                    <>
+                      {i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
+                        defaultMessage: 'Missing values',
+                      })}{' '}
+                      <EuiIconTip
+                        color="subdued"
+                        content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
+                          defaultMessage: `Gaps in the data are not shown by default, but can be represented as dotted lines with different modes.`,
+                        })}
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                        position="top"
+                        size="s"
+                        type="questionInCircle"
+                      />
+                    </>
+                  }
                 >
                   <EuiSuperSelect
                     data-test-subj="lnsMissingValuesSelect"
@@ -513,6 +533,7 @@ export function DimensionEditor(
           legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
             defaultMessage: 'Axis side',
           })}
+          data-test-subj="lnsXY_axisSide_groups"
           name="axisSide"
           buttonSize="compressed"
           options={[
@@ -521,6 +542,7 @@ export function DimensionEditor(
               label: i18n.translate('xpack.lens.xyChart.axisSide.auto', {
                 defaultMessage: 'Auto',
               }),
+              'data-test-subj': 'lnsXY_axisSide_groups_auto',
             },
             {
               id: `${idPrefix}left`,
@@ -531,6 +553,7 @@ export function DimensionEditor(
                 : i18n.translate('xpack.lens.xyChart.axisSide.left', {
                     defaultMessage: 'Left',
                   }),
+              'data-test-subj': 'lnsXY_axisSide_groups_left',
             },
             {
               id: `${idPrefix}right`,
@@ -541,6 +564,7 @@ export function DimensionEditor(
                 : i18n.translate('xpack.lens.xyChart.axisSide.right', {
                     defaultMessage: 'Right',
                   }),
+              'data-test-subj': 'lnsXY_axisSide_groups_right',
             },
           ]}
           idSelected={`${idPrefix}${axisMode}`}

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import {
   Agent,
   AgentAction,
@@ -307,7 +307,11 @@ export async function getLatestConfigChangeAction(
 }
 
 export interface ActionsService {
-  getAgent: (soClient: SavedObjectsClientContract, agentId: string) => Promise<Agent>;
+  getAgent: (
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    agentId: string
+  ) => Promise<Agent>;
 
   createAgentAction: (
     soClient: SavedObjectsClientContract,

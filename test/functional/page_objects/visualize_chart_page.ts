@@ -1,23 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
+
 import { FtrProviderContext } from '../ftr_provider_context';
+
+const elasticChartSelector = 'visTypeXyChart';
 
 export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -25,17 +18,92 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
+  const elasticChart = getService('elasticChart');
   const dataGrid = getService('dataGrid');
   const defaultFindTimeout = config.get('timeouts.find');
   const { common } = getPageObjects(['common']);
 
   class VisualizeChart {
+    private async getDebugState() {
+      return await elasticChart.getChartDebugData(elasticChartSelector);
+    }
+
+    /**
+     * Is new charts library advanced setting enabled
+     */
+    public async isNewChartsLibraryEnabled(): Promise<boolean> {
+      const legacyChartsLibrary =
+        Boolean(await kibanaServer.uiSettings.get('visualization:visualize:legacyChartsLibrary')) ??
+        true;
+      const enabled = !legacyChartsLibrary;
+      log.debug(`-- isNewChartsLibraryEnabled = ${enabled}`);
+
+      return enabled;
+    }
+
+    /**
+     * Is new charts library enabled and an area, line or histogram chart exists
+     */
+    private async isVisTypeXYChart(): Promise<boolean> {
+      const enabled = await this.isNewChartsLibraryEnabled();
+
+      if (!enabled) {
+        log.debug(`-- isVisTypeXYChart = false`);
+        return false;
+      }
+
+      // check if enabled but not a line, area or histogram chart
+      if (await find.existsByCssSelector('.visLib__chart', 1)) {
+        const chart = await find.byCssSelector('.visLib__chart');
+        const chartType = await chart.getAttribute('data-vislib-chart-type');
+
+        if (!['line', 'area', 'histogram'].includes(chartType)) {
+          log.debug(`-- isVisTypeXYChart = false`);
+          return false;
+        }
+      }
+
+      if (!(await elasticChart.hasChart(elasticChartSelector, 1))) {
+        // not be a vislib chart type
+        log.debug(`-- isVisTypeXYChart = false`);
+        return false;
+      }
+
+      log.debug(`-- isVisTypeXYChart = true`);
+      return true;
+    }
+
+    /**
+     * Helper method to get expected values that are slightly different
+     * between vislib and elastic-chart inplementations
+     * @param vislibValue value expected for vislib chart
+     * @param elasticChartsValue value expected for `@elastic/charts` chart
+     */
+    public async getExpectedValue<T>(vislibValue: T, elasticChartsValue: T): Promise<T> {
+      if (await this.isVisTypeXYChart()) {
+        return elasticChartsValue;
+      }
+
+      return vislibValue;
+    }
+
     public async getYAxisTitle() {
+      if (await this.isVisTypeXYChart()) {
+        const xAxis = (await this.getDebugState())?.axes?.y ?? [];
+        return xAxis[0]?.title;
+      }
+
       const title = await find.byCssSelector('.y-axis-div .y-axis-title text');
       return await title.getVisibleText();
     }
 
     public async getXAxisLabels() {
+      if (await this.isVisTypeXYChart()) {
+        const [xAxis] = (await this.getDebugState())?.axes?.x ?? [];
+        return xAxis?.labels;
+      }
+
       const xAxis = await find.byCssSelector('.visAxis--x.visAxis__column--bottom');
       const $ = await xAxis.parseDomContent();
       return $('.x > g > text')
@@ -44,6 +112,11 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async getYAxisLabels() {
+      if (await this.isVisTypeXYChart()) {
+        const [yAxis] = (await this.getDebugState())?.axes?.y ?? [];
+        return yAxis?.labels;
+      }
+
       const yAxis = await find.byCssSelector('.visAxis__column--y.visAxis__column--left');
       const $ = await yAxis.parseDomContent();
       return $('.y > g > text')
@@ -52,6 +125,11 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async getYAxisLabelsAsNumbers() {
+      if (await this.isVisTypeXYChart()) {
+        const [yAxis] = (await this.getDebugState())?.axes?.y ?? [];
+        return yAxis?.values;
+      }
+
       return (await this.getYAxisLabels()).map((label) => Number(label.replace(',', '')));
     }
 
@@ -63,6 +141,12 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
      * Returns an array of height values
      */
     public async getAreaChartData(dataLabel: string, axis = 'ValueAxis-1') {
+      if (await this.isVisTypeXYChart()) {
+        const areas = (await this.getDebugState())?.areas ?? [];
+        const points = areas.find(({ name }) => name === dataLabel)?.lines.y1.points ?? [];
+        return points.map(({ y }) => y);
+      }
+
       const yAxisRatio = await this.getChartYAxisRatio(axis);
 
       const rectangle = await find.byCssSelector('rect.background');
@@ -99,6 +183,12 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
      * @param dataLabel data-label value
      */
     public async getAreaChartPaths(dataLabel: string) {
+      if (await this.isVisTypeXYChart()) {
+        const areas = (await this.getDebugState())?.areas ?? [];
+        const path = areas.find(({ name }) => name === dataLabel)?.path ?? '';
+        return path.split('L');
+      }
+
       const path = await retry.try(
         async () =>
           await find.byCssSelector(`path[data-label="${dataLabel}"]`, defaultFindTimeout * 2)
@@ -118,6 +208,14 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
      * @param axis axis value, 'ValueAxis-1' by default
      */
     public async getLineChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
+      if (await this.isVisTypeXYChart()) {
+        // For now lines are rendered as areas to enable stacking
+        const areas = (await this.getDebugState())?.areas ?? [];
+        const lines = areas.map(({ lines: { y1 }, name, color }) => ({ ...y1, name, color }));
+        const points = lines.find(({ name }) => name === dataLabel)?.points ?? [];
+        return points.map(({ y }) => y);
+      }
+
       // 1). get the range/pixel ratio
       const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 2). find and save the y-axis pixel size (the chart height)
@@ -150,6 +248,12 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
      * @param axis axis value, 'ValueAxis-1' by default
      */
     public async getBarChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
+      if (await this.isVisTypeXYChart()) {
+        const bars = (await this.getDebugState())?.bars ?? [];
+        const values = bars.find(({ name }) => name === dataLabel)?.bars ?? [];
+        return values.map(({ y }) => y);
+      }
+
       const yAxisRatio = await this.getChartYAxisRatio(axis);
       const svg = await find.byCssSelector('div.chart');
       const $ = await svg.parseDomContent();
@@ -189,8 +293,11 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async toggleLegend(show = true) {
+      const isVisTypeXYChart = await this.isVisTypeXYChart();
+      const legendSelector = isVisTypeXYChart ? '.echLegend' : '.visLegend';
+
       await retry.try(async () => {
-        const isVisible = find.byCssSelector('.visLegend');
+        const isVisible = await find.existsByCssSelector(legendSelector);
         if ((show && !isVisible) || (!show && isVisible)) {
           await testSubjects.click('vislibToggleLegend');
         }
@@ -206,19 +313,26 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async doesLegendColorChoiceExist(color: string) {
-      return await testSubjects.exists(`legendSelectColor-${color}`);
+      return await testSubjects.exists(`visColorPickerColor-${color}`);
     }
 
     public async selectNewLegendColorChoice(color: string) {
-      await testSubjects.click(`legendSelectColor-${color}`);
+      await testSubjects.click(`visColorPickerColor-${color}`);
     }
 
     public async doesSelectedLegendColorExist(color: string) {
+      if (await this.isVisTypeXYChart()) {
+        const items = (await this.getDebugState())?.legend?.items ?? [];
+        return items.some(({ color: c }) => c === color);
+      }
+
       return await testSubjects.exists(`legendSelectedColor-${color}`);
     }
 
     public async expectError() {
-      await testSubjects.existOrFail('vislibVisualizeError');
+      if (!this.isVisTypeXYChart()) {
+        await testSubjects.existOrFail('vislibVisualizeError');
+      }
     }
 
     public async getVisualizationRenderingCount() {
@@ -233,6 +347,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         async () => {
           const currentRenderingCount = await this.getVisualizationRenderingCount();
           log.debug(`-- currentRenderingCount=${currentRenderingCount}`);
+          log.debug(`-- expectedCount=${minimumCount}`);
           return currentRenderingCount >= minimumCount;
         }
       );
@@ -255,10 +370,18 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
 
     public async waitForVisualization() {
       await this.waitForVisualizationRenderingStabilized();
-      await find.byCssSelector('.visualization');
+
+      if (!(await this.isVisTypeXYChart())) {
+        await find.byCssSelector('.visualization');
+      }
     }
 
     public async getLegendEntries() {
+      if (await this.isVisTypeXYChart()) {
+        const items = (await this.getDebugState())?.legend?.items ?? [];
+        return items.map(({ name }) => name);
+      }
+
       const legendEntries = await find.allByCssSelector(
         '.visLegend__button',
         defaultFindTimeout * 2
@@ -268,18 +391,39 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       );
     }
 
-    public async openLegendOptionColors(name: string) {
+    public async openLegendOptionColors(name: string, chartSelector = elasticChartSelector) {
       await this.waitForVisualizationRenderingStabilized();
       await retry.try(async () => {
-        // This click has been flaky in opening the legend, hence the retry.  See
-        // https://github.com/elastic/kibana/issues/17468
-        await testSubjects.click(`legend-${name}`);
+        if (await this.isVisTypeXYChart()) {
+          const chart = await find.byCssSelector(chartSelector);
+          const legendItemColor = await chart.findByCssSelector(
+            `[data-ech-series-name="${name}"] .echLegendItem__color`
+          );
+          legendItemColor.click();
+        } else {
+          // This click has been flaky in opening the legend, hence the retry.  See
+          // https://github.com/elastic/kibana/issues/17468
+          await testSubjects.click(`legend-${name}`);
+        }
+
         await this.waitForVisualizationRenderingStabilized();
         // arbitrary color chosen, any available would do
         const isOpen = await this.doesLegendColorChoiceExist('#EF843C');
         if (!isOpen) {
           throw new Error('legend color selector not open');
         }
+      });
+    }
+
+    public async filterOnTableCell(columnIndex: number, rowIndex: number) {
+      await retry.try(async () => {
+        const cell = await dataGrid.getCellElement(rowIndex, columnIndex);
+        await cell.moveMouseTo();
+        const filterBtn = await testSubjects.findDescendant(
+          'tbvChartCell__filterForCellValue',
+          cell
+        );
+        await filterBtn.click();
       });
     }
 
@@ -349,18 +493,6 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       });
     }
 
-    public async filterOnTableCell(column: number, row: number) {
-      await retry.try(async () => {
-        const cell = await dataGrid.getCellElement(row, column);
-        await cell.moveMouseTo();
-        const filterBtn = await testSubjects.findDescendant(
-          'tbvChartCell__filterForCellValue',
-          cell
-        );
-        await filterBtn.click();
-      });
-    }
-
     public async getMetric() {
       const elements = await find.allByCssSelector(
         '[data-test-subj="visualizationLoader"] .mtrVis__container'
@@ -389,6 +521,15 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return values.filter((item) => item.length > 0);
     }
 
+    public async getRightValueAxesCount() {
+      if (await this.isVisTypeXYChart()) {
+        const yAxes = (await this.getDebugState())?.axes?.y ?? [];
+        return yAxes.filter(({ position }) => position === Position.Right).length;
+      }
+      const axes = await find.allByCssSelector('.visAxis__column--right g.axis');
+      return axes.length;
+    }
+
     public async clickOnGaugeByLabel(label: string) {
       const gauge = await testSubjects.find(`visGauge__meter--${label}`);
       const gaugeSize = await gauge.getSize();
@@ -400,17 +541,22 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       await gauge.clickMouseButton({ xOffset: 0, yOffset });
     }
 
-    public async getRightValueAxes() {
-      const axes = await find.allByCssSelector('.visAxis__column--right g.axis');
-      return axes.length;
-    }
+    public async getHistogramSeriesCount() {
+      if (await this.isVisTypeXYChart()) {
+        const bars = (await this.getDebugState())?.bars ?? [];
+        return bars.filter(({ visible }) => visible).length;
+      }
 
-    public async getHistogramSeries() {
       const series = await find.allByCssSelector('.series.histogram');
       return series.length;
     }
 
     public async getGridLines(): Promise<Array<{ x: number; y: number }>> {
+      if (await this.isVisTypeXYChart()) {
+        const { x, y } = (await this.getDebugState())?.axes ?? { x: [], y: [] };
+        return [...x, ...y].flatMap(({ gridlines }) => gridlines);
+      }
+
       const grid = await find.byCssSelector('g.grid');
       const $ = await grid.parseDomContent();
       return $('path')
@@ -426,6 +572,11 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async getChartValues() {
+      if (await this.isVisTypeXYChart()) {
+        const barSeries = (await this.getDebugState())?.bars ?? [];
+        return barSeries.filter(({ visible }) => visible).flatMap((bars) => bars.labels);
+      }
+
       const elements = await find.allByCssSelector('.series.histogram text');
       const values = await Promise.all(
         elements.map(async (element) => {

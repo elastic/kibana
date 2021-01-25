@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useEffect, useState, useCallback } from 'react';
 import { EuiMarkdownEditor } from '@elastic/eui';
 
 import { uiPlugins, parsingPlugins, processingPlugins } from './plugins';
@@ -30,6 +30,11 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
   const onParse = useCallback((err, { messages }) => {
     setMarkdownErrorMessages(err ? [err] : messages);
   }, []);
+
+  useEffect(
+    () => document.querySelector<HTMLElement>('textarea.euiMarkdownEditorTextArea')?.focus(),
+    []
+  );
 
   return (
     <EuiMarkdownEditor

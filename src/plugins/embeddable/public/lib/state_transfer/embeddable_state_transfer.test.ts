@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { coreMock } from '../../../../../core/public/mocks';
@@ -23,6 +12,7 @@ import { EmbeddableStateTransfer } from '.';
 import { ApplicationStart, PublicAppInfo } from '../../../../../core/public';
 import { EMBEDDABLE_EDITOR_STATE_KEY, EMBEDDABLE_PACKAGE_STATE_KEY } from './types';
 import { EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY } from './embeddable_state_transfer';
+import { Subject } from 'rxjs';
 
 const createStorage = (): Storage => {
   const createMockStore = () => {
@@ -46,16 +36,24 @@ const createStorage = (): Storage => {
 describe('embeddable state transfer', () => {
   let application: jest.Mocked<ApplicationStart>;
   let stateTransfer: EmbeddableStateTransfer;
+  let currentAppId$: Subject<string | undefined>;
   let store: Storage;
 
   const destinationApp = 'superUltraVisualize';
   const originatingApp = 'superUltraTestDashboard';
 
   beforeEach(() => {
+    currentAppId$ = new Subject();
+    currentAppId$.next(originatingApp);
     const core = coreMock.createStart();
     application = core.application;
     store = createStorage();
-    stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, undefined, store);
+    stateTransfer = new EmbeddableStateTransfer(
+      application.navigateToApp,
+      currentAppId$,
+      undefined,
+      store
+    );
   });
 
   it('cannot fetch app name when given no app list', async () => {
@@ -67,7 +65,7 @@ describe('embeddable state transfer', () => {
       ['testId', { title: 'State Transfer Test App Hello' } as PublicAppInfo],
       ['testId2', { title: 'State Transfer Test App Goodbye' } as PublicAppInfo],
     ]);
-    stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, appsList);
+    stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, currentAppId$, appsList);
     expect(stateTransfer.getAppNameFromId('kibanana')).toBeUndefined();
   });
 
@@ -76,7 +74,7 @@ describe('embeddable state transfer', () => {
       ['testId', { title: 'State Transfer Test App Hello' } as PublicAppInfo],
       ['testId2', { title: 'State Transfer Test App Goodbye' } as PublicAppInfo],
     ]);
-    stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, appsList);
+    stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, currentAppId$, appsList);
     expect(stateTransfer.getAppNameFromId('testId')).toBe('State Transfer Test App Hello');
     expect(stateTransfer.getAppNameFromId('testId2')).toBe('State Transfer Test App Goodbye');
   });
@@ -107,6 +105,13 @@ describe('embeddable state transfer', () => {
     });
   });
 
+  it('sets isTransferInProgress to true when sending an outgoing editor state', async () => {
+    await stateTransfer.navigateToEditor(destinationApp, { state: { originatingApp } });
+    expect(stateTransfer.isTransferInProgress).toEqual(true);
+    currentAppId$.next(destinationApp);
+    expect(stateTransfer.isTransferInProgress).toEqual(false);
+  });
+
   it('can send an outgoing embeddable package state', async () => {
     await stateTransfer.navigateToWithEmbeddablePackage(destinationApp, {
       state: { type: 'coolestType', input: { savedObjectId: '150' } },
@@ -133,6 +138,15 @@ describe('embeddable state transfer', () => {
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
       path: undefined,
     });
+  });
+
+  it('sets isTransferInProgress to true when sending an outgoing embeddable package state', async () => {
+    await stateTransfer.navigateToWithEmbeddablePackage(destinationApp, {
+      state: { type: 'coolestType', input: { savedObjectId: '150' } },
+    });
+    expect(stateTransfer.isTransferInProgress).toEqual(true);
+    currentAppId$.next(destinationApp);
+    expect(stateTransfer.isTransferInProgress).toEqual(false);
   });
 
   it('can fetch an incoming editor state', async () => {

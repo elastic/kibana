@@ -35,9 +35,16 @@
       },
       "technique": [
         {
-          "id": "T1077",
-          "name": "Windows Admin Shares",
-          "reference": "https://attack.mitre.org/techniques/T1077/"
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/",
+          "subtechnique": [
+            {
+              "id": "T1021.002",
+              "name": "SMB/Windows Admin Shares",
+              "reference": "https://attack.mitre.org/techniques/T1021/002/"
+            }
+          ]
         }
       ]
     }

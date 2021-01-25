@@ -5,7 +5,7 @@
  */
 
 import { curry } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { validate } from './validators';
 import {
@@ -30,6 +30,8 @@ import {
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
 
+export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
+
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -37,6 +39,7 @@ interface GetActionTypeParams {
 
 const supportedSubActions: string[] = ['getFields', 'pushToService', 'incidentTypes', 'severity'];
 
+export const ActionTypeId = '.resilient';
 // action type definition
 export function getActionType(
   params: GetActionTypeParams
@@ -48,7 +51,7 @@ export function getActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: '.resilient',
+    id: ActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.NAME,
     validate: {

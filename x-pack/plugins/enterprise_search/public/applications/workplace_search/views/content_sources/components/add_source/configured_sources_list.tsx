@@ -42,7 +42,10 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
   isOrganization,
 }) => {
   const unConnectedTooltip = (
-    <span className="source-card-configured__not-connected-tooltip">
+    <span
+      className="source-card-configured__not-connected-tooltip"
+      data-test-subj="UnConnectedTooltip"
+    >
       <EuiToolTip position="top" content={CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP}>
         <EuiToken iconType="tokenException" color="orange" shape="circle" fill="light" />
       </EuiToolTip>
@@ -50,7 +53,10 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
   );
 
   const accountOnlyTooltip = (
-    <span className="source-card-configured__not-connected-tooltip">
+    <span
+      className="source-card-configured__not-connected-tooltip"
+      data-test-subj="AccountOnlyTooltip"
+    >
       <EuiToolTip position="top" content={CONFIGURED_SOURCES_LIST_ACCOUNT_ONLY_TOOLTIP}>
         <EuiToken iconType="tokenException" color="green" shape="circle" fill="light" />
       </EuiToolTip>
@@ -107,7 +113,9 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
     </EuiFlexGrid>
   );
 
-  const emptyState = <p>{CONFIGURED_SOURCES_EMPTY_STATE}</p>;
+  const emptyState = (
+    <p data-test-subj="ConfiguredSourceEmptyState">{CONFIGURED_SOURCES_EMPTY_STATE}</p>
+  );
 
   return (
     <>

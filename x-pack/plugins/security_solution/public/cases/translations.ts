@@ -278,3 +278,14 @@ export const SYNC_ALERTS_HELP = i18n.translate(
       'Enabling this option will sync the status of alerts in this case with the case status.',
   }
 );
+
+export const ALERT = i18n.translate('xpack.securitySolution.common.alertLabel', {
+  defaultMessage: 'Alert',
+});
+
+export const ALERT_ADDED_TO_CASE = i18n.translate(
+  'xpack.securitySolution.common.alertAddedToCase',
+  {
+    defaultMessage: 'added to case',
+  }
+);

@@ -19,7 +19,7 @@ import {
 } from '../../../../../common/api';
 import { mapIncident } from './utils';
 
-export function initPostPushToService({ router, connectorMappingsService }: RouteDeps) {
+export function initPostPushToService({ router }: RouteDeps) {
   router.post(
     {
       path: CASE_CONFIGURE_PUSH_URL,

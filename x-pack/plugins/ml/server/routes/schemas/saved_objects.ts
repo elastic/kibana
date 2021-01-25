@@ -22,3 +22,8 @@ export const syncJobObjects = schema.object({ simulate: schema.maybe(schema.bool
 export const jobTypeSchema = schema.object({
   jobType: schema.string(),
 });
+
+export const canDeleteJobSchema = schema.object({
+  /** List of job IDs. */
+  jobIds: schema.arrayOf(schema.maybe(schema.string())),
+});

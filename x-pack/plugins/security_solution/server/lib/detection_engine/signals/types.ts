@@ -11,6 +11,8 @@ import { RulesSchema } from '../../../../common/detection_engine/schemas/respons
 import {
   AlertType,
   AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerts/server';
@@ -128,19 +130,34 @@ export type BaseSignalHit = BaseHit<SignalSource>;
 
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
-export type RuleExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
-  params: RuleTypeParams;
-};
+export type RuleExecutorOptions = AlertExecutorOptions<
+  RuleTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
 
 // This returns true because by default a RuleAlertTypeDefinition is an AlertType
 // since we are only increasing the strictness of params.
-export const isAlertExecutor = (obj: SignalRuleAlertTypeDefinition): obj is AlertType => {
+export const isAlertExecutor = (
+  obj: SignalRuleAlertTypeDefinition
+): obj is AlertType<
+  RuleTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  'default'
+> => {
   return true;
 };
 
-export type SignalRuleAlertTypeDefinition = Omit<AlertType, 'executor'> & {
-  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<AlertTypeState | void>;
-};
+export type SignalRuleAlertTypeDefinition = AlertType<
+  RuleTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  'default'
+>;
 
 export interface Ancestor {
   rule?: string;
@@ -214,7 +231,7 @@ export interface SearchAfterAndBulkCreateParams {
   gap: moment.Duration | null;
   previousStartedAt: Date | null | undefined;
   ruleParams: RuleTypeParams;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;

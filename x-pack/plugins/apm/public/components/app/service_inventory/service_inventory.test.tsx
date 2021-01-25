@@ -9,10 +9,10 @@ import { CoreStart } from 'kibana/public';
 import { merge } from 'lodash';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import { ServiceInventory } from '.';
-import { EuiThemeProvider } from '../../../../../observability/public';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
@@ -21,7 +21,7 @@ import {
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import * as useLocalUIFilters from '../../../hooks/useLocalUIFilters';
 import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
-import { SessionStorageMock } from '../../../services/__test__/SessionStorageMock';
+import { SessionStorageMock } from '../../../services/__mocks__/SessionStorageMock';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import * as hook from './use_anomaly_detection_jobs_fetcher';
 
@@ -57,6 +57,8 @@ function wrapper({ children }: { children?: ReactNode }) {
                 rangeTo: 'now',
                 start: 'mystart',
                 end: 'myend',
+                comparisonEnabled: true,
+                comparisonType: 'yesterday',
               }}
             >
               {children}

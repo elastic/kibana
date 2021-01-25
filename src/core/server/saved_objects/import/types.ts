@@ -1,25 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { Readable } from 'stream';
-import { SavedObjectsClientContract, SavedObject } from '../types';
-import { ISavedObjectTypeRegistry } from '..';
+import { SavedObject } from '../types';
 
 /**
  * Describes a retry operation for importing a saved object.
@@ -98,7 +86,7 @@ export interface SavedObjectsImportMissingReferencesError {
  * Represents a failure to import.
  * @public
  */
-export interface SavedObjectsImportError {
+export interface SavedObjectsImportFailure {
   id: string;
   type: string;
   /**
@@ -154,7 +142,8 @@ export interface SavedObjectsImportResponse {
   success: boolean;
   successCount: number;
   successResults?: SavedObjectsImportSuccess[];
-  errors?: SavedObjectsImportError[];
+  warnings: SavedObjectsImportWarning[];
+  errors?: SavedObjectsImportFailure[];
 }
 
 /**
@@ -164,14 +153,8 @@ export interface SavedObjectsImportResponse {
 export interface SavedObjectsImportOptions {
   /** The stream of {@link SavedObject | saved objects} to import */
   readStream: Readable;
-  /** The maximum number of object to import */
-  objectLimit: number;
   /** If true, will override existing object if present. Note: this has no effect when used with the `createNewCopies` option. */
   overwrite: boolean;
-  /** {@link SavedObjectsClientContract | client} to use to perform the import operation */
-  savedObjectsClient: SavedObjectsClientContract;
-  /** The registry of all known saved object types */
-  typeRegistry: ISavedObjectTypeRegistry;
   /** if specified, will import in given namespace, else will import as global object */
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
@@ -185,12 +168,6 @@ export interface SavedObjectsImportOptions {
 export interface SavedObjectsResolveImportErrorsOptions {
   /** The stream of {@link SavedObject | saved objects} to resolve errors from */
   readStream: Readable;
-  /** The maximum number of object to import */
-  objectLimit: number;
-  /** client to use to perform the import operation */
-  savedObjectsClient: SavedObjectsClientContract;
-  /** The registry of all known saved object types */
-  typeRegistry: ISavedObjectTypeRegistry;
   /** saved object import references to retry */
   retries: SavedObjectsImportRetry[];
   /** if specified, will import in given namespace */
@@ -200,3 +177,72 @@ export interface SavedObjectsResolveImportErrorsOptions {
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
+
+/**
+ * A simple informative warning that will be displayed to the user.
+ *
+ * @public
+ */
+export interface SavedObjectsImportSimpleWarning {
+  type: 'simple';
+  /** The translated message to display to the user */
+  message: string;
+}
+
+/**
+ * A warning meant to notify that a specific user action is required to finalize the import
+ * of some type of object.
+ *
+ * @remark The `actionUrl` must be a path relative to the basePath, and not include it.
+ *
+ * @public
+ */
+export interface SavedObjectsImportActionRequiredWarning {
+  type: 'action_required';
+  /** The translated message to display to the user. */
+  message: string;
+  /** The path (without the basePath) that the user should be redirect to to address this warning. */
+  actionPath: string;
+  /** An optional label to use for the link button. If unspecified, a default label will be used. */
+  buttonLabel?: string;
+}
+
+/**
+ * Composite type of all the possible types of import warnings.
+ *
+ * See {@link SavedObjectsImportSimpleWarning} and {@link SavedObjectsImportActionRequiredWarning}
+ * for more details.
+ *
+ * @public
+ */
+export type SavedObjectsImportWarning =
+  | SavedObjectsImportSimpleWarning
+  | SavedObjectsImportActionRequiredWarning;
+
+/**
+ * Result from a {@link SavedObjectsImportHook | import hook}
+ *
+ * @public
+ */
+export interface SavedObjectsImportHookResult {
+  /**
+   * An optional list of warnings to display in the UI when the import succeeds.
+   */
+  warnings?: SavedObjectsImportWarning[];
+}
+
+/**
+ * A hook associated with a specific saved object type, that will be invoked during
+ * the import process. The hook will have access to the objects of the registered type.
+ *
+ * Currently, the only supported feature for import hooks is to return warnings to be displayed
+ * in the UI when the import succeeds.
+ *
+ * @remark The only interactions the hook can have with the import process is via the hook's
+ *         response. Mutating the objects inside the hook's code will have no effect.
+ *
+ * @public
+ */
+export type SavedObjectsImportHook<T = unknown> = (
+  objects: Array<SavedObject<T>>
+) => SavedObjectsImportHookResult | Promise<SavedObjectsImportHookResult>;

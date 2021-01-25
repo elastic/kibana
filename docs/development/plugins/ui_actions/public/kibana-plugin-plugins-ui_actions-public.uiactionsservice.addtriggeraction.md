@@ -6,10 +6,8 @@
 
 `addTriggerAction` is similar to `attachAction` as it attaches action to a trigger, but it also registers the action, if it has not been registered, yet.
 
-`addTriggerAction` also infers better typing of the `action` argument.
-
 <b>Signature:</b>
 
 ```typescript
-readonly addTriggerAction: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "ROW_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T, action: ActionDefinition<TriggerContextMapping[T]> | Action<TriggerContextMapping[T], "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_VISUALIZE_LENS_FIELD" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel" | "togglePanel" | "replacePanel" | "clonePanel" | "addToFromLibrary" | "unlinkFromLibrary" | "ACTION_LIBRARY_NOTIFICATION" | "ACTION_EXPORT_CSV">) => void;
+readonly addTriggerAction: (triggerId: string, action: ActionDefinition) => void;
 ```

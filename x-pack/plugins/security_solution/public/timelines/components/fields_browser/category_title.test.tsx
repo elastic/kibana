@@ -21,6 +21,7 @@ describe('CategoryTitle', () => {
       <CategoryTitle
         categoryId={categoryId}
         filteredBrowserFields={mockBrowserFields}
+        onUpdateColumns={jest.fn()}
         timelineId={timelineId}
       />
     );
@@ -36,6 +37,7 @@ describe('CategoryTitle', () => {
       <CategoryTitle
         categoryId={validCategoryId}
         filteredBrowserFields={mockBrowserFields}
+        onUpdateColumns={jest.fn()}
         timelineId={timelineId}
       />
     );
@@ -51,6 +53,7 @@ describe('CategoryTitle', () => {
       <CategoryTitle
         categoryId={invalidCategoryId}
         filteredBrowserFields={mockBrowserFields}
+        onUpdateColumns={jest.fn()}
         timelineId={timelineId}
       />
     );

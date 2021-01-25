@@ -14,9 +14,6 @@ export function registerApmAlerts(
 ) {
   alertTypeRegistry.register({
     id: AlertType.ErrorCount,
-    name: i18n.translate('xpack.apm.alertTypes.errorCount', {
-      defaultMessage: 'Error count threshold',
-    }),
     description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
       defaultMessage:
         'Alert when the number of errors in a service exceeds a defined threshold.',
@@ -45,14 +42,11 @@ export function registerApmAlerts(
 
   alertTypeRegistry.register({
     id: AlertType.TransactionDuration,
-    name: i18n.translate('xpack.apm.alertTypes.transactionDuration', {
-      defaultMessage: 'Transaction duration threshold',
-    }),
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionDuration.description',
       {
         defaultMessage:
-          'Alert when the duration of a specific transaction type in a service exceeds a defined threshold.',
+          'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
       }
     ),
     iconClass: 'bell',
@@ -74,17 +68,14 @@ export function registerApmAlerts(
 - Service name: \\{\\{context.serviceName\\}\\}
 - Type: \\{\\{context.transactionType\\}\\}
 - Environment: \\{\\{context.environment\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\}ms
-- Triggered value: \\{\\{context.triggerValue\\}\\} over the last \\{\\{context.interval\\}\\}`,
+- Latency threshold: \\{\\{context.threshold\\}\\}ms
+- Latency observed: \\{\\{context.triggerValue\\}\\} over the last \\{\\{context.interval\\}\\}`,
       }
     ),
   });
 
   alertTypeRegistry.register({
     id: AlertType.TransactionErrorRate,
-    name: i18n.translate('xpack.apm.alertTypes.transactionErrorRate', {
-      defaultMessage: 'Transaction error rate threshold',
-    }),
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionErrorRate.description',
       {
@@ -119,14 +110,10 @@ export function registerApmAlerts(
 
   alertTypeRegistry.register({
     id: AlertType.TransactionDurationAnomaly,
-    name: i18n.translate('xpack.apm.alertTypes.transactionDurationAnomaly', {
-      defaultMessage: 'Transaction duration anomaly',
-    }),
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionDurationAnomaly.description',
       {
-        defaultMessage:
-          'Alert when the overall transaction duration of a service is considered anomalous.',
+        defaultMessage: 'Alert when the latency of a service is abnormal.',
       }
     ),
     iconClass: 'bell',

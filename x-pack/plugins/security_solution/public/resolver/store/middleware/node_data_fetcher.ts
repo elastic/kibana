@@ -58,7 +58,6 @@ export function NodeDataFetcher(
     });
 
     let results: SafeResolverEvent[] | undefined;
-    const newID = selectors.refreshCount(state);
     try {
       const timeRangeFilters = selectors.timeRangeFilters(state);
       results = await dataAccessLayer.nodeData({
@@ -112,7 +111,6 @@ export function NodeDataFetcher(
            *  if that node is still in view we'll request its node data.
            */
           numberOfRequestedEvents: nodeDataLimit,
-          dataRequestID: newID,
         },
       });
     }
