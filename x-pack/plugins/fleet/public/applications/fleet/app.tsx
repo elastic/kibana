@@ -36,7 +36,7 @@ import { ProtectedRoute } from './index';
 import { FleetConfigType, FleetStartServices } from '../../plugin';
 import { UIExtensionsStorage } from './types';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../xpack_legacy/common';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import { UIExtensionsContext } from './hooks/use_ui_extension';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (

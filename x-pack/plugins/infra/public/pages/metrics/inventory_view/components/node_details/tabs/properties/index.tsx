@@ -15,7 +15,7 @@ import { useMetadata } from '../../../../../metric_detail/hooks/use_metadata';
 import { getFields } from './build_fields';
 import { useWaffleTimeContext } from '../../../../hooks/use_waffle_time';
 import { Table } from './table';
-import { euiStyled } from '../../../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { useWaffleFiltersContext } from '../../../../hooks/use_waffle_filters';
 
 const TabComponent = (props: TabProps) => {
