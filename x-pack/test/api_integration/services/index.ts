@@ -16,10 +16,6 @@ import { SupertestWithoutAuthProvider } from './supertest_without_auth';
 
 import { UsageAPIProvider } from './usage_api';
 import {
-  InfraOpsGraphQLClientProvider,
-  InfraOpsGraphQLClientFactoryProvider,
-} from './infraops_graphql_client';
-import {
   SecuritySolutionGraphQLClientProvider,
   SecuritySolutionGraphQLClientFactoryProvider,
 } from './security_solution_graphql_client';
@@ -37,8 +33,6 @@ export const services = {
 
   legacyEs: LegacyEsProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
-  infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
-  infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
   infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
   infraLogSourceConfiguration: InfraLogSourceConfigurationProvider,
   securitySolutionGraphQLClient: SecuritySolutionGraphQLClientProvider,

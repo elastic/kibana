@@ -13,13 +13,6 @@ import { InfraSourceStatus } from './source_status';
 import { InfraConfig } from '../plugin';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 
-// NP_TODO: We shouldn't need this context anymore but I am
-// not sure how the graphql stuff uses it, so we can't remove it yet
-export interface InfraContext {
-  req: any;
-  rawReq?: any;
-}
-
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;
   logEntries: InfraLogEntriesDomain;

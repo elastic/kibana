@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { InfraNodeType } from '../../../../plugins/infra/server/graphql/types';
 import {
   InfraMetadata,
   InfraMetadataRequest,
@@ -50,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
         const metadata = await fetchMetadata({
           sourceId: 'default',
           nodeId: 'demo-stack-mysql-01',
-          nodeType: InfraNodeType.host,
+          nodeType: 'host',
           timeRange: timeRange700,
         });
         if (metadata) {
@@ -70,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
         const metadata = await fetchMetadata({
           sourceId: 'default',
           nodeId: '631f36a845514442b93c3fdd2dc91bcd8feb680b8ac5832c7fb8fdc167bb938e',
-          nodeType: InfraNodeType.container,
+          nodeType: 'container',
           timeRange: timeRange660,
         });
         if (metadata) {
@@ -92,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: 'gke-observability-8--observability-8--bc1afd95-f0zc',
-            nodeType: InfraNodeType.host,
+            nodeType: 'host',
             timeRange: timeRange800withAws,
           });
           if (metadata) {
@@ -140,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: 'ip-172-31-47-9.us-east-2.compute.internal',
-            nodeType: InfraNodeType.host,
+            nodeType: 'host',
             timeRange: timeRange800withAws,
           });
           if (metadata) {
@@ -189,7 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: '14887487-99f8-11e9-9a96-42010a84004d',
-            nodeType: InfraNodeType.pod,
+            nodeType: 'pod',
             timeRange: timeRange800withAws,
           });
           if (metadata) {
@@ -242,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: 'c74b04834c6d7cc1800c3afbe31d0c8c0c267f06e9eb45c2b0c2df3e6cee40c5',
-            nodeType: InfraNodeType.container,
+            nodeType: 'container',
             timeRange: timeRange800withAws,
           });
           if (metadata) {

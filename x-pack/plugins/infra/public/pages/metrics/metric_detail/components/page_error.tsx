@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { GraphQLFormattedError } from 'graphql';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { IHttpFetchError } from 'src/core/public';
 import { InvalidNodeError } from './invalid_node';
-// import { InfraMetricsErrorCodes } from '../../../../common/errors';
 import { DocumentTitle } from '../../../../components/document_title';
 import { ErrorPageBody } from '../../../error';
 
