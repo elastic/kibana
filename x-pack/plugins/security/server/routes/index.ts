@@ -33,7 +33,7 @@ export interface RouteDefinitionParams {
   logger: Logger;
   config: ConfigType;
   authz: AuthorizationServiceSetup;
-  session: PublicMethodsOf<Session>;
+  getSession: () => PublicMethodsOf<Session>;
   license: SecurityLicense;
   getFeatures: () => Promise<KibanaFeature[]>;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
