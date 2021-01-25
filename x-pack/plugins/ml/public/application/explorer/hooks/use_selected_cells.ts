@@ -19,18 +19,25 @@ export const useSelectedCells = (
   const timeBounds = timeFilter.getBounds();
 
   // keep swimlane selection, restore selectedCells from AppState
-  const selectedCells = useMemo(() => {
-    return appState?.mlExplorerSwimlane?.selectedType !== undefined
-      ? {
-          type: appState.mlExplorerSwimlane.selectedType,
-          lanes: appState.mlExplorerSwimlane.selectedLanes!,
-          times: appState.mlExplorerSwimlane.selectedTimes!,
-          showTopFieldValues: appState.mlExplorerSwimlane.showTopFieldValues,
-          viewByFieldName: appState.mlExplorerSwimlane.viewByFieldName,
-        }
-      : undefined;
+  const selectedCells: AppStateSelectedCells | undefined = useMemo(() => {
+    if (!appState?.mlExplorerSwimlane?.selectedType) {
+      return;
+    }
+
+    let times = appState.mlExplorerSwimlane.selectedTimes!;
+    if (typeof times === 'number' && bucketIntervalInSeconds) {
+      times = [times, times + bucketIntervalInSeconds];
+    }
+
+    return {
+      type: appState.mlExplorerSwimlane.selectedType,
+      lanes: appState.mlExplorerSwimlane.selectedLanes!,
+      times,
+      showTopFieldValues: appState.mlExplorerSwimlane.showTopFieldValues,
+      viewByFieldName: appState.mlExplorerSwimlane.viewByFieldName,
+    } as AppStateSelectedCells;
     // TODO fix appState to use memoization
-  }, [JSON.stringify(appState?.mlExplorerSwimlane)]);
+  }, [JSON.stringify(appState?.mlExplorerSwimlane), bucketIntervalInSeconds]);
 
   const setSelectedCells = useCallback(
     (swimlaneSelectedCells?: AppStateSelectedCells) => {

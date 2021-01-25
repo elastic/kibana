@@ -93,7 +93,10 @@ export interface ExplorerAppState {
   mlExplorerSwimlane: {
     selectedType?: 'overall' | 'viewBy';
     selectedLanes?: string[];
-    selectedTimes?: [number, number];
+    /**
+     * It's possible to have only "from" time boundaries, e.g. in the Watcher URL
+     */
+    selectedTimes?: [number, number] | number;
     showTopFieldValues?: boolean;
     viewByFieldName?: string;
     viewByPerPage?: number;
