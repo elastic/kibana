@@ -12,6 +12,7 @@ import { Logger } from '../../logging';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { IKibanaMigrator } from '../migrations';
 import { registerGetRoute } from './get';
+import { registerResolveRoute } from './resolve';
 import { registerCreateRoute } from './create';
 import { registerDeleteRoute } from './delete';
 import { registerFindRoute } from './find';
@@ -41,6 +42,7 @@ export function registerRoutes({
   const router = http.createRouter('/api/saved_objects/');
 
   registerGetRoute(router, { coreUsageData });
+  registerResolveRoute(router, { coreUsageData });
   registerCreateRoute(router, { coreUsageData });
   registerDeleteRoute(router, { coreUsageData });
   registerFindRoute(router, { coreUsageData });

@@ -8,7 +8,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CoreSetup } from 'kibana/server';
 import { getIsAgentsEnabled } from './config_collectors';
 import { AgentUsage, getAgentUsage } from './agent_collectors';
-import { getInternalSavedObjectsClient } from './helpers';
+import { getInternalClients } from './helpers';
 import { PackageUsage, getPackageUsage } from './package_collectors';
 import { FleetConfigType } from '..';
 
@@ -34,10 +34,10 @@ export function registerFleetUsageCollector(
     type: 'fleet',
     isReady: () => true,
     fetch: async () => {
-      const soClient = await getInternalSavedObjectsClient(core);
+      const [soClient, esClient] = await getInternalClients(core);
       return {
         agents_enabled: getIsAgentsEnabled(config),
-        agents: await getAgentUsage(soClient),
+        agents: await getAgentUsage(soClient, esClient),
         packages: await getPackageUsage(soClient),
       };
     },
