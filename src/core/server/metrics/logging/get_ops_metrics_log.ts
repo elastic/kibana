@@ -7,7 +7,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { EcsOpsMetricsEvent } from './ecs';
+import { EcsOpsMetricsEvent } from '../../logging';
 import { OpsMetrics } from '..';
 
 /**

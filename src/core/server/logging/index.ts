@@ -17,6 +17,7 @@ export {
   LogLevelId,
   LogLevel,
 } from '@kbn/logging';
+export { EcsOpsMetricsEvent } from './ecs';
 export {
   config,
   LoggingConfigType,
