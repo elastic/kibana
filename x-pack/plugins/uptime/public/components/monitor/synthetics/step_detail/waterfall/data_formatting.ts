@@ -68,6 +68,7 @@ export const isHighlightedItem = (item: NetworkItem, query?: string, activeFilte
 
 export const getSeriesAndDomain = (
   items: NetworkItems,
+  onlyHighlighted: boolean,
   query?: string,
   activeFilters?: string[]
 ) => {
@@ -177,11 +178,17 @@ export const getSeriesAndDomain = (
   const yValues = series.map((serie) => serie.y);
   const domain = { min: 0, max: Math.max(...yValues) };
 
-  return { series, domain };
+  let filteredSeries = series;
+  if (onlyHighlighted) {
+    filteredSeries = series.filter((item) => item.config.isHighlighted);
+  }
+
+  return { series: filteredSeries, domain };
 };
 
 export const getSidebarItems = (
   items: NetworkItems,
+  onlyHighlighted: boolean,
   query: string,
   activeFilters: string[]
 ): SidebarItems => {

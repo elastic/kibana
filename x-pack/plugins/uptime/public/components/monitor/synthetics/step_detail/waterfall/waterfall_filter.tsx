@@ -10,6 +10,7 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCheckbox,
 } from '@elastic/eui';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -21,6 +22,8 @@ interface Props {
   activeFilters: string[];
   setActiveFilters: Dispatch<SetStateAction<string[]>>;
   setQuery: (val: string) => void;
+  onlyHighlighted: boolean;
+  setOlyHighlighted: (val: boolean) => void;
 }
 
 const MIME_FILTERS = [
@@ -50,7 +53,14 @@ const MIME_FILTERS = [
   },
 ];
 
-export const WaterfallFilter = ({ query, setQuery, activeFilters, setActiveFilters }: Props) => {
+export const WaterfallFilter = ({
+  query,
+  setQuery,
+  activeFilters,
+  setActiveFilters,
+  onlyHighlighted,
+  setOlyHighlighted,
+}: Props) => {
   const [value, setValue] = useState(query);
 
   const toggleFilters = (val: string) => {
@@ -66,7 +76,7 @@ export const WaterfallFilter = ({ query, setQuery, activeFilters, setActiveFilte
   );
 
   return (
-    <EuiFlexGroup gutterSize="xs">
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={2}>
         <EuiFieldSearch
           fullWidth
@@ -92,7 +102,17 @@ export const WaterfallFilter = ({ query, setQuery, activeFilters, setActiveFilte
           ))}
         </EuiFilterGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={3} />
+      <EuiFlexItem grow={3}>
+        <EuiCheckbox
+          disabled={!(query || activeFilters.length > 0)}
+          id="onlyHighlighted"
+          label="Only show highlighted"
+          checked={onlyHighlighted}
+          onChange={(e) => {
+            setOlyHighlighted(e.target.checked);
+          }}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

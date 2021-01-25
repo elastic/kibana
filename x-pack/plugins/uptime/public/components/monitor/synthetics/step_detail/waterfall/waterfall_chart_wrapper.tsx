@@ -59,16 +59,17 @@ interface Props {
 export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
   const [query, setQuery] = useState<string>('');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [onlyHighlighted, setOlyHighlighted] = useState(false);
 
   const [networkData] = useState<NetworkItems>(data);
 
   const { series, domain } = useMemo(() => {
-    return getSeriesAndDomain(networkData, query, activeFilters);
-  }, [networkData, query, activeFilters]);
+    return getSeriesAndDomain(networkData, onlyHighlighted, query, activeFilters);
+  }, [networkData, query, activeFilters, onlyHighlighted]);
 
   const sidebarItems = useMemo(() => {
-    return getSidebarItems(networkData, query, activeFilters);
-  }, [networkData, query, activeFilters]);
+    return getSidebarItems(networkData, onlyHighlighted, query, activeFilters);
+  }, [networkData, query, activeFilters, onlyHighlighted]);
 
   const legendItems = getLegendItems();
 
@@ -79,6 +80,8 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
         setQuery={setQuery}
         activeFilters={activeFilters}
         setActiveFilters={setActiveFilters}
+        onlyHighlighted={onlyHighlighted}
+        setOlyHighlighted={setOlyHighlighted}
       />
     );
   };
