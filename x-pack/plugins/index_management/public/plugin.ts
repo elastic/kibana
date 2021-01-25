@@ -12,6 +12,9 @@ import { ExtensionsService } from './services';
 
 import { IndexManagementPluginSetup, SetupDependencies, StartDependencies } from './types';
 
+// avoid import from index files in plugin.ts, use specific import paths
+import { PLUGIN } from '../common/constants/plugin';
+
 export class IndexMgmtUIPlugin {
   private extensionsService = new ExtensionsService();
 
@@ -28,7 +31,7 @@ export class IndexMgmtUIPlugin {
     const { fleet, usageCollection, management } = plugins;
 
     management.sections.section.data.registerApp({
-      id: 'index_management',
+      id: PLUGIN.id,
       title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
       order: 0,
       mount: async (params) => {

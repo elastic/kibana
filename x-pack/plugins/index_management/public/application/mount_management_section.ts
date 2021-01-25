@@ -10,7 +10,8 @@ import { ManagementAppMountParams } from 'src/plugins/management/public/';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
 import { FleetSetup } from '../../../fleet/public';
-import { PLUGIN, UIM_APP_NAME } from '../../common/constants';
+import { UIM_APP_NAME } from '../../common/constants';
+import { PLUGIN } from '../../common/constants/plugin';
 import { ExtensionsService } from '../services';
 import { StartDependencies } from '../types';
 import { AppDependencies } from './app_context';
