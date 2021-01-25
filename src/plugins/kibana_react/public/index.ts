@@ -21,7 +21,6 @@ export { ValidatedDualRange, Value } from './validated_range';
 export * from './notifications';
 export { Markdown, MarkdownSimple } from './markdown';
 export { reactToUiComponent, uiToReactComponent } from './adapters';
-export { useUrlTracker } from './use_url_tracker';
 export { toMountPoint, MountPointPortal } from './util';
 export { RedirectAppLinks } from './app_links';
 

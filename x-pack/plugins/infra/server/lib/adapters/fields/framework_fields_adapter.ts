@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { FieldsAdapter, IndexFieldDescriptor } from './adapter_types';
 
@@ -16,7 +16,7 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
   }
 
   public async getIndexFields(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     indices: string
   ): Promise<IndexFieldDescriptor[]> {
     const indexPatternsService = this.framework.getIndexPatternsService(requestContext);

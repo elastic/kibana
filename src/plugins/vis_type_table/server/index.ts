@@ -6,9 +6,11 @@
  * Public License, v 1.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
+import { CoreSetup, PluginConfigDescriptor } from 'kibana/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { configSchema, ConfigSchema } from '../config';
+import { registerVisTypeTableUsageCollector } from './usage_collector';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
@@ -21,6 +23,10 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 export const plugin = () => ({
-  setup() {},
+  setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
+    if (plugins.usageCollection) {
+      registerVisTypeTableUsageCollector(plugins.usageCollection);
+    }
+  },
   start() {},
 });
