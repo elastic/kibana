@@ -10,6 +10,8 @@ import 'brace/mode/sql';
 import 'brace/theme/tomorrow';
 import 'brace/ext/language_tools';
 
+import './osquery_mode';
+
 const EDITOR_SET_OPTIONS = {
   // useWorker: false,
   enableBasicAutocompletion: true,
@@ -33,7 +35,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, on
   return (
     <EuiCodeEditor
       value={defaultValue}
-      mode="sql"
+      mode="osquery"
       theme="tomorrow"
       onChange={handleChange}
       name="osquery_editor"
