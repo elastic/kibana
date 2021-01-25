@@ -6,8 +6,6 @@
  * Public License, v 1.
  */
 
-import React from 'react';
-
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
@@ -30,18 +28,17 @@ import { ChartType } from '../../common';
 import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
 import { defaultCountLabel, LabelRotation } from '../../../charts/public';
-import { SplitTooltip } from './split_tooltip';
 
-export const getHistogramVisTypeDefinition = (
+export const getHorizontalBarVisTypeDefinition = (
   showElasticChartsOptions = false
 ): XyVisTypeDefinition => ({
-  name: 'histogram',
-  title: i18n.translate('visTypeXy.histogram.histogramTitle', {
-    defaultMessage: 'Vertical bar',
+  name: 'horizontal_bar',
+  title: i18n.translate('visTypeXy.horizontalBar.horizontalBarTitle', {
+    defaultMessage: 'Horizontal bar',
   }),
-  icon: 'visBarVertical',
-  description: i18n.translate('visTypeXy.histogram.histogramDescription', {
-    defaultMessage: 'Present data in vertical bars on an axis.',
+  icon: 'visBarHorizontal',
+  description: i18n.translate('visTypeXy.horizontalBar.horizontalBarDescription', {
+    defaultMessage: 'Present data in horizontal bars on an axis.',
   }),
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
@@ -55,15 +52,16 @@ export const getHistogramVisTypeDefinition = (
         {
           id: 'CategoryAxis-1',
           type: AxisType.Category,
-          position: Position.Bottom,
+          position: Position.Left,
           show: true,
           scale: {
             type: ScaleType.Linear,
           },
           labels: {
             show: true,
-            filter: true,
-            truncate: 100,
+            rotate: LabelRotation.Horizontal,
+            filter: false,
+            truncate: 200,
           },
           title: {},
           style: {},
@@ -74,7 +72,7 @@ export const getHistogramVisTypeDefinition = (
           id: 'ValueAxis-1',
           name: 'LeftAxis-1',
           type: AxisType.Value,
-          position: Position.Left,
+          position: Position.Bottom,
           show: true,
           scale: {
             type: ScaleType.Linear,
@@ -82,8 +80,8 @@ export const getHistogramVisTypeDefinition = (
           },
           labels: {
             show: true,
-            rotate: LabelRotation.Horizontal,
-            filter: false,
+            rotate: LabelRotation.Angled,
+            filter: true,
             truncate: 100,
           },
           title: {
@@ -96,7 +94,7 @@ export const getHistogramVisTypeDefinition = (
         {
           show: true,
           type: ChartType.Histogram,
-          mode: ChartMode.Stacked,
+          mode: ChartMode.Normal,
           data: {
             label: defaultCountLabel,
             id: '1',
@@ -108,7 +106,6 @@ export const getHistogramVisTypeDefinition = (
           showCircles: true,
         },
       ],
-      radiusRatio: 0,
       addTooltip: true,
       detailedTooltip: true,
       palette: {
@@ -119,9 +116,8 @@ export const getHistogramVisTypeDefinition = (
       legendPosition: Position.Right,
       times: [],
       addTimeMarker: false,
-      labels: {
-        show: false,
-      },
+      labels: {},
+      radiusRatio: 0,
       thresholdLine: {
         show: false,
         value: 10,
@@ -138,7 +134,7 @@ export const getHistogramVisTypeDefinition = (
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('visTypeXy.histogram.metricTitle', {
+        title: i18n.translate('visTypeXy.horizontalBar.metricTitle', {
           defaultMessage: 'Y-axis',
         }),
         min: 1,
@@ -148,7 +144,7 @@ export const getHistogramVisTypeDefinition = (
       {
         group: AggGroupNames.Metrics,
         name: 'radius',
-        title: i18n.translate('visTypeXy.histogram.radiusTitle', {
+        title: i18n.translate('visTypeXy.horizontalBar.radiusTitle', {
           defaultMessage: 'Dot size',
         }),
         min: 0,
@@ -158,7 +154,7 @@ export const getHistogramVisTypeDefinition = (
       {
         group: AggGroupNames.Buckets,
         name: 'segment',
-        title: i18n.translate('visTypeXy.histogram.segmentTitle', {
+        title: i18n.translate('visTypeXy.horizontalBar.segmentTitle', {
           defaultMessage: 'X-axis',
         }),
         min: 0,
@@ -168,7 +164,7 @@ export const getHistogramVisTypeDefinition = (
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('visTypeXy.histogram.groupTitle', {
+        title: i18n.translate('visTypeXy.horizontalBar.groupTitle', {
           defaultMessage: 'Split series',
         }),
         min: 0,
@@ -178,18 +174,12 @@ export const getHistogramVisTypeDefinition = (
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('visTypeXy.histogram.splitTitle', {
+        title: i18n.translate('visTypeXy.horizontalBar.splitTitle', {
           defaultMessage: 'Split chart',
         }),
         min: 0,
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
-        // TODO: Remove when split chart aggs are supported
-        // https://github.com/elastic/kibana/issues/82496
-        ...(showElasticChartsOptions && {
-          disabled: true,
-          tooltip: <SplitTooltip />,
-        }),
       },
     ],
   },

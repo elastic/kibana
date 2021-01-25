@@ -16,18 +16,19 @@ import {
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
 
-import { BUCKET_TYPES } from '../../../data/public';
-
 import { Aspects } from '../types';
 
 import './_detailed_tooltip.scss';
 import { fillEmptyValue } from '../utils/get_series_name_fn';
-import { COMPLEX_SPLIT_ACCESSOR } from '../utils/accessors';
+import { COMPLEX_SPLIT_ACCESSOR, isRangeAggType } from '../utils/accessors';
 
 interface TooltipData {
   label: string;
   value: string;
 }
+
+// TODO: replace when exported from elastic/charts
+const DEFAULT_SINGLE_PANEL_SM_VALUE = '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__';
 
 const getTooltipData = (
   aspects: Aspects,
@@ -37,10 +38,7 @@ const getTooltipData = (
   const data: TooltipData[] = [];
 
   if (header) {
-    const xFormatter =
-      aspects.x.aggType === BUCKET_TYPES.DATE_RANGE || aspects.x.aggType === BUCKET_TYPES.RANGE
-        ? null
-        : aspects.x.formatter;
+    const xFormatter = isRangeAggType(aspects.x.aggType) ? null : aspects.x.formatter;
     data.push({
       label: aspects.x.title,
       value: xFormatter ? xFormatter(header.value) : `${header.value}`,
@@ -79,6 +77,28 @@ const getTooltipData = (
       });
     }
   });
+
+  if (
+    aspects.splitColumn &&
+    valueSeries.smHorizontalAccessorValue !== undefined &&
+    valueSeries.smHorizontalAccessorValue !== DEFAULT_SINGLE_PANEL_SM_VALUE
+  ) {
+    data.push({
+      label: aspects.splitColumn.title,
+      value: `${valueSeries.smHorizontalAccessorValue}`,
+    });
+  }
+
+  if (
+    aspects.splitRow &&
+    valueSeries.smVerticalAccessorValue !== undefined &&
+    valueSeries.smVerticalAccessorValue !== DEFAULT_SINGLE_PANEL_SM_VALUE
+  ) {
+    data.push({
+      label: aspects.splitRow.title,
+      value: `${valueSeries.smVerticalAccessorValue}`,
+    });
+  }
 
   return data;
 };
