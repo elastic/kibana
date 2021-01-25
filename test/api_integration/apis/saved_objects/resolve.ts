@@ -12,7 +12,7 @@ import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('resolve', () => {
@@ -81,10 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
-            ignore: [404],
-          })
+          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
       );
 
       it('should return basic 404 without mentioning index', async () =>
