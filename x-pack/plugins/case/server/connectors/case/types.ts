@@ -15,7 +15,7 @@ import {
   ConnectorSchema,
   CommentSchema,
 } from './schema';
-import { CaseResponse, CasesResponse, CombinedCaseResponse } from '../../../common/api';
+import { CaseResponse, CasesResponse, CollectionWithSubCaseResponse } from '../../../common/api';
 
 export type CaseConfiguration = TypeOf<typeof CaseConfigurationSchema>;
 export type Connector = TypeOf<typeof ConnectorSchema>;
@@ -28,7 +28,7 @@ export type ExecutorSubActionAddCommentParams = TypeOf<
 >;
 
 export type CaseExecutorParams = TypeOf<typeof CaseExecutorParamsSchema>;
-export type CaseExecutorResponse = CaseResponse | CasesResponse | CombinedCaseResponse;
+export type CaseExecutorResponse = CaseResponse | CasesResponse | CollectionWithSubCaseResponse;
 
 export type CaseActionType = ActionType<
   CaseConfiguration,

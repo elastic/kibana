@@ -9,11 +9,18 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { KibanaRequest, SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import {
+  KibanaRequest,
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+} from 'src/core/server';
 import {
   decodeComment,
-  flattenCombinedCaseSavedObject,
+  flattenCommentableCaseSavedObject,
   flattenSubCaseSavedObject,
+  getAlertIds,
+  isAlertGroupContext,
   transformNewComment,
 } from '../../routes/api/utils';
 
@@ -28,18 +35,19 @@ import {
   SubCaseAttributes,
   SubCaseResponseRt,
   SubCaseResponse,
-  InternalCommentRequestRt,
-  InternalCommentRequest,
   CommentRequest,
-  CombinedCaseResponseRt,
-  CombinedCaseResponse,
+  CollectWithSubCaseResponseRt,
+  CollectionWithSubCaseResponse,
+  ContextTypeAlertGroupRt,
+  CommentRequestAlertGroupType,
+  CommentAttributes,
 } from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
 import { CaseClientAddComment, CaseClientFactoryArguments } from '../types';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
-import { CombinedCase } from './combined_case';
+import { CommentableCase } from '../../common';
 import { CaseClientImpl } from '..';
 
 async function getSubCase({
@@ -62,35 +70,44 @@ async function getSubCase({
   return caseService.createSubCase(savedObjectsClient, createdAt, caseId);
 }
 
-function isUserOrAlertComment(comment: InternalCommentRequest): comment is CommentRequest {
-  return comment.type === CommentType.user || comment.type === CommentType.alert;
+function countAlerts(comments: SavedObjectsFindResponse<CommentAttributes>): number {
+  let totalAlerts = 0;
+  for (const comment of comments.saved_objects) {
+    if (
+      comment.attributes.type === CommentType.alert ||
+      comment.attributes.type === CommentType.alertGroup
+    ) {
+      if (Array.isArray(comment.attributes.alertId)) {
+        totalAlerts += comment.attributes.alertId.length;
+      } else {
+        totalAlerts++;
+      }
+    }
+  }
+  return totalAlerts;
 }
 
 interface AddCommentFromRuleArgs {
   caseClient: CaseClientImpl;
   caseId: string;
-  comment: InternalCommentRequest;
+  comment: CommentRequestAlertGroupType;
   savedObjectsClient: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
 }
 
-export const addCommentFromRule = async ({
+export const addAlertGroup = async ({
   savedObjectsClient,
   caseService,
   userActionService,
   caseClient,
   caseId,
   comment,
-}: AddCommentFromRuleArgs): Promise<CombinedCaseResponse> => {
+}: AddCommentFromRuleArgs): Promise<CollectionWithSubCaseResponse> => {
   const query = pipe(
-    InternalCommentRequestRt.decode(comment),
+    ContextTypeAlertGroupRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
-
-  if (isUserOrAlertComment(comment)) {
-    return caseClient.addComment(caseId, comment);
-  }
 
   decodeComment(comment);
   const createdDate = new Date().toISOString();
@@ -164,7 +181,18 @@ export const addCommentFromRule = async ({
     }),
   ]);
 
-  // TODO: handle updating the alert group status
+  if (
+    (newComment.attributes.type === CommentType.alert ||
+      newComment.attributes.type === CommentType.alertGroup) &&
+    myCase.attributes.settings.syncAlerts
+  ) {
+    const ids = getAlertIds(query);
+    caseClient.updateAlertsStatus({
+      ids,
+      status: myCase.attributes.status,
+      indices: new Set([newComment.attributes.index]),
+    });
+  }
 
   const totalCommentsFindBySubCase = await caseService.getAllCaseComments({
     client: savedObjectsClient,
@@ -202,11 +230,11 @@ export const addCommentFromRule = async ({
     }),
   ]);
 
-  // TODO: should we return anything? This will only return the sub case and comments
-  return CombinedCaseResponseRt.encode(
-    flattenCombinedCaseSavedObject({
+  return CollectWithSubCaseResponseRt.encode(
+    flattenCommentableCaseSavedObject({
+      totalAlerts: countAlerts(comments),
       comments: comments.saved_objects,
-      combinedCase: new CombinedCase(
+      combinedCase: new CommentableCase(
         {
           ...myCase,
           ...updatedCase,
@@ -233,7 +261,7 @@ async function getCombinedCase(
   service: CaseServiceSetup,
   client: SavedObjectsClientContract,
   id: string
-): Promise<CombinedCase> {
+): Promise<CommentableCase> {
   const [casePromise, subCasePromise] = await Promise.allSettled([
     service.getCase({
       client,
@@ -251,7 +279,7 @@ async function getCombinedCase(
         client,
         id: subCasePromise.value.references[0].id,
       });
-      return new CombinedCase(caseValue, subCasePromise.value);
+      return new CommentableCase(caseValue, subCasePromise.value);
     } else {
       // TODO: throw a boom instead?
       throw Error('Sub case found without reference to collection');
@@ -261,7 +289,7 @@ async function getCombinedCase(
   if (casePromise.status === 'rejected') {
     throw casePromise.reason;
   } else {
-    return new CombinedCase(casePromise.value);
+    return new CommentableCase(casePromise.value);
   }
 }
 
@@ -283,21 +311,20 @@ export const addComment = async ({
   caseClient,
   caseId,
   comment,
-}: AddCommentArgs): Promise<CombinedCaseResponse> => {
+}: AddCommentArgs): Promise<CollectionWithSubCaseResponse> => {
   const query = pipe(
     CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
+  if (isAlertGroupContext(comment)) {
+    return caseClient.addAlertGroup(caseId, comment);
+  }
+
   decodeComment(comment);
   const createdDate = new Date().toISOString();
 
   const combinedCase = await getCombinedCase(caseService, savedObjectsClient, caseId);
-
-  /* const myCase = await caseService.getCase({
-    client: savedObjectsClient,
-    id: caseId,
-  });*/
 
   // An alert cannot be attach to a closed case.
   if (query.type === CommentType.alert && combinedCase.status === CaseStatuses.closed) {
@@ -330,8 +357,6 @@ export const addComment = async ({
     }),
   ]);
 
-  // TODO: need to figure out what we do in this case for alerts that are attached to sub cases
-  // If the case is synced with alerts the newly attached alert must match the status of the case.
   if (newComment.attributes.type === CommentType.alert && updatedCase.settings.syncAlerts) {
     const ids = Array.isArray(newComment.attributes.alertId)
       ? newComment.attributes.alertId
@@ -379,10 +404,11 @@ export const addComment = async ({
     }),
   ]);
 
-  return CombinedCaseResponseRt.encode(
-    flattenCombinedCaseSavedObject({
+  return CollectWithSubCaseResponseRt.encode(
+    flattenCommentableCaseSavedObject({
       combinedCase: updatedCase,
       comments: comments.saved_objects,
+      totalAlerts: countAlerts(comments),
     })
   );
 };

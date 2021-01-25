@@ -118,7 +118,8 @@ export interface CaseServiceSetup {
   deleteComment(args: GetCommentArgs): Promise<{}>;
   deleteSubCase(client: SavedObjectsClientContract, id: string): Promise<{}>;
   findCases(args: FindCasesArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>>;
-  findSubCases(
+  findSubCases(args: FindCasesArgs): Promise<SavedObjectsFindResponse<SubCaseAttributes>>;
+  findSubCasesByCaseId(
     client: SavedObjectsClientContract,
     caseId: string
   ): Promise<SavedObjectsFindResponse<SubCaseAttributes>>;
@@ -272,36 +273,52 @@ export class CaseService implements CaseServiceSetup {
       throw error;
     }
   }
+
   public async findCases({
     client,
     options,
   }: FindCasesArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
     try {
-      this.log.debug(`Attempting to GET all cases`);
+      this.log.debug(`Attempting to find cases`);
       return await client.find({ ...options, type: CASE_SAVED_OBJECT });
     } catch (error) {
-      this.log.debug(`Error on GET cases: ${error}`);
+      this.log.debug(`Error on find cases: ${error}`);
       throw error;
     }
   }
 
-  public async findSubCases(
+  public async findSubCases({
+    client,
+    options,
+  }: FindCasesArgs): Promise<SavedObjectsFindResponse<SubCaseAttributes>> {
+    try {
+      this.log.debug(`Attempting to find sub cases`);
+      return await client.find({ ...options, type: SUB_CASE_SAVED_OBJECT });
+    } catch (error) {
+      this.log.debug(`Error on find sub cases: ${error}`);
+      throw error;
+    }
+  }
+
+  public async findSubCasesByCaseId(
     client: SavedObjectsClientContract,
     caseId: string
   ): Promise<SavedObjectsFindResponse<SubCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET sub cases for case collection id ${caseId}`);
-      return client.find({
-        type: SUB_CASE_SAVED_OBJECT,
-        hasReference: [
-          {
-            type: CASE_SAVED_OBJECT,
-            id: caseId,
-          },
-        ],
+      return this.findSubCases({
+        client,
+        options: {
+          hasReference: [
+            {
+              type: CASE_SAVED_OBJECT,
+              id: caseId,
+            },
+          ],
+        },
       });
     } catch (error) {
-      this.log.debug(`Error on GET all sub cases for case collection ids ${caseId}: ${error}`);
+      this.log.debug(`Error on GET all sub cases for case collection id ${caseId}: ${error}`);
       throw error;
     }
   }

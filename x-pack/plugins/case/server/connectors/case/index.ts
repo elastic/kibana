@@ -89,11 +89,11 @@ async function executor(
   }
 
   if (subAction === 'create') {
-    data = await caseClient.create({
+    data = await caseClient.create(
       // TODO: is it possible for the action framework to create an individual case that is not associated with sub cases?
       // TODO: I think this should be an individual case...
-      theCase: { ...(subActionParams as CasePostRequest), type: CaseType.parent },
-    });
+      { ...(subActionParams as CasePostRequest), type: CaseType.parent }
+    );
   }
 
   if (subAction === 'update') {
@@ -105,15 +105,12 @@ async function executor(
       {} as CasePatchRequest
     );
 
-    data = await caseClient.update({
-      caseClient,
-      cases: { cases: [updateParamsWithoutNullValues] },
-    });
+    data = await caseClient.update({ cases: [updateParamsWithoutNullValues] });
   }
 
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    data = await caseClient.addCommentFromRule({ caseClient, caseId, comment });
+    data = await caseClient.addComment(caseId, comment);
   }
 
   return { status: 'ok', data: data ?? {}, actionId };

@@ -11,6 +11,7 @@ import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
 import { CaseConnectorRt, ESCaseConnector } from '../connectors';
+import { SubCaseResponseRt } from './sub_case';
 
 export enum CaseStatuses {
   open = 'open',
@@ -101,6 +102,7 @@ export const CaseClientPostRequestRt = rt.type({
 export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;
 
 export const CasesFindRequestRt = rt.partial({
+  type: CaseTypeRt,
   tags: rt.union([rt.array(rt.string), rt.string]),
   status: CaseStatusRt,
   reporters: rt.union([rt.array(rt.string), rt.string]),
@@ -122,6 +124,7 @@ export const CaseResponseRt = rt.intersection([
     version: rt.string,
   }),
   rt.partial({
+    subCases: rt.array(SubCaseResponseRt),
     comments: rt.array(CommentResponseRt),
   }),
 ]);
@@ -163,6 +166,7 @@ export type CaseClientPostRequest = rt.TypeOf<typeof CaseClientPostRequestRt>;
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
 export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
+export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 // The update request is different from the patch request in that it allow updating the type field

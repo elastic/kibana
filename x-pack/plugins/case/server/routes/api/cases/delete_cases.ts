@@ -51,7 +51,7 @@ async function deleteSubCases({
   caseIds: string[];
 }) {
   const subCasesForCaseIds = await Promise.all(
-    caseIds.map((id) => caseService.findSubCases(client, id))
+    caseIds.map((id) => caseService.findSubCasesByCaseId(client, id))
   );
 
   const commentsForSubCases = await Promise.all(

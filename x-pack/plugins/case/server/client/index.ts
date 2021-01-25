@@ -19,7 +19,7 @@ import {
 } from './types';
 import { create } from './cases/create';
 import { update } from './cases/update';
-import { addComment, addCommentFromRule } from './comments/add';
+import { addComment, addAlertGroup } from './comments/add';
 import { getFields } from './configure/get_fields';
 import { getMappings } from './configure/get_mappings';
 import { updateAlertsStatus } from './alerts/update_status';
@@ -40,8 +40,8 @@ import {
   CasesResponse,
   CaseType,
   CommentRequest,
+  CommentRequestAlertGroupType,
   excess,
-  InternalCommentRequest,
   throwErrors,
 } from '../../common/api';
 
@@ -154,8 +154,8 @@ export class CaseClientImpl implements CaseClient {
     });
   }
 
-  public async addCommentFromRule(caseId: string, comment: InternalCommentRequest) {
-    return addCommentFromRule({
+  public async addAlertGroup(caseId: string, comment: CommentRequestAlertGroupType) {
+    return addAlertGroup({
       savedObjectsClient: this._savedObjectsClient,
       caseService: this._caseService,
       userActionService: this._userActionService,

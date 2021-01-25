@@ -13,11 +13,11 @@ import {
   CasesPatchRequest,
   CasesResponse,
   CaseStatuses,
-  CombinedCaseResponse,
+  CollectionWithSubCaseResponse,
   CommentRequest,
+  CommentRequestAlertGroupType,
   ConnectorMappingsAttributes,
   GetFieldsResponse,
-  InternalCommentRequest,
   SubCaseResponse,
 } from '../../common/api';
 import {
@@ -47,7 +47,7 @@ export interface CaseClientAddComment {
 
 export interface CaseClientAddInternalComment {
   caseId: string;
-  comment: InternalCommentRequest;
+  comment: CommentRequest;
 }
 
 export interface CaseClientUpdateAlertsStatus {
@@ -73,11 +73,11 @@ export interface ConfigureFields {
   connectorType: string;
 }
 export interface CaseClient {
-  addComment: (caseId: string, comment: CommentRequest) => Promise<CombinedCaseResponse>;
-  addCommentFromRule: (
+  addComment: (caseId: string, comment: CommentRequest) => Promise<CollectionWithSubCaseResponse>;
+  addAlertGroup: (
     caseId: string,
-    comment: InternalCommentRequest
-  ) => Promise<CombinedCaseResponse>;
+    comment: CommentRequestAlertGroupType
+  ) => Promise<CollectionWithSubCaseResponse>;
   create(theCase: CaseClientPostRequest): Promise<CaseResponse>;
   convertCaseToCollection(caseInfo: CaseConvertRequest): Promise<CasesResponse>;
   getFields(args: ConfigureFields): Promise<GetFieldsResponse>;

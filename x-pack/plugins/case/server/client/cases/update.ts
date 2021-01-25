@@ -24,6 +24,7 @@ import {
   CasesPatchRequest,
   CasesUpdateRequest,
   CasesUpdateRequestRt,
+  CommentType,
 } from '../../../common/api';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import {
@@ -33,6 +34,7 @@ import {
 
 import { CaseClientUpdate, CaseClientFactoryArguments } from '../types';
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseClientImpl } from '..';
 
 interface UpdateArgs {
@@ -178,7 +180,7 @@ export const update = async ({
         id: theCase.id,
         options: {
           fields: [],
-          filter: 'cases-comments.attributes.type: alert',
+          filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alertGroup}`,
           page: 1,
           perPage: 1,
         },
@@ -189,7 +191,7 @@ export const update = async ({
         id: theCase.id,
         options: {
           fields: [],
-          filter: 'cases-comments.attributes.type: alert',
+          filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alertGroup}`,
           page: 1,
           perPage: totalComments.total,
         },

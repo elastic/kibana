@@ -37,17 +37,16 @@ import {
   AssociationType,
   SubCaseAttributes,
   SubCaseResponse,
-  InternalCommentRequest,
   CommentRequestAlertGroupType,
   ContextTypeAlertGroupRt,
-  NeedToFixCommentRequestAlertGroupType,
-  CombinedCaseResponse,
+  CommentAlertGroupAttributesType,
+  CollectionWithSubCaseResponse,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
 import { SortFieldCase, TotalCommentByCase } from './types';
 // TODO: figure out where the class should actually be stored
-import { CombinedCase } from '../../client/comments/combined_case';
+import { CommentableCase } from '../../common';
 
 // TODO: refactor these functions to a common location, this is used by the caseClient too
 
@@ -92,12 +91,37 @@ export const transformNewCase = ({
   updated_by: null,
 });
 
-type NewCommentArgs = InternalCommentRequest & {
+type NewCommentArgs = CommentRequest & {
   associationType: AssociationType;
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
   username?: string | null;
+};
+
+/**
+ * Return the IDs from the comment.
+ *
+ * @param comment the comment from the add comment request
+ */
+export const getAlertIds = (comment: CommentRequest): string[] => {
+  if (isAlertGroupContext(comment)) {
+    const ids: string[] = [];
+    if (Array.isArray(comment.alerts)) {
+      ids.push(
+        ...comment.alerts.map((alert: { _id: string }) => {
+          return alert._id;
+        })
+      );
+    } else {
+      ids.push(comment.alerts._id);
+    }
+    return ids;
+  } else if (isAlertContext(comment)) {
+    return Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
+  } else {
+    return [];
+  }
 };
 
 export const transformNewComment = ({
@@ -109,21 +133,12 @@ export const transformNewComment = ({
   username,
   ...comment
 }: NewCommentArgs): CommentAttributes => {
-  if (isAlertGroupRequest(comment)) {
-    const ids: string[] = [];
-    if (Array.isArray(comment.alerts)) {
-      ids.push(
-        ...comment.alerts.map((alert: { _id: string }) => {
-          return alert._id;
-        })
-      );
-    } else {
-      ids.push(comment.alerts._id);
-    }
+  if (isAlertGroupContext(comment)) {
+    const ids = getAlertIds(comment);
 
     return {
       associationType,
-      alertIds: ids,
+      alertId: ids,
       index: comment.index,
       ruleId: comment.ruleId,
       type: comment.type,
@@ -206,15 +221,16 @@ export const flattenCaseSavedObject = ({
   connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
 });
 
-export const flattenCombinedCaseSavedObject = ({
+export const flattenCommentableCaseSavedObject = ({
   combinedCase,
   comments = [],
   totalComment = comments.length,
 }: {
-  combinedCase: CombinedCase;
+  combinedCase: CommentableCase;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
-}): CombinedCaseResponse => ({
+  totalAlerts?: number;
+}): CollectionWithSubCaseResponse => ({
   id: combinedCase.id,
   version: combinedCase.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
@@ -226,15 +242,18 @@ export const flattenSubCaseSavedObject = ({
   savedObject,
   comments = [],
   totalComment = comments.length,
+  totalAlerts = 0,
 }: {
   savedObject: SavedObject<SubCaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
+  totalAlerts?: number;
 }): SubCaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
   totalComment,
+  totalAlerts,
   ...savedObject.attributes,
 });
 
@@ -280,36 +299,36 @@ export const sortToSnake = (sortField: string): SortFieldCase => {
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 const isUserContext = (
-  context: InternalCommentRequest | CommentAttributes
+  context: CommentRequest | CommentAttributes
 ): context is CommentRequestUserType => {
   return context.type === CommentType.user;
 };
 
 const isAlertContext = (
-  context: InternalCommentRequest | CommentAttributes
+  context: CommentRequest | CommentAttributes
 ): context is CommentRequestAlertType => {
   return context.type === CommentType.alert;
 };
 
-const isAlertGroupRequest = (
-  context: InternalCommentRequest
+export const isAlertGroupContext = (
+  context: CommentRequest
 ): context is CommentRequestAlertGroupType => {
   return context.type === CommentType.alertGroup;
 };
 
-export const decodeComment = (comment: InternalCommentRequest) => {
+export const decodeComment = (comment: CommentRequest) => {
   if (isUserContext(comment)) {
     pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
   } else if (isAlertContext(comment)) {
     pipe(excess(ContextTypeAlertRt).decode(comment), fold(throwErrors(badRequest), identity));
-  } else if (isAlertGroupRequest(comment)) {
+  } else if (isAlertGroupContext(comment)) {
     pipe(excess(ContextTypeAlertGroupRt).decode(comment), fold(throwErrors(badRequest), identity));
   }
 };
 
 export const getCommentContextFromAttributes = (
   attributes: CommentAttributes
-): CommentRequestUserType | CommentRequestAlertType | NeedToFixCommentRequestAlertGroupType =>
+): CommentRequestUserType | CommentRequestAlertType | CommentAlertGroupAttributesType =>
   isUserContext(attributes)
     ? {
         type: CommentType.user,
@@ -323,7 +342,7 @@ export const getCommentContextFromAttributes = (
       }
     : {
         type: CommentType.alertGroup,
-        alertIds: attributes.alertIds,
+        alertId: attributes.alertId,
         index: attributes.index,
         ruleId: attributes.ruleId,
       };

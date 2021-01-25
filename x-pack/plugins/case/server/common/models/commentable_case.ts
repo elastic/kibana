@@ -8,7 +8,7 @@ import { SavedObject, SavedObjectReference, SavedObjectsClientContract } from 's
 import {
   CaseSettings,
   CaseStatuses,
-  CombinedCaseAttributes,
+  CollectionWithSubCaseAttributes,
   ESCaseAttributes,
   SubCaseAttributes,
 } from '../../../common/api';
@@ -22,7 +22,11 @@ interface UserInfo {
   email: string | null | undefined;
 }
 
-export class CombinedCase {
+/**
+ * This class represents a case that can have a comment attached to it. This includes
+ * a Sub Case, Case, and Collection.
+ */
+export class CommentableCase {
   constructor(
     private collection: SavedObject<ESCaseAttributes>,
     private subCase?: SavedObject<SubCaseAttributes>
@@ -44,7 +48,7 @@ export class CombinedCase {
     return this.collection.attributes.settings;
   }
 
-  public get attributes(): CombinedCaseAttributes {
+  public get attributes(): CollectionWithSubCaseAttributes {
     return {
       subCase: this.subCase?.attributes ?? null,
       caseCollection: {
@@ -76,7 +80,7 @@ export class CombinedCase {
     soClient: SavedObjectsClientContract;
     date: string;
     user: UserInfo;
-  }): Promise<CombinedCase> {
+  }): Promise<CommentableCase> {
     if (this.subCase) {
       const updated = await service.patchSubCase({
         client: soClient,
@@ -90,7 +94,7 @@ export class CombinedCase {
         version: this.subCase.version,
       });
 
-      return new CombinedCase(this.collection, {
+      return new CommentableCase(this.collection, {
         ...this.subCase,
         attributes: {
           ...this.subCase.attributes,
@@ -110,7 +114,7 @@ export class CombinedCase {
       version: this.collection.version,
     });
 
-    return new CombinedCase(
+    return new CommentableCase(
       {
         ...this.collection,
         attributes: {

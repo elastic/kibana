@@ -29,7 +29,7 @@ export const SubCaseAttributesRt = rt.intersection([
   }),
 ]);
 
-export const CombinedCaseAttributesRt = rt.type({
+export const CollectionSubCaseAttributesRt = rt.type({
   subCase: rt.union([SubCaseAttributesRt, rt.null]),
   caseCollection: CaseAttributesRt,
 });
@@ -46,14 +46,15 @@ export const SubCasesFindRequestRt = rt.partial({
   sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
 });
 
-export const CombinedCaseResponseRt = rt.intersection([
-  CombinedCaseAttributesRt,
+export const CollectWithSubCaseResponseRt = rt.intersection([
+  CollectionSubCaseAttributesRt,
   rt.type({
     id: rt.string,
     totalComment: rt.number,
     version: rt.string,
   }),
   rt.partial({
+    totalAlerts: rt.number,
     comments: rt.array(CommentResponseRt),
   }),
 ]);
@@ -63,6 +64,7 @@ export const SubCaseResponseRt = rt.intersection([
   rt.type({
     id: rt.string,
     totalComment: rt.number,
+    totalAlerts: rt.number,
     version: rt.string,
   }),
   rt.partial({
@@ -88,8 +90,10 @@ export const SubCasePatchRequestRt = rt.intersection([
 export const SubCasesPatchRequestRt = rt.type({ cases: rt.array(SubCasePatchRequestRt) });
 export const SubCasesResponseRt = rt.array(SubCaseResponseRt);
 
-export type CombinedCaseAttributes = rt.TypeOf<typeof CombinedCaseAttributesRt>;
-export type CombinedCaseResponse = rt.TypeOf<typeof CombinedCaseResponseRt>;
+// TODO: extract these to their own file and rename the types
+export type CollectionWithSubCaseAttributes = rt.TypeOf<typeof CollectionSubCaseAttributesRt>;
+export type CollectionWithSubCaseResponse = rt.TypeOf<typeof CollectWithSubCaseResponseRt>;
+
 export type SubCaseAttributes = rt.TypeOf<typeof SubCaseAttributesRt>;
 export type SubCaseResponse = rt.TypeOf<typeof SubCaseResponseRt>;
 export type SubCasesResponse = rt.TypeOf<typeof SubCasesResponseRt>;
