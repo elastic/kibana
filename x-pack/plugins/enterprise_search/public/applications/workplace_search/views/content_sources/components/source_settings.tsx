@@ -6,10 +6,9 @@
 
 import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
 
-import { History } from 'history';
 import { useActions, useValues } from 'kea';
 import { isEmpty } from 'lodash';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import {
   EuiButton,
@@ -22,8 +21,6 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { SOURCES_PATH, getSourcesPath } from '../../../routes';
-
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
@@ -35,7 +32,6 @@ import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
 
 export const SourceSettings: React.FC = () => {
-  const history = useHistory() as History;
   const {
     updateContentSource,
     removeContentSource,
@@ -83,8 +79,7 @@ export const SourceSettings: React.FC = () => {
      * modal here and set the button that was clicked to delete to a loading state.
      */
     setModalVisibility(false);
-    const onSourceRemoved = () => history.push(getSourcesPath(SOURCES_PATH, isOrganization));
-    removeContentSource(id, onSourceRemoved);
+    removeContentSource(id);
   };
 
   const confirmModal = (

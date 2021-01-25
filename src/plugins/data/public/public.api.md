@@ -1265,6 +1265,7 @@ export type IMetricAggType = MetricAggType;
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
     constructor({ spec, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
+    addRuntimeField(name: string, runtimeField: RuntimeField): void;
     addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     readonly allowNoIndex: boolean;
     // (undocumented)
@@ -1304,6 +1305,7 @@ export class IndexPattern implements IIndexPattern {
         type: string | undefined;
         typeMeta: string | undefined;
         allowNoIndex: true | undefined;
+        runtimeFieldMap: string | undefined;
     };
     // (undocumented)
     getComputedFields(): {
@@ -1313,6 +1315,7 @@ export class IndexPattern implements IIndexPattern {
             field: any;
             format: string;
         }[];
+        runtimeFields: Record<string, RuntimeField>;
     };
     // (undocumented)
     getFieldAttrs: () => {
@@ -1352,6 +1355,7 @@ export class IndexPattern implements IIndexPattern {
     isTimeNanosBased(): boolean;
     // (undocumented)
     metaFields: string[];
+    removeRuntimeField(name: string): void;
     removeScriptedField(fieldName: string): void;
     resetOriginalSavedObjectBody: () => void;
     // (undocumented)
@@ -1402,6 +1406,8 @@ export interface IndexPatternAttributes {
     // (undocumented)
     intervalName?: string;
     // (undocumented)
+    runtimeFieldMap?: string;
+    // (undocumented)
     sourceFilters?: string;
     // (undocumented)
     timeFieldName?: string;
@@ -1435,12 +1441,16 @@ export class IndexPatternField implements IFieldType {
     get esTypes(): string[] | undefined;
     // (undocumented)
     get filterable(): boolean;
+    get isMapped(): boolean | undefined;
     get lang(): string | undefined;
     set lang(lang: string | undefined);
     // (undocumented)
     get name(): string;
     // (undocumented)
     get readFromDocValues(): boolean;
+    // (undocumented)
+    get runtimeField(): RuntimeField | undefined;
+    set runtimeField(runtimeField: RuntimeField | undefined);
     get script(): string | undefined;
     set script(script: string | undefined);
     // (undocumented)
@@ -1536,6 +1546,8 @@ export interface IndexPatternSpec {
     id?: string;
     // @deprecated (undocumented)
     intervalName?: string;
+    // (undocumented)
+    runtimeFieldMap?: Record<string, RuntimeField>;
     // (undocumented)
     sourceFilters?: SourceFilter[];
     // (undocumented)
@@ -2585,8 +2597,9 @@ export const UI_SETTINGS: {
 // src/plugins/data/common/es_query/filters/meta_filter.ts:43:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrase_filter.ts:22:3 - (ae-forgotten-export) The symbol "PhraseFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrases_filter.ts:20:3 - (ae-forgotten-export) The symbol "PhrasesFilterMeta" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:63:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:133:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:65:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:138:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:169:7 - (ae-forgotten-export) The symbol "RuntimeField" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/search/aggs/types.ts:139:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/search/search_source/search_source.ts:186:7 - (ae-forgotten-export) The symbol "SearchFieldValue" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/field_formats/field_formats_service.ts:56:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
