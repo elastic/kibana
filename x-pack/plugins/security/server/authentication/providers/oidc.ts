@@ -248,14 +248,20 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/oidc/authenticate`.
-      result = await this.options.client.callAsInternalUser('shield.oidcAuthenticate', {
-        body: {
-          state: stateOIDCState,
-          nonce: stateNonce,
-          redirect_uri: authenticationResponseURI,
-          realm: this.realm,
-        },
-      });
+      // We can replace generic `transport.request` with a dedicated API method call once
+      // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+      result = (
+        await this.options.client.asInternalUser.transport.request({
+          method: 'POST',
+          path: '/_security/oidc/authenticate',
+          body: {
+            state: stateOIDCState,
+            nonce: stateNonce,
+            redirect_uri: authenticationResponseURI,
+            realm: this.realm,
+          },
+        })
+      ).body as any;
     } catch (err) {
       this.logger.debug(`Failed to authenticate request via OpenID Connect: ${err.message}`);
       return AuthenticationResult.failed(err);
@@ -289,11 +295,15 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/oidc/prepare`.
-      const {
-        state,
-        nonce,
-        redirect,
-      } = await this.options.client.callAsInternalUser('shield.oidcPrepare', { body: params });
+      // We can replace generic `transport.request` with a dedicated API method call once
+      // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+      const { state, nonce, redirect } = (
+        await this.options.client.asInternalUser.transport.request({
+          method: 'POST',
+          path: '/_security/oidc/prepare',
+          body: params,
+        })
+      ).body as any;
 
       this.logger.debug('Redirecting to OpenID Connect Provider with authentication request.');
       return AuthenticationResult.redirectTo(
@@ -407,18 +417,17 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
 
     if (state?.accessToken) {
       try {
-        const logoutBody = {
-          body: {
-            token: state.accessToken,
-            refresh_token: state.refreshToken,
-          },
-        };
         // This operation should be performed on behalf of the user with a privilege that normal
         // user usually doesn't have `cluster:admin/xpack/security/oidc/logout`.
-        const { redirect } = await this.options.client.callAsInternalUser(
-          'shield.oidcLogout',
-          logoutBody
-        );
+        // We can replace generic `transport.request` with a dedicated API method call once
+        // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+        const { redirect } = (
+          await this.options.client.asInternalUser.transport.request({
+            method: 'POST',
+            path: '/_security/oidc/logout',
+            body: { token: state.accessToken, refresh_token: state.refreshToken },
+          })
+        ).body as any;
 
         this.logger.debug('User session has been successfully invalidated.');
 

@@ -335,6 +335,42 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.redactSavedObjectNamespaces(savedObject, [options.namespace]);
   }
 
+  public async resolve<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ) {
+    try {
+      const args = { type, id, options };
+      await this.ensureAuthorized(type, 'get', options.namespace, { args, auditAction: 'resolve' });
+    } catch (error) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.RESOLVE,
+          savedObject: { type, id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    const resolveResult = await this.baseClient.resolve<T>(type, id, options);
+
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.RESOLVE,
+        savedObject: { type, id: resolveResult.saved_object.id },
+      })
+    );
+
+    return {
+      ...resolveResult,
+      saved_object: await this.redactSavedObjectNamespaces(resolveResult.saved_object, [
+        options.namespace,
+      ]),
+    };
+  }
+
   public async update<T = unknown>(
     type: string,
     id: string,
