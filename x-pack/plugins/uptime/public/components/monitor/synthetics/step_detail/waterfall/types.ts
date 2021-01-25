@@ -95,6 +95,9 @@ export const FriendlyMimetypeLabels = {
   [MimeType.Font]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.mimeTypes.font', {
     defaultMessage: 'Font',
   }),
+  [MimeType.XHR]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.mimeTypes.xhr', {
+    defaultMessage: 'XHR',
+  }),
   [MimeType.Other]: i18n.translate(
     'xpack.uptime.synthetics.waterfallChart.labels.mimeTypes.other',
     {

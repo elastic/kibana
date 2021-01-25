@@ -86,9 +86,7 @@ export const WaterfallChart = ({
                 fetchedNetworkRequests={fetchedNetworkRequests}
               />
               {renderFilter && (
-                <WaterfallChartFilterContainer borderRadius="none" paddingSize="s">
-                  {renderFilter()}
-                </WaterfallChartFilterContainer>
+                <WaterfallChartFilterContainer>{renderFilter()}</WaterfallChartFilterContainer>
               )}
             </EuiFlexItem>
           )}

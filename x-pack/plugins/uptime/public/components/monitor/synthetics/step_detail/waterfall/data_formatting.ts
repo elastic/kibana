@@ -58,7 +58,7 @@ export const isHighlightedItem = (item: NetworkItem, query?: string, activeFilte
   if (!query && activeFilters?.length === 0) {
     return true;
   }
-  return (
+  return !!(
     (query && item.url?.includes(query)) ||
     (activeFilters &&
       activeFilters.length > 0 &&
@@ -68,7 +68,7 @@ export const isHighlightedItem = (item: NetworkItem, query?: string, activeFilte
 
 export const getSeriesAndDomain = (
   items: NetworkItems,
-  onlyHighlighted: boolean,
+  onlyHighlighted = false,
   query?: string,
   activeFilters?: string[]
 ) => {
