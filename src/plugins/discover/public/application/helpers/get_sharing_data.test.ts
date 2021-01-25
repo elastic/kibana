@@ -49,6 +49,7 @@ describe('getSharingData', () => {
                 "should": Array [],
               },
             },
+            "runtime_mappings": Object {},
             "script_fields": Object {},
             "sort": Array [
               Object {

@@ -14,6 +14,14 @@ import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
+const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
+type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+export interface RuntimeField {
+  type: RuntimeType;
+  script: {
+    source: string;
+  };
+}
 
 /**
  * IIndexPattern allows for an IndexPattern OR an index pattern saved object
@@ -51,6 +59,7 @@ export interface IndexPatternAttributes {
   sourceFilters?: string;
   fieldFormatMap?: string;
   fieldAttrs?: string;
+  runtimeFieldMap?: string;
   /**
    * prevents errors when index pattern exists before indices
    */
@@ -199,8 +208,10 @@ export interface FieldSpec {
   subType?: IFieldSubType;
   indexed?: boolean;
   customLabel?: string;
+  runtimeField?: RuntimeField;
   // not persisted
   shortDotsEnable?: boolean;
+  isMapped?: boolean;
 }
 
 export type IndexPatternFieldMap = Record<string, FieldSpec>;
@@ -230,6 +241,7 @@ export interface IndexPatternSpec {
   typeMeta?: TypeMeta;
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
+  runtimeFieldMap?: Record<string, RuntimeField>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
 }

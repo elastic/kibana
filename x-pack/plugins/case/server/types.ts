@@ -4,19 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AppRequestContext } from '../../security_solution/server/types';
+import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { AppRequestContext } from '../../security_solution/server';
+import type { ActionsApiRequestHandlerContext } from '../../actions/server';
 import { CaseClient } from './client';
 
 export interface CaseRequestContext {
   getCaseClient: () => CaseClient;
 }
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    case?: CaseRequestContext;
-    // TODO: Remove when triggers_ui do not import case's types.
-    // PR https://github.com/elastic/kibana/pull/84587.
-    securitySolution?: AppRequestContext;
-  }
+/**
+ * @internal
+ */
+export interface CasesRequestHandlerContext extends RequestHandlerContext {
+  case: CaseRequestContext;
+  actions: ActionsApiRequestHandlerContext;
+  // TODO: Remove when triggers_ui do not import case's types.
+  // PR https://github.com/elastic/kibana/pull/84587.
+  securitySolution: AppRequestContext;
 }
+
+/**
+ * @internal
+ */
+export type CasesRouter = IRouter<CasesRequestHandlerContext>;
