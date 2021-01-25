@@ -145,4 +145,31 @@ export class LogicMounter {
       ? (listeners as Function)(listenersArgs) // e.g., listeners({ values, actions, props }) => ({ ... })
       : listeners; // handles simpler logic files that just define listeners: { ... }
   };
+
+  /**
+   * Small QOL helper for calling a listener directly derived from getListeners()
+   * and automatically passing mocking breakpoint() as well as invoking the
+   * listener action for test coverage.
+   *
+   * Example usage:
+   *
+   * const { mount, getListeners, invokeAsyncListener } = new LogicMounter(SomeLogic);
+   *
+   * it('some test', async () => {
+   *   mount();
+   *   const { someListener } = getListeners({ values: { someMockValue: false } });
+   *
+   *   await invokeAsyncListener(someListener, { someMockArgument: true });
+   * })
+   */
+  public invokeAsyncListener = async (listenerFn: Function, listenerArgs: unknown) => {
+    // Pass a breakpoint fn into listeners so we don't have to manually mock it each time
+    const mockBreakpoint = jest.fn();
+    await listenerFn(listenerArgs, mockBreakpoint);
+
+    // Call the action input for test coverage
+    const listenerName = listenerFn.name;
+    const { actions } = this.logicFile.inputs[0];
+    (actions as Record<string, Function>)[listenerName](listenerArgs);
+  };
 }
