@@ -85,7 +85,13 @@ export const WaterfallChart = ({
   maxHeight = '800px',
   fullHeight = false,
 }: WaterfallChartProps) => {
-  const { data, sidebarItems, legendItems, total, eventsCount } = useWaterfallContext();
+  const {
+    data,
+    sidebarItems,
+    legendItems,
+    totalNetworkRequests,
+    fetchedNetworkRequests,
+  } = useWaterfallContext();
 
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
@@ -117,7 +123,10 @@ export const WaterfallChart = ({
             {shouldRenderSidebar && (
               <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
                 <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false}>
-                  <NetworkRequestsTotal total={total} eventsCount={eventsCount} />
+                  <NetworkRequestsTotal
+                    totalNetworkRequests={totalNetworkRequests}
+                    fetchedNetworkRequests={fetchedNetworkRequests}
+                  />
                 </WaterfallChartFixedTopContainerSidebarCover>
               </EuiFlexItem>
             )}

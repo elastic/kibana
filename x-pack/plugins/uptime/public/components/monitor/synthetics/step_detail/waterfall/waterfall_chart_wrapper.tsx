@@ -67,8 +67,8 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
 
   return (
     <WaterfallProvider
-      total={total}
-      eventsCount={networkData.length}
+      totalNetworkRequests={total}
+      fetchedNetworkRequests={networkData.length}
       data={series}
       sidebarItems={sidebarItems}
       legendItems={legendItems}

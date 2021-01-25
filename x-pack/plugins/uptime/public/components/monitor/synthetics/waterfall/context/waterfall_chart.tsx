@@ -8,8 +8,8 @@ import React, { createContext, useContext, Context } from 'react';
 import { WaterfallData, WaterfallDataEntry } from '../types';
 
 export interface IWaterfallContext {
-  total: number;
-  eventsCount: number;
+  totalNetworkRequests: number;
+  fetchedNetworkRequests: number;
   data: WaterfallData;
   sidebarItems?: unknown[];
   legendItems?: unknown[];
@@ -22,8 +22,8 @@ export interface IWaterfallContext {
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
 
 interface ProviderProps {
-  total: number;
-  eventsCount: number;
+  totalNetworkRequests: number;
+  fetchedNetworkRequests: number;
   data: IWaterfallContext['data'];
   sidebarItems?: IWaterfallContext['sidebarItems'];
   legendItems?: IWaterfallContext['legendItems'];
@@ -36,12 +36,19 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
   sidebarItems,
   legendItems,
   renderTooltipItem,
-  total,
-  eventsCount,
+  totalNetworkRequests,
+  fetchedNetworkRequests,
 }) => {
   return (
     <WaterfallContext.Provider
-      value={{ data, sidebarItems, legendItems, renderTooltipItem, total, eventsCount }}
+      value={{
+        data,
+        sidebarItems,
+        legendItems,
+        renderTooltipItem,
+        totalNetworkRequests,
+        fetchedNetworkRequests,
+      }}
     >
       {children}
     </WaterfallContext.Provider>

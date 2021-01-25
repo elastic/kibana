@@ -10,28 +10,28 @@ import { EuiIconTip } from '@elastic/eui';
 import { NetworkRequestsTotalStyle } from './styles';
 
 interface Props {
-  total: number;
-  eventsCount: number;
+  totalNetworkRequests: number;
+  fetchedNetworkRequests: number;
 }
 
-export const NetworkRequestsTotal = ({ total, eventsCount }: Props) => {
+export const NetworkRequestsTotal = ({ totalNetworkRequests, fetchedNetworkRequests }: Props) => {
   return (
     <NetworkRequestsTotalStyle size="xs" color="subdued">
       <strong>
         {i18n.translate('xpack.uptime.synthetics.waterfall.requestsTotalMessage', {
-          defaultMessage: '{count} network requests',
+          defaultMessage: '{numNetworkRequests} network requests',
           values: {
-            count:
-              total > eventsCount
+            numNetworkRequests:
+              totalNetworkRequests > fetchedNetworkRequests
                 ? i18n.translate('xpack.uptime.synthetics.waterfall.requestsTotalMessage.first', {
                     defaultMessage: 'First {count}',
-                    values: { count: `${eventsCount}/${total}` },
+                    values: { count: `${fetchedNetworkRequests}/${totalNetworkRequests}` },
                   })
-                : total,
+                : totalNetworkRequests,
           },
         })}
       </strong>
-      {total > eventsCount && (
+      {totalNetworkRequests > fetchedNetworkRequests && (
         <EuiIconTip
           type={'iInCircle'}
           content={i18n.translate('xpack.uptime.synthetics.waterfall.requestsTotalMessage.info', {
