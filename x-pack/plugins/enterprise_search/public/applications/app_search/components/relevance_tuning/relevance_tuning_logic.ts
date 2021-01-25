@@ -35,6 +35,7 @@ interface RelevanceTuningActions {
   initializeRelevanceTuning(): void;
   getSearchResults(): void;
   setSearchSettingsResponse(searchSettings: SearchSettings): { searchSettings: SearchSettings };
+  onSearchSettingsSuccess(searchSettings: SearchSettings): { searchSettings: SearchSettings };
 }
 
 interface RelevanceTuningValues {
@@ -85,9 +86,10 @@ export const RelevanceTuningLogic = kea<
     dismissSchemaConflictCallout: true,
     initializeRelevanceTuning: true,
     getSearchResults: true,
-    setSearchSettingsResponse: (searchSettings: SearchSettings) => ({
+    setSearchSettingsResponse: (searchSettings) => ({
       searchSettings,
     }),
+    onSearchSettingsSuccess: (searchSettings) => ({ searchSettings }),
   }),
   reducers: () => ({
     searchSettings: [
@@ -221,6 +223,11 @@ export const RelevanceTuningLogic = kea<
       } catch (e) {
         flashAPIErrors(e);
       }
+    },
+    onSearchSettingsSuccess: ({ searchSettings }) => {
+      actions.setSearchSettingsResponse(searchSettings);
+      actions.getSearchResults();
+      window.scrollTo(0, 0);
     },
   }),
 });

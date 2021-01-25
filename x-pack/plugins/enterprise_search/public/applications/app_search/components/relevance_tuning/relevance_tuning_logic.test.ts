@@ -382,6 +382,33 @@ describe('RelevanceTuningLogic', () => {
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
+
+    describe('onSearchSettingsSuccess', () => {
+      let scrollToSpy: any;
+
+      beforeEach(() => {
+        scrollToSpy = jest.spyOn(window, 'scrollTo');
+        scrollToSpy.mockImplementation(jest.fn(() => true));
+      });
+
+      afterEach(() => {
+        scrollToSpy.mockRestore();
+      });
+
+      it('should save the response, trigger a new search, and then scroll to the top', () => {
+        mount();
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettingsResponse');
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.onSearchSettingsSuccess(searchSettings);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettingsResponse).toHaveBeenCalledWith(
+          searchSettings
+        );
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
+        expect(scrollToSpy).toHaveBeenCalledWith(0, 0);
+      });
+    });
   });
 
   describe('selectors', () => {
