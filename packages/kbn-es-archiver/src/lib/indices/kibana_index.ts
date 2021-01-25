@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { Client, CreateDocumentParams } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { ToolingLog, KbnClient } from '@kbn/dev-utils';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
@@ -75,9 +75,9 @@ export async function migrateKibanaIndex({
  * index (e.g. we don't want to remove .kibana_task_manager or the like).
  */
 async function fetchKibanaIndices(client: Client) {
-  const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
+  const { body } = await client.cat.indices({ index: '.kibana*', format: 'json' });
   const isKibanaIndex = (index: string) => /^\.kibana(:?_\d*)?$/.test(index);
-  return kibanaIndices.map((x: { index: string }) => x.index).filter(isKibanaIndex);
+  return body.map((x: { index: string }) => x.index).filter(isKibanaIndex);
 }
 
 const delay = (delayInMs: number) => new Promise((resolve) => setTimeout(resolve, delayInMs));
@@ -102,27 +102,29 @@ export async function cleanKibanaIndices({
   }
 
   while (true) {
-    const resp = await client.deleteByQuery({
-      index: `.kibana`,
-      body: {
-        query: {
-          bool: {
-            must_not: {
-              ids: {
-                values: ['space:default'],
+    const resp = await client.deleteByQuery(
+      {
+        index: `.kibana`,
+        body: {
+          query: {
+            bool: {
+              must_not: {
+                ids: {
+                  values: ['space:default'],
+                },
               },
             },
           },
         },
       },
-      ignore: [409],
-    });
+      { ignore: [409] }
+    );
 
-    if (resp.total !== resp.deleted) {
+    if (resp.body.total !== resp.body.deleted) {
       log.warning(
         'delete by query deleted %d of %d total documents, trying again',
-        resp.deleted,
-        resp.total
+        resp.body.deleted,
+        resp.body.total
       );
       await delay(200);
       continue;
@@ -140,19 +142,21 @@ export async function cleanKibanaIndices({
 }
 
 export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {
-  await client.create({
-    index,
-    id: 'space:default',
-    ignore: 409,
-    body: {
-      type: 'space',
-      updated_at: new Date().toISOString(),
-      space: {
-        name: 'Default Space',
-        description: 'This is the default space',
-        disabledFeatures: [],
-        _reserved: true,
+  await client.create(
+    {
+      index,
+      id: 'space:default',
+      body: {
+        type: 'space',
+        updated_at: new Date().toISOString(),
+        space: {
+          name: 'Default Space',
+          description: 'This is the default space',
+          disabledFeatures: [],
+          _reserved: true,
+        },
       },
     },
-  } as CreateDocumentParams);
+    { ignore: [409] }
+  );
 }

@@ -7,7 +7,7 @@
  */
 
 import { Transform } from 'stream';
-import { Client, SearchParams, SearchResponse } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 
@@ -31,7 +31,7 @@ export function createGenerateDocRecordsStream({
     async transform(index, enc, callback) {
       try {
         let remainingHits = 0;
-        let resp: SearchResponse<any> | null = null;
+        let resp = null;
 
         while (!resp || remainingHits > 0) {
           if (!resp) {
@@ -39,22 +39,22 @@ export function createGenerateDocRecordsStream({
               index,
               scroll: SCROLL_TIMEOUT,
               size: SCROLL_SIZE,
-              _source: true,
+              _source: 'true',
               body: {
                 query,
               },
               rest_total_hits_as_int: true, // not declared on SearchParams type
-            } as SearchParams);
-            remainingHits = resp.hits.total;
+            });
+            remainingHits = resp.body.hits.total;
             progress.addToTotal(remainingHits);
           } else {
             resp = await client.scroll({
-              scrollId: resp._scroll_id!,
+              scroll_id: resp.body._scroll_id!,
               scroll: SCROLL_TIMEOUT,
             });
           }
 
-          for (const hit of resp.hits.hits) {
+          for (const hit of resp.body.hits.hits) {
             remainingHits -= 1;
             stats.archivedDoc(hit._index);
             this.push({
@@ -70,7 +70,7 @@ export function createGenerateDocRecordsStream({
             });
           }
 
-          progress.addToComplete(resp.hits.hits.length);
+          progress.addToComplete(resp.body.hits.hits.length);
         }
 
         callback(undefined);

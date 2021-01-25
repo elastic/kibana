@@ -9,7 +9,7 @@
 import { Transform, Readable } from 'stream';
 import { inspect } from 'util';
 
-import { Client } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';

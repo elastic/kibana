@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { Client } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import sinon from 'sinon';
 import Chance from 'chance';
 import { times } from 'lodash';

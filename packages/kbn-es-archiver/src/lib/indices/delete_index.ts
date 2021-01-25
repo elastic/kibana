@@ -7,7 +7,7 @@
  */
 
 import { get } from 'lodash';
-import { Client } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 import { Stats } from '../stats';
 
@@ -24,8 +24,8 @@ export async function deleteIndex(options: {
   const { client, stats, index, log, retryIfSnapshottingCount = 10 } = options;
 
   const getIndicesToDelete = async () => {
-    const aliasInfo = await client.indices.getAlias({ name: index, ignore: [404] });
-    return aliasInfo.status === 404 ? [index] : Object.keys(aliasInfo);
+    const aliasInfo = await client.indices.getAlias({ name: index }, { ignore: [404] });
+    return aliasInfo.statusCode === 404 ? [index] : Object.keys(aliasInfo.body);
   };
 
   try {
@@ -71,20 +71,24 @@ export async function waitForSnapshotCompletion(client: Client, index: string, l
   const isSnapshotPending = async (repository: string, snapshot: string) => {
     const {
       snapshots: [status],
-    } = await client.snapshot.status({
-      repository,
-      snapshot,
-    });
+    } = (
+      await client.snapshot.status({
+        repository,
+        snapshot,
+      })
+    ).body;
 
     log.debug(`Snapshot ${repository}/${snapshot} is ${status.state}`);
     return PENDING_SNAPSHOT_STATUSES.includes(status.state);
   };
 
   const getInProgressSnapshots = async (repository: string) => {
-    const { snapshots: inProgressSnapshots } = await client.snapshot.get({
-      repository,
-      snapshot: '_current',
-    });
+    const { snapshots: inProgressSnapshots } = (
+      await client.snapshot.get({
+        repository,
+        snapshot: '_current',
+      })
+    ).body;
     return inProgressSnapshots;
   };
 
