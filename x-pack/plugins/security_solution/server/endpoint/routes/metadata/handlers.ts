@@ -5,7 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { RequestHandlerContext, Logger, RequestHandler } from 'kibana/server';
+import type { Logger, RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import {
   HostInfo,
@@ -14,6 +14,8 @@ import {
   HostStatus,
   MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import { Agent, AgentStatus, PackagePolicy } from '../../../../../fleet/common/types/models';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
@@ -25,7 +27,7 @@ import { EndpointAppContextService } from '../../endpoint_app_context_services';
 export interface MetadataRequestContext {
   endpointAppContextService: EndpointAppContextService;
   logger: Logger;
-  requestHandlerContext: RequestHandlerContext;
+  requestHandlerContext: SecuritySolutionRequestHandlerContext;
 }
 
 const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
@@ -52,7 +54,12 @@ export const getMetadataListRequestHandler = function (
   endpointAppContext: EndpointAppContext,
   logger: Logger,
   queryStrategyVersion?: MetadataQueryStrategyVersions
-): RequestHandler<undefined, undefined, TypeOf<typeof GetMetadataListRequestSchema.body>> {
+): RequestHandler<
+  unknown,
+  unknown,
+  TypeOf<typeof GetMetadataListRequestSchema.body>,
+  SecuritySolutionRequestHandlerContext
+> {
   return async (context, request, response) => {
     try {
       const agentService = endpointAppContext.service.getAgentService();
@@ -112,7 +119,12 @@ export const getMetadataRequestHandler = function (
   endpointAppContext: EndpointAppContext,
   logger: Logger,
   queryStrategyVersion?: MetadataQueryStrategyVersions
-): RequestHandler<TypeOf<typeof GetMetadataRequestSchema.params>, undefined, undefined> {
+): RequestHandler<
+  TypeOf<typeof GetMetadataRequestSchema.params>,
+  unknown,
+  unknown,
+  SecuritySolutionRequestHandlerContext
+> {
   return async (context, request, response) => {
     const agentService = endpointAppContext.service.getAgentService();
     if (agentService === undefined) {
