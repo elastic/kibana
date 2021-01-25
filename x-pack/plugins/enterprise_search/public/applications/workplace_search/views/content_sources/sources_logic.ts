@@ -12,11 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { HttpLogic } from '../../../shared/http';
 
-import {
-  flashAPIErrors,
-  setQueuedSuccessMessage,
-  clearFlashMessages,
-} from '../../../shared/flash_messages';
+import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
 
 import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } from '../../types';
 
@@ -40,7 +36,6 @@ export interface ISourcesActions {
     additionalConfiguration: boolean,
     serviceType: string
   ): { addedSourceName: string; additionalConfiguration: boolean; serviceType: string };
-  resetFlashMessages(): void;
   resetPermissionsModal(): void;
   resetSourcesState(): void;
   initializeSources(): void;
@@ -91,7 +86,6 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       additionalConfiguration: boolean,
       serviceType: string
     ) => ({ addedSourceName, additionalConfiguration, serviceType }),
-    resetFlashMessages: () => true,
     resetPermissionsModal: () => true,
     resetSourcesState: () => true,
     initializeSources: () => true,
@@ -237,9 +231,6 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
           additionalConfiguration ? additionalConfigurationMessage : '',
         ].join(' ')
       );
-    },
-    resetFlashMessages: () => {
-      clearFlashMessages();
     },
     resetSourcesState: () => {
       clearInterval(pollingInterval);
