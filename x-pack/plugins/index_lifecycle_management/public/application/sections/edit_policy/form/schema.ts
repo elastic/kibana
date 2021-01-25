@@ -56,6 +56,7 @@ export const schema: FormSchema<FormInternal> = {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
       },
       readonlyEnabled: {
+        defaultValue: false,
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
     },
@@ -80,6 +81,7 @@ export const schema: FormSchema<FormInternal> = {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
       },
       readonlyEnabled: {
+        defaultValue: false,
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
     },
@@ -92,6 +94,7 @@ export const schema: FormSchema<FormInternal> = {
         ),
       },
       freezeEnabled: {
+        defaultValue: false,
         label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
           defaultMessage: 'Freeze index',
         }),

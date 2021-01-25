@@ -34,14 +34,14 @@ import { LearnMoreLink, DescribedFormRow } from '../../';
 
 import {
   ForcemergeField,
+  IndexPriorityField,
   SearchableSnapshotField,
   ReadonlyField,
   ShrinkField,
-  IndexPriorityField,
 } from '../shared_fields';
 
-import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 import { Phase } from '../phase';
+import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 
 const hotProperty: keyof Phases = 'hot';
 

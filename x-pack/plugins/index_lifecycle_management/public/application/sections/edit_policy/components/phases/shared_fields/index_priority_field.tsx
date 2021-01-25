@@ -10,10 +10,10 @@ import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 
 import { Phases } from '../../../../../../../common/types';
 
+import { UseField, NumericField } from '../../../../../../shared_imports';
 import { LearnMoreLink, DescribedFormRow } from '../..';
 import { i18nTexts } from '../../../i18n_texts';
 import { useEditPolicyContext } from '../../../edit_policy_context';
-import { StyledFieldNumber } from './styled_field_number';
 
 interface Props {
   phase: 'hot' | 'warm' | ('cold' & keyof Phases);
@@ -53,15 +53,17 @@ export const IndexPriorityField: FunctionComponent<Props> = ({ phase }) => {
       titleSize="xs"
       fullWidth
       switchProps={{
-        'aria-label': i18nTexts.editPolicy.indexPriorityFieldLabel,
+        label: i18nTexts.editPolicy.indexPriorityFieldLabel,
         'data-test-subj': `${phase}-indexPrioritySwitch`,
         initialValue: initialToggleValue,
       }}
     >
       <EuiSpacer />
-      <StyledFieldNumber
+      <UseField
         path={`phases.${phase}.actions.set_priority.priority`}
-        fieldNumberProps={{
+        component={NumericField}
+        euiFieldProps={{
+          fullWidth: false,
           'data-test-subj': `${phase}-indexPriority`,
           min: 0,
         }}

@@ -6,16 +6,14 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 
-import { UseField, CheckBoxField } from '../../../../../../shared_imports';
+import { UseField, CheckBoxField, NumericField } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { LearnMoreLink, DescribedFormRow } from '../../';
-import { StyledFieldNumber } from './styled_field_number';
 
 interface Props {
   phase: 'hot' | 'warm';
@@ -39,28 +37,31 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
         </h3>
       }
       description={
-        <EuiTextColor color="subdued">
+        <>
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableExplanationText"
             defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
           />{' '}
           <LearnMoreLink docPath="ilm-forcemerge.html" />
-        </EuiTextColor>
+        </>
       }
       titleSize="xs"
       fullWidth
       switchProps={{
-        'aria-label': i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
+        label: i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
         'data-test-subj': `${phase}-forceMergeSwitch`,
         initialValue: initialToggleValue,
       }}
     >
-      <EuiSpacer />
-      <StyledFieldNumber
+      <UseField
         path={`phases.${phase}.actions.forcemerge.max_num_segments`}
-        fieldNumberProps={{
-          'data-test-subj': `${phase}-selectedForceMergeSegments`,
-          min: 1,
+        component={NumericField}
+        componentProps={{
+          fullWidth: false,
+          euiFieldProps: {
+            'data-test-subj': `${phase}-selectedForceMergeSegments`,
+            min: 1,
+          },
         }}
       />
       <UseField

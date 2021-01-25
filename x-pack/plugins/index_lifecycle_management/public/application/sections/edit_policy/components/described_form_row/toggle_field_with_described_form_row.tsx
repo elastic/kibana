@@ -28,7 +28,7 @@ export const ToggleFieldWithDescribedFormRow: FunctionComponent<Props> = ({
           {...passThroughProps}
           switchProps={{
             ...switchProps,
-            'aria-label': field.label,
+            label: field.label,
             checked: field.value,
             onChange: field.setValue,
           }}

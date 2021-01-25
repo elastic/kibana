@@ -6,9 +6,10 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { StyledFieldNumber } from './styled_field_number';
-import { DescribedFormRow } from '../../described_form_row';
+
+import { UseField, NumericField } from '../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../edit_policy_context';
+import { DescribedFormRow } from '../../described_form_row';
 
 interface Props {
   phase: 'warm' | 'cold';
@@ -35,19 +36,22 @@ export const ReplicasField: FunctionComponent<Props> = ({ phase }) => {
       )}
       switchProps={{
         'data-test-subj': `${phase}-setReplicasSwitch`,
-        'aria-label': i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.switchLabel',
-          { defaultMessage: 'Set replicas' }
-        ),
+        label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.switchLabel', {
+          defaultMessage: 'Set replicas',
+        }),
         initialValue,
       }}
       fullWidth
     >
-      <StyledFieldNumber
+      <UseField
         path={`phases.${phase}.actions.allocate.number_of_replicas`}
-        fieldNumberProps={{
-          'data-test-subj': `${phase}-selectedReplicaCount`,
-          min: 0,
+        component={NumericField}
+        componentProps={{
+          fullWidth: false,
+          euiFieldProps: {
+            'data-test-subj': `${phase}-selectedReplicaCount`,
+            min: 0,
+          },
         }}
       />
     </DescribedFormRow>

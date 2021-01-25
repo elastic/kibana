@@ -89,6 +89,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
                       size="xs"
                       iconType="controlsVertical"
                       iconSide="left"
+                      aria-controls={`${phase}-phaseContent`}
                     >
                       <FormattedMessage
                         id="xpack.indexLifecycleMgmt.editPolicy.phaseSettings.buttonLabel"
@@ -106,7 +107,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
           </EuiText>
 
           {enabled && (
-            <div style={isShowingSettings ? {} : { display: 'none' }}>
+            <div style={isShowingSettings ? {} : { display: 'none' }} id={`${phase}-phaseContent`}>
               <EuiSpacer />
               {children}
             </div>

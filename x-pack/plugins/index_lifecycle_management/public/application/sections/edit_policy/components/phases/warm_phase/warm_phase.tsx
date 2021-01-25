@@ -13,11 +13,11 @@ import { useConfigurationIssues } from '../../../form';
 
 import {
   ForcemergeField,
+  IndexPriorityField,
   DataTierAllocationField,
   ShrinkField,
   ReadonlyField,
   ReplicasField,
-  IndexPriorityField,
 } from '../shared_fields';
 
 import { Phase } from '../phase';
