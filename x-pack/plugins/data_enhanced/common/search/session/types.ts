@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchSessionStatus } from './';
+
 export interface SearchSessionSavedObjectAttributes {
   /**
    * User-facing session name to be displayed in session management
@@ -24,7 +26,7 @@ export interface SearchSessionSavedObjectAttributes {
   /**
    * status
    */
-  status: string;
+  status: SearchSessionStatus;
   /**
    * urlGeneratorId
    */
@@ -44,7 +46,6 @@ export interface SearchSessionSavedObjectAttributes {
    */
   idMapping: Record<string, SearchSessionRequestInfo>;
 }
-
 export interface SearchSessionRequestInfo {
   /**
    * ID of the async search request
