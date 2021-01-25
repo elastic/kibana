@@ -24,7 +24,9 @@ describe('Info session routes', () => {
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
-    session = routeParamsMock.session;
+
+    session = sessionMock.create();
+    routeParamsMock.getSession.mockReturnValue(session);
 
     defineSessionInfoRoutes(routeParamsMock);
   });
