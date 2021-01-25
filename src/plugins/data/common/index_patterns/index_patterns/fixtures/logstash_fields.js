@@ -68,6 +68,7 @@ function stubbedLogstashFields() {
       lang,
       scripted,
       subType,
+      isMapped: !scripted,
     };
   });
 }
