@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { InfraPluginRequestHandlerContext } from '../../types';
 import { InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
 import { fetchMlJob, MappedAnomalyHit, InfluencerFilter } from './common';
@@ -60,7 +61,7 @@ async function getCompatibleAnomaliesJobIds(
 }
 
 export async function getMetricsHostsAnomalies(
-  context: Required<InfraRequestHandlerContext>,
+  context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
   sourceId: string,
   startTime: number,
   endTime: number,

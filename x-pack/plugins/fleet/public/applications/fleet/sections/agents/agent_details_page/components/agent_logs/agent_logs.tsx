@@ -183,7 +183,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
     [http.basePath, state.start, state.end, logStreamQuery]
   );
 
-  const [logsPanelRef, { height: logPanelHeight }] = useMeasure();
+  const [logsPanelRef, { height: logPanelHeight }] = useMeasure<HTMLDivElement>();
 
   const agentVersion = agent.local_metadata?.elastic?.agent?.version;
   const isLogFeatureAvailable = useMemo(() => {

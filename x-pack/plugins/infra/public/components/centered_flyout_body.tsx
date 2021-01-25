@@ -5,7 +5,7 @@
  */
 
 import { EuiFlyoutBody } from '@elastic/eui';
-import { euiStyled } from '../../../observability/public';
+import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 
 export const CenteredEuiFlyoutBody = euiStyled(EuiFlyoutBody)`
   & .euiFlyoutBody__overflow {
