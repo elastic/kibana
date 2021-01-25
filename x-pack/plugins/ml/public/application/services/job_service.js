@@ -325,33 +325,6 @@ class JobService {
     return ml.addJob({ jobId: job.job_id, job }).then(func).catch(func);
   }
 
-  cloneDatafeed(datafeed) {
-    const tempDatafeed = cloneDeep(datafeed);
-
-    // remove parts of the datafeed config which should not be copied
-    if (tempDatafeed.datafeed_config) {
-      delete tempDatafeed.datafeed_config.datafeed_id;
-      delete tempDatafeed.datafeed_config.job_id;
-      delete tempDatafeed.datafeed_config.state;
-      delete tempDatafeed.datafeed_config.node;
-      delete tempDatafeed.datafeed_config.timing_stats;
-      delete tempDatafeed.datafeed_config.assignment_explanation;
-
-      // remove query_delay if it's between 60s and 120s
-      // the back-end produces a random value between 60 and 120 and so
-      // by deleting it, the back-end will produce a new random value
-      if (tempDatafeed.datafeed_config.query_delay) {
-        const interval = parseInterval(tempDatafeed.datafeed_config.query_delay);
-        if (interval !== null) {
-          const queryDelay = interval.asSeconds();
-          if (queryDelay > 60 && queryDelay < 120) {
-            delete tempDatafeed.datafeed_config.query_delay;
-          }
-        }
-      }
-    }
-    return tempDatafeed;
-  }
   cloneJob(job) {
     // create a deep copy of a job object
     // also remove items from the job which are set by the server and not needed
@@ -361,18 +334,41 @@ class JobService {
 
     // remove all of the items which should not be copied
     // such as counts, state and times
-    // delete tempJob.calendars;
-    // delete tempJob.data_counts;
-    // delete tempJob.model_size_stats;
-    // delete tempJob.forecasts_stats;
-    // delete tempJob.state;
-    // delete tempJob.timing_stats;
+    delete tempJob.calendars;
+    delete tempJob.data_counts;
+    delete tempJob.model_size_stats;
+    delete tempJob.forecasts_stats;
+    delete tempJob.state;
+    delete tempJob.timing_stats;
 
-    // delete tempJob.analysis_config.use_per_partition_normalization;
+    delete tempJob.analysis_config.use_per_partition_normalization;
 
     each(tempJob.analysis_config.detectors, (d) => {
       delete d.detector_index;
     });
+
+    // remove parts of the datafeed config which should not be copied
+    if (tempJob.datafeed_config) {
+      delete tempJob.datafeed_config.datafeed_id;
+      delete tempJob.datafeed_config.job_id;
+      delete tempJob.datafeed_config.state;
+      delete tempJob.datafeed_config.node;
+      delete tempJob.datafeed_config.timing_stats;
+      delete tempJob.datafeed_config.assignment_explanation;
+
+      // remove query_delay if it's between 60s and 120s
+      // the back-end produces a random value between 60 and 120 and so
+      // by deleting it, the back-end will produce a new random value
+      if (tempJob.datafeed_config.query_delay) {
+        const interval = parseInterval(tempJob.datafeed_config.query_delay);
+        if (interval !== null) {
+          const queryDelay = interval.asSeconds();
+          if (queryDelay > 60 && queryDelay < 120) {
+            delete tempJob.datafeed_config.query_delay;
+          }
+        }
+      }
+    }
 
     // when jumping from a wizard to the advanced job creation,
     // the wizard's created_by information should be stripped.

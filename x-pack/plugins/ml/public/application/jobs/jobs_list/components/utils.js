@@ -19,10 +19,10 @@ import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/state
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
 
-export function loadFullJob(jobId) {
+export function loadFullJob(jobId, excludeGenerated = false) {
   return new Promise((resolve, reject) => {
     ml.jobs
-      .jobs([jobId])
+      .jobs([jobId], excludeGenerated)
       .then((jobs) => {
         if (jobs.length) {
           resolve(jobs[0]);
@@ -39,10 +39,10 @@ export function loadFullJob(jobId) {
 export function loadJobForExport(jobId) {
   return new Promise((resolve, reject) => {
     ml.jobs
-      .jobForExport(jobId)
-      .then((resp) => {
-        if (resp?.job) {
-          resolve(resp);
+      .jobsForExport([jobId])
+      .then((jobs) => {
+        if (jobs.length) {
+          resolve(jobs[0]);
         } else {
           throw new Error(`Could not find job ${jobId}`);
         }
@@ -197,7 +197,7 @@ function showResults(resp, action) {
 
 export async function cloneJob(jobId) {
   try {
-    const [{ job: cloneableJob, datafeed }, originalJob] = await Promise.all([
+    const [cloneableJob, originalJob] = await Promise.all([
       loadJobForExport(jobId),
       loadFullJob(jobId, false),
     ]);
@@ -243,10 +243,6 @@ export async function cloneJob(jobId) {
       // otherwise use the tempJobCloningObjects
       mlJobService.tempJobCloningObjects.job = cloneableJob;
     }
-    if (datafeed !== undefined) {
-      mlJobService.tempJobCloningObjects.datafeed = datafeed;
-    }
-
     if (originalJob.calendars) {
       mlJobService.tempJobCloningObjects.calendars = await mlCalendarService.fetchCalendarsByIds(
         originalJob.calendars

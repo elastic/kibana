@@ -259,11 +259,16 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     return { jobs, jobsMap };
   }
 
-  async function getJobForExport(jobId: string) {
+  async function createJobsListForExport(jobIds: string[] = []) {
+    const jobs: CombinedJob[] = [];
     const datafeeds: { [id: string]: Datafeed } = {};
 
+    const jobIdsString = jobIds.join();
+
     const [{ body: jobResults }, { body: datafeedResults }] = await Promise.all([
-      mlClient.getJobs<MlJobsResponse>({ job_id: jobId, exclude_generated: true }),
+      mlClient.getJobs<MlJobsResponse>(
+        jobIds.length > 0 ? { job_id: jobIdsString, exclude_generated: true } : undefined
+      ),
       mlClient.getDatafeeds<MlDatafeedsResponse>({ exclude_generated: true }),
     ]);
 
@@ -275,15 +280,21 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
 
     // create jobs objects containing job stats, datafeeds, datafeed stats and calendars
     if (jobResults && jobResults.jobs) {
-      const job = jobResults.jobs.find((j) => j.job_id === jobId);
-      if (job && datafeeds[job.job_id]) {
-        return { job, datafeed: datafeeds[job.job_id] };
-      }
+      jobResults.jobs.forEach((job) => {
+        const tempJob = job as CombinedJob;
+
+        const datafeed = datafeeds[job.job_id];
+        if (datafeed !== undefined) {
+          tempJob.datafeed_config = datafeed;
+        }
+
+        jobs.push(tempJob);
+      });
     }
-    return undefined;
+    return jobs;
   }
 
-  async function createFullJobsList(jobIds: string[] = []) {
+  async function createFullJobsList(jobIds: string[] = [], excludeGenerated = false) {
     const jobs: CombinedJobWithStats[] = [];
     const groups: { [jobId: string]: string[] } = {};
     const datafeeds: { [id: string]: DatafeedWithStats } = {};
@@ -291,6 +302,8 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     const globalCalendars: string[] = [];
 
     const jobIdsString = jobIds.join();
+
+    const datafeedParams = excludeGenerated ? { exclude_generated: excludeGenerated } : undefined;
 
     const [
       { body: jobResults },
@@ -300,11 +313,15 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
       calendarResults,
       latestBucketTimestampByJob,
     ] = await Promise.all([
-      mlClient.getJobs<MlJobsResponse>(jobIds.length > 0 ? { job_id: jobIdsString } : undefined),
+      mlClient.getJobs<MlJobsResponse>(
+        jobIds.length > 0
+          ? { job_id: jobIdsString, exclude_generated: excludeGenerated }
+          : undefined
+      ),
       mlClient.getJobStats<MlJobsStatsResponse>(
         jobIds.length > 0 ? { job_id: jobIdsString } : undefined
       ),
-      mlClient.getDatafeeds<MlDatafeedsResponse>(),
+      mlClient.getDatafeeds<MlDatafeedsResponse>(datafeedParams),
       mlClient.getDatafeedStats<MlDatafeedsStatsResponse>(),
       calMngr.getAllCalendars(),
       getLatestBucketTimestampByJob(),
@@ -529,7 +546,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     forceStopAndCloseJob,
     jobsSummary,
     jobsWithTimerange,
-    getJobForExport,
+    createJobsListForExport,
     createFullJobsList,
     deletingJobTasks,
     jobsExist,
