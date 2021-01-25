@@ -60,7 +60,8 @@
 
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, keyBy, pick, difference, omit, isObject, isFunction } from 'lodash';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
+import { defer, from } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern } from '../../index_patterns';
@@ -243,31 +244,35 @@ export class SearchSource {
     return this.parent;
   }
 
+  fetch$(options: ISearchOptions = {}) {
+    const { getConfig } = this.dependencies;
+    return defer(() => {
+      return from(this.requestIsStarting(options)).pipe(
+        switchMap(() => {
+          const searchRequest = this.flatten();
+          this.history = [searchRequest];
+
+          return getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)
+            ? from(this.legacyFetch(searchRequest, options))
+            : this.fetchSearch$(searchRequest, options);
+        }),
+        map((response) => {
+          // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
+          if ((response as any).error) {
+            throw new RequestFailure(null, response);
+          }
+        })
+      );
+    });
+  }
+
   /**
    * Fetch this source and reject the returned Promise on error
    *
    * @async
    */
-  async fetch(options: ISearchOptions = {}) {
-    const { getConfig } = this.dependencies;
-    await this.requestIsStarting(options);
-
-    const searchRequest = await this.flatten();
-    this.history = [searchRequest];
-
-    let response;
-    if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
-      response = await this.legacyFetch(searchRequest, options);
-    } else {
-      response = await this.fetchSearch(searchRequest, options);
-    }
-
-    // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
-    if ((response as any).error) {
-      throw new RequestFailure(null, response);
-    }
-
-    return response;
+  fetch(options: ISearchOptions = {}) {
+    return this.fetch$(options).toPromise();
   }
 
   /**
@@ -305,16 +310,16 @@ export class SearchSource {
    * Run a search using the search service
    * @return {Promise<SearchResponse<unknown>>}
    */
-  private fetchSearch(searchRequest: SearchRequest, options: ISearchOptions) {
+  private fetchSearch$(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options)
-      .pipe(map(({ rawResponse }) => onResponse(searchRequest, rawResponse)))
-      .toPromise();
+    return search({ params, indexType: searchRequest.indexType }, options).pipe(
+      map(({ rawResponse }) => onResponse(searchRequest, rawResponse))
+    );
   }
 
   /**
