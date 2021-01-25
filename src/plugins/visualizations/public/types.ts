@@ -7,15 +7,12 @@
  */
 
 import { SavedObject } from '../../../plugins/saved_objects/public';
-import {
-  AggConfigOptions,
-  SearchSourceFields,
-  TimefilterContract,
-} from '../../../plugins/data/public';
+import { SearchSourceFields, TimefilterContract } from '../../../plugins/data/public';
 import { ExpressionAstExpression } from '../../expressions/public';
 
-import { SerializedVis, Vis, VisParams } from './vis';
+import { SerializedVis, Vis } from './vis';
 import { ExprVis } from './expressions/vis';
+import { SavedVisState, VisParams } from '../common/types';
 
 export { Vis, SerializedVis, VisParams };
 
@@ -29,13 +26,6 @@ export type VisualizationControllerConstructor = new (
   el: HTMLElement,
   vis: ExprVis
 ) => VisualizationController;
-
-export interface SavedVisState {
-  title: string;
-  type: string;
-  params: VisParams;
-  aggs: AggConfigOptions[];
-}
 
 export interface ISavedVis {
   id?: string;
