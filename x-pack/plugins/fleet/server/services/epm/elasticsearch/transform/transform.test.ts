@@ -164,6 +164,7 @@ describe('test transform install', () => {
         {
           method: 'GET',
           path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0',
+          ignore: [404],
         },
       ],
       [
@@ -450,6 +451,7 @@ describe('test transform install', () => {
         {
           method: 'GET',
           path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0',
+          ignore: [404],
         },
       ],
       [
