@@ -11,6 +11,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
+import type { RuntimeField } from '../types';
 import { IndexPattern } from './index_pattern';
 import {
   createEnsureDefaultIndexPattern,
@@ -34,6 +35,7 @@ import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateIndexPatternError } from '../errors';
+import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
@@ -247,7 +249,8 @@ export class IndexPatternsService {
    */
   refreshFields = async (indexPattern: IndexPattern) => {
     try {
-      const fields = await this.getFieldsForIndexPattern(indexPattern);
+      const fields = (await this.getFieldsForIndexPattern(indexPattern)) as FieldSpec[];
+      fields.forEach((field) => (field.isMapped = true));
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
       const fieldAttrs = indexPattern.getFieldAttrs();
       const fieldsWithSavedAttrs = Object.values(
@@ -288,6 +291,7 @@ export class IndexPatternsService {
     try {
       let updatedFieldList: FieldSpec[];
       const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
+      newFields.forEach((field) => (field.isMapped = true));
 
       // If allowNoIndex, only update field list if field caps finds fields. To support
       // beats creating index pattern and dashboard before docs
@@ -347,6 +351,7 @@ export class IndexPatternsService {
         fields,
         sourceFilters,
         fieldFormatMap,
+        runtimeFieldMap,
         typeMeta,
         type,
         fieldAttrs,
@@ -359,6 +364,9 @@ export class IndexPatternsService {
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
     const parsedFieldAttrs: FieldAttrs = fieldAttrs ? JSON.parse(fieldAttrs) : {};
+    const parsedRuntimeFieldMap: Record<string, RuntimeField> = runtimeFieldMap
+      ? JSON.parse(runtimeFieldMap)
+      : {};
 
     return {
       id,
@@ -373,6 +381,7 @@ export class IndexPatternsService {
       fieldFormats: parsedFieldFormatMap,
       fieldAttrs: parsedFieldAttrs,
       allowNoIndex,
+      runtimeFieldMap: parsedRuntimeFieldMap,
     };
   };
 
@@ -387,7 +396,7 @@ export class IndexPatternsService {
     }
 
     const spec = this.savedObjectToSpec(savedObject);
-    const { title, type, typeMeta } = spec;
+    const { title, type, typeMeta, runtimeFieldMap } = spec;
     spec.fieldAttrs = savedObject.attributes.fieldAttrs
       ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
@@ -406,6 +415,22 @@ export class IndexPatternsService {
         },
         spec.fieldAttrs
       );
+      // APPLY RUNTIME FIELDS
+      for (const [key, value] of Object.entries(runtimeFieldMap || {})) {
+        if (spec.fields[key]) {
+          spec.fields[key].runtimeField = value;
+        } else {
+          spec.fields[key] = {
+            name: key,
+            type: castEsToKbnFieldTypeName(value.type),
+            runtimeField: value,
+            aggregatable: true,
+            searchable: true,
+            count: 0,
+            readFromDocValues: false,
+          };
+        }
+      }
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({

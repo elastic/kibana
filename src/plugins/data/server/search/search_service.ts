@@ -21,12 +21,13 @@ import {
 import { first } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import {
+import type {
   ISearchSetup,
   ISearchStart,
   ISearchStrategy,
   SearchEnhancements,
   SearchStrategyDependencies,
+  DataRequestHandlerContext,
 } from './types';
 
 import { AggsService } from './aggs';
@@ -64,12 +65,6 @@ import { ConfigSchema } from '../../config';
 import { SessionService, IScopedSessionService, ISessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
 import { registerBsearchRoute } from './routes/bsearch';
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    search?: ISearchClient & { session: IScopedSessionService };
-  }
-}
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -113,7 +108,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<DataRequestHandlerContext>();
     const routeDependencies = {
       getStartServices: core.getStartServices,
       globalConfig$: this.initializerContext.config.legacy.globalConfig$,
@@ -125,11 +120,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       this.coreStart = coreStart;
     });
 
-    core.http.registerRouteHandlerContext('search', async (context, request) => {
-      const search = this.asScopedProvider(this.coreStart!)(request);
-      const session = this.sessionService.asScopedProvider(this.coreStart!)(request);
-      return { ...search, session };
-    });
+    core.http.registerRouteHandlerContext<DataRequestHandlerContext, 'search'>(
+      'search',
+      async (context, request) => {
+        const search = this.asScopedProvider(this.coreStart!)(request);
+        const session = this.sessionService.asScopedProvider(this.coreStart!)(request);
+        return { ...search, session };
+      }
+    );
 
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
