@@ -5,14 +5,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import type { BeatsManagementRouter } from '../../lib/types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { ReturnTypeBulkAction } from '../../../common/return_types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { BeatsTagAssignment } from '../../../public/lib/adapters/beats/adapter_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-export const registerTagAssignmentsRoute = (router: IRouter) => {
+export const registerTagAssignmentsRoute = (router: BeatsManagementRouter) => {
   // TODO: write to Kibana audit log file https://github.com/elastic/kibana/issues/26024
   router.post(
     {
