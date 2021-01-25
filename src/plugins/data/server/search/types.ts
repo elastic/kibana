@@ -7,11 +7,13 @@
  */
 
 import { Observable } from 'rxjs';
-import {
+import type {
+  IRouter,
   IScopedClusterClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
   KibanaRequest,
+  RequestHandlerContext,
 } from 'src/core/server';
 import {
   ISearchOptions,
@@ -111,3 +113,12 @@ export interface ISearchStart<
     asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
   };
 }
+
+/**
+ * @internal
+ */
+export interface DataRequestHandlerContext extends RequestHandlerContext {
+  search: IScopedSearchClient;
+}
+
+export type DataPluginRouter = IRouter<DataRequestHandlerContext>;

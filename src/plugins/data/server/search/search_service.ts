@@ -21,13 +21,14 @@ import {
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import {
+import type {
   IScopedSearchClient,
   ISearchSetup,
   ISearchStart,
   ISearchStrategy,
   SearchEnhancements,
   SearchStrategyDependencies,
+  DataRequestHandlerContext,
 } from './types';
 
 import { AggsService } from './aggs';
@@ -113,7 +114,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<DataRequestHandlerContext>();
     const routeDependencies = {
       getStartServices: core.getStartServices,
       globalConfig$: this.initializerContext.config.legacy.globalConfig$,
@@ -121,9 +122,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     registerSearchRoute(router);
     registerMsearchRoute(router, routeDependencies);
 
-    core.http.registerRouteHandlerContext('search', async (context, request) => {
-      return this.asScoped(request);
-    });
+    core.http.registerRouteHandlerContext<DataRequestHandlerContext, 'search'>(
+      'search',
+      async (context, request) => {
+        return this.asScoped(request);
+      }
+    );
 
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,

@@ -38,11 +38,14 @@ export {
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportResultDetails,
   SavedObjectsExportError,
+  SavedObjectsExportTransformContext,
+  SavedObjectsExportTransform,
 } from './export';
 
 export {
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
+  SavedObjectsRawDocParseOptions,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from './serialization';

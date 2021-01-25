@@ -7,6 +7,5 @@
  */
 
 import { CorePluginRouteTimeoutsPlugin } from './plugin';
-export { PluginARequestContext } from './plugin';
 
 export const plugin = () => new CorePluginRouteTimeoutsPlugin();

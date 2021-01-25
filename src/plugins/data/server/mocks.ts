@@ -6,7 +6,6 @@
  * Public License, v 1.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
 import {
   createSearchSetupMock,
   createSearchStartMock,
@@ -14,6 +13,7 @@ import {
 } from './search/mocks';
 import { createFieldFormatsSetupMock, createFieldFormatsStartMock } from './field_formats/mocks';
 import { createIndexPatternsStartMock } from './index_patterns/mocks';
+import { DataRequestHandlerContext } from './search';
 
 function createSetupContract() {
   return {
@@ -33,7 +33,7 @@ function createStartContract() {
 function createRequestHandlerContext() {
   return ({
     search: createSearchRequestHandlerContext(),
-  } as unknown) as jest.Mocked<RequestHandlerContext>;
+  } as unknown) as jest.Mocked<DataRequestHandlerContext>;
 }
 
 export const dataPluginMock = {

@@ -5,15 +5,19 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import type { CoreSetup, Logger, RequestHandlerContext } from 'kibana/server';
+
+import type { CoreSetup, Logger } from 'kibana/server';
 import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';
-import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import type {
+  PluginStart as DataPluginStart,
+  DataRequestHandlerContext,
+} from '../../../../../src/plugins/data/server';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 import { registerSessionRoutes } from './session';
 
 describe('registerSessionRoutes', () => {
   let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;
-  let mockContext: jest.Mocked<RequestHandlerContext>;
+  let mockContext: jest.Mocked<DataRequestHandlerContext>;
   let mockLogger: Logger;
 
   beforeEach(() => {
