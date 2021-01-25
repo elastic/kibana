@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
-
+import type { ListsPluginRouter } from '../types';
 import { LIST_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { validate } from '../../common/shared_imports';
@@ -13,7 +12,7 @@ import { listSchema, readListSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
-export const readListRoute = (router: IRouter): void => {
+export const readListRoute = (router: ListsPluginRouter): void => {
   router.get(
     {
       options: {

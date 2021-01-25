@@ -5,6 +5,7 @@
  */
 
 import { EuiFilterButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 interface UptimeFilterButtonProps {
@@ -25,6 +26,10 @@ export const UptimeFilterButton = ({
   title,
 }: UptimeFilterButtonProps) => (
   <EuiFilterButton
+    aria-label={i18n.translate('xpack.uptime.overview.filterButton.label', {
+      defaultMessage: 'expands filter group for {title} filter',
+      values: { title },
+    })}
     hasActiveFilters={numActiveFilters !== 0}
     iconType="arrowDown"
     isDisabled={isDisabled}

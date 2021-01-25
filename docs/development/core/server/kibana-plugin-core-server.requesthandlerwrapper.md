@@ -9,7 +9,7 @@ Type-safe wrapper for [RequestHandler](./kibana-plugin-core-server.requesthandle
 <b>Signature:</b>
 
 ```typescript
-export declare type RequestHandlerWrapper = <P, Q, B, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory>(handler: RequestHandler<P, Q, B, Method, ResponseFactory>) => RequestHandler<P, Q, B, Method, ResponseFactory>;
+export declare type RequestHandlerWrapper = <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory>(handler: RequestHandler<P, Q, B, Context, Method, ResponseFactory>) => RequestHandler<P, Q, B, Context, Method, ResponseFactory>;
 ```
 
 ## Example

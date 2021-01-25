@@ -150,7 +150,9 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
     <ExpressionWithPopover
       isInvalid={isInvalid}
       value={indexPattern.title}
-      defaultValue={'Select an index pattern and geo shape/point field'}
+      defaultValue={i18n.translate('xpack.stackAlerts.geoThreshold.entityIndexSelect', {
+        defaultMessage: 'Select an index pattern and geo point field',
+      })}
       popoverContent={indexPopover}
       expressionDescription={i18n.translate('xpack.stackAlerts.geoThreshold.entityIndexLabel', {
         defaultMessage: 'index',
