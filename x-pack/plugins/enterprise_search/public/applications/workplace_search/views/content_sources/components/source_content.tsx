@@ -122,7 +122,7 @@ export const SourceContent: React.FC = () => {
         <EuiTableRowCell className="eui-textTruncate">
           <TruncatedContent tooltipType="title" content={title.toString()} length={MAX_LENGTH} />
         </EuiTableRowCell>
-        <EuiTableRowCell className="eui-textTruncate">
+        <EuiTableRowCell className="eui-textTruncate" data-test-subj="URLFieldCell">
           {!urlFieldIsLinkable && (
             <TruncatedContent tooltipType="title" content={url.toString()} length={MAX_LENGTH} />
           )}

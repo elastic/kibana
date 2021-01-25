@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import archives_metadata from '../../../common/archives_metadata';
+import archives_metadata from '../../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
