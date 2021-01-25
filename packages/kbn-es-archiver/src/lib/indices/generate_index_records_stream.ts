@@ -16,22 +16,24 @@ export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
     readableObjectMode: true,
     async transform(indexOrAlias, enc, callback) {
       try {
-        const resp = (await client.indices.get({
-          index: indexOrAlias,
-          // filterPath: [
-          //   '*.settings',
-          //   '*.mappings',
-          //   // remove settings that aren't really settings
-          //   '-*.settings.index.creation_date',
-          //   '-*.settings.index.uuid',
-          //   '-*.settings.index.version',
-          //   '-*.settings.index.provided_name',
-          //   '-*.settings.index.frozen',
-          //   '-*.settings.index.search.throttled',
-          //   '-*.settings.index.query',
-          //   '-*.settings.index.routing',
-          // ],
-        })) as Record<string, any>;
+        const resp = (
+          await client.indices.get({
+            index: indexOrAlias,
+            filter_path: [
+              '*.settings',
+              '*.mappings',
+              // remove settings that aren't really settings
+              '-*.settings.index.creation_date',
+              '-*.settings.index.uuid',
+              '-*.settings.index.version',
+              '-*.settings.index.provided_name',
+              '-*.settings.index.frozen',
+              '-*.settings.index.search.throttled',
+              '-*.settings.index.query',
+              '-*.settings.index.routing',
+            ],
+          })
+        ).body as Record<string, any>;
 
         for (const [index, { settings, mappings }] of Object.entries(resp)) {
           const {
