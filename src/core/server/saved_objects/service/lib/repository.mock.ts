@@ -17,6 +17,7 @@ const create = (): jest.Mocked<ISavedObjectsRepository> => ({
   bulkGet: jest.fn(),
   find: jest.fn(),
   get: jest.fn(),
+  resolve: jest.fn(),
   update: jest.fn(),
   addToNamespaces: jest.fn(),
   deleteFromNamespaces: jest.fn(),

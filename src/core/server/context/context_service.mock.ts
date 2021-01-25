@@ -9,7 +9,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ContextService, ContextSetup } from './context_service';
-import { contextMock } from '../../utils/context.mock';
+import { contextMock } from './container/context.mock';
 
 const createSetupContractMock = (mockContext = {}) => {
   const setupContract: jest.Mocked<ContextSetup> = {

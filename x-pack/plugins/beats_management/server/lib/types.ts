@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { IRouter, RequestHandlerContext } from 'src/core/server';
 import { DatabaseAdapter } from './adapters/database/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
 import { BeatEventsLib } from './beat_events';
@@ -40,3 +40,20 @@ export interface AsyncResponse<DataType = any> {
 export interface AsyncResponse<DataType = any> {
   data: DataType;
 }
+
+/**
+ * @internal
+ */
+export type BeatsManagementApiRequestHandlerContext = CMServerLibs;
+
+/**
+ * @internal
+ */
+export interface BeatsManagementRequestHandlerContext extends RequestHandlerContext {
+  beatsManagement: CMServerLibs;
+}
+
+/**
+ * @internal
+ */
+export type BeatsManagementRouter = IRouter<BeatsManagementRequestHandlerContext>;
