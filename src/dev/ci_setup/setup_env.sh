@@ -6,6 +6,10 @@ if [[ "$CI_ENV_SETUP" ]]; then
   return 0
 fi
 
+ulimit -a
+whoami
+ps aux
+
 installNode=$1
 
 dir="$(pwd)"

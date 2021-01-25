@@ -4,6 +4,10 @@ set -euo pipefail
 
 source "$(dirname "${0}")/util.sh"
 
+ulimit -a
+whoami
+ps aux
+
 tc_set_env KIBANA_DIR "$(cd "$(dirname "$0")/../.." && pwd)"
 tc_set_env XPACK_DIR "$KIBANA_DIR/x-pack"
 
