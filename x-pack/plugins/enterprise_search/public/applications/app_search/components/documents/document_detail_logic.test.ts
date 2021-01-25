@@ -11,10 +11,7 @@ import {
   mockFlashMessageHelpers,
   expectedAsyncError,
 } from '../../../__mocks__';
-
-jest.mock('../engine', () => ({
-  EngineLogic: { values: { engineName: 'engine1' } },
-}));
+import { mockEngineValues } from '../../__mocks__';
 
 import { DocumentDetailLogic } from './document_detail_logic';
 import { InternalSchemaTypes } from '../../../shared/types';
@@ -32,6 +29,7 @@ describe('DocumentDetailLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockEngineValues.engineName = 'engine1';
   });
 
   describe('actions', () => {

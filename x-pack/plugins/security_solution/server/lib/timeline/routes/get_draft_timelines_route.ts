@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from '../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 import { ConfigType } from '../../..';
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 import { TIMELINE_DRAFT_URL } from '../../../../common/constants';
@@ -16,7 +16,7 @@ import { draftTimelineDefaults } from '../default_timeline';
 import { getDraftTimelineSchema } from './schemas/get_draft_timelines_schema';
 
 export const getDraftTimelinesRoute = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {
