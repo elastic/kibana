@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, noop } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -26,7 +26,6 @@ export interface UseTimelineKpiProps {
   filterQuery?: ESQuery | string | undefined;
   defaultIndex: string[];
   docValueFields?: DocValueFields[];
-  skip: boolean;
   isBlankTimeline: boolean;
 }
 
@@ -35,7 +34,6 @@ export const useTimelineKpis = ({
   filterQuery,
   docValueFields,
   defaultIndex,
-  skip,
   isBlankTimeline,
 }: UseTimelineKpiProps): [boolean, TimelineKpiStrategyResponse | null] => {
   const { data, notifications } = useKibana().services;
@@ -53,7 +51,7 @@ export const useTimelineKpis = ({
 
   const timelineKpiSearch = useCallback(
     (request: TimelineRequestBasicOptions | null) => {
-      if (request == null || skip) {
+      if (request == null) {
         return;
       }
 
@@ -79,7 +77,6 @@ export const useTimelineKpis = ({
                 if (!didCancel) {
                   setLoading(false);
                 }
-                // TODO: Make response error status clearer
                 notifications.toasts.addWarning('An error has occurred');
                 searchSubscription$.unsubscribe();
               }
@@ -102,7 +99,7 @@ export const useTimelineKpis = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, notifications.toasts]
   );
 
   useEffect(() => {

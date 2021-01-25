@@ -275,7 +275,6 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
   const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
 
-  // return events on empty search
   const kqlQueryExpression =
     isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
       ? ' '
@@ -302,7 +301,6 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQuery]
   );
   const [loading, kpis] = useTimelineKpis({
-    skip: false,
     defaultIndex: selectedPatterns,
     docValueFields,
     timerange: {
