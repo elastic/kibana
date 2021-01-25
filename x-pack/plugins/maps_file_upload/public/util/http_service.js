@@ -9,7 +9,7 @@ import { kbnFetch } from '../kibana_services';
 
 export async function http(options) {
   if (!(options && options.url)) {
-    throw i18n.translate('xpack.fileUpload.httpService.noUrl', {
+    throw i18n.translate('xpack.mapsFileUpload.httpService.noUrl', {
       defaultMessage: 'No URL provided',
     });
   }
@@ -41,7 +41,7 @@ async function doFetch(url, payload) {
   } catch (err) {
     return {
       failures: [
-        i18n.translate('xpack.fileUpload.httpService.fetchError', {
+        i18n.translate('xpack.mapsFileUpload.httpService.fetchError', {
           defaultMessage: 'Error performing fetch: {error}',
           values: { error: err.message },
         }),

@@ -20,7 +20,7 @@ export const fileHandler = async ({
     if (!file) {
       reject(
         new Error(
-          i18n.translate('xpack.fileUpload.fileParser.noFileProvided', {
+          i18n.translate('xpack.mapsFileUpload.fileParser.noFileProvided', {
             defaultMessage: 'Error, no file provided',
           })
         )
@@ -66,7 +66,7 @@ export const fileHandler = async ({
                   boolGeometryErrs = true;
                   errors.push(
                     new Error(
-                      i18n.translate('xpack.fileUpload.fileParser.featuresOmitted', {
+                      i18n.translate('xpack.mapsFileUpload.fileParser.featuresOmitted', {
                         defaultMessage: 'Some features without geometry omitted',
                       })
                     )
@@ -92,7 +92,7 @@ export const fileHandler = async ({
     if (!featuresProcessed && getFileParseActive()) {
       reject(
         new Error(
-          i18n.translate('xpack.fileUpload.fileParser.noFeaturesDetected', {
+          i18n.translate('xpack.mapsFileUpload.fileParser.noFeaturesDetected', {
             defaultMessage: 'Error, no features detected',
           })
         )
@@ -133,7 +133,7 @@ export async function parseFile({
         cleanAndValidate = geoJsonCleanAndValidate;
         break;
       default:
-        throw i18n.translate('xpack.fileUpload.fileParser.transformDetailsNotDefined', {
+        throw i18n.translate('xpack.mapsFileUpload.fileParser.transformDetailsNotDefined', {
           defaultMessage: 'Index options for {transformDetails} not defined',
           values: { transformDetails },
         });

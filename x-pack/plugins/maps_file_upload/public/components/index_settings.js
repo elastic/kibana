@@ -78,7 +78,7 @@ export class IndexSettings extends Component {
     if (nameAlreadyInUse) {
       return (
         <FormattedMessage
-          id="xpack.fileUpload.indexSettings.indexNameAlreadyExistsErrorMessage"
+          id="xpack.mapsFileUpload.indexSettings.indexNameAlreadyExistsErrorMessage"
           defaultMessage="Index name or pattern already exists."
         />
       );
@@ -88,7 +88,7 @@ export class IndexSettings extends Component {
     if (!indexPatternValid) {
       return (
         <FormattedMessage
-          id="xpack.fileUpload.indexSettings.indexNameContainsIllegalCharactersErrorMessage"
+          id="xpack.mapsFileUpload.indexSettings.indexNameContainsIllegalCharactersErrorMessage"
           defaultMessage="Index name contains illegal characters."
         />
       );
@@ -105,7 +105,7 @@ export class IndexSettings extends Component {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.fileUpload.indexSettings.enterIndexTypeLabel"
+              id="xpack.mapsFileUpload.indexSettings.enterIndexTypeLabel"
               defaultMessage="Index type"
             />
           }
@@ -123,7 +123,7 @@ export class IndexSettings extends Component {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.fileUpload.indexSettings.enterIndexNameLabel"
+              id="xpack.mapsFileUpload.indexSettings.enterIndexNameLabel"
               defaultMessage="Index name"
             />
           }
@@ -133,13 +133,13 @@ export class IndexSettings extends Component {
           <EuiFieldText
             data-test-subj="fileUploadIndexNameInput"
             disabled={indexDisabled}
-            placeholder={i18n.translate('xpack.fileUpload.enterIndexName', {
+            placeholder={i18n.translate('xpack.mapsFileUpload.enterIndexName', {
               defaultMessage: 'Enter Index Name',
             })}
             value={indexName}
             onChange={this._onIndexChange}
             isInvalid={indexNameError !== ''}
-            aria-label={i18n.translate('xpack.fileUpload.indexNameReqField', {
+            aria-label={i18n.translate('xpack.mapsFileUpload.indexNameReqField', {
               defaultMessage: 'Index name, required field',
             })}
           />
@@ -148,41 +148,41 @@ export class IndexSettings extends Component {
           <Fragment>
             <EuiSpacer size="m" />
             <EuiCallOut
-              title={i18n.translate('xpack.fileUpload.indexSettings.indexNameGuidelines', {
+              title={i18n.translate('xpack.mapsFileUpload.indexSettings.indexNameGuidelines', {
                 defaultMessage: 'Index name guidelines',
               })}
               size="s"
             >
               <ul style={{ marginBottom: 0 }}>
                 <li>
-                  {i18n.translate('xpack.fileUpload.indexSettings.guidelines.mustBeNewIndex', {
+                  {i18n.translate('xpack.mapsFileUpload.indexSettings.guidelines.mustBeNewIndex', {
                     defaultMessage: 'Must be a new index',
                   })}
                 </li>
                 <li>
-                  {i18n.translate('xpack.fileUpload.indexSettings.guidelines.lowercaseOnly', {
+                  {i18n.translate('xpack.mapsFileUpload.indexSettings.guidelines.lowercaseOnly', {
                     defaultMessage: 'Lowercase only',
                   })}
                 </li>
                 <li>
-                  {i18n.translate('xpack.fileUpload.indexSettings.guidelines.cannotInclude', {
+                  {i18n.translate('xpack.mapsFileUpload.indexSettings.guidelines.cannotInclude', {
                     defaultMessage:
                       'Cannot include \\\\, /, *, ?, ", <, >, |, \
                     " " (space character), , (comma), #',
                   })}
                 </li>
                 <li>
-                  {i18n.translate('xpack.fileUpload.indexSettings.guidelines.cannotStartWith', {
+                  {i18n.translate('xpack.mapsFileUpload.indexSettings.guidelines.cannotStartWith', {
                     defaultMessage: 'Cannot start with -, _, +',
                   })}
                 </li>
                 <li>
-                  {i18n.translate('xpack.fileUpload.indexSettings.guidelines.cannotBe', {
+                  {i18n.translate('xpack.mapsFileUpload.indexSettings.guidelines.cannotBe', {
                     defaultMessage: 'Cannot be . or ..',
                   })}
                 </li>
                 <li>
-                  {i18n.translate('xpack.fileUpload.indexSettings.guidelines.length', {
+                  {i18n.translate('xpack.mapsFileUpload.indexSettings.guidelines.length', {
                     defaultMessage:
                       'Cannot be longer than 255 bytes (note it is bytes, \
                     so multi-byte characters will count towards the 255 \
