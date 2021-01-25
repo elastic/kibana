@@ -7,11 +7,13 @@
  */
 
 import { Observable } from 'rxjs';
-import {
+import type {
+  IRouter,
   IScopedClusterClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
   KibanaRequest,
+  RequestHandlerContext,
 } from 'src/core/server';
 import {
   ISearchOptions,
@@ -23,7 +25,7 @@ import {
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
-import { ISessionService } from './session';
+import { ISessionService, IScopedSessionService } from './session';
 
 export interface SearchEnhancements {
   defaultStrategy: string;
@@ -101,3 +103,16 @@ export interface ISearchStart<
     asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
   };
 }
+
+export interface DataApiRequestHandlerContext extends ISearchClient {
+  session: IScopedSessionService;
+}
+
+/**
+ * @internal
+ */
+export interface DataRequestHandlerContext extends RequestHandlerContext {
+  search: DataApiRequestHandlerContext;
+}
+
+export type DataPluginRouter = IRouter<DataRequestHandlerContext>;

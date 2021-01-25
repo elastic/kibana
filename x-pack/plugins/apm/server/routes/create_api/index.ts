@@ -15,6 +15,7 @@ import { strictKeysRt } from '../../../common/runtime_types/strict_keys_rt';
 import { APMConfig } from '../..';
 import { ServerAPI } from '../typings';
 import { jsonRt } from '../../../common/runtime_types/json_rt';
+import type { ApmPluginRequestHandlerContext } from '../typings';
 
 const debugRt = t.exact(
   t.partial({
@@ -73,7 +74,10 @@ export function createApi() {
 
         const anyObject = schema.object({}, { unknowns: 'allow' });
 
-        (router[typedRouterMethod] as RouteRegistrar<typeof typedRouterMethod>)(
+        (router[typedRouterMethod] as RouteRegistrar<
+          typeof typedRouterMethod,
+          ApmPluginRequestHandlerContext
+        >)(
           {
             path,
             options,

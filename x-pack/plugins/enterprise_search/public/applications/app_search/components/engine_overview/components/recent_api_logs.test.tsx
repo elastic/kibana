@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setMockValues } from '../../../../__mocks__/kea.mock';
+import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
@@ -18,9 +18,6 @@ describe('RecentApiLogs', () => {
 
   beforeAll(() => {
     jest.clearAllMocks();
-    setMockValues({
-      engineName: 'some-engine',
-    });
     wrapper = shallow(<RecentApiLogs />);
   });
 
