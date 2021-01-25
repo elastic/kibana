@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { useValues } from 'kea';
 
 import {
   EuiPageContent,
@@ -16,17 +15,13 @@ import {
 } from '@elastic/eui';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { ENGINE_API_LOGS_PATH } from '../../../routes';
+import { generateEnginePath } from '../../engine';
 
-import { ENGINE_API_LOGS_PATH, getEngineRoute } from '../../../routes';
 import { RECENT_API_EVENTS } from '../../api_logs/constants';
 import { VIEW_API_LOGS } from '../constants';
 
-import { EngineLogic } from '../../engine';
-
 export const RecentApiLogs: React.FC = () => {
-  const { engineName } = useValues(EngineLogic);
-  const engineRoute = getEngineRoute(engineName);
-
   return (
     <EuiPageContent>
       <EuiPageContentHeader responsive={false}>
@@ -36,7 +31,7 @@ export const RecentApiLogs: React.FC = () => {
           </EuiTitle>
         </EuiPageContentHeaderSection>
         <EuiPageContentHeaderSection>
-          <EuiButtonTo to={engineRoute + ENGINE_API_LOGS_PATH} size="s">
+          <EuiButtonTo to={generateEnginePath(ENGINE_API_LOGS_PATH)} size="s">
             {VIEW_API_LOGS}
           </EuiButtonTo>
         </EuiPageContentHeaderSection>
