@@ -135,6 +135,7 @@ describe('sortLayer', () => {
         { id: `${BRAVO_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
         { id: `${SPATIAL_FILTERS_LAYER_ID}_fill`, type: 'fill' } as MbLayer,
         { id: `${SPATIAL_FILTERS_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
+        { id: `gl-draw-polygon-fill-active.cold`, type: 'fill' } as MbLayer,
         {
           id: `${CHARLIE_LAYER_ID}_text`,
           type: 'symbol',
@@ -158,6 +159,7 @@ describe('sortLayer', () => {
       'alpha_text',
       'alpha_circle',
       'charlie_text',
+      'gl-draw-polygon-fill-active.cold',
       'SPATIAL_FILTERS_LAYER_ID_fill',
       'SPATIAL_FILTERS_LAYER_ID_circle',
     ]);
