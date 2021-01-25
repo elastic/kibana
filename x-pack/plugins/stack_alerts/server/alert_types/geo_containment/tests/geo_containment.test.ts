@@ -311,6 +311,7 @@ describe('geo_containment', () => {
       expect(allActiveEntriesMap.has('d')).toBeTruthy();
       expect(testAlertActionArr).toMatchObject(expectedContextPlusD);
     });
+
     it('should remove "other" entries and schedule the expected number of actions', () => {
       const emptyPrevLocationMap = new Map();
       const currLocationMapWithOther = new Map([...currLocationMap]).set('d', [
@@ -331,6 +332,107 @@ describe('geo_containment', () => {
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
       expect(testAlertActionArr).toMatchObject(expectedContext);
+    });
+
+    it('should generate multiple alerts per entity if found in multiple shapes in interval', () => {
+      const emptyPrevLocationMap = new Map();
+      const currLocationMapWithThreeMore = new Map([...currLocationMap]).set('d', [
+        {
+          location: [0, 0],
+          shapeLocationId: '789',
+          dateInShape: 'Wed Dec 10 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId1',
+        },
+        {
+          location: [0, 0],
+          shapeLocationId: '123',
+          dateInShape: 'Wed Dec 08 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId2',
+        },
+        {
+          location: [0, 0],
+          shapeLocationId: '456',
+          dateInShape: 'Wed Dec 07 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId3',
+        },
+      ]);
+      getActiveEntriesAndGenerateAlerts(
+        emptyPrevLocationMap,
+        currLocationMapWithThreeMore,
+        alertInstanceFactory,
+        emptyShapesIdsNamesMap,
+        currentDateTime
+      );
+      let numEntitiesInShapes = 0;
+      currLocationMapWithThreeMore.forEach((v) => {
+        numEntitiesInShapes += v.length;
+      });
+      expect(testAlertActionArr.length).toEqual(numEntitiesInShapes);
+    });
+
+    it('should not return entity as active entry if most recent location is "other"', () => {
+      const emptyPrevLocationMap = new Map();
+      const currLocationMapWithOther = new Map([...currLocationMap]).set('d', [
+        {
+          location: [0, 0],
+          shapeLocationId: OTHER_CATEGORY,
+          dateInShape: 'Wed Dec 10 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId1',
+        },
+        {
+          location: [0, 0],
+          shapeLocationId: '123',
+          dateInShape: 'Wed Dec 08 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId1',
+        },
+        {
+          location: [0, 0],
+          shapeLocationId: '456',
+          dateInShape: 'Wed Dec 07 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId1',
+        },
+      ]);
+      expect(currLocationMapWithOther).not.toEqual(currLocationMap);
+      const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+        emptyPrevLocationMap,
+        currLocationMapWithOther,
+        alertInstanceFactory,
+        emptyShapesIdsNamesMap,
+        currentDateTime
+      );
+      expect(allActiveEntriesMap).toEqual(currLocationMap);
+    });
+
+    it('should return entity as active entry if "other" not the latest location', () => {
+      const emptyPrevLocationMap = new Map();
+      const currLocationMapWithOther = new Map([...currLocationMap]).set('d', [
+        {
+          location: [0, 0],
+          shapeLocationId: '123',
+          dateInShape: 'Wed Dec 10 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId1',
+        },
+        {
+          location: [0, 0],
+          shapeLocationId: OTHER_CATEGORY,
+          dateInShape: 'Wed Dec 08 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId1',
+        },
+        {
+          location: [0, 0],
+          shapeLocationId: '456',
+          dateInShape: 'Wed Dec 07 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId1',
+        },
+      ]);
+      const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+        emptyPrevLocationMap,
+        currLocationMapWithOther,
+        alertInstanceFactory,
+        emptyShapesIdsNamesMap,
+        currentDateTime
+      );
+      expect(allActiveEntriesMap).toEqual(currLocationMapWithOther);
     });
   });
 });
