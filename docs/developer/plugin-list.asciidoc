@@ -94,7 +94,7 @@ for use in their own application.
 
 
 |{kib-repo}blob/{branch}/src/plugins/index_pattern_field_editor/README.md[indexPatternFieldEditor]
-|The only truly reusable field editor across Kibana.
+|The reusable field editor across Kibana!
 
 
 |{kib-repo}blob/{branch}/src/plugins/index_pattern_management[indexPatternManagement]
