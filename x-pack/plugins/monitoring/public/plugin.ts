@@ -96,6 +96,7 @@ export class MonitoringPlugin
           usageCollection: plugins.usageCollection,
         };
 
+        this.setInitialTimefilter(deps);
         const monitoringApp = new AngularApp(deps);
         const removeHistoryListener = params.history.listen((location) => {
           if (location.pathname === '' && location.hash === '') {
@@ -117,6 +118,12 @@ export class MonitoringPlugin
   public start(core: CoreStart, plugins: any) {}
 
   public stop() {}
+
+  private setInitialTimefilter({ data }: MonitoringStartPluginDependencies) {
+    const { timefilter } = data.query.timefilter;
+    const refreshInterval = { value: 10000, pause: false };
+    timefilter.setRefreshInterval(refreshInterval);
+  }
 
   private getExternalConfig() {
     const monitoring = this.initializerContext.config.get();
