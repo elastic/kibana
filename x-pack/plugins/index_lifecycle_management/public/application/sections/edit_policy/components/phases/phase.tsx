@@ -21,7 +21,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ToggleField, UseField, useFormData } from '../../../../../shared_imports';
 import { i18nTexts } from '../../i18n_texts';
 
-import { ActiveHighlight, MinAgeField } from './shared_fields';
+import { ActiveHighlight } from '../active_highlight';
+import { MinAgeField } from './shared_fields';
 
 interface Props {
   phase: 'hot' | 'warm' | 'cold';
@@ -44,7 +45,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasShadow={enabled}>
-          <EuiFlexGroup>
+          <EuiFlexGroup wrap>
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize={'s'}>
                 {phase !== 'hot' && (
@@ -70,8 +71,15 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
             </EuiFlexItem>
             {enabled && (
               <EuiFlexItem>
-                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize={'xs'}>
-                  <EuiFlexItem>{phase !== 'hot' && <MinAgeField phase={phase} />}</EuiFlexItem>
+                <EuiFlexGroup
+                  justifyContent="spaceBetween"
+                  alignItems="center"
+                  gutterSize={'xs'}
+                  wrap
+                >
+                  <EuiFlexItem grow={true}>
+                    {phase !== 'hot' && <MinAgeField phase={phase} />}
+                  </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       data-test-subj={`${phase}-settingsSwitch`}
@@ -93,12 +101,15 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
             )}
           </EuiFlexGroup>
           <EuiSpacer />
-          {enabled && <div style={isShowingSettings ? {} : { display: 'none' }}>{children}</div>}
+          <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
+            {i18nTexts.editPolicy.descriptions[phase]}
+          </EuiText>
 
-          {(!enabled || !isShowingSettings) && (
-            <EuiText color="subdued" size={'s'}>
-              {i18nTexts.editPolicy.descriptions[phase]}
-            </EuiText>
+          {enabled && (
+            <div style={isShowingSettings ? {} : { display: 'none' }}>
+              <EuiSpacer />
+              {children}
+            </div>
           )}
         </EuiPanel>
       </EuiFlexItem>
