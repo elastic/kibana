@@ -12,17 +12,23 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const deployment = getService('deployment');
   const log = getService('log');
   const PageObjects = getPageObjects(['visualize']);
+  let isOss = true;
 
   describe('chart types', function () {
     before(async function () {
       log.debug('navigateToApp visualize');
+      isOss = await deployment.isOss();
       await PageObjects.visualize.navigateToNewVisualization();
     });
 
     it('should show the promoted vis types for the first step', async function () {
-      const expectedChartTypes = ['Custom visualization', 'Lens', 'Maps', 'TSVB'];
+      const expectedChartTypes = ['Custom visualization', 'TSVB'];
+      if (!isOss) {
+        expectedChartTypes.push('Lens', 'Maps');
+      }
 
       // find all the chart types and make sure there all there
       const chartTypes = (await PageObjects.visualize.getPromotedVisTypes()).sort();
@@ -33,8 +39,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the correct agg based chart types', async function () {
       await PageObjects.visualize.clickAggBasedVisualizations();
-      const expectedChartTypes = [
+      let expectedChartTypes = [
         'Area',
+        'Coordinate Map',
         'Data table',
         'Gauge',
         'Goal',
@@ -43,10 +50,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Line',
         'Metric',
         'Pie',
+        'Region Map',
         'Tag cloud',
         'Timelion',
         'Vertical bar',
       ];
+      if (!isOss) {
+        expectedChartTypes = _.remove(expectedChartTypes, function (n) {
+          return n !== 'Coordinate Map';
+        });
+        expectedChartTypes = _.remove(expectedChartTypes, function (n) {
+          return n !== 'Region Map';
+        });
+        expectedChartTypes.sort();
+      }
+      log.debug('oss= ' + isOss);
 
       // find all the chart types and make sure there all there
       const chartTypes = (await PageObjects.visualize.getChartTypes()).sort();
