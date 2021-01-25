@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  describe('GlobalSearchBar', function () {
+  describe('TOTO GlobalSearchBar', function () {
     const { common, navigationalSearch } = getPageObjects(['common', 'navigationalSearch']);
     const esArchiver = getService('esArchiver');
     const browser = getService('browser');
@@ -61,6 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'dashboard 1 (tag-2)',
           'dashboard 2 (tag-3)',
           'dashboard 3 (tag-1 and tag-3)',
+          'dashboard 4 (tag-special-chars)',
         ]);
       });
       it('shows a suggestion when searching for a term matching a tag name', async () => {
@@ -94,6 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'dashboard 1 (tag-2)',
           'dashboard 2 (tag-3)',
           'dashboard 3 (tag-1 and tag-3)',
+          'dashboard 4 (tag-special-chars)',
         ]);
       });
 
@@ -111,6 +113,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'dashboard 1 (tag-2)',
           'dashboard 2 (tag-3)',
           'dashboard 3 (tag-1 and tag-3)',
+          'dashboard 4 (tag-special-chars)',
         ]);
       });
 
@@ -179,6 +182,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const results = await navigationalSearch.getDisplayedResults();
 
         expect(results.map((result) => result.label)).to.eql(['My awesome vis (tag-4)']);
+      });
+
+      it('allows to filter by tags containing special characters', async () => {
+        await navigationalSearch.searchFor('tag:"my%tag"');
+
+        const results = await navigationalSearch.getDisplayedResults();
+
+        expect(results.map((result) => result.label)).to.eql(['dashboard 4 (tag-special-chars)']);
       });
 
       it('returns no results when searching for an unknown tag', async () => {

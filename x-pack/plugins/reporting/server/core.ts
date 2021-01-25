@@ -10,7 +10,6 @@ import { first, map, take } from 'rxjs/operators';
 import {
   BasePath,
   ElasticsearchServiceSetup,
-  IRouter,
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
@@ -27,10 +26,11 @@ import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
 import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
+import { ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
-  router: IRouter;
+  router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
   elasticsearch: ElasticsearchServiceSetup;
   licensing: LicensingPluginSetup;

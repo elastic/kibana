@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IRouter, StartServicesAccessor } from 'src/core/server';
+import { StartServicesAccessor } from 'src/core/server';
 import { LicensingPluginStart } from '../types';
+import { LicensingRouter } from '../types';
 
 export function registerFeatureUsageRoute(
-  router: IRouter,
+  router: LicensingRouter,
   getStartServices: StartServicesAccessor<{}, LicensingPluginStart>
 ) {
   router.get(

@@ -46,6 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               success: true,
               successCount: 0,
+              warnings: [],
             });
           });
       });
@@ -84,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
                 { ...visualization, overwrite: true },
                 { ...dashboard, overwrite: true },
               ],
+              warnings: [],
             });
           });
       });
@@ -125,6 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
                   error: { type: 'unsupported_type' },
                 },
               ],
+              warnings: [],
             });
           });
       });
@@ -198,6 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                 },
               ],
+              warnings: [],
             });
           });
       });
@@ -215,7 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({ success: true, successCount: 0 });
+              expect(resp.body).to.eql({ success: true, successCount: 0, warnings: [] });
             });
         });
 
@@ -253,6 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
                   { ...visualization, overwrite: true },
                   { ...dashboard, overwrite: true },
                 ],
+                warnings: [],
               });
             });
         });
@@ -277,6 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
                 success: true,
                 successCount: 1,
                 successResults: [{ ...visualization, overwrite: true }],
+                warnings: [],
               });
             });
         });
@@ -328,6 +334,7 @@ export default function ({ getService }: FtrProviderContext) {
                     meta: { title: 'My favorite vis', icon: 'visualizeApp' },
                   },
                 ],
+                warnings: [],
               });
             });
           await supertest

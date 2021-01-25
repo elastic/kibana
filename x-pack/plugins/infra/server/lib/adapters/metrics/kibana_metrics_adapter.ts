@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { flatten, get } from 'lodash';
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { KibanaRequest } from 'src/core/server';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
@@ -19,6 +19,7 @@ import {
 } from '../../../../common/inventory_models/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../framework';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   private framework: KibanaFramework;
@@ -28,7 +29,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   }
 
   public async getMetrics(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     options: InfraMetricsRequestOptions,
     rawRequest: KibanaRequest
   ): Promise<NodeDetailsMetricData[]> {
@@ -94,7 +95,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     metricId: InventoryMetric,
     options: InfraMetricsRequestOptions,
     nodeField: string,
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     rawRequest: KibanaRequest
   ) {
     const createTSVBModel = get(metrics, ['tsvb', metricId]) as TSVBMetricModelCreator | undefined;
