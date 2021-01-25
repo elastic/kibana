@@ -5,7 +5,7 @@
  */
 import { deflateSync, inflateSync } from 'zlib';
 import LRU from 'lru-cache';
-import {
+import type {
   ILegacyClusterClient,
   IRouter,
   SavedObjectsClientContract,
@@ -13,7 +13,6 @@ import {
   RouteConfig,
   RequestHandler,
   KibanaResponseFactory,
-  RequestHandlerContext,
   SavedObject,
 } from 'kibana/server';
 import {
@@ -29,6 +28,7 @@ import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockEndpointAppContextServiceStartContract } from '../../mocks';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { WrappedTranslatedExceptionList } from '../../schemas/artifacts/lists';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-v1`;
 const expectedEndpointExceptions: WrappedTranslatedExceptionList = {
@@ -173,7 +173,7 @@ describe('test alerts route', () => {
             client: mockSavedObjectClient,
           },
         },
-      } as unknown) as RequestHandlerContext,
+      } as unknown) as SecuritySolutionRequestHandlerContext,
       mockRequest,
       mockResponse
     );
@@ -217,7 +217,7 @@ describe('test alerts route', () => {
             client: mockSavedObjectClient,
           },
         },
-      } as unknown) as RequestHandlerContext,
+      } as unknown) as SecuritySolutionRequestHandlerContext,
       mockRequest,
       mockResponse
     );
@@ -251,7 +251,7 @@ describe('test alerts route', () => {
             client: mockSavedObjectClient,
           },
         },
-      } as unknown) as RequestHandlerContext,
+      } as unknown) as SecuritySolutionRequestHandlerContext,
       mockRequest,
       mockResponse
     );
@@ -279,7 +279,7 @@ describe('test alerts route', () => {
             client: mockSavedObjectClient,
           },
         },
-      } as unknown) as RequestHandlerContext,
+      } as unknown) as SecuritySolutionRequestHandlerContext,
       mockRequest,
       mockResponse
     );
@@ -313,7 +313,7 @@ describe('test alerts route', () => {
             client: mockSavedObjectClient,
           },
         },
-      } as unknown) as RequestHandlerContext,
+      } as unknown) as SecuritySolutionRequestHandlerContext,
       mockRequest,
       mockResponse
     );

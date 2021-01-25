@@ -23,6 +23,11 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportError,
+  SavedObjectsImportHook,
+  SavedObjectsImportHookResult,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
 } from './import';
 
 export {
@@ -33,11 +38,14 @@ export {
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportResultDetails,
   SavedObjectsExportError,
+  SavedObjectsExportTransformContext,
+  SavedObjectsExportTransform,
 } from './export';
 
 export {
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
+  SavedObjectsRawDocParseOptions,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from './serialization';

@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Link, Route, Router, Switch, useLocation } from 'react-router-dom';
 import { History } from 'history';
 import {
@@ -18,21 +18,21 @@ import {
   EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import {
-  BaseStateContainer,
-  INullableBaseStateContainer,
-  createKbnUrlStateStorage,
-  createSessionStorageStateStorage,
-  createStateContainer,
-  createStateContainerReactHelpers,
-  PureTransition,
-  syncStates,
-  getStateFromKbnUrl,
   BaseState,
+  BaseStateContainer,
+  createKbnUrlStateStorage,
+  createStateContainer,
+  getStateFromKbnUrl,
+  INullableBaseStateContainer,
+  StateContainer,
+  syncState,
+  useContainerSelector,
 } from '../../../../src/plugins/kibana_utils/public';
-import { useUrlTracker } from '../../../../src/plugins/kibana_react/public';
 import {
   defaultState,
   pureTransitions,
@@ -40,42 +40,24 @@ import {
   TodoState,
 } from '../../../../src/plugins/kibana_utils/demos/state_containers/todomvc';
 
-interface GlobalState {
-  text: string;
-}
-interface GlobalStateAction {
-  setText: PureTransition<GlobalState, [string]>;
-}
-const defaultGlobalState: GlobalState = { text: '' };
-const globalStateContainer = createStateContainer<GlobalState, GlobalStateAction>(
-  defaultGlobalState,
-  {
-    setText: (state) => (text) => ({ ...state, text }),
-  }
-);
-
-const GlobalStateHelpers = createStateContainerReactHelpers<typeof globalStateContainer>();
-
-const container = createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions);
-const { Provider, connect, useTransitions, useState } = createStateContainerReactHelpers<
-  typeof container
->();
-
 interface TodoAppProps {
   filter: 'completed' | 'not-completed' | null;
+  stateContainer: StateContainer<TodoState, TodoActions>;
 }
 
-const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
-  const { setText } = GlobalStateHelpers.useTransitions();
-  const { text } = GlobalStateHelpers.useState();
-  const { edit: editTodo, delete: deleteTodo, add: addTodo } = useTransitions();
-  const todos = useState().todos;
-  const filteredTodos = todos.filter((todo) => {
-    if (!filter) return true;
-    if (filter === 'completed') return todo.completed;
-    if (filter === 'not-completed') return !todo.completed;
-    return true;
-  });
+const TodoApp: React.FC<TodoAppProps> = ({ filter, stateContainer }) => {
+  const { edit: editTodo, delete: deleteTodo, add: addTodo } = stateContainer.transitions;
+  const todos = useContainerSelector(stateContainer, (state) => state.todos);
+  const filteredTodos = useMemo(
+    () =>
+      todos.filter((todo) => {
+        if (!filter) return true;
+        if (filter === 'completed') return todo.completed;
+        if (filter === 'not-completed') return !todo.completed;
+        return true;
+      }),
+    [todos, filter]
+  );
   const location = useLocation();
   return (
     <>
@@ -144,158 +126,115 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
       >
         <EuiFieldText placeholder="Type your todo and press enter to submit" name="newTodo" />
       </form>
-      <div style={{ margin: '16px 0px' }}>
-        <label htmlFor="globalInput">Global state piece: </label>
-        <input name="globalInput" value={text} onChange={(e) => setText(e.target.value)} />
-      </div>
     </>
   );
 };
 
-const TodoAppConnected = GlobalStateHelpers.connect<TodoAppProps, never>(() => ({}))(
-  connect<TodoAppProps, never>(() => ({}))(TodoApp)
-);
-
 export const TodoAppPage: React.FC<{
   history: History;
-  appInstanceId: string;
   appTitle: string;
   appBasePath: string;
-  isInitialRoute: () => boolean;
 }> = (props) => {
   const initialAppUrl = React.useRef(window.location.href);
+  const stateContainer = React.useMemo(
+    () => createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions),
+    []
+  );
+
+  // Most of kibana apps persist state in the URL in two ways:
+  // * Rison encoded.
+  // * Hashed URL: In the URL only the hash from the state is stored. The state itself is stored in
+  //   the sessionStorage. See `state:storeInSessionStorage` advanced option for more context.
+  // This example shows how to use both of them
   const [useHashedUrl, setUseHashedUrl] = React.useState(false);
 
-  /**
-   * Replicates what src/legacy/ui/public/chrome/api/nav.ts did
-   * Persists the url in sessionStorage and tries to restore it on "componentDidMount"
-   */
-  useUrlTracker(`lastUrlTracker:${props.appInstanceId}`, props.history, (urlToRestore) => {
-    // shouldRestoreUrl:
-    // App decides if it should restore url or not
-    // In this specific case, restore only if navigated to initial route
-    if (props.isInitialRoute()) {
-      // navigated to the base path, so should restore the url
-      return true;
-    } else {
-      // navigated to specific route, so should not restore the url
-      return false;
-    }
-  });
-
   useEffect(() => {
-    // have to sync with history passed to react-router
-    // history v5 will be singleton and this will not be needed
+    // storage to sync our app state with
+    // in this case we want to sync state with query params in the URL serialised in rison format
+    // similar like Discover or Dashboard apps do
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       useHash: useHashedUrl,
       history: props.history,
     });
 
-    const sessionStorageStateStorage = createSessionStorageStateStorage();
+    // key to store state in the storage. In this case in the key of the query param in the URL
+    const appStateKey = `_todo`;
 
-    /**
-     * Restoring global state:
-     * State restoration similar to what GlobalState in legacy world did
-     * It restores state both from url and from session storage
-     */
-    const globalStateKey = `_g`;
-    const globalStateFromInitialUrl = getStateFromKbnUrl<GlobalState>(
-      globalStateKey,
-      initialAppUrl.current
-    );
-    const globalStateFromCurrentUrl = kbnUrlStateStorage.get<GlobalState>(globalStateKey);
-    const globalStateFromSessionStorage = sessionStorageStateStorage.get<GlobalState>(
-      globalStateKey
-    );
-
-    const initialGlobalState: GlobalState = {
-      ...defaultGlobalState,
-      ...globalStateFromCurrentUrl,
-      ...globalStateFromSessionStorage,
-      ...globalStateFromInitialUrl,
-    };
-    globalStateContainer.set(initialGlobalState);
-    kbnUrlStateStorage.set(globalStateKey, initialGlobalState, { replace: true });
-    sessionStorageStateStorage.set(globalStateKey, initialGlobalState);
-
-    /**
-     * Restoring app local state:
-     * State restoration similar to what AppState in legacy world did
-     * It restores state both from url
-     */
-    const appStateKey = `_todo-${props.appInstanceId}`;
+    // take care of initial state. Make sure state in memory is the same as in the URL before starting any syncing
     const initialAppState: TodoState =
       getStateFromKbnUrl<TodoState>(appStateKey, initialAppUrl.current) ||
       kbnUrlStateStorage.get<TodoState>(appStateKey) ||
       defaultState;
-    container.set(initialAppState);
+    stateContainer.set(initialAppState);
     kbnUrlStateStorage.set(appStateKey, initialAppState, { replace: true });
 
-    // start syncing only when made sure, that state in synced
-    const { stop, start } = syncStates([
-      {
-        stateContainer: withDefaultState(container, defaultState),
-        storageKey: appStateKey,
-        stateStorage: kbnUrlStateStorage,
-      },
-      {
-        stateContainer: withDefaultState(globalStateContainer, defaultGlobalState),
-        storageKey: globalStateKey,
-        stateStorage: kbnUrlStateStorage,
-      },
-      {
-        stateContainer: withDefaultState(globalStateContainer, defaultGlobalState),
-        storageKey: globalStateKey,
-        stateStorage: sessionStorageStateStorage,
-      },
-    ]);
+    // start syncing state between state container and the URL
+    const { stop, start } = syncState({
+      stateContainer: withDefaultState(stateContainer, defaultState),
+      storageKey: appStateKey,
+      stateStorage: kbnUrlStateStorage,
+    });
 
     start();
 
     return () => {
       stop();
-
-      // reset state containers
-      container.set(defaultState);
-      globalStateContainer.set(defaultGlobalState);
     };
-  }, [props.appInstanceId, props.history, useHashedUrl]);
+  }, [stateContainer, props.history, useHashedUrl]);
 
   return (
     <Router history={props.history}>
-      <GlobalStateHelpers.Provider value={globalStateContainer}>
-        <Provider value={container}>
-          <EuiPageBody>
-            <EuiPageHeader>
-              <EuiPageHeaderSection>
-                <EuiTitle size="l">
-                  <h1>
-                    State sync example. Instance: ${props.appInstanceId}. {props.appTitle}
-                  </h1>
-                </EuiTitle>
-                <EuiButton onClick={() => setUseHashedUrl(!useHashedUrl)}>
-                  {useHashedUrl ? 'Use Expanded State' : 'Use Hashed State'}
-                </EuiButton>
-              </EuiPageHeaderSection>
-            </EuiPageHeader>
-            <EuiPageContent>
-              <EuiPageContentBody>
-                <Switch>
-                  <Route path={'/completed'}>
-                    <TodoAppConnected filter={'completed'} />
-                  </Route>
-                  <Route path={'/not-completed'}>
-                    <TodoAppConnected filter={'not-completed'} />
-                  </Route>
-                  <Route path={'/'}>
-                    <TodoAppConnected filter={null} />
-                  </Route>
-                </Switch>
-              </EuiPageContentBody>
-            </EuiPageContent>
-          </EuiPageBody>
-        </Provider>
-      </GlobalStateHelpers.Provider>
+      <EuiPageBody>
+        <EuiPageHeader>
+          <EuiPageHeaderSection>
+            <EuiTitle size="l">
+              <h1>{props.appTitle}</h1>
+            </EuiTitle>
+            <EuiSpacer />
+            <EuiText>
+              <p>
+                This is a simple TODO app that uses state containers and state syncing utils. It
+                stores state in the URL similar like Discover or Dashboard apps do. <br />
+                Play with the app and see how the state is persisted in the URL.
+                <br /> Undo/Redo with browser history also works.
+              </p>
+            </EuiText>
+          </EuiPageHeaderSection>
+        </EuiPageHeader>
+        <EuiPageContent>
+          <EuiPageContentBody>
+            <Switch>
+              <Route path={'/completed'}>
+                <TodoApp filter={'completed'} stateContainer={stateContainer} />
+              </Route>
+              <Route path={'/not-completed'}>
+                <TodoApp filter={'not-completed'} stateContainer={stateContainer} />
+              </Route>
+              <Route path={'/'}>
+                <TodoApp filter={null} stateContainer={stateContainer} />
+              </Route>
+            </Switch>
+            <EuiSpacer size={'xxl'} />
+            <EuiText size={'s'}>
+              <p>Most of kibana apps persist state in the URL in two ways:</p>
+              <ol>
+                <li>Expanded state in rison format</li>
+                <li>
+                  Just a state hash. <br />
+                  In the URL only the hash from the state is stored. The state itself is stored in
+                  the sessionStorage. See `state:storeInSessionStorage` advanced option for more
+                  context.
+                </li>
+              </ol>
+              <p>You can switch between these two mods:</p>
+            </EuiText>
+            <EuiSpacer />
+            <EuiButton onClick={() => setUseHashedUrl(!useHashedUrl)}>
+              {useHashedUrl ? 'Use Expanded State' : 'Use Hashed State'}
+            </EuiButton>
+          </EuiPageContentBody>
+        </EuiPageContent>
+      </EuiPageBody>
     </Router>
   );
 };

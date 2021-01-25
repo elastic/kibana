@@ -8,7 +8,8 @@
 import { createApmQuery } from './create_apm_query';
 // @ts-ignore
 import { ApmClusterMetric } from '../metrics';
-import { LegacyRequest, ElasticsearchResponse } from '../../types';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
 
 export async function getTimeOfLastEvent({
   req,
@@ -58,5 +59,5 @@ export async function getTimeOfLastEvent({
   };
 
   const response = await callWithRequest(req, 'search', params);
-  return response.hits?.hits.length ? response.hits?.hits[0]._source.timestamp : undefined;
+  return response.hits?.hits.length ? response.hits?.hits[0]?._source.timestamp : undefined;
 }
