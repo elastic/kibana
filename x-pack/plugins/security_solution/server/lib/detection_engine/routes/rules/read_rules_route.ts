@@ -10,7 +10,7 @@ import {
   QueryRulesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/query_rules_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
@@ -19,7 +19,7 @@ import { readRules } from '../../rules/read_rules';
 import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
-export const readRulesRoute = (router: IRouter) => {
+export const readRulesRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
       path: DETECTION_ENGINE_RULES_URL,

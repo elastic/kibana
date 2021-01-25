@@ -11,6 +11,8 @@ export {
   SavedObjectExportBaseOptions,
   SavedObjectsExportByTypeOptions,
   SavedObjectsExportResultDetails,
+  SavedObjectsExportTransformContext,
+  SavedObjectsExportTransform,
 } from './types';
 export { ISavedObjectsExporter, SavedObjectsExporter } from './saved_objects_exporter';
 export { SavedObjectsExportError } from './errors';

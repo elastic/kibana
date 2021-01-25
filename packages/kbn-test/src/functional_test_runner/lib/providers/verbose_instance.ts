@@ -65,7 +65,11 @@ export function createVerboseInstance(
         }
 
         const { returned } = result;
-        if (returned && typeof returned.then === 'function') {
+        if (
+          returned &&
+          typeof returned.then === 'function' &&
+          typeof returned.finally === 'function'
+        ) {
           return returned.finally(() => {
             log.indent(-2);
           });
