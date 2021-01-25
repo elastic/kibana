@@ -86,9 +86,10 @@ export async function getAgents(soClient: SavedObjectsClientContract, agentIds: 
 
 export async function getAgentPolicyForAgent(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agentId: string
 ) {
-  const agent = await getAgent(soClient, agentId);
+  const agent = await getAgent(soClient, esClient, agentId);
   if (!agent.policy_id) {
     throw new Error(`${agentId} is not enrolled in a policy`);
   }

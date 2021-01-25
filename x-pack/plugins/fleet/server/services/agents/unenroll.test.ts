@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import type { SavedObject } from 'kibana/server';
 import type { Agent, AgentPolicy } from '../../types';
 import { unenrollAgent, unenrollAgents } from './unenroll';
@@ -29,7 +29,8 @@ const managedAgentPolicySO = {
 describe('unenrollAgent (singular)', () => {
   it('can unenroll from unmanaged policy', async () => {
     const soClient = createClientMock();
-    await unenrollAgent(soClient, agentInUnmanagedSO.id);
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await unenrollAgent(soClient, esClient, agentInUnmanagedSO.id);
 
     // calls ES update with correct values
     expect(soClient.update).toBeCalledTimes(1);
@@ -40,7 +41,8 @@ describe('unenrollAgent (singular)', () => {
 
   it('cannot unenroll from managed policy', async () => {
     const soClient = createClientMock();
-    await expect(unenrollAgent(soClient, agentInManagedSO.id)).rejects.toThrow('managed');
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await expect(unenrollAgent(soClient, esClient, agentInManagedSO.id)).rejects.toThrow('managed');
     // does not call ES update
     expect(soClient.update).toBeCalledTimes(0);
   });
@@ -49,8 +51,9 @@ describe('unenrollAgent (singular)', () => {
 describe('unenrollAgents (plural)', () => {
   it('cannot unenroll from a manged policy', async () => {
     const soClient = createClientMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const idsToUnenroll = [agentInUnmanagedSO.id, agentInManagedSO.id, agentInUnmanagedSO.id];
-    await unenrollAgents(soClient, { agentIds: idsToUnenroll });
+    await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll });
 
     // calls ES update with correct values
     const calledWith = soClient.bulkUpdate.mock.calls[0][0];
