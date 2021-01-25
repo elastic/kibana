@@ -36,7 +36,7 @@ describe('sendTelemetryOptInStatus', () => {
     expect(fetch).toBeCalledTimes(1);
     expect(fetch).toBeCalledWith(mockConfig.optInStatusUrl, {
       method: 'post',
-      body: mockOptInStatus,
+      body: '["mock_opt_in_hashed_value"]',
       headers: { 'X-Elastic-Stack-Version': mockConfig.currentKibanaVersion },
     });
   });
