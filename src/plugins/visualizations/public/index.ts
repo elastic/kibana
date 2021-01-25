@@ -34,7 +34,7 @@ export type {
   Schema,
   ISchemas,
 } from './vis_types';
-export { VisParams, SerializedVis, SerializedVisData, VisData } from './vis';
+export { SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export { VisualizeInput } from './embeddable';
@@ -46,12 +46,13 @@ export { PersistedState } from './persisted_state';
 export {
   VisualizationControllerConstructor,
   VisualizationController,
-  SavedVisState,
   ISavedVis,
   VisSavedObject,
   VisResponseValue,
   VisToExpressionAst,
+  VisParams,
 } from './types';
 export { ExprVisAPIEvents } from './expressions/vis';
 export { VisualizationListItem, VisualizationStage } from './vis_types/vis_type_alias_registry';
 export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
+export { SavedVisState } from '../common';
