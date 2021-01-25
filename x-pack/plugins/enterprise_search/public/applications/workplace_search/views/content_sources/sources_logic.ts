@@ -264,7 +264,6 @@ const updateSourcesOnToggle = (
   sourceId: string,
   searchable: boolean
 ): ContentSourceDetails[] => {
-  if (!contentSources) return [];
   const sources = cloneDeep(contentSources) as ContentSourceDetails[];
   const index = findIndex(sources, ({ id }) => id === sourceId);
   const updatedSource = sources[index];
