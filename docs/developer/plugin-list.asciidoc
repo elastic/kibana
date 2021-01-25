@@ -77,7 +77,7 @@ by the user. The final output of the expression pipeline can be rendered using
 one of the *renderers* registered in `expressions` plugin.
 
 All the arguments to expression functions need to be serializable, as well as input and output.
-Expression functions should try to stay 'pure'. This makes functions easy to reuse and also
+Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
 make it possible to serialize the whole chain as well as output at every step of execution.
 
 Expressions power visualizations in Dashboard and Lens, as well as, every
@@ -380,10 +380,6 @@ and actions.
 |The features plugin enhance Kibana with a per-feature privilege system.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/maps_file_upload/README.md[mapsFileUpload]
-|Backend and core front-end react-components for GeoJson file upload. Only supports the Maps plugin.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
 |Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
 
@@ -451,6 +447,10 @@ using the CURL scripts in the scripts folder.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/maps/README.md[maps]
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/maps_file_upload/README.md[mapsFileUpload]
+|Deprecated - plugin targeted for removal and will get merged into file_upload plugin
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/maps_legacy_licensing/README.md[mapsLegacyLicensing]
