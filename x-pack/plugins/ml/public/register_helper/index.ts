@@ -5,7 +5,6 @@
  */
 
 export { registerEmbeddables } from '../embeddables';
-export { registerFeature } from './register_feature';
 export { registerManagementSection } from '../application/management';
 export { registerMlUiActions } from '../ui_actions';
 export { registerSearchLinks } from './register_search_links';

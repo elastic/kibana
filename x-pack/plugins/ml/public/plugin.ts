@@ -42,7 +42,7 @@ import { ML_APP_URL_GENERATOR } from '../common/constants/ml_url_generator';
 import { isFullLicense, isMlEnabled } from '../common/license';
 
 import { setDependencyCache } from './application/util/dependency_cache';
-import { registerFeature } from './register_helper';
+import { registerFeature } from './register_feature';
 // Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
 import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
 
