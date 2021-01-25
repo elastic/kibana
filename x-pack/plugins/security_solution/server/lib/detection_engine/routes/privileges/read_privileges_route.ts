@@ -6,12 +6,15 @@
 
 import { merge } from 'lodash/fp';
 
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
 import { buildSiemResponse, transformError } from '../utils';
 import { readPrivileges } from '../../privileges/read_privileges';
 
-export const readPrivilegesRoute = (router: IRouter, usingEphemeralEncryptionKey: boolean) => {
+export const readPrivilegesRoute = (
+  router: SecuritySolutionPluginRouter,
+  usingEphemeralEncryptionKey: boolean
+) => {
   router.get(
     {
       path: DETECTION_ENGINE_PRIVILEGES_URL,

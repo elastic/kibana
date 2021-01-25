@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
 import {
   registerUpdateTagRoute,
   registerGetAllTagsRoute,
@@ -18,8 +17,9 @@ import {
   registerGetAssignableTypesRoute,
 } from './assignments';
 import { registerInternalFindTagsRoute, registerInternalBulkDeleteRoute } from './internal';
+import { TagsPluginRouter } from '../types';
 
-export const registerRoutes = ({ router }: { router: IRouter }) => {
+export const registerRoutes = ({ router }: { router: TagsPluginRouter }) => {
   // tags API
   registerCreateTagRoute(router);
   registerUpdateTagRoute(router);

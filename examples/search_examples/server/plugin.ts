@@ -6,13 +6,16 @@
  * Public License, v 1.
  */
 
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
-} from '../../../src/core/server';
+  RequestHandlerContext,
+} from 'src/core/server';
+
+import type { DataApiRequestHandlerContext } from 'src/plugins/data/server';
 
 import {
   SearchExamplesPluginSetup,
@@ -42,12 +45,14 @@ export class SearchExamplesPlugin
     deps: SearchExamplesPluginSetupDeps
   ) {
     this.logger.debug('search_examples: Setup');
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<
+      RequestHandlerContext & { search: DataApiRequestHandlerContext }
+    >();
 
     core.getStartServices().then(([_, depsStart]) => {
       const myStrategy = mySearchStrategyProvider(depsStart.data);
       deps.data.search.registerSearchStrategy('myStrategy', myStrategy);
-      registerRoutes(router, depsStart.data);
+      registerRoutes(router);
     });
 
     return {};
