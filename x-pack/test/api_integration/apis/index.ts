@@ -33,5 +33,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./transform'));
     loadTestFile(require.resolve('./lists'));
     loadTestFile(require.resolve('./upgrade_assistant'));
+    loadTestFile(require.resolve('./searchprofiler'));
   });
 }
