@@ -223,7 +223,7 @@ export const SaveRule = (props: SaveRuleProps) => {
       return;
     }
 
-    saveQueryRule(saveRuleData)
+    saveQueryRule(saveRuleData.id, saveRuleData)
       .then(() => {
         dispatch({ type: 'SAVE_RULE_FINISH', success: true });
       })

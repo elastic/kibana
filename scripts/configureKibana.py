@@ -75,7 +75,6 @@ def load_assets(path_to_files):
             logger.warning('Failed to load kibana object: ' + file)
 
 def setup_config():
-    # setup the default query type to be Lucene (not KQL)
     try:
         url = 'http://localhost:9200/.kibana/_update/config:7.5.2'
         session = requests.Session()
@@ -86,10 +85,13 @@ def setup_config():
             'Content-type': 'application/json',
             'kbn-version': '7.5.2'
         }
+        # setup the default query type to be Lucene (not KQL)
+        # set the default index pattern to be network_* using its UUID
         data = json.dumps({
             'doc': {
                 'config': {
-                    'search:queryLanguage': 'lucene'
+                    'search:queryLanguage': 'lucene',
+                    'defaultIndex': '361f5c00-b47c-11e9-86a0-cd3d7bf2f81b'
                 }
             },
             'doc_as_upsert': True
