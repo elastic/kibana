@@ -7,9 +7,10 @@
 import { DataType } from '../types';
 import { IndexPattern, IndexPatternLayer } from './types';
 import { DraggedField } from './indexpattern';
-import {
+import type {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
 } from './operations/definitions/column_types';
 import { operationDefinitionMap, IndexPatternColumn } from './operations';
 
@@ -53,9 +54,16 @@ export function isColumnInvalid(
   if (!column) return;
 
   const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
-  return !!(
-    operationDefinition.getErrorMessage &&
-    operationDefinition.getErrorMessage(layer, columnId, indexPattern)
+  // check also references for errors
+  const referencesHaveErrors = (column as ReferenceBasedIndexPatternColumn).references
+    ?.map((referenceId: string) => {
+      const referencedOperation = layer.columns[referenceId]?.operationType;
+      const referencedDefinition = operationDefinitionMap[referencedOperation];
+      return referencedDefinition.getErrorMessage?.(layer, referenceId, indexPattern);
+    })
+    .filter(Boolean);
+  return (
+    !!operationDefinition.getErrorMessage?.(layer, columnId, indexPattern) || referencesHaveErrors
   );
 }
 
