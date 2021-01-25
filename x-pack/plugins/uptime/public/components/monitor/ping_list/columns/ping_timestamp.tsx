@@ -9,11 +9,13 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiImage,
+  EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import useIntersection from 'react-use/lib/useIntersection';
 import moment from 'moment';
 import styled from 'styled-components';
@@ -60,13 +62,21 @@ const StepDiv = styled.div`
   }
 `;
 
+const POPOVER_IMG_HEIGHT = 360;
+const POPOVER_IMG_WIDTH = 640;
+
 interface Props {
   timestamp: string;
   ping: Ping;
 }
 
+const nextAriaLabel = i18n.translate('xpack.uptime.synthetics.nextButton.ariaLabel', {
+  defaultMessage: 'Next',
+});
+
 export const PingTimestamp = ({ timestamp, ping }: Props) => {
   const [stepNo, setStepNo] = useState(1);
+  const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
   const [stepImages, setStepImages] = useState<string[]>([]);
 
@@ -113,7 +123,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
                   setStepNo(stepNo - 1);
                 }}
                 iconType="arrowLeft"
-                aria-label="Next"
+                aria-label={nextAriaLabel}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -127,7 +137,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
                   setStepNo(stepNo + 1);
                 }}
                 iconType="arrowRight"
-                aria-label="Next"
+                aria-label={nextAriaLabel}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -140,17 +150,36 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
   );
 
   return (
-    <StepDiv ref={intersectionRef}>
+    <StepDiv
+      onMouseEnter={() => setIsImagePopoverOpen(true)}
+      onMouseLeave={() => setIsImagePopoverOpen(false)}
+      ref={intersectionRef}
+    >
       {imgSrc ? (
-        <StepImage
-          allowFullScreen={true}
-          size="s"
-          hasShadow
-          caption={ImageCaption}
-          alt={captionContent}
-          url={imgSrc}
-          data-test-subj="pingTimestampImage"
-        />
+        <EuiPopover
+          anchorPosition="rightCenter"
+          button={
+            <StepImage
+              allowFullScreen={true}
+              alt={captionContent}
+              caption={ImageCaption}
+              data-test-subj="pingTimestampImage"
+              hasShadow
+              url={imgSrc}
+              size="s"
+            />
+          }
+          closePopover={() => setIsImagePopoverOpen(false)}
+          isOpen={isImagePopoverOpen}
+        >
+          <EuiImage
+            alt={i18n.translate('xpack.uptime.synthetics.thumbnail.fullSize.alt', {
+              defaultMessage: `A full-size screenshot for this journey step's thumbnail.`,
+            })}
+            url={imgSrc}
+            style={{ height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }}
+          />
+        </EuiPopover>
       ) : (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
@@ -167,6 +196,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
         className="stepArrows"
         gutterSize="s"
         alignItems="center"
+        onMouseEnter={() => setIsImagePopoverOpen(true)}
         style={{ position: 'absolute', bottom: 0, left: 30 }}
       >
         <EuiFlexItem grow={false}>
@@ -178,7 +208,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
               setStepNo(stepNo - 1);
             }}
             iconType="arrowLeft"
-            aria-label="Next"
+            aria-label={nextAriaLabel}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -190,7 +220,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
               setStepNo(stepNo + 1);
             }}
             iconType="arrowRight"
-            aria-label="Next"
+            aria-label={nextAriaLabel}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
