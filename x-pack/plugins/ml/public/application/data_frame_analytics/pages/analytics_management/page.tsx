@@ -29,6 +29,7 @@ import { DataFrameAnalyticsList } from './components/analytics_list';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
+import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
 import { AnalyticsNavigationBar } from './components/analytics_navigation_bar';
 import { ModelsList } from './components/models_management';
@@ -37,6 +38,8 @@ import { usePageUrlState } from '../../../util/url_state';
 import { ListingPageUrlState } from '../../../../../common/types/common';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { HelpMenu } from '../../../components/help_menu';
+import { useMlKibana } from '../../../contexts/kibana';
 
 export const getDefaultDFAListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -60,7 +63,10 @@ export const Page: FC = () => {
   const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
   const mapJobId = globalState?.ml?.jobId;
   const mapModelId = globalState?.ml?.modelId;
-
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const helpLink = docLinks.links.ml.dataFrameAnalytics;
   return (
     <Fragment>
       <NavigationMenu tabId="data_frame_analytics" />
@@ -106,6 +112,7 @@ export const Page: FC = () => {
           </EuiPageHeader>
 
           <NodeAvailableWarning />
+          <SavedObjectsWarning jobType="data-frame-analytics" />
           <UpgradeWarning />
 
           <EuiPageContent>
@@ -128,6 +135,7 @@ export const Page: FC = () => {
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
+      <HelpMenu docLink={helpLink} />
     </Fragment>
   );
 };

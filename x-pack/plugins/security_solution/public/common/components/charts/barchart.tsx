@@ -11,6 +11,7 @@ import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
 import uuid from 'uuid';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { useTimeZone } from '../../lib/kibana';
@@ -193,4 +194,11 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   );
 };
 
-export const BarChart = React.memo(BarChartComponent);
+export const BarChart = React.memo(
+  BarChartComponent,
+  (prevProps, nextProps) =>
+    prevProps.stackByField === nextProps.stackByField &&
+    prevProps.timelineId === nextProps.timelineId &&
+    deepEqual(prevProps.configs, nextProps.configs) &&
+    deepEqual(prevProps.barChart, nextProps.barChart)
+);

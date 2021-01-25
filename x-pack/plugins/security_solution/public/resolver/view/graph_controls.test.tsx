@@ -35,6 +35,8 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
       databaseDocumentID,
       resolverComponentInstanceID,
       indices: [],
+      shouldUpdate: false,
+      filters: {},
     });
     originEntityID = entityIDs.origin;
 

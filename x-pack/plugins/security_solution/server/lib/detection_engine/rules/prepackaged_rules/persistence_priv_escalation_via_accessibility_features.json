@@ -7,13 +7,16 @@
     "winlogbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License",
   "name": "Potential Modification of Accessibility Binaries",
-  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:winlogon.exe and not process.name:(atbroker.exe or displayswitch.exe or magnify.exe or narrator.exe or osk.exe or sethc.exe or utilman.exe)",
-  "risk_score": 21,
+  "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n process.parent.name : (\"Utilman.exe\", \"winlogon.exe\") and user.name == \"SYSTEM\" and\n process.args :\n    (\n    \"C:\\\\Windows\\\\System32\\\\osk.exe\",\n    \"C:\\\\Windows\\\\System32\\\\Magnify.exe\",\n    \"C:\\\\Windows\\\\System32\\\\Narrator.exe\",\n    \"C:\\\\Windows\\\\System32\\\\Sethc.exe\",\n    \"utilman.exe\",\n    \"ATBroker.exe\",\n    \"DisplaySwitch.exe\",\n    \"sethc.exe\"\n    )\n and not process.pe.original_file_name in\n    (\n    \"osk.exe\",\n    \"sethc.exe\",\n    \"utilman2.exe\",\n    \"DisplaySwitch.exe\",\n    \"ATBroker.exe\",\n    \"ScreenMagnifier.exe\",\n    \"SR.exe\",\n    \"Narrator.exe\",\n    \"magnify.exe\",\n    \"MAGNIFY.EXE\"\n    )\n\n/* uncomment once in winlogbeat to avoid bypass with rogue process with matching pe original file name */\n/* and process.code_signature.subject_name == \"Microsoft Windows\" and process.code_signature.status == \"trusted\" */\n",
+  "references": [
+    "https://www.elastic.co/blog/practical-security-engineering-stateful-detection"
+  ],
+  "risk_score": 73,
   "rule_id": "7405ddf1-6c8e-41ce-818f-48bea6bcaed8",
-  "severity": "low",
+  "severity": "high",
   "tags": [
     "Elastic",
     "Host",
@@ -31,9 +34,16 @@
       },
       "technique": [
         {
-          "id": "T1015",
-          "name": "Accessibility Features",
-          "reference": "https://attack.mitre.org/techniques/T1015/"
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.008",
+              "name": "Accessibility Features",
+              "reference": "https://attack.mitre.org/techniques/T1546/008/"
+            }
+          ]
         }
       ]
     },
@@ -46,13 +56,20 @@
       },
       "technique": [
         {
-          "id": "T1015",
-          "name": "Accessibility Features",
-          "reference": "https://attack.mitre.org/techniques/T1015/"
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.008",
+              "name": "Accessibility Features",
+              "reference": "https://attack.mitre.org/techniques/T1546/008/"
+            }
+          ]
         }
       ]
     }
   ],
-  "type": "query",
-  "version": 4
+  "type": "eql",
+  "version": 5
 }

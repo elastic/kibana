@@ -20,7 +20,9 @@ import { PaletteOutput } from 'src/plugins/charts/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
-import { RenderMode } from 'src/plugins/expressions';
+import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
+import { map, distinctUntilChanged, skip } from 'rxjs/operators';
+import isEqual from 'fast-deep-equal';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -38,25 +40,35 @@ import {
 import { Document, injectFilterReferences } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
-import { isLensBrushEvent, isLensFilterEvent } from '../../types';
+import {
+  isLensBrushEvent,
+  isLensFilterEvent,
+  isLensTableRowContextMenuClickEvent,
+} from '../../types';
 
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
 import { getEditPath, DOC_TYPE } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
 import { LensAttributeService } from '../../lens_attribute_service';
-import { LensInspectorAdapters } from '../types';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
-export type LensByValueInput = {
-  attributes: LensSavedObjectAttributes;
-} & EmbeddableInput;
-
-export type LensByReferenceInput = SavedObjectEmbeddableInput & EmbeddableInput;
-export type LensEmbeddableInput = (LensByValueInput | LensByReferenceInput) & {
+interface LensBaseEmbeddableInput extends EmbeddableInput {
+  filters?: Filter[];
+  query?: Query;
+  timeRange?: TimeRange;
   palette?: PaletteOutput;
   renderMode?: RenderMode;
-};
+  style?: React.CSSProperties;
+  className?: string;
+}
+
+export type LensByValueInput = {
+  attributes: LensSavedObjectAttributes;
+} & LensBaseEmbeddableInput;
+
+export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddableInput;
+export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
   indexPatterns?: IIndexPattern[];
@@ -71,6 +83,7 @@ export interface LensEmbeddableDeps {
   timefilter: TimefilterContract;
   basePath: IBasePath;
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
+  getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
 }
 
 export class Embeddable
@@ -83,9 +96,8 @@ export class Embeddable
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
-  private autoRefreshFetchSubscription: Subscription;
   private isInitialized = false;
-  private activeData: LensInspectorAdapters | undefined;
+  private activeData: Partial<DefaultInspectorAdapters> | undefined;
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -114,9 +126,66 @@ export class Embeddable
       this.onContainerStateChanged(this.input)
     );
 
-    this.autoRefreshFetchSubscription = deps.timefilter
-      .getAutoRefreshFetch$()
-      .subscribe(this.reload.bind(this));
+    const input$ = this.getInput$();
+
+    // Lens embeddable does not re-render when embeddable input changes in
+    // general, to improve performance. This line makes sure the Lens embeddable
+    // re-renders when anything in ".dynamicActions" (e.g. drilldowns) changes.
+    input$
+      .pipe(
+        map((input) => input.enhancements?.dynamicActions),
+        distinctUntilChanged((a, b) => isEqual(a, b)),
+        skip(1)
+      )
+      .subscribe((input) => {
+        this.reload();
+      });
+
+    // Lens embeddable does not re-render when embeddable input changes in
+    // general, to improve performance. This line makes sure the Lens embeddable
+    // re-renders when dashboard view mode switches between "view/edit". This is
+    // needed to see the changes to ".dynamicActions" (e.g. drilldowns) when
+    // dashboard's mode is toggled.
+    input$
+      .pipe(
+        map((input) => input.viewMode),
+        distinctUntilChanged(),
+        skip(1)
+      )
+      .subscribe((input) => {
+        this.reload();
+      });
+
+    // Re-initialize the visualization if either the attributes or the saved object id changes
+    input$
+      .pipe(
+        distinctUntilChanged((a, b) =>
+          isEqual(
+            ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
+            ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
+          )
+        ),
+        skip(1)
+      )
+      .subscribe(async (input) => {
+        await this.initializeSavedVis(input);
+        this.reload();
+      });
+
+    // Update search context and reload on changes related to search
+    input$
+      .pipe(
+        distinctUntilChanged((a, b) =>
+          isEqual(
+            [a.filters, a.query, a.timeRange, a.searchSessionId],
+            [b.filters, b.query, b.timeRange, b.searchSessionId]
+          )
+        ),
+        skip(1)
+      )
+      .subscribe(async (input) => {
+        this.onContainerStateChanged(input);
+      });
   }
 
   public supportedTriggers() {
@@ -127,6 +196,7 @@ export class Embeddable
       case 'lnsXY':
         return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
       case 'lnsDatatable':
+        return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick];
       case 'lnsPie':
         return [VIS_EVENT_TO_TRIGGER.filter];
       case 'lnsMetric':
@@ -191,7 +261,7 @@ export class Embeddable
 
   private updateActiveData = (
     data: unknown,
-    inspectorAdapters?: LensInspectorAdapters | undefined
+    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => {
     this.activeData = inspectorAdapters;
   };
@@ -217,10 +287,33 @@ export class Embeddable
         handleEvent={this.handleEvent}
         onData$={this.updateActiveData}
         renderMode={input.renderMode}
+        syncColors={input.syncColors}
+        hasCompatibleActions={this.hasCompatibleActions}
+        className={input.className}
+        style={input.style}
       />,
       domNode
     );
   }
+
+  private readonly hasCompatibleActions = async (
+    event: ExpressionRendererEvent
+  ): Promise<boolean> => {
+    if (isLensTableRowContextMenuClickEvent(event)) {
+      const { getTriggerCompatibleActions } = this.deps;
+      if (!getTriggerCompatibleActions) {
+        return false;
+      }
+      const actions = await getTriggerCompatibleActions(VIS_EVENT_TO_TRIGGER[event.name], {
+        data: event.data,
+        embeddable: this,
+      });
+
+      return actions.length > 0;
+    }
+
+    return false;
+  };
 
   /**
    * Combines the embeddable context with the saved object context, and replaces
@@ -263,6 +356,16 @@ export class Embeddable
         data: event.data,
         embeddable: this,
       });
+    }
+
+    if (isLensTableRowContextMenuClickEvent(event)) {
+      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
+        {
+          data: event.data,
+          embeddable: this,
+        },
+        true
+      );
     }
   };
 
@@ -342,6 +445,5 @@ export class Embeddable
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    this.autoRefreshFetchSubscription.unsubscribe();
   }
 }

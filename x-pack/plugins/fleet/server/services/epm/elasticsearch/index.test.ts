@@ -20,3 +20,18 @@ test('getBaseName', () => {
   const name = getRegistryDataStreamAssetBaseName(dataStream);
   expect(name).toStrictEqual('logs-nginx.access');
 });
+
+test('getBaseName for hidden index', () => {
+  const dataStream: RegistryDataStream = {
+    dataset: 'nginx.access',
+    title: 'Nginx Acess Logs',
+    release: 'beta',
+    type: 'logs',
+    ingest_pipeline: 'default',
+    package: 'nginx',
+    path: 'access',
+    hidden: true,
+  };
+  const name = getRegistryDataStreamAssetBaseName(dataStream);
+  expect(name).toStrictEqual('.logs-nginx.access');
+});

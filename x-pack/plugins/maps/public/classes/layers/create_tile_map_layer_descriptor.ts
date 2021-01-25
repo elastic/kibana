@@ -14,6 +14,7 @@ import {
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
+  DEFAULT_PERCENTILE,
   FIELD_ORIGIN,
   GRID_RESOLUTION,
   RENDER_AS,
@@ -59,9 +60,18 @@ export function createAggDescriptor(
   });
   const aggType = aggTypeKey ? AGG_TYPE[aggTypeKey as keyof typeof AGG_TYPE] : undefined;
 
-  return aggType && metricFieldName && (!isHeatmap(mapType) || isMetricCountable(aggType))
-    ? { type: aggType, field: metricFieldName }
-    : { type: AGG_TYPE.COUNT };
+  if (
+    !aggType ||
+    aggType === AGG_TYPE.COUNT ||
+    !metricFieldName ||
+    (isHeatmap(mapType) && !isMetricCountable(aggType))
+  ) {
+    return { type: AGG_TYPE.COUNT };
+  }
+
+  return aggType === AGG_TYPE.PERCENTILE
+    ? { type: aggType, field: metricFieldName, percentile: DEFAULT_PERCENTILE }
+    : { type: aggType, field: metricFieldName };
 }
 
 export function createTileMapLayerDescriptor({

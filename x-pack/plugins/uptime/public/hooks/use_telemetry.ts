@@ -14,6 +14,7 @@ export enum UptimePage {
   Monitor = 'Monitor',
   Settings = 'Settings',
   Certificates = 'Certificates',
+  StepDetail = 'StepDetail',
   NotFound = '__not-found__',
 }
 

@@ -58,7 +58,7 @@ const HeaderChildrenFlexItem = styled(EuiFlexItem)`
 const HistogramPanel = styled(Panel)<{ height?: number }>`
   display: flex;
   flex-direction: column;
-  ${({ height }) => (height != null ? `height: ${height}px;` : '')}
+  ${({ height }) => (height != null ? `min-height: ${height}px;` : '')}
 `;
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({

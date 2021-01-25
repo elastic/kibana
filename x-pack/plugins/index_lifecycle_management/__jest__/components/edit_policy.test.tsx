@@ -113,7 +113,14 @@ const expectedErrorMessages = (rendered: ReactWrapper, expectedMessages: string[
     expect(foundErrorMessage).toBe(true);
   });
 };
+const noDefaultRollover = async (rendered: ReactWrapper) => {
+  await act(async () => {
+    findTestSubject(rendered, 'useDefaultRolloverSwitch').simulate('click');
+  });
+  rendered.update();
+};
 const noRollover = async (rendered: ReactWrapper) => {
+  await noDefaultRollover(rendered);
   await act(async () => {
     findTestSubject(rendered, 'rolloverSwitch').simulate('click');
   });
@@ -326,6 +333,7 @@ describe('edit policy', () => {
   describe('hot phase', () => {
     test('should show errors when trying to save with no max size, no max age and no max docs', async () => {
       const rendered = mountWithIntl(component);
+      await noDefaultRollover(rendered);
       expect(findTestSubject(rendered, 'rolloverSettingsRequired').exists()).toBeFalsy();
       await setPolicyName(rendered, 'mypolicy');
       const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
@@ -349,6 +357,7 @@ describe('edit policy', () => {
     test('should show number above 0 required error when trying to save with -1 for max size', async () => {
       const rendered = mountWithIntl(component);
       await setPolicyName(rendered, 'mypolicy');
+      await noDefaultRollover(rendered);
       const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
       await act(async () => {
         maxSizeInput.simulate('change', { target: { value: '-1' } });
@@ -360,6 +369,7 @@ describe('edit policy', () => {
     test('should show number above 0 required error when trying to save with 0 for max size', async () => {
       const rendered = mountWithIntl(component);
       await setPolicyName(rendered, 'mypolicy');
+      await noDefaultRollover(rendered);
       const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
       await act(async () => {
         maxSizeInput.simulate('change', { target: { value: '-1' } });
@@ -370,6 +380,7 @@ describe('edit policy', () => {
     test('should show number above 0 required error when trying to save with -1 for max age', async () => {
       const rendered = mountWithIntl(component);
       await setPolicyName(rendered, 'mypolicy');
+      await noDefaultRollover(rendered);
       const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
       await act(async () => {
         maxAgeInput.simulate('change', { target: { value: '-1' } });
@@ -380,6 +391,7 @@ describe('edit policy', () => {
     test('should show number above 0 required error when trying to save with 0 for max age', async () => {
       const rendered = mountWithIntl(component);
       await setPolicyName(rendered, 'mypolicy');
+      await noDefaultRollover(rendered);
       const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
       await act(async () => {
         maxAgeInput.simulate('change', { target: { value: '0' } });

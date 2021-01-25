@@ -1,43 +1,32 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React from 'react';
 import { DashboardContainer } from '..';
-import { isErrorEmbeddable } from '../../embeddable_plugin';
 import { mountWithIntl } from '@kbn/test/jest';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { getSampleDashboardInput } from '../test_helpers';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
 import {
   LibraryNotificationPopover,
   LibraryNotificationProps,
 } from './library_notification_popover';
 import { CoreStart } from '../../../../../core/public';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiPopover } from '@elastic/eui';
+import { isErrorEmbeddable } from '../../services/embeddable';
+import {
+  CONTACT_CARD_EMBEDDABLE,
+  ContactCardEmbeddableFactory,
+  ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
+  ContactCardEmbeddable,
+} from '../../services/embeddable_test_samples';
 
 describe('LibraryNotificationPopover', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -64,6 +53,8 @@ describe('LibraryNotificationPopover', () => {
       overlays: coreStart.overlays,
       savedObjectMetaData: {} as any,
       uiActions: {} as any,
+      uiSettings: uiSettingsServiceMock.createStartContract(),
+      http: coreStart.http,
     };
 
     container = new DashboardContainer(getSampleDashboardInput(), containerOptions);

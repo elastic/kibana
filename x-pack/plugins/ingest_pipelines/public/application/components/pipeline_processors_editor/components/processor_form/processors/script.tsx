@@ -129,7 +129,7 @@ const fieldsConfig: FieldsConfig = {
 
 export const Script: FormFieldsComponent = ({ initialFieldValues }) => {
   const [showId, setShowId] = useState(() => !!initialFieldValues?.id);
-  const [scriptLanguage, setScriptLanguage] = useState<string>('plaintext');
+  const [scriptLanguage, setScriptLanguage] = useState<string>(PainlessLang.ID);
 
   const [{ fields }] = useFormData({ watch: 'fields.lang' });
 

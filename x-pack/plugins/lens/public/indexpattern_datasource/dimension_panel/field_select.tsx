@@ -41,6 +41,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<{}> {
   onDeleteColumn: () => void;
   existingFields: IndexPatternPrivateState['existingFields'];
   fieldIsInvalid: boolean;
+  markAllFieldsCompatible?: boolean;
 }
 
 export function FieldSelect({
@@ -53,6 +54,7 @@ export function FieldSelect({
   onDeleteColumn,
   existingFields,
   fieldIsInvalid,
+  markAllFieldsCompatible,
   ...rest
 }: FieldSelectProps) {
   const { operationByField } = operationSupportMatrix;
@@ -93,7 +95,7 @@ export function FieldSelect({
                   : operationByField[field]!.values().next().value,
             },
             exists: containsData(field),
-            compatible: isCompatibleWithCurrentOperation(field),
+            compatible: markAllFieldsCompatible || isCompatibleWithCurrentOperation(field),
           };
         })
         .sort((a, b) => {
@@ -163,6 +165,7 @@ export function FieldSelect({
     currentIndexPattern,
     operationByField,
     existingFields,
+    markAllFieldsCompatible,
   ]);
 
   return (

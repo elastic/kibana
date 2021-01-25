@@ -74,6 +74,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
           baseClassName="euiButton"
           element="a"
           href="/mock-base-path/"
+          isDisabled={false}
           rel="noreferrer"
         >
           <a

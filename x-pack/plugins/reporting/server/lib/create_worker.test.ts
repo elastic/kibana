@@ -16,7 +16,7 @@ import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 // @ts-ignore
-import { ClientMock } from './esqueue/__tests__/fixtures/legacy_elasticsearch';
+import { ClientMock } from './esqueue/__fixtures__/legacy_elasticsearch';
 import { ExportTypesRegistry } from './export_types_registry';
 
 const logger = createMockLevelLogger();

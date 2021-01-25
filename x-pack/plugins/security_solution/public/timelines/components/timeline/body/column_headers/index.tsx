@@ -27,8 +27,11 @@ import {
 } from '../../../../../common/components/drag_and_drop/helpers';
 import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
 import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../../common/constants';
-import { useFullScreen } from '../../../../../common/containers/use_full_screen';
-import { TimelineId } from '../../../../../../common/types/timeline';
+import {
+  useGlobalFullScreen,
+  useTimelineFullScreen,
+} from '../../../../../common/containers/use_full_screen';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { OnSelectAll } from '../../events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
@@ -50,8 +53,16 @@ import * as i18n from './translations';
 import { timelineActions } from '../../../../store/timeline';
 
 const SortingColumnsContainer = styled.div`
-  .euiPopover .euiButtonEmpty .euiButtonContent .euiButtonEmpty__text {
-    display: none;
+  button {
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
+
+  .euiPopover .euiButtonEmpty .euiButtonContent {
+    padding: 0;
+
+    .euiButtonEmpty__text {
+      display: none;
+    }
   }
 `;
 
@@ -65,6 +76,7 @@ interface Props {
   showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
   sort: Sort[];
+  tabType: TimelineTabs;
   timelineId: string;
 }
 
@@ -111,16 +123,13 @@ export const ColumnHeadersComponent = ({
   showEventsSelect,
   showSelectAllCheckbox,
   sort,
+  tabType,
   timelineId,
 }: Props) => {
   const dispatch = useDispatch();
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
-  const {
-    timelineFullScreen,
-    setTimelineFullScreen,
-    globalFullScreen,
-    setGlobalFullScreen,
-  } = useFullScreen();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
 
   const toggleFullScreen = useCallback(() => {
     if (timelineId === TimelineId.active) {
@@ -179,9 +188,10 @@ export const ColumnHeadersComponent = ({
           header={header}
           isDragging={draggingIndex === draggableIndex}
           sort={sort}
+          tabType={tabType}
         />
       )),
-    [columnHeaders, timelineId, draggingIndex, sort]
+    [columnHeaders, timelineId, draggingIndex, sort, tabType]
   );
 
   const fullScreen = useMemo(
@@ -223,11 +233,12 @@ export const ColumnHeadersComponent = ({
           id: timelineId,
           sort: cols.map(({ id, direction }) => ({
             columnId: id,
+            columnType: columnHeaders.find((ch) => ch.id === id)?.type ?? 'text',
             sortDirection: direction as SortDirection,
           })),
         })
       ),
-    [dispatch, timelineId]
+    [columnHeaders, dispatch, timelineId]
   );
   const sortedColumns = useMemo(
     () => ({
@@ -256,7 +267,7 @@ export const ColumnHeadersComponent = ({
           isEventViewer={isEventViewer}
         >
           {showSelectAllCheckbox && (
-            <EventsTh>
+            <EventsTh role="checkbox">
               <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <EuiCheckbox
                   data-test-subj="select-all-events"
@@ -268,7 +279,7 @@ export const ColumnHeadersComponent = ({
             </EventsTh>
           )}
 
-          <EventsTh>
+          <EventsTh role="button">
             <StatefulFieldsBrowser
               browserFields={browserFields}
               columnHeaders={columnHeaders}
@@ -278,14 +289,15 @@ export const ColumnHeadersComponent = ({
               width={FIELD_BROWSER_WIDTH}
             />
           </EventsTh>
-          <EventsTh>
+
+          <EventsTh role="button">
             <StatefulRowRenderersBrowser
               data-test-subj="row-renderers-browser"
               timelineId={timelineId}
             />
           </EventsTh>
 
-          <EventsTh>
+          <EventsTh role="button">
             <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
               <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
                 <EuiButtonIcon
@@ -296,14 +308,18 @@ export const ColumnHeadersComponent = ({
                   }
                   className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
                   color={fullScreen ? 'ghost' : 'primary'}
-                  data-test-subj="full-screen"
+                  data-test-subj={
+                    // a full screen button gets created for timeline and for the host page
+                    // this sets the data-test-subj for each case so that tests can differentiate between them
+                    timelineId === TimelineId.active ? 'full-screen-active' : 'full-screen'
+                  }
                   iconType="fullScreen"
                   onClick={toggleFullScreen}
                 />
               </EuiToolTip>
             </EventsThContent>
           </EventsTh>
-          <EventsTh>
+          <EventsTh role="button">
             <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
               <EuiToolTip content={i18n.SORT_FIELDS}>
                 <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
@@ -312,7 +328,7 @@ export const ColumnHeadersComponent = ({
           </EventsTh>
 
           {showEventsSelect && (
-            <EventsTh>
+            <EventsTh role="button">
               <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <EventsSelect checkState="unchecked" timelineId={timelineId} />
               </EventsThContent>
@@ -322,7 +338,7 @@ export const ColumnHeadersComponent = ({
 
         <Droppable
           direction={'horizontal'}
-          droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
+          droppableId={`${droppableTimelineColumnsPrefix}-${tabType}.${timelineId}`}
           isDropDisabled={false}
           type={DRAG_TYPE_FIELD}
           renderClone={renderClone}

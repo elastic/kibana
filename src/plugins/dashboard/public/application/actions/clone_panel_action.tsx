@@ -1,39 +1,31 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'src/core/public';
-import uuid from 'uuid';
 import _ from 'lodash';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
-import { SavedObject } from '../../../../saved_objects/public';
+import uuid from 'uuid';
+
+import { CoreStart } from 'src/core/public';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
+import { SavedObject } from '../../services/saved_objects';
 import {
+  ViewMode,
+  PanelState,
+  IEmbeddable,
   PanelNotFoundError,
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isErrorEmbeddable,
-} from '../../../../embeddable/public';
+} from '../../services/embeddable';
 import {
   placePanelBeside,
   IPanelPlacementBesideArgs,
 } from '../embeddable/panel/dashboard_panel_placement';
+import { dashboardClonePanelAction } from '../../dashboard_strings';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
@@ -42,7 +34,7 @@ export interface ClonePanelActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL> {
+export class ClonePanelAction implements Action<ClonePanelActionContext> {
   public readonly type = ACTION_CLONE_PANEL;
   public readonly id = ACTION_CLONE_PANEL;
   public order = 45;
@@ -53,9 +45,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
-    return i18n.translate('dashboard.panel.clonePanel', {
-      defaultMessage: 'Clone panel',
-    });
+    return dashboardClonePanelAction.getDisplayName();
   }
 
   public getIconType({ embeddable }: ClonePanelActionContext) {
@@ -99,9 +89,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
   }
 
   private async getUniqueTitle(rawTitle: string, embeddableType: string): Promise<string> {
-    const clonedTag = i18n.translate('dashboard.panel.title.clonedTag', {
-      defaultMessage: 'copy',
-    });
+    const clonedTag = dashboardClonePanelAction.getClonedTag();
     const cloneRegex = new RegExp(`\\(${clonedTag}\\)`, 'g');
     const cloneNumberRegex = new RegExp(`\\(${clonedTag} [0-9]+\\)`, 'g');
     const baseTitle = rawTitle.replace(cloneNumberRegex, '').replace(cloneRegex, '').trim();
@@ -152,9 +140,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
       (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId = clonedSavedObject.id;
     }
     this.core.notifications.toasts.addSuccess({
-      title: i18n.translate('dashboard.panel.clonedToast', {
-        defaultMessage: 'Cloned panel',
-      }),
+      title: dashboardClonePanelAction.getSuccessMessage(),
       'data-test-subj': 'addObjectToContainerSuccess',
     });
     return panelState;

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
-import { JsonObject } from '../../../../common/typed_json';
+import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/common';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
+
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
@@ -68,7 +69,7 @@ export class InfraLogEntriesDomain {
   ) {}
 
   public async getLogEntriesAround(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     params: LogEntriesAroundParams,
     columnOverrides?: LogEntriesRequest['columns']
@@ -128,7 +129,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogEntries(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     params: LogEntriesParams,
     columnOverrides?: LogEntriesRequest['columns']
@@ -187,7 +188,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogSummaryBucketsBetween(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     start: number,
     end: number,
@@ -210,7 +211,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogSummaryHighlightBucketsBetween(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     startTimestamp: number,
     endTimestamp: number,
@@ -256,7 +257,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogEntryDatasets(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     timestampField: string,
     indexName: string,
     startTime: number,
@@ -297,14 +298,14 @@ export class InfraLogEntriesDomain {
 
 export interface LogEntriesAdapter {
   getLogEntries(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     params: LogEntriesParams
   ): Promise<{ documents: LogEntryDocument[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }>;
 
   getContainedLogSummaryBuckets(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     startTimestamp: number,
     endTimestamp: number,

@@ -457,6 +457,12 @@ class JobService {
               if (scriptFields && Object.keys(scriptFields).length) {
                 body.script_fields = scriptFields;
               }
+
+              // add runtime_mappings if present
+              const runtimeMappings = job.datafeed_config.runtime_mappings;
+              if (runtimeMappings && Object.keys(runtimeMappings).length) {
+                body.runtime_mappings = runtimeMappings;
+              }
             } else {
               // if aggregations is not set and retrieveWholeSource is not set, add all of the fields from the job
               body.size = ML_DATA_PREVIEW_COUNT;
@@ -465,6 +471,12 @@ class JobService {
               const scriptFields = job.datafeed_config.script_fields;
               if (scriptFields && Object.keys(scriptFields).length) {
                 body.script_fields = scriptFields;
+              }
+
+              // add runtime_mappings if present
+              const runtimeMappings = job.datafeed_config.runtime_mappings;
+              if (runtimeMappings && Object.keys(runtimeMappings).length) {
+                body.runtime_mappings = runtimeMappings;
               }
 
               const fields = {};
@@ -507,6 +519,13 @@ class JobService {
               // get fields from time_field
               if (job.data_description.time_field) {
                 fields[job.data_description.time_field] = {};
+              }
+
+              // add runtime fields
+              if (runtimeMappings) {
+                Object.keys(runtimeMappings).forEach((fieldName) => {
+                  fields[fieldName] = {};
+                });
               }
 
               const fieldsList = Object.keys(fields);

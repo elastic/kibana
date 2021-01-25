@@ -29,8 +29,6 @@ import { useConfigurationIssues } from '../../../../form';
 
 import { i18nTexts } from '../../../../i18n_texts';
 
-import { useRolloverPath } from '../../../../constants';
-
 import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../../';
 
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
@@ -53,24 +51,28 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   const {
     services: { cloud },
   } = useKibana();
-  const { getUrlForApp, policy, license } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const { getUrlForApp, policy, license, isNewPolicy } = useEditPolicyContext();
+  const { isUsingSearchableSnapshotInHotPhase, isUsingRollover } = useConfigurationIssues();
 
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
 
-  const [formData] = useFormData({ watch: [searchableSnapshotPath, useRolloverPath] });
-  const isRolloverEnabled = get(formData, useRolloverPath);
+  const [formData] = useFormData({ watch: searchableSnapshotPath });
   const searchableSnapshotRepo = get(formData, searchableSnapshotPath);
 
+  const isColdPhase = phase === 'cold';
   const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
-  const isDisabledInColdDueToHotPhase = phase === 'cold' && isUsingSearchableSnapshotInHotPhase;
-  const isDisabledInColdDueToRollover = phase === 'cold' && !isRolloverEnabled;
+  const isDisabledInColdDueToHotPhase = isColdPhase && isUsingSearchableSnapshotInHotPhase;
+  const isDisabledInColdDueToRollover = isColdPhase && !isUsingRollover;
 
   const isDisabled =
     isDisabledDueToLicense || isDisabledInColdDueToHotPhase || isDisabledInColdDueToRollover;
 
   const [isFieldToggleChecked, setIsFieldToggleChecked] = useState(() =>
-    Boolean(policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository)
+    Boolean(
+      // New policy on cloud should have searchable snapshot on in cold phase
+      (isColdPhase && isNewPolicy && cloud?.isCloudEnabled) ||
+        policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
+    )
   );
 
   useEffect(() => {

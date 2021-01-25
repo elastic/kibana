@@ -4,7 +4,7 @@
 
 ## IExternalUrlPolicy.protocol property
 
-Optional protocol describing the external destination. May be combined with `host`<!-- -->. Required if `host` is not defined.
+Optional protocol describing the external destination. May be combined with `host`<!-- -->.
 
 <b>Signature:</b>
 

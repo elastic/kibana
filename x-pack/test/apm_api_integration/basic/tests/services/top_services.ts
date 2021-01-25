@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { isEmpty, pick, sortBy } from 'lodash';
 import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import archives_metadata from '../../../common/archives_metadata';
+import archives_metadata from '../../../common/fixtures/es_archiver/archives_metadata';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -99,21 +99,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             Array [
               Object {
                 "avgResponseTime": Object {
-                  "value": 556200.153101878,
+                  "value": 420419.34550767,
                 },
                 "transactionErrorRate": Object {
                   "value": 0,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 117.133333333333,
+                  "value": 45.6333333333333,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 2629229.16666667,
+                  "value": 2382833.33333333,
+                },
+                "transactionErrorRate": Object {
+                  "value": null,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 3.2,
+                  "value": 0.2,
                 },
               },
               Object {
@@ -151,24 +154,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 563605.417040359,
+                  "value": 24920.1052631579,
                 },
                 "transactionErrorRate": Object {
                   "value": 0.0210526315789474,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 7.43333333333333,
+                  "value": 3.16666666666667,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 217138.013645224,
+                  "value": 29542.6607142857,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.315789473684211,
+                  "value": 0.0357142857142857,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 17.1,
+                  "value": 1.86666666666667,
                 },
               },
               Object {
@@ -185,6 +188,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               Object {
                 "avgResponseTime": Object {
                   "value": 2319812.5,
+                },
+                "transactionErrorRate": Object {
+                  "value": null,
                 },
                 "transactionsPerMinute": Object {
                   "value": 0.533333333333333,

@@ -79,7 +79,7 @@ describe('getObservabilityAlerts', () => {
               { id: 2, consumer: 'apm' },
               { id: 3, consumer: 'uptime' },
               { id: 4, consumer: 'logs' },
-              { id: 5, consumer: 'metrics' },
+              { id: 5, consumer: 'infrastructure' },
               { id: 6, consumer: 'alerts' },
             ],
           };
@@ -104,7 +104,7 @@ describe('getObservabilityAlerts', () => {
       },
       {
         id: 5,
-        consumer: 'metrics',
+        consumer: 'infrastructure',
       },
       {
         id: 6,

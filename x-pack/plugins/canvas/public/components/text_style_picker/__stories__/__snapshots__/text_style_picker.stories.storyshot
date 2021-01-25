@@ -182,6 +182,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
             <button
               aria-label="Font Color black"
               className="euiLink euiLink--primary"
+              disabled={false}
               onClick={[Function]}
               style={
                 Object {
@@ -231,6 +232,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   "minWidth": undefined,
                 }
               }
+              type="button"
             >
               <span
                 className="euiButtonContent euiButton__content"
@@ -258,6 +260,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   "minWidth": undefined,
                 }
               }
+              type="button"
             >
               <span
                 className="euiButtonContent euiButton__content"
@@ -285,6 +288,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   "minWidth": undefined,
                 }
               }
+              type="button"
             >
               <span
                 className="euiButtonContent euiButton__content"
@@ -614,6 +618,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
             <button
               aria-label="Font Color black"
               className="euiLink euiLink--primary"
+              disabled={false}
               onClick={[Function]}
               style={
                 Object {
@@ -663,6 +668,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   "minWidth": undefined,
                 }
               }
+              type="button"
             >
               <span
                 className="euiButtonContent euiButton__content"
@@ -690,6 +696,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   "minWidth": undefined,
                 }
               }
+              type="button"
             >
               <span
                 className="euiButtonContent euiButton__content"
@@ -717,6 +724,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   "minWidth": undefined,
                 }
               }
+              type="button"
             >
               <span
                 className="euiButtonContent euiButton__content"

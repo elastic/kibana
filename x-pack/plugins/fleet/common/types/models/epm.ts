@@ -46,6 +46,7 @@ export enum KibanaAssetType {
   search = 'search',
   indexPattern = 'index_pattern',
   map = 'map',
+  lens = 'lens',
 }
 
 /*
@@ -57,6 +58,7 @@ export enum KibanaSavedObjectType {
   search = 'search',
   indexPattern = 'index-pattern',
   map = 'map',
+  lens = 'lens',
 }
 
 export enum ElasticsearchAssetType {
@@ -65,6 +67,7 @@ export enum ElasticsearchAssetType {
   indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
   transform = 'transform',
+  dataStreamIlmPolicy = 'data_stream_ilm_policy',
 }
 
 export type DataType = typeof dataTypes;
@@ -186,8 +189,8 @@ export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeTo
 export type AssetsGroupedByServiceByType = Record<
   Extract<ServiceName, 'kibana'>,
   KibanaAssetTypeToParts
->;
-// & Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
+> &
+  Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
 
 export type KibanaAssetParts = AssetParts & {
   service: Extract<ServiceName, 'kibana'>;
@@ -207,6 +210,8 @@ export type ElasticsearchAssetTypeToParts = Record<
 
 export interface RegistryDataStream {
   type: string;
+  ilm_policy?: string;
+  hidden?: boolean;
   dataset: string;
   title: string;
   release: string;
@@ -276,6 +281,10 @@ export interface Installation extends SavedObjectAttributes {
   install_source: InstallSource;
 }
 
+export interface PackageUsageStats {
+  agent_policy_count: number;
+}
+
 export type Installable<T> = Installed<T> | NotInstalled<T>;
 
 export type Installed<T = {}> = T & {
@@ -319,7 +328,7 @@ export interface IndexTemplate {
     mappings: any;
     aliases: object;
   };
-  data_stream: object;
+  data_stream: { hidden?: boolean };
   composed_of: string[];
   _meta: object;
 }

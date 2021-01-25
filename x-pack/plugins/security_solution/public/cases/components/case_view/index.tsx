@@ -16,7 +16,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses, CaseAttributes } from '../../../../../case/common/api';
 import { Case, CaseConnector } from '../../containers/types';
 import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
@@ -90,6 +90,8 @@ interface Signal {
   rule: {
     id: string;
     name: string;
+    to: string;
+    from: string;
   };
 }
 
@@ -97,6 +99,7 @@ interface SignalHit {
   _id: string;
   _index: string;
   _source: {
+    '@timestamp': string;
     signal: Signal;
   };
 }
@@ -104,6 +107,7 @@ interface SignalHit {
 export type Alert = {
   _id: string;
   _index: string;
+  '@timestamp': string;
 } & Signal;
 
 export const CaseComponent = React.memo<CaseProps>(
@@ -153,6 +157,7 @@ export const CaseComponent = React.memo<CaseProps>(
             [_id]: {
               _id,
               _index,
+              '@timestamp': _source['@timestamp'],
               ..._source.signal,
             },
           }),
@@ -175,7 +180,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'title',
                 updateValue: titleUpdate,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -189,7 +194,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'connector',
                 updateValue: connector,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -203,7 +208,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'description',
                 updateValue: descriptionUpdate,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -216,7 +221,7 @@ export const CaseComponent = React.memo<CaseProps>(
               updateKey: 'tags',
               updateValue: tagsUpdate,
               updateCase: handleUpdateNewCase,
-              version: caseData.version,
+              caseData,
               onSuccess,
               onError,
             });
@@ -229,11 +234,26 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'status',
                 updateValue: statusUpdate,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
             }
+            break;
+          case 'settings':
+            const settingsUpdate = getTypedPayload<CaseAttributes['settings']>(value);
+            if (caseData.settings !== value) {
+              updateCaseProperty({
+                fetchCaseUserActions,
+                updateKey: 'settings',
+                updateValue: settingsUpdate,
+                updateCase: handleUpdateNewCase,
+                caseData,
+                onSuccess,
+                onError,
+              });
+            }
+            break;
           default:
             return null;
         }
@@ -276,6 +296,7 @@ export const CaseComponent = React.memo<CaseProps>(
       updateCase: handleUpdateCase,
       userCanCrud,
       isValidConnector,
+      alerts,
     });
 
     const onSubmitConnector = useCallback(
@@ -352,7 +373,6 @@ export const CaseComponent = React.memo<CaseProps>(
             event: {
               eventId: alertId,
               indexName: index,
-              loading: false,
             },
           })
         );
@@ -398,9 +418,9 @@ export const CaseComponent = React.memo<CaseProps>(
               currentExternalIncident={currentExternalIncident}
               caseData={caseData}
               disabled={!userCanCrud}
-              isLoading={isLoading && updateKey === 'status'}
+              isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
               onRefresh={handleRefresh}
-              onStatusChanged={changeStatus}
+              onUpdateField={onUpdateField}
             />
           </HeaderPage>
         </HeaderWrapper>
@@ -409,7 +429,9 @@ export const CaseComponent = React.memo<CaseProps>(
             {!initLoadingData && pushCallouts != null && pushCallouts}
             <EuiFlexGroup>
               <EuiFlexItem grow={6}>
-                {initLoadingData && <EuiLoadingContent lines={8} />}
+                {initLoadingData && (
+                  <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
+                )}
                 {!initLoadingData && (
                   <>
                     <UserActionTree

@@ -24,13 +24,12 @@ import {
   DEFAULT_INDEX_PATTERN,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
-import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
 import { mockIndexPattern } from './index_pattern';
-import { TimelineTabs } from '../../timelines/store/timeline/model';
 
 export const mockGlobalState: State = {
   app: {
@@ -239,7 +238,7 @@ export const mockGlobalState: State = {
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
-        sort: [{ columnId: '@timestamp', sortDirection: Direction.desc }],
+        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
         isSaving: false,
         version: null,
         status: TimelineStatus.active,

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { combineLatest } from 'rxjs';
@@ -40,7 +29,8 @@ export class SearchAPI {
   constructor(
     private readonly dependencies: SearchAPIDependencies,
     private readonly abortSignal?: AbortSignal,
-    public readonly inspectorAdapters?: VegaInspectorAdapters
+    public readonly inspectorAdapters?: VegaInspectorAdapters,
+    private readonly searchSessionId?: string
   ) {}
 
   search(searchRequests: SearchRequest[]) {
@@ -55,15 +45,15 @@ export class SearchAPI {
         });
 
         if (this.inspectorAdapters) {
-          requestResponders[requestId] = this.inspectorAdapters.requests.start(requestId, request);
+          requestResponders[requestId] = this.inspectorAdapters.requests.start(requestId, {
+            ...request,
+            searchSessionId: this.searchSessionId,
+          });
           requestResponders[requestId].json(params.body);
         }
 
         return search
-          .search(
-            { params },
-            { abortSignal: this.abortSignal, sessionId: search.session.getSessionId() }
-          )
+          .search({ params }, { abortSignal: this.abortSignal, sessionId: this.searchSessionId })
           .pipe(
             tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
             map((data) => ({

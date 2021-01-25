@@ -1,40 +1,31 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import './search_embeddable.scss';
 import angular from 'angular';
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../../ui_actions/public';
+import { UiActionsStart } from '../../../../ui_actions/public';
 import { RequestAdapter, Adapters } from '../../../../inspector/public';
 import {
+  APPLY_FILTER_TRIGGER,
   esFilters,
   Filter,
   TimeRange,
   FilterManager,
-  getTime,
   Query,
   IFieldType,
 } from '../../../../data/public';
 import { Container, Embeddable } from '../../../../embeddable/public';
 import * as columnActions from '../angular/doc_table/actions/columns';
 import searchTemplate from './search_template.html';
+import searchTemplateGrid from './search_template_datagrid.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table';
@@ -48,22 +39,29 @@ import {
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
 import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import { DiscoverGridSettings } from '../components/discover_grid/types';
+import { DiscoverServices } from '../../build_services';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
+import { getDefaultSort } from '../angular/doc_table/lib/get_default_sort';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
+  settings?: DiscoverGridSettings;
   description?: string;
   sort?: SortOrder[];
   sharedItemTitle?: string;
   inspectorAdapters?: Adapters;
   setSortOrder?: (sortPair: SortOrder[]) => void;
+  setColumns?: (columns: string[]) => void;
   removeColumn?: (column: string) => void;
   addColumn?: (column: string) => void;
   moveColumn?: (column: string, index: number) => void;
   filter?: (field: IFieldType, value: string[], operator: string) => void;
-  hits?: any[];
+  hits?: ElasticSearchHit[];
   indexPattern?: IndexPattern;
   totalHitCount?: number;
   isLoading?: boolean;
+  showTimeCol?: boolean;
 }
 
 interface SearchEmbeddableConfig {
@@ -75,6 +73,7 @@ interface SearchEmbeddableConfig {
   indexPatterns?: IndexPattern[];
   editable: boolean;
   filterManager: FilterManager;
+  services: DiscoverServices;
 }
 
 export class SearchEmbeddable
@@ -88,11 +87,11 @@ export class SearchEmbeddable
   private panelTitle: string = '';
   private filtersSearchSource?: ISearchSource;
   private searchInstance?: JQLite;
-  private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterManager: FilterManager;
   private abortController?: AbortController;
+  private services: DiscoverServices;
 
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
@@ -109,6 +108,7 @@ export class SearchEmbeddable
       indexPatterns,
       editable,
       filterManager,
+      services,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
     private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
@@ -126,7 +126,7 @@ export class SearchEmbeddable
       },
       parent
     );
-
+    this.services = services;
     this.filterManager = filterManager;
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
@@ -135,10 +135,6 @@ export class SearchEmbeddable
       requests: new RequestAdapter(),
     };
     this.initializeSearchScope();
-
-    this.autoRefreshFetchSubscription = getServices()
-      .timefilter.getAutoRefreshFetch$()
-      .subscribe(this.fetch);
 
     this.subscription = this.getUpdated$().subscribe(() => {
       this.panelTitle = this.output.title || '';
@@ -165,7 +161,9 @@ export class SearchEmbeddable
     if (!this.searchScope) {
       throw new Error('Search scope not defined');
     }
-    this.searchInstance = this.$compile(searchTemplate)(this.searchScope);
+    this.searchInstance = this.$compile(
+      this.services.uiSettings.get('doc_table:legacy', true) ? searchTemplate : searchTemplateGrid
+    )(this.searchScope);
     const rootNode = angular.element(domNode);
     rootNode.append(this.searchInstance);
 
@@ -185,9 +183,7 @@ export class SearchEmbeddable
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    if (this.autoRefreshFetchSubscription) {
-      this.autoRefreshFetchSubscription.unsubscribe();
-    }
+
     if (this.abortController) this.abortController.abort();
   }
 
@@ -200,10 +196,17 @@ export class SearchEmbeddable
     const { searchSource } = this.savedSearch;
     const indexPattern = (searchScope.indexPattern = searchSource.getField('index'))!;
 
+    if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
+      this.savedSearch.sort = getDefaultSort(
+        indexPattern,
+        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+      );
+    }
+
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
       if (!this.searchScope || !this.input.timeRange) return;
-      return getTime(indexPattern, this.input.timeRange);
+      return this.services.timefilter.createFilter(indexPattern, this.input.timeRange);
     });
 
     this.filtersSearchSource = searchSource.create();
@@ -241,6 +244,15 @@ export class SearchEmbeddable
       this.updateInput({ columns });
     };
 
+    searchScope.setColumns = (columns: string[]) => {
+      this.updateInput({ columns });
+    };
+
+    if (this.savedSearch.grid) {
+      searchScope.settings = this.savedSearch.grid;
+    }
+    searchScope.showTimeCol = !this.services.uiSettings.get('doc_table:hideTimeColumn', false);
+
     searchScope.filter = async (field, value, operator) => {
       let filters = esFilters.generateFilters(
         this.filterManager,
@@ -277,13 +289,13 @@ export class SearchEmbeddable
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    searchSource.setField('size', getServices().uiSettings.get(SAMPLE_SIZE_SETTING));
+    searchSource.setField('size', this.services.uiSettings.get(SAMPLE_SIZE_SETTING));
     searchSource.setField(
       'sort',
       getSortForSearchSource(
         this.searchScope.sort,
         this.searchScope.indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
       )
     );
 
@@ -341,7 +353,14 @@ export class SearchEmbeddable
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
     searchScope.columns = this.input.columns || this.savedSearch.columns;
-    searchScope.sort = this.input.sort || this.savedSearch.sort;
+    const savedSearchSort =
+      this.savedSearch.sort && this.savedSearch.sort.length
+        ? this.savedSearch.sort
+        : getDefaultSort(
+            this.searchScope?.indexPattern,
+            getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+          );
+    searchScope.sort = this.input.sort || savedSearchSort;
     searchScope.sharedItemTitle = this.panelTitle;
 
     if (forceFetch || isFetchRequired) {

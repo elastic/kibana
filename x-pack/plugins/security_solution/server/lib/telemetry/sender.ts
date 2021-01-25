@@ -104,7 +104,7 @@ export class TelemetryEventsSender {
   public async fetchDiagnosticAlerts(executeFrom: string, executeTo: string) {
     const query = {
       expand_wildcards: 'open,hidden',
-      index: 'logs-endpoint.diagnostic.collection-*',
+      index: '.logs-endpoint.diagnostic.collection-*',
       ignore_unavailable: true,
       size: this.maxQueueSize,
       body: {

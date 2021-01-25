@@ -4,19 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  IRouter,
-  RequestHandlerContext,
-  KibanaRequest,
-  IKibanaResponse,
-  KibanaResponseFactory,
-} from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
+import { schema } from '@kbn/config-schema';
+import type { AlertingRouter } from '../types';
+import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { validateDurationSchema } from '../lib';
 import { handleDisabledApiKeysError } from './lib/error_handler';
-import { BASE_ALERT_API_PATH } from '../../common';
+import { AlertNotifyWhenType, BASE_ALERT_API_PATH, validateNotifyWhenType } from '../../common';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -39,9 +34,10 @@ const bodySchema = schema.object({
     }),
     { defaultValue: [] }
   ),
+  notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
-export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) => {
+export const updateAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
   router.put(
     {
       path: `${BASE_ALERT_API_PATH}/alert/{id}`,
@@ -51,24 +47,36 @@ export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) =>
       },
     },
     handleDisabledApiKeysError(
-      router.handleLegacyErrors(async function (
-        context: RequestHandlerContext,
-        req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, TypeOf<typeof bodySchema>>,
-        res: KibanaResponseFactory
-      ): Promise<IKibanaResponse> {
+      router.handleLegacyErrors(async function (context, req, res) {
         verifyApiAccess(licenseState);
         if (!context.alerting) {
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
         const alertsClient = context.alerting.getAlertsClient();
         const { id } = req.params;
-        const { name, actions, params, schedule, tags, throttle } = req.body;
-        return res.ok({
-          body: await alertsClient.update({
+        const { name, actions, params, schedule, tags, throttle, notifyWhen } = req.body;
+        try {
+          const alertRes = await alertsClient.update({
             id,
-            data: { name, actions, params, schedule, tags, throttle },
-          }),
-        });
+            data: {
+              name,
+              actions,
+              params,
+              schedule,
+              tags,
+              throttle,
+              notifyWhen: notifyWhen as AlertNotifyWhenType,
+            },
+          });
+          return res.ok({
+            body: alertRes,
+          });
+        } catch (e) {
+          if (e instanceof AlertTypeDisabledError) {
+            return e.sendResponse(res);
+          }
+          throw e;
+        }
       })
     )
   );

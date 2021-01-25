@@ -8,6 +8,7 @@ import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
+  ElasticsearchServiceStart,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -52,7 +53,12 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { EsAssetReference, FleetConfigType, NewPackagePolicy } from '../common';
+import {
+  EsAssetReference,
+  FleetConfigType,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+} from '../common';
 import {
   appContextService,
   licenseService,
@@ -75,6 +81,7 @@ import { agentCheckinState } from './services/agents/checkin/state';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
+import { runFleetServerMigration } from './services/fleet_server_migration';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -86,12 +93,13 @@ export interface FleetSetupDeps {
 }
 
 export interface FleetStartDeps {
-  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
 }
 
 export interface FleetAppContext {
-  encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart;
+  elasticsearch: ElasticsearchServiceStart;
+  encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   security?: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
@@ -119,14 +127,23 @@ const allSavedObjectTypes = [
 /**
  * Callbacks supported by the Fleet plugin
  */
-export type ExternalCallback = [
-  'packagePolicyCreate',
-  (
-    newPackagePolicy: NewPackagePolicy,
-    context: RequestHandlerContext,
-    request: KibanaRequest
-  ) => Promise<NewPackagePolicy>
-];
+export type ExternalCallback =
+  | [
+      'packagePolicyCreate',
+      (
+        newPackagePolicy: NewPackagePolicy,
+        context: RequestHandlerContext,
+        request: KibanaRequest
+      ) => Promise<NewPackagePolicy>
+    ]
+  | [
+      'packagePolicyUpdate',
+      (
+        newPackagePolicy: UpdatePackagePolicy,
+        context: RequestHandlerContext,
+        request: KibanaRequest
+      ) => Promise<UpdatePackagePolicy>
+    ];
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
 
@@ -236,8 +253,7 @@ export class FleetPlugin
 
       // Conditional config routes
       if (config.agents.enabled) {
-        const isESOUsingEphemeralEncryptionKey =
-          deps.encryptedSavedObjects.usingEphemeralEncryptionKey;
+        const isESOUsingEphemeralEncryptionKey = !deps.encryptedSavedObjects;
         if (isESOUsingEphemeralEncryptionKey) {
           if (this.logger) {
             this.logger.warn(
@@ -263,6 +279,7 @@ export class FleetPlugin
 
   public async start(core: CoreStart, plugins: FleetStartDeps): Promise<FleetStartContract> {
     await appContextService.start({
+      elasticsearch: core.elasticsearch,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
       security: plugins.security,
@@ -277,6 +294,13 @@ export class FleetPlugin
     });
     licenseService.start(this.licensing$);
     agentCheckinState.start();
+
+    const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
+    if (fleetServerEnabled) {
+      // We need licence to be initialized before using the SO service.
+      await this.licensing$.pipe(first()).toPromise();
+      await runFleetServerMigration();
+    }
 
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
@@ -302,8 +326,8 @@ export class FleetPlugin
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
       },
       packagePolicyService,
-      registerExternalCallback: (...args: ExternalCallback) => {
-        return appContextService.addExternalCallback(...args);
+      registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
+        return appContextService.addExternalCallback(type, callback);
       },
     };
   }

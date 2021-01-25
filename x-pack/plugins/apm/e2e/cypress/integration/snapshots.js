@@ -1,3 +1,3 @@
 module.exports = {
-  "__version": "5.4.0"
+  "__version": "6.0.1"
 }

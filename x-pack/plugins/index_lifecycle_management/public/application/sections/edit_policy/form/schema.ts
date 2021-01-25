@@ -32,21 +32,33 @@ const serializers = {
 export const schema: FormSchema<FormInternal> = {
   _meta: {
     hot: {
-      useRollover: {
+      isUsingDefaultRollover: {
         defaultValue: true,
-        label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel', {
-          defaultMessage: 'Enable rollover',
+        label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.isUsingDefaultRollover', {
+          defaultMessage: 'Use recommended defaults',
         }),
       },
-      maxStorageSizeUnit: {
-        defaultValue: 'gb',
-      },
-      maxAgeUnit: {
-        defaultValue: 'd',
+      customRollover: {
+        enabled: {
+          defaultValue: true,
+          label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel', {
+            defaultMessage: 'Enable rollover',
+          }),
+        },
+        maxStorageSizeUnit: {
+          defaultValue: 'gb',
+        },
+        maxAgeUnit: {
+          defaultValue: 'd',
+        },
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
         helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
+      },
+      readonlyEnabled: {
+        defaultValue: false,
+        label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
     },
     warm: {
@@ -75,6 +87,10 @@ export const schema: FormSchema<FormInternal> = {
       },
       allocationNodeAttribute: {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
+      readonlyEnabled: {
+        defaultValue: false,
+        label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
     },
     cold: {

@@ -45,6 +45,7 @@ describe('filterByAgent', () => {
       expect(getSettingKeysForAgent('go')).toEqual([
         'capture_body',
         'capture_headers',
+        'log_level',
         'recording',
         'sanitize_field_names',
         'span_frames_min_duration',
@@ -86,14 +87,12 @@ describe('filterByAgent', () => {
 
     it('js-base', () => {
       expect(getSettingKeysForAgent('js-base')).toEqual([
-        'recording',
         'transaction_sample_rate',
       ]);
     });
 
     it('rum-js', () => {
       expect(getSettingKeysForAgent('rum-js')).toEqual([
-        'recording',
         'transaction_sample_rate',
       ]);
     });
@@ -102,6 +101,8 @@ describe('filterByAgent', () => {
       expect(getSettingKeysForAgent('nodejs')).toEqual([
         'capture_body',
         'log_level',
+        'sanitize_field_names',
+        'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);
@@ -117,6 +118,7 @@ describe('filterByAgent', () => {
         'recording',
         'sanitize_field_names',
         'span_frames_min_duration',
+        'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);
@@ -128,8 +130,10 @@ describe('filterByAgent', () => {
         'capture_headers',
         'log_level',
         'recording',
+        'sanitize_field_names',
         'span_frames_min_duration',
         'stack_trace_limit',
+        'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);
@@ -143,7 +147,9 @@ describe('filterByAgent', () => {
         'capture_headers',
         'log_level',
         'recording',
+        'sanitize_field_names',
         'span_frames_min_duration',
+        'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);

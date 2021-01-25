@@ -65,6 +65,7 @@ export class HeadlessChromiumDriverFactory {
       logger.info(`Creating browser page driver`);
 
       const chromiumArgs = this.getChromiumArgs(viewport);
+      logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
 
       let browser: puppeteer.Browser;
       let page: puppeteer.Page;

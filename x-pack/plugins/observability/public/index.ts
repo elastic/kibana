@@ -27,7 +27,7 @@ export {
   METRIC_TYPE,
 } from './hooks/use_track_metric';
 
-export { useFetcher } from './hooks/use_fetcher';
+export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 
 export * from './typings';
 

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
-import { getInvalidFieldMessage } from './helpers';
+import { getInvalidFieldMessage, getSafeName } from './helpers';
 import {
   FormattedIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -28,6 +28,7 @@ const typeToFn: Record<string, string> = {
   max: 'aggMax',
   avg: 'aggAvg',
   sum: 'aggSum',
+  median: 'aggMedian',
 };
 
 function buildMetricOperation<T extends MetricColumn<string>>({
@@ -44,11 +45,11 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   optionalTimeScaling?: boolean;
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
-    const rawLabel = ofName(name);
+    const label = ofName(name);
     if (!optionalTimeScaling) {
-      return rawLabel;
+      return label;
     }
-    return adjustTimeScaleLabelSuffix(rawLabel, undefined, column?.timeScale);
+    return adjustTimeScaleLabelSuffix(label, undefined, column?.timeScale);
   };
 
   return {
@@ -80,21 +81,26 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    onOtherColumnChanged: (column, otherColumns) =>
-      optionalTimeScaling ? adjustTimeScaleOnOtherColumnChange(column, otherColumns) : column,
+    onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
+      optionalTimeScaling
+        ? (adjustTimeScaleOnOtherColumnChange(layer, thisColumnId, changedColumnId) as T)
+        : (layer.columns[thisColumnId] as T),
     getDefaultLabel: (column, indexPattern, columns) =>
-      labelLookup(indexPattern.getFieldByName(column.sourceField)!.displayName, column),
-    buildColumn: ({ field, previousColumn }) => ({
-      label: labelLookup(field.displayName, previousColumn),
-      dataType: 'number',
-      operationType: type,
-      sourceField: field.name,
-      isBucketed: false,
-      scale: 'ratio',
-      timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
-      params:
-        previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
-    }),
+      labelLookup(getSafeName(column.sourceField, indexPattern), column),
+    buildColumn: ({ field, previousColumn }) =>
+      ({
+        label: labelLookup(field.displayName, previousColumn),
+        dataType: 'number',
+        operationType: type,
+        sourceField: field.name,
+        isBucketed: false,
+        scale: 'ratio',
+        timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
+        params:
+          previousColumn && previousColumn.dataType === 'number'
+            ? previousColumn.params
+            : undefined,
+      } as T),
     onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,

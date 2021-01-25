@@ -29,7 +29,7 @@ export function createRange({
   to?: Date;
 } = {}): TimeRange {
   return {
-    from,
-    to,
+    from: from.toISOString(),
+    to: to.toISOString(),
   };
 }

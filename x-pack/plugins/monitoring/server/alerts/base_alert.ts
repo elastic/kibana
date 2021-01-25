@@ -13,7 +13,7 @@ import {
   AlertsClient,
   AlertServices,
 } from '../../../alerts/server';
-import { Alert, RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
+import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
@@ -42,6 +42,7 @@ import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
 
 interface LegacyOptions {
   watchName: string;
+  nodeNameLabel: string;
   changeDataValues?: Partial<AlertData>;
 }
 
@@ -92,7 +93,7 @@ export class BaseAlert {
     this.scopedLogger = Globals.app.getLogger(alertOptions.id!);
   }
 
-  public getAlertType(): AlertType {
+  public getAlertType(): AlertType<never, never, never, never, 'default'> {
     const { id, name, actionVariables } = this.alertOptions;
     return {
       id,
@@ -106,8 +107,12 @@ export class BaseAlert {
         },
       ],
       defaultActionGroupId: 'default',
-      executor: (options: AlertExecutorOptions & { state: ExecutedState }): Promise<any> =>
-        this.execute(options),
+      minimumLicenseRequired: 'basic',
+      executor: (
+        options: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+          state: ExecutedState;
+        }
+      ): Promise<any> => this.execute(options),
       producer: 'monitoring',
       actionVariables: {
         context: actionVariables,
@@ -133,7 +138,7 @@ export class BaseAlert {
     alertsClient: AlertsClient,
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
-  ): Promise<Alert> {
+  ): Promise<Alert<AlertTypeParams>> {
     const existingAlertData = await alertsClient.find({
       options: {
         search: this.alertOptions.id,
@@ -168,7 +173,7 @@ export class BaseAlert {
       throttle = '1d',
       interval = '1m',
     } = this.alertOptions;
-    return await alertsClient.create({
+    return await alertsClient.create<AlertTypeParams>({
       data: {
         enabled: true,
         tags: [],
@@ -177,6 +182,7 @@ export class BaseAlert {
         name,
         alertTypeId,
         throttle,
+        notifyWhen: null,
         schedule: { interval },
         actions: alertActions,
       },
@@ -199,11 +205,12 @@ export class BaseAlert {
           return accum;
         }
         const alertInstance: RawAlertInstance = states.alertInstances[instanceId];
-        if (alertInstance && this.filterAlertInstance(alertInstance, filters)) {
-          accum[instanceId] = alertInstance;
-          if (alertInstance.state) {
+        const filteredAlertInstance = this.filterAlertInstance(alertInstance, filters);
+        if (filteredAlertInstance) {
+          accum[instanceId] = filteredAlertInstance as RawAlertInstance;
+          if (filteredAlertInstance.state) {
             accum[instanceId].state = {
-              alertStates: (alertInstance.state as AlertInstanceState).alertStates,
+              alertStates: (filteredAlertInstance.state as AlertInstanceState).alertStates,
             };
           }
         }
@@ -219,22 +226,24 @@ export class BaseAlert {
     filterOnNodes: boolean = false
   ) {
     if (!filterOnNodes) {
-      return true;
+      return alertInstance;
     }
     const alertInstanceStates = alertInstance.state?.alertStates as AlertNodeState[];
     const nodeFilter = filters?.find((filter) => filter.nodeUuid);
     if (!filters || !filters.length || !alertInstanceStates?.length || !nodeFilter?.nodeUuid) {
-      return true;
+      return alertInstance;
     }
-    const nodeAlerts = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeFilter.nodeUuid);
-    return Boolean(nodeAlerts.length);
+    const alertStates = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeFilter.nodeUuid);
+    return { state: { alertStates } };
   }
 
   protected async execute({
     services,
     params,
     state,
-  }: AlertExecutorOptions & { state: ExecutedState }): Promise<any> {
+  }: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+    state: ExecutedState;
+  }): Promise<any> {
     this.scopedLogger.debug(
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
@@ -281,7 +290,7 @@ export class BaseAlert {
       ? {
           timestamp: {
             format: 'epoch_millis',
-            gte: limit - this.alertOptions.fetchClustersRange,
+            gte: +new Date() - limit - this.alertOptions.fetchClustersRange,
           },
         }
       : undefined;
@@ -320,6 +329,7 @@ export class BaseAlert {
         shouldFire: !legacyAlert.resolved_timestamp,
         severity: mapLegacySeverity(legacyAlert.metadata.severity),
         meta: legacyAlert,
+        nodeName: this.alertOptions.legacy!.nodeNameLabel,
         ...this.alertOptions.legacy!.changeDataValues,
       };
     });
@@ -328,7 +338,7 @@ export class BaseAlert {
   protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: AlertServices,
+    services: AlertServices<AlertInstanceState, never, 'default'>,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
@@ -340,7 +350,7 @@ export class BaseAlert {
 
       const firingNodeUuids = nodes
         .filter((node) => node.shouldFire)
-        .map((node) => node.meta.nodeId)
+        .map((node) => node.meta.nodeId || node.meta.instanceId)
         .join(',');
       const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
       const instance = services.alertInstanceFactory(instanceId);
@@ -350,13 +360,16 @@ export class BaseAlert {
         if (!node.shouldFire) {
           continue;
         }
-        const stat = node.meta as AlertNodeState;
+        const { meta } = node;
         const nodeState = this.getDefaultAlertState(cluster, node) as AlertNodeState;
         if (key) {
-          nodeState[key] = stat[key];
+          nodeState[key] = meta[key];
         }
-        nodeState.nodeId = stat.nodeId || node.nodeId!;
-        nodeState.nodeName = stat.nodeName || node.nodeName || nodeState.nodeId;
+        nodeState.nodeId = meta.nodeId || node.nodeId! || meta.instanceId;
+        // TODO: make these functions more generic, so it's node/item agnostic
+        nodeState.nodeName = meta.itemLabel || meta.nodeName || node.nodeName || nodeState.nodeId;
+        nodeState.itemLabel = meta.itemLabel;
+        nodeState.meta = meta;
         nodeState.ui.triggeredMS = currentUTC;
         nodeState.ui.isFiring = true;
         nodeState.ui.severity = node.severity;
@@ -379,7 +392,7 @@ export class BaseAlert {
   protected async processLegacyData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: AlertServices,
+    services: AlertServices<AlertInstanceState, never, 'default'>,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
@@ -392,6 +405,7 @@ export class BaseAlert {
       }
       const cluster = clusters.find((c: AlertCluster) => c.clusterUuid === item.clusterUuid);
       const alertState: AlertState = this.getDefaultAlertState(cluster!, item);
+      alertState.nodeName = item.nodeName;
       alertState.ui.triggeredMS = currentUTC;
       alertState.ui.isFiring = true;
       alertState.ui.severity = item.severity;

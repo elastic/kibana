@@ -10,7 +10,7 @@ import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
-import { createExecutionHandler } from './create_execution_handler';
+import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import {
   validateAlertTypeParams,
@@ -26,10 +26,10 @@ import {
   RawAlertInstance,
   AlertTaskState,
   Alert,
-  AlertExecutorOptions,
   SanitizedAlert,
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
+  AlertTypeRegistry,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -38,7 +38,14 @@ import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_l
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';
-import { ActionGroup } from '../../common';
+import {
+  ActionGroup,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  WithoutReservedActionGroups,
+} from '../../common';
 import { NormalizedAlertType } from '../alert_type_registry';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
@@ -54,14 +61,36 @@ interface AlertTaskInstance extends ConcreteTaskInstance {
   state: AlertTaskState;
 }
 
-export class TaskRunner {
+export class TaskRunner<
+  Params extends AlertTypeParams,
+  State extends AlertTypeState,
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
-  private alertType: NormalizedAlertType;
+  private alertType: NormalizedAlertType<
+    Params,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >;
+  private readonly alertTypeRegistry: AlertTypeRegistry;
 
   constructor(
-    alertType: NormalizedAlertType,
+    alertType: NormalizedAlertType<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext
   ) {
@@ -69,6 +98,7 @@ export class TaskRunner {
     this.logger = context.logger;
     this.alertType = alertType;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
+    this.alertTypeRegistry = context.alertTypeRegistry;
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
@@ -128,10 +158,17 @@ export class TaskRunner {
     tags: string[] | undefined,
     spaceId: string,
     apiKey: RawAlert['apiKey'],
-    actions: Alert['actions'],
-    alertParams: RawAlert['params']
+    actions: Alert<Params>['actions'],
+    alertParams: Params
   ) {
-    return createExecutionHandler({
+    return createExecutionHandler<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >({
       alertId,
       alertName,
       tags,
@@ -149,8 +186,8 @@ export class TaskRunner {
 
   async executeAlertInstance(
     alertInstanceId: string,
-    alertInstance: AlertInstance,
-    executionHandler: ReturnType<typeof createExecutionHandler>
+    alertInstance: AlertInstance<InstanceState, InstanceContext>,
+    executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>
   ) {
     const {
       actionGroup,
@@ -165,22 +202,34 @@ export class TaskRunner {
 
   async executeAlertInstances(
     services: Services,
-    alert: SanitizedAlert,
-    params: AlertExecutorOptions['params'],
-    executionHandler: ReturnType<typeof createExecutionHandler>,
+    alert: SanitizedAlert<Params>,
+    params: Params,
+    executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     spaceId: string,
     event: Event
   ): Promise<AlertTaskState> {
-    const { throttle, muteAll, mutedInstanceIds, name, tags, createdBy, updatedBy } = alert;
+    const {
+      throttle,
+      notifyWhen,
+      muteAll,
+      mutedInstanceIds,
+      name,
+      tags,
+      createdBy,
+      updatedBy,
+    } = alert;
     const {
       params: { alertId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
-    const alertInstances = mapValues<Record<string, RawAlertInstance>, AlertInstance>(
+    const alertInstances = mapValues<
+      Record<string, RawAlertInstance>,
+      AlertInstance<InstanceState, InstanceContext>
+    >(
       alertRawInstances,
-      (rawAlertInstance) => new AlertInstance(rawAlertInstance)
+      (rawAlertInstance) => new AlertInstance<InstanceState, InstanceContext>(rawAlertInstance)
     );
     const originalAlertInstances = cloneDeep(alertInstances);
 
@@ -193,10 +242,14 @@ export class TaskRunner {
         alertId,
         services: {
           ...services,
-          alertInstanceFactory: createAlertInstanceFactory(alertInstances),
+          alertInstanceFactory: createAlertInstanceFactory<
+            InstanceState,
+            InstanceContext,
+            WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+          >(alertInstances),
         },
         params,
-        state: alertTypeState,
+        state: alertTypeState as State,
         startedAt: this.taskInstance.startedAt!,
         previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
         spaceId,
@@ -220,12 +273,15 @@ export class TaskRunner {
     event.event.outcome = 'success';
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
-    const instancesWithScheduledActions = pickBy(alertInstances, (alertInstance: AlertInstance) =>
-      alertInstance.hasScheduledActions()
+    const instancesWithScheduledActions = pickBy(
+      alertInstances,
+      (alertInstance: AlertInstance<InstanceState, InstanceContext>) =>
+        alertInstance.hasScheduledActions()
     );
     const recoveredAlertInstances = pickBy(
       alertInstances,
-      (alertInstance: AlertInstance) => !alertInstance.hasScheduledActions()
+      (alertInstance: AlertInstance<InstanceState, InstanceContext>) =>
+        !alertInstance.hasScheduledActions()
     );
 
     logActiveAndRecoveredInstances({
@@ -248,7 +304,7 @@ export class TaskRunner {
     if (!muteAll) {
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
-      scheduleActionsForRecoveredInstances({
+      scheduleActionsForRecoveredInstances<InstanceState, InstanceContext, RecoveryActionGroupId>({
         recoveryActionGroup: this.alertType.recoveryActionGroup,
         recoveredAlertInstances,
         executionHandler,
@@ -257,24 +313,46 @@ export class TaskRunner {
         alertLabel,
       });
 
+      const instancesToExecute =
+        notifyWhen === 'onActionGroupChange'
+          ? Object.entries(instancesWithScheduledActions).filter(
+              ([alertInstanceName, alertInstance]: [
+                string,
+                AlertInstance<InstanceState, InstanceContext>
+              ]) => {
+                const shouldExecuteAction = alertInstance.scheduledActionGroupOrSubgroupHasChanged();
+                if (!shouldExecuteAction) {
+                  this.logger.debug(
+                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is active but action group has not changed`
+                  );
+                }
+                return shouldExecuteAction;
+              }
+            )
+          : Object.entries(instancesWithScheduledActions).filter(
+              ([alertInstanceName, alertInstance]: [
+                string,
+                AlertInstance<InstanceState, InstanceContext>
+              ]) => {
+                const throttled = alertInstance.isThrottled(throttle);
+                const muted = mutedInstanceIdsSet.has(alertInstanceName);
+                const shouldExecuteAction = !throttled && !muted;
+                if (!shouldExecuteAction) {
+                  this.logger.debug(
+                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
+                      muted ? 'muted' : 'throttled'
+                    }`
+                  );
+                }
+                return shouldExecuteAction;
+              }
+            );
+
       await Promise.all(
-        Object.entries(instancesWithScheduledActions)
-          .filter(([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
-            const throttled = alertInstance.isThrottled(throttle);
-            const muted = mutedInstanceIdsSet.has(alertInstanceName);
-            const shouldExecuteAction = !throttled && !muted;
-            if (!shouldExecuteAction) {
-              this.logger.debug(
-                `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
-                  muted ? 'muted' : 'throttled'
-                }`
-              );
-            }
-            return shouldExecuteAction;
-          })
-          .map(([id, alertInstance]: [string, AlertInstance]) =>
+        instancesToExecute.map(
+          ([id, alertInstance]: [string, AlertInstance<InstanceState, InstanceContext>]) =>
             this.executeAlertInstance(id, alertInstance, executionHandler)
-          )
+        )
       );
     } else {
       this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
@@ -282,17 +360,17 @@ export class TaskRunner {
 
     return {
       alertTypeState: updatedAlertTypeState || undefined,
-      alertInstances: mapValues<Record<string, AlertInstance>, RawAlertInstance>(
-        instancesWithScheduledActions,
-        (alertInstance) => alertInstance.toRaw()
-      ),
+      alertInstances: mapValues<
+        Record<string, AlertInstance<InstanceState, InstanceContext>>,
+        RawAlertInstance
+      >(instancesWithScheduledActions, (alertInstance) => alertInstance.toRaw()),
     };
   }
 
   async validateAndExecuteAlert(
     services: Services,
     apiKey: RawAlert['apiKey'],
-    alert: SanitizedAlert,
+    alert: SanitizedAlert<Params>,
     event: Event
   ) {
     const {
@@ -300,7 +378,7 @@ export class TaskRunner {
     } = this.taskInstance;
 
     // Validate
-    const validatedParams = validateAlertTypeParams(this.alertType, alert.params);
+    const validatedParams = validateAlertTypeParams(alert.params, this.alertType.validate?.params);
     const executionHandler = this.getExecutionHandler(
       alertId,
       alert.name,
@@ -332,7 +410,7 @@ export class TaskRunner {
     }
     const [services, alertsClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
 
-    let alert: SanitizedAlert;
+    let alert: SanitizedAlert<Params>;
 
     // Ensure API key is still valid and user has access
     try {
@@ -341,6 +419,11 @@ export class TaskRunner {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
     }
 
+    try {
+      this.alertTypeRegistry.ensureAlertTypeEnabled(alert.alertTypeId);
+    } catch (err) {
+      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.License, err);
+    }
     return {
       state: await promiseResult<AlertTaskState, Error>(
         this.validateAndExecuteAlert(services, apiKey, alert, event)
@@ -432,6 +515,7 @@ export class TaskRunner {
       await partiallyUpdateAlert(client, alertId, attributes, {
         ignore404: true,
         namespace,
+        refresh: false,
       });
     } catch (err) {
       this.logger.error(
@@ -468,19 +552,23 @@ export class TaskRunner {
   }
 }
 
-interface GenerateNewAndRecoveredInstanceEventsParams {
+interface GenerateNewAndRecoveredInstanceEventsParams<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
+> {
   eventLogger: IEventLogger;
-  originalAlertInstances: Dictionary<AlertInstance>;
-  currentAlertInstances: Dictionary<AlertInstance>;
-  recoveredAlertInstances: Dictionary<AlertInstance>;
+  originalAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  currentAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  recoveredAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
 }
 
-function generateNewAndRecoveredInstanceEvents(
-  params: GenerateNewAndRecoveredInstanceEventsParams
-) {
+function generateNewAndRecoveredInstanceEvents<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
+>(params: GenerateNewAndRecoveredInstanceEventsParams<InstanceState, InstanceContext>) {
   const {
     eventLogger,
     alertId,
@@ -551,16 +639,32 @@ function generateNewAndRecoveredInstanceEvents(
   }
 }
 
-interface ScheduleActionsForRecoveredInstancesParams {
+interface ScheduleActionsForRecoveredInstancesParams<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  RecoveryActionGroupId extends string
+> {
   logger: Logger;
-  recoveryActionGroup: ActionGroup;
-  recoveredAlertInstances: Dictionary<AlertInstance>;
-  executionHandler: ReturnType<typeof createExecutionHandler>;
+  recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
+  recoveredAlertInstances: Dictionary<
+    AlertInstance<InstanceState, InstanceContext, RecoveryActionGroupId>
+  >;
+  executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
   mutedInstanceIdsSet: Set<string>;
   alertLabel: string;
 }
 
-function scheduleActionsForRecoveredInstances(params: ScheduleActionsForRecoveredInstancesParams) {
+function scheduleActionsForRecoveredInstances<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  RecoveryActionGroupId extends string
+>(
+  params: ScheduleActionsForRecoveredInstancesParams<
+    InstanceState,
+    InstanceContext,
+    RecoveryActionGroupId
+  >
+) {
   const {
     logger,
     recoveryActionGroup,
@@ -590,14 +694,33 @@ function scheduleActionsForRecoveredInstances(params: ScheduleActionsForRecovere
   }
 }
 
-interface LogActiveAndRecoveredInstancesParams {
+interface LogActiveAndRecoveredInstancesParams<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
   logger: Logger;
-  activeAlertInstances: Dictionary<AlertInstance>;
-  recoveredAlertInstances: Dictionary<AlertInstance>;
+  activeAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext, ActionGroupIds>>;
+  recoveredAlertInstances: Dictionary<
+    AlertInstance<InstanceState, InstanceContext, RecoveryActionGroupId>
+  >;
   alertLabel: string;
 }
 
-function logActiveAndRecoveredInstances(params: LogActiveAndRecoveredInstancesParams) {
+function logActiveAndRecoveredInstances<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+>(
+  params: LogActiveAndRecoveredInstancesParams<
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >
+) {
   const { logger, activeAlertInstances, recoveredAlertInstances, alertLabel } = params;
   const activeInstanceIds = Object.keys(activeAlertInstances);
   const recoveredInstanceIds = Object.keys(recoveredAlertInstances);

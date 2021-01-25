@@ -7,7 +7,7 @@
 import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
-import { MlJobsResponse } from './jobs';
+import { MlJobsResponse } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';
 
 interface Group {
@@ -72,7 +72,9 @@ export function groupsProvider(mlClient: MlClient) {
       });
     }
 
-    return Object.keys(groups).map((g) => groups[g]);
+    return Object.keys(groups)
+      .sort()
+      .map((g) => groups[g]);
   }
 
   async function updateGroups(jobs: Job[]) {

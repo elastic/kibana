@@ -4,13 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { APMConfig } from '../..';
-import { AlertingPlugin } from '../../../../alerts/server';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertingPlugin,
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeState,
+} from '../../../../alerts/server';
+import {
+  AlertType,
+  ALERT_TYPES_CONFIG,
+  ThresholdMetActionGroupId,
+} from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -41,7 +50,13 @@ export function registerErrorCountAlertType({
   alerts,
   config$,
 }: RegisterAlertParams) {
-  alerts.registerType({
+  alerts.registerType<
+    TypeOf<typeof paramsSchema>,
+    AlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    ThresholdMetActionGroupId
+  >({
     id: AlertType.ErrorCount,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
@@ -59,6 +74,7 @@ export function registerErrorCountAlertType({
       ],
     },
     producer: 'apm',
+    minimumLicenseRequired: 'basic',
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
       const alertParams = params;

@@ -23,6 +23,8 @@ You can add the following metric aggregations:
 
 * *Min.* The lowest value.
 
+* *Percentile.* The value at which a certain percentage of observed values occur. For example, the 95th percentile is the value which is greater than 95% of the observed values.
+
 * *Sum.* The total value.
 
 * *Top term.* The most common value.

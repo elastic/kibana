@@ -69,19 +69,19 @@ export default function ({ getPageObjects, getService }) {
       expect(split[0]).to.equal('max prop1');
 
       //bands 1-8
-      expect(split[1]).to.equal('3');
-      expect(split[2]).to.equal('4.13');
-      expect(split[3]).to.equal('5.25');
-      expect(split[4]).to.equal('6.38');
-      expect(split[5]).to.equal('7.5');
-      expect(split[6]).to.equal('8.63');
-      expect(split[7]).to.equal('9.75');
-      expect(split[8]).to.equal('11');
+      expect(split[1]).to.equal('< 4.13');
+      expect(split[2]).to.equal('4.13 up to 5.25');
+      expect(split[3]).to.equal('5.25 up to 6.38');
+      expect(split[4]).to.equal('6.38 up to 7.5');
+      expect(split[5]).to.equal('7.5 up to 8.63');
+      expect(split[6]).to.equal('8.63 up to 9.75');
+      expect(split[7]).to.equal('9.75 up to 11');
+      expect(split[8]).to.equal('>= 11');
     });
 
     it('should decorate feature properties with join property', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-      expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(4);
+      expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(8);
 
       mapboxStyle.sources.n1t6f.data.features.forEach(({ properties }) => {
         if (properties.name === 'tango') {
@@ -130,7 +130,17 @@ export default function ({ getPageObjects, getService }) {
         return feature.properties.__kbn_isvisibleduetojoin__;
       });
 
-      expect(visibilitiesOfFeatures).to.eql([false, true, true, true]);
+      expect(visibilitiesOfFeatures).to.eql([
+        false,
+        true,
+        true,
+        true,
+        // geo centroids for above features
+        false,
+        true,
+        true,
+        true,
+      ]);
     });
 
     describe('query bar', () => {
@@ -196,7 +206,17 @@ export default function ({ getPageObjects, getService }) {
           return feature.properties.__kbn_isvisibleduetojoin__;
         });
 
-        expect(visibilitiesOfFeatures).to.eql([false, true, false, false]);
+        expect(visibilitiesOfFeatures).to.eql([
+          false,
+          true,
+          false,
+          false,
+          // geo centroids for above features
+          false,
+          true,
+          false,
+          false,
+        ]);
       });
     });
 

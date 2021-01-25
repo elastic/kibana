@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APP_OVERVIEW_PATH } from '../../../../common/constants';
 import { appendSearch } from './helpers';
 
-export const getAppOverviewUrl = (search?: string) => `${APP_OVERVIEW_PATH}${appendSearch(search)}`;
+export const getAppOverviewUrl = (overviewPath: string, search?: string) =>
+  `${overviewPath}${appendSearch(search)}`;

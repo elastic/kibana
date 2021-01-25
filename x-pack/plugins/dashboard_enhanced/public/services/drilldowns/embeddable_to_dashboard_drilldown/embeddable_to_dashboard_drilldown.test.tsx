@@ -23,6 +23,7 @@ import { UrlGeneratorsService } from '../../../../../../../src/plugins/share/pub
 import { StartDependencies } from '../../../plugin';
 import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_objects/public';
 import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public/core';
+import { EnhancedEmbeddableContext } from '../../../../../embeddable_enhanced/public';
 
 describe('.isConfigValid()', () => {
   const drilldown = new EmbeddableToDashboardDrilldown({} as any);
@@ -140,7 +141,7 @@ describe('.execute() & getHref', () => {
         }),
       },
       timeFieldName,
-    } as unknown) as ApplyGlobalFilterActionContext;
+    } as unknown) as ApplyGlobalFilterActionContext & EnhancedEmbeddableContext;
 
     await drilldown.execute(completeConfig, context);
 

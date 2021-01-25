@@ -38,7 +38,7 @@ import {
   MITRE_TACTIC,
   REFERENCE_URLS_INPUT,
   REFRESH_BUTTON,
-  RISK_INPUT,
+  DEFAULT_RISK_SCORE_INPUT,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
@@ -71,10 +71,10 @@ import {
   MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON,
   MITRE_ATTACK_ADD_TECHNIQUE_BUTTON,
 } from '../screens/create_new_rule';
-import { NOTIFICATION_TOASTS, TOAST_ERROR_CLASS } from '../screens/shared';
+import { TOAST_ERROR } from '../screens/shared';
+import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
-import { NUMBER_OF_ALERTS } from '../screens/alerts';
 
 export const createAndActivateRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
@@ -91,7 +91,7 @@ export const fillAboutRule = (
   cy.get(SEVERITY_DROPDOWN).click({ force: true });
   cy.get(`#${rule.severity.toLowerCase()}`).click();
 
-  cy.get(RISK_INPUT).clear({ force: true }).type(`${rule.riskScore}`, { force: true });
+  cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${rule.riskScore}`, { force: true });
 
   rule.tags.forEach((tag) => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
@@ -169,7 +169,7 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
     cy.get(COMBO_BOX_INPUT).type(`${rule.riskOverride}{enter}`);
   });
 
-  cy.get(RISK_INPUT).clear({ force: true }).type(`${rule.riskScore}`, { force: true });
+  cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${rule.riskScore}`, { force: true });
 
   rule.tags.forEach((tag) => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
@@ -229,7 +229,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   rule: CustomRule | OverrideRule
 ) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timelineId!)).click();
+  cy.get(TIMELINE(rule.timeline.id!)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
@@ -247,7 +247,8 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
 
-  cy.get(CUSTOM_QUERY_INPUT).type(rule.customQuery!);
+  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
+  cy.get(TIMELINE(rule.timeline.id!)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
@@ -262,11 +263,20 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 };
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
+  cy.get(EQL_QUERY_INPUT).should('exist');
+  cy.get(EQL_QUERY_INPUT).should('be.visible');
   cy.get(EQL_QUERY_INPUT).type(rule.customQuery!);
   cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
   cy.get(QUERY_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
-  cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
-  cy.get(NOTIFICATION_TOASTS).children().should('not.have.class', TOAST_ERROR_CLASS); // asserts no error toast on page
+  cy.get(EQL_QUERY_PREVIEW_HISTOGRAM)
+    .invoke('text')
+    .then((text) => {
+      if (text !== 'Hits') {
+        cy.get(QUERY_PREVIEW_BUTTON).click({ force: true });
+        cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
+      }
+    });
+  cy.get(TOAST_ERROR).should('not.exist');
 
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
   cy.get(EQL_QUERY_INPUT).should('not.exist');
@@ -331,6 +341,22 @@ export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
+export const waitForAlertsToPopulate = async () => {
+  cy.waitUntil(
+    () => {
+      refreshPage();
+      return cy
+        .get(SERVER_SIDE_EVENT_COUNT)
+        .invoke('text')
+        .then((countText) => {
+          const alertCount = parseInt(countText, 10) || 0;
+          return alertCount > 0;
+        });
+    },
+    { interval: 500, timeout: 12000 }
+  );
+};
+
 export const waitForTheRuleToBeExecuted = () => {
   cy.waitUntil(() => {
     cy.get(REFRESH_BUTTON).click();
@@ -338,18 +364,5 @@ export const waitForTheRuleToBeExecuted = () => {
       .get(RULE_STATUS)
       .invoke('text')
       .then((ruleStatus) => ruleStatus === 'succeeded');
-  });
-};
-
-export const waitForAlertsToPopulate = async () => {
-  cy.waitUntil(() => {
-    refreshPage();
-    return cy
-      .get(NUMBER_OF_ALERTS)
-      .invoke('text')
-      .then((countText) => {
-        const alertCount = parseInt(countText, 10) || 0;
-        return alertCount > 0;
-      });
   });
 };

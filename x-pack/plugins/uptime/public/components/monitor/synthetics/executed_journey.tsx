@@ -78,7 +78,7 @@ export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey }) => {
       <EuiSpacer />
       <EuiFlexGroup direction="column">
         {journey.steps.filter(isStepEnd).map((step, index) => (
-          <ExecutedStep key={index} index={index} step={step} />
+          <ExecutedStep key={index} index={index} step={step} checkGroup={journey.checkGroup} />
         ))}
         <EuiSpacer size="s" />
       </EuiFlexGroup>

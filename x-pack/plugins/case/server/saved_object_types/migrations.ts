@@ -9,16 +9,16 @@
 import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '../../../../../src/core/server';
 import { ConnectorTypes, CommentType } from '../../common/api';
 
-interface UnsanitizedCase {
+interface UnsanitizedCaseConnector {
   connector_id: string;
 }
 
-interface UnsanitizedConfigure {
+interface UnsanitizedConfigureConnector {
   connector_id: string;
   connector_name: string;
 }
 
-interface SanitizedCase {
+interface SanitizedCaseConnector {
   connector: {
     id: string;
     name: string | null;
@@ -27,7 +27,7 @@ interface SanitizedCase {
   };
 }
 
-interface SanitizedConfigure {
+interface SanitizedConfigureConnector {
   connector: {
     id: string;
     name: string | null;
@@ -42,10 +42,16 @@ interface UserActions {
   old_value: string;
 }
 
+interface SanitizedCaseSettings {
+  settings: {
+    syncAlerts: boolean;
+  };
+}
+
 export const caseMigrations = {
   '7.10.0': (
-    doc: SavedObjectUnsanitizedDoc<UnsanitizedCase>
-  ): SavedObjectSanitizedDoc<SanitizedCase> => {
+    doc: SavedObjectUnsanitizedDoc<UnsanitizedCaseConnector>
+  ): SavedObjectSanitizedDoc<SanitizedCaseConnector> => {
     const { connector_id, ...attributesWithoutConnectorId } = doc.attributes;
 
     return {
@@ -62,12 +68,26 @@ export const caseMigrations = {
       references: doc.references || [],
     };
   },
+  '7.11.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseSettings> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        settings: {
+          syncAlerts: true,
+        },
+      },
+      references: doc.references || [],
+    };
+  },
 };
 
 export const configureMigrations = {
   '7.10.0': (
-    doc: SavedObjectUnsanitizedDoc<UnsanitizedConfigure>
-  ): SavedObjectSanitizedDoc<SanitizedConfigure> => {
+    doc: SavedObjectUnsanitizedDoc<UnsanitizedConfigureConnector>
+  ): SavedObjectSanitizedDoc<SanitizedConfigureConnector> => {
     const { connector_id, connector_name, ...restAttributes } = doc.attributes;
 
     return {

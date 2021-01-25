@@ -51,8 +51,7 @@ interface ScrollableLogTextStreamViewProps {
   }) => any;
   loadNewerItems: () => void;
   reloadItems: () => void;
-  setFlyoutItem?: (id: string) => void;
-  setFlyoutVisibility?: (visible: boolean) => void;
+  onOpenLogEntryFlyout?: (logEntryId?: string) => void;
   setContextEntry?: (entry: LogEntry) => void;
   highlightedItem: string | null;
   currentHighlightKey: UniqueTimeKey | null;
@@ -143,15 +142,14 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       lastLoadedTime,
       updateDateRange,
       startLiveStreaming,
-      setFlyoutItem,
-      setFlyoutVisibility,
+      onOpenLogEntryFlyout,
       setContextEntry,
     } = this.props;
     const hideScrollbar = this.props.hideScrollbar ?? true;
 
     const { targetId, items, isScrollLocked } = this.state;
     const hasItems = items.length > 0;
-    const hasFlyoutAction = !!(setFlyoutItem && setFlyoutVisibility);
+    const hasFlyoutAction = !!onOpenLogEntryFlyout;
     const hasContextAction = !!setContextEntry;
 
     return (
@@ -305,12 +303,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   }
 
   private handleOpenFlyout = (id: string) => {
-    const { setFlyoutItem, setFlyoutVisibility } = this.props;
-
-    if (setFlyoutItem && setFlyoutVisibility) {
-      setFlyoutItem(id);
-      setFlyoutVisibility(true);
-    }
+    this.props.onOpenLogEntryFlyout?.(id);
   };
 
   private handleOpenViewLogInContext = (entry: LogEntry) => {

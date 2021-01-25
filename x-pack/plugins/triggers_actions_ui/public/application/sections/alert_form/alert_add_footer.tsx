@@ -17,12 +17,11 @@ import { useHealthContext } from '../../context/health_context';
 
 interface AlertAddFooterProps {
   isSaving: boolean;
-  hasErrors: boolean;
   onSave: () => void;
   onCancel: () => void;
 }
 
-export const AlertAddFooter = ({ isSaving, hasErrors, onSave, onCancel }: AlertAddFooterProps) => {
+export const AlertAddFooter = ({ isSaving, onSave, onCancel }: AlertAddFooterProps) => {
   const { loadingHealthCheck } = useHealthContext();
 
   return (
@@ -42,7 +41,7 @@ export const AlertAddFooter = ({ isSaving, hasErrors, onSave, onCancel }: AlertA
             data-test-subj="saveAlertButton"
             type="submit"
             iconType="check"
-            isDisabled={hasErrors || loadingHealthCheck}
+            isDisabled={loadingHealthCheck}
             isLoading={isSaving}
             onClick={onSave}
           >

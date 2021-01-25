@@ -17,18 +17,23 @@ export function getParsedDate(rawDate?: string, opts = {}) {
   }
 }
 
-export function getStart(prevState: IUrlParams, rangeFrom?: string) {
-  if (prevState.rangeFrom !== rangeFrom) {
-    return getParsedDate(rangeFrom);
+export function getDateRange({
+  state,
+  rangeFrom,
+  rangeTo,
+}: {
+  state: IUrlParams;
+  rangeFrom?: string;
+  rangeTo?: string;
+}) {
+  if (state.rangeFrom === rangeFrom && state.rangeTo === rangeTo) {
+    return { start: state.start, end: state.end };
   }
-  return prevState.start;
-}
 
-export function getEnd(prevState: IUrlParams, rangeTo?: string) {
-  if (prevState.rangeTo !== rangeTo) {
-    return getParsedDate(rangeTo, { roundUp: true });
-  }
-  return prevState.end;
+  return {
+    start: getParsedDate(rangeFrom),
+    end: getParsedDate(rangeTo, { roundUp: true }),
+  };
 }
 
 export function toNumber(value?: string) {

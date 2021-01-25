@@ -11,13 +11,12 @@ import { ActionWizard } from './action_wizard';
 import { ActionFactory, ActionFactoryDefinition, BaseActionConfig } from '../../dynamic_actions';
 import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
 import { licensingMock } from '../../../../licensing/public/mocks';
+import { Trigger } from '../../../../../../src/plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../../src/plugins/data/public';
 import {
-  APPLY_FILTER_TRIGGER,
   SELECT_RANGE_TRIGGER,
-  Trigger,
-  TriggerId,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/ui_actions/public';
+} from '../../../../../../src/plugins/embeddable/public';
 
 export const dashboards = [
   { id: 'dashboard1', title: 'Dashboard 1' },
@@ -81,7 +80,6 @@ function DashboardDrilldownCollectConfig(props: CollectConfigProps<DashboardDril
 
 export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
   DashboardDrilldownConfig,
-  any,
   any
 > = {
   id: 'Dashboard',
@@ -185,12 +183,12 @@ export const mockActionFactories: ActionFactory[] = ([dashboardFactory, urlFacto
   ActionFactory<any>
 >) as ActionFactory[];
 
-export const mockSupportedTriggers: TriggerId[] = [
+export const mockSupportedTriggers: string[] = [
   VALUE_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
   APPLY_FILTER_TRIGGER,
 ];
-export const mockGetTriggerInfo = (triggerId: TriggerId): Trigger => {
+export const mockGetTriggerInfo = (triggerId: string): Trigger => {
   const titleMap = {
     [VALUE_CLICK_TRIGGER]: 'Single click',
     [SELECT_RANGE_TRIGGER]: 'Range selection',
@@ -214,7 +212,7 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
   const [state, setState] = useState<{
     currentActionFactory?: ActionFactory;
     config?: BaseActionConfig;
-    selectedTriggers?: TriggerId[];
+    selectedTriggers?: string[];
   }>({});
 
   function changeActionFactory(newActionFactory?: ActionFactory) {

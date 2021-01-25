@@ -10,10 +10,6 @@ import {
 } from './flyout_create_drilldown';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
-import {
-  TriggerContextMapping,
-  TriggerId,
-} from '../../../../../../../../src/plugins/ui_actions/public';
 import { MockEmbeddable, enhanceEmbeddable } from '../test_helpers';
 import { uiActionsEnhancedPluginMock } from '../../../../../../ui_actions_enhanced/public/mocks';
 import { UiActionsEnhancedActionFactory } from '../../../../../../ui_actions_enhanced/public/';
@@ -54,7 +50,7 @@ interface CompatibilityParams {
   isValueClickTriggerSupported?: boolean;
   isEmbeddableEnhanced?: boolean;
   rootType?: string;
-  actionFactoriesTriggers?: TriggerId[];
+  actionFactoriesTriggers?: string[];
 }
 
 describe('isCompatible', () => {
@@ -79,9 +75,7 @@ describe('isCompatible', () => {
     let embeddable = new MockEmbeddable(
       { id: '', viewMode: isEdit ? ViewMode.EDIT : ViewMode.VIEW },
       {
-        supportedTriggers: (isValueClickTriggerSupported ? ['VALUE_CLICK_TRIGGER'] : []) as Array<
-          keyof TriggerContextMapping
-        >,
+        supportedTriggers: isValueClickTriggerSupported ? ['VALUE_CLICK_TRIGGER'] : [],
       }
     );
 

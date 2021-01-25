@@ -44,6 +44,7 @@ export const config = {
     telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
     metricsInterval: schema.number({ defaultValue: 30 }),
     maxServiceEnvironments: schema.number({ defaultValue: 100 }),
+    maxServiceSelection: schema.number({ defaultValue: 50 }),
   }),
 };
 
@@ -76,6 +77,7 @@ export function mergeConfigs(
       apmConfig.serviceMapMaxTracesPerRequest,
     'xpack.apm.ui.enabled': apmConfig.ui.enabled,
     'xpack.apm.maxServiceEnvironments': apmConfig.maxServiceEnvironments,
+    'xpack.apm.maxServiceSelection': apmConfig.maxServiceSelection,
     'xpack.apm.ui.maxTraceItems': apmConfig.ui.maxTraceItems,
     'xpack.apm.ui.transactionGroupBucketSize':
       apmConfig.ui.transactionGroupBucketSize,

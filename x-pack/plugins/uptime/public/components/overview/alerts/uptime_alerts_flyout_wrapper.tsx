@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../../../../plugins/triggers_actions_ui/public';
 
@@ -24,19 +24,20 @@ export const UptimeAlertsFlyoutWrapperComponent = ({
   setAlertFlyoutVisibility,
 }: Props) => {
   const { triggersActionsUi } = useKibana<KibanaDeps>().services;
-
+  const onCloseAlertFlyout = useCallback(() => setAlertFlyoutVisibility(false), [
+    setAlertFlyoutVisibility,
+  ]);
   const AddAlertFlyout = useMemo(
     () =>
       triggersActionsUi.getAddAlertFlyout({
         consumer: 'uptime',
-        addFlyoutVisible: alertFlyoutVisible,
-        setAddFlyoutVisibility: setAlertFlyoutVisibility,
+        onClose: onCloseAlertFlyout,
         alertTypeId,
         canChangeTrigger: !alertTypeId,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [alertFlyoutVisible, alertTypeId]
+    [onCloseAlertFlyout, alertTypeId]
   );
 
-  return <>{AddAlertFlyout}</>;
+  return <>{alertFlyoutVisible && AddAlertFlyout}</>;
 };

@@ -9,4 +9,3 @@ export { LogstashLicenseService } from './license';
 export { MonitoringService } from './monitoring';
 export { PipelineService } from './pipeline';
 export { PipelinesService } from './pipelines';
-export { UpgradeService } from './upgrade';

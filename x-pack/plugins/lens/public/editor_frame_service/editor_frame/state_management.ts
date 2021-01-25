@@ -54,7 +54,7 @@ export type Action =
   | {
       type: 'UPDATE_VISUALIZATION_STATE';
       visualizationId: string;
-      newState: unknown;
+      updater: unknown | ((state: unknown) => unknown);
       clearStagedPreview?: boolean;
     }
   | {
@@ -282,7 +282,10 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         ...state,
         visualization: {
           ...state.visualization,
-          state: action.newState,
+          state:
+            typeof action.updater === 'function'
+              ? action.updater(state.visualization.state)
+              : action.updater,
         },
         stagedPreview: action.clearStagedPreview ? undefined : state.stagedPreview,
       };

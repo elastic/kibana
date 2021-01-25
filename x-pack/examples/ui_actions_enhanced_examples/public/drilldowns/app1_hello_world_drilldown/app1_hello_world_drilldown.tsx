@@ -23,7 +23,7 @@ export type CollectConfigProps = CollectConfigPropsBase<Config, { triggers: Trig
 
 export const APP1_HELLO_WORLD_DRILLDOWN = 'APP1_HELLO_WORLD_DRILLDOWN';
 
-export class App1HelloWorldDrilldown implements Drilldown<Config, Trigger> {
+export class App1HelloWorldDrilldown implements Drilldown<Config, Context> {
   public readonly id = APP1_HELLO_WORLD_DRILLDOWN;
 
   public readonly order = 8;

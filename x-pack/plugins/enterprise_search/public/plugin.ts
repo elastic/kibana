@@ -18,6 +18,7 @@ import {
 } from '../../../../src/plugins/home/public';
 import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 import {
   APP_SEARCH_PLUGIN,
@@ -41,6 +42,7 @@ interface PluginsSetup {
 export interface PluginsStart {
   cloud?: CloudSetup;
   licensing: LicensingPluginStart;
+  charts: ChartsPluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {

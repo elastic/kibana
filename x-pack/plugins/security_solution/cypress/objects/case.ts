@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Timeline, TimelineWithId } from './timeline';
+import { CompleteTimeline, timeline } from './timeline';
 
 export interface TestCase {
   name: string;
   tags: string[];
   description: string;
-  timeline: Timeline;
+  timeline: CompleteTimeline;
   reporter: string;
 }
 
@@ -38,18 +38,11 @@ export interface IbmResilientConnectorOptions {
   incidentTypes: string[];
 }
 
-export const caseTimeline: TimelineWithId = {
-  title: 'SIEM test',
-  description: 'description',
-  query: 'host.name:*',
-  id: '0162c130-78be-11ea-9718-118a926974a4',
-};
-
 export const case1: TestCase = {
   name: 'This is the title of the case',
   tags: ['Tag1', 'Tag2'],
   description: 'This is the case description',
-  timeline: caseTimeline,
+  timeline,
   reporter: 'elastic',
 };
 
@@ -90,14 +83,6 @@ export const mockConnectorsResponse = [
     actionTypeId: '.jira',
     name: 'Jira',
     config: {
-      incidentConfiguration: {
-        mapping: [
-          { source: 'title', target: 'summary', actionType: 'overwrite' },
-          { source: 'description', target: 'description', actionType: 'overwrite' },
-          { source: 'comments', target: 'comments', actionType: 'append' },
-        ],
-      },
-      isCaseOwned: true,
       apiUrl: 'https://siem-kibana.atlassian.net',
       projectKey: 'RJ',
     },
@@ -109,14 +94,6 @@ export const mockConnectorsResponse = [
     actionTypeId: '.resilient',
     name: 'Resilient',
     config: {
-      incidentConfiguration: {
-        mapping: [
-          { source: 'title', target: 'name', actionType: 'overwrite' },
-          { source: 'description', target: 'description', actionType: 'overwrite' },
-          { source: 'comments', target: 'comments', actionType: 'append' },
-        ],
-      },
-      isCaseOwned: true,
       apiUrl: 'https://ibm-resilient.siem.estc.dev',
       orgId: '201',
     },
@@ -128,14 +105,6 @@ export const mockConnectorsResponse = [
     actionTypeId: '.servicenow',
     name: 'ServiceNow',
     config: {
-      incidentConfiguration: {
-        mapping: [
-          { source: 'title', target: 'short_description', actionType: 'overwrite' },
-          { source: 'description', target: 'description', actionType: 'overwrite' },
-          { source: 'comments', target: 'comments', actionType: 'append' },
-        ],
-      },
-      isCaseOwned: true,
       apiUrl: 'https://dev65287.service-now.com',
     },
     isPreconfigured: false,

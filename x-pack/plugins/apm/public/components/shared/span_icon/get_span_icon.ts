@@ -8,7 +8,7 @@ import { maybe } from '../../../../common/utils/maybe';
 import awsIcon from './icons/aws.svg';
 import cassandraIcon from './icons/cassandra.svg';
 import databaseIcon from './icons/database.svg';
-import defaultIconImport from './icons/default.svg';
+import defaultIcon from './icons/default.svg';
 import documentsIcon from './icons/documents.svg';
 import elasticsearchIcon from './icons/elasticsearch.svg';
 import globeIcon from './icons/globe.svg';
@@ -57,8 +57,6 @@ const typeIcons: { [key: string]: { [key: string]: string } } = {
     handlebars: handlebarsIcon,
   },
 };
-
-export const defaultIcon = defaultIconImport;
 
 export function getSpanIcon(type?: string, subtype?: string) {
   if (!type) {

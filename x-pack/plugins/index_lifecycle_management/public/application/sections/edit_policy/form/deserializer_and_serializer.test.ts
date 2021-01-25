@@ -7,6 +7,7 @@
 import { setAutoFreeze } from 'immer';
 import { cloneDeep } from 'lodash';
 import { SerializedPolicy } from '../../../../../common/types';
+import { defaultRolloverAction } from '../../../constants';
 import { deserializer } from './deserializer';
 import { createSerializer } from './serializer';
 import { FormInternal } from '../types';
@@ -44,6 +45,7 @@ const originalPolicy: SerializedPolicy = {
           index_codec: 'best_compression',
           max_num_segments: 22,
         },
+        readonly: {},
         set_priority: {
           priority: 1,
         },
@@ -63,6 +65,7 @@ const originalPolicy: SerializedPolicy = {
             some: 'value',
           },
         },
+        readonly: {},
         set_priority: {
           priority: 10,
         },
@@ -170,6 +173,48 @@ describe('deserializer and serializer', () => {
     expect(result.phases.warm!.actions.forcemerge).toBeUndefined();
   });
 
+  it('removes the index_codec option in the forcemerge action if it is disabled in the form', () => {
+    formInternal.phases.warm!.actions.forcemerge = {
+      max_num_segments: 22,
+      index_codec: 'best_compression',
+    };
+    formInternal._meta.hot.bestCompression = false;
+    formInternal._meta.warm.bestCompression = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.forcemerge!.index_codec).toBeUndefined();
+    expect(result.phases.warm!.actions.forcemerge!.index_codec).toBeUndefined();
+  });
+
+  it('removes the readonly action if it is disabled in hot', () => {
+    formInternal._meta.hot.readonlyEnabled = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.readonly).toBeUndefined();
+  });
+
+  it('removes the readonly action if it is disabled in warm', () => {
+    formInternal._meta.warm.readonlyEnabled = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.warm!.actions.readonly).toBeUndefined();
+  });
+
+  it('allows force merge and readonly actions to be configured in hot with default rollover enabled', () => {
+    formInternal._meta.hot.isUsingDefaultRollover = true;
+    formInternal._meta.hot.bestCompression = false;
+    formInternal.phases.hot!.actions.forcemerge = undefined;
+    formInternal._meta.hot.readonlyEnabled = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.readonly).toBeUndefined();
+    expect(result.phases.hot!.actions.forcemerge).toBeUndefined();
+  });
+
   it('removes set priority if it is disabled in the form', () => {
     delete formInternal.phases.hot!.actions.set_priority;
     delete formInternal.phases.warm!.actions.set_priority;
@@ -202,22 +247,35 @@ describe('deserializer and serializer', () => {
     expect(result.phases.cold!.actions.allocate!.exclude).toBeUndefined();
   });
 
-  it('removes forcemerge and rollover config when rollover is disabled in hot phase', () => {
-    formInternal._meta.hot.useRollover = false;
+  it('removes forcemerge, readonly, and rollover config when rollover is disabled in hot phase', () => {
+    // These two toggles jointly control whether rollover is enabled since the default is
+    // for rollover to be enabled.
+    formInternal._meta.hot.isUsingDefaultRollover = false;
+    formInternal._meta.hot.customRollover.enabled = false;
 
     const result = serializer(formInternal);
 
     expect(result.phases.hot!.actions.rollover).toBeUndefined();
     expect(result.phases.hot!.actions.forcemerge).toBeUndefined();
+    expect(result.phases.hot!.actions.readonly).toBeUndefined();
   });
 
   it('removes min_age from warm when rollover is enabled', () => {
-    formInternal._meta.hot.useRollover = true;
+    formInternal._meta.hot.customRollover.enabled = true;
     formInternal._meta.warm.warmPhaseOnRollover = true;
 
     const result = serializer(formInternal);
 
     expect(result.phases.warm!.min_age).toBeUndefined();
+  });
+
+  it('adds default rollover configuration when enabled, but previously not configured', () => {
+    delete formInternal.phases.hot!.actions.rollover;
+    formInternal._meta.hot.isUsingDefaultRollover = true;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.rollover).toEqual(defaultRolloverAction);
   });
 
   it('removes snapshot_repository when it is unset', () => {

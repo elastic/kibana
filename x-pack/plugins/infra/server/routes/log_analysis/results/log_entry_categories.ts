@@ -33,6 +33,7 @@ export const initGetLogEntryCategoriesRoute = ({ framework }: InfraBackendLibs) 
           sourceId,
           timeRange: { startTime, endTime },
           datasets,
+          sort,
         },
       } = request.body;
 
@@ -51,7 +52,8 @@ export const initGetLogEntryCategoriesRoute = ({ framework }: InfraBackendLibs) 
             endTime: histogram.timeRange.endTime,
             id: histogram.id,
             startTime: histogram.timeRange.startTime,
-          }))
+          })),
+          sort
         );
 
         return response.ok({

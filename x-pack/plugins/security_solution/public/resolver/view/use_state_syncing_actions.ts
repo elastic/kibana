@@ -16,6 +16,8 @@ export function useStateSyncingActions({
   databaseDocumentID,
   resolverComponentInstanceID,
   indices,
+  filters,
+  shouldUpdate,
 }: {
   /**
    * The `_id` of an event in ES. Used to determine the origin of the Resolver graph.
@@ -23,13 +25,30 @@ export function useStateSyncingActions({
   databaseDocumentID: string;
   resolverComponentInstanceID: string;
   indices: string[];
+  shouldUpdate: boolean;
+  filters: object;
 }) {
   const dispatch = useResolverDispatch();
   const locationSearch = useLocation().search;
   useLayoutEffect(() => {
     dispatch({
       type: 'appReceivedNewExternalProperties',
-      payload: { databaseDocumentID, resolverComponentInstanceID, locationSearch, indices },
+      payload: {
+        databaseDocumentID,
+        resolverComponentInstanceID,
+        locationSearch,
+        indices,
+        shouldUpdate,
+        filters,
+      },
     });
-  }, [dispatch, databaseDocumentID, resolverComponentInstanceID, locationSearch, indices]);
+  }, [
+    dispatch,
+    databaseDocumentID,
+    resolverComponentInstanceID,
+    locationSearch,
+    indices,
+    shouldUpdate,
+    filters,
+  ]);
 }

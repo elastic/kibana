@@ -9,9 +9,11 @@ import { RouteDependencies } from '../../plugin';
 import { registerOverviewRoute } from './overview';
 import { registerGroupsRoutes } from './groups';
 import { registerSourcesRoutes } from './sources';
+import { registerSettingsRoutes } from './settings';
 
 export const registerWorkplaceSearchRoutes = (dependencies: RouteDependencies) => {
   registerOverviewRoute(dependencies);
   registerGroupsRoutes(dependencies);
   registerSourcesRoutes(dependencies);
+  registerSettingsRoutes(dependencies);
 };

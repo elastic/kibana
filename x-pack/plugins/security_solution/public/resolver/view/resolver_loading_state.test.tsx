@@ -27,6 +27,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 
@@ -58,6 +60,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 
@@ -88,6 +92,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 
@@ -118,6 +124,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 
@@ -150,6 +158,8 @@ describe('Resolver: data loading and resolution states', () => {
         databaseDocumentID,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
     });
 

@@ -8,12 +8,13 @@ import { AppMountParameters, CoreStart } from 'kibana/public';
 import { createContext } from 'react';
 import { ConfigSchema } from '../..';
 import { ApmPluginSetupDeps } from '../../plugin';
+import { MapsStartApi } from '../../../../maps/public';
 
 export interface ApmPluginContextValue {
   appMountParameters: AppMountParameters;
   config: ConfigSchema;
   core: CoreStart;
-  plugins: ApmPluginSetupDeps;
+  plugins: ApmPluginSetupDeps & { maps?: MapsStartApi };
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);

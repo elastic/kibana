@@ -12,10 +12,9 @@ import {
   AlertCluster,
   AlertState,
   AlertMessage,
-  AlertNodeState,
   AlertMessageTimeToken,
-  CommonAlertFilter,
   CommonAlertParams,
+  CommonAlertFilter,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
 import {
@@ -40,12 +39,13 @@ export class MissingMonitoringDataAlert extends BaseAlert {
     super(rawAlert, {
       id: ALERT_MISSING_MONITORING_DATA,
       name: ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].label,
+      accessorKey: 'gapDuration',
+      fetchClustersRange: LIMIT_BUFFER,
       defaultParams: {
         duration: '15m',
         limit: '1d',
       },
       throttle: '6h',
-      accessorKey: 'gapDuration',
       actionVariables: [
         {
           name: 'nodes',
@@ -63,7 +63,6 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       ],
     });
   }
-
   protected async fetchData(
     params: CommonAlertParams,
     callCluster: any,
@@ -153,7 +152,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
 
   protected executeActions(
     instance: AlertInstance,
-    { alertStates }: { alertStates: AlertNodeState[] },
+    { alertStates }: { alertStates: AlertState[] },
     item: AlertData | null,
     cluster: AlertCluster
   ) {

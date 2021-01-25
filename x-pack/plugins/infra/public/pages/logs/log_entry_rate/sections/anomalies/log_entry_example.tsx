@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback, useState, useContext } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import moment from 'moment';
 import { encode } from 'rison-node';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +37,7 @@ import {
 } from '../../../../../utils/source_configuration';
 import { localizedDate } from '../../../../../../common/formatters/datetime';
 import { LogEntryAnomaly } from '../../../../../../common/http_api';
-import { LogFlyout } from '../../../../../containers/logs/log_flyout';
+import { useLogEntryFlyoutContext } from '../../../../../containers/logs/log_flyout';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'time' as const;
@@ -88,7 +88,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   const setItemIsHovered = useCallback(() => setIsHovered(true), []);
   const setItemIsNotHovered = useCallback(() => setIsHovered(false), []);
 
-  const { setFlyoutVisibility, setFlyoutId } = useContext(LogFlyout.Context);
+  const { openFlyout: openLogEntryFlyout } = useLogEntryFlyoutContext();
 
   // handle special cases for the dataset value
   const humanFriendlyDataset = getFriendlyNameForPartitionId(dataset);
@@ -129,8 +129,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
       {
         label: VIEW_DETAILS_LABEL,
         onClick: () => {
-          setFlyoutId(id);
-          setFlyoutVisibility(true);
+          openLogEntryFlyout(id);
         },
       },
       {
@@ -144,13 +143,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
         href: viewAnomalyInMachineLearningLinkProps.href,
       },
     ];
-  }, [
-    id,
-    setFlyoutId,
-    setFlyoutVisibility,
-    viewInStreamLinkProps,
-    viewAnomalyInMachineLearningLinkProps,
-  ]);
+  }, [id, openLogEntryFlyout, viewInStreamLinkProps, viewAnomalyInMachineLearningLinkProps]);
 
   return (
     <LogEntryRowWrapper

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { pick, uniqBy, sortBy } from 'lodash';
 import url from 'url';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import archives from '../../../common/archives_metadata';
+import archives from '../../../common/fixtures/es_archiver/archives_metadata';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -32,6 +32,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              latencyAggregationType: 'avg',
+              transactionType: 'request',
             },
           })
         );
@@ -62,6 +64,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              transactionType: 'request',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -107,7 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             "name": "DispatcherServlet#doGet",
             "throughput": Object {
-              "value": 16,
+              "value": 0.533333333333333,
             },
           }
         `);
@@ -138,6 +142,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              transactionType: 'request',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -162,6 +168,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              transactionType: 'request',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -186,6 +194,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'latency',
+              transactionType: 'request',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -212,6 +222,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               pageIndex: 0,
               sortDirection: 'desc',
               sortField: 'impact',
+              transactionType: 'request',
+              latencyAggregationType: 'avg',
             },
           })
         );
@@ -239,6 +251,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   pageIndex,
                   sortDirection: 'desc',
                   sortField: 'impact',
+                  transactionType: 'request',
+                  latencyAggregationType: 'avg',
                 },
               })
             );

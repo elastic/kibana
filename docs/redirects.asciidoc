@@ -96,11 +96,6 @@ More information on this new feature is available in <<apm-alerts>>.
 
 This content has moved to the <<development-rbac, Security>> page.
 
-[role="exclude",id="TSVB"]
-== TSVB
-
-This page was deleted. See <<tsvb>>.
-
 [role="exclude",id="managing-cross-cluster-replication"]
 == Cross-Cluster Replication
 
@@ -198,3 +193,11 @@ This page has moved. Refer to <<url_templating-language>>.
 === Variables
 
 This page has moved. Refer to <<url-template-variables>>.
+
+[role="exclude",id="visualize"]
+== Visualize
+
+This content has moved. See <<dashboard, **Dashboard**>>.
+
+[role="exclude",id="explore-dashboard-data"]
+This content has moved. See <<dashboard, **Dashboard**>>.

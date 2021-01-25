@@ -111,7 +111,9 @@ describe('Jira service', () => {
   beforeAll(() => {
     service = createExternalService(
       {
-        config: { apiUrl: 'https://siem-kibana.atlassian.net', projectKey: 'CK' },
+        // The trailing slash at the end of the url is intended.
+        // All API calls need to have the trailing slash removed.
+        config: { apiUrl: 'https://siem-kibana.atlassian.net/', projectKey: 'CK' },
         secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
       },
       logger
@@ -477,10 +479,6 @@ describe('Jira service', () => {
         comment: {
           comment: 'comment',
           commentId: 'comment-1',
-          createdBy: null,
-          createdAt: null,
-          updatedAt: null,
-          updatedBy: null,
         },
       });
 
@@ -505,10 +503,6 @@ describe('Jira service', () => {
         comment: {
           comment: 'comment',
           commentId: 'comment-1',
-          createdBy: null,
-          createdAt: null,
-          updatedAt: null,
-          updatedBy: null,
         },
       });
 
@@ -534,10 +528,6 @@ describe('Jira service', () => {
           comment: {
             comment: 'comment',
             commentId: 'comment-1',
-            createdBy: null,
-            createdAt: null,
-            updatedAt: null,
-            updatedBy: null,
           },
         })
       ).rejects.toThrow(
@@ -591,6 +581,19 @@ describe('Jira service', () => {
 
       await expect(service.getCapabilities()).rejects.toThrow(
         '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: Could not get capabilities'
+      );
+    });
+
+    test('it should throw an auth error', async () => {
+      requestMock.mockImplementation(() => {
+        const error = new Error('An error has occurred');
+        // @ts-ignore this can happen!
+        error.response = { data: 'Unauthorized' };
+        throw error;
+      });
+
+      await expect(service.getCapabilities()).rejects.toThrow(
+        '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: Unauthorized'
       );
     });
   });
