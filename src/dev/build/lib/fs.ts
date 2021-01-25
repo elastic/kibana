@@ -153,7 +153,7 @@ export async function copy(source: string, destination: string, options: CopyOpt
 interface CopyAllOptions {
   select?: string[];
   dot?: boolean;
-  time?: string | number | Date;
+  time?: Date;
 }
 
 export async function copyAll(
@@ -161,7 +161,7 @@ export async function copyAll(
   destination: string,
   options: CopyAllOptions = {}
 ) {
-  const { select = ['**/*'], dot = false, time = Date.now() } = options;
+  const { select = ['**/*'], dot = false, time = new Date() } = options;
 
   assertAbsolute(sourceDir);
   assertAbsolute(destination);

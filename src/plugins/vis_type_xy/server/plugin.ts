@@ -24,8 +24,7 @@ export const uiSettingsConfig: Record<string, UiSettingsParams<boolean>> = {
     description: i18n.translate(
       'visTypeXy.advancedSettings.visualization.legacyChartsLibrary.description',
       {
-        defaultMessage:
-          'Enables legacy charts library for area, line and bar charts in visualize. Currently, only legacy charts library supports split chart aggregation.',
+        defaultMessage: 'Enables legacy charts library for area, line and bar charts in visualize.',
       }
     ),
     category: ['visualization'],
