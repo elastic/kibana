@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { search } from '../../../data/public';
 import { SwitchOption, SelectOption, NumberInputOption } from '../../../vis_default_editor/public';
-import { TableVisParams } from '../types';
+import { TableVisParams } from '../../common';
 import { totalAggregations } from './utils';
 
 const { tabifyGetColumns } = search;

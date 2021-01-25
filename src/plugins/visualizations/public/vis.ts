@@ -30,6 +30,7 @@ import {
   SearchSourceFields,
 } from '../../../plugins/data/public';
 import { BaseVisType } from './vis_types';
+import { VisParams } from '../common/types';
 
 export interface SerializedVisData {
   expression?: string;
@@ -54,10 +55,6 @@ export interface VisData {
   indexPattern?: IndexPattern;
   searchSource?: ISearchSource;
   savedSearchId?: string;
-}
-
-export interface VisParams {
-  [key: string]: any;
 }
 
 const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {

@@ -26,7 +26,7 @@ export { getVisSchemas } from './vis_schemas';
 export { VisualizationsSetup, VisualizationsStart };
 export { VisGroups } from './vis_types';
 export type { VisTypeAlias, VisTypeDefinition, Schema, ISchemas } from './vis_types';
-export { VisParams, SerializedVis, SerializedVisData, VisData } from './vis';
+export { SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export { VisualizeInput } from './embeddable';
@@ -34,7 +34,6 @@ export { SchemaConfig } from './vis_schemas';
 export { updateOldState } from './legacy/vis_update_state';
 export { PersistedState } from './persisted_state';
 export {
-  SavedVisState,
   ISavedVis,
   VisSavedObject,
   VisToExpressionAst,
@@ -43,3 +42,4 @@ export {
 } from './types';
 export { VisualizationListItem, VisualizationStage } from './vis_types/vis_type_alias_registry';
 export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
+export { SavedVisState, VisParams } from '../common';
