@@ -14,12 +14,12 @@ import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import {
   ESFilter,
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../typings/elasticsearch';
-import { EuiThemeProvider } from '../../../observability/public';
 import { PromiseReturnType } from '../../../observability/typings/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
