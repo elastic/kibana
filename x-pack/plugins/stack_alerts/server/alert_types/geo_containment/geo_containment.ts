@@ -112,15 +112,11 @@ export function getActiveEntriesAndGenerateAlerts(
         alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
       }
     });
-    // Determine what remains active
-    const latestLocationsArr = locationsArr.filter(
-      (latestEntityLocation) => latestEntityLocation.dateInShape === locationsArr[0].dateInShape
-    );
     // If the latest location is "other", don't carry it through to the next interval
-    if (latestLocationsArr[0].shapeLocationId === OTHER_CATEGORY) {
+    if (locationsArr[0].shapeLocationId === OTHER_CATEGORY) {
       allActiveEntriesMap.delete(entityName);
     } else {
-      allActiveEntriesMap.set(entityName, latestLocationsArr);
+      allActiveEntriesMap.set(entityName, locationsArr);
     }
   });
   return allActiveEntriesMap;
