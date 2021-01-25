@@ -8,16 +8,26 @@ import { EndpointDocGenerator } from '../../../../../../../common/endpoint/gener
 import { EffectedPolicySelect, EffectedPolicySelectProps } from './effected_policy_select';
 import { render } from '@testing-library/react';
 import React from 'react';
+import { forceHTMLElementOffsetWith } from './test_utils';
 
 describe('when using EffectedPolicySelect component', () => {
   const generator = new EndpointDocGenerator('effected-poilcy-select');
+
+  let resetHTMLElementOffsetWidth: () => void;
+
+  beforeAll(() => {
+    resetHTMLElementOffsetWidth = forceHTMLElementOffsetWith();
+  });
+
+  afterAll(() => resetHTMLElementOffsetWidth());
 
   describe('and no policy entries exist', () => {});
 
   describe('and policy entries exist', () => {
     let renderProps: EffectedPolicySelectProps;
 
-    const renderWithPolicies = () => render(<EffectedPolicySelect {...renderProps} />);
+    const renderWithPolicies = () =>
+      render(<EffectedPolicySelect {...renderProps} style={{ width: '100px' }} />);
 
     beforeEach(() => {
       const policy = generator.generatePolicyPackagePolicy();
@@ -29,11 +39,13 @@ describe('when using EffectedPolicySelect component', () => {
         selected: [],
         options: [policy],
         onChange: jest.fn(),
+        height: 100,
       };
     });
 
     it('should display policies', () => {
-      const { getByTestId } = renderWithPolicies();
+      const renderResult = renderWithPolicies();
+      const { getByTestId } = renderResult;
       expect(getByTestId('policy-abc123'));
     });
 
