@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
-import { mockEngineValues } from '../../__mocks__';
+import { setMockActions } from '../../../__mocks__/kea.mock';
+import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -21,7 +21,6 @@ describe('DocumentCreationButtons', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockValues(mockEngineValues);
     setMockActions(actions);
   });
 
