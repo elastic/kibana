@@ -6,7 +6,17 @@
  * Public License, v 1.
  */
 
-export * from './create_error';
-export * from './get_by_alias';
-export * from './tables_adapter';
-export * from './expressions_inspector_adapter';
+import { EventEmitter } from 'events';
+
+export class ExpressionsInspectorAdapter extends EventEmitter {
+  private _ast: any = {};
+
+  public logAST(ast: any): void {
+    this._ast = ast;
+    this.emit('change', this._ast);
+  }
+
+  public get ast() {
+    return this._ast;
+  }
+}
