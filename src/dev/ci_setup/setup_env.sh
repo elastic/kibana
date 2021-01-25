@@ -6,6 +6,8 @@ if [[ "$CI_ENV_SETUP" ]]; then
   return 0
 fi
 
+ulimit -n 500000
+
 ulimit -a
 whoami
 ps aux
