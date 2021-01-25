@@ -15,6 +15,7 @@ import {
   Settings,
 } from '@elastic/charts';
 import { merge } from 'lodash';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { useChartTheme } from '../../../../../../observability/public';
 import { px, unit } from '../../../../style/variables';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -38,7 +39,7 @@ export function SparkPlot({
   compact,
 }: {
   color: Color;
-  series?: Array<{ x: number; y: number | null }> | null;
+  series?: Coordinate[] | null;
   valueLabel: React.ReactNode;
   compact?: boolean;
 }) {

@@ -11,12 +11,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
+import {
+  APIReturnType,
+  callApmApi,
+} from '../../../../services/rest/createCallApmApi';
 import { px, unit } from '../../../../style/variables';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
@@ -30,16 +33,6 @@ interface Props {
   serviceName: string;
 }
 
-interface ErrorGroupItem {
-  name: string;
-  last_seen: number;
-  group_id: string;
-  occurrences: {
-    value: number;
-    timeseries: Array<{ x: number; y: number }> | null;
-  };
-}
-
 type SortDirection = 'asc' | 'desc';
 type SortField = 'name' | 'last_seen' | 'occurrences';
 
@@ -49,24 +42,17 @@ const DEFAULT_SORT = {
   field: 'occurrences' as const,
 };
 
-export function ServiceOverviewErrorsTable({ serviceName }: Props) {
-  const {
-    urlParams: { start, end },
-    uiFilters,
-  } = useUrlParams();
-  const { transactionType } = useApmServiceContext();
-  const [tableOptions, setTableOptions] = useState<{
-    pageIndex: number;
-    sort: {
-      direction: SortDirection;
-      field: SortField;
-    };
-  }>({
-    pageIndex: 0,
-    sort: DEFAULT_SORT,
-  });
+type ErrorGroupItem = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups'>;
+type GroupIdsErrorMetrics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/metrics'>;
 
-  const columns: Array<EuiBasicTableColumn<ErrorGroupItem>> = [
+function getColumns({
+  serviceName,
+  groupIdsErrorMetrics,
+}: {
+  serviceName: string;
+  groupIdsErrorMetrics: GroupIdsErrorMetrics;
+}): Array<EuiBasicTableColumn<ErrorGroupItem['error_groups'][0]>> {
+  return [
     {
       field: 'name',
       name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnName', {
@@ -110,11 +96,14 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         }
       ),
       width: px(unit * 12),
-      render: (_, { occurrences }) => {
+      render: (_, { occurrences, group_id: errorGroupId }) => {
+        const timeseries = groupIdsErrorMetrics
+          ? groupIdsErrorMetrics[errorGroupId]?.timeseries
+          : undefined;
         return (
           <SparkPlot
             color="euiColorVis7"
-            series={occurrences.timeseries ?? undefined}
+            series={timeseries}
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',
               {
@@ -129,6 +118,24 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       },
     },
   ];
+}
+
+export function ServiceOverviewErrorsTable({ serviceName }: Props) {
+  const {
+    urlParams: { start, end },
+    uiFilters,
+  } = useUrlParams();
+  const { transactionType } = useApmServiceContext();
+  const [tableOptions, setTableOptions] = useState<{
+    pageIndex: number;
+    sort: {
+      direction: SortDirection;
+      field: SortField;
+    };
+  }>({
+    pageIndex: 0,
+    sort: DEFAULT_SORT,
+  });
 
   const {
     data = {
@@ -153,9 +160,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           start,
           end,
           uiFilters: JSON.stringify(uiFilters),
-          size: PAGE_SIZE,
           numBuckets: 20,
-          pageIndex: tableOptions.pageIndex,
           sortField: tableOptions.sort.field,
           sortDirection: tableOptions.sort.direction,
           transactionType,
@@ -191,6 +196,36 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     tableOptions: { pageIndex, sort },
   } = data;
 
+  const groupIds = useMemo(
+    () => items.map(({ group_id: groupId }) => groupId),
+    [items]
+  );
+  const { data: groupIdsErrorMetrics } = useFetcher(
+    () => {
+      if (groupIds.length && start && end && transactionType) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/services/{serviceName}/error_groups/metrics',
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              numBuckets: 20,
+              transactionType,
+              groupIds: groupIds.join(),
+            },
+          },
+        });
+      }
+    },
+    // only fetches metrics when groupIds change
+    // eslint-disable-next-line
+    [groupIds]
+  );
+
+  const columns = getColumns({ serviceName, groupIdsErrorMetrics });
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -222,7 +257,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           >
             <EuiBasicTable
               columns={columns}
-              items={items}
+              items={items.slice(
+                pageIndex * PAGE_SIZE,
+                (pageIndex + 1) * PAGE_SIZE
+              )}
               pagination={{
                 pageIndex,
                 pageSize: PAGE_SIZE,

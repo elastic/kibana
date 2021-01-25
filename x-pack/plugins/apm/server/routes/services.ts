@@ -24,6 +24,7 @@ import { getThroughput } from '../lib/services/get_throughput';
 import { getServiceInstances } from '../lib/services/get_service_instances';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
+import { getServiceErrorGroupsMetrics } from '../lib/services/get_service_error_groups_metrics';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -264,9 +265,7 @@ export const serviceErrorGroupsRoute = createRoute({
       rangeRt,
       uiFiltersRt,
       t.type({
-        size: toNumberRt,
         numBuckets: toNumberRt,
-        pageIndex: toNumberRt,
         sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
         sortField: t.union([
           t.literal('last_seen'),
@@ -283,24 +282,49 @@ export const serviceErrorGroupsRoute = createRoute({
 
     const {
       path: { serviceName },
-      query: {
-        numBuckets,
-        pageIndex,
-        size,
-        sortDirection,
-        sortField,
-        transactionType,
-      },
+      query: { numBuckets, sortDirection, sortField, transactionType },
     } = context.params;
     return getServiceErrorGroups({
       serviceName,
       setup,
-      size,
       numBuckets,
-      pageIndex,
       sortDirection,
       sortField,
       transactionType,
+    });
+  },
+});
+
+export const serviceErrorGroupsMetricsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/error_groups/metrics',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      uiFiltersRt,
+      t.type({
+        numBuckets: toNumberRt,
+        transactionType: t.string,
+        groupIds: t.string,
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const {
+      path: { serviceName },
+      query: { numBuckets, transactionType, groupIds },
+    } = context.params;
+    return getServiceErrorGroupsMetrics({
+      serviceName,
+      setup,
+      numBuckets,
+      transactionType,
+      groupIds: groupIds.split(','),
     });
   },
 });
