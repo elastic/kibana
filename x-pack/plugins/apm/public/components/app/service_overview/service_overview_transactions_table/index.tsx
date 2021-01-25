@@ -90,7 +90,7 @@ function getColumns({
 }: {
   serviceName: string;
   latencyAggregationType?: string;
-  transactionsMetricsData: TransactionGroupMetrics;
+  transactionsMetricsData?: TransactionGroupMetrics;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
