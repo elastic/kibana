@@ -2,6 +2,10 @@
 
 set -e
 
+df -h
+free -m
+du -sh .
+
 if [[ "$CI_ENV_SETUP" ]]; then
   return 0
 fi
