@@ -120,11 +120,13 @@ export const useTimelineKpis = ({
   }, [docValueFields, defaultIndex, timerange, filterQuery]);
 
   useEffect(() => {
-    timelineKpiSearch(timelineKpiRequest);
-  }, [timelineKpiRequest, timelineKpiSearch]);
-  if (isBlankTimeline) {
-    return [false, null];
-  } else {
-    return [loading, timelineKpiResponse];
-  }
+    if (isBlankTimeline) {
+      timelineKpiSearch(null);
+      setLoading(false);
+      setTimelineKpiResponse(null);
+    } else {
+      timelineKpiSearch(timelineKpiRequest);
+    }
+  }, [isBlankTimeline, timelineKpiRequest, timelineKpiSearch]);
+  return [loading, timelineKpiResponse];
 };
