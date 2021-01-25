@@ -5,10 +5,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from 'src/core/server';
+import { Logger } from 'src/core/server';
 import { reportServerError } from '../../../../../src/plugins/kibana_utils/server';
 import { ISearchClient } from '../../../../../src/plugins/data/common';
 import { IScopedSessionService } from '../../../../../src/plugins/data/server';
+import { DataEnhancedPluginRouter } from '../type';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
@@ -16,7 +17,7 @@ declare module 'src/core/server' {
   }
 }
 
-export function registerSessionRoutes(router: IRouter, logger: Logger): void {
+export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: Logger): void {
   router.post(
     {
       path: '/internal/session',

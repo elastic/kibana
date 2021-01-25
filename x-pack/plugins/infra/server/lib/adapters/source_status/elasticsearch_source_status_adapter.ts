@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { InfraSourceStatusAdapter, SourceIndexStatus } from '../../source_status';
 import { InfraDatabaseGetIndicesResponse } from '../framework';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
@@ -12,7 +12,7 @@ import { KibanaFramework } from '../framework/kibana_framework_adapter';
 export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusAdapter {
   constructor(private readonly framework: KibanaFramework) {}
 
-  public async getIndexNames(requestContext: RequestHandlerContext, aliasName: string) {
+  public async getIndexNames(requestContext: InfraPluginRequestHandlerContext, aliasName: string) {
     const indexMaps = await Promise.all([
       this.framework
         .callWithRequest(requestContext, 'indices.getAlias', {
@@ -34,14 +34,14 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
     );
   }
 
-  public async hasAlias(requestContext: RequestHandlerContext, aliasName: string) {
+  public async hasAlias(requestContext: InfraPluginRequestHandlerContext, aliasName: string) {
     return await this.framework.callWithRequest(requestContext, 'indices.existsAlias', {
       name: aliasName,
     });
   }
 
   public async getIndexStatus(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     indexNames: string
   ): Promise<SourceIndexStatus> {
     return await this.framework
