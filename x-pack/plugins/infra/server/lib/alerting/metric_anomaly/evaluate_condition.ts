@@ -45,18 +45,5 @@ export const evaluateCondition = async ({
     influencerFilter
   );
 
-  // if (influencerFilter) {
-  //   return result.data.filter((anomaly) =>
-  //     anomaly.influencers.some((i) => {
-  //       if (i.influencer_field_name !== influencerFilter.fieldName) return false;
-  //       return i.influencer_field_values.some(value => {
-  //         const { fieldValue } = influencerFilter;
-  //         if (!fieldValue.includes('*')) return value === fieldValue;
-  //         const wildcardMatchComponents = fieldValue.split('*').filter(Boolean);
-
-  //       })
-  //     })
-  //   );
-  // }
   return result;
 };
