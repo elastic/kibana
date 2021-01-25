@@ -6,15 +6,14 @@
 
 import { IconColor } from '@elastic/eui';
 import { invert } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { DeprecationInfo } from '../../../../../../../../src/core/server/elasticsearch/legacy/api_types';
+import { MIGRATION_DEPRECATION_LEVEL } from '../../../../../common/types';
 
 export const LEVEL_MAP: { [level: string]: number } = {
   warning: 0,
   critical: 1,
 };
 
-export const REVERSE_LEVEL_MAP: { [idx: number]: DeprecationInfo['level'] } = invert(
+export const REVERSE_LEVEL_MAP: { [idx: number]: MIGRATION_DEPRECATION_LEVEL } = invert(
   LEVEL_MAP
 ) as any;
 

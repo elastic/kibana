@@ -23,9 +23,7 @@ export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: 
         {
           core: {
             savedObjects: { client: savedObjectsClient },
-            elasticsearch: {
-              legacy: { client },
-            },
+            elasticsearch: { client },
           },
         },
         request,
@@ -34,10 +32,10 @@ export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: 
         try {
           const status = await getUpgradeAssistantStatus(client, isCloudEnabled);
 
-          const callAsCurrentUser = client.callAsCurrentUser.bind(client);
-          const reindexActions = reindexActionsFactory(savedObjectsClient, callAsCurrentUser);
+          const asCurrentUser = client.asCurrentUser;
+          const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser);
           const reindexService = reindexServiceFactory(
-            callAsCurrentUser,
+            asCurrentUser,
             reindexActions,
             log,
             licensing

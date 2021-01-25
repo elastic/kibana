@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  ILegacyClusterClient,
+  ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
   FakeRequest,
@@ -53,7 +53,7 @@ export class ReindexWorker {
   constructor(
     private client: SavedObjectsClientContract,
     private credentialStore: CredentialStore,
-    private clusterClient: ILegacyClusterClient,
+    private clusterClient: ElasticsearchClient,
     log: Logger,
     private licensing: LicensingPluginSetup
   ) {
@@ -62,7 +62,7 @@ export class ReindexWorker {
       throw new Error(`More than one ReindexWorker cannot be created.`);
     }
 
-    const callAsInternalUser = this.clusterClient.callAsInternalUser.bind(this.clusterClient);
+    const callAsInternalUser = this.clusterClient.asInternalUser;
 
     this.reindexService = reindexServiceFactory(
       callAsInternalUser,
