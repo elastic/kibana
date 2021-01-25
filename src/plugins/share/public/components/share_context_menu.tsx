@@ -32,7 +32,7 @@ interface Props {
   post: HttpStart['post'];
   embedUrlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: SecurityOssPluginStart['anonymousAccess'];
-  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => Promise<boolean>;
+  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
 }
 
 export class ShareContextMenu extends Component<Props> {

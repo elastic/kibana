@@ -251,7 +251,7 @@ export const getTopNavConfig = (
               title: savedVis?.title,
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
-            showPublicUrlSwitch: async (anonymousUserCapabilities) => {
+            showPublicUrlSwitch: (anonymousUserCapabilities) => {
               if (!anonymousUserCapabilities.visualize) return false;
 
               const visualize = (anonymousUserCapabilities.visualize as unknown) as VisualizeCapabilities;

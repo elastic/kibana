@@ -116,7 +116,7 @@ export const getTopNavLinks = ({
           title: savedSearch.title,
         },
         isDirty: !savedSearch.id || state.isAppStateDirty(),
-        showPublicUrlSwitch: async (anonymousUserCapabilities) => {
+        showPublicUrlSwitch: (anonymousUserCapabilities) => {
           if (!anonymousUserCapabilities.visualize) return false;
 
           const discover = (anonymousUserCapabilities.discover as unknown) as DiscoverCapabilities;

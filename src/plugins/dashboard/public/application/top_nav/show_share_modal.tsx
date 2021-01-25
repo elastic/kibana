@@ -113,7 +113,7 @@ export function ShowShareModal({
         component: EmbedUrlParamExtension,
       },
     ],
-    showPublicUrlSwitch: async (anonymousUserCapabilities) => {
+    showPublicUrlSwitch: (anonymousUserCapabilities) => {
       if (!anonymousUserCapabilities.dashboard) return false;
 
       const dashboard = (anonymousUserCapabilities.dashboard as unknown) as DashboardCapabilities;

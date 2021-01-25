@@ -44,7 +44,7 @@ interface Props {
   post: HttpStart['post'];
   urlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: SecurityOssPluginStart['anonymousAccess'];
-  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => Promise<boolean>;
+  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
 }
 
 export enum ExportUrlAsType {
@@ -127,13 +127,7 @@ export class UrlPanelContent extends Component<Props, State> {
             return;
           }
 
-          const showPublicUrlSwitch = await this.props.showPublicUrlSwitch!(
-            anonymousUserCapabilities
-          );
-
-          if (!this.mounted) {
-            return;
-          }
+          const showPublicUrlSwitch = this.props.showPublicUrlSwitch!(anonymousUserCapabilities);
 
           this.setState({
             showPublicUrlSwitch,
