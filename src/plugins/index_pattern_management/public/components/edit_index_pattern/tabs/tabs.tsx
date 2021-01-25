@@ -63,6 +63,13 @@ const filterPlaceholder = i18n.translate(
   }
 );
 
+const addFieldButtonLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.addFieldButtonLabel',
+  {
+    defaultMessage: 'Search',
+  }
+);
+
 export function Tabs({ indexPattern, saveIndexPattern, fields, history, location }: TabsProps) {
   const {
     uiSettings,
@@ -97,6 +104,15 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       convertToEuiSelectOption(tempScriptedFieldLanguages, 'scriptedFieldLanguages')
     );
   }, [indexPattern]);
+
+  const openFieldEditor = useCallback(async () => {
+    const { openEditor } = await indexPatternFieldEditor.loadEditor();
+    openEditor({
+      ctx: {
+        indexPattern: {} as any,
+      },
+    });
+  }, [indexPatternFieldEditor]);
 
   useEffect(() => {
     refreshFilters();
@@ -133,21 +149,8 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  onClick={async () => {
-                    const { openEditor } = await indexPatternFieldEditor.loadEditor();
-                    openEditor({
-                      onSave: () => {
-                        // console.log('Todo...');
-                      },
-                      ctx: {
-                        indexPattern: {} as any,
-                      },
-                    });
-                  }}
-                >
-                  Add field
+                <EuiButton fill onClick={openFieldEditor}>
+                  {addFieldButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
             </>
@@ -171,7 +174,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       indexedFieldTypes,
       scriptedFieldLanguageFilter,
       scriptedFieldLanguages,
-      indexPatternFieldEditor,
+      openFieldEditor,
     ]
   );
 

@@ -10,3 +10,8 @@ export {
   FieldEditorFlyoutContent,
   Props as FieldEditorFlyoutContentProps,
 } from './field_editor_flyout_content';
+
+export {
+  FieldEditorFlyoutContentContainer,
+  Props as FieldEditorFlyoutContentContainerProps,
+} from './field_editor_flyout_content_container';

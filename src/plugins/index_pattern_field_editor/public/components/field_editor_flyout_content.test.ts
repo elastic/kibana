@@ -6,8 +6,8 @@
  * Public License, v 1.
  */
 
-import { registerTestBed, TestBed, fieldFormats, noop, docLinks } from '../../test_utils';
-import { IndexPattern, IndexPatternField } from '../shared_imports';
+import { registerTestBed, TestBed, noop, docLinks } from '../../test_utils';
+import { IndexPatternField } from '../shared_imports';
 import { FieldEditorFlyoutContent, Props } from './field_editor_flyout_content';
 
 const setup = (props?: Props) =>
@@ -15,12 +15,7 @@ const setup = (props?: Props) =>
     memoryRouter: { wrapComponent: false },
   })(props) as TestBed;
 
-const ctx: Props['ctx'] = {
-  indexPattern: new IndexPattern({
-    fieldFormats,
-  }),
-};
-const defaultProps: Props = { onSave: noop, onCancel: noop, docLinks, ctx };
+const defaultProps: Props = { onSave: noop, onCancel: noop, docLinks };
 
 describe('<FieldEditorFlyoutContent />', () => {
   test('should have the correct title', () => {

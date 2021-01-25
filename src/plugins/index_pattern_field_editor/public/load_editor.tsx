@@ -11,18 +11,18 @@ import { CoreStart, OverlayRef } from 'src/core/public';
 
 import { createKibanaReactContext, toMountPoint, IndexPatternField } from './shared_imports';
 import { LoadEditorResponse } from './types';
-import { FieldEditorFlyoutContentProps } from './components';
+import { FieldEditorFlyoutContentContainerProps } from './components';
 
 export interface OpenFieldEditorProps {
-  onSave(field: IndexPatternField): void;
-  field?: FieldEditorFlyoutContentProps['field'];
-  ctx: FieldEditorFlyoutContentProps['ctx'];
+  ctx: FieldEditorFlyoutContentContainerProps['ctx'];
+  onSave?: (field: IndexPatternField) => void;
+  field?: FieldEditorFlyoutContentContainerProps['field'];
 }
 
 export const getFieldEditorLoader = (
   coreStart: CoreStart
 ) => async (): Promise<LoadEditorResponse> => {
-  const { FieldEditorFlyoutContent } = await import('./components');
+  const { FieldEditorFlyoutContentContainer } = await import('./components');
   const { uiSettings, overlays, docLinks } = coreStart;
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({ uiSettings });
 
@@ -38,15 +38,18 @@ export const getFieldEditorLoader = (
 
     const onSaveField = (updatedField: IndexPatternField) => {
       closeEditor();
-      onSave(updatedField);
+
+      if (onSave) {
+        onSave(updatedField);
+      }
     };
 
     overlayRef = overlays.openFlyout(
       toMountPoint(
         <KibanaReactContextProvider>
-          <FieldEditorFlyoutContent
+          <FieldEditorFlyoutContentContainer
             onSave={onSaveField}
-            onCancel={() => overlayRef?.close()}
+            onCancel={closeEditor}
             docLinks={docLinks}
             field={field}
             ctx={ctx}

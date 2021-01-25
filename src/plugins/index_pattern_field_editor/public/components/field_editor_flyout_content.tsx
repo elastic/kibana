@@ -21,7 +21,7 @@ import {
 
 import { DocLinksStart } from 'src/core/public';
 
-import { IndexPatternField, IndexPattern } from '../shared_imports';
+import { IndexPatternField } from '../shared_imports';
 
 const geti18nTexts = (field?: IndexPatternField) => {
   return {
@@ -48,7 +48,6 @@ const geti18nTexts = (field?: IndexPatternField) => {
 };
 
 export interface Props {
-  field?: IndexPatternField;
   /**
    * Handler for the "save" footer button
    */
@@ -62,22 +61,18 @@ export interface Props {
    */
   docLinks: DocLinksStart;
   /**
-   * The context object specific to where the editor is currently being consumed
+   * Optional field to edit
    */
-  ctx: {
-    indexPattern: IndexPattern;
-  };
+  field?: IndexPatternField;
 }
 
 export const FieldEditorFlyoutContent = ({ field, onSave, onCancel }: Props) => {
   const i18nTexts = geti18nTexts(field);
 
-  const onSaveField = useCallback(async () => {
-    // TODO: logic to get the field editor form data...
-
-    if (onSave) {
-      onSave({} as any);
-    }
+  const onClickSave = useCallback(async () => {
+    // TODO: Here we'll have the logic to retrieve the field editor formData...
+    const updatedField = {} as any;
+    onSave(updatedField);
   }, [onSave]);
 
   return (
@@ -89,7 +84,7 @@ export const FieldEditorFlyoutContent = ({ field, onSave, onCancel }: Props) => 
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <div>Here will come the Field editor</div>
+        <div>Here will come the FieldEditor component.</div>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
@@ -110,7 +105,7 @@ export const FieldEditorFlyoutContent = ({ field, onSave, onCancel }: Props) => 
             <EuiButtonEmpty
               iconType="cross"
               flush="left"
-              onClick={() => onCancel()}
+              onClick={onCancel}
               data-test-subj="closeFlyoutButton"
             >
               {i18nTexts.closeButtonLabel}
@@ -120,7 +115,7 @@ export const FieldEditorFlyoutContent = ({ field, onSave, onCancel }: Props) => 
           <EuiFlexItem grow={false}>
             <EuiButton
               color="primary"
-              onClick={() => onSaveField()}
+              onClick={onClickSave}
               data-test-subj="saveFieldButton"
               // disabled={isSubmitted && !isFormValid}
               fill
