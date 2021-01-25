@@ -19,6 +19,9 @@ const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {
     return new Promise((resolve) => resolve([]));
   }),
+  validatePatternListActive: jest.fn().mockImplementation(() => {
+    return new Promise((resolve) => resolve(mockPatternLists.patternListActive));
+  }),
   every: jest.fn(),
 }));
 
@@ -90,6 +93,7 @@ describe('IndexPatterns', () => {
       version: 'foo',
       attributes: {
         title: 'something',
+        patternList: ['filebeat-*'],
       },
     });
 
@@ -189,12 +193,12 @@ describe('IndexPatterns', () => {
     const title = 'kibana-*';
     indexPatterns.refreshFields = jest.fn();
 
-    const indexPattern = await indexPatterns.create({ title }, true);
+    const indexPattern = await indexPatterns.create({ title, ...mockPatternLists }, true);
     expect(indexPattern).toBeInstanceOf(IndexPattern);
     expect(indexPattern.title).toBe(title);
     expect(indexPatterns.refreshFields).not.toBeCalled();
 
-    await indexPatterns.create({ title });
+    await indexPatterns.create({ title, ...mockPatternLists });
     expect(indexPatterns.refreshFields).toBeCalled();
   });
 
@@ -216,18 +220,18 @@ describe('IndexPatterns', () => {
     const title = 'kibana-*';
     indexPatterns.createSavedObject = jest.fn();
     indexPatterns.setDefault = jest.fn();
-    await indexPatterns.createAndSave({ title });
+    await indexPatterns.createAndSave({ title, patternList: mockPatternLists.patternList });
     expect(indexPatterns.createSavedObject).toBeCalled();
     expect(indexPatterns.setDefault).toBeCalled();
   });
 
-  test('savedObjectToSpec', () => {
+  test('savedObjectToSpec', async () => {
     const savedObject = {
       id: 'id',
       version: 'version',
       attributes: {
         title: 'kibana-*',
-        ...mockPatternLists,
+        patternList: mockPatternLists.patternList,
         timeFieldName: '@timestamp',
         fields: '[]',
         sourceFilters: '[{"value":"item1"},{"value":"item2"}]',
@@ -238,8 +242,9 @@ describe('IndexPatterns', () => {
       type: 'index-pattern',
       references: [],
     };
+    const spec = await indexPatterns.savedObjectToSpec(savedObject);
 
-    expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
+    expect(spec).toMatchSnapshot();
   });
 
   test('failed requests are not cached', async () => {

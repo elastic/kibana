@@ -6,8 +6,6 @@
  * Public License, v 1.
  */
 
-import { PatternListDetail } from '../../../data/common/index_patterns';
-
 export interface IndexPatternCreationOption {
   text: string;
   description?: string;

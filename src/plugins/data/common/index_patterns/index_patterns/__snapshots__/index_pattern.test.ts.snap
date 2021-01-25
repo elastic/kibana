@@ -774,6 +774,20 @@ Object {
   },
   "id": "test-pattern",
   "intervalName": undefined,
+  "patternList": Array [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*",
+  ],
+  "patternListActive": Array [
+    "auditbeat-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*",
+  ],
   "runtimeFieldMap": Object {
     "runtime_field": Object {
       "script": Object {

@@ -32,7 +32,7 @@ export function stubbedSavedObjectIndexPattern(id: string | null = null) {
       customFormats: {},
       fields: mockLogstashFields,
       title: 'title',
-      ...mockPatternLists,
+      patternList: mockPatternLists.patternList,
     },
     version: '2',
   };

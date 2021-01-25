@@ -23,17 +23,16 @@ const matchedIndices = {
   exactMatchedIndices: [] as MatchedItem[],
   partialMatchedIndices: ([{ name: 'kibana', ...tagsPartial }] as unknown) as MatchedItem[],
 };
+const defaultProps = {
+  matchedIndices,
+  query: [],
+  isIncludingSystemIndices: false,
+  showSystemIndices: false,
+};
 
 describe('StatusMessage', () => {
   it('should render without a query', () => {
-    const component = shallow(
-      <StatusMessage
-        matchedIndices={matchedIndices}
-        query={''}
-        isIncludingSystemIndices={false}
-        showSystemIndices={false}
-      />
-    );
+    const component = shallow(<StatusMessage {...defaultProps} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -44,27 +43,23 @@ describe('StatusMessage', () => {
       exactMatchedIndices: ([{ name: 'kibana', ...tagsPartial }] as unknown) as MatchedItem[],
     };
 
-    const component = shallow(
-      <StatusMessage
-        matchedIndices={localMatchedIndices}
-        query={'k*'}
-        isIncludingSystemIndices={false}
-        showSystemIndices={false}
-      />
-    );
+    const testProps = {
+      ...defaultProps,
+      matchedIndices: localMatchedIndices,
+      query: ['k*'],
+    };
+
+    const component = shallow(<StatusMessage {...testProps} />);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render with partial matches', () => {
-    const component = shallow(
-      <StatusMessage
-        matchedIndices={matchedIndices}
-        query={'k'}
-        isIncludingSystemIndices={false}
-        showSystemIndices={false}
-      />
-    );
+    const testProps = {
+      ...defaultProps,
+      query: ['k'],
+    };
+    const component = shallow(<StatusMessage {...testProps} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -75,48 +70,43 @@ describe('StatusMessage', () => {
       partialMatchedIndices: [],
     };
 
-    const component = shallow(
-      <StatusMessage
-        matchedIndices={localMatchedIndices}
-        query={'k'}
-        isIncludingSystemIndices={false}
-        showSystemIndices={false}
-      />
-    );
+    const testProps = {
+      ...defaultProps,
+      matchedIndices: localMatchedIndices,
+      query: ['k'],
+    };
+    const component = shallow(<StatusMessage {...testProps} />);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should show that system indices exist', () => {
-    const component = shallow(
-      <StatusMessage
-        matchedIndices={{
-          allIndices: [],
-          exactMatchedIndices: [],
-          partialMatchedIndices: [],
-        }}
-        isIncludingSystemIndices={false}
-        query={''}
-        showSystemIndices={false}
-      />
-    );
+    const testProps = {
+      ...defaultProps,
+      matchedIndices: {
+        allIndices: [],
+        exactMatchedIndices: [],
+        partialMatchedIndices: [],
+      },
+      query: [],
+    };
+    const component = shallow(<StatusMessage {...testProps} />);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should show that no indices exist', () => {
-    const component = shallow(
-      <StatusMessage
-        matchedIndices={{
-          allIndices: [],
-          exactMatchedIndices: [],
-          partialMatchedIndices: [],
-        }}
-        isIncludingSystemIndices={true}
-        query={''}
-        showSystemIndices={false}
-      />
-    );
+    const testProps = {
+      ...defaultProps,
+      matchedIndices: {
+        allIndices: [],
+        exactMatchedIndices: [],
+        partialMatchedIndices: [],
+      },
+      query: [],
+      isIncludingSystemIndices: true,
+    };
+    const component = shallow(<StatusMessage {...testProps} />);
 
     expect(component).toMatchSnapshot();
   });

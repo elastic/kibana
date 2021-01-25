@@ -109,7 +109,11 @@ export const Header: React.FC<HeaderProps> = ({
   ]);
 
   const titleErrorMessage = useMemo(() => {
-    return titleError ? 'Index pattern title exists' : false;
+    const errorsArr = [];
+    if (titleError) {
+      errorsArr.push('Index pattern title exists');
+    }
+    return errorsArr;
   }, [titleError]);
 
   return (
@@ -125,8 +129,9 @@ export const Header: React.FC<HeaderProps> = ({
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="flexEnd">
         <EuiFlexItem>
-          <EuiForm isInvalid={patternError || titleError}>
+          <EuiForm data-test-subj="createIndexPatternForm" isInvalid={patternError || titleError}>
             <EuiFormRow
+              data-test-subj="createIndexPatternTitleFormRow"
               fullWidth
               label={
                 <FormattedMessage
@@ -154,11 +159,12 @@ export const Header: React.FC<HeaderProps> = ({
                 value={title}
                 isInvalid={titleError}
                 onChange={onTitleChanged}
-                data-test-subj="createIndexPatternNameInput"
+                data-test-subj="createIndexPatternTitleInput"
                 fullWidth
               />
             </EuiFormRow>
             <EuiFormRow
+              data-test-subj="createIndexPatternListFormRow"
               fullWidth
               label={
                 <FormattedMessage
@@ -188,7 +194,7 @@ export const Header: React.FC<HeaderProps> = ({
               }
             >
               <EuiComboBox
-                data-test-subj="createIndexPatternNameInput"
+                data-test-subj="createIndexPatternListInput"
                 fullWidth
                 isInvalid={isPatternInvalid}
                 noSuggestions

@@ -46,7 +46,7 @@ function create(id: string) {
   const {
     type,
     version,
-    attributes: { timeFieldName, fields, title, patternList, patternListActive },
+    attributes: { timeFieldName, fields, title, patternList },
   } = stubbedSavedObjectIndexPattern(id);
 
   return new IndexPattern({
@@ -59,7 +59,7 @@ function create(id: string) {
       title,
       runtimeFieldMap,
       patternList,
-      patternListActive,
+      patternListActive: patternList,
     },
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,

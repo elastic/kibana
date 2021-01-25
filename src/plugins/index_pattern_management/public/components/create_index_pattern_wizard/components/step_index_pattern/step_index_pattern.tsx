@@ -12,7 +12,7 @@ import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { indexPatterns } from '../../../../../../data/public';
 import { IndexPatternCreationConfig } from '../../../../service/creation';
-import { getMatchedIndices } from '../../lib';
+import { containsIllegalCharacters, getMatchedIndices } from '../../lib';
 import { MatchedItem } from '../../types';
 import { Header } from './components/header';
 import { IndicesList } from './components/indices_list';
@@ -29,7 +29,7 @@ interface StepIndexPatternProps {
   showSystemIndices: boolean;
 }
 
-const ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
+const ILLEGAL_CHARACTERS = indexPatterns.ILLEGAL_CHARACTERS;
 const characterList = ILLEGAL_CHARACTERS.slice(0, ILLEGAL_CHARACTERS.length - 1).join(', ');
 export const StepIndexPattern = ({
   allIndices,
@@ -63,7 +63,9 @@ export const StepIndexPattern = ({
   useEffect(() => {
     ip.setIndexPatternName(indexPatternCreationType.getIndexPatternName());
     if (initialQuery) {
-      ip.onQueryChanged(initialQuery);
+      if (!initialQuery.some((q) => containsIllegalCharacters(q, ILLEGAL_CHARACTERS))) {
+        ip.onQueryChanged(initialQuery);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -65,7 +65,6 @@ export interface IndexPatternAttributes {
    */
   allowNoIndex?: boolean;
 
-  patternListActive: string[];
   patternList: string[];
 }
 

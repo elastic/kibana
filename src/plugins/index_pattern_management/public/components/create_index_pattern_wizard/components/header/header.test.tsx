@@ -21,31 +21,28 @@ describe('Header', () => {
       indexPatterns: {},
     },
   } as DocLinksStart;
-
+  const defaultProps = {
+    indexPatternName,
+    docLinks: mockedDocLinks,
+  };
   it('should render normally', () => {
-    const component = mount(
-      <Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />,
-      {
-        wrappingComponent: KibanaContextProvider,
-        wrappingComponentProps: {
-          services: mockedContext,
-        },
-      }
-    );
+    const component = mount(<Header {...defaultProps} />, {
+      wrappingComponent: KibanaContextProvider,
+      wrappingComponentProps: {
+        services: mockedContext,
+      },
+    });
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render without including system indices', () => {
-    const component = mount(
-      <Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />,
-      {
-        wrappingComponent: KibanaContextProvider,
-        wrappingComponentProps: {
-          services: mockedContext,
-        },
-      }
-    );
+    const component = mount(<Header {...defaultProps} />, {
+      wrappingComponent: KibanaContextProvider,
+      wrappingComponentProps: {
+        services: mockedContext,
+      },
+    });
 
     expect(component).toMatchSnapshot();
   });
