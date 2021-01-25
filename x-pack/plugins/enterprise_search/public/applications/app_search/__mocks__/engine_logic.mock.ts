@@ -8,16 +8,14 @@ import { generatePath } from 'react-router-dom';
 
 export const mockEngineValues = {
   engineName: 'some-engine',
-  // Note: using getters allows us to use `this`, which lets tests
-  // override engineName and still generate correct engine names
-  get generateEnginePath() {
-    return jest.fn((path, pathParams = {}) =>
-      generatePath(path, { engineName: this.engineName, ...pathParams })
-    );
-  },
   engine: {},
 };
 
+export const mockGenerateEnginePath = jest.fn((path, pathParams = {}) =>
+  generatePath(path, { engineName: mockEngineValues.engineName, ...pathParams })
+);
+
 jest.mock('../components/engine', () => ({
   EngineLogic: { values: mockEngineValues },
+  generateEnginePath: mockGenerateEnginePath,
 }));
