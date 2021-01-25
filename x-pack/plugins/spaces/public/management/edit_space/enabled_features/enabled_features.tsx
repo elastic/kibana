@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
@@ -18,7 +18,6 @@ import { FeatureTable } from './feature_table';
 interface Props {
   space: Partial<Space>;
   features: KibanaFeatureConfig[];
-  securityEnabled: boolean;
   onChange: (space: Partial<Space>) => void;
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
@@ -129,27 +128,6 @@ export class EnabledFeatures extends Component<Props, {}> {
               defaultMessage="The feature is hidden in the UI, but is not disabled."
             />
           </p>
-          {this.props.securityEnabled && (
-            <p>
-              <FormattedMessage
-                id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"
-                defaultMessage="If you wish to secure access to features, please {manageSecurityRoles}."
-                values={{
-                  manageSecurityRoles: (
-                    <EuiLink
-                      data-test-subj="goToRoles"
-                      href={this.props.getUrlForApp('management', { path: 'security/roles' })}
-                    >
-                      <FormattedMessage
-                        id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
-                        defaultMessage="manage security roles"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          )}
         </EuiText>
       </Fragment>
     );

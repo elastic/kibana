@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CSM page views when there is data returns page views 1`] = `
+exports[`APM specs (trial) CSM CSM page views when there is data returns page views 1`] = `
 Object {
   "items": Array [
     Object {
@@ -128,7 +128,7 @@ Object {
 }
 `;
 
-exports[`CSM page views when there is data returns page views with breakdown 1`] = `
+exports[`APM specs (trial) CSM CSM page views when there is data returns page views with breakdown 1`] = `
 Object {
   "items": Array [
     Object {
@@ -265,14 +265,14 @@ Object {
 }
 `;
 
-exports[`CSM page views when there is no data returns empty list 1`] = `
+exports[`APM specs (trial) CSM CSM page views when there is no data returns empty list 1`] = `
 Object {
   "items": Array [],
   "topItems": Array [],
 }
 `;
 
-exports[`CSM page views when there is no data returns empty list with breakdowns 1`] = `
+exports[`APM specs (trial) CSM CSM page views when there is no data returns empty list with breakdowns 1`] = `
 Object {
   "items": Array [],
   "topItems": Array [],

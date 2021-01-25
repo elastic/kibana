@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
   const browser = getService('browser');
-  const sendToBackground = getService('sendToBackground');
+  const searchSessions = getService('searchSessions');
 
   describe('discover in space', () => {
     describe('Send to background in space', () => {
@@ -74,9 +74,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
-        await sendToBackground.expectState('completed');
-        await sendToBackground.save();
-        await sendToBackground.expectState('backgroundCompleted');
+        await searchSessions.expectState('completed');
+        await searchSessions.save();
+        await searchSessions.expectState('backgroundCompleted');
         await inspector.open();
 
         const savedSessionId = await (
@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
         // Check that session is restored
-        await sendToBackground.expectState('restored');
+        await searchSessions.expectState('restored');
         await testSubjects.missingOrFail('embeddableErrorLabel');
       });
     });
