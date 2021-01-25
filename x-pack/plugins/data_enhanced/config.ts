@@ -15,6 +15,12 @@ export const configSchema = schema.object({
       inMemTimeout: schema.duration({ defaultValue: '1m' }),
       maxUpdateRetries: schema.number({ defaultValue: 3 }),
       defaultExpiration: schema.duration({ defaultValue: '7d' }),
+      management: schema.object({
+        maxSessions: schema.number({ defaultValue: 10000 }),
+        refreshInterval: schema.duration({ defaultValue: '10s' }),
+        refreshTimeout: schema.duration({ defaultValue: '1m' }),
+        expiresSoonWarning: schema.duration({ defaultValue: '1d' }),
+      }),
     }),
   }),
 });
