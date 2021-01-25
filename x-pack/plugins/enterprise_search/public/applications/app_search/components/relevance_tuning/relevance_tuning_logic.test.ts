@@ -228,6 +228,16 @@ describe('RelevanceTuningLogic', () => {
   describe('listeners', () => {
     const { http } = mockHttpValues;
     const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+    let scrollToSpy: any;
+
+    beforeAll(() => {
+      scrollToSpy = jest.spyOn(window, 'scrollTo');
+      scrollToSpy.mockImplementation(jest.fn(() => true));
+    });
+
+    afterAll(() => {
+      scrollToSpy.mockRestore();
+    });
 
     describe('initializeRelevanceTuning', () => {
       it('should make an API call and set state based on the response', async () => {
@@ -384,17 +394,6 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('onSearchSettingsSuccess', () => {
-      let scrollToSpy: any;
-
-      beforeEach(() => {
-        scrollToSpy = jest.spyOn(window, 'scrollTo');
-        scrollToSpy.mockImplementation(jest.fn(() => true));
-      });
-
-      afterEach(() => {
-        scrollToSpy.mockRestore();
-      });
-
       it('should save the response, trigger a new search, and then scroll to the top', () => {
         mount();
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettingsResponse');
@@ -411,17 +410,6 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('onSearchSettingsError', () => {
-      let scrollToSpy: any;
-
-      beforeEach(() => {
-        scrollToSpy = jest.spyOn(window, 'scrollTo');
-        scrollToSpy.mockImplementation(jest.fn(() => true));
-      });
-
-      afterEach(() => {
-        scrollToSpy.mockRestore();
-      });
-
       it('scrolls to the top', () => {
         mount();
         RelevanceTuningLogic.actions.onSearchSettingsError();
