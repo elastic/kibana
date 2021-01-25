@@ -203,7 +203,7 @@ describe('TaskPool', () => {
     sinon.assert.calledOnce(secondRun);
   });
 
-  test('run cancels expired tasks prior to running new tasks', async () => {
+  test.skip('run cancels expired tasks prior to running new tasks', async () => {
     const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
       maxWorkers$: of(2),
