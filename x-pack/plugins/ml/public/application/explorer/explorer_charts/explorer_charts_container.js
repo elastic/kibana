@@ -22,6 +22,7 @@ import {
 } from '../../util/chart_utils';
 import { ExplorerChartDistribution } from './explorer_chart_distribution';
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
+import { EmbeddedMapComponent } from './explorer_chart_embedded_map';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 import { CHART_TYPE } from '../explorer_constants';
@@ -57,6 +58,7 @@ function getChartId(series) {
 function ExplorerChartContainer({
   series,
   severity,
+  showSingleMetricViewerLink,
   tooManyBuckets,
   wrapLabel,
   mlUrlGenerator,
@@ -68,7 +70,7 @@ function ExplorerChartContainer({
     let isCancelled = false;
     const generateLink = async () => {
       const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
-      if (!isCancelled) {
+      if (!isCancelled && showSingleMetricViewerLink === true) {
         setExplorerSeriesLink(singleMetricViewerLink);
       }
     };
@@ -150,6 +152,20 @@ function ExplorerChartContainer({
         </EuiFlexItem>
       </EuiFlexGroup>
       {(() => {
+        if (chartType === CHART_TYPE.GEO_MAP) {
+          return (
+            <MlTooltipComponent>
+              {(tooltipService) => (
+                <EmbeddedMapComponent
+                  tooManyBuckets={tooManyBuckets}
+                  seriesConfig={series}
+                  severity={severity}
+                  tooltipService={tooltipService}
+                />
+              )}
+            </MlTooltipComponent>
+          );
+        }
         if (
           chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
           chartType === CHART_TYPE.POPULATION_DISTRIBUTION

@@ -93,7 +93,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
     // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
     // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
     isSourceDataChartable =
-      mlFunctionToESAggregation(functionName) !== null &&
+      (mlFunctionToESAggregation(functionName) !== null || functionName === 'lat_long') &&
       dtr.by_field_name !== MLCATEGORY &&
       dtr.partition_field_name !== MLCATEGORY &&
       dtr.over_field_name !== MLCATEGORY;

@@ -36,6 +36,7 @@ export function getDefaultChartsData() {
     chartsPerRow: 1,
     errorMessages: undefined,
     seriesToPlot: [],
+    showSingleMetricViewerLink: true,
     // default values, will update on every re-render
     tooManyBuckets: false,
     timeFieldName: 'timestamp',
@@ -77,7 +78,36 @@ export const anomalyDataChange = function (
   // For now just take first 6 (or 8 if 4 charts per row).
   const maxSeriesToPlot = Math.max(chartsPerRow * 2, 6);
   const recordsToPlot = allSeriesRecords.slice(0, maxSeriesToPlot);
+  const isGeoMap =
+    (recordsToPlot[0]?.function_description || recordsToPlot[0]?.function) === 'lat_long';
   const seriesConfigs = recordsToPlot.map(buildConfig);
+
+  // initialize the charts with loading indicators
+  data.seriesToPlot = seriesConfigs.map((config) => ({
+    ...config,
+    loading: true,
+    chartData: null,
+  }));
+
+  if (isGeoMap === true) {
+    data.seriesToPlot = seriesConfigs.map((config) => {
+      const chartData = config.entityFields.length
+        ? [
+            recordsToPlot.find((record) => {
+              const entityFieldName = config.entityFields[0].fieldName;
+              const entityFieldValue = config.entityFields[0].fieldValue;
+              return record[entityFieldName][0] === entityFieldValue;
+            }),
+          ]
+        : recordsToPlot;
+      return {
+        ...config,
+        loading: false,
+        chartData,
+      };
+    });
+    data.showSingleMetricViewerLink = false;
+  }
 
   // Calculate the time range of the charts, which is a function of the chart width and max job bucket span.
   data.tooManyBuckets = false;
@@ -91,13 +121,6 @@ export const anomalyDataChange = function (
     data.timeFieldName
   );
   data.tooManyBuckets = tooManyBuckets;
-
-  // initialize the charts with loading indicators
-  data.seriesToPlot = seriesConfigs.map((config) => ({
-    ...config,
-    loading: true,
-    chartData: null,
-  }));
 
   data.errorMessages = errorMessages;
 
@@ -395,35 +418,39 @@ export const anomalyDataChange = function (
     return chartData.find((point) => point.date === time);
   }
 
-  Promise.all(seriesPromises)
-    .then((response) => {
-      // calculate an overall min/max for all series
-      const processedData = response.map(processChartData);
-      const allDataPoints = reduce(
-        processedData,
-        (datapoints, series) => {
-          each(series, (d) => datapoints.push(d));
-          return datapoints;
-        },
-        []
-      );
-      const overallChartLimits = chartLimits(allDataPoints);
+  if (!isGeoMap) {
+    Promise.all(seriesPromises)
+      .then((response) => {
+        // calculate an overall min/max for all series
+        const processedData = response.map(processChartData);
+        const allDataPoints = reduce(
+          processedData,
+          (datapoints, series) => {
+            each(series, (d) => datapoints.push(d));
+            return datapoints;
+          },
+          []
+        );
+        const overallChartLimits = chartLimits(allDataPoints);
 
-      data.seriesToPlot = response.map((d, i) => ({
-        ...seriesConfigs[i],
-        loading: false,
-        chartData: processedData[i],
-        plotEarliest: chartRange.min,
-        plotLatest: chartRange.max,
-        selectedEarliest: selectedEarliestMs,
-        selectedLatest: selectedLatestMs,
-        chartLimits: USE_OVERALL_CHART_LIMITS ? overallChartLimits : chartLimits(processedData[i]),
-      }));
-      explorerService.setCharts({ ...data });
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+        data.seriesToPlot = response.map((d, i) => ({
+          ...seriesConfigs[i],
+          loading: false,
+          chartData: processedData[i],
+          plotEarliest: chartRange.min,
+          plotLatest: chartRange.max,
+          selectedEarliest: selectedEarliestMs,
+          selectedLatest: selectedLatestMs,
+          chartLimits: USE_OVERALL_CHART_LIMITS
+            ? overallChartLimits
+            : chartLimits(processedData[i]),
+        }));
+        explorerService.setCharts({ ...data });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
 };
 
 function processRecordsForDisplay(anomalyRecords) {

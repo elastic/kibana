@@ -189,6 +189,8 @@ export function getChartType(config) {
     config.metricFunction !== null // Event distribution chart relies on the ML function mapping to an ES aggregation
   ) {
     chartType = CHART_TYPE.POPULATION_DISTRIBUTION;
+  } else if (config.functionDescription === 'lat_long') {
+    chartType = CHART_TYPE.GEO_MAP;
   }
 
   if (
