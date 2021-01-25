@@ -42,7 +42,6 @@ function DefaultEditor({
 }) {
   const visRef = useRef<HTMLDivElement>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isEmbeddableRendered, setIsEmbeddableRendered] = useState(false);
 
   const onClickCollapse = useCallback(() => {
     setIsCollapsed((value) => !value);
@@ -61,26 +60,21 @@ function DefaultEditor({
       return;
     }
 
+    embeddableHandler.render(visRef.current);
     setTimeout(() => {
-      embeddableHandler.render(visRef.current!);
-      setIsEmbeddableRendered(true);
-      setTimeout(() => {
-        eventEmitter.emit('embeddableRendered');
-      });
-    }, 300);
+      eventEmitter.emit('embeddableRendered');
+    });
 
     return () => embeddableHandler.destroy();
   }, [embeddableHandler, eventEmitter]);
 
   useEffect(() => {
-    if (isEmbeddableRendered) {
-      embeddableHandler.updateInput({
-        timeRange,
-        filters,
-        query,
-      });
-    }
-  }, [isEmbeddableRendered, embeddableHandler, timeRange, filters, query]);
+    embeddableHandler.updateInput({
+      timeRange,
+      filters,
+      query,
+    });
+  }, [embeddableHandler, timeRange, filters, query]);
 
   const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
 
