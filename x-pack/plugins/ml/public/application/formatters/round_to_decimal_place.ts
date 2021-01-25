@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function roundToDecimalPlace(num: number, dp: number = 2): number | string {
+export function roundToDecimalPlace(num?: number, dp: number = 2): number | string {
+  if (num === undefined) return '';
   if (num % 1 === 0) {
     // no decimal place
     return num;

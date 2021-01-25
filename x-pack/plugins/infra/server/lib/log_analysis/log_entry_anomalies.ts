@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
-import { InfraRequestHandlerContext } from '../../types';
+import type { InfraPluginRequestHandlerContext, InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
 import { fetchMlJob, getLogEntryDatasets } from './common';
 import {
@@ -91,7 +90,7 @@ async function getCompatibleAnomaliesJobIds(
 }
 
 export async function getLogEntryAnomalies(
-  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
   sourceId: string,
   startTime: number,
   endTime: number,
@@ -317,7 +316,7 @@ async function fetchLogEntryAnomalies(
 }
 
 export async function getLogEntryExamples(
-  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
   sourceId: string,
   startTime: number,
   endTime: number,
@@ -379,7 +378,7 @@ export async function getLogEntryExamples(
 }
 
 export async function fetchLogEntryExamples(
-  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
   sourceId: string,
   indices: string,
   timestampField: string,
