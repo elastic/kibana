@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../types';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
@@ -39,13 +39,15 @@ export interface SetupStatus {
 
 export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
-  return awaitIfPending(async () => createSetupSideEffects(soClient, callCluster));
+  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient, callCluster));
 }
 
 async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
   const [
@@ -56,7 +58,8 @@ async function createSetupSideEffects(
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
-    agentPolicyService.ensureDefaultAgentPolicy(soClient),
+    agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
+    updateFleetRoleIfExists(callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const defaultSettings = createDefaultSettings();
@@ -109,6 +112,7 @@ async function createSetupSideEffects(
       if (!isInstalled) {
         await addPackageToAgentPolicy(
           soClient,
+          esClient,
           callCluster,
           installedPackage,
           agentPolicyWithPackagePolicies,
@@ -123,14 +127,25 @@ async function createSetupSideEffects(
   return { isIntialized: true };
 }
 
-export async function setupFleet(
-  soClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser,
-  options?: { forceRecreate?: boolean }
-) {
-  // Create fleet_enroll role
-  // This should be done directly in ES at some point
-  const res = await callCluster('transport.request', {
+async function updateFleetRoleIfExists(callCluster: CallESAsCurrentUser) {
+  try {
+    await callCluster('transport.request', {
+      method: 'GET',
+      path: `/_security/role/${FLEET_ENROLL_ROLE}`,
+    });
+  } catch (e) {
+    if (e.status === 404) {
+      return;
+    }
+
+    throw e;
+  }
+
+  return putFleetRole(callCluster);
+}
+
+async function putFleetRole(callCluster: CallESAsCurrentUser) {
+  return callCluster('transport.request', {
     method: 'PUT',
     path: `/_security/role/${FLEET_ENROLL_ROLE}`,
     body: {
@@ -152,6 +167,18 @@ export async function setupFleet(
       ],
     },
   });
+}
+
+export async function setupFleet(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  callCluster: CallESAsCurrentUser,
+  options?: { forceRecreate?: boolean }
+) {
+  // Create fleet_enroll role
+  // This should be done directly in ES at some point
+  const res = await putFleetRole(callCluster);
+
   // If the role is already created skip the rest unless you have forceRecreate set to true
   if (options?.forceRecreate !== true && res.role.created === false) {
     return;
@@ -189,7 +216,7 @@ export async function setupFleet(
 
   await Promise.all(
     agentPolicies.map((agentPolicy) => {
-      return generateEnrollmentAPIKey(soClient, {
+      return generateEnrollmentAPIKey(soClient, esClient, {
         name: `Default`,
         agentPolicyId: agentPolicy.id,
       });
@@ -209,6 +236,7 @@ function generateRandomPassword() {
 
 async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser,
   packageToInstall: Installation,
   agentPolicy: AgentPolicy,
@@ -227,7 +255,7 @@ async function addPackageToAgentPolicy(
     agentPolicy.namespace
   );
 
-  await packagePolicyService.create(soClient, callCluster, newPackagePolicy, {
+  await packagePolicyService.create(soClient, esClient, callCluster, newPackagePolicy, {
     bumpRevision: false,
   });
 }

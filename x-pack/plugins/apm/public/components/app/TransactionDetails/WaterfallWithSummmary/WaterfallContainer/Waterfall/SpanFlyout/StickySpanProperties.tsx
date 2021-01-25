@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useUrlParams } from '../../../../../../../context/url_params_context/use_url_params';
+import { getNextEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
 import {
   SERVICE_NAME,
   SPAN_NAME,
@@ -26,8 +27,14 @@ interface Props {
 
 export function StickySpanProperties({ span, transaction }: Props) {
   const {
-    urlParams: { latencyAggregationType },
+    urlParams: { environment, latencyAggregationType },
   } = useUrlParams();
+
+  const nextEnvironment = getNextEnvironmentUrlParam({
+    requestedEnvironment: transaction?.service.environment,
+    currentEnvironmentUrlParam: environment,
+  });
+
   const spanName = span.span.name;
   const transactionStickyProperties = transaction
     ? [
@@ -39,6 +46,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
           val: (
             <ServiceOrTransactionsOverviewLink
               serviceName={transaction.service.name}
+              environment={nextEnvironment}
             >
               {transaction.service.name}
             </ServiceOrTransactionsOverviewLink>
@@ -60,6 +68,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
               traceId={transaction.trace.id}
               transactionName={transaction.transaction.name}
               transactionType={transaction.transaction.type}
+              environment={nextEnvironment}
               latencyAggregationType={latencyAggregationType}
             >
               {transaction.transaction.name}

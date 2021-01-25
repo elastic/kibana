@@ -59,6 +59,7 @@ describe('GET connectors', () => {
       })
     );
 
+    // @ts-expect-error
     context.actions = undefined;
 
     const res = await routeHandler(context, req, kibanaResponseFactory);

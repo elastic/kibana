@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
 import { finalizeSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema';
@@ -16,7 +16,7 @@ import { buildSiemResponse, transformError } from '../utils';
 import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
 
 export const finalizeSignalsMigrationRoute = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   security: SetupPlugins['security']
 ) => {
   router.post(

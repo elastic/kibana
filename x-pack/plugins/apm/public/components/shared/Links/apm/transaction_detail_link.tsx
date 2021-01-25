@@ -7,6 +7,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { EuiLink } from '@elastic/eui';
+import { pickBy, identity } from 'lodash';
 import { getAPMHref, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
@@ -20,6 +21,7 @@ interface Props extends APMLinkExtendProps {
   transactionName: string;
   transactionType: string;
   latencyAggregationType?: string;
+  environment?: string;
 }
 
 const persistedFilters: Array<keyof APMQueryParams> = [
@@ -34,6 +36,7 @@ export function TransactionDetailLink({
   transactionName,
   transactionType,
   latencyAggregationType,
+  environment,
   ...rest
 }: Props) {
   const { urlParams } = useUrlParams();
@@ -47,8 +50,8 @@ export function TransactionDetailLink({
       transactionId,
       transactionName,
       transactionType,
-      ...(latencyAggregationType ? { latencyAggregationType } : {}),
       ...pickKeys(urlParams as APMQueryParams, ...persistedFilters),
+      ...pickBy({ latencyAggregationType, environment }, identity),
     },
     search: location.search,
   });

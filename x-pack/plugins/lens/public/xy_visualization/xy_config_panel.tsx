@@ -21,6 +21,7 @@ import {
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import {
@@ -327,9 +328,25 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               {isFittingEnabled ? (
                 <EuiFormRow
                   display="columnCompressed"
-                  label={i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
-                    defaultMessage: 'Missing values',
-                  })}
+                  label={
+                    <>
+                      {i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
+                        defaultMessage: 'Missing values',
+                      })}{' '}
+                      <EuiIconTip
+                        color="subdued"
+                        content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
+                          defaultMessage: `Gaps in the data are not shown by default, but can be represented as dotted lines with different modes.`,
+                        })}
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                        position="top"
+                        size="s"
+                        type="questionInCircle"
+                      />
+                    </>
+                  }
                 >
                   <EuiSuperSelect
                     data-test-subj="lnsMissingValuesSelect"
