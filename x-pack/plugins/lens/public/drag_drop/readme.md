@@ -88,7 +88,7 @@ The children `DragDrop` components must have props defined as in the example:
         droppable
         dragType="reorder"
         dropType="reorder"
-        itemsInGroup={fields} // consists all reorderable elements in the group, eg. [{id:'3'}, {id:'5'}, {id:'1'}]
+        reorderableGroup={fields} // consists all reorderable elements in the group, eg. [{id:'3'}, {id:'5'}, {id:'1'}]
         value={{
           id: f.id,
         }}

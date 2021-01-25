@@ -44,6 +44,8 @@ export function EmptyDimensionButton({
   layerDatasource: Datasource<unknown, unknown>;
   layerDatasourceDropProps: LayerDatasourceDropProps;
 }) {
+  const handleDrop = (droppedItem: DragDropIdentifier) => onDrop(droppedItem, value);
+
   const value = React.useMemo(() => {
     const newId = generateId();
     return {
@@ -59,11 +61,11 @@ export function EmptyDimensionButton({
   return (
     <div className="lnsLayerPanel__dimensionContainer">
       <DragDrop
-        data-test-subj={group.dataTestSubj}
-        /* 2 to leave room for data panel and workspace, then go by layer index, then by group index */
+        dataTestSubj={group.dataTestSubj}
         value={value}
+        /* 2 to leave room for data panel and workspace, then go by layer index, then by group index */
         order={[2, layerIndex, groupIndex, group.accessors.length]}
-        onDrop={(droppedItem) => onDrop(droppedItem, value)}
+        onDrop={handleDrop}
         droppable={
           (Boolean(dragDropContext.dragging) &&
             // Verify that the dragged item is not coming from the same group

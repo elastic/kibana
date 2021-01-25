@@ -66,6 +66,8 @@ export interface FieldItemProps {
   chartsThemeService: ChartsPluginSetup['theme'];
   filters: Filter[];
   hideDetails?: boolean;
+  itemIndex: number;
+  groupIndex: number;
 }
 
 interface State {
@@ -95,6 +97,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     dateRange,
     filters,
     hideDetails,
+    itemIndex,
+    groupIndex,
   } = props;
 
   const [infoIsOpen, setOpen] = useState(false);
@@ -157,6 +161,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     () => ({ field, indexPatternId: indexPattern.id, id: field.name } as DraggedField),
     [field, indexPattern.id]
   );
+  const order = React.useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
+
   const lensFieldIcon = <LensFieldIcon type={field.type as DataType} />;
   const lensInfoIcon = (
     <EuiIconTip
@@ -190,10 +196,11 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         container={document.querySelector<HTMLElement>('.application') || undefined}
         button={
           <DragDrop
+            draggable
+            order={order}
             label={field.displayName}
             value={value}
-            data-test-subj={`lnsFieldListPanelField-${field.name}`}
-            draggable
+            dataTestSubj={`lnsFieldListPanelField-${field.name}`}
           >
             <FieldButton
               className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${

@@ -827,7 +827,7 @@ describe('workspace_panel', () => {
       ]);
       initComponent();
 
-      instance.find(DragDrop).prop('onDrop')!(draggedField);
+      instance.find(DragDrop).prop('onDrop')!(draggedField, { id: 'lnsWorkspace' });
 
       expect(mockDatasource.getDatasourceSuggestionsForField).toHaveBeenCalledTimes(1);
       expect(mockVisualization.getSuggestions).toHaveBeenCalledWith(
@@ -971,7 +971,7 @@ describe('workspace_panel', () => {
       ]);
 
       initComponent();
-      instance.find(DragDrop).prop('onDrop')!(draggedField);
+      instance.find(DragDrop).prop('onDrop')!(draggedField, { id: 'lnsWorkspace' });
 
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SWITCH_VISUALIZATION',

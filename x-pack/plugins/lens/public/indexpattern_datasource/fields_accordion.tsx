@@ -50,6 +50,7 @@ export interface FieldsAccordionProps {
   exists: (field: IndexPatternField) => boolean;
   showExistenceFetchError?: boolean;
   hideDetails?: boolean;
+  groupIndex: number;
 }
 
 export const InnerFieldsAccordion = function InnerFieldsAccordion({
@@ -67,18 +68,21 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
   exists,
   hideDetails,
   showExistenceFetchError,
+  groupIndex,
 }: FieldsAccordionProps) {
   const renderField = useCallback(
-    (field: IndexPatternField) => (
+    (field: IndexPatternField, index) => (
       <FieldItem
         {...fieldProps}
         key={field.name}
         field={field}
         exists={exists(field)}
         hideDetails={hideDetails}
+        itemIndex={index}
+        groupIndex={groupIndex}
       />
     ),
-    [fieldProps, exists, hideDetails]
+    [fieldProps, exists, hideDetails, groupIndex]
   );
 
   const titleClassname = classNames({

@@ -76,6 +76,7 @@
 
 .lnsLayerPanel__dimensionContainer {
   margin: 0 $euiSizeS $euiSizeS;
+  position: relative;
 
   &:last-child {
     margin-bottom: 0;

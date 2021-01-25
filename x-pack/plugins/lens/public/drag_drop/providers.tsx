@@ -179,13 +179,18 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
 }
 
 export function nextValidDropTarget(
-  activeDropTarget: ActiveDropTarget,
-  currentlyActiveDraggingElOrder: number[],
-  filterElements: (el?: DragDropIdentifier) => void,
+  activeDropTarget: ActiveDropTarget | undefined,
+  draggingData: [string, { dropTarget: DragDropIdentifier }],
+  filterElements?: (el?: DragDropIdentifier) => boolean,
   reverse = false
 ) {
-  const nextDropTargets = Object.entries(activeDropTarget.dropTargetsByOrder)
-    .filter(([, target]) => !!target && filterElements(target?.dropTarget))
+  if (!activeDropTarget) {
+    return;
+  }
+  const nextDropTargets = [...Object.entries(activeDropTarget.dropTargetsByOrder), draggingData]
+    .filter(
+      ([, target]) => !!target && !!(filterElements ? filterElements(target?.dropTarget) : true)
+    )
     .sort(([orderA], [orderB]) => {
       const parsedOrderA = orderA.split(',').map((v) => Number(v));
       const parsedOrderB = orderB.split(',').map((v) => Number(v));
@@ -193,11 +198,10 @@ export function nextValidDropTarget(
       const relevantLevel = parsedOrderA.findIndex((v, i) => parsedOrderA[i] !== parsedOrderB[i]);
       return parsedOrderA[relevantLevel] - parsedOrderB[relevantLevel];
     });
-
   const currentActiveDropIndex = nextDropTargets.findIndex(([targetOrder, target]) => {
     return activeDropTarget.activeDropTarget
-      ? target?.dropTarget === activeDropTarget.activeDropTarget
-      : targetOrder === currentlyActiveDraggingElOrder.join(',');
+      ? target?.dropTarget.id === activeDropTarget.activeDropTarget.id
+      : targetOrder === draggingData[0];
   });
 
   const previousElement =

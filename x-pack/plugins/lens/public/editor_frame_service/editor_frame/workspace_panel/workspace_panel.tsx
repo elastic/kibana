@@ -132,7 +132,7 @@ export function WorkspacePanel({
       return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dragDropContext.dragging]
+    [dragDropContext]
   );
 
   const [localState, setLocalState] = useState<WorkspaceState>({
@@ -314,6 +314,9 @@ export function WorkspacePanel({
     );
   }
 
+  const value = React.useMemo(() => ({ id: 'lnsWorkspace' }), []);
+  const order = React.useMemo(() => [1, 0, 0, 0], []);
+
   return (
     <WorkspacePanelWrapper
       title={title}
@@ -327,11 +330,12 @@ export function WorkspacePanel({
     >
       <DragDrop
         className="lnsWorkspacePanel__dragDrop"
-        data-test-subj="lnsWorkspace"
+        dataTestSubj="lnsWorkspace"
         draggable={false}
         droppable={Boolean(suggestionForDraggedField)}
         onDrop={onDrop}
-        value={{ id: 'lnsWorkspace' }}
+        value={value}
+        order={order}
       >
         <div>
           {renderVisualization()}

@@ -31,6 +31,23 @@ export interface ConfigPanelWrapperProps {
   core: DatasourceDimensionEditorProps['core'];
 }
 
+export interface LayerPanelProps {
+  activeDatasourceId: string;
+  visualizationState: unknown;
+  datasourceMap: Record<string, Datasource>;
+  activeVisualization: Visualization;
+  dispatch: (action: Action) => void;
+  framePublicAPI: FramePublicAPI;
+  datasourceStates: Record<
+    string,
+    {
+      isLoading: boolean;
+      state: unknown;
+    }
+  >;
+  core: DatasourceDimensionEditorProps['core'];
+}
+
 export interface ActiveDimensionState {
   isNew: boolean;
   activeId?: string;
