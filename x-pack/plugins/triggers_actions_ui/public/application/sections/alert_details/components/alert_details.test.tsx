@@ -797,7 +797,7 @@ describe('edit button', () => {
 });
 
 describe('refresh button', () => {
-  it('should render alert details when clicked', () => {
+  it('should call requestRefresh when clicked', () => {
     const alert = mockAlert();
     const alertType: AlertType = {
       id: '.noop',
@@ -812,15 +812,23 @@ describe('refresh button', () => {
       enabledInLicense: true,
     };
 
-    expect(
-      shallow(
-        <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-      )
-        .find(EuiButtonEmpty)
-        .find('[name="refresh"]')
-        .first()
-        .exists()
-    ).toBeTruthy();
+    const requestRefresh = jest.fn();
+    const refreshButton = shallow(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        {...mockAlertApis}
+        requestRefresh={requestRefresh}
+      />
+    )
+      .find('[data-test-subj="refreshAlertsButton"]')
+      .first();
+
+    expect(refreshButton.exists()).toBeTruthy();
+
+    refreshButton.simulate('click');
+    expect(requestRefresh).toHaveBeenCalledTimes(1);
   });
 });
 
