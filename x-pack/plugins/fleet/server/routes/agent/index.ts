@@ -294,6 +294,9 @@ export const registerElasticAgentRoutes = (router: IRouter, config: FleetConfigT
       getSavedObjectsClientContract: appContextService.getInternalUserSOClient.bind(
         appContextService
       ),
+      getElasticsearchClientContract: appContextService.getInternalUserESClient.bind(
+        appContextService
+      ),
       saveAgentEvents: AgentService.saveAgentEvents,
     })
   );
@@ -311,6 +314,9 @@ export const registerElasticAgentRoutes = (router: IRouter, config: FleetConfigT
       acknowledgeAgentActions: AgentService.acknowledgeAgentActions,
       authenticateAgentWithAccessToken: AgentService.authenticateAgentWithAccessToken,
       getSavedObjectsClientContract: appContextService.getInternalUserSOClient.bind(
+        appContextService
+      ),
+      getElasticsearchClientContract: appContextService.getInternalUserESClient.bind(
         appContextService
       ),
       saveAgentEvents: AgentService.saveAgentEvents,

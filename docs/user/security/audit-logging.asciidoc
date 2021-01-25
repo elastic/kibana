@@ -194,6 +194,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has accessed a saved object.
 | `failure` | User is not authorized to access a saved object.
 
+.2+| `saved_object_resolve`
+| `success` | User has accessed a saved object.
+| `failure` | User is not authorized to access a saved object.
+
 .2+| `saved_object_find`
 | `success` | User has accessed a saved object as part of a search operation.
 | `failure` | User is not authorized to search for saved objects.

@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { generatePath } from 'react-router-dom';
 import classNames from 'classnames';
 
 import './result.scss';
@@ -12,12 +13,13 @@ import './result.scss';
 import { EuiPanel, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
+import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
+
+import { Schema } from '../../../shared/types';
 import { FieldValue, Result as ResultType } from './types';
 import { ResultField } from './result_field';
 import { ResultHeader } from './result_header';
-import { getDocumentDetailRoute } from '../../routes';
-import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
-import { Schema } from '../../../shared/types';
 
 interface Props {
   result: ResultType;
@@ -50,7 +52,10 @@ export const Result: React.FC<Props> = ({
     if (schemaForTypeHighlights) return schemaForTypeHighlights[fieldName];
   };
 
-  const documentLink = getDocumentDetailRoute(resultMeta.engine, resultMeta.id);
+  const documentLink = generatePath(ENGINE_DOCUMENT_DETAIL_PATH, {
+    engineName: resultMeta.engine,
+    documentId: resultMeta.id,
+  });
   const conditionallyLinkedArticle = (children: React.ReactNode) => {
     return shouldLinkToDetailPage ? (
       <ReactRouterHelper to={documentLink}>
