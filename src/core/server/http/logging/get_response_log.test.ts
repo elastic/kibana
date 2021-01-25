@@ -31,13 +31,13 @@ interface RequestFixtureOptions {
 function createMockHapiRequest({
   auth = { isAuthenticated: true },
   body = {},
-  headers = { ['user-agent']: '' },
+  headers = { 'user-agent': '' },
   info = { referrer: 'localhost:5601/app/home' },
   method = 'get',
   mime = 'application/json',
   path = '/path',
   query = {},
-  response = { statusCode: 200 },
+  response = { headers: {}, statusCode: 200 },
 }: RequestFixtureOptions = {}): Request {
   return ({
     auth,
@@ -99,20 +99,31 @@ describe('getEcsResponseLog', () => {
     });
   });
 
-  test('correctly formats request querystring', () => {
-    const req = createMockHapiRequest({
-      query: {
-        a: 'hello',
-        b: 'world',
-      },
+  describe('handles request querystring', () => {
+    test('correctly formats querystring', () => {
+      const req = createMockHapiRequest({
+        query: {
+          a: 'hello',
+          b: 'world',
+        },
+      });
+      const result = getEcsResponseLog(req);
+      expect(result.url.query).toMatchInlineSnapshot(`"a=hello&b=world"`);
+      expect(result.message).toMatchInlineSnapshot(`"GET /path?a=hello&b=world 200 - 1.2KB"`);
     });
-    const result = getEcsResponseLog(req);
-    expect(result.url.query).toMatchInlineSnapshot(`"a=hello&b=world"`);
-    expect(result.message).toMatchInlineSnapshot(`"GET /path?a=hello&b=world 200 - 1.2KB"`);
+
+    test('correctly encodes querystring', () => {
+      const req = createMockHapiRequest({
+        query: { a: '¡hola!' },
+      });
+      const result = getEcsResponseLog(req);
+      expect(result.url.query).toMatchInlineSnapshot(`"a=%C2%A1hola!"`);
+      expect(result.message).toMatchInlineSnapshot(`"GET /path?a=%C2%A1hola! 200 - 1.2KB"`);
+    });
   });
 
   test('calls getResponsePayloadBytes to calculate payload bytes', () => {
-    const response = { source: '...' };
+    const response = { headers: {}, source: '...' };
     const req = createMockHapiRequest({ response });
     getEcsResponseLog(req);
     expect(getResponsePayloadBytes).toHaveBeenCalledWith(response);
@@ -134,28 +145,36 @@ describe('getEcsResponseLog', () => {
   });
 
   describe('filters sensitive headers', () => {
-    test('excludes Authorization and Cookie headers by default', () => {
+    test('redacts Authorization and Cookie headers by default', () => {
       const req = createMockHapiRequest({
-        headers: { authorization: 'a', cookie: 'b', ['user-agent']: 'hi' },
+        headers: { authorization: 'a', cookie: 'b', 'user-agent': 'hi' },
+        response: { headers: { 'content-length': 123, 'set-cookie': 'c' } },
       });
       const result = getEcsResponseLog(req);
       expect(result.http.request.headers).toMatchInlineSnapshot(`
         Object {
+          "authorization": "[REDACTED]",
+          "cookie": "[REDACTED]",
           "user-agent": "hi",
+        }
+      `);
+      expect(result.http.response.headers).toMatchInlineSnapshot(`
+        Object {
+          "content-length": 123,
+          "set-cookie": "[REDACTED]",
         }
       `);
     });
 
     test('is case-insensitive when filtering headers', () => {
       const req = createMockHapiRequest({
-        headers: { Authorization: 'a', COOKIE: 'b', ['user-agent']: 'hi' },
+        headers: { Authorization: 'a', COOKIE: 'b', 'user-agent': 'hi' },
+        response: { headers: { 'content-length': 123, 'Set-Cookie': 'c' } },
       });
       const result = getEcsResponseLog(req);
-      expect(result.http.request.headers).toMatchInlineSnapshot(`
-        Object {
-          "user-agent": "hi",
-        }
-      `);
+      expect(result.http.request.headers.Authorization).toBe('[REDACTED]');
+      expect(result.http.request.headers.COOKIE).toBe('[REDACTED]');
+      expect(result.http.response.headers['Set-Cookie']).toBe('[REDACTED]');
     });
   });
 
@@ -190,6 +209,7 @@ describe('getEcsResponseLog', () => {
               "body": Object {
                 "bytes": 1234,
               },
+              "headers": Object {},
               "responseTime": undefined,
               "status_code": 200,
             },

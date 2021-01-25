@@ -77,6 +77,7 @@ export class HttpServer {
   private registeredRouters = new Set<IRouter>();
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
+  private handleServerResponseEvent?: (req: Request) => void;
   private stopped = false;
 
   private readonly log: Logger;
@@ -218,6 +219,9 @@ export class HttpServer {
     const hasStarted = this.server.info.started > 0;
     if (hasStarted) {
       this.log.debug('stopping http server');
+      if (this.handleServerResponseEvent) {
+        this.server.events.removeListener('response', this.handleServerResponseEvent);
+      }
       await this.server.stop();
     }
   }
@@ -294,17 +298,12 @@ export class HttpServer {
 
     const log = this.logger.get('http', 'server', 'response');
 
-    const handleResponse = (request: Request) => {
-      const { message, ...rest } = getEcsResponseLog(request);
-      log.debug(message!, rest);
+    this.handleServerResponseEvent = (request) => {
+      const { message, ...meta } = getEcsResponseLog(request);
+      log.debug(message!, meta);
     };
 
-    this.server.events.on('response', handleResponse);
-    this.server.ext('onPreStop', () => {
-      if (this.server) {
-        this.server.events.removeListener('response', handleResponse);
-      }
-    });
+    this.server.events.on('response', this.handleServerResponseEvent);
   }
 
   private setupRequestStateAssignment(config: HttpConfig) {

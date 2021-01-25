@@ -240,21 +240,88 @@ describe('request logging', () => {
         expect(JSON.parse(meta).http.response.body.bytes).toBe(response.text.length);
       });
 
-      it('handles request headers', async () => {
-        const { http } = await root.setup();
+      describe('handles request/response headers', () => {
+        it('includes request/response headers in log entry', async () => {
+          const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
+          http
+            .createRouter('/')
+            .get(
+              { path: '/ping', validate: false, options: { authRequired: 'optional' } },
+              (context, req, res) => res.ok({ headers: { bar: 'world' }, body: 'pong' })
+            );
+          await root.start();
+
+          await kbnTestServer.request.get(root, '/ping').set('foo', 'hello').expect(200);
+          expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+          const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
+          expect(JSON.parse(meta).http.request.headers.foo).toBe('hello');
+          expect(JSON.parse(meta).http.response.headers.bar).toBe('world');
+        });
+
+        it('filters sensitive request headers', async () => {
+          const { http } = await root.setup();
+
+          http.createRouter('/').post(
+            {
+              path: '/ping',
+              validate: {
+                body: schema.object({ message: schema.string() }),
+              },
+              options: {
+                authRequired: 'optional',
+                body: {
+                  accepts: ['application/json'],
+                },
+                timeout: { payload: 100 },
+              },
+            },
+            (context, req, res) => res.ok({ body: { message: req.body.message } })
           );
-        await root.start();
+          await root.start();
 
-        await kbnTestServer.request.get(root, '/ping').set('foo', 'hello').expect(200);
-        expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-        const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
-        expect(JSON.parse(meta).http.request.headers.foo).toBe('hello');
+          await kbnTestServer.request
+            .post(root, '/ping')
+            .set('content-type', 'application/json')
+            .set('authorization', 'abc')
+            .send({ message: 'hi' })
+            .expect(200);
+          expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+          const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
+          expect(JSON.parse(meta).http.request.headers.authorization).toBe('[REDACTED]');
+        });
+
+        it('filters sensitive response headers', async () => {
+          const { http } = await root.setup();
+
+          http.createRouter('/').post(
+            {
+              path: '/ping',
+              validate: {
+                body: schema.object({ message: schema.string() }),
+              },
+              options: {
+                authRequired: 'optional',
+                body: {
+                  accepts: ['application/json'],
+                },
+                timeout: { payload: 100 },
+              },
+            },
+            (context, req, res) =>
+              res.ok({ headers: { 'set-cookie': ['123'] }, body: { message: req.body.message } })
+          );
+          await root.start();
+
+          await kbnTestServer.request
+            .post(root, '/ping')
+            .set('Content-Type', 'application/json')
+            .send({ message: 'hi' })
+            .expect(200);
+          expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+          const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
+          expect(JSON.parse(meta).http.response.headers['set-cookie']).toBe('[REDACTED]');
+        });
       });
 
       it('handles user agent', async () => {
