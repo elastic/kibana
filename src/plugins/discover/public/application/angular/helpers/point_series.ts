@@ -62,6 +62,7 @@ export interface Chart {
   }>;
   xAxisOrderedValues: number[];
   xAxisFormat: Dimension['format'];
+  yAxisFormat: Dimension['format'];
   xAxisLabel: Column['name'];
   yAxisLabel?: Column['name'];
   ordered: Ordered;
@@ -76,7 +77,7 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
   chart.xAxisOrderedValues = uniq(table.rows.map((r) => r[xAccessor] as number));
   chart.xAxisFormat = x.format;
   chart.xAxisLabel = table.columns[x.accessor].name;
-
+  chart.yAxisFormat = y.format;
   const { intervalESUnit, intervalESValue, interval, bounds } = x.params;
   chart.ordered = {
     date: true,
