@@ -192,11 +192,15 @@ export const getSidebarItems = (
   query: string,
   activeFilters: string[]
 ): SidebarItems => {
-  return items.map((item) => {
+  const sideBarItems = items.map((item) => {
     const isHighlighted = isHighlightedItem(item, query, activeFilters);
     const { url, status, method } = item;
     return { url, status, method, isHighlighted };
   });
+  if (onlyHighlighted) {
+    return sideBarItems.filter((item) => item.isHighlighted);
+  }
+  return sideBarItems;
 };
 
 export const getLegendItems = (): LegendItems => {

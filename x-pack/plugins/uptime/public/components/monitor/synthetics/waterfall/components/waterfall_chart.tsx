@@ -15,6 +15,7 @@ import {
   WaterfallChartFixedTopContainerSidebarCover,
   WaterfallChartTopContainer,
   RelativeContainer,
+  WaterfallChartFilterContainer,
 } from './styles';
 import { CHART_LEGEND_PADDING, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
 import { Sidebar } from './sidebar';
@@ -88,9 +89,9 @@ export const WaterfallChart = ({
         </WaterfallChartTopContainer>
 
         {renderFilter && (
-          <WaterfallChartFixedTopContainerSidebarCover borderRadius="none" paddingSize="s">
+          <WaterfallChartFilterContainer borderRadius="none" paddingSize="s">
             {renderFilter()}
-          </WaterfallChartFixedTopContainerSidebarCover>
+          </WaterfallChartFilterContainer>
         )}
       </WaterfallChartFixedTopContainer>
       <WaterfallChartOuterContainer height={height} data-test-subj="waterfallOuterContainer">

@@ -18,14 +18,16 @@ import {
   TooltipInfo,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { BAR_HEIGHT, CANVAS_MAX_ITEMS } from './constants';
+import { BAR_HEIGHT } from './constants';
 import { useChartTheme } from '../../../../../hooks/use_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
 import { useWaterfallContext, WaterfallData } from '..';
 
 const getChartHeight = (data: WaterfallData, ind: number): number => {
   // We get the last item x(number of bars) and adds 1 to cater for 0 index
-  return (data[data.length - 1]?.x + 1 - ind * CANVAS_MAX_ITEMS) * BAR_HEIGHT;
+  const noOfXBars = new Set(data.map((item) => item.x)).size;
+
+  return noOfXBars * BAR_HEIGHT;
 };
 
 const Tooltip = (tooltipInfo: TooltipInfo) => {
@@ -94,7 +96,7 @@ export const WaterfallBarChart = ({
 
         <BarSeries
           id="waterfallItems"
-          xScaleType={ScaleType.Linear}
+          xScaleType={ScaleType.Ordinal}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}

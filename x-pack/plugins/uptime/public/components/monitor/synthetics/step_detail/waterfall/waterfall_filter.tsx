@@ -64,7 +64,9 @@ export const WaterfallFilter = ({
   const [value, setValue] = useState(query);
 
   const toggleFilters = (val: string) => {
-    setActiveFilters((prevState) => (prevState.includes(val) ? [] : [...prevState, val]));
+    setActiveFilters((prevState) =>
+      prevState.includes(val) ? prevState.filter((filter) => filter !== val) : [...prevState, val]
+    );
   };
 
   useDebounce(
@@ -104,6 +106,7 @@ export const WaterfallFilter = ({
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
         <EuiCheckbox
+          compressed={true}
           disabled={!(query || activeFilters.length > 0)}
           id="onlyHighlighted"
           label="Only show highlighted"

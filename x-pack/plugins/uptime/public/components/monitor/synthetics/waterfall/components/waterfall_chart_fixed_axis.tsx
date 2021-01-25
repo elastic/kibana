@@ -60,7 +60,11 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
           yAccessors={['y']}
           y0Accessors={['y0']}
           styleAccessor={barStyleAccessor}
-          data={[{ x: 0, y0: 0, y1: 0 }]}
+          data={[
+            { x: 0, y0: 0, y1: 1 },
+            { x: 1, y0: 1, y1: 2 },
+            { x: 2, y0: 2, y1: 3 },
+          ]}
         />
       </Chart>
     </WaterfallChartFixedAxisContainer>

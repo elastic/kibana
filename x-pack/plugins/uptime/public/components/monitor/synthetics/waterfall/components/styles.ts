@@ -40,7 +40,6 @@ export const WaterfallChartFixedTopContainer = euiStyled.div`
 `;
 
 export const WaterfallChartTopContainer = euiStyled(EuiFlexGroup)`
-  border-bottom: ${(props) => `1px solid ${props.theme.eui.euiColorLightShade}`};
 `;
 
 export const WaterfallChartFixedTopContainerSidebarCover = euiStyled(EuiPanel)`
@@ -49,9 +48,24 @@ export const WaterfallChartFixedTopContainerSidebarCover = euiStyled(EuiPanel)`
   border: none;
 `; // NOTE: border-radius !important is here as the "border" prop isn't working
 
+export const WaterfallChartFilterContainer = euiStyled(EuiPanel)`
+  && {
+    border-radius: 0 !important;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+    width: 100%;
+    position: absolute;
+    top: 32px;
+    z-index: inherit;
+    background-color: transparent;
+  }
+`; // NOTE: border-radius !important is here as the "border" prop isn't working
+
 export const WaterfallChartFixedAxisContainer = euiStyled.div`
   height: ${FIXED_AXIS_HEIGHT}px;
   z-index: ${(props) => props.theme.eui.euiZLevel4};
+  height: 90px;
 `;
 
 interface WaterfallChartSidebarContainer {
