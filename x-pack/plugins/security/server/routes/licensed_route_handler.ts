@@ -5,17 +5,19 @@
  */
 
 import { KibanaResponseFactory, RequestHandler, RouteMethod } from 'kibana/server';
+import type { SecurityRequestHandlerContext } from '../types';
 
 export const createLicensedRouteHandler = <
   P,
   Q,
   B,
+  Context extends SecurityRequestHandlerContext,
   M extends RouteMethod,
   R extends KibanaResponseFactory
 >(
-  handler: RequestHandler<P, Q, B, M, R>
+  handler: RequestHandler<P, Q, B, Context, M, R>
 ) => {
-  const licensedRouteHandler: RequestHandler<P, Q, B, M, R> = (
+  const licensedRouteHandler: RequestHandler<P, Q, B, Context, M, R> = (
     context,
     request,
     responseToolkit
