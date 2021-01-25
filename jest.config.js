@@ -7,6 +7,7 @@
  */
 
 module.exports = {
+  preset: '@kbn/test',
   rootDir: '.',
   projects: [
     '<rootDir>/packages/*/jest.config.js',
@@ -16,5 +17,4 @@ module.exports = {
     '<rootDir>/test/*/jest.config.js',
     '<rootDir>/x-pack/plugins/*/jest.config.js',
   ],
-  reporters: ['default', '<rootDir>/packages/kbn-test/target/jest/junit_reporter'],
 };
