@@ -71,6 +71,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_data_table'));
       loadTestFile(require.resolve('./_data_table_nontimeindex'));
       loadTestFile(require.resolve('./_data_table_notimeindex_filters'));
+
+      // this check is not needed when the CI doesn't run anymore for the OSS
+      if (!isOss) {
+        loadTestFile(require.resolve('./_chart_types'));
+      }
     });
 
     describe('', function () {
