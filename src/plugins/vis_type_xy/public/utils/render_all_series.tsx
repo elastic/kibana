@@ -71,13 +71,15 @@ export const renderAllSeries = (
       interpolate,
       type,
     }) => {
-      const yAspect = aspects.y.find(({ aggId }) => aggId === paramId);
-
-      if (!show || !yAspect || yAspect.accessor === null) {
+      const yAspects = aspects.y.filter(
+        ({ aggId, accessor }) => aggId?.includes(paramId) && accessor !== null
+      );
+      if (!show || !yAspects.length) {
         return null;
       }
+      const yAccessors = yAspects.map((aspect) => aspect.accessor) as string[];
 
-      const id = `${type}-${yAspect.accessor}`;
+      const id = `${type}-${yAccessors[0]}`;
       const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
       const isStacked = mode === 'stacked' || yAxisScale?.mode === 'percentage';
       const stackMode = yAxisScale?.mode === 'normal' ? undefined : yAxisScale?.mode;
@@ -94,13 +96,13 @@ export const renderAllSeries = (
               id={id}
               name={getSeriesName}
               color={getSeriesColor}
-              tickFormat={yAspect.formatter}
+              tickFormat={yAspects[0].formatter}
               groupId={pseudoGroupId}
               useDefaultGroupDomain={useDefaultGroupDomain}
               xScaleType={xAxis.scale.type}
               yScaleType={yAxisScale?.type}
               xAccessor={xAccessor}
-              yAccessors={[yAspect.accessor]}
+              yAccessors={yAccessors}
               splitSeriesAccessors={splitSeriesAccessors}
               data={data}
               timeZone={timeZone}
@@ -125,7 +127,7 @@ export const renderAllSeries = (
               id={id}
               fit={fittingFunction}
               color={getSeriesColor}
-              tickFormat={yAspect.formatter}
+              tickFormat={yAspects[0].formatter}
               name={getSeriesName}
               curve={getCurveType(interpolate)}
               groupId={pseudoGroupId}
@@ -133,7 +135,7 @@ export const renderAllSeries = (
               xScaleType={xAxis.scale.type}
               yScaleType={yAxisScale?.type}
               xAccessor={xAccessor}
-              yAccessors={[yAspect.accessor]}
+              yAccessors={yAccessors}
               markSizeAccessor={markSizeAccessor}
               markFormat={aspects.z?.formatter}
               splitSeriesAccessors={splitSeriesAccessors}

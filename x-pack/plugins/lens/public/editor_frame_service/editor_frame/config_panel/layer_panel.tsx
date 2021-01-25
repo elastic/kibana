@@ -239,7 +239,7 @@ export function LayerPanel(
                 fullWidth
                 label={<div className="lnsLayerPanel__groupLabel">{group.groupLabel}</div>}
                 labelType="legend"
-                key={groupIndex}
+                key={group.groupId}
                 isInvalid={isMissing}
                 error={
                   isMissing ? (

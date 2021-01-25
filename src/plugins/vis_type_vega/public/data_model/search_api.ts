@@ -45,7 +45,10 @@ export class SearchAPI {
         });
 
         if (this.inspectorAdapters) {
-          requestResponders[requestId] = this.inspectorAdapters.requests.start(requestId, request);
+          requestResponders[requestId] = this.inspectorAdapters.requests.start(requestId, {
+            ...request,
+            searchSessionId: this.searchSessionId,
+          });
           requestResponders[requestId].json(params.body);
         }
 

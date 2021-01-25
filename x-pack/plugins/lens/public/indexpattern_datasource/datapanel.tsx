@@ -100,6 +100,8 @@ export function IndexPatternDataPanel({
   changeIndexPattern,
   charts,
   showNoDataPopover,
+  dropOntoWorkspace,
+  hasSuggestionForField,
 }: Props) {
   const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
   const onChangeIndexPattern = useCallback(
@@ -193,6 +195,8 @@ export function IndexPatternDataPanel({
           onChangeIndexPattern={onChangeIndexPattern}
           existingFields={state.existingFields}
           existenceFetchFailed={state.existenceFetchFailed}
+          dropOntoWorkspace={dropOntoWorkspace}
+          hasSuggestionForField={hasSuggestionForField}
         />
       )}
     </>
@@ -241,6 +245,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   data,
   existingFields,
   charts,
+  dropOntoWorkspace,
+  hasSuggestionForField,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover'> & {
   data: DataPublicPluginStart;
   currentIndexPatternId: string;
@@ -420,6 +426,23 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     );
   }, [unfilteredFieldGroups, localState.nameFilter, localState.typeFilter]);
 
+  const checkFieldExists = React.useCallback(
+    (field) =>
+      field.type === 'document' ||
+      fieldExists(existingFields, currentIndexPattern.title, field.name),
+    [existingFields, currentIndexPattern.title]
+  );
+
+  const { nameFilter, typeFilter } = localState;
+
+  const filter = useMemo(
+    () => ({
+      nameFilter,
+      typeFilter,
+    }),
+    [nameFilter, typeFilter]
+  );
+
   const fieldProps = useMemo(
     () => ({
       core,
@@ -579,20 +602,16 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         </EuiScreenReaderOnly>
         <EuiFlexItem>
           <FieldList
-            exists={(field) =>
-              field.type === 'document' ||
-              fieldExists(existingFields, currentIndexPattern.title, field.name)
-            }
+            exists={checkFieldExists}
             fieldProps={fieldProps}
             fieldGroups={fieldGroups}
             hasSyncedExistingFields={!!hasSyncedExistingFields}
-            filter={{
-              nameFilter: localState.nameFilter,
-              typeFilter: localState.typeFilter,
-            }}
+            filter={filter}
             currentIndexPatternId={currentIndexPatternId}
             existenceFetchFailed={existenceFetchFailed}
             existFieldsInIndex={!!allFields.length}
+            dropOntoWorkspace={dropOntoWorkspace}
+            hasSuggestionForField={hasSuggestionForField}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

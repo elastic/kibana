@@ -39,8 +39,8 @@ import {
   isLensFilterEvent,
   isLensEditEvent,
 } from '../../../types';
-import { DragDrop, DragContext } from '../../../drag_drop';
-import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
+import { DragDrop, DragContext, Dragging } from '../../../drag_drop';
+import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { debouncedComponent } from '../../../debounced_component';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
@@ -75,6 +75,7 @@ export interface WorkspacePanelProps {
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
+  getSuggestionForField: (field: Dragging) => Suggestion | undefined;
 }
 
 interface WorkspaceState {
@@ -83,7 +84,7 @@ interface WorkspaceState {
 }
 
 // Exported for testing purposes only.
-export function WorkspacePanel({
+export const WorkspacePanel = React.memo(function WorkspacePanel({
   activeDatasourceId,
   activeVisualizationId,
   visualizationMap,
@@ -97,43 +98,11 @@ export function WorkspacePanel({
   ExpressionRenderer: ExpressionRendererComponent,
   title,
   visualizeTriggerFieldContext,
+  getSuggestionForField,
 }: WorkspacePanelProps) {
   const dragDropContext = useContext(DragContext);
 
-  const suggestionForDraggedField = useMemo(
-    () => {
-      if (!dragDropContext.dragging || !activeDatasourceId) {
-        return;
-      }
-
-      const hasData = Object.values(framePublicAPI.datasourceLayers).some(
-        (datasource) => datasource.getTableSpec().length > 0
-      );
-
-      const mainPalette =
-        activeVisualizationId &&
-        visualizationMap[activeVisualizationId] &&
-        visualizationMap[activeVisualizationId].getMainPalette
-          ? visualizationMap[activeVisualizationId].getMainPalette!(visualizationState)
-          : undefined;
-      const suggestions = getSuggestions({
-        datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
-        datasourceStates,
-        visualizationMap:
-          hasData && activeVisualizationId
-            ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
-            : visualizationMap,
-        activeVisualizationId,
-        visualizationState,
-        field: dragDropContext.dragging,
-        mainPalette,
-      });
-
-      return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dragDropContext]
-  );
+  const suggestionForDraggedField = getSuggestionForField(dragDropContext.dragging);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
@@ -247,6 +216,9 @@ export function WorkspacePanel({
     }
   }
 
+  const value = React.useMemo(() => ({ id: 'lnsWorkspace' }), []);
+  const order = React.useMemo(() => [1, 0, 0, 0], []);
+
   function renderEmptyWorkspace() {
     return (
       <EuiText
@@ -314,9 +286,6 @@ export function WorkspacePanel({
     );
   }
 
-  const value = React.useMemo(() => ({ id: 'lnsWorkspace' }), []);
-  const order = React.useMemo(() => [1, 0, 0, 0], []);
-
   return (
     <WorkspacePanelWrapper
       title={title}
@@ -344,7 +313,7 @@ export function WorkspacePanel({
       </DragDrop>
     </WorkspacePanelWrapper>
   );
-}
+});
 
 export const InnerVisualizationWrapper = ({
   expression,

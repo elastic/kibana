@@ -75,7 +75,7 @@
 }
 
 .lnsDragDrop-isReorderable {
-  transition: transform $euiAnimSpeedFast ease-in-out;
+  transition: transform $euiAnimSpeedFast ease-in-out 64ms;
   pointer-events: none;
 }
 

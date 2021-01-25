@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from '../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 
 import { TIMELINE_URL } from '../../../../common/constants';
 
@@ -21,7 +21,7 @@ import { getAllTimeline } from '../saved_object';
 import { TimelineStatus } from '../../../../common/types/timeline';
 
 export const getTimelineRoute = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {

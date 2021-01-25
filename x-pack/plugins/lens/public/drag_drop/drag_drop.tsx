@@ -193,7 +193,7 @@ export const DragDrop = (props: BaseProps) => {
       // If the configuration has provided a droppable flag, but this particular item is not
       // droppable, then it should be less prominent. Ignores items that are both
       // draggable and drop targets
-      droppable === false && Boolean(dragging) && value !== dragging,
+      !!(droppable === false && dragging && value.id !== dragging.id),
   };
 
   if (draggable && !droppable) {
@@ -260,7 +260,11 @@ const DragInner = React.memo(function DragDropInner({
 
     const currentTarget = e?.currentTarget;
     setTimeout(() => {
+      // performance.mark('start');
       setDragging(value);
+      // performance.mark('end');
+      // performance.measure('def', 'start', 'end');
+      // console.log(performance.getEntriesByType('measure'));
       if (onDragStart) {
         onDragStart(currentTarget);
       }

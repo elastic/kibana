@@ -73,6 +73,8 @@ describe('Fields Accordion', () => {
       renderCallout: <div id="lens-test-callout">Callout</div>,
       exists: () => true,
       groupIndex: 0,
+      dropOntoWorkspace: () => {},
+      hasSuggestionForField: () => false,
     };
   });
 
