@@ -9,7 +9,13 @@ import { JobSelectorControl, JobSelectorControlProps } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
 import { HttpService } from '../application/services/http_service';
-import { MlAnomalyThresholdAlertParams } from '../../common/constants/alerts';
+
+interface MlAnomalyThresholdAlertParams {
+  jobSelection: {
+    jobIds?: string[];
+    groupIds?: string[];
+  };
+}
 
 interface Props {
   alertParams: MlAnomalyThresholdAlertParams;
