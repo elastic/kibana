@@ -304,9 +304,14 @@ const VisComponent = (props: VisComponentProps) => {
     ]
   );
   const xAccessor = getXAccessor(config.aspects.x);
-  const splitSeriesAccessors = config.aspects.series
-    ? compact(config.aspects.series.map(getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)))
-    : [];
+
+  const splitSeriesAccessors = useMemo(
+    () =>
+      config.aspects.series
+        ? compact(config.aspects.series.map(getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)))
+        : [],
+    [config.aspects.series]
+  );
   const splitChartColumnAccessor = config.aspects.splitColumn
     ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitColumn)
     : undefined;
@@ -314,6 +319,29 @@ const VisComponent = (props: VisComponentProps) => {
     ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitRow)
     : undefined;
 
+  const renderSeries = useMemo(
+    () =>
+      renderAllSeries(
+        config,
+        visParams.seriesParams,
+        visData.rows,
+        getSeriesName,
+        getSeriesColor,
+        timeZone,
+        xAccessor,
+        splitSeriesAccessors
+      ),
+    [
+      config,
+      getSeriesColor,
+      getSeriesName,
+      splitSeriesAccessors,
+      timeZone,
+      visData.rows,
+      visParams.seriesParams,
+      xAccessor,
+    ]
+  );
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
       <LegendToggle
@@ -371,16 +399,7 @@ const VisComponent = (props: VisComponentProps) => {
         {config.yAxes.map((axisProps) => (
           <XYAxis key={axisProps.id} {...axisProps} />
         ))}
-        {renderAllSeries(
-          config,
-          visParams.seriesParams,
-          visData.rows,
-          getSeriesName,
-          getSeriesColor,
-          timeZone,
-          xAccessor,
-          splitSeriesAccessors
-        )}
+        {renderSeries}
       </Chart>
     </div>
   );
