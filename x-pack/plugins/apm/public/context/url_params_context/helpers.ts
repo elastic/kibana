@@ -5,7 +5,7 @@
  */
 
 import datemath from '@elastic/datemath';
-import { scaleTime } from 'd3-scale';
+import { scaleUtc } from 'd3-scale';
 import { compact, pickBy } from 'lodash';
 import { IUrlParams } from './types';
 
@@ -42,7 +42,7 @@ export function getDateRange({
   }
 
   // Calculate ticks for the time ranges to produce nicely rounded values
-  const ticks = scaleTime().domain([start, end]).ticks();
+  const ticks = scaleUtc().domain([start, end]).nice().ticks();
 
   // Return the first and last tick values.
   return {
