@@ -18,8 +18,17 @@ export class IndexPatternFieldEditorPlugin
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
+    const {
+      application: { capabilities },
+    } = core;
+
     return {
       openEditor: getFieldEditorOpener(core),
+      userPermissions: {
+        editIndexPattern: () => {
+          return capabilities.management.kibana.indexPatterns;
+        },
+      },
     };
   }
 
