@@ -1,6 +1,6 @@
 # osquery
 
-A Kibana plugin
+This plugin adds extended support to Security Solution Fleet Osquery integration
 
 ---
 
