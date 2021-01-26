@@ -161,12 +161,6 @@ export const useFetchLogEntriesAround = ({
     },
   } = useObservableState(logEntriesAroundSearchResponses$, initialCombinedResponse);
 
-  useSubscription(logEntriesAroundSearchResponses$, {
-    next: ({ before, after, combined }) => {
-      console.log('combined next', before, after, combined);
-    },
-  });
-
   const cancelRequest = useCallback(() => {
     latestBeforeResponse?.abortController.abort();
     latestAfterResponse?.abortController.abort();
