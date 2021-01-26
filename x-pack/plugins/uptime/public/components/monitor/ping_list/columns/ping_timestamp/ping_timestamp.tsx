@@ -19,13 +19,12 @@ import { i18n } from '@kbn/i18n';
 import useIntersection from 'react-use/lib/useIntersection';
 import moment from 'moment';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { Ping } from '../../../../../common/runtime_types/ping';
-import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { useFetcher, FETCH_STATUS } from '../../../../../../observability/public';
-import { getJourneyScreenshot } from '../../../../state/api/journey';
-import { UptimeSettingsContext } from '../../../../contexts';
+import { Ping } from '../../../../../../common/runtime_types/ping';
+import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
+import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';
+import { getJourneyScreenshot } from '../../../../../state/api/journey';
+import { UptimeSettingsContext } from '../../../../../contexts';
+import { NoImageAvailable } from './no_image_available';
 
 const StepImage = styled(EuiImage)`
   &&& {
@@ -226,24 +225,5 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </StepDiv>
-  );
-};
-
-const BorderedText = euiStyled(EuiText)`
-  width: 120px;
-  text-align: center;
-  border: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
-`;
-
-export const NoImageAvailable = () => {
-  return (
-    <BorderedText data-test-subj="pingTimestampNoImageAvailable">
-      <strong>
-        <FormattedMessage
-          id="xpack.uptime.synthetics.screenshot.noImageMessage"
-          defaultMessage="No image available"
-        />
-      </strong>
-    </BorderedText>
   );
 };
