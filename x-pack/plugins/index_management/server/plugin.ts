@@ -13,7 +13,7 @@ import {
   ILegacyCustomClusterClient,
 } from 'src/core/server';
 
-import { PLUGIN } from '../common';
+import { PLUGIN } from '../common/constants/plugin';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License, IndexDataEnricher } from './services';

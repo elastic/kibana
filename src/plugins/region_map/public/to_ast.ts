@@ -11,11 +11,11 @@ import {
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../data/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
-import { getVisSchemas, Vis, BuildPipelineParams } from '../../visualizations/public';
+import { getVisSchemas, VisToExpressionAst } from '../../visualizations/public';
 import { RegionMapExpressionFunctionDefinition } from './region_map_fn';
 import { RegionMapVisConfig, RegionMapVisParams } from './region_map_types';
 
-export const toExpressionAst = (vis: Vis<RegionMapVisParams>, params: BuildPipelineParams) => {
+export const toExpressionAst: VisToExpressionAst<RegionMapVisParams> = (vis, params) => {
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: buildExpression([
       buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
