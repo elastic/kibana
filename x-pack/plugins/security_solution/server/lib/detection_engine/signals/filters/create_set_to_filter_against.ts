@@ -30,7 +30,7 @@ export const createSetToFilterAgainst = async <T>({
   buildRuleMessage,
 }: CreateSetToFilterAgainstOptions<T>): Promise<Set<unknown>> => {
   const valuesFromSearchResultField = events.reduce((acc, searchResultItem) => {
-    const valueField = get(field, searchResultItem._source);
+    const valueField = searchResultItem.fields ? searchResultItem.fields[field] : undefined;
     if (valueField != null) {
       acc.add(valueField);
     }

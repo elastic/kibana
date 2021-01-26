@@ -169,6 +169,12 @@ export const sampleDocWithSortId = (
       ip: destIp ?? '127.0.0.1',
     },
   },
+  fields: {
+    someKey: ['someValue'],
+    '@timestamp': ['2020-04-20T21:27:45+0000'],
+    'source.ip': [ip ?? '127.0.0.1'],
+    'destination.ip': [destIp ?? '127.0.0.1'],
+  },
   sort: ['1234567891111'],
 });
 
@@ -187,6 +193,11 @@ export const sampleDocNoSortId = (
     source: {
       ip: ip ?? '127.0.0.1',
     },
+  },
+  fields: {
+    someKey: ['someValue'],
+    '@timestamp': ['2020-04-20T21:27:45+0000'],
+    'source.ip': [ip ?? '127.0.0.1'],
   },
   sort: [],
 });

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash/fp';
 import { SearchResponse } from '../../../types';
+import { getFieldFromHit } from '../utils';
 import { FilterEventsOptions } from './types';
 
 /**
@@ -21,7 +21,7 @@ export const filterEvents = <T>({
   return events.filter((item) => {
     return fieldAndSetTuples
       .map((tuple) => {
-        const eventItem = get(tuple.field, item._source);
+        const eventItem = item.fields ? item.fields[tuple.field] : undefined;
         if (eventItem == null) {
           return true;
         } else if (tuple.operator === 'included') {

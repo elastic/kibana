@@ -68,6 +68,12 @@ export const findThresholdSignals = async ({
                       },
                     },
                   ],
+                  fields: [
+                    {
+                      field: '*',
+                      include_unmapped: true,
+                    },
+                  ],
                   size: 1,
                 },
               },

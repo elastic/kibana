@@ -88,6 +88,12 @@ export const buildEventsSearchQuery = ({
           ],
         },
       },
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+      ],
       ...(aggregations ? { aggregations } : {}),
       sort: [
         {
