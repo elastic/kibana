@@ -43,7 +43,8 @@ interface RelevanceTuningActions {
   resetSearchSettings(): void;
   toggleSearchField(name: string, disableField: boolean): { name: string; disableField: boolean };
   updateFieldWeight(name: string, weight: number): { name: string; weight: number };
-  addBoost: (name: string, type: BoostType) => { name: string; type: BoostType };
+  addBoost(name: string, type: BoostType): { name: string; type: BoostType };
+  deleteBoost(name: string, index: number): { name: string; index: number };
 }
 
 interface RelevanceTuningValues {
@@ -78,9 +79,15 @@ const DELETE_SUCCESS_MESSAGE = i18n.translate(
   }
 );
 const RESET_CONFIRMATION_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.relevanceTuning.messages.confirmation',
+  'xpack.enterpriseSearch.appSearch.relevanceTuning.messages.resetConfirmation',
   {
     defaultMessage: 'Are you sure you want to restore relevance defaults?',
+  }
+);
+const DELETE_CONFIRMATION_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.relevanceTuning.messages.deleteConfirmation',
+  {
+    defaultMessage: 'Are you sure you want to delete this boost?',
   }
 );
 
@@ -124,6 +131,7 @@ export const RelevanceTuningLogic = kea<
     toggleSearchField: (name, disableField) => ({ name, disableField }),
     updateFieldWeight: (name, weight) => ({ name, weight }),
     addBoost: (name, type) => ({ name, type }),
+    deleteBoost: (name, index) => ({ name, index }),
   }),
   reducers: () => ({
     searchSettings: [
@@ -301,12 +309,16 @@ export const RelevanceTuningLogic = kea<
       }
     },
     toggleSearchField: ({ name, disableField }) => {
-      const { searchSettings } = values;
+      const searchSettings = {
+        ...values.searchSettings,
+        boosts: values.searchSettings.boosts || {},
+        search_fields: values.searchSettings.search_fields || {},
+      };
       const { search_fields: searchFields } = searchSettings;
 
       actions.setSearchSettings({
         ...searchSettings,
-        boosts: searchSettings.boosts || {},
+        boosts: searchSettings.boosts,
         search_fields: {
           ...searchFields,
           [name]: disableField ? undefined : { weight: 1 },
@@ -315,16 +327,20 @@ export const RelevanceTuningLogic = kea<
       actions.getSearchResults();
     },
     updateFieldWeight: ({ name, weight }) => {
-      const { searchSettings } = values;
+      const searchSettings = {
+        ...values.searchSettings,
+        boosts: values.searchSettings.boosts || {},
+        search_fields: values.searchSettings.search_fields || {},
+      };
       const { search_fields: searchFields } = searchSettings;
 
       actions.setSearchSettings({
         ...searchSettings,
-        boosts: searchSettings.boosts || {},
+        boosts: searchSettings.boosts,
         search_fields: {
           ...searchFields,
           [name]: {
-            ...(searchFields || {})[name],
+            ...searchFields[name],
             weight: Math.round(weight * 10) / 10,
           },
         },
@@ -355,6 +371,31 @@ export const RelevanceTuningLogic = kea<
           [name]: boostArray,
         },
       });
+    },
+    deleteBoost: ({ name, index }) => {
+      if (window.confirm(DELETE_CONFIRMATION_MESSAGE)) {
+        const searchSettings = {
+          ...values.searchSettings,
+          boosts: values.searchSettings.boosts || {},
+          search_fields: values.searchSettings.search_fields || {},
+        };
+        const { boosts } = searchSettings;
+        const boostsRemoved = boosts[name].slice();
+        boostsRemoved.splice(index, 1);
+        const updatedBoosts = { ...boosts };
+
+        if (boostsRemoved.length > 0) {
+          updatedBoosts[name] = boostsRemoved;
+        } else {
+          delete updatedBoosts[name];
+        }
+
+        actions.setSearchSettings({
+          ...searchSettings,
+          boosts: updatedBoosts,
+        });
+        actions.getSearchResults();
+      }
     },
   }),
 });

@@ -650,6 +650,7 @@ describe('RelevanceTuningLogic', () => {
       it('adds a boost of given type for the given field', () => {
         mount({
           searchSettings: {
+            ...searchSettings,
             boosts: {
               foo: [
                 {
@@ -658,7 +659,6 @@ describe('RelevanceTuningLogic', () => {
                 },
               ],
             },
-            search_fields: {},
           },
         });
 
@@ -667,6 +667,7 @@ describe('RelevanceTuningLogic', () => {
         RelevanceTuningLogic.actions.addBoost('foo', 'functional');
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          ...searchSettings,
           boosts: {
             foo: [
               {
@@ -680,15 +681,14 @@ describe('RelevanceTuningLogic', () => {
               },
             ],
           },
-          search_fields: {},
         });
       });
 
-      it('will stil work if boosts are undefined', () => {
+      it('will stil work if boosts and search_fields are undefined', () => {
         mount({
           searchSettings: {
+            search_fields: undefined,
             boosts: undefined,
-            search_fields: {},
           },
         });
 
@@ -697,6 +697,7 @@ describe('RelevanceTuningLogic', () => {
         RelevanceTuningLogic.actions.addBoost('foo', 'functional');
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          search_fields: {},
           boosts: {
             foo: [
               {
@@ -706,8 +707,119 @@ describe('RelevanceTuningLogic', () => {
               },
             ],
           },
-          search_fields: {},
         });
+      });
+    });
+
+    describe('deleteBoost', () => {
+      it('deletes the boost with the given name and index and updates search results', () => {
+        mount({
+          searchSettings: {
+            ...searchSettings,
+            boosts: {
+              foo: [
+                {
+                  factor: 1,
+                  type: 'functional',
+                },
+                {
+                  factor: 2,
+                  type: 'value',
+                },
+              ],
+            },
+          },
+        });
+        confirmSpy.mockImplementation(() => true);
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.deleteBoost('foo', 1);
+
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          ...searchSettings,
+          boosts: {
+            foo: [
+              {
+                factor: 1,
+                type: 'functional',
+              },
+            ],
+          },
+        });
+      });
+
+      it('will delete they field key in boosts if this is the last boost or that field', () => {
+        mount({
+          searchSettings: {
+            ...searchSettings,
+            boosts: {
+              foo: [
+                {
+                  factor: 1,
+                  type: 'functional',
+                },
+              ],
+            },
+          },
+        });
+        confirmSpy.mockImplementation(() => true);
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.deleteBoost('foo', 0);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          ...searchSettings,
+          boosts: {},
+        });
+      });
+
+      it('will still work if search_fields are undefined', () => {
+        mount({
+          searchSettings: {
+            search_fields: undefined,
+            boosts: {
+              foo: [
+                {
+                  factor: 1,
+                  type: 'functional',
+                },
+              ],
+            },
+          },
+        });
+        confirmSpy.mockImplementation(() => true);
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.deleteBoost('foo', 0);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          search_fields: {},
+          boosts: {},
+        });
+      });
+
+      it('will do nothing if the user does not confirm', () => {
+        mount({
+          searchSettings: {
+            ...searchSettings,
+            boosts: {
+              foo: [
+                {
+                  factor: 1,
+                  type: 'functional',
+                },
+              ],
+            },
+          },
+        });
+        confirmSpy.mockImplementation(() => false);
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.deleteBoost('foo', 0);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).not.toHaveBeenCalled();
       });
     });
   });
