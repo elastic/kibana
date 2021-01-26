@@ -8,7 +8,7 @@ import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../observability/public';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 interface LogCustomizationMenuState {
   isShown: boolean;

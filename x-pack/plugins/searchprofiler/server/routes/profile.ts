@@ -28,10 +28,6 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
       }
 
       const {
-        core: { elasticsearch },
-      } = ctx;
-
-      const {
         body: { query, index },
       } = request;
 
@@ -46,21 +42,25 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
         body: JSON.stringify(parsed, null, 2),
       };
       try {
-        const resp = await elasticsearch.legacy.client.callAsCurrentUser('search', body);
+        const client = ctx.core.elasticsearch.client.asCurrentUser;
+        const resp = await client.search(body);
+
         return response.ok({
           body: {
             ok: true,
-            resp,
+            resp: resp.body,
           },
         });
       } catch (err) {
         log.error(err);
+        const { statusCode, body: errorBody } = err;
+
         return response.customError({
-          statusCode: err.status || 500,
-          body: err.body
+          statusCode: statusCode || 500,
+          body: errorBody
             ? {
-                message: err.message,
-                attributes: err.body,
+                message: errorBody.error?.reason,
+                attributes: errorBody,
               }
             : err,
         });
