@@ -611,7 +611,7 @@ describe('Lens migrations', () => {
             layers: [
               {
                 layerId: 'first',
-                columnIds: ['a', 'b', 'c'],
+                columns: ['a', 'b', 'c'],
               },
             ],
             sorting: {
