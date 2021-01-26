@@ -52,6 +52,16 @@ interface KibanaDeps {
   http: HttpSetup;
 }
 
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
+// normalize the `index` parameter to be a string array
+function indexParamToArray(index: string | string[]): string[] {
+  if (!index) return [];
+  return isString(index) ? [index] : index;
+}
+
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
   AlertTypeParamsExpressionProps<IndexThresholdAlertParams>
 > = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, charts, data }) => {
@@ -69,6 +79,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     timeWindowUnit,
   } = alertParams;
 
+  const indexArray = indexParamToArray(index);
   const { http } = useKibana<KibanaDeps>().services;
 
   const [esFields, setEsFields] = useState<
@@ -111,14 +122,14 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     });
 
-    if (index && index.length > 0) {
+    if (indexArray.length > 0) {
       await refreshEsFields();
     }
   };
 
   const refreshEsFields = async () => {
-    if (index) {
-      const currentEsFields = await getFields(http, index);
+    if (indexArray.length > 0) {
+      const currentEsFields = await getFields(http, indexArray);
       setEsFields(currentEsFields);
     }
   };
@@ -147,7 +158,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       </EuiTitle>
       <EuiSpacer size="s" />
       <IndexSelectPopover
-        index={index}
+        index={indexArray}
         esFields={esFields}
         timeField={timeField}
         errors={errors}

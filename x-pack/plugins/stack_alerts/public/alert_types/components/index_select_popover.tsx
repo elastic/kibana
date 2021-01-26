@@ -34,7 +34,6 @@ import {
 interface KibanaDeps {
   http: HttpSetup;
 }
-
 interface Props {
   index: string[];
   esFields: Array<{
@@ -155,7 +154,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
               defaultMessage="Indices to query"
             />
           }
-          isInvalid={errors.index.length > 0 && index !== undefined}
+          isInvalid={errors.index.length > 0 && index !== undefined && index.length > 0}
           error={errors.index}
           helpText={
             <FormattedMessage
@@ -168,7 +167,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
             fullWidth
             async
             isLoading={areIndicesLoading}
-            isInvalid={errors.index.length > 0 && index !== undefined}
+            isInvalid={errors.index.length > 0 && index !== undefined && index.length > 0}
             noSuggestions={!indexOptions.length}
             options={indexOptions}
             data-test-subj="thresholdIndexesComboBox"
