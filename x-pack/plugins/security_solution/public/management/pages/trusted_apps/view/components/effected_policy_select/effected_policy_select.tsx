@@ -25,6 +25,7 @@ import { SecurityPageName } from '../../../../../../../common/constants';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 
 const NOOP = () => {};
+const DEFAULT_LIST_PROPS: EuiSelectableProps['listProps'] = { bordered: true, showIcons: false };
 
 interface OptionPolicyData {
   policy: PolicyData;
@@ -56,11 +57,6 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     'data-test-subj': dataTestSubj,
     ...otherSelectableProps
   }) => {
-    const DEFAULT_LIST_PROPS = useMemo<EuiSelectableProps['listProps']>(
-      () => ({ bordered: true, showIcons: false }),
-      []
-    );
-
     const { formatUrl } = useFormatUrl(SecurityPageName.administration);
 
     const [selectionState, setSelectionState] = useState<EffectedPolicySelection>({
@@ -78,13 +74,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     );
 
     const selectableOptions: EffectedPolicyOption[] = useMemo(() => {
-      const isPolicySelected = selected.reduce<{ [K: string]: PolicyData }>(
-        (idToPolicyData, policy) => {
-          idToPolicyData[policy.id] = policy;
-          return idToPolicyData;
-        },
-        {}
-      );
+      const isPolicySelected = new Set<string>(selected.map((policy) => policy.id));
 
       return options
         .map<EffectedPolicyOption>((policy) => ({
@@ -93,7 +83,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             <EuiCheckbox
               id={htmlIdGenerator()()}
               onChange={NOOP}
-              checked={!!isPolicySelected[policy.id]}
+              checked={isPolicySelected.has(policy.id)}
               disabled={isGlobal}
             />
           ),
@@ -111,7 +101,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             </LinkToApp>
           ),
           policy,
-          checked: isPolicySelected[policy.id] ? 'on' : undefined,
+          checked: isPolicySelected.has(policy.id) ? 'on' : undefined,
           disabled: isGlobal,
           'data-test-subj': `policy-${policy.id}`,
         }))
