@@ -9728,7 +9728,6 @@
     "xpack.infra.alerting.alertFlyout.groupBy.placeholder": "なし（グループなし）",
     "xpack.infra.alerting.alertFlyout.groupByLabel": "グループ分けの条件",
     "xpack.infra.alerting.alertsButton": "アラート",
-    "xpack.infra.alerting.createAlertButton": "アラートの作成",
     "xpack.infra.alerting.logs.alertsButton": "アラート",
     "xpack.infra.alerting.logs.createAlertButton": "アラートの作成",
     "xpack.infra.alerting.logs.manageAlerts": "アラートを管理",
