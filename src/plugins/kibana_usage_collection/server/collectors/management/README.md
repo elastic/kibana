@@ -33,4 +33,4 @@ uiSettings.register({
 }),
 ```
 
-The value of any UI setting marked as `sensitive` will be reported as a boolean `true` instead of the actual value. This hides the actual sensitive information while giving us some intelligence over which fields the users are interactive with the most.
+The value of any UI setting marked as `sensitive` will be reported as a keyword `[REDACTED]` instead of the actual value. This hides the actual sensitive information while giving us some intelligence over which fields the users are interactive with the most.

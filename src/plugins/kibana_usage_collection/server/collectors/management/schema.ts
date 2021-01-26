@@ -13,13 +13,13 @@ import { UsageStats } from './types';
 // I would suggest we use flattened type for the mappings of this collector.
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   // sensitive
-  'timelion:quandl.key': { type: 'boolean' },
-  'securitySolution:defaultIndex': { type: 'boolean' },
-  'securitySolution:newsFeedUrl': { type: 'boolean' },
-  'xpackReporting:customPdfLogo': { type: 'boolean' },
-  'notifications:banner': { type: 'boolean' },
-  'timelion:graphite.url': { type: 'boolean' },
-  'xpackDashboardMode:roles': { type: 'boolean' },
+  'timelion:quandl.key': { type: 'keyword' },
+  'securitySolution:defaultIndex': { type: 'keyword' },
+  'securitySolution:newsFeedUrl': { type: 'keyword' },
+  'xpackReporting:customPdfLogo': { type: 'keyword' },
+  'notifications:banner': { type: 'keyword' },
+  'timelion:graphite.url': { type: 'keyword' },
+  'xpackDashboardMode:roles': { type: 'keyword' },
   // non-sensitive
   'visualize:enableLabs': { type: 'boolean' },
   'visualization:heatmap:maxBuckets': { type: 'long' },

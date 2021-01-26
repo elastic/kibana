@@ -10,6 +10,7 @@ import { IUiSettingsClient } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { stackManagementSchema } from './schema';
 import { UsageStats } from './types';
+import { REDACTED_KEYWORD } from '../../../common/constants';
 
 export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClient | undefined) {
   return async function fetchUsageStats(): Promise<UsageStats | undefined> {
@@ -23,7 +24,7 @@ export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClien
       .filter(([key]) => key !== 'buildNum')
       .reduce((obj: any, [key, { userValue }]) => {
         const sensitive = uiSettingsClient.isSensitive(key);
-        obj[key] = sensitive ? true : userValue;
+        obj[key] = sensitive ? REDACTED_KEYWORD : userValue;
         return obj;
       }, {});
 

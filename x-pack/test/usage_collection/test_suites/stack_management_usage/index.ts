@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const nonBooleanSensitiveProps = sensitiveSettings
         .map((key) => ({ key, ..._.get(stackManagementSchema, key) }))
-        .filter((keyDescriptor) => keyDescriptor.type !== 'boolean');
+        .filter((keyDescriptor) => keyDescriptor.type !== 'keyword');
 
       expect(nonBooleanSensitiveProps).to.eql([]);
     });

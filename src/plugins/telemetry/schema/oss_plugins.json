@@ -4077,25 +4077,25 @@
     "stack_management": {
       "properties": {
         "timelion:quandl.key": {
-          "type": "boolean"
+          "type": "keyword"
         },
         "securitySolution:defaultIndex": {
-          "type": "boolean"
+          "type": "keyword"
         },
         "securitySolution:newsFeedUrl": {
-          "type": "boolean"
+          "type": "keyword"
         },
         "xpackReporting:customPdfLogo": {
-          "type": "boolean"
+          "type": "keyword"
         },
         "notifications:banner": {
-          "type": "boolean"
+          "type": "keyword"
         },
         "timelion:graphite.url": {
-          "type": "boolean"
+          "type": "keyword"
         },
         "xpackDashboardMode:roles": {
-          "type": "boolean"
+          "type": "keyword"
         },
         "visualize:enableLabs": {
           "type": "boolean"

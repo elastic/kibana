@@ -124,7 +124,7 @@ describe('createCollectorFetch', () => {
       });
     });
 
-    it('returns true as a value for sensitive settings', async () => {
+    it('returns [REDACTED] as a value for sensitive settings', async () => {
       const uiSettingsClient = uiSettingsServiceMock.createClient();
       const getUiSettingsClient = jest.fn(() => uiSettingsClient);
       uiSettingsClient.getUserProvided.mockResolvedValue(mockUserSettings);
@@ -133,7 +133,7 @@ describe('createCollectorFetch', () => {
       const result = await fetchFunction();
       expect(typeof result).toBe('object');
       expect(result!).toMatchObject({
-        item3: true,
+        item3: '[REDACTED]',
       });
     });
   });

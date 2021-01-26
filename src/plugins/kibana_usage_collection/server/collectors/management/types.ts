@@ -10,13 +10,13 @@ export interface UsageStats {
   /**
    * sensitive settings
    */
-  'timelion:quandl.key': boolean;
-  'securitySolution:defaultIndex': boolean;
-  'securitySolution:newsFeedUrl': boolean;
-  'xpackReporting:customPdfLogo': boolean;
-  'notifications:banner': boolean;
-  'timelion:graphite.url': boolean;
-  'xpackDashboardMode:roles': boolean;
+  'timelion:quandl.key': string;
+  'securitySolution:defaultIndex': string;
+  'securitySolution:newsFeedUrl': string;
+  'xpackReporting:customPdfLogo': string;
+  'notifications:banner': string;
+  'timelion:graphite.url': string;
+  'xpackDashboardMode:roles': string;
   /**
    * non-sensitive settings
    */
