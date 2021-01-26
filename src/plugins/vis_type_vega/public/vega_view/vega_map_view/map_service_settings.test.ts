@@ -23,7 +23,12 @@ describe('vega_map_view/map_service_settings', () => {
     let getUiSettingsMockedValue: any;
 
     beforeEach(() => {
-      config = {} as MapsLegacyConfig;
+      config = {
+        emsTileLayerId: {
+          desaturated: 'road_map_desaturated',
+          dark: 'dark_map',
+        },
+      } as MapsLegacyConfig;
       setUISettings({
         ...uiSettingsServiceMock.createSetupContract(),
         get: () => getUiSettingsMockedValue,
@@ -54,7 +59,7 @@ describe('vega_map_view/map_service_settings', () => {
         appVersion
       );
 
-      expect(mapServiceSettings.defaultTmsLayer()).toBe('user_configured');
+      expect(mapServiceSettings.defaultTmsLayer()).toBe('TMS in config/kibana.yml');
       expect(mapServiceSettings.hasUserConfiguredTmsLayer()).toBeTruthy();
     });
 
