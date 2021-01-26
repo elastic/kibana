@@ -83,6 +83,6 @@ Body::      A JSON payload sent to the request URL. For example:
 }
 --
 
-Note that the text with double braces {{}} are mustache template variables provided an alert. For more information on mustache template variables, refer to
+Note that mustache template variables are escaped so that the final JSON will be valid JSON (example: escaping double quote characters) For more information on mustache template variables, refer to
 https://www.elastic.co/guide/en/kibana/current/defining-alerts.html#defining-alerts-actions-details.
 
