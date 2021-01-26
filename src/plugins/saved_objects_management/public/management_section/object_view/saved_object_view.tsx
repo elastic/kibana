@@ -14,16 +14,18 @@ import {
   SavedObjectsClientContract,
   OverlayStart,
   NotificationsStart,
-  SimpleSavedObject,
   ScopedHistory,
+  HttpSetup,
 } from '../../../../../core/public';
 import { ISavedObjectsManagementServiceRegistry } from '../../services';
 import { Header, NotFoundErrors, Intro, Form } from './components';
-import { canViewInApp } from '../../lib';
+import { canViewInApp, findObject } from '../../lib';
 import { SubmittedFormData } from '../types';
+import { SavedObjectWithMetadata } from '../../types';
 
 interface SavedObjectEditionProps {
   id: string;
+  http: HttpSetup;
   serviceName: string;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   capabilities: Capabilities;
@@ -36,7 +38,7 @@ interface SavedObjectEditionProps {
 
 interface SavedObjectEditionState {
   type: string;
-  object?: SimpleSavedObject<any>;
+  object?: SavedObjectWithMetadata<any>;
 }
 
 export class SavedObjectEdition extends Component<
@@ -56,9 +58,9 @@ export class SavedObjectEdition extends Component<
   }
 
   componentDidMount() {
-    const { id, savedObjectsClient } = this.props;
+    const { http, id } = this.props;
     const { type } = this.state;
-    savedObjectsClient.get(type, id).then((object) => {
+    findObject(http, type, id).then((object) => {
       this.setState({
         object,
       });
@@ -70,7 +72,7 @@ export class SavedObjectEdition extends Component<
       capabilities,
       notFoundType,
       serviceRegistry,
-      id,
+      http,
       serviceName,
       savedObjectsClient,
     } = this.props;
@@ -80,7 +82,7 @@ export class SavedObjectEdition extends Component<
       string,
       boolean
     >;
-    const canView = canViewInApp(capabilities, type);
+    const canView = canViewInApp(capabilities, type) && Boolean(object?.meta.inAppUrl?.path);
     const service = serviceRegistry.get(serviceName)!.service;
 
     return (
@@ -91,7 +93,7 @@ export class SavedObjectEdition extends Component<
           canViewInApp={canView}
           type={type}
           onDeleteClick={() => this.delete()}
-          viewUrl={service.urlFor(id)}
+          viewUrl={http.basePath.prepend(object?.meta.inAppUrl?.path || '')}
         />
         {notFoundType && (
           <>

@@ -220,8 +220,7 @@ export const postAgentEnrollHandler: RequestHandler<
       {
         userProvided: request.body.metadata.user_provided,
         local: request.body.metadata.local,
-      },
-      request.body.shared_id
+      }
     );
     const body: PostAgentEnrollResponse = {
       action: 'created',

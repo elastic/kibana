@@ -3,5 +3,5 @@
   "version": "kibana",
   "ui": true,
   "server": false,
-  "requiredBundles": ["kibanaUtils"]
+  "extraPublicDirs": ["common"]
 }

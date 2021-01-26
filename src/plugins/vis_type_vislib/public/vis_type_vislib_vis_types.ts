@@ -6,6 +6,7 @@
  * Public License, v 1.
  */
 
+import { VisTypeDefinition } from 'src/plugins/visualizations/public';
 import { histogramVisTypeDefinition } from './histogram';
 import { lineVisTypeDefinition } from './line';
 import { areaVisTypeDefinition } from './area';
@@ -16,7 +17,7 @@ import { goalVisTypeDefinition } from './goal';
 
 export { pieVisTypeDefinition } from './pie';
 
-export const visLibVisTypeDefinitions = [
+export const visLibVisTypeDefinitions: Array<VisTypeDefinition<any>> = [
   histogramVisTypeDefinition,
   lineVisTypeDefinition,
   areaVisTypeDefinition,
@@ -26,7 +27,7 @@ export const visLibVisTypeDefinitions = [
   goalVisTypeDefinition,
 ];
 
-export const convertedTypeDefinitions = [
+export const convertedTypeDefinitions: Array<VisTypeDefinition<any>> = [
   heatmapVisTypeDefinition,
   gaugeVisTypeDefinition,
   goalVisTypeDefinition,
