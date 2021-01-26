@@ -68,6 +68,7 @@ describe('update_rules_bulk', () => {
 
     it('returns 404 if siem client is unavailable', async () => {
       const { securitySolution, ...contextWithoutSecuritySolution } = context;
+      // @ts-expect-error
       const response = await server.inject(getUpdateBulkRequest(), contextWithoutSecuritySolution);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { BehaviorSubject, of } from 'rxjs';
@@ -31,6 +20,7 @@ const getComputedFields = () => ({
   storedFields: [],
   scriptFields: {},
   docvalueFields: [],
+  runtimeFields: {},
 });
 
 const mockSource = { excludes: ['foo-*'] };
@@ -47,6 +37,13 @@ const indexPattern2 = ({
   getComputedFields,
   getSourceFiltering: () => mockSource2,
 } as unknown) as IndexPattern;
+
+const runtimeFieldDef = {
+  type: 'keyword',
+  script: {
+    source: "emit('hello world')",
+  },
+};
 
 describe('SearchSource', () => {
   let mockSearchMethod: any;
@@ -93,12 +90,14 @@ describe('SearchSource', () => {
 
     describe('computed fields handling', () => {
       test('still provides computed fields when no fields are specified', async () => {
+        const runtimeFields = { runtime_field: runtimeFieldDef };
         searchSource.setField('index', ({
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: ['hello'],
             scriptFields: { world: {} },
             docvalueFields: ['@timestamp'],
+            runtimeFields,
           }),
         } as unknown) as IndexPattern);
 
@@ -106,6 +105,7 @@ describe('SearchSource', () => {
         expect(request.stored_fields).toEqual(['hello']);
         expect(request.script_fields).toEqual({ world: {} });
         expect(request.fields).toEqual(['@timestamp']);
+        expect(request.runtime_mappings).toEqual(runtimeFields);
       });
 
       test('never includes docvalue_fields', async () => {
@@ -401,15 +401,23 @@ describe('SearchSource', () => {
       });
 
       test('filters request when a specific list of fields is provided with fieldsFromSource', async () => {
+        const runtimeFields = { runtime_field: runtimeFieldDef, runtime_field_b: runtimeFieldDef };
         searchSource.setField('index', ({
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: ['*'],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp', 'date'],
+            runtimeFields,
           }),
         } as unknown) as IndexPattern);
-        searchSource.setField('fieldsFromSource', ['hello', '@timestamp', 'foo-a', 'bar']);
+        searchSource.setField('fieldsFromSource', [
+          'hello',
+          '@timestamp',
+          'foo-a',
+          'bar',
+          'runtime_field',
+        ]);
 
         const request = await searchSource.getSearchRequestBody();
         expect(request._source).toEqual({
@@ -418,6 +426,7 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual(['@timestamp']);
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['@timestamp', 'bar']);
+        expect(request.runtime_mappings).toEqual({ runtime_field: runtimeFieldDef });
       });
 
       test('filters request when a specific list of fields is provided with fieldsFromSource or fields', async () => {
