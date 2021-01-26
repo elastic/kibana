@@ -58,6 +58,7 @@ import {
 } from './saved_objects';
 import { RouteGuard } from './lib/route_guard';
 import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
+import { ML_ALERT_TYPES } from '../common/constants/alerts';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -99,6 +100,7 @@ export class MlServerPlugin
       management: {
         insightsAndAlerting: ['jobsListLink'],
       },
+      alerting: [ML_ALERT_TYPES.ANOMALY_THRESHOLD],
       privileges: {
         all: admin,
         read: user,
@@ -124,6 +126,7 @@ export class MlServerPlugin
         ],
       },
     });
+
     registerKibanaSettings(coreSetup);
 
     if (plugins.alerts) {
