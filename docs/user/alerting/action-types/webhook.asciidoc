@@ -72,7 +72,7 @@ Password::  An optional password. If set, HTTP basic authentication is used. Cur
 
 Webhook actions have the following properties:
 
-Body::      A json payload sent to the request URL. For example: 
+Body::      A JSON payload sent to the request URL. For example: 
 +
 [source,text]
 --
@@ -83,6 +83,6 @@ Body::      A json payload sent to the request URL. For example:
 }
 --
 
-For the `variables` that can be defined in an alert, refer to {painless}/painless-watcher-condition-context.html[Watcher condition text].
+For the variables that can be defined in an alert, refer to {painless}/painless-watcher-condition-context.html[Watcher condition text].
 Note that the characters are escaped so they don't contain double quotes, \n characters, and so on.
 
