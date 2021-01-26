@@ -14,9 +14,10 @@ import * as i18n from './translations';
 export const TimelineKPIs = React.memo(
   ({ kpis, isLoading }: { kpis: TimelineKpiStrategyResponse | null; isLoading: boolean }) => {
     return (
-      <EuiFlexGroup wrap>
+      <EuiFlexGroup wrap data-test-subj="siem-timeline-kpis">
         <EuiFlexItem>
           <EuiStat
+            data-test-subj="siem-timeline-process-kpi"
             title={kpis === null ? getEmptyValue() : kpis.processCount}
             description={i18n.PROCESS_KPI_TITLE}
             titleSize="s"
@@ -25,6 +26,7 @@ export const TimelineKPIs = React.memo(
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiStat
+            data-test-subj="siem-timeline-user-kpi"
             title={kpis === null ? getEmptyValue() : kpis.userCount}
             description={i18n.USER_KPI_TITLE}
             titleSize="s"
@@ -33,6 +35,7 @@ export const TimelineKPIs = React.memo(
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiStat
+            data-test-subj="siem-timeline-host-kpi"
             title={kpis === null ? getEmptyValue() : kpis.hostCount}
             description={i18n.HOST_KPI_TITLE}
             titleSize="s"
@@ -41,6 +44,7 @@ export const TimelineKPIs = React.memo(
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiStat
+            data-test-subj="siem-timeline-source-ip-kpi"
             title={kpis === null ? getEmptyValue() : kpis.sourceIpCount}
             description={i18n.SOURCE_IP_KPI_TITLE}
             titleSize="s"
@@ -49,6 +53,7 @@ export const TimelineKPIs = React.memo(
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 100 }}>
           <EuiStat
+            data-test-subj="siem-timeline-destination-ip-kpi"
             title={kpis === null ? getEmptyValue() : kpis.destinationIpCount}
             description={i18n.DESTINATION_IP_KPI_TITLE}
             titleSize="s"
