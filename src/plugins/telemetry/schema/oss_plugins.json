@@ -4381,6 +4381,9 @@
         },
         "apm:enableServiceOverview": {
           "type": "boolean"
+        },
+        "apm:enableCorrelations": {
+          "type": "boolean"
         }
       }
     },
