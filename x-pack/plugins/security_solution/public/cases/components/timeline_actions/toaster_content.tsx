@@ -5,8 +5,16 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText } from '@elastic/eui';
+import styled from 'styled-components';
+
 import * as i18n from './translations';
+
+const EuiTextStyled = styled(EuiText)`
+  ${({ theme }) => `
+    margin-bottom: ${theme.eui?.paddingSizes?.s ?? 8}px;
+  `}
+`;
 
 interface Props {
   caseId: string;
@@ -18,8 +26,17 @@ const ToasterContentComponent: React.FC<Props> = ({ caseId, syncAlerts, onViewCa
   const onClick = useCallback(() => onViewCaseClick(caseId), [caseId, onViewCaseClick]);
   return (
     <>
-      {syncAlerts && <div>{i18n.CASE_CREATED_SUCCESS_TOAST_TEXT}</div>}
-      <EuiButtonEmpty size="s" flush="left" onClick={onClick}>
+      {syncAlerts && (
+        <EuiTextStyled size="s" data-test-subj="toaster-content-sync-text">
+          {i18n.CASE_CREATED_SUCCESS_TOAST_TEXT}
+        </EuiTextStyled>
+      )}
+      <EuiButtonEmpty
+        size="xs"
+        flush="left"
+        onClick={onClick}
+        data-test-subj="toaster-content-case-view-link"
+      >
         {i18n.VIEW_CASE}
       </EuiButtonEmpty>
     </>
