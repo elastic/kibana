@@ -107,17 +107,6 @@ describe('ElasticIndex', () => {
     });
   });
 
-  describe('deleteIndex', () => {
-    test('calls indices.delete', async () => {
-      await Index.deleteIndex(client, '.lotr');
-
-      expect(client.indices.delete).toHaveBeenCalledTimes(1);
-      expect(client.indices.delete).toHaveBeenCalledWith({
-        index: '.lotr',
-      });
-    });
-  });
-
   describe('claimAlias', () => {
     test('handles unaliased indices', async () => {
       client.indices.getAlias.mockResolvedValue(

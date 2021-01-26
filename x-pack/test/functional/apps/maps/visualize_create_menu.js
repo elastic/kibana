@@ -12,42 +12,66 @@ export default function ({ getService, getPageObjects }) {
   const security = getService('security');
 
   describe('visualize create menu', () => {
-    before(async () => {
-      await security.testUser.setRoles(
-        ['test_logstash_reader', 'global_maps_all', 'geoshape_data_reader', 'global_visualize_all'],
-        false
-      );
+    describe('maps visualize alias', () => {
+      describe('with write permission', () => {
+        before(async () => {
+          await security.testUser.setRoles(['global_maps_all', 'global_visualize_all'], false);
 
-      await PageObjects.visualize.navigateToNewVisualization();
+          await PageObjects.visualize.navigateToNewVisualization();
+        });
+
+        it('should show maps application in create menu', async () => {
+          const hasMapsApp = await PageObjects.visualize.hasMapsApp();
+          expect(hasMapsApp).to.equal(true);
+        });
+
+        it('should take users to Maps application when Maps is clicked', async () => {
+          await PageObjects.visualize.clickMapsApp();
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.maps.waitForLayersToLoad();
+          const doesLayerExist = await PageObjects.maps.doesLayerExist('Road map');
+          expect(doesLayerExist).to.equal(true);
+        });
+      });
+
+      describe('without write permission', () => {
+        before(async () => {
+          await security.testUser.setRoles(['global_maps_read', 'global_visualize_all'], false);
+
+          await PageObjects.visualize.navigateToNewVisualization();
+        });
+
+        after(async () => {
+          await security.testUser.restoreDefaults();
+        });
+
+        it('should not show maps application in create menu', async () => {
+          const hasMapsApp = await PageObjects.visualize.hasMapsApp();
+          expect(hasMapsApp).to.equal(false);
+        });
+      });
     });
 
-    after(async () => {
-      await security.testUser.restoreDefaults();
-    });
+    describe('aggregion based visualizations', () => {
+      before(async () => {
+        await security.testUser.setRoles(['global_visualize_all'], false);
 
-    it('should show maps application in create menu', async () => {
-      const hasMapsApp = await PageObjects.visualize.hasMapsApp();
-      expect(hasMapsApp).to.equal(true);
-    });
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
+      });
 
-    it('should not show legacy region map visualizion in create menu', async () => {
-      await PageObjects.visualize.clickAggBasedVisualizations();
-      const hasLegecyViz = await PageObjects.visualize.hasRegionMap();
-      expect(hasLegecyViz).to.equal(false);
-    });
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
 
-    it('should not show legacy tilemap map visualizion in create menu', async () => {
-      const hasLegecyViz = await PageObjects.visualize.hasTileMap();
-      expect(hasLegecyViz).to.equal(false);
-    });
+      it('should not show legacy region map visualizion in create menu', async () => {
+        const hasLegecyViz = await PageObjects.visualize.hasRegionMap();
+        expect(hasLegecyViz).to.equal(false);
+      });
 
-    it('should take users to Maps application when Maps is clicked', async () => {
-      await PageObjects.visualize.goBackToGroups();
-      await PageObjects.visualize.clickMapsApp();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.maps.waitForLayersToLoad();
-      const doesLayerExist = await PageObjects.maps.doesLayerExist('Road map');
-      expect(doesLayerExist).to.equal(true);
+      it('should not show legacy tilemap map visualizion in create menu', async () => {
+        const hasLegecyViz = await PageObjects.visualize.hasTileMap();
+        expect(hasLegecyViz).to.equal(false);
+      });
     });
   });
 }
