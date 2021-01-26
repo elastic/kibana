@@ -37,6 +37,7 @@ import { BAR_HEIGHT, CANVAS_MAX_ITEMS, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from 
 import { Sidebar } from './sidebar';
 import { Legend } from './legend';
 import { useBarCharts } from './use_bar_charts';
+import { WaterfallFlyout } from './waterfall_flyout';
 
 const Tooltip = (tooltipInfo: TooltipInfo) => {
   const { data, renderTooltipItem } = useWaterfallContext();
@@ -58,7 +59,11 @@ const Tooltip = (tooltipInfo: TooltipInfo) => {
   ) : null;
 };
 
-export type RenderItem<I = any> = (item: I, index: number) => JSX.Element;
+export type RenderItem<I = any> = (
+  item: I,
+  index: number,
+  onClick?: (event: any) => void
+) => JSX.Element;
 
 export interface WaterfallChartProps {
   tickFormat: TickFormatter;
@@ -84,7 +89,7 @@ export const WaterfallChart = ({
   maxHeight = '800px',
   fullHeight = false,
 }: WaterfallChartProps) => {
-  const { data, sidebarItems, legendItems } = useWaterfallContext();
+  const { data, sidebarItems, legendItems, onBarClick, onProjectionClick } = useWaterfallContext();
 
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
@@ -176,6 +181,8 @@ export const WaterfallChart = ({
                     rotation={90}
                     tooltip={{ customTooltip: Tooltip }}
                     theme={theme}
+                    onElementClick={onBarClick}
+                    onProjectionClick={onProjectionClick}
                   />
 
                   <Axis
@@ -207,6 +214,7 @@ export const WaterfallChart = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         {shouldRenderLegend && <Legend items={legendItems!} render={renderLegendItem!} />}
+        <WaterfallFlyout />
       </>
     </WaterfallChartOuterContainer>
   );

@@ -5,7 +5,8 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import styled from 'styled-components';
+import { EuiButtonEmpty, EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
 import { SidebarItem, LegendItem, NetworkItems } from './types';
 import {
@@ -13,9 +14,21 @@ import {
   WaterfallChart,
   MiddleTruncatedText,
   RenderItem,
+  useFlyout,
 } from '../../waterfall';
 
-export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
+const StyledButton = styled(EuiButtonEmpty)`
+  &&& {
+    height: auto;
+
+    .euiButtonContent {
+      display: inline-block;
+      padding: 0;
+    }
+  }
+`;
+
+export const renderSidebarItem: RenderItem<SidebarItem> = (item, index, onClick) => {
   const { status } = item;
 
   const isErrorStatusCode = (statusCode: number) => {
@@ -28,11 +41,15 @@ export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
   return (
     <>
       {!status || !isErrorStatusCode(status) ? (
-        <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
+        <StyledButton onClick={onClick}>
+          <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
+        </StyledButton>
       ) : (
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
-            <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
+            <StyledButton onClick={onClick}>
+              <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
+            </StyledButton>
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
             <EuiBadge color="danger">{status}</EuiBadge>
@@ -54,7 +71,7 @@ interface Props {
 export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
   const [networkData] = useState<NetworkItems>(data);
 
-  const { series, domain } = useMemo(() => {
+  const { series, domain, metaData } = useMemo(() => {
     return getSeriesAndDomain(networkData);
   }, [networkData]);
 
@@ -64,11 +81,27 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
 
   const legendItems = getLegendItems();
 
+  const {
+    flyoutData,
+    onBarClick,
+    onProjectionClick,
+    onSidebarClick,
+    isFlyoutVisible,
+    setIsFlyoutVisible,
+  } = useFlyout(metaData);
+
   return (
     <WaterfallProvider
       data={series}
+      flyoutData={flyoutData}
+      onBarClick={onBarClick}
+      onProjectionClick={onProjectionClick}
+      onSidebarClick={onSidebarClick}
+      isFlyoutVisible={isFlyoutVisible}
+      setIsFlyoutVisible={setIsFlyoutVisible}
       sidebarItems={sidebarItems}
       legendItems={legendItems}
+      metaData={metaData}
       renderTooltipItem={(tooltipProps) => {
         return <EuiHealth color={String(tooltipProps?.colour)}>{tooltipProps?.value}</EuiHealth>;
       }}
