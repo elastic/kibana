@@ -78,7 +78,7 @@ export const hasReadIndexPrivileges = async (
   if (indexesWithReadPrivileges.length > 0 && indexesWithNoReadPrivileges.length > 0) {
     // some indices have read privileges others do not.
     // set a partial failure status
-    const errorString = `Missing required read permissions on indexes: ${JSON.stringify(
+    const errorString = `Missing required read privileges on the following indices: ${JSON.stringify(
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
@@ -90,11 +90,11 @@ export const hasReadIndexPrivileges = async (
   ) {
     // none of the indices had read privileges so set the status to failed
     // since we can't search on any indices we do not have read privileges on
-    const errorString = `The rule does not have read privileges to any of the following indices: ${JSON.stringify(
+    const errorString = `This rule may not have the required read privileges to the following indices: ${JSON.stringify(
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.error(errorString);
+    await ruleStatusService.partialFailure(errorString);
     return true;
   }
   return false;
@@ -120,8 +120,10 @@ export const hasTimestampFields = async (
     // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
     // partial failure
     const errorString = `The following indices are missing the ${
-      timestampField === '@timestamp' ? 'timestamp field "@timestamp"' : 'timestamp override field'
-    } "${timestampField}": ${JSON.stringify(
+      timestampField === '@timestamp'
+        ? 'timestamp field "@timestamp"'
+        : `timestamp override field "${timestampField}"`
+    }: ${JSON.stringify(
       isEmpty(timestampFieldCapsResponse.body.fields)
         ? timestampFieldCapsResponse.body.indices
         : timestampFieldCapsResponse.body.fields[timestampField].unmapped.indices

@@ -6,6 +6,7 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
+import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
@@ -28,6 +29,7 @@ import {
   getListsClient,
   getSignalTimeTuples,
   getExceptions,
+  hasTimestampFields,
   wrapBuildingBlocks,
   generateSignalId,
   createErrorsFromShard,
@@ -60,6 +62,14 @@ const buildRuleMessage = buildRuleMessageFactory({
   index: 'fakeindex',
   name: 'fake name',
 });
+
+const ruleStatusServiceMock = {
+  success: jest.fn(),
+  find: jest.fn(),
+  goingToRun: jest.fn(),
+  error: jest.fn(),
+  partialFailure: jest.fn(),
+};
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -800,6 +810,85 @@ describe('utils', () => {
       });
 
       expect(exceptions).toEqual([]);
+    });
+  });
+
+  describe('hasTimestampFields', () => {
+    test('returns true when missing timestamp override field', async () => {
+      const timestampField = 'event.ingested';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          fields: {
+            [timestampField]: {
+              date: {
+                type: 'date',
+                searchable: true,
+                aggregatable: true,
+                indices: ['myfakeindex-3', 'myfakeindex-4'],
+              },
+              unmapped: {
+                type: 'unmapped',
+                searchable: false,
+                aggregatable: false,
+                indices: ['myfakeindex-1', 'myfakeindex-2'],
+              },
+            },
+          },
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+    test('returns true when missing timestamp field', async () => {
+      const timestampField = '@timestamp';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          fields: {
+            [timestampField]: {
+              date: {
+                type: 'date',
+                searchable: true,
+                aggregatable: true,
+                indices: ['myfakeindex-3', 'myfakeindex-4'],
+              },
+              unmapped: {
+                type: 'unmapped',
+                searchable: false,
+                aggregatable: false,
+                indices: ['myfakeindex-1', 'myfakeindex-2'],
+              },
+            },
+          },
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
     });
   });
 

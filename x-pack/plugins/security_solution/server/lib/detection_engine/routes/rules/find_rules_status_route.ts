@@ -5,7 +5,7 @@
  */
 
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { RuleStatusResponse } from '../../rules/types';
 import { transformError, buildSiemResponse, mergeStatuses, getFailingRules } from '../utils';
@@ -22,7 +22,7 @@ import {
  * @param router
  * @returns RuleStatusResponse
  */
-export const findRulesStatusesRoute = (router: IRouter) => {
+export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,

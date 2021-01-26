@@ -37,7 +37,7 @@ export function createCCRReadExceptionsAlertType(): AlertTypeModel<ValidateOptio
     description: ALERT_DETAILS[ALERT_CCR_READ_EXCEPTIONS].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/kibana-alerts.html`;
+      return `${docLinks.links.monitoring.alertsKibana}`;
     },
     alertParamsExpression: (props: Props) => (
       <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_CCR_READ_EXCEPTIONS].paramDetails} />

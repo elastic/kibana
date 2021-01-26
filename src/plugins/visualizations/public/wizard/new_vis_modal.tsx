@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React from 'react';
@@ -32,7 +21,7 @@ import {
 import { SearchSelection } from './search_selection';
 import { GroupSelection } from './group_selection';
 import { AggBasedSelection } from './agg_based_selection';
-import type { TypesStart, VisType, VisTypeAlias } from '../vis_types';
+import type { TypesStart, BaseVisType, VisTypeAlias } from '../vis_types';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
 import { EmbeddableStateTransfer } from '../../../embeddable/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
@@ -57,7 +46,7 @@ interface TypeSelectionProps {
 interface TypeSelectionState {
   showSearchVisModal: boolean;
   showGroups: boolean;
-  visType?: VisType;
+  visType?: BaseVisType;
 }
 
 // TODO: redirect logic is specific to visualise & dashboard
@@ -140,7 +129,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.props.onClose();
   };
 
-  private onVisTypeSelected = (visType: VisType | VisTypeAlias) => {
+  private onVisTypeSelected = (visType: BaseVisType | VisTypeAlias) => {
     if (!('aliasPath' in visType) && visType.requiresSearch && visType.options.showIndexSelection) {
       this.setState({
         showSearchVisModal: true,
@@ -155,7 +144,11 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.redirectToVis(this.state.visType!, searchType, searchId);
   };
 
-  private redirectToVis(visType: VisType | VisTypeAlias, searchType?: string, searchId?: string) {
+  private redirectToVis(
+    visType: BaseVisType | VisTypeAlias,
+    searchType?: string,
+    searchId?: string
+  ) {
     if (this.trackUiMetric) {
       this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
     }

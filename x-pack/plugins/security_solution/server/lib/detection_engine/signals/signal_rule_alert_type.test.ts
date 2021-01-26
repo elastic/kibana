@@ -226,7 +226,7 @@ describe('rules_notification_alert_type', () => {
       await alert.executor(payload);
       expect(ruleStatusService.partialFailure).toHaveBeenCalled();
       expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
-        'Missing required read permissions on indexes: ["some*"]'
+        'Missing required read privileges on the following indices: ["some*"]'
       );
     });
 
@@ -247,9 +247,9 @@ describe('rules_notification_alert_type', () => {
       });
       payload.params.index = ['some*', 'myfa*'];
       await alert.executor(payload);
-      expect(ruleStatusService.error).toHaveBeenCalled();
-      expect(ruleStatusService.error.mock.calls[0][0]).toContain(
-        'The rule does not have read privileges to any of the following indices: ["myfa*","some*"]'
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
+        'This rule may not have the required read privileges to the following indices: ["myfa*","some*"]'
       );
     });
 
@@ -535,6 +535,35 @@ describe('rules_notification_alert_type', () => {
           errors: [],
         });
         await alert.executor(payload);
+        expect(ruleStatusService.success).toHaveBeenCalled();
+      });
+
+      it('should not call checkPrivileges if ML rule', async () => {
+        const ruleAlert = getMlResult();
+        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
+        jobsSummaryMock.mockResolvedValue([
+          {
+            id: 'some_job_id',
+            jobState: 'started',
+            datafeedState: 'started',
+          },
+        ]);
+        (findMlSignals as jest.Mock).mockResolvedValue({
+          _shards: { failed: 0 },
+          hits: {
+            hits: [{}],
+          },
+        });
+        (bulkCreateMlSignals as jest.Mock).mockResolvedValue({
+          success: true,
+          bulkCreateDuration: 1,
+          createdItemsCount: 1,
+          errors: [],
+        });
+        (checkPrivileges as jest.Mock).mockClear();
+
+        await alert.executor(payload);
+        expect(checkPrivileges).toHaveBeenCalledTimes(0);
         expect(ruleStatusService.success).toHaveBeenCalled();
       });
 

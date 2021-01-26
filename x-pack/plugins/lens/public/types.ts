@@ -16,7 +16,7 @@ import {
   Datatable,
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
-import { DragContextState } from './drag_drop';
+import { DragContextState, Dragging } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
@@ -139,6 +139,10 @@ export interface DatasourceSuggestion<T = unknown> {
 
 export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
 
+export interface InitializationOptions {
+  isFullEditor?: boolean;
+}
+
 /**
  * Interface for the datasource registry
  */
@@ -151,7 +155,8 @@ export interface Datasource<T = unknown, P = unknown> {
   initialize: (
     state?: P,
     savedObjectReferences?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext
+    initialContext?: VisualizeFieldContext,
+    options?: InitializationOptions
   ) => Promise<T>;
 
   // Given the current state, which parts should be saved?
@@ -217,6 +222,8 @@ export interface DatasourceDataPanelProps<T = unknown> {
   query: Query;
   dateRange: DateRange;
   filters: Filter[];
+  dropOntoWorkspace: (field: Dragging) => void;
+  hasSuggestionForField: (field: Dragging) => boolean;
 }
 
 interface SharedDimensionProps {
