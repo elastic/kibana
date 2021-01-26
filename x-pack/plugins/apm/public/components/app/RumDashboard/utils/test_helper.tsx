@@ -11,7 +11,7 @@ import { of } from 'rxjs';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { MemoryHistory } from 'history';
-import { EuiThemeProvider } from '../../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { UrlParamsProvider } from '../../../../context/url_params_context/url_params_context';
 
