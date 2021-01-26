@@ -120,8 +120,10 @@ export const hasTimestampFields = async (
     // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
     // partial failure
     const errorString = `The following indices are missing the ${
-      timestampField === '@timestamp' ? 'timestamp field "@timestamp"' : 'timestamp override field'
-    } "${timestampField}": ${JSON.stringify(
+      timestampField === '@timestamp'
+        ? 'timestamp field "@timestamp"'
+        : `timestamp override field "${timestampField}"`
+    }: ${JSON.stringify(
       isEmpty(timestampFieldCapsResponse.body.fields)
         ? timestampFieldCapsResponse.body.indices
         : timestampFieldCapsResponse.body.fields[timestampField].unmapped.indices

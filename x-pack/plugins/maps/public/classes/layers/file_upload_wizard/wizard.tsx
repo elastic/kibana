@@ -14,7 +14,7 @@ import {
   SCALING_TYPES,
 } from '../../../../common/constants';
 import { getFileUploadComponent } from '../../../kibana_services';
-import { GeojsonFileSource } from '../../sources/geojson_file_source';
+import { GeoJsonFileSource } from '../../sources/geojson_file_source';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
@@ -79,7 +79,10 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
       return;
     }
 
-    const sourceDescriptor = GeojsonFileSource.createDescriptor(geojsonFile, name);
+    const sourceDescriptor = GeoJsonFileSource.createDescriptor({
+      __featureCollection: geojsonFile,
+      name,
+    });
     const layerDescriptor = VectorLayer.createDescriptor(
       { sourceDescriptor },
       this.props.mapColors
