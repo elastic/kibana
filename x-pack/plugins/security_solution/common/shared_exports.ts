@@ -16,4 +16,4 @@ export { exactCheck } from './exact_check';
 export { getPaths, foldLeftRight, removeExternalLinkText } from './test_utils';
 export { validate, validateEither } from './validate';
 export { formatErrors } from './format_errors';
-export { migratePackagePolicyToV7110 } from './endpoint/policy/migrations/to_v7_11.0';
+export { migratePackagePolicyToV7110 } from './endpoint/policy/migrations/to_v7_11_0';

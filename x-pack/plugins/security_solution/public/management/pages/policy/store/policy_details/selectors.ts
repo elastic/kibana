@@ -32,10 +32,26 @@ export const licensedPolicy: (
   licenseState,
   (policyData, license) => {
     if (policyData) {
-      unsetPolicyFeaturesAboveLicenseLevel(
+      const policyValue = unsetPolicyFeaturesAboveLicenseLevel(
         policyData?.inputs[0]?.config.policy.value,
         license as ILicense
       );
+      const newPolicyData: Immutable<PolicyData> = {
+        ...policyData,
+        inputs: [
+          {
+            ...policyData?.inputs[0],
+            config: {
+              ...policyData?.inputs[0].config,
+              policy: {
+                ...policyData?.inputs[0].config.policy,
+                value: policyValue,
+              },
+            },
+          },
+        ],
+      };
+      return newPolicyData;
     }
     return policyData;
   }
