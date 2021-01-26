@@ -6,7 +6,7 @@
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from '../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { IUrlParams } from '../../../context/url_params_context/types';
 import {
