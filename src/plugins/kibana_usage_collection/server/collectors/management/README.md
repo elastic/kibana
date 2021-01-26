@@ -3,6 +3,16 @@
 The Usage Collector `stack_management` reports user changed settings.
 All user changed UI Settings are automatically collected.
 
+After adding a new setting you will be required -via our api_integration tests- to update the [schema](./schema.ts) of the management collector and the [UsageStats](./types.ts) interface.
+
+If you forget our telemetry check will help you through the process! You can then run the checker with `--fix` flag to automatically fix the mappings
+
+```
+node scripts/telemetry_check --fix
+```
+
+## Sensitive fields
+
 If the configured UI setting might contain user sensitive information simply add the property `sensitive: true` to the ui setting registration config.
 
 ```
