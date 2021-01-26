@@ -188,34 +188,38 @@ test('flags schema paths as handled when registering a schema', async () => {
 
 test('tracks unhandled paths', async () => {
   const initialConfig = {
-    bar: {
-      deep1: {
-        key: '123',
-      },
-      deep2: {
-        key: '321',
-      },
+    service: {
+      string: 'str',
+      number: 42,
     },
-    foo: 'value',
-    quux: {
-      deep1: {
-        key: 'hello',
-      },
-      deep2: {
-        key: 'world',
-      },
+    plugin: {
+      foo: 'bar',
+    },
+    unknown: {
+      hello: 'dolly',
+      number: 9000,
     },
   };
 
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
-
-  configService.atPath('foo');
-  configService.atPath(['bar', 'deep2']);
+  await configService.setSchema(
+    'service',
+    schema.object({
+      string: schema.string(),
+      number: schema.number(),
+    })
+  );
+  await configService.setSchema(
+    'plugin',
+    schema.object({
+      foo: schema.string(),
+    })
+  );
 
   const unused = await configService.getUnusedPaths();
 
-  expect(unused).toEqual(['bar.deep1.key', 'quux.deep1.key', 'quux.deep2.key']);
+  expect(unused).toEqual(['unknown.hello', 'unknown.number']);
 });
 
 test('correctly passes context', async () => {
