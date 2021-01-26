@@ -9,8 +9,6 @@
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { UsageStats } from './types';
 
-// Retrieved by changing all the current settings in Kibana (we'll need to revisit it in the future).
-// I would suggest we use flattened type for the mappings of this collector.
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   // sensitive
   'timelion:quandl.key': { type: 'keyword' },
