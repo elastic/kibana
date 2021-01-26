@@ -27,16 +27,17 @@ describe('SearchStrategyRegister', () => {
 
   beforeAll(() => {
     registry = new SearchStrategyRegistry();
+    registry.addStrategy(new DefaultSearchStrategy());
   });
 
   test('should init strategies register', () => {
-    expect(getPrivateField(registry, 'strategies')).toHaveLength(2);
+    expect(getPrivateField(registry, 'strategies')).toHaveLength(1);
   });
 
   test('should not add a strategy if it is not an instance of AbstractSearchStrategy', () => {
     const addedStrategies = registry.addStrategy({} as AbstractSearchStrategy);
 
-    expect(addedStrategies.length).toEqual(2);
+    expect(addedStrategies.length).toEqual(1);
   });
 
   test('should return a DefaultSearchStrategy instance', async () => {
@@ -53,7 +54,7 @@ describe('SearchStrategyRegister', () => {
     const anotherSearchStrategy = new MockSearchStrategy();
     const addedStrategies = registry.addStrategy(anotherSearchStrategy);
 
-    expect(addedStrategies.length).toEqual(3);
+    expect(addedStrategies.length).toEqual(2);
     expect(addedStrategies[0] instanceof AbstractSearchStrategy).toBe(true);
   });
 

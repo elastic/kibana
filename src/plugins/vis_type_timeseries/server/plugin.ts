@@ -23,9 +23,14 @@ import { PluginStart } from '../../data/server';
 import { visDataRoutes } from './routes/vis';
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
-import { SearchStrategyRegistry } from './lib/search_strategies';
 import { uiSettings } from './ui_settings';
 import type { VisTypeTimeseriesRequestHandlerContext, VisTypeTimeseriesRouter } from './types';
+
+import {
+  SearchStrategyRegistry,
+  DefaultSearchStrategy,
+  RollupSearchStrategy,
+} from './lib/search_strategies';
 
 export interface LegacySetup {
   server: Server;
@@ -74,6 +79,9 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     const router = core.http.createRouter<VisTypeTimeseriesRequestHandlerContext>();
 
     const searchStrategyRegistry = new SearchStrategyRegistry();
+
+    searchStrategyRegistry.addStrategy(new DefaultSearchStrategy());
+    searchStrategyRegistry.addStrategy(new RollupSearchStrategy());
 
     const framework: Framework = {
       core,

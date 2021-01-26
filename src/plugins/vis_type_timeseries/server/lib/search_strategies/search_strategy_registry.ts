@@ -8,22 +8,12 @@
 
 import { extractIndexPatterns } from '../../../common/extract_index_patterns';
 import { PanelSchema } from '../../../common/types';
-import {
-  AbstractSearchStrategy,
-  DefaultSearchStrategy,
-  RollupSearchStrategy,
-  ReqFacade,
-} from './strategies';
+import { AbstractSearchStrategy, ReqFacade } from './strategies';
 
 export type RequestFacade = ReqFacade<any>;
 
 export class SearchStrategyRegistry {
   private strategies: AbstractSearchStrategy[] = [];
-
-  constructor() {
-    this.addStrategy(new DefaultSearchStrategy());
-    this.addStrategy(new RollupSearchStrategy());
-  }
 
   public addStrategy(searchStrategy: AbstractSearchStrategy) {
     if (searchStrategy instanceof AbstractSearchStrategy) {
