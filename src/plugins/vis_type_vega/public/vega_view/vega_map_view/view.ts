@@ -11,7 +11,6 @@ import { Map, Style, NavigationControl, MapboxOptions } from 'mapbox-gl';
 
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
-import { TmsTileLayers } from './tms_tile_layers';
 import { getMapServiceSettings } from '../../services';
 import { getAttributionsForTmsService } from './map_service_settings';
 import type { MapServiceSettings } from './map_service_settings';
@@ -32,8 +31,9 @@ import './vega_map_view.scss';
 
 export class VegaMapView extends VegaBaseView {
   private mapServiceSettings: MapServiceSettings = getMapServiceSettings();
+  private mapStyle = this.getMapStyle();
 
-  private get mapStyle() {
+  private getMapStyle() {
     const { mapStyle } = this._parser.mapConfig;
 
     return mapStyle === 'default' ? this.mapServiceSettings.defaultTmsLayer() : mapStyle;
@@ -62,7 +62,7 @@ export class VegaMapView extends VegaBaseView {
       maxZoom: defaultMapConfig.maxZoom,
     };
 
-    if (this.mapStyle !== TmsTileLayers.userConfigured) {
+    if (this.mapStyle && this.mapStyle !== userConfiguredLayerId) {
       const tmsService = await this.mapServiceSettings.getTmsService(this.mapStyle);
 
       if (!tmsService) {
@@ -140,7 +140,7 @@ export class VegaMapView extends VegaBaseView {
   }
 
   private initLayers(mapBoxInstance: Map, vegaView: vega.View) {
-    const shouldShowUserConfiguredLayer = this.mapStyle === TmsTileLayers.userConfigured;
+    const shouldShowUserConfiguredLayer = this.mapStyle === userConfiguredLayerId;
 
     if (shouldShowUserConfiguredLayer) {
       const { url, options } = this.mapServiceSettings.config.tilemap;

@@ -6,10 +6,10 @@
  * Public License, v 1.
  */
 
-import { TmsTileLayers } from './tms_tile_layers';
+import { TMS_IN_YML_ID } from '../../../../maps_legacy/public';
 
 export const vegaLayerId = 'vega';
-export const userConfiguredLayerId = TmsTileLayers.userConfigured;
+export const userConfiguredLayerId = TMS_IN_YML_ID;
 export const defaultMapConfig = {
   maxZoom: 20,
   minZoom: 0,

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { EMSClient, TMSService } from '@elastic/ems-client';
 import { getUISettings } from '../../services';
-import { TmsTileLayers } from './tms_tile_layers';
+import { userConfiguredLayerId } from './constants';
 import type { MapsLegacyConfig } from '../../../../maps_legacy/config';
 
 type EmsClientConfig = ConstructorParameters<typeof EMSClient>[0];
@@ -47,10 +47,13 @@ export class MapServiceSettings {
   }
 
   public defaultTmsLayer() {
+    const { dark, desaturated } = this.config.emsTileLayerId;
+
     if (this.hasUserConfiguredTmsLayer()) {
-      return TmsTileLayers.userConfigured;
+      return userConfiguredLayerId;
     }
-    return this.isDarkMode ? TmsTileLayers.dark : TmsTileLayers.desaturated;
+
+    return this.isDarkMode ? dark : desaturated;
   }
 
   private async initialize() {
@@ -64,7 +67,7 @@ export class MapServiceSettings {
     });
   }
 
-  public async getTmsService(tmsTileLayer: TmsTileLayers | string = TmsTileLayers.desaturated) {
+  public async getTmsService(tmsTileLayer: string) {
     if (!this.isInitialized()) {
       await this.initialize();
     }
