@@ -13,7 +13,7 @@ import hjson from 'hjson';
 import 'brace/mode/hjson';
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { getNotifications } from '../services';
 import { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';
@@ -55,7 +55,7 @@ function format(
   }
 }
 
-function VegaVisEditor({ stateParams, setValue }: VisOptionsProps<VisParams>) {
+function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParams>) {
   const onChange = useCallback(
     (value: string) => {
       setValue('spec', value);
