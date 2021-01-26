@@ -6,11 +6,13 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiCheckbox,
   EuiFormRow,
   EuiSelectable,
   EuiSelectableProps,
   EuiSwitch,
   EuiSwitchProps,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
@@ -21,6 +23,8 @@ import { getPolicyDetailPath } from '../../../../../common/routing';
 import { useFormatUrl } from '../../../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../../../../common/constants';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
+
+const NOOP = () => {};
 
 interface OptionPolicyData {
   policy: PolicyData;
@@ -52,7 +56,10 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     'data-test-subj': dataTestSubj,
     ...otherSelectableProps
   }) => {
-    const DEFAULT_LIST_PROPS = useMemo(() => ({ bordered: true }), []);
+    const DEFAULT_LIST_PROPS = useMemo<EuiSelectableProps['listProps']>(
+      () => ({ bordered: true, showIcons: false }),
+      []
+    );
 
     const { formatUrl } = useFormatUrl(SecurityPageName.administration);
 
@@ -82,6 +89,14 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       return options
         .map<EffectedPolicyOption>((policy) => ({
           label: policy.name,
+          prepend: (
+            <EuiCheckbox
+              id={htmlIdGenerator()()}
+              onChange={NOOP}
+              checked={!!isPolicySelected[policy.id]}
+              disabled={isGlobal}
+            />
+          ),
           append: (
             <LinkToApp
               href={formatUrl(getPolicyDetailPath(policy.id))}
@@ -161,6 +176,9 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             listProps={listProps || DEFAULT_LIST_PROPS}
             onChange={handleOnPolicySelectChange}
             data-test-subj={getTestId('policiesSelectable')}
+            renderOption={(option, searchValue) => {
+              return <span id="paul">{option.policy.name}</span>;
+            }}
           >
             {listBuilderCallback}
           </EuiSelectable>
