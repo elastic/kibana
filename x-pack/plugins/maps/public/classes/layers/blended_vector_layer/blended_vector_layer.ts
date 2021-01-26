@@ -318,7 +318,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
         const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
         const resp = await searchSource.fetch({
           abortSignal: abortController.signal,
-          sessionId: searchFilters.searchSessionId,
+          sessionId: syncContext.dataFilters.searchSessionId,
         });
         const maxResultWindow = await this._documentSource.getMaxResultWindow();
         isSyncClustered = resp.hits.total > maxResultWindow;
