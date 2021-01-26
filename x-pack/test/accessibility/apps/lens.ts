@@ -7,15 +7,12 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'home', 'settings', 'lens']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'home', 'lens']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const listingTable = getService('listingTable');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/88926
-  // FLAKY: https://github.com/elastic/kibana/issues/88927
-  // FLAKY: https://github.com/elastic/kibana/issues/88929
-  describe.skip('Lens', () => {
+  describe('Lens', () => {
     const lensChartName = 'MyLensChart';
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
@@ -35,12 +32,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('lens', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.timePicker.ensureHiddenNoDataPopover();
       await a11y.testAppSnapshot();
     });
 
     it('lens XY chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.timePicker.ensureHiddenNoDataPopover();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -75,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('dimension configuration panel', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.timePicker.ensureHiddenNoDataPopover();
 
       await PageObjects.lens.openDimensionEditor('lnsXY_xDimensionPanel > lns-empty-dimension');
       await a11y.testAppSnapshot();

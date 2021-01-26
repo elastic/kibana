@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import { rgba } from 'polished';
 import { Suggestion } from './suggestion';
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
-import { euiStyled } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 
 export const unit = 16;
 

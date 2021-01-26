@@ -101,8 +101,9 @@ describe('Test discover state with legacy migration', () => {
 
 describe('createSearchSessionRestorationDataProvider', () => {
   let mockSavedSearch: SavedSearch = ({} as unknown) as SavedSearch;
+  const mockDataPlugin = dataPluginMock.createStartContract();
   const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
-    data: dataPluginMock.createStartContract(),
+    data: mockDataPlugin,
     appStateContainer: getState({
       history: createBrowserHistory(),
     }).appStateContainer,
@@ -122,6 +123,32 @@ describe('createSearchSessionRestorationDataProvider', () => {
     test('Saved Search without a title returns default name', async () => {
       mockSavedSearch = ({ id: 'id', title: undefined } as unknown) as SavedSearch;
       expect(await searchSessionInfoProvider.getName()).toBe('Discover');
+    });
+  });
+
+  describe('session state', () => {
+    test('restoreState has sessionId and initialState has not', async () => {
+      const searchSessionId = 'id';
+      (mockDataPlugin.search.session.getSessionId as jest.Mock).mockImplementation(
+        () => searchSessionId
+      );
+      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      expect(initialState.searchSessionId).toBeUndefined();
+      expect(restoreState.searchSessionId).toBe(searchSessionId);
+    });
+
+    test('restoreState has absoluteTimeRange', async () => {
+      const relativeTime = 'relativeTime';
+      const absoluteTime = 'absoluteTime';
+      (mockDataPlugin.query.timefilter.timefilter.getTime as jest.Mock).mockImplementation(
+        () => relativeTime
+      );
+      (mockDataPlugin.query.timefilter.timefilter.getAbsoluteTime as jest.Mock).mockImplementation(
+        () => absoluteTime
+      );
+      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      expect(initialState.timeRange).toBe(relativeTime);
+      expect(restoreState.timeRange).toBe(absoluteTime);
     });
   });
 });
