@@ -8,7 +8,7 @@ import React from 'react';
 import { getLocationStatus, MonitorListStatusColumn } from './monitor_status_column';
 import { Ping } from '../../../../../common/runtime_types';
 import { STATUS } from '../../../../../common/constants';
-import { EuiThemeProvider } from '../../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { mockDate, mockMoment } from '../../../../lib/helper/test_helpers';
 import { render } from '../../../../lib/helper/rtl_helpers';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
