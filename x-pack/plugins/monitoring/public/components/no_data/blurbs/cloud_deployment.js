@@ -7,8 +7,10 @@
 import React from 'react';
 import { EuiText, EuiTextColor, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Legacy } from '../../../legacy_shims';
 
 export const CloudDeployment = () => {
+  const { ELASTIC_WEBSITE_URL } = Legacy.shims.docLinks;
   return (
     <EuiTextColor color="subdued">
       <EuiText>
@@ -32,7 +34,7 @@ export const CloudDeployment = () => {
             defaultMessage="section for a deployment to configure monitoring. For more information visit "
           />
           <EuiLink
-            href="https://www.elastic.co/guide/en/cloud/current/ec-enable-monitoring.html"
+            href={`${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-enable-logging-and-monitoring.html`}
             target="_blank"
           >
             the documentation page.
