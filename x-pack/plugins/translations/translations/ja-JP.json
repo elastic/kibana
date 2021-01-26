@@ -7213,8 +7213,6 @@
     "xpack.enterpriseSearch.appSearch.documents.search.indexingGuide": "インデックスガイドをお読みください",
     "xpack.enterpriseSearch.appSearch.documents.search.noResults": "「{resultSearchTerm}」の結果がありません。",
     "xpack.enterpriseSearch.appSearch.documents.search.placeholder": "ドキュメントのフィルター...",
-    "xpack.enterpriseSearch.appSearch.documents.search.recentlyUploadedAsc": "最近アップロードされたドキュメント（昇順）",
-    "xpack.enterpriseSearch.appSearch.documents.search.recentlyUploadedDesc": "最近アップロードされたドキュメント（降順）",
     "xpack.enterpriseSearch.appSearch.documents.search.resultsPerPage.ariaLabel": "1 ページに表示する結果数",
     "xpack.enterpriseSearch.appSearch.documents.search.resultsPerPage.show": "表示：",
     "xpack.enterpriseSearch.appSearch.documents.search.sortBy": "並べ替え基準",
