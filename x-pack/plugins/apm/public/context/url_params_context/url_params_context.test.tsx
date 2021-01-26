@@ -75,13 +75,20 @@ describe('UrlParamsContext', () => {
       search: '?rangeFrom=now-1d%2Fd&rangeTo=now-1d%2Fd&transactionId=UPDATED',
     } as Location;
 
+    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(0);
+
     const wrapper = mountParams(location);
 
     // force an update
     wrapper.setProps({ abc: 123 });
     const params = getDataFromOutput(wrapper);
-    expect(new Date(params.start).getTime()).not.toBeNaN();
-    expect(new Date(params.end).getTime()).not.toBeNaN();
+
+    expect([params.start, params.end]).toEqual([
+      '1969-12-31T00:00:00.000Z',
+      '1970-01-01T00:00:00.000Z',
+    ]);
+
+    nowSpy.mockRestore();
   });
 
   it('should refresh the time range with new values', async () => {
