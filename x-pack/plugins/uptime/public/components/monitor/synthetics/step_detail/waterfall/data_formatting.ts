@@ -66,7 +66,7 @@ export const isHighlightedItem = (
   const matchFilters =
     activeFilters.length > 0 ? activeFilters.includes(MimeTypesMap[item.mimeType!]) : true;
 
-  return matchQuery && matchFilters;
+  return !!(matchQuery && matchFilters);
 };
 
 export const getSeriesAndDomain = (
