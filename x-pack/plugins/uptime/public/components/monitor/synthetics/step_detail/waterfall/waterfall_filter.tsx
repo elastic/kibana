@@ -75,9 +75,15 @@ export const WaterfallFilter = ({
     );
   };
 
-  useTrackMetric({ app: 'uptime', metric: 'waterfall__filter', metricType: METRIC_TYPE.CLICK }, [
-    isPopoverOpen,
-  ]);
+  useTrackMetric(
+    { app: 'uptime', metric: 'waterfall_filter_button', metricType: METRIC_TYPE.CLICK },
+    [isPopoverOpen]
+  );
+
+  useTrackMetric(
+    { app: 'uptime', metric: 'waterfall_filter_input', metricType: METRIC_TYPE.CLICK },
+    [query]
+  );
 
   useDebounce(
     () => {
