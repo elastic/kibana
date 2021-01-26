@@ -7,7 +7,7 @@
 import { LevelLogger } from '../';
 import { LayoutSelectorDictionary, Size } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
-import { Layout } from './layout';
+import type { Layout } from './layout';
 
 export {
   LayoutParams,
@@ -17,7 +17,7 @@ export {
   Size,
 } from '../../../common/types';
 export { createLayout } from './create_layout';
-export { Layout } from './layout';
+export type { Layout } from './layout';
 export { PreserveLayout } from './preserve_layout';
 export { CanvasLayout } from './canvas_layout';
 export { PrintLayout } from './print_layout';
