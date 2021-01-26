@@ -19,7 +19,7 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { LogEntry } from '../../../../common/http_api';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogStream } from '../../../components/log_stream';
 
 const MODAL_MARGIN = 25;
