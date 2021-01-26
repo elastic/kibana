@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { chooseLightOrDarkColor, tintOrShade } from '../../../utils/styles';
 
 export const ActiveHighlightMarker = euiStyled.mark`
