@@ -118,11 +118,7 @@ export const useGetCase = (caseId: string): UseGetCase => {
         }
       }
     };
-
-    if (caseId) {
-      fetchData();
-    }
-
+    fetchData();
     return () => {
       didCancel = true;
       abortCtrl.abort();
