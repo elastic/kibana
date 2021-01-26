@@ -330,6 +330,10 @@ Here is what we get with the config above:
 | metrics.ops      | console                  | debug |
 
 
+The `root` logger has a dedicated configuration node since this context is special and should always exist. By 
+default `root` is configured with `info` level and `default` appender that is also always available. This is the 
+configuration that all custom loggers will use unless they're re-configured explicitly.
+
 For example to see _all_ log messages that fall back on the `root` logger configuration, just add one line to the configuration:
 
 ```yaml
@@ -342,10 +346,6 @@ Or disable logging entirely with `off`:
 logging.root.level: off
 ```
 ### Dedicated loggers
-
-The `root` logger has a dedicated configuration node since this context is special and should always exist. By 
-default `root` is configured with `info` level and `default` appender that is also always available. This is the 
-configuration that all custom loggers will use unless they're re-configured explicitly.
 
 The `metrics.ops` logger is configured with `debug` level and will automatically output sample system and process information at a regular interval.
 The metrics that are logged are a subset of the data collected and are formatted in the log message as follows:
