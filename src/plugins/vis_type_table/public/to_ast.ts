@@ -12,8 +12,9 @@ import {
 } from '../../data/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { getVisSchemas, Vis, BuildPipelineParams } from '../../visualizations/public';
+import { TableVisParams } from '../common';
 import { TableExpressionFunctionDefinition } from './table_vis_fn';
-import { TableVisConfig, TableVisParams } from './types';
+import { TableVisConfig } from './types';
 
 const buildTableVisConfig = (
   schemas: ReturnType<typeof getVisSchemas>,
