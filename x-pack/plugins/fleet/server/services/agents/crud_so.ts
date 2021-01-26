@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from '@hapi/boom';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from 'src/core/server';
 
 import { isAgentUpgradeable } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
@@ -179,13 +179,27 @@ export async function getAgentByAccessAPIKeyId(
 export async function updateAgent(
   soClient: SavedObjectsClientContract,
   agentId: string,
-  data: {
-    userProvidedMetatada: any;
-  }
+  data: Partial<AgentSOAttributes>
 ) {
-  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
-    user_provided_metadata: data.userProvidedMetatada,
-  });
+  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, data);
+}
+
+export async function bulkUpdateAgents(
+  soClient: SavedObjectsClientContract,
+  updateData: Array<{
+    agentId: string;
+    data: Partial<AgentSOAttributes>;
+  }>
+) {
+  const updates: Array<SavedObjectsBulkUpdateObject<AgentSOAttributes>> = updateData.map(
+    ({ agentId, data }) => ({
+      type: AGENT_SAVED_OBJECT_TYPE,
+      id: agentId,
+      attributes: data,
+    })
+  );
+
+  await soClient.bulkUpdate<AgentSOAttributes>(updates);
 }
 
 export async function deleteAgent(soClient: SavedObjectsClientContract, agentId: string) {

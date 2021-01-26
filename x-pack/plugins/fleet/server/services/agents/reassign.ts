@@ -6,10 +6,8 @@
 
 import { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { AgentSOAttributes } from '../../types';
 import { agentPolicyService } from '../agent_policy';
-import { getAgents, listAllAgents } from './crud';
+import { getAgents, listAllAgents, updateAgent, bulkUpdateAgents } from './crud';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 
 export async function reassignAgent(
@@ -23,12 +21,12 @@ export async function reassignAgent(
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
 
-  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
+  await updateAgent(soClient, esClient, agentId, {
     policy_id: newAgentPolicyId,
     policy_revision: null,
   });
 
-  await createAgentAction(soClient, {
+  await createAgentAction(soClient, esClient, {
     agent_id: agentId,
     created_at: new Date().toISOString(),
     type: 'INTERNAL_POLICY_REASSIGN',
@@ -55,7 +53,7 @@ export async function reassignAgents(
   // Filter to agents that do not already use the new agent policy ID
   const agents =
     'agentIds' in options
-      ? await getAgents(soClient, options.agentIds)
+      ? await getAgents(soClient, esClient, options.agentIds)
       : (
           await listAllAgents(soClient, esClient, {
             kuery: options.kuery,
@@ -64,20 +62,22 @@ export async function reassignAgents(
         ).agents;
   const agentsToUpdate = agents.filter((agent) => agent.policy_id !== newAgentPolicyId);
 
-  // Update the necessary agents
-  const res = await soClient.bulkUpdate<AgentSOAttributes>(
+  const res = await bulkUpdateAgents(
+    soClient,
+    esClient,
     agentsToUpdate.map((agent) => ({
-      type: AGENT_SAVED_OBJECT_TYPE,
-      id: agent.id,
-      attributes: {
+      agentId: agent.id,
+      data: {
         policy_id: newAgentPolicyId,
         policy_revision: null,
       },
     }))
   );
+
   const now = new Date().toISOString();
   await bulkCreateAgentActions(
     soClient,
+    esClient,
     agentsToUpdate.map((agent) => ({
       agent_id: agent.id,
       created_at: now,

@@ -12,6 +12,7 @@ import { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { createAPIKey, invalidateAPIKeys } from './security';
 import { agentPolicyService } from '../agent_policy';
+import { escapeSearchQueryPhrase } from '../saved_object';
 
 // TODO Move these types to another file
 interface SearchResponse<T> {
@@ -182,6 +183,21 @@ export async function generateEnrollmentAPIKey(
     id: res.body._id,
     ...body,
   };
+}
+
+export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, apiKeyId: string) {
+  const res = await esClient.search<SearchResponse<FleetServerEnrollmentAPIKey>>({
+    index: ENROLLMENT_API_KEYS_INDEX,
+    q: `api_key_id:${escapeSearchQueryPhrase(apiKeyId)}`,
+  });
+
+  const [enrollmentAPIKey] = res.body.hits.hits.map(esDocToEnrollmentApiKey);
+
+  if (enrollmentAPIKey?.api_key_id !== apiKeyId) {
+    throw new Error('find enrollmentKeyById returned an incorrect key');
+  }
+
+  return enrollmentAPIKey;
 }
 
 async function validateAgentPolicyId(soClient: SavedObjectsClientContract, agentPolicyId: string) {

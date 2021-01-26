@@ -12,8 +12,9 @@ import {
   BaseAgentActionSOAttributes,
   AgentActionSOAttributes,
   AgentPolicyActionSOAttributes,
+  FleetServerAgentAction,
 } from '../../../common/types/models';
-import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { AGENT_ACTION_SAVED_OBJECT_TYPE, AGENT_ACTIONS_INDEX } from '../../../common/constants';
 import {
   isAgentActionSavedObject,
   isPolicyActionSavedObject,
@@ -24,35 +25,41 @@ import { nodeTypes } from '../../../../../../src/plugins/data/common';
 
 export async function createAgentAction(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   newAgentAction: Omit<AgentAction, 'id'>
 ): Promise<AgentAction> {
-  return createAction(soClient, newAgentAction);
+  return createAction(soClient, esClient, newAgentAction);
 }
 
 export async function bulkCreateAgentActions(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   newAgentActions: Array<Omit<AgentAction, 'id'>>
 ): Promise<AgentAction[]> {
-  return bulkCreateActions(soClient, newAgentActions);
+  return bulkCreateActions(soClient, esClient, newAgentActions);
 }
 
 export function createAgentPolicyAction(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   newAgentAction: Omit<AgentPolicyAction, 'id'>
 ): Promise<AgentPolicyAction> {
-  return createAction(soClient, newAgentAction);
+  return createAction(soClient, esClient, newAgentAction);
 }
 
 async function createAction(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   newAgentAction: Omit<AgentPolicyAction, 'id'>
 ): Promise<AgentPolicyAction>;
 async function createAction(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   newAgentAction: Omit<AgentAction, 'id'>
 ): Promise<AgentAction>;
 async function createAction(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   newAgentAction: Omit<AgentPolicyAction, 'id'> | Omit<AgentAction, 'id'>
 ): Promise<AgentPolicyAction | AgentAction> {
   const actionSO = await soClient.create<BaseAgentActionSOAttributes>(
@@ -63,6 +70,26 @@ async function createAction(
       ack_data: newAgentAction.ack_data ? JSON.stringify(newAgentAction.ack_data) : undefined,
     }
   );
+
+  if (
+    appContextService.getConfig()?.agents.fleetServerEnabled &&
+    isAgentActionSavedObject(actionSO)
+  ) {
+    const body: FleetServerAgentAction = {
+      '@timestamp': new Date().toISOString(),
+      agents: [actionSO.attributes.agent_id],
+      action_id: actionSO.id,
+      data: newAgentAction.data,
+      type: newAgentAction.type,
+    };
+
+    await esClient.create({
+      index: AGENT_ACTIONS_INDEX,
+      id: actionSO.id,
+      body,
+      refresh: 'wait_for',
+    });
+  }
 
   if (isAgentActionSavedObject(actionSO)) {
     const agentAction = savedObjectToAgentAction(actionSO);
@@ -83,14 +110,17 @@ async function createAction(
 
 async function bulkCreateActions(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   newAgentActions: Array<Omit<AgentPolicyAction, 'id'>>
 ): Promise<AgentPolicyAction[]>;
 async function bulkCreateActions(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   newAgentActions: Array<Omit<AgentAction, 'id'>>
 ): Promise<AgentAction[]>;
 async function bulkCreateActions(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   newAgentActions: Array<Omit<AgentPolicyAction, 'id'> | Omit<AgentAction, 'id'>>
 ): Promise<Array<AgentPolicyAction | AgentAction>> {
   const { saved_objects: actionSOs } = await soClient.bulkCreate<BaseAgentActionSOAttributes>(
@@ -103,6 +133,33 @@ async function bulkCreateActions(
       },
     }))
   );
+
+  if (appContextService.getConfig()?.agents.fleetServerEnabled) {
+    await esClient.bulk({
+      index: AGENT_ACTIONS_INDEX,
+      body: actionSOs.flatMap((actionSO) => {
+        if (!isAgentActionSavedObject(actionSO)) {
+          return [];
+        }
+        const body: FleetServerAgentAction = {
+          '@timestamp': new Date().toISOString(),
+          agents: [actionSO.attributes.agent_id],
+          action_id: actionSO.id,
+          data: actionSO.attributes.data ? JSON.parse(actionSO.attributes.data) : undefined,
+          type: actionSO.type,
+        };
+
+        return [
+          {
+            create: {
+              _id: actionSO.id,
+            },
+          },
+          body,
+        ];
+      }),
+    });
+  }
 
   return actionSOs.map((actionSO) => {
     if (isAgentActionSavedObject(actionSO)) {
@@ -315,6 +372,7 @@ export interface ActionsService {
 
   createAgentAction: (
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     newAgentAction: Omit<AgentAction, 'id'>
   ) => Promise<AgentAction>;
 }

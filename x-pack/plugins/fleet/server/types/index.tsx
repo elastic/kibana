@@ -79,6 +79,9 @@ export {
   dataTypes,
   // Fleet Server types
   FleetServerEnrollmentAPIKey,
+  FleetServerAgent,
+  FleetServerAgentAction,
+  FleetServerPolicy,
 } from '../../common';
 
 export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
