@@ -156,7 +156,13 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
     tooltipProperties: string[];
   };
 
+export type GeoJsonFileFieldDescriptor = {
+  name: string;
+  type: 'string' | 'number';
+};
+
 export type GeojsonFileSourceDescriptor = {
+  __fields?: GeoJsonFileFieldDescriptor[];
   __featureCollection: FeatureCollection;
   name: string;
   type: string;

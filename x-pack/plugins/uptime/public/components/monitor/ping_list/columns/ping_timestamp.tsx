@@ -20,7 +20,8 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Ping } from '../../../../../common/runtime_types/ping';
 import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
-import { euiStyled, FETCH_STATUS, useFetcher } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { useFetcher, FETCH_STATUS } from '../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../contexts';
 
