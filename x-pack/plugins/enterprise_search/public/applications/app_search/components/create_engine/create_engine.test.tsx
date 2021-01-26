@@ -14,4 +14,24 @@ describe('CreateEngine', () => {
     const wrapper = shallow(<CreateEngine />);
     expect(wrapper.find('[data-test-subj="CreateEngine"]')).toHaveLength(1);
   });
+
+  it('contains a form', () => {
+    const wrapper = shallow(<CreateEngine />);
+    expect(wrapper.find('[data-test-subj="CreateEngineForm"]')).toHaveLength(1);
+  });
+
+  it('contains a name input', () => {
+    const wrapper = shallow(<CreateEngine />);
+    expect(wrapper.find('[data-test-subj="CreateEngineNameInput"]')).toHaveLength(1);
+  });
+
+  it('contains a language input', () => {
+    const wrapper = shallow(<CreateEngine />);
+    expect(wrapper.find('[data-test-subj="CreateEngineLanguageInput"]')).toHaveLength(1);
+  });
+
+  it('contains a submit button', () => {
+    const wrapper = shallow(<CreateEngine />);
+    expect(wrapper.find('[data-test-subj="NewEngineSubmitButton"]')).toHaveLength(1);
+  });
 });

@@ -11,3 +11,57 @@ export const CREATE_ENGINE_TITLE = i18n.translate(
     defaultMessage: 'Create an Engine',
   }
 );
+
+export const CREATE_ENGINE_FORM_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.createEngine.form.title',
+  {
+    defaultMessage: 'Name your Engine',
+  }
+);
+
+export const CREATE_ENGINE_FORM_ENGINE_NAME_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.createEngine.form.engineName.label',
+  {
+    defaultMessage: 'Engine Name',
+  }
+);
+
+export const ALLOWED_CHARS_NOTE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.createEngine.form.engineName.allowedCharactersNote',
+  {
+    defaultMessage: 'Engine names can only contain lowercase letters, numbers, and hyphens',
+  }
+);
+
+export const getSanitizedNameNote = (name: string): string => {
+  return i18n.translate(
+    'xpack.enterpriseSearch.appSearch.createEngine.form.engineName.sanitizedNameNote',
+    {
+      defaultMessage: 'Your engine will be named <strong>{name}</strong>',
+      values: {
+        name,
+      },
+    }
+  );
+};
+
+export const CREATE_ENGINE_FORM_ENGINE_NAME_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.createEngine.form.engineName.placeholder',
+  {
+    defaultMessage: 'i.e., my-search-engine',
+  }
+);
+
+export const CREATE_ENGINE_FORM_ENGINE_LANGUAGE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.createEngine.form.engineLanguage.label',
+  {
+    defaultMessage: 'Engine Language',
+  }
+);
+
+export const CREATE_ENGINE_FORM_SUBMIT_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.createEngine.form.submitButton.label',
+  {
+    defaultMessage: 'Create Engine',
+  }
+);
