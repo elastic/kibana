@@ -12,7 +12,7 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import translations from '../../../translations/translations/ja-JP.json';
 import { PluginContext } from '../context/plugin_context';
 import { ObservabilityPluginSetupDeps } from '../plugin';
-import { EuiThemeProvider } from '../typings';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 
 const appMountParameters = ({ setHeaderActionMenu: () => {} } as unknown) as AppMountParameters;
 
