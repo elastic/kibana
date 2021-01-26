@@ -12,29 +12,31 @@ import { shallowWithIntl as shallow } from '@kbn/test/jest';
 // @ts-ignore
 import { ShallowWrapper } from 'enzyme';
 import { ChangeIndexPattern } from './change_indexpattern';
-import { SavedObject } from 'kibana/server';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { EuiSelectable } from '@elastic/eui';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IIndexPattern, IndexPatternSpec } from 'src/plugins/data/public';
 
-const indexPattern = {
+const indexPattern: IIndexPattern = {
+  fields: [{ name: 'name', type: 'type' }],
   id: 'test1',
+  patternList: ['logstash-*'],
+  patternListActive: ['logstash-*'],
   title: 'test1 title',
-} as IIndexPattern;
+};
 
-const indexPattern1 = {
+const indexPattern1: IndexPatternSpec = {
   id: 'test1',
-  attributes: {
-    title: 'test1 title',
-  },
-} as SavedObject<any>;
+  patternList: ['logstash-*'],
+  patternListActive: ['logstash-*'],
+  title: 'test1 title',
+};
 
-const indexPattern2 = {
+const indexPattern2: IndexPatternSpec = {
   id: 'test2',
-  attributes: {
-    title: 'test2 title',
-  },
-} as SavedObject<any>;
+  patternList: ['logstash-*'],
+  patternListActive: ['logstash-*'],
+  title: 'test2 title',
+};
 
 const defaultProps = {
   indexPatternList: [indexPattern1, indexPattern2],

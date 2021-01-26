@@ -43,7 +43,7 @@ type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
 
 export class IndexPattern implements IIndexPattern {
   public id: string = '';
-  public title: string = ''; // label, not pattern string
+  public title: string = '';
 
   public patternList: string[];
   public patternListActive: string[];

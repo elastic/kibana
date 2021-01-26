@@ -133,5 +133,46 @@ Object {
 
       expect(migrationFn(input3, savedObjectMigrationContext)).toEqual(expected3);
     });
+    test('should migrate title to patternList', () => {
+      const input = {
+        type: 'index-pattern',
+        id: 'logs-*',
+        attributes: {
+          title: 'logs-*',
+        },
+      };
+      const expected = {
+        type: 'index-pattern',
+        id: 'logs-*',
+        attributes: {
+          allowNoIndex: true,
+          title: 'logs-*',
+          patternList: ['logs-*'],
+        },
+      };
+
+      expect(migrationFn(input, savedObjectMigrationContext)).toEqual(expected);
+    });
+    test('should not migrate title to patternList when patternList exists', () => {
+      const input = {
+        type: 'index-pattern',
+        id: 'logs-*',
+        attributes: {
+          title: 'logs-*',
+          patternList: ['filebeat-*'],
+        },
+      };
+      const expected = {
+        type: 'index-pattern',
+        id: 'logs-*',
+        attributes: {
+          allowNoIndex: true,
+          title: 'logs-*',
+          patternList: ['filebeat-*'],
+        },
+      };
+
+      expect(migrationFn(input, savedObjectMigrationContext)).toEqual(expected);
+    });
   });
 });

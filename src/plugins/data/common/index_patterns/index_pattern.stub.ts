@@ -9,17 +9,29 @@
 import { IIndexPattern } from '.';
 import { stubFields } from './field.stub';
 
+export const mockPatternLists = {
+  patternListActive: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  patternList: [
+    'apm-*-transaction*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+};
 export const stubIndexPattern: IIndexPattern = {
   id: 'logstash-*',
   fields: stubFields,
   title: 'logstash-*',
+  ...mockPatternLists,
   timeFieldName: '@timestamp',
   getTimeField: () => ({ name: '@timestamp', type: 'date' }),
 };
-
 export const stubIndexPatternWithFields: IIndexPattern = {
   id: '1234',
   title: 'logstash-*',
+  ...mockPatternLists,
   fields: [
     {
       name: 'response',

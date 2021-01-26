@@ -28,12 +28,16 @@ const mockSource2 = { excludes: ['bar-*'] };
 
 const indexPattern = ({
   title: 'foo',
+  patternList: ['foo-*', 'bar-*'],
+  patternListActive: ['foo-*'],
   getComputedFields,
   getSourceFiltering: () => mockSource,
 } as unknown) as IndexPattern;
 
 const indexPattern2 = ({
   title: 'foo',
+  patternList: ['foo-*', 'bar-*'],
+  patternListActive: ['foo-*'],
   getComputedFields,
   getSourceFiltering: () => mockSource2,
 } as unknown) as IndexPattern;

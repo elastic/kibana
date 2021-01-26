@@ -28,46 +28,45 @@ export interface RuntimeField {
  * too ambiguous, should be avoided
  */
 export interface IIndexPattern {
-  fields: IFieldType[];
-  title: string; // label, not pattern string
-  patternList: string[];
-  patternListActive: string[];
-  id?: string;
-  /**
-   * Type is used for identifying rollup indices, otherwise left undefined
-   */
-  type?: string;
-  timeFieldName?: string;
-  getTimeField?(): IFieldType | undefined;
   fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
+  fields: IFieldType[];
   /**
    * Look up a formatter for a given field
    */
   getFormatterForField?: (
     field: IndexPatternField | IndexPatternField['spec'] | IFieldType
   ) => FieldFormat;
+  getTimeField?(): IFieldType | undefined;
+  id?: string;
+  patternList: string[];
+  patternListActive: string[];
+  timeFieldName?: string;
+  title: string;
+  /**
+   * Type is used for identifying rollup indices, otherwise left undefined
+   */
+  type?: string;
 }
 
 /**
  * Interface for an index pattern saved object
  */
 export interface IndexPatternAttributes {
-  type: string;
-  fields: string;
-  title: string; // label, not pattern string
-  typeMeta: string;
-  timeFieldName?: string;
-  intervalName?: string;
-  sourceFilters?: string;
-  fieldFormatMap?: string;
-  fieldAttrs?: string;
-  runtimeFieldMap?: string;
   /**
    * prevents errors when index pattern exists before indices
    */
   allowNoIndex?: boolean;
-
+  fieldAttrs?: string;
+  fieldFormatMap?: string;
+  fields: string;
+  intervalName?: string;
   patternList: string[];
+  runtimeFieldMap?: string;
+  sourceFilters?: string;
+  timeFieldName?: string;
+  title: string;
+  type: string;
+  typeMeta: string;
 }
 
 /**
@@ -241,16 +240,26 @@ export interface IndexPatternSpec {
   fieldAttrs?: FieldAttrs;
   fieldFormats?: Record<string, SerializedFieldFormat>;
   fields?: IndexPatternFieldMap;
+  /**
+   * saved object id
+   */
   id: string;
+  /**
+   * @deprecated
+   * Deprecated. Was used by time range based index patterns
+   */
   intervalName?: string;
   patternList: string[];
   patternListActive: string[];
   runtimeFieldMap?: Record<string, RuntimeField>;
   sourceFilters?: SourceFilter[];
   timeFieldName?: string;
-  title: string; // label, not pattern string
+  title: string;
   type?: string;
   typeMeta?: TypeMeta;
+  /**
+   * saved object version string
+   */
   version?: string;
 }
 export type IndexPatternSpecPreValidation = Omit<IndexPatternSpec, 'patternListActive'>;

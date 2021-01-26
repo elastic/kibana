@@ -10,6 +10,7 @@ import type { MockedKeys } from '@kbn/utility-types/jest';
 import { defaultSearchStrategy } from './default_search_strategy';
 import { LegacyFetchHandlers, SearchStrategySearchParams } from './types';
 import { BehaviorSubject } from 'rxjs';
+import { mockPatternLists } from '../../../index_patterns/index_pattern.stub';
 
 const { search } = defaultSearchStrategy;
 
@@ -21,7 +22,7 @@ describe('defaultSearchStrategy', () => {
       searchArgs = {
         searchRequests: [
           {
-            index: { title: 'foo' },
+            index: { title: 'foo', ...mockPatternLists },
             body: {},
           },
         ],
@@ -45,7 +46,7 @@ describe('defaultSearchStrategy', () => {
                   Object {
                     "body": Object {},
                     "header": Object {
-                      "index": "foo",
+                      "index": "auditbeat-*,filebeat-*,packetbeat-*,winlogbeat-*",
                       "preference": undefined,
                     },
                   },

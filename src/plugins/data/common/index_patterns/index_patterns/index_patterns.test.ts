@@ -38,7 +38,14 @@ describe('IndexPatterns', () => {
   let SOClientGetDelay = 0;
 
   beforeEach(() => {
-    const indexPatternObj = { id: 'id', version: 'a', attributes: object.attributes };
+    const indexPatternObj = {
+      id: 'id',
+      version: 'a',
+      attributes: {
+        title: 'something',
+        patternList: mockPatternLists.patternList,
+      },
+    };
     savedObjectsClient = {} as SavedObjectsClientCommon;
     savedObjectsClient.find = jest.fn(
       () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
@@ -129,7 +136,7 @@ describe('IndexPatterns', () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['patternList', 'title'],
       perPage: 10000,
     });
   });
@@ -190,15 +197,16 @@ describe('IndexPatterns', () => {
   });
 
   test('create', async () => {
+    const id = '1234';
     const title = 'kibana-*';
     indexPatterns.refreshFields = jest.fn();
 
-    const indexPattern = await indexPatterns.create({ title, ...mockPatternLists }, true);
+    const indexPattern = await indexPatterns.create({ id, title, ...mockPatternLists }, true);
     expect(indexPattern).toBeInstanceOf(IndexPattern);
     expect(indexPattern.title).toBe(title);
     expect(indexPatterns.refreshFields).not.toBeCalled();
 
-    await indexPatterns.create({ title, ...mockPatternLists });
+    await indexPatterns.create({ id, title, ...mockPatternLists });
     expect(indexPatterns.refreshFields).toBeCalled();
   });
 
@@ -209,7 +217,7 @@ describe('IndexPatterns', () => {
 
     expect(savedObjectsClient.find).lastCalledWith({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['patternList', 'title'],
       search,
       searchFields: ['title'],
       perPage: size,

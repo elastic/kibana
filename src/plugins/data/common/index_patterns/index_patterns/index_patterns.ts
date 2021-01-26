@@ -95,9 +95,11 @@ export class IndexPatternsService {
       fields: ['patternList', 'title'],
       perPage: 10000,
     });
-    this.kipCache = await Promise.all(
-      this.savedObjectsCache!.map(async (ip) => this.savedObjectToSpec(ip))
-    );
+    if (this.savedObjectsCache) {
+      this.kipCache = await Promise.all(
+        this.savedObjectsCache.map(async (ip) => this.savedObjectToSpec(ip))
+      );
+    }
   }
 
   /**
