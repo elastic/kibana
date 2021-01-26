@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { FormatFactory } from '../../types';
 import type { DataContextType } from './types';
@@ -12,10 +12,19 @@ import type { DataContextType } from './types';
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
   DataContext: React.Context<DataContextType>
-) => ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-  const { table } = useContext(DataContext);
+) => ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
+  const { table, alignments } = useContext(DataContext);
   const rowValue = table?.rows[rowIndex][columnId];
   const content = formatters[columnId]?.convert(rowValue, 'html');
+  const currentAlignment = alignments && alignments[columnId];
+
+  useEffect(() => {
+    setCellProps({
+      style: {
+        textAlign: currentAlignment,
+      },
+    });
+  }, [currentAlignment, setCellProps]);
 
   return (
     <span
@@ -25,7 +34,6 @@ export const createGridCell = (
        */
       dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
       data-test-subj="lnsTableCellContent"
-      className="lnsDataTableCellContent"
     />
   );
 };

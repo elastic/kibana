@@ -53,4 +53,5 @@ export interface DatatableRender {
 export interface DataContextType {
   table?: Datatable;
   rowHasRowClickTriggerActions?: boolean[];
+  alignments?: Record<string, 'left' | 'right' | 'center'>;
 }

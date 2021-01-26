@@ -18,11 +18,13 @@ import type {
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableToolbar } from './components/toolbar';
+import { TableDimensionEditor } from './components/dimension_editor';
 
 export interface ColumnState {
   columnId: string;
   width?: number;
   hidden?: boolean;
+  alignment?: 'left' | 'right' | 'center';
 }
 
 export interface SortingState {
@@ -158,6 +160,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_column',
+          enableDimensionEditor: true,
         },
         {
           groupId: 'metrics',
@@ -172,6 +175,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           filterOperations: (op) => !op.isBucketed,
           required: true,
           dataTestSubj: 'lnsDatatable_metrics',
+          enableDimensionEditor: true,
         },
       ],
     };
@@ -197,6 +201,15 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     render(
       <I18nProvider>
         <TableToolbar {...props} />
+      </I18nProvider>,
+      domElement
+    );
+  },
+
+  renderDimensionEditor(domElement, props) {
+    render(
+      <I18nProvider>
+        <TableDimensionEditor {...props} />
       </I18nProvider>,
       domElement
     );
@@ -242,6 +255,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                     columnId: [column.columnId],
                     hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
                     width: typeof column.width === 'undefined' ? [] : [column.width],
+                    alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                   },
                 },
               ],
