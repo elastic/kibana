@@ -18,6 +18,16 @@ import { act } from 'react-dom/test-utils';
 
 jest.useFakeTimers();
 
+const defaultContext = {
+  dragging: undefined,
+  setDragging: jest.fn(),
+  setActiveDropTarget: () => {},
+  activeDropTarget: undefined,
+  keyboardMode: false,
+  setKeyboardMode: () => {},
+  registerDropTarget: jest.fn(),
+};
+
 describe('DragDrop', () => {
   const value = { id: '1', label: 'hello' };
   test('renders if nothing is being dragged', () => {
@@ -64,15 +74,7 @@ describe('DragDrop', () => {
     };
 
     const component = mount(
-      <ChildDragDropProvider
-        dragging={value}
-        setDragging={setDragging}
-        setActiveDropTarget={() => {}}
-        activeDropTarget={undefined}
-        keyboardMode={false}
-        setKeyboardMode={() => {}}
-        registerDropTarget={jest.fn()}
-      >
+      <ChildDragDropProvider {...defaultContext} dragging={value} setDragging={setDragging}>
         <DragDrop value={value} draggable={true} label="drag label">
           <button>Hello!</button>
         </DragDrop>
@@ -95,13 +97,9 @@ describe('DragDrop', () => {
 
     const component = mount(
       <ChildDragDropProvider
+        {...defaultContext}
         dragging={{ id: '2', label: 'hi' }}
         setDragging={setDragging}
-        setActiveDropTarget={() => {}}
-        activeDropTarget={undefined}
-        keyboardMode={false}
-        setKeyboardMode={() => {}}
-        registerDropTarget={jest.fn()}
       >
         <DragDrop onDrop={onDrop} droppable={true} value={value}>
           <button>Hello!</button>
@@ -126,15 +124,7 @@ describe('DragDrop', () => {
     const onDrop = jest.fn();
 
     const component = mount(
-      <ChildDragDropProvider
-        dragging={{ id: 'hi' }}
-        setDragging={setDragging}
-        setActiveDropTarget={() => {}}
-        activeDropTarget={undefined}
-        keyboardMode={false}
-        setKeyboardMode={() => {}}
-        registerDropTarget={jest.fn()}
-      >
+      <ChildDragDropProvider {...defaultContext} dragging={{ id: 'hi' }} setDragging={setDragging}>
         <DragDrop onDrop={onDrop} droppable={false} value={value}>
           <button>Hello!</button>
         </DragDrop>
@@ -169,15 +159,7 @@ describe('DragDrop', () => {
 
   test('items that have droppable=false get special styling when another item is dragged', () => {
     const component = mount(
-      <ChildDragDropProvider
-        dragging={value}
-        setDragging={() => {}}
-        setActiveDropTarget={() => {}}
-        activeDropTarget={undefined}
-        keyboardMode={false}
-        setKeyboardMode={() => {}}
-        registerDropTarget={jest.fn()}
-      >
+      <ChildDragDropProvider {...defaultContext} dragging={value}>
         <DragDrop value={value} draggable={true} label="a">
           <button>Hello!</button>
         </DragDrop>
@@ -197,6 +179,7 @@ describe('DragDrop', () => {
 
     const component = mount(
       <ChildDragDropProvider
+        {...defaultContext}
         dragging={dragging}
         setDragging={() => {
           dragging = { id: '1' };
@@ -205,9 +188,6 @@ describe('DragDrop', () => {
           activeDropTarget = { activeDropTarget: val };
         }}
         activeDropTarget={activeDropTarget}
-        keyboardMode={false}
-        setKeyboardMode={() => {}}
-        registerDropTarget={jest.fn()}
       >
         <DragDrop value={{ label: 'ignored', id: '3' }} draggable={true} label="a">
           <button>Hello!</button>
@@ -297,7 +277,7 @@ describe('DragDrop', () => {
       let keyboardMode = !!dragContext?.keyboardMode;
       let activeDropTarget = dragContext?.activeDropTarget;
 
-      const defaultContext = {
+      const baseContext = {
         dragging,
         setDragging: (val?: DragDropIdentifier) => {
           dragging = val;
@@ -314,7 +294,7 @@ describe('DragDrop', () => {
       };
 
       return mount(
-        <ChildDragDropProvider {...defaultContext} {...dragContext}>
+        <ChildDragDropProvider {...baseContext} {...dragContext}>
           <ReorderProvider id="groupId">
             <DragDrop
               label="1"

@@ -74,6 +74,12 @@
   height: calc(100% + #{$lnsLayerPanelDimensionMargin});
 }
 
+.lnsDragDrop-translatedDrag {
+  transition: transform $euiAnimSpeedFast ease-in-out;
+  position: relative;
+  z-index: 10;
+}
+
 .lnsDragDrop-translatedDrop {
   transition: transform $euiAnimSpeedFast ease-in-out;
   pointer-events: none;

@@ -593,12 +593,18 @@ const ReorderableDrag = memo(function ReorderableDrag(
     );
   };
 
+  const areItemsReordered = isDragging && keyboardMode && reorderedItems.length;
+
   return (
     <div
       data-test-subj="lnsDragDrop-reorderableDrag"
-      className="lnsDragDrop-reorderable"
+      className={
+        areItemsReordered
+          ? 'lnsDragDrop-reorderable lnsDragDrop-translatedDrag'
+          : 'lnsDragDrop-reorderable'
+      }
       style={
-        isDragging && keyboardMode && reorderedItems.length
+        areItemsReordered
           ? {
               transform: `translateY(${direction === '+' ? '-' : '+'}${reorderedItems.reduce(
                 (acc, cur) => {
