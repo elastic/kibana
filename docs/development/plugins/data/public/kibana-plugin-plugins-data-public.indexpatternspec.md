@@ -22,6 +22,7 @@ export interface IndexPatternSpec
 |  [fields](./kibana-plugin-plugins-data-public.indexpatternspec.fields.md) | <code>IndexPatternFieldMap</code> |  |
 |  [id](./kibana-plugin-plugins-data-public.indexpatternspec.id.md) | <code>string</code> | saved object id |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpatternspec.intervalname.md) | <code>string</code> |  |
+|  [runtimeFieldMap](./kibana-plugin-plugins-data-public.indexpatternspec.runtimefieldmap.md) | <code>Record&lt;string, RuntimeField&gt;</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-public.indexpatternspec.sourcefilters.md) | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpatternspec.timefieldname.md) | <code>string</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpatternspec.title.md) | <code>string</code> |  |
