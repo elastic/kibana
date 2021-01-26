@@ -18,6 +18,8 @@ declare interface JobService {
   jobs: CombinedJob[];
   createResultsUrlForJobs: (jobs: any[], target: string, timeRange?: TimeRange) => string;
   tempJobCloningObjects: {
+    createdBy?: string;
+    datafeed?: Datafeed;
     job: any;
     skipTimeRangeStep: boolean;
     start?: number;
@@ -26,7 +28,7 @@ declare interface JobService {
   };
   skipTimeRangeStep: boolean;
   saveNewJob(job: any): Promise<any>;
-  cloneJob(job: any): any;
+  cloneDatafeed(datafeed: any): Datafeed;
   openJob(jobId: string): Promise<any>;
   saveNewDatafeed(datafeedConfig: any, jobId: string): Promise<any>;
   startDatafeed(

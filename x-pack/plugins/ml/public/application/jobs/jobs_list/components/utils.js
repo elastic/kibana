@@ -39,10 +39,10 @@ export function loadFullJob(jobId) {
 export function loadJobForExport(jobId) {
   return new Promise((resolve, reject) => {
     ml.jobs
-      .jobsForExport([jobId])
-      .then((jobs) => {
-        if (jobs.length) {
-          resolve(jobs[0]);
+      .jobForExport(jobId)
+      .then((resp) => {
+        if (resp?.job) {
+          resolve(resp);
         } else {
           throw new Error(`Could not find job ${jobId}`);
         }
@@ -197,21 +197,14 @@ function showResults(resp, action) {
 
 export async function cloneJob(jobId) {
   try {
-    const [cloneableJob, originalJob] = await Promise.all([
+    const [{ job: cloneableJob, datafeed }, originalJob] = await Promise.all([
       loadJobForExport(jobId),
       loadFullJob(jobId, false),
     ]);
     if (cloneableJob !== undefined && originalJob?.custom_settings?.created_by !== undefined) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
-      // cloneableJob.custom_settings.created_by = originalJob?.custom_settings?.created_by;
-
-      if (cloneableJob.custom_settings === undefined) {
-        cloneableJob.custom_settings = originalJob.custom_settings;
-      } else {
-        cloneableJob.custom_settings.created_by = originalJob.custom_settings.created_by;
-      }
-
+      mlJobService.tempJobCloningObjects.createdBy = originalJob?.custom_settings?.created_by;
       mlJobService.tempJobCloningObjects.job = cloneableJob;
 
       if (
@@ -244,7 +237,13 @@ export async function cloneJob(jobId) {
     } else {
       // otherwise use the tempJobCloningObjects
       mlJobService.tempJobCloningObjects.job = cloneableJob;
+      // resets the createdBy field in case it still retains previous settings
+      mlJobService.tempJobCloningObjects.createdBy = undefined;
     }
+    if (datafeed !== undefined) {
+      mlJobService.tempJobCloningObjects.datafeed = datafeed;
+    }
+
     if (originalJob.calendars) {
       mlJobService.tempJobCloningObjects.calendars = await mlCalendarService.fetchCalendarsByIds(
         originalJob.calendars

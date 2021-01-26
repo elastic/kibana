@@ -275,17 +275,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/jobs_for_export Get job
+   * @api {post} /api/ml/jobs/job_for_export Get job
    * @apiName CreateFullJobsList
    * @apiDescription Get the job configuration with auto generated fields excluded for cloning
    *
-   * @apiSchema (body) jobIdsSchema
+   * @apiSchema (body) jobIdSchema
    */
   router.post(
     {
-      path: '/api/ml/jobs/jobs_for_export',
+      path: '/api/ml/jobs/job_for_export',
       validate: {
-        body: jobIdsSchema,
+        body: jobIdSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -293,11 +293,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
-        const { createJobsListForExport } = jobServiceProvider(client, mlClient);
-        const { jobIds } = request.body;
+        const { getJobForExport } = jobServiceProvider(client, mlClient);
+        const { jobId } = request.body;
 
-        const resp = await createJobsListForExport(jobIds);
-
+        const resp = await getJobForExport(jobId);
         return response.ok({
           body: resp,
         });
