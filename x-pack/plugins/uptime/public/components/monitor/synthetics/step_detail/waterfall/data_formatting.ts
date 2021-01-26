@@ -62,12 +62,11 @@ export const isHighlightedItem = (
   if (!query && activeFilters?.length === 0) {
     return true;
   }
-  return !!(
-    (query && item.url?.includes(query)) ||
-    (activeFilters &&
-      activeFilters.length > 0 &&
-      activeFilters.includes(MimeTypesMap[item.mimeType!]))
-  );
+  const matchQuery = query ? item.url?.includes(query) : true;
+  const matchFilters =
+    activeFilters.length > 0 ? activeFilters.includes(MimeTypesMap[item.mimeType!]) : true;
+
+  return matchQuery && matchFilters;
 };
 
 export const getSeriesAndDomain = (
