@@ -5,14 +5,14 @@
  */
 
 import {
+  EuiButtonIcon,
+  EuiCheckbox,
   EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCheckbox,
   EuiPopover,
-  EuiButtonIcon,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { Dispatch, SetStateAction, useState } from 'react';
@@ -20,6 +20,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { FILTER_REQUESTS_LABEL } from '../../waterfall/components/translations';
 import { MimeType } from './types';
 import { OPEN_FILTERS_POPOVER } from '../../translations';
+import { METRIC_TYPE, useTrackMetric } from '../../../../../../../observability/public';
 
 interface Props {
   query: string;
@@ -73,6 +74,10 @@ export const WaterfallFilter = ({
       prevState.includes(val) ? prevState.filter((filter) => filter !== val) : [...prevState, val]
     );
   };
+
+  useTrackMetric({ app: 'uptime', metric: 'waterfall__filter', metricType: METRIC_TYPE.CLICK }, [
+    isPopoverOpen,
+  ]);
 
   useDebounce(
     () => {

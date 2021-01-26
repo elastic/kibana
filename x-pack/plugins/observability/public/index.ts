@@ -22,6 +22,7 @@ export { getCoreVitalsComponent, HeaderMenuPortal } from './components/shared/';
 export {
   useTrackPageview,
   useUiTracker,
+  useTrackMetric,
   UiTracker,
   TrackMetricOptions,
   METRIC_TYPE,
