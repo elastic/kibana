@@ -8,7 +8,7 @@ import React, { useMemo, useCallback, useState } from 'react';
 import moment from 'moment';
 import { encode } from 'rison-node';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import {
   LogEntryColumn,

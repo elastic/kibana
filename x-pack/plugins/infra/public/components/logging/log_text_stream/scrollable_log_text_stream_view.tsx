@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import moment from 'moment';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey, UniqueTimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';

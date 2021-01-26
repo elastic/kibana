@@ -10,7 +10,7 @@ import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
-import { SessionsMgmtConfigSchema } from '../';
+import { SessionsConfigSchema } from '../';
 import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
 import type { SearchSessionSavedObjectAttributes } from '../../../../common';
 import { SearchSessionStatus } from '../../../../common/search';
@@ -47,10 +47,9 @@ async function getUrlFromState(
 }
 
 // Helper: factory for a function to map server objects to UI objects
-const mapToUISession = (
-  urls: UrlGeneratorsStart,
-  { expiresSoonWarning }: SessionsMgmtConfigSchema
-) => async (savedObject: SavedObject<SearchSessionSavedObjectAttributes>): Promise<UISession> => {
+const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) => async (
+  savedObject: SavedObject<SearchSessionSavedObjectAttributes>
+): Promise<UISession> => {
   const {
     name,
     appId,
@@ -92,7 +91,7 @@ interface SearcgSessuibManagementDeps {
 export class SearchSessionsMgmtAPI {
   constructor(
     private sessionsClient: ISessionsClient,
-    private config: SessionsMgmtConfigSchema,
+    private config: SessionsConfigSchema,
     private deps: SearcgSessuibManagementDeps
   ) {}
 
@@ -101,12 +100,14 @@ export class SearchSessionsMgmtAPI {
       saved_objects: object[];
     }
 
-    const refreshTimeout = moment.duration(this.config.refreshTimeout);
+    const mgmtConfig = this.config.management;
+
+    const refreshTimeout = moment.duration(mgmtConfig.refreshTimeout);
 
     const fetch$ = from(
       this.sessionsClient.find({
         page: 1,
-        perPage: this.config.maxSessions,
+        perPage: mgmtConfig.maxSessions,
         sortField: 'created',
         sortOrder: 'asc',
       })
@@ -147,6 +148,10 @@ export class SearchSessionsMgmtAPI {
 
   public reloadSearchSession(reloadUrl: string) {
     this.deps.application.navigateToUrl(reloadUrl);
+  }
+
+  public getExtendByDuration() {
+    return this.config.defaultExpiration;
   }
 
   // Cancel and expire
