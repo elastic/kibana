@@ -100,9 +100,7 @@ export class MapEmbeddable
 
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
-    this._subscription = this.getUpdated$().subscribe(() =>
-      this.onContainerStateChanged(this.input)
-    );
+    this._subscription = this.getUpdated$().subscribe(() => this.onUpdate(this.input));
   }
 
   private async _initializeSaveMap() {
