@@ -16,7 +16,6 @@ import { VisualizationContainer } from '../../visualizations/public';
 import type { PersistedState } from '../../visualizations/public';
 
 import { XyVisType } from '../common';
-import { SplitChartWarning } from './components/split_chart_warning';
 import { VisComponentType } from './vis_component';
 import { RenderValue, visName } from './xy_vis_fn';
 
@@ -36,24 +35,20 @@ export const xyVisRenderer: ExpressionRenderDefinition<RenderValue> = {
   reuseDomNode: true,
   render: async (domNode, { visData, visConfig, visType, syncColors }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData, visType);
-    const isSplitChart = Boolean(visConfig.dimensions.splitRow);
 
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
     render(
       <I18nProvider>
-        <>
-          {isSplitChart && <SplitChartWarning />}
-          <VisualizationContainer handlers={handlers} showNoResult={showNoResult || isSplitChart}>
-            <VisComponent
-              visParams={visConfig}
-              visData={visData}
-              renderComplete={handlers.done}
-              fireEvent={handlers.event}
-              uiState={handlers.uiState as PersistedState}
-              syncColors={syncColors}
-            />
-          </VisualizationContainer>
-        </>
+        <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
+          <VisComponent
+            visParams={visConfig}
+            visData={visData}
+            renderComplete={handlers.done}
+            fireEvent={handlers.event}
+            uiState={handlers.uiState as PersistedState}
+            syncColors={syncColors}
+          />
+        </VisualizationContainer>
       </I18nProvider>,
       domNode
     );
