@@ -16,45 +16,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   // Failing: See https://github.com/elastic/kibana/issues/88826
-  describe.skip(
-    'Kibana browser back navigation should work',
-    function describeIndexTests() {
-      before(async () => {
-        await esArchiver.loadIfNeeded('discover');
-        await esArchiver.loadIfNeeded('logstash_functional');
-      });
+  describe.skip('Kibana browser back navigation should work', function describeIndexTests() {
+    before(async () => {
+      await esArchiver.loadIfNeeded('discover');
+      await esArchiver.loadIfNeeded('logstash_functional');
+    });
 
-      it('detect navigate back issues', async () => {
-        let currUrl;
-        // Detects bug described in issue #31238 - where back navigation would get stuck to URL encoding handling in Angular.
-        // Navigate to home app
-        await PageObjects.common.navigateToApp('home');
-        const homeUrl = await browser.getCurrentUrl();
+    it('detect navigate back issues', async () => {
+      let currUrl;
+      // Detects bug described in issue #31238 - where back navigation would get stuck to URL encoding handling in Angular.
+      // Navigate to home app
+      await PageObjects.common.navigateToApp('home');
+      const homeUrl = await browser.getCurrentUrl();
 
-        // Navigate to discover app
-        await appsMenu.clickLink('Discover');
-        const discoverUrl = await browser.getCurrentUrl();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        const modifiedTimeDiscoverUrl = await browser.getCurrentUrl();
+      // Navigate to discover app
+      await appsMenu.clickLink('Discover');
+      const discoverUrl = await browser.getCurrentUrl();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      const modifiedTimeDiscoverUrl = await browser.getCurrentUrl();
 
-        // Navigate to dashboard app
-        await appsMenu.clickLink('Dashboard');
+      // Navigate to dashboard app
+      await appsMenu.clickLink('Dashboard');
 
-        // Navigating back to discover
-        await browser.goBack();
-        currUrl = await browser.getCurrentUrl();
-        expect(currUrl).to.be(modifiedTimeDiscoverUrl);
+      // Navigating back to discover
+      await browser.goBack();
+      currUrl = await browser.getCurrentUrl();
+      expect(currUrl).to.be(modifiedTimeDiscoverUrl);
 
-        // Navigating back from time settings
-        await browser.goBack(); // undo time settings
-        currUrl = await browser.getCurrentUrl();
-        expect(currUrl.startsWith(discoverUrl)).to.be(true);
+      // Navigating back from time settings
+      await browser.goBack(); // undo time settings
+      currUrl = await browser.getCurrentUrl();
+      expect(currUrl.startsWith(discoverUrl)).to.be(true);
 
-        // Navigate back home
-        await browser.goBack();
-        currUrl = await browser.getCurrentUrl();
-        expect(currUrl).to.be(homeUrl);
-      });
-    }
-  );
+      // Navigate back home
+      await browser.goBack();
+      currUrl = await browser.getCurrentUrl();
+      expect(currUrl).to.be(homeUrl);
+    });
+  });
 }
