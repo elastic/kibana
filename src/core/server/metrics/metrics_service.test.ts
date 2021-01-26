@@ -168,11 +168,7 @@ describe('MetricsService', () => {
       };
 
       await nextEmission();
-
-      const opsLogs = loggingSystemMock.collect(opsLogger).debug.filter((log) => {
-        // Only return the opsMetrics logs that contain both a message string and the meta
-        if (log.length > 1) return log;
-      });
+      const opsLogs = loggingSystemMock.collect(opsLogger).debug;
       expect(opsLogs.length).toEqual(2);
       expect(opsLogs[0][1]).not.toEqual(opsLogs[1][1]);
     });
