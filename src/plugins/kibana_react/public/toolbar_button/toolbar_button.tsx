@@ -1,7 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import './toolbar_button.scss';
@@ -11,16 +13,24 @@ import { EuiButton, PropsOf, EuiButtonProps } from '@elastic/eui';
 
 const groupPositionToClassMap = {
   none: null,
-  left: 'lnsToolbarButton--groupLeft',
-  center: 'lnsToolbarButton--groupCenter',
-  right: 'lnsToolbarButton--groupRight',
+  left: 'toolbarButton--groupLeft',
+  center: 'toolbarButton--groupCenter',
+  right: 'toolbarButton--groupRight',
 };
+
+type ButtonPositions = keyof typeof groupPositionToClassMap;
+export const POSITIONS = Object.keys(groupPositionToClassMap) as ButtonPositions[];
+
+type Weights = 'normal' | 'bold';
+export const WEIGHTS = ['normal', 'bold'] as Weights[];
+
+export const TOOLBAR_BUTTON_SIZES: Array<EuiButtonProps['size']> = ['s', 'm'];
 
 export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
   /**
    * Determines prominence
    */
-  fontWeight?: 'normal' | 'bold';
+  fontWeight?: Weights;
   /**
    * Smaller buttons also remove extra shadow for less prominence
    */
@@ -32,7 +42,7 @@ export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
   /**
    * Adjusts the borders for groupings
    */
-  groupPosition?: 'none' | 'left' | 'center' | 'right';
+  groupPosition?: ButtonPositions;
   dataTestSubj?: string;
 };
 
@@ -47,9 +57,9 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   ...rest
 }) => {
   const classes = classNames(
-    'lnsToolbarButton',
+    'kbnToolbarButton',
     groupPositionToClassMap[groupPosition],
-    [`lnsToolbarButton--${fontWeight}`, `lnsToolbarButton--${size}`],
+    [`kbnToolbarButton--${fontWeight}`, `kbnToolbarButton--${size}`],
     className
   );
   return (
@@ -60,10 +70,10 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
       iconType={hasArrow ? 'arrowDown' : ''}
       color="text"
       contentProps={{
-        className: 'lnsToolbarButton__content',
+        className: 'kbnToolbarButton__content',
       }}
       textProps={{
-        className: 'lnsToolbarButton__text',
+        className: 'kbnToolbarButton__text',
       }}
       {...rest}
       size={size}
