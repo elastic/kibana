@@ -9,7 +9,8 @@ import styled from 'styled-components';
 import { EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { FIXED_AXIS_HEIGHT } from './constants';
 
-const OuterContainer = styled.div`
+const OuterContainer = styled.span`
+  display: inline-block;
   width: 100%;
   height: 100%;
   position: relative;
