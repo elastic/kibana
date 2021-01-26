@@ -33,8 +33,11 @@ import {
 import { FormContext } from './form_context';
 import { CreateCaseForm } from './form';
 import { SubmitCaseButton } from './submit_button';
+import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { noop } from 'lodash/fp';
 
 jest.mock('../../containers/use_post_case');
+jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/configure/use_configure');
@@ -48,17 +51,27 @@ jest.mock('../settings/jira/use_get_issues');
 const useConnectorsMock = useConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
+const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const postCase = jest.fn();
+const postPushToService = jest.fn();
 
 const defaultPostCase = {
   isLoading: false,
   isError: false,
   caseData: null,
   postCase,
+};
+
+const defaultPostPushToService = {
+  serviceData: null,
+  pushedCaseData: null,
+  isLoading: false,
+  isError: false,
+  postPushToService,
 };
 
 const fillForm = (wrapper: ReactWrapper) => {
@@ -86,6 +99,7 @@ describe('Create case', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     usePostCaseMock.mockImplementation(() => defaultPostCase);
+    usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useConnectorsMock.mockReturnValue(sampleConnectorData);
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
@@ -161,6 +175,25 @@ describe('Create case', () => {
       await waitFor(() =>
         expect(postCase).toBeCalledWith({ ...sampleData, settings: { syncAlerts: false } })
       );
+    });
+
+    it('should not push to the external connector when caseData is there but a connector is not selected', async () => {
+      const sampleId = 'case-id';
+      usePostCaseMock.mockImplementation(() => ({
+        ...defaultPostCase,
+        caseData: { id: sampleId },
+      }));
+
+      mount(
+        <TestProviders>
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseForm />
+            <SubmitCaseButton />
+          </FormContext>
+        </TestProviders>
+      );
+
+      await waitFor(() => expect(postPushToService).not.toHaveBeenCalled());
     });
 
     it('should redirect to new case when caseData is there', async () => {
@@ -317,6 +350,61 @@ describe('Create case', () => {
       );
     });
 
+    it(`it should push case to Jira connector`, async () => {
+      useConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        connectors: connectorsMock,
+      });
+      const sampleId = 'case-id';
+      usePostCaseMock.mockImplementation(() => ({
+        ...defaultPostCase,
+        caseData: { id: sampleId },
+      }));
+
+      const wrapper = mount(
+        <TestProviders>
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseForm />
+            <SubmitCaseButton />
+          </FormContext>
+        </TestProviders>
+      );
+
+      fillForm(wrapper);
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
+      wrapper
+        .find('select[data-test-subj="issueTypeSelect"]')
+        .first()
+        .simulate('change', {
+          target: { value: '10007' },
+        });
+
+      wrapper
+        .find('select[data-test-subj="prioritySelect"]')
+        .first()
+        .simulate('change', {
+          target: { value: '2' },
+        });
+
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+
+      await waitFor(() => {
+        expect(postPushToService).toHaveBeenCalledWith({
+          caseId: sampleId,
+          caseServices: {},
+          connector: {
+            id: 'jira-1',
+            name: 'Jira',
+            type: '.jira',
+            fields: { issueType: '10007', parent: null, priority: '2' },
+          },
+          alerts: {},
+          updateCase: noop,
+        });
+      });
+    });
+
     it(`it should submit a resilient connector`, async () => {
       useConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
@@ -372,6 +460,62 @@ describe('Create case', () => {
       );
     });
 
+    it(`it should push case to resilient connector`, async () => {
+      useConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        connectors: connectorsMock,
+      });
+
+      const sampleId = 'case-id';
+      usePostCaseMock.mockImplementation(() => ({
+        ...defaultPostCase,
+        caseData: { id: sampleId },
+      }));
+
+      const wrapper = mount(
+        <TestProviders>
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseForm />
+            <SubmitCaseButton />
+          </FormContext>
+        </TestProviders>
+      );
+
+      fillForm(wrapper);
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
+
+      act(() => {
+        ((wrapper.find(EuiComboBox).at(1).props() as unknown) as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }).onChange([{ value: '19', label: 'Denial of Service' }]);
+      });
+
+      wrapper
+        .find('select[data-test-subj="severitySelect"]')
+        .first()
+        .simulate('change', {
+          target: { value: '4' },
+        });
+
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+
+      await waitFor(() => {
+        expect(postPushToService).toHaveBeenCalledWith({
+          caseId: sampleId,
+          caseServices: {},
+          connector: {
+            id: 'resilient-2',
+            name: 'My Connector 2',
+            type: '.resilient',
+            fields: { incidentTypes: ['19'], severityCode: '4' },
+          },
+          alerts: {},
+          updateCase: noop,
+        });
+      });
+    });
+
     it(`it should submit a servicenow connector`, async () => {
       useConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
@@ -413,6 +557,60 @@ describe('Create case', () => {
             type: '.servicenow',
             fields: { impact: '2', severity: '2', urgency: '2' },
           },
+        })
+      );
+    });
+
+    it(`it should push case to servicenow connector`, async () => {
+      useConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        connectors: connectorsMock,
+      });
+
+      const sampleId = 'case-id';
+      usePostCaseMock.mockImplementation(() => ({
+        ...defaultPostCase,
+        caseData: { id: sampleId },
+      }));
+
+      const wrapper = mount(
+        <TestProviders>
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseForm />
+            <SubmitCaseButton />
+          </FormContext>
+        </TestProviders>
+      );
+
+      fillForm(wrapper);
+      expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeFalsy();
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find(`button[data-test-subj="dropdown-connector-servicenow-1"]`).simulate('click');
+      expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeTruthy();
+
+      ['severitySelect', 'urgencySelect', 'impactSelect'].forEach((subj) => {
+        wrapper
+          .find(`select[data-test-subj="${subj}"]`)
+          .first()
+          .simulate('change', {
+            target: { value: '2' },
+          });
+      });
+
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+
+      await waitFor(() =>
+        expect(postPushToService).toBeCalledWith({
+          caseId: sampleId,
+          caseServices: {},
+          connector: {
+            id: 'servicenow-1',
+            name: 'My Connector',
+            type: '.servicenow',
+            fields: { impact: '2', severity: '2', urgency: '2' },
+          },
+          alerts: {},
+          updateCase: noop,
         })
       );
     });

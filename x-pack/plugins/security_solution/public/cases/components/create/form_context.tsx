@@ -15,10 +15,10 @@ import {
   normalizeActionConnector,
 } from '../configure_cases/utils';
 import { usePostCase } from '../../containers/use_post_case';
+import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { Case } from '../../containers/types';
-import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
 const initialCaseValue: FormProps = {
   description: '',
