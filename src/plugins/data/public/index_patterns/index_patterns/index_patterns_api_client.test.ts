@@ -34,7 +34,7 @@ describe('IndexPatternsApiClient', () => {
   test('uses the right URI to fetch fields for wildcard', async function () {
     const expectedPath = '/api/index_patterns/_fields_for_wildcard';
 
-    await indexPatternsApiClient.getFieldsForWildcard({ pattern: 'blah' });
+    await indexPatternsApiClient.getFieldsForWildcard({ patternList: ['blah'] });
 
     expect(fetchSpy).toHaveBeenCalledWith(expectedPath, expect.any(Object));
   });

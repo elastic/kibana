@@ -20,6 +20,7 @@ export function stubbedSavedObjectIndexPattern(id: string | null = null) {
       customFormats: {},
       fields: mockLogstashFields,
       title: 'title',
+      patternList: ['auditbeat-*'],
     },
     version: '2',
   };

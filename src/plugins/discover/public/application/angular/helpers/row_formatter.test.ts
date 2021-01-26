@@ -24,11 +24,20 @@ describe('Row formatter', () => {
     const {
       type,
       version,
-      attributes: { timeFieldName, fields, title },
+      attributes: { timeFieldName, fields, title, patternList },
     } = stubbedSavedObjectIndexPattern(id);
 
     return new IndexPattern({
-      spec: { id, type, version, timeFieldName, fields, title },
+      spec: {
+        id,
+        type,
+        version,
+        timeFieldName,
+        fields,
+        title,
+        patternList,
+        patternListActive: patternList,
+      },
       fieldFormats: fieldFormatsMock,
       shortDotsEnable: false,
       metaFields: [],

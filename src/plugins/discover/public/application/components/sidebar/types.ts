@@ -9,6 +9,8 @@
 export interface IndexPatternRef {
   id: string;
   title: string;
+  patternList: string[];
+  patternListActive: string[];
 }
 
 export interface FieldDetails {

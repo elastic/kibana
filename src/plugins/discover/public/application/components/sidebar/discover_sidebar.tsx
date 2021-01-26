@@ -25,8 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
-import { IndexPatternAttributes } from '../../../../../data/common';
-import { SavedObject } from '../../../../../../core/types';
+import { IndexPatternSpec } from '../../../../../data/common';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { groupFields } from './lib/group_fields';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
@@ -60,7 +59,7 @@ export interface DiscoverSidebarProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: IndexPatternSpec[];
   /**
    * Callback function when selecting a field
    */
@@ -204,7 +203,7 @@ export function DiscoverSidebar({
         <DiscoverIndexPattern
           selectedIndexPattern={selectedIndexPattern}
           setIndexPattern={setIndexPattern}
-          indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+          indexPatternList={sortBy(indexPatternList, (o) => o.title)}
         />
       </section>
     );
@@ -230,7 +229,7 @@ export function DiscoverSidebar({
           <DiscoverIndexPattern
             selectedIndexPattern={selectedIndexPattern}
             setIndexPattern={setIndexPattern}
-            indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+            indexPatternList={sortBy(indexPatternList, (o) => o.title)}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

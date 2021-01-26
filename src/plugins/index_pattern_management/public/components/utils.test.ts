@@ -10,7 +10,7 @@ import { getIndexPatterns } from './utils';
 import { coreMock } from '../../../../core/public/mocks';
 import { mockManagementPlugin } from '../mocks';
 
-const { savedObjects } = coreMock.createStart();
+const { http, savedObjects } = coreMock.createStart();
 const mockManagementPluginStart = mockManagementPlugin.createStartContract();
 
 (savedObjects.client.find as jest.Mock).mockResolvedValue({
@@ -49,7 +49,8 @@ test('getting index patterns', async () => {
   const indexPatterns = await getIndexPatterns(
     savedObjects.client,
     'test',
-    mockManagementPluginStart
+    mockManagementPluginStart,
+    http
   );
   expect(indexPatterns).toMatchSnapshot();
 });

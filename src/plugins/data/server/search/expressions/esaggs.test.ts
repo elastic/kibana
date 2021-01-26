@@ -25,6 +25,7 @@ jest.mock('../../../common/search/expressions', () => ({
 }));
 
 import { getEsaggsMeta, handleEsaggsRequest } from '../../../common/search/expressions';
+import { mockPatternLists } from '../../../common/index_patterns/index_patterns/fixtures/stubbed_saved_object_index_pattern';
 
 describe('esaggs expression function - server', () => {
   let getStartDependencies: () => Promise<MockedKeys<EsaggsStartDependencies>>;
@@ -34,7 +35,7 @@ describe('esaggs expression function - server', () => {
   const args = {
     index: {
       type: 'index_pattern' as 'index_pattern',
-      value: { title: 'logstash-*' },
+      value: { title: 'logstash-*', ...mockPatternLists },
     },
     aggs: [
       {

@@ -61,6 +61,8 @@ fields.getByName = (name: string) => {
 const indexPattern = ({
   id: 'the-index-pattern-id',
   title: 'the-index-pattern-title',
+  patternList: ['the-index-pattern-title'],
+  patternListActive: ['the-index-pattern-title'],
   metaFields: ['_index', '_score'],
   formatField: jest.fn(),
   flattenHit: undefined,

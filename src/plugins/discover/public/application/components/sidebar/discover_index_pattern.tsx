@@ -7,8 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { SavedObject } from 'kibana/public';
-import { IIndexPattern, IndexPatternAttributes } from 'src/plugins/data/public';
+import { IIndexPattern, IndexPatternSpec } from 'src/plugins/data/public';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { IndexPatternRef } from './types';
@@ -17,7 +16,7 @@ export interface DiscoverIndexPatternProps {
   /**
    * list of available index patterns, if length > 1, component offers a "change" link
    */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: IndexPatternSpec[];
   /**
    * currently selected index pattern, due to angular issues it's undefined at first rendering
    */
@@ -38,17 +37,26 @@ export function DiscoverIndexPattern({
 }: DiscoverIndexPatternProps) {
   const options: IndexPatternRef[] = (indexPatternList || []).map((entity) => ({
     id: entity.id,
-    title: entity.attributes!.title,
+    title: entity!.title,
+    patternList: entity!.patternList,
+    patternListActive: entity!.patternListActive,
   }));
-  const { id: selectedId, title: selectedTitle } = selectedIndexPattern || {};
+  const {
+    id: selectedId,
+    title: selectedTitle,
+    patternList: selectedPatternList,
+    patternListActive: selectedPatternListActive,
+  } = selectedIndexPattern || {};
 
   const [selected, setSelected] = useState({
     id: selectedId,
     title: selectedTitle || '',
+    patternList: selectedPatternList || [],
+    patternListActive: selectedPatternListActive || [],
   });
   useEffect(() => {
-    const { id, title } = selectedIndexPattern;
-    setSelected({ id, title });
+    const { id, patternList, patternListActive, title } = selectedIndexPattern;
+    setSelected({ id, patternList, patternListActive, title });
   }, [selectedIndexPattern]);
   if (!selectedId) {
     return null;
@@ -60,6 +68,8 @@ export function DiscoverIndexPattern({
         trigger={{
           label: selected.title,
           title: selected.title,
+          patternList: selected.patternList,
+          patternListActive: selected.patternListActive,
           'data-test-subj': 'indexPattern-switch-link',
         }}
         indexPatternId={selected.id}

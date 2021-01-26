@@ -36,15 +36,14 @@ import {
   ISearchSource,
   TimeRange,
   Query,
-  IndexPatternAttributes,
   DataPublicPluginStart,
   AggConfigs,
   FilterManager,
+  IndexPatternSpec,
 } from '../../../../data/public';
 import { Chart } from '../angular/helpers/point_series';
 import { AppState } from '../angular/discover_state';
 import { SavedSearch } from '../../saved_searches';
-import { SavedObject } from '../../../../../core/types';
 import { TopNavMenuData } from '../../../../navigation/public';
 import {
   DiscoverSidebarResponsive,
@@ -139,7 +138,7 @@ export interface DiscoverProps {
     /**
      * List of available index patterns
      */
-    indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+    indexPatternList: IndexPatternSpec[];
     /**
      * The number of documents that can be displayed in the table/grid
      */

@@ -20,8 +20,7 @@ import { createSearchSourceMock } from '../../../../data/common/search/search_so
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { createFilterManagerMock } from '../../../../data/public/query/filter_manager/filter_manager.mock';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
-import { IndexPattern, IndexPatternAttributes } from '../../../../data/common/index_patterns';
-import { SavedObject } from '../../../../../core/types';
+import { IndexPattern, IndexPatternSpec } from '../../../../data/common/index_patterns';
 import { navigationPluginMock } from '../../../../navigation/public/mocks';
 import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
@@ -76,7 +75,7 @@ function getProps(indexPattern: IndexPattern) {
       data: dataPluginMock.createStartContract(),
       fixedScroll: jest.fn(),
       filterManager: createFilterManagerMock(),
-      indexPatternList: (indexPattern as unknown) as Array<SavedObject<IndexPatternAttributes>>,
+      indexPatternList: (indexPattern as unknown) as IndexPatternSpec[],
       sampleSize: 10,
       savedSearch: savedSearchMock,
       setHeaderActionMenu: jest.fn(),

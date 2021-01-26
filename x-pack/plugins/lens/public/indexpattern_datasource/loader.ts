@@ -328,9 +328,9 @@ export async function changeLayerIndexPattern({
 async function loadIndexPatternRefs(
   savedObjectsClient: SavedObjectsClient
 ): Promise<IndexPatternRef[]> {
-  const result = await savedObjectsClient.find<{ title: string }>({
+  const result = await savedObjectsClient.find<{ title: string; patternList: string[] }>({
     type: 'index-pattern',
-    fields: ['title'],
+    fields: ['patternList', 'title'],
     perPage: 10000,
   });
 
@@ -338,6 +338,7 @@ async function loadIndexPatternRefs(
     .map((o) => ({
       id: String(o.id),
       title: (o.attributes as { title: string }).title,
+      patternList: (o.attributes as { patternList: string[] }).patternList,
     }))
     .sort((a, b) => {
       return a.title.localeCompare(b.title);

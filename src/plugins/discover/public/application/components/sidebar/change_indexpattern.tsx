@@ -5,22 +5,59 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-
+import './change_indexpattern.scss';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
+  EuiButtonProps,
+  EuiHighlight,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiButtonProps,
+  EuiSelectableOption,
+  EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
 import { IndexPatternRef } from './types';
+interface PatternListProps {
+  patternList: string[];
+  patternListActive: string[];
+}
+const PatternList = ({ patternList, patternListActive }: PatternListProps) => (
+  <div className="dscChangeIndexPattern__flex">
+    {patternList.map((label) => {
+      const isActive = patternListActive.includes(label);
+      const badgeContent = isActive
+        ? i18n.translate('discover.fieldChooser.indexPattern.changeIndexPatternActive', {
+            defaultMessage: 'Active',
+          })
+        : i18n.translate('discover.fieldChooser.indexPattern.changeIndexPatternInactive', {
+            defaultMessage: 'Inactive; index pattern does not match any indices',
+          });
+      return (
+        <EuiToolTip content={badgeContent} key={label} position="top">
+          <EuiBadge
+            aria-label={badgeContent}
+            className="dscChangeIndexPattern__rightSpacer"
+            color={'hollow'}
+            isDisabled={!isActive}
+          >
+            {label}
+          </EuiBadge>
+        </EuiToolTip>
+      );
+    })}
+  </div>
+);
 
 export type ChangeIndexPatternTriggerProps = EuiButtonProps & {
   label: string;
-  title?: string;
+  title: string;
+  patternList: string[];
+  patternListActive: string[];
 };
 
 // TODO: refactor to shared component with ../../../../../../../../x-pack/legacy/plugins/lens/public/indexpattern_plugin/change_indexpattern
@@ -36,14 +73,15 @@ export function ChangeIndexPattern({
   indexPatternRefs: IndexPatternRef[];
   onChangeIndexPattern: (newId: string) => void;
   indexPatternId?: string;
-  selectableProps?: EuiSelectableProps<{ value: string }>;
+  selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
-  const createTrigger = function () {
-    const { label, title, ...rest } = trigger;
+  const createTrigger = useMemo(() => {
+    const { label, patternList, patternListActive, title, ...rest } = trigger;
     return (
       <EuiButton
+        className="dscChangeIndexPattern__button"
         fullWidth
         color="text"
         iconSide="right"
@@ -53,13 +91,42 @@ export function ChangeIndexPattern({
         {...rest}
       >
         <strong>{label}</strong>
+        <br />
+        <PatternList patternList={patternList} patternListActive={patternListActive} />
       </EuiButton>
     );
-  };
+  }, [isPopoverOpen, trigger]);
+  const renderOption = useCallback(
+    (option, searchValue) => (
+      <>
+        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+        <br />
+        <EuiTextColor color="subdued">
+          <small>
+            <EuiHighlight className="dscChangeIndexPattern__patternList" search={searchValue}>
+              {option.searchableLabel}
+            </EuiHighlight>
+          </small>
+        </EuiTextColor>
+      </>
+    ),
+    []
+  );
 
+  const options: EuiSelectableOption[] = useMemo(
+    () =>
+      indexPatternRefs.map(({ patternList, title, id }) => ({
+        label: title,
+        key: id,
+        value: id,
+        searchableLabel: patternList.join(','),
+        checked: id === indexPatternId ? 'on' : undefined,
+      })),
+    [indexPatternId, indexPatternRefs]
+  );
   return (
     <EuiPopover
-      button={createTrigger()}
+      button={createTrigger}
       isOpen={isPopoverOpen}
       closePopover={() => setPopoverIsOpen(false)}
       display="block"
@@ -71,17 +138,16 @@ export function ChangeIndexPattern({
             defaultMessage: 'Change index pattern',
           })}
         </EuiPopoverTitle>
-        <EuiSelectable<{ value: string }>
+        <EuiSelectable
           data-test-subj="indexPattern-switcher"
           {...selectableProps}
           searchable
           singleSelection="always"
-          options={indexPatternRefs.map(({ title, id }) => ({
-            label: title,
-            key: id,
-            value: id,
-            checked: id === indexPatternId ? 'on' : undefined,
-          }))}
+          options={options}
+          listProps={{
+            rowHeight: 65,
+          }}
+          renderOption={renderOption}
           onChange={(choices) => {
             const choice = (choices.find(({ checked }) => checked) as unknown) as {
               value: string;

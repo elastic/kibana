@@ -30,6 +30,8 @@ export interface RuntimeField {
 export interface IIndexPattern {
   fields: IFieldType[];
   title: string; // label, not pattern string
+  patternList: string[];
+  patternListActive: string[];
   id?: string;
   /**
    * Type is used for identifying rollup indices, otherwise left undefined
@@ -239,7 +241,7 @@ export interface IndexPatternSpec {
   fieldAttrs?: FieldAttrs;
   fieldFormats?: Record<string, SerializedFieldFormat>;
   fields?: IndexPatternFieldMap;
-  id?: string;
+  id: string;
   intervalName?: string;
   patternList: string[];
   patternListActive: string[];
@@ -251,6 +253,7 @@ export interface IndexPatternSpec {
   typeMeta?: TypeMeta;
   version?: string;
 }
+export type IndexPatternSpecPreValidation = Omit<IndexPatternSpec, 'patternListActive'>;
 
 export interface SourceFilter {
   value: string;

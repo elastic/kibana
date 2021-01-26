@@ -263,6 +263,7 @@ export {
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternSpec,
+  IndexPatternSpecPreValidation,
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
 } from '../common';

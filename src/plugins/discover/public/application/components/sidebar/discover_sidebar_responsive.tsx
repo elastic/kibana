@@ -25,8 +25,7 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { IndexPatternAttributes } from '../../../../../data/common';
-import { SavedObject } from '../../../../../../core/types';
+import { IndexPatternSpec } from '../../../../../data/common';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
@@ -53,7 +52,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: IndexPatternSpec[];
   /**
    * Has been toggled closed
    */
@@ -132,7 +131,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             <DiscoverIndexPattern
               selectedIndexPattern={props.selectedIndexPattern}
               setIndexPattern={props.setIndexPattern}
-              indexPatternList={sortBy(props.indexPatternList, (o) => o.attributes.title)}
+              indexPatternList={sortBy(props.indexPatternList, (o) => o.title)}
             />
           </section>
           <EuiSpacer size="s" />

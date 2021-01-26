@@ -42,7 +42,7 @@ interface SavedObjectBody {
 type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
 
 export class IndexPattern implements IIndexPattern {
-  public id?: string;
+  public id: string = '';
   public title: string = ''; // label, not pattern string
 
   public patternList: string[];
@@ -88,6 +88,7 @@ export class IndexPattern implements IIndexPattern {
 
   constructor({
     spec = {
+      id: '',
       title: '',
       patternList: [],
       patternListActive: [],

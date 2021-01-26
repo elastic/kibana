@@ -14,7 +14,7 @@ import {
   DataPublicPluginStart,
   IndexPatternsContract,
   injectSearchSourceReferences,
-  IndexPatternSpec,
+  IndexPatternSpecPreValidation,
 } from '../../../data/public';
 import { FailedImport } from './process_import_response';
 import { DuplicateIndexPatternError, IndexPattern } from '../../../data/public';
@@ -72,9 +72,11 @@ async function importIndexPattern(
     sourceFilters,
     type,
     typeMeta,
+    patternList,
   } = doc._source;
-  const indexPatternSpec: IndexPatternSpec = {
+  const indexPatternSpec: IndexPatternSpecPreValidation = {
     id: doc._id,
+    patternList,
     title,
     timeFieldName,
   };

@@ -6,8 +6,7 @@
  * Public License, v 1.
  */
 
-import type { IndexPatternSavedObjectAttrs } from './index_patterns';
-import type { SavedObjectsClientCommon } from '../types';
+import type { IndexPatternAttributes, SavedObjectsClientCommon } from '../types';
 
 /**
  * Returns an object matching a given title
@@ -18,7 +17,7 @@ import type { SavedObjectsClientCommon } from '../types';
  */
 export async function findByTitle(client: SavedObjectsClientCommon, title: string) {
   if (title) {
-    const savedObjects = await client.find<IndexPatternSavedObjectAttrs>({
+    const savedObjects = await client.find<IndexPatternAttributes>({
       type: 'index-pattern',
       perPage: 10,
       search: `"${title}"`,

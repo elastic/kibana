@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsClientCommon } from '../..';
+import { IndexPatternSpecPreValidation, SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
 import type { RuntimeField } from '../types';
@@ -40,10 +40,6 @@ import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
 
-export interface IndexPatternSavedObjectAttrs {
-  title: string;
-}
-
 interface IndexPatternsServiceDeps {
   uiSettings: UiSettingsCommon;
   savedObjectsClient: SavedObjectsClientCommon;
@@ -57,7 +53,8 @@ interface IndexPatternsServiceDeps {
 export class IndexPatternsService {
   private config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientCommon;
-  private savedObjectsCache?: Array<SavedObject<IndexPatternSavedObjectAttrs>> | null;
+  private savedObjectsCache?: Array<SavedObject<IndexPatternAttributes>> | null;
+  private kipCache?: IndexPatternSpec[] | null;
   private apiClient: IIndexPatternsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
@@ -90,15 +87,17 @@ export class IndexPatternsService {
   }
 
   /**
-   * Refresh cache of index pattern ids and titles
+   * Refresh cache of index pattern ids, titles, and patternLists
    */
   private async refreshSavedObjectsCache() {
-    const so = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+    this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternAttributes>({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['patternList', 'title'],
       perPage: 10000,
     });
-    this.savedObjectsCache = so;
+    this.kipCache = await Promise.all(
+      this.savedObjectsCache!.map(async (ip) => this.savedObjectToSpec(ip))
+    );
   }
 
   /**
@@ -136,9 +135,9 @@ export class IndexPatternsService {
    * @returns IndexPattern[]
    */
   find = async (search: string, size: number = 10): Promise<IndexPattern[]> => {
-    const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+    const savedObjects = await this.savedObjectsClient.find<IndexPatternAttributes>({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['patternList', 'title'],
       search,
       searchFields: ['title'],
       perPage: size,
@@ -186,6 +185,13 @@ export class IndexPatternsService {
       await this.refreshSavedObjectsCache();
     }
     return this.savedObjectsCache;
+  };
+
+  getPatternCache = async () => {
+    if (!this.kipCache) {
+      await this.refreshSavedObjectsCache();
+    }
+    return this.kipCache;
   };
 
   /**
@@ -518,7 +524,7 @@ export class IndexPatternsService {
    */
 
   async createAndSave(
-    spec: Omit<IndexPatternSpec, 'patternListActive'>,
+    spec: IndexPatternSpecPreValidation,
     override = false,
     skipFetchFields = false
   ) {

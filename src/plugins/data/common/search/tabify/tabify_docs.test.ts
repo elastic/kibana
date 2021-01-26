@@ -9,6 +9,7 @@
 import { tabifyDocs } from './tabify_docs';
 import { IndexPattern } from '../../index_patterns/index_patterns';
 import { SearchResponse } from 'elasticsearch';
+import { mockPatternLists } from '../../index_patterns/index_patterns/fixtures/stubbed_saved_object_index_pattern';
 
 describe('tabifyDocs', () => {
   const fieldFormats = {
@@ -29,6 +30,8 @@ describe('tabifyDocs', () => {
           aggregatable: true,
         },
       },
+      title: 'any',
+      ...mockPatternLists,
     },
     fieldFormats: fieldFormats as any,
   });
