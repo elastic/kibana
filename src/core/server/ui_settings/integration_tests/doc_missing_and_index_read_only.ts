@@ -42,7 +42,7 @@ export const docMissingAndIndexReadOnlySuite = (savedObjectsIndex: string) => ()
   });
 
   afterEach(async () => {
-    const { kbnServer, callCluster } = getServices();
+    const { callCluster } = getServices();
 
     // disable the read only block
     await callCluster('indices.putSettings', {

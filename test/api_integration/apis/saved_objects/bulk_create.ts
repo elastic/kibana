@@ -101,10 +101,6 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       it('should return 200 with errors', async () => {
-        await es.indices.delete({
-          index: '.kibana*',
-          ignore: [404],
-        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
         await supertest
           .post('/api/saved_objects/_bulk_create')
