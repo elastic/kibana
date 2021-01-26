@@ -229,10 +229,12 @@ describe('RelevanceTuningLogic', () => {
     const { http } = mockHttpValues;
     const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
     let scrollToSpy: any;
+    let confirmSpy: any;
 
     beforeAll(() => {
       scrollToSpy = jest.spyOn(window, 'scrollTo');
-      scrollToSpy.mockImplementation(jest.fn(() => true));
+      scrollToSpy.mockImplementation(() => true);
+      confirmSpy = jest.spyOn(window, 'confirm');
     });
 
     afterAll(() => {
@@ -447,13 +449,59 @@ describe('RelevanceTuningLogic', () => {
       it('handles errors', async () => {
         mount();
         jest.spyOn(RelevanceTuningLogic.actions, 'onSearchSettingsError');
-        (RelevanceTuningLogic.actions.onSearchSettingsError as jest.Mock).mockImplementationOnce(
-          () => true
-        );
         const promise = Promise.reject('error');
         http.put.mockReturnValueOnce(promise);
 
         RelevanceTuningLogic.actions.updateSearchSettings();
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        expect(RelevanceTuningLogic.actions.onSearchSettingsError).toHaveBeenCalled();
+      });
+    });
+
+    describe('resetSearchSettings', () => {
+      it('calls and API endpoint, shows a success message, and saves the response', async () => {
+        mount();
+        jest.spyOn(RelevanceTuningLogic.actions, 'onSearchSettingsSuccess');
+        confirmSpy.mockImplementation(() => true);
+
+        const promise = Promise.resolve(searchSettings);
+        http.post.mockReturnValueOnce(promise);
+        RelevanceTuningLogic.actions.resetSearchSettings();
+
+        await promise;
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/api/app_search/engines/test-engine/search_settings/reset'
+        );
+        expect(setSuccessMessage).toHaveBeenCalledWith(
+          'Relevance has been reset to default values. The change will impact your results shortly.'
+        );
+        expect(RelevanceTuningLogic.actions.onSearchSettingsSuccess).toHaveBeenCalledWith(
+          searchSettings
+        );
+      });
+
+      it('does nothing if the user does not confirm', async () => {
+        mount();
+        confirmSpy.mockImplementation(() => false);
+
+        RelevanceTuningLogic.actions.resetSearchSettings();
+
+        expect(http.post).not.toHaveBeenCalledWith(
+          '/api/app_search/engines/test-engine/search_settings/reset'
+        );
+      });
+
+      it('handles errors', async () => {
+        mount();
+        jest.spyOn(RelevanceTuningLogic.actions, 'onSearchSettingsError');
+        confirmSpy.mockImplementation(() => true);
+        const promise = Promise.reject('error');
+        http.post.mockReturnValueOnce(promise);
+
+        RelevanceTuningLogic.actions.resetSearchSettings();
         await expectedAsyncError(promise);
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');

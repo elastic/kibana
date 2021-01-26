@@ -40,6 +40,7 @@ interface RelevanceTuningActions {
   onSearchSettingsSuccess(searchSettings: SearchSettings): { searchSettings: SearchSettings };
   onSearchSettingsError(): void;
   updateSearchSettings(): void;
+  resetSearchSettings(): void;
 }
 
 interface RelevanceTuningValues {
@@ -61,9 +62,22 @@ interface RelevanceTuningValues {
 }
 
 const UPDATE_SUCCESS_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.relevanceTuning.messages.success',
+  'xpack.enterpriseSearch.appSearch.relevanceTuning.messages.updateSuccess',
   {
     defaultMessage: 'Relevance successfully tuned. The changes will impact your results shortly.',
+  }
+);
+const DELETE_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.relevanceTuning.messages.deleteSuccess',
+  {
+    defaultMessage:
+      'Relevance has been reset to default values. The change will impact your results shortly.',
+  }
+);
+const RESET_CONFIRMATION_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.relevanceTuning.messages.confirmation',
+  {
+    defaultMessage: 'Are you sure you want to restore relevance defaults?',
   }
 );
 
@@ -103,6 +117,7 @@ export const RelevanceTuningLogic = kea<
     onSearchSettingsSuccess: (searchSettings) => ({ searchSettings }),
     onSearchSettingsError: () => true,
     updateSearchSettings: true,
+    resetSearchSettings: true,
   }),
   reducers: () => ({
     searchSettings: [
@@ -260,6 +275,23 @@ export const RelevanceTuningLogic = kea<
       } catch (e) {
         flashAPIErrors(e);
         actions.onSearchSettingsError();
+      }
+    },
+    resetSearchSettings: async () => {
+      if (window.confirm(RESET_CONFIRMATION_MESSAGE)) {
+        const { http } = HttpLogic.values;
+        const { engineName } = EngineLogic.values;
+
+        const url = `/api/app_search/engines/${engineName}/search_settings/reset`;
+
+        try {
+          const response = await http.post(url);
+          setSuccessMessage(DELETE_SUCCESS_MESSAGE);
+          actions.onSearchSettingsSuccess(response);
+        } catch (e) {
+          flashAPIErrors(e);
+          actions.onSearchSettingsError();
+        }
       }
     },
   }),
