@@ -241,10 +241,10 @@ export const getSpatialFiltersLayer = createSelector(
       type: 'FeatureCollection',
       features: extractFeaturesFromFilters(filters),
     };
-    const geoJsonSourceDescriptor = GeoJsonFileSource.createDescriptor(
-      featureCollection,
-      'spatialFilters'
-    );
+    const geoJsonSourceDescriptor = GeoJsonFileSource.createDescriptor({
+      __featureCollection: featureCollection,
+      name: 'spatialFilters',
+    });
 
     return new VectorLayer({
       layerDescriptor: VectorLayer.createDescriptor({

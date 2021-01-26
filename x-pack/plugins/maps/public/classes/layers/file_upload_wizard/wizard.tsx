@@ -80,7 +80,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     }
 
     const sourceDescriptor = GeoJsonFileSource.createDescriptor({
-      __featureCollection: geoJson,
+      __featureCollection: geojsonFile,
       name,
     });
     const layerDescriptor = VectorLayer.createDescriptor(
