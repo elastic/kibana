@@ -179,67 +179,72 @@ describe('LogEntries search strategy', () => {
     ]);
   });
 
-  // it.skip('forwards errors from the underlying search strategy', async () => {
-  //   const esSearchStrategyMock = createEsSearchStrategyMock({
-  //     id: 'ASYNC_REQUEST_ID',
-  //     isRunning: false,
-  //     rawResponse: {
-  //       took: 1,
-  //       _shards: { total: 1, failed: 0, skipped: 0, successful: 1 },
-  //       timed_out: false,
-  //       hits: { total: 0, max_score: 0, hits: [] },
-  //     },
-  //   });
-  //   const dataMock = createDataPluginMock(esSearchStrategyMock);
-  //   const sourcesMock = createInfraSourcesMock();
-  //   sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
-  //   const mockDependencies = createSearchStrategyDependenciesMock();
+  it('forwards errors from the underlying search strategy', async () => {
+    const esSearchStrategyMock = createEsSearchStrategyMock({
+      id: 'ASYNC_REQUEST_ID',
+      isRunning: false,
+      rawResponse: {
+        took: 1,
+        _shards: { total: 1, failed: 0, skipped: 0, successful: 1 },
+        timed_out: false,
+        hits: { total: 0, max_score: 0, hits: [] },
+      },
+    });
+    const dataMock = createDataPluginMock(esSearchStrategyMock);
+    const sourcesMock = createInfraSourcesMock();
+    sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
+    const mockDependencies = createSearchStrategyDependenciesMock();
 
-  //   const logEntriesSearchStrategy = logEntriesSearchStrategyProvider({
-  //     data: dataMock,
-  //     sources: sourcesMock,
-  //   });
+    const logEntriesSearchStrategy = logEntriesSearchStrategyProvider({
+      data: dataMock,
+      sources: sourcesMock,
+    });
 
-  //   const response = logEntriesSearchStrategy.search(
-  //     {
-  //       id: logEntriesSearchRequestStateRT.encode({ esRequestId: 'UNKNOWN_ID' }),
-  //       params: { sourceId: 'SOURCE_ID', logEntryId: 'LOG_ENTRY_ID' },
-  //     },
-  //     {},
-  //     mockDependencies
-  //   );
+    const response = logEntriesSearchStrategy.search(
+      {
+        id: logEntriesSearchRequestStateRT.encode({ esRequestId: 'UNKNOWN_ID' }),
+        params: {
+          sourceId: 'SOURCE_ID',
+          startTimestamp: 100,
+          endTimestamp: 200,
+          size: 3,
+        },
+      },
+      {},
+      mockDependencies
+    );
 
-  //   await expect(response.toPromise()).rejects.toThrowError(ResponseError);
-  // });
+    await expect(response.toPromise()).rejects.toThrowError(ResponseError);
+  });
 
-  // it.skip('forwards cancellation to the underlying search strategy', async () => {
-  //   const esSearchStrategyMock = createEsSearchStrategyMock({
-  //     id: 'ASYNC_REQUEST_ID',
-  //     isRunning: false,
-  //     rawResponse: {
-  //       took: 1,
-  //       _shards: { total: 1, failed: 0, skipped: 0, successful: 1 },
-  //       timed_out: false,
-  //       hits: { total: 0, max_score: 0, hits: [] },
-  //     },
-  //   });
-  //   const dataMock = createDataPluginMock(esSearchStrategyMock);
-  //   const sourcesMock = createInfraSourcesMock();
-  //   sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
-  //   const mockDependencies = createSearchStrategyDependenciesMock();
+  it('forwards cancellation to the underlying search strategy', async () => {
+    const esSearchStrategyMock = createEsSearchStrategyMock({
+      id: 'ASYNC_REQUEST_ID',
+      isRunning: false,
+      rawResponse: {
+        took: 1,
+        _shards: { total: 1, failed: 0, skipped: 0, successful: 1 },
+        timed_out: false,
+        hits: { total: 0, max_score: 0, hits: [] },
+      },
+    });
+    const dataMock = createDataPluginMock(esSearchStrategyMock);
+    const sourcesMock = createInfraSourcesMock();
+    sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
+    const mockDependencies = createSearchStrategyDependenciesMock();
 
-  //   const logEntriesSearchStrategy = logEntriesSearchStrategyProvider({
-  //     data: dataMock,
-  //     sources: sourcesMock,
-  //   });
-  //   const requestId = logEntriesSearchRequestStateRT.encode({
-  //     esRequestId: 'ASYNC_REQUEST_ID',
-  //   });
+    const logEntriesSearchStrategy = logEntriesSearchStrategyProvider({
+      data: dataMock,
+      sources: sourcesMock,
+    });
+    const requestId = logEntriesSearchRequestStateRT.encode({
+      esRequestId: 'ASYNC_REQUEST_ID',
+    });
 
-  //   await logEntriesSearchStrategy.cancel?.(requestId, {}, mockDependencies);
+    await logEntriesSearchStrategy.cancel?.(requestId, {}, mockDependencies);
 
-  //   expect(esSearchStrategyMock.cancel).toHaveBeenCalled();
-  // });
+    expect(esSearchStrategyMock.cancel).toHaveBeenCalled();
+  });
 });
 
 const createSourceConfigurationMock = (): InfraSource => ({
