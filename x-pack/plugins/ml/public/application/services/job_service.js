@@ -334,23 +334,6 @@ class JobService {
     if (tempDatafeed) {
       delete tempDatafeed.datafeed_id;
       delete tempDatafeed.job_id;
-      delete tempDatafeed.state;
-      delete tempDatafeed.node;
-      delete tempDatafeed.timing_stats;
-      delete tempDatafeed.assignment_explanation;
-
-      // remove query_delay if it's between 60s and 120s
-      // the back-end produces a random value between 60 and 120 and so
-      // by deleting it, the back-end will produce a new random value
-      if (tempDatafeed.query_delay) {
-        const interval = parseInterval(tempDatafeed.query_delay);
-        if (interval !== null) {
-          const queryDelay = interval.asSeconds();
-          if (queryDelay > 60 && queryDelay < 120) {
-            delete tempDatafeed.query_delay;
-          }
-        }
-      }
     }
     return tempDatafeed;
   }
