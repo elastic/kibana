@@ -14,7 +14,17 @@
     // add all the folders containg files to be compiled
   ],
   "references": [
-    { "path": "../licensing/tsconfig.json" }
+    { "path": "../alerts/tsconfig.json" },
+    { "path": "../features/tsconfig.json" },
+    { "path": "../licensing/tsconfig.json" },
+    { "path": "../ml/tsconfig.json" },
+    { "path": "../maps/tsconfig.json" },
+    { "path": "../observability/tsconfig.json" },
+    { "path": "../triggers_actions_ui/tsconfig.json" },
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
     // add references to other TypeScript projects your plugin dependes on
   ]
 }
