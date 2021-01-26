@@ -39,6 +39,7 @@ interface Props<T> {
     sortDirection: 'asc' | 'desc'
   ) => T[];
   pagination?: boolean;
+  isLoading?: boolean;
 }
 
 function defaultSortFn<T extends any>(
@@ -63,6 +64,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     sortItems = true,
     sortFn = defaultSortFn,
     pagination = true,
+    isLoading = false,
   } = props;
 
   const {
@@ -124,6 +126,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
 
   return (
     <EuiBasicTable
+      loading={isLoading}
       noItemsMessage={noItemsMessage}
       items={renderedItems}
       columns={(columns as unknown) as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn

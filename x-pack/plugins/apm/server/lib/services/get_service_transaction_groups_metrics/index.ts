@@ -9,7 +9,7 @@ import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { getLatencyValue } from '../../helpers/latency_aggregation_type';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { getTimeseriesDataForTransactionGroups } from '../get_service_transaction_groups/get_timeseries_data_for_transaction_groups';
+import { getTimeseriesDataForTransactionGroups } from './get_timeseries_data_for_transaction_groups';
 
 export async function getServiceTransactionGroupsMetrics({
   serviceName,
@@ -31,9 +31,9 @@ export async function getServiceTransactionGroupsMetrics({
   Record<
     string,
     {
-      latency: { timeseries: Coordinate[] };
-      throughput: { timeseries: Coordinate[] };
-      errorRate: { timeseries: Coordinate[] };
+      latency: Coordinate[];
+      throughput: Coordinate[];
+      errorRate: Coordinate[];
     }
   >
 > {
@@ -62,47 +62,40 @@ export async function getServiceTransactionGroupsMetrics({
           const x = timeseriesBucket.key;
           return {
             ...acc,
-            latency: {
-              timeseries: [
-                ...acc.latency.timeseries,
-                {
-                  x,
-                  y: getLatencyValue({
-                    latencyAggregationType,
-                    aggregation: timeseriesBucket.latency,
-                  }),
-                },
-              ],
-            },
-            throughput: {
-              timeseries: [
-                ...acc.throughput.timeseries,
-                {
-                  x,
-                  y: timeseriesBucket.transaction_count.value / deltaAsMinutes,
-                },
-              ],
-            },
-            errorRate: {
-              timeseries: [
-                ...acc.errorRate.timeseries,
-                {
-                  x,
-                  y:
-                    timeseriesBucket.transaction_count.value > 0
-                      ? (timeseriesBucket[EVENT_OUTCOME].transaction_count
-                          .value ?? 0) /
-                        timeseriesBucket.transaction_count.value
-                      : null,
-                },
-              ],
-            },
+            latency: [
+              ...acc.latency,
+              {
+                x,
+                y: getLatencyValue({
+                  latencyAggregationType,
+                  aggregation: timeseriesBucket.latency,
+                }),
+              },
+            ],
+            throughput: [
+              ...acc.throughput,
+              {
+                x,
+                y: timeseriesBucket.transaction_count.value / deltaAsMinutes,
+              },
+            ],
+            errorRate: [
+              ...acc.errorRate,
+              {
+                x,
+                y:
+                  timeseriesBucket.transaction_count.value > 0
+                    ? (timeseriesBucket[EVENT_OUTCOME].transaction_count
+                        .value ?? 0) / timeseriesBucket.transaction_count.value
+                    : null,
+              },
+            ],
           };
         },
         {
-          latency: { timeseries: [] as Coordinate[] },
-          throughput: { timeseries: [] as Coordinate[] },
-          errorRate: { timeseries: [] as Coordinate[] },
+          latency: [] as Coordinate[],
+          throughput: [] as Coordinate[],
+          errorRate: [] as Coordinate[],
         }
       ),
     };

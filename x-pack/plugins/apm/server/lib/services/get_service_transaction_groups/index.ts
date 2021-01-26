@@ -6,26 +6,17 @@
 
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import {
-  getTransactionGroupsForPage,
-  ServiceOverviewTransactionGroupSortField,
-} from './get_transaction_groups_for_page';
+import { getTransactionGroups } from './get_transaction_groups';
 
 export async function getServiceTransactionGroups({
   serviceName,
   setup,
-  numBuckets,
-  sortDirection,
-  sortField,
   searchAggregatedTransactions,
   transactionType,
   latencyAggregationType,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
-  numBuckets: number;
-  sortDirection: 'asc' | 'desc';
-  sortField: ServiceOverviewTransactionGroupSortField;
   searchAggregatedTransactions: boolean;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
@@ -34,33 +25,23 @@ export async function getServiceTransactionGroups({
 
   const {
     transactionGroups,
-    totalTransactionGroups,
     isAggregationAccurate,
-  } = await getTransactionGroupsForPage({
+  } = await getTransactionGroups({
     apmEventClient,
     start,
     end,
     serviceName,
     esFilter,
-    sortField,
-    sortDirection,
     searchAggregatedTransactions,
     transactionType,
     latencyAggregationType,
   });
 
   return {
-    transactionGroups: transactionGroups.map((transactionGroup) => {
-      return {
-        name: transactionGroup.name,
-        transactionType,
-        latency: { value: transactionGroup.latency },
-        throughput: { value: transactionGroup.throughput },
-        errorRate: { value: transactionGroup.errorRate },
-        impact: transactionGroup.impact,
-      };
-    }),
-    totalTransactionGroups,
+    transactionGroups: transactionGroups.map((transactionGroup) => ({
+      ...transactionGroup,
+      transactionType,
+    })),
     isAggregationAccurate,
   };
 }

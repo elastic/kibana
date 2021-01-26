@@ -3,19 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { orderBy } from 'lodash';
-import { ValuesType } from 'utility-types';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
-import { EventOutcome } from '../../../../common/event_outcome';
+import { sortBy } from 'lodash';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../../common/event_outcome';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
@@ -26,26 +24,13 @@ import {
   getLatencyValue,
 } from '../../helpers/latency_aggregation_type';
 
-export type ServiceOverviewTransactionGroupSortField =
-  | 'name'
-  | 'latency'
-  | 'throughput'
-  | 'errorRate'
-  | 'impact';
-
-export type TransactionGroupWithoutTimeseriesData = ValuesType<
-  PromiseReturnType<typeof getTransactionGroupsForPage>['transactionGroups']
->;
-
-export async function getTransactionGroupsForPage({
+export async function getTransactionGroups({
   apmEventClient,
   searchAggregatedTransactions,
   serviceName,
   start,
   end,
   esFilter,
-  sortField,
-  sortDirection,
   transactionType,
   latencyAggregationType,
 }: {
@@ -55,8 +40,6 @@ export async function getTransactionGroupsForPage({
   start: number;
   end: number;
   esFilter: ESFilter[];
-  sortField: ServiceOverviewTransactionGroupSortField;
-  sortDirection: 'asc' | 'desc';
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
@@ -140,18 +123,14 @@ export async function getTransactionGroupsForPage({
       100,
   }));
 
-  // Sort transaction groups first, and only get timeseries for data in view.
-  // This is to limit the possibility of creating too many buckets.
-
-  const sortedAndSlicedTransactionGroups = orderBy(
+  // By default sorts transactions by impact
+  const sortedTransactionGroups = sortBy(
     transactionGroupsWithImpact,
-    sortField,
-    [sortDirection]
-  );
+    'impact'
+  ).reverse();
 
   return {
-    transactionGroups: sortedAndSlicedTransactionGroups,
-    totalTransactionGroups: transactionGroups.length,
+    transactionGroups: sortedTransactionGroups,
     isAggregationAccurate:
       (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) ===
       0,

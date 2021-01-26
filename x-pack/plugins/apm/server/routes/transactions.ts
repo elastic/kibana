@@ -71,15 +71,6 @@ export const transactionGroupsOverviewRoute = createRoute({
       rangeRt,
       uiFiltersRt,
       t.type({
-        numBuckets: toNumberRt,
-        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-        sortField: t.union([
-          t.literal('name'),
-          t.literal('latency'),
-          t.literal('throughput'),
-          t.literal('errorRate'),
-          t.literal('impact'),
-        ]),
         transactionType: t.string,
         latencyAggregationType: latencyAggregationTypeRt,
       }),
@@ -97,23 +88,14 @@ export const transactionGroupsOverviewRoute = createRoute({
 
     const {
       path: { serviceName },
-      query: {
-        latencyAggregationType,
-        numBuckets,
-        sortDirection,
-        sortField,
-        transactionType,
-      },
+      query: { latencyAggregationType, transactionType },
     } = context.params;
 
     return getServiceTransactionGroups({
       setup,
       serviceName,
       searchAggregatedTransactions,
-      sortDirection,
-      sortField,
       transactionType,
-      numBuckets,
       latencyAggregationType: latencyAggregationType as LatencyAggregationType,
     });
   },

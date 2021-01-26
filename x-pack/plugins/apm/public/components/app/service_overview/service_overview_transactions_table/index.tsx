@@ -4,22 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
-import { ValuesType } from 'utility-types';
+import React, { useMemo } from 'react';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import {
-  asMillisecondDuration,
-  asPercent,
-  asTransactionRate,
-} from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -27,175 +15,22 @@ import {
   APIReturnType,
   callApmApi,
 } from '../../../../services/rest/createCallApmApi';
-import { px, unit } from '../../../../style/variables';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
-import { ImpactBar } from '../../../shared/ImpactBar';
-import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_link';
+import { ManagedTable } from '../../../shared/ManagedTable';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
+import { getColumns } from './get_columns';
 
-type ServiceTransactionGroupItem = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/overview'>['transactionGroups']
->;
-
-type TransactionGroupMetrics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/metrics'>;
+export type TransactionGroupsOverview = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/overview'>;
 
 interface Props {
   serviceName: string;
 }
 
-type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
-type SortDirection = 'asc' | 'desc';
-
-const PAGE_SIZE = 5;
-const DEFAULT_SORT = {
-  direction: 'desc' as const,
-  field: 'impact' as const,
+const INITIAL_STATE: TransactionGroupsOverview = {
+  transactionGroups: [],
+  isAggregationAccurate: true,
 };
-
-function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
-  switch (latencyAggregationType) {
-    case 'avg':
-      return i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnLatency.avg',
-        {
-          defaultMessage: 'Latency (avg.)',
-        }
-      );
-
-    case 'p95':
-      return i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnLatency.p95',
-        {
-          defaultMessage: 'Latency (95th)',
-        }
-      );
-
-    case 'p99':
-      return i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnLatency.p99',
-        {
-          defaultMessage: 'Latency (99th)',
-        }
-      );
-  }
-}
-
-function getColumns({
-  serviceName,
-  latencyAggregationType,
-  transactionsMetricsData,
-}: {
-  serviceName: string;
-  latencyAggregationType?: string;
-  transactionsMetricsData?: TransactionGroupMetrics;
-}): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
-  return [
-    {
-      field: 'name',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnName',
-        {
-          defaultMessage: 'Name',
-        }
-      ),
-      render: (_, { name, transactionType: type }) => {
-        return (
-          <TruncateWithTooltip
-            text={name}
-            content={
-              <TransactionDetailLink
-                serviceName={serviceName}
-                transactionName={name}
-                transactionType={type}
-                latencyAggregationType={latencyAggregationType}
-              >
-                {name}
-              </TransactionDetailLink>
-            }
-          />
-        );
-      },
-    },
-    {
-      field: 'latency',
-      name: getLatencyAggregationTypeLabel(latencyAggregationType),
-      width: px(unit * 10),
-      render: (_, { latency, name }) => {
-        const timeseries = transactionsMetricsData
-          ? transactionsMetricsData[name]?.latency.timeseries
-          : undefined;
-        return (
-          <SparkPlot
-            color="euiColorVis1"
-            compact
-            series={timeseries}
-            valueLabel={asMillisecondDuration(latency.value)}
-          />
-        );
-      },
-    },
-    {
-      field: 'throughput',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnThroughput',
-        { defaultMessage: 'Throughput' }
-      ),
-      width: px(unit * 10),
-      render: (_, { throughput, name }) => {
-        const timeseries = transactionsMetricsData
-          ? transactionsMetricsData[name]?.throughput.timeseries
-          : undefined;
-        return (
-          <SparkPlot
-            color="euiColorVis0"
-            compact
-            series={timeseries}
-            valueLabel={asTransactionRate(throughput.value)}
-          />
-        );
-      },
-    },
-    {
-      field: 'errorRate',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
-        {
-          defaultMessage: 'Error rate',
-        }
-      ),
-      width: px(unit * 8),
-      render: (_, { errorRate, name }) => {
-        const timeseries = transactionsMetricsData
-          ? transactionsMetricsData[name]?.errorRate.timeseries
-          : undefined;
-        return (
-          <SparkPlot
-            color="euiColorVis7"
-            compact
-            series={timeseries}
-            valueLabel={asPercent(errorRate.value, 1)}
-          />
-        );
-      },
-    },
-    {
-      field: 'impact',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnImpact',
-        {
-          defaultMessage: 'Impact',
-        }
-      ),
-      width: px(unit * 5),
-      render: (_, { impact }) => {
-        return <ImpactBar value={impact ?? 0} size="m" />;
-      },
-    },
-  ];
-}
 
 export function ServiceOverviewTransactionsTable(props: Props) {
   const { serviceName } = props;
@@ -205,32 +40,10 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     urlParams: { start, end, latencyAggregationType },
   } = useUrlParams();
 
-  const [tableOptions, setTableOptions] = useState<{
-    pageIndex: number;
-    sort: {
-      direction: SortDirection;
-      field: SortField;
-    };
-  }>({
-    pageIndex: 0,
-    sort: DEFAULT_SORT,
-  });
-
-  const {
-    data = {
-      totalItemCount: 0,
-      items: [],
-      tableOptions: {
-        pageIndex: 0,
-        sort: DEFAULT_SORT,
-      },
-    },
-    status,
-  } = useFetcher(() => {
+  const { data = INITIAL_STATE, status } = useFetcher(() => {
     if (!start || !end || !latencyAggregationType || !transactionType) {
       return;
     }
-
     return callApmApi({
       endpoint:
         'GET /api/apm/services/{serviceName}/transactions/groups/overview',
@@ -240,54 +53,33 @@ export function ServiceOverviewTransactionsTable(props: Props) {
           start,
           end,
           uiFilters: JSON.stringify(uiFilters),
-          numBuckets: 20,
-          sortField: tableOptions.sort.field,
-          sortDirection: tableOptions.sort.direction,
           transactionType,
           latencyAggregationType: latencyAggregationType as LatencyAggregationType,
         },
       },
-    }).then((response) => {
-      return {
-        items: response.transactionGroups,
-        totalItemCount: response.totalTransactionGroups,
-        tableOptions: {
-          pageIndex: tableOptions.pageIndex,
-          sort: {
-            field: tableOptions.sort.field,
-            direction: tableOptions.sort.direction,
-          },
-        },
-      };
     });
   }, [
     serviceName,
     start,
     end,
     uiFilters,
-    tableOptions.pageIndex,
-    tableOptions.sort.field,
-    tableOptions.sort.direction,
     transactionType,
     latencyAggregationType,
   ]);
 
-  const {
-    items,
-    totalItemCount,
-    tableOptions: { pageIndex, sort },
-  } = data;
+  const { transactionGroups } = data;
 
-  const transactionNames = useMemo(() => items.map(({ name }) => name), [
-    items,
-  ]);
+  const transactionNames = useMemo(
+    () => transactionGroups.map(({ name }) => name).join(),
+    [transactionGroups]
+  );
 
   const {
     data: transactionsMetricsData,
     status: transactionsMetricsStatus,
   } = useFetcher(
     () => {
-      if (transactionNames.length && start && end && transactionType) {
+      if (transactionNames && start && end && transactionType) {
         return callApmApi({
           endpoint:
             'GET /api/apm/services/{serviceName}/transactions/groups/metrics',
@@ -300,7 +92,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
               numBuckets: 20,
               transactionType,
               latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-              transactionNames: transactionNames.join(),
+              transactionNames,
             },
           },
         });
@@ -316,6 +108,10 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     latencyAggregationType,
     transactionsMetricsData,
   });
+
+  const isLoading =
+    status === FETCH_STATUS.LOADING ||
+    transactionsMetricsStatus === FETCH_STATUS.LOADING;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -352,50 +148,16 @@ export function ServiceOverviewTransactionsTable(props: Props) {
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
             <ServiceOverviewTableContainer
-              isEmptyAndLoading={
-                items.length === 0 && status === FETCH_STATUS.LOADING
-              }
+              isEmptyAndLoading={transactionGroups.length === 0 && isLoading}
             >
-              <EuiBasicTable
+              <ManagedTable
+                isLoading={isLoading}
+                // @ts-ignore
                 columns={columns}
-                items={items.slice(
-                  pageIndex * PAGE_SIZE,
-                  (pageIndex + 1) * PAGE_SIZE
-                )}
-                pagination={{
-                  pageIndex,
-                  pageSize: PAGE_SIZE,
-                  totalItemCount,
-                  pageSizeOptions: [PAGE_SIZE],
-                  hidePerPageOptions: true,
-                }}
-                loading={
-                  status === FETCH_STATUS.LOADING ||
-                  transactionsMetricsStatus === FETCH_STATUS.LOADING
-                }
-                onChange={(newTableOptions: {
-                  page?: {
-                    index: number;
-                  };
-                  sort?: { field: string; direction: SortDirection };
-                }) => {
-                  setTableOptions({
-                    pageIndex: newTableOptions.page?.index ?? 0,
-                    sort: newTableOptions.sort
-                      ? {
-                          field: newTableOptions.sort.field as SortField,
-                          direction: newTableOptions.sort.direction,
-                        }
-                      : DEFAULT_SORT,
-                  });
-                }}
-                sorting={{
-                  enableAllColumns: true,
-                  sort: {
-                    direction: sort.direction,
-                    field: sort.field,
-                  },
-                }}
+                items={transactionGroups}
+                initialSortField="impact"
+                initialSortDirection="desc"
+                initialPageSize={5}
               />
             </ServiceOverviewTableContainer>
           </TableFetchWrapper>
