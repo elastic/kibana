@@ -45,6 +45,11 @@ interface RelevanceTuningActions {
   updateFieldWeight(name: string, weight: number): { name: string; weight: number };
   addBoost(name: string, type: BoostType): { name: string; type: BoostType };
   deleteBoost(name: string, index: number): { name: string; index: number };
+  updateBoostFactor: (
+    name: string,
+    index: number,
+    factor: number
+  ) => { name: string; index: number; factor: number };
 }
 
 interface RelevanceTuningValues {
@@ -132,6 +137,7 @@ export const RelevanceTuningLogic = kea<
     updateFieldWeight: (name, weight) => ({ name, weight }),
     addBoost: (name, type) => ({ name, type }),
     deleteBoost: (name, index) => ({ name, index }),
+    updateBoostFactor: (name, index, factor) => ({ name, index, factor }),
   }),
   reducers: () => ({
     searchSettings: [
@@ -396,6 +402,25 @@ export const RelevanceTuningLogic = kea<
         });
         actions.getSearchResults();
       }
+    },
+    updateBoostFactor: ({ name, index, factor }) => {
+      const searchSettings = {
+        ...values.searchSettings,
+        boosts: values.searchSettings.boosts || {},
+        search_fields: values.searchSettings.search_fields || {},
+      };
+      const { boosts } = searchSettings;
+      const updatedBoosts = cloneDeep(boosts[name]);
+      updatedBoosts[index].factor = Math.round(factor * 10) / 10;
+
+      actions.setSearchSettings({
+        ...searchSettings,
+        boosts: {
+          ...boosts,
+          [name]: updatedBoosts,
+        },
+      });
+      actions.getSearchResults();
     },
   }),
 });

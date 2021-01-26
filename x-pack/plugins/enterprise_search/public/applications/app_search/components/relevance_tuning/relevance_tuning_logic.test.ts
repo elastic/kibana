@@ -684,7 +684,7 @@ describe('RelevanceTuningLogic', () => {
         });
       });
 
-      it('will stil work if boosts and search_fields are undefined', () => {
+      it('will still work if boosts and search_fields are undefined', () => {
         mount({
           searchSettings: {
             search_fields: undefined,
@@ -820,6 +820,106 @@ describe('RelevanceTuningLogic', () => {
         RelevanceTuningLogic.actions.deleteBoost('foo', 0);
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('updateBoostFactor', () => {
+      it('updates the boost factor of the target boost and updates search results', () => {
+        mount({
+          searchSettings: {
+            ...searchSettings,
+            boosts: {
+              foo: [
+                {
+                  factor: 1,
+                  type: 'functional',
+                },
+              ],
+            },
+          },
+        });
+
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.updateBoostFactor('foo', 0, 5);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          ...searchSettings,
+          boosts: {
+            foo: [
+              {
+                factor: 5,
+                type: 'functional',
+              },
+            ],
+          },
+        });
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
+      });
+
+      it('will still work if search_fields are undefined', () => {
+        mount({
+          searchSettings: {
+            search_fields: undefined,
+            boosts: {
+              foo: [
+                {
+                  factor: 1,
+                  type: 'functional',
+                },
+              ],
+            },
+          },
+        });
+
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.updateBoostFactor('foo', 0, 5);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          search_fields: {},
+          boosts: {
+            foo: [
+              {
+                factor: 5,
+                type: 'functional',
+              },
+            ],
+          },
+        });
+      });
+
+      it('will round decimal numbers', () => {
+        mount({
+          searchSettings: {
+            search_fields: undefined,
+            boosts: {
+              foo: [
+                {
+                  factor: 1,
+                  type: 'functional',
+                },
+              ],
+            },
+          },
+        });
+
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.updateBoostFactor('foo', 0, 5.293191);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          search_fields: {},
+          boosts: {
+            foo: [
+              {
+                factor: 5.3,
+                type: 'functional',
+              },
+            ],
+          },
+        });
       });
     });
   });
