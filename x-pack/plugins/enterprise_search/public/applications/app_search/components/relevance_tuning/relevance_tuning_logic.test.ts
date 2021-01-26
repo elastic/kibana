@@ -561,9 +561,6 @@ describe('RelevanceTuningLogic', () => {
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
           ...searchSettings,
-          search_fields: {
-            bar: undefined,
-          },
         });
         expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });

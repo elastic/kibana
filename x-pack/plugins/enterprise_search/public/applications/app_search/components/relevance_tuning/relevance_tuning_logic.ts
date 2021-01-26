@@ -6,7 +6,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
-import { cloneDeep, isEmpty } from 'lodash';
+import { omit, cloneDeep, isEmpty } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
@@ -325,8 +325,8 @@ export const RelevanceTuningLogic = kea<
         ...searchSettings,
         boosts: searchSettings.boosts,
         search_fields: {
-          ...searchFields,
-          [name]: disableField ? undefined : { weight: 1 },
+          ...omit(searchFields, name),
+          ...(!disableField && { [name]: { weight: 1 } }),
         },
       });
       actions.getSearchResults();
