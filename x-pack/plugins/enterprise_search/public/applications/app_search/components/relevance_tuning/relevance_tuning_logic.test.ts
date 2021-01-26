@@ -584,6 +584,67 @@ describe('RelevanceTuningLogic', () => {
         });
       });
     });
+
+    describe('updateFieldWeight', () => {
+      it('updates the search weight in search fields and then triggers a new search', () => {
+        mount({
+          searchSettings,
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.updateFieldWeight('foo', 3);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          ...searchSettings,
+          search_fields: {
+            foo: {
+              weight: 3,
+            },
+          },
+        });
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
+      });
+
+      it('will stil work if boosts and search_fields are undefined', () => {
+        mount({
+          searchSettings: {
+            search_fields: undefined,
+            boosts: undefined,
+          },
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.updateFieldWeight('foo', 3);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          boosts: {},
+          search_fields: {
+            foo: {
+              weight: 3,
+            },
+          },
+        });
+      });
+
+      it('will round decimal numbers', () => {
+        mount({
+          searchSettings,
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.updateFieldWeight('foo', 3.9393939);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          ...searchSettings,
+          search_fields: {
+            foo: {
+              weight: 3.9,
+            },
+          },
+        });
+      });
+    });
   });
 
   describe('selectors', () => {

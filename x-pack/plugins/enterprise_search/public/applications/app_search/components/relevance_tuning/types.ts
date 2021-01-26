@@ -23,6 +23,12 @@ export interface BoostObject {
 
 export interface SearchSettings {
   boosts: Record<string, Boost[]>;
-  search_fields: object;
+  search_fields: {
+    [key: string]:
+      | {
+          weight: number;
+        }
+      | undefined;
+  };
   result_fields?: object;
 }
