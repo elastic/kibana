@@ -166,79 +166,15 @@ describe('MetricsService', () => {
         await new Promise((resolve) => process.nextTick(resolve));
         return emission;
       };
-      expect(loggingSystemMock.collect(opsLogger).debug[1]).toMatchInlineSnapshot(`
-        Array [
-          "memory: 100.0B uptime: 0:00:01 load: [10.00,20.00,30.00] delay: 50.000",
-          Object {
-            "ecs": Object {
-              "version": "1.7.0",
-            },
-            "event": Object {
-              "category": Array [
-                "process",
-                "host",
-              ],
-              "kind": "metric",
-              "type": "info",
-            },
-            "host": Object {
-              "os": Object {
-                "load": Object {
-                  "15m": 30,
-                  "1m": 10,
-                  "5m": 20,
-                },
-              },
-            },
-            "process": Object {
-              "eventLoopDelay": 50,
-              "memory": Object {
-                "heap": Object {
-                  "usedInBytes": 100,
-                },
-              },
-              "uptime": 1,
-            },
-          },
-        ]
-      `);
+
       await nextEmission();
-      expect(loggingSystemMock.collect(opsLogger).debug[3]).toMatchInlineSnapshot(`
-        Array [
-          "memory: 200.0B uptime: 0:00:03 load: [20.00,30.00,40.00] delay: 100.000",
-          Object {
-            "ecs": Object {
-              "version": "1.7.0",
-            },
-            "event": Object {
-              "category": Array [
-                "process",
-                "host",
-              ],
-              "kind": "metric",
-              "type": "info",
-            },
-            "host": Object {
-              "os": Object {
-                "load": Object {
-                  "15m": 40,
-                  "1m": 20,
-                  "5m": 30,
-                },
-              },
-            },
-            "process": Object {
-              "eventLoopDelay": 100,
-              "memory": Object {
-                "heap": Object {
-                  "usedInBytes": 200,
-                },
-              },
-              "uptime": 3,
-            },
-          },
-        ]
-      `);
+
+      const opsLogs = loggingSystemMock.collect(opsLogger).debug.filter((log) => {
+        // Only return the opsMetrics logs that contain both a message string and the meta
+        if (log.length > 1) return log;
+      });
+      expect(opsLogs.length).toEqual(2);
+      expect(opsLogs[0][1]).not.toEqual(opsLogs[1][1]);
     });
 
     it('omits metrics from log message if they are missing or malformed', async () => {
@@ -246,7 +182,7 @@ describe('MetricsService', () => {
       mockOpsCollector.collect.mockResolvedValueOnce({ secondMetrics: 'metrics' });
       await metricsService.setup({ http: httpMock });
       await metricsService.start();
-      expect(loggingSystemMock.collect(opsLogger).debug[1]).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(opsLogger).debug[0]).toMatchInlineSnapshot(`
         Array [
           "",
           Object {

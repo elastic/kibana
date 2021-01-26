@@ -10,6 +10,7 @@ import numeral from '@elastic/numeral';
 import { EcsOpsMetricsEvent } from '../../logging';
 import { OpsMetrics } from '..';
 
+const ECS_VERSION = '1.7.0';
 /**
  * Converts ops metrics into ECS-compliant `LogMeta` for logging
  *
@@ -51,7 +52,7 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsOpsMetricsEvent {
       : '';
 
   return {
-    ecs: { version: '1.7.0' },
+    ecs: { version: ECS_VERSION },
     message: `${processMemoryUsedInBytesMsg}${uptimeValMsg}${loadValsMsg}${eventLoopDelayValMsg}`,
     event: {
       kind: 'metric',
@@ -70,7 +71,7 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsOpsMetricsEvent {
     },
     host: {
       os: {
-        load: { ...loadEntries },
+        load: loadEntries,
       },
     },
   };
