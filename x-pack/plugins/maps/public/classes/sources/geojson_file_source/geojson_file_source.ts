@@ -72,6 +72,7 @@ export class GeoJsonFileSource extends AbstractVectorSource {
       fieldName: descriptor.name,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
+      dataType: descriptor.type,
     });
   }
 
@@ -82,6 +83,7 @@ export class GeoJsonFileSource extends AbstractVectorSource {
         fieldName: field.name,
         source: this,
         origin: FIELD_ORIGIN.SOURCE,
+        dataType: field.type,
       });
     });
   }

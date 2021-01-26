@@ -11,18 +11,22 @@ import { GeoJsonFileSource } from '../sources/geojson_file_source';
 
 export class GeoJsonFileField extends AbstractField implements IField {
   private readonly _source: GeoJsonFileSource;
+  private readonly _dataType: string;
 
   constructor({
     fieldName,
     source,
     origin,
+    dataType,
   }: {
     fieldName: string;
     source: GeoJsonFileSource;
     origin: FIELD_ORIGIN;
+    dataType: string;
   }) {
     super({ fieldName, origin });
     this._source = source;
+    this._dataType = dataType;
   }
 
   getSource(): IVectorSource {
@@ -31,5 +35,9 @@ export class GeoJsonFileField extends AbstractField implements IField {
 
   async getLabel(): Promise<string> {
     return this.getName();
+  }
+
+  async getDataType(): Promise<string> {
+    return this._dataType;
   }
 }
