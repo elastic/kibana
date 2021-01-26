@@ -65,3 +65,10 @@ export const CREATE_ENGINE_FORM_SUBMIT_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Create Engine',
   }
 );
+
+export const CREATE_ENGINE_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.createEngine.successMessage',
+  {
+    defaultMessage: 'Successfully created engine.',
+  }
+);

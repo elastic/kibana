@@ -22,8 +22,11 @@ import {
   EuiPanel,
   EuiSelectOption,
 } from '@elastic/eui';
+import { useActions, useValues } from 'kea';
+
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
+
 import {
   ALLOWED_CHARS_NOTE,
   CREATE_ENGINE_FORM_ENGINE_LANGUAGE_LABEL,
@@ -34,13 +37,16 @@ import {
   CREATE_ENGINE_TITLE,
   getSanitizedNameNote,
 } from './constants';
+import { CreateEngineLogic } from './create_engine_logic';
 
 export const CreateEngine: React.FC = () => {
-  // TODO manage these in a logic file
-  const rawName = '';
-  const name = '';
-  const language = '';
-  const supportedLanguages: EuiSelectOption[] = [];
+  const { name, rawName, language } = useValues(CreateEngineLogic);
+  const { setLanguage, setRawName, submitEngine } = useActions(CreateEngineLogic);
+
+  const supportedLanguages: EuiSelectOption[] = [
+    { text: 'Universal', value: 'Universal' },
+    { text: 'English', value: 'English' },
+  ];
 
   return (
     <div data-test-subj="CreateEngine">
@@ -57,7 +63,10 @@ export const CreateEngine: React.FC = () => {
         <EuiForm>
           <form
             data-test-subj="CreateEngineForm"
-            // onSubmit={handleSubmit}
+            onSubmit={(e) => {
+              e.preventDefault();
+              submitEngine();
+            }}
           >
             <EuiTitle>
               <EuiText>{CREATE_ENGINE_FORM_TITLE}</EuiText>
@@ -73,7 +82,7 @@ export const CreateEngine: React.FC = () => {
                   <EuiFieldText
                     name="engine-name"
                     value={rawName}
-                    // onChange={(event) => setRawName(event.currentTarget.value)}
+                    onChange={(event) => setRawName(event.currentTarget.value)}
                     autoComplete="off"
                     fullWidth={true}
                     data-test-subj="CreateEngineNameInput"
@@ -89,7 +98,7 @@ export const CreateEngine: React.FC = () => {
                     value={language}
                     options={supportedLanguages}
                     data-test-subj="CreateEngineLanguageInput"
-                    // onChange={(event) => setLanguage(event.target.value)}
+                    onChange={(event) => setLanguage(event.target.value)}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
