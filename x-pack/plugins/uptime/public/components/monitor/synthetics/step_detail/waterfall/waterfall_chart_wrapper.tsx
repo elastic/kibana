@@ -60,7 +60,7 @@ interface Props {
 export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
   const [query, setQuery] = useState<string>('');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [onlyHighlighted, setOlyHighlighted] = useState(false);
+  const [onlyHighlighted, setOnlyHighlighted] = useState(false);
 
   const [networkData] = useState<NetworkItems>(data);
 
@@ -82,7 +82,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
         activeFilters={activeFilters}
         setActiveFilters={setActiveFilters}
         onlyHighlighted={onlyHighlighted}
-        setOlyHighlighted={setOlyHighlighted}
+        setOnlyHighlighted={setOnlyHighlighted}
       />
     );
   };

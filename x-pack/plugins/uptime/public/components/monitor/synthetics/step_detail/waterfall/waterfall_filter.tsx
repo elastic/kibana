@@ -28,7 +28,7 @@ interface Props {
   setActiveFilters: Dispatch<SetStateAction<string[]>>;
   setQuery: (val: string) => void;
   onlyHighlighted: boolean;
-  setOlyHighlighted: (val: boolean) => void;
+  setOnlyHighlighted: (val: boolean) => void;
 }
 
 export const MIME_FILTERS = [
@@ -64,7 +64,7 @@ export const WaterfallFilter = ({
   activeFilters,
   setActiveFilters,
   onlyHighlighted,
-  setOlyHighlighted,
+  setOnlyHighlighted,
 }: Props) => {
   const [value, setValue] = useState(query);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -140,7 +140,7 @@ export const WaterfallFilter = ({
             label="Only show highlighted"
             checked={onlyHighlighted}
             onChange={(e) => {
-              setOlyHighlighted(e.target.checked);
+              setOnlyHighlighted(e.target.checked);
             }}
           />
         </EuiPopover>

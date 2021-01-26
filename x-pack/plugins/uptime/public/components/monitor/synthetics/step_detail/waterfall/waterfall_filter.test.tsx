@@ -25,7 +25,7 @@ describe('waterfall filter', () => {
         activeFilters={[]}
         onlyHighlighted={false}
         setActiveFilters={jest.fn()}
-        setOlyHighlighted={jest.fn()}
+        setOnlyHighlighted={jest.fn()}
       />
     );
 
@@ -49,7 +49,7 @@ describe('waterfall filter', () => {
           activeFilters={activeFilters}
           onlyHighlighted={false}
           setActiveFilters={setActiveFilters}
-          setOlyHighlighted={jest.fn()}
+          setOnlyHighlighted={jest.fn()}
         />
       );
     };
@@ -90,7 +90,7 @@ describe('waterfall filter', () => {
           activeFilters={[]}
           onlyHighlighted={false}
           setActiveFilters={jest.fn()}
-          setOlyHighlighted={jest.fn()}
+          setOnlyHighlighted={jest.fn()}
         />
       );
     };
