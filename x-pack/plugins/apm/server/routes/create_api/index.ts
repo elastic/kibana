@@ -10,7 +10,6 @@ import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { KibanaResponseFactory, RouteRegistrar } from 'src/core/server';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { merge } from '../../../common/runtime_types/merge';
 import { strictKeysRt } from '../../../common/runtime_types/strict_keys_rt';
 import { APMConfig } from '../..';
@@ -133,9 +132,6 @@ export function createApi() {
               if (Boom.isBoom(error)) {
                 return convertBoomToKibanaResponse(error, response);
               }
-              if (error.meta?.meta?.name === 'elasticsearch-js') {
-                return convertEsErrorToKibanaResponse(error, response);
-              }
               throw error;
             }
           }
@@ -163,21 +159,6 @@ function convertBoomToKibanaResponse(
       return response.forbidden(opts);
 
     default:
-      return response.custom({
-        statusCode: error.output.statusCode,
-        ...opts,
-      });
+      throw error;
   }
-}
-
-function convertEsErrorToKibanaResponse(
-  error: ResponseError,
-  response: KibanaResponseFactory
-) {
-  return response.custom({
-    body: {
-      message: `Elasticsearch: ${error.message}`,
-    },
-    statusCode: 500,
-  });
 }
