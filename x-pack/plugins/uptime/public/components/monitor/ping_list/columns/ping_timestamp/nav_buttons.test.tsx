@@ -41,7 +41,7 @@ describe('NavButtons', () => {
     });
   });
 
-  it('decrements ste number on prev click', async () => {
+  it('decrements step number on prev click', async () => {
     const { getByLabelText } = render(<NavButtons {...defaultProps} />);
 
     const nextButton = getByLabelText('Previous step');
