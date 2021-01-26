@@ -70,6 +70,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(titles.indexOf(newTitle)).to.not.be(-1);
     });
 
+    it('retains unsaved panel count after navigating to listing page and back', async () => {
+      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      // await PageObjects.visualize.gotoVisualizationLandingPage();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      // await PageObjects.common.navigateToApp('dashboards');
+      await PageObjects.dashboard.loadSavedDashboard('few panels');
+      await PageObjects.dashboard.switchToEditMode();
+      const newPanelCount = await PageObjects.dashboard.getPanelCount();
+      expect(newPanelCount).to.eql(originalPanelCount);
+    });
+
     it('loses originatingApp connection after save as when redirectToOrigin is false', async () => {
       const newTitle = 'wowee, my title just got cooler again';
       await PageObjects.header.waitUntilLoadingHasFinished();

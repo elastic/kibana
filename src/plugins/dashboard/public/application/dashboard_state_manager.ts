@@ -284,13 +284,13 @@ export class DashboardStateManager {
       this.stateContainer.transitions.set('panels', Object.values(convertedPanelStateMap));
       if (dirtyBecauseOfInitialStateMigration) {
         this.saveState({ replace: true });
-      } else {
-        this.setUnsavedPanels(this.getPanels());
       }
 
       // If a panel has been changed, and the state is now equal to the state in the saved object, remove the unsaved panels
       if (!this.isDirty && this.getIsEditMode()) {
         this.clearUnsavedPanels();
+      } else {
+        this.setUnsavedPanels(this.getPanels());
       }
     }
 
