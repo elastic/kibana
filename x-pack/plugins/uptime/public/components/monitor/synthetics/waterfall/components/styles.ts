@@ -13,10 +13,7 @@ interface WaterfallChartOuterContainerProps {
   height?: string;
 }
 
-export const WaterfallChartOuterContainer = euiStyled.div<WaterfallChartOuterContainerProps>`
-  height: ${(props) => (props.height ? `${props.height}` : 'auto')};
-  overflow-y: ${(props) => (props.height ? 'scroll' : 'visible')};
-  overflow-x: hidden;
+const StyledScrollDiv = euiStyled.div`
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
     width: ${({ theme }) => theme.eui.euiScrollBar};
@@ -32,11 +29,20 @@ export const WaterfallChartOuterContainer = euiStyled.div<WaterfallChartOuterCon
   }
 `;
 
-export const WaterfallChartFixedTopContainer = euiStyled.div`
+export const WaterfallChartOuterContainer = euiStyled(
+  StyledScrollDiv
+)<WaterfallChartOuterContainerProps>`
+  height: ${(props) => (props.height ? `${props.height}` : 'auto')};
+  overflow-y: ${(props) => (props.height ? 'scroll' : 'visible')};
+  overflow-x: hidden;
+`;
+
+export const WaterfallChartFixedTopContainer = euiStyled(StyledScrollDiv)`
   position: sticky;
   top: 0;
   z-index: ${(props) => props.theme.eui.euiZLevel4};
-  margin-right: ${(props) => props.theme.eui.paddingSizes.m}
+  overflow-y: scroll;
+  overflow-x: hidden;
 `;
 
 export const WaterfallChartAxisOnlyContainer = euiStyled(EuiFlexItem)`
