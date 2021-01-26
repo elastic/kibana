@@ -7,6 +7,7 @@
 import { KibanaRequest } from 'kibana/server';
 import { PLUGIN_ID } from '../constants/app';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
+import { ML_ALERT_TYPES } from '../constants/alerts';
 
 export const apmUserMlCapabilities = {
   canGetJobs: false,
@@ -105,6 +106,10 @@ export function getPluginPrivileges() {
         all: savedObjects,
         read: savedObjects,
       },
+      alerting: {
+        all: [ML_ALERT_TYPES.ANOMALY_THRESHOLD],
+        read: [],
+      },
     },
     user: {
       ...privilege,
@@ -115,6 +120,10 @@ export function getPluginPrivileges() {
       savedObject: {
         all: [],
         read: savedObjects,
+      },
+      alerting: {
+        all: [],
+        read: [ML_ALERT_TYPES.ANOMALY_THRESHOLD],
       },
     },
     apmUser: {
