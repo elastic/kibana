@@ -8,7 +8,7 @@ import { EuiButton, EuiDatePicker, EuiFlexGroup, EuiFlexItem } from '@elastic/eu
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React, { useCallback } from 'react';
-import { withTheme, EuiTheme } from '../../../../../../../observability/public';
+import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 
 interface Props {
