@@ -21,7 +21,7 @@ describe('IndexingStatusLogic', () => {
   const mockStatusResponse = {
     percentageComplete: 50,
     numDocumentsWithErrors: 3,
-    activeReindexJobId: 1,
+    activeReindexJobId: '1',
   };
 
   beforeEach(() => {

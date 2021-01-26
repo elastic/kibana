@@ -7,7 +7,7 @@ exports[`CertStatus renders expected elements for valid props 1`] = `
 }
 
 <div
-  class="euiHealth"
+  class="euiHealth euiHealth--textSizeS"
 >
   <div
     class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"

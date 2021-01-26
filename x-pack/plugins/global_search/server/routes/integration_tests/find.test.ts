@@ -41,13 +41,12 @@ describe('POST /internal/global_search/find', () => {
     ({ server, httpSetup } = await setupServer(pluginId));
 
     globalSearchHandlerContext = globalSearchPluginMock.createRouteHandlerContext();
-    httpSetup.registerRouteHandlerContext(
-      pluginId,
-      'globalSearch',
-      () => globalSearchHandlerContext
-    );
+    httpSetup.registerRouteHandlerContext<
+      ReturnType<typeof globalSearchPluginMock.createRequestHandlerContext>,
+      'globalSearch'
+    >(pluginId, 'globalSearch', () => globalSearchHandlerContext);
 
-    const router = httpSetup.createRouter('/');
+    const router = httpSetup.createRouter<any>('/');
 
     registerInternalFindRoute(router);
 

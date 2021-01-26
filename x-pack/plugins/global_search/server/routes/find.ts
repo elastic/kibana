@@ -6,10 +6,10 @@
 
 import { reduce, map } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import { GlobalSearchRouter } from '../types';
 import { GlobalSearchFindError } from '../../common/errors';
 
-export const registerInternalFindRoute = (router: IRouter) => {
+export const registerInternalFindRoute = (router: GlobalSearchRouter) => {
   router.post(
     {
       path: '/internal/global_search/find',

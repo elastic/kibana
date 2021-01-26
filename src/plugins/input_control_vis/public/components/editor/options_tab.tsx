@@ -12,10 +12,10 @@ import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSwitchEvent } from '@elastic/eui';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { InputControlVisParams } from '../../types';
 
-export type OptionsTabProps = VisOptionsProps<InputControlVisParams>;
+export type OptionsTabProps = VisEditorOptionsProps<InputControlVisParams>;
 
 class OptionsTab extends PureComponent<OptionsTabProps> {
   handleUpdateFiltersChange = (event: EuiSwitchEvent) => {
