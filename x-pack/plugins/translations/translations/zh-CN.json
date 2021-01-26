@@ -9754,7 +9754,6 @@
     "xpack.infra.alerting.alertFlyout.groupBy.placeholder": "无内容（未分组）",
     "xpack.infra.alerting.alertFlyout.groupByLabel": "分组依据",
     "xpack.infra.alerting.alertsButton": "告警",
-    "xpack.infra.alerting.createAlertButton": "创建告警",
     "xpack.infra.alerting.logs.alertsButton": "告警",
     "xpack.infra.alerting.logs.createAlertButton": "创建告警",
     "xpack.infra.alerting.logs.manageAlerts": "管理告警",
