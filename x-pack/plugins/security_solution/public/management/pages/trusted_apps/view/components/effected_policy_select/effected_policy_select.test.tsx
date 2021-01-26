@@ -6,13 +6,29 @@
 
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 import { EffectedPolicySelect, EffectedPolicySelectProps } from './effected_policy_select';
-import { render } from '@testing-library/react';
+import {
+  AppContextTestRender,
+  createAppRootMockRenderer,
+} from '../../../../../../common/mock/endpoint';
 import React from 'react';
 import { forceHTMLElementOffsetWith } from './test_utils';
 
 describe('when using EffectedPolicySelect component', () => {
   const generator = new EndpointDocGenerator('effected-poilcy-select');
-
+  let mockedContext: AppContextTestRender;
+  const handleOnChange: jest.MockedFunction<EffectedPolicySelectProps['onChange']> = jest.fn();
+  const render = (props: Partial<EffectedPolicySelectProps> = {}) => {
+    const componentProps = {
+      ...{
+        options: [],
+        isGlobal: true,
+        onChange: handleOnChange,
+        'data-test-subj': 'test',
+      },
+      ...props,
+    };
+    return mockedContext.render(<EffectedPolicySelect {...componentProps} />);
+  };
   let resetHTMLElementOffsetWidth: () => void;
 
   beforeAll(() => {
@@ -21,13 +37,25 @@ describe('when using EffectedPolicySelect component', () => {
 
   afterAll(() => resetHTMLElementOffsetWidth());
 
-  describe('and no policy entries exist', () => {});
+  beforeEach(() => {
+    mockedContext = createAppRootMockRenderer();
+  });
+
+  afterEach(() => {
+    handleOnChange.mockClear();
+  });
+
+  describe('and no policy entries exist', () => {
+    it('should display no options available message', () => {
+      const { getByTestId } = render();
+      expect(getByTestId('test-policiesSelectable').textContent).toEqual('No options available');
+    });
+  });
 
   describe('and policy entries exist', () => {
-    let renderProps: EffectedPolicySelectProps;
+    let renderProps: Partial<EffectedPolicySelectProps>;
 
-    const renderWithPolicies = () =>
-      render(<EffectedPolicySelect {...renderProps} style={{ width: '100px' }} />);
+    const renderWithPolicies = () => render(renderProps);
 
     beforeEach(() => {
       const policy = generator.generatePolicyPackagePolicy();
@@ -35,11 +63,7 @@ describe('when using EffectedPolicySelect component', () => {
       policy.id = 'abc123';
 
       renderProps = {
-        isGlobal: true,
-        selected: [],
         options: [policy],
-        onChange: jest.fn(),
-        height: 100,
       };
     });
 
