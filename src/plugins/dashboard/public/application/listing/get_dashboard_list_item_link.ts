@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 import { ApplicationStart } from 'kibana/public';
-import { QueryState, DataPublicPluginStart } from '../../../../data/public';
+import { QueryState, esFilters, DataPublicPluginStart } from '../../../../data/public';
 
 import { setStateToKbnUrl } from '../../../../kibana_utils/public';
 import { createDashboardEditUrl, DashboardConstants } from '../../dashboard_constants';
@@ -25,10 +25,16 @@ export const getDashboardListItem = (
   });
   const queryState: QueryState = {};
   const timeRange = queryService.timefilter.timefilter.getTime();
+  const filters = queryService.filterManager.getFilters();
+  const refreshInterval = queryService.timefilter.timefilter.getRefreshInterval();
+  if (filters && filters.length) {
+    queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
+  }
+  if (refreshInterval) queryState.refreshInterval = refreshInterval;
   // if time is not saved with the dashboard, add the time on the url query
   if (!timeRestore) {
     if (timeRange) queryState.time = timeRange;
-    url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, queryState, { useHash }, url);
   }
+  url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, queryState, { useHash }, url);
   return url;
 };
