@@ -1,4 +1,4 @@
-.lnsToolbarButton {
+.kbnToolbarButton {
   line-height: $euiButtonHeight; // Keeps alignment of text and chart icon
   background-color: $euiColorEmptyShade;
 
@@ -15,11 +15,11 @@
     pointer-events: initial;
   }
 
-  .lnsToolbarButton__text > svg {
+  .kbnToolbarButton__text > svg {
     margin-top: -1px; // Just some weird alignment issue when icon is the child not the `iconType`
   }
 
-  .lnsToolbarButton__text:empty {
+  .kbnToolbarButton__text:empty {
     margin: 0;
   }
 
@@ -27,34 +27,33 @@
   &[class*='fullWidth'] {
     text-align: left;
 
-    .lnsToolbarButton__content {
+    .kbnToolbarButton__content {
       justify-content: space-between;
     }
   }
-
 }
 
-.lnsToolbarButton--groupLeft {
+.kbnToolbarButton--groupLeft {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-.lnsToolbarButton--groupCenter {
+.kbnToolbarButton--groupCenter {
   border-radius: 0;
   border-left: none;
 }
 
-.lnsToolbarButton--groupRight {
+.kbnToolbarButton--groupRight {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-left: none;
 }
 
-.lnsToolbarButton--bold {
+.kbnToolbarButton--bold {
   font-weight: $euiFontWeightBold;
 }
 
-.lnsToolbarButton--s {
+.kbnToolbarButton--s {
   box-shadow: none !important; // sass-lint:disable-line no-important
   font-size: $euiFontSizeS;
 }
