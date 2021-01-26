@@ -330,6 +330,17 @@ Here is what we get with the config above:
 | metrics.ops      | console                  | debug |
 
 
+For example to see _all_ log messages that fall back on the `root` logger configuration, just add one line to the configuration:
+
+```yaml
+logging.root.level: all
+```
+
+Or disable logging entirely with `off`:
+
+```yaml
+logging.root.level: off
+```
 ### Dedicated loggers
 
 The `root` logger has a dedicated configuration node since this context is special and should always exist. By 
@@ -353,19 +364,6 @@ ops.interval: 5000
 ```
 
 The minimum interval is 100ms and defaults to 5000ms.
-
-For example to see _all_ log messages that fall back on the `root` logger configuration, just add one line to the configuration:
-
-```yaml
-logging.root.level: all
-```
-
-Or disable logging entirely with `off`:
-
-```yaml
-logging.root.level: off
-```
-
 ## Usage
 
 Usage is very straightforward, one should just get a logger for a specific context and use it to log messages with 

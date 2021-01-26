@@ -39,8 +39,52 @@ interface EcsProcessField {
   uptime?: number;
 }
 
-interface EcsEventField {
-  kind?: string;
-  category?: string[];
+export interface EcsEventField {
+  kind?: EcsEventKind;
+  category?: EcsEventCategory[];
   type?: string;
+}
+
+export enum EcsEventKind {
+  ALERT = 'alert',
+  EVENT = 'event',
+  METRIC = 'metric',
+  STATE = 'state',
+  PIPELINE_ERROR = 'pipeline_error',
+  SIGNAL = 'signal',
+}
+
+export enum EcsEventCategory {
+  AUTHENTICATION = 'authentication',
+  CONFIGURATION = 'configuration',
+  DATABASE = 'database',
+  DRIVER = 'driver',
+  FILE = 'file',
+  HOST = 'host',
+  IAM = 'iam',
+  INTRUSION_DETECTION = 'intrusion_detection',
+  MALWARE = 'malware',
+  NETWORK = 'network',
+  PACKAGE = 'package',
+  PROCESS = 'process',
+  WEB = 'web',
+}
+
+export enum EcsEventType {
+  ACCESS = 'access',
+  ADMIN = 'admin',
+  ALLOWED = 'allowed',
+  CHANGE = 'change',
+  CONNECTION = 'connection',
+  CREATION = 'creation',
+  DELETION = 'deletion',
+  DENIED = 'denied',
+  END = 'end',
+  ERROR = 'error',
+  GROUP = 'group',
+  INFO = 'info',
+  INSTALLATION = 'installation',
+  PROTOCOL = 'protocol',
+  START = 'start',
+  USER = 'user',
 }

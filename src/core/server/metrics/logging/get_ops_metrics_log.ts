@@ -7,7 +7,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { EcsOpsMetricsEvent } from '../../logging';
+import { EcsOpsMetricsEvent, EcsEventKind, EcsEventCategory, EcsEventType } from '../../logging';
 import { OpsMetrics } from '..';
 
 const ECS_VERSION = '1.7.0';
@@ -55,9 +55,9 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsOpsMetricsEvent {
     ecs: { version: ECS_VERSION },
     message: `${processMemoryUsedInBytesMsg}${uptimeValMsg}${loadValsMsg}${eventLoopDelayValMsg}`,
     event: {
-      kind: 'metric',
-      category: ['process', 'host'],
-      type: 'info',
+      kind: EcsEventKind.METRIC,
+      category: [EcsEventCategory.PROCESS, EcsEventCategory.HOST],
+      type: EcsEventType.INFO,
     },
     process: {
       uptime: uptimeVal,
