@@ -50,10 +50,10 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  jobForExport(jobId: string) {
+  jobForCloning(jobId: string) {
     const body = JSON.stringify({ jobId });
     return httpService.http<{ job: Job; datafeed: Datafeed } | undefined>({
-      path: `${basePath()}/jobs/job_for_export`,
+      path: `${basePath()}/jobs/job_for_cloning`,
       method: 'POST',
       body,
     });

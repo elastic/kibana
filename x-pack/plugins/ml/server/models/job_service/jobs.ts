@@ -18,7 +18,6 @@ import {
   AuditMessage,
   DatafeedWithStats,
   CombinedJobWithStats,
-  Datafeed,
 } from '../../../common/types/anomaly_detection_jobs';
 import {
   MlJobsResponse,
@@ -48,7 +47,9 @@ interface Results {
 export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   const { asInternalUser } = client;
 
-  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(mlClient);
+  const { forceDeleteDatafeed, getDatafeedIdsByJobId, getDatafeedByJobId } = datafeedsProvider(
+    mlClient
+  );
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(client, mlClient);
   const { getLatestBucketTimestampByJob } = resultsServiceProvider(mlClient);
   const calMngr = new CalendarManager(mlClient);
@@ -258,25 +259,17 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     return { jobs, jobsMap };
   }
 
-  async function getJobForExport(jobId: string) {
-    const datafeeds: { [id: string]: Datafeed } = {};
-
-    const [{ body: jobResults }, { body: datafeedResults }] = await Promise.all([
+  async function getJobForCloning(jobId: string) {
+    const [{ body: jobResults }, datafeedResult] = await Promise.all([
       mlClient.getJobs<MlJobsResponse>({ job_id: jobId, exclude_generated: true }),
-      mlClient.getDatafeeds<MlDatafeedsResponse>({ exclude_generated: true }),
+      getDatafeedByJobId(jobId, true),
     ]);
 
-    if (datafeedResults && datafeedResults.datafeeds) {
-      datafeedResults.datafeeds.forEach((datafeed) => {
-        datafeeds[datafeed.job_id] = datafeed;
-      });
-    }
-
     // create jobs objects containing job stats, datafeeds, datafeed stats and calendars
-    if (jobResults && jobResults.jobs) {
+    if (jobResults && jobResults.jobs && datafeedResult) {
       const job = jobResults.jobs.find((j) => j.job_id === jobId);
-      if (job && datafeeds[job.job_id]) {
-        return { job, datafeed: datafeeds[job.job_id] };
+      if (job) {
+        return { job, datafeed: datafeedResult };
       }
     }
     return undefined;
@@ -528,7 +521,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     forceStopAndCloseJob,
     jobsSummary,
     jobsWithTimerange,
-    getJobForExport,
+    getJobForCloning,
     createFullJobsList,
     deletingJobTasks,
     jobsExist,

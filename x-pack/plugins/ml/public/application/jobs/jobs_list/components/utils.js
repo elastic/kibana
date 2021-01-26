@@ -36,10 +36,10 @@ export function loadFullJob(jobId) {
   });
 }
 
-export function loadJobForExport(jobId) {
+export function loadJobForCloning(jobId) {
   return new Promise((resolve, reject) => {
     ml.jobs
-      .jobForExport(jobId)
+      .jobForCloning(jobId)
       .then((resp) => {
         if (resp?.job) {
           resolve(resp);
@@ -198,7 +198,7 @@ function showResults(resp, action) {
 export async function cloneJob(jobId) {
   try {
     const [{ job: cloneableJob, datafeed }, originalJob] = await Promise.all([
-      loadJobForExport(jobId),
+      loadJobForCloning(jobId),
       loadFullJob(jobId, false),
     ]);
     if (cloneableJob !== undefined && originalJob?.custom_settings?.created_by !== undefined) {

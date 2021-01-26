@@ -160,11 +160,43 @@ export function datafeedsProvider(mlClient: MlClient) {
     }, {} as { [id: string]: string });
   }
 
+  async function getDatafeedByJobId(jobId: string, excludeGenerated?: boolean) {
+    // if the job was created by the wizard,
+    // then we can assume it uses the standard format of the datafeedId
+    const assumedDefaultDatafeedId = `datafeed-${jobId}`;
+    const {
+      body: { datafeeds: datafeedsResults },
+    } = await mlClient.getDatafeeds<MlDatafeedsResponse>({
+      datafeed_id: assumedDefaultDatafeedId,
+      ...(excludeGenerated ? { exclude_generated: true } : {}),
+    });
+    if (Array.isArray(datafeedsResults)) {
+      if (datafeedsResults.length === 1) {
+        const datafeed = datafeedsResults[0];
+        if (datafeed.job_id === jobId) {
+          return datafeed;
+        }
+      } else {
+        // if the job was doesn't use the standard datafeedId format
+        // get all the datafeeds and match it with the jobId
+        const {
+          body: { datafeeds: allDatafeedsResults },
+        } = await mlClient.getDatafeeds<MlDatafeedsResponse>();
+        for (const result of allDatafeedsResults) {
+          if (result.job_id === jobId) {
+            return result;
+          }
+        }
+      }
+    }
+  }
+
   return {
     forceStartDatafeeds,
     stopDatafeeds,
     forceDeleteDatafeed,
     getDatafeedIdsByJobId,
     getJobIdsByDatafeedId,
+    getDatafeedByJobId,
   };
 }
