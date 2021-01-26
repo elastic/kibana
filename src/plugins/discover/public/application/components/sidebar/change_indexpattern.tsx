@@ -7,17 +7,15 @@
  */
 import './change_indexpattern.scss';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonProps,
-  EuiHighlight,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
   EuiSelectableOption,
-  EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
 import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
@@ -80,46 +78,30 @@ export function ChangeIndexPattern({
   const createTrigger = useMemo(() => {
     const { label, patternList, patternListActive, title, ...rest } = trigger;
     return (
-      <EuiButton
-        className="dscChangeIndexPattern__button"
-        fullWidth
-        color="text"
-        iconSide="right"
-        iconType="arrowDown"
-        title={title}
-        onClick={() => setPopoverIsOpen(!isPopoverOpen)}
-        {...rest}
+      <EuiToolTip
+        content={<PatternList patternList={patternList} patternListActive={patternListActive} />}
       >
-        <strong>{label}</strong>
-        <br />
-        <PatternList patternList={patternList} patternListActive={patternListActive} />
-      </EuiButton>
+        <EuiButton
+          fullWidth
+          color="text"
+          iconSide="right"
+          iconType="arrowDown"
+          title={title}
+          onClick={() => setPopoverIsOpen(!isPopoverOpen)}
+          {...rest}
+        >
+          <strong>{label}</strong>
+        </EuiButton>
+      </EuiToolTip>
     );
   }, [isPopoverOpen, trigger]);
-  const renderOption = useCallback(
-    (option, searchValue) => (
-      <>
-        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-        <br />
-        <EuiTextColor color="subdued">
-          <small>
-            <EuiHighlight className="dscChangeIndexPattern__patternList" search={searchValue}>
-              {option.searchableLabel}
-            </EuiHighlight>
-          </small>
-        </EuiTextColor>
-      </>
-    ),
-    []
-  );
 
   const options: EuiSelectableOption[] = useMemo(
     () =>
       indexPatternRefs.map(({ patternList, title, id }) => ({
-        label: title,
+        label: patternList.join(', '),
         key: id,
         value: id,
-        searchableLabel: patternList.join(','),
         checked: id === indexPatternId ? 'on' : undefined,
       })),
     [indexPatternId, indexPatternRefs]
@@ -144,10 +126,6 @@ export function ChangeIndexPattern({
           searchable
           singleSelection="always"
           options={options}
-          listProps={{
-            rowHeight: 65,
-          }}
-          renderOption={renderOption}
           onChange={(choices) => {
             const choice = (choices.find(({ checked }) => checked) as unknown) as {
               value: string;
