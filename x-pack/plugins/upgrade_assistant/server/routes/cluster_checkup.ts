@@ -50,7 +50,7 @@ export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: 
             body: status,
           });
         } catch (e) {
-          if (e.status === 403) {
+          if (e.statusCode === 403) {
             return response.forbidden(e.message);
           }
 
