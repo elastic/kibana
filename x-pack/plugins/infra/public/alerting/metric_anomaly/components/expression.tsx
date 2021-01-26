@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { debounce, pick } from 'lodash';
-import React, { useCallback, useState, useMemo, useEffect, ChangeEvent } from 'react';
-import { EuiFlexGroup, EuiSpacer, EuiText, EuiFormRow, EuiFieldSearch } from '@elastic/eui';
+import { pick } from 'lodash';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import { EuiFlexGroup, EuiSpacer, EuiText, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AlertPreview } from '../../common';
@@ -14,28 +14,24 @@ import {
   METRIC_ANOMALY_ALERT_TYPE_ID,
   MetricAnomalyParams,
 } from '../../../../common/alerting/metrics';
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   WhenExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
-import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { NodeTypeExpression } from './node_type';
 import { SeverityThresholdExpression } from './severity_threshold';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
-import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 
 import { validateMetricAnomaly } from './validation';
 import { InfluencerFilter } from './influencer_filter';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-
-const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 export interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;

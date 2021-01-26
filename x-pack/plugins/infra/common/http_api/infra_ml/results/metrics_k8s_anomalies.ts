@@ -18,12 +18,7 @@ const metricsK8sAnomalyCommonFieldsRT = rt.type({
   typical: rt.number,
   actual: rt.number,
   type: anomalyTypeRT,
-  influencers: rt.array(
-    rt.type({
-      influencer_field_name: rt.string,
-      influencer_field_values: rt.array(rt.string),
-    })
-  ),
+  influencers: rt.array(rt.string),
   duration: rt.number,
   startTime: rt.number,
   jobId: rt.string,

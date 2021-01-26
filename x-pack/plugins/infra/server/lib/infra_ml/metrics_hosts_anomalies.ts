@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { InfraPluginRequestHandlerContext } from '../../types';
 import { InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
 import { fetchMlJob, MappedAnomalyHit, InfluencerFilter } from './common';
@@ -61,7 +60,7 @@ async function getCompatibleAnomaliesJobIds(
 }
 
 export async function getMetricsHostsAnomalies(
-  context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  context: Required<InfraRequestHandlerContext>,
   sourceId: string,
   startTime: number,
   endTime: number,
@@ -69,7 +68,7 @@ export async function getMetricsHostsAnomalies(
   sort: Sort,
   pagination: Pagination,
   scoreThreshold: ANOMALY_THRESHOLD = ANOMALY_THRESHOLD.MAJOR,
-  influencerFilter: InfluencerFilter | undefined
+  influencerFilter?: InfluencerFilter
 ) {
   const finalizeMetricsHostsAnomaliesSpan = startTracingSpan('get metrics hosts entry anomalies');
 
@@ -159,7 +158,7 @@ async function fetchMetricsHostsAnomalies(
   sort: Sort,
   pagination: Pagination,
   scoreThreshold: ANOMALY_THRESHOLD,
-  influencerFilter: InfluencerFilter | undefined
+  influencerFilter?: InfluencerFilter
 ) {
   // We'll request 1 extra entry on top of our pageSize to determine if there are
   // more entries to be fetched. This avoids scenarios where the client side can't
