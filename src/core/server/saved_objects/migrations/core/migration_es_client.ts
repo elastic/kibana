@@ -20,7 +20,6 @@ const methods = [
   'clearScroll',
   'count',
   'indices.create',
-  'indices.delete',
   'indices.deleteTemplate',
   'indices.get',
   'indices.getAlias',
