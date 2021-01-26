@@ -508,6 +508,82 @@ describe('RelevanceTuningLogic', () => {
         expect(RelevanceTuningLogic.actions.onSearchSettingsError).toHaveBeenCalled();
       });
     });
+
+    describe('toggleSearchField', () => {
+      it('updates search weight to 1 in search fields and then triggers a new search when enabling', () => {
+        mount({
+          searchSettings: {
+            ...searchSettings,
+            search_fields: {
+              bar: {
+                weight: 1,
+              },
+            },
+          },
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.toggleSearchField('foo', false);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          ...searchSettings,
+          search_fields: {
+            bar: {
+              weight: 1,
+            },
+            foo: {
+              weight: 1,
+            },
+          },
+        });
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
+      });
+
+      it('removes fields from search fields and triggers a new search when disabling', () => {
+        mount({
+          searchSettings: {
+            ...searchSettings,
+            search_fields: {
+              bar: {
+                weight: 1,
+              },
+            },
+          },
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.toggleSearchField('bar', true);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          ...searchSettings,
+          search_fields: {
+            bar: undefined,
+          },
+        });
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
+      });
+
+      it('will stil work when boosts is undefined', () => {
+        mount({
+          searchSettings: {
+            ...searchSettings,
+            boosts: undefined,
+          },
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.toggleSearchField('bar', true);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          boosts: {},
+          search_fields: {
+            bar: undefined,
+          },
+        });
+      });
+    });
   });
 
   describe('selectors', () => {

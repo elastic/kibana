@@ -41,6 +41,7 @@ interface RelevanceTuningActions {
   onSearchSettingsError(): void;
   updateSearchSettings(): void;
   resetSearchSettings(): void;
+  toggleSearchField(name: string, disableField: boolean): { name: string; disableField: boolean };
 }
 
 interface RelevanceTuningValues {
@@ -118,6 +119,7 @@ export const RelevanceTuningLogic = kea<
     onSearchSettingsError: () => true,
     updateSearchSettings: true,
     resetSearchSettings: true,
+    toggleSearchField: (name, disableField) => ({ name, disableField }),
   }),
   reducers: () => ({
     searchSettings: [
@@ -293,6 +295,20 @@ export const RelevanceTuningLogic = kea<
           actions.onSearchSettingsError();
         }
       }
+    },
+    toggleSearchField: ({ name, disableField }) => {
+      const { searchSettings } = values;
+      const { search_fields: searchFields } = searchSettings;
+
+      actions.setSearchSettings({
+        ...searchSettings,
+        boosts: searchSettings.boosts || {},
+        search_fields: {
+          ...searchFields,
+          [name]: disableField ? undefined : { weight: 1 },
+        },
+      });
+      actions.getSearchResults();
     },
   }),
 });
