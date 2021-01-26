@@ -55,16 +55,25 @@ export function isColumnInvalid(
 
   const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
   // check also references for errors
-  const referencesHaveErrors = (column as ReferenceBasedIndexPatternColumn).references
-    ?.map((referenceId: string) => {
-      const referencedOperation = layer.columns[referenceId]?.operationType;
-      const referencedDefinition = operationDefinitionMap[referencedOperation];
-      return referencedDefinition.getErrorMessage?.(layer, referenceId, indexPattern);
-    })
-    .filter(Boolean);
+  const referencesHaveErrors =
+    'references' in column &&
+    Boolean(getReferencesErrors(layer, column, indexPattern).filter(Boolean).length);
+
   return (
     !!operationDefinition.getErrorMessage?.(layer, columnId, indexPattern) || referencesHaveErrors
   );
+}
+
+function getReferencesErrors(
+  layer: IndexPatternLayer,
+  column: ReferenceBasedIndexPatternColumn,
+  indexPattern: IndexPattern
+) {
+  return column.references?.map((referenceId: string) => {
+    const referencedOperation = layer.columns[referenceId]?.operationType;
+    const referencedDefinition = operationDefinitionMap[referencedOperation];
+    return referencedDefinition.getErrorMessage?.(layer, referenceId, indexPattern);
+  });
 }
 
 export function fieldIsInvalid(column: IndexPatternColumn | undefined, indexPattern: IndexPattern) {
