@@ -25,6 +25,8 @@ import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/pub
 import { getJourneyScreenshot } from '../../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../../contexts';
 import { NoImageAvailable } from './no_image_available';
+import { nextAriaLabel } from './translations';
+import { NavButtons } from './nav_buttons';
 
 const StepImage = styled(EuiImage)`
   &&& {
@@ -69,10 +71,6 @@ interface Props {
   timestamp: string;
   ping: Ping;
 }
-
-const nextAriaLabel = i18n.translate('xpack.uptime.synthetics.nextButton.ariaLabel', {
-  defaultMessage: 'Next',
-});
 
 export const PingTimestamp = ({ timestamp, ping }: Props) => {
   const [stepNo, setStepNo] = useState(1);
@@ -192,38 +190,12 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
           <EuiFlexItem>{ImageCaption}</EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <EuiFlexGroup
-        className="stepArrows"
-        gutterSize="s"
-        alignItems="center"
-        onMouseEnter={() => setIsImagePopoverOpen(true)}
-        style={{ position: 'absolute', bottom: 0, left: 30 }}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            disabled={stepNo === 1}
-            color="subdued"
-            size="s"
-            onClick={() => {
-              setStepNo(stepNo - 1);
-            }}
-            iconType="arrowLeft"
-            aria-label={nextAriaLabel}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            disabled={stepNo === data?.maxSteps}
-            color="subdued"
-            size="s"
-            onClick={() => {
-              setStepNo(stepNo + 1);
-            }}
-            iconType="arrowRight"
-            aria-label={nextAriaLabel}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <NavButtons
+        maxSteps={data?.maxSteps}
+        setIsImagePopoverOpen={setIsImagePopoverOpen}
+        setStepNo={setStepNo}
+        stepNo={stepNo}
+      />
     </StepDiv>
   );
 };
