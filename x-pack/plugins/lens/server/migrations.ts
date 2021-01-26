@@ -85,7 +85,7 @@ interface XYStatePost77 {
 interface DatatableStatePre711 {
   layers: Array<{
     layerId: string;
-    columnIds: string[];
+    columns: string[];
   }>;
   sorting?: {
     columnId: string | undefined;
@@ -378,7 +378,7 @@ const transformTableState: SavedObjectMigrationFn<
         visualization: {
           sorting: oldState.sorting,
           layerId: layer.layerId,
-          columns: layer.columnIds.map((columnId) => ({ columnId })),
+          columns: layer.columns.map((columnId) => ({ columnId })),
         },
       },
     },
