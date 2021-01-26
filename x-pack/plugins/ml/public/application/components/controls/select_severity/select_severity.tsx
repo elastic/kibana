@@ -83,7 +83,7 @@ export const useTableSeverity = (): [TableSeverity, (v: TableSeverity) => void] 
   return usePageUrlState('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
 };
 
-const getSeverityOptions = () =>
+export const getSeverityOptions = () =>
   SEVERITY_OPTIONS.map(({ color, display, val }) => ({
     value: display,
     inputDisplay: (
