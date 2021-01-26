@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import type { Datatable, DatatableColumnMeta } from 'src/plugins/expressions';
 import type { FormatFactory } from '../../types';
-import type { DatatableColumns } from './types';
+import { ColumnConfig } from './table_basic';
 
 export const createGridColumns = (
   bucketColumns: string[],
@@ -22,7 +22,7 @@ export const createGridColumns = (
     negate?: boolean
   ) => void,
   isReadOnly: boolean,
-  columnConfig: DatatableColumns & { type: 'lens_datatable_columns' },
+  columnConfig: ColumnConfig,
   visibleColumns: string[],
   formatFactory: FormatFactory,
   onColumnResize: (eventData: { columnId: string; width: number | undefined }) => void,
@@ -134,8 +134,7 @@ export const createGridColumns = (
         ]
       : undefined;
 
-    const initialWidth = columnConfig.columnWidth?.find(({ columnId }) => columnId === field)
-      ?.width;
+    const initialWidth = columnConfig.columns.find(({ columnId }) => columnId === field)?.width;
 
     const columnDefinition: EuiDataGridColumn = {
       id: field,

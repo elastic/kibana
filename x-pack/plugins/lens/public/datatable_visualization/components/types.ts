@@ -31,23 +31,6 @@ export type LensSortAction = LensEditEvent<typeof LENS_EDIT_SORT_ACTION>;
 export type LensResizeAction = LensEditEvent<typeof LENS_EDIT_RESIZE_ACTION>;
 export type LensToggleAction = LensEditEvent<typeof LENS_TOGGLE_ACTION>;
 
-export interface DatatableColumns {
-  columnIds: string[];
-  hiddenColumnIds?: string[];
-  sortBy: string;
-  sortDirection: string;
-  columnWidth?: DatatableColumnWidthResult[];
-}
-
-export interface DatatableColumnWidth {
-  columnId: string;
-  width: number;
-}
-
-export type DatatableColumnWidthResult = DatatableColumnWidth & {
-  type: 'lens_datatable_column_width';
-};
-
 export type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
   dispatchEvent: ILensInterpreterRenderHandlers['event'];
