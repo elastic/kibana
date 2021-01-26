@@ -62,14 +62,12 @@ export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: s
     countByType: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
       // ES DSL aggregations are returned as `any` by callCluster
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (obj: any, key: string) => {
-        const hasFirstSymbolDot = key.startsWith('.');
-        const actionTypeId = hasFirstSymbolDot ? key.replace('.', '__') : key;
-        return {
-          ...obj,
-          [actionTypeId]: searchResult.aggregations.byActionTypeId.value.types[key],
-        };
-      },
+      (obj: any, key: string) => ({
+        ...obj,
+        [replaceFirstAndLastDotSymbols(key)]: searchResult.aggregations.byActionTypeId.value.types[
+          key
+        ],
+      }),
       {}
     ),
   };
@@ -172,10 +170,7 @@ export async function getInUseTotalCount(
   const actions = await actionsBulkGet(bulkFilter);
   const countByType = actions.saved_objects.reduce(
     (actionTypeCount: Record<string, number>, action) => {
-      const hasFirstSymbolDot = action.attributes.actionTypeId.startsWith('.');
-      const alertTypeId = hasFirstSymbolDot
-        ? action.attributes.actionTypeId.replace('.', '__')
-        : action.attributes.actionTypeId;
+      const alertTypeId = replaceFirstAndLastDotSymbols(action.attributes.actionTypeId);
       const currentCount =
         actionTypeCount[alertTypeId] !== undefined ? actionTypeCount[alertTypeId] : 0;
       actionTypeCount[alertTypeId] = currentCount + 1;
@@ -184,6 +179,13 @@ export async function getInUseTotalCount(
     {}
   );
   return { countTotal: actionResults.aggregations.refs.actionRefIds.value.total, countByType };
+}
+
+function replaceFirstAndLastDotSymbols(strToReplace: string) {
+  const hasFirstSymbolDot = strToReplace.startsWith('.');
+  const appliedString = hasFirstSymbolDot ? strToReplace.replace('.', '__') : strToReplace;
+  const hasLastSymbolDot = strToReplace.endsWith('.');
+  return hasLastSymbolDot ? `${appliedString.slice(0, -1)}__` : appliedString;
 }
 
 // TODO: Implement executions count telemetry with eventLog, when it will write to index
