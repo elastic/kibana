@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { InputControlVisDependencies } from '../../plugin';
 import { InputControlVisParams } from '../../types';
 
@@ -15,9 +15,9 @@ const ControlsTab = lazy(() => import('./controls_tab'));
 const OptionsTab = lazy(() => import('./options_tab'));
 
 export const getControlsTab = (deps: InputControlVisDependencies) => (
-  props: VisOptionsProps<InputControlVisParams>
+  props: VisEditorOptionsProps<InputControlVisParams>
 ) => <ControlsTab {...props} deps={deps} />;
 
-export const OptionsTabLazy = (props: VisOptionsProps<InputControlVisParams>) => (
+export const OptionsTabLazy = (props: VisEditorOptionsProps<InputControlVisParams>) => (
   <OptionsTab {...props} />
 );

@@ -73,9 +73,10 @@
     // sass-lint:disable-block no-important
     flex-grow: 0 !important;
     flex-basis: auto !important;
-    margin-right: -$euiSizeXS !important;
 
     &.kbnQueryBar__datePickerWrapper-isHidden {
+      // sass-lint:disable-block no-important
+      margin-right: -$euiSizeXS !important;
       width: 0;
       overflow: hidden;
       max-width: 0;
