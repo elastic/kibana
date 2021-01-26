@@ -19,20 +19,32 @@ const NetworkTimingsType = t.type({
   ssl: t.number,
 });
 
+const CertificateDataType = t.partial({
+  validFrom: t.number,
+  validTo: t.number,
+  issuer: t.string,
+  subjectName: t.string,
+});
+
 export type NetworkTimings = t.TypeOf<typeof NetworkTimingsType>;
+export type CertificateData = t.TypeOf<typeof CertificateDataType>;
 
 const NetworkEventType = t.intersection([
   t.type({
     timestamp: t.string,
     requestSentTime: t.number,
     loadEndTime: t.number,
+    url: t.string,
   }),
   t.partial({
+    bytesDownloaded: t.number,
+    certificates: CertificateDataType,
     method: t.string,
-    url: t.string,
     status: t.number,
     mimeType: t.string,
     requestStartTime: t.number,
+    responseHeaders: t.record(t.string, t.string),
+    requestHeaders: t.record(t.string, t.string),
     timings: NetworkTimingsType,
   }),
 ]);
