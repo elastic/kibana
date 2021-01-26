@@ -161,3 +161,24 @@ export type GeojsonFileSourceDescriptor = {
   name: string;
   type: string;
 };
+
+export type TableSourceColumn = {
+  name: string;
+  type: 'string' | 'number';
+};
+
+export type TableSourceValue = {
+  column: string;
+  value: string | number;
+};
+
+export type TableSourceDescriptor = {
+  type: string;
+  __table?: {
+    columns: TableSourceColumn[];
+    values: TableSourceValue[];
+  };
+  termField?: {};
+};
+
+export type TermJoinSourceDescriptor = ESTermSourceDescriptor | TableSourceDescriptor;

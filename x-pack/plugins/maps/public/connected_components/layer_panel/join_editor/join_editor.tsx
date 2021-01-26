@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import _ from 'lodash';
 import uuid from 'uuid/v4';
 
 import {

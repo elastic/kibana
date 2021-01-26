@@ -11,27 +11,47 @@ import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
 import {
   META_DATA_REQUEST_ID_SUFFIX,
   FORMATTERS_DATA_REQUEST_ID_SUFFIX,
+  SOURCE_TYPES,
 } from '../../../common/constants';
-import { JoinDescriptor } from '../../../common/descriptor_types';
+import {
+  ESTermSourceDescriptor,
+  JoinDescriptor,
+  TableSourceDescriptor,
+  TermJoinSourceDescriptor,
+} from '../../../common/descriptor_types';
 import { IVectorSource } from '../sources/vector_source';
 import { IField } from '../fields/field';
 import { PropertiesMap } from '../../../common/elasticsearch_util';
+import { ITermJoinSource } from '../sources/term_join_source';
+import { TableSource } from '../sources/table_source';
+import { Adapters } from '../../../../../../src/plugins/inspector/common/adapters';
+
+function createJoinTermSource(
+  descriptor: Partial<TermJoinSourceDescriptor> | undefined,
+  inspectorAdapters: Adapters | undefined
+): ITermJoinSource | undefined {
+  if (!descriptor) {
+    return;
+  }
+
+  if ('indexPatternId' in descriptor && 'term' in descriptor) {
+    return new ESTermSource(descriptor as ESTermSourceDescriptor, inspectorAdapters);
+  }
+
+  if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
+    return new TableSource(descriptor as TableSourceDescriptor, inspectorAdapters);
+  }
+}
 
 export class InnerJoin {
   private readonly _descriptor: JoinDescriptor;
-  private readonly _rightSource?: ESTermSource;
+  private readonly _rightSource?: ITermJoinSource;
   private readonly _leftField?: IField;
 
   constructor(joinDescriptor: JoinDescriptor, leftSource: IVectorSource) {
     this._descriptor = joinDescriptor;
     const inspectorAdapters = leftSource.getInspectorAdapters();
-    if (
-      joinDescriptor.right &&
-      'indexPatternId' in joinDescriptor.right &&
-      'term' in joinDescriptor.right
-    ) {
-      this._rightSource = new ESTermSource(joinDescriptor.right, inspectorAdapters);
-    }
+    this._rightSource = createJoinTermSource(this._descriptor.right, inspectorAdapters);
     this._leftField = joinDescriptor.leftField
       ? leftSource.createField({ fieldName: joinDescriptor.leftField })
       : undefined;
@@ -47,7 +67,7 @@ export class InnerJoin {
     return this._leftField && this._rightSource ? this._rightSource.hasCompleteConfig() : false;
   }
 
-  getJoinFields() {
+  getJoinFields(): IField[] {
     return this._rightSource ? this._rightSource.getMetricFields() : [];
   }
 
@@ -106,7 +126,7 @@ export class InnerJoin {
     }
   }
 
-  getRightJoinSource(): ESTermSource {
+  getRightJoinSource(): ITermJoinSource {
     if (!this._rightSource) {
       throw new Error('Cannot get rightSource from InnerJoin with incomplete config');
     }
