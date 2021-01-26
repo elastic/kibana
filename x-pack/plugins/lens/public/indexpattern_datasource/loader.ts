@@ -219,7 +219,9 @@ export async function loadInitialState({
     .filter(Boolean);
 
   const currentIndexPatternId = initialContext?.indexPatternId ?? requiredPatterns[0];
-  setLastUsedIndexPatternId(storage, currentIndexPatternId);
+  if (currentIndexPatternId) {
+    setLastUsedIndexPatternId(storage, currentIndexPatternId);
+  }
 
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
