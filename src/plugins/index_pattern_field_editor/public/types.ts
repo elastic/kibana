@@ -13,6 +13,9 @@ export interface PluginSetup {}
 
 export interface PluginStart {
   openEditor(options: OpenFieldEditorOptions): void;
+  userPermissions: {
+    editIndexPattern: () => boolean;
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

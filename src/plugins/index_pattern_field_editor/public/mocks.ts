@@ -12,6 +12,9 @@ export type Start = jest.Mocked<ReturnType<IndexPatternFieldEditorPlugin['start'
 const createStartContract = (): Start => {
   return {
     openEditor: jest.fn(),
+    userPermissions: {
+      editIndexPattern: jest.fn(),
+    },
   };
 };
 
