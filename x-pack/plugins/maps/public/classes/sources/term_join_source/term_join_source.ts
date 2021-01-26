@@ -13,8 +13,9 @@ import {
 } from '../../../../common/descriptor_types';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { ISource } from '../source';
 
-export interface ITermJoinSource {
+export interface ITermJoinSource extends ISource {
   hasCompleteConfig(): boolean;
   getTermField(): IField;
   getWhereQuery(): Query | undefined;
@@ -27,8 +28,5 @@ export interface ITermJoinSource {
   getSyncMeta(): VectorSourceSyncMeta | null;
   getId(): string;
   getMetricFields(): IField[];
-  destroy(): void;
-  getIndexPatternIds(): string[];
-  getQueryableIndexPatternIds(): string[];
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
 }

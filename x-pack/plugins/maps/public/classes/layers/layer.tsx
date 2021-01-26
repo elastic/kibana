@@ -158,6 +158,7 @@ export class AbstractLayer implements ILayer {
 
     if (clonedDescriptor.joins) {
       clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
+        // todo: must tie this to generic thing
         const originalJoinId = joinDescriptor.right.id!;
 
         // right.id is uuid used to track requests in inspector

@@ -173,12 +173,14 @@ export type TableSourceValue = {
 };
 
 export type TableSourceDescriptor = {
+  id: string;
   type: string;
   __table?: {
     columns: TableSourceColumn[];
     values: TableSourceValue[];
   };
   termField?: {};
+  metrics: AggDescriptor[];
 };
 
 export type TermJoinSourceDescriptor = ESTermSourceDescriptor | TableSourceDescriptor;

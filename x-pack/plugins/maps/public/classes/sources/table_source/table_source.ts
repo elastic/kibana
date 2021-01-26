@@ -5,6 +5,7 @@
  */
 
 import uuid from 'uuid';
+import { GeoJsonProperties } from 'geojson';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import {
   TableSourceDescriptor,
@@ -17,6 +18,7 @@ import { ITermJoinSource } from '../term_join_source';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { IField } from '../../fields/field';
 import { Query } from '../../../../../../../src/plugins/data/common/query';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export class TableSource extends AbstractSource implements ITermJoinSource {
   static type = SOURCE_TYPES.TABLE_SOURCE;
@@ -33,7 +35,7 @@ export class TableSource extends AbstractSource implements ITermJoinSource {
 
   constructor(descriptor: TableSourceDescriptor, inspectorAdapters?: Adapters) {
     const sourceDescriptor = TableSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters);
+    super(descriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
   }
 
@@ -65,5 +67,28 @@ export class TableSource extends AbstractSource implements ITermJoinSource {
 
   hasCompleteConfig(): boolean {
     return true;
+  }
+
+  getId(): string {
+    throw new Error('must implement');
+  }
+
+  getMetricFields(): IField[] {
+    return [];
+  }
+
+  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
+    throw new Error('must implement');
+  }
+
+  getApplyGlobalTime(): boolean {
+    return false;
+  }
+
+  async isTimeAware(): Promise<boolean> {
+    return false;
+  }
+  getFieldNames(): string[] {
+    throw new Error('must implement');
   }
 }
