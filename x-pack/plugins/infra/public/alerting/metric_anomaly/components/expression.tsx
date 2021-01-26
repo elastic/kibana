@@ -36,13 +36,11 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 export interface AlertContextMeta {
   metric?: InfraWaffleMapOptions['metric'];
   nodeType?: InventoryItemType;
-  filter?: string;
 }
 
 interface Props {
   errors: IErrorObject[];
   alertParams: MetricAnomalyParams & {
-    filterQueryText?: string;
     sourceId: string;
   };
   alertInterval: string;
