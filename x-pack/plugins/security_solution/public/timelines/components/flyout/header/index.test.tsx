@@ -52,6 +52,10 @@ describe('Timeline KPIs', () => {
     };
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('when the data is not loading and the response contains data', () => {
     beforeEach(() => {
       mockUseTimelineKpis.mockReturnValue([false, mockUseTimelineKpiResponse]);
