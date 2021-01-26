@@ -24,14 +24,22 @@ export const useSelectedCells = (
       return;
     }
 
-    let times = appState.mlExplorerSwimlane.selectedTimes!;
+    let times =
+      appState.mlExplorerSwimlane.selectedTimes ?? appState.mlExplorerSwimlane.selectedTime!;
     if (typeof times === 'number' && bucketIntervalInSeconds) {
       times = [times, times + bucketIntervalInSeconds];
     }
 
+    let lanes =
+      appState.mlExplorerSwimlane.selectedLanes ?? appState.mlExplorerSwimlane.selectedLane!;
+
+    if (typeof lanes === 'string') {
+      lanes = [lanes];
+    }
+
     return {
       type: appState.mlExplorerSwimlane.selectedType,
-      lanes: appState.mlExplorerSwimlane.selectedLanes!,
+      lanes,
       times,
       showTopFieldValues: appState.mlExplorerSwimlane.showTopFieldValues,
       viewByFieldName: appState.mlExplorerSwimlane.viewByFieldName,
