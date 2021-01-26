@@ -265,7 +265,7 @@ describe('#start(installPath)', () => {
       Array [
         Array [
           Array [
-            "indices.query.bool.max_nested_depth=100",
+            "indices.query.bool.max_nested_depth=10",
           ],
           undefined,
           Object {
@@ -343,7 +343,7 @@ describe('#run()', () => {
       Array [
         Array [
           Array [
-            "indices.query.bool.max_nested_depth=100",
+            "indices.query.bool.max_nested_depth=10",
           ],
           undefined,
           Object {
