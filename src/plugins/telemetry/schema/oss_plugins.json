@@ -4268,9 +4268,6 @@
         "query:queryString:options": {
           "type": "keyword"
         },
-        "pageNavigation": {
-          "type": "keyword"
-        },
         "metrics:max_buckets": {
           "type": "long"
         },
@@ -5242,6 +5239,36 @@
                   "type": "keyword"
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "vis_type_table": {
+      "properties": {
+        "total": {
+          "type": "long"
+        },
+        "total_split": {
+          "type": "long"
+        },
+        "split_columns": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "enabled": {
+              "type": "long"
+            }
+          }
+        },
+        "split_rows": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "enabled": {
+              "type": "long"
             }
           }
         }

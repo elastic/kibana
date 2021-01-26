@@ -16,6 +16,9 @@ export interface PluginSetup {
 export interface PluginStart {
   openEditor(options: OpenFieldEditorOptions): void;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
+  userPermissions: {
+    editIndexPattern: () => boolean;
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

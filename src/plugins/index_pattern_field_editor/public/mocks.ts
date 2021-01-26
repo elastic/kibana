@@ -13,8 +13,7 @@ export type Setup = jest.Mocked<ReturnType<IndexPatternFieldEditorPlugin['setup'
 const createSetupContract = (): Setup => {
   return {
     fieldFormatEditors: {
-      getAll: jest.fn(),
-      getById: jest.fn(),
+      register: jest.fn(),
     } as any,
   };
 };
@@ -26,6 +25,9 @@ const createStartContract = (): Start => {
       getAll: jest.fn(),
       getById: jest.fn(),
     } as any,
+    userPermissions: {
+      editIndexPattern: jest.fn(),
+    },
   };
 };
 
