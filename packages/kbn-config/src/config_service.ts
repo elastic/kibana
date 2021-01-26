@@ -108,7 +108,7 @@ export class ConfigService {
 
   /**
    * Returns the full config object observable. This is not intended for
-   * "normal use", but for features that _need_ access to the full object.
+   * "normal use", but for internal features that _need_ access to the full object.
    */
   public getConfig$() {
     return this.config$;
@@ -116,7 +116,7 @@ export class ConfigService {
 
   /**
    * Reads the subset of the config at the specified `path` and validates it
-   * against the static `schema` on the given `ConfigClass`.
+   * against its registered schema.
    *
    * @param path - The path to the desired subset of the config.
    */
@@ -134,7 +134,6 @@ export class ConfigService {
     if (!this.validated) {
       throw new Error('`atPathSync` called before config was validated');
     }
-    this.markAsHandled(path);
     const configAtPath = this.lastConfig!.get(path);
     return this.validateAtPath(path, configAtPath) as TSchema;
   }
@@ -211,9 +210,7 @@ export class ConfigService {
     );
   }
 
-  // TODO: only one consumer, remove method + remove `markAsHandled`
   private getValidatedConfigAtPath$(path: ConfigPath) {
-    this.markAsHandled(path);
     return this.config$.pipe(
       map((config) => config.get(path)),
       distinctUntilChanged(isEqual),
