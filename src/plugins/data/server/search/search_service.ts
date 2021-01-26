@@ -67,12 +67,6 @@ import { ISearchSessionService, SearchSessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
 import { tapFirst } from '../../common';
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    search?: IScopedSearchClient;
-  }
-}
-
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
 /** @internal */
