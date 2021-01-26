@@ -30,10 +30,10 @@ export const getDashboardListItem = (
   if (filters && filters.length) {
     queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
   }
-  if (refreshInterval) queryState.refreshInterval = refreshInterval;
   // if time is not saved with the dashboard, add the time on the url query
   if (!timeRestore) {
     if (timeRange) queryState.time = timeRange;
+    if (refreshInterval) queryState.refreshInterval = refreshInterval;
   }
   url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, queryState, { useHash }, url);
   return url;
