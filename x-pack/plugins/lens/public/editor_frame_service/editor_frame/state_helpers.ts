@@ -11,6 +11,7 @@ import {
   Datasource,
   DatasourcePublicAPI,
   FramePublicAPI,
+  InitializationOptions,
   Visualization,
   VisualizationDimensionGroupConfig,
 } from '../../types';
@@ -22,14 +23,20 @@ export async function initializeDatasources(
   datasourceMap: Record<string, Datasource>,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
   references?: SavedObjectReference[],
-  initialContext?: VisualizeFieldContext
+  initialContext?: VisualizeFieldContext,
+  options?: InitializationOptions
 ) {
   const states: Record<string, { isLoading: boolean; state: unknown }> = {};
   await Promise.all(
     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
       if (datasourceStates[datasourceId]) {
         return datasource
-          .initialize(datasourceStates[datasourceId].state || undefined, references, initialContext)
+          .initialize(
+            datasourceStates[datasourceId].state || undefined,
+            references,
+            initialContext,
+            options
+          )
           .then((datasourceState) => {
             states[datasourceId] = { isLoading: false, state: datasourceState };
           });
@@ -83,7 +90,9 @@ export async function persistedStateToExpression(
         { isLoading: false, state },
       ])
     ),
-    references
+    references,
+    undefined,
+    { isFullEditor: false }
   );
 
   const datasourceLayers = createDatasourceLayers(datasources, datasourceStates);
