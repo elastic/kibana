@@ -72,6 +72,10 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
       value={initialValue}
       onChange={onChange}
       options={{
+        lineNumbers: 'off',
+        glyphMargin: false,
+        folding: false,
+        lineDecorationsWidth: 2,
         minimap: {
           enabled: false,
         },
