@@ -30,9 +30,11 @@ import { useMlKibana } from '../../../../contexts/kibana';
 
 interface Props {
   indexPattern: IndexPattern;
+  searchString?: string | { [key: string]: any };
+  searchQueryLanguage?: string;
 }
 
-export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
+export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQueryLanguage }) => {
   const showCreateJob = indexPattern.timeFieldName !== undefined;
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
   const [discoverLink, setDiscoverLink] = useState('');
@@ -60,6 +62,9 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
       const state: DiscoverUrlGeneratorState = {
         indexPatternId,
       };
+      if (searchString && searchQueryLanguage !== undefined) {
+        state.query = { query: searchString, language: searchQueryLanguage };
+      }
 
       let discoverUrlGenerator;
       try {
@@ -80,7 +85,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
     return () => {
       unmounted = true;
     };
-  }, [indexPattern]);
+  }, [indexPattern, searchString, searchQueryLanguage]);
 
   // Note we use display:none for the DataRecognizer section as it needs to be
   // passed the recognizerResults object, and then run the recognizer check which

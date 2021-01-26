@@ -797,7 +797,11 @@ export const Page: FC = () => {
               </EuiFlexItem>
               {showActionsPanel === true && (
                 <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }}>
-                  <ActionsPanel indexPattern={currentIndexPattern} />
+                  <ActionsPanel
+                    indexPattern={currentIndexPattern}
+                    searchQueryLanguage={searchQueryLanguage}
+                    searchString={searchString}
+                  />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

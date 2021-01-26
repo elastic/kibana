@@ -65,7 +65,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, toggleExpandAll] = useState<boolean>(false);
 
-  const { onTableChange, pagination, sorting } = useTableSettings<DataVisualizerTableItem>(
+  const { onTableChange, pagination, sorting } = useTableSettings<T>(
     items,
     pageState,
     updatePageState
@@ -251,7 +251,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
   return (
     <EuiFlexItem data-test-subj="mlDataVisualizerTableContainer">
-      <EuiInMemoryTable<DataVisualizerTableItem>
+      <EuiInMemoryTable<T>
         className={'mlDataVisualizer'}
         items={items}
         itemId={FIELD_NAME}
