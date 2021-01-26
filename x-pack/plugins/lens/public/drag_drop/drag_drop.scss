@@ -74,8 +74,8 @@
   height: calc(100% + #{$lnsLayerPanelDimensionMargin});
 }
 
-.lnsDragDrop-isReorderable {
-  transition: transform $euiAnimSpeedFast ease-in-out 64ms;
+.lnsDragDrop-translatedDrop {
+  transition: transform $euiAnimSpeedFast ease-in-out;
   pointer-events: none;
 }
 

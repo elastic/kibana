@@ -426,7 +426,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     );
   }, [unfilteredFieldGroups, localState.nameFilter, localState.typeFilter]);
 
-  const checkFieldExists = React.useCallback(
+  const checkFieldExists = useCallback(
     (field) =>
       field.type === 'document' ||
       fieldExists(existingFields, currentIndexPattern.title, field.name),

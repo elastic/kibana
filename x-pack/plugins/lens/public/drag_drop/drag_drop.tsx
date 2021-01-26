@@ -5,7 +5,7 @@
  */
 
 import './drag_drop.scss';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, memo } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -220,7 +220,7 @@ export const DragDrop = (props: BaseProps) => {
   return <DropInner {...dropProps} />;
 };
 
-const DragInner = React.memo(function DragDropInner({
+const DragInner = memo(function DragDropInner({
   dataTestSubj,
   className,
   value,
@@ -260,11 +260,7 @@ const DragInner = React.memo(function DragDropInner({
 
     const currentTarget = e?.currentTarget;
     setTimeout(() => {
-      // performance.mark('start');
       setDragging(value);
-      // performance.mark('end');
-      // performance.measure('def', 'start', 'end');
-      // console.log(performance.getEntriesByType('measure'));
       if (onDragStart) {
         onDragStart(currentTarget);
       }
@@ -354,7 +350,7 @@ const DragInner = React.memo(function DragDropInner({
   );
 });
 
-const DropInner = React.memo(function DropInner(props: DropInnerProps) {
+const DropInner = memo(function DropInner(props: DropInnerProps) {
   const {
     dataTestSubj,
     className,
@@ -454,7 +450,7 @@ const DropInner = React.memo(function DropInner(props: DropInnerProps) {
   );
 });
 
-const ReorderableDrag = React.memo(function ReorderableDrag(
+const ReorderableDrag = memo(function ReorderableDrag(
   props: DragInnerProps & { reorderableGroup: DragDropIdentifier[]; dragging?: DragDropIdentifier }
 ) {
   const {
@@ -500,13 +496,7 @@ const ReorderableDrag = React.memo(function ReorderableDrag(
       }));
     }
 
-    if (isReorderOn) {
-      // that should be drop
-      const targetIndex = reorderableGroup.findIndex(
-        (i) => i.id === activeDropTarget?.activeDropTarget?.id
-      );
-      resetReorderState(reorderAnnouncements.dropped(targetIndex + 1, currentIndex + 1));
-    } else {
+    if (!isReorderOn) {
       setReorderState((s: ReorderState) => ({
         ...s,
         keyboardReorderMessage: reorderAnnouncements.lifted(label, currentIndex + 1),
@@ -532,41 +522,39 @@ const ReorderableDrag = React.memo(function ReorderableDrag(
     }));
 
   const extraKeyboardHandler = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (keyboardMode) {
+    if (isReorderOn && keyboardMode) {
       e.stopPropagation();
       e.preventDefault();
-      if (isReorderOn) {
-        let activeDropTargetIndex = reorderableGroup.findIndex((i) => i.id === value.id);
-        if (activeDropTarget?.activeDropTarget) {
-          const index = reorderableGroup.findIndex(
-            (i) => i.id === activeDropTarget.activeDropTarget?.id
-          );
-          if (index !== -1) activeDropTargetIndex = index;
+      let activeDropTargetIndex = reorderableGroup.findIndex((i) => i.id === value.id);
+      if (activeDropTarget?.activeDropTarget) {
+        const index = reorderableGroup.findIndex(
+          (i) => i.id === activeDropTarget.activeDropTarget?.id
+        );
+        if (index !== -1) activeDropTargetIndex = index;
+      }
+      if (keys.ARROW_DOWN === e.key) {
+        if (activeDropTargetIndex < reorderableGroup.length - 1) {
+          setReorderState((s: ReorderState) => ({
+            ...s,
+            keyboardReorderMessage: reorderAnnouncements.moved(
+              label,
+              activeDropTargetIndex + 2,
+              currentIndex + 1
+            ),
+          }));
+          onReorderableDragOver(reorderableGroup[activeDropTargetIndex + 1]);
         }
-        if (keys.ARROW_DOWN === e.key) {
-          if (activeDropTargetIndex < reorderableGroup.length - 1) {
-            setReorderState((s: ReorderState) => ({
-              ...s,
-              keyboardReorderMessage: reorderAnnouncements.moved(
-                label,
-                activeDropTargetIndex + 2,
-                currentIndex + 1
-              ),
-            }));
-            onReorderableDragOver(reorderableGroup[activeDropTargetIndex + 1]);
-          }
-        } else if (keys.ARROW_UP === e.key) {
-          if (activeDropTargetIndex > 0) {
-            setReorderState((s: ReorderState) => ({
-              ...s,
-              keyboardReorderMessage: reorderAnnouncements.moved(
-                label,
-                activeDropTargetIndex,
-                currentIndex + 1
-              ),
-            }));
-            onReorderableDragOver(reorderableGroup[activeDropTargetIndex - 1]);
-          }
+      } else if (keys.ARROW_UP === e.key) {
+        if (activeDropTargetIndex > 0) {
+          setReorderState((s: ReorderState) => ({
+            ...s,
+            keyboardReorderMessage: reorderAnnouncements.moved(
+              label,
+              activeDropTargetIndex,
+              currentIndex + 1
+            ),
+          }));
+          onReorderableDragOver(reorderableGroup[activeDropTargetIndex - 1]);
         }
       }
     }
@@ -608,12 +596,13 @@ const ReorderableDrag = React.memo(function ReorderableDrag(
   return (
     <div
       data-test-subj="lnsDragDrop-reorderableDrag"
+      className="lnsDragDrop-reorderable"
       style={
-        isDragging && keyboardMode
+        isDragging && keyboardMode && reorderedItems.length
           ? {
               transform: `translateY(${direction === '+' ? '-' : '+'}${reorderedItems.reduce(
                 (acc, cur) => {
-                  return acc + Number(cur.height) + lnsLayerPanelDimensionMargin;
+                  return acc + Number(cur.height || 0) + lnsLayerPanelDimensionMargin;
                 },
                 0
               )}px)`,
@@ -632,7 +621,7 @@ const ReorderableDrag = React.memo(function ReorderableDrag(
   );
 });
 
-const ReorderableDrop = React.memo(function ReorderableDrop(
+const ReorderableDrop = memo(function ReorderableDrop(
   props: DropInnerProps & { reorderableGroup: DragDropIdentifier[] }
 ) {
   const {
@@ -751,14 +740,14 @@ const ReorderableDrop = React.memo(function ReorderableDrop(
             : undefined
         }
         ref={heightRef}
-        data-test-subj="lnsDragDrop-translatedReorderableDrop"
-        className="lnsDragDrop-isReorderable"
+        data-test-subj="lnsDragDrop-translatedDrop"
+        className="lnsDragDrop-translatedDrop lnsDragDrop-reorderable"
       >
         <DropInner {...props} />
       </div>
 
       <div
-        data-test-subj="lnsDragDrop-reorderableDrop"
+        data-test-subj="lnsDragDrop-reorderableDropLayer"
         className={classNames('lnsDragDrop', {
           ['lnsDragDrop__reorderableDrop']: dragging && droppable,
         })}

@@ -6,7 +6,7 @@
 
 import './field_item.scss';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import DateMath from '@elastic/datemath';
 import {
   EuiButtonGroup,
@@ -167,11 +167,11 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     }
   }
 
-  const value = React.useMemo(
+  const value = useMemo(
     () => ({ field, indexPatternId: indexPattern.id, id: field.name } as DraggedField),
     [field, indexPattern.id]
   );
-  const order = React.useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
+  const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
   const lensFieldIcon = <LensFieldIcon type={field.type as DataType} />;
   const lensInfoIcon = (

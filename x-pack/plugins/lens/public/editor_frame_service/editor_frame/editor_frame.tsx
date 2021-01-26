@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useState, useCallback } from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
@@ -289,12 +289,12 @@ export function EditorFrame(props: EditorFrameProps) {
     ]
   );
 
-  const hasSuggestionForField = React.useCallback(
+  const hasSuggestionForField = useCallback(
     (field: DragDropIdentifier) => getSuggestionForField(field) !== undefined,
     [getSuggestionForField]
   );
 
-  const dropOntoWorkspace = React.useCallback(
+  const dropOntoWorkspace = useCallback(
     (field) => {
       const suggestion = getSuggestionForField(field);
       if (suggestion) {

@@ -13,7 +13,7 @@ export type DragDropIdentifier = Record<string, unknown> & {
   id: string;
 };
 
-interface ActiveDropTarget {
+export interface ActiveDropTarget {
   activeDropTarget?: DragDropIdentifier;
   dropTargetsByOrder: Record<string, { dropTarget: DragDropIdentifier } | undefined>;
 }

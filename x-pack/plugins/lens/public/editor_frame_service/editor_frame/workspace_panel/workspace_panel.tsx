@@ -217,8 +217,8 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
     }
   }
 
-  const value = React.useMemo(() => ({ id: 'lnsWorkspace' }), []);
-  const order = React.useMemo(() => [1, 0, 0, 0], []);
+  const value = useMemo(() => ({ id: 'lnsWorkspace' }), []);
+  const order = useMemo(() => [1, 0, 0, 0], []);
 
   function renderEmptyWorkspace() {
     return (

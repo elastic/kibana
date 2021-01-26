@@ -5,7 +5,7 @@
  */
 import './layer_panel.scss';
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
@@ -68,10 +68,7 @@ export function LayerPanel(
     setActiveDimension(initialActiveDimensionState);
   }, [activeVisualization.id]);
 
-  const setLayerRefMemoized = React.useCallback((el) => setLayerRef(layerId, el), [
-    layerId,
-    setLayerRef,
-  ]);
+  const setLayerRefMemoized = useCallback((el) => setLayerRef(layerId, el), [layerId, setLayerRef]);
 
   const layerVisualizationConfigProps = {
     layerId,
@@ -85,7 +82,7 @@ export function LayerPanel(
   const datasourceId = datasourcePublicAPI.datasourceId;
   const layerDatasourceState = props.datasourceStates[datasourceId].state;
 
-  const layerDatasourceDropProps = React.useMemo(
+  const layerDatasourceDropProps = useMemo(
     () => ({
       layerId,
       dragDropContext,
@@ -115,7 +112,7 @@ export function LayerPanel(
   const { setDimension, removeDimension } = activeVisualization;
   const layerDatasourceOnDrop = layerDatasource.onDrop;
 
-  const onDrop = React.useMemo(() => {
+  const onDrop = useMemo(() => {
     return (droppedItem: DragDropIdentifier, targetItem: DragDropIdentifier) => {
       const { columnId, groupId, layerId: targetLayerId, isNew } = (targetItem as unknown) as {
         groupId: string;

@@ -12,7 +12,7 @@ import {
   createMockDatasource,
   DatasourceMock,
 } from '../../mocks';
-import { ChildDragDropProvider, DroppableEvent } from '../../../drag_drop';
+import { ChildDragDropProvider, DroppableEvent, DragDrop } from '../../../drag_drop';
 import { EuiFormRow } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
 import { Visualization } from '../../../types';
@@ -625,15 +625,12 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
 
-      component.find('DragDrop[dataTestSubj="lnsGroup"]').at(1).prop('onDrop')!(
-        (draggingOperation as unknown) as DroppableEvent
-        // {
-        //   layerId: 'first',
-        //   columnId: 'b',
-        //   groupId: 'a',
-        //   id: 'b',
-        // }
-      );
+      component.find(DragDrop).at(1).prop('onDrop')!(draggingOperation, {
+        layerId: 'first',
+        columnId: 'b',
+        groupId: 'a',
+        id: 'b',
+      });
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           groupId: 'a',

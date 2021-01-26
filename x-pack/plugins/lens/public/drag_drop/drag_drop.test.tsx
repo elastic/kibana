@@ -12,6 +12,7 @@ import {
   DragContextState,
   ReorderProvider,
   DragDropIdentifier,
+  ActiveDropTarget,
 } from './providers';
 import { act } from 'react-dom/test-utils';
 
@@ -253,7 +254,7 @@ describe('DragDrop', () => {
           ({ activeDropTarget: value } as unknown) as DragContextState['activeDropTarget']
         }
         keyboardMode={false}
-        setKeyboardMode={() => {}}
+        setKeyboardMode={(keyboardMode) => true}
         registerDropTarget={jest.fn()}
       >
         <DragDrop value={{ label: 'ignored', id: '3' }} draggable={true} label="a">
@@ -289,21 +290,31 @@ describe('DragDrop', () => {
 
   describe('reordering', () => {
     const mountComponent = (
-      dragging: DragDropIdentifier | undefined,
+      dragContext: Partial<DragContextState> | undefined,
       onDrop: DropHandler = jest.fn()
-    ) =>
-      mount(
-        <ChildDragDropProvider
-          dragging={dragging}
-          setDragging={(val) => {
-            dragging = val;
-          }}
-          setActiveDropTarget={() => {}}
-          activeDropTarget={undefined}
-          keyboardMode={true}
-          setKeyboardMode={() => {}}
-          registerDropTarget={jest.fn()}
-        >
+    ) => {
+      let dragging = dragContext?.dragging;
+      let keyboardMode = !!dragContext?.keyboardMode;
+      let activeDropTarget = dragContext?.activeDropTarget;
+
+      const defaultContext = {
+        dragging,
+        setDragging: (val?: DragDropIdentifier) => {
+          dragging = val;
+        },
+        keyboardMode,
+        setKeyboardMode: jest.fn((mode) => {
+          keyboardMode = mode;
+        }),
+        setActiveDropTarget: (target?: DragDropIdentifier) => {
+          activeDropTarget = { activeDropTarget: target } as ActiveDropTarget;
+        },
+        activeDropTarget,
+        registerDropTarget: jest.fn(),
+      };
+
+      return mount(
+        <ChildDragDropProvider {...defaultContext} {...dragContext}>
           <ReorderProvider id="groupId">
             <DragDrop
               label="1"
@@ -348,54 +359,52 @@ describe('DragDrop', () => {
           </ReorderProvider>
         </ChildDragDropProvider>
       );
+    };
     test(`Reorderable component renders properly`, () => {
       const component = mountComponent(undefined, jest.fn());
-      expect(component.find('.lnsDragDrop-isReorderable')).toHaveLength(3);
+      expect(component.find('.lnsDragDrop-reorderable')).toHaveLength(3);
     });
-    test(`Elements between dragged and drop get extra class to show the reorder effect when dragging`, () => {
-      const component = mountComponent({ id: '1' }, jest.fn());
+    test(`Elements between dragged and drop get extra styles to show the reorder effect when dragging`, () => {
+      const component = mountComponent({ dragging: { id: '1' } }, jest.fn());
       const dataTransfer = {
         setData: jest.fn(),
         getData: jest.fn(),
       };
+      act(() => {
+        component
+          .find('[data-test-subj="lnsDragDrop"]')
+          .first()
+          .simulate('dragstart', { dataTransfer });
+        jest.runAllTimers();
+      });
+
       component
-        .find('.lnsDragDrop-isReorderable')
-        .first()
-        .find('[data-test-subj="lnsDragDrop"]')
-        .simulate('dragstart', { dataTransfer });
-      jest.runAllTimers();
-
-      component.find('[data-test-subj="lnsDragDrop-reorderableDrop"]').at(1).simulate('dragover');
-
+        .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
+        .at(1)
+        .simulate('dragover');
       expect(
         component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
       ).toEqual(undefined);
       expect(
-        component
-          .find('[data-test-subj="lnsDragDrop-translatedReorderableDrop"]')
-          .at(0)
-          .prop('style')
+        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(0).prop('style')
       ).toEqual({
         transform: 'translateY(-8px)',
       });
       expect(
-        component
-          .find('[data-test-subj="lnsDragDrop-translatedReorderableDrop"]')
-          .at(1)
-          .prop('style')
+        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(1).prop('style')
       ).toEqual({
         transform: 'translateY(-8px)',
       });
 
-      component.find('[data-test-subj="lnsDragDrop-reorderableDrop"]').at(1).simulate('dragleave');
+      component
+        .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
+        .at(1)
+        .simulate('dragleave');
       expect(
         component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
       ).toEqual(undefined);
       expect(
-        component
-          .find('[data-test-subj="lnsDragDrop-translatedReorderableDrop"]')
-          .at(1)
-          .prop('style')
+        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(1).prop('style')
       ).toEqual(undefined);
     });
     test(`Dropping an item runs onDrop function`, () => {
@@ -403,48 +412,101 @@ describe('DragDrop', () => {
       const stopPropagation = jest.fn();
       const onDrop = jest.fn();
 
-      const component = mountComponent({ id: '1' }, onDrop);
+      const component = mountComponent({ dragging: { id: '1' } }, onDrop);
 
       component
-        .find('[data-test-subj="lnsDragDrop-reorderableDrop"]')
+        .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
         .at(1)
         .simulate('drop', { preventDefault, stopPropagation });
       expect(preventDefault).toBeCalled();
       expect(stopPropagation).toBeCalled();
       expect(onDrop).toBeCalledWith({ id: '1' }, { id: '3' });
     });
-    test(`Keyboard navigation: user can reorder an element`, () => {
+
+    test(`Keyboard navigation: user can drop element to an activeDropTarget`, () => {
       const onDrop = jest.fn();
-      const component = mountComponent({ id: '2' }, onDrop);
+      const component = mountComponent(
+        {
+          dragging: { id: '1' },
+          activeDropTarget: { activeDropTarget: { id: '3' } } as ActiveDropTarget,
+          keyboardMode: true,
+        },
+        onDrop
+      );
       const keyboardHandler = component
-        .find('.lnsDragDrop-isReorderable')
-        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
+        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .simulate('focus');
 
       act(() => {
         keyboardHandler.simulate('keydown', { key: 'ArrowDown' });
+        keyboardHandler.simulate('keydown', { key: 'ArrowDown' });
         keyboardHandler.simulate('keydown', { key: 'Enter' });
       });
-      expect(onDrop).toBeCalledWith('3');
-
-      keyboardHandler.simulate('keydown', { key: 'ArrowUp' });
-      expect(onDrop).toBeCalledWith('1');
+      expect(onDrop).toBeCalledWith({ id: '1' }, { id: '3' });
     });
+
     test(`Keyboard Navigation: User cannot move an element outside of the group`, () => {
       const onDrop = jest.fn();
-      const component = mountComponent(undefined, onDrop);
-      const keyboardHandler = component
-        .find('.lnsDragDrop-isReorderable')
-        .first()
-        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
+      const setActiveDropTarget = jest.fn();
+      const component = mountComponent(
+        { dragging: { id: '1' }, keyboardMode: true, setActiveDropTarget },
+        onDrop
+      );
+      const keyboardHandler = component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
 
       keyboardHandler.simulate('keydown', { key: 'Space' });
       keyboardHandler.simulate('keydown', { key: 'ArrowUp' });
-      keyboardHandler.simulate('keydown', { key: 'Space' });
-      expect(onDrop).not.toHaveBeenCalled();
+      expect(setActiveDropTarget).not.toHaveBeenCalled();
 
-      keyboardHandler.simulate('keydown', { key: 'ArrowDown' });
       keyboardHandler.simulate('keydown', { key: 'Space' });
-      expect(onDrop).toBeCalledWith('2');
+      keyboardHandler.simulate('keydown', { key: 'ArrowDown' });
+
+      expect(setActiveDropTarget).toBeCalledWith({ id: '2' });
+    });
+    test(`Keyboard Navigation: Dragged element and elements between dragged and drop get extra styles to show the reorder effect`, () => {
+      const component = mountComponent({ dragging: { id: '1' }, keyboardMode: true }, jest.fn());
+      const dataTransfer = {
+        setData: jest.fn(),
+        getData: jest.fn(),
+      };
+      act(() => {
+        component
+          .find('[data-test-subj="lnsDragDrop"]')
+          .first()
+          .simulate('dragstart', { dataTransfer });
+        jest.runAllTimers();
+      });
+
+      component
+        .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
+        .at(1)
+        .simulate('dragover');
+      expect(
+        component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
+      ).toEqual({
+        transform: 'translateY(+16px)',
+      });
+      expect(
+        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(0).prop('style')
+      ).toEqual({
+        transform: 'translateY(-8px)',
+      });
+      expect(
+        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(1).prop('style')
+      ).toEqual({
+        transform: 'translateY(-8px)',
+      });
+
+      component
+        .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
+        .at(1)
+        .simulate('dragleave');
+      expect(
+        component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
+      ).toEqual(undefined);
+      expect(
+        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(1).prop('style')
+      ).toEqual(undefined);
     });
   });
 });

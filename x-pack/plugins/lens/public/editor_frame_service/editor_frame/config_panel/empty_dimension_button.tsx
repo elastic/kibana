@@ -4,23 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { isDraggedOperation } from '../../../types';
-
 import { generateId } from '../../../id_generator';
 import { DragDrop, DragDropIdentifier, DragContextState } from '../../../drag_drop';
-import { Datasource, VisualizationDimensionGroupConfig } from '../../../types';
-
-interface LayerDatasourceDropProps {
-  layerId: string;
-  dragDropContext: DragContextState;
-  state: unknown;
-  setState: (newState: unknown) => void;
-}
+import { Datasource, VisualizationDimensionGroupConfig, isDraggedOperation } from '../../../types';
+import { LayerDatasourceDropProps } from './types';
 
 export function EmptyDimensionButton({
   dragDropContext,
@@ -46,7 +37,7 @@ export function EmptyDimensionButton({
 }) {
   const handleDrop = (droppedItem: DragDropIdentifier) => onDrop(droppedItem, value);
 
-  const value = React.useMemo(() => {
+  const value = useMemo(() => {
     const newId = generateId();
     return {
       columnId: newId,

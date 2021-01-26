@@ -4,17 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { isDraggedOperation } from '../../../types';
+import React, { useMemo } from 'react';
 import { DragDrop, DragDropIdentifier, DragContextState } from '../../../drag_drop';
-import { Datasource, VisualizationDimensionGroupConfig } from '../../../types';
-
-interface LayerDatasourceDropProps {
-  layerId: string;
-  dragDropContext: DragContextState;
-  state: unknown;
-  setState: (newState: unknown) => void;
-}
+import { Datasource, VisualizationDimensionGroupConfig, isDraggedOperation } from '../../../types';
+import { LayerDatasourceDropProps } from './types';
 
 const isFromTheSameGroup = (el1: DragDropIdentifier, el2?: DragDropIdentifier) =>
   el2 && isDraggedOperation(el2) && el1.groupId === el2.groupId && el1.columnId !== el2.columnId;
@@ -49,7 +42,7 @@ export function DraggableDimensionButton({
   accessorIndex: number;
   columnId: string;
 }) {
-  const value = React.useMemo(() => {
+  const value = useMemo(() => {
     return {
       columnId,
       groupId: group.groupId,
@@ -81,7 +74,7 @@ export function DraggableDimensionButton({
 
   const isDroppable = isDraggedOperation(dragging)
     ? dragType === 'reorder'
-      ? !!isFromTheSameGroup
+      ? isFromTheSameGroup(value, dragging)
       : isCompatibleFromOtherGroup
     : layerDatasource.canHandleDrop({
         ...layerDatasourceDropProps,
@@ -89,7 +82,7 @@ export function DraggableDimensionButton({
         filterOperations: group.filterOperations,
       });
 
-  const reorderableGroup = React.useMemo(() => {
+  const reorderableGroup = useMemo(() => {
     // if (group.accessors.length > 1) {
     return group.accessors.map((a) => ({
       columnId: a.columnId,
@@ -100,7 +93,7 @@ export function DraggableDimensionButton({
     // }
   }, [group, layerId]);
 
-  const filterSameGroup = React.useMemo(
+  const filterSameGroup = useMemo(
     () => (el?: DragDropIdentifier) => {
       return !!(!el || !isFromTheSameGroup(value, el) || el.isNew);
     },
