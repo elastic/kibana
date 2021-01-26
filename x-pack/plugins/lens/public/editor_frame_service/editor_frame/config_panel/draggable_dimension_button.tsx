@@ -102,6 +102,7 @@ export function DraggableDimensionButton({
         dataTestSubj={group.dataTestSubj}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
+        label={label}
         droppable={dragging && isDroppable}
         onDrop={onDrop}
       >

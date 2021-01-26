@@ -281,8 +281,8 @@ const DragInner = memo(function DragDropInner({
               if (isDragging) {
                 dragEnd();
               } else {
-                setKeyboardMode(true);
                 dragStart(e);
+                setKeyboardMode(true);
               }
               if (activeDropTarget) {
                 dropToActiveDropTarget();
@@ -380,7 +380,6 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
       trackUiEvent('drop_total');
       onDrop(dragging, value);
     }
-
     setActiveDropTarget(undefined);
     setDragging(undefined);
     setKeyboardMode(false);
@@ -415,6 +414,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
     isDragging,
     activeDropTarget,
     reorderableGroup,
+    onDrop,
   } = props;
 
   const currentIndex = reorderableGroup.findIndex((i) => i.id === value.id);
@@ -454,13 +454,17 @@ const ReorderableDrag = memo(function ReorderableDrag(
   };
 
   const onReorderableDragEnd = () => {
-    resetReorderState(
-      isReorderOn
-        ? reorderAnnouncements.cancelled(currentIndex + 1)
-        : i18n.translate('xpack.lens.dragDrop.abortMessage', {
-            defaultMessage: 'Movement cancelled.',
-          })
-    );
+    resetReorderState(reorderAnnouncements.cancelled(currentIndex + 1));
+  };
+
+  const onReorderableDrop = (dragging: DragDropIdentifier, target: DragDropIdentifier) => {
+    if (onDrop) {
+      onDrop(dragging, target);
+      const targetIndex = reorderableGroup.findIndex(
+        (i) => i.id === activeDropTarget?.activeDropTarget?.id
+      );
+      resetReorderState(reorderAnnouncements.dropped(targetIndex + 1, currentIndex + 1));
+    }
   };
 
   const resetReorderState = (keyboardReorderMessage = '') =>
@@ -570,6 +574,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
         extraKeyboardHandler={extraKeyboardHandler}
         onDragStart={onReorderableDragStart}
         onDragEnd={onReorderableDragEnd}
+        onDrop={onReorderableDrop}
       />
     </div>
   );
@@ -678,9 +683,14 @@ const ReorderableDrop = memo(function ReorderableDrop(
 
     if (onDrop && droppable && dragging) {
       trackUiEvent('drop_total');
+
       onDrop(dragging, value);
+      const draggingIndex = reorderableGroup.findIndex((i) => i.id === dragging.id);
+      // setTimeout ensures it will run after dragEnd messaging
+      setTimeout(() =>
+        resetReorderState(reorderAnnouncements.dropped(currentIndex + 1, draggingIndex + 1))
+      );
     }
-    resetReorderState();
   };
 
   return (
