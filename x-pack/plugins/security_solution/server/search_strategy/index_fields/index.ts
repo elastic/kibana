@@ -117,18 +117,17 @@ const missingFields: FieldDescriptor[] = [
  * in size at a time calling this function repeatedly. This function should be as optimized as possible
  * and should avoid any and all creation of new arrays, iterating over the arrays or performing
  * any n^2 operations.
- * @param beatFields The list of patterns
- * @param indexesAlias The list of patterns
+ * @param indexesAlias The index alias
  * @param index The index its self
  * @param indexesAliasIdx The index within the alias
  */
 export const createFieldItem = (
   beatFields: BeatFields,
-  patternList: string[],
+  indexesAlias: string[],
   index: FieldDescriptor,
-  patternListIdx: number
+  indexesAliasIdx: number
 ): IndexField => {
-  const alias = patternList[patternListIdx];
+  const alias = indexesAlias[indexesAliasIdx];
   const splitIndexName = index.name.split('.');
   const indexName =
     splitIndexName[splitIndexName.length - 1] === 'text'
@@ -156,24 +155,24 @@ export const createFieldItem = (
  * has already consumed a lot of the event loop processing up to this function and we want to give
  * I/O opportunity to occur by scheduling this on the next loop.
  * @param responsesIndexFields The response index fields to loop over
- * @param patternList The list of patterns such as filebeat-*
+ * @param indexesAlias The index aliases such as filebeat-*
  */
 export const formatFirstFields = async (
   beatFields: BeatFields,
   responsesIndexFields: FieldDescriptor[][],
-  patternList: string[]
+  indexesAlias: string[]
 ): Promise<IndexField[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(
         responsesIndexFields.reduce(
-          (accumulator: IndexField[], indexFields: FieldDescriptor[], patternListIdx: number) => {
+          (accumulator: IndexField[], indexFields: FieldDescriptor[], indexesAliasIdx: number) => {
             missingFields.forEach((index) => {
-              const item = createFieldItem(beatFields, patternList, index, patternListIdx);
+              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
               accumulator.push(item);
             });
             indexFields.forEach((index) => {
-              const item = createFieldItem(beatFields, patternList, index, patternListIdx);
+              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
               accumulator.push(item);
             });
             return accumulator;
@@ -230,14 +229,14 @@ export const formatSecondFields = async (fields: IndexField[]): Promise<IndexFie
  * This function should be as optimized as possible and should avoid any and all creation
  * of new arrays, iterating over the arrays or performing any n^2 operations.
  * @param responsesIndexFields  The response index fields to format
- * @param patternList The list of patterns
+ * @param indexesAlias The index alias
  */
 export const formatIndexFields = async (
   beatFields: BeatFields,
   responsesIndexFields: FieldDescriptor[][],
-  patternList: string[]
+  indexesAlias: string[]
 ): Promise<IndexField[]> => {
-  const fields = await formatFirstFields(beatFields, responsesIndexFields, patternList);
+  const fields = await formatFirstFields(beatFields, responsesIndexFields, indexesAlias);
   const secondFields = await formatSecondFields(fields);
   return secondFields;
 };
