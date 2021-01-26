@@ -49,8 +49,11 @@ describe('UrlParamsContext', () => {
 
     const wrapper = mountParams(location);
     const params = getDataFromOutput(wrapper);
-    expect(params.start).toEqual('2010-03-15T00:00:00.000Z');
-    expect(params.end).toEqual('2010-04-11T00:00:00.000Z');
+
+    expect([params.start, params.end]).toEqual([
+      '2010-03-15T00:00:00.000Z',
+      '2010-04-10T12:00:00.000Z',
+    ]);
   });
 
   it('should update param values if location has changed', () => {
@@ -65,8 +68,11 @@ describe('UrlParamsContext', () => {
     // force an update
     wrapper.setProps({ abc: 123 });
     const params = getDataFromOutput(wrapper);
-    expect(params.start).toEqual('2009-03-15T00:00:00.000Z');
-    expect(params.end).toEqual('2009-04-11T00:00:00.000Z');
+
+    expect([params.start, params.end]).toEqual([
+      '2009-03-15T00:00:00.000Z',
+      '2009-04-10T12:00:00.000Z',
+    ]);
   });
 
   it('should parse relative time ranges on mount', () => {
@@ -85,7 +91,7 @@ describe('UrlParamsContext', () => {
 
     expect([params.start, params.end]).toEqual([
       '1969-12-31T00:00:00.000Z',
-      '1970-01-01T00:00:00.000Z',
+      '1969-12-31T23:59:59.999Z',
     ]);
 
     nowSpy.mockRestore();
@@ -136,8 +142,11 @@ describe('UrlParamsContext', () => {
     expect(calls.length).toBe(2);
 
     const params = getDataFromOutput(wrapper);
-    expect(params.start).toEqual('2005-09-19T00:00:00.000Z');
-    expect(params.end).toEqual('2005-10-23T00:00:00.000Z');
+
+    expect([params.start, params.end]).toEqual([
+      '2005-09-19T00:00:00.000Z',
+      '2005-10-21T12:00:00.000Z',
+    ]);
   });
 
   it('should refresh the time range with new values if time range is relative', async () => {
@@ -183,7 +192,10 @@ describe('UrlParamsContext', () => {
     await waitFor(() => {});
 
     const params = getDataFromOutput(wrapper);
-    expect(params.start).toEqual('2000-06-14T00:00:00.000Z');
-    expect(params.end).toEqual('2000-06-15T00:00:00.000Z');
+
+    expect([params.start, params.end]).toEqual([
+      '2000-06-14T00:00:00.000Z',
+      '2000-06-14T23:59:59.999Z',
+    ]);
   });
 });

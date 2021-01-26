@@ -11,7 +11,7 @@ import * as helpers from './helpers';
 describe('url_params_context helpers', () => {
   describe('getDateRange', () => {
     describe('with non-rounded dates', () => {
-      it('rounds the values', () => {
+      it('rounds the lower value', () => {
         expect(
           helpers.getDateRange({
             state: {},
@@ -20,7 +20,7 @@ describe('url_params_context helpers', () => {
           })
         ).toEqual({
           start: '1970-01-01T00:00:00.000Z',
-          end: '1971-02-01T00:00:00.000Z',
+          end: '1971-01-10T10:11:12.123Z',
         });
       });
     });
