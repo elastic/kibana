@@ -104,14 +104,14 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(400);
     });
     it('should accept a valid "kuery" value', async () => {
-      const filter = encodeURIComponent('fleet-agents.shared_id : "agent2_filebeat"');
+      const filter = encodeURIComponent('fleet-agents.access_api_key_id : "api-key-2"');
       const { body: apiResponse } = await supertest
         .get(`/api/fleet/agents?kuery=${filter}`)
         .expect(200);
 
       expect(apiResponse.total).to.eql(1);
       const agent = apiResponse.list[0];
-      expect(agent.shared_id).to.eql('agent2_filebeat');
+      expect(agent.access_api_key_id).to.eql('api-key-2');
     });
   });
 }
