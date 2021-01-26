@@ -38,7 +38,7 @@ export function getSearchParamsFromRequest(
   const searchParams = getSearchParams(getConfig);
 
   return {
-    index: searchRequest.index.title || searchRequest.index,
+    index: searchRequest.index.patternListActive.join(',') || searchRequest.index,
     body: searchRequest.body,
     ...searchParams,
   };

@@ -24,7 +24,7 @@ function msearch({ searchRequests, getConfig, legacy }: SearchStrategySearchPara
   const requests = searchRequests.map(({ index, body }) => {
     return {
       header: {
-        index: index.title || index,
+        index: index.patternListActive.join(',') || index,
         preference: getPreference(getConfig),
       },
       body,
