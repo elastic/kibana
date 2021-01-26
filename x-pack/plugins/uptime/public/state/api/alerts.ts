@@ -71,7 +71,7 @@ export const createAlert = async ({
     schedule: { interval: '1m' },
     notifyWhen: 'onActionGroupChange',
     tags: [UPTIME_AUTO_ALERT],
-    name: `${selectedMonitor?.monitor.name}(Simple status alert)`,
+    name: `${selectedMonitor?.monitor.name || selectedMonitor?.url?.full}(Simple status alert)`,
     enabled: true,
     throttle: null,
   };
