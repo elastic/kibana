@@ -8,21 +8,23 @@ import React from 'react';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { SearchSessionIndicator } from '../search_session_indicator';
 import { ISessionService, TimefilterContract } from '../../../../../../../src/plugins/data/public/';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApplicationStart } from '../../../../../../../src/core/public';
-
+import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public/';
+import { SearchSessionIndicatorWithTour } from './search_session_indicator_with_tour';
 export interface SearchSessionIndicatorDeps {
   sessionService: ISessionService;
   timeFilter: TimefilterContract;
   application: ApplicationStart;
+  storage: IStorageWrapper;
 }
 
 export const createConnectedSearchSessionIndicator = ({
   sessionService,
   application,
   timeFilter,
+  storage,
 }: SearchSessionIndicatorDeps): React.FC => {
   const isAutoRefreshEnabled = () => !timeFilter.getRefreshInterval().pause;
   const isAutoRefreshEnabled$ = timeFilter
@@ -71,7 +73,9 @@ export const createConnectedSearchSessionIndicator = ({
     if (!state) return null;
     return (
       <RedirectAppLinks application={application}>
-        <SearchSessionIndicator
+        <SearchSessionIndicatorWithTour
+          storage={storage}
+          sessionService={sessionService}
           state={state}
           onContinueInBackground={() => {
             sessionService.save();
