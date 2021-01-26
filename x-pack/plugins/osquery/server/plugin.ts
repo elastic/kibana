@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { first } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -12,19 +13,29 @@ import {
   Logger,
 } from '../../../../src/core/server';
 
+import { ConfigType } from './config';
+import { createConfig$ } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
+  private config: ConfigType | undefined | null;
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
+  public async setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
     this.logger.debug('osquery: Setup');
+    const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
+    this.config = config;
+
+    if (!this.config.enabled) {
+      return {};
+    }
+
     const router = core.http.createRouter();
 
     // Register server side APIs
@@ -40,8 +51,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('osquery: Started');
-
+    this.logger.debug('osquery: S');
     return {};
   }
 

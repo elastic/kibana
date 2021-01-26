@@ -19,11 +19,17 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private kibanaVersion: string;
   private storage = new Storage(localStorage);
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.kibanaVersion = initializerContext.env.packageInfo.version;
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = this.initializerContext.env.packageInfo.version;
   }
 
   public setup(core: CoreSetup): OsqueryPluginSetup {
+    const config = this.initializerContext.config.get<{ enabled: boolean }>();
+
+    if (!config.enabled) {
+      return {};
+    }
+
     const storage = this.storage;
     const kibanaVersion = this.kibanaVersion;
     // Register an application into the side navigation menu

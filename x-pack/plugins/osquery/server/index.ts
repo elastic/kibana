@@ -6,10 +6,9 @@
 
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { OsqueryPlugin } from './plugin';
+import { ConfigSchema } from './config';
 
-//  This exports static code and TypeScript types,
-//  as well as, Kibana Platform `plugin()` initializer.
-
+export const config = { schema: ConfigSchema };
 export function plugin(initializerContext: PluginInitializerContext) {
   return new OsqueryPlugin(initializerContext);
 }
