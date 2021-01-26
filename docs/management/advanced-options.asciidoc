@@ -458,7 +458,7 @@ of buckets to try to represent.
 
 [horizontal]
 [[visualization-visualize-chartslibrary]]`visualization:visualize:legacyChartsLibrary`::
-Enables legacy charts library for area, line and bar charts in visualize. Currently, only legacy charts library supports split chart aggregation.
+Enables legacy charts library for area, line and bar charts in visualize.
 
 [[visualization-colormapping]]`visualization:colorMapping`::
 **This setting is deprecated and will not be supported as of 8.0.**
