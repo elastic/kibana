@@ -11,7 +11,7 @@ import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_so
 import { LogEntryCursor } from '../../../../common/log_entry';
 import { JsonObject } from '../../../../common/typed_json';
 import { flattenDataSearchResponseDescriptor } from '../../../utils/data_search';
-import { useObservable, useObservableState, useSubscription } from '../../../utils/use_observable';
+import { useObservable, useObservableState } from '../../../utils/use_observable';
 import { useLogEntriesAfterRequest } from './use_fetch_log_entries_after';
 import { useLogEntriesBeforeRequest } from './use_fetch_log_entries_before';
 
