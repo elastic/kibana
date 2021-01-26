@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
-import {
-  AbstractSearchStrategy,
-  ReqFacade,
-  VisPayload,
-} from '../../../../../src/plugins/vis_type_timeseries/server';
 
-import { getCapabilitiesForRollupIndices } from '../../../../../src/plugins/data/server';
+import { ReqFacade, AbstractSearchStrategy } from './abstract_search_strategy';
+import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
+import type { VisPayload } from '../../../../common/types';
 
-import { RollupSearchCapabilities } from './rollup_search_capabilities';
+import { getCapabilitiesForRollupIndices } from '../../../../../data/server';
 
 const getRollupIndices = (rollupData: { [key: string]: any }) => Object.keys(rollupData);
 const isIndexPatternContainsWildcard = (indexPattern: string) => indexPattern.includes('*');
@@ -19,8 +18,6 @@ const isIndexPatternValid = (indexPattern: string) =>
   indexPattern && typeof indexPattern === 'string' && !isIndexPatternContainsWildcard(indexPattern);
 
 export class RollupSearchStrategy extends AbstractSearchStrategy {
-  name = 'rollup';
-
   async search(req: ReqFacade<VisPayload>, bodies: any[]) {
     return super.search(req, bodies, 'rollup');
   }

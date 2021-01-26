@@ -6,15 +6,6 @@
  * Public License, v 1.
  */
 
-import { utc } from 'moment';
-import type { ReqFacade } from '../../search_strategies';
-import type { VisPayload } from '../../../../common/types';
-
-export const getTimerange = (req: ReqFacade<VisPayload>) => {
-  const { min, max } = req.payload.timerange;
-
-  return {
-    from: utc(min),
-    to: utc(max),
-  };
-};
+export { AbstractSearchStrategy, ReqFacade } from './abstract_search_strategy';
+export { DefaultSearchStrategy } from './default_search_strategy';
+export { RollupSearchStrategy } from './rollup_search_strategy';

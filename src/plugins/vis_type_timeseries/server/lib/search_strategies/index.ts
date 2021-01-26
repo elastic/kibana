@@ -6,4 +6,6 @@
  * Public License, v 1.
  */
 
+export { AbstractSearchStrategy, ReqFacade } from './strategies';
 export { SearchStrategyRegistry } from './search_strategy_registry';
+export { DefaultSearchCapabilities } from './capabilities/default_search_capabilities';
