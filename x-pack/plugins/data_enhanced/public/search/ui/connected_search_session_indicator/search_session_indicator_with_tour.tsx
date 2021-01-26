@@ -86,7 +86,7 @@ export function SearchSessionIndicatorWithTour(props: SearchSessionIndicatoWithT
           data-test-subj="searchSessionsPopoverDismissButton"
           onClick={onTourDismiss}
         >
-          {i18n.translate('data.noDataPopover.dismissAction', {
+          {i18n.translate('xpack.data.searchSessionIndicator.tour.dismissAction', {
             defaultMessage: "Don't show again",
           })}
         </EuiButtonEmpty>

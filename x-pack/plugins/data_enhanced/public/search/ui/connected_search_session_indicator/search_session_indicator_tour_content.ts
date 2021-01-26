@@ -18,10 +18,10 @@ export interface TourStepMessage {
 export const TOUR_MESSAGES: Record<string, TourStepMessage> = {
   [SearchSessionState.Loading]: {
     storageKey: 'data.searchSessiosn.tour.slowSearch',
-    title: i18n.translate('xpack.data.searchSessionIndicator.slowSearchTitle', {
+    title: i18n.translate('xpack.data.searchSessionIndicator.tour.slowSearchTitle', {
       defaultMessage: 'It seems like your search is taking awhile',
     }),
-    message: i18n.translate('xpack.data.searchSessionIndicator.slowSearchMessage', {
+    message: i18n.translate('xpack.data.searchSessionIndicator.tour.slowSearchMessage', {
       defaultMessage:
         'Click on this icon to either cancel and re-adjust your configuration or to continue running this search in the background. You can get back to the results from the Advanced Settings > Search Sessions menu.',
     }),
@@ -29,20 +29,20 @@ export const TOUR_MESSAGES: Record<string, TourStepMessage> = {
   },
   [SearchSessionState.BackgroundCompleted]: {
     storageKey: 'data.searchSessiosn.tour.backgroundComplete',
-    title: i18n.translate('xpack.data.searchSessionIndicator.completeInBackgroundTitle', {
+    title: i18n.translate('xpack.data.searchSessionIndicator.tour.completeInBackgroundTitle', {
       defaultMessage: 'Your results are ready',
     }),
-    message: i18n.translate('xpack.data.searchSessionIndicator.completeInBackgroundMessage', {
+    message: i18n.translate('xpack.data.searchSessionIndicator.tour.completeInBackgroundMessage', {
       defaultMessage:
         'Your results are now complete and saved. You can get back to the results at a later time from the Advanced Settings > Search Sessions menu.',
     }),
   },
   [SearchSessionState.Restored]: {
     storageKey: 'data.searchSessiosn.tour.restored',
-    title: i18n.translate('xpack.data.searchSessionIndicator.completeInBackgroundTitle', {
+    title: i18n.translate('xpack.data.searchSessionIndicator.tour.restoredTitle', {
       defaultMessage: 'Your results were restored',
     }),
-    message: i18n.translate('xpack.data.searchSessionIndicator.completeInBackgroundMessage', {
+    message: i18n.translate('xpack.data.searchSessionIndicator.tour.restoredMessage', {
       defaultMessage:
         'Your results were restored. You can get back to the results at a later time from the Advanced Settings > Search Sessions menu.',
     }),
