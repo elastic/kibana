@@ -1840,13 +1840,12 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = obj
 
 // @public
 export interface PluginInitializerContext<ConfigSchema = unknown> {
-    // (undocumented)
     config: {
         legacy: {
             globalConfig$: Observable<SharedGlobalConfig>;
         };
         create: <T = ConfigSchema>() => Observable<T>;
-        createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
+        get: <T = ConfigSchema>() => T;
     };
     // (undocumented)
     env: {
@@ -1854,7 +1853,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
         packageInfo: Readonly<PackageInfo>;
         instanceUuid: string;
     };
-    // (undocumented)
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     logger: LoggerFactory;
     // (undocumented)
     opaqueId: PluginOpaqueId;
@@ -3137,5 +3136,6 @@ export const validBodyOutput: readonly ["data", "stream"];
 // src/core/server/plugins/types.ts:263:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:263:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:368:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```
