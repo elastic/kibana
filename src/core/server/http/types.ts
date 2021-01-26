@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import { IContextProvider, IContextContainer } from '../context';
 import { ICspConfig } from '../csp';
 import { GetAuthState, IsAuthenticated } from './auth_state_storage';
@@ -31,13 +21,13 @@ import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
 import { ExternalUrlConfig } from '../external_url';
-import { PluginOpaqueId, RequestHandlerContext } from '..';
+import type { PluginOpaqueId, RequestHandlerContext } from '..';
 
 /**
  * An object that handles registration of http request context providers.
  * @public
  */
-export type RequestHandlerContextContainer = IContextContainer<RequestHandler<any, any, any>>;
+export type RequestHandlerContextContainer = IContextContainer<RequestHandler>;
 
 /**
  * Context provider for request handler.
@@ -46,8 +36,9 @@ export type RequestHandlerContextContainer = IContextContainer<RequestHandler<an
  * @public
  */
 export type RequestHandlerContextProvider<
-  TContextName extends keyof RequestHandlerContext
-> = IContextProvider<RequestHandler<any, any, any>, TContextName>;
+  Context extends RequestHandlerContext,
+  ContextName extends keyof Context
+> = IContextProvider<Context, ContextName>;
 
 /**
  * @public
@@ -240,14 +231,19 @@ export interface HttpServiceSetup {
    * ```
    * @public
    */
-  createRouter: () => IRouter;
+  createRouter: <
+    Context extends RequestHandlerContext = RequestHandlerContext
+  >() => IRouter<Context>;
 
   /**
    * Register a context provider for a route handler.
    * @example
    * ```ts
    *  // my-plugin.ts
-   *  deps.http.registerRouteHandlerContext(
+   *  interface MyRequestHandlerContext extends RequestHandlerContext {
+   *    myApp: { search(id: string): Promise<Result> };
+   *  }
+   *  deps.http.registerRouteHandlerContext<MyRequestHandlerContext, 'myApp'>(
    *    'myApp',
    *    (context, req) => {
    *     async function search (id: string) {
@@ -258,6 +254,8 @@ export interface HttpServiceSetup {
    *  );
    *
    * // my-route-handler.ts
+   *  import type { MyRequestHandlerContext } from './my-plugin.ts';
+   *  const router = createRouter<MyRequestHandlerContext>();
    *  router.get({ path: '/', validate: false }, async (context, req, res) => {
    *    const response = await context.myApp.search(...);
    *    return res.ok(response);
@@ -265,9 +263,12 @@ export interface HttpServiceSetup {
    * ```
    * @public
    */
-  registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
-    contextName: T,
-    provider: RequestHandlerContextProvider<T>
+  registerRouteHandlerContext: <
+    Context extends RequestHandlerContext,
+    ContextName extends keyof Context
+  >(
+    contextName: ContextName,
+    provider: RequestHandlerContextProvider<Context, ContextName>
   ) => RequestHandlerContextContainer;
 
   /**
@@ -282,13 +283,19 @@ export interface InternalHttpServiceSetup
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   externalUrl: ExternalUrlConfig;
-  createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+  createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>(
+    path: string,
+    plugin?: PluginOpaqueId
+  ) => IRouter<Context>;
   registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
-  registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+  registerRouteHandlerContext: <
+    Context extends RequestHandlerContext,
+    ContextName extends keyof Context
+  >(
     pluginOpaqueId: PluginOpaqueId,
-    contextName: T,
-    provider: RequestHandlerContextProvider<T>
+    contextName: ContextName,
+    provider: RequestHandlerContextProvider<Context, ContextName>
   ) => RequestHandlerContextContainer;
 }
 

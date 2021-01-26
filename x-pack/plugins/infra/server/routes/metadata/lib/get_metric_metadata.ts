@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { RequestHandlerContext } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   InfraMetadataAggregationBucket,
   InfraMetadataAggregationResponse,
@@ -23,7 +23,7 @@ export interface InfraMetricsAdapterResponse {
 
 export const getMetricMetadata = async (
   framework: KibanaFramework,
-  requestContext: RequestHandlerContext,
+  requestContext: InfraPluginRequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
   nodeType: InventoryItemType,
