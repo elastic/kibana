@@ -281,7 +281,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     ).toBe(false);
   });
 
-  it('is droppable if the dragged column is incompatible', () => {
+  it('is not droppable if the dragged column is incompatible', () => {
     expect(
       canHandleDrop({
         ...defaultProps,
@@ -297,7 +297,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         columnId: 'col2',
         filterOperations: (op: OperationMetadata) => op.dataType === 'number',
       })
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it('appends the dropped column when a field is dropped', () => {
@@ -555,115 +555,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
           columnOrder: ['col1', 'col3'],
           columns: {
             col1: testState.layers.first.columns.col2,
-            col3: testState.layers.first.columns.col3,
-          },
-        },
-      },
-    });
-  });
-
-  it('copies a dimension if group is the same an isNew is set, respecting bucket metric order', () => {
-    const testState = { ...state };
-    testState.layers.first = {
-      indexPatternId: 'foo',
-      columnOrder: ['col1', 'col2', 'col3'],
-      columns: {
-        col1: testState.layers.first.columns.col1,
-
-        col2: {
-          label: 'Top values of src',
-          dataType: 'string',
-          isBucketed: true,
-
-          // Private
-          operationType: 'terms',
-          params: {
-            orderBy: { type: 'column', columnId: 'col3' },
-            orderDirection: 'desc',
-            size: 10,
-          },
-          sourceField: 'src',
-        },
-        col3: {
-          label: 'Count',
-          dataType: 'number',
-          isBucketed: false,
-
-          // Private
-          operationType: 'count',
-          sourceField: 'Records',
-        },
-      },
-    };
-
-    const metricDragging = {
-      columnId: 'col3',
-      groupId: 'a',
-      layerId: 'first',
-      id: 'col3',
-    };
-
-    onDrop({
-      ...defaultProps,
-      dragDropContext: {
-        ...dragDropContext,
-        dragging: metricDragging,
-      },
-      droppedItem: metricDragging,
-      state: testState,
-      groupId: 'a',
-      isNew: true,
-      columnId: 'newCol',
-    });
-
-    // metric is appended
-    expect(setState).toHaveBeenCalledWith({
-      ...testState,
-      layers: {
-        first: {
-          ...testState.layers.first,
-          columnOrder: ['col1', 'col2', 'col3', 'newCol'],
-          columns: {
-            col1: testState.layers.first.columns.col1,
-            col2: testState.layers.first.columns.col2,
-            col3: testState.layers.first.columns.col3,
-            newCol: testState.layers.first.columns.col3,
-          },
-        },
-      },
-    });
-
-    const bucketDragging = {
-      columnId: 'col2',
-      groupId: 'a',
-      layerId: 'first',
-      id: 'col2',
-    };
-
-    onDrop({
-      ...defaultProps,
-      dragDropContext: {
-        ...dragDropContext,
-        dragging: bucketDragging,
-      },
-      droppedItem: bucketDragging,
-      state: testState,
-      groupId: 'a',
-      isNew: true,
-      columnId: 'newCol',
-    });
-
-    // bucket is placed after the last existing bucket
-    expect(setState).toHaveBeenCalledWith({
-      ...testState,
-      layers: {
-        first: {
-          ...testState.layers.first,
-          columnOrder: ['col1', 'col2', 'newCol', 'col3'],
-          columns: {
-            col1: testState.layers.first.columns.col1,
-            col2: testState.layers.first.columns.col2,
-            newCol: testState.layers.first.columns.col2,
             col3: testState.layers.first.columns.col3,
           },
         },

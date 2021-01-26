@@ -218,7 +218,6 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
   }
 
   const value = useMemo(() => ({ id: 'lnsWorkspace' }), []);
-  const order = useMemo(() => [1, 0, 0, 0], []);
 
   function renderEmptyWorkspace() {
     return (
@@ -305,7 +304,6 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         droppable={Boolean(suggestionForDraggedField)}
         onDrop={onDrop}
         value={value}
-        order={order}
       >
         <div>
           {renderVisualization()}

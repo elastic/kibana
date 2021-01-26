@@ -54,23 +54,18 @@ export function EmptyDimensionButton({
       <DragDrop
         dataTestSubj={group.dataTestSubj}
         value={value}
-        /* 2 to leave room for data panel and workspace, then go by layer index, then by group index */
-        order={[2, layerIndex, groupIndex, group.accessors.length]}
         onDrop={handleDrop}
         droppable={
-          (Boolean(dragDropContext.dragging) &&
-            // Verify that the dragged item is not coming from the same group
-            // since this would be a duplicate
-            (!isDraggedOperation(dragDropContext.dragging) ||
-              dragDropContext.dragging.groupId !== group.groupId) &&
-            layerDatasource.canHandleDrop({
-              ...layerDatasourceDropProps,
-              columnId: value.columnId,
-              filterOperations: group.filterOperations,
-            })) ||
-          // isFromTheSameGroup
-          (isDraggedOperation(dragDropContext.dragging) &&
-            dragDropContext.dragging.groupId === group.groupId)
+          Boolean(dragDropContext.dragging) &&
+          // Verify that the dragged item is not coming from the same group
+          // since this would be a duplicate
+          (!isDraggedOperation(dragDropContext.dragging) ||
+            dragDropContext.dragging.groupId !== group.groupId) &&
+          layerDatasource.canHandleDrop({
+            ...layerDatasourceDropProps,
+            columnId: value.columnId,
+            filterOperations: group.filterOperations,
+          })
         }
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">

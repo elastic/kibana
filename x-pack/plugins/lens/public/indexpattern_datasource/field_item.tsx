@@ -102,8 +102,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     dateRange,
     filters,
     hideDetails,
-    itemIndex,
-    groupIndex,
     dropOntoWorkspace,
   } = props;
 
@@ -171,7 +169,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     () => ({ field, indexPatternId: indexPattern.id, id: field.name } as DraggedField),
     [field, indexPattern.id]
   );
-  const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
   const lensFieldIcon = <LensFieldIcon type={field.type as DataType} />;
   const lensInfoIcon = (
@@ -207,7 +204,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         button={
           <DragDrop
             draggable
-            order={order}
             label={field.displayName}
             value={value}
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}

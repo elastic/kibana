@@ -791,7 +791,6 @@ describe('workspace_panel', () => {
           activeDropTarget={undefined}
           keyboardMode={false}
           setKeyboardMode={() => {}}
-          registerDropTarget={jest.fn()}
         >
           <WorkspacePanel
             activeDatasourceId={'mock'}

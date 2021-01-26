@@ -9,12 +9,10 @@ import React, { useContext, useEffect, memo } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import {
   DragDropIdentifier,
   DragContext,
   DragContextState,
-  nextValidDropTarget,
   ReorderContext,
   ReorderState,
   reorderAnnouncements,
@@ -27,11 +25,6 @@ export type DroppableEvent = React.DragEvent<HTMLElement>;
  * A function that handles a drop event.
  */
 export type DropHandler = (dropped: DragDropIdentifier, dropTarget: DragDropIdentifier) => void;
-
-export interface GroupMoveResult {
-  targetDescription: string;
-  actionSuccessMessage: string;
-}
 
 /**
  * The base props to the DragDrop component.
@@ -101,14 +94,6 @@ interface BaseProps {
    * replace something that is existing or add a new one
    */
   dropType?: 'add' | 'replace' | 'reorder';
-  /**
-   * Order for keyboard dragging. This takes an array of numbers which will be used to order hierarchically
-   */
-  order?: number[];
-  /**
-   * A function to filter the elements that will be used for out of group interactions
-   */
-  dropTargetsFilter?: (el?: DragDropIdentifier) => boolean;
 }
 
 /**
@@ -133,7 +118,6 @@ interface DragInnerProps extends BaseProps {
   ) => void;
   onDragEnd?: () => void;
   extraKeyboardHandler?: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
-  blockRightLeftKeys?: boolean;
 }
 
 /**
@@ -158,7 +142,6 @@ export const DragDrop = (props: BaseProps) => {
   const {
     dragging,
     setDragging,
-    registerDropTarget,
     keyboardMode,
     setKeyboardMode,
     activeDropTarget,
@@ -187,7 +170,6 @@ export const DragDrop = (props: BaseProps) => {
     setDragging,
     activeDropTarget,
     setActiveDropTarget,
-    registerDropTarget,
     isDragging,
     isNotDroppable:
       // If the configuration has provided a droppable flag, but this particular item is not
@@ -229,17 +211,14 @@ const DragInner = memo(function DragDropInner({
   setKeyboardMode,
   setActiveDropTarget,
   label = '',
-  order,
   keyboardMode,
   isDragging,
   activeDropTarget,
   onDrop,
-  dropTargetsFilter,
   dragType,
   onDragStart,
   onDragEnd,
   extraKeyboardHandler,
-  blockRightLeftKeys,
 }: DragInnerProps) {
   const dragStart = (e?: DroppableEvent | React.KeyboardEvent<HTMLButtonElement>) => {
     // Setting stopPropgagation causes Chrome failures, so
@@ -286,21 +265,6 @@ const DragInner = memo(function DragDropInner({
     }
   };
 
-  const setNextTarget = (reversed = false) => {
-    if (!order) {
-      return;
-    }
-
-    const nextTarget = nextValidDropTarget(
-      activeDropTarget,
-      [order.join(','), { dropTarget: value }],
-      dropTargetsFilter,
-      reversed
-    );
-
-    setActiveDropTarget(nextTarget);
-  };
-
   return (
     <div className={className}>
       <EuiScreenReaderOnly showOnFocus>
@@ -325,10 +289,6 @@ const DragInner = memo(function DragDropInner({
               }
             } else if (e.key === keys.ESCAPE) {
               dragEnd();
-            } else if (keyboardMode && order && !blockRightLeftKeys) {
-              if (keys.ARROW_RIGHT === e.key || keys.ARROW_LEFT === e.key) {
-                setNextTarget(!!(keys.ARROW_LEFT === e.key));
-              }
             }
             if (extraKeyboardHandler) {
               extraKeyboardHandler(e);
@@ -340,7 +300,7 @@ const DragInner = memo(function DragDropInner({
       {React.cloneElement(children, {
         'data-test-subj': dataTestSubj || 'lnsDragDrop',
         className: classNames(children.props.className, 'lnsDragDrop', 'lnsDragDrop-isDraggable', {
-          'lnsDragDrop-isHidden': isDragging && dragType === 'move' && !keyboardMode, // but move!
+          'lnsDragDrop-isHidden': isDragging && dragType === 'move' && !keyboardMode,
         }),
         draggable: true,
         onDragEnd: dragEnd,
@@ -370,18 +330,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
     activeDropTarget,
     setActiveDropTarget,
     getAdditionalClassesOnEnter,
-    registerDropTarget,
-    order,
   } = props;
-
-  useShallowCompareEffect(() => {
-    if (order && droppable && value) {
-      registerDropTarget(order, value);
-      return () => {
-        registerDropTarget(order, undefined);
-      };
-    }
-  }, [order, value, registerDropTarget, droppable]);
 
   const activeDropTargetMatches =
     activeDropTarget?.activeDropTarget && activeDropTarget.activeDropTarget.id === value.id;
@@ -619,7 +568,6 @@ const ReorderableDrag = memo(function ReorderableDrag(
       <DragInner
         {...props}
         extraKeyboardHandler={extraKeyboardHandler}
-        blockRightLeftKeys={!!reorderedItems.length}
         onDragStart={onReorderableDragStart}
         onDragEnd={onReorderableDragEnd}
       />

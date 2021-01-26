@@ -11,7 +11,7 @@ import {
   DraggedOperation,
 } from '../../types';
 import { IndexPatternColumn } from '../indexpattern';
-import { insertOrReplaceColumn, deleteColumn } from '../operations';
+import { insertOrReplaceColumn } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { hasField, isDraggedField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
@@ -56,10 +56,6 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
     if (isOperation) {
       return true;
     }
-    // suggest
-    const field =
-      hasField(op) && props.state.indexPatterns[layerIndexPatternId].getFieldByName(op.sourceField);
-    return Boolean(field && hasOperationForField(field));
   }
   return false;
 }
@@ -90,98 +86,6 @@ const onReorderDrop = ({ columnId, setState, state, layerId, droppedItem }: Drop
     })
   );
 
-  return true;
-};
-
-const onMoveDropToNonCompatibleGroup = ({
-  columnId,
-  setState,
-  state,
-  layerId,
-  droppedItem,
-  operationSupportMatrix,
-}: DropHandlerProps) => {
-  // move to suggest
-  const layer = state.layers[layerId];
-  const op = { ...layer.columns[droppedItem.columnId] };
-  const field =
-    hasField(op) && state.indexPatterns[layer.indexPatternId].getFieldByName(op.sourceField);
-  if (!field) {
-    return false;
-  }
-
-  const operationsForNewField = operationSupportMatrix.operationByField[field.name];
-
-  if (!operationsForNewField || operationsForNewField.size === 0) {
-    return false;
-  }
-
-  const currentIndexPattern = state.indexPatterns[layer.indexPatternId];
-
-  const newLayer = insertOrReplaceColumn({
-    layer: deleteColumn({
-      layer,
-      columnId: droppedItem.columnId,
-      indexPattern: currentIndexPattern,
-    }),
-    columnId,
-    indexPattern: currentIndexPattern,
-    op: operationsForNewField.values().next().value,
-    field,
-  });
-
-  trackUiEvent('drop_onto_dimension');
-  const hasData = Object.values(state.layers).some(({ columns }) => columns.length);
-  trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
-  setState(
-    mergeLayer({
-      state,
-      layerId,
-      newLayer: {
-        ...newLayer,
-      },
-    })
-  );
-
-  return { deleted: droppedItem.columnId }; // -> to do for removing the old one
-
-  return true; // duplicating
-};
-
-const onSameGroupDuplicateDrop = ({
-  columnId,
-  setState,
-  state,
-  layerId,
-  droppedItem,
-}: DropHandlerProps) => {
-  const layer = state.layers[layerId];
-
-  const op = { ...layer.columns[droppedItem.columnId] };
-  const newColumns = {
-    ...layer.columns,
-    [columnId]: op,
-  };
-
-  const newColumnOrder = [...layer.columnOrder];
-  // put a new bucketed dimension just in front of the metric dimensions, a metric dimension in the back of the array
-  // TODO this logic does not take into account groups - we probably need to pass the current
-  // group config to this position to place the column right
-  const insertionIndex = op.isBucketed
-    ? newColumnOrder.findIndex((id) => !newColumns[id].isBucketed)
-    : newColumnOrder.length;
-  newColumnOrder.splice(insertionIndex, 0, columnId);
-  // Time to replace
-  setState(
-    mergeLayer({
-      state,
-      layerId,
-      newLayer: {
-        columnOrder: newColumnOrder,
-        columns: newColumns,
-      },
-    })
-  );
   return true;
 };
 
@@ -305,21 +209,6 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     });
   }
 
-  // duplicate in the same group
-  const isNewFromSameGroup =
-    isDraggedOperation(droppedItem) && droppedItem.groupId === groupId && isNew;
-  // reorderDrop
-  if (isNewFromSameGroup) {
-    return onSameGroupDuplicateDrop({
-      columnId,
-      setState,
-      state,
-      layerId,
-      droppedItem,
-      operationSupportMatrix,
-    });
-  }
-
   // replace or move to compatible group
   const isFromOtherGroup =
     isDraggedOperation(droppedItem) &&
@@ -332,15 +221,6 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
 
     if (props.filterOperations(op)) {
       return onMoveDropToCompatibleGroup({
-        columnId,
-        setState,
-        state,
-        layerId,
-        droppedItem,
-        operationSupportMatrix,
-      });
-    } else {
-      return onMoveDropToNonCompatibleGroup({
         columnId,
         setState,
         state,

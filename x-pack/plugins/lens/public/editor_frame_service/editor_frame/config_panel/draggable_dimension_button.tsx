@@ -82,34 +82,25 @@ export function DraggableDimensionButton({
         filterOperations: group.filterOperations,
       });
 
-  const reorderableGroup = useMemo(() => {
-    // if (group.accessors.length > 1) {
-    return group.accessors.map((a) => ({
-      columnId: a.columnId,
-      id: a.columnId,
-      groupId: group.groupId,
-      layerId,
-    }));
-    // }
-  }, [group, layerId]);
-
-  const filterSameGroup = useMemo(
-    () => (el?: DragDropIdentifier) => {
-      return !!(!el || !isFromTheSameGroup(value, el) || el.isNew);
-    },
-    [value]
+  const reorderableGroup = useMemo(
+    () =>
+      group.accessors.map((a) => ({
+        columnId: a.columnId,
+        id: a.columnId,
+        groupId: group.groupId,
+        layerId,
+      })),
+    [group, layerId]
   );
 
   return (
     <div className="lnsLayerPanel__dimensionContainer">
       <DragDrop
-        order={[2, layerIndex, groupIndex, accessorIndex]}
         draggable
         dragType={dragType}
         dropType={dropType}
         dataTestSubj={group.dataTestSubj}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
-        dropTargetsFilter={filterSameGroup}
         value={value}
         droppable={dragging && isDroppable}
         onDrop={onDrop}

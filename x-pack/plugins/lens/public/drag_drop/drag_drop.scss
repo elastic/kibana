@@ -52,17 +52,6 @@
   }
 }
 
-// Drop area will be replacing existing content
-.lnsDragDrop-notCompatible {
-  background-color: transparentize($euiColorWarning, .9);
-}
-
-// Drop area while hovering with item
-.lnsDragDrop-notCompatible.lnsDragDrop-isActiveDropTarget {
-  background-color: transparentize($euiColorWarning, .75);
-  border: $euiBorderWidthThin dashed $euiColorWarning;
-}
-
 .lnsDragDrop__container {
   position: relative;
 }

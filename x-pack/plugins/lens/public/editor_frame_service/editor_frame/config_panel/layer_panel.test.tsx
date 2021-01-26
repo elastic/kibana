@@ -448,7 +448,6 @@ describe('LayerPanel', () => {
           activeDropTarget={undefined}
           keyboardMode={false}
           setKeyboardMode={() => {}}
-          registerDropTarget={jest.fn()}
         >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
@@ -499,7 +498,6 @@ describe('LayerPanel', () => {
           activeDropTarget={undefined}
           keyboardMode={false}
           setKeyboardMode={() => {}}
-          registerDropTarget={jest.fn()}
         >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
@@ -558,7 +556,6 @@ describe('LayerPanel', () => {
           activeDropTarget={undefined}
           keyboardMode={false}
           setKeyboardMode={() => {}}
-          registerDropTarget={jest.fn()}
         >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
@@ -619,7 +616,6 @@ describe('LayerPanel', () => {
           activeDropTarget={undefined}
           keyboardMode={false}
           setKeyboardMode={() => {}}
-          registerDropTarget={jest.fn()}
         >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
@@ -663,7 +659,6 @@ describe('LayerPanel', () => {
           activeDropTarget={undefined}
           keyboardMode={false}
           setKeyboardMode={() => {}}
-          registerDropTarget={jest.fn()}
         >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>

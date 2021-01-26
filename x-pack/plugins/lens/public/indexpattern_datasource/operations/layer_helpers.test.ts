@@ -546,8 +546,7 @@ describe('state_helpers', () => {
       );
     });
 
-    // Why do we want this behavior?
-    it.skip('should throw if nothing is changing', () => {
+    it('should throw if nothing is changing', () => {
       expect(() => {
         replaceColumn({
           layer: {

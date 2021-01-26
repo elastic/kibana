@@ -25,7 +25,6 @@ const defaultContext = {
   activeDropTarget: undefined,
   keyboardMode: false,
   setKeyboardMode: () => {},
-  registerDropTarget: jest.fn(),
 };
 
 describe('DragDrop', () => {
@@ -235,7 +234,6 @@ describe('DragDrop', () => {
         }
         keyboardMode={false}
         setKeyboardMode={(keyboardMode) => true}
-        registerDropTarget={jest.fn()}
       >
         <DragDrop value={{ label: 'ignored', id: '3' }} draggable={true} label="a">
           <button>Hello!</button>
@@ -290,7 +288,6 @@ describe('DragDrop', () => {
           activeDropTarget = { activeDropTarget: target } as ActiveDropTarget;
         },
         activeDropTarget,
-        registerDropTarget: jest.fn(),
       };
 
       return mount(
