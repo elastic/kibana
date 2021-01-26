@@ -24,13 +24,6 @@ export const txtUrlPreviewHelpText = i18n.translate(
   }
 );
 
-export const txtAddVariableButtonTitle = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.addVariableButtonTitle',
-  {
-    defaultMessage: 'Add variable',
-  }
-);
-
 export const txtUrlTemplateLabel = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateLabel',
   {
@@ -42,20 +35,6 @@ export const txtUrlTemplateSyntaxHelpLinkText = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateSyntaxHelpLinkText',
   {
     defaultMessage: 'Syntax help',
-  }
-);
-
-export const txtUrlTemplateVariablesHelpLinkText = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesHelpLinkText',
-  {
-    defaultMessage: 'Help',
-  }
-);
-
-export const txtUrlTemplateVariablesFilterPlaceholderText = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesFilterPlaceholderText',
-  {
-    defaultMessage: 'Filter variables',
   }
 );
 

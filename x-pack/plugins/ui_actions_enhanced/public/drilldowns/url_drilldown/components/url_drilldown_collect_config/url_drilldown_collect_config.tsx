@@ -4,18 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import {
   EuiFormRow,
-  EuiIcon,
   EuiLink,
-  EuiPopover,
-  EuiPopoverFooter,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiText,
   EuiTextArea,
-  EuiSelectableOption,
   EuiSwitch,
   EuiAccordion,
   EuiSpacer,
@@ -25,10 +18,7 @@ import {
 import { UrlDrilldownConfig } from '../../types';
 import './index.scss';
 import {
-  txtAddVariableButtonTitle,
   txtUrlTemplateSyntaxHelpLinkText,
-  txtUrlTemplateVariablesHelpLinkText,
-  txtUrlTemplateVariablesFilterPlaceholderText,
   txtUrlTemplateLabel,
   txtUrlTemplateOpenInNewTab,
   txtUrlTemplatePlaceholder,
@@ -36,6 +26,7 @@ import {
   txtUrlTemplateEncodeUrl,
   txtUrlTemplateEncodeDescription,
 } from './i18n';
+import { VariablePopover } from '../variable_popover';
 
 export interface UrlDrilldownCollectConfig {
   config: UrlDrilldownConfig;
@@ -71,7 +62,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
   const isEmpty = !urlTemplate;
   const isInvalid = showUrlError && isEmpty;
   const variablesDropdown = (
-    <AddVariableButton
+    <VariablePopover
       variables={variables}
       variablesHelpLink={variablesHelpDocsLink}
       onSelect={(variable: string) => {
@@ -155,71 +146,3 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
     </>
   );
 };
-
-function AddVariableButton({
-  variables,
-  onSelect,
-  variablesHelpLink,
-}: {
-  variables: string[];
-  onSelect: (variable: string) => void;
-  variablesHelpLink?: string;
-}) {
-  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
-  const closePopover = () => setIsVariablesPopoverOpen(false);
-
-  const options: EuiSelectableOption[] = variables.map((variable: string) => ({
-    key: variable,
-    label: variable,
-  }));
-
-  return (
-    <EuiPopover
-      ownFocus={true}
-      button={
-        <EuiText size="xs">
-          <EuiLink onClick={() => setIsVariablesPopoverOpen(true)}>
-            {txtAddVariableButtonTitle} <EuiIcon type="indexOpen" />
-          </EuiLink>
-        </EuiText>
-      }
-      isOpen={isVariablesPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiSelectable
-        singleSelection={true}
-        searchable
-        searchProps={{
-          placeholder: txtUrlTemplateVariablesFilterPlaceholderText,
-          compressed: true,
-        }}
-        options={options}
-        onChange={(newOptions) => {
-          const selected = newOptions.find((o) => o.checked === 'on');
-          if (!selected) return;
-          onSelect(selected.key!);
-          closePopover();
-        }}
-        listProps={{
-          showIcons: false,
-        }}
-      >
-        {(list, search) => (
-          <div style={{ width: 320 }}>
-            <EuiPopoverTitle>{search}</EuiPopoverTitle>
-            {list}
-            {variablesHelpLink && (
-              <EuiPopoverFooter className={'eui-textRight'}>
-                <EuiLink external href={variablesHelpLink} target="_blank">
-                  {txtUrlTemplateVariablesHelpLinkText}
-                </EuiLink>
-              </EuiPopoverFooter>
-            )}
-          </div>
-        )}
-      </EuiSelectable>
-    </EuiPopover>
-  );
-}
