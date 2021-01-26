@@ -160,7 +160,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     name: i18n.translate('discover.advancedSettings.docTableVersionName', {
       defaultMessage: 'Use legacy table',
     }),
-    value: true,
+    value: false,
     description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
       defaultMessage:
         'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen ' +
