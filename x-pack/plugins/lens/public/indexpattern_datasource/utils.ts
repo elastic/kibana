@@ -56,6 +56,7 @@ export function isColumnInvalid(
   const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
   // check also references for errors
   const referencesHaveErrors =
+    true &&
     'references' in column &&
     Boolean(getReferencesErrors(layer, column, indexPattern).filter(Boolean).length);
 
@@ -72,7 +73,7 @@ function getReferencesErrors(
   return column.references?.map((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
     const referencedDefinition = operationDefinitionMap[referencedOperation];
-    return referencedDefinition.getErrorMessage?.(layer, referenceId, indexPattern);
+    return referencedDefinition?.getErrorMessage?.(layer, referenceId, indexPattern);
   });
 }
 
