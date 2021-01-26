@@ -17,3 +17,4 @@ export { getPaths, foldLeftRight, removeExternalLinkText } from './test_utils';
 export { validate, validateEither } from './validate';
 export { formatErrors } from './format_errors';
 export { migratePackagePolicyToV7110 } from './endpoint/policy/migrations/to_v7_11_0';
+export { migratePackagePolicyToV7120 } from './endpoint/policy/migrations/to_v7_12_0';
