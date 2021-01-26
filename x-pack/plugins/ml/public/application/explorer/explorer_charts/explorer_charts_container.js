@@ -183,18 +183,20 @@ function ExplorerChartContainer({
             </MlTooltipComponent>
           );
         }
-        return (
-          <MlTooltipComponent>
-            {(tooltipService) => (
-              <ExplorerChartSingleMetric
-                tooManyBuckets={tooManyBuckets}
-                seriesConfig={series}
-                severity={severity}
-                tooltipService={tooltipService}
-              />
-            )}
-          </MlTooltipComponent>
-        );
+        if (chartType === CHART_TYPE.SINGLE_METRIC) {
+          return (
+            <MlTooltipComponent>
+              {(tooltipService) => (
+                <ExplorerChartSingleMetric
+                  tooManyBuckets={tooManyBuckets}
+                  seriesConfig={series}
+                  severity={severity}
+                  tooltipService={tooltipService}
+                />
+              )}
+            </MlTooltipComponent>
+          );
+        }
       })()}
     </React.Fragment>
   );

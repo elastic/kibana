@@ -28,6 +28,7 @@ import { mlJobService } from '../../services/job_service';
 import { explorerService } from '../explorer_dashboard_service';
 
 import { CHART_TYPE } from '../explorer_constants';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { i18n } from '@kbn/i18n';
 import { SWIM_LANE_LABEL_WIDTH } from '../swimlane_container';
 
@@ -78,8 +79,11 @@ export const anomalyDataChange = function (
   // For now just take first 6 (or 8 if 4 charts per row).
   const maxSeriesToPlot = Math.max(chartsPerRow * 2, 6);
   const recordsToPlot = allSeriesRecords.slice(0, maxSeriesToPlot);
-  const isGeoMap =
-    (recordsToPlot[0]?.function_description || recordsToPlot[0]?.function) === 'lat_long';
+  const hasGeoData = recordsToPlot.find(
+    (record) =>
+      (record.function_description || recordsToPlot.function) === ML_JOB_AGGREGATION.LAT_LONG
+  );
+
   const seriesConfigs = recordsToPlot.map(buildConfig);
 
   // initialize the charts with loading indicators
@@ -89,24 +93,34 @@ export const anomalyDataChange = function (
     chartData: null,
   }));
 
-  if (isGeoMap === true) {
-    data.seriesToPlot = seriesConfigs.map((config) => {
-      const chartData = config.entityFields.length
-        ? [
+  const mapData = [];
+
+  if (hasGeoData !== undefined) {
+    for (let i = 0; i < seriesConfigs.length; i++) {
+      const config = seriesConfigs[i];
+      let records;
+      if (config.detectorLabel.includes(ML_JOB_AGGREGATION.LAT_LONG)) {
+        if (config.entityFields.length) {
+          records = [
             recordsToPlot.find((record) => {
               const entityFieldName = config.entityFields[0].fieldName;
               const entityFieldValue = config.entityFields[0].fieldValue;
-              return record[entityFieldName][0] === entityFieldValue;
+              return (record[entityFieldName] && record[entityFieldName][0]) === entityFieldValue;
             }),
-          ]
-        : recordsToPlot;
-      return {
-        ...config,
-        loading: false,
-        chartData,
-      };
-    });
-    data.showSingleMetricViewerLink = false;
+          ];
+        } else {
+          records = recordsToPlot;
+        }
+
+        mapData.push({
+          ...config,
+          loading: false,
+          mapData: records,
+        });
+      }
+    }
+
+    data.seriesToPlot = mapData;
   }
 
   // Calculate the time range of the charts, which is a function of the chart width and max job bucket span.
@@ -292,14 +306,19 @@ export const anomalyDataChange = function (
   // only after that trigger data processing and page render.
   // TODO - if query returns no results e.g. source data has been deleted,
   // display a message saying 'No data between earliest/latest'.
-  const seriesPromises = seriesConfigs.map((seriesConfig) =>
-    Promise.all([
-      getMetricData(seriesConfig, chartRange),
-      getRecordsForCriteria(seriesConfig, chartRange),
-      getScheduledEvents(seriesConfig, chartRange),
-      getEventDistribution(seriesConfig, chartRange),
-    ])
-  );
+  const seriesPromises = [];
+  seriesConfigs.forEach((seriesConfig) => {
+    if (!seriesConfig.detectorLabel.includes(ML_JOB_AGGREGATION.LAT_LONG)) {
+      seriesPromises.push(
+        Promise.all([
+          getMetricData(seriesConfig, chartRange),
+          getRecordsForCriteria(seriesConfig, chartRange),
+          getScheduledEvents(seriesConfig, chartRange),
+          getEventDistribution(seriesConfig, chartRange),
+        ])
+      );
+    }
+  });
 
   function processChartData(response, seriesIndex) {
     const metricData = response[0].results;
@@ -418,39 +437,48 @@ export const anomalyDataChange = function (
     return chartData.find((point) => point.date === time);
   }
 
-  if (!isGeoMap) {
-    Promise.all(seriesPromises)
-      .then((response) => {
-        // calculate an overall min/max for all series
-        const processedData = response.map(processChartData);
-        const allDataPoints = reduce(
-          processedData,
-          (datapoints, series) => {
-            each(series, (d) => datapoints.push(d));
-            return datapoints;
-          },
-          []
-        );
-        const overallChartLimits = chartLimits(allDataPoints);
+  Promise.all(seriesPromises)
+    .then((response) => {
+      // calculate an overall min/max for all series
+      const processedData = response.map(processChartData);
+      const allDataPoints = reduce(
+        processedData,
+        (datapoints, series) => {
+          each(series, (d) => datapoints.push(d));
+          return datapoints;
+        },
+        []
+      );
+      const overallChartLimits = chartLimits(allDataPoints);
 
-        data.seriesToPlot = response.map((d, i) => ({
-          ...seriesConfigs[i],
-          loading: false,
-          chartData: processedData[i],
-          plotEarliest: chartRange.min,
-          plotLatest: chartRange.max,
-          selectedEarliest: selectedEarliestMs,
-          selectedLatest: selectedLatestMs,
-          chartLimits: USE_OVERALL_CHART_LIMITS
-            ? overallChartLimits
-            : chartLimits(processedData[i]),
-        }));
-        explorerService.setCharts({ ...data });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }
+      data.seriesToPlot = response
+        .map((d, i) => {
+          if (!seriesConfigs[i].detectorLabel.includes(ML_JOB_AGGREGATION.LAT_LONG)) {
+            return {
+              ...seriesConfigs[i],
+              loading: false,
+              chartData: processedData[i],
+              plotEarliest: chartRange.min,
+              plotLatest: chartRange.max,
+              selectedEarliest: selectedEarliestMs,
+              selectedLatest: selectedLatestMs,
+              chartLimits: USE_OVERALL_CHART_LIMITS
+                ? overallChartLimits
+                : chartLimits(processedData[i]),
+            };
+          }
+        })
+        .filter((value) => value !== undefined);
+
+      if (mapData.length) {
+        // push map data in if it's available
+        data.seriesToPlot.push(...mapData);
+      }
+      explorerService.setCharts({ ...data });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 };
 
 function processRecordsForDisplay(anomalyRecords) {

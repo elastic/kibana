@@ -11,8 +11,8 @@ function getAnomalyFeatures(anomalies: any[], type: 'actual_point' | 'typical_po
   const anomalyFeatures = [];
   for (let i = 0; i < anomalies.length; i++) {
     const anomaly = anomalies[i];
-    const geoResults = anomaly.geo_results || anomaly?.causes[0].geo_results;
-    const coordinateStr = geoResults[type];
+    const geoResults = anomaly.geo_results || (anomaly?.causes && anomaly?.causes[0]?.geo_results);
+    const coordinateStr = geoResults && geoResults[type];
     if (coordinateStr !== undefined) {
       // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
       const coordinates = coordinateStr

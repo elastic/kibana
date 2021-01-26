@@ -18,7 +18,7 @@ import {
 } from '../../../../../maps/public/embeddable';
 import { Dictionary } from '../../../../common/types/common';
 import { useMlKibana } from '../../contexts/kibana';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/common/constants';
+import { MAP_SAVED_OBJECT_TYPE, INITIAL_LOCATION } from '../../../../../maps/common/constants';
 import { LayerDescriptor } from '../../../../../maps/common/descriptor_types';
 import { getMLAnomaliesActualLayer, getMLAnomaliesTypicalLayer } from './map_config';
 interface Props {
@@ -49,22 +49,13 @@ export function EmbeddedMapComponent({ seriesConfig, severity }: Props) {
     viewMode: ViewMode.VIEW,
     isLayerTOCOpen: false,
     hideFilterActions: true,
-    // Zoom Lat/Lon values are set to make sure map is in center in the panel
-    // It will also omit Greenland/Antarctica etc. NOTE: Can be removed when initialLocation is set
-    mapCenter: {
-      lon: 11,
-      lat: 20,
-      zoom: 1,
-    },
-    // can use mapSettings to center map on chart data
     mapSettings: {
       disableInteractive: false,
       hideToolbarOverlay: true,
       hideLayerControl: false,
       hideViewControl: false,
-      // Doesn't currently work with GEO_JSON. Will uncomment when https://github.com/elastic/kibana/pull/88294 is in
-      // initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
-      // autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
+      initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
+      autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
     },
   };
 
@@ -73,17 +64,17 @@ export function EmbeddedMapComponent({ seriesConfig, severity }: Props) {
     if (
       embeddable &&
       !isErrorEmbeddable(embeddable) &&
-      seriesConfig.chartData &&
-      seriesConfig.chartData.length > 0
+      seriesConfig.mapData &&
+      seriesConfig.mapData.length > 0
     ) {
       layerList.current = [
         layerList.current[0],
-        getMLAnomaliesActualLayer(seriesConfig.chartData),
-        getMLAnomaliesTypicalLayer(seriesConfig.chartData),
+        getMLAnomaliesActualLayer(seriesConfig.mapData),
+        getMLAnomaliesTypicalLayer(seriesConfig.mapData),
       ];
       embeddable.setLayerList(layerList.current);
     }
-  }, [embeddable, seriesConfig.chartData]);
+  }, [embeddable, seriesConfig.mapData]);
 
   useEffect(() => {
     async function setupEmbeddable() {
@@ -120,7 +111,7 @@ export function EmbeddedMapComponent({ seriesConfig, severity }: Props) {
     if (embeddableRoot?.current && embeddable) {
       embeddable.render(embeddableRoot.current);
     }
-  }, [embeddable, embeddableRoot, seriesConfig.chartData]);
+  }, [embeddable, embeddableRoot, seriesConfig.mapData]);
 
   if (!embeddablePlugin) {
     // eslint-disable-next-line no-console
