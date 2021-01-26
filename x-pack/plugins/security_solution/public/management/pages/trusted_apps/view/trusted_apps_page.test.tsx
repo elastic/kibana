@@ -158,6 +158,7 @@ describe('When on the Trusted Apps Page', () => {
         fireEvent.click(addButton, { button: 1 });
       });
 
+      // Wait for the policies to be loaded
       await act(async () => {
         await waitForAction('trustedAppsPoliciesStateChanged', {
           validate: (action) => {

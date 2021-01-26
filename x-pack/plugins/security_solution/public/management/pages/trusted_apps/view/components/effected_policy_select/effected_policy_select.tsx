@@ -14,7 +14,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
+import { MANAGEMENT_APP_ID } from '../../../../../common/constants';
+import { getPolicyDetailPath } from '../../../../../common/routing';
+import { useFormatUrl } from '../../../../../../common/components/link_to';
+import { SecurityPageName } from '../../../../../../../common/constants';
+import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 
 interface OptionPolicyData {
   policy: PolicyData;
@@ -48,6 +54,8 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   }) => {
     const DEFAULT_LIST_PROPS = useMemo(() => ({ bordered: true }), []);
 
+    const { formatUrl } = useFormatUrl(SecurityPageName.administration);
+
     const [selectionState, setSelectionState] = useState<EffectedPolicySelection>({
       isGlobal,
       selected,
@@ -74,13 +82,26 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       return options
         .map<EffectedPolicyOption>((policy) => ({
           label: policy.name,
+          append: (
+            <LinkToApp
+              href={formatUrl(getPolicyDetailPath(policy.id))}
+              appId={MANAGEMENT_APP_ID}
+              appPath={getPolicyDetailPath(policy.id)}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.effectedPolicySelect.viewPolicyLinkLabel"
+                defaultMessage="View policy"
+              />
+            </LinkToApp>
+          ),
           policy,
           checked: isPolicySelected[policy.id] ? 'on' : undefined,
           disabled: isGlobal,
           'data-test-subj': `policy-${policy.id}`,
         }))
         .sort(({ label: labelA }, { label: labelB }) => labelA.localeCompare(labelB));
-    }, [isGlobal, options, selected]);
+    }, [formatUrl, isGlobal, options, selected]);
 
     const handleOnPolicySelectChange = useCallback<
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']
