@@ -30,12 +30,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '../../../../../core/public';
 import { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
-import type { VisType, TypesStart } from '../../vis_types';
+import type { BaseVisType, TypesStart } from '../../vis_types';
 import { VisGroups } from '../../vis_types';
 import './group_selection.scss';
 
 interface GroupSelectionProps {
-  onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;
+  onVisTypeSelected: (visType: BaseVisType | VisTypeAlias) => void;
   visTypesRegistry: TypesStart;
   docLinks: DocLinksStart;
   toggleGroups: (flag: boolean) => void;
@@ -43,8 +43,8 @@ interface GroupSelectionProps {
 }
 
 interface VisCardProps {
-  onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;
-  visType: VisType | VisTypeAlias;
+  onVisTypeSelected: (visType: BaseVisType | VisTypeAlias) => void;
+  visType: BaseVisType | VisTypeAlias;
   showExperimental?: boolean | undefined;
 }
 
