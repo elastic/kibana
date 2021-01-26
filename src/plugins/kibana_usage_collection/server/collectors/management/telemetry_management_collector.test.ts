@@ -71,18 +71,29 @@ describe('createCollectorFetch', () => {
     item2: { userValue: 123 },
     item3: { userValue: false },
   };
-  const mockWhitelist = ['item1', 'item2'] as any[];
+
+  const mockIsSensitive = (key: string) => {
+    switch (key) {
+      case 'item1':
+      case 'item2':
+        return false;
+      case 'item3':
+        return true;
+      default:
+        throw new Error(`Unexpected ui setting: ${key}`);
+    }
+  };
 
   it('returns #fetchUsageStats function', () => {
     const getUiSettingsClient = jest.fn(() => undefined);
-    const fetchFunction = createCollectorFetch(getUiSettingsClient, mockWhitelist);
+    const fetchFunction = createCollectorFetch(getUiSettingsClient);
     expect(typeof fetchFunction).toBe('function');
   });
 
   describe('#fetchUsageStats', () => {
     it('returns undefined if no uiSettingsClient returned from getUiSettingsClient', async () => {
       const getUiSettingsClient = jest.fn(() => undefined);
-      const fetchFunction = createCollectorFetch(getUiSettingsClient, mockWhitelist);
+      const fetchFunction = createCollectorFetch(getUiSettingsClient);
       const result = await fetchFunction();
       expect(result).toBe(undefined);
       expect(getUiSettingsClient).toBeCalledTimes(1);
@@ -92,17 +103,19 @@ describe('createCollectorFetch', () => {
       const uiSettingsClient = uiSettingsServiceMock.createClient();
       const getUiSettingsClient = jest.fn(() => uiSettingsClient);
       uiSettingsClient.getUserProvided.mockResolvedValue(mockUserSettings);
-      const fetchFunction = createCollectorFetch(getUiSettingsClient, mockWhitelist);
+      uiSettingsClient.isSensitive.mockImplementation(mockIsSensitive);
+      const fetchFunction = createCollectorFetch(getUiSettingsClient);
       const result = await fetchFunction();
       expect(typeof result).toBe('object');
       expect(Object.keys(result!)).toEqual(Object.keys(mockUserSettings));
     });
 
-    it('returns values of whitelisted items', async () => {
+    it('returns the actual values of non-sensitive settings', async () => {
       const uiSettingsClient = uiSettingsServiceMock.createClient();
       const getUiSettingsClient = jest.fn(() => uiSettingsClient);
       uiSettingsClient.getUserProvided.mockResolvedValue(mockUserSettings);
-      const fetchFunction = createCollectorFetch(getUiSettingsClient, mockWhitelist);
+      uiSettingsClient.isSensitive.mockImplementation(mockIsSensitive);
+      const fetchFunction = createCollectorFetch(getUiSettingsClient);
       const result = await fetchFunction();
       expect(typeof result).toBe('object');
       expect(result!).toMatchObject({
@@ -111,11 +124,12 @@ describe('createCollectorFetch', () => {
       });
     });
 
-    it('returns true as value of blacklisted items', async () => {
+    it('returns true as a value for sensitive settings', async () => {
       const uiSettingsClient = uiSettingsServiceMock.createClient();
       const getUiSettingsClient = jest.fn(() => uiSettingsClient);
       uiSettingsClient.getUserProvided.mockResolvedValue(mockUserSettings);
-      const fetchFunction = createCollectorFetch(getUiSettingsClient, mockWhitelist);
+      uiSettingsClient.isSensitive.mockImplementation(mockIsSensitive);
+      const fetchFunction = createCollectorFetch(getUiSettingsClient);
       const result = await fetchFunction();
       expect(typeof result).toBe('object');
       expect(result!).toMatchObject({

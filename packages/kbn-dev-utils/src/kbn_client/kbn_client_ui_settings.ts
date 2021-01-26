@@ -11,6 +11,7 @@ import { ToolingLog } from '../tooling_log';
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
 export type UiSettingValues = Record<string, string | number | boolean>;
+
 interface UiSettingsApiResponse {
   settings: {
     [key: string]: {
@@ -18,6 +19,10 @@ interface UiSettingsApiResponse {
       isOverridden: boolean | undefined;
     };
   };
+}
+
+interface UiSettingsWithRegisteredApiResponse<V> extends UiSettingsApiResponse {
+  registered: Record<string, V>;
 }
 
 export class KbnClientUiSettings {
@@ -77,6 +82,18 @@ export class KbnClientUiSettings {
       body: { changes },
       retries,
     });
+  }
+
+  /**
+   * Returns all registered kibana settings
+   */
+  async getAllRegistered<T = unknown>() {
+    const { data } = await this.requester.request<UiSettingsWithRegisteredApiResponse<T>>({
+      path: '/api/kibana/settings?_allRegistered=true',
+      method: 'GET',
+    });
+
+    return data.registered;
   }
 
   /**

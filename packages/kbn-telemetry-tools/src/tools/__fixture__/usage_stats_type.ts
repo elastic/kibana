@@ -6,11 +6,11 @@
  * Public License, v 1.
  */
 
-export default function ({ loadTestFile }) {
-  describe('Telemetry', () => {
-    loadTestFile(require.resolve('./telemetry_local'));
-    loadTestFile(require.resolve('./ui_settings'));
-    loadTestFile(require.resolve('./opt_in'));
-    loadTestFile(require.resolve('./telemetry_optin_notice_seen'));
-  });
+export interface UsageStats {
+  withBooleanValue: boolean;
+  withStringValue: string;
+  withNumberValue: number;
+  withStringArrayValue: string[];
+  withObjectValue: { withBooleanValue: boolean };
+  withObjectArrayValue: Array<{ withNumberValue: number }>;
 }

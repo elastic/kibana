@@ -7,18 +7,18 @@
  */
 
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
-import { UsageStats } from './telemetry_management_collector';
+import { UsageStats } from './types';
 
 // Retrieved by changing all the current settings in Kibana (we'll need to revisit it in the future).
 // I would suggest we use flattened type for the mappings of this collector.
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
-  // blacklisted
+  // sensitive
   'timelion:quandl.key': { type: 'boolean' },
   'securitySolution:newsFeedUrl': { type: 'boolean' },
   'securitySolution:defaultIndex': { type: 'boolean' },
   'xpackReporting:customPdfLogo': { type: 'boolean' },
   'notifications:banner': { type: 'boolean' },
-  // whitelisted
+  // non-sensitive
   'visualize:enableLabs': { type: 'boolean' },
   'visualization:heatmap:maxBuckets': { type: 'long' },
   'visualization:colorMapping': { type: 'text' },
