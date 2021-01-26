@@ -13,3 +13,10 @@ export const prevAriaLabel = i18n.translate('xpack.uptime.synthetics.prevStepBut
 export const nextAriaLabel = i18n.translate('xpack.uptime.synthetics.nextStepButton.ariaLabel', {
   defaultMessage: 'Next step',
 });
+
+export const imageLoadingSpinnerAriaLabel = i18n.translate(
+  'xpack.uptime.synthetics.imageLoadingSpinner.ariaLabel',
+  {
+    defaultMessage: 'An animated spinner indicating the image is loading',
+  }
+);

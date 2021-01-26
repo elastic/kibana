@@ -5,7 +5,7 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiImage, EuiPopover } from '@elastic/eui';
+import { EuiImage, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useIntersection from 'react-use/lib/useIntersection';
 import styled from 'styled-components';
@@ -13,8 +13,8 @@ import { Ping } from '../../../../../../common/runtime_types/ping';
 import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../../contexts';
-import { NoImageAvailable } from './no_image_available';
 import { NavButtons } from './nav_buttons';
+import { NoImageDisplay } from './no_image_display';
 import { StepImageCaption } from './step_image_caption';
 
 const StepImage = styled(EuiImage)`
@@ -92,9 +92,6 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
 
   const imgSrc = stepImages[stepNo] || data?.src;
 
-  const isLoading = status === FETCH_STATUS.LOADING;
-  const isPending = status === FETCH_STATUS.PENDING;
-
   const captionContent = `Step:${stepNo} ${data?.stepName}`;
 
   const ImageCaption = (
@@ -140,16 +137,11 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
           />
         </EuiPopover>
       ) : (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem>
-            {isLoading || isPending ? (
-              <EuiLoadingSpinner size="xl" data-test-subj="pingTimestampSpinner" />
-            ) : (
-              <NoImageAvailable />
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem>{ImageCaption}</EuiFlexItem>
-        </EuiFlexGroup>
+        <NoImageDisplay
+          imageCaption={ImageCaption}
+          isLoading={status === FETCH_STATUS.LOADING}
+          isPending={status === FETCH_STATUS.PENDING}
+        />
       )}
       <NavButtons
         maxSteps={data?.maxSteps}
