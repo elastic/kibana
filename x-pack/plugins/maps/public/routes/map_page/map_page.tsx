@@ -35,9 +35,10 @@ export class MapPage extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
+    const layerList = getInitialLayersFromUrlParam();
     this.state = {
       savedMap: new SavedMap({
-        defaultLayers: getInitialLayersFromUrlParam(),
+        defaultLayers: layerList,
         mapEmbeddableInput: props.mapEmbeddableInput,
         embeddableId: props.embeddableId,
         originatingApp: props.originatingApp,
