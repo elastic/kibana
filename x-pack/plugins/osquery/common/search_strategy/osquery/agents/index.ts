@@ -6,16 +6,12 @@
 
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 
-import { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../common';
+import { Inspect, Maybe, PageInfoPaginated } from '../../common';
 import { RequestOptionsPaginated } from '../..';
-
-export interface AgentEdge {
-  node: any[];
-  cursor: CursorType;
-}
+import { Agent } from '../../../shared_imports';
 
 export interface AgentsStrategyResponse extends IEsSearchResponse {
-  edges: AgentEdge[];
+  edges: Agent[];
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;

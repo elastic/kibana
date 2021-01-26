@@ -6,10 +6,17 @@
 
 import { find } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { EuiBasicTable, EuiBasicTableProps, EuiTableSelectionType, EuiHealth } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiBasicTableProps,
+  EuiTableSelectionType,
+  EuiHealth,
+} from '@elastic/eui';
 
 import { useAllAgents } from './use_all_agents';
-import { AgentEdge, Direction } from '../../common/search_strategy';
+import { Direction } from '../../common/search_strategy';
+import { Agent } from '../shared_imports';
 
 interface AgentsTableProps {
   selectedAgents: string[];
@@ -19,12 +26,12 @@ interface AgentsTableProps {
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onChange }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
-  const [sortField, setSortField] = useState('firstName');
+  const [sortField, setSortField] = useState<keyof Agent>('id');
   const [sortDirection, setSortDirection] = useState<Direction>(Direction.asc);
   const [selectedItems, setSelectedItems] = useState([]);
-  const tableRef = useRef<EuiBasicTable<AgentEdge>>(null);
+  const tableRef = useRef<EuiBasicTable<Agent>>(null);
 
-  const onTableChange: EuiBasicTableProps<{}>['onChange'] = useCallback(
+  const onTableChange: EuiBasicTableProps<Agent>['onChange'] = useCallback(
     ({ page = {}, sort = {} }) => {
       const { index: newPageIndex, size: newPageSize } = page;
 
@@ -41,6 +48,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   const onSelectionChange: EuiTableSelectionType<{}>['onSelectionChange'] = useCallback(
     (newSelectedItems) => {
       setSelectedItems(newSelectedItems);
+      // @ts-expect-error
       onChange(newSelectedItems.map((item) => item._id));
     },
     [onChange]
@@ -59,7 +67,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
     sortField,
   });
 
-  const columns = useMemo(
+  const columns: Array<EuiBasicTableColumn<{}>> = useMemo(
     () => [
       {
         field: 'local_metadata.elastic.agent.id',
@@ -103,11 +111,10 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
     [sortDirection, sortField]
   );
 
-  const selection = useMemo(
+  const selection: EuiBasicTableProps<Agent>['selection'] = useMemo(
     () => ({
-      selectable: (agent: AgentEdge) => agent.active,
-      selectableMessage: (selectable: boolean) =>
-        !selectable ? 'User is currently offline' : undefined,
+      selectable: (agent: Agent) => agent.active,
+      selectableMessage: (selectable: boolean) => (!selectable ? 'User is currently offline' : ''),
       onSelectionChange,
       initialSelected: selectedItems,
     }),
@@ -117,13 +124,14 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   useEffect(() => {
     if (selectedAgents?.length && agents.length && selectedItems.length !== selectedAgents.length) {
       tableRef?.current?.setSelection(
+        // @ts-expect-error
         selectedAgents.map((agentId) => find({ _id: agentId }, agents))
       );
     }
   }, [selectedAgents, agents, selectedItems.length]);
 
   return (
-    <EuiBasicTable<AgentEdge>
+    <EuiBasicTable<Agent>
       ref={tableRef}
       items={agents}
       itemId="_id"

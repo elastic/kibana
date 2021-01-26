@@ -58,7 +58,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     () => ({ rowIndex, columnId, setCellProps }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
-
+      // @ts-expect-error
       const value = data[rowIndex].fields[columnId];
 
       return !isEmpty(value) ? value : '-';
@@ -82,6 +82,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
   );
 
   useEffect(() => {
+    // @ts-expect-error
     const newColumns = keys(results[0]?.fields)
       .sort()
       .map((fieldName) => ({

@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
-
-export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-});
-
-export type ConfigType = TypeOf<typeof ConfigSchema>;
+export { Agent } from '../../fleet/common';

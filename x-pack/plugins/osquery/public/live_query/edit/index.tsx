@@ -6,7 +6,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useActionDetails } from '../../actions/use_action_details';
@@ -17,13 +17,17 @@ const EditLiveQueryPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
   const [loading, { actionDetails }] = useActionDetails({ actionId });
 
+  const handleSubmit = useCallback(() => Promise.resolve(), []);
+
   if (loading) {
     return <>{'Loading...'}</>;
   }
 
   return (
     <>
-      {!isEmpty(actionDetails) && <LiveQueryForm type="edit" actionDetails={actionDetails} />}
+      {!isEmpty(actionDetails) && (
+        <LiveQueryForm actionDetails={actionDetails} onSubmit={handleSubmit} />
+      )}
       <EuiSpacer />
       <ResultTabs />
     </>

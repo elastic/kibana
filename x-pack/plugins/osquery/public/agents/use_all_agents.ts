@@ -10,7 +10,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
-  AgentEdge,
   PageInfoPaginated,
   DocValueFields,
   OsqueryQueries,
@@ -19,6 +18,7 @@ import {
   Direction,
 } from '../../common/search_strategy';
 import { ESTermQuery } from '../../common/typed_json';
+import { Agent } from '../shared_imports';
 
 import * as i18n from './translations';
 import { isCompleteResponse, isErrorResponse } from '../../../../../src/plugins/data/common';
@@ -28,7 +28,7 @@ import { generateTablePaginationOptions, getInspectResponse, InspectResponse } f
 const ID = 'agentsAllQuery';
 
 export interface AgentsArgs {
-  agents: AgentEdge[];
+  agents: Agent[];
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;
@@ -97,6 +97,7 @@ export const useAllAgents = ({
             next: (response) => {
               if (isCompleteResponse(response)) {
                 if (!didCancel) {
+                  console.error('agents', response.edges);
                   setLoading(false);
                   setAgentsResponse((prevResponse) => ({
                     ...prevResponse,

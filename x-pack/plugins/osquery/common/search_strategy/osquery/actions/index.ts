@@ -4,23 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 
-import { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../common';
+import { Inspect, Maybe, PageInfoPaginated } from '../../common';
 import { RequestOptions, RequestOptionsPaginated } from '../..';
 
-export interface ActionEdge {
-  node: any[];
-  cursor: CursorType;
-}
+export type ActionEdge = SearchResponse<object>['hits']['hits'];
 
-export interface ActionResultEdge {
-  node: any[];
-  cursor: CursorType;
-}
-
+export type ActionResultEdge = SearchResponse<object>['hits']['hits'];
 export interface ActionsStrategyResponse extends IEsSearchResponse {
-  edges: ActionEdge[];
+  edges: ActionEdge;
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
@@ -38,7 +32,7 @@ export interface ActionDetailsRequestOptions extends RequestOptions {
 }
 
 export interface ActionResultsStrategyResponse extends IEsSearchResponse {
-  edges: ActionResultEdge[];
+  edges: ActionResultEdge;
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;

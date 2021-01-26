@@ -87,6 +87,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId 
   );
 
   useEffect(() => {
+    // @ts-expect-error
     const newColumns: EuiDataGridColumn[] = keys(results[0]?.fields)
       .sort()
       .map((fieldName) => ({

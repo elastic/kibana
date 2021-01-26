@@ -8,7 +8,12 @@ import { PluginInitializerContext } from '../../../../src/core/server';
 import { OsqueryPlugin } from './plugin';
 import { ConfigSchema } from './config';
 
-export const config = { schema: ConfigSchema };
+export const config = {
+  schema: ConfigSchema,
+  exposeToBrowser: {
+    enabled: true,
+  },
+};
 export function plugin(initializerContext: PluginInitializerContext) {
   return new OsqueryPlugin(initializerContext);
 }

@@ -12,6 +12,7 @@ import {
   OsqueryQueries,
 } from '../../../../../common/search_strategy/osquery';
 
+import { Agent } from '../../../../../common/shared_imports';
 import { inspectStringifyObject } from '../../../../../common/utils/build_query';
 import { OsqueryFactory } from '../types';
 import { buildAgentsQuery } from './query.all_agents.dsl';
@@ -25,7 +26,7 @@ export const allAgents: OsqueryFactory<OsqueryQueries.agents> = {
   },
   parse: async (
     options: AgentsRequestOptions,
-    response: IEsSearchResponse<unknown>
+    response: IEsSearchResponse<Agent>
   ): Promise<AgentsStrategyResponse> => {
     const { activePage } = options.pagination;
     const inspect = {

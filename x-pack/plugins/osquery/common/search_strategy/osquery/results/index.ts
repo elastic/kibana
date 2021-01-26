@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 
-import { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../common';
+import { Inspect, Maybe, PageInfoPaginated } from '../../common';
 import { RequestOptionsPaginated } from '../..';
 
-export interface ResultEdge {
-  node: any[];
-  cursor: CursorType;
-}
+export type ResultEdge = SearchResponse<unknown>['hits']['hits'];
 
 export interface ResultsStrategyResponse extends IEsSearchResponse {
-  edges: ResultEdge[];
+  edges: ResultEdge;
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;

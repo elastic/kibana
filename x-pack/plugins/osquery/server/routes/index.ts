@@ -11,20 +11,6 @@ import moment from 'moment';
 import { IRouter } from '../../../../../src/core/server';
 
 export function defineRoutes(router: IRouter) {
-  router.get(
-    {
-      path: '/api/osquery/example',
-      validate: false,
-    },
-    async (context, request, response) => {
-      return response.ok({
-        body: {
-          time: new Date().toISOString(),
-        },
-      });
-    }
-  );
-
   router.post(
     {
       path: '/api/osquery/queries',
@@ -43,11 +29,13 @@ export function defineRoutes(router: IRouter) {
           expiration: moment().add(2, 'days').toISOString(),
           type: 'APP_ACTION',
           input_id: 'osquery',
+          // @ts-expect-error
           agents: request.body.agents,
           data: {
             commands: [
               {
                 id: uuid.v4(),
+                // @ts-expect-error
                 query: request.body.command.query,
               },
             ],

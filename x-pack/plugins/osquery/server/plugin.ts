@@ -13,7 +13,6 @@ import {
   Logger,
 } from '../../../../src/core/server';
 
-import { ConfigType } from './config';
 import { createConfig$ } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
@@ -21,7 +20,6 @@ import { osquerySearchStrategyProvider } from './search_strategy/osquery';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
-  private config: ConfigType | undefined | null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -30,9 +28,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   public async setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
     this.logger.debug('osquery: Setup');
     const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
-    this.config = config;
 
-    if (!this.config.enabled) {
+    if (!config.enabled) {
       return {};
     }
 
@@ -51,7 +48,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('osquery: S');
+    this.logger.debug('osquery: Started');
     return {};
   }
 
