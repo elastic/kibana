@@ -12,7 +12,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     label={
       <FormattedMessage
         defaultMessage="Input format"
-        id="indexPatternManagement.duration.inputFormatLabel"
+        id="indexPatternFieldEditor.duration.inputFormatLabel"
         values={Object {}}
       />
     }
@@ -42,7 +42,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     label={
       <FormattedMessage
         defaultMessage="Output format"
-        id="indexPatternManagement.duration.outputFormatLabel"
+        id="indexPatternFieldEditor.duration.outputFormatLabel"
         values={Object {}}
       />
     }
@@ -124,7 +124,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     label={
       <FormattedMessage
         defaultMessage="Input format"
-        id="indexPatternManagement.duration.inputFormatLabel"
+        id="indexPatternFieldEditor.duration.inputFormatLabel"
         values={Object {}}
       />
     }
@@ -154,7 +154,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     label={
       <FormattedMessage
         defaultMessage="Output format"
-        id="indexPatternManagement.duration.outputFormatLabel"
+        id="indexPatternFieldEditor.duration.outputFormatLabel"
         values={Object {}}
       />
     }
@@ -189,7 +189,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     label={
       <FormattedMessage
         defaultMessage="Decimal places"
-        id="indexPatternManagement.duration.decimalPlacesLabel"
+        id="indexPatternFieldEditor.duration.decimalPlacesLabel"
         values={Object {}}
       />
     }
@@ -216,7 +216,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       label={
         <FormattedMessage
           defaultMessage="Show suffix"
-          id="indexPatternManagement.duration.showSuffixLabel"
+          id="indexPatternFieldEditor.duration.showSuffixLabel"
           values={Object {}}
         />
       }

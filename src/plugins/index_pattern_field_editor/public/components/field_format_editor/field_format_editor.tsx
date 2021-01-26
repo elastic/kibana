@@ -66,7 +66,7 @@ const getFieldTypeFormatsList = (
     {
       id: '',
       defaultFieldFormat,
-      title: i18n.translate('indexPatternManagement.defaultFormatDropDown', {
+      title: i18n.translate('indexPatternFieldEditor.defaultFormatDropDown', {
         defaultMessage: '- Default -',
       }),
     },
@@ -128,14 +128,14 @@ export class FormatSelectEditor extends PureComponent<
 
     const label = defaultFormat ? (
       <FormattedMessage
-        id="indexPatternManagement.defaultFormatHeader"
+        id="indexPatternFieldEditor.defaultFormatHeader"
         defaultMessage="Format (Default: {defaultFormat})"
         values={{
           defaultFormat: <EuiCode>{defaultFormat}</EuiCode>,
         }}
       />
     ) : (
-      <FormattedMessage id="indexPatternManagement.formatHeader" defaultMessage="Format" />
+      <FormattedMessage id="indexPatternFieldEditor.formatHeader" defaultMessage="Format" />
     );
     return (
       <>
@@ -143,7 +143,7 @@ export class FormatSelectEditor extends PureComponent<
           label={label}
           helpText={
             <FormattedMessage
-              id="indexPatternManagement.formatLabel"
+              id="indexPatternFieldEditor.formatLabel"
               defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
           completely changed and prevent highlighting in Discover from working."
             />

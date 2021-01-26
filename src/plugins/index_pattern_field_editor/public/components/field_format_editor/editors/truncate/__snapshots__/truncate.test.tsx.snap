@@ -12,7 +12,7 @@ exports[`TruncateFormatEditor should render normally 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Field length"
-        id="indexPatternManagement.truncate.lengthLabel"
+        id="indexPatternFieldEditor.truncate.lengthLabel"
         values={Object {}}
       />
     }

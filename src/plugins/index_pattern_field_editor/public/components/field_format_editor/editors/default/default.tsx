@@ -30,7 +30,7 @@ export const convertSampleInput = (
       };
     });
   } catch (e) {
-    error = i18n.translate('indexPatternManagement.defaultErrorMessage', {
+    error = i18n.translate('indexPatternFieldEditor.defaultErrorMessage', {
       defaultMessage: 'An error occurred while trying to use this format configuration: {message}',
       values: { message: e.message },
     });

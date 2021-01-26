@@ -32,7 +32,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
     const columns = [
       {
         field: 'input',
-        name: i18n.translate('indexPatternManagement.samples.inputHeader', {
+        name: i18n.translate('indexPatternFieldEditor.samples.inputHeader', {
           defaultMessage: 'Input',
         }),
         render: (input: {} | string) => {
@@ -41,7 +41,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
       },
       {
         field: 'output',
-        name: i18n.translate('indexPatternManagement.samples.outputHeader', {
+        name: i18n.translate('indexPatternFieldEditor.samples.outputHeader', {
           defaultMessage: 'Output',
         }),
         render: (output: string) => {
@@ -63,7 +63,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
     return samples.length ? (
       <EuiFormRow
         label={
-          <FormattedMessage id="indexPatternManagement.samplesHeader" defaultMessage="Samples" />
+          <FormattedMessage id="indexPatternFieldEditor.samplesHeader" defaultMessage="Samples" />
         }
       >
         <EuiBasicTable<Sample>

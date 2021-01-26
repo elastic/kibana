@@ -16,7 +16,7 @@ exports[`DateFormatEditor should render normally 1`] = `
         >
           <FormattedMessage
             defaultMessage="Documentation"
-            id="indexPatternManagement.date.documentationLabel"
+            id="indexPatternFieldEditor.date.documentationLabel"
             values={Object {}}
           />
            
@@ -30,7 +30,7 @@ exports[`DateFormatEditor should render normally 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Moment.js format pattern (Default: {defaultPattern})"
-        id="indexPatternManagement.date.momentLabel"
+        id="indexPatternFieldEditor.date.momentLabel"
         values={
           Object {
             "defaultPattern": <EuiCode>

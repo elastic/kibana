@@ -12,7 +12,7 @@ exports[`StringFormatEditor should render normally 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Transform"
-        id="indexPatternManagement.string.transformLabel"
+        id="indexPatternFieldEditor.string.transformLabel"
         values={Object {}}
       />
     }

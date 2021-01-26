@@ -10,7 +10,7 @@ exports[`FormatEditorSamples should render normally 1`] = `
   label={
     <FormattedMessage
       defaultMessage="Samples"
-      id="indexPatternManagement.samplesHeader"
+      id="indexPatternFieldEditor.samplesHeader"
       values={Object {}}
     />
   }

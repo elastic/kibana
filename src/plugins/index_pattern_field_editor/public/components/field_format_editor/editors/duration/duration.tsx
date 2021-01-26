@@ -65,7 +65,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
       !(nextProps.format as DurationFormat).isHuman() &&
       nextProps.formatParams.outputPrecision > 20
     ) {
-      error = i18n.translate('indexPatternManagement.durationErrorMessage', {
+      error = i18n.translate('indexPatternFieldEditor.durationErrorMessage', {
         defaultMessage: 'Decimal places must be between 0 and 20',
       });
       nextProps.onError(error);
@@ -91,7 +91,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
         <EuiFormRow
           label={
             <FormattedMessage
-              id="indexPatternManagement.duration.inputFormatLabel"
+              id="indexPatternFieldEditor.duration.inputFormatLabel"
               defaultMessage="Input format"
             />
           }
@@ -115,7 +115,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
         <EuiFormRow
           label={
             <FormattedMessage
-              id="indexPatternManagement.duration.outputFormatLabel"
+              id="indexPatternFieldEditor.duration.outputFormatLabel"
               defaultMessage="Output format"
             />
           }
@@ -140,7 +140,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
             <EuiFormRow
               label={
                 <FormattedMessage
-                  id="indexPatternManagement.duration.decimalPlacesLabel"
+                  id="indexPatternFieldEditor.duration.decimalPlacesLabel"
                   defaultMessage="Decimal places"
                 />
               }
@@ -163,7 +163,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
               <EuiSwitch
                 label={
                   <FormattedMessage
-                    id="indexPatternManagement.duration.showSuffixLabel"
+                    id="indexPatternFieldEditor.duration.showSuffixLabel"
                     defaultMessage="Show suffix"
                   />
                 }

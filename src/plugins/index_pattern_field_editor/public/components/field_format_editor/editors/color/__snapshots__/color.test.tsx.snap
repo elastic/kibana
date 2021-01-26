@@ -9,7 +9,7 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
           "field": "regex",
           "name": <FormattedMessage
             defaultMessage="Pattern (regular expression)"
-            id="indexPatternManagement.color.patternLabel"
+            id="indexPatternFieldEditor.color.patternLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -18,7 +18,7 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
           "field": "text",
           "name": <FormattedMessage
             defaultMessage="Text color"
-            id="indexPatternManagement.color.textColorLabel"
+            id="indexPatternFieldEditor.color.textColorLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -27,7 +27,7 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
           "field": "background",
           "name": <FormattedMessage
             defaultMessage="Background color"
-            id="indexPatternManagement.color.backgroundLabel"
+            id="indexPatternFieldEditor.color.backgroundLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -35,7 +35,7 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
         Object {
           "name": <FormattedMessage
             defaultMessage="Example"
-            id="indexPatternManagement.color.exampleLabel"
+            id="indexPatternFieldEditor.color.exampleLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -89,7 +89,7 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
   >
     <FormattedMessage
       defaultMessage="Add color"
-      id="indexPatternManagement.color.addColorButton"
+      id="indexPatternFieldEditor.color.addColorButton"
       values={Object {}}
     />
   </EuiButton>
@@ -108,7 +108,7 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
           "field": "range",
           "name": <FormattedMessage
             defaultMessage="Range (min:max)"
-            id="indexPatternManagement.color.rangeLabel"
+            id="indexPatternFieldEditor.color.rangeLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -117,7 +117,7 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
           "field": "text",
           "name": <FormattedMessage
             defaultMessage="Text color"
-            id="indexPatternManagement.color.textColorLabel"
+            id="indexPatternFieldEditor.color.textColorLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -126,7 +126,7 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
           "field": "background",
           "name": <FormattedMessage
             defaultMessage="Background color"
-            id="indexPatternManagement.color.backgroundLabel"
+            id="indexPatternFieldEditor.color.backgroundLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -134,7 +134,7 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
         Object {
           "name": <FormattedMessage
             defaultMessage="Example"
-            id="indexPatternManagement.color.exampleLabel"
+            id="indexPatternFieldEditor.color.exampleLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -181,7 +181,7 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
   >
     <FormattedMessage
       defaultMessage="Add color"
-      id="indexPatternManagement.color.addColorButton"
+      id="indexPatternFieldEditor.color.addColorButton"
       values={Object {}}
     />
   </EuiButton>
@@ -200,7 +200,7 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
           "field": "regex",
           "name": <FormattedMessage
             defaultMessage="Pattern (regular expression)"
-            id="indexPatternManagement.color.patternLabel"
+            id="indexPatternFieldEditor.color.patternLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -209,7 +209,7 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
           "field": "text",
           "name": <FormattedMessage
             defaultMessage="Text color"
-            id="indexPatternManagement.color.textColorLabel"
+            id="indexPatternFieldEditor.color.textColorLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -218,7 +218,7 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
           "field": "background",
           "name": <FormattedMessage
             defaultMessage="Background color"
-            id="indexPatternManagement.color.backgroundLabel"
+            id="indexPatternFieldEditor.color.backgroundLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -226,7 +226,7 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
         Object {
           "name": <FormattedMessage
             defaultMessage="Example"
-            id="indexPatternManagement.color.exampleLabel"
+            id="indexPatternFieldEditor.color.exampleLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -273,7 +273,7 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
   >
     <FormattedMessage
       defaultMessage="Add color"
-      id="indexPatternManagement.color.addColorButton"
+      id="indexPatternFieldEditor.color.addColorButton"
       values={Object {}}
     />
   </EuiButton>

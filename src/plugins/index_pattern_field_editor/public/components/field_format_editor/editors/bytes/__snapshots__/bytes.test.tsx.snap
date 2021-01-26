@@ -16,7 +16,7 @@ exports[`BytesFormatEditor should render normally 1`] = `
         >
           <FormattedMessage
             defaultMessage="Documentation"
-            id="indexPatternManagement.number.documentationLabel"
+            id="indexPatternFieldEditor.number.documentationLabel"
             values={Object {}}
           />
            
@@ -30,7 +30,7 @@ exports[`BytesFormatEditor should render normally 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Numeral.js format pattern (Default: {defaultPattern})"
-        id="indexPatternManagement.number.numeralLabel"
+        id="indexPatternFieldEditor.number.numeralLabel"
         values={
           Object {
             "defaultPattern": <EuiCode>

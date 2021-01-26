@@ -9,7 +9,7 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
           "field": "key",
           "name": <FormattedMessage
             defaultMessage="Key"
-            id="indexPatternManagement.staticLookup.keyLabel"
+            id="indexPatternFieldEditor.staticLookup.keyLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -18,7 +18,7 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
           "field": "value",
           "name": <FormattedMessage
             defaultMessage="Value"
-            id="indexPatternManagement.staticLookup.valueLabel"
+            id="indexPatternFieldEditor.staticLookup.valueLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -73,7 +73,7 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
   >
     <FormattedMessage
       defaultMessage="Add entry"
-      id="indexPatternManagement.staticLookup.addEntryButton"
+      id="indexPatternFieldEditor.staticLookup.addEntryButton"
       values={Object {}}
     />
   </EuiButton>
@@ -89,7 +89,7 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
     label={
       <FormattedMessage
         defaultMessage="Value for unknown key"
-        id="indexPatternManagement.staticLookup.unknownKeyLabel"
+        id="indexPatternFieldEditor.staticLookup.unknownKeyLabel"
         values={Object {}}
       />
     }
@@ -116,7 +116,7 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
           "field": "key",
           "name": <FormattedMessage
             defaultMessage="Key"
-            id="indexPatternManagement.staticLookup.keyLabel"
+            id="indexPatternFieldEditor.staticLookup.keyLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -125,7 +125,7 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
           "field": "value",
           "name": <FormattedMessage
             defaultMessage="Value"
-            id="indexPatternManagement.staticLookup.valueLabel"
+            id="indexPatternFieldEditor.staticLookup.valueLabel"
             values={Object {}}
           />,
           "render": [Function],
@@ -174,7 +174,7 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
   >
     <FormattedMessage
       defaultMessage="Add entry"
-      id="indexPatternManagement.staticLookup.addEntryButton"
+      id="indexPatternFieldEditor.staticLookup.addEntryButton"
       values={Object {}}
     />
   </EuiButton>
@@ -190,7 +190,7 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Value for unknown key"
-        id="indexPatternManagement.staticLookup.unknownKeyLabel"
+        id="indexPatternFieldEditor.staticLookup.unknownKeyLabel"
         values={Object {}}
       />
     }
