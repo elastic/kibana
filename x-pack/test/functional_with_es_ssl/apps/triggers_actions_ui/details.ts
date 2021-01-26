@@ -228,7 +228,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             timeWindowUnit: 'm',
             groupBy: 'all',
             threshold: [1000, 5000],
-            index: ['.kibana_1'],
+            index: '.kibana_1',
             timeField: 'alert',
           },
           actions: [
