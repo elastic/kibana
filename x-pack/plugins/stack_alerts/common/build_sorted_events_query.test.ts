@@ -231,7 +231,7 @@ describe('buildSortedEventsQuery', () => {
   });
 
   test('it includes aggregations if provided', () => {
-    query.aggregations = {
+    query.aggs = {
       tags: {
         terms: {
           field: 'tag',
@@ -276,7 +276,7 @@ describe('buildSortedEventsQuery', () => {
             ],
           },
         },
-        aggregations: {
+        aggs: {
           tags: {
             terms: {
               field: 'tag',
