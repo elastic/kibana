@@ -431,11 +431,13 @@ export const reindexServiceFactory = (
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
     const { indexName, newIndexName, reindexOptions } = reindexOp.attributes;
 
-    const { body: existingAliases } = await esClient.indices.getAlias({
+    const { body: response } = await esClient.indices.getAlias({
       index: indexName,
     });
 
-    const extraAlises = Object.keys(existingAliases).map((aliasName) => ({
+    const existingAliases = response[indexName].aliases;
+
+    const extraAliases = Object.keys(existingAliases).map((aliasName) => ({
       add: { index: newIndexName, alias: aliasName, ...existingAliases[aliasName] },
     }));
 
@@ -444,7 +446,7 @@ export const reindexServiceFactory = (
         actions: [
           { add: { index: newIndexName, alias: indexName } },
           { remove_index: { index: indexName } },
-          ...extraAlises,
+          ...extraAliases,
         ],
       },
     });

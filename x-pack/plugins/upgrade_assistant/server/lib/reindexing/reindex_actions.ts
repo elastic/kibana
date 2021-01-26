@@ -236,7 +236,9 @@ export const reindexActionsFactory = (
     },
 
     async getFlatSettings(indexName: string) {
-      const { body: flatSettings } = await esClient.indices.getSettings<FlatSettings>({
+      const { body: flatSettings } = await esClient.indices.getSettings<{
+        [indexName: string]: FlatSettings;
+      }>({
         index: indexName,
         flat_settings: true,
       });

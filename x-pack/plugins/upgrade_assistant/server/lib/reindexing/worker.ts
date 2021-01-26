@@ -3,12 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  ElasticsearchClient,
-  Logger,
-  SavedObjectsClientContract,
-  FakeRequest,
-} from 'src/core/server';
+import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 'src/core/server';
 import moment from 'moment';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { Credential, CredentialStore } from './credential_store';
@@ -53,7 +48,7 @@ export class ReindexWorker {
   constructor(
     private client: SavedObjectsClientContract,
     private credentialStore: CredentialStore,
-    private clusterClient: ElasticsearchClient,
+    private clusterClient: IClusterClient,
     log: Logger,
     private licensing: LicensingPluginSetup
   ) {
@@ -151,7 +146,7 @@ export class ReindexWorker {
   private getCredentialScopedReindexService = (credential: Credential) => {
     const fakeRequest: FakeRequest = { headers: credential };
     const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
-    const callAsCurrentUser = scopedClusterClient.callAsCurrentUser.bind(scopedClusterClient);
+    const callAsCurrentUser = scopedClusterClient.asCurrentUser;
     const actions = reindexActionsFactory(this.client, callAsCurrentUser);
     return reindexServiceFactory(callAsCurrentUser, actions, this.log, this.licensing);
   };
