@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const deployment = getService('deployment');
-  let isOss = false;
+  let isOss = true;
 
   describe('management', function () {
     before(async () => {
