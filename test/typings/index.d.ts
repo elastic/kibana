@@ -6,11 +6,19 @@
  * Public License, v 1.
  */
 
+/* eslint-disable max-classes-per-file */
+
 declare module '*.html' {
   const template: string;
   // eslint-disable-next-line import/no-default-export
   export default template;
 }
+
+declare abstract class Foo {
+  bar(): string;
+}
+
+declare class Bar implements Foo {}
 
 type MethodKeysOf<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
