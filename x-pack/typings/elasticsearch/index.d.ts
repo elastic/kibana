@@ -69,6 +69,7 @@ export interface ESSearchBody {
   aggs?: AggregationInputMap;
   track_total_hits?: boolean | number;
   collapse?: CollapseQuery;
+  search_after?: Array<string | number>;
   _source?: ESSourceOptions;
 }
 

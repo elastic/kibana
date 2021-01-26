@@ -4,20 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface BuildSortedEventsQuery {
-  aggregations?: unknown;
-  index: string[];
+import { ESSearchBody, ESSearchRequest } from '../../../typings/elasticsearch';
+import { SortOrder } from '../../../typings/elasticsearch/aggregations';
+
+type BuildSortedEventsQueryOpts = Pick<ESSearchBody, 'aggs'> &
+  Pick<Required<ESSearchRequest>, 'index' | 'size'>;
+
+export interface BuildSortedEventsQuery extends BuildSortedEventsQueryOpts {
+  filter: unknown;
   from: string;
   to: string;
-  filter: unknown;
-  size: number;
-  sortOrder?: 'asc' | 'desc' | undefined;
+  sortOrder?: SortOrder | undefined;
   searchAfterSortId: string | number | undefined;
   timeField: string;
 }
 
 export const buildSortedEventsQuery = ({
-  aggregations,
+  aggs,
   index,
   from,
   to,
@@ -26,7 +29,7 @@ export const buildSortedEventsQuery = ({
   searchAfterSortId,
   sortOrder,
   timeField,
-}: BuildSortedEventsQuery) => {
+}: BuildSortedEventsQuery): ESSearchRequest => {
   const sortField = timeField;
   const docFields = [timeField].map((tstamp) => ({
     field: tstamp,
@@ -64,7 +67,7 @@ export const buildSortedEventsQuery = ({
           ],
         },
       },
-      ...(aggregations ? { aggregations } : {}),
+      ...(aggs ? { aggs } : {}),
       sort: [
         {
           [sortField]: {
