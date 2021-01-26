@@ -78,11 +78,11 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
   }, [esFields]);
 
   const renderIndices = (indices: string[]) => {
-    const rows = indices.map((s: string, i: number) => {
+    const rows = indices.map((indexName: string, idx: number) => {
       return (
-        <p key={i}>
-          {s}
-          {i < indices.length - 1 ? ',' : null}
+        <p key={idx}>
+          {indexName}
+          {idx < indices.length - 1 ? ',' : null}
         </p>
       );
     });

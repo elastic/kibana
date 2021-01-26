@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
-import { SearchResponse } from 'elasticsearch';
+import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { ActionContext, EsQueryAlertActionContext, addMessages } from './action_context';
 import {
@@ -18,7 +18,6 @@ import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 import { parseDuration } from '../../../../alerts/server';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
-import { shimHitsTotal } from '../../../../../../src/plugins/data/server';
 
 export const ES_QUERY_ID = '.es-query';
 
@@ -197,21 +196,26 @@ export function getAlertType(
 
     logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`);
 
-    let searchResult: SearchResponse<unknown> = await callCluster('search', query);
-    // Needed until https://github.com/elastic/kibana/issues/26356 is resolved
-    searchResult = shimHitsTotal(searchResult);
+    const searchResult: ESSearchResponse<unknown, {}> = await callCluster('search', query);
 
     if (searchResult.hits.hits.length > 0) {
-      const numMatches = searchResult.hits.total;
+      const numMatches = searchResult.hits.total.value;
       logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query has ${numMatches} matches`);
 
       // apply the alert condition
       const conditionMet = compareFn(numMatches, params.threshold);
 
       if (conditionMet) {
-        const humanFn = `number of matching documents is ${getHumanReadableComparator(
-          params.thresholdComparator
-        )} ${params.threshold.join(' and ')}`;
+        const humanFn = i18n.translate(
+          'xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription',
+          {
+            defaultMessage: `number of matching documents is {thresholdComparator} {threshold}`,
+            values: {
+              thresholdComparator: getHumanReadableComparator(params.thresholdComparator),
+              threshold: params.threshold.join(' and '),
+            },
+          }
+        );
 
         const baseContext: EsQueryAlertActionContext = {
           date: new Date().toISOString(),
