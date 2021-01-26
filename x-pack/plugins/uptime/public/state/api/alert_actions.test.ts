@@ -5,6 +5,7 @@
  */
 
 import { populateAlertActions } from './alert_actions';
+import { ActionConnector } from '../alerts/alerts';
 
 const selectedMonitor = {
   docId: 'X5dkPncBy0xTcvZ347hy',
@@ -36,10 +37,10 @@ const selectedMonitor = {
 };
 
 describe('Alert Actions factory', () => {
-  it('generate expected action for slack', async () => {
+  it('generate expected action for pager duty', async () => {
     const resp = populateAlertActions({
       selectedMonitor,
-      defaultActions: [
+      defaultActions: ([
         {
           actionTypeId: '.pagerduty',
           group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
@@ -52,7 +53,52 @@ describe('Alert Actions factory', () => {
           },
           id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         },
-      ],
+      ] as unknown) as ActionConnector[],
+    });
+    expect(resp).toEqual([
+      {
+        actionTypeId: '.pagerduty',
+        group: 'recovered',
+        id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
+        params: {
+          dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
+          eventAction: 'resolve',
+          summary:
+            'Monitor Always Down Local Port with url tcp://localhost:18278 has recovered with status Up',
+        },
+      },
+      {
+        actionTypeId: '.pagerduty',
+        group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
+        id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
+        params: {
+          dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
+          eventAction: 'trigger',
+          severity: 'error',
+          summary:
+            'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}',
+        },
+      },
+    ]);
+  });
+
+  it('generate expected action for slack action connector', async () => {
+    const resp = populateAlertActions({
+      selectedMonitor,
+      defaultActions: ([
+        {
+          actionTypeId: '.pagerduty',
+          group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
+          params: {
+            dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
+            eventAction: 'trigger',
+            severity: 'error',
+            summary:
+              'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}',
+          },
+          id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
+        },
+      ] as unknown) as ActionConnector[],
     });
     expect(resp).toEqual([
       {
