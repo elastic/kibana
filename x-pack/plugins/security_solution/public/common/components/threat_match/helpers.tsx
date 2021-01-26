@@ -13,7 +13,7 @@ import {
 
 import { IndexPattern, IFieldType } from '../../../../../../../src/plugins/data/common';
 import { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
-import { addIdToItem } from '../../utils/add_id_to_item';
+import { addIdToItem } from '../../utils/add_remove_id_to_item';
 
 /**
  * Formats the entry into one that is easily usable for the UI.
@@ -127,12 +127,13 @@ export const getEntryOnThreatFieldChange = (
   };
 };
 
-export const getDefaultEmptyEntry = (): EmptyEntry =>
-  addIdToItem({
+export const getDefaultEmptyEntry = (): EmptyEntry => {
+  return addIdToItem({
     field: '',
     type: 'mapping',
     value: '',
   });
+};
 
 export const getNewItem = (): ThreatMap => {
   return addIdToItem({
