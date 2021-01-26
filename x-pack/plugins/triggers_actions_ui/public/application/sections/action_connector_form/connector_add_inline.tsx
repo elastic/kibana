@@ -198,6 +198,7 @@ export const AddConnectorInline = ({
                   type="alert"
                   size="m"
                   color="danger"
+                  data-test-subj={`alertActionAccordionErrorTooltip`}
                   content={
                     <FormattedMessage
                       defaultMessage="Unable to load connector."
