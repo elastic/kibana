@@ -24,7 +24,6 @@ export const fetchConnectors = async () => {
 };
 
 export interface NewAlertParams extends AlertTypeParams {
-  monitorId: string;
   selectedMonitor: Ping;
   defaultActions: ActionConnector[];
 }

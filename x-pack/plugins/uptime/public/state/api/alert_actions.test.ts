@@ -41,32 +41,40 @@ describe('Alert Actions factory', () => {
       selectedMonitor,
       defaultActions: [
         {
-          id: '25b89830-5fc6-11eb-9c97-d1d4e807ea39',
-          notifyWhen: 'onActionGroupChange',
-          actions: [
-            {
-              actionTypeId: '.pagerduty',
-              group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
-              params: {
-                dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
-                eventAction: 'trigger',
-                severity: 'error',
-                summary:
-                  'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}',
-              },
-              id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
-            },
-          ],
+          actionTypeId: '.pagerduty',
+          group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
+          params: {
+            dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
+            eventAction: 'trigger',
+            severity: 'error',
+            summary:
+              'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}',
+          },
+          id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         },
       ],
     });
     expect(resp).toEqual([
       {
-        actionTypeId: undefined,
-        group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
-        id: '25b89830-5fc6-11eb-9c97-d1d4e807ea39',
+        actionTypeId: '.pagerduty',
+        group: 'recovered',
+        id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
-          message:
+          dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
+          eventAction: 'resolve',
+          summary:
+            'Monitor Always Down Local Port with url tcp://localhost:18278 has recovered with status Up',
+        },
+      },
+      {
+        actionTypeId: '.pagerduty',
+        group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
+        id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
+        params: {
+          dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
+          eventAction: 'trigger',
+          severity: 'error',
+          summary:
             'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}',
         },
       },

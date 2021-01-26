@@ -15,6 +15,7 @@ import {
 import { EuiPopover, EuiText } from '@elastic/eui';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
+import { makePing } from '../../../../../common/runtime_types/ping';
 
 describe('EnableAlertComponent', () => {
   let defaultConnectors: string[] = [];
@@ -45,14 +46,20 @@ describe('EnableAlertComponent', () => {
 
   it('shallow renders without errors for valid props', () => {
     const wrapper = shallowWithRouterRedux(
-      <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />
+      <EnableMonitorAlert
+        monitorId={'testMonitor'}
+        selectedMonitor={makePing({ name: 'My website' })}
+      />
     );
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders without errors for valid props', () => {
     const wrapper = renderWithRouterRedux(
-      <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />
+      <EnableMonitorAlert
+        monitorId={'testMonitor'}
+        selectedMonitor={makePing({ name: 'My website' })}
+      />
     );
     expect(wrapper).toMatchSnapshot();
   });
@@ -60,7 +67,10 @@ describe('EnableAlertComponent', () => {
   it('displays define connectors when there is none', () => {
     defaultConnectors = [];
     const wrapper = mountWithRouterRedux(
-      <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />
+      <EnableMonitorAlert
+        monitorId={'testMonitor'}
+        selectedMonitor={makePing({ name: 'My website' })}
+      />
     );
     expect(wrapper.find(EuiPopover)).toHaveLength(1);
     wrapper.find('button').simulate('click');
@@ -98,7 +108,10 @@ describe('EnableAlertComponent', () => {
   it('does not displays define connectors when there is connector', () => {
     defaultConnectors = ['infra-slack-connector-id'];
     const wrapper = mountWithRouterRedux(
-      <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />
+      <EnableMonitorAlert
+        monitorId={'testMonitor'}
+        selectedMonitor={makePing({ name: 'My website' })}
+      />
     );
 
     expect(wrapper.find(EuiPopover)).toHaveLength(0);
@@ -109,7 +122,10 @@ describe('EnableAlertComponent', () => {
     defaultConnectors = ['infra-slack-connector-id'];
 
     const wrapper = mountWithRouterRedux(
-      <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />
+      <EnableMonitorAlert
+        monitorId={'testMonitor'}
+        selectedMonitor={makePing({ name: 'My website' })}
+      />
     );
 
     expect(wrapper.find('button').prop('aria-label')).toBe('Disable status alert');

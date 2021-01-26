@@ -82,7 +82,22 @@ exports[`EnableAlertComponent shallow renders without errors for valid props 1`]
   >
     <EnableMonitorAlert
       monitorId="testMonitor"
-      monitorName="My website"
+      selectedMonitor={
+        Object {
+          "docId": "myDocId",
+          "monitor": Object {
+            "duration": Object {
+              "us": 100000,
+            },
+            "id": "myId",
+            "ip": "127.0.0.1",
+            "name": "My website",
+            "status": "up",
+            "type": "myType",
+          },
+          "timestamp": "2020-07-07T01:14:08Z",
+        }
+      }
     />
   </Router>
 </Provider>
