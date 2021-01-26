@@ -7,6 +7,7 @@ import builds.oss.*
 import builds.test.*
 import CloudProfile
 import co.elastic.teamcity.common.googleCloudProfile
+import isHourlyOnlyBranch
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.projectFeatures.slackConnection
 import templates.KibanaTemplate
@@ -136,7 +137,16 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
 
       buildType(FullCi)
       buildType(BaselineCi)
-      buildType(HourlyCi)
+
+      // master and 7.x get committed to so often, we only want to run full CI for them hourly
+      // but for other branches, we can run daily and on merge
+      if (isHourlyOnlyBranch()) {
+        buildType(HourlyCi)
+      } else {
+        buildType(DailyCi)
+        buildType(OnMergeCi)
+      }
+
       buildType(PullRequestCi)
     }
 
