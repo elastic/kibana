@@ -10,6 +10,21 @@ import * as helpers from './helpers';
 
 describe('url_params_context helpers', () => {
   describe('getDateRange', () => {
+    describe('with non-rounded dates', () => {
+      it('rounds the values', () => {
+        expect(
+          helpers.getDateRange({
+            state: {},
+            rangeFrom: '1970-01-05T01:22:33.234Z',
+            rangeTo: '1971-01-10T10:11:12.123Z',
+          })
+        ).toEqual({
+          start: '1970-01-01T00:00:00.000Z',
+          end: '1971-02-01T00:00:00.000Z',
+        });
+      });
+    });
+
     describe('when rangeFrom and rangeTo are not changed', () => {
       it('returns the previous state', () => {
         expect(
@@ -32,7 +47,9 @@ describe('url_params_context helpers', () => {
 
     describe('when rangeFrom or rangeTo are falsy', () => {
       it('returns the previous state', () => {
+        // Disable console warning about not receiving a valid date for rangeFrom
         jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
+
         expect(
           helpers.getDateRange({
             state: {
