@@ -133,8 +133,8 @@ export const AddConnectorInline = ({
             fullWidth
             singleSelection={{ asPlainText: true }}
             options={connectorOptionsList}
-            id={`selectActionConnector-${actionItem.id}`}
-            data-test-subj={`selectActionConnector-${actionItem.actionTypeId}`}
+            id={`selectActionConnector-${actionItem.id}-${index}`}
+            data-test-subj={`selectActionConnector-${actionItem.actionTypeId}-${index}`}
             onChange={(selectedOptions) => {
               // On selecting a option from this combo box, this component will
               // be removed but the EuiComboBox performs some additional updates on
