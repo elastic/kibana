@@ -5,28 +5,17 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiImage,
-  EuiPopover,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiImage, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useIntersection from 'react-use/lib/useIntersection';
-import moment from 'moment';
 import styled from 'styled-components';
 import { Ping } from '../../../../../../common/runtime_types/ping';
-import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
 import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../../contexts';
 import { NoImageAvailable } from './no_image_available';
-import { nextAriaLabel } from './translations';
 import { NavButtons } from './nav_buttons';
+import { StepImageCaption } from './step_image_caption';
 
 const StepImage = styled(EuiImage)`
   &&& {
@@ -109,42 +98,14 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
   const captionContent = `Step:${stepNo} ${data?.stepName}`;
 
   const ImageCaption = (
-    <>
-      <div className="stepArrowsFullScreen">
-        {imgSrc && (
-          <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                disabled={stepNo === 1}
-                size="m"
-                onClick={() => {
-                  setStepNo(stepNo - 1);
-                }}
-                iconType="arrowLeft"
-                aria-label={nextAriaLabel}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText>{captionContent}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                disabled={stepNo === data?.maxSteps}
-                size="m"
-                onClick={() => {
-                  setStepNo(stepNo + 1);
-                }}
-                iconType="arrowRight"
-                aria-label={nextAriaLabel}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </div>
-      {/* TODO: Add link to details page once it's available */}
-      <span className="eui-textNoWrap">{getShortTimeStamp(moment(timestamp))}</span>
-      <EuiSpacer size="s" />
-    </>
+    <StepImageCaption
+      captionContent={captionContent}
+      imgSrc={imgSrc}
+      maxSteps={data?.maxSteps}
+      setStepNo={setStepNo}
+      stepNo={stepNo}
+      timestamp={timestamp}
+    />
   );
 
   return (
