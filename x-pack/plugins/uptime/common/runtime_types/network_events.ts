@@ -41,6 +41,7 @@ export type NetworkEvent = t.TypeOf<typeof NetworkEventType>;
 
 export const SyntheticsNetworkEventsApiResponseType = t.type({
   events: t.array(NetworkEventType),
+  total: t.number,
 });
 
 export type SyntheticsNetworkEventsApiResponse = t.TypeOf<
