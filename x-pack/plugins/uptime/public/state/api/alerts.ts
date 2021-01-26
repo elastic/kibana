@@ -50,7 +50,6 @@ export const createAlert = async ({
 }: NewAlertParams): Promise<Alert> => {
   const actions: AlertAction[] = populateAlertActions({
     defaultActions,
-    monitorId,
     selectedMonitor,
   });
 
