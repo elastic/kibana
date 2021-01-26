@@ -7,7 +7,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 // import { act } from 'react-dom/test-utils';
-import { EuiThemeProvider } from '../../../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { EuiToolTip } from '@elastic/eui';
 import { ConditionalToolTip } from './conditional_tooltip';
 import {
