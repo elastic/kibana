@@ -211,6 +211,7 @@ export class ConfigService {
     );
   }
 
+  // TODO: only one consumer, remove method + remove `markAsHandled`
   private getValidatedConfigAtPath$(path: ConfigPath) {
     this.markAsHandled(path);
     return this.config$.pipe(

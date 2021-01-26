@@ -78,11 +78,6 @@ export function createPluginInitializerContext(
      */
     config: {
       legacy: {
-        /**
-         * Global configuration
-         * Note: naming not final here, it will be renamed in a near future (https://github.com/elastic/kibana/issues/46240)
-         * @deprecated
-         */
         globalConfig$: combineLatest([
           coreContext.configService.atPath<KibanaConfigType>(kibanaConfig.path),
           coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
@@ -102,13 +97,13 @@ export function createPluginInitializerContext(
 
       /**
        * Reads the subset of the config at the `configPath` defined in the plugin
-       * manifest and validates it against the schema in the static `schema` on
-       * the given `ConfigClass`.
-       * @param ConfigClass A class (not an instance of a class) that contains a
-       * static `schema` that we validate the config at the given `path` against.
+       * manifest.
        */
       create<T>() {
         return coreContext.configService.atPath<T>(pluginManifest.configPath).pipe(shareReplay(1));
+      },
+      get<T>() {
+        return coreContext.configService.atPathSync<T>(pluginManifest.configPath);
       },
     },
   };
