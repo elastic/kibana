@@ -10,7 +10,7 @@ import { FIELD_ORIGIN } from '../../../../common/constants';
 
 describe('GeoJsonFileSource', () => {
   describe('getName', () => {
-    it('should get bounds from feature collection', async () => {
+    it('should get default display name', async () => {
       const geojsonFileSource = new GeoJsonFileSource({});
       expect(await geojsonFileSource.getDisplayName()).toBe('Features');
     });
