@@ -7,15 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import { reportServerError } from '../../../../../src/plugins/kibana_utils/server';
-import { ISearchClient } from '../../../../../src/plugins/data/common';
-import { IScopedSessionService } from '../../../../../src/plugins/data/server';
 import { DataEnhancedPluginRouter } from '../type';
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    search?: ISearchClient & { session: IScopedSessionService };
-  }
-}
 
 export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: Logger): void {
   router.post(
