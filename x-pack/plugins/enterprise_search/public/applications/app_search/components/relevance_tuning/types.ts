@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type IBoostType = 'value' | 'functional' | 'proximity';
+export type BoostType = 'value' | 'functional' | 'proximity';
 
 export interface IBoost {
-  type: IBoostType;
+  type: BoostType;
   operation?: string;
   function?: string;
   newBoost?: boolean;
@@ -16,11 +16,11 @@ export interface IBoost {
   factor: number;
 }
 
-export interface IBoostObject {
+export interface BoostObject {
   [key: string]: IBoost[];
 }
 
-export interface ISearchSettings {
-  boosts: IBoostObject;
+export interface SearchSettings {
+  boosts: BoostObject;
   search_fields: object;
 }

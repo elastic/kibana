@@ -6,7 +6,7 @@
 
 import { LogicMounter } from '../../../__mocks__';
 
-import { IBoostType } from './types';
+import { BoostType } from './types';
 
 import { RelevanceTuningLogic } from './relevance_tuning_logic';
 
@@ -15,7 +15,7 @@ describe('RelevanceTuningLogic', () => {
     boosts: {
       foo: [
         {
-          type: 'value' as IBoostType,
+          type: 'value' as BoostType,
           factor: 5,
         },
       ],
@@ -24,7 +24,7 @@ describe('RelevanceTuningLogic', () => {
   };
   const schema = {};
   const schemaConflicts = {};
-  const searchSettingProps = {
+  const relevanceTuningProps = {
     searchSettings,
     schema,
     schemaConflicts,
@@ -61,12 +61,12 @@ describe('RelevanceTuningLogic', () => {
   });
 
   describe('actions', () => {
-    describe('onInitializeSearchSettings', () => {
+    describe('onInitializeRelevanceTuning', () => {
       it('should set state', () => {
         mount({
           dataLoading: true,
         });
-        RelevanceTuningLogic.actions.onInitializeSearchSettings(searchSettingProps);
+        RelevanceTuningLogic.actions.onInitializeRelevanceTuning(relevanceTuningProps);
 
         expect(RelevanceTuningLogic.values).toEqual({
           ...DEFAULT_VALUES,

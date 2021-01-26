@@ -7,17 +7,18 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Schema, SchemaConflicts } from '../../../shared/types';
-import { ISearchSettings } from './types';
 
-interface ISearchSettingsProps {
-  searchSettings: ISearchSettings;
+import { SearchSettings } from './types';
+
+interface RelevanceTuningProps {
+  searchSettings: SearchSettings;
   schema: Schema;
   schemaConflicts: SchemaConflicts;
 }
 
-interface ISearchSettingsActions {
-  onInitializeSearchSettings(props: ISearchSettingsProps): ISearchSettingsProps;
-  setSearchSettings(searchSettings: ISearchSettings): { searchSettings: ISearchSettings };
+interface RelevanceTuningActions {
+  onInitializeRelevanceTuning(props: RelevanceTuningProps): RelevanceTuningProps;
+  setSearchSettings(searchSettings: SearchSettings): { searchSettings: SearchSettings };
   setFilterValue(value: string): string;
   setSearchQuery(value: string): string;
   setSearchResults(searchResults: object[]): object[];
@@ -27,8 +28,8 @@ interface ISearchSettingsActions {
   dismissSchemaConflictCallout(): void;
 }
 
-interface ISearchSettingsValues {
-  searchSettings: Partial<ISearchSettings>;
+interface RelevanceTuningValues {
+  searchSettings: Partial<SearchSettings>;
   schema: Schema;
   dataLoading: boolean;
   schemaConflicts: SchemaConflicts;
@@ -51,11 +52,11 @@ const filterIfTerm = (array: string[], filterTerm: string): string[] => {
 };
 
 export const RelevanceTuningLogic = kea<
-  MakeLogicType<ISearchSettingsValues, ISearchSettingsActions>
+  MakeLogicType<RelevanceTuningValues, RelevanceTuningActions>
 >({
   path: ['enterprise_search', 'app_search', 'relevance_tuning_logic'],
   actions: () => ({
-    onInitializeSearchSettings: (props) => props,
+    onInitializeRelevanceTuning: (props) => props,
     setSearchSettings: (searchSettings) => ({ searchSettings }),
     setFilterValue: (value) => value,
     setSearchQuery: (query) => query,
@@ -69,27 +70,27 @@ export const RelevanceTuningLogic = kea<
     searchSettings: [
       {},
       {
-        onInitializeSearchSettings: (_, { searchSettings }) => searchSettings,
+        onInitializeRelevanceTuning: (_, { searchSettings }) => searchSettings,
         setSearchSettings: (_, { searchSettings }) => searchSettings,
       },
     ],
     schema: [
       {},
       {
-        onInitializeSearchSettings: (_, { schema }) => schema,
+        onInitializeRelevanceTuning: (_, { schema }) => schema,
       },
     ],
     dataLoading: [
       true,
       {
-        onInitializeSearchSettings: () => false,
+        onInitializeRelevanceTuning: () => false,
         resetSearchSettingsState: () => true,
       },
     ],
     schemaConflicts: [
       {},
       {
-        onInitializeSearchSettings: (_, { schemaConflicts }) => schemaConflicts,
+        onInitializeRelevanceTuning: (_, { schemaConflicts }) => schemaConflicts,
       },
     ],
     unsavedChanges: [
