@@ -49,7 +49,7 @@ export class DocLinksService {
         enterpriseSearch: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}`,
           appSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}`,
-          workplaceSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search//${DOC_LINK_VERSION}`,
+          workplaceSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}`,
         },
         metricbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
