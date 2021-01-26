@@ -83,6 +83,5 @@ Body::      A JSON payload sent to the request URL. For example:
 }
 --
 
-For the variables that can be defined in an alert, refer to {painless}/painless-watcher-condition-context.html[Watcher condition text].
 Note that the characters are escaped so they don't contain double quotes, \n characters, and so on.
 
