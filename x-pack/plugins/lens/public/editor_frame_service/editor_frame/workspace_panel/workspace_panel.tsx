@@ -39,7 +39,7 @@ import {
   isLensFilterEvent,
   isLensEditEvent,
 } from '../../../types';
-import { DragDrop, DragContext, Dragging } from '../../../drag_drop';
+import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { debouncedComponent } from '../../../debounced_component';
@@ -75,7 +75,7 @@ export interface WorkspacePanelProps {
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
-  getSuggestionForField: (field: Dragging) => Suggestion | undefined;
+  getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
 }
 
 interface WorkspaceState {
@@ -102,7 +102,8 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
 }: WorkspacePanelProps) {
   const dragDropContext = useContext(DragContext);
 
-  const suggestionForDraggedField = getSuggestionForField(dragDropContext.dragging);
+  const suggestionForDraggedField =
+    dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,

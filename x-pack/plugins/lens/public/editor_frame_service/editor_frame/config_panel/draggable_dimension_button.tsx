@@ -19,6 +19,9 @@ interface LayerDatasourceDropProps {
 const isFromTheSameGroup = (el1: DragDropIdentifier, el2?: DragDropIdentifier) =>
   el2 && isDraggedOperation(el2) && el1.groupId === el2.groupId && el1.columnId !== el2.columnId;
 
+const isSelf = (el1: DragDropIdentifier, el2?: DragDropIdentifier) =>
+  isDraggedOperation(el2) && el1.columnId === el2.columnId;
+
 export function DraggableDimensionButton({
   layerId,
   label,
@@ -56,12 +59,11 @@ export function DraggableDimensionButton({
   }, [columnId, group.groupId, layerId]);
 
   const { dragging } = dragDropContext;
-  const dragType =
-    isDraggedOperation(dragging) && columnId === dragging.columnId
-      ? 'move'
-      : isDraggedOperation(dragging) && group.groupId === dragging.groupId
-      ? 'reorder'
-      : 'copy';
+  const dragType = isSelf(value, dragging)
+    ? 'move'
+    : isDraggedOperation(dragging) && group.groupId === dragging.groupId
+    ? 'reorder'
+    : 'copy';
 
   const dropType = isDraggedOperation(dragging)
     ? group.groupId !== dragging.groupId
@@ -77,20 +79,15 @@ export function DraggableDimensionButton({
       filterOperations: group.filterOperations,
     });
 
-  const isFromNotCompatibleGroup =
-    !isFromTheSameGroup(value, dragging) &&
-    !isCompatibleFromOtherGroup &&
-    layerDatasource.canHandleDrop({
-      ...layerDatasourceDropProps,
-      columnId,
-      filterOperations: group.filterOperations,
-    });
-
   const isDroppable = isDraggedOperation(dragging)
     ? dragType === 'reorder'
-      ? isFromTheSameGroup(value, dragging)
+      ? !!isFromTheSameGroup
       : isCompatibleFromOtherGroup
-    : isFromNotCompatibleGroup;
+    : layerDatasource.canHandleDrop({
+        ...layerDatasourceDropProps,
+        columnId,
+        filterOperations: group.filterOperations,
+      });
 
   const reorderableGroup = React.useMemo(() => {
     // if (group.accessors.length > 1) {

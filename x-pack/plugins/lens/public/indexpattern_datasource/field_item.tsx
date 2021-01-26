@@ -48,7 +48,7 @@ import {
 import { FieldButton } from '../../../../../src/plugins/kibana_react/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DraggedField } from './indexpattern';
-import { DragDrop, Dragging } from '../drag_drop';
+import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField } from './types';
@@ -110,7 +110,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
 
   const dropOntoWorkspaceAndClose = useCallback(
-    (droppedField: Dragging) => {
+    (droppedField: DragDropIdentifier) => {
       dropOntoWorkspace(droppedField);
       setOpen(false);
     },

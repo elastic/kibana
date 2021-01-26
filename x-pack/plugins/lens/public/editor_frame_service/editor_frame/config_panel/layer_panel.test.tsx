@@ -626,13 +626,13 @@ describe('LayerPanel', () => {
       );
 
       component.find('DragDrop[dataTestSubj="lnsGroup"]').at(1).prop('onDrop')!(
-        (draggingOperation as unknown) as DroppableEvent,
-        {
-          layerId: 'first',
-          columnId: 'b',
-          groupId: 'a',
-          id: 'b',
-        }
+        (draggingOperation as unknown) as DroppableEvent
+        // {
+        //   layerId: 'first',
+        //   columnId: 'b',
+        //   groupId: 'a',
+        //   id: 'b',
+        // }
       );
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
