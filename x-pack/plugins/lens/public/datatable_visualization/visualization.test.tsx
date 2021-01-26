@@ -384,11 +384,13 @@ describe('Datatable Visualization', () => {
         columnId: ['c'],
         hidden: [],
         width: [],
+        alignment: [],
       });
       expect(columnArgs[1].arguments).toEqual({
         columnId: ['b'],
         hidden: [],
         width: [],
+        alignment: [],
       });
     });
 
