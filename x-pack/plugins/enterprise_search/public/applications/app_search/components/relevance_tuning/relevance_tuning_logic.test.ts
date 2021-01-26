@@ -645,6 +645,71 @@ describe('RelevanceTuningLogic', () => {
         });
       });
     });
+
+    describe('addBoost', () => {
+      it('adds a boost of given type for the given field', () => {
+        mount({
+          searchSettings: {
+            boosts: {
+              foo: [
+                {
+                  factor: 2,
+                  type: 'value',
+                },
+              ],
+            },
+            search_fields: {},
+          },
+        });
+
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.addBoost('foo', 'functional');
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          boosts: {
+            foo: [
+              {
+                factor: 2,
+                type: 'value',
+              },
+              {
+                factor: 1,
+                newBoost: true,
+                type: 'functional',
+              },
+            ],
+          },
+          search_fields: {},
+        });
+      });
+
+      it('will stil work if boosts are undefined', () => {
+        mount({
+          searchSettings: {
+            boosts: undefined,
+            search_fields: {},
+          },
+        });
+
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.addBoost('foo', 'functional');
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          boosts: {
+            foo: [
+              {
+                factor: 1,
+                newBoost: true,
+                type: 'functional',
+              },
+            ],
+          },
+          search_fields: {},
+        });
+      });
+    });
   });
 
   describe('selectors', () => {

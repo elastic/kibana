@@ -17,7 +17,7 @@ import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_message
 import { Result } from '../result/types';
 import { EngineLogic } from '../engine';
 
-import { SearchSettings } from './types';
+import { BoostType, SearchSettings } from './types';
 interface RelevanceTuningProps {
   searchSettings: SearchSettings;
   schema: Schema;
@@ -43,6 +43,7 @@ interface RelevanceTuningActions {
   resetSearchSettings(): void;
   toggleSearchField(name: string, disableField: boolean): { name: string; disableField: boolean };
   updateFieldWeight(name: string, weight: number): { name: string; weight: number };
+  addBoost: (name: string, type: BoostType) => { name: string; type: BoostType };
 }
 
 interface RelevanceTuningValues {
@@ -122,6 +123,7 @@ export const RelevanceTuningLogic = kea<
     resetSearchSettings: true,
     toggleSearchField: (name, disableField) => ({ name, disableField }),
     updateFieldWeight: (name, weight) => ({ name, weight }),
+    addBoost: (name, type) => ({ name, type }),
   }),
   reducers: () => ({
     searchSettings: [
@@ -328,6 +330,31 @@ export const RelevanceTuningLogic = kea<
         },
       });
       actions.getSearchResults();
+    },
+    addBoost: ({ name, type }) => {
+      const searchSettings = {
+        ...values.searchSettings,
+        boosts: values.searchSettings.boosts || {},
+        search_fields: values.searchSettings.search_fields || {},
+      };
+      const { boosts } = searchSettings;
+      const emptyBoost = { type, factor: 1, newBoost: true };
+      let boostArray;
+
+      if (Array.isArray(boosts[name])) {
+        boostArray = boosts[name].slice();
+        boostArray.push(emptyBoost);
+      } else {
+        boostArray = [emptyBoost];
+      }
+
+      actions.setSearchSettings({
+        ...searchSettings,
+        boosts: {
+          ...boosts,
+          [name]: boostArray,
+        },
+      });
     },
   }),
 });
