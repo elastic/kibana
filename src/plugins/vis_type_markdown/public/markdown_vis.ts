@@ -11,10 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { MarkdownOptions } from './markdown_options';
 import { SettingsOptions } from './settings_options_lazy';
 import { DefaultEditorSize } from '../../vis_default_editor/public';
-import { VisGroups } from '../../visualizations/public';
+import { VisGroups, VisTypeDefinition } from '../../visualizations/public';
 import { toExpressionAst } from './to_ast';
+import { MarkdownVisParams } from './types';
 
-export const markdownVisDefinition = {
+export const markdownVisDefinition: VisTypeDefinition<MarkdownVisParams> = {
   name: 'markdown',
   title: 'Markdown',
   isAccessible: true,
@@ -58,7 +59,5 @@ export const markdownVisDefinition = {
     showTimePicker: false,
     showFilterBar: false,
   },
-  requestHandler: 'none',
-  responseHandler: 'none',
   inspectorAdapters: {},
 };
