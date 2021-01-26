@@ -8,5 +8,3 @@
 
 export { runTelemetryCheck } from './cli/run_telemetry_check';
 export { runTelemetryExtract } from './cli/run_telemetry_extract';
-export { getInterfacesDescriptors } from './tools/interface_to_object';
-export { loadProgram } from './tools/utils';

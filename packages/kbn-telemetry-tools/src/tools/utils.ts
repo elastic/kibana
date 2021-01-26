@@ -30,16 +30,6 @@ export const readFileAsync = promisify(readFile);
 export const writeFileAsync = promisify(writeFile);
 export const globAsync = promisify(glob);
 
-export function loadProgram(configPath: string, files: string[]) {
-  const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
-  if (!tsConfig) {
-    throw new Error('Could not find a valid tsconfig.json.');
-  }
-  const program = ts.createProgram(files, tsConfig as any);
-  const typeChecker = program.getTypeChecker();
-  return { program, typeChecker };
-}
-
 export function isPropertyWithKey(property: ts.Node, identifierName: string) {
   if (ts.isPropertyAssignment(property) || ts.isMethodDeclaration(property)) {
     if (ts.isIdentifier(property.name)) {
