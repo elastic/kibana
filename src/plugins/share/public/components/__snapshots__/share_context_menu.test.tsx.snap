@@ -55,6 +55,7 @@ exports[`shareContextMenuExtensions should sort ascending on sort order first an
         },
       ]
     }
+    size="m"
   />
 </I18nProvider>
 `;
@@ -78,6 +79,7 @@ exports[`should only render permalink panel when there are no other panels 1`] =
         },
       ]
     }
+    size="m"
   />
 </I18nProvider>
 `;
@@ -130,6 +132,7 @@ exports[`should render context menu panel when there are more than one panel 1`]
         },
       ]
     }
+    size="m"
   />
 </I18nProvider>
 `;

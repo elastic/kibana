@@ -70,7 +70,7 @@ export interface MlSetupDependencies {
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
-  private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private urlGenerator: undefined | UrlGeneratorContract<typeof ML_APP_URL_GENERATOR>;
 
   constructor(private initializerContext: PluginInitializerContext) {}
@@ -85,7 +85,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       euiIconType: PLUGIN_ICON_SOLUTION,
       appRoute: '/app/ml',
       category: DEFAULT_APP_CATEGORIES.kibana,
-      updater$: this.appUpdater,
+      updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const kibanaVersion = this.initializerContext.env.packageInfo.version;
@@ -133,23 +133,34 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         });
       } else {
         // if ml is disabled in elasticsearch, disable ML in kibana
-        this.appUpdater.next(() => ({
+        this.appUpdater$.next(() => ({
           status: AppStatus.inaccessible,
         }));
       }
 
       // register various ML plugin features which require a full license
-      const { registerEmbeddables, registerManagementSection, registerMlUiActions } = await import(
-        './register_helper'
-      );
+      // note including registerFeature in register_helper would cause the page bundle size to increase significantly
+      const {
+        registerEmbeddables,
+        registerManagementSection,
+        registerMlUiActions,
+        registerSearchLinks,
+      } = await import('./register_helper');
 
-      if (isMlEnabled(license) && isFullLicense(license)) {
-        const canManageMLJobs = capabilities.management?.insightsAndAlerting?.jobsListLink ?? false;
-        if (canManageMLJobs && pluginsSetup.management !== undefined) {
-          registerManagementSection(pluginsSetup.management, core).enable();
+      const mlEnabled = isMlEnabled(license);
+      const fullLicense = isFullLicense(license);
+      if (mlEnabled) {
+        registerSearchLinks(this.appUpdater$, fullLicense);
+
+        if (fullLicense) {
+          const canManageMLJobs =
+            capabilities.management?.insightsAndAlerting?.jobsListLink ?? false;
+          if (canManageMLJobs && pluginsSetup.management !== undefined) {
+            registerManagementSection(pluginsSetup.management, core).enable();
+          }
+          registerEmbeddables(pluginsSetup.embeddable, core);
+          registerMlUiActions(pluginsSetup.uiActions, core);
         }
-        registerEmbeddables(pluginsSetup.embeddable, core);
-        registerMlUiActions(pluginsSetup.uiActions, core);
       }
     });
 
