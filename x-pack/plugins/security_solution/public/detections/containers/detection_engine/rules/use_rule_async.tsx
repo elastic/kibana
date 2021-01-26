@@ -25,10 +25,12 @@ export interface UseRuleAsync {
 const _fetchRule = flow(withOptionalSignal(pureFetchRuleById), async (rule: Promise<Rule>) =>
   transformInput(await rule)
 );
-const _useRuleAsync = () => useAsync(_fetchRule);
+
+/** This does not use "_useRuleAsyncInternal" as that would deactivate the useHooks linter rule, so instead it has the word "Internal" post-pended  */
+const useRuleAsyncInternal = () => useAsync(_fetchRule);
 
 export const useRuleAsync = (ruleId: string): UseRuleAsync => {
-  const { start, loading, result, error } = _useRuleAsync();
+  const { start, loading, result, error } = useRuleAsyncInternal();
   const http = useHttp();
   const { addError } = useAppToasts();
 
