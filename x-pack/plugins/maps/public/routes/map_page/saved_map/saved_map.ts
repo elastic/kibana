@@ -8,14 +8,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import {
-  COLOR_MAP_TYPE,
-  FIELD_ORIGIN,
-  MAP_PATH,
-  MAP_SAVED_OBJECT_TYPE,
-  SOURCE_TYPES,
-  STYLE_TYPE,
-} from '../../../../common/constants';
+import { MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
 import {
   getTimeFilters,
@@ -47,7 +40,7 @@ import {
   getSavedObjectsTagging,
 } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
-import { LayerDescriptor, VectorLayerDescriptor } from '../../../../common/descriptor_types';
+import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { copyPersistentState } from '../../../reducers/util';
 import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
@@ -174,71 +167,10 @@ export class SavedMap {
         layerList.push(...this._defaultLayers);
       }
     }
-    const geojsonLayer: VectorLayerDescriptor = {
-      type: 'VECTOR',
-      id: 'foobar1',
-      style: {
-        properties: {
-          fillColor: {
-            type: STYLE_TYPE.DYNAMIC,
-            options: {
-              customColorRamp: [
-                {
-                  stop: 0,
-                  color: '#FF0000',
-                },
-                {
-                  stop: 1,
-                  color: '#00FF00',
-                },
-              ],
-              field: {
-                name: 'foobarnumber',
-                origin: FIELD_ORIGIN.SOURCE,
-              },
-              useCustomColorRamp: true,
-            },
-          },
-        },
-      },
-      sourceDescriptor: {
-        type: SOURCE_TYPES.GEOJSON_FILE,
-        __fields: [
-          {
-            name: 'foobarnumber',
-            type: 'number',
-          },
-          {
-            name: 'foobarstring',
-            type: 'string',
-          },
-        ],
-        __featureCollection: {
-          type: 'FeatureCollection',
-          features: [
-            {
-              type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: [0, 0],
-              },
-              properties: {
-                foobarnumber: 1,
-                foobarstring: 'foobar',
-              },
-            },
-          ],
-        },
-      },
-    };
-
-    layerList.push(geojsonLayer);
-
     this._store.dispatch<any>(replaceLayerList(layerList));
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.hiddenLayers !== undefined) {
       this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableInput.hiddenLayers));
     }
-
     this._initialLayerListConfig = copyPersistentState(layerList);
   }
 
