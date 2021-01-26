@@ -117,7 +117,6 @@ export default function ({ getService }: FtrProviderContext) {
                     message: 'An internal server error occurred',
                     statusCode: 500,
                   },
-                  coreMigrationVersion: KIBANA_VERSION, // updated from 1.2.3 to the latest kibana version
                 },
                 {
                   id: BULK_REQUESTS[1].id,
@@ -127,7 +126,6 @@ export default function ({ getService }: FtrProviderContext) {
                     message: 'An internal server error occurred',
                     statusCode: 500,
                   },
-                  coreMigrationVersion: KIBANA_VERSION,
                 },
               ],
             });
