@@ -125,4 +125,21 @@ describe('registerSessionRoutes', () => {
 
     expect(mockContext.search!.cancelSession).toHaveBeenCalledWith(id);
   });
+
+  it('extend calls extendSession with id', async () => {
+    const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
+    const expires = new Date().toISOString();
+    const params = { id };
+    const body = { expires };
+
+    const mockRequest = httpServerMock.createKibanaRequest({ params, body });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const [, , [, extendHandler]] = mockRouter.post.mock.calls;
+
+    extendHandler(mockContext, mockRequest, mockResponse);
+
+    expect(mockContext.search.extendSession).toHaveBeenCalledWith(id, new Date(expires));
+  });
 });

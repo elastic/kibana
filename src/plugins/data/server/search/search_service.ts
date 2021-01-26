@@ -8,6 +8,7 @@
 
 import { BehaviorSubject, from, Observable } from 'rxjs';
 import { pick } from 'lodash';
+import moment from 'moment';
 import {
   CoreSetup,
   CoreStart,
@@ -363,9 +364,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private extendSession = async (
     deps: SearchStrategyDependencies,
     sessionId: string,
-    keepAlive: string
+    expires: Date
   ) => {
     const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
+    const keepAlive = `${moment(expires).diff(moment())}ms`;
 
     for (const [searchId, strategyName] of searchIdMapping.entries()) {
       const searchOptions = {
@@ -376,7 +378,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       await this.extend(deps, searchId, keepAlive, searchOptions);
     }
 
-    return deps.searchSessionsClient.extend(sessionId, keepAlive);
+    return deps.searchSessionsClient.extend(sessionId, expires);
   };
 
   private asScopedProvider = (core: CoreStart) => {

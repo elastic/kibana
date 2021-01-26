@@ -4,21 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { Logger, SavedObject } from 'src/core/server';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { Logger } from 'src/core/server';
 import { reportServerError } from '../../../../../src/plugins/kibana_utils/server';
 import { DataEnhancedPluginRouter } from '../type';
-import { ConfigSchema } from '../../config';
-import { SearchSessionSavedObjectAttributes } from '../../common';
 
-export function registerSessionRoutes(
-  router: DataEnhancedPluginRouter,
-  logger: Logger,
-  config$: Observable<ConfigSchema>
-): void {
+export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: Logger): void {
   router.post(
     {
       path: '/internal/session',
@@ -183,20 +174,16 @@ export function registerSessionRoutes(
         params: schema.object({
           id: schema.string(),
         }),
+        body: schema.object({
+          expires: schema.string(),
+        }),
       },
     },
     async (context, request, res) => {
       const { id } = request.params;
+      const { expires } = request.body;
       try {
-        const config = await config$.pipe(first()).toPromise();
-        const searchSession = (await context.search.getSession(
-          id
-        )) as SavedObject<SearchSessionSavedObjectAttributes>;
-        const expires = moment(searchSession.attributes.expires).add(
-          config.search.sessions.defaultExpiration
-        );
-        const ttl = `${expires.diff(moment())}ms`;
-        const response = await context.search!.extendSession(id, ttl);
+        const response = await context.search!.extendSession(id, new Date(expires));
 
         return res.ok({
           body: response,

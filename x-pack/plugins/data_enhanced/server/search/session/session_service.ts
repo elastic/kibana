@@ -7,7 +7,6 @@
 import moment, { Moment } from 'moment';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import dateMath from '@elastic/datemath';
 import {
   CoreSetup,
   CoreStart,
@@ -300,18 +299,10 @@ export class SearchSessionService
     );
   };
 
-  public extend(deps: SearchSessionDependencies, sessionId: string, keepAlive: string) {
+  public extend(deps: SearchSessionDependencies, sessionId: string, expires: Date) {
     this.logger.debug(`extend | ${sessionId}`);
 
-    // Calculate the new `expires` value given the `keepAlive`
-    const expiresMoment = dateMath.parse(`now+${keepAlive}`);
-    if (!expiresMoment || isNaN(expiresMoment.date())) {
-      throw new Error(`"${keepAlive}" is not a valid value for keepAlive`);
-    }
-    const expires = expiresMoment.toISOString();
-
-    // Update the `expires` value in the search session saved object
-    return this.update(deps, sessionId, { expires });
+    return this.update(deps, sessionId, { expires: expires.toISOString() });
   }
 
   // TODO: Throw an error if this session doesn't belong to this user

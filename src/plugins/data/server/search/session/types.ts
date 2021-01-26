@@ -29,7 +29,7 @@ export interface IScopedSearchSessionsClient<T = unknown> {
   find: (options: Omit<SavedObjectsFindOptions, 'type'>) => Promise<SavedObjectsFindResponse<T>>;
   update: (sessionId: string, attributes: Partial<T>) => Promise<SavedObjectsUpdateResponse<T>>;
   cancel: (sessionId: string) => Promise<{}>;
-  extend: (sessionId: string, keepAlive: string) => Promise<SavedObjectsUpdateResponse<T>>;
+  extend: (sessionId: string, expires: Date) => Promise<SavedObjectsUpdateResponse<T>>;
 }
 
 export interface ISearchSessionService<T = unknown> {
