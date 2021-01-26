@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import { uiSettingsServiceMock } from 'src/core/public/mocks';
 
-import { MapServiceSettings } from './map_service_settings';
+import { MapServiceSettings, getAttributionsForTmsService } from './map_service_settings';
 import { MapsLegacyConfig } from '../../../../maps_legacy/config';
 import { EMSClient, TMSService } from '@elastic/ems-client';
 import { setUISettings } from '../../services';
@@ -34,9 +34,8 @@ describe('vega_map_view/map_service_settings', () => {
       const mapServiceSettings = new MapServiceSettings(config, appVersion);
 
       expect(mapServiceSettings instanceof MapServiceSettings).toBeTruthy();
-      expect(mapServiceSettings.isInitialized).toBeFalsy();
-      expect(mapServiceSettings.hasUserConfiguredTmsLayer).toBeFalsy();
-      expect(mapServiceSettings.defaultTmsLayer).toBe('road_map_desaturated');
+      expect(mapServiceSettings.hasUserConfiguredTmsLayer()).toBeFalsy();
+      expect(mapServiceSettings.defaultTmsLayer()).toBe('road_map_desaturated');
     });
 
     test('should be able to set user configured base layer through config', () => {
@@ -55,48 +54,34 @@ describe('vega_map_view/map_service_settings', () => {
         appVersion
       );
 
-      expect(mapServiceSettings.defaultTmsLayer).toBe('user_configured');
-      expect(mapServiceSettings.hasUserConfiguredTmsLayer).toBeTruthy();
+      expect(mapServiceSettings.defaultTmsLayer()).toBe('user_configured');
+      expect(mapServiceSettings.hasUserConfiguredTmsLayer()).toBeTruthy();
     });
 
-    test('should load ems client only on executing initialize method', async () => {
+    test('should load ems client only on executing getTmsService method', async () => {
       const mapServiceSettings = new MapServiceSettings(config, appVersion);
 
-      expect(mapServiceSettings.isInitialized).toBeFalsy();
       expect(getPrivateField<EMSClient>(mapServiceSettings, 'emsClient')).toBeUndefined();
 
-      await mapServiceSettings.initialize();
-
-      expect(mapServiceSettings.isInitialized).toBeTruthy();
+      await mapServiceSettings.getTmsService('road_map');
 
       expect(
         getPrivateField<EMSClient>(mapServiceSettings, 'emsClient') instanceof EMSClient
       ).toBeTruthy();
     });
 
-    test('should set isDarkMode value on executing initialize method', async () => {
+    test('should set isDarkMode value on executing getTmsService method', async () => {
       const mapServiceSettings = new MapServiceSettings(config, appVersion);
       getUiSettingsMockedValue = true;
 
       expect(getPrivateField<EMSClient>(mapServiceSettings, 'isDarkMode')).toBeFalsy();
 
-      await mapServiceSettings.initialize();
+      await mapServiceSettings.getTmsService('road_map');
 
       expect(getPrivateField<EMSClient>(mapServiceSettings, 'isDarkMode')).toBeTruthy();
     });
 
-    test('getTmsService method should return TMS service by id', async () => {
-      const mapServiceSettings = new MapServiceSettings(config, appVersion);
-      await mapServiceSettings.initialize();
-      const emsClient = getPrivateField<EMSClient>(mapServiceSettings, 'emsClient');
-      emsClient.findTMSServiceById = jest.fn();
-      await mapServiceSettings.getTmsService('road_map');
-
-      expect(emsClient.findTMSServiceById).toHaveBeenCalledWith('road_map');
-    });
-
     test('getAttributionsForTmsService method should return attributes in a correct form', () => {
-      const mapServiceSettings = new MapServiceSettings(config, appVersion);
       const tmsService = ({
         getAttributions: jest.fn(() => [
           { url: 'https://fist_attr.com', label: 'fist_attr' },
@@ -104,7 +89,7 @@ describe('vega_map_view/map_service_settings', () => {
         ]),
       } as unknown) as TMSService;
 
-      expect(mapServiceSettings.getAttributionsForTmsService(tmsService)).toMatchInlineSnapshot(`
+      expect(getAttributionsForTmsService(tmsService)).toMatchInlineSnapshot(`
         Array [
           "<a rel=\\"noreferrer noopener\\" href=\\"https://fist_attr.com\\">fist_attr</a>",
           "<a rel=\\"noreferrer noopener\\" href=\\"https://second_attr.com\\">second_attr</a>",
