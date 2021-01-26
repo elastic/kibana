@@ -25,7 +25,7 @@ jest.mock('../../../common/search/expressions', () => ({
 }));
 
 import { getEsaggsMeta, handleEsaggsRequest } from '../../../common/search/expressions';
-import { mockPatternLists } from '../../../common/index_patterns/index_patterns/fixtures/stubbed_saved_object_index_pattern';
+import { mockPatternLists } from '../../../common/index_patterns/index_pattern.stub';
 
 describe('esaggs expression function - server', () => {
   let getStartDependencies: () => Promise<MockedKeys<EsaggsStartDependencies>>;
