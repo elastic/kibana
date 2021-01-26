@@ -76,7 +76,7 @@ export async function scheduleSearchSessionsTasks(
       params: {},
     });
 
-    logger.debug(`Background search task, scheduled to run`);
+    logger.debug(`Search sessions task, scheduled to run`);
   } catch (e) {
     logger.debug(`Error scheduling task, received ${e.message}`);
   }
