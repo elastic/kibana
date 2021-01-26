@@ -36,7 +36,6 @@ describe('EngineLogic', () => {
     dataLoading: true,
     engine: {},
     engineName: '',
-    generateEnginePath: expect.any(Function),
     isMetaEngine: false,
     isSampleEngine: false,
     hasSchemaConflicts: false,
@@ -198,28 +197,6 @@ describe('EngineLogic', () => {
   });
 
   describe('selectors', () => {
-    describe('generateEnginePath', () => {
-      it('returns helper function that generates paths with engineName prefilled', () => {
-        mount({ engineName: 'hello-world' });
-
-        const generatedPath = EngineLogic.values.generateEnginePath('/engines/:engineName/example');
-        expect(generatedPath).toEqual('/engines/hello-world/example');
-      });
-
-      it('allows overriding engineName and filling other params', () => {
-        mount({ engineName: 'lorem-ipsum' });
-
-        const generatedPath = EngineLogic.values.generateEnginePath(
-          '/engines/:engineName/foo/:bar',
-          {
-            engineName: 'dolor-sit',
-            bar: 'baz',
-          }
-        );
-        expect(generatedPath).toEqual('/engines/dolor-sit/foo/baz');
-      });
-    });
-
     describe('isSampleEngine', () => {
       it('should be set based on engine.sample', () => {
         const mockSampleEngine = { ...mockEngineData, sample: true };

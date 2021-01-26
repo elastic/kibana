@@ -147,6 +147,10 @@ const TopNav = ({
       }
       return actions.default();
     });
+    return () => {
+      // reset on app leave handler so leaving from the listing page doesn't trigger a confirmation
+      onAppLeave((actions) => actions.default());
+    };
   }, [
     onAppLeave,
     originatingApp,

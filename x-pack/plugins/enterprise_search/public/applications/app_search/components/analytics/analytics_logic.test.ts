@@ -29,6 +29,15 @@ describe('AnalyticsLogic', () => {
     dataLoading: true,
     analyticsUnavailable: false,
     allTags: [],
+    totalQueries: 0,
+    totalQueriesNoResults: 0,
+    totalClicks: 0,
+    totalQueriesForQuery: 0,
+    queriesPerDay: [],
+    queriesNoResultsPerDay: [],
+    clicksPerDay: [],
+    queriesPerDayForQuery: [],
+    startDate: '',
   };
 
   const MOCK_TOP_QUERIES = [
@@ -66,6 +75,7 @@ describe('AnalyticsLogic', () => {
   const MOCK_ANALYTICS_RESPONSE = {
     analyticsUnavailable: false,
     allTags: ['some-tag'],
+    startDate: '1970-01-01',
     recentQueries: MOCK_RECENT_QUERIES,
     topQueries: MOCK_TOP_QUERIES,
     topQueriesNoResults: MOCK_TOP_QUERIES,
@@ -81,6 +91,7 @@ describe('AnalyticsLogic', () => {
   const MOCK_QUERY_RESPONSE = {
     analyticsUnavailable: false,
     allTags: ['some-tag'],
+    startDate: '1970-01-01',
     totalQueriesForQuery: 50,
     queriesPerDayForQuery: [25, 0, 25],
     topClicksForQuery: MOCK_TOP_CLICKS,
@@ -120,7 +131,14 @@ describe('AnalyticsLogic', () => {
           dataLoading: false,
           analyticsUnavailable: false,
           allTags: ['some-tag'],
-          // TODO: more state will get set here in future PRs
+          startDate: '1970-01-01',
+          totalClicks: 1000,
+          totalQueries: 5000,
+          totalQueriesNoResults: 500,
+          queriesPerDay: [10, 50, 100],
+          queriesNoResultsPerDay: [1, 2, 3],
+          clicksPerDay: [0, 10, 50],
+          // TODO: Replace this with ...MOCK_ANALYTICS_RESPONSE once all data is set
         });
       });
     });
@@ -135,7 +153,10 @@ describe('AnalyticsLogic', () => {
           dataLoading: false,
           analyticsUnavailable: false,
           allTags: ['some-tag'],
-          // TODO: more state will get set here in future PRs
+          startDate: '1970-01-01',
+          totalQueriesForQuery: 50,
+          queriesPerDayForQuery: [25, 0, 25],
+          // TODO: Replace this with ...MOCK_QUERY_RESPONSE once all data is set
         });
       });
     });

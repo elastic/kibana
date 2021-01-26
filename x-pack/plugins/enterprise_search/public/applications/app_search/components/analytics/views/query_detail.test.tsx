@@ -5,6 +5,7 @@
  */
 
 import '../../../../__mocks__/react_router_history.mock';
+import { setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
@@ -12,6 +13,7 @@ import { shallow } from 'enzyme';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 
+import { AnalyticsCards, AnalyticsChart } from '../components';
 import { QueryDetail } from './';
 
 describe('QueryDetail', () => {
@@ -19,6 +21,11 @@ describe('QueryDetail', () => {
 
   beforeEach(() => {
     (useParams as jest.Mock).mockReturnValueOnce({ query: 'some-query' });
+
+    setMockValues({
+      totalQueriesForQuery: 100,
+      queriesPerDayForQuery: [0, 5, 10],
+    });
   });
 
   it('renders', () => {
@@ -31,5 +38,8 @@ describe('QueryDetail', () => {
       'Query',
       'some-query',
     ]);
+
+    expect(wrapper.find(AnalyticsCards)).toHaveLength(1);
+    expect(wrapper.find(AnalyticsChart)).toHaveLength(1);
   });
 });

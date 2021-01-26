@@ -10,7 +10,7 @@ import {
   useUiSetting$,
   KibanaContextProvider,
 } from '../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../observability/public';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
 import { createKibanaContextForPlugin } from '../hooks/use_kibana';
 import { InfraClientStartDeps } from '../types';
