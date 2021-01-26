@@ -92,7 +92,7 @@ describe('#setup', () => {
       // reset all mocks called during setup phase
       MockLegacyClusterClient.mockClear();
 
-      const customConfig = { logQueries: true };
+      const customConfig = { keepAlive: true };
       const clusterClient = setupContract.legacy.createClient('some-custom-type', customConfig);
 
       expect(clusterClient).toBe(mockLegacyClusterClientInstance);
@@ -267,7 +267,7 @@ describe('#start', () => {
       // reset all mocks called during setup phase
       MockClusterClient.mockClear();
 
-      const customConfig = { logQueries: true };
+      const customConfig = { keepAlive: true };
       const clusterClient = startContract.createClient('custom-type', customConfig);
 
       expect(clusterClient).toBe(mockClusterClientInstance);
@@ -286,7 +286,7 @@ describe('#start', () => {
       // reset all mocks called during setup phase
       MockClusterClient.mockClear();
 
-      const customConfig = { logQueries: true };
+      const customConfig = { keepAlive: true };
 
       startContract.createClient('custom-type', customConfig);
       startContract.createClient('another-type', customConfig);

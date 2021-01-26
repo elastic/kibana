@@ -22,7 +22,6 @@ test('parses minimally specified config', () => {
       {
         apiVersion: 'master',
         customHeaders: { xsrf: 'something' },
-        logQueries: false,
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
@@ -58,7 +57,6 @@ test('parses fully specified config', () => {
   const elasticsearchConfig: LegacyElasticsearchClientConfig = {
     apiVersion: 'v7.0.0',
     customHeaders: { xsrf: 'something' },
-    logQueries: true,
     sniffOnStart: true,
     sniffOnConnectionFault: true,
     hosts: [
@@ -163,7 +161,6 @@ test('parses config timeouts of moment.Duration type', () => {
       {
         apiVersion: 'master',
         customHeaders: { xsrf: 'something' },
-        logQueries: false,
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         pingTimeout: duration(100, 'ms'),
@@ -208,7 +205,6 @@ describe('#auth', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: { xsrf: 'something' },
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['http://user:password@localhost/elasticsearch', 'https://es.local'],
@@ -260,7 +256,6 @@ describe('#auth', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: { xsrf: 'something' },
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
@@ -300,7 +295,6 @@ describe('#auth', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: { xsrf: 'something' },
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
@@ -342,7 +336,6 @@ describe('#customHeaders', () => {
       {
         apiVersion: 'master',
         customHeaders: { [headerKey]: 'foo' },
-        logQueries: false,
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
@@ -357,56 +350,11 @@ describe('#customHeaders', () => {
 });
 
 describe('#log', () => {
-  test('default logger with #logQueries = false', () => {
+  test('default logger', () => {
     const parsedConfig = parseElasticsearchClientConfig(
       {
         apiVersion: 'master',
         customHeaders: { xsrf: 'something' },
-        logQueries: false,
-        sniffOnStart: false,
-        sniffOnConnectionFault: false,
-        hosts: ['http://localhost/elasticsearch'],
-        requestHeadersWhitelist: [],
-      },
-      logger.get()
-    );
-
-    const esLogger = new parsedConfig.log();
-    esLogger.error('some-error');
-    esLogger.warning('some-warning');
-    esLogger.trace('some-trace');
-    esLogger.info('some-info');
-    esLogger.debug('some-debug');
-
-    expect(typeof esLogger.close).toBe('function');
-
-    expect(loggingSystemMock.collect(logger)).toMatchInlineSnapshot(`
-      Object {
-        "debug": Array [],
-        "error": Array [
-          Array [
-            "some-error",
-          ],
-        ],
-        "fatal": Array [],
-        "info": Array [],
-        "log": Array [],
-        "trace": Array [],
-        "warn": Array [
-          Array [
-            "some-warning",
-          ],
-        ],
-      }
-    `);
-  });
-
-  test('default logger with #logQueries = true', () => {
-    const parsedConfig = parseElasticsearchClientConfig(
-      {
-        apiVersion: 'master',
-        customHeaders: { xsrf: 'something' },
-        logQueries: true,
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
@@ -433,11 +381,6 @@ describe('#log', () => {
             "304
       METHOD /some-path
       ?query=2",
-            Object {
-              "tags": Array [
-                "query",
-              ],
-            },
           ],
         ],
         "error": Array [
@@ -465,7 +408,6 @@ describe('#log', () => {
       {
         apiVersion: 'master',
         customHeaders: { xsrf: 'something' },
-        logQueries: true,
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
@@ -486,7 +428,6 @@ describe('#ssl', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: {},
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
@@ -527,7 +468,6 @@ describe('#ssl', () => {
       {
         apiVersion: 'v7.0.0',
         customHeaders: {},
-        logQueries: true,
         sniffOnStart: true,
         sniffOnConnectionFault: true,
         hosts: ['https://es.local'],
@@ -576,7 +516,6 @@ describe('#ssl', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: {},
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
@@ -618,7 +557,6 @@ describe('#ssl', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: {},
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
@@ -636,7 +574,6 @@ describe('#ssl', () => {
         {
           apiVersion: 'v7.0.0',
           customHeaders: {},
-          logQueries: true,
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],

@@ -19,7 +19,6 @@ const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
 ): ElasticsearchClientConfig => {
   return {
-    logQueries: false,
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,
