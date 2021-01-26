@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './eui_styled_components';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Search Profiler', () => {
+    loadTestFile(require.resolve('./searchprofiler'));
+  });
+}

@@ -8,11 +8,11 @@
 
 import React, { lazy } from 'react';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { VisParams } from '../vega_fn';
 
 const VegaVisEditor = lazy(() => import('./vega_vis_editor'));
 
-export const VegaVisEditorComponent = (props: VisOptionsProps<VisParams>) => (
+export const VegaVisEditorComponent = (props: VisEditorOptionsProps<VisParams>) => (
   <VegaVisEditor {...props} />
 );
