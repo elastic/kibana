@@ -17,12 +17,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
 
-  describe('indexpattern with unmapped fields', () => {
+  describe('index pattern with unmapped fields', () => {
     const unmappedFieldsSwitchSelector = 'unmappedFieldsSwitch';
 
     before(async () => {
       await esArchiver.loadIfNeeded('unmapped_fields');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'test-index-unampped-fields' });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'test-index-unmapped-fields' });
       await kibanaServer.uiSettings.update({
         'discover:searchFieldsFromSource': false,
       });
