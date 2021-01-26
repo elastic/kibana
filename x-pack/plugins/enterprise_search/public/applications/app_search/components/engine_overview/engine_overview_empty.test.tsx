@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 
-import { CURRENT_MAJOR_VERSION } from '../../../../../common/version';
+import { docLinksService } from '../../../shared/doc_links/doc_links';
 
 import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 import { EmptyEngineOverview } from './engine_overview_empty';
@@ -26,7 +26,7 @@ describe('EmptyEngineOverview', () => {
 
   it('renders correctly versioned documentation URLs', () => {
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      `https://www.elastic.co/guide/en/app-search/${CURRENT_MAJOR_VERSION}/index.html`
+      `${docLinksService.appSearchBase}/index.html`
     );
   });
 
