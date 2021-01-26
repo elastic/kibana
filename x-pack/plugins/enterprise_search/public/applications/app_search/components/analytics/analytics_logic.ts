@@ -62,6 +62,61 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
         onQueryDataLoad: (_, { allTags }) => allTags,
       },
     ],
+    totalQueries: [
+      0,
+      {
+        onAnalyticsDataLoad: (_, { totalQueries }) => totalQueries,
+      },
+    ],
+    totalQueriesNoResults: [
+      0,
+      {
+        onAnalyticsDataLoad: (_, { totalQueriesNoResults }) => totalQueriesNoResults,
+      },
+    ],
+    totalClicks: [
+      0,
+      {
+        onAnalyticsDataLoad: (_, { totalClicks }) => totalClicks,
+      },
+    ],
+    queriesPerDay: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { queriesPerDay }) => queriesPerDay,
+      },
+    ],
+    queriesNoResultsPerDay: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { queriesNoResultsPerDay }) => queriesNoResultsPerDay,
+      },
+    ],
+    clicksPerDay: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { clicksPerDay }) => clicksPerDay,
+      },
+    ],
+    totalQueriesForQuery: [
+      0,
+      {
+        onQueryDataLoad: (_, { totalQueriesForQuery }) => totalQueriesForQuery,
+      },
+    ],
+    queriesPerDayForQuery: [
+      [],
+      {
+        onQueryDataLoad: (_, { queriesPerDayForQuery }) => queriesPerDayForQuery,
+      },
+    ],
+    startDate: [
+      '',
+      {
+        onAnalyticsDataLoad: (_, { startDate }) => startDate,
+        onQueryDataLoad: (_, { startDate }) => startDate,
+      },
+    ],
   }),
   listeners: ({ actions }) => ({
     loadAnalyticsData: async () => {

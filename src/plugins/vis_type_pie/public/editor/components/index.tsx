@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from '../../../../visualizations/public';
 import { PieVisParams, PieTypeProps } from '../../types';
 
 const PieOptionsLazy = lazy(() => import('./pie'));
@@ -16,7 +16,7 @@ export const getPieOptions = ({
   showElasticChartsOptions,
   palettes,
   trackUiMetric,
-}: PieTypeProps) => (props: VisOptionsProps<PieVisParams>) => (
+}: PieTypeProps) => (props: VisEditorOptionsProps<PieVisParams>) => (
   <PieOptionsLazy
     {...props}
     palettes={palettes}

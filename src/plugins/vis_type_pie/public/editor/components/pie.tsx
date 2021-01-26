@@ -13,18 +13,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  VisOptionsProps,
   BasicOptions,
   SwitchOption,
   SelectOption,
   PalettePicker,
 } from '../../../../vis_default_editor/public';
+import { VisEditorOptionsProps } from '../../../../visualizations/public';
 import { TruncateLabelsOption } from './truncate_labels';
 import { PaletteRegistry } from '../../../../charts/public';
 import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../../types';
 import { getLabelPositions, getValuesFormats } from '../collections';
 
-export interface PieOptionsProps extends VisOptionsProps<PieVisParams>, PieTypeProps {}
+export interface PieOptionsProps extends VisEditorOptionsProps<PieVisParams>, PieTypeProps {}
 
 const PieOptions = (props: PieOptionsProps) => {
   const { stateParams, setValue } = props;

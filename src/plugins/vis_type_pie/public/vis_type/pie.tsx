@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { AggGroupNames } from '../../../data/public';
-import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions } from '../../../visualizations/public';
+import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../visualizations/public';
 import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getLegendPositions } from '../editor';
@@ -21,7 +21,7 @@ export const getPieVisTypeDefinition = ({
   showElasticChartsOptions = false,
   palettes,
   trackUiMetric,
-}: PieTypeProps): BaseVisTypeOptions<PieVisParams> => ({
+}: PieTypeProps): VisTypeDefinition<PieVisParams> => ({
   name: 'pie',
   title: i18n.translate('visTypePie.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
@@ -102,4 +102,5 @@ export const getPieVisTypeDefinition = ({
     ],
   },
   hierarchicalData: true,
+  requiresSearch: true,
 });

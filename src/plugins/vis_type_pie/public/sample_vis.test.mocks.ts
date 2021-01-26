@@ -106,10 +106,7 @@ export const samplePieVis = {
       },
     },
     hidden: false,
-    requestHandler: 'courier',
-    responseHandler: 'vislib_slices',
     hierarchicalData: true,
-    useCustomNoDataScreen: false,
   },
   title: '[Flights] Airline Carrier',
   description: '',
@@ -126,7 +123,6 @@ export const samplePieVis = {
       truncate: 100,
     },
   },
-  sessionState: {},
   data: {
     searchSource: {
       id: 'data_source1',

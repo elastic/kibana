@@ -299,10 +299,7 @@ export const sampleAreaVis = {
       },
     },
     hidden: false,
-    requestHandler: 'courier',
-    responseHandler: 'none',
     hierarchicalData: false,
-    useCustomNoDataScreen: false,
   },
   title: '[eCommerce] Sales by Category',
   description: '',
@@ -439,7 +436,6 @@ export const sampleAreaVis = {
       ],
     },
   },
-  sessionState: {},
   data: {
     searchSource: {
       id: 'data_source1',

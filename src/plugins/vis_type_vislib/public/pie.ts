@@ -7,8 +7,8 @@
  */
 
 import { pieVisType } from '../../vis_type_pie/public';
+import { VisTypeDefinition } from '../../visualizations/public';
 import { CommonVislibParams } from './types';
-import { BaseVisTypeOptions } from '../../../plugins/visualizations/public';
 import { toExpressionAst } from './to_ast_pie';
 
 export interface PieVisParams extends CommonVislibParams {
@@ -22,8 +22,7 @@ export interface PieVisParams extends CommonVislibParams {
   };
 }
 
-export const pieVisTypeDefinition: BaseVisTypeOptions<PieVisParams> = {
-  ...(pieVisType({}) as BaseVisTypeOptions<PieVisParams>),
+export const pieVisTypeDefinition = {
+  ...pieVisType({}),
   toExpressionAst,
-  visualization: undefined,
-};
+} as VisTypeDefinition<PieVisParams>;
