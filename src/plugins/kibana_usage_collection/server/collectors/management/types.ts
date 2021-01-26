@@ -89,7 +89,6 @@ export interface UsageStats {
   'sort:options': string;
   'savedObjects:listingLimit': number;
   'query:queryString:options': string;
-  pageNavigation: string;
   'metrics:max_buckets': number;
   'query:allowLeadingWildcards': boolean;
   metaFields: string[];
