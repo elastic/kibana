@@ -16,7 +16,7 @@ import {
 
 import { useAllAgents } from './use_all_agents';
 import { Direction } from '../../common/search_strategy';
-import { Agent } from '../shared_imports';
+import { Agent } from '../../common/shared_imports';
 
 interface AgentsTableProps {
   selectedAgents: string[];

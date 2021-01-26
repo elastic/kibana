@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
-  ResultEdge,
+  ResultEdges,
   PageInfoPaginated,
   DocValueFields,
   OsqueryQueries,
@@ -28,7 +28,7 @@ import { generateTablePaginationOptions, getInspectResponse, InspectResponse } f
 const ID = 'resultsAllQuery';
 
 export interface ResultsArgs {
-  results: ResultEdge[];
+  results: ResultEdges;
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;

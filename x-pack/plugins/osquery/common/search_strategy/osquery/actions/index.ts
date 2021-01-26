@@ -10,11 +10,11 @@ import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common'
 import { Inspect, Maybe, PageInfoPaginated } from '../../common';
 import { RequestOptions, RequestOptionsPaginated } from '../..';
 
-export type ActionEdge = SearchResponse<object>['hits']['hits'];
+export type ActionEdges = SearchResponse<object>['hits']['hits'];
 
-export type ActionResultEdge = SearchResponse<object>['hits']['hits'];
+export type ActionResultEdges = SearchResponse<object>['hits']['hits'];
 export interface ActionsStrategyResponse extends IEsSearchResponse {
-  edges: ActionEdge;
+  edges: ActionEdges;
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
@@ -32,7 +32,7 @@ export interface ActionDetailsRequestOptions extends RequestOptions {
 }
 
 export interface ActionResultsStrategyResponse extends IEsSearchResponse {
-  edges: ActionResultEdge;
+  edges: ActionResultEdges;
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;

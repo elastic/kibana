@@ -9,9 +9,9 @@ import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn, EuiDataGridSorting } 
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { useAllActions } from './use_all_actions';
-import { ActionEdge, Direction } from '../../common/search_strategy';
+import { ActionEdges, Direction } from '../../common/search_strategy';
 
-const DataContext = createContext<ActionEdge[]>([]);
+const DataContext = createContext<ActionEdges>([]);
 
 const ActionsTableComponent = () => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
@@ -53,8 +53,6 @@ const ActionsTableComponent = () => {
     return ({ rowIndex, columnId, setCellProps }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
-
-      // @ts-expect-error
       const value = data[rowIndex].fields[columnId];
 
       return !isEmpty(value) ? value : '-';
@@ -77,7 +75,6 @@ const ActionsTableComponent = () => {
   );
 
   useEffect(() => {
-    // @ts-expect-error
     const newColumns = keys(actions[0]?.fields)
       .sort()
       .map((fieldName) => ({

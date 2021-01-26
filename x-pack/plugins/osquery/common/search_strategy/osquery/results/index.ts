@@ -10,10 +10,10 @@ import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common'
 import { Inspect, Maybe, PageInfoPaginated } from '../../common';
 import { RequestOptionsPaginated } from '../..';
 
-export type ResultEdge = SearchResponse<unknown>['hits']['hits'];
+export type ResultEdges = SearchResponse<unknown>['hits']['hits'];
 
 export interface ResultsStrategyResponse extends IEsSearchResponse {
-  edges: ResultEdge;
+  edges: ResultEdges;
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;

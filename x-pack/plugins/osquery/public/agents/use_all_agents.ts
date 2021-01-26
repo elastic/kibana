@@ -18,7 +18,7 @@ import {
   Direction,
 } from '../../common/search_strategy';
 import { ESTermQuery } from '../../common/typed_json';
-import { Agent } from '../shared_imports';
+import { Agent } from '../../common/shared_imports';
 
 import * as i18n from './translations';
 import { isCompleteResponse, isErrorResponse } from '../../../../../src/plugins/data/common';
@@ -97,7 +97,6 @@ export const useAllAgents = ({
             next: (response) => {
               if (isCompleteResponse(response)) {
                 if (!didCancel) {
-                  console.error('agents', response.edges);
                   setLoading(false);
                   setAgentsResponse((prevResponse) => ({
                     ...prevResponse,

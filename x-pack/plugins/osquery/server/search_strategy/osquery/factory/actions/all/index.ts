@@ -24,7 +24,7 @@ export const allActions: OsqueryFactory<OsqueryQueries.actions> = {
   },
   parse: async (
     options: ActionsRequestOptions,
-    response: IEsSearchResponse<unknown>
+    response: IEsSearchResponse<object>
   ): Promise<ActionsStrategyResponse> => {
     const { activePage } = options.pagination;
     const inspect = {

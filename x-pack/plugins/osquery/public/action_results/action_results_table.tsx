@@ -9,9 +9,9 @@ import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn, EuiDataGridSorting } 
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { useAllResults } from './use_action_results';
-import { Direction, ResultEdge } from '../../common/search_strategy';
+import { Direction, ResultEdges } from '../../common/search_strategy';
 
-const DataContext = createContext<ResultEdge[]>([]);
+const DataContext = createContext<ResultEdges>([]);
 
 interface ActionResultsTableProps {
   actionId: string;
@@ -58,7 +58,6 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     () => ({ rowIndex, columnId, setCellProps }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
-      // @ts-expect-error
       const value = data[rowIndex].fields[columnId];
 
       return !isEmpty(value) ? value : '-';
@@ -82,7 +81,6 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
   );
 
   useEffect(() => {
-    // @ts-expect-error
     const newColumns = keys(results[0]?.fields)
       .sort()
       .map((fieldName) => ({

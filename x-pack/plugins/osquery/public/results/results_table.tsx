@@ -10,9 +10,9 @@ import React, { createContext, useEffect, useState, useCallback, useContext, use
 
 import { EuiDataGridSorting } from '@elastic/eui';
 import { useAllResults } from './use_all_results';
-import { Direction } from '../../common/search_strategy';
+import { Direction, ResultEdges } from '../../common/search_strategy';
 
-const DataContext = createContext<any[]>([]);
+const DataContext = createContext<ResultEdges>([]);
 
 interface ResultsTableComponentProps {
   actionId: string;
@@ -87,7 +87,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId 
   );
 
   useEffect(() => {
-    // @ts-expect-error
     const newColumns: EuiDataGridColumn[] = keys(results[0]?.fields)
       .sort()
       .map((fieldName) => ({
