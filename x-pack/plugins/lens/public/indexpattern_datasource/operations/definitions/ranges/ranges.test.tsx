@@ -275,7 +275,7 @@ describe('ranges', () => {
 
       it('should start update the state with the default maxBars value', () => {
         const updateLayerSpy = jest.fn();
-        mount(
+        const instance = mount(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -285,19 +285,7 @@ describe('ranges', () => {
           />
         );
 
-        expect(updateLayerSpy).toHaveBeenCalledWith({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            col1: {
-              ...layer.columns.col1,
-              params: {
-                ...layer.columns.col1.params,
-                maxBars: GRANULARITY_DEFAULT_VALUE,
-              },
-            },
-          },
-        });
+        expect(instance.find(EuiRange).prop('value')).toEqual(String(GRANULARITY_DEFAULT_VALUE));
       });
 
       it('should update state when changing Max bars number', () => {
@@ -313,8 +301,6 @@ describe('ranges', () => {
           />
         );
 
-        // There's a useEffect in the component that updates the value on bootstrap
-        // because there's a debouncer, wait a bit before calling onChange
         act(() => {
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
@@ -358,8 +344,6 @@ describe('ranges', () => {
           />
         );
 
-        // There's a useEffect in the component that updates the value on bootstrap
-        // because there's a debouncer, wait a bit before calling onChange
         act(() => {
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
           // minus button
@@ -368,6 +352,7 @@ describe('ranges', () => {
             .find('button')
             .prop('onClick')!({} as ReactMouseEvent);
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+          instance.update();
         });
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -391,6 +376,7 @@ describe('ranges', () => {
             .find('button')
             .prop('onClick')!({} as ReactMouseEvent);
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+          instance.update();
         });
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -788,7 +774,7 @@ describe('ranges', () => {
           instance.find(EuiLink).first().prop('onClick')!({} as ReactMouseEvent);
         });
 
-        expect(updateLayerSpy.mock.calls[1][0].columns.col1.params.format).toEqual({
+        expect(updateLayerSpy.mock.calls[0][0].columns.col1.params.format).toEqual({
           id: 'custom',
           params: { decimals: 3 },
         });
