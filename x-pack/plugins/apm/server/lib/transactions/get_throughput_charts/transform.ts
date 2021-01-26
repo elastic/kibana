@@ -7,17 +7,19 @@
 import { sortBy } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { ThroughputChartsResponse } from '.';
+import { getTpmRate } from '../../helpers/get_tpm_rate';
+import { SetupTimeRange } from '../../helpers/setup_request';
 
 type ThroughputResultBuckets = Required<ThroughputChartsResponse>['aggregations']['throughput']['buckets'];
 
 export function getThroughputBuckets({
   throughputResultBuckets = [],
   bucketSize,
-  durationAsMinutes,
+  setupTimeRange,
 }: {
   throughputResultBuckets?: ThroughputResultBuckets;
   bucketSize: number;
-  durationAsMinutes: number;
+  setupTimeRange: SetupTimeRange;
 }) {
   const buckets = throughputResultBuckets.map(
     ({ key: resultKey, timeseries }) => {
@@ -38,7 +40,7 @@ export function getThroughputBuckets({
         .reduce((a, b) => a + b, 0);
 
       // calculate average throughput
-      const avg = docCountTotal / durationAsMinutes;
+      const avg = getTpmRate(setupTimeRange, docCountTotal);
 
       return { key, dataPoints, avg };
     }

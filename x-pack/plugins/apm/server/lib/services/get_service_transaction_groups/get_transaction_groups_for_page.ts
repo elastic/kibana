@@ -25,6 +25,7 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../helpers/latency_aggregation_type';
+import { getTpmRate } from '../../helpers/get_tpm_rate';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -64,8 +65,6 @@ export async function getTransactionGroupsForPage({
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
-  const deltaAsMinutes = (end - start) / 1000 / 60;
-
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions
   );
@@ -124,7 +123,7 @@ export async function getTransactionGroupsForPage({
           latencyAggregationType,
           aggregation: bucket.latency,
         }),
-        throughput: bucket.transaction_count.value / deltaAsMinutes,
+        throughput: getTpmRate({ start, end }, bucket.transaction_count.value),
         errorRate,
       };
     }) ?? [];

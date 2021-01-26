@@ -6,6 +6,7 @@
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { getTpmRate } from '../../helpers/get_tpm_rate';
 import { getLatencyValue } from '../../helpers/latency_aggregation_type';
 import { TransactionGroupTimeseriesData } from './get_timeseries_data_for_transaction_groups';
 import { TransactionGroupWithoutTimeseriesData } from './get_transaction_groups_for_page';
@@ -25,8 +26,6 @@ export function mergeTransactionGroupData({
   latencyAggregationType: LatencyAggregationType;
   transactionType: string;
 }) {
-  const deltaAsMinutes = (end - start) / 1000 / 60;
-
   return transactionGroups.map((transactionGroup) => {
     const groupBucket = timeseriesData.find(
       ({ key }) => key === transactionGroup.name
@@ -52,7 +51,7 @@ export function mergeTransactionGroupData({
             ...acc.throughput,
             timeseries: acc.throughput.timeseries.concat({
               x: point.key,
-              y: point.transaction_count.value / deltaAsMinutes,
+              y: getTpmRate({ start, end }, point.transaction_count.value),
             }),
           },
           errorRate: {

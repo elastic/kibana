@@ -16,6 +16,7 @@ import {
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
+import { getTpmRate } from '../helpers/get_tpm_rate';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 interface Options {
@@ -27,16 +28,14 @@ interface Options {
 
 type ESResponse = PromiseReturnType<typeof fetcher>;
 
-function transform(response: ESResponse, options: Options) {
-  const { end, start } = options.setup;
-  const deltaAsMinutes = (end - start) / 1000 / 60;
+function transform(options: Options, response: ESResponse) {
   if (response.hits.total.value === 0) {
     return [];
   }
   const buckets = response.aggregations?.throughput.buckets ?? [];
   return buckets.map(({ key: x, doc_count: y }) => ({
     x,
-    y: y / deltaAsMinutes,
+    y: getTpmRate(options.setup, y),
   }));
 }
 
@@ -87,6 +86,6 @@ async function fetcher({
 
 export async function getThroughput(options: Options) {
   return {
-    throughput: transform(await fetcher(options), options),
+    throughput: transform(options, await fetcher(options)),
   };
 }
