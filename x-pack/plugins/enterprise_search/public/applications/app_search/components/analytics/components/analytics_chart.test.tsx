@@ -54,6 +54,14 @@ describe('AnalyticsChart', () => {
     expect(wrapper.find(LineSeries)).toHaveLength(3);
   });
 
+  it('renders dashed lines', () => {
+    const wrapper = shallow(
+      <AnalyticsChart lines={[{ id: 'dashed 1', data: MOCK_DATA, isDashed: true }]} />
+    );
+
+    expect(wrapper.find(LineSeries).prop('lineSeriesStyle')?.line?.dash).toBeTruthy();
+  });
+
   it('formats x-axis dates correctly', () => {
     const wrapper = shallow(<AnalyticsChart lines={[{ id: 'test', data: MOCK_DATA }]} />);
     const dateFormatter: Function = wrapper.find('#bottom-axis').prop('tickFormat');

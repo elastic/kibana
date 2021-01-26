@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VisGroups, BaseVisTypeOptions } from '../../visualizations/public';
+import { VisGroups, VisTypeDefinition } from '../../visualizations/public';
 import { getControlsTab, OptionsTabLazy } from './components/editor';
 import { InputControlVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
@@ -15,7 +15,7 @@ import { InputControlVisParams } from './types';
 
 export function createInputControlVisTypeDefinition(
   deps: InputControlVisDependencies
-): BaseVisTypeOptions<InputControlVisParams> {
+): VisTypeDefinition<InputControlVisParams> {
   const ControlsTab = getControlsTab(deps);
 
   return {
@@ -56,7 +56,6 @@ export function createInputControlVisTypeDefinition(
       ],
     },
     inspectorAdapters: {},
-    requestHandler: 'none',
     toExpressionAst,
   };
 }
