@@ -13,6 +13,7 @@ import moment from 'moment';
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
+  const esArchiver = getService('esArchiver');
 
   const createUiCounterEvent = (eventName, type, count = 1) => ({
     eventName,
@@ -22,6 +23,10 @@ export default function ({ getService }) {
   });
 
   describe('UI Counters API', () => {
+    before(async () => {
+      await esArchiver.emptyKibanaIndex();
+    });
+
     const dayDate = moment().format('DDMMYYYY');
 
     it('stores ui counter events in savedObjects', async () => {

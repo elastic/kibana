@@ -172,6 +172,7 @@ export default function ({ getService }) {
       describe('basic behaviour', () => {
         let savedObjectIds = [];
         before('create application usage entries', async () => {
+          await esArchiver.emptyKibanaIndex();
           savedObjectIds = await Promise.all([
             createSavedObject(),
             createSavedObject('appView1'),

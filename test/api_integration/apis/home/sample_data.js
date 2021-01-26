@@ -11,10 +11,14 @@ import expect from '@kbn/expect';
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
+  const esArchiver = getService('esArchiver');
 
   const MILLISECOND_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
 
   describe('sample data apis', () => {
+    before(async () => {
+      await esArchiver.emptyKibanaIndex();
+    });
     describe('list', () => {
       it('should return list of sample data sets with installed status', async () => {
         const resp = await supertest.get(`/api/sample_data`).set('kbn-xsrf', 'kibana').expect(200);

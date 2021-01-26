@@ -11,8 +11,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('search', () => {
+    before(async () => {
+      await esArchiver.emptyKibanaIndex();
+    });
     describe('post', () => {
       it('should return 200 when correctly formatted searches are provided', async () => {
         const resp = await supertest

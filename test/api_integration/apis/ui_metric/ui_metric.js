@@ -12,6 +12,7 @@ import { ReportManager, METRIC_TYPE } from '@kbn/analytics';
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
+  const esArchiver = getService('esArchiver');
 
   const createStatsMetric = (eventName, type = METRIC_TYPE.CLICK, count = 1) => ({
     eventName,
@@ -28,6 +29,10 @@ export default function ({ getService }) {
   });
 
   describe('ui_metric savedObject data', () => {
+    before(async () => {
+      await esArchiver.emptyKibanaIndex();
+    });
+
     it('increments the count field in the document defined by the {app}/{action_type} path', async () => {
       const reportManager = new ReportManager();
       const uiStatsMetric = createStatsMetric('myEvent');
