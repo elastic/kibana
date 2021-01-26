@@ -14,7 +14,7 @@ import {
   EuiContextMenuItem,
 } from '@elastic/eui';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryContextMenuItem {
