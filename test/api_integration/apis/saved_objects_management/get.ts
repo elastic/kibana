@@ -11,7 +11,7 @@ import { Response } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -45,10 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana*',
-            ignore: [404],
-          })
+          await es.indices.delete({ index: '.kibana*' }, { ignore: [404] })
       );
 
       it('should return 404 for object that no longer exists', async () =>
