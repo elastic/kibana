@@ -17,6 +17,10 @@ export interface Boost {
   factor: number;
 }
 
+export interface BoostObject {
+  [key: string]: Boost[];
+}
+
 export interface SearchSettings {
   boosts: Record<string, Boost[]>;
   search_fields: object;
