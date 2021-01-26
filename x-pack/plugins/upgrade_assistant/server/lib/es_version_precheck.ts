@@ -70,7 +70,7 @@ export const esVersionCheck = async (
   ctx: RequestHandlerContext,
   response: KibanaResponseFactory
 ) => {
-  const client = ctx.core.elasticsearch.client;
+  const { client } = ctx.core.elasticsearch;
   let allNodeVersions: SemVer[];
 
   try {

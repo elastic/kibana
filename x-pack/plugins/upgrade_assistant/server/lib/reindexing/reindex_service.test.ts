@@ -734,9 +734,7 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
           expect(updatedOp.attributes.errorMessage!.includes(`Can't lock!`)).toBeTruthy();
           expect(log.error).toHaveBeenCalledWith(expect.any(String));
-          expect(clusterClient.asCurrentUser.watcher.stop).not.toHaveBeenCalledWith({
-            enabled: true,
-          });
+          expect(clusterClient.asCurrentUser.watcher.stop).not.toHaveBeenCalled();
         });
 
         it('fails if watcher endpoint fails', async () => {

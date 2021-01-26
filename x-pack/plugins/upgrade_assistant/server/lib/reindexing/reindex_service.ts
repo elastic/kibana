@@ -286,12 +286,12 @@ export const reindexServiceFactory = (
    */
   const setReadonly = async (reindexOp: ReindexSavedObject) => {
     const { indexName } = reindexOp.attributes;
-    const { body } = await esClient.indices.putSettings({
+    const { body: putReadonly } = await esClient.indices.putSettings({
       index: indexName,
       body: { 'index.blocks.write': true },
     });
 
-    if (!body.acknowledged) {
+    if (!putReadonly.acknowledged) {
       throw new Error(`Index could not be set to readonly.`);
     }
 
@@ -312,7 +312,7 @@ export const reindexServiceFactory = (
 
     const { settings, mappings } = transformFlatSettings(flatSettings);
 
-    const { body } = await esClient.indices.create({
+    const { body: createIndex } = await esClient.indices.create({
       index: newIndexName,
       body: {
         settings,
@@ -320,7 +320,7 @@ export const reindexServiceFactory = (
       },
     });
 
-    if (!body.acknowledged) {
+    if (!createIndex.acknowledged) {
       throw error.cannotCreateIndex(`Index could not be created: ${newIndexName}`);
     }
 

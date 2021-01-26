@@ -6,14 +6,14 @@
 
 import { IconColor } from '@elastic/eui';
 import { invert } from 'lodash';
-import { MIGRATION_DEPRECATION_LEVEL } from '../../../../../common/types';
+import { DeprecationInfo } from '../../../../../common/types';
 
 export const LEVEL_MAP: { [level: string]: number } = {
   warning: 0,
   critical: 1,
 };
 
-export const REVERSE_LEVEL_MAP: { [idx: number]: MIGRATION_DEPRECATION_LEVEL } = invert(
+export const REVERSE_LEVEL_MAP: { [idx: number]: DeprecationInfo['level'] } = invert(
   LEVEL_MAP
 ) as any;
 

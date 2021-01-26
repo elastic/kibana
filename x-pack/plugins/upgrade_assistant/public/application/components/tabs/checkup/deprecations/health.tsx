@@ -10,7 +10,7 @@ import React, { FunctionComponent } from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DeprecationInfo, MIGRATION_DEPRECATION_LEVEL } from '../../../../../../common/types';
+import { DeprecationInfo } from '../../../../../../common/types';
 import { COLOR_MAP, LEVEL_MAP, REVERSE_LEVEL_MAP } from '../constants';
 
 const LocalizedLevels: { [level: string]: string } = {
@@ -36,7 +36,7 @@ interface DeprecationHealthProps {
   single?: boolean;
 }
 
-const SingleHealth: FunctionComponent<{ level: MIGRATION_DEPRECATION_LEVEL; label: string }> = ({
+const SingleHealth: FunctionComponent<{ level: DeprecationInfo['level']; label: string }> = ({
   level,
   label,
 }) => (
@@ -80,7 +80,7 @@ export const DeprecationHealth: FunctionComponent<DeprecationHealthProps> = ({
         .map(([numLevel, stringLevel]) => (
           <SingleHealth
             key={stringLevel}
-            level={stringLevel as MIGRATION_DEPRECATION_LEVEL}
+            level={stringLevel as DeprecationInfo['level']}
             label={`${countByLevel[numLevel]} ${LocalizedLevels[stringLevel]}`}
           />
         ))}
