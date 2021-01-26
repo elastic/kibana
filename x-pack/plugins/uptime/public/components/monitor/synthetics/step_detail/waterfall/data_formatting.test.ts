@@ -11,7 +11,7 @@ import { WaterfallDataEntry } from '../../waterfall/types';
 describe('Palettes', () => {
   it('A colour palette comprising timing and mime type colours is correctly generated', () => {
     expect(colourPalette).toEqual({
-      blocked: '#b9a888',
+      blocked: '#dcd4c4',
       connect: '#da8b45',
       dns: '#54b399',
       font: '#aa6556',
@@ -173,10 +173,10 @@ describe('getSeriesAndDomain', () => {
         "series": Array [
           Object {
             "config": Object {
-              "colour": "#b9a888",
+              "colour": "#dcd4c4",
               "showTooltip": true,
               "tooltipProps": Object {
-                "colour": "#b9a888",
+                "colour": "#dcd4c4",
                 "value": "Queued / Blocked: 0.854ms",
               },
             },
@@ -264,10 +264,10 @@ describe('getSeriesAndDomain', () => {
           },
           Object {
             "config": Object {
-              "colour": "#b9a888",
+              "colour": "#dcd4c4",
               "showTooltip": true,
               "tooltipProps": Object {
-                "colour": "#b9a888",
+                "colour": "#dcd4c4",
                 "value": "Queued / Blocked: 84.546ms",
               },
             },
@@ -330,10 +330,10 @@ describe('getSeriesAndDomain', () => {
         "series": Array [
           Object {
             "config": Object {
-              "colour": "#b9a888",
+              "colour": "#dcd4c4",
               "showTooltip": true,
               "tooltipProps": Object {
-                "colour": "#b9a888",
+                "colour": "#dcd4c4",
                 "value": "Queued / Blocked: 0.854ms",
               },
             },
