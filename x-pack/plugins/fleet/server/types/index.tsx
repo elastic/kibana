@@ -72,8 +72,6 @@ export {
   SettingsSOAttributes,
   InstallType,
   InstallSource,
-  // Fleet Server types
-  FleetServerEnrollmentAPIKey,
   // Agent Request types
   PostAgentEnrollRequest,
   PostAgentCheckinRequest,

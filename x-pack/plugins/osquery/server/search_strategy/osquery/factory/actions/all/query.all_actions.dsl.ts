@@ -5,11 +5,7 @@
  */
 
 import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
-import {
-  Direction,
-  AgentsRequestOptions,
-  SortField,
-} from '../../../../../../common/search_strategy';
+import { AgentsRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 
 export const buildActionsQuery = ({

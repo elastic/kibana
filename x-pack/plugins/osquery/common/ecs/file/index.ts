@@ -17,36 +17,20 @@ export interface Hash {
 
 export interface FileEcs {
   name?: string[];
-
   path?: string[];
-
   target_path?: string[];
-
   extension?: string[];
-
   Ext?: Ext;
-
   type?: string[];
-
   device?: string[];
-
   inode?: string[];
-
   uid?: string[];
-
   owner?: string[];
-
   gid?: string[];
-
   group?: string[];
-
   mode?: string[];
-
   size?: number[];
-
   mtime?: string[];
-
   ctime?: string[];
-
   hash?: Hash;
 }

@@ -6,7 +6,6 @@
 
 export interface SystemEcs {
   audit?: AuditEcs;
-
   auth?: AuthEcs;
 }
 
@@ -16,15 +15,10 @@ export interface AuditEcs {
 
 export interface PackageEcs {
   arch?: string[];
-
   entity_id?: string[];
-
   name?: string[];
-
   size?: number[];
-
   summary?: string[];
-
   version?: string[];
 }
 
@@ -34,6 +28,5 @@ export interface AuthEcs {
 
 export interface SshEcs {
   method?: string[];
-
   signature?: string[];
 }

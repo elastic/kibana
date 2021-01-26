@@ -5,7 +5,7 @@
  */
 
 import { isEmpty, isEqual, keys, map } from 'lodash/fp';
-import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { useAllResults } from './use_action_results';
@@ -36,7 +36,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
   // ** Sorting config
-  const [sortingColumns, setSortingColumns] = useState<string[]>([]);
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
   const [, { results, totalCount }] = useAllResults({
     actionId,
@@ -66,9 +66,10 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     []
   );
 
-  const tableSorting = useMemo(() => ({ columns: sortingColumns, onSort: setSortingColumns }), [
-    sortingColumns,
-  ]);
+  const tableSorting: EuiDataGridSorting = useMemo(
+    () => ({ columns: sortingColumns, onSort: setSortingColumns }),
+    [sortingColumns]
+  );
 
   const tablePagination = useMemo(
     () => ({
@@ -86,7 +87,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
       .map((fieldName) => ({
         id: fieldName,
         displayAsText: fieldName.split('.')[1],
-        defaultSortDirection: 'asc',
+        defaultSortDirection: Direction.asc,
       }));
 
     if (!isEqual(columns, newColumns)) {

@@ -82,7 +82,7 @@ const ActionsTableComponent = () => {
       .map((fieldName) => ({
         id: fieldName,
         displayAsText: fieldName.split('.')[1],
-        defaultSortDirection: 'asc',
+        defaultSortDirection: Direction.asc,
       }));
 
     if (!isEqual(columns, newColumns)) {

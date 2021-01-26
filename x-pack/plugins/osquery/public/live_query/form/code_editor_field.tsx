@@ -7,21 +7,25 @@
 import React, { useCallback } from 'react';
 
 import { OsqueryEditor } from '../../editor';
+import { FieldHook } from '../../shared_imports';
 
-const CodeEditorFieldComponent = ({ field }) => {
-  console.error('CodeEditorFieldComponent', field);
+interface CodeEditorFieldProps {
+  field: FieldHook<{ query: string }>;
+}
 
+const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ field }) => {
+  const { value, setValue } = field;
   const handleChange = useCallback(
     (newQuery) => {
-      field.setValue({
-        ...field.value,
+      setValue({
+        ...value,
         query: newQuery,
       });
     },
-    [field]
+    [value, setValue]
   );
 
-  return <OsqueryEditor defaultValue={field.value.query} onChange={handleChange} />;
+  return <OsqueryEditor defaultValue={value.query} onChange={handleChange} />;
 };
 
 export const CodeEditorField = React.memo(CodeEditorFieldComponent);

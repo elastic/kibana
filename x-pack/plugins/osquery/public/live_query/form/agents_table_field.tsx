@@ -5,25 +5,25 @@
  */
 
 import React, { useCallback } from 'react';
-// import { AgentListPage } from '../../../../fleet/public';
+import { FieldHook } from '../../shared_imports';
 import { AgentsTable } from '../../agents/agents_table';
 
-const AgentsTableFieldComponent = (payload) => {
-  console.error('AgentsTableFieldComponent', payload);
+interface AgentsTableFieldProps {
+  field: FieldHook<string[]>;
+}
 
+const AgentsTableFieldComponent: React.FC<AgentsTableFieldProps> = ({ field }) => {
+  const { value, setValue } = field;
   const handleChange = useCallback(
     (props) => {
-      console.error('handleChange', payload, props);
-
-      if (props !== payload.field.value) {
-        // payload.field.setValue
-        return payload.field.setValue(props);
+      if (props !== value) {
+        return setValue(props);
       }
     },
-    [payload]
+    [value, setValue]
   );
 
-  return <AgentsTable selectedAgents={payload.field.value} onChange={handleChange} />;
+  return <AgentsTable selectedAgents={value} onChange={handleChange} />;
 };
 
 export const AgentsTableField = React.memo(AgentsTableFieldComponent);

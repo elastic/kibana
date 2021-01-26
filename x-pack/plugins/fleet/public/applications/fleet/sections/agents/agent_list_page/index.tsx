@@ -57,7 +57,7 @@ const RowActions = React.memo<{
   onUpgradeClick: () => void;
 }>(({ agent, refresh, onReassignClick, onUnenrollClick, onUpgradeClick }) => {
   const { getHref } = useLink();
-  const hasWriteCapabilities = useCapabilities().write;
+  const hasWriteCapabilites = useCapabilities().write;
 
   const isUnenrolling = agent.status === 'unenrolling';
   const kibanaVersion = useKibanaVersion();

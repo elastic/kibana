@@ -34,8 +34,6 @@ export function defineRoutes(router: IRouter) {
       },
     },
     async (context, request, response) => {
-      console.log(request);
-      console.log(JSON.stringify(request.body, null, 2));
       const esClient = context.core.elasticsearch.client.asInternalUser;
       const query = await esClient.index<{}, {}>({
         index: '.fleet-actions-new',

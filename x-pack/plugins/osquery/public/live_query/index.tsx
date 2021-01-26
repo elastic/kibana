@@ -14,8 +14,6 @@ import { EditLiveQueryPage } from './edit';
 const LiveQueryComponent = () => {
   const match = useRouteMatch();
 
-  console.error('match', match);
-
   return (
     <Switch>
       <Route path={`${match.url}/queries/new`}>

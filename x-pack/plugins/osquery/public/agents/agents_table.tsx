@@ -5,15 +5,15 @@
  */
 
 import { find } from 'lodash/fp';
-import React, { useCallback, useEffect, useState, useRef } from 'react';
-import { EuiBasicTable, EuiBasicTableProps, EuiHealth } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { EuiBasicTable, EuiBasicTableProps, EuiTableSelectionType, EuiHealth } from '@elastic/eui';
 
 import { useAllAgents } from './use_all_agents';
-import { Direction } from '../../common/search_strategy';
+import { AgentEdge, Direction } from '../../common/search_strategy';
 
 interface AgentsTableProps {
   selectedAgents: string[];
-  onChange: () => void;
+  onChange: (payload: string[]) => void;
 }
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onChange }) => {
@@ -22,7 +22,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   const [sortField, setSortField] = useState('firstName');
   const [sortDirection, setSortDirection] = useState<Direction>(Direction.asc);
   const [selectedItems, setSelectedItems] = useState([]);
-  const tableRef = useRef();
+  const tableRef = useRef<EuiBasicTable<AgentEdge>>(null);
 
   const onTableChange: EuiBasicTableProps<{}>['onChange'] = useCallback(
     ({ page = {}, sort = {} }) => {
@@ -38,12 +38,15 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
     []
   );
 
-  const onSelectionChange = useCallback((newSelectedItems) => {
-    setSelectedItems(newSelectedItems);
-    onChange(newSelectedItems.map((item) => item._id));
-  }, []);
+  const onSelectionChange: EuiTableSelectionType<{}>['onSelectionChange'] = useCallback(
+    (newSelectedItems) => {
+      setSelectedItems(newSelectedItems);
+      onChange(newSelectedItems.map((item) => item._id));
+    },
+    [onChange]
+  );
 
-  const renderStatus = (online) => {
+  const renderStatus = (online: string) => {
     const color = online ? 'success' : 'danger';
     const label = online ? 'Online' : 'Offline';
     return <EuiHealth color={color}>{label}</EuiHealth>;
@@ -53,61 +56,74 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
     activePage: pageIndex,
     limit: pageSize,
     direction: sortDirection,
-    field: sortField,
+    sortField,
   });
 
-  const columns = [
-    {
-      field: 'local_metadata.elastic.agent.id',
-      name: 'id',
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'local_metadata.host.name',
-      name: 'hostname',
-      truncateText: true,
-    },
+  const columns = useMemo(
+    () => [
+      {
+        field: 'local_metadata.elastic.agent.id',
+        name: 'id',
+        sortable: true,
+        truncateText: true,
+      },
+      {
+        field: 'local_metadata.host.name',
+        name: 'hostname',
+        truncateText: true,
+      },
 
-    {
-      field: 'active',
-      name: 'Online',
-      dataType: 'boolean',
-      render: (active) => renderStatus(active),
-    },
-  ];
+      {
+        field: 'active',
+        name: 'Online',
+        dataType: 'boolean',
+        render: (active: string) => renderStatus(active),
+      },
+    ],
+    []
+  );
 
-  const pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount: totalCount,
-    pageSizeOptions: [3, 5, 8],
-  };
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+      totalItemCount: totalCount,
+      pageSizeOptions: [3, 5, 8],
+    }),
+    [pageIndex, pageSize, totalCount]
+  );
 
-  const sorting = {
-    sort: {
-      field: sortField,
-      direction: sortDirection,
-    },
-  };
+  const sorting = useMemo(
+    () => ({
+      sort: {
+        field: sortField,
+        direction: sortDirection,
+      },
+    }),
+    [sortDirection, sortField]
+  );
 
-  const selection = {
-    selectable: (agent) => agent.active,
-    selectableMessage: (selectable) => (!selectable ? 'User is currently offline' : undefined),
-    onSelectionChange,
-    initialSelected: selectedItems,
-  };
+  const selection = useMemo(
+    () => ({
+      selectable: (agent: AgentEdge) => agent.active,
+      selectableMessage: (selectable: boolean) =>
+        !selectable ? 'User is currently offline' : undefined,
+      onSelectionChange,
+      initialSelected: selectedItems,
+    }),
+    [onSelectionChange, selectedItems]
+  );
 
   useEffect(() => {
     if (selectedAgents?.length && agents.length && selectedItems.length !== selectedAgents.length) {
-      tableRef?.current.setSelection(
+      tableRef?.current?.setSelection(
         selectedAgents.map((agentId) => find({ _id: agentId }, agents))
       );
     }
   }, [selectedAgents, agents, selectedItems.length]);
 
   return (
-    <EuiBasicTable
+    <EuiBasicTable<AgentEdge>
       ref={tableRef}
       items={agents}
       itemId="_id"

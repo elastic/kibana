@@ -31,6 +31,7 @@ export const OsqueryAppComponent = () => {
               <FormattedMessage
                 id="osquery.helloWorldText"
                 defaultMessage="{name}"
+                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 values={{ name: PLUGIN_NAME }}
               />
             </h1>

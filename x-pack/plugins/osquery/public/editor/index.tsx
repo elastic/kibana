@@ -10,12 +10,13 @@ import 'brace/mode/sql';
 import 'brace/theme/tomorrow';
 import 'brace/ext/language_tools';
 
-import './osquery_mode';
-
 const EDITOR_SET_OPTIONS = {
-  // useWorker: false,
   enableBasicAutocompletion: true,
   enableLiveAutocompletion: true,
+};
+
+const EDITOR_PROPS = {
+  $blockScrolling: true,
 };
 
 interface OsqueryEditorProps {
@@ -26,7 +27,6 @@ interface OsqueryEditorProps {
 const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, onChange }) => {
   const handleChange = useCallback(
     (newValue) => {
-      console.log('change', newValue);
       onChange(newValue);
     },
     [onChange]
@@ -35,12 +35,12 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, on
   return (
     <EuiCodeEditor
       value={defaultValue}
-      mode="osquery"
+      mode="sql"
       theme="tomorrow"
       onChange={handleChange}
       name="osquery_editor"
       setOptions={EDITOR_SET_OPTIONS}
-      editorProps={{ $blockScrolling: true }}
+      editorProps={EDITOR_PROPS}
       height="200px"
     />
   );

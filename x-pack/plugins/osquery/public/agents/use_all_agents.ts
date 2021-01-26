@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
-  AgentEdges,
+  AgentEdge,
   PageInfoPaginated,
   DocValueFields,
   OsqueryQueries,
@@ -28,7 +28,7 @@ import { generateTablePaginationOptions, getInspectResponse, InspectResponse } f
 const ID = 'agentsAllQuery';
 
 export interface AgentsArgs {
-  agents: AgentEdges[];
+  agents: AgentEdge[];
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;

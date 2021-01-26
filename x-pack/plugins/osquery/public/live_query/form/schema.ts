@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FIELD_TYPES, FormSchema, fieldValidators } from '../../shared_imports';
+import { FIELD_TYPES, FormSchema } from '../../shared_imports';
 
 export const formSchema: FormSchema = {
   agents: {

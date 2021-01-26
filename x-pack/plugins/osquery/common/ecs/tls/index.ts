@@ -6,9 +6,7 @@
 
 export interface TlsEcs {
   client_certificate?: TlsClientCertificateData;
-
   fingerprints?: TlsFingerprintsData;
-
   server_certificate?: TlsServerCertificateData;
 }
 

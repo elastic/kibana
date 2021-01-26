@@ -13,7 +13,6 @@ import { Router } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ThemeProvider } from 'styled-components';
 
-import { KibanaVersionContext } from '../../fleet/public';
 import { useUiSetting$ } from '../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
@@ -48,6 +47,7 @@ export const renderApp = (
 ) => {
   ReactDOM.render(
     <KibanaContextProvider
+      // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
       services={{
         appName: PLUGIN_NAME,
         ...core,
@@ -56,13 +56,11 @@ export const renderApp = (
       }}
     >
       <EuiErrorBoundary>
-        <KibanaVersionContext.Provider value={kibanaVersion}>
-          <Router history={history}>
-            <I18nProvider>
-              <OsqueryAppContext />
-            </I18nProvider>
-          </Router>
-        </KibanaVersionContext.Provider>
+        <Router history={history}>
+          <I18nProvider>
+            <OsqueryAppContext />
+          </I18nProvider>
+        </Router>
       </EuiErrorBoundary>
     </KibanaContextProvider>,
     element
