@@ -24,7 +24,7 @@ import { Ping } from '../../../../../common/runtime_types/ping';
 
 interface Props {
   monitorId: string;
-  selectedMonitor?: Ping;
+  selectedMonitor: Ping;
 }
 
 export const EnableMonitorAlert = ({ monitorId, selectedMonitor }: Props) => {
