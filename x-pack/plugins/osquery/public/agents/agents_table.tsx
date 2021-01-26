@@ -4,38 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/no-shadow */
-
 import { find } from 'lodash/fp';
-import React, { useEffect, useState, useRef } from 'react';
-import { EuiBasicTable, EuiHealth } from '@elastic/eui';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
+import { EuiBasicTable, EuiBasicTableProps, EuiHealth } from '@elastic/eui';
 
 import { useAllAgents } from './use_all_agents';
+import { Direction } from '../../common/search_strategy';
 
-export const AgentsTable = ({ selectedAgents, onChange }) => {
+interface AgentsTableProps {
+  selectedAgents: string[];
+  onChange: () => void;
+}
+
+const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onChange }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [sortField, setSortField] = useState('firstName');
-  const [sortDirection, setSortDirection] = useState('asc');
+  const [sortDirection, setSortDirection] = useState<Direction>(Direction.asc);
   const [selectedItems, setSelectedItems] = useState([]);
   const tableRef = useRef();
 
-  const onTableChange = ({ page = {}, sort = {} }) => {
-    const { index: pageIndex, size: pageSize } = page;
+  const onTableChange: EuiBasicTableProps<{}>['onChange'] = useCallback(
+    ({ page = {}, sort = {} }) => {
+      const { index: newPageIndex, size: newPageSize } = page;
 
-    const { field: sortField, direction: sortDirection } = sort;
+      const { field: newSortField, direction: newSortDirection } = sort;
 
-    setPageIndex(pageIndex);
-    setPageSize(pageSize);
-    setSortField(sortField);
-    setSortDirection(sortDirection);
-  };
+      setPageIndex(newPageIndex);
+      setPageSize(newPageSize);
+      setSortField(newSortField);
+      setSortDirection(newSortDirection);
+    },
+    []
+  );
 
-  const onSelectionChange = (newSelectedItems) => {
-    console.error('onSelectionChange', newSelectedItems);
+  const onSelectionChange = useCallback((newSelectedItems) => {
     setSelectedItems(newSelectedItems);
     onChange(newSelectedItems.map((item) => item._id));
-  };
+  }, []);
 
   const renderStatus = (online) => {
     const color = online ? 'success' : 'danger';
@@ -115,3 +121,5 @@ export const AgentsTable = ({ selectedAgents, onChange }) => {
     />
   );
 };
+
+export const AgentsTable = React.memo(AgentsTableComponent);

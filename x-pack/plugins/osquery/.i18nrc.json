@@ -1,7 +1,9 @@
 {
-  "prefix": "osquery",
   "paths": {
     "osquery": "."
   },
-  "translations": ["translations/ja-JP.json"]
+  "prefix": "osquery",
+  "translations": [
+    "translations/ja-JP.json"
+  ]
 }

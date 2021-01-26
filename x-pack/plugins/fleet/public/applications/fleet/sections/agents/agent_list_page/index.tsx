@@ -88,9 +88,11 @@ const RowActions = React.memo<{
           />
         </EuiContextMenuItem>,
         <EuiContextMenuItem
-          disabled={!hasWriteCapabilities || !agent.active}
+          disabled={!hasWriteCapabilites || !agent.active}
           icon="trash"
-          onClick={onUnenrollClick}
+          onClick={() => {
+            onUnenrollClick();
+          }}
         >
           {isUnenrolling ? (
             <FormattedMessage
@@ -107,7 +109,9 @@ const RowActions = React.memo<{
         <EuiContextMenuItem
           icon="refresh"
           disabled={!isAgentUpgradeable(agent, kibanaVersion)}
-          onClick={onUpgradeClick}
+          onClick={() => {
+            onUpgradeClick();
+          }}
         >
           <FormattedMessage
             id="xpack.fleet.agentList.upgradeOneButton"
@@ -128,10 +132,10 @@ function safeMetadata(val: any) {
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { notifications } = useStartServices();
-  // useBreadcrumbs('fleet_agent_list');
+  useBreadcrumbs('fleet_agent_list');
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
-  const hasWriteCapabilities = useCapabilities().write;
+  const hasWriteCapabilites = useCapabilities().write;
   const isGoldPlus = useLicense().isGoldPlus();
   const kibanaVersion = useKibanaVersion();
 
@@ -464,7 +468,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         </h2>
       }
       actions={
-        hasWriteCapabilities ? (
+        hasWriteCapabilites ? (
           <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
             <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
           </EuiButton>

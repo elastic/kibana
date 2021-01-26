@@ -5,9 +5,10 @@
  */
 
 import { isEmpty, isEqual, keys, map } from 'lodash/fp';
-import { EuiDataGrid, EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn } from '@elastic/eui';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
+import { EuiDataGridSorting } from '@elastic/eui';
 import { useAllResults } from './use_all_results';
 import { Direction } from '../../common/search_strategy';
 
@@ -18,7 +19,6 @@ interface ResultsTableComponentProps {
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId }) => {
-  // ** Pagination config
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
@@ -37,7 +37,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId 
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
   // ** Sorting config
-  const [sortingColumns, setSortingColumns] = useState<string[]>([]);
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
   const onSort = useCallback(
     (newSortingColumns) => {
       setSortingColumns(newSortingColumns);
@@ -50,26 +50,26 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId 
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     direction: Direction.asc,
-    field: '@timestamp',
+    sortField: '@timestamp',
   });
 
-  // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState<string[]>([]); // initialize to the full set of columns
-
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [
     visibleColumns,
     setVisibleColumns,
   ]);
 
-  const renderCellValue = useMemo(() => {
-    return ({ rowIndex, columnId, setCellProps }) => {
+  const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
+    () => ({ rowIndex, columnId, setCellProps }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
 
       const value = data[rowIndex].fields[columnId];
 
       return !isEmpty(value) ? value : '-';
-    };
-  }, []);
+    },
+    []
+  );
 
   const tableSorting = useMemo(() => ({ columns: sortingColumns, onSort }), [
     onSort,
@@ -87,7 +87,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId 
   );
 
   useEffect(() => {
-    const newColumns = keys(results[0]?.fields)
+    const newColumns: EuiDataGridColumn[] = keys(results[0]?.fields)
       .sort()
       .map((fieldName) => ({
         id: fieldName,

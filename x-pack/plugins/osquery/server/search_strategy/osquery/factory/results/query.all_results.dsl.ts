@@ -5,12 +5,11 @@
  */
 
 import { ISearchRequestParams } from '../../../../../../../../src/plugins/data/common';
-import { Direction, ResultsRequestOptions, SortField } from '../../../../../common/search_strategy';
+import { ResultsRequestOptions } from '../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
 
 export const buildResultsQuery = ({
   actionId,
-  docValueFields,
   filterQuery,
   pagination: { activePage, querySize },
   sort,

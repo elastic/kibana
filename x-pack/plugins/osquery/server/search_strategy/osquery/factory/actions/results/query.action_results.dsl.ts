@@ -5,11 +5,7 @@
  */
 
 import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
-import {
-  Direction,
-  AgentsRequestOptions,
-  SortField,
-} from '../../../../../../common/search_strategy';
+import { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 
 export const buildActionResultsQuery = ({
@@ -18,7 +14,7 @@ export const buildActionResultsQuery = ({
   filterQuery,
   pagination: { activePage, querySize },
   sort,
-}: AgentsRequestOptions): ISearchRequestParams => {
+}: ActionResultsRequestOptions): ISearchRequestParams => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {

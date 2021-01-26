@@ -5,13 +5,13 @@
  */
 
 import { isEmpty, isEqual, keys, map } from 'lodash/fp';
-import { EuiDataGrid, EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn } from '@elastic/eui';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { useAllActions } from './use_all_actions';
-import { Direction } from '../../common/search_strategy';
+import { ActionEdge, Direction } from '../../common/search_strategy';
 
-const DataContext = createContext([]);
+const DataContext = createContext<ActionEdge[]>([]);
 
 const ActionsTableComponent = () => {
   // ** Pagination config
@@ -39,19 +39,20 @@ const ActionsTableComponent = () => {
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     direction: Direction.asc,
-    field: '@timestamp',
+    sortField: '@timestamp',
   });
 
   // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState<string>([]); // initialize to the full set of columns
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([]); // initialize to the full set of columns
 
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [
     visibleColumns,
     setVisibleColumns,
   ]);
 
-  const renderCellValue = useMemo(() => {
+  const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(() => {
     return ({ rowIndex, columnId, setCellProps }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
 
       const value = data[rowIndex].fields[columnId];

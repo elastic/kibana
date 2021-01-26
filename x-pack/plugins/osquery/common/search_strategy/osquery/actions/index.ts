@@ -44,4 +44,6 @@ export interface ActionResultsStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
-export type ActionResultsRequestOptions = RequestOptionsPaginated<{}>;
+export interface ActionResultsRequestOptions extends RequestOptionsPaginated {
+  actionId: string;
+}

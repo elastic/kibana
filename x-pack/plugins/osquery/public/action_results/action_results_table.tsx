@@ -5,7 +5,7 @@
  */
 
 import { isEmpty, isEqual, keys, map } from 'lodash/fp';
-import { EuiDataGrid, EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn } from '@elastic/eui';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { useAllResults } from './use_action_results';
@@ -18,7 +18,6 @@ interface ActionResultsTableProps {
 }
 
 const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ actionId }) => {
-  // ** Pagination config
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
@@ -44,7 +43,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     direction: Direction.asc,
-    field: '@timestamp',
+    sortField: '@timestamp',
   });
 
   // Column visibility
@@ -55,19 +54,31 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     setVisibleColumns,
   ]);
 
-  const renderCellValue = useMemo(() => {
-    return ({ rowIndex, columnId, setCellProps }) => {
+  const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
+    () => ({ rowIndex, columnId, setCellProps }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
 
       const value = data[rowIndex].fields[columnId];
 
       return !isEmpty(value) ? value : '-';
-    };
-  }, []);
+    },
+    []
+  );
 
   const tableSorting = useMemo(() => ({ columns: sortingColumns, onSort: setSortingColumns }), [
     sortingColumns,
   ]);
+
+  const tablePagination = useMemo(
+    () => ({
+      ...pagination,
+      pageSizeOptions: [10, 50, 100],
+      onChangeItemsPerPage,
+      onChangePage,
+    }),
+    [onChangeItemsPerPage, onChangePage, pagination]
+  );
 
   useEffect(() => {
     const newColumns = keys(results[0]?.fields)
@@ -93,12 +104,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
         rowCount={totalCount}
         renderCellValue={renderCellValue}
         sorting={tableSorting}
-        pagination={{
-          ...pagination,
-          pageSizeOptions: [10, 50, 100],
-          onChangeItemsPerPage,
-          onChangePage,
-        }}
+        pagination={tablePagination}
       />
     </DataContext.Provider>
   );

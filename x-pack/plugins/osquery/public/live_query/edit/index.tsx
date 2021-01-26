@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useParams } from 'react-router-dom';
@@ -14,18 +15,15 @@ import { LiveQueryForm } from '../form';
 
 const EditLiveQueryPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
-
   const [loading, { actionDetails }] = useActionDetails({ actionId });
 
-  console.error('actionDetails', actionDetails);
-
   if (loading) {
-    return <>{'LOading...'}</>;
+    return <>{'Loading...'}</>;
   }
 
   return (
     <>
-      <LiveQueryForm type="edit" actionDetails={actionDetails} />
+      {!isEmpty(actionDetails) && <LiveQueryForm type="edit" actionDetails={actionDetails} />}
       <EuiSpacer />
       <ResultTabs />
     </>
