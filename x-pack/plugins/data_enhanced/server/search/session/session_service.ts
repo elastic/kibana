@@ -60,6 +60,9 @@ interface StartDependencies {
 
 type SearchSessionsConfig = ConfigSchema['search']['sessions'];
 
+/**
+ * @internal
+ */
 export class SearchSessionService
   implements ISearchSessionService<SearchSessionSavedObjectAttributes> {
   /**
@@ -321,7 +324,7 @@ export class SearchSessionService
     deps: SearchSessionDependencies,
     searchRequest: IKibanaSearchRequest,
     searchId: string,
-    { sessionId, isStored, strategy }: ISearchOptions
+    { sessionId, strategy }: ISearchOptions
   ) => {
     if (!sessionId || !searchId) return;
     this.logger.debug(`trackId | ${sessionId} | ${searchId}`);
@@ -332,22 +335,14 @@ export class SearchSessionService
       status: SearchStatus.IN_PROGRESS,
     };
 
-    // If there is already a saved object for this session, update it to include this request/ID.
-    // Otherwise, just update the in-memory mapping for this session for when the session is saved.
-    if (isStored) {
-      const attributes = {
-        idMapping: { [requestHash]: searchInfo },
-      };
-      await this.update(deps, sessionId, attributes);
-    } else {
-      const map = this.sessionSearchMap.get(sessionId) ?? {
-        insertTime: moment(),
-        retryCount: 0,
-        ids: new Map<string, SearchSessionRequestInfo>(),
-      };
-      map.ids.set(requestHash, searchInfo);
-      this.sessionSearchMap.set(sessionId, map);
-    }
+    // Update the in-memory mapping for this session for when the session is saved.
+    const map = this.sessionSearchMap.get(sessionId) ?? {
+      insertTime: moment(),
+      retryCount: 0,
+      ids: new Map<string, SearchSessionRequestInfo>(),
+    };
+    map.ids.set(requestHash, searchInfo);
+    this.sessionSearchMap.set(sessionId, map);
   };
 
   public async getSearchIdMapping(deps: SearchSessionDependencies, sessionId: string) {

@@ -11,6 +11,7 @@ import { ISearchSessionService } from './types';
 /**
  * The OSS session service, which leaves most search session-related logic unimplemented.
  * @see x-pack/plugins/data_enhanced/server/search/session/session_service.ts
+ * @internal
  */
 export class SearchSessionService implements ISearchSessionService {
   constructor() {}

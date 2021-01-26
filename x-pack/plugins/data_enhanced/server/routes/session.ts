@@ -188,16 +188,10 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
         return res.ok({
           body: response,
         });
-      } catch (err) {
-        return res.customError({
-          statusCode: err.statusCode || 500,
-          body: {
-            message: err.message,
-            attributes: {
-              error: err.body?.error || err.message,
-            },
-          },
-        });
+      } catch (e) {
+        const err = e.output?.payload || e;
+        logger.error(err);
+        return reportServerError(res, err);
       }
     }
   );
