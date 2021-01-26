@@ -34,7 +34,7 @@ import { InfluencerFilter } from './influencer_filter';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export interface AlertContextMeta {
-  options?: Partial<InfraWaffleMapOptions>;
+  metric?: InfraWaffleMapOptions['metric'];
   nodeType?: InventoryItemType;
   filter?: string;
 }
@@ -135,10 +135,10 @@ export const Expression: React.FC<Props> = (props) => {
 
   const prefillMetric = useCallback(() => {
     const md = metadata;
-    if (md && md.options?.metric) {
+    if (md && md.metric) {
       setAlertParams(
         'metric',
-        getMLMetricFromInventoryMetric(md.options.metric!.type) ?? defaultExpression.metric
+        getMLMetricFromInventoryMetric(md.metric.type) ?? defaultExpression.metric
       );
     } else {
       setAlertParams('metric', defaultExpression.metric);
@@ -305,7 +305,7 @@ const getMLMetricFromInventoryMetric = (metric: SnapshotMetricType) => {
     case 'rx':
       return 'network_in';
     default:
-      return false;
+      return null;
   }
 };
 
@@ -316,6 +316,6 @@ const getMLNodeTypeFromInventoryNodeType = (nodeType: InventoryItemType) => {
     case 'pod':
       return 'k8s';
     default:
-      return false;
+      return null;
   }
 };

@@ -32,7 +32,9 @@ export class Plugin implements InfraClientPluginClass {
     pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createInventoryMetricAlertType());
     pluginsSetup.triggersActionsUi.alertTypeRegistry.register(getLogsAlertType());
     pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricThresholdAlertType());
-    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricAnomalyAlertType());
+    if (pluginsSetup.ml) {
+      pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricAnomalyAlertType());
+    }
 
     if (pluginsSetup.observability) {
       pluginsSetup.observability.dashboard.register({

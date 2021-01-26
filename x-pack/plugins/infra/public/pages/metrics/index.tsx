@@ -33,8 +33,7 @@ import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
 
-import { InventoryAlertDropdown } from '../../alerting/inventory/components/alert_dropdown';
-import { MetricsAlertDropdown } from '../../alerting/metric_threshold/components/alert_dropdown';
+import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
 import { SavedView } from '../../containers/saved_view/saved_view';
 import { SourceConfigurationFields } from '../../graphql/types';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
@@ -82,8 +81,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                             <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-                            <Route path={'/explorer'} component={MetricsAlertDropdown} />
-                            <Route path={'/inventory'} component={InventoryAlertDropdown} />
+                            <MetricsAlertDropdown />
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <EuiButtonEmpty
