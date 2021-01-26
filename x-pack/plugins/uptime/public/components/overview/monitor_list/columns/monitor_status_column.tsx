@@ -19,7 +19,7 @@ import {
 } from '../../../../../common/constants';
 
 import { UptimeThemeContext } from '../../../../contexts';
-import { euiStyled } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../../common/translations';
 
 interface MonitorListStatusColumnProps {

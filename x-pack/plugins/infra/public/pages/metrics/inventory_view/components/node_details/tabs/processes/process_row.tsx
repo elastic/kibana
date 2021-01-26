@@ -21,7 +21,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { AutoSizer } from '../../../../../../../components/auto_sizer';
-import { euiStyled } from '../../../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { Process } from './types';
 import { ProcessRowCharts } from './process_row_charts';
 
