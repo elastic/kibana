@@ -16,7 +16,7 @@ export interface UsageStats {
   'xpackReporting:customPdfLogo': boolean;
   'notifications:banner': boolean;
   'timelion:graphite.url': boolean;
-  'xpackDashboardMode:roles': string[];
+  'xpackDashboardMode:roles': boolean;
   /**
    * non-sensitive settings
    */

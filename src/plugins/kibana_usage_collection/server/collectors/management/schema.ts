@@ -14,10 +14,12 @@ import { UsageStats } from './types';
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   // sensitive
   'timelion:quandl.key': { type: 'boolean' },
-  'securitySolution:newsFeedUrl': { type: 'boolean' },
   'securitySolution:defaultIndex': { type: 'boolean' },
+  'securitySolution:newsFeedUrl': { type: 'boolean' },
   'xpackReporting:customPdfLogo': { type: 'boolean' },
   'notifications:banner': { type: 'boolean' },
+  'timelion:graphite.url': { type: 'boolean' },
+  'xpackDashboardMode:roles': { type: 'boolean' },
   // non-sensitive
   'visualize:enableLabs': { type: 'boolean' },
   'visualization:heatmap:maxBuckets': { type: 'long' },
@@ -119,4 +121,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'csv:quoteValues': { type: 'boolean' },
   'dateFormat:dow': { type: 'keyword' },
   dateFormat: { type: 'keyword' },
+  'autocomplete:useTimeRange': { type: 'boolean' },
+  'search:timeout': { type: 'long' },
+  'visualization:visualize:legacyChartsLibrary': { type: 'boolean' },
+  'doc_table:legacy': { type: 'boolean' },
+  'discover:modifyColumnsOnSwitch': { type: 'boolean' },
+  'discover:searchFieldsFromSource': { type: 'boolean' },
+  'securitySolution:rulesTableRefresh': { type: 'text' },
+  'apm:enableSignificantTerms': { type: 'boolean' },
+  'apm:enableServiceOverview': { type: 'boolean' },
 };
