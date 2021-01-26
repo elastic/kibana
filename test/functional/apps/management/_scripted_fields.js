@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const deployment = getService('deployment');
   const PageObjects = getPageObjects([
     'common',
     'header',
@@ -190,14 +189,10 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.removeAllFilters();
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const isOss = await deployment.isOss();
-        // Remove this flag when ci doesn't run on OSS
-        if (!isOss) {
-          // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-            'Average of ram_Pain1'
-          );
-        }
+        // verify Lens opens a visualization
+        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+          'Average of ram_Pain1'
+        );
       });
     });
 
@@ -280,14 +275,10 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const isOss = await deployment.isOss();
-        // Remove this flag when ci doesn't run on OSS
-        if (!isOss) {
-          // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-            'Top values of painString'
-          );
-        }
+        // verify Lens opens a visualization
+        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+          'Top values of painString'
+        );
       });
     });
 
@@ -371,14 +362,10 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const isOss = await deployment.isOss();
-        // Remove this flag when ci doesn't run on OSS
-        if (!isOss) {
-          // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-            'Top values of painBool'
-          );
-        }
+        // verify Lens opens a visualization
+        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+          'Top values of painBool'
+        );
       });
     });
 
@@ -465,14 +452,8 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const isOss = await deployment.isOss();
-        // Remove this flag when ci doesn't run on OSS
-        if (!isOss) {
-          // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-            'painDate'
-          );
-        }
+        // verify Lens opens a visualization
+        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain('painDate');
       });
     });
   });

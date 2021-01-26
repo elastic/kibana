@@ -10,12 +10,15 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const deployment = getService('deployment');
+  let isOss = false;
 
   describe('management', function () {
     before(async () => {
       await esArchiver.unload('logstash_functional');
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('makelogs');
+      isOss = await deployment.isOss();
     });
 
     after(async () => {
@@ -31,10 +34,13 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_index_pattern_results_sort'));
       loadTestFile(require.resolve('./_index_pattern_popularity'));
       loadTestFile(require.resolve('./_kibana_settings'));
-      loadTestFile(require.resolve('./_scripted_fields'));
       loadTestFile(require.resolve('./_scripted_fields_preview'));
       loadTestFile(require.resolve('./_mgmt_import_saved_objects'));
       loadTestFile(require.resolve('./_index_patterns_empty'));
+      // Remove this flag when ci doesn't run on OSS
+      if (!isOss) {
+        loadTestFile(require.resolve('./_scripted_fields'));
+      }
     });
 
     describe('', function () {
