@@ -27,11 +27,14 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../lib/alert_api', () => ({
   loadAlertTypes: jest.fn(),
   updateAlert: jest.fn().mockRejectedValue({ body: { message: 'Fail message' } }),
-  alertingFrameworkHealth: jest.fn(() => ({ isSufficientlySecure: true })),
+  alertingFrameworkHealth: jest.fn(() => ({
+    isSufficientlySecure: true,
+    hasPermanentEncryptionKey: true,
+  })),
 }));
 
 jest.mock('../../../common/lib/health_api', () => ({
-  triggersActionsUiHealth: jest.fn(() => ({ isESOAvailable: true, isAlertsAvailable: true })),
+  triggersActionsUiHealth: jest.fn(() => ({ isAlertsAvailable: true })),
 }));
 
 describe('alert_edit', () => {

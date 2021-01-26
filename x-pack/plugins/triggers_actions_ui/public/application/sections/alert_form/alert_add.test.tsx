@@ -25,11 +25,14 @@ jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../lib/alert_api', () => ({
   loadAlertTypes: jest.fn(),
-  alertingFrameworkHealth: jest.fn(() => ({ isSufficientlySecure: true })),
+  alertingFrameworkHealth: jest.fn(() => ({
+    isSufficientlySecure: true,
+    hasPermanentEncryptionKey: true,
+  })),
 }));
 
 jest.mock('../../../common/lib/health_api', () => ({
-  triggersActionsUiHealth: jest.fn(() => ({ isESOAvailable: true, isAlertsAvailable: true })),
+  triggersActionsUiHealth: jest.fn(() => ({ isAlertsAvailable: true })),
 }));
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -97,6 +100,7 @@ describe('alert_add', () => {
 
     mocks.http.get.mockResolvedValue({
       isSufficientlySecure: true,
+      hasPermanentEncryptionKey: true,
     });
 
     const alertType = {

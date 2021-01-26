@@ -20,7 +20,6 @@ export function healthRoute(
   logger: Logger,
   router: IRouter,
   baseRoute: string,
-  isESOAvailable: boolean,
   isAlertsAvailable: boolean
 ) {
   const path = `${baseRoute}/_health`;
@@ -37,7 +36,7 @@ export function healthRoute(
     req: KibanaRequest<unknown, unknown, unknown>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
-    const result = { isESOAvailable, isAlertsAvailable };
+    const result = { isAlertsAvailable };
 
     logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });
