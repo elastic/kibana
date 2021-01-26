@@ -16,19 +16,17 @@ import {
   MapEmbeddableInput,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../maps/public/embeddable';
+import { Dictionary } from '../../../../common/types/common';
 import { useMlKibana } from '../../contexts/kibana';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/common/constants';
 import { LayerDescriptor } from '../../../../../maps/common/descriptor_types';
 import { getMLAnomaliesActualLayer, getMLAnomaliesTypicalLayer } from './map_config';
-// import { AnomalyRecordDoc } from '../../../../common/types/seriesConfig.chartData';
-
 interface Props {
-  seriesConfig?: any; // object;
+  seriesConfig: Dictionary<any>;
   severity: number;
-  tooltipService: any; // object;
 }
 
-export function EmbeddedMapComponent({ seriesConfig, severity, tooltipService }: Props) {
+export function EmbeddedMapComponent({ seriesConfig, severity }: Props) {
   const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
 
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
@@ -37,14 +35,7 @@ export function EmbeddedMapComponent({ seriesConfig, severity, tooltipService }:
     services: { embeddable: embeddablePlugin, maps: mapsPlugin },
   } = useMlKibana();
 
-  if (!embeddablePlugin) {
-    throw new Error('Embeddable start plugin not found');
-  }
-  if (!mapsPlugin) {
-    throw new Error('Maps start plugin not found');
-  }
-
-  const factory: any = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+  const factory = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   const input: MapEmbeddableInput = {
     id: uuid.v4(),
@@ -97,7 +88,9 @@ export function EmbeddedMapComponent({ seriesConfig, severity, tooltipService }:
   useEffect(() => {
     async function setupEmbeddable() {
       if (!factory) {
-        throw new Error('Map embeddable not found.');
+        // eslint-disable-next-line no-console
+        console.error('Map embeddable not found.');
+        return;
       }
       const embeddableObject: any = await factory.create({
         ...input,
@@ -129,9 +122,19 @@ export function EmbeddedMapComponent({ seriesConfig, severity, tooltipService }:
     }
   }, [embeddable, embeddableRoot, seriesConfig.chartData]);
 
+  if (!embeddablePlugin) {
+    // eslint-disable-next-line no-console
+    console.error('Embeddable start plugin not found');
+    return null;
+  }
+  if (!mapsPlugin) {
+    // eslint-disable-next-line no-console
+    console.error('Maps start plugin not found');
+    return null;
+  }
+
   return (
     <div
-      className={'mlFieldDataCard__geoContent'}
       style={{
         width: '100%',
         height: 300,
@@ -139,7 +142,6 @@ export function EmbeddedMapComponent({ seriesConfig, severity, tooltipService }:
     >
       <div
         data-test-subj="xpack.ml.explorer.embeddedMapPanel"
-        className="embPanel__content"
         ref={embeddableRoot}
         style={{
           width: '100%',
