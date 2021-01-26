@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { MarkdownVisParams } from './types';
 import { MarkdownOptions } from './markdown_options';
 
@@ -21,7 +21,7 @@ describe('MarkdownOptions', () => {
       openLinksInNewTab: false,
     },
     setValue: jest.fn(),
-  } as unknown) as VisOptionsProps<MarkdownVisParams>;
+  } as unknown) as VisEditorOptionsProps<MarkdownVisParams>;
 
   it('should match snapshot', () => {
     const comp = shallow(<MarkdownOptions {...props} />);
