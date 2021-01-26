@@ -18,10 +18,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import {
   ColorRanges,
   SetColorRangeValue,
-  VisOptionsProps,
   SwitchOption,
   SetColorSchemaOptionsValue,
   ColorSchemaOptions,
@@ -37,7 +37,7 @@ function MetricVisOptions({
   setTouched,
   vis,
   uiState,
-}: VisOptionsProps<VisParams>) {
+}: VisEditorOptionsProps<VisParams>) {
   const setMetricValue: <T extends keyof MetricVisParam>(
     paramName: T,
     value: MetricVisParam[T]
