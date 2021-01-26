@@ -7,14 +7,13 @@
  */
 
 import React, { useEffect } from 'react';
-
 import { EuiBadge } from '@elastic/eui';
 
+import { SelfChangingVisParams } from '../self_changing_vis_fn';
+
 interface SelfChangingComponentProps {
-  renderComplete: () => {};
-  visParams: {
-    counter: number;
-  };
+  renderComplete(): void;
+  visParams: SelfChangingVisParams;
 }
 
 export function SelfChangingComponent(props: SelfChangingComponentProps) {
