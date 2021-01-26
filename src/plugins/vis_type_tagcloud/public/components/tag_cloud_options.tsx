@@ -9,11 +9,12 @@
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { VisOptionsProps, SelectOption, SwitchOption } from '../../../vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
+import { SelectOption, SwitchOption } from '../../../vis_default_editor/public';
 import { ValidatedDualRange } from '../../../kibana_react/public';
 import { TagCloudVisParams } from '../types';
 
-function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps<TagCloudVisParams>) {
+function TagCloudOptions({ stateParams, setValue, vis }: VisEditorOptionsProps<TagCloudVisParams>) {
   const handleFontSizeChange = ([minFontSize, maxFontSize]: [string | number, string | number]) => {
     setValue('minFontSize', Number(minFontSize));
     setValue('maxFontSize', Number(maxFontSize));
