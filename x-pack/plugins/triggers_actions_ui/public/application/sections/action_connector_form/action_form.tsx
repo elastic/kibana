@@ -331,8 +331,8 @@ export const ActionForm = ({
                   });
                   setAddModalVisibility(true);
                 }}
-                onSelectAltConnector={(altConnectorId: string) => {
-                  setActionIdByIndex(altConnectorId, index);
+                onSelectConnector={(connectorId: string) => {
+                  setActionIdByIndex(connectorId, index);
                 }}
               />
             );
