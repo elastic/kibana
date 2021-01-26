@@ -16,17 +16,20 @@ import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { DiscoverServices } from '../../../build_services';
 import { DocViewsRegistry } from '../../doc_views/doc_views_registry';
 import { setDocViewsRegistry } from '../../../kibana_services';
+import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
 
 describe('Discover flyout', function () {
-  it('should be rendered', async () => {
-    setDocViewsRegistry(new DocViewsRegistry());
+  setDocViewsRegistry(new DocViewsRegistry());
+
+  it('should be rendered correctly using an index pattern without timefield', async () => {
+    const onClose = jest.fn();
     const component = mountWithIntl(
       <DiscoverGridFlyout
         columns={['date']}
         indexPattern={indexPatternMock}
         hit={esHits[0]}
         onAddColumn={jest.fn()}
-        onClose={jest.fn()}
+        onClose={onClose}
         onFilter={jest.fn()}
         onRemoveColumn={jest.fn()}
         services={({ filterManager: createFilterManagerMock() } as unknown) as DiscoverServices}
@@ -35,5 +38,34 @@ describe('Discover flyout', function () {
 
     const url = findTestSubject(component, 'docTableRowAction').prop('href');
     expect(url).toMatchInlineSnapshot(`"#/doc/the-index-pattern-id/i?id=1"`);
+    findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('should be rendered correctly using an index pattern with timefield', async () => {
+    const onClose = jest.fn();
+    const component = mountWithIntl(
+      <DiscoverGridFlyout
+        columns={['date']}
+        indexPattern={indexPatternWithTimefieldMock}
+        hit={esHits[0]}
+        onAddColumn={jest.fn()}
+        onClose={onClose}
+        onFilter={jest.fn()}
+        onRemoveColumn={jest.fn()}
+        services={({ filterManager: createFilterManagerMock() } as unknown) as DiscoverServices}
+      />
+    );
+
+    const actions = findTestSubject(component, 'docTableRowAction');
+    expect(actions.length).toBe(2);
+    expect(actions.first().prop('href')).toMatchInlineSnapshot(
+      `"#/doc/index-pattern-with-timefield-id/i?id=1"`
+    );
+    expect(actions.last().prop('href')).toMatchInlineSnapshot(
+      `"#/context/index-pattern-with-timefield-id/1?_g=(filters:!())&_a=(columns:!(date),filters:!())"`
+    );
+    findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
+    expect(onClose).toHaveBeenCalled();
   });
 });
