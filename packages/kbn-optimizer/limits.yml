@@ -25,7 +25,6 @@ pageLoadAssetSize:
   esUiShared: 326654
   expressions: 224136
   features: 31211
-  fileUpload: 24717
   globalSearch: 43548
   globalSearchBar: 62888
   globalSearchProviders: 25554
@@ -107,3 +106,4 @@ pageLoadAssetSize:
   presentationUtil: 28545
   spacesOss: 18817
   indexPatternFieldEditor: 90489
+  mapsFileUpload: 23775
