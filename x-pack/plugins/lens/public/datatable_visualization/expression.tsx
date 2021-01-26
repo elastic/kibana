@@ -124,7 +124,7 @@ export const getDatatable = ({
 
 type DatatableColumnResult = ColumnState & { type: 'lens_datatable_column' };
 
-export const datatableColumns: ExpressionFunctionDefinition<
+export const datatableColumn: ExpressionFunctionDefinition<
   'lens_datatable_column',
   null,
   ColumnState,

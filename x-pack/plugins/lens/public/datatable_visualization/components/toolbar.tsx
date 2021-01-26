@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiSwitch } from '@elastic/eui';
 import { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover } from '../../shared_components';
-import { DatatableVisualizationState } from '../visualization';
+import { DatatableVisualizationState, ColumnState } from '../visualization';
 
 export function TableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
-  const { state, setState } = props;
-  const layer = state.layers[0];
-  if (!layer) {
-    return null;
-  }
+  const { state, setState, frame } = props;
+  const columnMap: Record<string, ColumnState> = {};
+  state.columns.forEach((column) => {
+    columnMap[column.columnId] = column;
+  });
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
       <ToolbarPopover
@@ -28,27 +28,34 @@ export function TableToolbar(props: VisualizationToolbarProps<DatatableVisualiza
         buttonDataTestSubj="lnsColumnsButton"
       >
         <EuiFlexGroup gutterSize="m" direction="column">
-          {layer.columns.map((columnId) => {
-            const label = props.frame.datasourceLayers[layer.layerId].getOperationForColumnId(
+          {frame.datasourceLayers[state.layerId].getTableSpec().map(({ columnId }) => {
+            const label = props.frame.datasourceLayers[state.layerId].getOperationForColumnId(
               columnId
             )?.label;
-            const isHidden = state.hiddenColumnIds?.includes(columnId);
+            const isHidden = columnMap[columnId].hidden;
             return (
-              <EuiFlexItem>
+              <EuiFlexItem key={columnId}>
                 <EuiSwitch
                   name={columnId}
                   label={label}
                   checked={!isHidden}
+                  data-test-subj={`lnsColumns-toggle-${label?.replace(/ /g, '-')}`}
                   compressed
                   onChange={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     const newState = {
                       ...state,
-                      hiddenColumnIds:
-                        isHidden && state.hiddenColumnIds
-                          ? state.hiddenColumnIds.filter((id) => id !== columnId)
-                          : [...(state.hiddenColumnIds || []), columnId],
+                      columns: state.columns.map((currentColumn) => {
+                        if (currentColumn.columnId === columnId) {
+                          return {
+                            ...currentColumn,
+                            hidden: !isHidden,
+                          };
+                        } else {
+                          return currentColumn;
+                        }
+                      }),
                     };
                     setState(newState);
                   }}

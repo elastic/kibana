@@ -561,6 +561,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return buttonEl.click();
     },
 
+    async toggleColumnVisibility(label: string) {
+      const id = `lnsColumns-toggle-${label.replace(/ /g, '-')}`;
+      await testSubjects.click('lnsColumnsButton');
+      await testSubjects.existOrFail(id);
+      const isChecked = await testSubjects.isEuiSwitchChecked(id);
+      await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
+      await testSubjects.click('lnsColumnsButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
     async clickTableCellAction(rowIndex = 0, colIndex = 0, actionTestSub: string) {
       const el = await this.getDatatableCell(rowIndex, colIndex);
       await el.focus();
