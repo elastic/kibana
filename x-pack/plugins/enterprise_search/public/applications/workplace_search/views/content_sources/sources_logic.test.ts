@@ -199,7 +199,7 @@ describe('SourcesLogic', () => {
 
       it('calls API and sets values (org)', async () => {
         AppLogic.values.isOrganization = true;
-        const ononSetSearchability = jest.spyOn(SourcesLogic.actions, 'onSetSearchability');
+        const onSetSearchability = jest.spyOn(SourcesLogic.actions, 'onSetSearchability');
         const promise = Promise.resolve(contentSources);
         http.put.mockReturnValue(promise);
         SourcesLogic.actions.setSourceSearchability(id, true);
@@ -208,7 +208,7 @@ describe('SourcesLogic', () => {
           body: JSON.stringify({ searchable: true }),
         });
         await promise;
-        expect(ononSetSearchability).toHaveBeenCalledWith(id, true);
+        expect(onSetSearchability).toHaveBeenCalledWith(id, true);
       });
 
       it('calls API (account)', async () => {
