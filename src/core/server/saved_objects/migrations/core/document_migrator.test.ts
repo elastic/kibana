@@ -143,7 +143,7 @@ describe('DocumentMigrator', () => {
       ).toThrow(/Migrations are not ready. Make sure prepareMigrations is called first./i);
     });
 
-    it(`validates convertToMultiNamespaceTypeVersion can only be used with namespaceType 'multiple'`, () => {
+    it(`validates convertToMultiNamespaceTypeVersion can only be used with namespaceType 'multiple' or 'multiple-isolated'`, () => {
       const invalidDefinition = {
         kibanaVersion: '3.2.3',
         typeRegistry: createRegistry({
@@ -154,7 +154,7 @@ describe('DocumentMigrator', () => {
         log: mockLogger,
       };
       expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Expected namespaceType to be 'multiple', but got 'single'.`
+        `Invalid convertToMultiNamespaceTypeVersion for type foo. Expected namespaceType to be 'multiple' or 'multiple-isolated', but got 'single'.`
       );
     });
 

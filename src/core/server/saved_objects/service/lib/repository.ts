@@ -247,7 +247,7 @@ export class SavedObjectsRepository {
     const namespace = normalizeNamespace(options.namespace);
 
     if (initialNamespaces) {
-      if (!this._registry.isMultiNamespace(type)) {
+      if (!this._registry.isShareable(type)) {
         throw SavedObjectsErrorHelpers.createBadRequestError(
           '"options.initialNamespaces" can only be used on multi-namespace types'
         );
@@ -336,7 +336,7 @@ export class SavedObjectsRepository {
       if (!this._allowedTypes.includes(object.type)) {
         error = SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type);
       } else if (object.initialNamespaces) {
-        if (!this._registry.isMultiNamespace(object.type)) {
+        if (!this._registry.isShareable(object.type)) {
           error = SavedObjectsErrorHelpers.createBadRequestError(
             '"initialNamespaces" can only be used on multi-namespace types'
           );
@@ -1176,7 +1176,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    if (!this._registry.isMultiNamespace(type)) {
+    if (!this._registry.isShareable(type)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         `${type} doesn't support multiple namespaces`
       );
@@ -1239,7 +1239,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    if (!this._registry.isMultiNamespace(type)) {
+    if (!this._registry.isShareable(type)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         `${type} doesn't support multiple namespaces`
       );

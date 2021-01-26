@@ -312,9 +312,9 @@ function validateMigrationDefinition(
     convertToMultiNamespaceTypeVersion: string,
     type: string
   ) {
-    if (namespaceType !== 'multiple') {
+    if (namespaceType !== 'multiple' && namespaceType !== 'multiple-isolated') {
       throw new Error(
-        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Expected namespaceType to be 'multiple', but got '${namespaceType}'.`
+        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Expected namespaceType to be 'multiple' or 'multiple-isolated', but got '${namespaceType}'.`
       );
     } else if (!Semver.valid(convertToMultiNamespaceTypeVersion)) {
       throw new Error(

@@ -2740,7 +2740,7 @@ export interface SavedObjectsMigrationVersion {
 }
 
 // @public
-export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';
+export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
 // @public
 export interface SavedObjectsRawDoc {
@@ -2924,6 +2924,7 @@ export class SavedObjectTypeRegistry {
     isImportableAndExportable(type: string): boolean;
     isMultiNamespace(type: string): boolean;
     isNamespaceAgnostic(type: string): boolean;
+    isShareable(type: string): boolean;
     isSingleNamespace(type: string): boolean;
     registerType(type: SavedObjectsType): void;
     }
