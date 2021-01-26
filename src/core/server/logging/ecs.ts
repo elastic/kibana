@@ -42,7 +42,7 @@ interface EcsProcessField {
 export interface EcsEventField {
   kind?: EcsEventKind;
   category?: EcsEventCategory[];
-  type?: string;
+  type?: EcsEventType;
 }
 
 export enum EcsEventKind {
