@@ -8,6 +8,36 @@
 
 import { i18n } from '@kbn/i18n';
 
+function validate(
+  name: string,
+  value: number,
+  defaultValue: number,
+  min: number,
+  max: number,
+  onWarn: (message: string) => void
+) {
+  if (value === undefined) {
+    value = defaultValue;
+  } else if (value < min) {
+    onWarn(
+      i18n.translate('visTypeVega.mapView.resettingPropertyToMinValueWarningMessage', {
+        defaultMessage: 'Resetting {name} to {min}',
+        values: { name: `"${name}"`, min },
+      })
+    );
+    value = min;
+  } else if (value > max) {
+    onWarn(
+      i18n.translate('visTypeVega.mapView.resettingPropertyToMaxValueWarningMessage', {
+        defaultMessage: 'Resetting {name} to {max}',
+        values: { name: `"${name}"`, max },
+      })
+    );
+    value = max;
+  }
+  return value;
+}
+
 export function validateZoomSettings(
   mapConfig: {
     maxZoom: number;
@@ -24,37 +54,8 @@ export function validateZoomSettings(
 
   let { maxZoom, minZoom, zoom = DEFAULT_ZOOM } = mapConfig;
 
-  const validate = (
-    name: string,
-    value: number,
-    defaultValue: number,
-    min: number,
-    max: number
-  ) => {
-    if (value === undefined) {
-      value = defaultValue;
-    } else if (value < min) {
-      onWarn(
-        i18n.translate('visTypeVega.mapView.resettingPropertyToMinValueWarningMessage', {
-          defaultMessage: 'Resetting {name} to {min}',
-          values: { name: `"${name}"`, min },
-        })
-      );
-      value = min;
-    } else if (value > max) {
-      onWarn(
-        i18n.translate('visTypeVega.mapView.resettingPropertyToMaxValueWarningMessage', {
-          defaultMessage: 'Resetting {name} to {max}',
-          values: { name: `"${name}"`, max },
-        })
-      );
-      value = max;
-    }
-    return value;
-  };
-
-  minZoom = validate('minZoom', minZoom, limits.minZoom, limits.minZoom, limits.maxZoom);
-  maxZoom = validate('maxZoom', maxZoom, limits.maxZoom, limits.minZoom, limits.maxZoom);
+  minZoom = validate('minZoom', minZoom, limits.minZoom, limits.minZoom, limits.maxZoom, onWarn);
+  maxZoom = validate('maxZoom', maxZoom, limits.maxZoom, limits.minZoom, limits.maxZoom, onWarn);
 
   if (minZoom > maxZoom) {
     onWarn(
@@ -69,7 +70,7 @@ export function validateZoomSettings(
     [minZoom, maxZoom] = [maxZoom, minZoom];
   }
 
-  zoom = validate('zoom', zoom, DEFAULT_ZOOM, minZoom, maxZoom);
+  zoom = validate('zoom', zoom, DEFAULT_ZOOM, minZoom, maxZoom, onWarn);
 
   return {
     zoom,

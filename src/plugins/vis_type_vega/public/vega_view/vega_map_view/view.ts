@@ -7,13 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { throttle } from 'lodash';
 import { Map, Style, NavigationControl, MapboxOptions } from 'mapbox-gl';
 
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
 import { TmsTileLayers } from './tms_tile_layers';
 import { getMapServiceSettings } from '../../services';
+import { getAttributionsForTmsService } from './map_service_settings';
 import type { MapServiceSettings } from './map_service_settings';
 
 import {
@@ -36,7 +36,7 @@ export class VegaMapView extends VegaBaseView {
   private get mapStyle() {
     const { mapStyle } = this._parser.mapConfig;
 
-    return mapStyle === 'default' ? this.mapServiceSettings.defaultTmsLayer : mapStyle;
+    return mapStyle === 'default' ? this.mapServiceSettings.defaultTmsLayer() : mapStyle;
   }
 
   private get shouldShowZoomControl() {
@@ -76,7 +76,7 @@ export class VegaMapView extends VegaBaseView {
       }
       zoomSettings.maxZoom = (await tmsService.getMaxZoom()) ?? defaultMapConfig.maxZoom;
       zoomSettings.minZoom = (await tmsService.getMinZoom()) ?? defaultMapConfig.minZoom;
-      customAttribution = await this.mapServiceSettings.getAttributionsForTmsService(tmsService);
+      customAttribution = getAttributionsForTmsService(tmsService);
       style = (await tmsService.getVectorStyleSheet()) as Style;
     } else {
       customAttribution = this.mapServiceSettings.config.tilemap.options.attribution;
@@ -162,16 +162,12 @@ export class VegaMapView extends VegaBaseView {
       map: mapBoxInstance,
       context: {
         vegaView,
-        updateVegaView: throttle(this.updateVegaView, 8),
+        updateVegaView: this.updateVegaView,
       },
     });
   }
 
   public async _initViewCustomizations() {
-    if (!this.mapServiceSettings.isInitialized) {
-      await this.mapServiceSettings.initialize();
-    }
-
     const vegaView = new vega.View(
       vega.parse(injectMapPropsIntoSpec(this._parser.spec)),
       this._vegaViewConfig

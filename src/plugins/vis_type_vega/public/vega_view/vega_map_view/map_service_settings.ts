@@ -38,22 +38,22 @@ export class MapServiceSettings {
 
   constructor(public config: MapsLegacyConfig, private appVersion: string) {}
 
-  public get isInitialized() {
+  private isInitialized() {
     return Boolean(this.emsClient);
   }
 
-  public get hasUserConfiguredTmsLayer() {
+  public hasUserConfiguredTmsLayer() {
     return hasUserConfiguredTmsService(this.config);
   }
 
-  public get defaultTmsLayer() {
-    if (this.hasUserConfiguredTmsLayer) {
+  public defaultTmsLayer() {
+    if (this.hasUserConfiguredTmsLayer()) {
       return TmsTileLayers.userConfigured;
     }
     return this.isDarkMode ? TmsTileLayers.dark : TmsTileLayers.desaturated;
   }
 
-  public async initialize() {
+  private async initialize() {
     this.isDarkMode = getUISettings().get('theme:darkMode');
 
     this.emsClient = await initEmsClientAsync({
@@ -64,19 +64,22 @@ export class MapServiceSettings {
     });
   }
 
-  public getTmsService(tmsTileLayer: TmsTileLayers | string = TmsTileLayers.desaturated) {
+  public async getTmsService(tmsTileLayer: TmsTileLayers | string = TmsTileLayers.desaturated) {
+    if (!this.isInitialized()) {
+      await this.initialize();
+    }
     return this.emsClient?.findTMSServiceById(tmsTileLayer);
   }
+}
 
-  public getAttributionsForTmsService(tmsService: TMSService) {
-    return tmsService.getAttributions().map(({ label, url }) => {
-      const anchorTag = document.createElement('a');
+export function getAttributionsForTmsService(tmsService: TMSService) {
+  return tmsService.getAttributions().map(({ label, url }) => {
+    const anchorTag = document.createElement('a');
 
-      anchorTag.textContent = label;
-      anchorTag.setAttribute('rel', 'noreferrer noopener');
-      anchorTag.setAttribute('href', url);
+    anchorTag.textContent = label;
+    anchorTag.setAttribute('rel', 'noreferrer noopener');
+    anchorTag.setAttribute('href', url);
 
-      return anchorTag.outerHTML;
-    });
-  }
+    return anchorTag.outerHTML;
+  });
 }
