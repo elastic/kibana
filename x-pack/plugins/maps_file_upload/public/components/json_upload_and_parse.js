@@ -16,27 +16,27 @@ import { JsonImportProgress } from './json_import_progress';
 import _ from 'lodash';
 
 const INDEXING_STAGE = {
-  INDEXING_STARTED: i18n.translate('xpack.mapsFileUpload.jsonUploadAndParse.dataIndexingStarted', {
+  INDEXING_STARTED: i18n.translate('xpack.fileUpload.jsonUploadAndParse.dataIndexingStarted', {
     defaultMessage: 'Data indexing started',
   }),
-  WRITING_TO_INDEX: i18n.translate('xpack.mapsFileUpload.jsonUploadAndParse.writingToIndex', {
+  WRITING_TO_INDEX: i18n.translate('xpack.fileUpload.jsonUploadAndParse.writingToIndex', {
     defaultMessage: 'Writing to index',
   }),
-  INDEXING_COMPLETE: i18n.translate('xpack.mapsFileUpload.jsonUploadAndParse.indexingComplete', {
+  INDEXING_COMPLETE: i18n.translate('xpack.fileUpload.jsonUploadAndParse.indexingComplete', {
     defaultMessage: 'Indexing complete',
   }),
   CREATING_INDEX_PATTERN: i18n.translate(
-    'xpack.mapsFileUpload.jsonUploadAndParse.creatingIndexPattern',
+    'xpack.fileUpload.jsonUploadAndParse.creatingIndexPattern',
     { defaultMessage: 'Creating index pattern' }
   ),
   INDEX_PATTERN_COMPLETE: i18n.translate(
-    'xpack.mapsFileUpload.jsonUploadAndParse.indexPatternComplete',
+    'xpack.fileUpload.jsonUploadAndParse.indexPatternComplete',
     { defaultMessage: 'Index pattern complete' }
   ),
-  INDEXING_ERROR: i18n.translate('xpack.mapsFileUpload.jsonUploadAndParse.dataIndexingError', {
+  INDEXING_ERROR: i18n.translate('xpack.fileUpload.jsonUploadAndParse.dataIndexingError', {
     defaultMessage: 'Data indexing error',
   }),
-  INDEX_PATTERN_ERROR: i18n.translate('xpack.mapsFileUpload.jsonUploadAndParse.indexPatternError', {
+  INDEX_PATTERN_ERROR: i18n.translate('xpack.fileUpload.jsonUploadAndParse.indexPatternError', {
     defaultMessage: 'Index pattern error',
   }),
 };

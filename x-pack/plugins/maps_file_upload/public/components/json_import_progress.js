@@ -60,7 +60,7 @@ export class JsonImportProgress extends Component {
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="xpack.mapsFileUpload.jsonImport.indexingStatus"
+              id="xpack.fileUpload.jsonImport.indexingStatus"
               defaultMessage="Indexing status"
             />
           </h3>
@@ -74,7 +74,7 @@ export class JsonImportProgress extends Component {
                 <EuiTitle size="xxs">
                   <h4>
                     <FormattedMessage
-                      id="xpack.mapsFileUpload.jsonImport.indexingResponse"
+                      id="xpack.fileUpload.jsonImport.indexingResponse"
                       defaultMessage="Indexing response"
                     />
                   </h4>
@@ -94,7 +94,7 @@ export class JsonImportProgress extends Component {
                 <EuiTitle size="xxs">
                   <h4>
                     <FormattedMessage
-                      id="xpack.mapsFileUpload.jsonImport.indexPatternResponse"
+                      id="xpack.fileUpload.jsonImport.indexPatternResponse"
                       defaultMessage="Index pattern response"
                     />
                   </h4>
@@ -111,7 +111,7 @@ export class JsonImportProgress extends Component {
             ) : null}
             <EuiCallOut>
               <div>
-                {i18n.translate('xpack.mapsFileUpload.jsonImport.indexModsMsg', {
+                {i18n.translate('xpack.fileUpload.jsonImport.indexModsMsg', {
                   defaultMessage: 'Further index modifications can be made using\n',
                 })}
                 <a
@@ -121,7 +121,7 @@ export class JsonImportProgress extends Component {
                       management/elasticsearch/index_management/indices/
                       filter/${indexName}`.replace(/\s/g, '')}
                 >
-                  {i18n.translate('xpack.mapsFileUpload.jsonImport.indexMgmtLink', {
+                  {i18n.translate('xpack.fileUpload.jsonImport.indexMgmtLink', {
                     defaultMessage: 'Index Management',
                   })}
                 </a>
