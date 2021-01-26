@@ -29,6 +29,7 @@ import {
   CaseType,
   SavedObjectFindOptions,
   CaseResponse,
+  AssociationType,
 } from '../../../../common/api';
 import {
   transformCases,
@@ -117,13 +118,16 @@ async function getCaseCommentStats({
     )
   );
 
+  const associationType =
+    type === SUB_CASE_SAVED_OBJECT ? AssociationType.subCase : AssociationType.case;
+
   const alerts = await Promise.all(
     ids.map((id) =>
       caseService.getAllCaseComments({
         client,
         id,
         options: {
-          filter: `${type}.attributes.type: ${CommentType.alert} OR ${type}.attributes.type: ${CommentType.alertGroup}`,
+          filter: `(${type}.attributes.type: ${CommentType.alert} OR ${type}.attributes.type: ${CommentType.alertGroup}) AND ${type}.attributes.associationType: ${associationType}`,
         },
       })
     )
