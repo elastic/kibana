@@ -11,6 +11,7 @@ import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { enableServiceOverview } from '../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useErrorOverviewHref } from '../../shared/Links/apm/ErrorOverviewLink';
 import { useMetricOverviewHref } from '../../shared/Links/apm/MetricOverviewLink';
 import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
@@ -46,6 +47,9 @@ interface Props {
 export function ServiceDetailTabs({ serviceName, tab }: Props) {
   const { agentName } = useApmServiceContext();
   const { uiSettings } = useApmPluginContext().core;
+  const {
+    urlParams: { latencyAggregationType },
+  } = useUrlParams();
 
   const overviewTab = {
     key: 'overview',
@@ -60,7 +64,7 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
 
   const transactionsTab = {
     key: 'transactions',
-    href: useTransactionsOverviewHref(serviceName),
+    href: useTransactionsOverviewHref({ serviceName, latencyAggregationType }),
     text: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
       defaultMessage: 'Transactions',
     }),

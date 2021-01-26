@@ -47,7 +47,7 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { mergeLayer } from './state_helpers';
-import { Datasource, StateSetter } from '../index';
+import { Datasource, StateSetter } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
 import { Dragging } from '../drag_drop/providers';

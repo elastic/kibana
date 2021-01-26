@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -26,9 +15,9 @@ import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 
 import { getVisualizationInstance } from '../get_visualization_instance';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { SavedVisInstance, IEditorController, VisualizeServices } from '../../types';
+import { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
 import { VisualizeConstants } from '../../visualize_constants';
-import { getDefaultEditor } from '../../../services';
+import { getVisEditorsRegistry } from '../../../services';
 
 /**
  * This effect is responsible for instantiating a saved vis or creating a new one
@@ -101,7 +90,8 @@ export const useSavedVisInstance = (
           ? stateTransferService.getAppNameFromId(originatingApp)
           : undefined;
         const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
-        const byValueCreateMode = dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
+        const byValueCreateMode =
+          Boolean(originatingApp) && dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
 
         if (savedVis.id) {
           chrome.setBreadcrumbs(
@@ -122,13 +112,16 @@ export const useSavedVisInstance = (
         // do not create editor in embeded mode
         if (visEditorRef.current) {
           if (isChromeVisible) {
-            const Editor = vis.type.editor || getDefaultEditor();
-            visEditorController = new Editor(
-              visEditorRef.current,
-              vis,
-              eventEmitter,
-              embeddableHandler
-            );
+            const Editor = getVisEditorsRegistry().get(vis.type.editorConfig?.editor);
+
+            if (Editor) {
+              visEditorController = new Editor(
+                visEditorRef.current,
+                vis,
+                eventEmitter,
+                embeddableHandler
+              );
+            }
           } else {
             embeddableHandler.render(visEditorRef.current);
           }

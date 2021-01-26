@@ -8,16 +8,37 @@ import { ChromeBreadcrumb } from 'kibana/public';
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { of } from 'rxjs';
-import { MountWithReduxProvider, mountWithRouter } from '../../../../lib';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { render } from '../../../../lib/helper/rtl_helpers';
 import { useMonitorBreadcrumb } from './use_monitor_breadcrumb';
 import { OVERVIEW_ROUTE } from '../../../../../common/constants';
 import { Ping } from '../../../../../common/runtime_types/ping';
 import { JourneyState } from '../../../../state/reducers/journey';
+import { chromeServiceMock, uiSettingsServiceMock } from 'src/core/public/mocks';
 
 describe('useMonitorBreadcrumbs', () => {
   it('sets the given breadcrumbs', () => {
-    const [getBreadcrumbs, core] = mockCore();
+    let breadcrumbObj: ChromeBreadcrumb[] = [];
+    const getBreadcrumbs = () => {
+      return breadcrumbObj;
+    };
+
+    const core = {
+      chrome: {
+        ...chromeServiceMock.createStartContract(),
+        setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
+          breadcrumbObj = newBreadcrumbs;
+        },
+      },
+      uiSettings: {
+        ...uiSettingsServiceMock.createSetupContract(),
+        get(key: string, defaultOverride?: any): any {
+          return `MMM D, YYYY @ HH:mm:ss.SSS` || defaultOverride;
+        },
+        get$(key: string, defaultOverride?: any): any {
+          return of(`MMM D, YYYY @ HH:mm:ss.SSS`) || of(defaultOverride);
+        },
+      },
+    };
 
     const Component = () => {
       useMonitorBreadcrumb({
@@ -27,14 +48,11 @@ describe('useMonitorBreadcrumbs', () => {
       return <>Step Water Fall</>;
     };
 
-    mountWithRouter(
-      <MountWithReduxProvider>
-        <KibanaContextProvider services={{ ...core }}>
-          <Route path={OVERVIEW_ROUTE}>
-            <Component />
-          </Route>
-        </KibanaContextProvider>
-      </MountWithReduxProvider>
+    render(
+      <Route path={OVERVIEW_ROUTE}>
+        <Component />
+      </Route>,
+      { core }
     );
 
     expect(getBreadcrumbs()).toMatchInlineSnapshot(`
@@ -56,27 +74,3 @@ describe('useMonitorBreadcrumbs', () => {
     `);
   });
 });
-
-const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
-  let breadcrumbObj: ChromeBreadcrumb[] = [];
-  const get = () => {
-    return breadcrumbObj;
-  };
-  const core = {
-    application: {
-      getUrlForApp: () => '/app/uptime',
-      navigateToUrl: jest.fn(),
-    },
-    chrome: {
-      setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
-        breadcrumbObj = newBreadcrumbs;
-      },
-    },
-    uiSettings: {
-      get: (key: string) => 'MMM D, YYYY @ HH:mm:ss.SSS',
-      get$: (key: string) => of('MMM D, YYYY @ HH:mm:ss.SSS'),
-    },
-  };
-
-  return [get, core];
-};

@@ -248,7 +248,7 @@ export function ApmIndices() {
                       fill
                       onClick={handleApplyChangesEvent}
                       isLoading={isSaving}
-                      disabled={!canSave}
+                      isDisabled={!canSave}
                     >
                       {i18n.translate(
                         'xpack.apm.settings.apmIndices.applyButton',

@@ -40,7 +40,7 @@ const EXPECTED_DATA = [
     category: 'traefik',
     field: 'traefik.access.geoip.location',
     values: ['{"long":-122.3341,"lat":47.6103}'],
-    originalValue: ['[{"coordinates":[-122.3341,47.6103],"type":"Point"}]'],
+    originalValue: ['{"coordinates":[-122.3341,47.6103],"type":"Point"}'],
   },
   {
     category: 'suricata',
@@ -318,7 +318,7 @@ const EXPECTED_DATA = [
     category: 'source',
     field: 'source.geo.location',
     values: ['{"long":-122.3341,"lat":47.6103}'],
-    originalValue: ['[{"coordinates":[-122.3341,47.6103],"type":"Point"}]'],
+    originalValue: ['{"coordinates":[-122.3341,47.6103],"type":"Point"}'],
   },
   {
     category: 'source',

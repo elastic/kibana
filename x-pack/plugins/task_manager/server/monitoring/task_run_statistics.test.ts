@@ -11,7 +11,12 @@ import sinon from 'sinon';
 import { take, tap, bufferCount, skip, map } from 'rxjs/operators';
 
 import { ConcreteTaskInstance, TaskStatus } from '../task';
-import { asTaskRunEvent, asTaskPollingCycleEvent, TaskTiming } from '../task_events';
+import {
+  asTaskRunEvent,
+  asTaskPollingCycleEvent,
+  TaskTiming,
+  asTaskManagerStatEvent,
+} from '../task_events';
 import { asOk } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRunResult } from '../task_running';
@@ -523,16 +528,35 @@ describe('Task Run Statistics', () => {
           }
         });
 
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.PoolFilled)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.RanOutOfCapacity)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.RanOutOfCapacity)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
-      events$.next(asTaskPollingCycleEvent(asOk(FillPoolResult.NoTasksClaimed)));
+      const timing = {
+        start: 0,
+        stop: 0,
+      };
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
+      events$.next(asTaskManagerStatEvent('pollingDelay', asOk(0)));
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
+      events$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.PoolFilled, timing })));
+      events$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.PoolFilled, timing })));
+      events$.next(asTaskPollingCycleEvent(asOk({ result: FillPoolResult.PoolFilled, timing })));
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.RanOutOfCapacity, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.RanOutOfCapacity, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
     });
   });
 });

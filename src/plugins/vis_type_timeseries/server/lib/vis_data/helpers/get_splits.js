@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import Color from 'color';
@@ -27,7 +16,7 @@ import { formatKey } from './format_key';
 const getTimeSeries = (resp, series) =>
   _.get(resp, `aggregations.timeseries`) || _.get(resp, `aggregations.${series.id}.timeseries`);
 
-export function getSplits(resp, panel, series, meta) {
+export async function getSplits(resp, panel, series, meta, extractFields) {
   if (!meta) {
     meta = _.get(resp, `aggregations.${series.id}.meta`);
   }
@@ -35,12 +24,17 @@ export function getSplits(resp, panel, series, meta) {
   const color = new Color(series.color);
   const metric = getLastMetric(series);
   const buckets = _.get(resp, `aggregations.${series.id}.buckets`);
+
+  const fieldsForMetaIndex = meta.index ? await extractFields(meta.index) : [];
+  const splitByLabel = calculateLabel(metric, series.metrics, fieldsForMetaIndex);
+
   if (buckets) {
     if (Array.isArray(buckets)) {
       const size = buckets.length;
       const colors = getSplitColors(series.color, size, series.split_color_mode);
       return buckets.map((bucket) => {
         bucket.id = `${series.id}:${bucket.key}`;
+        bucket.splitByLabel = splitByLabel;
         bucket.label = formatKey(bucket.key, series);
         bucket.labelFormatted = bucket.key_as_string ? formatKey(bucket.key_as_string, series) : '';
         bucket.color = panel.type === 'top_n' ? color.string() : colors.shift();
@@ -72,10 +66,12 @@ export function getSplits(resp, panel, series, meta) {
     .forEach((m) => {
       mergeObj[m.id] = _.get(resp, `aggregations.${series.id}.${m.id}`);
     });
+
   return [
     {
       id: series.id,
-      label: series.label || calculateLabel(metric, series.metrics),
+      splitByLabel,
+      label: series.label || splitByLabel,
       color: color.string(),
       ...mergeObj,
       meta,

@@ -155,7 +155,7 @@ interface DataProvidersGroupItem extends Omit<Props, 'dataProviders'> {
 export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
   ({ browserFields, group, groupIndex, dataProvider, index, timelineId }) => {
     const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
-    const [, setHoverActionsOwnFocus] = useState<boolean>(false);
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [, setClosePopOverTrigger] = useState(false);
     const dispatch = useDispatch();
 
@@ -240,7 +240,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
     }, []);
 
     const openPopover = useCallback(() => {
-      setHoverActionsOwnFocus(true);
+      setIsPopoverOpen(true);
     }, []);
 
     const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
@@ -250,6 +250,15 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       keyboardHandlerRef,
       openPopover,
     });
+
+    const keyDownHandler = useCallback(
+      (keyboardEvent: React.KeyboardEvent<Element>) => {
+        if (keyboardHandlerRef.current === document.activeElement) {
+          onKeyDown(keyboardEvent);
+        }
+      },
+      [onKeyDown]
+    );
 
     const DraggableContent = useCallback(
       (provided, snapshot) => (
@@ -275,6 +284,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 kqlQuery={index > 0 ? dataProvider.kqlQuery : group[0].kqlQuery}
                 isEnabled={index > 0 ? dataProvider.enabled : group[0].enabled}
                 isExcluded={index > 0 ? dataProvider.excluded : group[0].excluded}
+                isPopoverOpen={isPopoverOpen}
                 onDataProviderEdited={handleDataProviderEdited}
                 operator={
                   index > 0
@@ -284,6 +294,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 register={dataProvider}
                 providerId={index > 0 ? group[0].id : dataProvider.id}
                 timelineId={timelineId}
+                setIsPopoverOpen={setIsPopoverOpen}
                 toggleEnabledProvider={handleToggleEnabledProvider}
                 toggleExcludedProvider={handleToggleExcludedProvider}
                 toggleTypeProvider={handleToggleTypeProvider}
@@ -315,7 +326,9 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         handleToggleExcludedProvider,
         handleToggleTypeProvider,
         index,
+        isPopoverOpen,
         keyboardHandlerRef,
+        setIsPopoverOpen,
         timelineId,
       ]
     );
@@ -326,7 +339,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         data-test-subj="draggableWrapperKeyboardHandler"
         onClick={onFocus}
         onBlur={onBlur}
-        onKeyDown={onKeyDown}
+        onKeyDown={keyDownHandler}
         ref={keyboardHandlerRef}
         role="button"
         tabIndex={0}

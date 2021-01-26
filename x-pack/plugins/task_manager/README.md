@@ -45,6 +45,7 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 - `max_poll_inactivity_cycles` - How many poll intervals is work allowed to block polling for before it's timed out. This does not include task execution, as task execution does not block the polling, but rather includes work needed to manage Task Manager's state.
 - `index` - **deprecated** The name of the index that the task_manager will use. This is deprecated, and will be removed starting in 8.0
 - `max_workers` - The maximum number of tasks a Kibana will run concurrently (defaults to 10)
+- `version_conflict_threshold` - The threshold percentage for workers experiencing version conflicts for shifting the polling interval
 - `credentials` - Encrypted user credentials. All tasks will run in the security context of this user. See [this issue](https://github.com/elastic/dev/issues/1045) for a discussion on task scheduler security.
 - `override_num_workers`: An object of `taskType: number` that overrides the `num_workers` for tasks
   - For example: `task_manager.override_num_workers.reporting: 2` would override the number of workers occupied by tasks of type `reporting`

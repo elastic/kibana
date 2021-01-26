@@ -16,7 +16,10 @@ const persistedFilters: Array<keyof APMQueryParams> = [
 ];
 
 export function useMetricOverviewHref(serviceName: string) {
-  return useAPMHref(`/services/${serviceName}/metrics`, persistedFilters);
+  return useAPMHref({
+    path: `/services/${serviceName}/metrics`,
+    persistedFilters,
+  });
 }
 
 interface Props extends APMLinkExtendProps {
