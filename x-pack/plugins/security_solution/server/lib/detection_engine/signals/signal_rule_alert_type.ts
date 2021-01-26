@@ -186,49 +186,52 @@ export const signalRulesAlertType = ({
       // move this collection of lines into a function in utils
       // so that we can use it in create rules route, bulk, etc.
       try {
-        const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
-        const [privileges, timestampFieldCaps] = await Promise.all([
-          pipe(
-            { services, version, index },
-            ({ services: svc, version: ver, index: idx }) =>
-              pipe(
-                tryCatch(() => getInputIndex(svc, ver, idx), toError),
-                chain((indices) => tryCatch(() => checkPrivileges(svc, indices), toError))
-              ),
-            toPromise
-          ),
-          services.scopedClusterClient.fieldCaps({
-            index,
-            fields: hasTimestampOverride
-              ? ['@timestamp', timestampOverride as string]
-              : ['@timestamp'],
-            allow_no_indices: false,
-            include_unmapped: true,
-          }),
-        ]);
-
-        wrotePartialFailureStatus = await flow(
-          () =>
-            tryCatch(
-              () => hasReadIndexPrivileges(privileges, logger, buildRuleMessage, ruleStatusService),
-              toError
-            ),
-          chain((wroteStatus) =>
-            tryCatch(
-              () =>
-                hasTimestampFields(
-                  wroteStatus,
-                  hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
-                  timestampFieldCaps,
-                  ruleStatusService,
-                  logger,
-                  buildRuleMessage
+        if (!isEmpty(index)) {
+          const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
+          const [privileges, timestampFieldCaps] = await Promise.all([
+            pipe(
+              { services, version, index },
+              ({ services: svc, version: ver, index: idx }) =>
+                pipe(
+                  tryCatch(() => getInputIndex(svc, ver, idx), toError),
+                  chain((indices) => tryCatch(() => checkPrivileges(svc, indices), toError))
                 ),
-              toError
-            )
-          ),
-          toPromise
-        )();
+              toPromise
+            ),
+            services.scopedClusterClient.fieldCaps({
+              index,
+              fields: hasTimestampOverride
+                ? ['@timestamp', timestampOverride as string]
+                : ['@timestamp'],
+              allow_no_indices: false,
+              include_unmapped: true,
+            }),
+          ]);
+
+          wrotePartialFailureStatus = await flow(
+            () =>
+              tryCatch(
+                () =>
+                  hasReadIndexPrivileges(privileges, logger, buildRuleMessage, ruleStatusService),
+                toError
+              ),
+            chain((wroteStatus) =>
+              tryCatch(
+                () =>
+                  hasTimestampFields(
+                    wroteStatus,
+                    hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
+                    timestampFieldCaps,
+                    ruleStatusService,
+                    logger,
+                    buildRuleMessage
+                  ),
+                toError
+              )
+            ),
+            toPromise
+          )();
+        }
       } catch (exc) {
         logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
       }
