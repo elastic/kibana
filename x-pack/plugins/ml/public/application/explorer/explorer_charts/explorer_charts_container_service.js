@@ -29,6 +29,7 @@ import { explorerService } from '../explorer_dashboard_service';
 
 import { CHART_TYPE } from '../explorer_constants';
 import { i18n } from '@kbn/i18n';
+import { SWIM_LANE_LABEL_WIDTH } from '../swimlane_container';
 
 export function getDefaultChartsData() {
   return {
@@ -57,15 +58,14 @@ export const anomalyDataChange = function (
 ) {
   const data = getDefaultChartsData();
 
+  const containerWith = chartsContainerWidth + SWIM_LANE_LABEL_WIDTH;
+
   const filteredRecords = anomalyRecords.filter((record) => {
     return Number(record.record_score) >= severity;
   });
   const [allSeriesRecords, errorMessages] = processRecordsForDisplay(filteredRecords);
   // Calculate the number of charts per row, depending on the width available, to a max of 4.
-  let chartsPerRow = Math.min(
-    Math.max(Math.floor(chartsContainerWidth / 550), 1),
-    MAX_CHARTS_PER_ROW
-  );
+  let chartsPerRow = Math.min(Math.max(Math.floor(containerWith / 550), 1), MAX_CHARTS_PER_ROW);
   if (allSeriesRecords.length === 1) {
     chartsPerRow = 1;
   }
@@ -81,7 +81,7 @@ export const anomalyDataChange = function (
 
   // Calculate the time range of the charts, which is a function of the chart width and max job bucket span.
   data.tooManyBuckets = false;
-  const chartWidth = Math.floor(chartsContainerWidth / chartsPerRow);
+  const chartWidth = Math.floor(containerWith / chartsPerRow);
   const { chartRange, tooManyBuckets } = calculateChartRange(
     seriesConfigs,
     selectedEarliestMs,
@@ -126,6 +126,7 @@ export const anomalyDataChange = function (
           datafeedQuery,
           config.metricFunction,
           config.metricFieldName,
+          config.summaryCountFieldName,
           config.timeField,
           range.min,
           range.max,

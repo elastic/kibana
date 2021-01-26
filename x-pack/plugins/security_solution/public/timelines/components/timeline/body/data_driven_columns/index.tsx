@@ -11,7 +11,8 @@ import { getOr } from 'lodash/fp';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '../../../../../common/components/drag_and_drop/helpers';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/store/timeline/model';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import { EventsTd, EVENTS_TD_CLASS_NAME, EventsTdContent, EventsTdGroupData } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
@@ -117,17 +118,17 @@ export const DataDrivenColumns = React.memo<Props>(
               })}
             </>
           </EventsTdContent>
-          {hasRowRenderers && (
+          {hasRowRenderers ? (
             <EuiScreenReaderOnly data-test-subj="hasRowRendererScreenReaderOnly">
               <p>{i18n.EVENT_HAS_AN_EVENT_RENDERER(ariaRowindex)}</p>
             </EuiScreenReaderOnly>
-          )}
+          ) : null}
 
-          {notesCount && (
+          {notesCount ? (
             <EuiScreenReaderOnly data-test-subj="hasNotesScreenReaderOnly">
               <p>{i18n.EVENT_HAS_NOTES({ row: ariaRowindex, notesCount })}</p>
             </EuiScreenReaderOnly>
-          )}
+          ) : null}
         </EventsTd>
       ))}
     </EventsTdGroupData>

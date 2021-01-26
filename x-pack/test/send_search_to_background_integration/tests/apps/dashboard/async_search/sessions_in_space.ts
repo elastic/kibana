@@ -5,7 +5,6 @@
  */
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { getSearchSessionIdByPanelProvider } from './get_search_session_id_by_panel';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -19,9 +18,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'security',
     'timePicker',
   ]);
-  const getSearchSessionIdByPanel = getSearchSessionIdByPanelProvider(getService);
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const browser = getService('browser');
-  const sendToBackground = getService('sendToBackground');
+  const searchSessions = getService('searchSessions');
 
   describe('dashboard in space', () => {
     describe('Send to background in space', () => {
@@ -34,7 +33,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
           kibana: [
             {
-              base: ['all'],
+              feature: {
+                dashboard: ['minimal_read', 'store_search_session'],
+              },
               spaces: ['another-space'],
             },
           ],
@@ -54,6 +55,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
+        await security.role.delete('data_analyst');
+        await security.user.delete('analyst');
+
         await esArchiver.unload('dashboard/session_in_space');
         await PageObjects.security.forceLogout();
       });
@@ -69,10 +73,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await sendToBackground.expectState('completed');
-        await sendToBackground.save();
-        await sendToBackground.expectState('backgroundCompleted');
-        const savedSessionId = await getSearchSessionIdByPanel('A Pie in another space');
+        await searchSessions.expectState('completed');
+        await searchSessions.save();
+        await searchSessions.expectState('backgroundCompleted');
+        const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
+          'A Pie in another space'
+        );
 
         // load URL to restore a saved session
         const url = await browser.getCurrentUrl();
@@ -82,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.waitForRenderComplete();
 
         // Check that session is restored
-        await sendToBackground.expectState('restored');
+        await searchSessions.expectState('restored');
         await testSubjects.missingOrFail('embeddableErrorLabel');
       });
     });

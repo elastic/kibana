@@ -14,7 +14,7 @@ import {
   EuiContextMenuItem,
 } from '@elastic/eui';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryContextMenuItem {
@@ -79,7 +79,13 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   return (
     <LogEntryContextMenuContent>
       <AbsoluteWrapper>
-        <EuiPopover closePopover={onClose} isOpen={isOpen} button={button} ownFocus={true}>
+        <EuiPopover
+          panelPaddingSize="none"
+          closePopover={onClose}
+          isOpen={isOpen}
+          button={button}
+          ownFocus={true}
+        >
           <EuiContextMenuPanel items={wrappedItems} />
         </EuiPopover>
       </AbsoluteWrapper>

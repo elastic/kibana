@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../__mocks__/kea.mock';
 import '../../../__mocks__/enterprise_search_url.mock';
-import { mockTelemetryActions, mountWithIntl } from '../../../__mocks__/';
+import { mockTelemetryActions, mountWithIntl } from '../../../__mocks__';
 
 import React from 'react';
 import { EuiBasicTable, EuiPagination, EuiButtonEmpty } from '@elastic/eui';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
+import { EngineDetails } from '../engine/types';
 import { EnginesTable } from './engines_table';
 
 describe('EnginesTable', () => {
@@ -25,7 +25,7 @@ describe('EnginesTable', () => {
       isMeta: false,
       document_count: 99999,
       field_count: 10,
-    },
+    } as EngineDetails,
   ];
   const pagination = {
     totalEngines: 50,

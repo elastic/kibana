@@ -83,7 +83,8 @@ describe('filters', () => {
       const esAggsFn = filtersOperation.toEsAggsFn(
         layer.columns.col1 as FiltersIndexPatternColumn,
         'col1',
-        createMockedIndexPattern()
+        createMockedIndexPattern(),
+        layer
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({

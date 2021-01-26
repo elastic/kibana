@@ -10,14 +10,16 @@ val StandardAgents = sizes.map { size -> size to GoogleCloudAgent {
   machineType = "n2-standard-$size"
   diskSizeGb = 75
   diskType = GoogleCloudAgentDiskType.SSD
+  maxInstances = 750
 } }.toMap()
 
 val BuildAgent = GoogleCloudAgent {
-    sourceImageFamily = "elastic-kibana-ci-ubuntu-1804-lts"
-    agentPrefix = "kibana-c2-16-"
-    machineType = "c2-standard-16"
-    diskSizeGb = 250
-    diskType = GoogleCloudAgentDiskType.SSD
+  sourceImageFamily = "elastic-kibana-ci-ubuntu-1804-lts"
+  agentPrefix = "kibana-c2-16-"
+  machineType = "c2-standard-16"
+  diskSizeGb = 250
+  diskType = GoogleCloudAgentDiskType.SSD
+  maxInstances = 200
 }
 
 val CloudProfile = GoogleCloudProfile {

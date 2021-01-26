@@ -24,7 +24,7 @@ def check() {
 def lint() {
   tasks([
     kibanaPipeline.scriptTask('Lint: eslint', 'test/scripts/lint/eslint.sh'),
-    kibanaPipeline.scriptTask('Lint: sasslint', 'test/scripts/lint/sasslint.sh'),
+    kibanaPipeline.scriptTask('Lint: stylelint', 'test/scripts/lint/stylelint.sh'),
   ])
 }
 
@@ -32,7 +32,6 @@ def test() {
   tasks([
     // These 2 tasks require isolation because of hard-coded, conflicting ports and such, so let's use Docker here
     kibanaPipeline.scriptTaskDocker('Jest Integration Tests', 'test/scripts/test/jest_integration.sh'),
-    kibanaPipeline.scriptTaskDocker('Mocha Tests', 'test/scripts/test/mocha.sh'),
 
     kibanaPipeline.scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh'),
     kibanaPipeline.scriptTask('API Integration Tests', 'test/scripts/test/api_integration.sh'),
@@ -95,7 +94,7 @@ def functionalXpack(Map params = [:]) {
     kibanaPipeline.buildXpack(10)
 
     if (config.ciGroups) {
-      def ciGroups = 1..11
+      def ciGroups = 1..13
       tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it) })
     }
 
@@ -115,14 +114,16 @@ def functionalXpack(Map params = [:]) {
       task(kibanaPipeline.functionalTestProcess('xpack-savedObjectsFieldMetrics', './test/scripts/jenkins_xpack_saved_objects_field_metrics.sh'))
     }
 
-     whenChanged([
-       'x-pack/plugins/security_solution/',
-       'x-pack/test/security_solution_cypress/',
-       'x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/',
-       'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
-     ]) {
-       task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypress', './test/scripts/jenkins_security_solution_cypress.sh'))
-     }
+    whenChanged([
+      'x-pack/plugins/security_solution/',
+      'x-pack/test/security_solution_cypress/',
+      'x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/',
+      'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
+    ]) {
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypress', './test/scripts/jenkins_security_solution_cypress.sh'))
+      }
+    }
   }
 }
 

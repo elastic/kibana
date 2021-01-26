@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }) {
 
       // Here we are checking that once Monitoring is enabled,
       // it moves on to the cluster overview page.
-      await retry.tryForTime(10000, async () => {
+      await retry.tryForTime(20000, async () => {
         // Click the refresh button
         await testSubjects.click('querySubmitButton');
         expect(await clusterOverview.isOnClusterOverview()).to.be(true);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTheme } from '../../../observability/public';
+import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import {
   getThrouputChartSelector,
   ThrouputChartsResponse,
@@ -34,6 +34,14 @@ const throughputData = {
 describe('getThrouputChartSelector', () => {
   it('returns default values when data is undefined', () => {
     const throughputTimeseries = getThrouputChartSelector({ theme });
+    expect(throughputTimeseries).toEqual({ throughputTimeseries: [] });
+  });
+
+  it('returns default values when timeseries is empty', () => {
+    const throughputTimeseries = getThrouputChartSelector({
+      theme,
+      throuputChart: { throughputTimeseries: [] },
+    });
     expect(throughputTimeseries).toEqual({ throughputTimeseries: [] });
   });
 

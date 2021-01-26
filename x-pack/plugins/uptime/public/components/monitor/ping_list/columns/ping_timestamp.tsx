@@ -10,9 +10,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
-  EuiLink,
   EuiSpacer,
   EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import useIntersection from 'react-use/lib/useIntersection';
 import moment from 'moment';
@@ -20,7 +20,8 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Ping } from '../../../../../common/runtime_types/ping';
 import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
-import { euiStyled, useFetcher } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { useFetcher, FETCH_STATUS } from '../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../contexts';
 
@@ -32,6 +33,7 @@ const StepImage = styled(EuiImage)`
       align-self: center;
       margin-left: 8px;
       margin-top: 8px;
+      text-decoration: none !important;
     }
   }
 `;
@@ -81,7 +83,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
     threshold: 1,
   });
 
-  const { data } = useFetcher(() => {
+  const { data, status } = useFetcher(() => {
     if (intersection && intersection.intersectionRatio === 1 && !stepImages[stepNo - 1])
       return getJourneyScreenshot(imgPath);
   }, [intersection?.intersectionRatio, stepNo]);
@@ -94,12 +96,14 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
 
   const imgSrc = stepImages[stepNo] || data?.src;
 
+  const isLoading = status === FETCH_STATUS.LOADING;
+  const isPending = status === FETCH_STATUS.PENDING;
+
+  const captionContent = `Step:${stepNo} ${data?.stepName}`;
+
   const ImageCaption = (
     <>
-      <div
-        className="stepArrowsFullScreen"
-        style={{ position: 'absolute', bottom: 32, width: '100%' }}
-      >
+      <div className="stepArrowsFullScreen">
         {imgSrc && (
           <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
             <EuiFlexItem grow={false}>
@@ -114,9 +118,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText>
-                Step:{stepNo} {data?.stepName}
-              </EuiText>
+              <EuiText>{captionContent}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
@@ -132,9 +134,8 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
           </EuiFlexGroup>
         )}
       </div>
-      <EuiLink className="eui-textNoWrap" href={'/step/details'}>
-        {getShortTimeStamp(moment(timestamp))}
-      </EuiLink>
+      {/* TODO: Add link to details page once it's available */}
+      <span className="eui-textNoWrap">{getShortTimeStamp(moment(timestamp))}</span>
       <EuiSpacer size="s" />
     </>
   );
@@ -147,15 +148,20 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
           size="s"
           hasShadow
           caption={ImageCaption}
-          alt="No image available"
+          alt={captionContent}
           url={imgSrc}
+          data-test-subj="pingTimestampImage"
         />
       ) : (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
-            <NoImageAvailable />
+            {isLoading || isPending ? (
+              <EuiLoadingSpinner size="xl" data-test-subj="pingTimestampSpinner" />
+            ) : (
+              <NoImageAvailable />
+            )}
           </EuiFlexItem>
-          <EuiFlexItem> {ImageCaption}</EuiFlexItem>
+          <EuiFlexItem>{ImageCaption}</EuiFlexItem>
         </EuiFlexGroup>
       )}
       <EuiFlexGroup
@@ -201,7 +207,7 @@ const BorderedText = euiStyled(EuiText)`
 
 export const NoImageAvailable = () => {
   return (
-    <BorderedText>
+    <BorderedText data-test-subj="pingTimestampNoImageAvailable">
       <strong>
         <FormattedMessage
           id="xpack.uptime.synthetics.screenshot.noImageMessage"

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, IRouter, CoreSetup } from 'src/core/server';
+import { Logger, CoreSetup } from 'src/core/server';
 import { initDeleteSpacesApi } from './delete';
 import { initGetSpaceApi } from './get';
 import { initGetAllSpacesApi } from './get_all';
@@ -14,11 +14,11 @@ import { SpacesServiceStart } from '../../../spaces_service';
 import { UsageStatsServiceSetup } from '../../../usage_stats';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { initShareToSpacesApi } from './share_to_space';
+import type { SpacesRouter } from '../../../types';
 
 export interface ExternalRouteDeps {
-  externalRouter: IRouter;
+  externalRouter: SpacesRouter;
   getStartServices: CoreSetup['getStartServices'];
-  getImportExportObjectLimit: () => number;
   getSpacesService: () => SpacesServiceStart;
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
   log: Logger;

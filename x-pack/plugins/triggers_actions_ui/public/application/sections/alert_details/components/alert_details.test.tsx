@@ -11,6 +11,7 @@ import { Alert, ActionType, AlertTypeModel, AlertType } from '../../../../types'
 import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { ViewInApp } from './view_in_app';
 import {
+  ActionGroup,
   AlertExecutionStatusErrorReasons,
   ALERTS_FEATURE_ID,
 } from '../../../../../../alerts/common';
@@ -47,7 +48,7 @@ const mockAlertApis = {
 const authorizedConsumers = {
   [ALERTS_FEATURE_ID]: { read: true, all: true },
 };
-const recoveryActionGroup = { id: 'recovered', name: 'Recovered' };
+const recoveryActionGroup: ActionGroup<'recovered'> = { id: 'recovered', name: 'Recovered' };
 
 describe('alert_details', () => {
   // mock Api handlers
@@ -792,6 +793,42 @@ describe('edit button', () => {
         .first()
         .exists()
     ).toBeTruthy();
+  });
+});
+
+describe('refresh button', () => {
+  it('should call requestRefresh when clicked', () => {
+    const alert = mockAlert();
+    const alertType: AlertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
+      enabledInLicense: true,
+    };
+
+    const requestRefresh = jest.fn();
+    const refreshButton = shallow(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        {...mockAlertApis}
+        requestRefresh={requestRefresh}
+      />
+    )
+      .find('[data-test-subj="refreshAlertsButton"]')
+      .first();
+
+    expect(refreshButton.exists()).toBeTruthy();
+
+    refreshButton.simulate('click');
+    expect(requestRefresh).toHaveBeenCalledTimes(1);
   });
 });
 

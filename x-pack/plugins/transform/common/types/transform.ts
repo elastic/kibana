@@ -49,9 +49,7 @@ export function isPivotTransform(
   return transform.hasOwnProperty('pivot');
 }
 
-export function isLatestTransform(
-  transform: TransformBaseConfig
-): transform is TransformLatestConfig {
+export function isLatestTransform(transform: any): transform is TransformLatestConfig {
   return transform.hasOwnProperty('latest');
 }
 

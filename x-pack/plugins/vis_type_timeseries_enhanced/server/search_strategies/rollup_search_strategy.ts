@@ -3,24 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { keyBy, isString } from 'lodash';
 import {
   AbstractSearchStrategy,
   ReqFacade,
   VisPayload,
 } from '../../../../../src/plugins/vis_type_timeseries/server';
 
-import {
-  mergeCapabilitiesWithFields,
-  getCapabilitiesForRollupIndices,
-} from '../../../../../src/plugins/data/server';
+import { getCapabilitiesForRollupIndices } from '../../../../../src/plugins/data/server';
 
 import { RollupSearchCapabilities } from './rollup_search_capabilities';
 
 const getRollupIndices = (rollupData: { [key: string]: any }) => Object.keys(rollupData);
 const isIndexPatternContainsWildcard = (indexPattern: string) => indexPattern.includes('*');
 const isIndexPatternValid = (indexPattern: string) =>
-  indexPattern && isString(indexPattern) && !isIndexPatternContainsWildcard(indexPattern);
+  indexPattern && typeof indexPattern === 'string' && !isIndexPatternContainsWildcard(indexPattern);
 
 export class RollupSearchStrategy extends AbstractSearchStrategy {
   name = 'rollup';
@@ -65,15 +61,11 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
   async getFieldsForWildcard<TPayload = unknown>(
     req: ReqFacade<TPayload>,
     indexPattern: string,
-    {
-      fieldsCapabilities,
-      rollupIndex,
-    }: { fieldsCapabilities: { [key: string]: any }; rollupIndex: string }
+    capabilities?: unknown
   ) {
-    const fields = await super.getFieldsForWildcard(req, indexPattern);
-    const fieldsFromFieldCapsApi = keyBy(fields, 'name');
-    const rollupIndexCapabilities = fieldsCapabilities[rollupIndex].aggs;
-
-    return mergeCapabilitiesWithFields(rollupIndexCapabilities, fieldsFromFieldCapsApi);
+    return super.getFieldsForWildcard(req, indexPattern, capabilities, {
+      type: 'rollup',
+      rollupIndex: indexPattern,
+    });
   }
 }

@@ -19,7 +19,7 @@ import {
   deleteSignalsIndex,
   getSignalsByIds,
   removeServerGeneratedProperties,
-  waitForRuleSuccess,
+  waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../utils';
 
@@ -54,11 +54,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating threat match rule', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
+        await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
+        await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -72,7 +74,8 @@ export default ({ getService }: FtrProviderContext) => {
           supertest,
           getCreateThreatMatchRulesSchemaMock('rule-1', true)
         );
-        await waitForRuleSuccess(supertest, ruleResponse.id);
+
+        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id, 'succeeded');
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -104,6 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
+          index: ['auditbeat-*'],
           type: 'threat_match',
           risk_score: 55,
           language: 'kuery',
@@ -128,7 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).equal(10);
@@ -139,6 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
+          index: ['auditbeat-*'],
           type: 'threat_match',
           risk_score: 55,
           language: 'kuery',
@@ -163,7 +168,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const ruleResponse = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, ruleResponse.id);
+        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
         const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
@@ -173,6 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
+          index: ['auditbeat-*'],
           type: 'threat_match',
           risk_score: 55,
           language: 'kuery',
@@ -201,7 +207,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const ruleResponse = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, ruleResponse.id);
+        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
         const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
@@ -212,6 +218,7 @@ export default ({ getService }: FtrProviderContext) => {
           name: 'Query with a rule id',
           severity: 'high',
           type: 'threat_match',
+          index: ['auditbeat-*'],
           risk_score: 55,
           language: 'kuery',
           rule_id: 'rule-1',
@@ -239,7 +246,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const ruleResponse = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, ruleResponse.id);
+        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
         const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
       });

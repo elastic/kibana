@@ -7,13 +7,13 @@
 import { DocLinksStart } from 'src/core/public';
 
 export class DocumentationLinksService {
-  private readonly kbn: string;
+  private readonly kbnPrivileges: string;
 
   constructor(docLinks: DocLinksStart) {
-    this.kbn = `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/`;
+    this.kbnPrivileges = `${docLinks.links.security.kibanaPrivileges}`;
   }
 
   public getKibanaPrivilegesDocUrl() {
-    return `${this.kbn}kibana-privileges.html`;
+    return `${this.kbnPrivileges}`;
   }
 }

@@ -7,7 +7,6 @@
 import { useState } from 'react';
 import { ToastsStart } from 'kibana/public';
 import useMountedState from 'react-use/lib/useMountedState';
-import { TriggerId } from '../../../../../../src/plugins/ui_actions/public';
 import { useContainerState } from '../../../../../../src/plugins/kibana_utils/public';
 import {
   toastDrilldownCreated,
@@ -40,7 +39,7 @@ export function useDrilldownsStateManager(
     }
   }
 
-  async function createDrilldown(action: SerializedAction, selectedTriggers: TriggerId[]) {
+  async function createDrilldown(action: SerializedAction, selectedTriggers: string[]) {
     await run(async () => {
       await actionManager.createEvent(action, selectedTriggers);
       toastService.addSuccess({
@@ -53,7 +52,7 @@ export function useDrilldownsStateManager(
   async function editDrilldown(
     drilldownId: string,
     action: SerializedAction,
-    selectedTriggers: TriggerId[]
+    selectedTriggers: string[]
   ) {
     await run(async () => {
       await actionManager.updateEvent(drilldownId, action, selectedTriggers);

@@ -16,6 +16,7 @@ import {
   PasteJsonText,
   UploadJsonFile,
 } from './creation_mode_components';
+import { Summary } from './creation_response_components';
 import { DocumentCreationStep } from './types';
 
 import { DocumentCreationFlyout, FlyoutContent } from './document_creation_flyout';
@@ -82,28 +83,11 @@ describe('DocumentCreationFlyout', () => {
       });
     });
 
-    describe('creation steps', () => {
-      it('renders an error page', () => {
-        setMockValues({ ...values, creationStep: DocumentCreationStep.ShowError });
-        const wrapper = shallow(<FlyoutContent />);
+    it('renders a summary', () => {
+      setMockValues({ ...values, creationStep: DocumentCreationStep.ShowSummary });
+      const wrapper = shallow(<FlyoutContent />);
 
-        expect(wrapper.text()).toBe('DocumentCreationError'); // TODO: actual component
-      });
-
-      it('renders an error summary', () => {
-        setMockValues({ ...values, creationStep: DocumentCreationStep.ShowErrorSummary });
-        const wrapper = shallow(<FlyoutContent />);
-
-        expect(wrapper.text()).toBe('DocumentCreationSummary'); // TODO: actual component
-      });
-
-      it('renders a success summary', () => {
-        setMockValues({ ...values, creationStep: DocumentCreationStep.ShowSuccessSummary });
-        const wrapper = shallow(<FlyoutContent />);
-
-        // TODO: Figure out if the error and success summary should remain the same vs different components
-        expect(wrapper.text()).toBe('DocumentCreationSummary'); // TODO: actual component
-      });
+      expect(wrapper.find(Summary)).toHaveLength(1);
     });
   });
 });

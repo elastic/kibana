@@ -9,6 +9,7 @@ import { useCallback, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { HttpHandler } from 'src/core/public';
 import {
+  LogIndexField,
   LogSourceConfiguration,
   LogSourceConfigurationProperties,
   LogSourceConfigurationPropertiesPatch,
@@ -20,6 +21,7 @@ import { callFetchLogSourceStatusAPI } from './api/fetch_log_source_status';
 import { callPatchLogSourceConfigurationAPI } from './api/patch_log_source_configuration';
 
 export {
+  LogIndexField,
   LogSourceConfiguration,
   LogSourceConfigurationProperties,
   LogSourceConfigurationPropertiesPatch,

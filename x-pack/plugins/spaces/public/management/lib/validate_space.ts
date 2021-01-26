@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { isReservedSpace } from '../../../common/is_reserved_space';
-import { Space } from '../../../common/model/space';
 import { isValidSpaceIdentifier } from './space_identifier_utils';
 
 interface SpaceValidatorOptions {

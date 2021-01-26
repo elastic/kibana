@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -24,7 +13,6 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import { createSearchSessionRestorationDataProvider, getState, splitState } from './discover_state';
-
 import { RequestAdapter } from '../../../../inspector/public';
 import {
   connectToQueryState,
@@ -35,6 +23,7 @@ import {
 import { getSortArray } from './doc_table';
 import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
+import indexTemplateGrid from './discover_datagrid.html';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
 import {
@@ -64,6 +53,7 @@ import {
   DEFAULT_COLUMNS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
   SEARCH_ON_PAGE_LOAD_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
@@ -77,6 +67,7 @@ const services = getServices();
 
 const {
   core,
+  capabilities,
   chrome,
   data,
   history: getHistory,
@@ -106,8 +97,8 @@ app.config(($routeProvider) => {
     requireUICapability: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
       $injector.invoke($route.current.params.id ? getSavedSearchBreadcrumbs : getRootBreadcrumbs),
-    badge: (uiCapabilities) => {
-      if (uiCapabilities.discover.save) {
+    badge: () => {
+      if (capabilities.discover.save) {
         return undefined;
       }
 
@@ -124,7 +115,9 @@ app.config(($routeProvider) => {
   };
   const discoverRoute = {
     ...defaults,
-    template: indexTemplateLegacy,
+    template: getServices().uiSettings.get('doc_table:legacy', true)
+      ? indexTemplateLegacy
+      : indexTemplateGrid,
     reloadOnSearch: false,
     resolve: {
       savedObjects: function ($route, Promise) {
@@ -182,7 +175,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($element, $route, $scope, $timeout, Promise, uiCapabilities) {
+function discoverController($route, $scope, Promise) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
@@ -194,6 +187,8 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     $scope.searchSource,
     toastNotifications
   );
+  $scope.useNewFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
+
   //used for functional testing
   $scope.fetchCounter = 0;
 
@@ -202,7 +197,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
 
   const history = getHistory();
-  // used for restoring background session
+  // used for restoring a search session
   let isInitialSearch = true;
 
   // search session requested a data refresh
@@ -293,7 +288,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     createSearchSessionRestorationDataProvider({
       appStateContainer,
       data,
-      getSavedSearchId: () => savedSearch.id,
+      getSavedSearch: () => savedSearch,
     })
   );
 
@@ -305,7 +300,8 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
         nextIndexPattern,
         $scope.state.columns,
         $scope.state.sort,
-        config.get(MODIFY_COLUMNS_ON_SWITCH)
+        config.get(MODIFY_COLUMNS_ON_SWITCH),
+        $scope.useNewFieldsApi
       );
       await setAppState(nextAppState);
     }
@@ -339,7 +335,9 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
-  $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
+  $scope.showSaveQuery = capabilities.discover.saveQuery;
+  $scope.showTimeCol =
+    !config.get('doc_table:hideTimeColumn', false) && $scope.indexPattern.timeFieldName;
 
   let abortController;
   $scope.$on('$destroy', () => {
@@ -410,23 +408,42 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
 
   setBreadcrumbsTitle(savedSearch, chrome);
 
+  function removeSourceFromColumns(columns) {
+    return columns.filter((col) => col !== '_source');
+  }
+
+  function getDefaultColumns() {
+    const columns = [...savedSearch.columns];
+
+    if ($scope.useNewFieldsApi) {
+      return removeSourceFromColumns(columns);
+    }
+    if (columns.length > 0) {
+      return columns;
+    }
+    return [...config.get(DEFAULT_COLUMNS_SETTING)];
+  }
+
   function getStateDefaults() {
     const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
     const sort = getSortArray(savedSearch.sort, $scope.indexPattern);
+    const columns = getDefaultColumns();
 
-    return {
+    const defaultState = {
       query,
       sort: !sort.length
         ? getDefaultSort($scope.indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
         : sort,
-      columns:
-        savedSearch.columns.length > 0
-          ? savedSearch.columns
-          : config.get(DEFAULT_COLUMNS_SETTING).slice(),
+      columns,
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
     };
+    if (savedSearch.grid) {
+      defaultState.grid = savedSearch.grid;
+    }
+
+    return defaultState;
   }
 
   $scope.state.index = $scope.indexPattern.id;
@@ -440,6 +457,8 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     indexPatternList: $route.current.locals.savedObjects.ip.list,
     config: config,
     setHeaderActionMenu: getHeaderActionMenuMounter(),
+    filterManager,
+    setAppState,
     data,
   };
 
@@ -706,20 +725,20 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     $route.reload();
   };
 
-  $scope.onSkipBottomButtonClick = function () {
+  $scope.onSkipBottomButtonClick = async () => {
     // show all the Rows
     $scope.minimumVisibleRows = $scope.hits;
 
     // delay scrolling to after the rows have been rendered
-    const bottomMarker = $element.find('#discoverBottomMarker');
-    $timeout(() => {
-      bottomMarker.focus();
-      // The anchor tag is not technically empty (it's a hack to make Safari scroll)
-      // so the browser will show a highlight: remove the focus once scrolled
-      $timeout(() => {
-        bottomMarker.blur();
-      }, 0);
-    }, 0);
+    const bottomMarker = document.getElementById('discoverBottomMarker');
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    while ($scope.rows.length !== document.getElementsByClassName('kbnDocTable__row').length) {
+      await wait(50);
+    }
+    bottomMarker.focus();
+    await wait(50);
+    bottomMarker.blur();
   };
 
   $scope.newQuery = function () {
@@ -727,10 +746,14 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
 
   $scope.updateDataSource = () => {
-    updateSearchSource($scope.searchSource, {
-      indexPattern: $scope.indexPattern,
+    const { indexPattern, searchSource, useNewFieldsApi } = $scope;
+    const { columns, sort } = $scope.state;
+    updateSearchSource(searchSource, {
+      indexPattern,
       services,
-      sort: $scope.state.sort,
+      sort,
+      columns,
+      useNewFieldsApi,
     });
     return Promise.resolve();
   };
@@ -758,20 +781,20 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
 
   $scope.addColumn = function addColumn(columnName) {
-    if (uiCapabilities.discover.save) {
-      const { indexPattern } = $scope;
+    const { indexPattern, useNewFieldsApi } = $scope;
+    if (capabilities.discover.save) {
       popularizeField(indexPattern, columnName, indexPatterns);
     }
-    const columns = columnActions.addColumn($scope.state.columns, columnName);
+    const columns = columnActions.addColumn($scope.state.columns, columnName, useNewFieldsApi);
     setAppState({ columns });
   };
 
   $scope.removeColumn = function removeColumn(columnName) {
-    if (uiCapabilities.discover.save) {
-      const { indexPattern } = $scope;
+    const { indexPattern, useNewFieldsApi } = $scope;
+    if (capabilities.discover.save) {
       popularizeField(indexPattern, columnName, indexPatterns);
     }
-    const columns = columnActions.removeColumn($scope.state.columns, columnName);
+    const columns = columnActions.removeColumn($scope.state.columns, columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const sort = $scope.state.sort.length
       ? $scope.state.sort.filter((subArr) => subArr[0] !== columnName)
@@ -783,6 +806,17 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     const columns = columnActions.moveColumn($scope.state.columns, columnName, newIndex);
     setAppState({ columns });
   };
+
+  $scope.setColumns = function setColumns(columns) {
+    // remove first element of columns if it's the configured timeFieldName, which is prepended automatically
+    const actualColumns =
+      $scope.indexPattern.timeFieldName && $scope.indexPattern.timeFieldName === columns[0]
+        ? columns.slice(1)
+        : columns;
+    $scope.state = { ...$scope.state, columns: actualColumns };
+    setAppState({ columns: actualColumns });
+  };
+
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
     if (!getTimeField()) return;

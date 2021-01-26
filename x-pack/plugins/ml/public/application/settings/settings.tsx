@@ -14,7 +14,14 @@ import { AnomalyDetectionSettings } from './anomaly_detection_settings';
 
 import { NavigationMenu } from '../components/navigation_menu';
 
+import { HelpMenu } from '../components/help_menu';
+import { useMlKibana } from '../contexts/kibana';
+
 export const Settings: FC = () => {
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const helpLink = docLinks.links.ml.guide;
   return (
     <Fragment>
       <NavigationMenu tabId="settings" />
@@ -32,6 +39,7 @@ export const Settings: FC = () => {
           <AnomalyDetectionSettings />
         </EuiPageBody>
       </EuiPage>
+      <HelpMenu docLink={helpLink} />
     </Fragment>
   );
 };

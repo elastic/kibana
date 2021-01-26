@@ -15,6 +15,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   ElasticsearchClient,
+  RequestHandlerContext,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
 export { ActionTypeExecutorResult } from '../common';
@@ -31,19 +32,22 @@ export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 
 export interface Services {
+  /**
+   * @deprecated Use `scopedClusterClient` instead.
+   */
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
   getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    actions?: {
-      getActionsClient: () => ActionsClient;
-      listTypes: ActionTypeRegistry['list'];
-    };
-  }
+export interface ActionsApiRequestHandlerContext {
+  getActionsClient: () => ActionsClient;
+  listTypes: ActionTypeRegistry['list'];
+}
+
+export interface ActionsRequestHandlerContext extends RequestHandlerContext {
+  actions: ActionsApiRequestHandlerContext;
 }
 
 export interface ActionsPlugin {

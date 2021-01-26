@@ -195,11 +195,11 @@ a| `xpack.reporting.capture.browser`
   Defaults to `false`.
 
 a| `xpack.reporting.capture.browser`
-.chromium.proxy.server`
+`.chromium.proxy.server`
   | The uri for the proxy server. Providing the username and password for the proxy server via the uri is not supported.
 
 a| `xpack.reporting.capture.browser`
-.chromium.proxy.bypass`
+`.chromium.proxy.bypass`
   | An array of hosts that should not go through the proxy server and should use a direct connection instead.
   Examples of valid entries are "elastic.co", "*.elastic.co", ".elastic.co", ".elastic.co:5601".
 

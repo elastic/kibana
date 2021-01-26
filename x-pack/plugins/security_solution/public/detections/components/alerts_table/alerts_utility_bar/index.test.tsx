@@ -16,8 +16,8 @@ describe('AlertsUtilityBar', () => {
   test('renders correctly', () => {
     const wrapper = shallow(
       <AlertsUtilityBar
-        canUserCRUD={true}
         hasIndexWrite={true}
+        hasIndexMaintenance={true}
         areEventsLoading={false}
         clearSelection={jest.fn()}
         totalCount={100}
@@ -40,8 +40,8 @@ describe('AlertsUtilityBar', () => {
       const wrapper = mount(
         <TestProviders>
           <AlertsUtilityBar
-            canUserCRUD={true}
             hasIndexWrite={true}
+            hasIndexMaintenance={true}
             areEventsLoading={false}
             clearSelection={jest.fn()}
             totalCount={100}
@@ -76,8 +76,8 @@ describe('AlertsUtilityBar', () => {
       const wrapper = mount(
         <TestProviders>
           <AlertsUtilityBar
-            canUserCRUD={true}
             hasIndexWrite={true}
+            hasIndexMaintenance={true}
             areEventsLoading={false}
             clearSelection={jest.fn()}
             totalCount={100}
@@ -112,8 +112,8 @@ describe('AlertsUtilityBar', () => {
       const wrapper = mount(
         <TestProviders>
           <AlertsUtilityBar
-            canUserCRUD={true}
             hasIndexWrite={true}
+            hasIndexMaintenance={true}
             areEventsLoading={false}
             clearSelection={jest.fn()}
             totalCount={100}
@@ -148,8 +148,8 @@ describe('AlertsUtilityBar', () => {
       const Proxy = (props: AlertsUtilityBarProps) => (
         <TestProviders>
           <AlertsUtilityBar
-            canUserCRUD={true}
             hasIndexWrite={true}
+            hasIndexMaintenance={true}
             areEventsLoading={false}
             clearSelection={jest.fn()}
             totalCount={100}
@@ -166,8 +166,8 @@ describe('AlertsUtilityBar', () => {
 
       const wrapper = mount(
         <Proxy
-          canUserCRUD={true}
           hasIndexWrite={true}
+          hasIndexMaintenance={true}
           areEventsLoading={false}
           clearSelection={jest.fn()}
           totalCount={100}

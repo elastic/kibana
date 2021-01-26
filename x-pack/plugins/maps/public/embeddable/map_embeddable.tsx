@@ -16,10 +16,7 @@ import {
   ReferenceOrValueEmbeddable,
   VALUE_CLICK_TRIGGER,
 } from '../../../../../src/plugins/embeddable/public';
-import {
-  ActionExecutionContext,
-  TriggerContextMapping,
-} from '../../../../../src/plugins/ui_actions/public';
+import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   APPLY_FILTER_TRIGGER,
@@ -34,11 +31,6 @@ import {
   setQuery,
   setRefreshConfig,
   disableScrollZoom,
-  disableInteractive,
-  disableTooltipControl,
-  hideToolbarOverlay,
-  hideLayerControl,
-  hideViewControl,
   setReadOnly,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
@@ -107,7 +99,9 @@ export class MapEmbeddable
 
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
-    this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+    this._subscription = this.getUpdated$().subscribe(() =>
+      this.onContainerStateChanged(this.input)
+    );
   }
 
   private async _initializeSaveMap() {
@@ -118,36 +112,23 @@ export class MapEmbeddable
       return;
     }
     this._initializeStore();
-    this._initializeOutput();
+    try {
+      await this._initializeOutput();
+    } catch (e) {
+      this.onFatalError(e);
+      return;
+    }
+
     this._isInitialized = true;
     if (this._domNode) {
       this.render(this._domNode);
     }
   }
 
-  private async _initializeStore() {
+  private _initializeStore() {
     const store = this._savedMap.getStore();
     store.dispatch(setReadOnly(true));
     store.dispatch(disableScrollZoom());
-
-    if (_.has(this.input, 'disableInteractive') && this.input.disableInteractive) {
-      store.dispatch(disableInteractive());
-    }
-
-    if (_.has(this.input, 'disableTooltipControl') && this.input.disableTooltipControl) {
-      store.dispatch(disableTooltipControl());
-    }
-    if (_.has(this.input, 'hideToolbarOverlay') && this.input.hideToolbarOverlay) {
-      store.dispatch(hideToolbarOverlay());
-    }
-
-    if (_.has(this.input, 'hideLayerControl') && this.input.hideLayerControl) {
-      store.dispatch(hideLayerControl());
-    }
-
-    if (_.has(this.input, 'hideViewControl') && this.input.hideViewControl) {
-      store.dispatch(hideViewControl());
-    }
 
     this._dispatchSetQuery({
       query: this.input.query,
@@ -204,7 +185,7 @@ export class MapEmbeddable
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
   }
 
-  public supportedTriggers(): Array<keyof TriggerContextMapping> {
+  public supportedTriggers(): string[] {
     return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
   }
 

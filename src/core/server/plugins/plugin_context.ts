@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { map, shareReplay } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import { PathConfigType, config as pathConfig } from '@kbn/utils';
 import { pick, deepFreeze } from '@kbn/std';
+import type { RequestHandlerContext } from 'src/core/server';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -35,6 +25,7 @@ import {
   ElasticsearchConfigType,
   config as elasticsearchConfig,
 } from '../elasticsearch/elasticsearch_config';
+import { IRouter, RequestHandlerContextProvider } from '../http';
 import { SavedObjectsConfigType, savedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
 
@@ -160,11 +151,15 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
-      registerRouteHandlerContext: deps.http.registerRouteHandlerContext.bind(
-        null,
-        plugin.opaqueId
-      ),
-      createRouter: () => router,
+      registerRouteHandlerContext: <
+        Context extends RequestHandlerContext,
+        ContextName extends keyof Context
+      >(
+        contextName: ContextName,
+        provider: RequestHandlerContextProvider<Context, ContextName>
+      ) => deps.http.registerRouteHandlerContext(plugin.opaqueId, contextName, provider),
+      createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() =>
+        router as IRouter<Context>,
       resources: deps.httpResources.createRegistrar(router),
       registerOnPreRouting: deps.http.registerOnPreRouting,
       registerOnPreAuth: deps.http.registerOnPreAuth,
@@ -188,7 +183,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
       registerType: deps.savedObjects.registerType,
-      getImportExportObjectLimit: deps.savedObjects.getImportExportObjectLimit,
     },
     status: {
       core$: deps.status.core$,
@@ -241,6 +235,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       createInternalRepository: deps.savedObjects.createInternalRepository,
       createScopedRepository: deps.savedObjects.createScopedRepository,
       createSerializer: deps.savedObjects.createSerializer,
+      createExporter: deps.savedObjects.createExporter,
+      createImporter: deps.savedObjects.createImporter,
       getTypeRegistry: deps.savedObjects.getTypeRegistry,
     },
     metrics: {

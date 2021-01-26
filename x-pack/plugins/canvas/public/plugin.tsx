@@ -26,9 +26,6 @@ import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
-// @ts-expect-error untyped local
-import { argTypeSpecs } from './expression_types/arg_types';
-import { transitions } from './transitions';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
 export { CoreStart, CoreSetup };
@@ -123,8 +120,15 @@ export class CanvasPlugin
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    canvasApi.addArgumentUIs(argTypeSpecs);
-    canvasApi.addTransitions(transitions);
+    canvasApi.addArgumentUIs(async () => {
+      // @ts-expect-error
+      const { argTypeSpecs } = await import('./expression_types/arg_types');
+      return argTypeSpecs;
+    });
+    canvasApi.addTransitions(async () => {
+      const { transitions } = await import('./transitions');
+      return transitions;
+    });
 
     return {
       ...canvasApi,

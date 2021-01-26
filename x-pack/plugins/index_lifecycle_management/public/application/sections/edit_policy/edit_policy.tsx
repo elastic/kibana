@@ -43,6 +43,7 @@ import {
   DeletePhase,
   HotPhase,
   WarmPhase,
+  Timeline,
 } from './components';
 
 import { schema, deserializer, createSerializer, createPolicyNameValidations, Form } from './form';
@@ -240,7 +241,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                         'xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage',
                         {
                           defaultMessage:
-                            'A policy name cannot start with an underscore and cannot contain a question mark or a space.',
+                            'A policy name cannot start with an underscore and cannot contain a comma or a space.',
                         }
                       ),
                       validations: policyNameValidations,
@@ -256,7 +257,11 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                 </EuiDescribedFormGroup>
               ) : null}
 
-              <EuiSpacer />
+              <EuiHorizontalRule />
+
+              <Timeline />
+
+              <EuiSpacer size="l" />
 
               <HotPhase />
 

@@ -7,7 +7,7 @@
 import './space_cards.scss';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Component } from 'react';
-import { Space } from '../../../common/model/space';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { SpaceCard } from './space_card';
 
 interface Props {
