@@ -9,14 +9,6 @@
 import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
 import { VisTypeTimeseriesConfig, config as configSchema } from './config';
 import { VisTypeTimeseriesPlugin } from './plugin';
-import { ISearchClient } from '../../data/common';
-import { IScopedSessionService } from '../../data/server';
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    search?: ISearchClient & { session: IScopedSessionService };
-  }
-}
 
 export { VisTypeTimeseriesSetup } from './plugin';
 
