@@ -134,7 +134,14 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       []
     );
 
-    const listBuilderCallback: EuiSelectableProps['children'] = useCallback((list) => list, []);
+    const listBuilderCallback: EuiSelectableProps['children'] = useCallback((list, search) => {
+      return (
+        <>
+          {search}
+          {list}
+        </>
+      );
+    }, []);
 
     // Anytime selection state is updated, call `onChange`
     useEffect(() => {
@@ -175,10 +182,8 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             options={selectableOptions}
             listProps={listProps || DEFAULT_LIST_PROPS}
             onChange={handleOnPolicySelectChange}
+            searchable={true}
             data-test-subj={getTestId('policiesSelectable')}
-            renderOption={(option, searchValue) => {
-              return <span id="paul">{option.policy.name}</span>;
-            }}
           >
             {listBuilderCallback}
           </EuiSelectable>
