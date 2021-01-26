@@ -37,13 +37,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
       baseRoute: '/api/triggers_actions_ui',
     });
 
-    healthRoute(
-      this.logger,
-      router,
-      '/api/triggers_actions_ui',
-      plugins.encryptedSavedObjects !== undefined,
-      plugins.alerts !== undefined
-    );
+    healthRoute(this.logger, router, '/api/triggers_actions_ui', plugins.alerts !== undefined);
   }
 
   public async start(): Promise<PluginStartContract> {

@@ -81,12 +81,12 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
       (healthCheck) => {
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
           <Fragment>{children}</Fragment>
+        ) : !healthCheck.isAlertsAvailable ? (
+          <AlertsError docLinks={docLinks} className={className} />
         ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (
           <TlsAndEncryptionError docLinks={docLinks} className={className} />
         ) : !healthCheck.hasPermanentEncryptionKey ? (
           <EncryptionError docLinks={docLinks} className={className} />
-        ) : !healthCheck.isAlertsAvailable ? (
-          <AlertsError docLinks={docLinks} className={className} />
         ) : (
           <TlsError docLinks={docLinks} className={className} />
         );
