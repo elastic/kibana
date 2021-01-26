@@ -7,11 +7,11 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import type { DefaultFormatEditor } from 'src/plugins/index_pattern_field_editor/public';
+import { FieldFormat } from 'src/plugins/data/public';
 
-export interface FieldFormatEditorProps {
+export interface FormatEditorProps {
   fieldType: string;
-  fieldFormat: DefaultFormatEditor;
+  fieldFormat: FieldFormat;
   fieldFormatId: string;
   fieldFormatParams: { [key: string]: unknown };
   fieldFormatEditors: any;
@@ -20,29 +20,27 @@ export interface FieldFormatEditorProps {
 }
 
 interface EditorComponentProps {
-  fieldType: FieldFormatEditorProps['fieldType'];
-  format: FieldFormatEditorProps['fieldFormat'];
-  formatParams: FieldFormatEditorProps['fieldFormatParams'];
-  onChange: FieldFormatEditorProps['onChange'];
-  onError: FieldFormatEditorProps['onError'];
+  fieldType: FormatEditorProps['fieldType'];
+  format: FormatEditorProps['fieldFormat'];
+  formatParams: FormatEditorProps['fieldFormatParams'];
+  onChange: FormatEditorProps['onChange'];
+  onError: FormatEditorProps['onError'];
 }
 
-interface FieldFormatEditorState {
+interface FormatEditorState {
   EditorComponent: React.FC<EditorComponentProps>;
+  fieldFormatId?: string;
 }
 
-export class FieldFormatEditor extends PureComponent<
-  FieldFormatEditorProps,
-  FieldFormatEditorState
-> {
-  constructor(props: FieldFormatEditorProps) {
+export class FormatEditor extends PureComponent<FormatEditorProps, FormatEditorState> {
+  constructor(props: FormatEditorProps) {
     super(props);
     this.state = {
       EditorComponent: props.fieldFormatEditors.getById(props.fieldFormatId),
     };
   }
 
-  static getDerivedStateFromProps(nextProps: FieldFormatEditorProps) {
+  static getDerivedStateFromProps(nextProps: FormatEditorProps) {
     return {
       EditorComponent: nextProps.fieldFormatEditors.getById(nextProps.fieldFormatId) || null,
     };

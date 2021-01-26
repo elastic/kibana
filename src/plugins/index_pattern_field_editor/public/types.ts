@@ -7,12 +7,15 @@
  */
 
 import { OpenFieldEditorOptions } from './open_editor';
+import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginSetup {}
+export interface PluginSetup {
+  fieldFormatEditors: FormatEditorServiceSetup['fieldFormatEditors'];
+}
 
 export interface PluginStart {
   openEditor(options: OpenFieldEditorOptions): void;
+  fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

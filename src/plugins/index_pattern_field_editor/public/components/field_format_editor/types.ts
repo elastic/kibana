@@ -6,15 +6,9 @@
  * Public License, v 1.
  */
 
-export {
-  FieldEditorFlyoutContent,
-  Props as FieldEditorFlyoutContentProps,
-} from './field_editor_flyout_content';
+import { ReactText } from 'react';
 
-export {
-  FieldEditorFlyoutContentContainer,
-  Props as FieldEditorFlyoutContentContainerProps,
-  FieldEditorContext,
-} from './field_editor_flyout_content_container';
-
-export * from './field_format_editor';
+export interface Sample {
+  input: ReactText | ReactText[];
+  output: string;
+}

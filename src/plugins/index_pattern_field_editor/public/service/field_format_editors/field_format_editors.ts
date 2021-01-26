@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { DefaultFormatEditor } from '../../components/field_editor/components/field_format_editor';
+import { DefaultFormatEditor } from '../../components/field_format_editor';
 
 export class FieldFormatEditors {
   private editors: Array<typeof DefaultFormatEditor> = [];

@@ -21,11 +21,12 @@
 import { IndexPatternFieldEditorPlugin } from './plugin';
 
 export { PluginStart as IndexPatternFieldEditorStart } from './types';
+export { DefaultFormatEditor } from './components';
 
 export function plugin() {
   return new IndexPatternFieldEditorPlugin();
 }
 
 // Expose types
-export { OpenFieldEditorOptions } from './open_editor';
-export { FieldEditorContext } from './components/field_editor_flyout_content_container';
+export type { OpenFieldEditorOptions } from './open_editor';
+export type { FieldEditorContext } from './components/field_editor_flyout_content_container';

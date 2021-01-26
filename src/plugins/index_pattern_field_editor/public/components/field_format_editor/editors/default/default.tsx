@@ -10,8 +10,8 @@ import React, { PureComponent, ReactText } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FieldFormat, FieldFormatsContentType } from 'src/plugins/data/public';
-import { Sample } from '../../../../types';
-import { FieldFormatEditorProps } from '../../field_format_editor';
+import { Sample } from '../../types';
+import { FormatSelectEditorProps } from '../../field_format_editor';
 
 export type ConverterParams = string | number | Array<string | number>;
 
@@ -51,7 +51,7 @@ export interface FormatEditorProps<P> {
   format: FieldFormat;
   formatParams: { type?: string } & P;
   onChange: (newParams: Record<string, any>) => void;
-  onError: FieldFormatEditorProps['onError'];
+  onError: FormatSelectEditorProps['onError'];
 }
 
 export interface FormatEditorState {

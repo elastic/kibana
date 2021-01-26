@@ -10,8 +10,8 @@ import React from 'react';
 import { FieldFormat } from 'src/plugins/data/public';
 import { IntlProvider } from 'react-intl';
 import { UrlFormatEditor } from './url';
-import { coreMock } from '../../../../../../../../../core/public/mocks';
-import { createKibanaReactContext } from '../../../../../../../../kibana_react/public';
+import { coreMock } from 'src/core/public/mocks';
+import { createKibanaReactContext } from '../../../../../../kibana_react/public';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

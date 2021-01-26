@@ -8,9 +8,7 @@
 
 import React, { PureComponent } from 'react';
 import { shallow } from 'enzyme';
-
-import { FieldFormatEditor } from './field_format_editor';
-import type { DefaultFormatEditor } from 'src/plugins/index_pattern_field_editor/public';
+import { FormatEditor } from './format_editor';
 
 class TestEditor extends PureComponent {
   render() {
@@ -26,15 +24,16 @@ const formatEditors = {
     ip: TestEditor,
     number: TestEditor,
   },
-  getById: jest.fn(() => TestEditor),
+  getById: jest.fn(() => TestEditor as any),
+  getAll: jest.fn(),
 };
 
 describe('FieldFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallow(
-      <FieldFormatEditor
+      <FormatEditor
         fieldType="number"
-        fieldFormat={{} as DefaultFormatEditor}
+        fieldFormat={{} as any}
         fieldFormatId="number"
         fieldFormatParams={{}}
         fieldFormatEditors={formatEditors}
@@ -48,9 +47,9 @@ describe('FieldFormatEditor', () => {
 
   it('should render nothing if there is no editor for the format', async () => {
     const component = shallow(
-      <FieldFormatEditor
+      <FormatEditor
         fieldType="number"
-        fieldFormat={{} as DefaultFormatEditor}
+        fieldFormat={{} as any}
         fieldFormatId="ip"
         fieldFormatParams={{}}
         fieldFormatEditors={formatEditors}
