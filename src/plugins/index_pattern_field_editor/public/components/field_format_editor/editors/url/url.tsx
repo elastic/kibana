@@ -25,7 +25,6 @@ import { FormatEditorSamples } from '../../samples';
 import { LabelTemplateFlyout } from './label_template_flyout';
 
 import { UrlTemplateFlyout } from './url_template_flyout';
-// import type { IndexPatternManagmentContextValue } from '../../../../../../types';
 import { context as contextType } from '../../../../../../kibana_react/public';
 
 interface OnChangeParam {
@@ -59,10 +58,6 @@ export class UrlFormatEditor extends DefaultFormatEditor<
 > {
   static contextType = contextType;
   static formatId = 'url';
-  // TODO: @kbn/optimizer can't compile this
-  // declare context: IndexPatternManagmentContextValue;
-  // context: IndexPatternManagmentContextValue | undefined;
-  context: any;
   private get sampleIconPath() {
     const sampleIconPath = `/plugins/indexPatternManagement/assets/icons/{{value}}.png`;
     return this.context?.services.http
