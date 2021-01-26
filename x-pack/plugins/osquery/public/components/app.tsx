@@ -29,7 +29,7 @@ export const OsqueryAppComponent = () => {
           <EuiTitle size="l">
             <h1>
               <FormattedMessage
-                id="osquery.helloWorldText"
+                id="xpack.osquery.helloWorldText"
                 defaultMessage="{name}"
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 values={{ name: PLUGIN_NAME }}
