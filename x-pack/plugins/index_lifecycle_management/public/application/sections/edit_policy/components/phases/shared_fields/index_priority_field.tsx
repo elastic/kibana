@@ -6,11 +6,11 @@
 
 import React, { FunctionComponent, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 
 import { UseField, NumericField } from '../../../../../../shared_imports';
 import { LearnMoreLink, DescribedFormRow } from '../..';
-import { i18nTexts } from '../../../i18n_texts';
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
 interface Props {
@@ -51,7 +51,12 @@ export const IndexPriorityField: FunctionComponent<Props> = ({ phase }) => {
       titleSize="xs"
       fullWidth
       switchProps={{
-        label: i18nTexts.editPolicy.indexPriorityFieldLabel,
+        label: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.indexPriority.indexPriorityEnabledFieldLabel',
+          {
+            defaultMessage: 'Set index priority',
+          }
+        ),
         'data-test-subj': `${phase}-indexPrioritySwitch`,
         initialValue: initialToggleValue,
       }}

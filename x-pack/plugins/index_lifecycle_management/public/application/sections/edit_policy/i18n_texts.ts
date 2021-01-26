@@ -43,7 +43,7 @@ export const i18nTexts = {
     indexPriorityFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.indexPriorityLabel',
       {
-        defaultMessage: 'Set index priority',
+        defaultMessage: 'Index priority',
       }
     ),
     bestCompressionFieldLabel: i18n.translate(
@@ -58,10 +58,6 @@ export const i18nTexts = {
         defaultMessage:
           'Use higher compression for stored fields at the cost of slower performance.',
       }
-    ),
-    allocationLabel: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.dataTierAllocation.enableFieldLabel',
-      { defaultMessage: 'Data allocation' }
     ),
     allocationTypeOptionsFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.dataTierAllocation.allocationFieldLabel',
@@ -79,12 +75,6 @@ export const i18nTexts = {
         defaultMessage: 'Searchable snapshot repository',
       }
     ),
-    onLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.onLabel', {
-      defaultMessage: 'On',
-    }),
-    offLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.offLabel', {
-      defaultMessage: 'Off',
-    }),
     errors: {
       numberRequired: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.errors.numberRequiredErrorMessage',

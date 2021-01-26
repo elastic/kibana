@@ -5,6 +5,7 @@
  */
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiFieldNumber,
@@ -73,7 +74,10 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
             <EuiFlexGroup gutterSize={'s'} alignItems={'center'} justifyContent={'spaceBetween'}>
               <EuiFlexItem grow={false}>
                 <EuiText className={'eui-textNoWrap'} size={'xs'}>
-                  Move data into phase when:
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.minimumAge.minimumAgeFieldLabel"
+                    defaultMessage="Move data into phase when:"
+                  />
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
