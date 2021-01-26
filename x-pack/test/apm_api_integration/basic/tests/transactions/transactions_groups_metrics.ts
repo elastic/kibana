@@ -95,17 +95,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const firstItem = response.body['DispatcherServlet#doGet'];
 
-        expectSnapshot(
-          firstItem.latency.timeseries.filter(({ y }: any) => y > 0).length
-        ).toMatchInline(`9`);
+        expectSnapshot(firstItem.latency.filter(({ y }: any) => y > 0).length).toMatchInline(`9`);
 
-        expectSnapshot(
-          firstItem.throughput.timeseries.filter(({ y }: any) => y > 0).length
-        ).toMatchInline(`9`);
+        expectSnapshot(firstItem.throughput.filter(({ y }: any) => y > 0).length).toMatchInline(
+          `9`
+        );
 
-        expectSnapshot(
-          firstItem.errorRate.timeseries.filter(({ y }: any) => y > 0).length
-        ).toMatchInline(`1`);
+        expectSnapshot(firstItem.errorRate.filter(({ y }: any) => y > 0).length).toMatchInline(`1`);
       });
     });
   });

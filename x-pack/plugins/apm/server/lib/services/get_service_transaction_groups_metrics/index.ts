@@ -4,12 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Coordinate } from '../../../../typings/timeseries';
-import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
+import {
+  EVENT_OUTCOME,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { getLatencyValue } from '../../helpers/latency_aggregation_type';
+import { rangeFilter } from '../../../../common/utils/range_filter';
+import { Coordinate } from '../../../../typings/timeseries';
+import {
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../../helpers/aggregated_transactions';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import {
+  getLatencyAggregation,
+  getLatencyValue,
+} from '../../helpers/latency_aggregation_type';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { getTimeseriesDataForTransactionGroups } from './get_timeseries_data_for_transaction_groups';
 
 export async function getServiceTransactionGroupsMetrics({
   serviceName,
@@ -38,66 +52,103 @@ export async function getServiceTransactionGroupsMetrics({
   >
 > {
   const { apmEventClient, start, end, esFilter } = setup;
-
-  const buckets = await getTimeseriesDataForTransactionGroups({
-    apmEventClient,
-    start,
-    end,
-    esFilter,
-    numBuckets,
-    searchAggregatedTransactions,
-    serviceName,
-    transactionNames,
-    transactionType,
-    latencyAggregationType,
-  });
   const deltaAsMinutes = (end - start) / 1000 / 60;
 
-  return buckets.reduce((bucketAcc, bucket) => {
-    const transactionName = bucket.key;
-    return {
-      ...bucketAcc,
-      [transactionName]: bucket.timeseries.buckets.reduce(
-        (acc, timeseriesBucket) => {
-          const x = timeseriesBucket.key;
-          return {
-            ...acc,
-            latency: [
-              ...acc.latency,
-              {
-                x,
-                y: getLatencyValue({
-                  latencyAggregationType,
-                  aggregation: timeseriesBucket.latency,
-                }),
-              },
-            ],
-            throughput: [
-              ...acc.throughput,
-              {
-                x,
-                y: timeseriesBucket.transaction_count.value / deltaAsMinutes,
-              },
-            ],
-            errorRate: [
-              ...acc.errorRate,
-              {
-                x,
-                y:
-                  timeseriesBucket.transaction_count.value > 0
-                    ? (timeseriesBucket[EVENT_OUTCOME].transaction_count
-                        .value ?? 0) / timeseriesBucket.transaction_count.value
-                    : null,
-              },
-            ],
-          };
+  const { intervalString } = getBucketSize({ start, end, numBuckets });
+
+  const field = getTransactionDurationFieldForAggregatedTransactions(
+    searchAggregatedTransactions
+  );
+
+  const response = await apmEventClient.search({
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { [TRANSACTION_NAME]: transactionNames } },
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [TRANSACTION_TYPE]: transactionType } },
+            { range: rangeFilter(start, end) },
+            ...esFilter,
+          ],
         },
-        {
-          latency: [] as Coordinate[],
-          throughput: [] as Coordinate[],
-          errorRate: [] as Coordinate[],
-        }
-      ),
+      },
+      aggs: {
+        transaction_groups: {
+          terms: {
+            field: TRANSACTION_NAME,
+            size: transactionNames.length,
+          },
+          aggs: {
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: intervalString,
+                min_doc_count: 0,
+                extended_bounds: {
+                  min: start,
+                  max: end,
+                },
+              },
+              aggs: {
+                ...getLatencyAggregation(latencyAggregationType, field),
+                transaction_count: { value_count: { field } },
+                [EVENT_OUTCOME]: {
+                  filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
+                  aggs: { transaction_count: { value_count: { field } } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const buckets = response.aggregations?.transaction_groups.buckets ?? [];
+
+  return buckets.reduce((acc, bucket) => {
+    const transactionName = bucket.key;
+
+    const latency: Coordinate[] = [];
+    const throughput: Coordinate[] = [];
+    const errorRate: Coordinate[] = [];
+
+    bucket.timeseries.buckets.forEach((timeseriesBucket) => {
+      const x = timeseriesBucket.key;
+      latency.push({
+        x,
+        y: getLatencyValue({
+          latencyAggregationType,
+          aggregation: timeseriesBucket.latency,
+        }),
+      });
+
+      throughput.push({
+        x,
+        y: timeseriesBucket.transaction_count.value / deltaAsMinutes,
+      });
+
+      errorRate.push({
+        x,
+        y:
+          timeseriesBucket.transaction_count.value > 0
+            ? (timeseriesBucket[EVENT_OUTCOME].transaction_count.value ?? 0) /
+              timeseriesBucket.transaction_count.value
+            : null,
+      });
+    });
+    return {
+      ...acc,
+      [transactionName]: { latency, throughput, errorRate },
     };
   }, {});
 }

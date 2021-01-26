@@ -27,9 +27,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start,
               end,
               uiFilters: '{}',
-              numBuckets: 20,
-              sortDirection: 'desc',
-              sortField: 'impact',
               latencyAggregationType: 'avg',
               transactionType: 'request',
             },
@@ -38,7 +35,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(response.body).to.eql({
-          totalTransactionGroups: 0,
           transactionGroups: [],
           isAggregationAccurate: true,
         });
@@ -57,9 +53,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start,
               end,
               uiFilters: '{}',
-              numBuckets: 20,
-              sortDirection: 'desc',
-              sortField: 'impact',
               transactionType: 'request',
               latencyAggregationType: 'avg',
             },
@@ -67,8 +60,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-
-        expectSnapshot(response.body.totalTransactionGroups).toMatchInline(`12`);
 
         expectSnapshot(response.body.transactionGroups.map((group: any) => group.name))
           .toMatchInline(`
@@ -108,21 +99,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const firstItem = response.body.transactionGroups[0];
 
-        expectSnapshot(
-          pick(firstItem, 'name', 'latency.value', 'throughput.value', 'errorRate.value', 'impact')
-        ).toMatchInline(`
+        expectSnapshot(pick(firstItem, 'name', 'latency', 'throughput', 'errorRate', 'impact'))
+          .toMatchInline(`
           Object {
-            "errorRate": Object {
-              "value": 0.0625,
-            },
+            "errorRate": 0.0625,
             "impact": 100,
-            "latency": Object {
-              "value": 1044995.1875,
-            },
+            "latency": 1044995.1875,
             "name": "DispatcherServlet#doGet",
-            "throughput": Object {
-              "value": 0.533333333333333,
-            },
+            "throughput": 0.533333333333333,
           }
         `);
       });
@@ -135,9 +119,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start,
               end,
               uiFilters: '{}',
-              numBuckets: 20,
-              sortDirection: 'desc',
-              sortField: 'impact',
               transactionType: 'request',
               latencyAggregationType: 'avg',
             },
@@ -159,9 +140,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start,
               end,
               uiFilters: '{}',
-              numBuckets: 20,
-              sortDirection: 'desc',
-              sortField: 'impact',
               transactionType: 'request',
               latencyAggregationType: 'avg',
             },
@@ -173,30 +151,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(ascendingOccurrences).to.eql(sortBy(ascendingOccurrences.concat()).reverse());
-      });
-
-      it('sorts items by the correct field', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/overview`,
-            query: {
-              start,
-              end,
-              uiFilters: '{}',
-              numBuckets: 20,
-              sortDirection: 'desc',
-              sortField: 'latency',
-              transactionType: 'request',
-              latencyAggregationType: 'avg',
-            },
-          })
-        );
-
-        expect(response.status).to.be(200);
-
-        const latencies = response.body.transactionGroups.map((group: any) => group.latency.value);
-
-        expect(latencies).to.eql(sortBy(latencies.concat()).reverse());
       });
     });
   });
