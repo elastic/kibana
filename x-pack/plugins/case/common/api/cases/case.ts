@@ -121,6 +121,7 @@ export const CaseResponseRt = rt.intersection([
   rt.type({
     id: rt.string,
     totalComment: rt.number,
+    totalAlerts: rt.number,
     version: rt.string,
   }),
   rt.partial({

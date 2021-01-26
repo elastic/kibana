@@ -11,39 +11,54 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import {
-  SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from 'kibana/server';
-import { groupBy } from 'lodash';
 import {
   CasesFindResponseRt,
   CasesFindRequestRt,
   throwErrors,
   CaseStatuses,
   caseStatuses,
-  CasesFindRequest,
   SubCaseResponse,
   ESCaseAttributes,
   SubCaseAttributes,
   CommentType,
   CommentAttributes,
+  CaseType,
+  SavedObjectFindOptions,
+  CaseResponse,
 } from '../../../../common/api';
-import { transformCases, sortToSnake, wrapError, escapeHatch } from '../utils';
-import { RouteDeps, TotalCommentByCase } from '../types';
+import {
+  transformCases,
+  sortToSnake,
+  wrapError,
+  escapeHatch,
+  flattenSubCaseSavedObject,
+  flattenCaseSavedObject,
+} from '../utils';
+import { RouteDeps } from '../types';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../saved_object_types';
 import { CASES_URL } from '../../../../common/constants';
 import { CaseServiceSetup } from '../../../services';
+import { countAlerts } from '../../../common';
 
 const combineFilters = (filters: string[], operator: 'OR' | 'AND'): string =>
   filters?.filter((i) => i !== '').join(` ${operator} `);
 
-// TODO: make this pass in the saved object name string
-const addStatusFilter = (status: CaseStatuses | undefined, appendFilter?: string) => {
+const addStatusFilter = ({
+  status,
+  appendFilter,
+  type = CASE_SAVED_OBJECT,
+}: {
+  status: CaseStatuses | undefined;
+  appendFilter?: string;
+  type?: string;
+}) => {
   const filters: string[] = [];
   if (status) {
-    filters.push(`${CASE_SAVED_OBJECT}.attributes.status: ${status}`);
+    filters.push(`${type}.attributes.status: ${status}`);
   }
 
   if (appendFilter) {
@@ -52,18 +67,24 @@ const addStatusFilter = (status: CaseStatuses | undefined, appendFilter?: string
   return combineFilters(filters, 'AND');
 };
 
-const buildFilter = (
-  filters: string | string[] | undefined,
-  field: string,
-  operator: 'OR' | 'AND'
-): string =>
+const buildFilter = ({
+  filters,
+  field,
+  operator,
+  type = CASE_SAVED_OBJECT,
+}: {
+  filters: string | string[] | undefined;
+  field: string;
+  operator: 'OR' | 'AND';
+  type?: string;
+}): string =>
   filters != null && filters.length > 0
     ? Array.isArray(filters)
       ? // Be aware of the surrounding parenthesis (as string inside literal) around filters.
         `(${filters
-          .map((filter) => `${CASE_SAVED_OBJECT}.attributes.${field}: ${filter}`)
+          .map((filter) => `${type}.attributes.${field}: ${filter}`)
           ?.join(` ${operator} `)})`
-      : `${CASE_SAVED_OBJECT}.attributes.${field}: ${filters}`
+      : `${type}.attributes.${field}: ${filters}`
     : '';
 
 interface SubCaseStats {
@@ -71,14 +92,16 @@ interface SubCaseStats {
   alertTotals: Map<string, number>;
 }
 
-async function getSubCaseCommentStats({
+async function getCaseCommentStats({
   client,
   caseService,
   ids,
+  type,
 }: {
   client: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   ids: string[];
+  type: typeof SUB_CASE_SAVED_OBJECT | typeof CASE_SAVED_OBJECT;
 }): Promise<SubCaseStats> {
   const allComments = await Promise.all(
     ids.map((id) =>
@@ -100,10 +123,7 @@ async function getSubCaseCommentStats({
         client,
         id,
         options: {
-          page: 1,
-          // TODO: fix this
-          perPage: 10000,
-          filter: `${SUB_CASE_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${SUB_CASE_SAVED_OBJECT}.attributes.type: ${CommentType.alertGroup}`,
+          filter: `${type}.attributes.type: ${CommentType.alert} OR ${type}.attributes.type: ${CommentType.alertGroup}`,
         },
       })
     )
@@ -111,25 +131,8 @@ async function getSubCaseCommentStats({
 
   const getID = (comments: SavedObjectsFindResponse<unknown>) => {
     return comments.saved_objects.length > 0
-      ? comments.saved_objects[0].references.find((ref) => ref.type === SUB_CASE_SAVED_OBJECT)?.id
+      ? comments.saved_objects[0].references.find((ref) => ref.type === type)?.id
       : undefined;
-  };
-
-  const countAlerts = (comments: SavedObjectsFindResponse<CommentAttributes>) => {
-    let totalAlerts = 0;
-    for (const comment of comments.saved_objects) {
-      if (
-        comment.attributes.type === CommentType.alert ||
-        comment.attributes.type === CommentType.alertGroup
-      ) {
-        if (Array.isArray(comment.attributes.alertId)) {
-          totalAlerts += comment.attributes.alertId.length;
-        } else {
-          totalAlerts++;
-        }
-      }
-    }
-    return totalAlerts;
   };
 
   const groupedComments = allComments.reduce((acc, comments) => {
@@ -154,48 +157,115 @@ async function getSubCaseCommentStats({
   return { commentTotals: groupedComments, alertTotals: groupedAlerts };
 }
 
-async function findSubCases({
-  client,
-  caseService,
-  query,
-  filtersWithoutStatus,
-  filteredCases,
+/**
+ * Constructs the filters used for finding cases and sub cases.
+ */
+function constructQueries({
+  tags,
+  reporters,
+  status,
+  sortByField,
+  caseType,
 }: {
-  client: SavedObjectsClientContract;
-  caseService: CaseServiceSetup;
-  query: CasesFindRequest;
-  filtersWithoutStatus: string;
-  filteredCases: SavedObjectsFindResponse<ESCaseAttributes>;
-}): SavedObjectsFindResponse<SubCaseResponse> {
-  const ids = [...filteredCases.saved_objects.map((caseInfo) => caseInfo.id)];
-  const cases: Map<string, SavedObjectsFindResult<ESCaseAttributes>> = new Map(
-    filteredCases.saved_objects.map((caseInfo) => {
-      return [caseInfo.id, caseInfo];
-    })
-  );
+  tags?: string | string[];
+  reporters?: string | string[];
+  status?: CaseStatuses;
+  sortByField?: string;
+  caseType?: CaseType;
+}): { case: SavedObjectFindOptions; subCase?: SavedObjectFindOptions } {
+  const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'OR' });
+  const reportersFilter = buildFilter({
+    filters: reporters,
+    field: 'created_by.username',
+    operator: 'OR',
+  });
+  const sortField = sortToSnake(sortByField);
 
-  if (query.status) {
-    // TODO: count the total comments for these cases
-    const casesWithoutStatusFilter = await caseService.findCases({
-      client,
-      options: {
-        ...query,
-        filter: filtersWithoutStatus,
-        sortField: sortToSnake(query.sortField ?? ''),
-      },
-    });
-    ids.push(...casesWithoutStatusFilter.saved_objects.map((so) => so.id));
+  switch (caseType) {
+    case CaseType.individual: {
+      // The cases filter will result in this structure "status === oh and (type === individual) and (tags === blah) and (reporter === yo)"
+      // The subCase filter will be undefined because we don't need to find sub cases if type === individual
 
-    for (const caseInfo of casesWithoutStatusFilter.saved_objects) {
-      cases.set(caseInfo.id, caseInfo);
+      // We do not want to support multiple type's being used, so force it to be a single filter value
+      const typeFilter = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.individual}`;
+      const caseFilters = addStatusFilter({
+        status,
+        appendFilter: combineFilters([tagsFilter, reportersFilter, typeFilter], 'AND'),
+      });
+      return {
+        case: {
+          filter: caseFilters,
+          sortField,
+        },
+      };
+    }
+    case CaseType.parent: {
+      // The cases filter will result in this structure "(type == parent) and (tags == blah) and (reporter == yo)"
+      // The sub case filter will use the query.status if it exists
+      const typeFilter = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.parent}`;
+      const caseFilters = combineFilters([tagsFilter, reportersFilter, typeFilter], 'AND');
+
+      return {
+        case: {
+          filter: caseFilters,
+          sortField,
+        },
+        subCase: {
+          filter: addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT }),
+          sortField,
+        },
+      };
+    }
+    default: {
+      // The cases filter will result in this structure "(status == open or type == parent) and (tags == blah) and (reporter == yo)"
+      // The sub case filter will use the query.status if it exists
+      const statusFilter = addStatusFilter({ status });
+      const typeFilter = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.parent}`;
+      const statusAndType = combineFilters([statusFilter, typeFilter], 'OR');
+      const caseFilters = combineFilters([statusAndType, tagsFilter, reportersFilter], 'AND');
+
+      return {
+        case: {
+          filter: caseFilters,
+          sortField,
+        },
+        subCase: {
+          filter: addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT }),
+          sortField,
+        },
+      };
     }
   }
+}
 
-  // TODO: count the totals for open, closed, and in-progress sub cases
-  const foundSubCases = await caseService.findSubCases({
+/**
+ * Returns all the sub cases for a set of case IDs. Optionally includes the comment statistics as well.
+ */
+async function findSubCases({
+  client,
+  subCaseOptions,
+  caseService,
+  ids,
+  includeCommentsStats,
+}: {
+  client: SavedObjectsClientContract;
+  subCaseOptions?: SavedObjectFindOptions;
+  caseService: CaseServiceSetup;
+  ids: string[];
+  includeCommentsStats: boolean;
+}): Promise<Map<string, SubCaseResponse[]>> {
+  const getCaseID = (subCase: SavedObjectsFindResult<SubCaseAttributes>): string | undefined => {
+    return subCase.references.length > 0 ? subCase.references[0].id : undefined;
+  };
+
+  if (!subCaseOptions) {
+    return new Map<string, SubCaseResponse[]>();
+  }
+
+  const subCases = await caseService.findSubCases({
     client,
     options: {
-      filter: addStatusFilter(query.status),
+      ...subCaseOptions,
       hasReference: ids.map((id) => {
         return {
           id,
@@ -205,39 +275,139 @@ async function findSubCases({
     },
   });
 
-  const subCasesComments = await getSubCaseCommentStats({
-    client,
-    caseService,
-    ids: foundSubCases.saved_objects.map((so) => so.id),
-  });
-
-  const caseCollections = new Map<
-    string,
-    {
-      subCases?: Array<SavedObjectsFindResult<SubCaseAttributes>>;
-      caseInfo: SavedObjectsFindResult;
-    }
-  >(
-    filteredCases.saved_objects.map((caseInfo) => {
-      return [caseInfo.id, { caseInfo }];
-    })
-  );
-
-  const getCaseID = (subCase: SavedObjectsFindResult<SubCaseAttributes>): string | undefined => {
-    return subCase.references.length > 0 ? subCase.references[0].id : undefined;
+  let subCaseComments: SubCaseStats = {
+    commentTotals: new Map(),
+    alertTotals: new Map(),
   };
 
-  const subCasesGroupedByCaseID = groupBy(foundSubCases.saved_objects, getCaseID);
-
-  for (const [id, subCases] of Object.entries(subCasesGroupedByCaseID)) {
-    const caseInfo = cases.get(id);
-    if (caseInfo) {
-      caseCollections.set(id, { caseInfo, subCases });
-    }
+  if (includeCommentsStats) {
+    subCaseComments = await getCaseCommentStats({
+      client,
+      caseService,
+      ids: subCases.saved_objects.map((subCase) => subCase.id),
+      type: SUB_CASE_SAVED_OBJECT,
+    });
   }
 
-  // TODO: merge sub cases and new found cases together with comment stats?
-  return caseCollections;
+  return subCases.saved_objects.reduce((accMap, subCase) => {
+    const id = getCaseID(subCase);
+    if (id) {
+      const subCaseFromMap = accMap.get(id);
+
+      if (subCaseFromMap === undefined) {
+        const subCasesForID = [
+          flattenSubCaseSavedObject({
+            savedObject: subCase,
+            totalComment: subCaseComments.commentTotals.get(id) ?? 0,
+            totalAlerts: subCaseComments.alertTotals.get(id) ?? 0,
+          }),
+        ];
+        accMap.set(id, subCasesForID);
+      } else {
+        subCaseFromMap.push(
+          flattenSubCaseSavedObject({
+            savedObject: subCase,
+            totalComment: subCaseComments.commentTotals.get(id) ?? 0,
+            totalAlerts: subCaseComments.alertTotals.get(id) ?? 0,
+          })
+        );
+      }
+    }
+    return accMap;
+  }, new Map<string, SubCaseResponse[]>());
+}
+
+interface Collection {
+  case: SavedObjectsFindResult<ESCaseAttributes>;
+  subCases?: SubCaseResponse[];
+}
+
+interface CasesMapWithPageInfo {
+  casesMap: Map<string, CaseResponse>;
+  page: number;
+  perPage: number;
+}
+
+/**
+ * Returns a map of all cases combined with their sub cases if they are collections and
+ * optionally includes the statistics for the cases' comments.
+ *
+ * @param includeEmptyCollections is a flag for whether to include collections that don't
+ *  have any sub cases
+ */
+async function findCases({
+  client,
+  caseOptions,
+  subCaseOptions,
+  caseService,
+  includeEmptyCollections,
+  includeCommentsStats,
+}: {
+  client: SavedObjectsClientContract;
+  caseOptions: SavedObjectFindOptions;
+  subCaseOptions?: SavedObjectFindOptions;
+  caseService: CaseServiceSetup;
+  includeEmptyCollections: boolean;
+  includeCommentsStats: boolean;
+}): Promise<CasesMapWithPageInfo> {
+  const cases = await caseService.findCases({
+    client,
+    options: caseOptions,
+  });
+
+  const subCases = await findSubCases({
+    client,
+    subCaseOptions,
+    caseService,
+    ids: cases.saved_objects.map((caseInfo) => caseInfo.id),
+    includeCommentsStats,
+  });
+
+  const casesMap = cases.saved_objects.reduce((accMap, caseInfo) => {
+    const subCasesForCase = subCases.get(caseInfo.id);
+    // if we don't have the sub cases for the case and the case is a collection then ignore it
+    // unless we're forcing retrieval of empty collections
+    if (
+      (subCasesForCase && caseInfo.attributes.type === CaseType.parent) ||
+      includeEmptyCollections
+    ) {
+      accMap.set(caseInfo.id, { case: caseInfo, subCases: subCasesForCase });
+    }
+    return accMap;
+  }, new Map<string, Collection>());
+
+  let totalCommentsForCases: SubCaseStats = {
+    commentTotals: new Map(),
+    alertTotals: new Map(),
+  };
+
+  if (includeCommentsStats) {
+    totalCommentsForCases = await getCaseCommentStats({
+      client,
+      caseService,
+      ids: Array.from(casesMap.keys()),
+      type: CASE_SAVED_OBJECT,
+    });
+  }
+
+  const casesWithComments = new Map<string, CaseResponse>();
+  for (const [id, caseInfo] of casesMap.entries()) {
+    casesWithComments.set(
+      id,
+      flattenCaseSavedObject({
+        savedObject: caseInfo.case,
+        totalComment: totalCommentsForCases.commentTotals.get(id) ?? 0,
+        totalAlerts: totalCommentsForCases.alertTotals.get(id) ?? 0,
+        subCases: caseInfo.subCases,
+      })
+    );
+  }
+
+  return {
+    casesMap: casesWithComments,
+    page: cases.page,
+    perPage: cases.per_page,
+  };
 }
 
 export function initFindCasesApi({ caseService, caseConfigureService, router }: RouteDeps) {
@@ -256,80 +426,54 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const { tags, reporters, status, ...query } = queryParams;
-        const tagsFilter = buildFilter(tags, 'tags', 'OR');
-        const reportersFilters = buildFilter(reporters, 'created_by.username', 'OR');
+        const queryArgs = {
+          tags: queryParams.tags,
+          reporters: queryParams.reporters,
+          sortByField: queryParams.sortField,
+          status: queryParams.status,
+          caseType: queryParams.type,
+        };
 
-        const myFilters = combineFilters([tagsFilter, reportersFilters], 'AND');
-        const filter = addStatusFilter(status, myFilters);
-
-        // TODO: I think this is a bug, queryParams will always be defined
-        const args = queryParams
-          ? {
-              client,
-              options: {
-                ...query,
-                filter,
-                sortField: sortToSnake(query.sortField ?? ''),
-              },
-            }
-          : {
-              client,
-            };
-
-        const statusArgs = caseStatuses.map((caseStatus) => ({
-          client,
-          options: {
-            fields: [],
-            page: 1,
-            perPage: 1,
-            filter: addStatusFilter(caseStatus, myFilters),
-          },
-        }));
+        const caseQueries = constructQueries(queryArgs);
 
         const [cases, openCases, inProgressCases, closedCases] = await Promise.all([
-          caseService.findCases(args),
-          ...statusArgs.map((arg) => caseService.findCases(arg)),
-        ]);
-
-        const totalCommentsFindByCases = await Promise.all(
-          cases.saved_objects.map((c) =>
-            caseService.getAllCaseComments({
+          findCases({
+            client,
+            caseOptions: { ...queryParams, ...caseQueries.case },
+            subCaseOptions: caseQueries.subCase,
+            caseService,
+            includeEmptyCollections: queryParams.type === CaseType.parent || !queryParams.status,
+            includeCommentsStats: true,
+          }),
+          ...caseStatuses.map((status) => {
+            const statusQuery = constructQueries({ ...queryArgs, status });
+            return findCases({
               client,
-              id: c.id,
-              options: {
-                fields: [],
+              caseOptions: {
+                ...statusQuery.case,
+                fields: ['attributes.type'],
                 page: 1,
                 perPage: 1,
               },
-            })
-          )
-        );
-
-        const totalCommentsByCases = totalCommentsFindByCases.reduce<TotalCommentByCase[]>(
-          (acc, itemFind) => {
-            if (itemFind.saved_objects.length > 0) {
-              const caseId = itemFind.saved_objects[0].references.find(
-                (r) => r.type === CASE_SAVED_OBJECT
-              )?.id;
-              if (caseId) {
-                return [...acc, { caseId, totalComments: itemFind.total }];
-              }
-            }
-            return [...acc];
-          },
-          []
-        );
+              subCaseOptions: statusQuery.subCase,
+              caseService,
+              includeEmptyCollections: false,
+              // we don't need the comment stats because we're just trying to get the total open, closed, and in-progress
+              // cases
+              includeCommentsStats: false,
+            });
+          }),
+        ]);
 
         return response.ok({
           body: CasesFindResponseRt.encode(
-            transformCases(
-              cases,
-              openCases.total ?? 0,
-              inProgressCases.total ?? 0,
-              closedCases.total ?? 0,
-              totalCommentsByCases
-            )
+            transformCases({
+              ...cases,
+              countOpenCases: openCases.casesMap.size,
+              countInProgressCases: inProgressCases.casesMap.size,
+              countClosedCases: closedCases.casesMap.size,
+              total: cases.casesMap.size,
+            })
           ),
         });
       } catch (error) {

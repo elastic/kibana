@@ -9,16 +9,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import {
-  KibanaRequest,
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-} from 'src/core/server';
+import { KibanaRequest, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import {
   decodeComment,
   flattenCommentableCaseSavedObject,
-  flattenSubCaseSavedObject,
   getAlertIds,
   isAlertGroupContext,
   transformNewComment,
@@ -27,27 +21,22 @@ import {
 import {
   throwErrors,
   CommentRequestRt,
-  CaseResponse,
   CommentType,
   CaseStatuses,
   AssociationType,
   CaseType,
   SubCaseAttributes,
-  SubCaseResponseRt,
-  SubCaseResponse,
   CommentRequest,
   CollectWithSubCaseResponseRt,
   CollectionWithSubCaseResponse,
   ContextTypeAlertGroupRt,
   CommentRequestAlertGroupType,
-  CommentAttributes,
 } from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
-import { CaseClientAddComment, CaseClientFactoryArguments } from '../types';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
-import { CommentableCase } from '../../common';
+import { CommentableCase, countAlerts } from '../../common';
 import { CaseClientImpl } from '..';
 
 async function getSubCase({
@@ -68,23 +57,6 @@ async function getSubCase({
 
   // else need to create a new sub case
   return caseService.createSubCase(savedObjectsClient, createdAt, caseId);
-}
-
-function countAlerts(comments: SavedObjectsFindResponse<CommentAttributes>): number {
-  let totalAlerts = 0;
-  for (const comment of comments.saved_objects) {
-    if (
-      comment.attributes.type === CommentType.alert ||
-      comment.attributes.type === CommentType.alertGroup
-    ) {
-      if (Array.isArray(comment.attributes.alertId)) {
-        totalAlerts += comment.attributes.alertId.length;
-      } else {
-        totalAlerts++;
-      }
-    }
-  }
-  return totalAlerts;
 }
 
 interface AddCommentFromRuleArgs {
@@ -281,7 +253,6 @@ async function getCombinedCase(
       });
       return new CommentableCase(caseValue, subCasePromise.value);
     } else {
-      // TODO: throw a boom instead?
       throw Error('Sub case found without reference to collection');
     }
   }

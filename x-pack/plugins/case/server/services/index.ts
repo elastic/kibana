@@ -293,13 +293,40 @@ export class CaseService implements CaseServiceSetup {
   }: FindCasesArgs): Promise<SavedObjectsFindResponse<SubCaseAttributes>> {
     try {
       this.log.debug(`Attempting to find sub cases`);
-      return await client.find({ ...options, type: SUB_CASE_SAVED_OBJECT });
+      // if the page or perPage options are set then respect those instead of trying to
+      // grab all sub cases
+      if (options?.page !== undefined || options?.perPage !== undefined) {
+        return client.find({
+          ...options,
+          type: SUB_CASE_SAVED_OBJECT,
+        });
+      }
+
+      const stats = await client.find({
+        fields: [],
+        page: 1,
+        perPage: 1,
+        ...options,
+        type: SUB_CASE_SAVED_OBJECT,
+      });
+      return client.find({
+        page: 1,
+        perPage: stats.total,
+        ...options,
+        type: SUB_CASE_SAVED_OBJECT,
+      });
     } catch (error) {
       this.log.debug(`Error on find sub cases: ${error}`);
       throw error;
     }
   }
 
+  /**
+   * Find sub cases using a collection's ID. This would try to retrieve the maximum amount of sub cases
+   * by default.
+   *
+   * @param caseId the saved object ID of the parent collection to find sub cases for.
+   */
   public async findSubCasesByCaseId(
     client: SavedObjectsClientContract,
     caseId: string
@@ -323,6 +350,10 @@ export class CaseService implements CaseServiceSetup {
     }
   }
 
+  /**
+   * Default behavior is to retrieve all comments that adhere to a given filter (if one is included).
+   * to override this pass in the either the page or perPage options.
+   */
   public async getAllCaseComments({
     client,
     id,
@@ -330,14 +361,41 @@ export class CaseService implements CaseServiceSetup {
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
     try {
       this.log.debug(`Attempting to GET all comments for case ${id}`);
-      return await client.find({
+      if (options?.page !== undefined || options?.perPage !== undefined) {
+        return client.find({
+          type: CASE_COMMENT_SAVED_OBJECT,
+          hasReferenceOperator: 'OR',
+          hasReference: [
+            { type: CASE_SAVED_OBJECT, id },
+            { type: SUB_CASE_SAVED_OBJECT, id },
+          ],
+          ...options,
+        });
+      }
+      // get the total number of comments that are in ES then we'll grab them all in one go
+      const stats = await client.find({
         type: CASE_COMMENT_SAVED_OBJECT,
         hasReferenceOperator: 'OR',
         hasReference: [
           { type: CASE_SAVED_OBJECT, id },
           { type: SUB_CASE_SAVED_OBJECT, id },
         ],
+        fields: [],
+        page: 1,
+        perPage: 1,
         // spread the options after so the caller can override the default behavior if they want
+        ...options,
+      });
+
+      return client.find({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        hasReferenceOperator: 'OR',
+        hasReference: [
+          { type: CASE_SAVED_OBJECT, id },
+          { type: SUB_CASE_SAVED_OBJECT, id },
+        ],
+        page: 1,
+        perPage: stats.total,
         ...options,
       });
     } catch (error) {

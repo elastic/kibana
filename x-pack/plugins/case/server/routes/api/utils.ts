@@ -173,17 +173,27 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
   };
 }
 
-export const transformCases = (
-  cases: SavedObjectsFindResponse<ESCaseAttributes>,
-  countOpenCases: number,
-  countInProgressCases: number,
-  countClosedCases: number,
-  totalCommentByCase: TotalCommentByCase[]
-): CasesFindResponse => ({
-  page: cases.page,
-  per_page: cases.per_page,
-  total: cases.total,
-  cases: flattenCaseSavedObjects(cases.saved_objects, totalCommentByCase),
+export const transformCases = ({
+  casesMap,
+  countOpenCases,
+  countInProgressCases,
+  countClosedCases,
+  page,
+  perPage,
+  total,
+}: {
+  casesMap: Map<string, CaseResponse>;
+  countOpenCases: number;
+  countInProgressCases: number;
+  countClosedCases: number;
+  page: number;
+  perPage: number;
+  total: number;
+}): CasesFindResponse => ({
+  page,
+  per_page: perPage,
+  total,
+  cases: Array.from(casesMap.values()),
   count_open_cases: countOpenCases,
   count_in_progress_cases: countInProgressCases,
   count_closed_cases: countClosedCases,
@@ -208,17 +218,23 @@ export const flattenCaseSavedObject = ({
   savedObject,
   comments = [],
   totalComment = comments.length,
+  totalAlerts = 0,
+  subCases,
 }: {
   savedObject: SavedObject<ESCaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
+  totalAlerts?: number;
+  subCases?: SubCaseResponse[];
 }): CaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
   totalComment,
+  totalAlerts,
   ...savedObject.attributes,
   connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
+  subCases,
 });
 
 export const flattenCommentableCaseSavedObject = ({
@@ -281,7 +297,7 @@ export const flattenCommentSavedObject = (
   ...savedObject.attributes,
 });
 
-export const sortToSnake = (sortField: string): SortFieldCase => {
+export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
   switch (sortField) {
     case 'status':
       return SortFieldCase.status;
