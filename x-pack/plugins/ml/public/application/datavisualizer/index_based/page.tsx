@@ -15,9 +15,12 @@ import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiPanel,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   IFieldType,
   KBN_FIELD_TYPES,
@@ -62,6 +65,7 @@ import type {
   MetricFieldsStats,
   TotalFieldsStats,
 } from '../stats_table/components/field_count_stats';
+import { getActions } from './components/field_data_row/action_menu/actions';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -115,6 +119,10 @@ export const getDefaultDataVisualizerListState = (): Required<DataVisualizerInde
 export const Page: FC = () => {
   const mlContext = useMlContext();
   const restorableDefaults = getDefaultDataVisualizerListState();
+  const {
+    services: { lens: lensPlugin, docLinks },
+  } = useMlKibana();
+
   const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(
     ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
     restorableDefaults
@@ -166,11 +174,7 @@ export const Page: FC = () => {
 
   const defaults = getDefaultPageState();
 
-  const showActionsPanel =
-    isFullLicense() &&
-    checkPermission('canCreateJob') &&
-    mlNodesAvailable() &&
-    currentIndexPattern.timeFieldName !== undefined;
+  const showActionsPanel = isFullLicense() && checkPermission('canCreateJob') && mlNodesAvailable();
 
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
     const searchData = extractSearchData(currentSavedSearch);
@@ -685,9 +689,31 @@ export const Page: FC = () => {
     [currentIndexPattern, searchQuery]
   );
 
-  const {
-    services: { docLinks },
-  } = useMlKibana();
+  // Inject custom action column for the index based visualizer
+  const extendedColumns = useMemo(() => {
+    if (lensPlugin === undefined) {
+      // eslint-disable-next-line no-console
+      console.error('Lens plugin not available');
+      return;
+    }
+    const actionColumn: EuiTableActionsColumnType<FieldVisConfig> = {
+      name: (
+        <EuiScreenReaderOnly>
+          <p>
+            <FormattedMessage
+              id="xpack.ml.dataVisualizer.indexBasedDataGrid.actionColumnLabel"
+              defaultMessage="This column contains extra actions that can be performed on each field"
+            />
+          </p>
+        </EuiScreenReaderOnly>
+      ),
+      actions: getActions(currentIndexPattern, lensPlugin, { searchQueryLanguage, searchString }),
+      width: '100px',
+    };
+
+    return [actionColumn];
+  }, [currentIndexPattern, lensPlugin, searchQueryLanguage, searchString]);
+
   const helpLink = docLinks.links.ml.guide;
   return (
     <Fragment>
@@ -765,6 +791,7 @@ export const Page: FC = () => {
                     pageState={dataVisualizerListState}
                     updatePageState={setDataVisualizerListState}
                     getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
+                    extendedColumns={extendedColumns}
                   />
                 </EuiPanel>
               </EuiFlexItem>
