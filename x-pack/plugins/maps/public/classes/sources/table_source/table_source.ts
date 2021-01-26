@@ -19,6 +19,7 @@ import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { IField } from '../../fields/field';
 import { Query } from '../../../../../../../src/plugins/data/common/query';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { IESAggField } from '../../fields/agg';
 
 export class TableSource extends AbstractSource implements ITermJoinSource {
   static type = SOURCE_TYPES.TABLE_SOURCE;
@@ -28,6 +29,8 @@ export class TableSource extends AbstractSource implements ITermJoinSource {
       type: SOURCE_TYPES.TABLE_SOURCE,
       __table: descriptor.__table || { columns: [], values: [] },
       termField: descriptor.termField,
+      id: descriptor.id || uuid(),
+      metrics: [],
     };
   }
 
@@ -90,5 +93,13 @@ export class TableSource extends AbstractSource implements ITermJoinSource {
   }
   getFieldNames(): string[] {
     throw new Error('must implement');
+  }
+
+  getMetricFieldForName(fieldName: string): IESAggField | null {
+    throw new Error('Not implemented');
+  }
+
+  hasMatchingMetricField(fieldName: string): boolean {
+    return false;
   }
 }

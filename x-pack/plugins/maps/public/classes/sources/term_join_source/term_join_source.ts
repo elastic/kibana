@@ -14,6 +14,7 @@ import {
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ISource } from '../source';
+import { IESAggField } from '../../fields/agg';
 
 export interface ITermJoinSource extends ISource {
   hasCompleteConfig(): boolean;
@@ -29,4 +30,6 @@ export interface ITermJoinSource extends ISource {
   getId(): string;
   getMetricFields(): IField[];
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  hasMatchingMetricField(fieldName: string): boolean;
+  getMetricFieldForName(fieldName: string): IESAggField | null;
 }
