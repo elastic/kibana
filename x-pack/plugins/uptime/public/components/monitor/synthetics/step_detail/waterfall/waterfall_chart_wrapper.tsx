@@ -65,10 +65,11 @@ export const renderLegendItem: RenderItem<LegendItem> = (item) => {
 };
 
 interface Props {
+  total: number;
   data: NetworkItems;
 }
 
-export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
+export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
   const [networkData] = useState<NetworkItems>(data);
 
   const { series, domain, metaData } = useMemo(() => {
@@ -92,6 +93,8 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
 
   return (
     <WaterfallProvider
+      totalNetworkRequests={total}
+      fetchedNetworkRequests={networkData.length}
       data={series}
       flyoutData={flyoutData}
       onBarClick={onBarClick}

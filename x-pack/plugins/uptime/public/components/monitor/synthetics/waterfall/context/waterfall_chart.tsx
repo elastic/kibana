@@ -14,6 +14,8 @@ import {
 } from '../types';
 
 export interface IWaterfallContext {
+  totalNetworkRequests: number;
+  fetchedNetworkRequests: number;
   data: WaterfallData;
   flyoutData?: WaterfallMetaDataEntry;
   onBarClick?: ElementClickListener;
@@ -33,6 +35,8 @@ export interface IWaterfallContext {
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
 
 interface ProviderProps {
+  totalNetworkRequests: number;
+  fetchedNetworkRequests: number;
   data: IWaterfallContext['data'];
   flyoutData: IWaterfallContext['flyoutData'];
   onBarClick: IWaterfallContext['onBarClick'];
@@ -59,6 +63,8 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
   legendItems,
   metaData,
   renderTooltipItem,
+  totalNetworkRequests,
+  fetchedNetworkRequests,
 }) => {
   return (
     <WaterfallContext.Provider
@@ -74,6 +80,8 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
         setIsFlyoutVisible,
         flyoutData,
         renderTooltipItem,
+        totalNetworkRequests,
+        fetchedNetworkRequests,
       }}
     >
       {children}

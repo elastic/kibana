@@ -14,9 +14,10 @@ interface GetNetworkEventsParams {
 
 export const getNetworkEvents: UMElasticsearchQueryFn<
   GetNetworkEventsParams,
-  NetworkEvent[]
+  { events: NetworkEvent[]; total: number }
 > = async ({ uptimeEsClient, checkGroup, stepIndex }) => {
   const params = {
+    track_total_hits: true,
     query: {
       bool: {
         filter: [
@@ -36,38 +37,44 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
 
   const microToMillis = (micro: number): number => (micro === -1 ? -1 : micro * 1000);
 
-  return result.hits.hits.map<NetworkEvent>((event: any) => {
-    const requestSentTime = microToMillis(event._source.synthetics.payload.request_sent_time);
-    const loadEndTime = microToMillis(event._source.synthetics.payload.load_end_time);
-    const requestStartTime =
-      event._source.synthetics.payload.response && event._source.synthetics.payload.response.timing
-        ? microToMillis(event._source.synthetics.payload.response.timing.request_time)
-        : undefined;
-    const securityDetails = event._source.synthetics.payload.response?.security_details;
+  return {
+    total: result.hits.total.value,
+    events: result.hits.hits.map<NetworkEvent>((event: any) => {
+      const requestSentTime = microToMillis(event._source.synthetics.payload.request_sent_time);
+      const loadEndTime = microToMillis(event._source.synthetics.payload.load_end_time);
+      const requestStartTime =
+        event._source.synthetics.payload.response &&
+        event._source.synthetics.payload.response.timing
+          ? microToMillis(event._source.synthetics.payload.response.timing.request_time)
+          : undefined;
+      const securityDetails = event._source.synthetics.payload.response?.security_details;
 
-    return {
-      timestamp: event._source['@timestamp'],
-      method: event._source.synthetics.payload?.method,
-      url: event._source.synthetics.payload?.url,
-      status: event._source.synthetics.payload?.status,
-      mimeType: event._source.synthetics.payload?.response?.mime_type,
-      requestSentTime,
-      requestStartTime,
-      loadEndTime,
-      timings: event._source.synthetics.payload.timings,
-      bytesDownloaded: event._source.synthetics.payload.response?.encoded_data_length,
-      certificates: securityDetails
-        ? {
-            issuer: securityDetails.issuer,
-            subjectName: securityDetails.subject_name,
-            validFrom: securityDetails.valid_from
-              ? microToMillis(securityDetails.valid_from)
-              : undefined,
-            validTo: securityDetails.valid_to ? microToMillis(securityDetails.valid_to) : undefined,
-          }
-        : undefined,
-      requestHeaders: event._source.synthetics.payload.request?.headers,
-      responseHeaders: event._source.synthetics.payload.response?.headers,
-    };
-  });
+      return {
+        timestamp: event._source['@timestamp'],
+        method: event._source.synthetics.payload?.method,
+        url: event._source.synthetics.payload?.url,
+        status: event._source.synthetics.payload?.status,
+        mimeType: event._source.synthetics.payload?.response?.mime_type,
+        requestSentTime,
+        requestStartTime,
+        loadEndTime,
+        timings: event._source.synthetics.payload.timings,
+        bytesDownloaded: event._source.synthetics.payload.response?.encoded_data_length,
+        certificates: securityDetails
+          ? {
+              issuer: securityDetails.issuer,
+              subjectName: securityDetails.subject_name,
+              validFrom: securityDetails.valid_from
+                ? microToMillis(securityDetails.valid_from)
+                : undefined,
+              validTo: securityDetails.valid_to
+                ? microToMillis(securityDetails.valid_to)
+                : undefined,
+            }
+          : undefined,
+        requestHeaders: event._source.synthetics.payload.request?.headers,
+        responseHeaders: event._source.synthetics.payload.response?.headers,
+      };
+    }),
+  };
 };
