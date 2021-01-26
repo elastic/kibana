@@ -19,8 +19,8 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { IServiceSettings } from '../../../../maps_legacy/public';
 import type { MapsLegacyConfig } from '../../../../maps_legacy/config';
-import { TmsTileLayers } from './tms_tile_layers';
 import { MapServiceSettings } from './map_service_settings';
+import { userConfiguredLayerId } from './constants';
 import {
   setInjectedVars,
   setData,
@@ -83,6 +83,7 @@ describe('vega_map_view/view', () => {
       }),
       getMaxZoom: async () => 20,
       getMinZoom: async () => 0,
+      getAttributions: () => [{ url: 'tms_attributions' }],
     } as unknown) as TMSService);
     const config = {
       tilemap: {
@@ -97,13 +98,9 @@ describe('vega_map_view/view', () => {
 
     function setMapService(defaultTmsLayer: string) {
       setMapServiceSettings(({
-        isInitialized: true,
         getTmsService,
-        defaultTmsLayer,
-        getAttributionsForTmsService: () => ['tms_attributions'],
+        defaultTmsLayer: () => defaultTmsLayer,
         config,
-        isDarkMode: false,
-        hasUserConfiguredTmsLayer: false,
       } as unknown) as MapServiceSettings);
     }
 
@@ -137,7 +134,7 @@ describe('vega_map_view/view', () => {
     });
 
     test('should be added TmsRasterLayer and do not use tmsService if mapStyle is "user_configured"', async () => {
-      setMapService(TmsTileLayers.userConfigured);
+      setMapService(userConfiguredLayerId);
       const vegaMapView = await createVegaMapView();
 
       expect(vegaMapView._initViewCustomizations).toBeDefined();
@@ -165,7 +162,7 @@ describe('vega_map_view/view', () => {
     });
 
     test('should not be added TmsRasterLayer and use tmsService if mapStyle is not "user_configured"', async () => {
-      setMapService(TmsTileLayers.desaturated);
+      setMapService('road_map_desaturated');
       const vegaMapView = await createVegaMapView();
 
       await vegaMapView.init();
@@ -177,7 +174,7 @@ describe('vega_map_view/view', () => {
           sources: {},
           layers: [],
         },
-        customAttribution: ['tms_attributions'],
+        customAttribution: ['<a rel="noreferrer noopener" href="tms_attributions"></a>'],
         container: vegaMapView._$container.get(0),
         minZoom: 0,
         maxZoom: 20,
@@ -191,7 +188,7 @@ describe('vega_map_view/view', () => {
     });
 
     test('should be added NavigationControl', async () => {
-      setMapService(TmsTileLayers.desaturated);
+      setMapService('road_map_desaturated');
       const vegaMapView = await createVegaMapView();
 
       await vegaMapView.init();
