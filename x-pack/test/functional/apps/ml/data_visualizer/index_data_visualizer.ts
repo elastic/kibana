@@ -24,7 +24,7 @@ interface TestData {
   sourceIndexOrSavedSearch: string;
   fieldNameFilters: string[];
   fieldTypeFilters: string[];
-  minimumRowsPerPage?: 10 | 25 | 50;
+  rowsPerPage?: 10 | 25 | 50;
   sampleSizeValidations: Array<{
     size: number;
     expected: { field: string; docCountFormatted: string };
@@ -319,7 +319,7 @@ export default function ({ getService }: FtrProviderContext) {
     sourceIndexOrSavedSearch: 'ft_module_sample_logs',
     fieldNameFilters: ['geo.coordinates'],
     fieldTypeFilters: [ML_JOB_FIELD_TYPES.GEO_POINT],
-    minimumRowsPerPage: 50,
+    rowsPerPage: 50,
     expected: {
       totalDocCountFormatted: '408',
       metricFields: [],
@@ -384,8 +384,8 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
-      if (testData.minimumRowsPerPage) {
-        await ml.dataVisualizerTable.ensureNumRowsPerPage(testData.minimumRowsPerPage);
+      if (testData.rowsPerPage) {
+        await ml.dataVisualizerTable.ensureNumRowsPerPage(testData.rowsPerPage);
       }
 
       await ml.dataVisualizerTable.assertSearchPanelExist();
