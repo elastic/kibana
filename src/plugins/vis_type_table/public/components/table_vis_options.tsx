@@ -12,14 +12,10 @@ import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { search } from '../../../data/public';
-import {
-  SwitchOption,
-  SelectOption,
-  NumberInputOption,
-  VisOptionsProps,
-} from '../../../vis_default_editor/public';
-import { TableVisParams } from '../types';
+import { SwitchOption, SelectOption, NumberInputOption } from '../../../vis_default_editor/public';
+import { TableVisParams } from '../../common';
 import { totalAggregations } from './utils';
 
 const { tabifyGetColumns } = search;
@@ -29,7 +25,7 @@ function TableOptions({
   stateParams,
   setValidity,
   setValue,
-}: VisOptionsProps<TableVisParams>) {
+}: VisEditorOptionsProps<TableVisParams>) {
   const percentageColumns = useMemo(
     () => [
       {
