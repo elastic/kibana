@@ -91,7 +91,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'sort:options': { type: 'keyword' },
   'savedObjects:listingLimit': { type: 'long' },
   'query:queryString:options': { type: 'keyword' },
-  pageNavigation: { type: 'keyword' },
   'metrics:max_buckets': { type: 'long' },
   'query:allowLeadingWildcards': { type: 'boolean' },
   metaFields: {
