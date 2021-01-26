@@ -78,6 +78,12 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       <Route exact path="/">
         {errorConnecting ? <ErrorState /> : <Overview />}
       </Route>
+      <Route path={PERSONAL_SOURCES_PATH}>
+        {/* TODO: replace Layout with PrivateSourcesLayout (needs to be created) */}
+        <Layout navigation={<></>} restrictWidth readOnlyMode={readOnlyMode}>
+          <SourcesRouter />
+        </Layout>
+      </Route>
       <Route path={SOURCES_PATH}>
         <Layout
           navigation={<WorkplaceSearchNav sourcesSubNav={showSourcesSubnav && <SourceSubNav />} />}

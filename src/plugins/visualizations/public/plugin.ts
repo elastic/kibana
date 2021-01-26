@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import './index.scss';
@@ -31,15 +20,12 @@ import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
   setUISettings,
   setTypes,
-  setI18n,
   setApplication,
   setCapabilities,
   setHttp,
-  setIndexPatterns,
   setSearch,
   setSavedObjects,
   setUsageCollector,
-  setFilterManager,
   setExpressions,
   setUiActions,
   setSavedVisualizationsLoader,
@@ -58,8 +44,6 @@ import {
 } from './embeddable';
 import { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
-import { visualization as visualizationFunction } from './expressions/visualization_function';
-import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
 import { range as rangeExpressionFunction } from './expression_functions/range';
 import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
@@ -149,8 +133,6 @@ export class VisualizationsPlugin
     setUISettings(core.uiSettings);
     setUsageCollector(usageCollection);
 
-    expressions.registerFunction(visualizationFunction);
-    expressions.registerRenderer(visualizationRenderer);
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
@@ -166,7 +148,6 @@ export class VisualizationsPlugin
     { data, expressions, uiActions, embeddable, dashboard, savedObjects }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
-    setI18n(core.i18n);
     setTypes(types);
     setEmbeddable(embeddable);
     setApplication(core.application);
@@ -174,9 +155,7 @@ export class VisualizationsPlugin
     setHttp(core.http);
     setSavedObjects(core.savedObjects);
     setDocLinks(core.docLinks);
-    setIndexPatterns(data.indexPatterns);
     setSearch(data.search);
-    setFilterManager(data.query.filterManager);
     setExpressions(expressions);
     setUiActions(uiActions);
     setTimeFilter(data.query.timefilter.timefilter);

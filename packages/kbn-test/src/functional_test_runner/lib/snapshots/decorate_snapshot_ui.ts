@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import {
@@ -26,9 +15,10 @@ import {
 import path from 'path';
 import prettier from 'prettier';
 import babelTraverse from '@babel/traverse';
-import { flatten, once } from 'lodash';
+import { once } from 'lodash';
+import callsites from 'callsites';
 import { Lifecycle } from '../lifecycle';
-import { Test, Suite } from '../../fake_mocha_types';
+import { Test } from '../../fake_mocha_types';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
@@ -39,40 +29,17 @@ interface SnapshotContext {
   currentTestName: string;
 }
 
-let testContext: {
-  file: string;
-  snapshotTitle: string;
-  snapshotContext: SnapshotContext;
-} | null = null;
-
-let registered: boolean = false;
-
-function getSnapshotMeta(currentTest: Test) {
-  // Make sure snapshot title is unique per-file, rather than entire
-  // suite. This allows reuse of tests, for instance to compare
-  // results for different configurations.
-
-  const titles = [currentTest.title];
-  const file = currentTest.file;
-
-  let test: Suite | undefined = currentTest?.parent;
-
-  while (test && test.file === file) {
-    titles.push(test.title);
-    test = test.parent;
-  }
-
-  const snapshotTitle = titles.reverse().join(' ');
-
-  if (!file || !snapshotTitle) {
-    throw new Error(`file or snapshotTitle not available in Mocha test context`);
-  }
-
-  return {
-    file,
-    snapshotTitle,
-  };
-}
+const globalState: {
+  updateSnapshot: SnapshotUpdateState;
+  registered: boolean;
+  currentTest: Test | null;
+  snapshots: Array<{ tests: Test[]; file: string; snapshotState: ISnapshotState }>;
+} = {
+  updateSnapshot: 'none',
+  registered: false,
+  currentTest: null,
+  snapshots: [],
+};
 
 const modifyStackTracePrepareOnce = once(() => {
   const originalPrepareStackTrace = Error.prepareStackTrace;
@@ -83,7 +50,7 @@ const modifyStackTracePrepareOnce = once(() => {
 
   Error.prepareStackTrace = (error, structuredStackTrace) => {
     let filteredStrackTrace: NodeJS.CallSite[] = structuredStackTrace;
-    if (registered) {
+    if (globalState.registered) {
       filteredStrackTrace = filteredStrackTrace.filter((callSite) => {
         // check for both compiled and uncompiled files
         return !callSite.getFileName()?.match(/decorate_snapshot_ui\.(js|ts)/);
@@ -105,21 +72,16 @@ export function decorateSnapshotUi({
   updateSnapshots: boolean;
   isCi: boolean;
 }) {
-  let snapshotStatesByFilePath: Record<
-    string,
-    { snapshotState: ISnapshotState; testsInFile: Test[] }
-  > = {};
-
-  registered = true;
-
-  let updateSnapshot: SnapshotUpdateState;
+  globalState.registered = true;
+  globalState.snapshots.length = 0;
+  globalState.currentTest = null;
 
   if (isCi) {
     // make sure snapshots that have not been committed
     // are not written to file on CI, passing the test
-    updateSnapshot = 'none';
+    globalState.updateSnapshot = 'none';
   } else {
-    updateSnapshot = updateSnapshots ? 'all' : 'new';
+    globalState.updateSnapshot = updateSnapshots ? 'all' : 'new';
   }
 
   modifyStackTracePrepareOnce();
@@ -136,21 +98,8 @@ export function decorateSnapshotUi({
   // @ts-expect-error
   global.expectSnapshot = expectSnapshot;
 
-  lifecycle.beforeEachTest.add((currentTest: Test) => {
-    const { file, snapshotTitle } = getSnapshotMeta(currentTest);
-
-    if (!snapshotStatesByFilePath[file]) {
-      snapshotStatesByFilePath[file] = getSnapshotState(file, currentTest, updateSnapshot);
-    }
-
-    testContext = {
-      file,
-      snapshotTitle,
-      snapshotContext: {
-        snapshotState: snapshotStatesByFilePath[file].snapshotState,
-        currentTestName: snapshotTitle,
-      },
-    };
+  lifecycle.beforeEachTest.add((test: Test) => {
+    globalState.currentTest = test;
   });
 
   lifecycle.afterTestSuite.add(function (testSuite) {
@@ -161,19 +110,18 @@ export function decorateSnapshotUi({
 
     const unused: string[] = [];
 
-    Object.keys(snapshotStatesByFilePath).forEach((file) => {
-      const { snapshotState, testsInFile } = snapshotStatesByFilePath[file];
-
-      testsInFile.forEach((test) => {
-        const snapshotMeta = getSnapshotMeta(test);
+    globalState.snapshots.forEach((snapshot) => {
+      const { tests, snapshotState } = snapshot;
+      tests.forEach((test) => {
+        const title = test.fullTitle();
         // If test is failed or skipped, mark snapshots as used. Otherwise,
         // running a test in isolation will generate false positives.
         if (!test.isPassed()) {
-          snapshotState.markSnapshotsAsCheckedForTest(snapshotMeta.snapshotTitle);
+          snapshotState.markSnapshotsAsCheckedForTest(title);
         }
       });
 
-      if (!updateSnapshots) {
+      if (globalState.updateSnapshot !== 'all') {
         unused.push(...snapshotState.getUncheckedKeys());
       } else {
         snapshotState.removeUncheckedKeys();
@@ -190,27 +138,13 @@ export function decorateSnapshotUi({
       );
     }
 
-    snapshotStatesByFilePath = {};
+    globalState.snapshots.length = 0;
   });
 }
 
-function recursivelyGetTestsFromSuite(suite: Suite): Test[] {
-  return suite.tests.concat(flatten(suite.suites.map((s) => recursivelyGetTestsFromSuite(s))));
-}
-
-function getSnapshotState(file: string, test: Test, updateSnapshot: SnapshotUpdateState) {
+function getSnapshotState(file: string, updateSnapshot: SnapshotUpdateState) {
   const dirname = path.dirname(file);
   const filename = path.basename(file);
-
-  let parent: Suite | undefined = test.parent;
-
-  while (parent && parent.parent?.file === file) {
-    parent = parent.parent;
-  }
-
-  if (!parent) {
-    throw new Error('Top-level suite not found');
-  }
 
   const snapshotState = new SnapshotState(
     path.join(dirname + `/__snapshots__/` + filename.replace(path.extname(filename), '.snap')),
@@ -222,24 +156,54 @@ function getSnapshotState(file: string, test: Test, updateSnapshot: SnapshotUpda
     }
   );
 
-  return { snapshotState, testsInFile: recursivelyGetTestsFromSuite(parent) };
+  return snapshotState;
 }
 
 export function expectSnapshot(received: any) {
-  if (!registered) {
+  if (!globalState.registered) {
     throw new Error(
       'Mocha hooks were not registered before expectSnapshot was used. Call `registerMochaHooksForSnapshots` in your top-level describe().'
     );
   }
 
-  if (!testContext) {
-    throw new Error('A current Mocha context is needed to match snapshots');
+  if (!globalState.currentTest) {
+    throw new Error('expectSnapshot can only be called inside of an it()');
   }
 
+  const [, fileOfTest] = callsites().map((site) => site.getFileName());
+
+  if (!fileOfTest) {
+    throw new Error("Couldn't infer a filename for the current test");
+  }
+
+  let snapshot = globalState.snapshots.find(({ file }) => file === fileOfTest);
+
+  if (!snapshot) {
+    snapshot = {
+      file: fileOfTest,
+      tests: [],
+      snapshotState: getSnapshotState(fileOfTest, globalState.updateSnapshot),
+    };
+    globalState.snapshots.unshift(snapshot!);
+  }
+
+  if (!snapshot) {
+    throw new Error('Snapshot is undefined');
+  }
+
+  if (!snapshot.tests.includes(globalState.currentTest)) {
+    snapshot.tests.push(globalState.currentTest);
+  }
+
+  const context: SnapshotContext = {
+    snapshotState: snapshot.snapshotState,
+    currentTestName: globalState.currentTest.fullTitle(),
+  };
+
   return {
-    toMatch: expectToMatchSnapshot.bind(null, testContext.snapshotContext, received),
+    toMatch: expectToMatchSnapshot.bind(null, context, received),
     // use bind to support optional 3rd argument (actual)
-    toMatchInline: expectToMatchInlineSnapshot.bind(null, testContext.snapshotContext, received),
+    toMatchInline: expectToMatchInlineSnapshot.bind(null, context, received),
   };
 }
 
