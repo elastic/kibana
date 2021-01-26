@@ -15,26 +15,28 @@ import { ChangeIndexPattern } from './change_indexpattern';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { EuiSelectable } from '@elastic/eui';
 import { IIndexPattern, IndexPatternSpec } from 'src/plugins/data/public';
+import { mockPatternLists } from '../../../__mocks__/index_pattern';
 
 const indexPattern: IIndexPattern = {
   fields: [{ name: 'name', type: 'type' }],
   id: 'test1',
-  patternList: ['logstash-*'],
-  patternListActive: ['logstash-*'],
+  ...mockPatternLists,
   title: 'test1 title',
+};
+const mockPatternListsAlt = {
+  patternList: mockPatternLists.patternList.slice(2, 4),
+  patternListActive: mockPatternLists.patternList.slice(2, 3),
 };
 
 const indexPattern1: IndexPatternSpec = {
   id: 'test1',
-  patternList: ['logstash-*'],
-  patternListActive: ['logstash-*'],
+  ...mockPatternLists,
   title: 'test1 title',
 };
 
 const indexPattern2: IndexPatternSpec = {
   id: 'test2',
-  patternList: ['logstash-*'],
-  patternListActive: ['logstash-*'],
+  ...mockPatternListsAlt,
   title: 'test2 title',
 };
 
@@ -77,15 +79,15 @@ describe('DiscoverIndexPattern', () => {
     const instance = shallow(<DiscoverIndexPattern {...defaultProps} />);
 
     expect(getIndexPatternPickerOptions(instance)!.map((option: any) => option.label)).toEqual([
-      'test1 title',
-      'test2 title',
+      mockPatternLists.patternList.join(', '),
+      mockPatternListsAlt.patternList.join(', '),
     ]);
   });
 
   test('should switch data panel to target index pattern', () => {
     const instance = shallow(<DiscoverIndexPattern {...defaultProps} />);
 
-    selectIndexPatternPickerOption(instance, 'test2 title');
+    selectIndexPatternPickerOption(instance, mockPatternListsAlt.patternList.join(', '));
     expect(defaultProps.setIndexPattern).toHaveBeenCalledWith('test2');
   });
 });

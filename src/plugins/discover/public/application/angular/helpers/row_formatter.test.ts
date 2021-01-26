@@ -10,6 +10,7 @@ import { formatRow } from './row_formatter';
 import { stubbedSavedObjectIndexPattern } from '../../../__mocks__/stubbed_saved_object_index_pattern';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
 import { fieldFormatsMock } from '../../../../../data/common/field_formats/mocks';
+import { mockPatternLists } from '../../../__mocks__/index_pattern';
 
 describe('Row formatter', () => {
   const hit = {
@@ -36,7 +37,7 @@ describe('Row formatter', () => {
         fields,
         title,
         patternList,
-        patternListActive: patternList,
+        patternListActive: mockPatternLists.patternListActive,
       },
       fieldFormats: fieldFormatsMock,
       shortDotsEnable: false,

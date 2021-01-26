@@ -8,9 +8,9 @@
 
 // @ts-expect-error
 import stubbedLogstashFields from '../../../../fixtures/logstash_fields';
+import { mockPatternLists } from './index_pattern';
 
 const mockLogstashFields = stubbedLogstashFields();
-
 export function stubbedSavedObjectIndexPattern(id: string | null = null) {
   return {
     id,
@@ -20,7 +20,7 @@ export function stubbedSavedObjectIndexPattern(id: string | null = null) {
       customFormats: {},
       fields: mockLogstashFields,
       title: 'title',
-      patternList: ['auditbeat-*'],
+      patternList: mockPatternLists.patternList,
     },
     version: '2',
   };

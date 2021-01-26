@@ -32,6 +32,8 @@ export function getStubIndexPattern(
 export class StubIndexPattern {
   id: string;
   title: string;
+  patternList: string[];
+  patternListActive: string[];
   popularizeField: Function;
   timeFieldName: string | null;
   isTimeBased: () => boolean;
@@ -63,6 +65,8 @@ export class StubIndexPattern {
 
     this.id = pattern;
     this.title = pattern;
+    this.patternList = [pattern];
+    this.patternListActive = [pattern];
     this.popularizeField = sinon.stub();
     this.timeFieldName = timeField;
     this.isTimeBased = () => Boolean(this.timeFieldName);

@@ -13,6 +13,9 @@ export const indexPatternsMock = ({
   getCache: () => {
     return [indexPatternMock];
   },
+  getPatternCache: () => {
+    return [indexPatternMock];
+  },
   get: (id: string) => {
     if (id === 'the-index-pattern-id') {
       return indexPatternMock;

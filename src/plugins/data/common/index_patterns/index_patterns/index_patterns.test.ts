@@ -225,10 +225,11 @@ describe('IndexPatterns', () => {
   });
 
   test('createAndSave', async () => {
+    const id = '1234';
     const title = 'kibana-*';
     indexPatterns.createSavedObject = jest.fn();
     indexPatterns.setDefault = jest.fn();
-    await indexPatterns.createAndSave({ title, patternList: mockPatternLists.patternList });
+    await indexPatterns.createAndSave({ id, title, patternList: mockPatternLists.patternList });
     expect(indexPatterns.createSavedObject).toBeCalled();
     expect(indexPatterns.setDefault).toBeCalled();
   });

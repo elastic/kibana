@@ -58,11 +58,22 @@ fields.getByName = (name: string) => {
   return fields.find((field) => field.name === name);
 };
 
+export const mockPatternLists = {
+  patternListActive: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  patternList: [
+    'apm-*-transaction*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+};
+
 const indexPattern = ({
   id: 'the-index-pattern-id',
   title: 'the-index-pattern-title',
-  patternList: ['the-index-pattern-title'],
-  patternListActive: ['the-index-pattern-title'],
+  ...mockPatternLists,
   metaFields: ['_index', '_score'],
   formatField: jest.fn(),
   flattenHit: undefined,

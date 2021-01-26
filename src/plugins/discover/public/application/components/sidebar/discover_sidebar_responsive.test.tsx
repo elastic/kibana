@@ -17,13 +17,13 @@ import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../core/public/mocks';
-import { IndexPatternAttributes } from '../../../../../data/common';
+import { IndexPatternSpec } from '../../../../../data/common';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
-import { SavedObject } from '../../../../../../core/types';
 import { FieldFilterState } from './lib/field_filter';
 import { DiscoverSidebarResponsive } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../build_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { mockPatternLists } from '../../../__mocks__/index_pattern';
 
 const mockServices = ({
   history: () => ({
@@ -70,10 +70,22 @@ function getCompProps() {
     Record<string, unknown>
   >) as ElasticSearchHit[];
 
-  const indexPatternList = [
-    { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
-    { id: '1', attributes: { title: 'a' } } as SavedObject<IndexPatternAttributes>,
-    { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
+  const indexPatternList: IndexPatternSpec[] = [
+    {
+      id: '0',
+      ...mockPatternLists,
+      title: 'b',
+    },
+    {
+      id: '1',
+      ...mockPatternLists,
+      title: 'a',
+    },
+    {
+      id: '2',
+      ...mockPatternLists,
+      title: 'c',
+    },
   ];
 
   const fieldCounts: Record<string, number> = {};
