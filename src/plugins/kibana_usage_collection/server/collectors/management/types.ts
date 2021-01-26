@@ -29,6 +29,7 @@ export interface UsageStats {
   'securitySolution:rulesTableRefresh': string;
   'apm:enableSignificantTerms': boolean;
   'apm:enableServiceOverview': boolean;
+  'apm:enableCorrelations': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;

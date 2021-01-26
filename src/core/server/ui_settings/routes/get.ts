@@ -6,28 +6,17 @@
  * Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 
 export function registerGetRoute(router: IRouter) {
   router.get(
-    {
-      path: '/api/kibana/settings',
-      validate: {
-        query: schema.object({
-          _allRegistered: schema.maybe(schema.boolean()),
-        }),
-      },
-    },
+    { path: '/api/kibana/settings', validate: false },
     async (context, request, response) => {
       try {
-        const { _allRegistered } = request.query;
         const uiSettingsClient = context.core.uiSettings.client;
-
         return response.ok({
           body: {
-            registered: _allRegistered ? uiSettingsClient.getRegistered() : undefined,
             settings: await uiSettingsClient.getUserProvided(),
           },
         });
