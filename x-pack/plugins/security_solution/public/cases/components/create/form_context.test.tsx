@@ -36,6 +36,8 @@ import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { noop } from 'lodash/fp';
 
+const sampleId = 'case-id';
+
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
@@ -62,7 +64,6 @@ const postPushToService = jest.fn();
 const defaultPostCase = {
   isLoading: false,
   isError: false,
-  caseData: null,
   postCase,
 };
 
@@ -98,6 +99,10 @@ describe('Create case', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    postCase.mockResolvedValue({
+      id: sampleId,
+      ...sampleData,
+    });
     usePostCaseMock.mockImplementation(() => defaultPostCase);
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useConnectorsMock.mockReturnValue(sampleConnectorData);
@@ -177,44 +182,6 @@ describe('Create case', () => {
       );
     });
 
-    it('should not push to the external connector when caseData is there but a connector is not selected', async () => {
-      const sampleId = 'case-id';
-      usePostCaseMock.mockImplementation(() => ({
-        ...defaultPostCase,
-        caseData: { id: sampleId },
-      }));
-
-      mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
-      );
-
-      await waitFor(() => expect(postPushToService).not.toHaveBeenCalled());
-    });
-
-    it('should redirect to new case when caseData is there', async () => {
-      const sampleId = 'case-id';
-      usePostCaseMock.mockImplementation(() => ({
-        ...defaultPostCase,
-        caseData: { id: sampleId },
-      }));
-
-      mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
-      );
-
-      await waitFor(() => expect(onFormSubmitSuccess).toHaveBeenCalledWith({ id: 'case-id' }));
-    });
-
     it('it should select the default connector set in the configuration', async () => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
@@ -291,12 +258,15 @@ describe('Create case', () => {
 
       fillForm(wrapper);
       wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-      await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
+      await waitFor(() => {
+        expect(postCase).toBeCalledWith(sampleData);
+        expect(postPushToService).not.toHaveBeenCalled();
+      });
     });
   });
 
   describe('Step 2 - Connector Fields', () => {
-    it(`it should submit a Jira connector`, async () => {
+    it(`it should submit and push to Jira connector`, async () => {
       useConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         connectors: connectorsMock,
@@ -337,7 +307,7 @@ describe('Create case', () => {
 
       wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
 
-      await waitFor(() =>
+      await waitFor(() => {
         expect(postCase).toBeCalledWith({
           ...sampleData,
           connector: {
@@ -346,50 +316,7 @@ describe('Create case', () => {
             type: '.jira',
             fields: { issueType: '10007', parent: null, priority: '2' },
           },
-        })
-      );
-    });
-
-    it(`it should push case to Jira connector`, async () => {
-      useConnectorsMock.mockReturnValue({
-        ...sampleConnectorData,
-        connectors: connectorsMock,
-      });
-      const sampleId = 'case-id';
-      usePostCaseMock.mockImplementation(() => ({
-        ...defaultPostCase,
-        caseData: { id: sampleId },
-      }));
-
-      const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
-      );
-
-      fillForm(wrapper);
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
-      wrapper
-        .find('select[data-test-subj="issueTypeSelect"]')
-        .first()
-        .simulate('change', {
-          target: { value: '10007' },
         });
-
-      wrapper
-        .find('select[data-test-subj="prioritySelect"]')
-        .first()
-        .simulate('change', {
-          target: { value: '2' },
-        });
-
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-
-      await waitFor(() => {
         expect(postPushToService).toHaveBeenCalledWith({
           caseId: sampleId,
           caseServices: {},
@@ -402,10 +329,14 @@ describe('Create case', () => {
           alerts: {},
           updateCase: noop,
         });
+        expect(onFormSubmitSuccess).toHaveBeenCalledWith({
+          id: sampleId,
+          ...sampleData,
+        });
       });
     });
 
-    it(`it should submit a resilient connector`, async () => {
+    it(`it should submit and push to resilient connector`, async () => {
       useConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         connectors: connectorsMock,
@@ -447,7 +378,7 @@ describe('Create case', () => {
 
       wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
 
-      await waitFor(() =>
+      await waitFor(() => {
         expect(postCase).toBeCalledWith({
           ...sampleData,
           connector: {
@@ -456,51 +387,8 @@ describe('Create case', () => {
             type: '.resilient',
             fields: { incidentTypes: ['19'], severityCode: '4' },
           },
-        })
-      );
-    });
-
-    it(`it should push case to resilient connector`, async () => {
-      useConnectorsMock.mockReturnValue({
-        ...sampleConnectorData,
-        connectors: connectorsMock,
-      });
-
-      const sampleId = 'case-id';
-      usePostCaseMock.mockImplementation(() => ({
-        ...defaultPostCase,
-        caseData: { id: sampleId },
-      }));
-
-      const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
-      );
-
-      fillForm(wrapper);
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
-
-      act(() => {
-        ((wrapper.find(EuiComboBox).at(1).props() as unknown) as {
-          onChange: (a: EuiComboBoxOptionOption[]) => void;
-        }).onChange([{ value: '19', label: 'Denial of Service' }]);
-      });
-
-      wrapper
-        .find('select[data-test-subj="severitySelect"]')
-        .first()
-        .simulate('change', {
-          target: { value: '4' },
         });
 
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-
-      await waitFor(() => {
         expect(postPushToService).toHaveBeenCalledWith({
           caseId: sampleId,
           caseServices: {},
@@ -513,10 +401,15 @@ describe('Create case', () => {
           alerts: {},
           updateCase: noop,
         });
+
+        expect(onFormSubmitSuccess).toHaveBeenCalledWith({
+          id: sampleId,
+          ...sampleData,
+        });
       });
     });
 
-    it(`it should submit a servicenow connector`, async () => {
+    it(`it should submit and push to servicenow connector`, async () => {
       useConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         connectors: connectorsMock,
@@ -548,7 +441,7 @@ describe('Create case', () => {
 
       wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
 
-      await waitFor(() =>
+      await waitFor(() => {
         expect(postCase).toBeCalledWith({
           ...sampleData,
           connector: {
@@ -557,50 +450,9 @@ describe('Create case', () => {
             type: '.servicenow',
             fields: { impact: '2', severity: '2', urgency: '2' },
           },
-        })
-      );
-    });
+        });
 
-    it(`it should push case to servicenow connector`, async () => {
-      useConnectorsMock.mockReturnValue({
-        ...sampleConnectorData,
-        connectors: connectorsMock,
-      });
-
-      const sampleId = 'case-id';
-      usePostCaseMock.mockImplementation(() => ({
-        ...defaultPostCase,
-        caseData: { id: sampleId },
-      }));
-
-      const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm />
-            <SubmitCaseButton />
-          </FormContext>
-        </TestProviders>
-      );
-
-      fillForm(wrapper);
-      expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeFalsy();
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.find(`button[data-test-subj="dropdown-connector-servicenow-1"]`).simulate('click');
-      expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeTruthy();
-
-      ['severitySelect', 'urgencySelect', 'impactSelect'].forEach((subj) => {
-        wrapper
-          .find(`select[data-test-subj="${subj}"]`)
-          .first()
-          .simulate('change', {
-            target: { value: '2' },
-          });
-      });
-
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-
-      await waitFor(() =>
-        expect(postPushToService).toBeCalledWith({
+        expect(postPushToService).toHaveBeenCalledWith({
           caseId: sampleId,
           caseServices: {},
           connector: {
@@ -611,8 +463,13 @@ describe('Create case', () => {
           },
           alerts: {},
           updateCase: noop,
-        })
-      );
+        });
+
+        expect(onFormSubmitSuccess).toHaveBeenCalledWith({
+          id: sampleId,
+          ...sampleData,
+        });
+      });
     });
   });
 });

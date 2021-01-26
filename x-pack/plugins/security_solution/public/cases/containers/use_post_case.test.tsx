@@ -6,7 +6,6 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { usePostCase, UsePostCase } from './use_post_case';
-import { basicCasePost } from './mock';
 import * as api from './api';
 import { ConnectorTypes } from '../../../../case/common/api/connectors';
 
@@ -40,7 +39,6 @@ describe('usePostCase', () => {
       expect(result.current).toEqual({
         isLoading: false,
         isError: false,
-        caseData: null,
         postCase: result.current.postCase,
       });
     });
@@ -66,7 +64,6 @@ describe('usePostCase', () => {
       result.current.postCase(samplePost);
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        caseData: basicCasePost,
         isLoading: false,
         isError: false,
         postCase: result.current.postCase,
@@ -96,7 +93,6 @@ describe('usePostCase', () => {
       result.current.postCase(samplePost);
 
       expect(result.current).toEqual({
-        caseData: null,
         isLoading: false,
         isError: true,
         postCase: result.current.postCase,
