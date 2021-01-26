@@ -118,34 +118,34 @@ export async function getServiceTransactionGroupsMetrics({
   return buckets.reduce((acc, bucket) => {
     const transactionName = bucket.key;
 
-    const latency: Coordinate[] = [];
-    const throughput: Coordinate[] = [];
-    const errorRate: Coordinate[] = [];
-
-    bucket.timeseries.buckets.forEach((timeseriesBucket) => {
-      const x = timeseriesBucket.key;
-      latency.push({
-        x,
+    const latency: Coordinate[] = bucket.timeseries.buckets.map(
+      (timeseriesBucket) => ({
+        x: timeseriesBucket.key,
         y: getLatencyValue({
           latencyAggregationType,
           aggregation: timeseriesBucket.latency,
         }),
-      });
+      })
+    );
 
-      throughput.push({
-        x,
+    const throughput: Coordinate[] = bucket.timeseries.buckets.map(
+      (timeseriesBucket) => ({
+        x: timeseriesBucket.key,
         y: timeseriesBucket.transaction_count.value / deltaAsMinutes,
-      });
+      })
+    );
 
-      errorRate.push({
-        x,
+    const errorRate: Coordinate[] = bucket.timeseries.buckets.map(
+      (timeseriesBucket) => ({
+        x: timeseriesBucket.key,
         y:
           timeseriesBucket.transaction_count.value > 0
             ? (timeseriesBucket[EVENT_OUTCOME].transaction_count.value ?? 0) /
               timeseriesBucket.transaction_count.value
             : null,
-      });
-    });
+      })
+    );
+
     return {
       ...acc,
       [transactionName]: { latency, throughput, errorRate },
