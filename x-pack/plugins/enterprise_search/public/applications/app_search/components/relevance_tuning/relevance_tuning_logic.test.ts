@@ -58,7 +58,10 @@ describe('RelevanceTuningLogic', () => {
     dataLoading: true,
     schema: {},
     schemaConflicts: {},
-    searchSettings: {},
+    searchSettings: {
+      boosts: {},
+      search_fields: {},
+    },
     unsavedChanges: false,
     filterInputValue: '',
     query: '',
@@ -325,7 +328,7 @@ describe('RelevanceTuningLogic', () => {
         expect(http.post).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/search_settings_search',
           {
-            body: '{"boosts":{"foo":[{"type":"value","factor":5}]},"search_fields":{}}',
+            body: '{"boosts":{"foo":[{"type":"value","factor":5}]}}',
             query: {
               query: 'foo',
             },
@@ -334,7 +337,7 @@ describe('RelevanceTuningLogic', () => {
         expect(RelevanceTuningLogic.actions.setSearchResults).toHaveBeenCalledWith(searchResults);
       });
 
-      it("won't send boosts if on the API call if there are none", async () => {
+      it("won't send boosts or search_fields on the API call if there are none", async () => {
         mount({
           query: 'foo',
         });
@@ -564,25 +567,6 @@ describe('RelevanceTuningLogic', () => {
         });
         expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
-
-      it('will stil work when boosts is undefined', () => {
-        mount({
-          searchSettings: {
-            ...searchSettings,
-            boosts: undefined,
-          },
-        });
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.toggleSearchField('bar', true);
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
-          boosts: {},
-          search_fields: {
-            bar: undefined,
-          },
-        });
-      });
     });
 
     describe('updateFieldWeight', () => {
@@ -604,27 +588,6 @@ describe('RelevanceTuningLogic', () => {
           },
         });
         expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
-      });
-
-      it('will stil work if boosts and search_fields are undefined', () => {
-        mount({
-          searchSettings: {
-            search_fields: undefined,
-            boosts: undefined,
-          },
-        });
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.updateFieldWeight('foo', 3);
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
-          boosts: {},
-          search_fields: {
-            foo: {
-              weight: 3,
-            },
-          },
-        });
       });
 
       it('will round decimal numbers', () => {
@@ -674,32 +637,6 @@ describe('RelevanceTuningLogic', () => {
                 factor: 2,
                 type: 'value',
               },
-              {
-                factor: 1,
-                newBoost: true,
-                type: 'functional',
-              },
-            ],
-          },
-        });
-      });
-
-      it('will still work if boosts and search_fields are undefined', () => {
-        mount({
-          searchSettings: {
-            search_fields: undefined,
-            boosts: undefined,
-          },
-        });
-
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.addBoost('foo', 'functional');
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
-          search_fields: {},
-          boosts: {
-            foo: [
               {
                 factor: 1,
                 newBoost: true,
@@ -775,31 +712,6 @@ describe('RelevanceTuningLogic', () => {
         });
       });
 
-      it('will still work if search_fields are undefined', () => {
-        mount({
-          searchSettings: {
-            search_fields: undefined,
-            boosts: {
-              foo: [
-                {
-                  factor: 1,
-                  type: 'functional',
-                },
-              ],
-            },
-          },
-        });
-        confirmSpy.mockImplementation(() => true);
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.deleteBoost('foo', 0);
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
-          search_fields: {},
-          boosts: {},
-        });
-      });
-
       it('will do nothing if the user does not confirm', () => {
         mount({
           searchSettings: {
@@ -858,42 +770,10 @@ describe('RelevanceTuningLogic', () => {
         expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
 
-      it('will still work if search_fields are undefined', () => {
-        mount({
-          searchSettings: {
-            search_fields: undefined,
-            boosts: {
-              foo: [
-                {
-                  factor: 1,
-                  type: 'functional',
-                },
-              ],
-            },
-          },
-        });
-
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.updateBoostFactor('foo', 0, 5);
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
-          search_fields: {},
-          boosts: {
-            foo: [
-              {
-                factor: 5,
-                type: 'functional',
-              },
-            ],
-          },
-        });
-      });
-
       it('will round decimal numbers', () => {
         mount({
           searchSettings: {
-            search_fields: undefined,
+            ...searchSettings,
             boosts: {
               foo: [
                 {
@@ -910,7 +790,7 @@ describe('RelevanceTuningLogic', () => {
         RelevanceTuningLogic.actions.updateBoostFactor('foo', 0, 5.293191);
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
-          search_fields: {},
+          ...searchSettings,
           boosts: {
             foo: [
               {

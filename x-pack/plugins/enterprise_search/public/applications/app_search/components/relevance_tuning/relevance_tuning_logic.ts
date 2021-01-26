@@ -53,7 +53,7 @@ interface RelevanceTuningActions {
 }
 
 interface RelevanceTuningValues {
-  searchSettings: Partial<SearchSettings>;
+  searchSettings: SearchSettings;
   schema: Schema;
   schemaFields: string[];
   schemaFieldsWithConflicts: string[];
@@ -101,11 +101,11 @@ const filterIfTerm = (array: string[], filterTerm: string): string[] => {
   return filterTerm === '' ? array : array.filter((item) => item.includes(filterTerm));
 };
 
-const removeBoostStateProps = (searchSettings: Partial<SearchSettings>) => {
+const removeBoostStateProps = (searchSettings: SearchSettings) => {
   const updatedSettings = cloneDeep(searchSettings);
   const { boosts } = updatedSettings;
-  const keys = Object.keys(boosts || {});
-  keys.forEach((key) => (boosts || {})[key].forEach((boost) => delete boost.newBoost));
+  const keys = Object.keys(boosts);
+  keys.forEach((key) => boosts[key].forEach((boost) => delete boost.newBoost));
 
   return updatedSettings;
 };
@@ -141,7 +141,10 @@ export const RelevanceTuningLogic = kea<
   }),
   reducers: () => ({
     searchSettings: [
-      {},
+      {
+        search_fields: {},
+        boosts: {},
+      },
       {
         onInitializeRelevanceTuning: (_, { searchSettings }) => searchSettings,
         setSearchSettings: (_, { searchSettings }) => searchSettings,
@@ -263,7 +266,7 @@ export const RelevanceTuningLogic = kea<
           },
           body: JSON.stringify({
             boosts: isEmpty(boosts) ? undefined : boosts,
-            search_fields: searchFields,
+            search_fields: isEmpty(searchFields) ? undefined : searchFields,
           }),
         });
 
@@ -315,11 +318,7 @@ export const RelevanceTuningLogic = kea<
       }
     },
     toggleSearchField: ({ name, disableField }) => {
-      const searchSettings = {
-        ...values.searchSettings,
-        boosts: values.searchSettings.boosts || {},
-        search_fields: values.searchSettings.search_fields || {},
-      };
+      const { searchSettings } = values;
       const { search_fields: searchFields } = searchSettings;
 
       actions.setSearchSettings({
@@ -333,11 +332,7 @@ export const RelevanceTuningLogic = kea<
       actions.getSearchResults();
     },
     updateFieldWeight: ({ name, weight }) => {
-      const searchSettings = {
-        ...values.searchSettings,
-        boosts: values.searchSettings.boosts || {},
-        search_fields: values.searchSettings.search_fields || {},
-      };
+      const { searchSettings } = values;
       const { search_fields: searchFields } = searchSettings;
 
       actions.setSearchSettings({
@@ -354,11 +349,7 @@ export const RelevanceTuningLogic = kea<
       actions.getSearchResults();
     },
     addBoost: ({ name, type }) => {
-      const searchSettings = {
-        ...values.searchSettings,
-        boosts: values.searchSettings.boosts || {},
-        search_fields: values.searchSettings.search_fields || {},
-      };
+      const { searchSettings } = values;
       const { boosts } = searchSettings;
       const emptyBoost = { type, factor: 1, newBoost: true };
       let boostArray;
@@ -380,11 +371,7 @@ export const RelevanceTuningLogic = kea<
     },
     deleteBoost: ({ name, index }) => {
       if (window.confirm(DELETE_CONFIRMATION_MESSAGE)) {
-        const searchSettings = {
-          ...values.searchSettings,
-          boosts: values.searchSettings.boosts || {},
-          search_fields: values.searchSettings.search_fields || {},
-        };
+        const { searchSettings } = values;
         const { boosts } = searchSettings;
         const boostsRemoved = boosts[name].slice();
         boostsRemoved.splice(index, 1);
@@ -404,11 +391,7 @@ export const RelevanceTuningLogic = kea<
       }
     },
     updateBoostFactor: ({ name, index, factor }) => {
-      const searchSettings = {
-        ...values.searchSettings,
-        boosts: values.searchSettings.boosts || {},
-        search_fields: values.searchSettings.search_fields || {},
-      };
+      const { searchSettings } = values;
       const { boosts } = searchSettings;
       const updatedBoosts = cloneDeep(boosts[name]);
       updatedBoosts[index].factor = Math.round(factor * 10) / 10;
