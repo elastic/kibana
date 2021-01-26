@@ -60,7 +60,7 @@
 
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, keyBy, pick, difference, omit, isObject, isFunction } from 'lodash';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { defer, from } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
@@ -246,24 +246,22 @@ export class SearchSource {
 
   fetch$(options: ISearchOptions = {}) {
     const { getConfig } = this.dependencies;
-    return defer(() => {
-      return from(this.requestIsStarting(options)).pipe(
-        switchMap(() => {
-          const searchRequest = this.flatten();
-          this.history = [searchRequest];
+    return defer(() => this.requestIsStarting(options)).pipe(
+      switchMap(() => {
+        const searchRequest = this.flatten();
+        this.history = [searchRequest];
 
-          return getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)
-            ? from(this.legacyFetch(searchRequest, options))
-            : this.fetchSearch$(searchRequest, options);
-        }),
-        map((response) => {
-          // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
-          if ((response as any).error) {
-            throw new RequestFailure(null, response);
-          }
-        })
-      );
-    });
+        return getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)
+          ? from(this.legacyFetch(searchRequest, options))
+          : this.fetchSearch$(searchRequest, options);
+      }),
+      tap((response) => {
+        // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
+        if ((response as any).error) {
+          throw new RequestFailure(null, response);
+        }
+      })
+    );
   }
 
   /**
