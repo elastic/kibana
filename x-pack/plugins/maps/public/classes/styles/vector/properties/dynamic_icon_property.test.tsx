@@ -16,7 +16,7 @@ import React from 'react';
 import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 // @ts-ignore
 import { DynamicIconProperty } from './dynamic_icon_property';
-import { mockField, MockLayer } from './__tests__/test_util';
+import { mockField, MockLayer } from './test_helpers/test_util';
 import { IconDynamicOptions } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';

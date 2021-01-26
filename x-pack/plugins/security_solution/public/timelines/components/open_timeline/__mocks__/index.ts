@@ -151,6 +151,7 @@ export const mockTimeline = {
       savedQueryId: null,
       sort: {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: 'desc',
         __typename: 'SortTimelineResult',
       },
@@ -403,6 +404,7 @@ export const mockTemplate = {
       savedQueryId: null,
       sort: {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: 'desc',
         __typename: 'SortTimelineResult',
       },

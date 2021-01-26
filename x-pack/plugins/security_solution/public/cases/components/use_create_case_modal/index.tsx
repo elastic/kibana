@@ -8,17 +8,17 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { Case } from '../../containers/types';
 import { CreateCaseModal } from './create_case_modal';
 
-interface Props {
+export interface UseCreateCaseModalProps {
   onCaseCreated: (theCase: Case) => void;
 }
-export interface UseAllCasesModalReturnedValues {
+export interface UseCreateCaseModalReturnedValues {
   modal: JSX.Element;
   isModalOpen: boolean;
   closeModal: () => void;
   openModal: () => void;
 }
 
-export const useCreateCaseModal = ({ onCaseCreated }: Props) => {
+export const useCreateCaseModal = ({ onCaseCreated }: UseCreateCaseModalProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);

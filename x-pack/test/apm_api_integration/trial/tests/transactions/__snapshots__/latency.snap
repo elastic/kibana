@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Latency when data is loaded and fetching transaction charts with uiFilters when not defined environments seleted should return the correct anomaly boundaries 1`] = `
+exports[`APM specs (trial) Transactions Latency when data is loaded and fetching transaction charts with uiFilters when not defined environments seleted should return the correct anomaly boundaries 1`] = `
 Array [
   Object {
     "x": 1607436000000,
@@ -12,15 +12,10 @@ Array [
     "y": 0,
     "y0": 0,
   },
-  Object {
-    "x": 1607437650000,
-    "y": 0,
-    "y0": 0,
-  },
 ]
 `;
 
-exports[`Latency when data is loaded and fetching transaction charts with uiFilters with environment selected and empty kuery filter should return a non-empty anomaly series 1`] = `
+exports[`APM specs (trial) Transactions Latency when data is loaded and fetching transaction charts with uiFilters with environment selected and empty kuery filter should return a non-empty anomaly series 1`] = `
 Array [
   Object {
     "x": 1607436000000,
@@ -32,15 +27,10 @@ Array [
     "y": 1660982.24115757,
     "y0": 5732.00699123528,
   },
-  Object {
-    "x": 1607437650000,
-    "y": 1660982.24115757,
-    "y0": 5732.00699123528,
-  },
 ]
 `;
 
-exports[`Latency when data is loaded and fetching transaction charts with uiFilters with environment selected in uiFilters should return a non-empty anomaly series 1`] = `
+exports[`APM specs (trial) Transactions Latency when data is loaded and fetching transaction charts with uiFilters with environment selected in uiFilters should return a non-empty anomaly series 1`] = `
 Array [
   Object {
     "x": 1607436000000,
@@ -49,11 +39,6 @@ Array [
   },
   Object {
     "x": 1607436900000,
-    "y": 1660982.24115757,
-    "y0": 5732.00699123528,
-  },
-  Object {
-    "x": 1607437650000,
     "y": 1660982.24115757,
     "y0": 5732.00699123528,
   },

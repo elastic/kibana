@@ -45,6 +45,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/security_api_integration/oidc_implicit_flow.config.ts'),
   require.resolve('../test/security_api_integration/token.config.ts'),
   require.resolve('../test/security_api_integration/anonymous.config.ts'),
+  require.resolve('../test/security_api_integration/anonymous_es_anonymous.config.ts'),
   require.resolve('../test/observability_api_integration/basic/config.ts'),
   require.resolve('../test/observability_api_integration/trial/config.ts'),
   require.resolve('../test/encrypted_saved_objects_api_integration/config.ts'),
@@ -72,6 +73,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/saved_object_tagging/functional/config.ts'),
   require.resolve('../test/saved_object_tagging/api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/saved_object_tagging/api_integration/tagging_api/config.ts'),
+  require.resolve('../test/usage_collection/config.ts'),
 ];
 
 require('../../src/setup_node_env');

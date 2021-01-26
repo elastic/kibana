@@ -7,13 +7,14 @@
     "Logging sink deletions may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Logging sink deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-gcp*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "GCP Logging Sink Deletion",
   "note": "The GCP Filebeat module must be enabled to use this rule.",
-  "query": "event.dataset:googlecloud.audit and event.action:google.logging.v*.ConfigServiceV*.DeleteSink and event.outcome:success",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:google.logging.v*.ConfigServiceV*.DeleteSink and event.outcome:success",
   "references": [
     "https://cloud.google.com/logging/docs/export"
   ],
@@ -46,5 +47,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

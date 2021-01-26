@@ -12,7 +12,7 @@ import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
 import { Logger } from '../../../../src/core/server';
 
-import { Result, asErr, mapErr, asOk } from './lib/result_type';
+import { Result, asErr, mapErr, asOk, map } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig } from './config';
 
@@ -24,8 +24,10 @@ import {
   asTaskRunRequestEvent,
   TaskPollingCycle,
   asTaskPollingCycleEvent,
+  TaskManagerStat,
+  asTaskManagerStatEvent,
 } from './task_events';
-import { fillPool, FillPoolResult } from './lib/fill_pool';
+import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
@@ -41,6 +43,7 @@ import { TaskStore, OwnershipClaimingOpts, ClaimOwnershipResult } from './task_s
 import { identifyEsError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { delayOnClaimConflicts } from './polling';
 
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
@@ -56,7 +59,8 @@ export type TaskLifecycleEvent =
   | TaskRun
   | TaskClaim
   | TaskRunRequest
-  | TaskPollingCycle;
+  | TaskPollingCycle
+  | TaskManagerStat;
 
 /**
  * The public interface into the task manager system.
@@ -99,8 +103,9 @@ export class TaskPollingLifecycle {
     this.definitions = definitions;
     this.store = taskStore;
 
+    const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
     // pipe store events into the lifecycle event stream
-    this.store.events.subscribe((event) => this.events$.next(event));
+    this.store.events.subscribe(emitEvent);
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: config.max_workers,
@@ -111,20 +116,30 @@ export class TaskPollingLifecycle {
       logger,
       maxWorkers$: maxWorkersConfiguration$,
     });
+    this.pool.load.subscribe(emitEvent);
 
     const {
       max_poll_inactivity_cycles: maxPollInactivityCycles,
       poll_interval: pollInterval,
     } = config;
 
+    const pollIntervalDelay$ = delayOnClaimConflicts(
+      maxWorkersConfiguration$,
+      pollIntervalConfiguration$,
+      this.events$,
+      config.version_conflict_threshold,
+      config.monitored_stats_running_average_window
+    ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
+
     // the task poller that polls for work on fixed intervals and on demand
     const poller$: Observable<
-      Result<FillPoolResult, PollingError<string>>
-    > = createObservableMonitor<Result<FillPoolResult, PollingError<string>>, Error>(
+      Result<TimedFillPoolResult, PollingError<string>>
+    > = createObservableMonitor<Result<TimedFillPoolResult, PollingError<string>>, Error>(
       () =>
-        createTaskPoller<string, FillPoolResult>({
+        createTaskPoller<string, TimedFillPoolResult>({
           logger,
           pollInterval$: pollIntervalConfiguration$,
+          pollIntervalDelay$,
           bufferCapacity: config.request_capacity,
           getCapacity: () => this.pool.availableWorkers,
           pollRequests$: this.claimRequests$,
@@ -189,7 +204,7 @@ export class TaskPollingLifecycle {
     return !this.pollingSubscription.closed;
   }
 
-  private pollForWork = async (...tasksToClaim: string[]): Promise<FillPoolResult> => {
+  private pollForWork = async (...tasksToClaim: string[]): Promise<TimedFillPoolResult> => {
     return fillPool(
       // claim available tasks
       () =>
@@ -206,7 +221,9 @@ export class TaskPollingLifecycle {
     );
   };
 
-  private subscribeToPoller(poller$: Observable<Result<FillPoolResult, PollingError<string>>>) {
+  private subscribeToPoller(
+    poller$: Observable<Result<TimedFillPoolResult, PollingError<string>>>
+  ) {
     return poller$
       .pipe(
         tap(
@@ -221,8 +238,14 @@ export class TaskPollingLifecycle {
           })
         )
       )
-      .subscribe((event: Result<FillPoolResult, PollingError<string>>) => {
-        this.emitEvent(asTaskPollingCycleEvent<string>(event));
+      .subscribe((result: Result<TimedFillPoolResult, PollingError<string>>) => {
+        this.emitEvent(
+          map(
+            result,
+            ({ timing, ...event }) => asTaskPollingCycleEvent<string>(asOk(event), timing),
+            (event) => asTaskPollingCycleEvent<string>(asErr(event))
+          )
+        );
       });
   }
 }
@@ -232,18 +255,22 @@ export async function claimAvailableTasks(
   claim: (opts: OwnershipClaimingOpts) => Promise<ClaimOwnershipResult>,
   availableWorkers: number,
   logger: Logger
-): Promise<Result<ClaimOwnershipResult['docs'], FillPoolResult>> {
+): Promise<Result<ClaimOwnershipResult, FillPoolResult>> {
   if (availableWorkers > 0) {
     performance.mark('claimAvailableTasks_start');
 
     try {
-      const { docs, claimedTasks } = await claim({
+      const claimResult = await claim({
         size: availableWorkers,
         claimOwnershipUntil: intervalFromNow('30s')!,
         claimTasksById,
       });
+      const {
+        docs,
+        stats: { tasksClaimed },
+      } = claimResult;
 
-      if (claimedTasks === 0) {
+      if (tasksClaimed === 0) {
         performance.mark('claimAvailableTasks.noTasks');
       }
       performance.mark('claimAvailableTasks_stop');
@@ -253,14 +280,14 @@ export async function claimAvailableTasks(
         'claimAvailableTasks_stop'
       );
 
-      if (docs.length !== claimedTasks) {
+      if (docs.length !== tasksClaimed) {
         logger.warn(
-          `[Task Ownership error]: ${claimedTasks} tasks were claimed by Kibana, but ${
+          `[Task Ownership error]: ${tasksClaimed} tasks were claimed by Kibana, but ${
             docs.length
           } task(s) were fetched (${docs.map((doc) => doc.id).join(', ')})`
         );
       }
-      return asOk(docs);
+      return asOk(claimResult);
     } catch (ex) {
       if (identifyEsError(ex).includes('cannot execute [inline] scripts')) {
         logger.warn(

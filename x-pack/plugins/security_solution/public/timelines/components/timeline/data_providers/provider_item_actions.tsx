@@ -231,6 +231,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
         button={button}
         anchorPosition="downCenter"
         panelPaddingSize="none"
+        ownFocus={true}
       >
         <div style={{ userSelect: 'none' }}>
           <EuiContextMenu initialPanelId={0} panels={panelTree} data-test-subj="providerActions" />
