@@ -82,6 +82,7 @@ export const WaterfallBarChart = ({
         />
 
         <Axis
+          aria-hidden={true}
           id="time"
           position={Position.Top}
           tickFormat={tickFormat}
