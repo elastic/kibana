@@ -158,10 +158,14 @@ export async function getLogEntryAnomalies(
 
   const parsedAnomaliesWithExpandedCategoryInformation = parsedAnomalies.map((anomaly) => {
     if (isCategoryAnomaly(anomaly)) {
-      const {
-        _source: { regex, terms },
-      } = logEntryCategoriesById[parseInt(anomaly.categoryId, 10)];
-      return { ...anomaly, ...{ categoryRegex: regex, categoryTerms: terms } };
+      if (logEntryCategoriesById[parseInt(anomaly.categoryId, 10)]) {
+        const {
+          _source: { regex, terms },
+        } = logEntryCategoriesById[parseInt(anomaly.categoryId, 10)];
+        return { ...anomaly, ...{ categoryRegex: regex, categoryTerms: terms } };
+      } else {
+        return { ...anomaly, ...{ categoryRegex: '', categoryTerms: '' } };
+      }
     } else {
       return anomaly;
     }
