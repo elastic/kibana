@@ -6,7 +6,7 @@
 
 export type BoostType = 'value' | 'functional' | 'proximity';
 
-export interface IBoost {
+export interface Boost {
   type: BoostType;
   operation?: string;
   function?: string;
@@ -17,7 +17,7 @@ export interface IBoost {
 }
 
 export interface BoostObject {
-  [key: string]: IBoost[];
+  [key: string]: Boost[];
 }
 
 export interface SearchSettings {
