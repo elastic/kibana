@@ -93,7 +93,7 @@ export const CreateDockerContexts: Task = {
       image: false,
     });
 
-    if (build.isOss()) {
+    if (!build.isOss()) {
       await runDockerGenerator(config, log, build, {
         ubi: true,
         context: true,
