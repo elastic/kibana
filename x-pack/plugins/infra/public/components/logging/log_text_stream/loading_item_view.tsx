@@ -16,7 +16,7 @@ import { FormattedMessage, FormattedTime, FormattedRelative } from '@kbn/i18n/re
 import * as React from 'react';
 import { Unit } from '@elastic/datemath';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogTextSeparator } from './log_text_separator';
 import { extendDatemath } from '../../../utils/datemath';
 

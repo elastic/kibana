@@ -8,7 +8,7 @@ import React, { useRef, useEffect, RefObject } from 'react';
 import { EuiSuggestItem } from '@elastic/eui';
 
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
-import { euiStyled } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 
 const SuggestionItem = euiStyled.div<{ selected: boolean }>`
   background: ${(props) => (props.selected ? props.theme.eui.euiColorLightestShade : 'initial')};
