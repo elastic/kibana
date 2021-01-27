@@ -11,11 +11,12 @@ import { SimpleSavedObject } from '../../../../core/public';
 import { castEsToKbnFieldTypeName } from '../../../data/public';
 import { ObjectField } from '../management_section/types';
 import { SavedObjectLoader } from '../../../saved_objects/public';
+import { SavedObjectWithMetadata } from '../types';
 
 const maxRecursiveIterations = 20;
 
 export function createFieldList(
-  object: SimpleSavedObject,
+  object: SimpleSavedObject | SavedObjectWithMetadata,
   service?: SavedObjectLoader
 ): ObjectField[] {
   let fields = Object.entries(object.attributes as Record<string, any>).reduce(

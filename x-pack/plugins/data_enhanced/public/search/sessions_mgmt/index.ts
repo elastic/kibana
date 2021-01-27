@@ -33,7 +33,7 @@ export interface AppDependencies {
   api: SearchSessionsMgmtAPI;
   http: HttpStart;
   i18n: I18nStart;
-  config: SessionsMgmtConfigSchema;
+  config: SessionsConfigSchema;
 }
 
 export const APP = {
@@ -44,11 +44,11 @@ export const APP = {
     }),
 };
 
-export type SessionsMgmtConfigSchema = ConfigSchema['search']['sessions']['management'];
+export type SessionsConfigSchema = ConfigSchema['search']['sessions'];
 
 export function registerSearchSessionsMgmt(
   coreSetup: CoreSetup<DataEnhancedStartDependencies>,
-  config: SessionsMgmtConfigSchema,
+  config: SessionsConfigSchema,
   services: IManagementSectionsPluginsSetup
 ) {
   services.management.sections.section.kibana.registerApp({
