@@ -30,12 +30,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '../../../../../core/public';
 import { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
-import type { VisType, TypesStart } from '../../vis_types';
+import type { BaseVisType, TypesStart } from '../../vis_types';
 import { VisGroups } from '../../vis_types';
 import './group_selection.scss';
 
 interface GroupSelectionProps {
-  onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;
+  onVisTypeSelected: (visType: BaseVisType | VisTypeAlias) => void;
   visTypesRegistry: TypesStart;
   docLinks: DocLinksStart;
   toggleGroups: (flag: boolean) => void;
@@ -43,13 +43,9 @@ interface GroupSelectionProps {
 }
 
 interface VisCardProps {
-  onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;
-  visType: VisType | VisTypeAlias;
+  onVisTypeSelected: (visType: BaseVisType | VisTypeAlias) => void;
+  visType: BaseVisType | VisTypeAlias;
   showExperimental?: boolean | undefined;
-}
-
-function isVisTypeAlias(type: VisType | VisTypeAlias): type is VisTypeAlias {
-  return 'aliasPath' in type;
 }
 
 function GroupSelection(props: GroupSelectionProps) {
@@ -185,29 +181,8 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
   const onClick = useCallback(() => {
     onVisTypeSelected(visType);
   }, [onVisTypeSelected, visType]);
-  const shouldDisableCard = isVisTypeAlias(visType) && visType.disabled;
-  const betaBadgeContent =
-    shouldDisableCard && 'promoTooltip' in visType ? (
-      <EuiLink
-        href={visType?.promoTooltip?.link}
-        target="_blank"
-        color="text"
-        className="visNewVisDialog__groupsCardLink"
-        external={false}
-      >
-        <EuiBetaBadge
-          data-test-subj="visTypeBadge"
-          className="visNewVisDialog__groupsCardBetaBadge"
-          label={i18n.translate('visualizations.newVisWizard.basicTitle', {
-            defaultMessage: 'Basic',
-          })}
-          tooltipContent={visType?.promoTooltip?.description}
-        />
-      </EuiLink>
-    ) : undefined;
   return (
     <EuiFlexItem className="visNewVisDialog__groupsCardWrapper">
-      {betaBadgeContent}
       <EuiCard
         titleSize="xs"
         title={
@@ -218,7 +193,6 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
           </span>
         }
         onClick={onClick}
-        isDisabled={shouldDisableCard}
         data-test-subj={`visType-${visType.name}`}
         data-vis-stage={!('aliasPath' in visType) ? visType.stage : 'alias'}
         aria-label={`visType-${visType.name}`}

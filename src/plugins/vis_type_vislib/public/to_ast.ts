@@ -8,7 +8,12 @@
 
 import moment from 'moment';
 
-import { VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
+import {
+  Vis,
+  VisToExpressionAstParams,
+  getVisSchemas,
+  VisParams,
+} from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import type { Dimensions, DateHistogramParams, HistogramParams } from '../../vis_type_xy/public';
 import { BUCKET_TYPES } from '../../data/public';
@@ -17,7 +22,10 @@ import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_
 import { BasicVislibParams, VislibChartType } from './types';
 import { getEsaggsFn } from './to_ast_esaggs';
 
-export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis, params) => {
+export const toExpressionAst = async <TVisParams extends VisParams>(
+  vis: Vis<TVisParams>,
+  params: VisToExpressionAstParams
+) => {
   const schemas = getVisSchemas(vis, params);
   const dimensions: Dimensions = {
     x: schemas.segment ? schemas.segment[0] : null,
@@ -58,9 +66,11 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
 
   (dimensions.y || []).forEach((yDimension) => {
     const yAgg = responseAggs.filter(({ enabled }) => enabled)[yDimension.accessor];
-    const seriesParam = (visConfig.seriesParams || []).find((param) => param.data.id === yAgg.id);
+    const seriesParam = ((visConfig.seriesParams as BasicVislibParams['seriesParams']) || []).find(
+      (param) => param.data.id === yAgg.id
+    );
     if (seriesParam) {
-      const usedValueAxis = (visConfig.valueAxes || []).find(
+      const usedValueAxis = ((visConfig.valueAxes as BasicVislibParams['valueAxes']) || []).find(
         (valueAxis) => valueAxis.id === seriesParam.valueAxis
       );
       if (usedValueAxis?.scale.mode === 'percentage') {
@@ -72,13 +82,11 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
     }
   });
 
-  visConfig.dimensions = dimensions;
-
   const visTypeVislib = buildExpressionFunction<VisTypeVislibExpressionFunctionDefinition>(
     vislibVisName,
     {
       type: vis.type.name as Exclude<VislibChartType, 'pie'>,
-      visConfig: JSON.stringify(visConfig),
+      visConfig: JSON.stringify({ ...visConfig, dimensions }),
     }
   );
 
