@@ -6,4 +6,4 @@
  * Public License, v 1.
  */
 
-export const dateFormatAliases: any;
+export { getEcsOpsMetricsLog } from './get_ops_metrics_log';
