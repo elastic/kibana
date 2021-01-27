@@ -15,8 +15,8 @@ describe('NavButtons', () => {
   beforeEach(() => {
     defaultProps = {
       maxSteps: 3,
-      stepNo: 2,
-      setStepNo: jest.fn(),
+      stepNumber: 2,
+      setStepNumber: jest.fn(),
       setIsImagePopoverOpen: jest.fn(),
     };
   });
@@ -36,8 +36,8 @@ describe('NavButtons', () => {
     fireEvent.click(nextButton);
 
     await waitFor(() => {
-      expect(defaultProps.setStepNo).toHaveBeenCalledTimes(1);
-      expect(defaultProps.setStepNo).toHaveBeenCalledWith(3);
+      expect(defaultProps.setStepNumber).toHaveBeenCalledTimes(1);
+      expect(defaultProps.setStepNumber).toHaveBeenCalledWith(3);
     });
   });
 
@@ -49,22 +49,23 @@ describe('NavButtons', () => {
     fireEvent.click(nextButton);
 
     await waitFor(() => {
-      expect(defaultProps.setStepNo).toHaveBeenCalledTimes(1);
-      expect(defaultProps.setStepNo).toHaveBeenCalledWith(1);
+      expect(defaultProps.setStepNumber).toHaveBeenCalledTimes(1);
+      expect(defaultProps.setStepNumber).toHaveBeenCalledWith(1);
     });
   });
 
   it('disables `next` button on final step', () => {
-    defaultProps.stepNo = 3;
+    defaultProps.stepNumber = 3;
 
     const { getByLabelText } = render(<NavButtons {...defaultProps} />);
 
+    // getByLabelText('Next step');
     expect(getByLabelText('Next step')).toHaveAttribute('disabled');
     expect(getByLabelText('Previous step')).not.toHaveAttribute('disabled');
   });
 
   it('disables `prev` button on final step', () => {
-    defaultProps.stepNo = 1;
+    defaultProps.stepNumber = 1;
 
     const { getByLabelText } = render(<NavButtons {...defaultProps} />);
 

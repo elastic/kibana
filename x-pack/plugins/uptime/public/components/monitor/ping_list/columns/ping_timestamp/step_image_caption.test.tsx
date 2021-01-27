@@ -17,8 +17,8 @@ describe('StepImageCaption', () => {
       captionContent: 'test caption content',
       imgSrc: 'http://sample.com/sampleImageSrc.png',
       maxSteps: 3,
-      setStepNo: jest.fn(),
-      stepNo: 2,
+      setStepNumber: jest.fn(),
+      stepNumber: 2,
       timestamp: '2020-11-26T15:28:56.896Z',
     };
   });
@@ -38,8 +38,8 @@ describe('StepImageCaption', () => {
     fireEvent.click(nextButton);
 
     await waitFor(() => {
-      expect(defaultProps.setStepNo).toHaveBeenCalledTimes(1);
-      expect(defaultProps.setStepNo).toHaveBeenCalledWith(3);
+      expect(defaultProps.setStepNumber).toHaveBeenCalledTimes(1);
+      expect(defaultProps.setStepNumber).toHaveBeenCalledWith(3);
     });
   });
 
@@ -51,22 +51,23 @@ describe('StepImageCaption', () => {
     fireEvent.click(nextButton);
 
     await waitFor(() => {
-      expect(defaultProps.setStepNo).toHaveBeenCalledTimes(1);
-      expect(defaultProps.setStepNo).toHaveBeenCalledWith(1);
+      expect(defaultProps.setStepNumber).toHaveBeenCalledTimes(1);
+      expect(defaultProps.setStepNumber).toHaveBeenCalledWith(1);
     });
   });
 
   it('disables `next` button on final step', () => {
-    defaultProps.stepNo = 3;
+    defaultProps.stepNumber = 3;
 
     const { getByLabelText } = render(<StepImageCaption {...defaultProps} />);
 
+    // getByLabelText('Next step');
     expect(getByLabelText('Next step')).toHaveAttribute('disabled');
     expect(getByLabelText('Previous step')).not.toHaveAttribute('disabled');
   });
 
   it('disables `prev` button on final step', () => {
-    defaultProps.stepNo = 1;
+    defaultProps.stepNumber = 1;
 
     const { getByLabelText } = render(<StepImageCaption {...defaultProps} />);
 

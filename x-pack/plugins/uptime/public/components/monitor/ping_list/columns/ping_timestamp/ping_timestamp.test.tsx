@@ -14,8 +14,8 @@ import * as observabilityPublic from '../../../../../../../observability/public'
 
 mockReduxHooks();
 
-jest.mock('../../../../../../observability/public', () => {
-  const originalModule = jest.requireActual('../../../../../../observability/public');
+jest.mock('../../../../../../../observability/public', () => {
+  const originalModule = jest.requireActual('../../../../../../../observability/public');
 
   return {
     ...originalModule,
@@ -107,7 +107,7 @@ describe('Ping Timestamp component', () => {
     const caption = getByText('Nov 26, 2020 10:28:56 AM');
     fireEvent.mouseEnter(caption);
 
-    const altText = `A full-size screenshot for this journey step's thumbnail.`;
+    const altText = `A larger version of the screenshot for this journey step's thumbnail.`;
 
     await waitFor(() => getByAltText(altText));
 
