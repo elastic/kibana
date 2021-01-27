@@ -158,10 +158,13 @@ date values in {es}, you can use a {kib} field formatter to change the display t
 <<field-formatters-geopoint, geopoints>>,
 and <<field-formatters-numeric, numbers>>.
 
+To customize the displayed field name provided by {es}, you can 
+use *Custom Label* .
+
 A popularity counter keeps track of the fields you use most often.
 The top five most popular fields and their values are displayed in <<discover,*Discover*>>.
 
-To edit the field format and popularity counter, click the edit icon
+To edit the field display, click the edit icon
 (image:management/index-patterns/images/edit_icon.png[]) in the index pattern detail view.
 
 [role="screenshot"]

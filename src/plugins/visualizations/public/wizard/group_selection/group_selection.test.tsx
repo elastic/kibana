@@ -1,38 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { TypesStart, VisType, VisGroups } from '../../vis_types';
+import { TypesStart, BaseVisType, VisGroups } from '../../vis_types';
 import { GroupSelection } from './group_selection';
 import { DocLinksStart } from '../../../../../core/public';
 
 describe('GroupSelection', () => {
   const defaultVisTypeParams = {
     hidden: false,
-    visualization: class Controller {
-      public render = jest.fn();
-      public destroy = jest.fn();
-    },
     requiresSearch: false,
-    requestHandler: 'none',
-    responseHandler: 'none',
   };
   const _visTypes = [
     {
@@ -75,22 +58,22 @@ describe('GroupSelection', () => {
       aliasPath: '#/anotherUrl',
       promotion: true,
     } as unknown,
-  ] as VisType[];
+  ] as BaseVisType[];
 
-  const visTypesRegistry = (visTypes: VisType[]): TypesStart => {
+  const visTypesRegistry = (visTypes: BaseVisType[]): TypesStart => {
     return {
-      get<T>(id: string): VisType<T> {
-        return (visTypes.find((vis) => vis.name === id) as unknown) as VisType<T>;
+      get<T>(id: string): BaseVisType<T> {
+        return (visTypes.find((vis) => vis.name === id) as unknown) as BaseVisType<T>;
       },
       all: () => {
-        return (visTypes as unknown) as VisType[];
+        return (visTypes as unknown) as BaseVisType[];
       },
       getAliases: () => [],
       unRegisterAlias: () => [],
       getByGroup: (group: VisGroups) => {
         return (visTypes.filter((type) => {
           return type.group === group;
-        }) as unknown) as VisType[];
+        }) as unknown) as BaseVisType[];
       },
     };
   };
@@ -153,7 +136,7 @@ describe('GroupSelection', () => {
     };
     const wrapper = mountWithIntl(
       <GroupSelection
-        visTypesRegistry={visTypesRegistry([..._visTypes, aggBasedVisType] as VisType[])}
+        visTypesRegistry={visTypesRegistry([..._visTypes, aggBasedVisType] as BaseVisType[])}
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
@@ -186,7 +169,7 @@ describe('GroupSelection', () => {
     };
     const wrapper = mountWithIntl(
       <GroupSelection
-        visTypesRegistry={visTypesRegistry([..._visTypes, toolsVisType] as VisType[])}
+        visTypesRegistry={visTypesRegistry([..._visTypes, toolsVisType] as BaseVisType[])}
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
@@ -207,7 +190,7 @@ describe('GroupSelection', () => {
     };
     const wrapper = mountWithIntl(
       <GroupSelection
-        visTypesRegistry={visTypesRegistry([..._visTypes, aggBasedVisType] as VisType[])}
+        visTypesRegistry={visTypesRegistry([..._visTypes, aggBasedVisType] as BaseVisType[])}
         docLinks={docLinks as DocLinksStart}
         toggleGroups={toggleGroups}
         onVisTypeSelected={jest.fn()}
@@ -222,7 +205,7 @@ describe('GroupSelection', () => {
   it('should sort promoted visualizations first', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
-        visTypesRegistry={visTypesRegistry(_visTypes as VisType[])}
+        visTypesRegistry={visTypesRegistry(_visTypes as BaseVisType[])}
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
@@ -247,7 +230,7 @@ describe('GroupSelection', () => {
   it('should render disabled aliases with a disabled class', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
-        visTypesRegistry={visTypesRegistry(_visTypes as VisType[])}
+        visTypesRegistry={visTypesRegistry(_visTypes as BaseVisType[])}
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
@@ -266,7 +249,7 @@ describe('GroupSelection', () => {
   it('should render a basic badge with link for disabled aliases with promoTooltip', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
-        visTypesRegistry={visTypesRegistry(_visTypes as VisType[])}
+        visTypesRegistry={visTypesRegistry(_visTypes as BaseVisType[])}
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
@@ -289,7 +272,7 @@ describe('GroupSelection', () => {
     };
     const wrapper = mountWithIntl(
       <GroupSelection
-        visTypesRegistry={visTypesRegistry([..._visTypes, expVis] as VisType[])}
+        visTypesRegistry={visTypesRegistry([..._visTypes, expVis] as BaseVisType[])}
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
@@ -309,7 +292,7 @@ describe('GroupSelection', () => {
     };
     const wrapper = mountWithIntl(
       <GroupSelection
-        visTypesRegistry={visTypesRegistry([..._visTypes, expVis] as VisType[])}
+        visTypesRegistry={visTypesRegistry([..._visTypes, expVis] as BaseVisType[])}
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}

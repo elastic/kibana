@@ -10,18 +10,14 @@ jest.mock('tls');
 import { Socket } from 'net';
 import { PeerCertificate, TLSSocket } from 'tls';
 import Boom from '@hapi/boom';
-import { errors } from 'elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { securityMock } from '../../mocks';
 import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
-import {
-  LegacyElasticsearchErrorHelpers,
-  ILegacyClusterClient,
-  KibanaRequest,
-  ScopeableRequest,
-} from '../../../../../../src/core/server';
+import { KibanaRequest, ScopeableRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { PKIAuthenticationProvider } from './pki';
@@ -87,15 +83,14 @@ function getMockSocket({
 }
 
 function expectAuthenticateCall(
-  mockClusterClient: jest.Mocked<ILegacyClusterClient>,
+  mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
   expect(mockClusterClient.asScoped).toHaveBeenCalledWith(scopeableRequest);
 
   const mockScopedClusterClient = mockClusterClient.asScoped.mock.results[0].value;
-  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+  expect(mockScopedClusterClient.asCurrentUser.security.authenticate).toHaveBeenCalledTimes(1);
 }
 
 describe('PKIAuthenticationProvider', () => {
@@ -125,7 +120,7 @@ describe('PKIAuthenticationProvider', () => {
       await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
       expectDebugLogs(
         'Peer certificate chain: [{"subject":"mock subject(2A:7A:C2:DD)","issuer":"mock issuer","issuerCertType":"object","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
         'Authentication is not possible since peer certificate was not authorized: Error: mock authorization error.'
@@ -139,7 +134,7 @@ describe('PKIAuthenticationProvider', () => {
       await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
       expectDebugLogs(
         'Peer certificate chain: []',
         'Authentication is not possible due to missing peer certificate chain.'
@@ -159,7 +154,7 @@ describe('PKIAuthenticationProvider', () => {
         await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
 
         expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+        expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
         expectDebugLogs(
           `Detected incomplete certificate chain with protocol 'TLSv1.3', cannot renegotiate connection.`,
           'Peer certificate chain: [{"subject":"mock subject(2A:7A:C2:DD)","issuer":"mock issuer","issuerCertType":"undefined","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
@@ -181,7 +176,7 @@ describe('PKIAuthenticationProvider', () => {
         await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
 
         expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+        expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
         expectDebugLogs(
           `Detected incomplete certificate chain with protocol 'TLSv1.2', attempting to renegotiate connection.`,
           `Failed to renegotiate connection: Error: Oh no!.`,
@@ -203,7 +198,7 @@ describe('PKIAuthenticationProvider', () => {
         await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
 
         expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+        expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
         expectDebugLogs(
           `Detected incomplete certificate chain with protocol 'TLSv1.2', attempting to renegotiate connection.`,
           'Peer certificate chain: [{"subject":"mock subject(2A:7A:C2:DD)","issuer":"mock issuer","issuerCertType":"undefined","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
@@ -231,7 +226,7 @@ describe('PKIAuthenticationProvider', () => {
         await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
 
         expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+        expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
         expectDebugLogs(
           `Detected incomplete certificate chain with protocol 'TLSv1.2', attempting to renegotiate connection.`,
           'Self-signed certificate is detected in certificate chain',
@@ -253,10 +248,11 @@ describe('PKIAuthenticationProvider', () => {
         mockGetPeerCertificate.mockReturnValueOnce(peerCertificate1);
         const request = httpServerMock.createKibanaRequest({ socket });
 
-        mockOptions.client.callAsInternalUser.mockResolvedValue({
-          authentication: user,
-          access_token: 'access-token',
-        });
+        mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
+          securityMock.createApiResponse({
+            body: { authentication: user, access_token: 'access-token' },
+          })
+        );
 
         await expect(operation(request)).resolves.toEqual(
           AuthenticationResult.succeeded(
@@ -268,8 +264,10 @@ describe('PKIAuthenticationProvider', () => {
           )
         );
 
-        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
-        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/delegate_pki',
           body: {
             x509_certificate_chain: [
               'fingerprint:2A:7A:C2:DD:base64',
@@ -295,10 +293,11 @@ describe('PKIAuthenticationProvider', () => {
       const { socket } = getMockSocket({ authorized: true, peerCertificate });
       const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
-      mockOptions.client.callAsInternalUser.mockResolvedValue({
-        authentication: user,
-        access_token: 'access-token',
-      });
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
+        securityMock.createApiResponse({
+          body: { authentication: user, access_token: 'access-token' },
+        })
+      );
 
       await expect(operation(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
@@ -310,8 +309,10 @@ describe('PKIAuthenticationProvider', () => {
         )
       );
 
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/delegate_pki',
         body: {
           x509_certificate_chain: [
             'fingerprint:2A:7A:C2:DD:base64',
@@ -330,10 +331,11 @@ describe('PKIAuthenticationProvider', () => {
       const { socket } = getMockSocket({ authorized: true, peerCertificate });
       const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
-      mockOptions.client.callAsInternalUser.mockResolvedValue({
-        authentication: user,
-        access_token: 'access-token',
-      });
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
+        securityMock.createApiResponse({
+          body: { authentication: user, access_token: 'access-token' },
+        })
+      );
 
       await expect(operation(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
@@ -345,8 +347,10 @@ describe('PKIAuthenticationProvider', () => {
         )
       );
 
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/delegate_pki',
         body: { x509_certificate_chain: ['fingerprint:2A:7A:C2:DD:base64'] },
       });
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
@@ -359,13 +363,17 @@ describe('PKIAuthenticationProvider', () => {
       const { socket } = getMockSocket({ authorized: true, peerCertificate });
       const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
-      const failureReason = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
-      mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 401, body: {} })
+      );
+      mockOptions.client.asInternalUser.transport.request.mockRejectedValue(failureReason);
 
       await expect(operation(request)).resolves.toEqual(AuthenticationResult.failed(failureReason));
 
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/delegate_pki',
         body: { x509_certificate_chain: ['fingerprint:2A:7A:C2:DD:base64'] },
       });
 
@@ -390,7 +398,7 @@ describe('PKIAuthenticationProvider', () => {
       );
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
       expect(request.headers.authorization).toBe('Bearer some-token');
     });
 
@@ -408,7 +416,7 @@ describe('PKIAuthenticationProvider', () => {
       );
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
       expect(request.headers.authorization).toBe('Bearer some-token');
     });
 
@@ -421,7 +429,7 @@ describe('PKIAuthenticationProvider', () => {
       );
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
     });
 
     it('does not exchange peer certificate to access token for Ajax requests.', async () => {
@@ -436,7 +444,7 @@ describe('PKIAuthenticationProvider', () => {
       );
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
     });
 
     it('fails with non-401 error if state is available, peer is authorized, but certificate is not available.', async () => {
@@ -490,10 +498,11 @@ describe('PKIAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ socket });
       const state = { accessToken: 'existing-token', peerCertificateFingerprint256: '3A:9A:C5:DD' };
 
-      mockOptions.client.callAsInternalUser.mockResolvedValue({
-        authentication: user,
-        access_token: 'access-token',
-      });
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
+        securityMock.createApiResponse({
+          body: { authentication: user, access_token: 'access-token' },
+        })
+      );
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
         AuthenticationResult.succeeded(
@@ -510,8 +519,10 @@ describe('PKIAuthenticationProvider', () => {
         accessToken: state.accessToken,
       });
 
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/delegate_pki',
         body: {
           x509_certificate_chain: [
             'fingerprint:2A:7A:C2:DD:base64',
@@ -526,15 +537,16 @@ describe('PKIAuthenticationProvider', () => {
     it('gets a new access token even if existing token is expired.', async () => {
       const user = mockAuthenticatedUser({ authentication_provider: { type: 'pki', name: 'pki' } });
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+        new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
-      mockOptions.client.callAsInternalUser.mockResolvedValue({
-        authentication: user,
-        access_token: 'access-token',
-      });
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
+        securityMock.createApiResponse({
+          body: { authentication: user, access_token: 'access-token' },
+        })
+      );
 
       const nonAjaxRequest = httpServerMock.createKibanaRequest({
         socket: getMockSocket({
@@ -589,8 +601,10 @@ describe('PKIAuthenticationProvider', () => {
         })
       );
 
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(3);
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(3);
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/delegate_pki',
         body: {
           x509_certificate_chain: [
             'fingerprint:2A:7A:C2:DD:base64',
@@ -598,7 +612,9 @@ describe('PKIAuthenticationProvider', () => {
           ],
         },
       });
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/delegate_pki',
         body: {
           x509_certificate_chain: [
             'fingerprint:3A:7A:C2:DD:base64',
@@ -606,7 +622,9 @@ describe('PKIAuthenticationProvider', () => {
           ],
         },
       });
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/delegate_pki',
         body: {
           x509_certificate_chain: [
             'fingerprint:4A:7A:C2:DD:base64',
@@ -625,9 +643,9 @@ describe('PKIAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ socket });
       const state = { accessToken: 'existing-token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+        new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -635,7 +653,7 @@ describe('PKIAuthenticationProvider', () => {
         AuthenticationResult.failed(Boom.unauthorized())
       );
 
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
 
       expect(request.headers).not.toHaveProperty('authorization');
     });
@@ -647,8 +665,10 @@ describe('PKIAuthenticationProvider', () => {
       const { socket } = getMockSocket({ authorized: true, peerCertificate });
       const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
+        securityMock.createApiResponse({ body: user })
+      );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
@@ -660,7 +680,7 @@ describe('PKIAuthenticationProvider', () => {
 
       expectAuthenticateCall(mockOptions.client, { headers: { authorization: 'Bearer token' } });
 
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
 
       expect(request.headers).not.toHaveProperty('authorization');
     });
@@ -671,9 +691,12 @@ describe('PKIAuthenticationProvider', () => {
       const { socket } = getMockSocket({ authorized: true, peerCertificate });
       const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
-      const failureReason = new errors.ServiceUnavailable();
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
+      const failureReason = new errors.ConnectionError(
+        'unavailable',
+        securityMock.createApiResponse({ statusCode: 503, body: {} })
+      );
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(

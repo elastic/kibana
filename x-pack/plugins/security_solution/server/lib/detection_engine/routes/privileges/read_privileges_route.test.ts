@@ -74,6 +74,7 @@ describe('read_privileges route', () => {
       const { securitySolution, ...contextWithoutSecuritySolution } = context;
       const response = await server.inject(
         getPrivilegeRequest({ auth: { isAuthenticated: false } }),
+        // @ts-expect-error
         contextWithoutSecuritySolution
       );
       expect(response.status).toEqual(404);
