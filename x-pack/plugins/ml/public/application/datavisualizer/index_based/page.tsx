@@ -701,7 +701,7 @@ export const Page: FC = () => {
         <EuiScreenReaderOnly>
           <p>
             <FormattedMessage
-              id="xpack.ml.dataVisualizer.indexBasedDataGrid.actionColumnLabel"
+              id="xpack.ml.dataVisualizer.indexBasedDataGrid.actionsColumnLabel"
               defaultMessage="This column contains extra actions that can be performed on each field"
             />
           </p>

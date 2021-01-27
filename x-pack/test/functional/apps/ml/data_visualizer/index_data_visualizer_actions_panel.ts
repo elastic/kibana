@@ -49,7 +49,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('displays the actions panel with advanced job card');
         await ml.dataVisualizerIndexBased.assertActionsPanelExists();
         await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardExists();
-        await ml.dataVisualizerIndexBased.assertViewInDiscoverCardExists();
 
         // Note the search is not currently passed to the wizard, just the index.
         await ml.testExecution.logTestStep('displays the actions panel with advanced job card');
