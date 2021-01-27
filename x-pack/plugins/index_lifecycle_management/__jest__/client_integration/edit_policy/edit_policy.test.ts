@@ -824,4 +824,50 @@ describe('<EditPolicy />', () => {
       expect(actions.cold.searchableSnapshotDisabledDueToRollover()).toBeTruthy();
     });
   });
+
+  describe('policy timeline', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { test: ['123'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component } = testBed;
+      component.update();
+    });
+
+    test('showing all phases on the timeline', async () => {
+      const { actions } = testBed;
+      // This is how the default policy should look
+      expect(actions.timeline.hasHotPhase()).toBe(true);
+      expect(actions.timeline.hasWarmPhase()).toBe(false);
+      expect(actions.timeline.hasColdPhase()).toBe(false);
+      expect(actions.timeline.hasDeletePhase()).toBe(false);
+
+      await actions.warm.enable(true);
+      expect(actions.timeline.hasHotPhase()).toBe(true);
+      expect(actions.timeline.hasWarmPhase()).toBe(true);
+      expect(actions.timeline.hasColdPhase()).toBe(false);
+      expect(actions.timeline.hasDeletePhase()).toBe(false);
+
+      await actions.cold.enable(true);
+      expect(actions.timeline.hasHotPhase()).toBe(true);
+      expect(actions.timeline.hasWarmPhase()).toBe(true);
+      expect(actions.timeline.hasColdPhase()).toBe(true);
+      expect(actions.timeline.hasDeletePhase()).toBe(false);
+
+      await actions.delete.enable(true);
+      expect(actions.timeline.hasHotPhase()).toBe(true);
+      expect(actions.timeline.hasWarmPhase()).toBe(true);
+      expect(actions.timeline.hasColdPhase()).toBe(true);
+      expect(actions.timeline.hasDeletePhase()).toBe(true);
+    });
+  });
 });
