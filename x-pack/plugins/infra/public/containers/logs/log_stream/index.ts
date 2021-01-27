@@ -10,8 +10,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { esKuery } from '../../../../../../../src/plugins/data/public';
 import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { LogEntry } from '../../../../common/http_api';
-import { LogEntryCursor } from '../../../../common/log_entry';
+import { LogEntryCursor, LogEntry } from '../../../../common/log_entry';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { LogSourceConfigurationProperties } from '../log_source';
 

@@ -12,7 +12,7 @@ import {
   LogFieldColumn,
   LogMessagePart,
   LogMessageFieldPart,
-} from '../../../common/http_api';
+} from '../../../common/log_entry';
 
 export type LogEntryHighlightColumn = InfraLogEntryHighlightFields.Columns;
 export type LogEntryHighlightMessageColumn = InfraLogEntryHighlightFields.InfraLogEntryMessageColumnInlineFragment;

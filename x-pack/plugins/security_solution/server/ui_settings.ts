@@ -78,6 +78,8 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexLabel', {
         defaultMessage: 'Elasticsearch indices',
       }),
+      sensitive: true,
+
       value: DEFAULT_INDEX_PATTERN,
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexDescription', {
         defaultMessage:
@@ -147,6 +149,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         defaultMessage: 'News feed URL',
       }),
       value: NEWS_FEED_URL_SETTING_DEFAULT,
+      sensitive: true,
       description: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrlDescription', {
         defaultMessage: '<p>News feed content will be retrieved from this URL</p>',
       }),
@@ -167,6 +170,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
             'Array of URL templates to build the list of reputation URLs to be displayed on the IP Details page.',
         }
       ),
+      sensitive: true,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(

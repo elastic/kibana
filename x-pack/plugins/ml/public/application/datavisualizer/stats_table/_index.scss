@@ -1,5 +1,6 @@
-@import 'components/field_data_expanded_row/number_content';
+@import 'components/field_data_expanded_row/index';
 @import 'components/field_count_stats/index';
+@import 'components/field_data_row/index';
 
 .mlDataVisualizerFieldExpandedRow {
   padding-left: $euiSize * 4;
@@ -37,6 +38,7 @@
   }
   .mlDataVisualizerSummaryTable {
     max-width: 350px;
+    min-width: 250px;
     .euiTableRow > .euiTableRowCell {
       border-bottom: 0;
     }
@@ -45,6 +47,10 @@
     }
   }
   .mlDataVisualizerSummaryTableWrapper {
-    max-width: 350px;
+    max-width: 300px;
+  }
+  .mlDataVisualizerMapWrapper {
+    min-height: 300px;
+    min-width: 600px;
   }
 }
