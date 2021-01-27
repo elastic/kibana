@@ -8,14 +8,14 @@
 
 import React from 'react';
 
-import { DecoratorFunction } from '@storybook/addons';
+import { DecoratorFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { pluginServices } from '../public/services';
 import { PresentationUtilServices } from '../public/services';
 import { providers, StorybookParams } from '../public/services/storybook';
 import { PluginServiceRegistry } from '../public/services/create';
 
-export const servicesContextDecorator: DecoratorFunction = (story: Function, storybook) => {
+export const servicesContextDecorator: DecoratorFn = (story: Function, storybook) => {
   const registry = new PluginServiceRegistry<PresentationUtilServices, StorybookParams>(providers);
   pluginServices.setRegistry(registry.start(storybook.args));
   const ContextProvider = pluginServices.getContextProvider();

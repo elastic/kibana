@@ -196,12 +196,10 @@ export function getTopNavConfig({
               options={tagSelector}
             />
           ) : (
-            <PresentationUtilContext>
-              <SavedObjectSaveModalDashboard {...saveModalProps} tagOptions={tagSelector} />
-            </PresentationUtilContext>
+            <SavedObjectSaveModalDashboard {...saveModalProps} tagOptions={tagSelector} />
           );
 
-        showSaveModal(saveModal, getCoreI18n().Context);
+        showSaveModal(saveModal, getCoreI18n().Context, PresentationUtilContext);
       },
     });
 
