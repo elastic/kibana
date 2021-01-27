@@ -23,8 +23,6 @@ import {
   AbsoluteTimings,
 } from '../../lib';
 
-import { i18nTexts as sharedi18nTexts } from '../../i18n_texts';
-
 import './timeline.scss';
 import { InfinityIconSvg } from './infinity_icon.svg';
 import { TimelinePhaseText } from './components';
