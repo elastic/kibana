@@ -95,7 +95,6 @@ export async function getServiceTransactionStats({
             transactionType: {
               terms: {
                 field: TRANSACTION_TYPE,
-                order: { real_document_count: 'desc' },
               },
               aggs: {
                 ...metrics,

@@ -160,9 +160,6 @@ Array [
               },
               "terms": Object {
                 "field": "transaction.type",
-                "order": Object {
-                  "real_document_count": "desc",
-                },
               },
             },
           },
