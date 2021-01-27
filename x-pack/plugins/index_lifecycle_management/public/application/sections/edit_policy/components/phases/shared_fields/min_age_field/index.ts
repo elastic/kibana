@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MinAgeInputField } from './min_age_input_field';
+export { MinAgeField } from './min_age_field';
