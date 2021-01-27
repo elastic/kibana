@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { min } from '../../src/functions/min.js';
+const { min } = require('../../src/functions/min.js');
 
 describe('Min', () => {
   it('numbers', () => {

@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { exp } from '../../src/functions/exp.js';
+const { exp } = require('../../src/functions/exp.js');
 
 describe('Exp', () => {
   it('numbers', () => {

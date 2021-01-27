@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { abs } from '../../src/functions/abs.js';
+const { abs } = require('../../src/functions/abs.js');
 
 describe('Abs', () => {
   it('numbers', () => {

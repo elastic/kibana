@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { log10 } from '../../src/functions/log10.js';
+const { log10 } = require('../../src/functions/log10.js');
 
 describe('Log10', () => {
   it('numbers', () => {

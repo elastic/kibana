@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { cube } from '../../src/functions/cube.js';
+const { cube } = require('../../src/functions/cube.js');
 
 describe('Cube', () => {
   it('numbers', () => {

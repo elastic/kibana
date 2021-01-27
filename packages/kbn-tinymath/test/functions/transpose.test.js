@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { transpose } from '../../src/functions/lib/transpose';
+const { transpose } = require('../../src/functions/lib/transpose');
 
 describe('transpose', () => {
   it('2D arrays', () => {

@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { last } from '../../src/functions/last.js';
+const { last } = require('../../src/functions/last.js');
 
 describe('Last', () => {
   it('numbers', () => {

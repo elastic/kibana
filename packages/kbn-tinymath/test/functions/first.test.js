@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { first } from '../../src/functions/first.js';
+const { first } = require('../../src/functions/first.js');
 
 describe('First', () => {
   it('numbers', () => {

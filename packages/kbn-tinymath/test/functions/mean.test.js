@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { mean } from '../../src/functions/mean.js';
+const { mean } = require('../../src/functions/mean.js');
 
 describe('Mean', () => {
   it('numbers', () => {

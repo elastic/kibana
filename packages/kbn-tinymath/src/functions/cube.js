@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { pow } from './pow.js';
+const { pow } = require('./pow.js');
 
 /**
  * Calculates the cube of a number. For arrays, the function will be applied index-wise to each element.

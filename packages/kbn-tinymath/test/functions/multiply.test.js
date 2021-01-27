@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { multiply } from '../../src/functions/multiply.js';
+const { multiply } = require('../../src/functions/multiply.js');
 
 describe('Multiply', () => {
   it('number, number', () => {

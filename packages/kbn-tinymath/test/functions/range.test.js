@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { range } from '../../src/functions/range.js';
+const { range } = require('../../src/functions/range.js');
 
 describe('Range', () => {
   it('numbers', () => {

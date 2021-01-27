@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { random } from '../../src/functions/random.js';
+const { random } = require('../../src/functions/random.js');
 
 describe('Random', () => {
   it('numbers', () => {

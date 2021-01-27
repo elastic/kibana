@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { round } from '../../src/functions/round.js';
+const { round } = require('../../src/functions/round.js');
 
 describe('Round', () => {
   it('numbers', () => {

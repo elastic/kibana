@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { add } from '../../src/functions/add.js';
+const { add } = require('../../src/functions/add.js');
 
 describe('Add', () => {
   it('numbers', () => {

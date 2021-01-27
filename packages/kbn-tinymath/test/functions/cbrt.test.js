@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { cbrt } from '../../src/functions/cbrt.js';
+const { cbrt } = require('../../src/functions/cbrt.js');
 
 describe('Cbrt', () => {
   it('numbers', () => {

@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { pi } from '../../src/functions/pi.js';
+const { pi } = require('../../src/functions/pi.js');
 
 describe('PI', () => {
   it('constant', () => {

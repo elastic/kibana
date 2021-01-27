@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { tan } from '../../src/functions/tan.js';
+const { tan } = require('../../src/functions/tan.js');
 
 describe('Tangent', () => {
   it('numbers', () => {

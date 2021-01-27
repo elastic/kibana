@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { pow } from '../../src/functions/pow.js';
+const { pow } = require('../../src/functions/pow.js');
 
 describe('Pow', () => {
   it('numbers', () => {

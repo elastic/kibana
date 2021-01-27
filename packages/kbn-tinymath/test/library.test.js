@@ -11,7 +11,7 @@
   Need tests for spacing, etc
 */
 
-import { evaluate, parse } from '..';
+const { evaluate, parse } = require('..');
 
 describe('Parser', () => {
   describe('Numbers', () => {

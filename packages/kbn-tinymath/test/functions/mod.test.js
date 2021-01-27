@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { mod } from '../../src/functions/mod.js';
+const { mod } = require('../../src/functions/mod.js');
 
 describe('Mod', () => {
   it('number, number', () => {

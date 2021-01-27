@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { degtorad } from '../../src/functions/degtorad.js';
+const { degtorad } = require('../../src/functions/degtorad.js');
 
 describe('Degrees to Radians', () => {
   it('numbers', () => {

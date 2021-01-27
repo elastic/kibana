@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { square } from '../../src/functions/square.js';
+const { square } = require('../../src/functions/square.js');
 
 describe('Square', () => {
   it('numbers', () => {

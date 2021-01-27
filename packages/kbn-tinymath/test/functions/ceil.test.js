@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { ceil } from '../../src/functions/ceil.js';
+const { ceil } = require('../../src/functions/ceil.js');
 
 describe('Ceil', () => {
   it('numbers', () => {

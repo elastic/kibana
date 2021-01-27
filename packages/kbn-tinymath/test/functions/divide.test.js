@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { divide } from '../../src/functions/divide.js';
+const { divide } = require('../../src/functions/divide.js');
 
 describe('Divide', () => {
   it('number, number', () => {

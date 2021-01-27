@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { radtodeg } from '../../src/functions/radtodeg.js';
+const { radtodeg } = require('../../src/functions/radtodeg.js');
 
 describe('Radians to Degrees', () => {
   it('numbers', () => {

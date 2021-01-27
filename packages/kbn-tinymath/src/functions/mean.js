@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { add } from './add.js';
+const { add } = require('./add.js');
 
 /**
  * Finds the mean value of one of more numbers/arrays of numbers into the function. If at least one array of numbers is passed into the function, the function will find the mean by index.

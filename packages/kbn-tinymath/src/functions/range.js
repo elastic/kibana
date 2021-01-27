@@ -6,9 +6,9 @@
  * Public License, v 1.
  */
 
-import { max } from './max.js';
-import { min } from './min.js';
-import { subtract } from './subtract.js';
+const { max } = require('./max.js');
+const { min } = require('./min.js');
+const { subtract } = require('./subtract.js');
 
 /**
  * Finds the range of one of more numbers/arrays of numbers into the function. If at least one array of numbers is passed into the function, the function will find the range by index.

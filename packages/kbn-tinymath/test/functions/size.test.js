@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { size } from '../../src/functions/size.js';
+const { size } = require('../../src/functions/size.js');
 
 describe('Size (also Count)', () => {
   it('array', () => {

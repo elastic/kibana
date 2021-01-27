@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { unique } from '../../src/functions/unique.js';
+const { unique } = require('../../src/functions/unique.js');
 
 describe('Unique', () => {
   it('numbers', () => {

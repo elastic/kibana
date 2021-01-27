@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { transpose } from './lib/transpose';
+const { transpose } = require('./lib/transpose');
 
 const findMode = (a) => {
   let maxFreq = 0;

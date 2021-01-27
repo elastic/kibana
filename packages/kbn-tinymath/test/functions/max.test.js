@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { max } from '../../src/functions/max.js';
+const { max } = require('../../src/functions/max.js');
 
 describe('Max', () => {
   it('numbers', () => {

@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { cos } from '../../src/functions/cos.js';
+const { cos } = require('../../src/functions/cos.js');
 
 describe('Cosine', () => {
   it('numbers', () => {

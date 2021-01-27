@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { mode } from '../../src/functions/mode.js';
+const { mode } = require('../../src/functions/mode.js');
 
 describe('Mode', () => {
   it('numbers', () => {

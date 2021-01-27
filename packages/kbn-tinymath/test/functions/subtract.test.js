@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { subtract } from '../../src/functions/subtract.js';
+const { subtract } = require('../../src/functions/subtract.js');
 
 describe('Subtract', () => {
   it('number, number', () => {

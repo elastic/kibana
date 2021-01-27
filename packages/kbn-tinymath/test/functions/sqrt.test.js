@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { sqrt } from '../../src/functions/sqrt.js';
+const { sqrt } = require('../../src/functions/sqrt.js');
 
 describe('Sqrt', () => {
   it('numbers', () => {

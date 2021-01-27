@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { sin } from '../../src/functions/sin.js';
+const { sin } = require('../../src/functions/sin.js');
 
 describe('Sine', () => {
   it('numbers', () => {

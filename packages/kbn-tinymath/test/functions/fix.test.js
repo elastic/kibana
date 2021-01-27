@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { fix } from '../../src/functions/fix.js';
+const { fix } = require('../../src/functions/fix.js');
 
 describe('Fix', () => {
   it('numbers', () => {

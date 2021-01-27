@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { clamp } from '../../src/functions/clamp.js';
+const { clamp } = require('../../src/functions/clamp.js');
 
 describe('Clamp', () => {
   it('numbers', () => {

@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { sum } from '../../src/functions/sum.js';
+const { sum } = require('../../src/functions/sum.js');
 
 describe('Sum', () => {
   it('numbers', () => {

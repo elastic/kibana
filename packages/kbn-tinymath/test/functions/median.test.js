@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { median } from '../../src/functions/median.js';
+const { median } = require('../../src/functions/median.js');
 
 describe('Median', () => {
   it('numbers', () => {

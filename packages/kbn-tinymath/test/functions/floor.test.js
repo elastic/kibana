@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { floor } from '../../src/functions/floor.js';
+const { floor } = require('../../src/functions/floor.js');
 
 describe('Floor', () => {
   it('numbers', () => {

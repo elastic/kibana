@@ -7,7 +7,7 @@ for use by Kibana plugins that want to use math.
 See [Function Documentation](/docs/functions.md) for details on built-in functions available in Tinymath.
 
 ```javascript
-import { evaluate } from '@kbn/tinymath';
+const { evaluate } = require('@kbn/tinymath');
 
 // Simple math
 evaluate('10 + 20'); // 30
@@ -27,7 +27,7 @@ evaluate('multiply(bar, baz) / 10', {bar: [1, 2, 3], baz: [4, 5, 6]}); // [0.4, 
 Functions can be injected, and built in function overwritten, via the 3rd argument to `evaluate`:
 
 ```javascript
-import { evaluate } from '@kbn/tinymath';
+const { evaluate } = require('@kbn/tinymath');
 
 evaluate('plustwo(foo)', {foo: 5}, {
     plustwo: function(a) {
@@ -41,7 +41,7 @@ evaluate('plustwo(foo)', {foo: 5}, {
 You can get to the parsed AST by importing `parse`
 
 ```javascript
-import { parse } from '@kbn/tinymath';
+const { parse } = require('@kbn/tinymath');
 
 parse('1 + random()')
 /*
