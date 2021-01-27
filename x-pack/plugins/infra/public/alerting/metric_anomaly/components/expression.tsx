@@ -62,7 +62,7 @@ export const defaultExpression = {
 export const Expression: React.FC<Props> = (props) => {
   const { hasInfraMLCapabilities, isLoading: isLoadingMLCapabilities } = useInfraMLCapabilities();
   const { http, notifications } = useKibanaContextForPlugin().services;
-  const { setAlertParams, alertParams, errors, alertInterval, alertThrottle, metadata } = props;
+  const { setAlertParams, alertParams, alertInterval, alertThrottle, metadata } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',

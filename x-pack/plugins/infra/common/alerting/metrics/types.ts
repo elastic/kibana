@@ -52,7 +52,6 @@ export interface MetricAnomalyParams {
   sourceId?: string;
   threshold: Exclude<ANOMALY_THRESHOLD, ANOMALY_THRESHOLD.LOW>;
   influencerFilter: rt.TypeOf<typeof metricAnomalyInfluencerFilterRT> | undefined;
-  hasInfraMLCapabilities: boolean;
 }
 
 // Alert Preview API

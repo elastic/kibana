@@ -43,7 +43,7 @@ export const FlyoutHome = (props: Props) => {
     jobSummaries: k8sJobSummaries,
   } = useMetricK8sModuleContext();
   const {
-    hasInfraMLCapabilites,
+    hasInfraMLCapabilities,
     hasInfraMLReadCapabilities,
     hasInfraMLSetupCapabilities,
   } = useInfraMLCapabilitiesContext();
@@ -68,7 +68,7 @@ export const FlyoutHome = (props: Props) => {
     }
   }, [fetchK8sJobStatus, fetchHostJobStatus, hasInfraMLReadCapabilities]);
 
-  if (!hasInfraMLCapabilites) {
+  if (!hasInfraMLCapabilities) {
     return <SubscriptionSplashContent />;
   } else if (!hasInfraMLReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;
