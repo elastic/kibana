@@ -258,7 +258,7 @@ const AnomalyMessage = ({ anomaly }: { anomaly: TableItem }) => {
   const ratioMessage = useRatio ? `${formatOneDecimalPlace(ratio)}x` : '';
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
       <EuiFlexItem grow={false} component="span">
         <EuiIcon type={icon} />
       </EuiFlexItem>
