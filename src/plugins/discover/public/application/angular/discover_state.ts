@@ -45,9 +45,9 @@ export interface AppState {
    */
   grid?: DiscoverGridSettings;
   /**
-   * Hide Histogram
+   * Hide chart
    */
-  hideHistogram?: boolean;
+  hideChart?: boolean;
   /**
    * id of the used index pattern
    */

@@ -268,7 +268,7 @@ function discoverController($route, $scope, Promise) {
           (prop) => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
         );
 
-        if (oldStatePartial.hideHistogram && !newStatePartial.hideHistogram) {
+        if (oldStatePartial.hideChart && !newStatePartial.hideChart) {
           // in case the histogram is hidden, no data is requested
           // so when changing this state data needs to be fetched
           changes.push(true);
@@ -448,8 +448,8 @@ function discoverController($route, $scope, Promise) {
     if (savedSearch.grid) {
       defaultState.grid = savedSearch.grid;
     }
-    if (savedSearch.hideHistogram) {
-      defaultState.hideHistogram = savedSearch.hideHistogram;
+    if (savedSearch.hideChart) {
+      defaultState.hideChart = savedSearch.hideChart;
     }
 
     return defaultState;
@@ -683,7 +683,7 @@ function discoverController($route, $scope, Promise) {
   function onResults(resp) {
     inspectorRequest.stats(getResponseInspectorStats(resp, $scope.searchSource)).ok({ json: resp });
 
-    if (getTimeField() && !$scope.state.hideHistogram) {
+    if (getTimeField() && !$scope.state.hideChart) {
       const tabifiedData = tabifyAggResponse($scope.opts.chartAggConfigs, resp);
       $scope.searchSource.rawResponse = resp;
       $scope.histogramData = discoverResponseHandler(
@@ -829,7 +829,7 @@ function discoverController($route, $scope, Promise) {
 
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
-    if (!getTimeField() || $scope.state.hideHistogram) return;
+    if (!getTimeField() || $scope.state.hideChart) return;
     const { interval: histogramInterval } = $scope.state;
 
     const visStateAggs = [

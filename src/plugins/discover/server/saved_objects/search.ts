@@ -34,7 +34,7 @@ export const searchSavedObjectType: SavedObjectsType = {
     properties: {
       columns: { type: 'keyword', index: false, doc_values: false },
       description: { type: 'text' },
-      hideHistogram: { type: 'boolean', index: false, doc_values: false },
+      hideChart: { type: 'boolean', index: false, doc_values: false },
       hits: { type: 'integer', index: false, doc_values: false },
       kibanaSavedObjectMeta: {
         properties: {

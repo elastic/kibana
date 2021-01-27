@@ -48,8 +48,8 @@ export async function persistSavedSearch(
   if (state.grid) {
     savedSearch.grid = state.grid;
   }
-  if (state.hideHistogram) {
-    savedSearch.hideHistogram = state.hideHistogram;
+  if (state.hideChart) {
+    savedSearch.hideChart = state.hideChart;
   }
 
   try {

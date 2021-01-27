@@ -267,7 +267,7 @@ export function DiscoverLegacy({
   const { trackUiMetric } = services;
   const { savedSearch, indexPatternList, stateContainer } = opts;
   function toggleChart() {
-    const newState = { ...state, hideHistogram: !state.hideHistogram };
+    const newState = { ...state, hideChart: !state.hideChart };
     stateContainer.setAppState(newState);
   }
 
@@ -383,7 +383,7 @@ export function DiscoverLegacy({
                             onResetQuery={resetQuery}
                           />
                         </EuiFlexItem>
-                        {!state.hideHistogram && (
+                        {!state.hideChart && (
                           <EuiFlexItem className="dscResultCount__actions">
                             <TimechartHeader
                               dateFormat={opts.config.get('dateFormat')}
@@ -399,13 +399,13 @@ export function DiscoverLegacy({
                           <EuiFlexItem className="dscResultCount__toggle" grow={false}>
                             <EuiButtonEmpty
                               size="xs"
-                              iconType={state.hideHistogram ? 'eyeClosed' : 'eye'}
+                              iconType={state.hideChart ? 'eyeClosed' : 'eye'}
                               onClick={() => {
                                 toggleChart();
                               }}
                               data-test-subj="discoverChartToggle"
                             >
-                              {!state.hideHistogram
+                              {!state.hideChart
                                 ? i18n.translate('discover.hideChart', {
                                     defaultMessage: 'Hide chart',
                                   })
@@ -418,7 +418,7 @@ export function DiscoverLegacy({
                       </EuiFlexGroup>
                       <SkipBottomButton onClick={onSkipBottomButtonClick} />
                     </EuiFlexItem>
-                    {!state.hideHistogram && opts.timefield && (
+                    {!state.hideChart && opts.timefield && (
                       <EuiFlexItem grow={false}>
                         <section
                           aria-label={i18n.translate(
