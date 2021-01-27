@@ -170,6 +170,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
             'Array of URL templates to build the list of reputation URLs to be displayed on the IP Details page.',
         }
       ),
+      sensitive: true,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(

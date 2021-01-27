@@ -17,6 +17,7 @@ export interface UsageStats {
   'notifications:banner': string;
   'timelion:graphite.url': string;
   'xpackDashboardMode:roles': string;
+  'securitySolution:ipReputationLinks': string;
   /**
    * non-sensitive settings
    */
@@ -36,7 +37,6 @@ export interface UsageStats {
   'visualization:regionmap:showWarnings': boolean;
   'visualization:dimmingOpacity': number;
   'visualization:tileMap:maxPrecision': number;
-  'securitySolution:ipReputationLinks': string;
   'csv:separator': string;
   'visualization:tileMap:WMSdefaults': string;
   'timelion:target_buckets': number;

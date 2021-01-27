@@ -18,6 +18,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'notifications:banner': { type: 'keyword' },
   'timelion:graphite.url': { type: 'keyword' },
   'xpackDashboardMode:roles': { type: 'keyword' },
+  'securitySolution:ipReputationLinks': { type: 'keyword' },
   // non-sensitive
   'visualize:enableLabs': { type: 'boolean' },
   'visualization:heatmap:maxBuckets': { type: 'long' },
@@ -25,7 +26,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'visualization:regionmap:showWarnings': { type: 'boolean' },
   'visualization:dimmingOpacity': { type: 'float' },
   'visualization:tileMap:maxPrecision': { type: 'long' },
-  'securitySolution:ipReputationLinks': { type: 'text' },
   'csv:separator': { type: 'keyword' },
   'visualization:tileMap:WMSdefaults': { type: 'text' },
   'timelion:target_buckets': { type: 'long' },

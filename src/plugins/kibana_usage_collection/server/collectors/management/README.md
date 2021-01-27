@@ -3,13 +3,28 @@
 The Usage Collector `stack_management` reports user changed settings.
 All user changed UI Settings are automatically collected.
 
-After adding a new setting you will be required -via our usage_collection functional tests- to update the [schema](./schema.ts) of the management collector and the [UsageStats](./types.ts) interface.
+After adding a new setting you will be required to do the following steps:
 
-If you forget our telemetry check will help you through the process! You can then run the checker with `--fix` flag to automatically fix the mappings
+1. Update the [schema](./schema.ts) to include the setting name and schema type.
+```
+export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
+  'MY_UI_SETTING': { type: 'keyword' },
+}
+```
+
+2. Update the [UsageStats interface](./types.ts) with the setting name and typescript type.
+```
+export interface UsageStats {
+  'MY_UI_SETTING': string;
+}
+```
+3. Run the telemetry checker with `--fix` flag to automatically fix the mappings
 
 ```
 node scripts/telemetry_check --fix
 ```
+
+If you forget any of the steps our telemetry tools and tests will help you through the process!
 
 ## Sensitive fields
 

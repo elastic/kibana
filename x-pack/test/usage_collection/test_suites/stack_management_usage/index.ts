@@ -27,10 +27,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .filter((key) => key !== 'buildNum')
         .filter((key) => typeof _.get(stackManagementSchema, key) === 'undefined');
 
-      expect(unreportedUISettings).to.eql([]);
+      if (unreportedUISettings.length) {
+        throw new Error(
+          `Detected the following unregistered UI Settings in the stack management collector:
+          ${JSON.stringify(unreportedUISettings, null)}
+          Update the management collector schema and its UsageStats interface.
+          Refer to src/plugins/kibana_usage_collection/server/collectors/management/README.md for additional information.
+        `
+        );
+      }
     });
 
-    it('registers all sensitive UI settings as boolean type', async () => {
+    it('registers all sensitive UI settings as keyword type', async () => {
       const sensitiveSettings = Object.entries(registeredSettings)
         .filter(([, config]) => config.sensitive)
         .map(([key]) => key);
@@ -39,7 +47,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .map((key) => ({ key, ..._.get(stackManagementSchema, key) }))
         .filter((keyDescriptor) => keyDescriptor.type !== 'keyword');
 
-      expect(nonBooleanSensitiveProps).to.eql([]);
+      if (nonBooleanSensitiveProps.length) {
+        throw new Error(
+          `Detected the following sensitive UI Settings in the stack management collector not having a 'keyword' type:
+          ${JSON.stringify(nonBooleanSensitiveProps, null)}
+          Update each setting in the management collector schema with ({ type: 'keyword' }).
+          Refer to src/plugins/kibana_usage_collection/server/collectors/management/README.md for additional information.
+        `
+        );
+      }
     });
   });
 }

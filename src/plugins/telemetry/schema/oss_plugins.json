@@ -4116,7 +4116,7 @@
           "type": "long"
         },
         "securitySolution:ipReputationLinks": {
-          "type": "text"
+          "type": "keyword"
         },
         "csv:separator": {
           "type": "keyword"
