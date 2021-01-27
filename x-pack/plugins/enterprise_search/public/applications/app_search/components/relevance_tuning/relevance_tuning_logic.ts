@@ -18,7 +18,7 @@ import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_message
 import { Result } from '../result/types';
 import { EngineLogic } from '../engine';
 
-import { Boost, BoostType, SearchSettings } from './types';
+import { BaseBoost, Boost, BoostType, SearchSettings } from './types';
 interface RelevanceTuningProps {
   searchSettings: SearchSettings;
   schema: Schema;
@@ -68,6 +68,17 @@ interface RelevanceTuningActions {
     boostIndex: number,
     valueIndex: number
   ): { name: string; boostIndex: number; valueIndex: number };
+  updateBoostSelectOption: (
+    name: string,
+    boostIndex: number,
+    optionType: keyof BaseBoost,
+    value: string
+  ) => {
+    name: string;
+    boostIndex: number;
+    optionType: keyof BaseBoost;
+    value: string;
+  };
 }
 
 interface RelevanceTuningValues {
@@ -174,6 +185,12 @@ export const RelevanceTuningLogic = kea<
     updateBoostCenter: (name, boostIndex, value) => ({ name, boostIndex, value }),
     addBoostValue: (name, boostIndex) => ({ name, boostIndex }),
     removeBoostValue: (name, boostIndex, valueIndex) => ({ name, boostIndex, valueIndex }),
+    updateBoostSelectOption: (name, boostIndex, optionType, value) => ({
+      name,
+      boostIndex,
+      optionType,
+      value,
+    }),
   }),
   reducers: () => ({
     searchSettings: [
@@ -505,6 +522,21 @@ export const RelevanceTuningLogic = kea<
       if (boostValue === undefined) return;
 
       boostValue.splice(valueIndex, 1);
+      actions.setSearchSettings({
+        ...searchSettings,
+        boosts: {
+          ...boosts,
+          [name]: updatedBoosts,
+        },
+      });
+      actions.getSearchResults();
+    },
+    updateBoostSelectOption: ({ name, boostIndex, optionType, value }) => {
+      const { searchSettings } = values;
+      const { boosts } = searchSettings;
+      const updatedBoosts = cloneDeep(boosts[name]);
+      updatedBoosts[boostIndex][optionType] = value;
+
       actions.setSearchSettings({
         ...searchSettings,
         boosts: {

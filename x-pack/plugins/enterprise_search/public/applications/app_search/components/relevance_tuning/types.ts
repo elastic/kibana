@@ -7,10 +7,13 @@
 
 export type BoostType = 'value' | 'functional' | 'proximity';
 
-export interface Boost {
-  type: BoostType;
+export interface BaseBoost {
   operation?: string;
   function?: string;
+}
+
+export interface Boost extends BaseBoost {
+  type: BoostType;
   newBoost?: boolean;
   center?: string | number;
   value?: Array<string | number>;

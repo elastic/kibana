@@ -972,6 +972,7 @@ describe('RelevanceTuningLogic', () => {
         );
       });
     });
+
     describe('removeBoostValue', () => {
       it('will remove a boost value and update search reusults', () => {
         mount({
@@ -1010,6 +1011,50 @@ describe('RelevanceTuningLogic', () => {
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).not.toHaveBeenCalled();
         expect(RelevanceTuningLogic.actions.getSearchResults).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('updateBoostSelectOption', () => {
+      it('will update the boost and update search reusults', () => {
+        mount({
+          searchSettings: searchSettingsWithBoost({
+            factor: 1,
+            type: 'functional',
+          }),
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.updateBoostSelectOption('foo', 1, 'function', 'exponential');
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
+          searchSettingsWithBoost({
+            factor: 1,
+            type: 'functional',
+            function: 'exponential',
+          })
+        );
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
+      });
+
+      it('will can also update operation', () => {
+        mount({
+          searchSettings: searchSettingsWithBoost({
+            factor: 1,
+            type: 'functional',
+          }),
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.updateBoostSelectOption('foo', 1, 'operation', 'add');
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
+          searchSettingsWithBoost({
+            factor: 1,
+            type: 'functional',
+            operation: 'add',
+          })
+        );
       });
     });
   });
