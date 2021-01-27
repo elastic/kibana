@@ -28050,10 +28050,9 @@ tinygradient@0.4.3:
     "@types/tinycolor2" "^1.4.0"
     tinycolor2 "^1.0.0"
 
-tinymath@1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/tinymath/-/tinymath-1.2.1.tgz#f97ed66c588cdbf3c19dfba2ae266ee323db7e47"
-  integrity sha512-8CYutfuHR3ywAJus/3JUhaJogZap1mrUQGzNxdBiQDhP3H0uFdQenvaXvqI8lMehX4RsanRZzxVfjMBREFdQaA==
+"tinymath@link:packages/tinymath":
+  version "0.0.0"
+  uid ""
 
 tinyqueue@^1.1.0:
   version "1.2.3"
