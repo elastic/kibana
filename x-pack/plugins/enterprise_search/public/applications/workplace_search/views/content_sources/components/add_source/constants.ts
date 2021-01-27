@@ -236,13 +236,6 @@ export const OAUTH_SAVE_CONFIG_BUTTON = i18n.translate(
   }
 );
 
-export const OAUTH_REMOVE_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.remove.button',
-  {
-    defaultMessage: 'Remove',
-  }
-);
-
 export const OAUTH_BACK_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.back.button',
   {

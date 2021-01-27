@@ -589,3 +589,10 @@ export const RECENT_ACTIVITY_TITLE = i18n.translate(
     defaultMessage: 'Recent activity',
   }
 );
+
+export const REMOVE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.remove.button',
+  {
+    defaultMessage: 'Remove',
+  }
+);
