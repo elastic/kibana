@@ -5,8 +5,6 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { EuiImage, EuiPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import useIntersection from 'react-use/lib/useIntersection';
 import styled from 'styled-components';
 import { Ping } from '../../../../../../common/runtime_types/ping';
@@ -16,19 +14,7 @@ import { UptimeSettingsContext } from '../../../../../contexts';
 import { NavButtons } from './nav_buttons';
 import { NoImageDisplay } from './no_image_display';
 import { StepImageCaption } from './step_image_caption';
-
-const StepImage = styled(EuiImage)`
-  &&& {
-    display: flex;
-    figcaption {
-      white-space: nowrap;
-      align-self: center;
-      margin-left: 8px;
-      margin-top: 8px;
-      text-decoration: none !important;
-    }
-  }
-`;
+import { StepImagePopover } from './step_image_popover';
 
 const StepDiv = styled.div`
   figure.euiImage {
@@ -52,9 +38,6 @@ const StepDiv = styled.div`
     }
   }
 `;
-
-const POPOVER_IMG_HEIGHT = 360;
-const POPOVER_IMG_WIDTH = 640;
 
 interface Props {
   timestamp: string;
@@ -112,30 +95,12 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
       ref={intersectionRef}
     >
       {imgSrc ? (
-        <EuiPopover
-          anchorPosition="rightCenter"
-          button={
-            <StepImage
-              allowFullScreen={true}
-              alt={captionContent}
-              caption={ImageCaption}
-              data-test-subj="pingTimestampImage"
-              hasShadow
-              url={imgSrc}
-              size="s"
-            />
-          }
-          closePopover={() => setIsImagePopoverOpen(false)}
-          isOpen={isImagePopoverOpen}
-        >
-          <EuiImage
-            alt={i18n.translate('xpack.uptime.synthetics.thumbnail.fullSize.alt', {
-              defaultMessage: `A full-size screenshot for this journey step's thumbnail.`,
-            })}
-            url={imgSrc}
-            style={{ height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }}
-          />
-        </EuiPopover>
+        <StepImagePopover
+          captionContent={captionContent}
+          imageCaption={ImageCaption}
+          imgSrc={imgSrc}
+          isImagePopoverOpen={isImagePopoverOpen}
+        />
       ) : (
         <NoImageDisplay
           imageCaption={ImageCaption}
