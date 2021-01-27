@@ -18,6 +18,7 @@ import {
   EuiTextColor,
   EuiSwitch,
   EuiIconTip,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { Phases } from '../../../../../../../common/types';
@@ -118,6 +119,10 @@ export const HotPhase: FunctionComponent = () => {
                   />
                 </p>
               </EuiTextColor>
+              <EuiSpacer />
+              <EuiIcon type="iInCircle" />
+              &nbsp;
+              {i18nTexts.editPolicy.rolloverOffsetsHotPhaseTiming}
               <EuiSpacer />
               <UseField<boolean> path={isUsingDefaultRolloverPath}>
                 {(field) => (

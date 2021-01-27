@@ -11,6 +11,13 @@ export const i18nTexts = {
     shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.indexFieldLabel', {
       defaultMessage: 'Shrink index',
     }),
+    rolloverOffsetsHotPhaseTiming: i18n.translate(
+      'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescription',
+      {
+        defaultMessage:
+          'When rollover is active, data age is only considered after rollover has occurred which adds variation to time in hot phase.',
+      }
+    ),
     searchableSnapshotInHotPhase: {
       searchableSnapshotDisallowed: {
         calloutTitle: i18n.translate(

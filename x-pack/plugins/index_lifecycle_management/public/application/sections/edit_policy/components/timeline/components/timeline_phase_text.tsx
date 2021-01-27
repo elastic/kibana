@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 export const TimelinePhaseText: FunctionComponent<{
-  phaseName: string;
-  durationInPhase?: React.ReactNode | string;
+  phaseName: ReactNode | string;
+  durationInPhase?: ReactNode | string;
 }> = ({ phaseName, durationInPhase }) => (
   <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
     <EuiFlexItem>
