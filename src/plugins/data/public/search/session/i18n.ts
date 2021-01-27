@@ -6,7 +6,15 @@
  * Public License, v 1.
  */
 
-export const APP_NAME = 'lens';
-export const PLUGIN_ID_OSS = 'lensOss';
-export const APP_PATH = '#/';
-export const APP_ICON = 'lensApp';
+import { i18n } from '@kbn/i18n';
+
+/**
+ * Message to display in case storing
+ * session session is disabled due to turned off capability
+ */
+export const noSearchSessionStorageCapabilityMessage = i18n.translate(
+  'data.searchSessionIndicator.noCapability',
+  {
+    defaultMessage: "You don't have permissions to create search sessions.",
+  }
+);
