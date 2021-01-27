@@ -13,7 +13,8 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('fleet_setup', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/89499
+  describe.skip('fleet_setup', () => {
     skipIfNoDockerRegistry(providerContext);
     beforeEach(async () => {
       try {
