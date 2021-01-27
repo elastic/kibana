@@ -15,8 +15,7 @@ import { SubSection } from '../../../public/pages/metrics/metric_detail/componen
 import { GaugesSectionVis } from '../../../public/pages/metrics/metric_detail/components/gauges_section_vis';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChartSectionVis } from '../../../public/pages/metrics/metric_detail/components/chart_section_vis';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { withTheme } from '../../../../observability/public';
+import { withTheme } from '../../../../../../src/plugins/kibana_react/common';
 import * as Nginx from '../shared/layouts/nginx';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetadataDetails } from '../../../public/pages/metrics/metric_detail/components/metadata_details';

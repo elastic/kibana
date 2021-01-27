@@ -9,3 +9,4 @@
 export { SessionService, ISessionService, SearchSessionInfoProvider } from './session_service';
 export { SearchSessionState } from './search_session_state';
 export { SessionsClient, ISessionsClient } from './sessions_client';
+export { noSearchSessionStorageCapabilityMessage } from './i18n';

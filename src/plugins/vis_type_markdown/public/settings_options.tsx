@@ -10,10 +10,11 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps, SwitchOption, RangeOption } from '../../vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
+import { SwitchOption, RangeOption } from '../../vis_default_editor/public';
 import { MarkdownVisParams } from './types';
 
-function SettingsOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {
+function SettingsOptions({ stateParams, setValue }: VisEditorOptionsProps<MarkdownVisParams>) {
   return (
     <EuiPanel paddingSize="s">
       <RangeOption
