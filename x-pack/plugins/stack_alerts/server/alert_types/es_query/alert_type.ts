@@ -18,6 +18,7 @@ import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 import { parseDuration } from '../../../../alerts/server';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
+import { ESSearchHit } from '../../../../../typings/elasticsearch';
 
 export const ES_QUERY_ID = '.es-query';
 
@@ -231,11 +232,13 @@ export function getAlertType(
           // store the params we would need to recreate the query that led to this alert instance
           .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })
           .scheduleActions(ActionGroupId, actionContext);
-        logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
 
         // update the timestamp based on the current search results
-        const lastTimestamp = searchResult.hits.hits[0]?.sort;
-        if (lastTimestamp != null && lastTimestamp.length !== 0) {
+        const firstHitWithSort = searchResult.hits.hits.find(
+          (hit: ESSearchHit) => hit.sort != null
+        );
+        const lastTimestamp = firstHitWithSort?.sort;
+        if (lastTimestamp != null && lastTimestamp.length > 0) {
           timestamp = lastTimestamp[0];
         }
       }

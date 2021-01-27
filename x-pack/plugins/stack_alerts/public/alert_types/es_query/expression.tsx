@@ -189,7 +189,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           })
         );
       } catch (err) {
-        const message = err?.body?.message;
+        const message = err?.body?.attributes?.error?.root_cause[0]?.reason || err?.body?.message;
         setTestQueryError(
           i18n.translate('xpack.stackAlerts.esQuery.ui.queryError', {
             defaultMessage: 'Error testing query: {message}',
