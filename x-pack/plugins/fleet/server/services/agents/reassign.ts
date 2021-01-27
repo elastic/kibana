@@ -23,7 +23,7 @@ export async function reassignAgent(
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
 
-  await reassignAgentIsAllowed(soClient, esClient, agentId);
+  await reassignAgentIsAllowed(soClient, esClient, agentId, newAgentPolicyId);
 
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
     policy_id: newAgentPolicyId,
@@ -37,15 +37,23 @@ export async function reassignAgent(
   });
 }
 
-async function reassignAgentIsAllowed(
+export async function reassignAgentIsAllowed(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  agentId: string
+  agentId: string,
+  newAgentPolicyId: string
 ) {
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
-    throw new Error(`Cannot reassign an agent from managed agent policy ${agentPolicy?.id}`);
+    throw new Error(`Cannot reassign an agent from managed agent policy ${agentPolicy.id}`);
   }
+
+  const newAgentPolicy = await getAgentPolicyForAgent(soClient, esClient, newAgentPolicyId);
+  if (newAgentPolicy?.is_managed) {
+    throw new Error(`Cannot reassign an agent to managed agent policy ${newAgentPolicy.id}`);
+  }
+
+  return true;
 }
 
 export async function reassignAgents(
@@ -75,7 +83,15 @@ export async function reassignAgents(
             showInactive: false,
           })
         ).agents;
-  const agentsToUpdate = agents.filter((agent) => agent.policy_id !== newAgentPolicyId);
+  // And which are allowed to unenroll
+  const settled = await Promise.allSettled(
+    agents.map((agent) =>
+      reassignAgentIsAllowed(soClient, esClient, agent.id, newAgentPolicyId).then((_) => agent)
+    )
+  );
+  const agentsToUpdate = agents.filter(
+    (agent, index) => settled[index].status === 'fulfilled' && agent.policy_id !== newAgentPolicyId
+  );
 
   // Update the necessary agents
   const res = await soClient.bulkUpdate<AgentSOAttributes>(
