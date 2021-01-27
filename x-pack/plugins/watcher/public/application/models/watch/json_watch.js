@@ -114,7 +114,6 @@ export class JsonWatch extends BaseWatch {
     return new JsonWatch(upstreamWatch);
   }
 
-  static defaultWatch = defaultWatch;
   static typeName = i18n.translate('xpack.watcher.models.jsonWatch.typeName', {
     defaultMessage: 'Advanced Watch',
   });
