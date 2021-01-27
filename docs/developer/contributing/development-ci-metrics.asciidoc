@@ -15,12 +15,12 @@ In addition to running our tests, CI collects metrics about the Kibana build. Th
 [[ci-metric-types-bundle-size-metrics]]
 ==== Bundle size
 
-These metrics help contributors know how they are impacting the size of the bundles Kibana creates, and help make sure that Kibana loads as fast as possible.
+THESE METRICS HELP CONTRIBUTORS KNOW HOW THEY ARE IMPACTING THE SIZE OF THE BUNDLES KIBANA CREATES, AND HELP MAKE SURE THAT KIBANA LOADS AS FAST AS POSSIBLE.
 
 [[ci-metric-page-load-bundle-size]] `page load bundle size` ::
 The size of the entry file produced for each bundle/plugin. This file is always loaded on every page load, so it should be as small as possible. To reduce this metric you can put any code that isn't necessary on every page load behind an https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports[`async import()`].
 +
-Code that is shared statically with other plugins will contribute to the `page load bundle size` of that plugin. This includes exports from the `public/index.ts` file and any file referenced by the `extraPublicDirs` manifest property.
+CODE THAT IS SHARED STATICALLY WITH OTHER PLUGINS WILL CONTRIBUTE TO THE `PAGE LOAD BUNDLE SIZE` OF THAT PLUGIN. THIS INCLUDES EXPORTS FROM THE `PUBLIC/INDEX.TS` FILE AND ANY FILE REFERENCED BY THE `EXTRAPUBLICDIRS` MANIFEST PROPERTY.
 
 [[ci-metric-async-chunks-size]] `async chunks size` ::
 An "async chunk" is created for the files imported by each https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports[`async import()`] statement. This metric tracks the sum size of these chunks, in bytes, broken down by plugin/bundle id. You can think of this as the amount of code users will have to download if they access all the components/applications within a bundle.
@@ -39,7 +39,7 @@ The size of the Kibana distributable is an essential metric as it not only contr
 
 There are several metrics that we don't report on PRs because gzip-compression produces different file sizes even when provided the same input, so this metric would regularly show changes even though PR authors hadn't made any relevant changes.
 
-All metrics are collected from the `tar.gz` archive produced for the linux platform.
+ALL METRICS ARE COLLECTED FROM THE `TAR.GZ` ARCHIVE PRODUCED FOR THE LINUX PLATFORM.
 
 [[ci-metric-distributable-file-count]] `distributable file count` ::
 The number of files included in the default distributable.
