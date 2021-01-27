@@ -14,12 +14,22 @@ export function useChartTheme() {
 
   return {
     ...baseChartTheme,
+    chartMargins: {
+      left: 10,
+      right: 10,
+      top: 10,
+      bottom: 10,
+    },
     background: {
       ...baseChartTheme.background,
       color: 'transparent',
     },
     lineSeriesStyle: {
       ...baseChartTheme.lineSeriesStyle,
+      point: { visible: false },
+    },
+    areaSeriesStyle: {
+      ...baseChartTheme.areaSeriesStyle,
       point: { visible: false },
     },
   };

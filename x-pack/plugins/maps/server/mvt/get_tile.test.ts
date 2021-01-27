@@ -5,11 +5,32 @@
  */
 
 import { getGridTile, getTile } from './get_tile';
-import { TILE_GRIDAGGS, TILE_SEARCHES } from './__tests__/tile_es_responses';
+import { TILE_GRIDAGGS, TILE_SEARCHES } from './__fixtures__/tile_es_responses';
 import { Logger } from 'src/core/server';
-import * as path from 'path';
-import * as fs from 'fs';
-import { ES_GEO_FIELD_TYPE, RENDER_AS } from '../../common/constants';
+import {
+  ES_GEO_FIELD_TYPE,
+  KBN_IS_CENTROID_FEATURE,
+  MVT_SOURCE_LAYER_NAME,
+  RENDER_AS,
+} from '../../common/constants';
+
+// @ts-expect-error
+import { VectorTile, VectorTileLayer } from '@mapbox/vector-tile';
+// @ts-expect-error
+import Protobuf from 'pbf';
+
+interface ITileLayerJsonExpectation {
+  version: number;
+  name: string;
+  extent: number;
+  features: Array<{
+    id: string | number | undefined;
+    type: number;
+    properties: object;
+    extent: number;
+    pointArrays: object;
+  }>;
+}
 
 describe('getTile', () => {
   const mockCallElasticsearch = jest.fn();
@@ -39,7 +60,7 @@ describe('getTile', () => {
       }
     });
 
-    const tile = await getTile({
+    const pbfTile = await getTile({
       x: 0,
       y: 0,
       z: 0,
@@ -53,7 +74,46 @@ describe('getTile', () => {
       geoFieldType: ES_GEO_FIELD_TYPE.GEO_SHAPE,
     });
 
-    compareTiles('./__tests__/pbf/0_0_0_docs.pbf', tile);
+    const jsonTile = new VectorTile(new Protobuf(pbfTile));
+    compareJsonTiles(jsonTile, {
+      version: 2,
+      name: 'source_layer',
+      extent: 4096,
+      features: [
+        {
+          id: undefined,
+          type: 3,
+          properties: {
+            __kbn__feature_id__: 'poly:G7PRMXQBgyyZ-h5iYibj:0',
+            _id: 'G7PRMXQBgyyZ-h5iYibj',
+            _index: 'poly',
+          },
+          extent: 4096,
+          pointArrays: [
+            [
+              { x: 840, y: 1600 },
+              { x: 1288, y: 1096 },
+              { x: 1672, y: 1104 },
+              { x: 2104, y: 1508 },
+              { x: 1472, y: 2316 },
+              { x: 840, y: 1600 },
+            ],
+          ],
+        },
+        {
+          id: undefined,
+          type: 1,
+          properties: {
+            __kbn__feature_id__: 'poly:G7PRMXQBgyyZ-h5iYibj:0',
+            _id: 'G7PRMXQBgyyZ-h5iYibj',
+            _index: 'poly',
+            [KBN_IS_CENTROID_FEATURE]: true,
+          },
+          extent: 4096,
+          pointArrays: [[{ x: 1470, y: 1702 }]],
+        },
+      ],
+    });
   });
 });
 
@@ -115,22 +175,87 @@ describe('getGridTile', () => {
   };
 
   test('0.0.0 tile (clusters)', async () => {
-    const tile = await getGridTile(defaultParams);
-    compareTiles('./__tests__/pbf/0_0_0_grid_aspoint.pbf', tile);
+    const pbfTile = await getGridTile(defaultParams);
+    const jsonTile = new VectorTile(new Protobuf(pbfTile));
+    compareJsonTiles(jsonTile, {
+      version: 2,
+      name: 'source_layer',
+      extent: 4096,
+      features: [
+        {
+          id: undefined,
+          type: 1,
+          properties: {
+            ['avg_of_TOTAL_AV']: 5398920.390458991,
+            doc_count: 42637,
+          },
+          extent: 4096,
+          pointArrays: [[{ x: 1206, y: 1539 }]],
+        },
+      ],
+    });
   });
 
   test('0.0.0 tile (grids)', async () => {
-    const tile = await getGridTile({ ...defaultParams, requestType: RENDER_AS.GRID });
-    compareTiles('./__tests__/pbf/0_0_0_grid_asgrid.pbf', tile);
+    const pbfTile = await getGridTile({ ...defaultParams, requestType: RENDER_AS.GRID });
+    const jsonTile = new VectorTile(new Protobuf(pbfTile));
+    compareJsonTiles(jsonTile, {
+      version: 2,
+      name: 'source_layer',
+      extent: 4096,
+      features: [
+        {
+          id: undefined,
+          type: 3,
+          properties: {
+            ['avg_of_TOTAL_AV']: 5398920.390458991,
+            doc_count: 42637,
+          },
+          extent: 4096,
+          pointArrays: [
+            [
+              { x: 1216, y: 1536 },
+              { x: 1216, y: 1568 },
+              { x: 1184, y: 1568 },
+              { x: 1184, y: 1536 },
+              { x: 1216, y: 1536 },
+            ],
+          ],
+        },
+        {
+          id: undefined,
+          type: 1,
+          properties: {
+            ['avg_of_TOTAL_AV']: 5398920.390458991,
+            doc_count: 42637,
+            [KBN_IS_CENTROID_FEATURE]: true,
+          },
+          extent: 4096,
+          pointArrays: [[{ x: 1200, y: 1552 }]],
+        },
+      ],
+    });
   });
 });
 
-function compareTiles(expectedRelativePath: string, actualTile: Buffer | null) {
-  if (actualTile === null) {
-    throw new Error('Tile should be created');
-  }
-  const expectedPath = path.resolve(__dirname, expectedRelativePath);
-  const expectedBin = fs.readFileSync(expectedPath, 'binary');
-  const expectedTile = Buffer.from(expectedBin, 'binary');
-  expect(expectedTile.equals(actualTile)).toBe(true);
+/**
+ * Verifies JSON-representation of tile-contents
+ * @param actualTileJson
+ * @param expectedLayer
+ */
+function compareJsonTiles(actualTileJson: VectorTile, expectedLayer: ITileLayerJsonExpectation) {
+  const actualLayer: VectorTileLayer = actualTileJson.layers[MVT_SOURCE_LAYER_NAME];
+  expect(actualLayer.version).toEqual(expectedLayer.version);
+  expect(actualLayer.extent).toEqual(expectedLayer.extent);
+  expect(actualLayer.name).toEqual(expectedLayer.name);
+  expect(actualLayer.length).toEqual(expectedLayer.features.length);
+
+  expectedLayer.features.forEach((expectedFeature, index) => {
+    const actualFeature = actualLayer.feature(index);
+    expect(actualFeature.type).toEqual(expectedFeature.type);
+    expect(actualFeature.extent).toEqual(expectedFeature.extent);
+    expect(actualFeature.id).toEqual(expectedFeature.id);
+    expect(actualFeature.properties).toEqual(expectedFeature.properties);
+    expect(actualFeature.loadGeometry()).toEqual(expectedFeature.pointArrays);
+  });
 }

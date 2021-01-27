@@ -20,13 +20,22 @@ import {
 } from './mock';
 import * as api from './api';
 import { CaseServices } from './use_get_case_user_actions';
-import { CaseConnector, ConnectorTypes } from '../../../../case/common/api/connectors';
-
+import { CaseConnector, ConnectorTypes, CommentType } from '../../../../case/common/api';
+import moment from 'moment';
 jest.mock('./api');
-
+jest.mock('../../common/components/link_to', () => {
+  const originalModule = jest.requireActual('../../common/components/link_to');
+  return {
+    ...originalModule,
+    getTimelineTabsUrl: jest.fn(),
+    useFormatUrl: jest.fn().mockReturnValue({ formatUrl: jest.fn(), search: 'urlSearch' }),
+  };
+});
 describe('usePostPushToService', () => {
   const abortCtrl = new AbortController();
   const updateCase = jest.fn();
+  const formatUrl = jest.fn();
+
   const samplePush = {
     caseId: pushedCase.id,
     caseServices: {
@@ -45,7 +54,21 @@ describe('usePostPushToService', () => {
       fields: { issueType: 'Task', priority: 'Low', parent: null },
     } as CaseConnector,
     updateCase,
+    alerts: {
+      'alert-id-1': {
+        _id: 'alert-id-1',
+        _index: 'alert-index-1',
+        '@timestamp': '2020-11-20T15:35:28.373Z',
+        rule: {
+          id: 'rule-id-1',
+          name: 'Awesome rule',
+          from: 'now-360s',
+          to: 'now',
+        },
+      },
+    },
   };
+
   const sampleServiceRequestData = {
     savedObjectId: pushedCase.id,
     createdAt: pushedCase.createdAt,
@@ -53,7 +76,7 @@ describe('usePostPushToService', () => {
     comments: [
       {
         commentId: basicComment.id,
-        comment: basicComment.comment,
+        comment: basicComment.type === CommentType.user ? basicComment.comment : '',
         createdAt: basicComment.createdAt,
         createdBy: serviceConnectorUser,
         updatedAt: null,
@@ -141,11 +164,14 @@ describe('usePostPushToService', () => {
       await waitForNextUpdate();
       expect(spyOnPushToService).toBeCalledWith(
         samplePush.connector.id,
-        formatServiceRequestData(
-          basicCase,
-          samplePush.connector,
-          sampleCaseServices as CaseServices
-        ),
+        samplePush.connector.type,
+        formatServiceRequestData({
+          myCase: basicCase,
+          connector: samplePush.connector,
+          caseServices: sampleCaseServices as CaseServices,
+          alerts: samplePush.alerts,
+          formatUrl,
+        }),
         abortCtrl.signal
       );
     });
@@ -161,6 +187,7 @@ describe('usePostPushToService', () => {
         type: ConnectorTypes.none,
         fields: null,
       },
+      alerts: samplePush.alerts,
       updateCase,
     };
     const spyOnPushToService = jest.spyOn(api, 'pushToService');
@@ -174,7 +201,14 @@ describe('usePostPushToService', () => {
       await waitForNextUpdate();
       expect(spyOnPushToService).toBeCalledWith(
         samplePush2.connector.id,
-        formatServiceRequestData(basicCase, samplePush2.connector, {}),
+        samplePush2.connector.type,
+        formatServiceRequestData({
+          myCase: basicCase,
+          connector: samplePush2.connector,
+          caseServices: {},
+          alerts: samplePush.alerts,
+          formatUrl,
+        }),
         abortCtrl.signal
       );
     });
@@ -211,7 +245,13 @@ describe('usePostPushToService', () => {
 
   it('formatServiceRequestData - current connector', () => {
     const caseServices = sampleCaseServices;
-    const result = formatServiceRequestData(pushedCase, samplePush.connector, caseServices);
+    const result = formatServiceRequestData({
+      myCase: pushedCase,
+      connector: samplePush.connector,
+      caseServices,
+      alerts: samplePush.alerts,
+      formatUrl,
+    });
     expect(result).toEqual(sampleServiceRequestData);
   });
 
@@ -223,7 +263,13 @@ describe('usePostPushToService', () => {
       type: ConnectorTypes.jira,
       fields: { issueType: 'Task', priority: 'High', parent: 'RJ-01' },
     };
-    const result = formatServiceRequestData(pushedCase, connector as CaseConnector, caseServices);
+    const result = formatServiceRequestData({
+      myCase: pushedCase,
+      connector: connector as CaseConnector,
+      caseServices,
+      alerts: samplePush.alerts,
+      formatUrl,
+    });
     expect(result).toEqual({
       ...sampleServiceRequestData,
       ...connector.fields,
@@ -235,18 +281,55 @@ describe('usePostPushToService', () => {
     const caseServices = {
       '123': sampleCaseServices['123'],
     };
+
     const connector = {
       id: '456',
       name: 'connector 2',
       type: ConnectorTypes.jira,
       fields: { issueType: 'Task', priority: 'High', parent: null },
     };
-    const result = formatServiceRequestData(pushedCase, connector as CaseConnector, caseServices);
+
+    const result = formatServiceRequestData({
+      myCase: pushedCase,
+      connector: connector as CaseConnector,
+      caseServices,
+      alerts: samplePush.alerts,
+      formatUrl,
+    });
+
     expect(result).toEqual({
       ...sampleServiceRequestData,
       ...connector.fields,
       externalId: null,
     });
+  });
+
+  it('formatServiceRequestData - Alert comment content', () => {
+    const mockDuration = moment.duration(1);
+    jest.spyOn(moment, 'duration').mockReturnValue(mockDuration);
+    formatUrl.mockReturnValue('https://app.com/detections');
+    const caseServices = sampleCaseServices;
+    const result = formatServiceRequestData({
+      myCase: {
+        ...pushedCase,
+        comments: [
+          {
+            ...pushedCase.comments[0],
+            type: CommentType.alert,
+            alertId: 'alert-id-1',
+            index: 'alert-index-1',
+          },
+        ],
+      },
+      connector: samplePush.connector,
+      caseServices,
+      alerts: samplePush.alerts,
+      formatUrl,
+    });
+
+    expect(result.comments![0].comment).toEqual(
+      '[Alert](https://app.com/detections?filters=!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,key:_id,negate:!f,params:(query:alert-id-1),type:phrase),query:(match:(_id:(query:alert-id-1,type:phrase)))))&sourcerer=(default:!())&timerange=(global:(linkTo:!(timeline),timerange:(from:%272020-11-20T15:35:28.372Z%27,kind:absolute,to:%272020-11-20T15:35:28.373Z%27)),timeline:(linkTo:!(global),timerange:(from:%272020-11-20T15:35:28.372Z%27,kind:absolute,to:%272020-11-20T15:35:28.373Z%27)))) added to case.'
+    );
   });
 
   it('unhappy path', async () => {

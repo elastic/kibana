@@ -17,15 +17,32 @@ import { TestProviders } from '../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
 import { ColumnHeadersComponent } from '.';
+import { cloneDeep } from 'lodash/fp';
+import { timelineActions } from '../../../../store/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
+const timelineId = 'test';
 
 describe('ColumnHeaders', () => {
   const mount = useMountAppended();
 
   describe('rendering', () => {
-    const sort: Sort = {
-      columnId: 'fooColumn',
-      sortDirection: Direction.desc,
-    };
+    const sort: Sort[] = [
+      {
+        columnId: '@timestamp',
+        columnType: 'number',
+        sortDirection: Direction.desc,
+      },
+    ];
 
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
@@ -39,7 +56,8 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
-            timelineId={'test'}
+            tabType={TimelineTabs.query}
+            timelineId={timelineId}
           />
         </TestProviders>
       );
@@ -58,7 +76,8 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
-            timelineId={'test'}
+            tabType={TimelineTabs.query}
+            timelineId={timelineId}
           />
         </TestProviders>
       );
@@ -78,7 +97,8 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
-            timelineId={'test'}
+            tabType={TimelineTabs.query}
+            timelineId={timelineId}
           />
         </TestProviders>
       );
@@ -86,6 +106,158 @@ describe('ColumnHeaders', () => {
       defaultHeaders.forEach((h) => {
         expect(wrapper.find('[data-test-subj="headers-group"]').first().text()).toContain(h.id);
       });
+    });
+  });
+
+  describe('#onColumnsSorted', () => {
+    let mockSort: Sort[] = [
+      {
+        columnId: '@timestamp',
+        columnType: 'number',
+        sortDirection: Direction.desc,
+      },
+      {
+        columnId: 'host.name',
+        columnType: 'text',
+        sortDirection: Direction.asc,
+      },
+    ];
+    let mockDefaultHeaders = cloneDeep(
+      defaultHeaders.map((h) => (h.id === 'message' ? h : { ...h, aggregatable: true }))
+    );
+
+    beforeEach(() => {
+      mockDefaultHeaders = cloneDeep(
+        defaultHeaders.map((h) => (h.id === 'message' ? h : { ...h, aggregatable: true }))
+      );
+      mockSort = [
+        {
+          columnId: '@timestamp',
+          columnType: 'number',
+          sortDirection: Direction.desc,
+        },
+        {
+          columnId: 'host.name',
+          columnType: 'text',
+          sortDirection: Direction.asc,
+        },
+      ];
+    });
+
+    test('Add column `event.category` as desc sorting', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <ColumnHeadersComponent
+            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            browserFields={mockBrowserFields}
+            columnHeaders={mockDefaultHeaders}
+            isSelectAllChecked={false}
+            onSelectAll={jest.fn}
+            showEventsSelect={false}
+            showSelectAllCheckbox={false}
+            sort={mockSort}
+            tabType={TimelineTabs.query}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('[data-test-subj="header-event.category"] [data-test-subj="header-sort-button"]')
+        .first()
+        .simulate('click');
+      expect(mockDispatch).toHaveBeenCalledWith(
+        timelineActions.updateSort({
+          id: timelineId,
+          sort: [
+            {
+              columnId: '@timestamp',
+              columnType: 'number',
+              sortDirection: Direction.desc,
+            },
+            {
+              columnId: 'host.name',
+              columnType: 'text',
+              sortDirection: Direction.asc,
+            },
+            { columnId: 'event.category', columnType: 'text', sortDirection: Direction.desc },
+          ],
+        })
+      );
+    });
+
+    test('Change order of column `@timestamp` from desc to asc without changing index position', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <ColumnHeadersComponent
+            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            browserFields={mockBrowserFields}
+            columnHeaders={mockDefaultHeaders}
+            isSelectAllChecked={false}
+            onSelectAll={jest.fn()}
+            showEventsSelect={false}
+            showSelectAllCheckbox={false}
+            sort={mockSort}
+            tabType={TimelineTabs.query}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('[data-test-subj="header-@timestamp"] [data-test-subj="header-sort-button"]')
+        .first()
+        .simulate('click');
+      expect(mockDispatch).toHaveBeenCalledWith(
+        timelineActions.updateSort({
+          id: timelineId,
+          sort: [
+            {
+              columnId: '@timestamp',
+              columnType: 'number',
+              sortDirection: Direction.asc,
+            },
+            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.asc },
+          ],
+        })
+      );
+    });
+
+    test('Change order of column `host.name` from asc to desc without changing index position', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <ColumnHeadersComponent
+            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            browserFields={mockBrowserFields}
+            columnHeaders={mockDefaultHeaders}
+            isSelectAllChecked={false}
+            onSelectAll={jest.fn()}
+            showEventsSelect={false}
+            showSelectAllCheckbox={false}
+            sort={mockSort}
+            tabType={TimelineTabs.query}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('[data-test-subj="header-host.name"] [data-test-subj="header-sort-button"]')
+        .first()
+        .simulate('click');
+      expect(mockDispatch).toHaveBeenCalledWith(
+        timelineActions.updateSort({
+          id: timelineId,
+          sort: [
+            {
+              columnId: '@timestamp',
+              columnType: 'number',
+              sortDirection: Direction.desc,
+            },
+            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.desc },
+          ],
+        })
+      );
     });
   });
 });

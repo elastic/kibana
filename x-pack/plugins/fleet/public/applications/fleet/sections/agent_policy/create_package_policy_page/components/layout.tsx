@@ -38,7 +38,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
     'data-test-subj': dataTestSubj,
   }) => {
     const pageTitle = useMemo(() => {
-      if ((from === 'package' || from === 'edit') && packageInfo) {
+      if ((from === 'package' || from === 'package-edit' || from === 'edit') && packageInfo) {
         return (
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
@@ -51,8 +51,8 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
-                <h1>
-                  {from === 'edit' ? (
+                <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
+                  {from === 'edit' || from === 'package-edit' ? (
                     <FormattedMessage
                       id="xpack.fleet.editPackagePolicy.pageTitleWithPackageName"
                       defaultMessage="Edit {packageName} integration"
@@ -76,9 +76,9 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
         );
       }
 
-      return from === 'edit' ? (
+      return from === 'edit' || from === 'package-edit' ? (
         <EuiText>
-          <h1>
+          <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
             <FormattedMessage
               id="xpack.fleet.editPackagePolicy.pageTitle"
               defaultMessage="Edit integration"
@@ -95,10 +95,10 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
           </h1>
         </EuiText>
       );
-    }, [from, packageInfo]);
+    }, [dataTestSubj, from, packageInfo]);
 
     const pageDescription = useMemo(() => {
-      return from === 'edit' ? (
+      return from === 'edit' || from === 'package-edit' ? (
         <FormattedMessage
           id="xpack.fleet.editPackagePolicy.pageDescription"
           defaultMessage="Modify integration settings and deploy changes to the selected agent policy."

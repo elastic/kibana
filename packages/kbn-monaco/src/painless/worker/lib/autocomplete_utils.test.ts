@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import {
@@ -23,6 +12,8 @@ import {
   hasDeclaredType,
   isAccessingProperty,
   showStaticSuggestions,
+  isDefiningString,
+  isDefiningBoolean,
 } from './autocomplete_utils';
 
 const primitives = ['boolean', 'int', 'char', 'float', 'double'];
@@ -59,6 +50,24 @@ describe('Utils', () => {
       expect(isAccessingProperty('Math.E.foobar')).toEqual(false);
       expect(isAccessingProperty('foobar')).toEqual(false);
       expect(isAccessingProperty('Math.floor(')).toEqual(false);
+    });
+  });
+
+  describe('isDefiningBoolean()', () => {
+    test('returns true or false depending if an array contains a boolean type and "=" token at a specific index', () => {
+      expect(isDefiningBoolean(['boolean', 'myBoolean', '=', 't'])).toEqual(true);
+      expect(isDefiningBoolean(['double', 'myBoolean', '=', 't'])).toEqual(false);
+      expect(isDefiningBoolean(['boolean', '='])).toEqual(false);
+    });
+  });
+
+  describe('isDefiningString()', () => {
+    test('returns true or false depending if active typing contains a single or double quotation mark', () => {
+      expect(isDefiningString(`'mystring'`)).toEqual(true);
+      expect(isDefiningString(`"mystring"`)).toEqual(true);
+      expect(isDefiningString(`'`)).toEqual(true);
+      expect(isDefiningString(`"`)).toEqual(true);
+      expect(isDefiningString('mystring')).toEqual(false);
     });
   });
 

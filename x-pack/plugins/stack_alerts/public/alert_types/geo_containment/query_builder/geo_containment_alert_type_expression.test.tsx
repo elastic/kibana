@@ -8,22 +8,11 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
-import { ApplicationStart, DocLinksStart, HttpSetup, ToastsStart } from 'kibana/public';
-import {
-  ActionTypeRegistryContract,
-  AlertTypeRegistryContract,
-  IErrorObject,
-} from '../../../../../triggers_actions_ui/public';
+import { IErrorObject } from '../../../../../triggers_actions_ui/public';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
-const alertsContext = {
-  http: (null as unknown) as HttpSetup,
-  alertTypeRegistry: (null as unknown) as AlertTypeRegistryContract,
-  actionTypeRegistry: (null as unknown) as ActionTypeRegistryContract,
-  toastNotifications: (null as unknown) as ToastsStart,
-  docLinks: (null as unknown) as DocLinksStart,
-  capabilities: (null as unknown) as ApplicationStart['capabilities'],
-};
+const dataStartMock = dataPluginMock.createStartContract();
 
 const alertParams = {
   index: '',
@@ -42,7 +31,6 @@ test('should render EntityIndexExpression', async () => {
     <EntityIndexExpression
       dateField={'testDateField'}
       geoField={'testGeoField'}
-      alertsContext={alertsContext}
       errors={{} as IErrorObject}
       setAlertParamsDate={() => {}}
       setAlertParamsGeoField={() => {}}
@@ -50,6 +38,7 @@ test('should render EntityIndexExpression', async () => {
       setIndexPattern={() => {}}
       indexPattern={('' as unknown) as IIndexPattern}
       isInvalid={false}
+      data={dataStartMock}
     />
   );
 
@@ -61,7 +50,6 @@ test('should render EntityIndexExpression w/ invalid flag if invalid', async () 
     <EntityIndexExpression
       dateField={'testDateField'}
       geoField={'testGeoField'}
-      alertsContext={alertsContext}
       errors={{} as IErrorObject}
       setAlertParamsDate={() => {}}
       setAlertParamsGeoField={() => {}}
@@ -69,6 +57,7 @@ test('should render EntityIndexExpression w/ invalid flag if invalid', async () 
       setIndexPattern={() => {}}
       indexPattern={('' as unknown) as IIndexPattern}
       isInvalid={true}
+      data={dataStartMock}
     />
   );
 
@@ -79,13 +68,13 @@ test('should render BoundaryIndexExpression', async () => {
   const component = shallow(
     <BoundaryIndexExpression
       alertParams={alertParams}
-      alertsContext={alertsContext}
       errors={{} as IErrorObject}
       boundaryIndexPattern={('' as unknown) as IIndexPattern}
       setBoundaryIndexPattern={() => {}}
       setBoundaryGeoField={() => {}}
       setBoundaryNameField={() => {}}
       boundaryNameField={'testNameField'}
+      data={dataStartMock}
     />
   );
 

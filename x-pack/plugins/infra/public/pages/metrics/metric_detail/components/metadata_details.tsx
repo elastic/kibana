@@ -9,7 +9,7 @@ import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@ela
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { InfraMetadata } from '../../../../../common/http_api';
-import { euiStyled } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { MetadataContext } from '../containers/metadata_context';
 
 interface FieldDef {

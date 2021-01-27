@@ -15,10 +15,14 @@ import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../../triggers_actions_ui/public/application/alert_type_registry.mock';
-import { ValidationResult, Alert } from '../../../triggers_actions_ui/public/types';
+import {
+  ValidationResult,
+  Alert,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../triggers_actions_ui/public/types';
 import { AlertForm } from '../../../triggers_actions_ui/public/application/sections/alert_form/alert_form';
 import ActionForm from '../../../triggers_actions_ui/public/application/sections/action_connector_form/action_form';
-import { AlertsContextProvider } from '../../../triggers_actions_ui/public/application/context/alerts_context';
 import { Legacy } from '../legacy_shims';
 import { I18nProvider } from '@kbn/i18n/react';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
@@ -72,7 +76,6 @@ describe('alert_form', () => {
   const alertType = {
     id: 'alert-type',
     iconClass: 'test',
-    name: 'test-alert',
     description: 'Testing',
     documentationUrl: 'https://...',
     validate: validationMethod,
@@ -90,8 +93,13 @@ describe('alert_form', () => {
     id: 'alert-action-type',
     iconClass: '',
     selectMessage: '',
-    validateConnector: validationMethod,
-    validateParams: validationMethod,
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
+    },
+    validateParams: (): GenericValidationResult<unknown> => {
+      const validationResult = { errors: {} };
+      return validationResult;
+    },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
   };
@@ -100,7 +108,6 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     beforeEach(async () => {
-      const coreStart = coreMock.createStart();
       alertTypeRegistry.list.mockReturnValue([alertType]);
       alertTypeRegistry.get.mockReturnValue(alertType);
       alertTypeRegistry.has.mockReturnValue(true);
@@ -108,12 +115,7 @@ describe('alert_form', () => {
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
 
-      const monitoringDependencies = {
-        toastNotifications: coreStart.notifications.toasts,
-        ...Legacy.shims.kibanaServices,
-        actionTypeRegistry,
-        alertTypeRegistry,
-      } as any;
+      const KibanaReactContext = createKibanaReactContext(Legacy.shims.kibanaServices);
 
       const initialAlert = ({
         name: 'test',
@@ -131,18 +133,18 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       wrapper = mountWithIntl(
-        <AlertsContextProvider
-          value={{
-            ...monitoringDependencies,
-          }}
-        >
-          <AlertForm
-            alert={initialAlert}
-            dispatch={() => {}}
-            errors={{ name: [], interval: [] }}
-            operation="create"
-          />
-        </AlertsContextProvider>
+        <I18nProvider>
+          <KibanaReactContext.Provider>
+            <AlertForm
+              alert={initialAlert}
+              dispatch={() => {}}
+              errors={{ name: [], interval: [] }}
+              operation="create"
+              actionTypeRegistry={actionTypeRegistry}
+              alertTypeRegistry={alertTypeRegistry}
+            />
+          </KibanaReactContext.Provider>
+        </I18nProvider>
       );
 
       await act(async () => {
@@ -163,6 +165,10 @@ describe('alert_form', () => {
     });
 
     it('should update throttle value', async () => {
+      wrapper.find('button[data-test-subj="notifyWhenSelect"]').simulate('click');
+      wrapper.update();
+      wrapper.find('button[data-test-subj="onThrottleInterval"]').simulate('click');
+      wrapper.update();
       const newThrottle = 17;
       const throttleField = wrapper.find('[data-test-subj="throttleInput"]');
       expect(throttleField.exists()).toBeTruthy();

@@ -6,18 +6,18 @@ import kibanaAgent
 
 object Lint : BuildType({
   name = "Lint"
-  description = "Executes Linting, such as eslint and sasslint"
+  description = "Executes Linting, such as eslint and stylelint"
 
   kibanaAgent(2)
 
   steps {
     script {
-      name = "Sasslint"
+      name = "Stylelint"
 
       scriptContent =
         """
           #!/bin/bash
-          yarn run grunt run:sasslint
+          ./.ci/teamcity/checks/stylelint.sh
         """.trimIndent()
     }
 
@@ -26,7 +26,7 @@ object Lint : BuildType({
       scriptContent =
         """
           #!/bin/bash
-          yarn run grunt run:eslint
+          ./.ci/teamcity/checks/eslint.sh
         """.trimIndent()
     }
   }

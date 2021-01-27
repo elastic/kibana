@@ -20,14 +20,25 @@ import {
 } from '../../../../common/lib/utils';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import {
+  ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
+} from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const actionsRemover = new ActionsRemover(supertest);
+  const kibanaServer = getService('kibanaServer');
 
   describe('get_all_user_actions', () => {
+    let servicenowSimulatorURL: string = '<could not determine kibana url>';
+    before(() => {
+      servicenowSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+      );
+    });
     afterEach(async () => {
       await deleteCases(es);
       await deleteComments(es);
@@ -36,7 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
-    it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title', 'connector']`, async () => {
+    it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title', 'connector', 'settings]`, async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -51,7 +62,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.length).to.eql(1);
 
-      expect(body[0].action_field).to.eql(['description', 'status', 'tags', 'title', 'connector']);
+      expect(body[0].action_field).to.eql([
+        'description',
+        'status',
+        'tags',
+        'title',
+        'connector',
+        'settings',
+      ]);
       expect(body[0].action).to.eql('create');
       expect(body[0].old_value).to.eql(null);
       expect(body[0].new_value).to.eql(JSON.stringify(postCaseReq));
@@ -311,7 +329,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: connector } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
-        .send(getServiceNowConnector())
+        .send({
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        })
         .expect(200);
 
       actionsRemover.add('default', connector.id, 'action', 'actions');

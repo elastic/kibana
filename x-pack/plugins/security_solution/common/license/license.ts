@@ -51,5 +51,5 @@ export class LicenseService {
 }
 
 export const isAtLeast = (license: ILicense | null, level: LicenseType): boolean => {
-  return license !== null && license.isAvailable && license.isActive && license.hasAtLeast(level);
+  return !!license && license.isAvailable && license.isActive && license.hasAtLeast(level);
 };

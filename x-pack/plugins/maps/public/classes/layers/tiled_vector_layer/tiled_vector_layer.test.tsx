@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { MockSyncContext } from '../__tests__/mock_sync_context';
+import { MockSyncContext } from '../__fixtures__/mock_sync_context';
 import sinon from 'sinon';
 
 jest.mock('../../../kibana_services', () => {

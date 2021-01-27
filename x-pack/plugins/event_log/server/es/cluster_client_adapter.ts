@@ -7,9 +7,10 @@
 import { Subject } from 'rxjs';
 import { bufferTime, filter, switchMap } from 'rxjs/operators';
 import { reject, isUndefined } from 'lodash';
-import { SearchResponse, Client } from 'elasticsearch';
+import { Client } from 'elasticsearch';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, LegacyClusterClient } from 'src/core/server';
+import { ESSearchResponse } from '../../../../typings/elasticsearch';
 import { EsContext } from '.';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
@@ -193,11 +194,11 @@ export class ClusterClientAdapter {
     }
   }
 
-  public async queryEventsBySavedObject(
+  public async queryEventsBySavedObjects(
     index: string,
     namespace: string | undefined,
     type: string,
-    id: string,
+    ids: string[],
     // eslint-disable-next-line @typescript-eslint/naming-convention
     { page, per_page: perPage, start, end, sort_field, sort_order }: FindOptionsType
   ): Promise<QueryEventsBySavedObjectResult> {
@@ -248,10 +249,9 @@ export class ClusterClientAdapter {
                           },
                         },
                         {
-                          term: {
-                            'kibana.saved_objects.id': {
-                              value: id,
-                            },
+                          terms: {
+                            // default maximum of 65,536 terms, configurable by index.max_terms_count
+                            'kibana.saved_objects.id': ids,
                           },
                         },
                         namespaceQuery,
@@ -284,22 +284,20 @@ export class ClusterClientAdapter {
     try {
       const {
         hits: { hits, total },
-      }: SearchResponse<unknown> = await this.callEs('search', {
+      }: ESSearchResponse<unknown, {}> = await this.callEs('search', {
         index,
-        // The SearchResponse type only supports total as an int,
-        // so we're forced to explicitly request that it return as an int
-        rest_total_hits_as_int: true,
+        track_total_hits: true,
         body,
       });
       return {
         page,
         per_page: perPage,
-        total,
+        total: total.value,
         data: hits.map((hit) => hit._source) as IValidatedEvent[],
       };
     } catch (err) {
       throw new Error(
-        `querying for Event Log by for type "${type}" and id "${id}" failed with: ${err.message}`
+        `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
       );
     }
   }

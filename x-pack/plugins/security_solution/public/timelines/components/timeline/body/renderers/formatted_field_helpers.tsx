@@ -77,6 +77,15 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         {content}
       </LinkAnchor>
     </DefaultDraggable>
+  ) : value != null ? (
+    <DefaultDraggable
+      field={fieldName}
+      id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`}
+      tooltipContent={value}
+      value={`${value}`}
+    >
+      {value}
+    </DefaultDraggable>
   ) : (
     getEmptyTagValue()
   );

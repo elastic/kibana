@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerApiError } from '../../../../common/types';
 import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
 import { AsyncResourceState } from '.';
 
@@ -23,24 +22,6 @@ export interface TrustedAppsListData {
   totalItemsCount: number;
 }
 
-/** Store State when an API request has been sent to create a new trusted app entry */
-export interface TrustedAppCreatePending {
-  type: 'pending';
-  data: NewTrustedApp;
-}
-
-/** Store State when creation of a new Trusted APP entry was successful */
-export interface TrustedAppCreateSuccess {
-  type: 'success';
-  data: TrustedApp;
-}
-
-/** Store State when creation of a new Trusted App Entry failed */
-export interface TrustedAppCreateFailure {
-  type: 'failure';
-  data: ServerApiError;
-}
-
 export type ViewType = 'list' | 'grid';
 
 export interface TrustedAppsListPageLocation {
@@ -51,6 +32,10 @@ export interface TrustedAppsListPageLocation {
 }
 
 export interface TrustedAppsListPageState {
+  /** Represents if trusted apps entries exist, regardless of whether the list is showing results
+   * or not (which could use filtering in the future)
+   */
+  entriesExist: AsyncResourceState<boolean>;
   listView: {
     listResourceState: AsyncResourceState<TrustedAppsListData>;
     freshDataTimestamp: number;
@@ -60,11 +45,14 @@ export interface TrustedAppsListPageState {
     confirmed: boolean;
     submissionResourceState: AsyncResourceState;
   };
-  createView:
-    | undefined
-    | TrustedAppCreatePending
-    | TrustedAppCreateSuccess
-    | TrustedAppCreateFailure;
+  creationDialog: {
+    formState?: {
+      entry: NewTrustedApp;
+      isValid: boolean;
+    };
+    confirmed: boolean;
+    submissionResourceState: AsyncResourceState<TrustedApp>;
+  };
   location: TrustedAppsListPageLocation;
   active: boolean;
 }

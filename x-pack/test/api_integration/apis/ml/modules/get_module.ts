@@ -25,6 +25,8 @@ const moduleIds = [
   'nginx_ecs',
   'sample_data_ecommerce',
   'sample_data_weblogs',
+  'security_linux',
+  'security_windows',
   'siem_auditbeat',
   'siem_auditbeat_auth',
   'siem_cloudtrail',

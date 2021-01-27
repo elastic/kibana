@@ -11,11 +11,7 @@ import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import {
-  CODE_PATH_BEATS,
-  ALERT_MISSING_MONITORING_DATA,
-  BEATS_SYSTEM_ID,
-} from '../../../../common/constants';
+import { CODE_PATH_BEATS } from '../../../../common/constants';
 import { Beat } from '../../../components/beats/beat';
 
 uiRoutes.when('/beats/beat/:beatUuid', {
@@ -56,17 +52,6 @@ uiRoutes.when('/beats/beat/:beatUuid', {
         $scope,
         $injector,
         reactNodeId: 'monitoringBeatsInstanceApp',
-        alerts: {
-          shouldFetch: true,
-          options: {
-            alertTypeIds: [ALERT_MISSING_MONITORING_DATA],
-            filters: [
-              {
-                stackProduct: BEATS_SYSTEM_ID,
-              },
-            ],
-          },
-        },
       });
 
       this.data = pageData;
@@ -75,7 +60,6 @@ uiRoutes.when('/beats/beat/:beatUuid', {
         (data) => {
           this.renderReact(
             <Beat
-              alerts={this.alerts}
               summary={data.summary}
               metrics={data.metrics}
               onBrush={$scope.onBrush}

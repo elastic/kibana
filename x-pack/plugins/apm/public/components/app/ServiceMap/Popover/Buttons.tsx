@@ -29,7 +29,7 @@ export function Buttons({
 
   const detailsUrl = getAPMHref({
     basePath,
-    path: `/services/${selectedNodeServiceName}/transactions`,
+    path: `/services/${selectedNodeServiceName}`,
     query: urlParams,
   });
   const focusUrl = getAPMHref({

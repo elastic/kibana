@@ -47,6 +47,15 @@ export const getCaseConfigure = async ({ signal }: ApiProps): Promise<CaseConfig
     : null;
 };
 
+export const getConnectorMappings = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
+  const response = await KibanaServices.get().http.fetch(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`, {
+    method: 'GET',
+    signal,
+  });
+
+  return response;
+};
+
 export const postCaseConfigure = async (
   caseConfiguration: CasesConfigureRequest,
   signal: AbortSignal

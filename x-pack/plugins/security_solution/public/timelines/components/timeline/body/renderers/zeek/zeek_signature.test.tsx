@@ -27,6 +27,15 @@ import {
   defaultStringRenderer,
 } from './zeek_signature';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 describe('ZeekSignature', () => {
   const mount = useMountAppended();
   let zeek: Ecs;

@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, Logger } from 'kibana/server';
+import { ElasticsearchClient, Logger } from 'kibana/server';
+import { unwrapEsResponse } from '../../../../../observability/server';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
@@ -17,45 +19,44 @@ export async function getStoredAnnotations({
   setup,
   serviceName,
   environment,
-  apiCaller,
+  client,
   annotationsClient,
   logger,
 }: {
   setup: Setup & SetupTimeRange;
   serviceName: string;
   environment?: string;
-  apiCaller: LegacyAPICaller;
+  client: ElasticsearchClient;
   annotationsClient: ScopedAnnotationsClient;
   logger: Logger;
 }): Promise<Annotation[]> {
-  try {
-    const response: ESSearchResponse<ESAnnotation, any> = (await apiCaller(
-      'search',
-      {
-        index: annotationsClient.index,
-        body: {
-          size: 50,
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: setup.start,
-                      lt: setup.end,
-                    },
-                  },
-                },
-                { term: { 'annotation.type': 'deployment' } },
-                { term: { tags: 'apm' } },
-                { term: { [SERVICE_NAME]: serviceName } },
-                ...getEnvironmentUiFilterES(environment),
-              ],
-            },
+  const body = {
+    size: 50,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: rangeFilter(setup.start, setup.end),
           },
-        },
-      }
-    )) as any;
+          { term: { 'annotation.type': 'deployment' } },
+          { term: { tags: 'apm' } },
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...getEnvironmentUiFilterES(environment),
+        ],
+      },
+    },
+  };
+
+  try {
+    const response: ESSearchResponse<
+      ESAnnotation,
+      { body: typeof body }
+    > = await unwrapEsResponse(
+      client.search<any>({
+        index: annotationsClient.index,
+        body,
+      })
+    );
 
     return response.hits.hits.map((hit) => {
       return {

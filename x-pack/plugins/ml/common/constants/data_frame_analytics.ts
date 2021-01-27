@@ -10,6 +10,15 @@ export const ANALYSIS_CONFIG_TYPE = {
   CLASSIFICATION: 'classification',
 } as const;
 
+export const DATA_FRAME_TASK_STATE = {
+  ANALYZING: 'analyzing',
+  FAILED: 'failed',
+  REINDEXING: 'reindexing',
+  STARTED: 'started',
+  STARTING: 'starting',
+  STOPPED: 'stopped',
+} as const;
+
 export const DEFAULT_RESULTS_FIELD = 'ml';
 
 export const JOB_MAP_NODE_TYPES = {

@@ -9,7 +9,7 @@ import { ResolverSchema } from '../../../../../../common/endpoint/types';
 /**
  * Represents a time range filter
  */
-export interface Timerange {
+export interface TimeRange {
   from: string;
   to: string;
 }
@@ -38,4 +38,13 @@ export function docValueFields(schema: ResolverSchema): Array<{ field: string }>
     filter.push({ field: schema.name });
   }
   return filter;
+}
+
+/**
+ * Returns valid IDs that can be used in a search.
+ *
+ * @param ids array of ids
+ */
+export function validIDs(ids: NodeID[]): NodeID[] {
+  return ids.filter((id) => String(id) !== '');
 }

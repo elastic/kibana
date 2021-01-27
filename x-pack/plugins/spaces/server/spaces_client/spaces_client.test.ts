@@ -6,8 +6,8 @@
 
 import { SpacesClient } from './spaces_client';
 import { ConfigType, ConfigSchema } from '../config';
-import { GetAllSpacesPurpose } from '../../common/model/types';
 import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
+import { GetAllSpacesPurpose } from '../../common';
 
 const createMockDebugLogger = () => {
   return jest.fn();

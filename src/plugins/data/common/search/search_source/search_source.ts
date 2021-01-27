@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 /**
@@ -408,7 +397,12 @@ export class SearchSource {
       case 'query':
         return addToRoot(key, (data[key] || []).concat(val));
       case 'fields':
-        // uses new Fields API
+        // This will pass the passed in parameters to the new fields API.
+        // Also if will only return scripted fields that are part of the specified
+        // array of fields. If you specify the wildcard `*` as an array element
+        // the fields API will return all fields, and all scripted fields will be returned.
+        // NOTE: While the fields API supports wildcards within names, e.g. `user.*`
+        //       scripted fields won't be considered for this.
         return addToBody('fields', val);
       case 'fieldsFromSource':
         // preserves legacy behavior
@@ -467,12 +461,13 @@ export class SearchSource {
     searchRequest.indexType = this.getIndexType(index);
 
     // get some special field types from the index pattern
-    const { docvalueFields, scriptFields, storedFields } = index
+    const { docvalueFields, scriptFields, storedFields, runtimeFields } = index
       ? index.getComputedFields()
       : {
           docvalueFields: [],
           scriptFields: {},
           storedFields: ['*'],
+          runtimeFields: {},
         };
 
     const fieldListProvided = !!body.fields;
@@ -487,6 +482,7 @@ export class SearchSource {
       ...scriptFields,
     };
     body.stored_fields = storedFields;
+    body.runtime_mappings = runtimeFields || {};
 
     // apply source filters from index pattern if specified by the user
     let filteredDocvalueFields = docvalueFields;
@@ -518,17 +514,24 @@ export class SearchSource {
       );
       const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
-      // filter down script_fields to only include items specified
-      body.script_fields = pick(
-        body.script_fields,
-        Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
-      );
+      if (!uniqFieldNames.includes('*')) {
+        // filter down script_fields to only include items specified
+        body.script_fields = pick(
+          body.script_fields,
+          Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
+        );
+        body.runtime_mappings = pick(
+          body.runtime_mappings,
+          Object.keys(body.runtime_mappings).filter((f) => uniqFieldNames.includes(f))
+        );
+      }
 
       // request the remaining fields from stored_fields just in case, since the
       // fields API does not handle stored fields
-      const remainingFields = difference(uniqFieldNames, Object.keys(body.script_fields)).filter(
-        Boolean
-      );
+      const remainingFields = difference(uniqFieldNames, [
+        ...Object.keys(body.script_fields),
+        ...Object.keys(body.runtime_mappings),
+      ]).filter(Boolean);
 
       // only include unique values
       body.stored_fields = [...new Set(remainingFields)];

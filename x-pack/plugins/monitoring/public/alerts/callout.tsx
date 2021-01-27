@@ -5,79 +5,129 @@
  */
 
 import React, { Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { CommonAlertStatus } from '../../common/types/alerts';
-import { AlertSeverity } from '../../common/enums';
+import {
+  EuiPanel,
+  EuiSpacer,
+  EuiAccordion,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiCodeBlock,
+} from '@elastic/eui';
 import { replaceTokens } from './lib/replace_tokens';
-import { AlertMessage, AlertState } from '../../common/types/alerts';
-
-const TYPES = [
-  {
-    severity: AlertSeverity.Warning,
-    color: 'warning',
-    label: i18n.translate('xpack.monitoring.alerts.callout.warningLabel', {
-      defaultMessage: 'Warning alert(s)',
-    }),
-  },
-  {
-    severity: AlertSeverity.Danger,
-    color: 'danger',
-    label: i18n.translate('xpack.monitoring.alerts.callout.dangerLabel', {
-      defaultMessage: 'Danger alert(s)',
-    }),
-  },
-];
+import { AlertMessage } from '../../common/types/alerts';
+import { AlertsByName } from './types';
+import { isInSetupMode } from '../lib/setup_mode';
+import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
+import { AlertConfiguration } from './configuration';
 
 interface Props {
-  alerts: { [alertTypeId: string]: CommonAlertStatus };
-  stateFilter: (state: AlertState) => boolean;
-  nextStepsFilter: (nextStep: AlertMessage) => boolean;
+  alerts: AlertsByName;
 }
 export const AlertsCallout: React.FC<Props> = (props: Props) => {
-  const { alerts, stateFilter = () => true, nextStepsFilter = () => true } = props;
+  const { alerts } = props;
+  const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
-  const callouts = TYPES.map((type) => {
-    const list = [];
-    for (const alertTypeId of Object.keys(alerts)) {
-      const alertInstance = alerts[alertTypeId];
-      for (const { firing, state } of alertInstance.states) {
-        if (firing && stateFilter(state) && state.ui.severity === type.severity) {
-          list.push(state);
-        }
-      }
+  if (inSetupMode) {
+    return null;
+  }
+
+  const list = [];
+  for (const alertTypeId of Object.keys(alerts)) {
+    const alertInstance = alerts[alertTypeId];
+    for (const state of alertInstance.states) {
+      list.push({
+        alert: alertInstance,
+        state,
+      });
     }
+  }
 
-    if (list.length) {
-      return (
-        <Fragment>
-          <EuiCallOut title={type.label} color={type.severity} iconType="bell">
-            <ul>
-              {list.map((state, index) => {
-                const nextStepsUi =
-                  state.ui.message.nextSteps && state.ui.message.nextSteps.length ? (
-                    <ul>
-                      {state.ui.message.nextSteps
-                        .filter(nextStepsFilter)
-                        .map((step: AlertMessage, nextStepIndex: number) => (
-                          <li key={nextStepIndex}>{replaceTokens(step)}</li>
-                        ))}
-                    </ul>
-                  ) : null;
+  if (list.length === 0) {
+    return null;
+  }
 
-                return (
-                  <li key={index}>
-                    {replaceTokens(state.ui.message)}
-                    {nextStepsUi}
-                  </li>
-                );
-              })}
-            </ul>
-          </EuiCallOut>
-          <EuiSpacer />
-        </Fragment>
-      );
-    }
+  const accordions = list.map((status, index) => {
+    const buttonContent = (
+      <div>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="alert" size="m" color="danger" />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiTextColor color="danger">
+              {replaceTokens(status.state.state.ui.message)}
+            </EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    );
+
+    const { code } = status.state.state.ui.message;
+    const accordion = (
+      <EuiAccordion
+        id={`monitoringAlertCallout_${index}`}
+        buttonContent={buttonContent}
+        paddingSize="s"
+      >
+        {code?.length ? (
+          <EuiCodeBlock
+            fontSize="s"
+            paddingSize="s"
+            language="json"
+            isCopyable={true}
+            overflowHeight={300}
+          >
+            {code}
+          </EuiCodeBlock>
+        ) : null}
+        <EuiListGroup
+          flush={true}
+          bordered={true}
+          gutterSize="m"
+          size="xs"
+          style={{
+            marginTop: '0.5rem',
+            paddingTop: '0.5rem',
+            paddingBottom: '0.5rem',
+            paddingLeft: `0.5rem`,
+          }}
+        >
+          {(status.state.state.ui.message.nextSteps || []).map(
+            (step: AlertMessage, stepIndex: number) => {
+              return (
+                <EuiListGroupItem
+                  onClick={() => {}}
+                  label={replaceTokens(step)}
+                  key={index + stepIndex}
+                />
+              );
+            }
+          )}
+          <EuiListGroupItem
+            label={<AlertConfiguration alert={status.alert.rawAlert} key={index} compressed />}
+          />
+        </EuiListGroup>
+      </EuiAccordion>
+    );
+
+    const spacer = index !== list.length - 1 ? <EuiSpacer /> : null;
+    return (
+      <div key={index}>
+        {accordion}
+        {spacer}
+      </div>
+    );
   });
-  return <Fragment>{callouts}</Fragment>;
+
+  return (
+    <Fragment>
+      <EuiPanel>{accordions}</EuiPanel>
+      <EuiSpacer />
+    </Fragment>
+  );
 };

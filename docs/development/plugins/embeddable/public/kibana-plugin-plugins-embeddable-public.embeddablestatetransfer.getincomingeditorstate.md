@@ -4,21 +4,19 @@
 
 ## EmbeddableStateTransfer.getIncomingEditorState() method
 
-Fetches an [originating app](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.md) argument from the scoped history's location state.
+Fetches an [originating app](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.md) argument from the sessionStorage
 
 <b>Signature:</b>
 
 ```typescript
-getIncomingEditorState(options?: {
-        keysToRemoveAfterFetch?: string[];
-    }): EmbeddableEditorState | undefined;
+getIncomingEditorState(removeAfterFetch?: boolean): EmbeddableEditorState | undefined;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>{</code><br/><code>        keysToRemoveAfterFetch?: string[];</code><br/><code>    }</code> |  |
+|  removeAfterFetch | <code>boolean</code> | Whether to remove the package state after fetch to prevent duplicates. |
 
 <b>Returns:</b>
 

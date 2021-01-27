@@ -7,11 +7,15 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiSwitch, EuiText } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
 import { ENABLE_STATUS_ALERT } from './translations';
-import { SETTINGS_LINK_TEXT } from '../../../../pages/page_header';
+
+const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
+  defaultMessage: 'Settings',
+});
 
 export const DefineAlertConnectors = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

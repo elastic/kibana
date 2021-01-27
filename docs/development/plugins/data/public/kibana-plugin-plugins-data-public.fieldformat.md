@@ -21,6 +21,7 @@ export declare abstract class FieldFormat
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [\_params](./kibana-plugin-plugins-data-public.fieldformat._params.md) |  | <code>any</code> |  |
+|  [allowsNumericalAggregations](./kibana-plugin-plugins-data-public.fieldformat.allowsnumericalaggregations.md) |  | <code>boolean</code> |  |
 |  [convertObject](./kibana-plugin-plugins-data-public.fieldformat.convertobject.md) |  | <code>FieldFormatConvert &#124; undefined</code> |  {<!-- -->FieldFormatConvert<!-- -->}  have to remove the private because of https://github.com/Microsoft/TypeScript/issues/17293 |
 |  [fieldType](./kibana-plugin-plugins-data-public.fieldformat.fieldtype.md) | <code>static</code> | <code>string &#124; string[]</code> |  {<!-- -->string<!-- -->} - Field Format Type  |
 |  [getConfig](./kibana-plugin-plugins-data-public.fieldformat.getconfig.md) |  | <code>FieldFormatsGetConfigFn &#124; undefined</code> |  |

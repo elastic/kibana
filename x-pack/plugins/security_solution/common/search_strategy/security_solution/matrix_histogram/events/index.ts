@@ -28,6 +28,7 @@ export interface EventsActionGroupData {
 export interface EventHit extends SearchHit {
   sort: string[];
   _source: EventSource;
+  fields: Record<string, unknown[]>;
   aggregations: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [agg: string]: any;

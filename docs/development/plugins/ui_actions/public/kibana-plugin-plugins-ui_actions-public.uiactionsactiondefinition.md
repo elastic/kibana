@@ -9,7 +9,7 @@ A convenience interface used to register an action.
 <b>Signature:</b>
 
 ```typescript
-export interface ActionDefinition<Context extends BaseContext = {}> extends Partial<Presentable<ActionDefinitionContext<Context>>> 
+export interface ActionDefinition<Context extends object = object> extends Partial<Presentable<ActionDefinitionContext<Context>>> 
 ```
 
 ## Properties
@@ -17,7 +17,7 @@ export interface ActionDefinition<Context extends BaseContext = {}> extends Part
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [id](./kibana-plugin-plugins-ui_actions-public.uiactionsactiondefinition.id.md) | <code>string</code> | ID of the action that uniquely identifies this action in the actions registry. |
-|  [type](./kibana-plugin-plugins-ui_actions-public.uiactionsactiondefinition.type.md) | <code>ActionType</code> | ID of the factory for this action. Used to construct dynamic actions. |
+|  [type](./kibana-plugin-plugins-ui_actions-public.uiactionsactiondefinition.type.md) | <code>string</code> | ID of the factory for this action. Used to construct dynamic actions. |
 
 ## Methods
 

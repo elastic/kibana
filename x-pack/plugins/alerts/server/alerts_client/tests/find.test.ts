@@ -18,6 +18,7 @@ import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
+import { RegistryAlertType } from '../../alert_type_registry';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -53,15 +54,17 @@ beforeEach(() => {
 setGlobalDate();
 
 describe('find()', () => {
-  const listedTypes = new Set([
+  const listedTypes = new Set<RegistryAlertType>([
     {
       actionGroups: [],
       recoveryActionGroup: RecoveredActionGroup,
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       id: 'myType',
       name: 'myType',
       producer: 'myApp',
+      enabledInLicense: true,
     },
   ]);
   beforeEach(() => {
@@ -85,6 +88,7 @@ describe('find()', () => {
             },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
             actions: [
               {
                 group: 'default',
@@ -115,10 +119,12 @@ describe('find()', () => {
           actionGroups: [{ id: 'default', name: 'Default' }],
           recoveryActionGroup: RecoveredActionGroup,
           defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },
           },
+          enabledInLicense: true,
         },
       ])
     );
@@ -143,6 +149,7 @@ describe('find()', () => {
             "alertTypeId": "myType",
             "createdAt": 2019-02-12T21:01:22.479Z,
             "id": "1",
+            "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
             },
@@ -234,6 +241,7 @@ describe('find()', () => {
             Object {
               "actions": Array [],
               "id": "1",
+              "notifyWhen": undefined,
               "schedule": undefined,
               "tags": Array [
                 "myTag",

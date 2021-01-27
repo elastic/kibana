@@ -34,7 +34,12 @@ export const createInitialState = (
   {
     kibanaIndexPatterns,
     configIndexPatterns,
-  }: { kibanaIndexPatterns: KibanaIndexPatterns; configIndexPatterns: string[] }
+    signalIndexName,
+  }: {
+    kibanaIndexPatterns: KibanaIndexPatterns;
+    configIndexPatterns: string[];
+    signalIndexName: string | null;
+  }
 ): PreloadedState<State> => {
   const preloadedState: PreloadedState<State> = {
     app: initialAppState,
@@ -52,6 +57,7 @@ export const createInitialState = (
       },
       kibanaIndexPatterns,
       configIndexPatterns,
+      signalIndexName,
     },
   };
   return preloadedState;

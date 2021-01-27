@@ -5,7 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../src/plugins/data/public';
+import {
+  FieldFormat,
+  FieldFormatInstanceType,
+  KBN_FIELD_TYPES,
+} from '../../../../../src/plugins/data/public';
 import { FormatFactory } from '../types';
 import { TimeScaleUnit } from './time_scale';
 
@@ -23,7 +27,7 @@ export const unitSuffixesLong: Record<TimeScaleUnit, string> = {
   d: i18n.translate('xpack.lens.fieldFormats.longSuffix.d', { defaultMessage: 'per day' }),
 };
 
-export function getSuffixFormatter(formatFactory: FormatFactory) {
+export function getSuffixFormatter(formatFactory: FormatFactory): FieldFormatInstanceType {
   return class SuffixFormatter extends FieldFormat {
     static id = 'suffix';
     static title = i18n.translate('xpack.lens.fieldFormats.suffix.title', {
@@ -48,6 +52,11 @@ export function getSuffixFormatter(formatFactory: FormatFactory) {
       const formattedValue = formatFactory({ id: nestedFormatter, params: nestedParams }).convert(
         val
       );
+
+      // do not add suffixes to empty strings
+      if (formattedValue === '') {
+        return '';
+      }
 
       if (suffix) {
         return `${formattedValue}${suffix}`;

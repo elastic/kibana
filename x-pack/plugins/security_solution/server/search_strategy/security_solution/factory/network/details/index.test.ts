@@ -29,7 +29,7 @@ describe('networkDetails search strategy', () => {
   describe('parse', () => {
     test('should parse data correctly', async () => {
       const result = await networkDetails.parse(mockOptions, mockSearchStrategyResponse);
-      expect(result).toMatchObject(formattedSearchStrategyResponse);
+      expect(result).toEqual(formattedSearchStrategyResponse);
     });
   });
 });

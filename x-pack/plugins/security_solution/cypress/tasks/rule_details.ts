@@ -24,12 +24,11 @@ import {
 } from '../screens/rule_details';
 
 export const activatesRule = () => {
-  cy.server();
-  cy.route('PATCH', '**/api/detection_engine/rules/_bulk_update').as('bulk_update');
+  cy.intercept('PATCH', '/api/detection_engine/rules/_bulk_update').as('bulk_update');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
-  cy.wait('@bulk_update').then((response) => {
-    cy.wrap(response.status).should('eql', 200);
+  cy.wait('@bulk_update').then(({ response }) => {
+    cy.wrap(response!.statusCode).should('eql', 200);
   });
 };
 
@@ -50,7 +49,7 @@ export const addsException = (exception: Exception) => {
   cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
-  cy.get(CONFIRM_BTN).should('not.have.attr', 'disabled');
+  cy.get(CONFIRM_BTN).should('not.exist');
 };
 
 export const addsExceptionFromRuleSettings = (exception: Exception) => {
@@ -68,7 +67,7 @@ export const addsExceptionFromRuleSettings = (exception: Exception) => {
   cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
-  cy.get(CONFIRM_BTN).should('not.have.attr', 'disabled');
+  cy.get(CONFIRM_BTN).should('not.exist');
 };
 
 export const goToAlertsTab = () => {

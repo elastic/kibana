@@ -25,6 +25,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
     const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
 
+    const hideErrorToast = async () => {
+      if (await testSubjects.exists('errorToastMessage', { timeout: 0 })) {
+        await testSubjects.click('toastCloseButton');
+      }
+    };
+
     before(async () => {
       // delete the saved object
       await deleteUptimeSettingsObject(server);
@@ -39,12 +45,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('displays to define default connector', async () => {
+      await hideErrorToast();
       await testSubjects.click('uptimeDisplayDefineConnector');
       await testSubjects.existOrFail('uptimeSettingsDefineConnector');
     });
 
     it('go to settings to define connector', async () => {
-      await testSubjects.click('uptimeSettingsLink');
+      await uptimeService.overview.clickDefineSettings();
       await uptimeService.common.waitUntilDataIsLoaded();
       await testSubjects.existOrFail('comboBoxInput');
     });

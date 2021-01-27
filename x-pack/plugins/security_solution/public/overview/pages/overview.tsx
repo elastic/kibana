@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
-import { Query, Filter } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
 import { AlertsByCategory } from '../components/alerts_by_category';
@@ -33,9 +32,6 @@ import { Sourcerer } from '../../common/components/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 
-const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
-const NO_FILTERS: Filter[] = [];
-
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
 `;
@@ -46,10 +42,8 @@ const OverviewComponent = () => {
     []
   );
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
-  const query = useDeepEqualSelector((state) => getGlobalQuerySelector(state) ?? DEFAULT_QUERY);
-  const filters = useDeepEqualSelector(
-    (state) => getGlobalFiltersQuerySelector(state) ?? NO_FILTERS
-  );
+  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
@@ -97,7 +91,6 @@ const OverviewComponent = () => {
                     <SignalsByCategory
                       filters={filters}
                       from={from}
-                      indexPattern={indexPattern}
                       query={query}
                       setQuery={setQuery}
                       to={to}

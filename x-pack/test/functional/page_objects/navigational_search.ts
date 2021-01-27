@@ -43,6 +43,11 @@ export function NavigationalSearchProvider({ getService, getPageObjects }: FtrPr
       }
     }
 
+    async getFieldValue() {
+      const field = await testSubjects.find('nav-search-input');
+      return field.getAttribute('value');
+    }
+
     async clearField() {
       const field = await testSubjects.find('nav-search-input');
       await field.clearValueWithKeyboard();

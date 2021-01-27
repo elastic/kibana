@@ -57,6 +57,7 @@ describe('editor_frame service', () => {
             indexPatternId: '1',
             fieldName: 'test',
           },
+          searchSessionId: 'sessionId',
         });
         instance.unmount();
       })()
@@ -78,6 +79,7 @@ describe('editor_frame service', () => {
       query: { query: '', language: 'lucene' },
       filters: [],
       showNoDataPopover: jest.fn(),
+      searchSessionId: 'sessionId',
     });
     instance.unmount();
 

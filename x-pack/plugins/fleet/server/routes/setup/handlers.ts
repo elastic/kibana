@@ -15,13 +15,14 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
   const soClient = context.core.savedObjects.client;
   try {
     const isAdminUserSetup = (await outputService.getAdminUser(soClient)) !== null;
-    const isApiKeysEnabled = await appContextService.getSecurity().authc.areAPIKeysEnabled();
+    const isApiKeysEnabled = await appContextService
+      .getSecurity()
+      .authc.apiKeys.areAPIKeysEnabled();
     const isTLSEnabled = appContextService.getHttpSetup().getServerInfo().protocol === 'https';
     const isProductionMode = appContextService.getIsProductionMode();
     const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
     const isTLSCheckDisabled = appContextService.getConfig()?.agents?.tlsCheckDisabled ?? false;
-    const isUsingEphemeralEncryptionKey = appContextService.getEncryptedSavedObjectsSetup()
-      .usingEphemeralEncryptionKey;
+    const isUsingEphemeralEncryptionKey = !appContextService.getEncryptedSavedObjectsSetup();
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
     if (!isAdminUserSetup) {
@@ -58,9 +59,10 @@ export const createFleetSetupHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const soClient = context.core.savedObjects.client;
+    const esClient = context.core.elasticsearch.client.asCurrentUser;
     const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-    await setupIngestManager(soClient, callCluster);
-    await setupFleet(soClient, callCluster, {
+    await setupIngestManager(soClient, esClient, callCluster);
+    await setupFleet(soClient, esClient, callCluster, {
       forceRecreate: request.body?.forceRecreate ?? false,
     });
 
@@ -74,11 +76,12 @@ export const createFleetSetupHandler: RequestHandler<
 
 export const FleetSetupHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
 
   try {
     const body: PostIngestSetupResponse = { isInitialized: true };
-    await setupIngestManager(soClient, callCluster);
+    await setupIngestManager(soClient, esClient, callCluster);
     return response.ok({
       body,
     });

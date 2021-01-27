@@ -24,6 +24,12 @@ import { registerSettingsRoute } from './settings';
 type HttpService = ReturnType<typeof createHttpServer>;
 type HttpSetup = UnwrapPromise<ReturnType<HttpService['setup']>>;
 
+export function mockGetClusterInfo(clusterInfo: any) {
+  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+  // @ts-ignore we only care about the response body
+  esClient.info.mockResolvedValue({ body: { ...clusterInfo } });
+  return esClient;
+}
 describe('/api/settings', () => {
   let server: HttpService;
   let httpSetup: HttpSetup;
@@ -31,7 +37,7 @@ describe('/api/settings', () => {
   let mockApiCaller: jest.Mocked<LegacyAPICaller>;
 
   beforeEach(async () => {
-    mockApiCaller = jest.fn().mockResolvedValue({ cluster_uuid: 'yyy-yyyyy' });
+    mockApiCaller = jest.fn();
     server = createHttpServer();
     httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract({
@@ -43,7 +49,7 @@ describe('/api/settings', () => {
               },
             },
             client: {
-              asCurrentUser: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
+              asCurrentUser: mockGetClusterInfo({ cluster_uuid: 'yyy-yyyyy' }),
             },
           },
           savedObjects: {

@@ -13,26 +13,32 @@ import { IS_DRAGGING_CLASS_NAME } from '../../../../common/components/drag_and_d
 import { DataProvider } from '../../timeline/data_providers/data_provider';
 import { flattenIntoAndGroups } from '../../timeline/data_providers/helpers';
 import { DataProviders } from '../../timeline/data_providers';
+import { FLYOUT_BUTTON_BAR_CLASS_NAME, FLYOUT_BUTTON_CLASS_NAME } from '../../timeline/helpers';
 import { FlyoutHeaderPanel } from '../header';
-
-export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 
 export const getBadgeCount = (dataProviders: DataProvider[]): number =>
   flattenIntoAndGroups(dataProviders).reduce((total, group) => total + group.length, 0);
 
-const SHOW_HIDE_TRANSLATE_X = 50; // px
+const SHOW_HIDE_GLOBAL_TRANSLATE_Y = 50; // px
+const SHOW_HIDE_TIMELINE_TRANSLATE_Y = 0; // px
 
-const Container = styled.div`
+const Container = styled.div.attrs<{ $isGlobal: boolean }>(({ $isGlobal = true }) => ({
+  style: {
+    transform: $isGlobal
+      ? `translateY(calc(100% - ${SHOW_HIDE_GLOBAL_TRANSLATE_Y}px))`
+      : `translateY(calc(100% - ${SHOW_HIDE_TIMELINE_TRANSLATE_Y}px))`,
+  },
+}))<{ $isGlobal: boolean }>`
   position: fixed;
   left: 0;
   bottom: 0;
-  transform: translateY(calc(100% - ${SHOW_HIDE_TRANSLATE_X}px));
   user-select: none;
   width: 100%;
-  z-index: ${({ theme }) => theme.eui.euiZLevel6};
+  z-index: ${({ theme }) => theme.eui.euiZLevel8 + 1};
 
   .${IS_DRAGGING_CLASS_NAME} & {
-    transform: none;
+    transform: none !important;
   }
 
   .${FLYOUT_BUTTON_CLASS_NAME} {
@@ -61,16 +67,28 @@ const DataProvidersPanel = styled(EuiPanel)`
 `;
 
 interface FlyoutBottomBarProps {
+  activeTab: TimelineTabs;
+  showDataproviders: boolean;
   timelineId: string;
 }
 
-export const FlyoutBottomBar = React.memo<FlyoutBottomBarProps>(({ timelineId }) => (
-  <Container data-test-subj="flyoutBottomBar">
-    <FlyoutHeaderPanel timelineId={timelineId} />
-    <DataProvidersPanel paddingSize="none">
-      <DataProviders timelineId={timelineId} data-test-subj="dataProviders-bottomBar" />
-    </DataProvidersPanel>
-  </Container>
-));
+export const FlyoutBottomBar = React.memo<FlyoutBottomBarProps>(
+  ({ activeTab, showDataproviders, timelineId }) => {
+    return (
+      <Container
+        className={FLYOUT_BUTTON_BAR_CLASS_NAME}
+        $isGlobal={showDataproviders}
+        data-test-subj="flyoutBottomBar"
+      >
+        {showDataproviders && <FlyoutHeaderPanel timelineId={timelineId} />}
+        {(showDataproviders || (!showDataproviders && activeTab !== TimelineTabs.query)) && (
+          <DataProvidersPanel paddingSize="none">
+            <DataProviders timelineId={timelineId} data-test-subj="dataProviders-bottomBar" />
+          </DataProvidersPanel>
+        )}
+      </Container>
+    );
+  }
+);
 
 FlyoutBottomBar.displayName = 'FlyoutBottomBar';

@@ -63,7 +63,9 @@ exports[`Paginated Table Component rendering it renders the default load more ta
           "disabled": "#4c4e51",
           "ghost": "#ffffff",
           "primary": "#1ba9f5",
+          "success": "#7de2d1",
           "text": "#dfe5ef",
+          "warning": "#ffce7a",
         },
         "euiButtonHeight": "40px",
         "euiButtonHeightSmall": "32px",
@@ -353,6 +355,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
           "small": "14px",
           "xSmall": "12px",
         },
+        "euiMarkdownEditorMinHeight": "150px",
         "euiPageBackgroundColor": "#1a1b20",
         "euiPaletteColorBlind": Object {
           "euiColorVis0": Object {
@@ -458,12 +461,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         "euiRangeTrackHeight": "2px",
         "euiRangeTrackRadius": "4px",
         "euiRangeTrackWidth": "100%",
-        "euiResizableButtonSizeModifiers": Object {
-          "sizeExtraLarge": "40px",
-          "sizeLarge": "24px",
-          "sizeMedium": "16px",
-          "sizeSmall": "12px",
-        },
+        "euiResizableButtonSize": "16px",
         "euiResizableButtonTransitionSpeed": "150ms",
         "euiScrollBar": "16px",
         "euiScrollBarCorner": "6px",

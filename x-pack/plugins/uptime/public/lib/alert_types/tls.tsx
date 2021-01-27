@@ -10,7 +10,7 @@ import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { TlsTranslations } from './translations';
 import { AlertTypeInitializer } from '.';
 
-const { name, defaultActionMessage, description } = TlsTranslations;
+const { defaultActionMessage, description } = TlsTranslations;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
 export const initTlsAlertType: AlertTypeInitializer = ({ core, plugins }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
@@ -21,7 +21,6 @@ export const initTlsAlertType: AlertTypeInitializer = ({ core, plugins }): Alert
   alertParamsExpression: (params: any) => (
     <TLSAlert core={core} plugins={plugins} params={params} />
   ),
-  name,
   description,
   validate: () => ({ errors: {} }),
   defaultActionMessage,

@@ -7,7 +7,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 // import { act } from 'react-dom/test-utils';
-import { EuiThemeProvider } from '../../../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { EuiToolTip } from '@elastic/eui';
 import { ConditionalToolTip } from './conditional_tooltip';
 import {
@@ -22,7 +22,12 @@ jest.mock('../../../../../containers/source', () => ({
 
 jest.mock('../../hooks/use_snaphot');
 import { useSnapshot } from '../../hooks/use_snaphot';
+jest.mock('../../hooks/use_waffle_options');
+import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 const mockedUseSnapshot = useSnapshot as jest.Mock<ReturnType<typeof useSnapshot>>;
+const mockedUseWaffleOptionsContext = useWaffleOptionsContext as jest.Mock<
+  ReturnType<typeof useWaffleOptionsContext>
+>;
 
 const NODE: InfraWaffleMapNode = {
   pathId: 'host-01',
@@ -50,6 +55,7 @@ const ChildComponent = () => <div>child</div>;
 describe('ConditionalToolTip', () => {
   afterEach(() => {
     mockedUseSnapshot.mockReset();
+    mockedUseWaffleOptionsContext.mockReset();
   });
 
   function createWrapper(currentTime: number = Date.now(), hidden: boolean = false) {
@@ -77,6 +83,7 @@ describe('ConditionalToolTip', () => {
       interval: '',
       reload: jest.fn(() => Promise.resolve()),
     });
+    mockedUseWaffleOptionsContext.mockReturnValue(mockedUseWaffleOptionsContexReturnValue);
     const currentTime = Date.now();
     const wrapper = createWrapper(currentTime, true);
     expect(wrapper.find(ChildComponent).exists()).toBeTruthy();
@@ -95,6 +102,18 @@ describe('ConditionalToolTip', () => {
             { name: 'memory', value: 0.8, avg: 0.8, max: 1 },
             { name: 'tx', value: 1000000, avg: 1000000, max: 1000000 },
             { name: 'rx', value: 1000000, avg: 1000000, max: 1000000 },
+            {
+              name: 'cedd6ca0-5775-11eb-a86f-adb714b6c486',
+              max: 0.34164999922116596,
+              value: 0.34140000740687054,
+              avg: 0.20920833365784752,
+            },
+            {
+              name: 'e12dd700-5775-11eb-a86f-adb714b6c486',
+              max: 4703.166666666667,
+              value: 4392.166666666667,
+              avg: 3704.6666666666674,
+            },
           ],
         },
       ],
@@ -103,6 +122,7 @@ describe('ConditionalToolTip', () => {
       interval: '60s',
       reload: reloadMock,
     });
+    mockedUseWaffleOptionsContext.mockReturnValue(mockedUseWaffleOptionsContexReturnValue);
     const currentTime = Date.now();
     const wrapper = createWrapper(currentTime, false);
     expect(wrapper.find(ChildComponent).exists()).toBeTruthy();
@@ -114,7 +134,25 @@ describe('ConditionalToolTip', () => {
         },
       },
     });
-    const expectedMetrics = [{ type: 'cpu' }, { type: 'memory' }, { type: 'tx' }, { type: 'rx' }];
+    const expectedMetrics = [
+      { type: 'cpu' },
+      { type: 'memory' },
+      { type: 'tx' },
+      { type: 'rx' },
+      {
+        aggregation: 'avg',
+        field: 'host.cpu.pct',
+        id: 'cedd6ca0-5775-11eb-a86f-adb714b6c486',
+        label: 'My Custom Label',
+        type: 'custom',
+      },
+      {
+        aggregation: 'avg',
+        field: 'host.network.out.packets',
+        id: 'e12dd700-5775-11eb-a86f-adb714b6c486',
+        type: 'custom',
+      },
+    ];
     expect(mockedUseSnapshot).toBeCalledWith(
       expectedQuery,
       expectedMetrics,
@@ -143,6 +181,7 @@ describe('ConditionalToolTip', () => {
       interval: '',
       reload: reloadMock,
     });
+    mockedUseWaffleOptionsContext.mockReturnValue(mockedUseWaffleOptionsContexReturnValue);
     const currentTime = Date.now();
     const wrapper = createWrapper(currentTime, false);
     expect(wrapper.find(ChildComponent).exists()).toBeTruthy();
@@ -154,3 +193,44 @@ describe('ConditionalToolTip', () => {
     expect(reloadMock).not.toHaveBeenCalled();
   });
 });
+
+const mockedUseWaffleOptionsContexReturnValue: ReturnType<typeof useWaffleOptionsContext> = {
+  changeMetric: jest.fn(() => {}),
+  changeGroupBy: jest.fn(() => {}),
+  changeNodeType: jest.fn(() => {}),
+  changeView: jest.fn(() => {}),
+  changeCustomOptions: jest.fn(() => {}),
+  changeAutoBounds: jest.fn(() => {}),
+  changeBoundsOverride: jest.fn(() => {}),
+  changeAccount: jest.fn(() => {}),
+  changeRegion: jest.fn(() => {}),
+  changeCustomMetrics: jest.fn(() => {}),
+  changeLegend: jest.fn(() => {}),
+  changeSort: jest.fn(() => {}),
+  setWaffleOptionsState: jest.fn(() => {}),
+  boundsOverride: { max: 1, min: 0 },
+  autoBounds: true,
+  accountId: '',
+  region: '',
+  sort: { by: 'name', direction: 'desc' },
+  groupBy: [],
+  nodeType: 'host',
+  customOptions: [],
+  view: 'map',
+  metric: { type: 'cpu' },
+  customMetrics: [
+    {
+      aggregation: 'avg',
+      field: 'host.cpu.pct',
+      id: 'cedd6ca0-5775-11eb-a86f-adb714b6c486',
+      label: 'My Custom Label',
+      type: 'custom',
+    },
+    {
+      aggregation: 'avg',
+      field: 'host.network.out.packets',
+      id: 'e12dd700-5775-11eb-a86f-adb714b6c486',
+      type: 'custom',
+    },
+  ],
+};

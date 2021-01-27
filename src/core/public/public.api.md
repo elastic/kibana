@@ -7,33 +7,37 @@
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
+import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
+import { DetailedPeerCertificate } from 'tls';
 import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
-import { ExclusiveUnion } from '@elastic/eui';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
+import { IncomingHttpHeaders } from 'http';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
+import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
+import { PeerCertificate } from 'tls';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
 import React from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { Request } from '@hapi/hapi';
 import * as Rx from 'rxjs';
-import { ShallowPromise } from '@kbn/utility-types';
+import { SchemaTypeError } from '@kbn/config-schema';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -41,6 +45,7 @@ import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
+import { URL } from 'url';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
@@ -57,11 +62,10 @@ export interface App<HistoryLocationState = unknown> {
     exactRoute?: boolean;
     icon?: string;
     id: string;
-    mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
+    meta?: AppMeta;
+    mount: AppMount<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
     order?: number;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppSubLink"
-    searchDeepLinks?: AppSearchDeepLink[];
     status?: AppStatus;
     title: string;
     tooltip?: string;
@@ -93,6 +97,8 @@ export enum AppLeaveActionType {
 // @public
 export interface AppLeaveConfirmAction {
     // (undocumented)
+    callback?: () => void;
+    // (undocumented)
     text: string;
     // (undocumented)
     title?: string;
@@ -111,14 +117,12 @@ export interface AppLeaveDefaultAction {
 // Warning: (ae-forgotten-export) The symbol "AppLeaveActionFactory" needs to be exported by the entry point index.d.ts
 //
 // @public
-export type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction;
+export type AppLeaveHandler = (factory: AppLeaveActionFactory, nextAppId?: string) => AppLeaveAction;
 
 // @public (undocumented)
 export interface ApplicationSetup {
     register<HistoryLocationState = unknown>(app: App<HistoryLocationState>): void;
     registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
-    // @deprecated
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
 
 // @public (undocumented)
@@ -132,33 +136,16 @@ export interface ApplicationStart {
     }): string;
     navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
     navigateToUrl(url: string): Promise<void>;
-    // @deprecated
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
+}
+
+// @public
+export interface AppMeta {
+    keywords?: string[];
+    searchDeepLinks?: AppSearchDeepLink[];
 }
 
 // @public
 export type AppMount<HistoryLocationState = unknown> = (params: AppMountParameters<HistoryLocationState>) => AppUnmount | Promise<AppUnmount>;
-
-// @public @deprecated
-export interface AppMountContext {
-    core: {
-        application: Pick<ApplicationStart, 'capabilities' | 'navigateToApp'>;
-        chrome: ChromeStart;
-        docLinks: DocLinksStart;
-        http: HttpStart;
-        i18n: I18nStart;
-        notifications: NotificationsStart;
-        overlays: OverlayStart;
-        savedObjects: SavedObjectsStart;
-        uiSettings: IUiSettingsClient;
-        injectedMetadata: {
-            getInjectedVar: (name: string, defaultValue?: any) => unknown;
-        };
-    };
-}
-
-// @public @deprecated
-export type AppMountDeprecated<HistoryLocationState = unknown> = (context: AppMountContext, params: AppMountParameters<HistoryLocationState>) => AppUnmount | Promise<AppUnmount>;
 
 // @public (undocumented)
 export interface AppMountParameters<HistoryLocationState = unknown> {
@@ -185,9 +172,11 @@ export type AppSearchDeepLink = {
 } & ({
     path: string;
     searchDeepLinks?: AppSearchDeepLink[];
+    keywords?: string[];
 } | {
     path?: string;
     searchDeepLinks: AppSearchDeepLink[];
+    keywords?: string[];
 });
 
 // @public
@@ -200,7 +189,7 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'searchDeepLinks'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'meta'>;
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
@@ -250,32 +239,36 @@ export interface ChromeHelpExtension {
 }
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
-    linkType: 'custom';
+export type ChromeHelpExtensionLinkBase = Pick<EuiButtonEmptyProps, 'iconType' | 'target' | 'rel' | 'data-test-subj'>;
+
+// @public (undocumented)
+export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLinkBase {
     content: React.ReactNode;
-};
+    href: string;
+    linkType: 'custom';
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
+export interface ChromeHelpExtensionMenuDiscussLink extends ChromeHelpExtensionLinkBase {
+    href: string;
     linkType: 'discuss';
-    href: string;
-};
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
+export interface ChromeHelpExtensionMenuDocumentationLink extends ChromeHelpExtensionLinkBase {
+    href: string;
     linkType: 'documentation';
-    href: string;
-};
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
-    linkType: 'github';
+export interface ChromeHelpExtensionMenuGitHubLink extends ChromeHelpExtensionLinkBase {
     labels: string[];
+    linkType: 'github';
     title?: string;
-};
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuLink = ExclusiveUnion<ChromeHelpExtensionMenuGitHubLink, ExclusiveUnion<ChromeHelpExtensionMenuDiscussLink, ExclusiveUnion<ChromeHelpExtensionMenuDocumentationLink, ChromeHelpExtensionMenuCustomLink>>>;
+export type ChromeHelpExtensionMenuLink = ChromeHelpExtensionMenuGitHubLink | ChromeHelpExtensionMenuDiscussLink | ChromeHelpExtensionMenuDocumentationLink | ChromeHelpExtensionMenuCustomLink;
 
 // @public (undocumented)
 export interface ChromeNavControl {
@@ -380,11 +373,6 @@ export interface ChromeStart {
     setIsVisible(isVisible: boolean): void;
 }
 
-// @public
-export interface ContextSetup {
-    createContextContainer<THandler extends HandlerFunction<any>>(): IContextContainer<THandler>;
-}
-
 // @internal (undocumented)
 export interface CoreContext {
     // Warning: (ae-forgotten-export) The symbol "CoreId" needs to be exported by the entry point index.d.ts
@@ -402,8 +390,6 @@ export interface CoreContext {
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
     application: ApplicationSetup;
-    // @deprecated (undocumented)
-    context: ContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
@@ -482,6 +468,7 @@ export interface DocLinksStart {
             readonly urlDrilldownTemplateSyntax: string;
             readonly urlDrilldownVariables: string;
         };
+        readonly discover: Record<string, string>;
         readonly filebeat: {
             readonly base: string;
             readonly installation: string;
@@ -495,6 +482,11 @@ export interface DocLinksStart {
         };
         readonly metricbeat: {
             readonly base: string;
+        };
+        readonly enterpriseSearch: {
+            readonly base: string;
+            readonly appSearchBase: string;
+            readonly workplaceSearchBase: string;
         };
         readonly heartbeat: {
             readonly base: string;
@@ -511,6 +503,7 @@ export interface DocLinksStart {
         readonly aggs: {
             readonly date_histogram: string;
             readonly date_range: string;
+            readonly date_format_pattern: string;
             readonly filter: string;
             readonly filters: string;
             readonly geohash_grid: string;
@@ -540,6 +533,7 @@ export interface DocLinksStart {
             readonly sum: string;
             readonly top_hits: string;
         };
+        readonly runtimeFields: string;
         readonly scriptedFields: {
             readonly scriptFields: string;
             readonly scriptAggs: string;
@@ -554,6 +548,7 @@ export interface DocLinksStart {
         };
         readonly addData: string;
         readonly kibana: string;
+        readonly elasticsearch: Record<string, string>;
         readonly siem: {
             readonly guide: string;
             readonly gettingStarted: string;
@@ -568,7 +563,43 @@ export interface DocLinksStart {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
+        readonly ml: Record<string, string>;
+        readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
+        readonly apis: Readonly<{
+            createIndex: string;
+            createSnapshotLifecyclePolicy: string;
+            createRoleMapping: string;
+            createRoleMappingTemplates: string;
+            createApiKey: string;
+            createPipeline: string;
+            createTransformRequest: string;
+            executeWatchActionModes: string;
+            openIndex: string;
+            putComponentTemplate: string;
+            painlessExecute: string;
+            putComponentTemplateMetadata: string;
+            putWatch: string;
+            updateTransform: string;
+        }>;
+        readonly observability: Record<string, string>;
+        readonly alerting: Record<string, string>;
+        readonly maps: Record<string, string>;
+        readonly monitoring: Record<string, string>;
+        readonly security: Readonly<{
+            apiKeyServiceSettings: string;
+            clusterPrivileges: string;
+            elasticsearchSettings: string;
+            elasticsearchEnableSecurity: string;
+            indicesPrivileges: string;
+            kibanaTLS: string;
+            kibanaPrivileges: string;
+            mappingRoles: string;
+            mappingRolesFieldRules: string;
+            runAsPrivilege: string;
+        }>;
+        readonly watcher: Record<string, string>;
+        readonly ccs: Record<string, string>;
     };
 }
 
@@ -596,15 +627,6 @@ export interface FatalErrorsSetup {
 
 // @public
 export type FatalErrorsStart = FatalErrorsSetup;
-
-// @public
-export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
-
-// @public
-export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => any;
-
-// @public
-export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
 
 // @internal (undocumented)
 export class HttpFetchError extends Error implements IHttpFetchError {
@@ -721,6 +743,8 @@ export interface HttpSetup {
     anonymousPaths: IAnonymousPaths;
     basePath: IBasePath;
     delete: HttpHandler;
+    // (undocumented)
+    externalUrl: IExternalUrl;
     fetch: HttpHandler;
     get: HttpHandler;
     getLoadingCount$(): Observable<number>;
@@ -754,21 +778,23 @@ export interface IAnonymousPaths {
 export interface IBasePath {
     get: () => string;
     prepend: (url: string) => string;
+    readonly publicBaseUrl?: string;
     remove: (url: string) => string;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "BasePath"
     readonly serverBasePath: string;
 }
 
 // @public
-export interface IContextContainer<THandler extends HandlerFunction<any>> {
-    createHandler(pluginOpaqueId: PluginOpaqueId, handler: THandler): (...rest: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
-    registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
+export interface IExternalUrl {
+    validateUrl(relativeOrAbsoluteUrl: string): URL | null;
 }
 
-// Warning: (ae-forgotten-export) The symbol "PartialExceptFor" needs to be exported by the entry point index.d.ts
-//
 // @public
-export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: PartialExceptFor<HandlerContextType<THandler>, 'core'>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
+export interface IExternalUrlPolicy {
+    allow: boolean;
+    host?: string;
+    protocol?: string;
+}
 
 // @public (undocumented)
 export interface IHttpFetchError extends Error {
@@ -986,16 +1012,23 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 export type PluginOpaqueId = symbol;
 
 // @public
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'searchDeepLinks'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'meta'> & {
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
+    meta: PublicAppMetaInfo;
+};
+
+// @public
+export type PublicAppMetaInfo = Omit<AppMeta, 'keywords' | 'searchDeepLinks'> & {
+    keywords: string[];
     searchDeepLinks: PublicAppSearchDeepLinkInfo[];
 };
 
 // @public
-export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks'> & {
+export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks' | 'keywords'> & {
     searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+    keywords: string[];
 };
 
 // @public
@@ -1006,6 +1039,7 @@ export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
+    coreMigrationVersion?: string;
     // (undocumented)
     error?: SavedObjectError;
     id: string;
@@ -1123,6 +1157,7 @@ export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
 // @public (undocumented)
 export interface SavedObjectsCreateOptions {
+    coreMigrationVersion?: string;
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
     overwrite?: boolean;
@@ -1178,6 +1213,15 @@ export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObject
 }
 
 // @public
+export interface SavedObjectsImportActionRequiredWarning {
+    actionPath: string;
+    buttonLabel?: string;
+    message: string;
+    // (undocumented)
+    type: 'action_required';
+}
+
+// @public
 export interface SavedObjectsImportAmbiguousConflictError {
     // (undocumented)
     destinations: Array<{
@@ -1198,7 +1242,7 @@ export interface SavedObjectsImportConflictError {
 }
 
 // @public
-export interface SavedObjectsImportError {
+export interface SavedObjectsImportFailure {
     // (undocumented)
     error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
     // (undocumented)
@@ -1229,13 +1273,15 @@ export interface SavedObjectsImportMissingReferencesError {
 // @public
 export interface SavedObjectsImportResponse {
     // (undocumented)
-    errors?: SavedObjectsImportError[];
+    errors?: SavedObjectsImportFailure[];
     // (undocumented)
     success: boolean;
     // (undocumented)
     successCount: number;
     // (undocumented)
     successResults?: SavedObjectsImportSuccess[];
+    // (undocumented)
+    warnings: SavedObjectsImportWarning[];
 }
 
 // @public
@@ -1255,6 +1301,13 @@ export interface SavedObjectsImportRetry {
     }>;
     // (undocumented)
     type: string;
+}
+
+// @public
+export interface SavedObjectsImportSimpleWarning {
+    message: string;
+    // (undocumented)
+    type: 'simple';
 }
 
 // @public
@@ -1289,6 +1342,9 @@ export interface SavedObjectsImportUnsupportedTypeError {
     // (undocumented)
     type: 'unsupported_type';
 }
+
+// @public
+export type SavedObjectsImportWarning = SavedObjectsImportSimpleWarning | SavedObjectsImportActionRequiredWarning;
 
 // @public
 export interface SavedObjectsMigrationVersion {
@@ -1335,9 +1391,11 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
 
 // @public
 export class SimpleSavedObject<T = unknown> {
-    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
+    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, }: SavedObject<T>);
     // (undocumented)
     attributes: T;
+    // (undocumented)
+    coreMigrationVersion: SavedObject<T>['coreMigrationVersion'];
     // (undocumented)
     delete(): Promise<{}>;
     // (undocumented)
@@ -1449,6 +1507,7 @@ export interface UiSettingsParams<T = unknown> {
     requiresPageReload?: boolean;
     // (undocumented)
     schema: Type<T>;
+    sensitive?: boolean;
     type?: UiSettingsType;
     // (undocumented)
     validation?: ImageValidation | StringValidation;
@@ -1481,6 +1540,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:185:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:164:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

@@ -10,6 +10,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('apis', function () {
     this.tags('ciGroup6');
 
+    loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./es'));
     loadTestFile(require.resolve('./security'));
     loadTestFile(require.resolve('./spaces'));
@@ -32,5 +33,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./transform'));
     loadTestFile(require.resolve('./lists'));
     loadTestFile(require.resolve('./upgrade_assistant'));
+    loadTestFile(require.resolve('./searchprofiler'));
+    loadTestFile(require.resolve('./painless_lab'));
   });
 }

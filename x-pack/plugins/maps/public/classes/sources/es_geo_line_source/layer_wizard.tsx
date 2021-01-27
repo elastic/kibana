@@ -18,7 +18,7 @@ import { TracksLayerIcon } from '../../layers/icons/tracks_layer_icon';
 export const geoLineLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esGeoLineDescription', {
-    defaultMessage: 'Connect points into lines',
+    defaultMessage: 'Create lines from points',
   }),
   disabledReason: REQUIRES_GOLD_LICENSE_MSG,
   icon: TracksLayerIcon,

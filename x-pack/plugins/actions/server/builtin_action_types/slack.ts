@@ -6,8 +6,7 @@
 
 import { URL } from 'url';
 import { curry } from 'lodash';
-import { HttpsProxyAgent } from 'https-proxy-agent';
-import HttpProxyAgent from 'http-proxy-agent';
+import { Agent } from 'http';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
@@ -15,6 +14,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import { Logger } from '../../../../../src/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
+import { renderMustacheString } from '../lib/mustache_renderer';
 
 import {
   ActionType,
@@ -23,7 +23,7 @@ import {
   ExecutorType,
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { getProxyAgent } from './lib/get_proxy_agent';
+import { getProxyAgents } from './lib/get_proxy_agents';
 
 export type SlackActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 export type SlackActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -51,6 +51,7 @@ const ParamsSchema = schema.object({
 
 // action type definition
 
+export const ActionTypeId = '.slack';
 // customizing executor is only used for tests
 export function getActionType({
   logger,
@@ -62,28 +63,38 @@ export function getActionType({
   executor?: ExecutorType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 }): SlackActionType {
   return {
-    id: '.slack',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',
     }),
     validate: {
       secrets: schema.object(secretsSchemaProps, {
-        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
+        validate: curry(validateActionTypeConfig)(configurationUtilities),
       }),
       params: ParamsSchema,
     },
+    renderParameterTemplates,
     executor,
   };
 }
 
-function valdiateActionTypeConfig(
+function renderParameterTemplates(
+  params: ActionParamsType,
+  variables: Record<string, unknown>
+): ActionParamsType {
+  return {
+    message: renderMustacheString(params.message, variables, 'slack'),
+  };
+}
+
+function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   secretsObject: ActionTypeSecretsType
 ) {
-  let url: URL;
+  const configuredUrl = secretsObject.webhookUrl;
   try {
-    url = new URL(secretsObject.webhookUrl);
+    new URL(configuredUrl);
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.slack.slackConfigurationErrorNoHostname', {
       defaultMessage: 'error configuring slack action: unable to parse host name from webhookUrl',
@@ -91,7 +102,7 @@ function valdiateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureHostnameAllowed(url.hostname);
+    configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
       defaultMessage: 'error configuring slack action: {message}',
@@ -116,9 +127,13 @@ async function slackExecutor(
   const { webhookUrl } = secrets;
   const { message } = params;
 
-  let proxyAgent: HttpsProxyAgent | HttpProxyAgent | undefined;
+  let httpProxyAgent: Agent | undefined;
   if (execOptions.proxySettings) {
-    proxyAgent = getProxyAgent(execOptions.proxySettings, logger);
+    const httpProxyAgents = getProxyAgents(execOptions.proxySettings, logger);
+    httpProxyAgent = webhookUrl.toLowerCase().startsWith('https')
+      ? httpProxyAgents.httpsAgent
+      : httpProxyAgents.httpAgent;
+
     logger.debug(`IncomingWebhook was called with proxyUrl ${execOptions.proxySettings.proxyUrl}`);
   }
 
@@ -126,8 +141,7 @@ async function slackExecutor(
     // https://slack.dev/node-slack-sdk/webhook
     // node-slack-sdk use Axios inside :)
     const webhook = new IncomingWebhook(webhookUrl, {
-      // @ts-expect-error The types exposed by 'HttpsProxyAgent' isn't up to date with 'Agent'
-      agent: proxyAgent,
+      agent: httpProxyAgent,
     });
     result = await webhook.send(message);
   } catch (err) {

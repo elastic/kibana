@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "Tor Activity to the Internet",
-  "query": "event.category:(network or network_traffic) and network.transport:tcp and destination.port:(9001 or 9030) and source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and not destination.ip:(10.0.0.0/8 or 127.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or \"::1\")",
+  "query": "event.category:(network or network_traffic) and network.transport:tcp and destination.port:(9001 or 9030) and source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and  not destination.ip:(10.0.0.0/8 or 127.0.0.0/8 or 169.254.0.0/16 or 172.16.0.0/12 or 192.168.0.0/16 or 224.0.0.0/4 or \"::1\" or \"FE80::/10\" or \"FF00::/8\")",
   "risk_score": 47,
   "rule_id": "7d2c38d7-ede7-4bdf-b140-445906e6c540",
   "severity": "medium",
@@ -35,28 +35,20 @@
       },
       "technique": [
         {
-          "id": "T1043",
-          "name": "Commonly Used Port",
-          "reference": "https://attack.mitre.org/techniques/T1043/"
-        }
-      ]
-    },
-    {
-      "framework": "MITRE ATT&CK",
-      "tactic": {
-        "id": "TA0011",
-        "name": "Command and Control",
-        "reference": "https://attack.mitre.org/tactics/TA0011/"
-      },
-      "technique": [
-        {
-          "id": "T1188",
-          "name": "Multi-hop Proxy",
-          "reference": "https://attack.mitre.org/techniques/T1188/"
+          "id": "T1090",
+          "name": "Proxy",
+          "reference": "https://attack.mitre.org/techniques/T1090/",
+          "subtechnique": [
+            {
+              "id": "T1090.003",
+              "name": "Multi-hop Proxy",
+              "reference": "https://attack.mitre.org/techniques/T1090/003/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "query",
-  "version": 5
+  "version": 6
 }

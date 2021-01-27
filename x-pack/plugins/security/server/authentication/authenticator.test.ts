@@ -43,7 +43,7 @@ function getMockOptions({
     legacyAuditLogger: securityAuditLoggerMock.create(),
     audit: auditServiceMock.create(),
     getCurrentUser: jest.fn(),
-    clusterClient: elasticsearchServiceMock.createLegacyClusterClient(),
+    clusterClient: elasticsearchServiceMock.createClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
     license: licenseMock.create(),
     loggers: loggingSystemMock.create(),
@@ -53,9 +53,7 @@ function getMockOptions({
       { isTLSEnabled: false }
     ),
     session: sessionMock.create(),
-    getFeatureUsageService: jest
-      .fn()
-      .mockReturnValue(securityFeatureUsageServiceMock.createStartContract()),
+    featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
   };
 }
 
@@ -198,9 +196,7 @@ describe('Authenticator', () => {
       afterEach(() => jest.resetAllMocks());
 
       it('enabled by default', () => {
-        const authenticator = new Authenticator(getMockOptions());
-        expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
-        expect(authenticator.isProviderTypeEnabled('http')).toBe(true);
+        new Authenticator(getMockOptions());
 
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
@@ -210,14 +206,11 @@ describe('Authenticator', () => {
       });
 
       it('includes all required schemes if `autoSchemesEnabled` is enabled', () => {
-        const authenticator = new Authenticator(
+        new Authenticator(
           getMockOptions({
             providers: { basic: { basic1: { order: 0 } }, kerberos: { kerberos1: { order: 1 } } },
           })
         );
-        expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
-        expect(authenticator.isProviderTypeEnabled('kerberos')).toBe(true);
-        expect(authenticator.isProviderTypeEnabled('http')).toBe(true);
 
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
@@ -227,15 +220,12 @@ describe('Authenticator', () => {
       });
 
       it('does not include additional schemes if `autoSchemesEnabled` is disabled', () => {
-        const authenticator = new Authenticator(
+        new Authenticator(
           getMockOptions({
             providers: { basic: { basic1: { order: 0 } }, kerberos: { kerberos1: { order: 1 } } },
             http: { autoSchemesEnabled: false },
           })
         );
-        expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
-        expect(authenticator.isProviderTypeEnabled('kerberos')).toBe(true);
-        expect(authenticator.isProviderTypeEnabled('http')).toBe(true);
 
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
@@ -243,14 +233,12 @@ describe('Authenticator', () => {
       });
 
       it('disabled if explicitly disabled', () => {
-        const authenticator = new Authenticator(
+        new Authenticator(
           getMockOptions({
             providers: { basic: { basic1: { order: 0 } } },
             http: { enabled: false },
           })
         );
-        expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
-        expect(authenticator.isProviderTypeEnabled('http')).toBe(false);
 
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
@@ -1864,27 +1852,6 @@ describe('Authenticator', () => {
     });
   });
 
-  describe('`isProviderEnabled` method', () => {
-    it('returns `true` only if specified provider is enabled', () => {
-      let authenticator = new Authenticator(
-        getMockOptions({ providers: { basic: { basic1: { order: 0 } } } })
-      );
-      expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
-      expect(authenticator.isProviderTypeEnabled('saml')).toBe(false);
-
-      authenticator = new Authenticator(
-        getMockOptions({
-          providers: {
-            basic: { basic1: { order: 0 } },
-            saml: { saml1: { order: 1, realm: 'test' } },
-          },
-        })
-      );
-      expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
-      expect(authenticator.isProviderTypeEnabled('saml')).toBe(true);
-    });
-  });
-
   describe('`acknowledgeAccessAgreement` method', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
@@ -1911,9 +1878,7 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.update).not.toHaveBeenCalled();
-      expect(
-        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
-      ).not.toHaveBeenCalled();
+      expect(mockOptions.featureUsageService.recordPreAccessAgreementUsage).not.toHaveBeenCalled();
     });
 
     it('fails if cannot retrieve user session', async () => {
@@ -1926,12 +1891,10 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.update).not.toHaveBeenCalled();
-      expect(
-        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
-      ).not.toHaveBeenCalled();
+      expect(mockOptions.featureUsageService.recordPreAccessAgreementUsage).not.toHaveBeenCalled();
     });
 
-    it('fails if license doesn allow access agreement acknowledgement', async () => {
+    it('fails if license does not allow access agreement acknowledgement', async () => {
       mockOptions.license.getFeatures.mockReturnValue({
         allowAccessAgreement: false,
       } as SecurityLicenseFeatures);
@@ -1943,9 +1906,7 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.update).not.toHaveBeenCalled();
-      expect(
-        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
-      ).not.toHaveBeenCalled();
+      expect(mockOptions.featureUsageService.recordPreAccessAgreementUsage).not.toHaveBeenCalled();
     });
 
     it('properly acknowledges access agreement for the authenticated user', async () => {
@@ -1967,9 +1928,9 @@ describe('Authenticator', () => {
         }
       );
 
-      expect(
-        mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage
-      ).toHaveBeenCalledTimes(1);
+      expect(mockOptions.featureUsageService.recordPreAccessAgreementUsage).toHaveBeenCalledTimes(
+        1
+      );
     });
   });
 });

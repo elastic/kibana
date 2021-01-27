@@ -6,15 +6,15 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
-import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../common/alerting/logs/log_threshold/types';
+import {
+  LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+  PartialAlertParams,
+} from '../../../common/alerting/logs/log_threshold/types';
 import { validateExpression } from './validation';
 
-export function getAlertType(): AlertTypeModel {
+export function getAlertType(): AlertTypeModel<PartialAlertParams> {
   return {
     id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
-    name: i18n.translate('xpack.infra.logs.alertFlyout.alertName', {
-      defaultMessage: 'Log threshold',
-    }),
     description: i18n.translate('xpack.infra.logs.alertFlyout.alertDescription', {
       defaultMessage: 'Alert when the log aggregation exceeds the threshold.',
     }),

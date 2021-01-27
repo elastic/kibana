@@ -6,24 +6,15 @@
 
 import { BufferOptions } from 'pdfmake/interfaces';
 
+export const REPORTING_TABLE_LAYOUT = 'noBorder';
+
 export function getDocOptions(tableBorderWidth: number): BufferOptions {
   return {
     tableLayouts: {
-      noBorder: {
+      [REPORTING_TABLE_LAYOUT]: {
         // format is function (i, node) { ... };
         hLineWidth: () => 0,
         vLineWidth: () => 0,
-        paddingLeft: () => 0,
-        paddingRight: () => 0,
-        paddingTop: () => 0,
-        paddingBottom: () => 0,
-      },
-      simpleBorder: {
-        // format is function (i, node) { ... };
-        hLineWidth: () => tableBorderWidth,
-        vLineWidth: () => tableBorderWidth,
-        hLineColor: () => 'silver',
-        vLineColor: () => 'silver',
         paddingLeft: () => 0,
         paddingRight: () => 0,
         paddingTop: () => 0,

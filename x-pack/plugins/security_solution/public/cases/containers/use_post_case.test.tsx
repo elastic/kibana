@@ -24,6 +24,9 @@ describe('usePostCase', () => {
       type: ConnectorTypes.none,
       fields: null,
     },
+    settings: {
+      syncAlerts: true,
+    },
   };
   beforeEach(() => {
     jest.clearAllMocks();

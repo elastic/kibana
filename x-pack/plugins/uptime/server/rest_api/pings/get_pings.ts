@@ -22,12 +22,13 @@ export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
       size: schema.maybe(schema.number()),
       sort: schema.maybe(schema.string()),
       status: schema.maybe(schema.string()),
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({ uptimeEsClient }, _context, request, response): Promise<any> => {
+  handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
     const { from, to, index, monitorId, status, sort, size, locations } = request.query;
 
-    const result = await libs.requests.getPings({
+    return await libs.requests.getPings({
       uptimeEsClient,
       dateRange: { from, to },
       index,
@@ -36,12 +37,6 @@ export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
       sort,
       size,
       locations: locations ? JSON.parse(locations) : [],
-    });
-
-    return response.ok({
-      body: {
-        ...result,
-      },
     });
   },
 });

@@ -1,0 +1,44 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies execution from a directory masquerading as the Windows Program Files directories. These paths are trusted and usually host trusted third party programs. An adversary may leverage masquerading, along with low privileges to bypass detections whitelisting those folders.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License",
+  "name": "Program Files Directory Masquerading",
+  "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n /* capture both fake program files directory in process executable as well as if passed in process args as a dll*/\n  process.args : (\"C:\\\\*Program*Files*\\\\*\", \"C:\\\\*Program*Files*\\\\*\") and\n  not process.args : (\"C:\\\\Program Files\\\\*\", \"C:\\\\Program Files (x86)\\\\*\")\n",
+  "risk_score": 43,
+  "rule_id": "32c5cf9c-2ef8-4e87-819e-5ccb7cd18b14",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "reference": "https://attack.mitre.org/techniques/T1036/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 1
+}

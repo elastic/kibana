@@ -5,6 +5,7 @@
  */
 
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
+import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
 import { isEventTypeSignal } from './build_event_type_signal';
 import { Signal, Ancestor, BaseSignalHit } from './types';
 
@@ -73,6 +74,9 @@ export const removeClashes = (doc: BaseSignalHit): BaseSignalHit => {
  * @param rule The rule that is generating the new signal.
  */
 export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal => {
+  const _meta = {
+    version: SIGNALS_TEMPLATE_VERSION,
+  };
   const removedClashes = docs.map(removeClashes);
   const parents = removedClashes.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
@@ -81,6 +85,7 @@ export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal =>
     []
   );
   return {
+    _meta,
     parents,
     ancestors,
     status: 'open',

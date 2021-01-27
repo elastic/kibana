@@ -133,6 +133,12 @@ Example:
 
 `{{split event.value ","}}`
 
+|encodeURIComponent
+a|Escapes string using built in `encodeURIComponent` function.
+
+|encodeURIQuery
+a|Escapes string using built in `encodeURIComponent` function, while keeping "@", ":", "$", ",", and ";" characters as is.
+
 |===
 
 
@@ -146,17 +152,7 @@ The URL drilldown template has three sources for variables:
 * *Context* variables that change depending on where the drilldown is created and used. These variables are extracted from a context of a panel on a dashboard. For example, `{{context.panel.filters}}` gives access to filters that applied to the current panel.
 * *Event* variables that depend on the trigger context. These variables are dynamically extracted from the interaction context when the drilldown is executed.
 
-[[values-in-preview]]
-A subtle but important difference between *context* and *event* variables is that *context* variables use real values in previews when creating a URL drilldown. 
-For example, `{{context.panel.filters}}` are previewed with the current filters that applied to a panel. 
-*Event* variables are extracted during drilldown execution from a user interaction with a panel (for example, from a pie slice that the user clicked on).
-
-Because there is no user interaction with a panel in preview, there is no interaction context to use in a preview.
-To work around this, {kib} provides a sample interaction that relies on a trigger.
-So in a preview, you might notice that `{{event.value}}` is replaced with `{{event.value}}` instead of with a sample from your data.
-Such previews can help you make sure that the structure of your URL template is valid.
-However, to ensure that the configured URL drilldown works as expected with your data, you have to save the dashboard and test in the panel.
-
+To ensure that the configured URL drilldown works as expected with your data, you have to save the dashboard and test in the panel.
 You can access the full list of variables available for the current panel and selected trigger by clicking *Add variable* in the top-right corner of a URL template input.
 
 [float]
@@ -240,6 +236,22 @@ Note:
 
 `{{event.value}}` is a shorthand for `{{event.points.[0].value}}` + 
 `{{event.key}}` is a shorthand for `{{event.points.[0].key}}`
+
+| *Row click*
+| event.rowIndex
+| Number, representing the row that was clicked, starting from 0.
+
+|
+| event.values
+| An array of all cell values for the raw on which the action will execute.
+
+|
+| event.keys
+| An array of field names for each column.
+
+|
+| event.columnNames
+| An array of column names.
 
 | *Range selection*
 | event.from +

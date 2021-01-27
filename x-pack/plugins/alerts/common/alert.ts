@@ -5,11 +5,10 @@
  */
 
 import { SavedObjectAttribute, SavedObjectAttributes } from 'kibana/server';
+import { AlertNotifyWhenType } from './alert_notify_when_type';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AlertTypeState = Record<string, any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AlertTypeParams = Record<string, any>;
+export type AlertTypeState = Record<string, unknown>;
+export type AlertTypeParams = Record<string, unknown>;
 
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
@@ -25,6 +24,7 @@ export enum AlertExecutionStatusErrorReasons {
   Decrypt = 'decrypt',
   Execute = 'execute',
   Unknown = 'unknown',
+  License = 'license',
 }
 
 export interface AlertExecutionStatus {
@@ -50,7 +50,7 @@ export interface AlertAggregations {
   alertExecutionStatus: { [status: string]: number };
 }
 
-export interface Alert {
+export interface Alert<Params extends AlertTypeParams = never> {
   id: string;
   enabled: boolean;
   name: string;
@@ -59,7 +59,7 @@ export interface Alert {
   consumer: string;
   schedule: IntervalSchedule;
   actions: AlertAction[];
-  params: AlertTypeParams;
+  params: Params;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
@@ -68,12 +68,13 @@ export interface Alert {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
+  notifyWhen: AlertNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;
 }
 
-export type SanitizedAlert = Omit<Alert, 'apiKey'>;
+export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
 
 export enum HealthStatus {
   OK = 'ok',

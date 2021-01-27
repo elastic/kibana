@@ -26,7 +26,7 @@ import {
   removeServerGeneratedProperties,
   downgradeImmutableRule,
   createRule,
-  waitForRuleSuccess,
+  waitForRuleSuccessOrStatus,
   installPrePackagedRules,
   getRule,
   createExceptionList,
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const rule = await createRule(supertest, ruleWithException);
-        await waitForRuleSuccess(supertest, rule.id);
+        await waitForRuleSuccessOrStatus(supertest, rule.id);
         const bodyToCompare = removeServerGeneratedProperties(rule);
 
         const expected: Partial<RulesSchema> = {
@@ -444,7 +444,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           };
           const { id: createdId } = await createRule(supertest, ruleWithException);
-          await waitForRuleSuccess(supertest, createdId);
+          await waitForRuleSuccessOrStatus(supertest, createdId);
           await waitForSignalsToBePresent(supertest, 10, [createdId]);
           const signalsOpen = await getSignalsByIds(supertest, [createdId]);
           expect(signalsOpen.hits.hits.length).equal(10);
@@ -490,7 +490,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           };
           const rule = await createRule(supertest, ruleWithException);
-          await waitForRuleSuccess(supertest, rule.id);
+          await waitForRuleSuccessOrStatus(supertest, rule.id);
           const signalsOpen = await getSignalsByIds(supertest, [rule.id]);
           expect(signalsOpen.hits.hits.length).equal(0);
         });

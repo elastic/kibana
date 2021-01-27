@@ -72,6 +72,7 @@ describe('get()', () => {
             },
           },
         ],
+        notifyWhen: 'onActiveAlert',
       },
       references: [
         {
@@ -96,6 +97,7 @@ describe('get()', () => {
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
+        "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
         },

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 const reservedWords = ['valueOf', 'toString'];
@@ -47,38 +36,6 @@ const getDisplayName = (name, imported) => {
   }
 
   return displayName.replace('$', '.');
-};
-
-/**
- * Filters the context data by primitives and returns an array of primitive names
- * The current data structure from ES does not indicate if a field is
- * a primitive or class, so we infer this by checking
- * that no methods or fields are defined
- * @param {string} contextData
- * @returns {Array<String>}
- */
-const getPrimitives = (contextData) => {
-  return contextData
-    .filter(
-      ({
-        static_fields: staticFields,
-        fields,
-        static_methods: staticMethods,
-        methods,
-        constructors,
-      }) => {
-        if (
-          staticMethods.length === 0 &&
-          methods.length === 0 &&
-          staticFields.length === 0 &&
-          fields.length === 0 &&
-          constructors.length === 0
-        ) {
-          return true;
-        }
-      }
-    )
-    .map((type) => type.name);
 };
 
 /**
@@ -286,7 +243,6 @@ const createAutocompleteDefinitions = (painlessClasses) => {
     }) => {
       // The name is often prefixed by the Java package (e.g., Java.lang.Math) and needs to be removed
       const displayName = getDisplayName(name, imported);
-      const isType = getPrimitives(painlessClasses).includes(name);
 
       const properties = getPainlessClassToAutocomplete({
         staticFields,
@@ -299,8 +255,8 @@ const createAutocompleteDefinitions = (painlessClasses) => {
 
       return {
         label: displayName,
-        kind: isType ? 'type' : 'class',
-        documentation: isType ? `Primitive: ${displayName}` : `Class: ${displayName}`,
+        kind: 'class',
+        documentation: `Class: ${displayName}`,
         insertText: displayName,
         properties: properties.length ? properties : undefined,
         constructorDefinition,
@@ -313,7 +269,6 @@ const createAutocompleteDefinitions = (painlessClasses) => {
 
 module.exports = {
   getMethodDescription,
-  getPrimitives,
   getPainlessClassToAutocomplete,
   createAutocompleteDefinitions,
 };
