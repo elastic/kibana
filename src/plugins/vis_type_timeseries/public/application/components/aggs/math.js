@@ -114,12 +114,12 @@ export function MathAgg(props) {
                 values={{
                   link: (
                     <EuiLink
-                      href="https://github.com/elastic/kibana/blob/master/packages/tinymath/docs/functions.md"
+                      href="https://github.com/elastic/kibana/blob/master/packages/kbn-tinymath/docs/functions.md"
                       target="_blank"
                     >
                       <FormattedMessage
                         id="visTypeTimeseries.math.expressionDescription.tinyMathLinkText"
-                        defaultMessage="TinyMath"
+                        defaultMessage="@kbn/tinymath"
                       />
                     </EuiLink>
                   ),

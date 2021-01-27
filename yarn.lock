@@ -3512,6 +3512,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/tinymath@link:packages/kbn-tinymath":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-framework@link:packages/kbn-ui-framework":
   version "0.0.0"
   uid ""
@@ -28049,10 +28053,6 @@ tinygradient@0.4.3:
   dependencies:
     "@types/tinycolor2" "^1.4.0"
     tinycolor2 "^1.0.0"
-
-"tinymath@link:packages/tinymath":
-  version "0.0.0"
-  uid ""
 
 tinyqueue@^1.1.0:
   version "1.2.3"

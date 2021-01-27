@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/tinymath'],
+  roots: ['<rootDir>/packages/kbn-tinymath'],
 };
