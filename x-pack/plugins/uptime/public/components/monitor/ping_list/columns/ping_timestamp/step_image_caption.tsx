@@ -14,8 +14,8 @@ export interface StepImageCaptionProps {
   captionContent: string;
   imgSrc?: string;
   maxSteps?: number;
-  setStepNo: React.Dispatch<React.SetStateAction<number>>;
-  stepNo: number;
+  setStepNumber: React.Dispatch<React.SetStateAction<number>>;
+  stepNumber: number;
   timestamp: string;
 }
 
@@ -23,8 +23,8 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
   captionContent,
   imgSrc,
   maxSteps,
-  setStepNo,
-  stepNo,
+  setStepNumber,
+  stepNumber,
   timestamp,
 }) => {
   return (
@@ -34,10 +34,10 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
           <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                disabled={stepNo === 1}
+                disabled={stepNumber === 1}
                 size="m"
                 onClick={() => {
-                  setStepNo(stepNo - 1);
+                  setStepNumber(stepNumber - 1);
                 }}
                 iconType="arrowLeft"
                 aria-label={prevAriaLabel}
@@ -48,10 +48,10 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                disabled={stepNo === maxSteps}
+                disabled={stepNumber === maxSteps}
                 size="m"
                 onClick={() => {
-                  setStepNo(stepNo + 1);
+                  setStepNumber(stepNumber + 1);
                 }}
                 iconType="arrowRight"
                 aria-label={nextAriaLabel}

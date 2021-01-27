@@ -89,8 +89,8 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
       captionContent={captionContent}
       imgSrc={imgSrc}
       maxSteps={data?.maxSteps}
-      setStepNo={setStepNumber}
-      stepNo={stepNumber}
+      setStepNumber={setStepNumber}
+      stepNumber={stepNumber}
       timestamp={timestamp}
     />
   );
@@ -118,8 +118,8 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
       <NavButtons
         maxSteps={data?.maxSteps}
         setIsImagePopoverOpen={setIsImagePopoverOpen}
-        setStepNo={setStepNumber}
-        stepNo={stepNumber}
+        setStepNumber={setStepNumber}
+        stepNumber={stepNumber}
       />
     </StepDiv>
   );
