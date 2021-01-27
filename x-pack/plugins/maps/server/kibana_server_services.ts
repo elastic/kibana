@@ -7,7 +7,6 @@
 import {
   ElasticsearchClient,
   ISavedObjectsRepository,
-  KibanaRequest,
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { IndexPatternsService } from '../../../../src/plugins/data/server';
@@ -23,7 +22,7 @@ export const getInternalRepository = () => internalRepository;
 let indexPatternsService: IndexPatternsService;
 export const setIndexPatternsService = async (
   indexPatternsServiceFactory: (
-    savedObjectsClient: SavedObjectsClientContract,
+    savedObjectsClient: Omit<SavedObjectsClientContract, 'errors'>,
     elasticsearchClient: ElasticsearchClient
   ) => Promise<IndexPatternsService>,
   elasticsearchClient: ElasticsearchClient
