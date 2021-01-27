@@ -83,6 +83,10 @@ export interface SavedObjectsFindOptions {
   /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
   searchFields?: string[];
   /**
+   * Use the sort values from the previous page or a Point In Time (PIT) ID to retrieve the next page of results.
+   */
+  searchAfter?: Array<string | number>;
+  /**
    * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
    * be modified. If used in conjunction with `searchFields`, both are concatenated together.
    */

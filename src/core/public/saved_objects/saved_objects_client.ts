@@ -320,6 +320,7 @@ export class SavedObjectsClient {
       page: 'page',
       perPage: 'per_page',
       search: 'search',
+      searchAfter: 'search_after',
       searchFields: 'search_fields',
       sortField: 'sort_field',
       type: 'type',

@@ -2973,6 +2973,19 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
+      it(`accepts searchAfter`, async () => {
+        const relevantOpts = {
+          ...commonOptions,
+          searchAfter: [1, 'a'],
+        };
+
+        await findSuccess(relevantOpts, namespace);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+          ...relevantOpts,
+          searchAfter: [1, 'a'],
+        });
+      });
+
       it(`accepts KQL expression filter and passes KueryNode to getSearchDsl`, async () => {
         const findOpts = {
           namespaces: [namespace],

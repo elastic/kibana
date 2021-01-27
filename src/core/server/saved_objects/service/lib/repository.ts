@@ -708,6 +708,7 @@ export class SavedObjectsRepository {
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
+   * @property {Array<string|integer>} [options.searchAfter]
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
@@ -726,6 +727,7 @@ export class SavedObjectsRepository {
       hasReferenceOperator,
       page = FIND_DEFAULT_PAGE,
       perPage = FIND_DEFAULT_PER_PAGE,
+      searchAfter,
       sortField,
       sortOrder,
       fields,
@@ -801,6 +803,7 @@ export class SavedObjectsRepository {
           searchFields,
           rootSearchFields,
           type: allowedTypes,
+          searchAfter,
           sortField,
           sortOrder,
           namespaces,

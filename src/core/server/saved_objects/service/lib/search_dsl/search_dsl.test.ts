@@ -101,5 +101,15 @@ describe('getSearchDsl', () => {
       getSortingParams.mockReturnValue({ b: 'b' });
       expect(getSearchDsl(mappings, registry, { type: 'foo' })).toEqual({ a: 'a', b: 'b' });
     });
+
+    it('returns searchAfter if provided', () => {
+      getQueryParams.mockReturnValue({ a: 'a' });
+      getSortingParams.mockReturnValue({ b: 'b' });
+      expect(getSearchDsl(mappings, registry, { type: 'foo', searchAfter: [1, 'bar'] })).toEqual({
+        a: 'a',
+        b: 'b',
+        search_after: [1, 'bar'],
+      });
+    });
   });
 });
