@@ -4,7 +4,7 @@
 <titleabbrev>What is Kibana?</titleabbrev>
 ++++
 
-{kib} is an extensible user interface that enables you to
+{kib} enables you to
 shape your data and navigate the Elastic Stack.  With {kib}, you can:
 
 * *Visualize and analyze your data.*
@@ -17,7 +17,9 @@ From discovering documents to analyzing logs to finding security vulnerabilities
 
 * *Manage, monitor, and secure the Elastic Stack.*
 Manage your indices and ingest pipelines, monitor the health of your
-Elastic Stack cluster, and control which users have access to which features and data.
+Elastic Stack cluster, and control which users have access to
+which features.
+
 
 *{kib} is for administrators, analysts, and business users.*
 As an admin, your role is to manage the Elastic Stack, from creating your
@@ -36,7 +38,7 @@ No matter your data, {kib} can help you uncover patterns and relationships and v
 === Where to start
 
 Start with the home page, where you’re guided toward the most common use cases.
-For a reference of all {kib} use cases, refer to <<whats-the-right-app,What’s the right app for you?>>
+For a quick reference of {kib} use cases, refer to <<whats-the-right-app,What’s the right app for you?>>
 
 [role="screenshot"]
 image::images/home-page.png[Kibana home page]
@@ -46,8 +48,8 @@ the menu is organized by use case. Want to work with your logs, metrics, APM, or
 Uptime data? The apps you need are under *Observability*. The main menu also includes
 *Recently viewed*, so you can easily access your previously opened apps.
 
-Hidden by default, you can open the main menu by clicking the
-hamburger icon. To keep the main menu visible at all times, open the main menu, and then click *Dock navigation*.
+Hidden by default, you open the main menu by clicking the
+hamburger icon. To keep the main menu visible at all times, click the *Dock navigation* item.
 
 [role="screenshot"]
 image::images/kibana-main-menu.png[Kibana main menu]
@@ -57,7 +59,7 @@ image::images/kibana-main-menu.png[Kibana main menu]
 === Search {kib}
 
 Using the Search field in the global header, you can
-search for applications and objects, including
+search for applications and objects, such as
 dashboards and visualizations.
 
 Search suggestions include deep links into applications,
@@ -74,11 +76,11 @@ You can then quickly search for related objects based on shared tags.
 [role="screenshot"]
 image::images/tags-search.png[Example of searching for tags]
 
-To get the most from the search feature, use these tips:
+To get the most from the search feature, follow these tips:
 
 * Use the keyboard shortcut&mdash;Ctrl+/ on Windows and Linux, Command+/ on MacOS&mdash;to focus on the input at any time.
 
-* Use the provided syntax keywords to filter results:
+* Use the provided syntax keywords.
 +
 [cols=2*]
 |===
@@ -119,7 +121,7 @@ file, or add a sample data set.
 
 . *Explore.* With <<discover,*Discover*>>, you can search your data for hidden
 insights and relationships. Ask your questions, and then filter the results to just the data you want.
-Or, just see the most recent documents added to {es}.
+You can also limit your results the most recent documents added to {es}.
 
 . *Visualize.* {kib} provides many options to create visualizations of your data, from
 aggregation-based data to time series data.
@@ -133,13 +135,14 @@ the “wow” factor needed to impress your CEO and captivate coworkers with a b
 . *Share.* Ready to <<reporting-getting-started, share>> your findings with a larger audience? {kib} offers many options&mdash;embed
 a dashboard, share a link, export to PDF, and more.
 
-For hands-on experience with analyzing your data, check out the Elastic https://www.elastic.co/demos[demo site].
+For hands-on experience with analyzing your data, check out
+the Elastic https://www.elastic.co/demos[demo gallery].
 
 
 [float]
 ==== Plot location data on a map
 If you’re looking to better understand the “where’’ in your data, your data
-analysis journey will also include <<maps, *Maps*>>. This app is the right
+analysis journey also includes <<maps, *Maps*>>. This app is the right
 choice when you’re looking for a spatial pattern, performing ad-hoc location-driven analysis,
 or analyzing metrics with a geographic perspective. With *Maps*, you can build
 world country maps, administrative region maps, and point-to-point origin-destination maps.
@@ -148,7 +151,7 @@ You can also visualize and track movement over space and through time.
 [float]
 ==== Model data behavior
 
-{kib}’s <<xpack-ml, *{ml-cap}*>> is for modeling the behavior of your data.
+<<xpack-ml, *{ml-cap}*>> is for modeling the behavior of your data.
 This app can help you extract insights from your data that you might otherwise miss.
 You can forecast unusual behavior in your time series data.
 You can also perform outlier detection, regression, and classification analysis
@@ -157,8 +160,8 @@ on your data and generate annotated results.
 [float]
 ==== Graph relationships
 
-The <<xpack-graph, *Graph*>> app enables you to uncover how items in your
-data are related. This is useful in a variety of applications,
+<<xpack-graph, *Graph*>> enables you to uncover how items in your
+data are related. This information is useful in a variety of applications,
 from fraud detection to recommendation engines. For example, graph exploration
 can help you uncover website vulnerabilities that hackers are targeting
 so you can harden your website. Or, you might provide graph-based
@@ -178,7 +181,7 @@ to events happening across all your environments. You can analyze log events, mo
 that it ran in, trace the transaction, and check the overall service availability.
 
 * Designed for security analysts, {security-guide}/es-overview.html[*Elastic Security*] provides an overview of
-the events and alerts from your environment.  This app helps you defend
+the events and alerts from your environment.  Elastic Security helps you defend
 your organization from threats before damage and loss occur.
 +
 [role="screenshot"]
@@ -188,8 +191,8 @@ image::siem/images/detections-ui.png[]
 [[manage-all-things-stack]]
 === Manage all things Elastic Stack
 
-{kib}'s <<management, Stack Management>> takes administrators under the hood,
-so they can twist the levers and turn the knobs.  *Stack Management* provides
+{kib}'s <<management, Stack Management>> takes you under the hood,
+so you can twist the levers and turn the knobs.  *Stack Management* provides
 guided processes for administering all things Elastic Stack,
 including data, indices, clusters, alerts, and security.
 
@@ -199,7 +202,7 @@ image::images/intro-management.png[]
 [float]
 ==== Manage your data, indices, and clusters
 
-{kib} offers these data management tasks from the convenience of a UI:
+{kib} offers these data management tasks&mdash;all from the convenience of a UI:
 
 * Refresh, flush, and clear the cache of your indices.
 * Define the lifecycle of an index as it ages.
@@ -216,14 +219,15 @@ that exists in almost every use case. For example, you might set an alert to not
 * System resources, such as memory, CPU and disk space, take a dip.
 * An unusually high number of service requests, suspicious processes, and login attempts occurs.
 
-Alerts are triggered when a specified condition is met. For example,
-you might set an alert to trigger when the average or max of one of
+An alert is triggered when a specified condition is met. For example,
+an alert might trigger when the average or max of one of
 your metrics exceeds a threshold within a specified time frame.
 
 When the alert triggers, you can send a notification to a system that is part of
-your daily workflow. {kib} integrates with email, Slack, PagerDuty, ServiceNow, Jira and IBM Resilient.
+your daily workflow. {kib} integrates with email, Slack, PagerDuty, and ServiceNow,
+to name a few.
 
-A dedicated view for creating, searching, and editing all your alerts is in <<alert-management,*Alerts and Actions*>>.
+A dedicated view for creating, searching, and editing alerts is in <<alert-management,*Alerts and Actions*>>.
 
 [role="screenshot"]
 image::images/alerts-and-actions.png[Alerts and Actions view]
@@ -235,7 +239,6 @@ image::images/alerts-and-actions.png[Alerts and Actions view]
 
 Want to share {kib}’s goodness with other people or teams without overwhelming them? You can do so
 with <<xpack-spaces, Spaces>>, built for organizing your visualizations, dashboards, and indices.
-, built for organizing your visualizations and dashboards.
 Think of a space as its own mini {kib} installation&mdash;it’s isolated from all other spaces,
 so you can tailor it to your specific needs without impacting others.
 
@@ -278,8 +281,9 @@ image::images/features-control.png[Features Controls screen]
 === {kib} security
 
 {kib} offers a range of security features for you to control who has access to what.
-The security features are automatically turned on when {es-ref}/get-started-enable-security.html[security is enabled in
-{es}. For a description of all available configuration options,
+The security features are automatically turned on when
+{ref}/get-started-enable-security.html[security is enabled in
+{es}]. For a description of all available configuration options,
 see <<security-settings-kb,Security settings in {kib}>>.
 
 [float]
@@ -306,7 +310,7 @@ have privileges to create and edit visualizations and dashboards,
 while analysts or executives might have *Dashboard* and *Canvas* with read-only privileges.
 
 {kib}’s role management interface allows you to describe these various access
-levels, or you can easily automate role creation via our <<role-management-api,API>>.
+levels, or you can automate role creation via our <<role-management-api,API>>.
 
 [role="screenshot"]
 image::images/roles-and-privileges.png[{kib privileges}]
@@ -396,22 +400,22 @@ the <<get-started,{kib} Quick start>>.
 2+|*Prevent, detect, and respond to threats*
 
 |Create and manage rules for suspicious source events, and view the alerts these rules create.
-|Detections
+|{security-guide}/detection-engine-overview.html[Detections]
 
 |View all hosts and host-related security events.
-|Hosts
+|{security-guide}/hosts-overview.html[Hosts]
 
 |View key network activity metrics via an interactive map.
-|Network
+|{security-guide}/network-page-overview.html[Network]
 
 |Investigate alerts and complex threats, such as lateral movement of malware across hosts in your network.
-|Timelines
+|{security-guide}/timelines-ui.html[Timelines]
 
-|
-|Cases
+|Create and track security issues
+|{security-guide}/cases-overview.html[Cases]
 
 |View and manage hosts that are running Endpoint Security
-|Administration
+|{security-guide}/admin-page-ov.html[Administration]
 
 2+|*Administer your Kibana instance*
 
@@ -425,10 +429,9 @@ the <<get-started,{kib} Quick start>>.
 |<<xpack-spaces,Stack Management > Spaces>>
 
 |Define user roles and privileges
-|Stack Management > Users +
-Stack Management > Roles
+|<<xpack-security,Stack Management > Users>>
 
-|Customize Kibana to suit your needs
+|Customize {kib} to suit your needs
 |<<advanced-options,Stack Management > Advanced Settings>>
 
 |===
