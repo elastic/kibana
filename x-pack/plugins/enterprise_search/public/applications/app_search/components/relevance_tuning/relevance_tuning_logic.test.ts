@@ -972,6 +972,46 @@ describe('RelevanceTuningLogic', () => {
         );
       });
     });
+    describe('removeBoostValue', () => {
+      it('will remove a boost value and update search reusults', () => {
+        mount({
+          searchSettings: searchSettingsWithBoost({
+            factor: 1,
+            type: 'functional',
+            value: ['a', 'b', 'c'],
+          }),
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.removeBoostValue('foo', 1, 1);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
+          searchSettingsWithBoost({
+            factor: 1,
+            type: 'functional',
+            value: ['a', 'c'],
+          })
+        );
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
+      });
+
+      it('will do nothing if boost values do not exist', () => {
+        mount({
+          searchSettings: searchSettingsWithBoost({
+            factor: 1,
+            type: 'functional',
+          }),
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.removeBoostValue('foo', 1, 1);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).not.toHaveBeenCalled();
+        expect(RelevanceTuningLogic.actions.getSearchResults).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('selectors', () => {
