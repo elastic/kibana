@@ -80,7 +80,9 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
       )}
       {canManageEngines && (
         <Route exact path={CREATE_ENGINES_PATH}>
-          <CreateEngine />
+          <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
+            <CreateEngine />
+          </Layout>
         </Route>
       )}
       <Route path={ENGINE_PATH}>
