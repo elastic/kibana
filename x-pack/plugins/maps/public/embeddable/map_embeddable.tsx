@@ -68,7 +68,7 @@ import {
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from './types';
-export { MapEmbeddableInput };
+export { MapEmbeddableInput, MapEmbeddableOutput };
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>

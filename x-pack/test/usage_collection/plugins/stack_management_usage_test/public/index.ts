@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '..',
-  projects: ['<rootDir>/x-pack/plugins/*/jest.config.js'],
-};
+import { StackManagementUsageTest } from './plugin';
+
+export function plugin() {
+  return new StackManagementUsageTest();
+}
