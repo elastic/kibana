@@ -133,7 +133,7 @@ export const CheckupTab: FunctionComponent<CheckupTabProps> = ({
                 values={{
                   snapshotRestoreDocsButton: (
                     <EuiLink
-                      href={`${esDocBasePath}/modules-snapshots.html`}
+                      href={`${esDocBasePath}/snapshot-restore.html`}
                       target="_blank"
                       external
                     >
