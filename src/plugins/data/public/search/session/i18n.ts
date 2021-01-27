@@ -6,7 +6,15 @@
  * Public License, v 1.
  */
 
-export { SessionService, ISessionService, SearchSessionInfoProvider } from './session_service';
-export { SearchSessionState } from './search_session_state';
-export { SessionsClient, ISessionsClient } from './sessions_client';
-export { noSearchSessionStorageCapabilityMessage } from './i18n';
+import { i18n } from '@kbn/i18n';
+
+/**
+ * Message to display in case storing
+ * session session is disabled due to turned off capability
+ */
+export const noSearchSessionStorageCapabilityMessage = i18n.translate(
+  'data.searchSessionIndicator.noCapability',
+  {
+    defaultMessage: "You don't have permissions to create search sessions.",
+  }
+);
