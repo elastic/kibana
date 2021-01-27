@@ -42,16 +42,14 @@ import { SortPairArr } from '../angular/doc_table/lib/get_sort';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid/discover_grid';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 
-export const DocTableLegacyMemoized = React.memo((props: DocTableLegacyProps) => (
+const DocTableLegacyMemoized = React.memo((props: DocTableLegacyProps) => (
   <DocTableLegacy {...props} />
 ));
-export const SidebarMemoized = React.memo((props: DiscoverSidebarResponsiveProps) => (
+const SidebarMemoized = React.memo((props: DiscoverSidebarResponsiveProps) => (
   <DiscoverSidebarResponsive {...props} />
 ));
 
-export const DataGridMemoized = React.memo((props: DiscoverGridProps) => (
-  <DiscoverGrid {...props} />
-));
+const DataGridMemoized = React.memo((props: DiscoverGridProps) => <DiscoverGrid {...props} />);
 
 export function Discover({
   fetch,
