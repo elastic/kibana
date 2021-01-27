@@ -18,6 +18,7 @@ import {
   Operation,
   DatasourceLayerPanelProps,
   PublicAPIProps,
+  InitializationOptions,
 } from '../types';
 import {
   loadInitialState,
@@ -104,7 +105,8 @@ export function getIndexPatternDatasource({
     async initialize(
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
-      initialContext?: VisualizeFieldContext
+      initialContext?: VisualizeFieldContext,
+      options?: InitializationOptions
     ) {
       return loadInitialState({
         persistedState,
@@ -114,6 +116,7 @@ export function getIndexPatternDatasource({
         storage,
         indexPatternsService,
         initialContext,
+        options,
       });
     },
 
