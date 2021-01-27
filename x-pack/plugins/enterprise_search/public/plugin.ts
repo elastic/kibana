@@ -6,6 +6,7 @@
 
 import {
   AppMountParameters,
+  CoreStart,
   CoreSetup,
   HttpSetup,
   Plugin,
@@ -26,6 +27,8 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { InitialAppData } from '../common/types';
+
+import { docLinksService } from './applications/shared/doc_links';
 
 export interface ClientConfigType {
   host?: string;
@@ -153,7 +156,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public start() {}
+  public start(core: CoreStart) {
+    docLinksService.setDocLinks(core.docLinks);
+  }
 
   public stop() {}
 
