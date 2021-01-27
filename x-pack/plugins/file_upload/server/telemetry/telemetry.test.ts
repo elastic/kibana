@@ -34,7 +34,7 @@ describe('ml plugin telemetry', () => {
     it('should update existing telemetry', async () => {
       const internalRepo = mockInit({
         attributes: {
-          file_data_visualizer: {
+          file_upload: {
             index_creation_count: 2,
           },
         },

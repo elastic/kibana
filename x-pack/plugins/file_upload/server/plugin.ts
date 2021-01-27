@@ -6,10 +6,13 @@
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { fileUploadRoutes } from './routes';
+import { initTelemetry } from './telemetry';
 
 export class FileUploadPlugin implements Plugin {
   async setup(core: CoreSetup, plugins: SetupDeps) {
     fileUploadRoutes(coreSetup.http.createRouter());
+
+    initTelemetry(coreSetup, plugins.usageCollection);
   }
 
   start(core: CoreStart) {}

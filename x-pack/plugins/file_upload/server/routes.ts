@@ -5,12 +5,11 @@
  */
 
 import { IRouter, IScopedClusterClient } from 'kibana/server';
-import { MAX_FILE_SIZE_BYTES } from '../../common/constants';
+import { MAX_FILE_SIZE_BYTES } from '../common/constants';
 import { wrapError } from './error_wrapper';
 import { InputData, importDataProvider } from './import_data';
 
-import { RouteInitialization } from '../types';
-import { updateTelemetry } from '../lib/telemetry';
+import { updateTelemetry } from './telemetry';
 import { importFileBodySchema, importFileQuerySchema } from './schemas';
 
 function importData(
@@ -33,7 +32,7 @@ export function fileUploadRoutes(router: IRouter) {
   /**
    * @apiGroup FileDataVisualizer
    *
-   * @api {post} /api/ml/file_data_visualizer/import Import file data
+   * @api {post} /api/file_upload/import Import file data
    * @apiName ImportFile
    * @apiDescription Imports file data into elasticsearch index.
    *
@@ -42,7 +41,7 @@ export function fileUploadRoutes(router: IRouter) {
    */
   router.post(
     {
-      path: '/api/ml/file_data_visualizer/import',
+      path: '/api/file_upload/import',
       validate: {
         query: importFileQuerySchema,
         body: importFileBodySchema,
