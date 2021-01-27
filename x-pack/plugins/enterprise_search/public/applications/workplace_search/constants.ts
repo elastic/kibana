@@ -511,6 +511,10 @@ export const CANCEL_BUTTON = i18n.translate(
   }
 );
 
+export const OK_BUTTON = i18n.translate('xpack.enterpriseSearch.workplaceSearch.ok.button', {
+  defaultMessage: 'Ok',
+});
+
 export const PRIVATE_PLATINUM_LICENSE_CALLOUT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.privatePlatinumCallout.text',
   {
@@ -587,6 +591,13 @@ export const RECENT_ACTIVITY_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.recentActivity.title',
   {
     defaultMessage: 'Recent activity',
+  }
+);
+
+export const CONFIRM_MODAL_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.comfirmModal.title',
+  {
+    defaultMessage: 'Please confirm',
   }
 );
 

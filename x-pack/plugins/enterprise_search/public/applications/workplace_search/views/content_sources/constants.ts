@@ -171,3 +171,143 @@ export const CUSTOM_CALLOUT_TITLE = i18n.translate(
     defaultMessage: 'Getting started with custom sources?',
   }
 );
+
+export const NO_CONTENT_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.noContentEmpty.message',
+  {
+    defaultMessage: "This source doesn't have any content yet",
+  }
+);
+
+export const CUSTOM_DOCUMENTATION_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.customSourceDocs.link',
+  {
+    defaultMessage: 'documentation',
+  }
+);
+
+export const TITLE_HEADING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.title.heading',
+  {
+    defaultMessage: 'Title',
+  }
+);
+
+export const LAST_UPDATED_HEADING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.lastUpdated.heading',
+  {
+    defaultMessage: 'Last updated',
+  }
+);
+
+export const GO_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.go.button',
+  {
+    defaultMessage: 'Go',
+  }
+);
+
+export const RESET_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.reset.button',
+  {
+    defaultMessage: 'Reset',
+  }
+);
+
+export const SOURCE_CONTENT_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceContent.title',
+  {
+    defaultMessage: 'Source content',
+  }
+);
+
+export const CONTENT_LOADING_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.contentLoading.text',
+  {
+    defaultMessage: 'Loading content...',
+  }
+);
+
+export const REMOTE_SOURCE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.remoteSource.label',
+  {
+    defaultMessage: 'Remote source',
+  }
+);
+
+export const CREATED_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.created.label',
+  {
+    defaultMessage: 'Created: ',
+  }
+);
+
+export const STATUS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.status.label',
+  {
+    defaultMessage: 'Status: ',
+  }
+);
+
+export const READY_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.ready.text',
+  {
+    defaultMessage: 'Ready to search',
+  }
+);
+
+export const SOURCE_SETTINGS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.settings.title',
+  {
+    defaultMessage: 'Content source name',
+  }
+);
+
+export const SOURCE_SETTINGS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.settings.description',
+  {
+    defaultMessage: 'Customize the name of this content source.',
+  }
+);
+
+export const SOURCE_CONFIG_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.config.title',
+  {
+    defaultMessage: 'Content source configuration',
+  }
+);
+
+export const SOURCE_CONFIG_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.config.description',
+  {
+    defaultMessage: 'Edit content source connector settings to change.',
+  }
+);
+
+export const SOURCE_CONFIG_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.config.link',
+  {
+    defaultMessage: 'Edit content source connector settings',
+  }
+);
+
+export const SOURCE_REMOVE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.config.title',
+  {
+    defaultMessage: 'Remove this source',
+  }
+);
+
+export const SOURCE_REMOVE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.config.description',
+  {
+    defaultMessage: 'Edit content source connector settings to change.',
+  }
+);
+
+export const SOURCE_NAME_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceName.label',
+  {
+    defaultMessage: 'Source name',
+  }
+);
