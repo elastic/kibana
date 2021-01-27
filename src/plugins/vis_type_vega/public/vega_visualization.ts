@@ -12,6 +12,7 @@ import { VegaParser } from './data_model/vega_parser';
 import { VegaVisualizationDependencies } from './plugin';
 import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
+import { createVegaStateRestorer } from './lib/vega_state_restorer';
 
 type VegaVisType = new (el: HTMLDivElement, fireEvent: IInterpreterRenderHandlers['event']) => {
   render(visData: VegaParser): Promise<void>;
@@ -24,6 +25,14 @@ export const createVegaVisualization = ({
   class VegaVisualization {
     private readonly dataPlugin = getData();
     private vegaView: InstanceType<typeof VegaView> | null = null;
+    private vegaStateRestorer = createVegaStateRestorer({
+      restoreData: false,
+      /**
+       *  exclude Built-in signals
+       *  @see https://vega.github.io/vega/docs/signals/
+       */
+      omitSignals: ['width', 'height', 'padding', 'autosize', 'background'],
+    });
 
     constructor(
       private el: HTMLDivElement,
@@ -71,6 +80,7 @@ export const createVegaVisualization = ({
         const vegaViewParams = {
           parentEl: this.el,
           fireEvent: this.fireEvent,
+          vegaStateRestorer: this.vegaStateRestorer,
           vegaParser,
           serviceSettings,
           filterManager,
@@ -89,6 +99,7 @@ export const createVegaVisualization = ({
     }
 
     destroy() {
+      this.vegaStateRestorer.clear();
       this.vegaView?.destroy();
     }
   };
