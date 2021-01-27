@@ -13,7 +13,6 @@ import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getMetrics } from './get_metrics';
 import { getDestinationMap } from './get_destination_map';
-import { getTpmRate } from '../../helpers/get_tpm_rate';
 
 export type ServiceDependencyItem = {
   name: string;
@@ -51,6 +50,8 @@ export async function getServiceDependencies({
   environment: string;
   numBuckets: number;
 }): Promise<ServiceDependencyItem[]> {
+  const { start, end } = setup;
+
   const [allMetrics, destinationMap] = await Promise.all([
     getMetrics({
       setup,
@@ -133,6 +134,8 @@ export async function getServiceDependencies({
       }
     );
 
+    const deltaAsMinutes = (end - start) / 60 / 1000;
+
     const destMetrics = {
       latency: {
         value:
@@ -147,11 +150,11 @@ export async function getServiceDependencies({
       throughput: {
         value:
           mergedMetrics.value.count > 0
-            ? getTpmRate(setup, mergedMetrics.value.count)
+            ? mergedMetrics.value.count / deltaAsMinutes
             : null,
         timeseries: mergedMetrics.timeseries.map((point) => ({
           x: point.x,
-          y: point.count > 0 ? getTpmRate(setup, point.count) : null,
+          y: point.count > 0 ? point.count / deltaAsMinutes : null,
         })),
       },
       errorRate: {

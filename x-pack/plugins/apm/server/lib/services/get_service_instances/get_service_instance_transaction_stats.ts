@@ -19,7 +19,6 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { getTpmRate } from '../../helpers/get_tpm_rate';
 
 export async function getServiceInstanceTransactionStats({
   setup,
@@ -113,6 +112,8 @@ export async function getServiceInstanceTransactionStats({
     },
   });
 
+  const deltaAsMinutes = (end - start) / 60 / 1000;
+
   return (
     response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
       (serviceNodeBucket) => {
@@ -134,10 +135,10 @@ export async function getServiceInstanceTransactionStats({
             })),
           },
           throughput: {
-            value: getTpmRate(setup, count.value),
+            value: count.value / deltaAsMinutes,
             timeseries: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
-              y: getTpmRate(setup, dateBucket.count.value),
+              y: dateBucket.count.value / deltaAsMinutes,
             })),
           },
           latency: {

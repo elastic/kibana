@@ -22,7 +22,6 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import { getTpmRate } from '../../helpers/get_tpm_rate';
 import {
   calculateTransactionErrorPercentage,
   getOutcomeAggregation,
@@ -35,6 +34,16 @@ interface AggregationParams {
 }
 
 const MAX_NUMBER_OF_SERVICES = 500;
+
+function calculateAvgDuration({
+  value,
+  deltaAsMinutes,
+}: {
+  value: number;
+  deltaAsMinutes: number;
+}) {
+  return value / deltaAsMinutes;
+}
 
 export async function getServiceTransactionStats({
   setup,
@@ -130,6 +139,8 @@ export async function getServiceTransactionStats({
     },
   });
 
+  const deltaAsMinutes = (setup.end - setup.start) / 1000 / 60;
+
   return (
     response.aggregations?.services.buckets.map((bucket) => {
       const topTransactionTypeBucket =
@@ -168,14 +179,17 @@ export async function getServiceTransactionStats({
           ),
         },
         transactionsPerMinute: {
-          value: getTpmRate(
-            setup,
-            topTransactionTypeBucket.real_document_count.value
-          ),
+          value: calculateAvgDuration({
+            value: topTransactionTypeBucket.real_document_count.value,
+            deltaAsMinutes,
+          }),
           timeseries: topTransactionTypeBucket.timeseries.buckets.map(
             (dateBucket) => ({
               x: dateBucket.key,
-              y: getTpmRate(setup, dateBucket.real_document_count.value),
+              y: calculateAvgDuration({
+                value: dateBucket.real_document_count.value,
+                deltaAsMinutes,
+              }),
             })
           ),
         },

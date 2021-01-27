@@ -15,7 +15,6 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { getTpmRate } from '../helpers/get_tpm_rate';
 
 export async function getTransactionCoordinates({
   setup,
@@ -64,10 +63,12 @@ export async function getTransactionCoordinates({
     },
   });
 
+  const deltaAsMinutes = (end - start) / 1000 / 60;
+
   return (
     aggregations?.distribution.buckets.map((bucket) => ({
       x: bucket.key,
-      y: getTpmRate(setup, bucket.count.value),
+      y: bucket.count.value / deltaAsMinutes,
     })) || []
   );
 }
