@@ -12,7 +12,7 @@ import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
 
 import { LicensingLogic } from '../../../../applications/shared/licensing';
 
-import { ADD_SOURCE_PATH } from '../../routes';
+import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import noSharedSourcesIcon from '../../assets/share_circle.svg';
 
@@ -74,12 +74,17 @@ export const PrivateSources: React.FC = () => {
     sidebarLinks.push({
       title: PRIVATE_LINK_TITLE,
       iconType: 'plusInCircle',
-      path: ADD_SOURCE_PATH,
+      path: getSourcesPath(ADD_SOURCE_PATH, false),
     });
   }
 
   const headerAction = (
-    <EuiButtonTo to={ADD_SOURCE_PATH} fill color="primary" data-test-subj="AddSourceButton">
+    <EuiButtonTo
+      to={getSourcesPath(ADD_SOURCE_PATH, false)}
+      fill
+      color="primary"
+      data-test-subj="AddSourceButton"
+    >
       {PRIVATE_LINK_TITLE}
     </EuiButtonTo>
   );
