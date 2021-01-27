@@ -528,6 +528,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
         operation: 'last_value',
         field: 'bytes',
+        isPreviousIncompatible: true,
       });
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
