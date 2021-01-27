@@ -35,6 +35,7 @@
     "plugins/cloud/**/*",
     "plugins/saved_objects_tagging/**/*",
     "plugins/global_search_bar/**/*",
+    "plugins/licence_management/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -102,6 +103,7 @@
     { "path": "./plugins/actions/tsconfig.json"},
     { "path": "./plugins/alerts/tsconfig.json"},
     { "path": "./plugins/triggers_actions_ui/tsconfig.json"},
-    { "path": "./plugins/stack_alerts/tsconfig.json"}
+    { "path": "./plugins/stack_alerts/tsconfig.json"},
+    { "path": "./plugins/license_management/tsconfig.json" },
   ]
 }
