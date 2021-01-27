@@ -147,6 +147,7 @@ export class MonitoringPlugin
     );
     const { createMemoryUsageAlertType } = await import('./alerts/memory_usage_alert');
     const { createCCRReadExceptionsAlertType } = await import('./alerts/ccr_read_exceptions_alert');
+    const { createLargeShardSizeAlertType } = await import('./alerts/large_shard_size_alert');
 
     const {
       triggersActionsUi: { alertTypeRegistry },
@@ -168,6 +169,7 @@ export class MonitoringPlugin
       )
     );
     alertTypeRegistry.register(createCCRReadExceptionsAlertType());
+    alertTypeRegistry.register(createLargeShardSizeAlertType());
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
       alertTypeRegistry.register(legacyAlertType);

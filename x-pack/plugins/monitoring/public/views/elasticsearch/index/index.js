@@ -18,7 +18,13 @@ import { labels } from '../../../components/elasticsearch/shard_allocation/lib/l
 import { indicesByNodes } from '../../../components/elasticsearch/shard_allocation/transformers/indices_by_nodes';
 import { Index } from '../../../components/elasticsearch/index/index';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
+import {
+  CODE_PATH_ELASTICSEARCH,
+  ALERT_LARGE_SHARD_SIZE,
+  ELASTICSEARCH_SYSTEM_ID,
+} from '../../../../common/constants';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import { SetupModeRenderer } from '../../../components/renderers';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -78,6 +84,17 @@ uiRoutes.when('/elasticsearch/indices/:index', {
         reactNodeId: 'monitoringElasticsearchIndexApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_LARGE_SHARD_SIZE],
+            filters: [
+              {
+                shardIndex: $route.current.pathParams.index,
+              },
+            ],
+          },
+        },
       });
 
       this.indexName = indexName;
@@ -101,13 +118,26 @@ uiRoutes.when('/elasticsearch/indices/:index', {
           }
 
           this.renderReact(
-            <Index
+            <SetupModeRenderer
               scope={$scope}
-              onBrush={this.onBrush}
-              indexUuid={this.indexName}
-              clusterUuid={$scope.cluster.cluster_uuid}
-              zoomInfo={this.zoomInfo}
-              {...data}
+              injector={$injector}
+              productName={ELASTICSEARCH_SYSTEM_ID}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                  {flyoutComponent}
+                  <Index
+                    scope={$scope}
+                    setupMode={setupMode}
+                    alerts={this.alerts}
+                    onBrush={this.onBrush}
+                    indexUuid={this.indexName}
+                    clusterUuid={$scope.cluster.cluster_uuid}
+                    zoomInfo={this.zoomInfo}
+                    {...data}
+                  />
+                  {bottomBarComponent}
+                </SetupModeContext.Provider>
+              )}
             />
           );
         }

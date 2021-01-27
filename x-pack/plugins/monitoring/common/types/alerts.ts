@@ -182,6 +182,18 @@ export interface CCRReadExceptionsUIMeta extends CCRReadExceptionsStats {
   itemLabel: string;
 }
 
+export interface IndexShardSizeStats extends AlertNodeStats {
+  shardIndex: string;
+  shardSize: number;
+}
+
+export interface IndexShardSizeUIMeta extends IndexShardSizeStats {
+  shardIndex: string;
+  shardSize: number;
+  instanceId: string;
+  itemLabel: string;
+}
+
 export interface AlertData {
   nodeName?: string;
   nodeId?: string;

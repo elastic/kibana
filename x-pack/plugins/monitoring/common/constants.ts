@@ -252,6 +252,7 @@ export const ALERT_MISSING_MONITORING_DATA = `${ALERT_PREFIX}alert_missing_monit
 export const ALERT_THREAD_POOL_SEARCH_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_search_rejections`;
 export const ALERT_THREAD_POOL_WRITE_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_write_rejections`;
 export const ALERT_CCR_READ_EXCEPTIONS = `${ALERT_PREFIX}ccr_read_exceptions`;
+export const ALERT_LARGE_SHARD_SIZE = `${ALERT_PREFIX}shard_size`;
 
 /**
  * Legacy alerts details/label for server and public use
@@ -471,6 +472,28 @@ export const ALERT_DETAILS = {
       defaultMessage: 'Alert if any CCR read exceptions have been detected.',
     }),
   },
+  [ALERT_LARGE_SHARD_SIZE]: {
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.shardSize.paramDetails.threshold.label', {
+          defaultMessage: `Notify when a shard exceeds size (GB)`,
+        }),
+        type: AlertParamType.Number,
+      },
+      indexPattern: {
+        label: i18n.translate('xpack.monitoring.alerts.shardSize.paramDetails.indexPattern.label', {
+          defaultMessage: `Check for the following index patterns`,
+        }),
+        type: AlertParamType.TextField,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.shardSize.label', {
+      defaultMessage: 'Shard size',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.shardSize.description', {
+      defaultMessage: 'Alert if an index (primary) shard is oversize.',
+    }),
+  },
 };
 
 export const ALERT_PANEL_MENU = [
@@ -506,6 +529,7 @@ export const ALERT_PANEL_MENU = [
       { alertName: ALERT_THREAD_POOL_SEARCH_REJECTIONS },
       { alertName: ALERT_THREAD_POOL_WRITE_REJECTIONS },
       { alertName: ALERT_CCR_READ_EXCEPTIONS },
+      { alertName: ALERT_LARGE_SHARD_SIZE },
     ],
   },
 ];
@@ -527,6 +551,7 @@ export const ALERTS = [
   ALERT_THREAD_POOL_SEARCH_REJECTIONS,
   ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_CCR_READ_EXCEPTIONS,
+  ALERT_LARGE_SHARD_SIZE,
 ];
 
 /**

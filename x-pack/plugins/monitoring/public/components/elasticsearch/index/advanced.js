@@ -18,8 +18,9 @@ import {
 import { IndexDetailStatus } from '../index_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AlertsCallout } from '../../../alerts/callout';
 
-export const AdvancedIndex = ({ indexSummary, metrics, ...props }) => {
+export const AdvancedIndex = ({ indexSummary, metrics, alerts, ...props }) => {
   const metricsToShow = [
     metrics.index_1,
     metrics.index_2,
@@ -46,8 +47,10 @@ export const AdvancedIndex = ({ indexSummary, metrics, ...props }) => {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
-          <IndexDetailStatus stats={indexSummary} />
+          <IndexDetailStatus stats={indexSummary} alerts={alerts} />
         </EuiPanel>
+        <EuiSpacer size="m" />
+        <AlertsCallout alerts={alerts} />
         <EuiSpacer size="m" />
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">

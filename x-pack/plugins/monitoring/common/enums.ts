@@ -23,6 +23,7 @@ export enum AlertMessageTokenType {
 }
 
 export enum AlertParamType {
+  TextField = 'textfield',
   Duration = 'duration',
   Percentage = 'percentage',
   Number = 'number',
