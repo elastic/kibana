@@ -27,7 +27,6 @@ export function DocViewTable({
   const [fieldsWithParents, setFieldsWithParents] = useState([] as string[]);
 
   useEffect(() => {
-    // Update the document title using the browser API
     if (!indexPattern) {
       return;
     }
