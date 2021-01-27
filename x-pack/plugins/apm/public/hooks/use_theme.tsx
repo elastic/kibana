@@ -6,7 +6,7 @@
 
 import { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { EuiTheme } from '../../../observability/public';
+import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 
 export function useTheme(): EuiTheme {
   const theme = useContext(ThemeContext);

@@ -16,7 +16,6 @@ export { PalettePicker } from './components/controls/palette_picker';
 export * from './components/options';
 export { RangesParamEditor, RangeValues } from './components/controls/ranges';
 export * from './editor_size';
-export * from './vis_options_props';
 export * from './utils';
 
 export const plugin = (context: PluginInitializerContext) => {

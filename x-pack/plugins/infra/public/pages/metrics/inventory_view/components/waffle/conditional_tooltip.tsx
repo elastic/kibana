@@ -8,7 +8,7 @@ import { EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { first } from 'lodash';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
-import { withTheme, EuiTheme } from '../../../../../../../observability/public';
+import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { useSourceContext } from '../../../../../containers/source';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
 import {

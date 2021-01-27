@@ -19,7 +19,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { ControlEditor } from './control_editor';
 import {
@@ -40,7 +40,7 @@ interface ControlsTabUiState {
   type: CONTROL_TYPES;
 }
 
-export type ControlsTabProps = VisOptionsProps<InputControlVisParams> & {
+export type ControlsTabProps = VisEditorOptionsProps<InputControlVisParams> & {
   deps: InputControlVisDependencies;
 };
 

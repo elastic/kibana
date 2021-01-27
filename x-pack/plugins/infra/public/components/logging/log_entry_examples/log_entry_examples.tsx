@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogEntryExampleMessagesEmptyIndicator } from './log_entry_examples_empty_indicator';
 import { LogEntryExampleMessagesFailureIndicator } from './log_entry_examples_failure_indicator';
 import { LogEntryExampleMessagesLoadingIndicator } from './log_entry_examples_loading_indicator';
