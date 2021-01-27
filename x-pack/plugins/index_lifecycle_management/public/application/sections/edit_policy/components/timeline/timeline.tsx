@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { FunctionComponent, memo } from 'react';
 import {
-  EuiText,
   EuiIcon,
   EuiIconProps,
   EuiFlexGroup,
@@ -16,18 +15,19 @@ import {
 } from '@elastic/eui';
 
 import { PhasesExceptDelete } from '../../../../../../common/types';
-import { useFormData } from '../../../../../shared_imports';
-
-import { FormInternal } from '../../types';
 
 import {
-  calculateRelativeTimingMs,
+  calculateRelativeFromAbsoluteMilliseconds,
   normalizeTimingsToHumanReadable,
   PhaseAgeInMilliseconds,
+  AbsoluteTimings,
 } from '../../lib';
 
 import './timeline.scss';
 import { InfinityIconSvg } from './infinity_icon.svg';
+import { TimelinePhaseText } from './components';
+
+const exists = (v: unknown) => v != null;
 
 const InfinityIcon: FunctionComponent<Omit<EuiIconProps, 'type'>> = (props) => (
   <EuiIcon type={InfinityIconSvg} {...props} />
@@ -88,41 +88,36 @@ const calculateWidths = (inputs: PhaseAgeInMilliseconds) => {
   };
 };
 
-const TimelinePhaseText: FunctionComponent<{
-  phaseName: string;
-  durationInPhase?: React.ReactNode | string;
-}> = ({ phaseName, durationInPhase }) => (
-  <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
-    <EuiFlexItem>
-      <EuiText size="s">
-        <strong>{phaseName}</strong>
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      {typeof durationInPhase === 'string' ? (
-        <EuiText size="s">{durationInPhase}</EuiText>
-      ) : (
-        durationInPhase
-      )}
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+interface Props {
+  hasDeletePhase: boolean;
+  /**
+   * For now we assume the hot phase does not have a min age
+   */
+  hotPhaseMinAge: undefined;
+  warmPhaseMinAge?: string;
+  coldPhaseMinAge?: string;
+  deletePhaseMinAge?: string;
+}
 
-export const Timeline: FunctionComponent = () => {
-  const [formData] = useFormData<FormInternal>();
+/**
+ * Display a timeline given ILM policy phase information. This component is re-usable and memo-ized
+ * and should not rely directly on any application-specific context.
+ */
+export const Timeline: FunctionComponent<Props> = memo(({ hasDeletePhase, ...rest }) => {
+  const absoluteTimings: AbsoluteTimings = {
+    hot: { min_age: rest.hotPhaseMinAge },
+    warm: rest.warmPhaseMinAge ? { min_age: rest.warmPhaseMinAge } : undefined,
+    cold: rest.coldPhaseMinAge ? { min_age: rest.coldPhaseMinAge } : undefined,
+    delete: rest.deletePhaseMinAge ? { min_age: rest.deletePhaseMinAge } : undefined,
+  };
 
-  const phaseTimingInMs = useMemo(() => {
-    return calculateRelativeTimingMs(formData);
-  }, [formData]);
+  const phaseAgeInMilliseconds = calculateRelativeFromAbsoluteMilliseconds(absoluteTimings);
+  const humanReadableTimings = normalizeTimingsToHumanReadable(phaseAgeInMilliseconds);
 
-  const humanReadableTimings = useMemo(() => normalizeTimingsToHumanReadable(phaseTimingInMs), [
-    phaseTimingInMs,
-  ]);
-
-  const widths = calculateWidths(phaseTimingInMs);
+  const widths = calculateWidths(phaseAgeInMilliseconds);
 
   const getDurationInPhaseContent = (phase: PhasesExceptDelete): string | React.ReactNode =>
-    phaseTimingInMs.phases[phase] === Infinity ? (
+    phaseAgeInMilliseconds.phases[phase] === Infinity ? (
       <InfinityIcon aria-label={humanReadableTimings[phase]} />
     ) : (
       humanReadableTimings[phase]
@@ -164,7 +159,7 @@ export const Timeline: FunctionComponent = () => {
                     durationInPhase={getDurationInPhaseContent('hot')}
                   />
                 </div>
-                {formData._meta?.warm.enabled && (
+                {exists(phaseAgeInMilliseconds.phases.warm) && (
                   <div
                     data-test-subj="ilmTimelineWarmPhase"
                     className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase"
@@ -176,7 +171,7 @@ export const Timeline: FunctionComponent = () => {
                     />
                   </div>
                 )}
-                {formData._meta?.cold.enabled && (
+                {exists(phaseAgeInMilliseconds.phases.cold) && (
                   <div
                     data-test-subj="ilmTimelineColdPhase"
                     className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase"
@@ -190,7 +185,7 @@ export const Timeline: FunctionComponent = () => {
                 )}
               </div>
             </EuiFlexItem>
-            {formData._meta?.delete.enabled && (
+            {hasDeletePhase && (
               <EuiFlexItem grow={false}>
                 <div
                   data-test-subj="ilmTimelineDeletePhase"
@@ -205,4 +200,4 @@ export const Timeline: FunctionComponent = () => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+});
