@@ -49,7 +49,7 @@ describe('unenrollAgent (singular)', () => {
 });
 
 describe('unenrollAgents (plural)', () => {
-  it('cannot unenroll from a manged policy', async () => {
+  it('cannot unenroll from a managed policy', async () => {
     const soClient = createClientMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const idsToUnenroll = [agentInUnmanagedSO.id, agentInManagedSO.id, agentInUnmanagedSO.id];
