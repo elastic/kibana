@@ -52,7 +52,7 @@ export const dataFrameAnalytics = {
     return http<GetDataFrameAnalyticsResponse>({
       path: `${basePath()}/data_frame/analytics${analyticsIdString}`,
       method: 'GET',
-      query: { excludeGenerated },
+      ...(excludeGenerated ? { query: { excludeGenerated } } : {}),
     });
   },
   getDataFrameAnalyticsStats(analyticsId?: string) {
