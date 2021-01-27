@@ -36,30 +36,28 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
   imageCaption,
   imgSrc,
   isImagePopoverOpen,
-}) => {
-  return (
-    <EuiPopover
-      anchorPosition="rightCenter"
-      button={
-        <StepImage
-          allowFullScreen={true}
-          alt={captionContent}
-          caption={imageCaption}
-          data-test-subj="pingTimestampImage"
-          hasShadow
-          url={imgSrc}
-          size="s"
-        />
-      }
-      isOpen={isImagePopoverOpen}
-    >
-      <EuiImage
-        alt={i18n.translate('xpack.uptime.synthetics.thumbnail.fullSize.alt', {
-          defaultMessage: `A larger version of the screenshot for this journey step's thumbnail.`,
-        })}
+}) => (
+  <EuiPopover
+    anchorPosition="rightCenter"
+    button={
+      <StepImage
+        allowFullScreen={true}
+        alt={captionContent}
+        caption={imageCaption}
+        data-test-subj="pingTimestampImage"
+        hasShadow
         url={imgSrc}
-        style={{ height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }}
+        size="s"
       />
-    </EuiPopover>
-  );
-};
+    }
+    isOpen={isImagePopoverOpen}
+  >
+    <EuiImage
+      alt={i18n.translate('xpack.uptime.synthetics.thumbnail.fullSize.alt', {
+        defaultMessage: `A larger version of the screenshot for this journey step's thumbnail.`,
+      })}
+      url={imgSrc}
+      style={{ height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }}
+    />
+  </EuiPopover>
+);
