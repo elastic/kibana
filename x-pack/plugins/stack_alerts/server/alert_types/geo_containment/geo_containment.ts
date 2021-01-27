@@ -113,16 +113,17 @@ export function getActiveEntriesAndGenerateAlerts(
         alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
       }
     });
-    let otherIndex;
+
     if (locationsArr[0].shapeLocationId === OTHER_CATEGORY) {
       allActiveEntriesMap.delete(entityName);
-    } else if (
-      locationsArr.some(({ shapeLocationId }, index) => {
-        otherIndex = index;
-        return shapeLocationId === OTHER_CATEGORY;
-      })
-    ) {
-      const afterOtherLocationsArr = locationsArr.slice(0, otherIndex);
+      return;
+    }
+
+    const otherCatIndex = locationsArr.findIndex(
+      ({ shapeLocationId }) => shapeLocationId === OTHER_CATEGORY
+    );
+    if (otherCatIndex >= 0) {
+      const afterOtherLocationsArr = locationsArr.slice(0, otherCatIndex);
       allActiveEntriesMap.set(entityName, afterOtherLocationsArr);
     } else {
       allActiveEntriesMap.set(entityName, locationsArr);

@@ -162,7 +162,7 @@ describe('geo_containment', () => {
           {
             location: [0, 0],
             shapeLocationId: '456',
-            dateInShape: 'Wed Dec 09 2020 15:31:31 GMT-0700 (Mountain Standard Time)',
+            dateInShape: 'Wed Dec 16 2020 15:31:31 GMT-0700 (Mountain Standard Time)',
             docId: 'docId2',
           },
         ],
@@ -173,7 +173,7 @@ describe('geo_containment', () => {
           {
             location: [0, 0],
             shapeLocationId: '789',
-            dateInShape: 'Wed Dec 09 2020 16:31:31 GMT-0700 (Mountain Standard Time)',
+            dateInShape: 'Wed Dec 23 2020 16:31:31 GMT-0700 (Mountain Standard Time)',
             docId: 'docId3',
           },
         ],
@@ -346,13 +346,13 @@ describe('geo_containment', () => {
         {
           location: [0, 0],
           shapeLocationId: '123',
-          dateInShape: 'Wed Dec 08 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          dateInShape: 'Wed Dec 08 2020 12:31:31 GMT-0700 (Mountain Standard Time)',
           docId: 'docId2',
         },
         {
           location: [0, 0],
           shapeLocationId: '456',
-          dateInShape: 'Wed Dec 07 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          dateInShape: 'Wed Dec 07 2020 10:31:31 GMT-0700 (Mountain Standard Time)',
           docId: 'docId3',
         },
       ]);
@@ -382,13 +382,13 @@ describe('geo_containment', () => {
         {
           location: [0, 0],
           shapeLocationId: '123',
-          dateInShape: 'Wed Dec 08 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          dateInShape: 'Wed Dec 08 2020 12:31:31 GMT-0700 (Mountain Standard Time)',
           docId: 'docId1',
         },
         {
           location: [0, 0],
           shapeLocationId: '456',
-          dateInShape: 'Wed Dec 07 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          dateInShape: 'Wed Dec 07 2020 10:31:31 GMT-0700 (Mountain Standard Time)',
           docId: 'docId1',
         },
       ]);
@@ -415,13 +415,13 @@ describe('geo_containment', () => {
         {
           location: [0, 0],
           shapeLocationId: OTHER_CATEGORY,
-          dateInShape: 'Wed Dec 08 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          dateInShape: 'Wed Dec 08 2020 12:31:31 GMT-0700 (Mountain Standard Time)',
           docId: 'docId1',
         },
         {
           location: [0, 0],
           shapeLocationId: '456',
-          dateInShape: 'Wed Dec 07 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          dateInShape: 'Wed Dec 07 2020 10:31:31 GMT-0700 (Mountain Standard Time)',
           docId: 'docId1',
         },
       ]);
