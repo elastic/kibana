@@ -71,6 +71,7 @@ export const getTopNavConfig = (
     i18n: { Context: I18nContext },
     dashboard,
     savedObjectsTagging,
+    presentationUtil,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -379,39 +380,43 @@ export const getTopNavConfig = (
                 );
               }
 
-              const saveModal =
-                !!originatingApp ||
-                !dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables ? (
-                  <SavedObjectSaveModalOrigin
-                    documentInfo={savedVis || { title: '' }}
-                    onSave={onSave}
-                    options={tagOptions}
-                    getAppNameFromId={stateTransfer.getAppNameFromId}
-                    objectType={'visualization'}
-                    onClose={() => {}}
-                    originatingApp={originatingApp}
-                    returnToOriginSwitchLabel={
-                      originatingApp && embeddableId
-                        ? i18n.translate('visualize.topNavMenu.updatePanel', {
-                            defaultMessage: 'Update panel on {originatingAppName}',
-                            values: {
-                              originatingAppName: stateTransfer.getAppNameFromId(originatingApp),
-                            },
-                          })
-                        : undefined
-                    }
-                  />
-                ) : (
-                  <SavedObjectSaveModalDashboard
-                    documentInfo={savedVis || { title: '' }}
-                    onSave={onSave}
-                    tagOptions={tagOptions}
-                    objectType={'visualization'}
-                    onClose={() => {}}
-                    savedObjectsClient={savedObjectsClient}
-                  />
-                );
-              showSaveModal(saveModal, I18nContext);
+              const useByRefFlow =
+                !!originatingApp || !dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
+
+              const saveModal = useByRefFlow ? (
+                <SavedObjectSaveModalOrigin
+                  documentInfo={savedVis || { title: '' }}
+                  onSave={onSave}
+                  options={tagOptions}
+                  getAppNameFromId={stateTransfer.getAppNameFromId}
+                  objectType={'visualization'}
+                  onClose={() => {}}
+                  originatingApp={originatingApp}
+                  returnToOriginSwitchLabel={
+                    originatingApp && embeddableId
+                      ? i18n.translate('visualize.topNavMenu.updatePanel', {
+                          defaultMessage: 'Update panel on {originatingAppName}',
+                          values: {
+                            originatingAppName: stateTransfer.getAppNameFromId(originatingApp),
+                          },
+                        })
+                      : undefined
+                  }
+                />
+              ) : (
+                <SavedObjectSaveModalDashboard
+                  documentInfo={savedVis || { title: '' }}
+                  onSave={onSave}
+                  tagOptions={tagOptions}
+                  objectType={'visualization'}
+                  onClose={() => {}}
+                />
+              );
+              showSaveModal(
+                saveModal,
+                I18nContext,
+                !useByRefFlow ? presentationUtil.ContextProvider : React.Fragment
+              );
             },
           },
         ]
