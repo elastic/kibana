@@ -45,6 +45,9 @@ const textViewButton = i18n.translate(
     defaultMessage: 'Open in Single Metric Viewer',
   }
 );
+const mapsPluginMessage = i18n.translate('xpack.ml.explorer.charts.mapsPluginMissingMessage', {
+  defaultMessage: 'maps or embeddable start plugin not found',
+});
 
 // create a somewhat unique ID
 // from charts metadata for React's key attribute
@@ -217,8 +220,31 @@ export const ExplorerChartsContainerUI = ({
       share: {
         urlGenerators: { getUrlGenerator },
       },
+      embeddable: embeddablePlugin,
+      maps: mapsPlugin,
     },
   } = kibana;
+
+  let seriesToPlotFiltered;
+
+  if (!embeddablePlugin || !mapsPlugin) {
+    seriesToPlotFiltered = [];
+    // Show missing plugin callout
+    seriesToPlot.forEach((series) => {
+      if (series.functionDescription === 'lat_long') {
+        if (errorMessages[mapsPluginMessage] === undefined) {
+          errorMessages[mapsPluginMessage] = new Set([series.jobId]);
+        } else {
+          errorMessages[mapsPluginMessage].add(series.jobId);
+        }
+      } else {
+        seriesToPlotFiltered.push(series);
+      }
+    });
+  }
+
+  const seriesToUse = seriesToPlotFiltered !== undefined ? seriesToPlotFiltered : seriesToPlot;
+
   const mlUrlGenerator = useMemo(() => getUrlGenerator(ML_APP_URL_GENERATOR), [getUrlGenerator]);
 
   // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
@@ -226,13 +252,13 @@ export const ExplorerChartsContainerUI = ({
   const chartsWidth = chartsPerRow === 1 ? 'calc(100% - 20px)' : 'auto';
   const chartsColumns = chartsPerRow === 1 ? 0 : chartsPerRow;
 
-  const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
+  const wrapLabel = seriesToUse.some((series) => isLabelLengthAboveThreshold(series));
   return (
     <>
       <ExplorerChartsErrorCallOuts errorMessagesByType={errorMessages} />
       <EuiFlexGrid columns={chartsColumns}>
-        {seriesToPlot.length > 0 &&
-          seriesToPlot.map((series) => (
+        {seriesToUse.length > 0 &&
+          seriesToUse.map((series) => (
             <EuiFlexItem
               key={getChartId(series)}
               className="ml-explorer-chart-container"
