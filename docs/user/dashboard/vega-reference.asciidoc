@@ -235,9 +235,9 @@ format: {property: "features"}
 
 [float]
 [[vega-with-a-map]]
-==== experimental[] Vega with a Map
+==== Vega with a Map
 
-To enable *Maps*, the graph must specify `type=map` in the host configuration:
+experimental[] To enable *Maps*, the graph must specify `type=map` in the host configuration:
 
 [source,yaml]
 ----
