@@ -209,7 +209,7 @@ export function getAlertType(
         const humanFn = i18n.translate(
           'xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription',
           {
-            defaultMessage: `number of matching documents is {thresholdComparator} {threshold}`,
+            defaultMessage: `Number of matching documents is {thresholdComparator} {threshold}`,
             values: {
               thresholdComparator: getHumanReadableComparator(params.thresholdComparator),
               threshold: params.threshold.join(' and '),
