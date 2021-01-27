@@ -17,7 +17,7 @@ import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_message
 import { Result } from '../result/types';
 import { EngineLogic } from '../engine';
 
-import { BoostType, SearchSettings } from './types';
+import { Boost, BoostType, SearchSettings } from './types';
 interface RelevanceTuningProps {
   searchSettings: SearchSettings;
   schema: Schema;
@@ -45,11 +45,17 @@ interface RelevanceTuningActions {
   updateFieldWeight(name: string, weight: number): { name: string; weight: number };
   addBoost(name: string, type: BoostType): { name: string; type: BoostType };
   deleteBoost(name: string, index: number): { name: string; index: number };
-  updateBoostFactor: (
+  updateBoostFactor(
     name: string,
     index: number,
     factor: number
-  ) => { name: string; index: number; factor: number };
+  ): { name: string; index: number; factor: number };
+  updateBoostValue(
+    name: string,
+    boostIndex: number,
+    valueIndex: number,
+    value: string | number
+  ): { name: string; boostIndex: number; valueIndex: number; value: string | number };
 }
 
 interface RelevanceTuningValues {
@@ -138,6 +144,12 @@ export const RelevanceTuningLogic = kea<
     addBoost: (name, type) => ({ name, type }),
     deleteBoost: (name, index) => ({ name, index }),
     updateBoostFactor: (name, index, factor) => ({ name, index, factor }),
+    updateBoostValue: (name, boostIndex, valueIndex, value) => ({
+      name,
+      boostIndex,
+      valueIndex,
+      value,
+    }),
   }),
   reducers: () => ({
     searchSettings: [
@@ -395,6 +407,26 @@ export const RelevanceTuningLogic = kea<
       const { boosts } = searchSettings;
       const updatedBoosts = cloneDeep(boosts[name]);
       updatedBoosts[index].factor = Math.round(factor * 10) / 10;
+
+      actions.setSearchSettings({
+        ...searchSettings,
+        boosts: {
+          ...boosts,
+          [name]: updatedBoosts,
+        },
+      });
+      actions.getSearchResults();
+    },
+    updateBoostValue: ({ name, boostIndex, valueIndex, value }) => {
+      const { searchSettings } = values;
+      const { boosts } = searchSettings;
+      const updatedBoosts: Boost[] = cloneDeep(boosts[name]);
+      const existingValue = updatedBoosts[boostIndex].value;
+      if (existingValue === undefined) {
+        updatedBoosts[boostIndex].value = [value];
+      } else {
+        existingValue[valueIndex] = value;
+      }
 
       actions.setSearchSettings({
         ...searchSettings,

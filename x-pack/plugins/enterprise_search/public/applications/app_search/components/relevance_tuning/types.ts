@@ -13,7 +13,7 @@ export interface Boost {
   function?: string;
   newBoost?: boolean;
   center?: string | number;
-  value?: string | number | string[] | number[];
+  value?: Array<string | number>;
   factor: number;
 }
 

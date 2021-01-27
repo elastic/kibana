@@ -799,6 +799,85 @@ describe('RelevanceTuningLogic', () => {
         });
       });
     });
+
+    describe('updateBoostValue', () => {
+      it('will update the boost value and update search reuslts', () => {
+        mount({
+          searchSettings: {
+            ...searchSettings,
+            boosts: {
+              foo: [
+                {
+                  factor: 1,
+                  type: 'functional',
+                },
+                {
+                  factor: 1,
+                  type: 'value',
+                  value: ['a', 'b', 'c'],
+                },
+              ],
+            },
+          },
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.updateBoostValue('foo', 1, 1, 'a');
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          ...searchSettings,
+          boosts: {
+            foo: [
+              {
+                factor: 1,
+                type: 'functional',
+              },
+              {
+                factor: 1,
+                type: 'value',
+                // boost index and value index were 1, which corresponds to the 2nd item in
+                // the second boost, which was originally 'b' but upudated to 'a'
+                value: ['a', 'a', 'c'],
+              },
+            ],
+          },
+        });
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
+      });
+
+      it('will create a new array if no array exists yet for value', () => {
+        mount({
+          searchSettings: {
+            ...searchSettings,
+            boosts: {
+              foo: [
+                {
+                  factor: 1,
+                  type: 'functional',
+                },
+              ],
+            },
+          },
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.updateBoostValue('foo', 0, 0, 'a');
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          ...searchSettings,
+          boosts: {
+            foo: [
+              {
+                factor: 1,
+                type: 'functional',
+                value: ['a'],
+              },
+            ],
+          },
+        });
+      });
+    });
   });
 
   describe('selectors', () => {
