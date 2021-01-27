@@ -13,7 +13,7 @@ import { networkItems as mockNetworkItems } from './data_formatting.test';
 describe('WaterfallChartWrapper', () => {
   it('opens flyout on sidebar click and closes on flyout close button', async () => {
     const { getByText, getByTestId, queryByText } = render(
-      <WaterfallChartWrapper data={mockNetworkItems} />
+      <WaterfallChartWrapper total={mockNetworkItems.length} data={mockNetworkItems} />
     );
 
     expect(getByText(`1. ${mockNetworkItems[0].url}`)).toBeInTheDocument();
