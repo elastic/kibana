@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { reindexOperationWithLargeErrorMessage } from './reindex_operation_with_large_error_message';
 
 export default function ({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('Reindex operation saved object', function () {
     const dotKibanaIndex = '.kibana';

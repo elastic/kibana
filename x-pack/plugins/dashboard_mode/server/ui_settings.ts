@@ -22,6 +22,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       value: [DASHBOARD_ONLY_USER_ROLE],
       category: ['dashboard'],
+      sensitive: true,
       deprecation: {
         message: i18n.translate('xpack.dashboardMode.uiSettings.dashboardsOnlyRolesDeprecation', {
           defaultMessage: 'This setting is deprecated and will be removed in Kibana 8.0.',
