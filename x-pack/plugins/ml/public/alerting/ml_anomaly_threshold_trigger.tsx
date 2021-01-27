@@ -5,13 +5,14 @@
  */
 
 import React, { FC, useCallback } from 'react';
-import { JobSelectorControl, JobSelectorControlProps } from './job_selector';
+import { JobSelectorControl } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
 import { HttpService } from '../application/services/http_service';
-import { SeveritySelector, SeveritySelectorProps } from './severity_selector';
-import { ResultTypeSelector, ResultTypeSelectorProps } from './result_type_selector';
+import { SeveritySelector } from './severity_selector';
+import { ResultTypeSelector } from './result_type_selector';
 import type { AnomalyResultType } from '../../common/types/anomalies';
+import { IntervalSelector } from './interval_selector';
 
 interface MlAnomalyThresholdAlertParams {
   jobSelection: {
@@ -20,6 +21,7 @@ interface MlAnomalyThresholdAlertParams {
   };
   severity: number;
   resultTypes: AnomalyResultType[];
+  timeRange: string;
 }
 
 interface Props {
@@ -38,30 +40,26 @@ const MlAlertThresholdAlertTrigger: FC<Props> = ({
   } = useMlKibana();
   const adJobsApiService = jobsApiProvider(new HttpService(http));
 
-  const onJobSelectionChange: JobSelectorControlProps['onSelectionChange'] = useCallback(
-    (update) => {
-      setAlertParams('jobSelection', update);
+  const onAlertParamChange = useCallback(
+    (param) => (update: any) => {
+      setAlertParams(param, update);
     },
     []
   );
-
-  const onSeverityChange: SeveritySelectorProps['onChange'] = useCallback((update) => {
-    setAlertParams('severity', update);
-  }, []);
-
-  const onResultTypesChange: ResultTypeSelectorProps['onChange'] = useCallback((update) => {
-    setAlertParams('resultTypes', update);
-  }, []);
 
   return (
     <>
       <JobSelectorControl
         jobSelection={alertParams.jobSelection}
         adJobsApiService={adJobsApiService}
-        onSelectionChange={onJobSelectionChange}
+        onSelectionChange={onAlertParamChange('jobSelection')}
       />
-      <ResultTypeSelector value={alertParams.resultTypes} onChange={onResultTypesChange} />
-      <SeveritySelector value={alertParams.severity} onChange={onSeverityChange} />
+      <ResultTypeSelector
+        value={alertParams.resultTypes}
+        onChange={onAlertParamChange('resultTypes')}
+      />
+      <SeveritySelector value={alertParams.severity} onChange={onAlertParamChange('severity')} />
+      <IntervalSelector value={alertParams.timeRange} onChange={onAlertParamChange('timeRange')} />
     </>
   );
 };

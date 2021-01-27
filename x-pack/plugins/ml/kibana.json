@@ -37,7 +37,8 @@
     "dashboard",
     "savedObjects",
     "home",
-    "spaces"
+    "spaces",
+    "alerts"
   ],
   "extraPublicDirs": [
     "common"
