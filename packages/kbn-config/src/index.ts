@@ -14,7 +14,6 @@ export {
   ConfigDeprecationLogger,
   ConfigDeprecationProvider,
   ConfigDeprecationWithContext,
-  copyFromRoot,
 } from './deprecation';
 
 export { RawConfigurationProvider, RawConfigService, getConfigFromFiles } from './raw';

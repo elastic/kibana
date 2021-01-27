@@ -20,6 +20,8 @@ export interface Suite {
   title: string;
   file?: string;
   parent?: Suite;
+  eachTest: (cb: (test: Test) => void) => void;
+  root: boolean;
 }
 
 export interface Test {
