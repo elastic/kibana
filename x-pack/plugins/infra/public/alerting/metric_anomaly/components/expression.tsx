@@ -16,7 +16,7 @@ import {
   METRIC_ANOMALY_ALERT_TYPE_ID,
   MetricAnomalyParams,
 } from '../../../../common/alerting/metrics';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled, EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   WhenExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -175,7 +175,8 @@ export const Expression: React.FC<Props> = (props) => {
   if (!hasInfraMLCapabilities) return <SubscriptionSplashContent />;
 
   return (
-    <>
+    // https://github.com/elastic/kibana/issues/89506
+    <EuiThemeProvider>
       <EuiText size="xs">
         <h4>
           <FormattedMessage
@@ -235,7 +236,6 @@ export const Expression: React.FC<Props> = (props) => {
         </StyledExpression>
       </StyledExpressionRow>
       <EuiSpacer size={'m'} />
-
       <InfluencerFilter
         derivedIndexPattern={derivedIndexPattern}
         nodeType={alertParams.nodeType}
@@ -244,7 +244,6 @@ export const Expression: React.FC<Props> = (props) => {
         onChangeFieldName={updateInfluencerFieldName}
         onChangeFieldValue={updateInfluencerFieldValue}
       />
-
       <EuiSpacer size={'m'} />
       <AlertPreview
         alertInterval={alertInterval}
@@ -261,7 +260,7 @@ export const Expression: React.FC<Props> = (props) => {
         validate={validateMetricAnomaly}
       />
       <EuiSpacer size={'m'} />
-    </>
+    </EuiThemeProvider>
   );
 };
 
