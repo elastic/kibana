@@ -5,7 +5,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { bufferTime, filter, switchMap } from 'rxjs/operators';
+import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
 import { reject, isUndefined } from 'lodash';
 import { Client } from 'elasticsearch';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -14,6 +14,8 @@ import { ESSearchResponse } from '../../../../typings/elasticsearch';
 import { EsContext } from '.';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
+import { esKuery } from '../../../../../src/plugins/data/server';
+import { IndexPatternTitleAndFields } from '../lib/get_index_pattern';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
@@ -29,6 +31,7 @@ export interface Doc {
 export interface ConstructorOpts {
   logger: Logger;
   clusterClientPromise: Promise<EsClusterClient>;
+  eventLogIndexPattern: Promise<IndexPatternTitleAndFields | undefined>;
   context: EsContext;
 }
 
@@ -42,6 +45,7 @@ export interface QueryEventsBySavedObjectResult {
 export class ClusterClientAdapter {
   private readonly logger: Logger;
   private readonly clusterClientPromise: Promise<EsClusterClient>;
+  private readonly eventLogIndexPattern: Promise<IndexPatternTitleAndFields | undefined>;
   private readonly docBuffer$: Subject<Doc>;
   private readonly context: EsContext;
   private readonly docsBufferedFlushed: Promise<void>;
@@ -49,6 +53,7 @@ export class ClusterClientAdapter {
   constructor(opts: ConstructorOpts) {
     this.logger = opts.logger;
     this.clusterClientPromise = opts.clusterClientPromise;
+    this.eventLogIndexPattern = opts.eventLogIndexPattern;
     this.context = opts.context;
     this.docBuffer$ = new Subject<Doc>();
 
@@ -58,7 +63,7 @@ export class ClusterClientAdapter {
     this.docsBufferedFlushed = this.docBuffer$
       .pipe(
         bufferTime(EVENT_BUFFER_TIME, null, EVENT_BUFFER_LENGTH),
-        filter((docs) => docs.length > 0),
+        rxFilter((docs) => docs.length > 0),
         switchMap(async (docs) => await this.indexDocuments(docs))
       )
       .toPromise();
@@ -200,7 +205,7 @@ export class ClusterClientAdapter {
     type: string,
     ids: string[],
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    { page, per_page: perPage, start, end, sort_field, sort_order }: FindOptionsType
+    { page, per_page: perPage, start, end, sort_field, sort_order, filter }: FindOptionsType
   ): Promise<QueryEventsBySavedObjectResult> {
     const defaultNamespaceQuery = {
       bool: {
@@ -220,12 +225,28 @@ export class ClusterClientAdapter {
     };
     const namespaceQuery = namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
 
+    let dslFilterQuery;
+    try {
+      dslFilterQuery = filter
+        ? esKuery.toElasticsearchQuery(
+            esKuery.fromKueryExpression(filter),
+            await this.eventLogIndexPattern
+          )
+        : [];
+    } catch (err) {
+      this.debug(`Invalid kuery syntax for the filter (${filter}) error:`, {
+        message: err.message,
+        statusCode: err.statusCode,
+      });
+      throw err;
+    }
     const body = {
       size: perPage,
       from: (page - 1) * perPage,
       sort: { [sort_field]: { order: sort_order } },
       query: {
         bool: {
+          filter: dslFilterQuery,
           must: reject(
             [
               {

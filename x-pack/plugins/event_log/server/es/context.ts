@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, LegacyClusterClient } from 'src/core/server';
+import { Logger, LegacyClusterClient, IClusterClient } from 'src/core/server';
 
 import { EsNames, getEsNames } from './names';
 import { initializeEs } from './init';
 import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
 import { createReadySignal, ReadySignal } from '../lib/ready_signal';
+import { getEventLogIndexPattern } from '../lib/get_index_pattern';
 
 export type EsClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
@@ -37,6 +38,7 @@ export interface EsContextCtorParams {
   clusterClientPromise: Promise<EsClusterClient>;
   indexNameRoot: string;
   kibanaVersion: string;
+  elasticsearchClientPromise: Promise<IClusterClient>;
 }
 
 class EsContextImpl implements EsContext {
@@ -54,6 +56,10 @@ class EsContextImpl implements EsContext {
     this.esAdapter = new ClusterClientAdapter({
       logger: params.logger,
       clusterClientPromise: params.clusterClientPromise,
+      eventLogIndexPattern: getEventLogIndexPattern({
+        elasticsearchClientPromise: params.elasticsearchClientPromise,
+        index: this.esNames.indexPattern,
+      }),
       context: this,
     });
   }

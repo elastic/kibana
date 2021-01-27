@@ -15,6 +15,7 @@ import { contextMock } from './context.mock';
 import { findOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { times } from 'lodash';
+import { IndexPatternTitleAndFields } from '../lib/get_index_pattern';
 
 type EsClusterClient = Pick<jest.Mocked<LegacyClusterClient>, 'callAsInternalUser' | 'asScoped'>;
 type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
@@ -22,13 +23,19 @@ type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
 let logger: MockedLogger;
 let clusterClient: EsClusterClient;
 let clusterClientAdapter: IClusterClientAdapter;
+let eventLogIndexPattern: Promise<IndexPatternTitleAndFields | undefined>;
 
 beforeEach(() => {
   logger = loggingSystemMock.createLogger();
   clusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+  eventLogIndexPattern = Promise.resolve({
+    title: 'index',
+    fields: [],
+  });
   clusterClientAdapter = new ClusterClientAdapter({
     logger,
     clusterClientPromise: Promise.resolve(clusterClient),
+    eventLogIndexPattern,
     context: contextMock.create(),
   });
 });

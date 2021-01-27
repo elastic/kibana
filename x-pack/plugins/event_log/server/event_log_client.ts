@@ -48,12 +48,13 @@ export const findOptionsSchema = schema.object({
   sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
     defaultValue: 'asc',
   }),
+  filter: schema.maybe(schema.string()),
 });
 // page & perPage are required, other fields are optional
 // using schema.maybe allows us to set undefined, but not to make the field optional
 export type FindOptionsType = Pick<
   TypeOf<typeof findOptionsSchema>,
-  'page' | 'per_page' | 'sort_field' | 'sort_order'
+  'page' | 'per_page' | 'sort_field' | 'sort_order' | 'filter'
 > &
   Partial<TypeOf<typeof findOptionsSchema>>;
 

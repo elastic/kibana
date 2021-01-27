@@ -80,6 +80,9 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       clusterClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.legacy.client),
+      elasticsearchClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client),
       kibanaVersion: this.kibanaVersion,
     });
 

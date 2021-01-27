@@ -5,7 +5,7 @@
  */
 
 import { createEsContext } from './context';
-import { LegacyClusterClient, Logger } from '../../../../../src/core/server';
+import { IClusterClient, LegacyClusterClient, Logger } from '../../../../../src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 jest.mock('../lib/../../../../package.json', () => ({ version: '1.2.3' }));
 jest.mock('./init');
@@ -13,10 +13,12 @@ type EsClusterClient = Pick<jest.Mocked<LegacyClusterClient>, 'callAsInternalUse
 
 let logger: Logger;
 let clusterClient: EsClusterClient;
+let elasticsearchClient: IClusterClient;
 
 beforeEach(() => {
   logger = loggingSystemMock.createLogger();
   clusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+  elasticsearchClient = elasticsearchServiceMock.createClusterClient();
 });
 
 describe('createEsContext', () => {
@@ -26,6 +28,7 @@ describe('createEsContext', () => {
       clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test0',
       kibanaVersion: '1.2.3',
+      elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
 
     expect(context.initialized).toBeFalsy();
@@ -40,6 +43,7 @@ describe('createEsContext', () => {
       clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test-index',
       kibanaVersion: '1.2.3',
+      elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
 
     const esNames = context.esNames;
@@ -60,6 +64,7 @@ describe('createEsContext', () => {
       clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test1',
       kibanaVersion: '1.2.3',
+      elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
     clusterClient.callAsInternalUser.mockResolvedValue(false);
 
@@ -78,6 +83,7 @@ describe('createEsContext', () => {
       clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test2',
       kibanaVersion: '1.2.3',
+      elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
     clusterClient.callAsInternalUser.mockResolvedValue(true);
     context.initialize();
@@ -103,6 +109,7 @@ describe('createEsContext', () => {
       clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test2',
       kibanaVersion: '1.2.3',
+      elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
     context.initialize();
     const success = await context.waitTillReady();
