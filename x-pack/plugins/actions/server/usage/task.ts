@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, CoreSetup, LegacyAPICaller } from 'kibana/server';
+import {
+  Logger,
+  CoreSetup,
+  LegacyAPICaller,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBaseOptions,
+} from 'kibana/server';
 import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../task_manager/server';
+import { ActionResult } from '../types';
 import { getTotalCount, getInUseTotalCount } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
@@ -66,19 +73,30 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
         client.callAsInternalUser(...args)
       );
     };
+    const actionsBulkGet = (
+      objects?: SavedObjectsBulkGetObject[],
+      options?: SavedObjectsBaseOptions
+    ) => {
+      return core
+        .getStartServices()
+        .then(([{ savedObjects }]) =>
+          savedObjects.createInternalRepository(['action']).bulkGet<ActionResult>(objects, options)
+        );
+    };
     return {
       async run() {
         return Promise.all([
           getTotalCount(callCluster, kibanaIndex),
-          getInUseTotalCount(callCluster, kibanaIndex),
+          getInUseTotalCount(callCluster, actionsBulkGet, kibanaIndex),
         ])
-          .then(([totalAggegations, countActiveTotal]) => {
+          .then(([totalAggegations, totalInUse]) => {
             return {
               state: {
                 runs: (state.runs || 0) + 1,
                 count_total: totalAggegations.countTotal,
                 count_by_type: totalAggegations.countByType,
-                count_active_total: countActiveTotal,
+                count_active_total: totalInUse.countTotal,
+                count_active_by_type: totalInUse.countByType,
               },
               runAt: getNextMidnight(),
             };
