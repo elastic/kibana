@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts"],
+  "references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/maps_legacy/tsconfig.json" },
+    { "path": "../features/tsconfig.json" },
+    { "path": "../licensing/tsconfig.json" },
+    { "path": "../maps_file_upload/tsconfig.json" },
+    { "path": "../saved_objects_tagging/tsconfig.json" },
+  ]
+}

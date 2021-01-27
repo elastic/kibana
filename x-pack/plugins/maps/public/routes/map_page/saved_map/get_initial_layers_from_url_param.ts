@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-expect-error
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import '../../../classes/sources/wms_source';

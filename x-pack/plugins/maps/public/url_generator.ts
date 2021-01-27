@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+// @ts-expect-error
 import rison from 'rison-node';
 import {
   TimeRange,

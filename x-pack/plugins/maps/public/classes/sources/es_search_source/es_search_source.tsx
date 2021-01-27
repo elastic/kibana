@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
+// @ts-expect-error
 import rison from 'rison-node';
 
 import { i18n } from '@kbn/i18n';
