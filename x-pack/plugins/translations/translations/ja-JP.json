@@ -11425,7 +11425,6 @@
     "xpack.lens.indexPatterns.clearFiltersLabel": "名前とタイプフィルターを消去",
     "xpack.lens.indexPatterns.fieldFiltersLabel": "フィールドフィルター",
     "xpack.lens.indexPatterns.fieldSearchLiveRegion": "{availableFields}使用可能な{availableFields, plural, other {フィールド}}。{emptyFields}空の{emptyFields, plural, other {フィールド}}。 {metaFields}メタ{metaFields, plural, other {フィールド}}。",
-    "xpack.lens.indexPatterns.filterByNameAriaLabel": "検索フィールド",
     "xpack.lens.indexPatterns.filterByNameLabel": "検索フィールド名",
     "xpack.lens.indexPatterns.noAvailableDataLabel": "データを含むフィールドはありません。",
     "xpack.lens.indexPatterns.noDataLabel": "フィールドがありません。",
