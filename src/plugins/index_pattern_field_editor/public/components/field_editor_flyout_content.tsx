@@ -21,10 +21,11 @@ import {
 
 import { DocLinksStart } from 'src/core/public';
 
-import { IndexPatternField } from '../shared_imports';
+import { Field } from '../types';
+import { getLinks } from '../lib';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 
-const geti18nTexts = (field?: IndexPatternField) => {
+const geti18nTexts = (field?: Field) => {
   return {
     flyoutTitle: field
       ? i18n.translate('indexPatternFieldEditor.editor.flyoutEditFieldTitle', {
@@ -52,7 +53,7 @@ export interface Props {
   /**
    * Handler for the "save" footer button
    */
-  onSave: (field: IndexPatternField) => void;
+  onSave: (field: Field) => void;
   /**
    * Handler for the "cancel" footer button
    */
@@ -68,10 +69,16 @@ export interface Props {
   /**
    * Optional field to edit
    */
-  field?: IndexPatternField;
+  field?: Field;
 }
 
-export const FieldEditorFlyoutContent = ({ field, onSave, onCancel, FieldEditor }: Props) => {
+const FieldEditorFlyoutContentComponent = ({
+  field,
+  onSave,
+  onCancel,
+  FieldEditor,
+  docLinks,
+}: Props) => {
   const i18nTexts = geti18nTexts(field);
 
   const onClickSave = useCallback(async () => {
@@ -88,7 +95,7 @@ export const FieldEditorFlyoutContent = ({ field, onSave, onCancel, FieldEditor 
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>{FieldEditor && <FieldEditor />}</EuiFlyoutBody>
+      <EuiFlyoutBody>{FieldEditor && <FieldEditor links={getLinks(docLinks)} />}</EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         {FieldEditor && (
@@ -120,3 +127,5 @@ export const FieldEditorFlyoutContent = ({ field, onSave, onCancel, FieldEditor 
     </>
   );
 };
+
+export const FieldEditorFlyoutContent = React.memo(FieldEditorFlyoutContentComponent);
