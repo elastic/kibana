@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart } from './shared_imports';
 import { OpenFieldEditorOptions } from './open_editor';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
 

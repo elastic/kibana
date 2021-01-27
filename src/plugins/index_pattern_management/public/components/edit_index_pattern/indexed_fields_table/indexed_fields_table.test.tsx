@@ -26,7 +26,7 @@ jest.mock('./components/table', () => ({
 }));
 
 const helpers = {
-  redirectToRoute: (obj: any) => {},
+  editField: (obj: any) => {},
   getFieldInfo: () => [],
 };
 

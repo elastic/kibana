@@ -9,9 +9,13 @@
 import React from 'react';
 import { CoreStart, OverlayRef } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
 
-import { createKibanaReactContext, toMountPoint, IndexPatternField } from './shared_imports';
+import {
+  createKibanaReactContext,
+  toMountPoint,
+  IndexPatternField,
+  DataPublicPluginStart,
+} from './shared_imports';
 import {
   FieldEditorFlyoutContentContainer,
   Props as FieldEditorFlyoutContentContainerProps,
