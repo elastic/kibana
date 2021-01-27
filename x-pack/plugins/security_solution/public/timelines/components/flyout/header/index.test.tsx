@@ -68,23 +68,13 @@ describe('Timeline KPIs', () => {
       );
       expect(wrapper.find('[data-test-subj="siem-timeline-kpis"]').exists()).toEqual(true);
       // label
-      expect(
-        wrapper
-          .find('[data-test-subj="siem-timeline-process-kpi"]')
-          .first()
-          .childAt(0)
-          .childAt(0)
-          .text()
-      ).toEqual('Processes');
+      expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
+        expect.stringContaining('Processes')
+      );
       // value
-      expect(
-        wrapper
-          .find('[data-test-subj="siem-timeline-process-kpi"]')
-          .first()
-          .childAt(0)
-          .childAt(1)
-          .text()
-      ).toEqual('1');
+      expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
+        expect.stringContaining('1')
+      );
     });
   });
 
@@ -98,14 +88,9 @@ describe('Timeline KPIs', () => {
           <FlyoutHeader timelineId={'timeline-1'} />
         </TestProviders>
       );
-      expect(
-        wrapper
-          .find('[data-test-subj="siem-timeline-process-kpi"]')
-          .first()
-          .childAt(0)
-          .childAt(1)
-          .text()
-      ).toEqual('--');
+      expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
+        expect.stringContaining('--')
+      );
     });
   });
 
@@ -120,22 +105,12 @@ describe('Timeline KPIs', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="siem-timeline-process-kpi"]')
-          .first()
-          .childAt(0)
-          .childAt(0)
-          .text()
-      ).toEqual('Processes');
-      expect(
-        wrapper
-          .find('[data-test-subj="siem-timeline-process-kpi"]')
-          .first()
-          .childAt(0)
-          .childAt(1)
-          .text()
-      ).toEqual(getEmptyValue());
+      expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
+        expect.stringContaining('Processes')
+      );
+      expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
+        expect.stringContaining(getEmptyValue())
+      );
     });
   });
 });
