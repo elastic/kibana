@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useRef, useEffect } from 'react';
-import uuid from 'uuid';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
+import { htmlIdGenerator } from '@elastic/eui';
 import {
+  EmbeddableFactory,
   ErrorEmbeddable,
-  ViewMode,
   isErrorEmbeddable,
+  ViewMode,
 } from '../../../../../../../src/plugins/embeddable/public';
 import {
   MapEmbeddable,
   MapEmbeddableInput,
+  MapEmbeddableOutput,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../maps/public/embeddable';
 import { Dictionary } from '../../../../common/types/common';
@@ -28,6 +30,7 @@ interface Props {
 
 export function EmbeddedMapComponent({ seriesConfig, severity }: Props) {
   const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
+  const id = useMemo(() => htmlIdGenerator()(), []);
 
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
   const layerList = useRef<LayerDescriptor[]>([]);
@@ -35,10 +38,14 @@ export function EmbeddedMapComponent({ seriesConfig, severity }: Props) {
     services: { embeddable: embeddablePlugin, maps: mapsPlugin },
   } = useMlKibana();
 
-  const factory = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+  const factory:
+    | EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput, MapEmbeddable>
+    | undefined = embeddablePlugin
+    ? embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE)
+    : undefined;
 
   const input: MapEmbeddableInput = {
-    id: uuid.v4(),
+    id,
     attributes: { title: '' },
     filters: [],
     hidePanelTitles: true,
@@ -83,7 +90,7 @@ export function EmbeddedMapComponent({ seriesConfig, severity }: Props) {
         console.error('Map embeddable not found.');
         return;
       }
-      const embeddableObject: any = await factory.create({
+      const embeddableObject = await factory.create({
         ...input,
         title: 'Explorer map',
       });

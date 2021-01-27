@@ -269,7 +269,6 @@ export class Explorer extends React.Component {
     const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
     const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
-
     return (
       <ExplorerPage
         jobSelectorProps={jobSelectorProps}
@@ -331,6 +330,7 @@ export class Explorer extends React.Component {
                 }
               />
             )}
+
             <AnomalyTimeline
               explorerState={this.props.explorerState}
               setSelectedCells={this.props.setSelectedCells}

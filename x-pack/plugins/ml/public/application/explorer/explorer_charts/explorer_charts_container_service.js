@@ -37,7 +37,6 @@ export function getDefaultChartsData() {
     chartsPerRow: 1,
     errorMessages: undefined,
     seriesToPlot: [],
-    showSingleMetricViewerLink: true,
     // default values, will update on every re-render
     tooManyBuckets: false,
     timeFieldName: 'timestamp',

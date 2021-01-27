@@ -31,6 +31,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ML_APP_URL_GENERATOR } from '../../../../common/constants/ml_url_generator';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 
@@ -58,7 +59,6 @@ function getChartId(series) {
 function ExplorerChartContainer({
   series,
   severity,
-  showSingleMetricViewerLink,
   tooManyBuckets,
   wrapLabel,
   mlUrlGenerator,
@@ -69,8 +69,8 @@ function ExplorerChartContainer({
   useEffect(() => {
     let isCancelled = false;
     const generateLink = async () => {
-      const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
-      if (!isCancelled && showSingleMetricViewerLink === true) {
+      if (!isCancelled && series.functionDescription !== ML_JOB_AGGREGATION.LAT_LONG) {
+        const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
         setExplorerSeriesLink(singleMetricViewerLink);
       }
     };
