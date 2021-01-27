@@ -68,11 +68,12 @@ export function transformResults(
         el: LatestEntityLocation & { entityName: string }
       ) => {
         const { entityName, ...locationData } = el;
-        if (!accu.has(entityName)) {
-          accu.set(entityName, []);
+        if (entityName) {
+          if (!accu.has(entityName)) {
+            accu.set(entityName, []);
+          }
+          accu.get(entityName)!.push(locationData);
         }
-        // @ts-ignore
-        accu.get(entityName).push(locationData);
         return accu;
       },
       new Map()
