@@ -99,6 +99,13 @@ const activatePhase = async (rendered: ReactWrapper, phase: string) => {
   });
   rendered.update();
 };
+const activateDeletePhase = async (rendered: ReactWrapper) => {
+  const testSubject = `enableDeletePhaseLink`;
+  await act(async () => {
+    await findTestSubject(rendered, testSubject).simulate('click');
+  });
+  rendered.update();
+};
 const openNodeAttributesSection = async (rendered: ReactWrapper, phase: string) => {
   const getControls = () => findTestSubject(rendered, `${phase}-dataTierAllocationControls`);
   await act(async () => {
@@ -813,7 +820,7 @@ describe('edit policy', () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
       await setPolicyName(rendered, 'mypolicy');
-      await activatePhase(rendered, 'delete');
+      await activateDeletePhase(rendered);
       await setPhaseAfter(rendered, 'delete', '0');
       waitForFormLibValidation(rendered);
       expectedErrorMessages(rendered, []);
@@ -822,7 +829,7 @@ describe('edit policy', () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
       await setPolicyName(rendered, 'mypolicy');
-      await activatePhase(rendered, 'delete');
+      await activateDeletePhase(rendered);
       await setPhaseAfter(rendered, 'delete', '-1');
       waitForFormLibValidation(rendered);
       expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);

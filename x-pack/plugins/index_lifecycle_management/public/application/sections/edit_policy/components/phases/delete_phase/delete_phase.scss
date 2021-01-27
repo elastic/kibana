@@ -1,0 +1,15 @@
+.ilmDeletePhase {
+  .euiCommentEvent {
+    &__header {
+      padding: $euiSize;
+      background-color: $euiColorEmptyShade;
+
+    }
+    &__body {
+      padding: $euiSize;
+      background-color: $euiColorLightestShade;
+
+    }
+
+  }
+}

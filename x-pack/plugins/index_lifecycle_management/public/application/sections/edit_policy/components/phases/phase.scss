@@ -1,0 +1,18 @@
+.ilmPhase {
+  .euiCommentEvent {
+    &__header {
+      padding: $euiSize;
+      background-color: $euiColorEmptyShade;
+    }
+    &__body {
+      padding: 0;
+    }
+
+  }
+  &__inner {
+    padding: $euiSize;
+  }
+  .ilmSettingsButton {
+    color: $euiColorPrimary;
+  }
+}

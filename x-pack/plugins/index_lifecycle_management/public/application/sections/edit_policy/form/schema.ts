@@ -361,6 +361,18 @@ export const schema: FormSchema<FormInternal> = {
           },
         ],
       },
+      actions: {
+        wait_for_snapshot: {
+          policy: {
+            label: i18n.translate(
+              'xpack.indexLifecycleMgmt.editPolicy.waitForSnapshot.snapshotPolicyFieldLabel',
+              {
+                defaultMessage: 'Policy name (optional)',
+              }
+            ),
+          },
+        },
+      },
     },
   },
 };

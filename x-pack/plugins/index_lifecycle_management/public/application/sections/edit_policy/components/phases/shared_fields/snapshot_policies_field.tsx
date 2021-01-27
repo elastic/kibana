@@ -10,15 +10,21 @@ import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiCallOut, EuiComboBoxOptionOption, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiComboBoxOptionOption,
+  EuiDescribedFormGroup,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 
-import { ComboBoxField, useFormData } from '../../../../../../shared_imports';
+import { getFieldValidityAndErrorMessage, ComboBoxField, useFormData } from '../../../../../../shared_imports';
 import { useLoadSnapshotPolicies } from '../../../../../services/api';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { UseField } from '../../../form';
 
-import { FieldLoadingError } from '../../';
+import { FieldLoadingError, LearnMoreLink, OptionalLabel } from '../../';
 
 const waitForSnapshotFormField = 'phases.delete.actions.wait_for_snapshot.policy';
 
@@ -137,43 +143,78 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
   }
 
   return (
-    <>
-      <UseField<string> path={waitForSnapshotFormField}>
-        {(field) => {
-          const singleSelectionArray: [selectedSnapshot?: string] = field.value
-            ? [field.value]
-            : [];
+    <EuiDescribedFormGroup
+      title={
+        <h3>
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotTitle"
+            defaultMessage="Wait for snapshot policy"
+          />
+        </h3>
+      }
+      description={
+        <>
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotDescription"
+            defaultMessage="Specify a snapshot policy to be executed before the deletion of the index. This ensures that a snapshot of the deleted index is available."
+          />{' '}
+          <LearnMoreLink docPath="ilm-wait-for-snapshot.html" />
+        </>
+      }
+      titleSize="xs"
+      fullWidth
+    >
+      <>
+        <UseField<string>
+          path={waitForSnapshotFormField}
+          componentProps={{
+            label: (
+              <>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotLabel"
+                  defaultMessage="Snapshot policy name"
+                />
+                <OptionalLabel />
+              </>
+            ),
+          }}
+        >
+          {(field) => {
+            const singleSelectionArray: [selectedSnapshot?: string] = field.value
+              ? [field.value]
+              : [];
 
-          return (
-            <ComboBoxField
-              field={
-                {
-                  ...field,
-                  value: singleSelectionArray,
-                } as any
-              }
-              euiFieldProps={{
-                'data-test-subj': 'snapshotPolicyCombobox',
-                options: policies,
-                singleSelection: { asPlainText: true },
-                isLoading,
-                noSuggestions: !!(error || data.length === 0),
-                onCreateOption: (newOption: string) => {
-                  field.setValue(newOption);
-                },
-                onChange: (options: EuiComboBoxOptionOption[]) => {
-                  if (options.length > 0) {
-                    field.setValue(options[0].label);
-                  } else {
-                    field.setValue('');
-                  }
-                },
-              }}
-            />
-          );
-        }}
-      </UseField>
-      {calloutContent}
-    </>
+            return (
+              <ComboBoxField
+                field={
+                  {
+                    ...field,
+                    value: singleSelectionArray,
+                  } as any
+                }
+                euiFieldProps={{
+                  'data-test-subj': 'snapshotPolicyCombobox',
+                  options: policies,
+                  singleSelection: { asPlainText: true },
+                  isLoading,
+                  noSuggestions: !!(error || data.length === 0),
+                  onCreateOption: (newOption: string) => {
+                    field.setValue(newOption);
+                  },
+                  onChange: (options: EuiComboBoxOptionOption[]) => {
+                    if (options.length > 0) {
+                      field.setValue(options[0].label);
+                    } else {
+                      field.setValue('');
+                    }
+                  },
+                }}
+              />
+            );
+          }}
+        </UseField>
+        {calloutContent}
+      </>
+    </EuiDescribedFormGroup>
   );
 };
