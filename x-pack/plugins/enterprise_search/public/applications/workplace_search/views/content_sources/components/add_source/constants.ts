@@ -292,20 +292,6 @@ export const SAVE_CUSTOM_API_KEYS_BODY = i18n.translate(
   }
 );
 
-export const SAVE_CUSTOM_ACCESS_TOKEN_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.accessToken.label',
-  {
-    defaultMessage: 'Access Token',
-  }
-);
-
-export const SAVE_CUSTOM_ID_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.id.label',
-  {
-    defaultMessage: 'ID',
-  }
-);
-
 export const SAVE_CUSTOM_VISUAL_WALKTHROUGH_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.visualWalkthrough.title',
   {
@@ -324,13 +310,6 @@ export const SAVE_CUSTOM_DOC_PERMISSIONS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.docPermissions.title',
   {
     defaultMessage: 'Set document-level permissions',
-  }
-);
-
-export const SAVE_CUSTOM_FEATURES_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.features.button',
-  {
-    defaultMessage: 'Learn about Platinum features',
   }
 );
 
