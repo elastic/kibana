@@ -20,7 +20,7 @@ describe('CreateEngineLogic', () => {
   const { mount } = new LogicMounter(CreateEngineLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { setSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+  const { setQueuedSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     name: '',
@@ -49,7 +49,7 @@ describe('CreateEngineLogic', () => {
       });
 
       it('should set a success message', () => {
-        expect(setSuccessMessage).toHaveBeenCalledWith(CREATE_ENGINE_SUCCESS_MESSAGE);
+        expect(setQueuedSuccessMessage).toHaveBeenCalledWith(CREATE_ENGINE_SUCCESS_MESSAGE);
       });
 
       it('should navigate the user to the engine page', () => {
