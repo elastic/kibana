@@ -79,7 +79,7 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
         </Route>
       )}
       {canManageEngines && (
-        <Route path={CREATE_ENGINES_PATH}>
+        <Route exact path={CREATE_ENGINES_PATH}>
           <CreateEngine />
         </Route>
       )}
