@@ -1195,6 +1195,7 @@ export interface IUiSettingsClient {
     getRegistered: () => Readonly<Record<string, PublicUiSettingsParams>>;
     getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
     isOverridden: (key: string) => boolean;
+    isSensitive: (key: string) => boolean;
     remove: (key: string) => Promise<void>;
     removeMany: (keys: string[]) => Promise<void>;
     set: (key: string, value: any) => Promise<void>;
@@ -3100,6 +3101,7 @@ export interface UiSettingsParams<T = unknown> {
     requiresPageReload?: boolean;
     // (undocumented)
     schema: Type<T>;
+    sensitive?: boolean;
     type?: UiSettingsType;
     // (undocumented)
     validation?: ImageValidation | StringValidation;
