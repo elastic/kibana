@@ -32,11 +32,11 @@ import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 
 interface VisualizeCapabilities {
-  createShortUrl?: boolean;
-  delete?: boolean;
-  save?: boolean;
-  saveQuery?: boolean;
-  show?: boolean;
+  createShortUrl: boolean;
+  delete: boolean;
+  save: boolean;
+  saveQuery: boolean;
+  show: boolean;
 }
 
 interface TopNavConfigParams {
