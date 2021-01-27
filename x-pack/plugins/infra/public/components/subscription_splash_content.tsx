@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
+import { euiStyled, EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { HttpStart } from '../../../../../src/core/public';
 import { useTrialStatus } from '../hooks/use_trial_status';
 import { LoadingPage } from '../components/loading_page';
@@ -101,58 +101,60 @@ export const SubscriptionSplashContent: React.FC = () => {
   }
 
   return (
-    <SubscriptionPage>
-      <EuiPageBody>
-        <SubscriptionPageContent verticalPosition="center" horizontalPosition="center">
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle size="m">
-                <h2>{title}</h2>
-              </EuiTitle>
-              <EuiSpacer size="xl" />
-              <EuiText>
-                <p>{description}</p>
-              </EuiText>
-              <EuiSpacer />
-              <div>{cta}</div>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiImage
-                alt={i18n.translate('xpack.infra.ml.splash.splashImageAlt', {
-                  defaultMessage: 'Placeholder image',
-                })}
-                url={services.http.basePath.prepend(
-                  '/plugins/infra/assets/anomaly_chart_minified.svg'
-                )}
-                size="fullWidth"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <SubscriptionPageFooter>
-            <EuiTitle size="xs">
-              <h3>
-                <FormattedMessage
-                  id="xpack.infra.ml.splash.learnMoreTitle"
-                  defaultMessage="Want to learn more?"
+    <EuiThemeProvider>
+      <SubscriptionPage>
+        <EuiPageBody>
+          <SubscriptionPageContent verticalPosition="center" horizontalPosition="center">
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiTitle size="m">
+                  <h2>{title}</h2>
+                </EuiTitle>
+                <EuiSpacer size="xl" />
+                <EuiText>
+                  <p>{description}</p>
+                </EuiText>
+                <EuiSpacer />
+                <div>{cta}</div>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiImage
+                  alt={i18n.translate('xpack.infra.ml.splash.splashImageAlt', {
+                    defaultMessage: 'Placeholder image',
+                  })}
+                  url={services.http.basePath.prepend(
+                    '/plugins/infra/assets/anomaly_chart_minified.svg'
+                  )}
+                  size="fullWidth"
                 />
-              </h3>
-            </EuiTitle>
-            <EuiButtonEmpty
-              flush="left"
-              iconType="training"
-              target="_blank"
-              color="text"
-              href="https://www.elastic.co/guide/en/kibana/master/xpack-logs-analysis.html"
-            >
-              <FormattedMessage
-                id="xpack.infra.ml.splash.learnMoreLink"
-                defaultMessage="Read documentation"
-              />
-            </EuiButtonEmpty>
-          </SubscriptionPageFooter>
-        </SubscriptionPageContent>
-      </EuiPageBody>
-    </SubscriptionPage>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <SubscriptionPageFooter>
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.infra.ml.splash.learnMoreTitle"
+                    defaultMessage="Want to learn more?"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiButtonEmpty
+                flush="left"
+                iconType="training"
+                target="_blank"
+                color="text"
+                href="https://www.elastic.co/guide/en/kibana/master/xpack-logs-analysis.html"
+              >
+                <FormattedMessage
+                  id="xpack.infra.ml.splash.learnMoreLink"
+                  defaultMessage="Read documentation"
+                />
+              </EuiButtonEmpty>
+            </SubscriptionPageFooter>
+          </SubscriptionPageContent>
+        </EuiPageBody>
+      </SubscriptionPage>
+    </EuiThemeProvider>
   );
 };
 

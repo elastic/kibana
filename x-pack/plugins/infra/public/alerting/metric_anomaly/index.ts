@@ -11,7 +11,11 @@ import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { AlertTypeParams } from '../../../../alerts/common';
 import { validateMetricAnomaly } from './components/validation';
 
-export function createMetricAnomalyAlertType(): AlertTypeModel<AlertTypeParams> {
+interface MetricAnomalyAlertTypeParams extends AlertTypeParams {
+  hasInfraMLCapabilities: boolean;
+}
+
+export function createMetricAnomalyAlertType(): AlertTypeModel<MetricAnomalyAlertTypeParams> {
   return {
     id: METRIC_ANOMALY_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.metrics.anomaly.alertFlyout.alertDescription', {

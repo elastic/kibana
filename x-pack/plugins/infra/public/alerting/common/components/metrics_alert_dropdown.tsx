@@ -24,7 +24,7 @@ type VisibleFlyoutType = 'inventory' | 'threshold' | 'anomaly' | null;
 export const MetricsAlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [visibleFlyoutType, setVisibleFlyoutType] = useState<VisibleFlyoutType>(null);
-  const { hasInfraMLCapabilites } = useInfraMLCapabilities();
+  const { hasInfraMLCapabilities } = useInfraMLCapabilities();
 
   const closeFlyout = useCallback(() => setVisibleFlyoutType(null), [setVisibleFlyoutType]);
 
@@ -75,7 +75,7 @@ export const MetricsAlertDropdown = () => {
             onClick: () => setVisibleFlyoutType('inventory'),
           },
         ].concat(
-          hasInfraMLCapabilites
+          hasInfraMLCapabilities
             ? {
                 name: i18n.translate('xpack.infra.alerting.createAnomalyAlertButton', {
                   defaultMessage: 'Create anomaly alert',
@@ -100,7 +100,7 @@ export const MetricsAlertDropdown = () => {
         ],
       },
     ],
-    [manageAlertsLinkProps, setVisibleFlyoutType, hasInfraMLCapabilites]
+    [manageAlertsLinkProps, setVisibleFlyoutType, hasInfraMLCapabilities]
   );
 
   const closePopover = useCallback(() => {

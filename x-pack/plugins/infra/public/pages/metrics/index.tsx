@@ -38,7 +38,7 @@ import { SavedView } from '../../containers/saved_view/saved_view';
 import { SourceConfigurationFields } from '../../graphql/types';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
-import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomoly_detection_flyout';
+import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 

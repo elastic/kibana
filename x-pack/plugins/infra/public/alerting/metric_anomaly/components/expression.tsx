@@ -6,9 +6,11 @@
 
 import { pick } from 'lodash';
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
-import { EuiFlexGroup, EuiSpacer, EuiText, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer, EuiText, EuiFormRow, EuiLoadingContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
+import { SubscriptionSplashContent } from '../../../components/subscription_splash_content';
 import { AlertPreview } from '../../common';
 import {
   METRIC_ANOMALY_ALERT_TYPE_ID,
@@ -58,8 +60,9 @@ export const defaultExpression = {
 };
 
 export const Expression: React.FC<Props> = (props) => {
+  const { hasInfraMLCapabilities, isLoading: isLoadingMLCapabilities } = useInfraMLCapabilities();
   const { http, notifications } = useKibanaContextForPlugin().services;
-  const { setAlertParams, alertParams, alertInterval, alertThrottle, metadata } = props;
+  const { setAlertParams, alertParams, errors, alertInterval, alertThrottle, metadata } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
@@ -72,6 +75,11 @@ export const Expression: React.FC<Props> = (props) => {
   ]);
 
   const [influencerFieldName, updateInfluencerFieldName] = useState('host.name');
+
+  useEffect(() => {
+    setAlertParams('hasInfraMLCapabilities', hasInfraMLCapabilities);
+  }, [setAlertParams, hasInfraMLCapabilities]);
+
   useEffect(() => {
     if (alertParams.influencerFilter) {
       setAlertParams('influencerFilter', {
@@ -161,9 +169,11 @@ export const Expression: React.FC<Props> = (props) => {
     }
   }, [metadata, derivedIndexPattern, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  if (isLoadingMLCapabilities) return <EuiLoadingContent lines={10} />;
+  if (!hasInfraMLCapabilities) return <SubscriptionSplashContent />;
+
   return (
     <>
-      <EuiSpacer size={'m'} />
       <EuiText size="xs">
         <h4>
           <FormattedMessage
