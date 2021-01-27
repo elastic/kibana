@@ -29,7 +29,7 @@ export default function rumJsErrorsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('when there is data', () => {
+    describe.only('when there is data', () => {
       before(async () => {
         await esArchiver.load('8.0.0');
         await esArchiver.load('rum_test_data');
