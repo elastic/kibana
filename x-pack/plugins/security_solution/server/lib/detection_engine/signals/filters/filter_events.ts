@@ -5,7 +5,6 @@
  */
 
 import { SearchResponse } from '../../../types';
-import { getFieldFromHit } from '../utils';
 import { FilterEventsOptions } from './types';
 
 /**

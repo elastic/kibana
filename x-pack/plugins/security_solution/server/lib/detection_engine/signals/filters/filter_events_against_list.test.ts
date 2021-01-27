@@ -161,12 +161,12 @@ describe('filterEventsAgainstList', () => {
 
       // this call represents an exception list with a value list containing ['2.2.2.2', '4.4.4.4']
       (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
-        { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
-        { ...getSearchListItemResponseMock(), value: '4.4.4.4' },
+        { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
+        { ...getSearchListItemResponseMock(), value: ['4.4.4.4'] },
       ]);
       // this call represents an exception list with a value list containing ['6.6.6.6']
       (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
-        { ...getSearchListItemResponseMock(), value: '6.6.6.6' },
+        { ...getSearchListItemResponseMock(), value: ['6.6.6.6'] },
       ]);
 
       const res = await filterEventsAgainstList({
@@ -223,11 +223,11 @@ describe('filterEventsAgainstList', () => {
 
       // this call represents an exception list with a value list containing ['2.2.2.2', '4.4.4.4']
       (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
-        { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
+        { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
       ]);
       // this call represents an exception list with a value list containing ['6.6.6.6']
       (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
-        { ...getSearchListItemResponseMock(), value: '6.6.6.6' },
+        { ...getSearchListItemResponseMock(), value: ['6.6.6.6'] },
       ]);
 
       const res = await filterEventsAgainstList({
@@ -282,11 +282,11 @@ describe('filterEventsAgainstList', () => {
 
       // this call represents an exception list with a value list containing ['2.2.2.2']
       (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
-        { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
+        { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
       ]);
       // this call represents an exception list with a value list containing ['4.4.4.4']
       (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
-        { ...getSearchListItemResponseMock(), value: '4.4.4.4' },
+        { ...getSearchListItemResponseMock(), value: ['4.4.4.4'] },
       ]);
 
       const res = await filterEventsAgainstList({
@@ -364,7 +364,7 @@ describe('filterEventsAgainstList', () => {
 
       // this call represents an exception list with a value list containing ['2.2.2.2', '4.4.4.4']
       (listClient.searchListItemByValues as jest.Mock).mockResolvedValue([
-        { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
+        { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
       ]);
 
       const res = await filterEventsAgainstList({
