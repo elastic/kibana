@@ -5,11 +5,19 @@
  */
 
 import { isEmpty, isEqual, keys, map } from 'lodash/fp';
-import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiDataGrid,
+  EuiDataGridProps,
+  EuiDataGridColumn,
+  EuiDataGridSorting,
+  EuiLoadingContent,
+} from '@elastic/eui';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { useAllActions } from './use_all_actions';
 import { ActionEdges, Direction } from '../../common/search_strategy';
+import { useRouterNavigate } from '../common/lib/kibana';
 
 const DataContext = createContext<ActionEdges>([]);
 
@@ -34,7 +42,7 @@ const ActionsTableComponent = () => {
   // ** Sorting config
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
-  const [, { actions, totalCount }] = useAllActions({
+  const [actionsLoading, { actions, totalCount }] = useAllActions({
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     direction: Direction.asc,
@@ -49,15 +57,22 @@ const ActionsTableComponent = () => {
     setVisibleColumns,
   ]);
 
-  const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(() => {
-    return ({ rowIndex, columnId, setCellProps }) => {
+  const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
+    () => ({ rowIndex, columnId, setCellProps }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
       const value = data[rowIndex].fields[columnId];
 
+      if (columnId === 'action_id') {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const linkProps = useRouterNavigate(`/live_query/queries/${value}`);
+        return <EuiLink {...linkProps}>{value}</EuiLink>;
+      }
+
       return !isEmpty(value) ? value : '-';
-    };
-  }, []);
+    },
+    []
+  );
 
   const tableSorting: EuiDataGridSorting = useMemo(
     () => ({ columns: sortingColumns, onSort: setSortingColumns }),
@@ -88,6 +103,10 @@ const ActionsTableComponent = () => {
       setVisibleColumns(map('id', newColumns));
     }
   }, [columns, actions]);
+
+  if (actionsLoading) {
+    return <EuiLoadingContent lines={10} />;
+  }
 
   return (
     <DataContext.Provider value={actions}>

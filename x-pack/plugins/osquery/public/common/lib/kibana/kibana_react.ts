@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useHistory } from 'react-router-dom';
 import {
   KibanaContextProvider,
   KibanaReactContextValue,
@@ -11,6 +12,7 @@ import {
   useUiSetting,
   useUiSetting$,
   withKibana,
+  reactRouterNavigate,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../../types';
 
@@ -21,8 +23,17 @@ export interface WithKibanaProps {
 
 const useTypedKibana = () => useKibana<StartServices>();
 
+const useRouterNavigate = (
+  to: Parameters<typeof reactRouterNavigate>[1],
+  onClickCallback?: Parameters<typeof reactRouterNavigate>[2]
+) => {
+  const history = useHistory();
+  return reactRouterNavigate(history, to, onClickCallback);
+};
+
 export {
   KibanaContextProvider,
+  useRouterNavigate,
   useTypedKibana as useKibana,
   useUiSetting,
   useUiSetting$,
