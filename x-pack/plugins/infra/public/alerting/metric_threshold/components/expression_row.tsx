@@ -5,14 +5,7 @@
  */
 import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiSpacer,
-  EuiText,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 import { pctToDecimal, decimalToPct } from '../../../../common/utils/corrected_percent_convert';
 import {
@@ -62,9 +55,6 @@ const StyledExpressionRow = euiStyled(EuiFlexGroup)`
 
 const StyledExpression = euiStyled.div`
   padding: 0 4px;
-  & .euiBadge {
-    margin-left: 4px;
-  }
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
@@ -167,8 +157,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 />
               </StyledExpression>
             )}
-          </StyledExpressionRow>
-          <StyledExpressionRow>
             <StyledExpression>
               <ThresholdExpression
                 thresholdComparator={comparator || Comparator.GT}
@@ -188,7 +176,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 <EuiText size={'s'}>%</EuiText>
               </div>
             )}
-            <EuiBadge color="danger">Alert</EuiBadge>
           </StyledExpressionRow>
         </EuiFlexItem>
         {canDelete && (
