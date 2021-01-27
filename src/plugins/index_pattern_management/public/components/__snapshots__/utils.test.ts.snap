@@ -1,20 +1,45 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getting index patterns 1`] = `
+exports[`getting index patterns it gets 1`] = `
 Array [
   Object {
     "default": true,
     "id": "test",
-    "sort": "0test name",
+    "patternList": Array [
+      "auditbeat-*",
+      "filebeat-*",
+      "packetbeat-*",
+      "winlogbeat-*",
+    ],
+    "patternListActive": Array [
+      "auditbeat-*",
+      "filebeat-*",
+      "packetbeat-*",
+      "winlogbeat-*",
+    ],
+    "sort": "0auditbeat-*,filebeat-*,packetbeat-*,winlogbeat-*",
     "tags": undefined,
-    "title": "test name",
+    "title": Array [
+      "auditbeat-*",
+      "filebeat-*",
+      "packetbeat-*",
+      "winlogbeat-*",
+    ],
   },
   Object {
     "default": false,
     "id": "test1",
+    "patternList": Array [
+      "test name 1",
+    ],
+    "patternListActive": Array [
+      "test name 1",
+    ],
     "sort": "1test name 1",
     "tags": undefined,
-    "title": "test name 1",
+    "title": Array [
+      "test name 1",
+    ],
   },
 ]
 `;

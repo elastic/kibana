@@ -36,6 +36,13 @@ const fields = [
     type: 'date',
   },
 ];
+const defaultProps = {
+  createIndexPattern: noop,
+  goToPreviousStep: noop,
+  indexPatternCreationType: mockIndexPatternCreationType,
+  patternList: ['ki*'],
+  title: 'ki*',
+};
 mockContext.data.indexPatterns = {
   create: () => ({}),
   getFieldsForWildcard: jest.fn().mockReturnValue(Promise.resolve(fields)),
@@ -43,31 +50,13 @@ mockContext.data.indexPatterns = {
 
 describe('StepTimeField', () => {
   it('should render normally', () => {
-    const component = createComponentWithContext(
-      StepTimeField,
-      {
-        indexPattern: 'ki*',
-        goToPreviousStep: noop,
-        createIndexPattern: noop,
-        indexPatternCreationType: mockIndexPatternCreationType,
-      },
-      mockContext
-    );
+    const component = createComponentWithContext(StepTimeField, defaultProps, mockContext);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render timeFields', () => {
-    const component = createComponentWithContext(
-      StepTimeField,
-      {
-        indexPattern: 'ki*',
-        goToPreviousStep: noop,
-        createIndexPattern: noop,
-        indexPatternCreationType: mockIndexPatternCreationType,
-      },
-      mockContext
-    );
+    const component = createComponentWithContext(StepTimeField, defaultProps, mockContext);
 
     component.setState({
       timeFields: [
@@ -80,16 +69,7 @@ describe('StepTimeField', () => {
   });
 
   it('should render a selected timeField', () => {
-    const component = createComponentWithContext(
-      StepTimeField,
-      {
-        indexPattern: 'ki*',
-        goToPreviousStep: noop,
-        createIndexPattern: noop,
-        indexPatternCreationType: mockIndexPatternCreationType,
-      },
-      mockContext
-    );
+    const component = createComponentWithContext(StepTimeField, defaultProps, mockContext);
 
     component.setState({
       timeFields: [
@@ -104,16 +84,7 @@ describe('StepTimeField', () => {
   });
 
   it('should ensure disabled time field options work properly', () => {
-    const component = createComponentWithContext(
-      StepTimeField,
-      {
-        indexPattern: 'ki*',
-        goToPreviousStep: noop,
-        createIndexPattern: noop,
-        indexPatternCreationType: mockIndexPatternCreationType,
-      },
-      mockContext
-    );
+    const component = createComponentWithContext(StepTimeField, defaultProps, mockContext);
 
     component.setState({
       timeFields: [
@@ -138,16 +109,7 @@ describe('StepTimeField', () => {
   });
 
   it('should disable the action button if an invalid time field is selected', () => {
-    const component = createComponentWithContext(
-      StepTimeField,
-      {
-        indexPattern: 'ki*',
-        goToPreviousStep: noop,
-        createIndexPattern: noop,
-        indexPatternCreationType: mockIndexPatternCreationType,
-      },
-      mockContext
-    );
+    const component = createComponentWithContext(StepTimeField, defaultProps, mockContext);
 
     component.setState({
       timeFields: [
@@ -165,16 +127,7 @@ describe('StepTimeField', () => {
   });
 
   it('should enable the action button if the user decides to not select a time field', () => {
-    const component = createComponentWithContext(
-      StepTimeField,
-      {
-        indexPattern: 'ki*',
-        goToPreviousStep: noop,
-        createIndexPattern: noop,
-        indexPatternCreationType: mockIndexPatternCreationType,
-      },
-      mockContext
-    );
+    const component = createComponentWithContext(StepTimeField, defaultProps, mockContext);
 
     component.setState({
       timeFields: [
@@ -192,16 +145,7 @@ describe('StepTimeField', () => {
   });
 
   it('should render advanced options', () => {
-    const component = createComponentWithContext(
-      StepTimeField,
-      {
-        indexPattern: 'ki*',
-        goToPreviousStep: noop,
-        createIndexPattern: noop,
-        indexPatternCreationType: mockIndexPatternCreationType,
-      },
-      mockContext
-    );
+    const component = createComponentWithContext(StepTimeField, defaultProps, mockContext);
 
     component.setState({ showingAdvancedOptions: true });
 
@@ -209,16 +153,7 @@ describe('StepTimeField', () => {
   });
 
   it('should render advanced options with an index pattern id', () => {
-    const component = createComponentWithContext(
-      StepTimeField,
-      {
-        indexPattern: 'ki*',
-        goToPreviousStep: noop,
-        createIndexPattern: noop,
-        indexPatternCreationType: mockIndexPatternCreationType,
-      },
-      mockContext
-    );
+    const component = createComponentWithContext(StepTimeField, defaultProps, mockContext);
 
     component.setState({
       showingAdvancedOptions: true,
@@ -229,16 +164,7 @@ describe('StepTimeField', () => {
   });
 
   it('should render a loading state when creating the index pattern', () => {
-    const component = createComponentWithContext(
-      StepTimeField,
-      {
-        indexPattern: 'ki*',
-        goToPreviousStep: noop,
-        createIndexPattern: noop,
-        indexPatternCreationType: mockIndexPatternCreationType,
-      },
-      mockContext
-    );
+    const component = createComponentWithContext(StepTimeField, defaultProps, mockContext);
 
     component.setState({ isCreating: true });
 
@@ -246,16 +172,7 @@ describe('StepTimeField', () => {
   });
 
   it('should render any error message', () => {
-    const component = createComponentWithContext(
-      StepTimeField,
-      {
-        indexPattern: 'ki*',
-        goToPreviousStep: noop,
-        createIndexPattern: noop,
-        indexPatternCreationType: mockIndexPatternCreationType,
-      },
-      mockContext
-    );
+    const component = createComponentWithContext(StepTimeField, defaultProps, mockContext);
 
     component.setState({ error: 'foobar' });
 
@@ -263,16 +180,7 @@ describe('StepTimeField', () => {
   });
 
   it('should render "Custom index pattern ID already exists" when error is "Conflict"', () => {
-    const component = createComponentWithContext(
-      StepTimeField,
-      {
-        indexPattern: 'ki*',
-        goToPreviousStep: noop,
-        createIndexPattern: noop,
-        indexPatternCreationType: mockIndexPatternCreationType,
-      },
-      mockContext
-    );
+    const component = createComponentWithContext(StepTimeField, defaultProps, mockContext);
 
     component.setState({ error: 'Conflict' });
 

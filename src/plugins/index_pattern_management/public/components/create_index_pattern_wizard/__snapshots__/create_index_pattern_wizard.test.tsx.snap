@@ -48,6 +48,7 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
           "type": "default",
         }
       }
+      initialQuery={Array []}
       showSystemIndices={true}
     />
   </EuiPageContent>
@@ -90,6 +91,7 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
           "type": "default",
         }
       }
+      initialQuery={Array []}
       showSystemIndices={true}
     />
   </EuiPageContent>
@@ -122,7 +124,6 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
     <StepTimeField
       createIndexPattern={[Function]}
       goToPreviousStep={[Function]}
-      indexPattern=""
       indexPatternCreationType={
         IndexPatternCreationConfig {
           "httpClient": null,
@@ -133,6 +134,8 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
           "type": "default",
         }
       }
+      patternList={Array []}
+      title=""
     />
   </EuiPageContent>
   <EuiGlobalToastList
@@ -174,6 +177,7 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
           "type": "default",
         }
       }
+      initialQuery={Array []}
       showSystemIndices={true}
     />
   </EuiPageContent>
@@ -222,6 +226,7 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
           "type": "default",
         }
       }
+      initialQuery={Array []}
       showSystemIndices={true}
     />
   </EuiPageContent>

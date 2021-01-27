@@ -32,8 +32,8 @@ interface StepTimeFieldProps {
   goToPreviousStep: () => void;
   indexPatternCreationType: IndexPatternCreationConfig;
   patternList: string[];
-  title: string;
   selectedTimeField?: string;
+  title: string;
 }
 
 interface StepTimeFieldState {

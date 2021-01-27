@@ -9,6 +9,7 @@
 import { getIndexPatterns } from './utils';
 import { coreMock } from '../../../../core/public/mocks';
 import { mockManagementPlugin } from '../mocks';
+import { HttpFetchOptions } from 'kibana/public';
 
 const { http, savedObjects } = coreMock.createStart();
 const mockManagementPluginStart = mockManagementPlugin.createStartContract();
@@ -18,39 +19,37 @@ const mockManagementPluginStart = mockManagementPlugin.createStartContract();
     {
       id: 'test',
       attributes: {
-        activeCollection: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        aliasCollection: [
-          'apm-*-transaction*',
-          'auditbeat-*',
-          'endgame-*',
-          'filebeat-*',
-          'packetbeat-*',
-          'winlogbeat-*',
-        ],
-        label: 'Label',
+        patternList: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        title: 'Label',
       },
-      get title() {
-        return 'test name';
+      get: () => {
+        return ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
       },
-      // get: (key: string) => {
-      //   return this?[key];
-      // },
     },
     {
       id: 'test1',
       get: () => {
-        return 'test name 1';
+        return ['test name 1'];
       },
     },
   ],
 });
 
-test('getting index patterns', async () => {
-  const indexPatterns = await getIndexPatterns(
-    savedObjects.client,
-    'test',
-    mockManagementPluginStart,
-    http
-  );
-  expect(indexPatterns).toMatchSnapshot();
+describe('getting index patterns', () => {
+  beforeEach(() => {
+    // @ts-ignore
+    jest.spyOn(http, 'fetch').mockImplementation((path: string, options: HttpFetchOptions) =>
+      // @ts-ignore
+      Promise.resolve(JSON.parse(options.body).patternList)
+    );
+  });
+  test('it gets', async () => {
+    const indexPatterns = await getIndexPatterns(
+      savedObjects.client,
+      'test',
+      mockManagementPluginStart,
+      http
+    );
+    expect(indexPatterns).toMatchSnapshot();
+  });
 });
