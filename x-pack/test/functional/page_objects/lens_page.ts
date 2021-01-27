@@ -289,7 +289,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.timeToVisualize.setSaveModalValues(title, {
         saveAsNew,
         redirectToOrigin,
-        addToDashboard,
+        addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
       });
 
