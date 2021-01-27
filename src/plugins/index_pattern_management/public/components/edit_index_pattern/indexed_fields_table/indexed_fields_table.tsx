@@ -18,7 +18,7 @@ interface IndexedFieldsTableProps {
   fieldFilter?: string;
   indexedFieldTypeFilter?: string;
   helpers: {
-    redirectToRoute: (obj: any) => void;
+    editField: (fieldName: string) => void;
     getFieldInfo: (indexPattern: IndexPattern, field: IFieldType) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
@@ -102,7 +102,7 @@ export class IndexedFieldsTable extends Component<
         <Table
           indexPattern={indexPattern}
           items={fields}
-          editField={(field) => this.props.helpers.redirectToRoute(field)}
+          editField={(field) => this.props.helpers.editField(field.name)}
         />
       </div>
     );

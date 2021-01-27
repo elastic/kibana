@@ -206,6 +206,9 @@ export const EditIndexPattern = withRouter(
             fields={fields}
             history={history}
             location={location}
+            refreshFields={() => {
+              setFields(indexPattern.getNonScriptedFields());
+            }}
           />
         </div>
       </EuiPanel>

@@ -6,6 +6,7 @@
  * Public License, v 1.
  */
 
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { OpenFieldEditorOptions } from './open_editor';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -21,5 +22,6 @@ export interface PluginStart {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupPlugins {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartPlugins {}
+export interface StartPlugins {
+  data: DataPublicPluginStart;
+}

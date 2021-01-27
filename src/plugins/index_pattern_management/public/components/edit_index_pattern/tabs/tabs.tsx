@@ -40,6 +40,7 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: IndexPattern;
   fields: IndexPatternField[];
   saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
+  refreshFields: () => void;
 }
 
 const searchAriaLabel = i18n.translate(
@@ -70,7 +71,14 @@ const addFieldButtonLabel = i18n.translate(
   }
 );
 
-export function Tabs({ indexPattern, saveIndexPattern, fields, history, location }: TabsProps) {
+export function Tabs({
+  indexPattern,
+  saveIndexPattern,
+  fields,
+  history,
+  location,
+  refreshFields,
+}: TabsProps) {
   const {
     uiSettings,
     indexPatternManagementStart,
@@ -105,13 +113,18 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
     );
   }, [indexPattern]);
 
-  const openFieldEditor = useCallback(() => {
-    indexPatternFieldEditor.openEditor({
-      ctx: {
-        indexPattern,
-      },
-    });
-  }, [indexPatternFieldEditor, indexPattern]);
+  const openFieldEditor = useCallback(
+    (fieldName?: string) => {
+      indexPatternFieldEditor.openEditor({
+        ctx: {
+          indexPattern,
+        },
+        onSave: refreshFields,
+        fieldName,
+      });
+    },
+    [indexPatternFieldEditor, indexPattern, refreshFields]
+  );
 
   useEffect(() => {
     refreshFilters();
@@ -148,7 +161,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={openFieldEditor}>
+                <EuiButton fill onClick={() => openFieldEditor()}>
                   {addFieldButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
@@ -193,9 +206,12 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
                 fieldWildcardMatcher={fieldWildcardMatcherDecorated}
                 indexedFieldTypeFilter={indexedFieldTypeFilter}
                 helpers={{
+                  /*
                   redirectToRoute: (field: IndexPatternField) => {
                     history.push(getPath(field, indexPattern));
                   },
+                  */
+                  editField: openFieldEditor,
                   getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
                 }}
               />
@@ -252,6 +268,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       refreshFilters,
       scriptedFieldLanguageFilter,
       saveIndexPattern,
+      openFieldEditor,
     ]
   );
 

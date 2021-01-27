@@ -21,9 +21,10 @@ export class IndexPatternFieldEditorPlugin
     const {
       application: { capabilities },
     } = core;
+    const { data } = plugins;
 
     return {
-      openEditor: getFieldEditorOpener(core),
+      openEditor: getFieldEditorOpener(core, data.indexPatterns),
       userPermissions: {
         editIndexPattern: () => {
           return capabilities.management.kibana.indexPatterns;

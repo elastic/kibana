@@ -9,7 +9,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { DocLinksStart } from 'src/core/public';
 
-import { IndexPatternField, IndexPattern } from '../shared_imports';
+import { IndexPatternField, IndexPattern, DataPublicPluginStart } from '../shared_imports';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 
@@ -37,6 +37,10 @@ export interface Props {
    * Optional field to edit
    */
   field?: IndexPatternField;
+  /**
+   * Index pattern service
+   */
+  indexPatternService: DataPublicPluginStart['indexPatterns'];
 }
 
 /**
@@ -45,14 +49,21 @@ export interface Props {
  * The <FieldEditorFlyoutContent /> component is the presentational component that won't know
  * anything about where a field comes from and where it should be persisted.
  */
-export const FieldEditorFlyoutContentContainer = ({ field, onSave, onCancel, docLinks }: Props) => {
+export const FieldEditorFlyoutContentContainer = ({
+  field,
+  onSave,
+  onCancel,
+  docLinks,
+  indexPatternService,
+  ctx: { indexPattern },
+}: Props) => {
   const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
 
   const saveField = useCallback(async () => {
-    // TODO: here we will put the logic to update the Kibana saved object
-
-    onSave({} as any);
-  }, [onSave]);
+    indexPatternService.updateSavedObject(indexPattern).then(() => {
+      onSave({} as any);
+    });
+  }, [onSave, indexPatternService, indexPattern]);
 
   const loadEditor = useCallback(async () => {
     const { FieldEditor } = await import('./field_editor');
