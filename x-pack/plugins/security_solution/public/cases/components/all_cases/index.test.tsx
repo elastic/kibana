@@ -665,7 +665,7 @@ describe('AllCases', () => {
     });
   });
 
-  it('should not allow the user to enter configuration page with gold license and above', async () => {
+  it('should allow the user to enter configuration page with gold license and above', async () => {
     useGetActionLicenseMock.mockReturnValue({
       ...defaultActionLicense,
       actionLicense: {
