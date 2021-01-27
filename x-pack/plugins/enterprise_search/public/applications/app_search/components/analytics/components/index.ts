@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { AnalyticsCards } from './analytics_cards';
 export { AnalyticsChart } from './analytics_chart';
 export { AnalyticsHeader } from './analytics_header';
 export { AnalyticsUnavailable } from './analytics_unavailable';

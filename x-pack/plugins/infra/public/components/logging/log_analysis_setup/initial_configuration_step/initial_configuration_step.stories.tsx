@@ -7,7 +7,7 @@
 import { actions } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { InitialConfigurationStep } from './initial_configuration_step';
 
 storiesOf('infra/logAnalysis/SetupInitialConfigurationStep', module)

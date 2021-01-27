@@ -16,6 +16,7 @@ import { useKibana } from '../../services/kibana_react';
 import {
   connectToQueryState,
   esFilters,
+  noSearchSessionStorageCapabilityMessage,
   QueryState,
   syncQueryStateWithUrl,
 } from '../../services/data';
@@ -159,13 +160,22 @@ export const useDashboardStateManager = (
       stateManager.isNew()
     );
 
-    searchSession.setSearchSessionInfoProvider(
+    searchSession.enableStorage(
       createSessionRestorationDataProvider({
         data: dataPlugin,
         getDashboardTitle: () => dashboardTitle,
         getDashboardId: () => savedDashboard?.id || '',
         getAppState: () => stateManager.getAppState(),
-      })
+      }),
+      {
+        isDisabled: () =>
+          dashboardCapabilities.storeSearchSession
+            ? { disabled: false }
+            : {
+                disabled: true,
+                reasonText: noSearchSessionStorageCapabilityMessage,
+              },
+      }
     );
 
     setDashboardStateManager(stateManager);
@@ -192,6 +202,7 @@ export const useDashboardStateManager = (
     toasts,
     uiSettings,
     usageCollection,
+    dashboardCapabilities.storeSearchSession,
   ]);
 
   return { dashboardStateManager, viewMode, setViewMode };
