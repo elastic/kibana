@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockFlashMessageHelpers,
-  mockHttpValues,
-  expectedAsyncError,
-} from '../../../__mocks__';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
+
+import { nextTick } from '@kbn/test/jest';
 
 import { BoostType } from './types';
 
@@ -260,12 +257,11 @@ describe('RelevanceTuningLogic', () => {
     describe('initializeRelevanceTuning', () => {
       it('should make an API call and set state based on the response', async () => {
         mount();
-        const promise = Promise.resolve(relevanceTuningProps);
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.resolve(relevanceTuningProps));
         jest.spyOn(RelevanceTuningLogic.actions, 'onInitializeRelevanceTuning');
 
         RelevanceTuningLogic.actions.initializeRelevanceTuning();
-        await promise;
+        await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/search_settings/details'
@@ -277,29 +273,16 @@ describe('RelevanceTuningLogic', () => {
 
       it('handles errors', async () => {
         mount();
-        const promise = Promise.reject('error');
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.reject('error'));
 
         RelevanceTuningLogic.actions.initializeRelevanceTuning();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
-    // Debouncing with kea's `breakpoint` is challenging. It uses a timeout,
-    // which we don't have access to, so we need to use fake timers. Additionally,
-    // it awaits a promise we don't have access to. To handle that situation,
-    // we use the waitATick function.
     describe('getSearchResults', () => {
-      const waitATick = () => {
-        let promiseResolve: any;
-        const promise = new Promise((resolve) => (promiseResolve = resolve));
-        setTimeout(() => promiseResolve());
-        jest.runAllTimers();
-        return promise;
-      };
-
       beforeAll(() => {
         jest.useFakeTimers();
       });
@@ -327,15 +310,15 @@ describe('RelevanceTuningLogic', () => {
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');
         jest.spyOn(RelevanceTuningLogic.actions, 'setResultsLoading');
 
-        const promise = Promise.resolve({
-          results: searchResults,
-        });
-        http.post.mockReturnValueOnce(promise);
+        http.post.mockReturnValueOnce(
+          Promise.resolve({
+            results: searchResults,
+          })
+        );
         RelevanceTuningLogic.actions.getSearchResults();
 
-        await waitATick();
-        await waitATick();
-        await promise;
+        jest.runAllTimers();
+        await nextTick();
 
         expect(RelevanceTuningLogic.actions.setResultsLoading).toHaveBeenCalledWith(true);
         expect(http.post).toHaveBeenCalledWith(
@@ -356,15 +339,15 @@ describe('RelevanceTuningLogic', () => {
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');
 
-        const promise = Promise.resolve({
-          results: searchResults,
-        });
-        http.post.mockReturnValueOnce(promise);
+        http.post.mockReturnValueOnce(
+          Promise.resolve({
+            results: searchResults,
+          })
+        );
         RelevanceTuningLogic.actions.getSearchResults();
 
-        await waitATick();
-        await waitATick();
-        await promise;
+        jest.runAllTimers();
+        await nextTick();
 
         expect(http.post).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/search_settings_search',
@@ -386,8 +369,8 @@ describe('RelevanceTuningLogic', () => {
         jest.spyOn(RelevanceTuningLogic.actions, 'clearSearchResults');
 
         RelevanceTuningLogic.actions.getSearchResults();
-        await waitATick();
-        await waitATick();
+        jest.runAllTimers();
+        await nextTick();
 
         expect(RelevanceTuningLogic.actions.clearSearchResults).toHaveBeenCalled();
         expect(RelevanceTuningLogic.actions.setSearchResults).not.toHaveBeenCalled();
@@ -399,13 +382,11 @@ describe('RelevanceTuningLogic', () => {
           query: 'foo',
         });
 
-        const promise = Promise.reject('error');
-        http.post.mockReturnValueOnce(promise);
+        http.post.mockReturnValueOnce(Promise.reject('error'));
         RelevanceTuningLogic.actions.getSearchResults();
 
-        await waitATick();
-        await waitATick();
-        await expectedAsyncError(promise);
+        jest.runAllTimers();
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
@@ -442,11 +423,10 @@ describe('RelevanceTuningLogic', () => {
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'onSearchSettingsSuccess');
 
-        const promise = Promise.resolve(searchSettings);
-        http.put.mockReturnValueOnce(promise);
+        http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
         RelevanceTuningLogic.actions.updateSearchSettings();
 
-        await promise;
+        await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/search_settings',
@@ -465,11 +445,10 @@ describe('RelevanceTuningLogic', () => {
       it('handles errors', async () => {
         mount();
         jest.spyOn(RelevanceTuningLogic.actions, 'onSearchSettingsError');
-        const promise = Promise.reject('error');
-        http.put.mockReturnValueOnce(promise);
+        http.put.mockReturnValueOnce(Promise.reject('error'));
 
         RelevanceTuningLogic.actions.updateSearchSettings();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
         expect(RelevanceTuningLogic.actions.onSearchSettingsError).toHaveBeenCalled();
@@ -482,11 +461,10 @@ describe('RelevanceTuningLogic', () => {
         jest.spyOn(RelevanceTuningLogic.actions, 'onSearchSettingsSuccess');
         confirmSpy.mockImplementation(() => true);
 
-        const promise = Promise.resolve(searchSettings);
-        http.post.mockReturnValueOnce(promise);
+        http.post.mockReturnValueOnce(Promise.resolve(searchSettings));
         RelevanceTuningLogic.actions.resetSearchSettings();
 
-        await promise;
+        await nextTick();
 
         expect(http.post).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/search_settings/reset'
@@ -514,11 +492,10 @@ describe('RelevanceTuningLogic', () => {
         mount();
         jest.spyOn(RelevanceTuningLogic.actions, 'onSearchSettingsError');
         confirmSpy.mockImplementation(() => true);
-        const promise = Promise.reject('error');
-        http.post.mockReturnValueOnce(promise);
+        http.post.mockReturnValueOnce(Promise.reject('error'));
 
         RelevanceTuningLogic.actions.resetSearchSettings();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
         expect(RelevanceTuningLogic.actions.onSearchSettingsError).toHaveBeenCalled();
