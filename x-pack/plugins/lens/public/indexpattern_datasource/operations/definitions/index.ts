@@ -204,7 +204,8 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   getErrorMessage?: (
     layer: IndexPatternLayer,
     columnId: string,
-    indexPattern: IndexPattern
+    indexPattern: IndexPattern,
+    operationDefinitionMap?: Record<string, GenericOperationDefinition>
   ) => string[] | undefined;
 
   /*

@@ -8,7 +8,7 @@ import { parse } from 'tinymath';
 import { EuiButton, EuiTextArea } from '@elastic/eui';
 import { OperationDefinition, GenericOperationDefinition, IndexPatternColumn } from './index';
 import { ReferenceBasedIndexPatternColumn } from './column_types';
-import { IndexPattern, IndexPatternLayer } from '../../types';
+import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { getColumnOrder } from '../layer_helpers';
 import { mathOperation } from './math';
 
@@ -37,8 +37,28 @@ export const formulaOperation: OperationDefinition<
   getDisabledStatus(indexPattern: IndexPattern) {
     return undefined;
   },
-  getErrorMessage(layer, columnId, indexPattern) {
-    return undefined;
+  getErrorMessage(layer, columnId, indexPattern, operationDefinitionMap) {
+    const column = layer.columns[columnId] as FormulaIndexPatternColumn;
+    if (!column.params.ast || !operationDefinitionMap) {
+      return;
+    }
+    const ast = parse(column.params.ast);
+    /*
+      { name: 'add', args: [ { name: 'abc', args: [5] }, 5 ] }
+      */
+    const extracted = extractColumns(columnId, operationDefinitionMap, ast, layer, indexPattern);
+
+    const errors = extracted
+      .flatMap(({ operationType, label }) => {
+        return operationDefinitionMap[operationType]?.getErrorMessage?.(
+          layer,
+          label,
+          indexPattern,
+          operationDefinitionMap
+        );
+      })
+      .filter(Boolean) as string[];
+    return errors.length ? errors : undefined;
   },
   getPossibleOperation() {
     return {
@@ -74,7 +94,8 @@ export const formulaOperation: OperationDefinition<
       },
     ];
   },
-  buildColumn() {
+  buildColumn({ referenceIds, previousColumn, layer }) {
+    const metric = layer.columns[referenceIds[0]];
     return {
       label: 'Formula',
       dataType: 'number',
@@ -175,9 +196,17 @@ function extractColumns(
   const columns: IndexPatternColumn[] = [];
   // let currentTree: any  = cloneDeep(ast);
   function parseNode(node: any) {
-    if (typeof node === 'number' || typeof node === 'string') {
+    if (typeof node === 'number') {
       // leaf node
       return node;
+    }
+    if (typeof node === 'string') {
+      if (indexPattern.getFieldByName(node)) {
+        // leaf node
+        return node;
+      }
+      // create a fake node just for making run a validation pass
+      return parseNode({ name: 'avg', args: [node] });
     }
     const nodeOperation = operations[node.name];
     if (!nodeOperation) {
@@ -191,13 +220,16 @@ function extractColumns(
     // operation node
     if (nodeOperation.input === 'field') {
       const fieldName = node.args[0];
+
+      const field = indexPattern.getFieldByName(fieldName);
+
       const newCol = (nodeOperation as OperationDefinition<
         IndexPatternColumn,
         'field'
       >).buildColumn({
         layer,
         indexPattern,
-        field: indexPattern.getFieldByName(fieldName)!,
+        field: field ?? ({ displayName: fieldName, name: fieldName } as IndexPatternField),
       });
       const newColId = `${idPrefix}X${columns.length}`;
       newCol.customLabel = true;

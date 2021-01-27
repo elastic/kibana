@@ -61,7 +61,12 @@ export function isColumnInvalid(
     Boolean(getReferencesErrors(layer, column, indexPattern).filter(Boolean).length);
 
   return (
-    !!operationDefinition.getErrorMessage?.(layer, columnId, indexPattern) || referencesHaveErrors
+    !!operationDefinition.getErrorMessage?.(
+      layer,
+      columnId,
+      indexPattern,
+      operationDefinitionMap
+    ) || referencesHaveErrors
   );
 }
 
@@ -73,7 +78,12 @@ function getReferencesErrors(
   return column.references?.map((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
     const referencedDefinition = operationDefinitionMap[referencedOperation];
-    return referencedDefinition?.getErrorMessage?.(layer, referenceId, indexPattern);
+    return referencedDefinition?.getErrorMessage?.(
+      layer,
+      referenceId,
+      indexPattern,
+      operationDefinitionMap
+    );
   });
 }
 

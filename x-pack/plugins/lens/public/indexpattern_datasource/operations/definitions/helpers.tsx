@@ -7,7 +7,7 @@
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
-import { IndexPatternColumn, operationDefinitionMap } from '.';
+import { GenericOperationDefinition, IndexPatternColumn, operationDefinitionMap } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPattern } from '../../types';
 
@@ -53,14 +53,33 @@ export function getInvalidFieldMessage(
         operationDefinition.getPossibleOperationForField(field) !== undefined
       )
   );
-  return isInvalid
-    ? [
-        i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
-          defaultMessage: 'Field {invalidField} was not found',
-          values: { invalidField: sourceField },
+
+  const isWrongType = Boolean(
+    sourceField &&
+      operationDefinition &&
+      field &&
+      !operationDefinition.isTransferable(column as IndexPatternColumn, indexPattern)
+  );
+  if (isInvalid) {
+    if (isWrongType) {
+      return [
+        i18n.translate('xpack.lens.indexPattern.fieldWrongType', {
+          defaultMessage: 'Field {invalidField} is of the wrong type',
+          values: {
+            invalidField: sourceField,
+          },
         }),
-      ]
-    : undefined;
+      ];
+    }
+    return [
+      i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
+        defaultMessage: 'Field {invalidField} was not found',
+        values: { invalidField: sourceField },
+      }),
+    ];
+  }
+
+  return undefined;
 }
 
 export function getEsAggsSuffix(column: IndexPatternColumn) {
