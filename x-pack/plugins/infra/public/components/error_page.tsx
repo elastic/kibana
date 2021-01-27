@@ -15,7 +15,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { euiStyled } from '../../../observability/public';
+import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import { FlexPage } from './page';
 
 interface Props {

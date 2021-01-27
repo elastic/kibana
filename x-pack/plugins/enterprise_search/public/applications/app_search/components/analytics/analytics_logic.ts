@@ -12,6 +12,7 @@ import { HttpLogic } from '../../../shared/http';
 import { flashAPIErrors } from '../../../shared/flash_messages';
 import { EngineLogic } from '../engine';
 
+import { DEFAULT_START_DATE, DEFAULT_END_DATE } from './constants';
 import { AnalyticsData, QueryDetails } from './types';
 
 interface AnalyticsValues extends AnalyticsData, QueryDetails {
@@ -54,6 +55,68 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
         onQueryDataLoad: () => false,
       },
     ],
+    allTags: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { allTags }) => allTags,
+        onQueryDataLoad: (_, { allTags }) => allTags,
+      },
+    ],
+    totalQueries: [
+      0,
+      {
+        onAnalyticsDataLoad: (_, { totalQueries }) => totalQueries,
+      },
+    ],
+    totalQueriesNoResults: [
+      0,
+      {
+        onAnalyticsDataLoad: (_, { totalQueriesNoResults }) => totalQueriesNoResults,
+      },
+    ],
+    totalClicks: [
+      0,
+      {
+        onAnalyticsDataLoad: (_, { totalClicks }) => totalClicks,
+      },
+    ],
+    queriesPerDay: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { queriesPerDay }) => queriesPerDay,
+      },
+    ],
+    queriesNoResultsPerDay: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { queriesNoResultsPerDay }) => queriesNoResultsPerDay,
+      },
+    ],
+    clicksPerDay: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { clicksPerDay }) => clicksPerDay,
+      },
+    ],
+    totalQueriesForQuery: [
+      0,
+      {
+        onQueryDataLoad: (_, { totalQueriesForQuery }) => totalQueriesForQuery,
+      },
+    ],
+    queriesPerDayForQuery: [
+      [],
+      {
+        onQueryDataLoad: (_, { queriesPerDayForQuery }) => queriesPerDayForQuery,
+      },
+    ],
+    startDate: [
+      '',
+      {
+        onAnalyticsDataLoad: (_, { startDate }) => startDate,
+        onQueryDataLoad: (_, { startDate }) => startDate,
+      },
+    ],
   }),
   listeners: ({ actions }) => ({
     loadAnalyticsData: async () => {
@@ -63,7 +126,12 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
 
       try {
         const { start, end, tag } = queryString.parse(history.location.search);
-        const query = { start, end, tag, size: 20 };
+        const query = {
+          start: start || DEFAULT_START_DATE,
+          end: end || DEFAULT_END_DATE,
+          tag,
+          size: 20,
+        };
         const url = `/api/app_search/engines/${engineName}/analytics/queries`;
 
         const response = await http.get(url, { query });
@@ -85,7 +153,11 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
 
       try {
         const { start, end, tag } = queryString.parse(history.location.search);
-        const queryParams = { start, end, tag };
+        const queryParams = {
+          start: start || DEFAULT_START_DATE,
+          end: end || DEFAULT_END_DATE,
+          tag,
+        };
         const url = `/api/app_search/engines/${engineName}/analytics/queries/${query}`;
 
         const response = await http.get(url, { query: queryParams });

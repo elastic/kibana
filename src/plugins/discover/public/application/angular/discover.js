@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -186,7 +175,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($element, $route, $scope, $timeout, Promise) {
+function discoverController($route, $scope, Promise) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
@@ -736,20 +725,20 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     $route.reload();
   };
 
-  $scope.onSkipBottomButtonClick = function () {
+  $scope.onSkipBottomButtonClick = async () => {
     // show all the Rows
     $scope.minimumVisibleRows = $scope.hits;
 
     // delay scrolling to after the rows have been rendered
-    const bottomMarker = $element.find('#discoverBottomMarker');
-    $timeout(() => {
-      bottomMarker.focus();
-      // The anchor tag is not technically empty (it's a hack to make Safari scroll)
-      // so the browser will show a highlight: remove the focus once scrolled
-      $timeout(() => {
-        bottomMarker.blur();
-      }, 0);
-    }, 0);
+    const bottomMarker = document.getElementById('discoverBottomMarker');
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    while ($scope.rows.length !== document.getElementsByClassName('kbnDocTable__row').length) {
+      await wait(50);
+    }
+    bottomMarker.focus();
+    await wait(50);
+    bottomMarker.blur();
   };
 
   $scope.newQuery = function () {
