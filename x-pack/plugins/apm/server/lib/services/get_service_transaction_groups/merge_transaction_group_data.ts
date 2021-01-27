@@ -6,7 +6,7 @@
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { getTpmRate } from '../../helpers/get_tpm_rate';
 import { getLatencyValue } from '../../helpers/latency_aggregation_type';
 import { TransactionGroupTimeseriesData } from './get_timeseries_data_for_transaction_groups';
 import { TransactionGroupWithoutTimeseriesData } from './get_transaction_groups_for_page';
@@ -51,11 +51,7 @@ export function mergeTransactionGroupData({
             ...acc.throughput,
             timeseries: acc.throughput.timeseries.concat({
               x: point.key,
-              y: calculateThroughput({
-                start,
-                end,
-                value: point.transaction_count.value,
-              }),
+              y: getTpmRate({ start, end }, point.transaction_count.value),
             }),
           },
           errorRate: {

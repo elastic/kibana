@@ -25,7 +25,7 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../helpers/latency_aggregation_type';
-import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { getTpmRate } from '../../helpers/get_tpm_rate';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -123,11 +123,7 @@ export async function getTransactionGroupsForPage({
           latencyAggregationType,
           aggregation: bucket.latency,
         }),
-        throughput: calculateThroughput({
-          start,
-          end,
-          value: bucket.transaction_count.value,
-        }),
+        throughput: getTpmRate({ start, end }, bucket.transaction_count.value),
         errorRate,
       };
     }) ?? [];

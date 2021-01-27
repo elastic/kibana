@@ -19,7 +19,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { getTpmRate } from '../../helpers/get_tpm_rate';
 
 export async function getServiceInstanceTransactionStats({
   setup,
@@ -134,14 +134,10 @@ export async function getServiceInstanceTransactionStats({
             })),
           },
           throughput: {
-            value: calculateThroughput({ start, end, value: count.value }),
+            value: getTpmRate(setup, count.value),
             timeseries: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
-              y: calculateThroughput({
-                start,
-                end,
-                value: dateBucket.count.value,
-              }),
+              y: getTpmRate(setup, dateBucket.count.value),
             })),
           },
           latency: {
