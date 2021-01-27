@@ -5,7 +5,7 @@
  */
 
 import faker from 'faker';
-import { LogEntry } from '../../common/http_api';
+import { LogEntry } from '../../common/log_entry';
 import { LogSourceConfiguration } from '../containers/logs/log_source';
 
 export const ENTRIES_EMPTY = {

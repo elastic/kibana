@@ -26,25 +26,30 @@ import classNames from 'classnames';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
 import { getServices } from '../../kibana_services';
-import { DiscoverUninitialized, DiscoverHistogram } from '../angular/directives';
+import { DiscoverHistogram, DiscoverUninitialized } from '../angular/directives';
 import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
+import { DocTableLegacy, DocTableLegacyProps } from '../angular/doc_table/create_doc_table_react';
+import { SkipBottomButton } from './skip_bottom_button';
 import { search } from '../../../../data/public';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
 } from './sidebar/discover_sidebar_responsive';
-import { DiscoverProps } from './discover_legacy';
+import { DiscoverProps } from './types';
+import { getDisplayedColumns } from '../helpers/columns';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid/discover_grid';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 
-export const SidebarMemoized = React.memo((props: DiscoverSidebarResponsiveProps) => (
+const DocTableLegacyMemoized = React.memo((props: DocTableLegacyProps) => (
+  <DocTableLegacy {...props} />
+));
+const SidebarMemoized = React.memo((props: DiscoverSidebarResponsiveProps) => (
   <DiscoverSidebarResponsive {...props} />
 ));
 
-export const DataGridMemoized = React.memo((props: DiscoverGridProps) => (
-  <DiscoverGrid {...props} />
-));
+const DataGridMemoized = React.memo((props: DiscoverGridProps) => <DiscoverGrid {...props} />);
 
 export function Discover({
   fetch,
@@ -54,11 +59,14 @@ export function Discover({
   histogramData,
   hits,
   indexPattern,
+  minimumVisibleRows,
   onAddColumn,
   onAddFilter,
   onChangeInterval,
+  onMoveColumn,
   onRemoveColumn,
   onSetColumns,
+  onSkipBottomButtonClick,
   onSort,
   opts,
   resetQuery,
@@ -66,7 +74,6 @@ export function Discover({
   rows,
   searchSource,
   setIndexPattern,
-  showSaveQuery,
   state,
   timefilterUpdateHandler,
   timeRange,
@@ -76,6 +83,11 @@ export function Discover({
 }: DiscoverProps) {
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
+  const isMobile = () => {
+    // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
+    return collapseIcon && !collapseIcon.current;
+  };
+
   const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const services = getServices();
@@ -88,18 +100,8 @@ export function Discover({
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
   const contentCentered = resultState === 'uninitialized';
-  const showTimeCol = !config.get('doc_table:hideTimeColumn', false) && indexPattern.timeFieldName;
-  const columns =
-    state.columns &&
-    state.columns.length > 0 &&
-    // check if all columns where removed except the configured timeField (this can't be removed)
-    !(state.columns.length === 1 && state.columns[0] === indexPattern.timeFieldName)
-      ? state.columns
-      : ['_source'];
-  // if columns include _source this is considered as default view, so you can't remove columns
-  // until you add a column using Discover's sidebar
-  const defaultColumns = columns.includes('_source');
-
+  const isLegacy = services.uiSettings.get('doc_table:legacy');
+  const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
@@ -114,7 +116,7 @@ export function Discover({
           savedQueryId={state.savedQuery}
           screenTitle={savedSearch.title}
           showDatePicker={indexPattern.isTimeBased()}
-          showSaveQuery={showSaveQuery}
+          showSaveQuery={!!services.capabilities.discover.saveQuery}
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
@@ -137,6 +139,7 @@ export function Discover({
                 setIndexPattern={setIndexPattern}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
+                useNewFieldsApi={useNewFieldsApi}
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
@@ -207,24 +210,28 @@ export function Discover({
                             />
                           </EuiFlexItem>
                         )}
-                        <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-                          <EuiButtonEmpty
-                            size="xs"
-                            iconType={toggleOn ? 'eyeClosed' : 'eye'}
-                            onClick={() => {
-                              toggleChart(!toggleOn);
-                            }}
-                          >
-                            {toggleOn
-                              ? i18n.translate('discover.hideChart', {
-                                  defaultMessage: 'Hide chart',
-                                })
-                              : i18n.translate('discover.showChart', {
-                                  defaultMessage: 'Show chart',
-                                })}
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
+                        {opts.timefield && (
+                          <EuiFlexItem className="dscResultCount__toggle" grow={false}>
+                            <EuiButtonEmpty
+                              size="xs"
+                              iconType={toggleOn ? 'eyeClosed' : 'eye'}
+                              onClick={() => {
+                                toggleChart(!toggleOn);
+                              }}
+                              data-test-subj="discoverChartToggle"
+                            >
+                              {toggleOn
+                                ? i18n.translate('discover.hideChart', {
+                                    defaultMessage: 'Hide chart',
+                                  })
+                                : i18n.translate('discover.showChart', {
+                                    defaultMessage: 'Show chart',
+                                  })}
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                        )}
                       </EuiFlexGroup>
+                      {isLegacy && <SkipBottomButton onClick={onSkipBottomButtonClick} />}
                     </EuiFlexItem>
                     {toggleOn && opts.timefield && (
                       <EuiFlexItem grow={false}>
@@ -238,7 +245,10 @@ export function Discover({
                           className="dscTimechart"
                         >
                           {opts.chartAggConfigs && histogramData && rows.length !== 0 && (
-                            <div className="dscHistogramGrid" data-test-subj="discoverChart">
+                            <div
+                              className={isLegacy ? 'dscHistogram' : 'dscHistogramGrid'}
+                              data-test-subj="discoverChart"
+                            >
                               <DiscoverHistogram
                                 chartData={histogramData}
                                 timefilterUpdateHandler={timefilterUpdateHandler}
@@ -265,19 +275,50 @@ export function Discover({
                             defaultMessage="Documents"
                           />
                         </h2>
-                        {rows && rows.length && (
+                        {isLegacy && rows && rows.length && (
+                          <DocTableLegacyMemoized
+                            columns={state.columns || []}
+                            indexPattern={indexPattern}
+                            minimumVisibleRows={minimumVisibleRows}
+                            rows={rows}
+                            sort={state.sort || []}
+                            searchDescription={opts.savedSearch.description}
+                            searchTitle={opts.savedSearch.lastSavedTitle}
+                            onAddColumn={onAddColumn}
+                            onBackToTop={() => {
+                              if (scrollableDesktop && scrollableDesktop.current) {
+                                scrollableDesktop.current.focus();
+                              }
+                              // Only the desktop one needs to target a specific container
+                              if (!isMobile() && scrollableDesktop.current) {
+                                scrollableDesktop.current.scrollTo(0, 0);
+                              } else if (window) {
+                                window.scrollTo(0, 0);
+                              }
+                            }}
+                            onFilter={onAddFilter}
+                            onMoveColumn={onMoveColumn}
+                            onRemoveColumn={onRemoveColumn}
+                            onSort={onSort}
+                            sampleSize={opts.sampleSize}
+                            useNewFieldsApi={useNewFieldsApi}
+                          />
+                        )}
+                        {!isLegacy && rows && rows.length && (
                           <div className="dscDiscoverGrid">
                             <DataGridMemoized
                               ariaLabelledBy="documentsAriaLabel"
-                              columns={columns}
-                              defaultColumns={defaultColumns}
+                              columns={getDisplayedColumns(state.columns, indexPattern)}
                               indexPattern={indexPattern}
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}
                               sampleSize={opts.sampleSize}
                               searchDescription={opts.savedSearch.description}
                               searchTitle={opts.savedSearch.lastSavedTitle}
-                              showTimeCol={Boolean(showTimeCol)}
+                              showTimeCol={
+                                !config.get('doc_table:hideTimeColumn', false) &&
+                                !!indexPattern.timeFieldName
+                              }
                               services={services}
                               settings={state.grid}
                               onAddColumn={onAddColumn}

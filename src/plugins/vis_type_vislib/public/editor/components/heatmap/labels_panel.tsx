@@ -12,7 +12,8 @@ import { EuiColorPicker, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elas
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps, SwitchOption } from '../../../../../vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
+import { SwitchOption } from '../../../../../vis_default_editor/public';
 import { ValueAxis } from '../../../../../vis_type_xy/public';
 
 import { HeatmapVisParams } from '../../../heatmap';
@@ -21,7 +22,7 @@ const VERTICAL_ROTATION = 270;
 
 interface LabelsPanelProps {
   valueAxis: ValueAxis;
-  setValue: VisOptionsProps<HeatmapVisParams>['setValue'];
+  setValue: VisEditorOptionsProps<HeatmapVisParams>['setValue'];
 }
 
 function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
