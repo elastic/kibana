@@ -39,7 +39,6 @@ export interface MetricVisRenderValue {
   visType: typeof visType;
   visData: Input;
   visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
-  params: any;
 }
 
 export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -193,9 +192,6 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
             },
           },
           dimensions,
-        },
-        params: {
-          listenOnChange: true,
         },
       },
     };

@@ -7,9 +7,8 @@
  */
 
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
-import { BaseVisType, BaseVisTypeOptions } from './base_vis_type';
-import { ReactVisType, ReactVisTypeOptions } from './react_vis_type';
-import { VisType, VisGroups } from './types';
+import { BaseVisType } from './base_vis_type';
+import { VisTypeDefinition, VisGroups } from './types';
 
 /**
  * Vis Types Service
@@ -17,10 +16,10 @@ import { VisType, VisGroups } from './types';
  * @internal
  */
 export class TypesService {
-  private types: Record<string, VisType<any>> = {};
+  private types: Record<string, BaseVisType<any>> = {};
   private unregisteredHiddenTypes: string[] = [];
 
-  private registerVisualization<TVisParam>(visDefinition: VisType<TVisParam>) {
+  private registerVisualization<TVisParam>(visDefinition: BaseVisType<TVisParam>) {
     if (this.unregisteredHiddenTypes.includes(visDefinition.name)) {
       visDefinition.hidden = true;
     }
@@ -37,16 +36,8 @@ export class TypesService {
        * registers a visualization type
        * @param config - visualization type definition
        */
-      createBaseVisualization: <TVisParams>(config: BaseVisTypeOptions<TVisParams>): void => {
+      createBaseVisualization: <TVisParams>(config: VisTypeDefinition<TVisParams>): void => {
         const vis = new BaseVisType(config);
-        this.registerVisualization(vis);
-      },
-      /**
-       * registers a visualization which uses react for rendering
-       * @param config - visualization type definition
-       */
-      createReactVisualization: <TVisParams>(config: ReactVisTypeOptions<TVisParams>): void => {
-        const vis = new ReactVisType(config);
         this.registerVisualization(vis);
       },
       /**
@@ -77,13 +68,13 @@ export class TypesService {
        * returns specific visualization or undefined if not found
        * @param {string} visualization - id of visualization to return
        */
-      get: <TVisParams>(visualization: string): VisType<TVisParams> => {
+      get: <TVisParams>(visualization: string): BaseVisType<TVisParams> | undefined => {
         return this.types[visualization];
       },
       /**
        * returns all registered visualization types
        */
-      all: (): VisType[] => {
+      all: (): BaseVisType[] => {
         return [...Object.values(this.types)];
       },
       /**
@@ -119,6 +110,3 @@ export type TypesStart = ReturnType<TypesService['start']>;
 
 /** @public types */
 export { VisTypeAlias };
-
-/** @public static code */
-// TODO once items are moved from ui/vis into this service
