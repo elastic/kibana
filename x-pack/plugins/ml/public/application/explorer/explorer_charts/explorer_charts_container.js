@@ -22,7 +22,7 @@ import {
 } from '../../util/chart_utils';
 import { ExplorerChartDistribution } from './explorer_chart_distribution';
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
-import { EmbeddedMapComponent } from './explorer_chart_embedded_map';
+import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 import { CHART_TYPE } from '../explorer_constants';
@@ -159,10 +159,8 @@ function ExplorerChartContainer({
           return (
             <MlTooltipComponent>
               {(tooltipService) => (
-                <EmbeddedMapComponent
-                  tooManyBuckets={tooManyBuckets}
+                <EmbeddedMapComponentWrapper
                   seriesConfig={series}
-                  severity={severity}
                   tooltipService={tooltipService}
                 />
               )}

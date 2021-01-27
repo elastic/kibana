@@ -4,152 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { htmlIdGenerator } from '@elastic/eui';
-import {
-  EmbeddableFactory,
-  ErrorEmbeddable,
-  isErrorEmbeddable,
-  ViewMode,
-} from '../../../../../../../src/plugins/embeddable/public';
-import {
-  MapEmbeddable,
-  MapEmbeddableInput,
-  MapEmbeddableOutput,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../maps/public/embeddable';
+import React, { useState, useEffect } from 'react';
 import { Dictionary } from '../../../../common/types/common';
-import { useMlKibana } from '../../contexts/kibana';
-import { MAP_SAVED_OBJECT_TYPE, INITIAL_LOCATION } from '../../../../../maps/common/constants';
 import { LayerDescriptor } from '../../../../../maps/common/descriptor_types';
 import { getMLAnomaliesActualLayer, getMLAnomaliesTypicalLayer } from './map_config';
+import { MlEmbeddedMapComponent } from '../../components/ml_embedded_map';
 interface Props {
   seriesConfig: Dictionary<any>;
-  severity: number;
 }
 
-export function EmbeddedMapComponent({ seriesConfig, severity }: Props) {
-  const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
-  const id = useMemo(() => htmlIdGenerator()(), []);
+export function EmbeddedMapComponentWrapper({ seriesConfig }: Props) {
+  const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
 
-  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
-  const layerList = useRef<LayerDescriptor[]>([]);
-  const {
-    services: { embeddable: embeddablePlugin, maps: mapsPlugin },
-  } = useMlKibana();
-
-  const factory:
-    | EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput, MapEmbeddable>
-    | undefined = embeddablePlugin
-    ? embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE)
-    : undefined;
-
-  const input: MapEmbeddableInput = {
-    id,
-    attributes: { title: '' },
-    filters: [],
-    hidePanelTitles: true,
-    refreshConfig: {
-      value: 0,
-      pause: false,
-    },
-    viewMode: ViewMode.VIEW,
-    isLayerTOCOpen: false,
-    hideFilterActions: true,
-    mapSettings: {
-      disableInteractive: false,
-      hideToolbarOverlay: true,
-      hideLayerControl: false,
-      hideViewControl: false,
-      initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
-      autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
-    },
-  };
-
-  // Update the layer list  with updated geo points upon refresh
   useEffect(() => {
-    if (
-      embeddable &&
-      !isErrorEmbeddable(embeddable) &&
-      seriesConfig.mapData &&
-      seriesConfig.mapData.length > 0
-    ) {
-      layerList.current = [
-        layerList.current[0],
+    if (seriesConfig.mapData && seriesConfig.mapData.length > 0) {
+      setLayerList([
         getMLAnomaliesActualLayer(seriesConfig.mapData),
         getMLAnomaliesTypicalLayer(seriesConfig.mapData),
-      ];
-      embeddable.setLayerList(layerList.current);
+      ]);
     }
-  }, [embeddable, seriesConfig.mapData]);
-
-  useEffect(() => {
-    async function setupEmbeddable() {
-      if (!factory) {
-        // eslint-disable-next-line no-console
-        console.error('Map embeddable not found.');
-        return;
-      }
-      const embeddableObject = await factory.create({
-        ...input,
-        title: 'Explorer map',
-      });
-
-      if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
-        const basemapLayerDescriptor = mapsPlugin
-          ? await mapsPlugin.createLayerDescriptors.createBasemapLayerDescriptor()
-          : null;
-
-        if (basemapLayerDescriptor) {
-          layerList.current = [basemapLayerDescriptor];
-          await embeddableObject.setLayerList(layerList.current);
-        }
-      }
-
-      setEmbeddable(embeddableObject);
-    }
-
-    setupEmbeddable();
-    // we want this effect to execute exactly once after the component mounts
-  }, []);
-
-  // We can only render after embeddable has already initialized
-  useEffect(() => {
-    if (embeddableRoot?.current && embeddable) {
-      embeddable.render(embeddableRoot.current);
-    }
-  }, [embeddable, embeddableRoot, seriesConfig.mapData]);
-
-  if (!embeddablePlugin) {
-    // eslint-disable-next-line no-console
-    console.error('Embeddable start plugin not found');
-    return null;
-  }
-  if (!mapsPlugin) {
-    // eslint-disable-next-line no-console
-    console.error('Maps start plugin not found');
-    return null;
-  }
+  }, [seriesConfig]);
 
   return (
-    <div
-      style={{
-        width: '100%',
-        height: 300,
-      }}
-    >
-      <div
-        data-test-subj="xpack.ml.explorer.embeddedMapPanel"
-        ref={embeddableRoot}
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flex: '1 1 100%',
-          zIndex: 1,
-          minHeight: 0, // Absolute must for Firefox to scroll contents
-        }}
-      />
+    <div data-test-subj="xpack.ml.explorer.embeddedMap" style={{ width: '100%', height: 300 }}>
+      <MlEmbeddedMapComponent layerList={layerList} />
     </div>
   );
 }
