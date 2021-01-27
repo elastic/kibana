@@ -162,27 +162,27 @@ describe('StepIndexPattern', () => {
   });
 
   // TODO steph delete this test??
-  it.skip('ensures the response of the latest request is persisted', async () => {
-    const component = shallow(<StepIndexPattern {...defaultProps} />);
-    const instance = component.instance() as StepIndexPattern;
-    instance.onQueryChanged({ target: { value: 'e' } } as React.ChangeEvent<HTMLInputElement>);
-    instance.lastQuery = 'k';
-    await new Promise((resolve) => process.nextTick(resolve));
-
-    // Honesty, the state would match the result of the `k` query but
-    // it's hard to mock this in tests but if remove our fix
-    // (the early return if the queries do not match) then this
-    // equals [{name: 'es'}]
-    expect(component.state('exactMatchedIndices')).toEqual([]);
-
-    // Ensure it works in the other code flow too (the other early return)
-
-    // Provide `es` so we do not auto append * and enter our other code flow
-    instance.onQueryChanged({ target: { value: 'es' } } as React.ChangeEvent<HTMLInputElement>);
-    instance.lastQuery = 'k';
-    await new Promise((resolve) => process.nextTick(resolve));
-    expect(component.state('exactMatchedIndices')).toEqual([]);
-  });
+  // it.skip('ensures the response of the latest request is persisted', async () => {
+  //   const component = shallow(<StepIndexPattern {...defaultProps} />);
+  //   const instance = component.instance() as StepIndexPattern;
+  //   instance.onQueryChanged({ target: { value: 'e' } } as React.ChangeEvent<HTMLInputElement>);
+  //   instance.lastQuery = 'k';
+  //   await new Promise((resolve) => process.nextTick(resolve));
+  //
+  //   // Honesty, the state would match the result of the `k` query but
+  //   // it's hard to mock this in tests but if remove our fix
+  //   // (the early return if the queries do not match) then this
+  //   // equals [{name: 'es'}]
+  //   expect(component.state('exactMatchedIndices')).toEqual([]);
+  //
+  //   // Ensure it works in the other code flow too (the other early return)
+  //
+  //   // Provide `es` so we do not auto append * and enter our other code flow
+  //   instance.onQueryChanged({ target: { value: 'es' } } as React.ChangeEvent<HTMLInputElement>);
+  //   instance.lastQuery = 'k';
+  //   await new Promise((resolve) => process.nextTick(resolve));
+  //   expect(component.state('exactMatchedIndices')).toEqual([]);
+  // });
 
   it('it can preselect time field', async () => {
     const dataStream1 = {
