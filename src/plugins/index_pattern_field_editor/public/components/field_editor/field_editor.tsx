@@ -5,10 +5,17 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { FormHook } from '../../shared_imports';
+import { Form, useForm, FormHook, UseField, TextField, useFormData } from '../../shared_imports';
 import { Field } from '../../types';
+
+import { schema } from './form_schema';
+import { getNameFieldConfig } from './lib';
+import { ShadowingFieldWarning } from './shadowing_field_warning';
+import { TypeField } from './form_fields';
 
 export interface FieldEditorFormState {
   isValid: boolean | undefined;
@@ -43,8 +50,60 @@ export interface Props {
   };
 }
 
-const FieldEditorComponent = (props: Props) => {
-  return <div>Placeholder for the future field editor</div>;
+const FieldEditorComponent = ({
+  field,
+  onChange,
+  ctx: { namesNotAllowed, existingConcreteFields = [] } = {},
+}: Props) => {
+  const { form } = useForm<Field>({ defaultValue: field, schema });
+  const { submit, isValid: isFormValid, isSubmitted } = form;
+  const [{ name }] = useFormData<Field>({ form, watch: 'name' });
+
+  const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
+  const isShadowingField = existingConcreteFields.find((_field) => _field.name === name);
+
+  useEffect(() => {
+    if (onChange) {
+      onChange({ isValid: isFormValid, isSubmitted, submit });
+    }
+  }, [onChange, isFormValid, isSubmitted, submit]);
+
+  return (
+    <Form form={form} className="indexPatternFieldEditor__form">
+      <EuiFlexGroup>
+        {/* Name */}
+        <EuiFlexItem>
+          <UseField<string, Field>
+            path="name"
+            config={nameFieldConfig}
+            component={TextField}
+            data-test-subj="nameField"
+            componentProps={{
+              euiFieldProps: {
+                'aria-label': i18n.translate('indexPatternFieldEditor.editor.form.nameAriaLabel', {
+                  defaultMessage: 'Name field',
+                }),
+              },
+            }}
+          />
+        </EuiFlexItem>
+
+        {/* Type */}
+        <EuiFlexItem>
+          <TypeField />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {isShadowingField && (
+        <>
+          <EuiSpacer />
+          <ShadowingFieldWarning />
+        </>
+      )}
+
+      <EuiSpacer size="l" />
+    </Form>
+  );
 };
 
 export const FieldEditor = React.memo(FieldEditorComponent);

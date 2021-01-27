@@ -18,7 +18,7 @@ export const deserializeField = (field?: IndexPatternField): Field | undefined =
     type: field.type,
     script: field.runtimeField ? field.runtimeField.script : undefined,
     customLabel: field.customLabel,
-    popularity: 0, // TODO: set correct value
+    popularity: field.count,
     format: undefined, // TODO: set correct value
   };
 };

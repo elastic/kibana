@@ -32,3 +32,8 @@ export interface Field {
   popularity?: number;
   format?: Record<string, any>; // TODO set correct interface
 }
+
+export interface ComboBoxOption<T = unknown> {
+  label: string;
+  value?: T;
+}
