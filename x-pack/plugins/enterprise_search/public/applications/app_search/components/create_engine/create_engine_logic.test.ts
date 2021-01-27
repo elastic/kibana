@@ -28,10 +28,6 @@ describe('CreateEngineLogic', () => {
     language: DEFAULT_LANGUAGE,
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('has expected default values', () => {
     mount();
     expect(CreateEngineLogic.values).toEqual(DEFAULT_VALUES);
@@ -94,14 +90,13 @@ describe('CreateEngineLogic', () => {
         });
       });
     });
+
     describe('submitEngine', () => {
       beforeAll(() => {
         mount();
         // setup local state
         CreateEngineLogic.actions.setLanguage('English');
         CreateEngineLogic.actions.setRawName('test');
-        // jest spying
-        jest.spyOn(CreateEngineLogic.actions, 'onCreateEngineSuccess');
       });
 
       it('POSTS to /api/app_search/engines', () => {
@@ -109,39 +104,31 @@ describe('CreateEngineLogic', () => {
           name: CreateEngineLogic.values.name,
           language: CreateEngineLogic.values.language,
         });
+        CreateEngineLogic.actions.submitEngine();
         expect(http.post).toHaveBeenCalledWith('/api/app_search/engines', { body });
       });
 
-      describe('valid submission', () => {
-        beforeEach(async () => {
-          const promise = (http.post as jest.Mock).mockReturnValueOnce({});
-          await CreateEngineLogic.actions.submitEngine();
-          await promise;
-        });
-
-        it('calls onCreateEngineSuccess', async () => {
-          expect(CreateEngineLogic.actions.onCreateEngineSuccess).toHaveBeenCalledTimes(1);
-        });
+      it('calls onCreateEngineSuccess on valid submission', async () => {
+        jest.spyOn(CreateEngineLogic.actions, 'onCreateEngineSuccess'); // .mockImplementation();
+        const promise = (http.post as jest.Mock).mockReturnValueOnce({});
+        await CreateEngineLogic.actions.submitEngine();
+        await promise;
+        expect(CreateEngineLogic.actions.onCreateEngineSuccess).toHaveBeenCalledTimes(1);
       });
 
-      describe('API Error', () => {
-        beforeEach(async () => {
-          const promise = (http.post as jest.Mock).mockReturnValueOnce(
-            Promise.reject({
-              body: {
-                statusCode: 400,
-                error: 'Bad Request',
-                message: 'Invalid request payload JSON format',
-              },
-            })
-          );
-          await CreateEngineLogic.actions.submitEngine();
-          await promise;
-        });
-
-        it('calls flashAPIErrors', () => {
-          expect(flashAPIErrors).toHaveBeenCalledTimes(1);
-        });
+      it('calls flashAPIErrors on API Error', async () => {
+        const promise = (http.post as jest.Mock).mockReturnValueOnce(
+          Promise.reject({
+            body: {
+              statusCode: 400,
+              error: 'Bad Request',
+              message: 'Invalid request payload JSON format',
+            },
+          })
+        );
+        await CreateEngineLogic.actions.submitEngine();
+        await promise;
+        expect(flashAPIErrors).toHaveBeenCalledTimes(1);
       });
     });
   });

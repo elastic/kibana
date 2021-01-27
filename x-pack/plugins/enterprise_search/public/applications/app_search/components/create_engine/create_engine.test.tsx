@@ -16,8 +16,8 @@ describe('CreateEngine', () => {
   const values = {
     name: '',
     rawName: '',
-    language: 'Universal'
-  }
+    language: 'Universal',
+  };
 
   describe('default values', () => {
     beforeEach(() => {
@@ -49,5 +49,4 @@ describe('CreateEngine', () => {
       expect(wrapper.find('[data-test-subj="NewEngineSubmitButton"]')).toHaveLength(1);
     });
   });
-
 });
