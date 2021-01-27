@@ -32,6 +32,7 @@ export const mlAnomalyThresholdAlertParams = schema.object({
     }
   ),
   severity: schema.number(),
+  resultTypes: schema.arrayOf(schema.string()),
 });
 
 export function registerAnomalyThresholdAlertType({ alerts }: RegisterAlertParams) {

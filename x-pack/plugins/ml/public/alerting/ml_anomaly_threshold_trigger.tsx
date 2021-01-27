@@ -10,6 +10,8 @@ import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
 import { HttpService } from '../application/services/http_service';
 import { SeveritySelector, SeveritySelectorProps } from './severity_selector';
+import { ResultTypeSelector, ResultTypeSelectorProps } from './result_type_selector';
+import type { AnomalyResultType } from '../../common/types/anomalies';
 
 interface MlAnomalyThresholdAlertParams {
   jobSelection: {
@@ -17,6 +19,7 @@ interface MlAnomalyThresholdAlertParams {
     groupIds?: string[];
   };
   severity: number;
+  resultTypes: AnomalyResultType[];
 }
 
 interface Props {
@@ -46,6 +49,10 @@ const MlAlertThresholdAlertTrigger: FC<Props> = ({
     setAlertParams('severity', update);
   }, []);
 
+  const onResultTypesChange: ResultTypeSelectorProps['onChange'] = useCallback((update) => {
+    setAlertParams('resultTypes', update);
+  }, []);
+
   return (
     <>
       <JobSelectorControl
@@ -53,6 +60,7 @@ const MlAlertThresholdAlertTrigger: FC<Props> = ({
         adJobsApiService={adJobsApiService}
         onSelectionChange={onJobSelectionChange}
       />
+      <ResultTypeSelector value={alertParams.resultTypes} onChange={onResultTypesChange} />
       <SeveritySelector value={alertParams.severity} onChange={onSeverityChange} />
     </>
   );
