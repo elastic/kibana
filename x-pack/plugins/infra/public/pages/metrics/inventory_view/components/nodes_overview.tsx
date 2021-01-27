@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { getBreakpoint } from '@elastic/eui';
 
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { euiStyled } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions, InfraFormatter } from '../../../../lib/lib';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';

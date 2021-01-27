@@ -12,7 +12,6 @@ export const tagNameMaxLength = 50;
 export const tagDescriptionMaxLength = 100;
 
 const hexColorRegexp = /^#[0-9A-F]{6}$/i;
-const nameValidCharsRegexp = /^[0-9A-Z:\-_\s]+$/i;
 
 export interface TagValidation {
   valid: boolean;
@@ -47,11 +46,6 @@ export const validateTagName = (name: string): string | undefined => {
       values: {
         length: tagNameMaxLength,
       },
-    });
-  }
-  if (!nameValidCharsRegexp.test(name)) {
-    return i18n.translate('xpack.savedObjectsTagging.validation.name.errorInvalidCharacters', {
-      defaultMessage: 'Tag name can only include a-z, 0-9, _, -,:.',
     });
   }
 };

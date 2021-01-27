@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setMockValues } from '../../../__mocks__';
-import { mockEngineValues } from '../../__mocks__';
+import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -16,7 +15,6 @@ import { AnalyticsRouter } from './';
 describe('AnalyticsRouter', () => {
   // Detailed route testing is better done via E2E tests
   it('renders', () => {
-    setMockValues(mockEngineValues);
     const wrapper = shallow(<AnalyticsRouter engineBreadcrumb={['Engines', 'some-engine']} />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);
