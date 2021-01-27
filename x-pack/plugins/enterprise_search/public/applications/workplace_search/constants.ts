@@ -500,6 +500,13 @@ export const CONFIGURE_BUTTON = i18n.translate(
   }
 );
 
+export const CANCEL_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.cancel.button',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
 export const PRIVATE_PLATINUM_LICENSE_CALLOUT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.privatePlatinumCallout.text',
   {
