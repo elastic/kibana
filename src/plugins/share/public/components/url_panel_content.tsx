@@ -114,9 +114,7 @@ export class UrlPanelContent extends Component<Props, State> {
           return;
         }
 
-        this.setState({
-          anonymousAccessParameters,
-        });
+        let showPublicUrlSwitch: boolean = false;
 
         if (this.props.showPublicUrlSwitch) {
           const anonymousUserCapabilities = await this.props.anonymousAccess!.getCapabilities();
@@ -125,12 +123,17 @@ export class UrlPanelContent extends Component<Props, State> {
             return;
           }
 
-          const showPublicUrlSwitch = this.props.showPublicUrlSwitch!(anonymousUserCapabilities);
-
-          this.setState({
-            showPublicUrlSwitch,
-          });
+          try {
+            showPublicUrlSwitch = this.props.showPublicUrlSwitch!(anonymousUserCapabilities);
+          } catch {
+            showPublicUrlSwitch = false;
+          }
         }
+
+        this.setState({
+          anonymousAccessParameters,
+          showPublicUrlSwitch,
+        });
       })();
     }
   }
