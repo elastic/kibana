@@ -57,11 +57,12 @@ interface RelevanceTuningActions {
     valueIndex: number,
     value: string | number
   ): { name: string; boostIndex: number; valueIndex: number; value: string | number };
-  updateBoostCenter: (
+  updateBoostCenter(
     name: string,
     boostIndex: number,
     value: string | number
-  ) => { name: string; boostIndex: number; value: string | number };
+  ): { name: string; boostIndex: number; value: string | number };
+  addBoostValue(name: string, boostIndex: number): { name: string; boostIndex: index };
 }
 
 interface RelevanceTuningValues {
@@ -166,6 +167,7 @@ export const RelevanceTuningLogic = kea<
       value,
     }),
     updateBoostCenter: (name, boostIndex, value) => ({ name, boostIndex, value }),
+    addBoostValue: (name, boostIndex) => ({ name, boostIndex }),
   }),
   reducers: () => ({
     searchSettings: [
@@ -459,6 +461,25 @@ export const RelevanceTuningLogic = kea<
       const updatedBoosts = cloneDeep(boosts[name]);
       const fieldType = values.schema[name];
       updatedBoosts[boostIndex].center = parseBoostCenter(fieldType, value);
+
+      actions.setSearchSettings({
+        ...searchSettings,
+        boosts: {
+          ...boosts,
+          [name]: updatedBoosts,
+        },
+      });
+      actions.getSearchResults();
+    },
+    addBoostValue: ({ name, boostIndex }) => {
+      const { searchSettings } = values;
+      const { boosts } = searchSettings;
+      const updatedBoosts = cloneDeep(boosts[name]);
+      const updatedBoost = updatedBoosts[boostIndex];
+      if (updatedBoost) {
+        updatedBoost.value = Array.isArray(updatedBoost.value) ? updatedBoost.value : [''];
+        updatedBoost.value.push('');
+      }
 
       actions.setSearchSettings({
         ...searchSettings,
