@@ -53,9 +53,7 @@ describe('expression params validation', () => {
       threshold: [0],
     };
     expect(validateExpression(initialParams).errors.esQuery.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.esQuery[0]).toBe(
-      `ES Query with "query" field is required.`
-    );
+    expect(validateExpression(initialParams).errors.esQuery[0]).toBe(`Query field is required.`);
   });
 
   test('if threshold0 property is not set should return proper error message', () => {
@@ -68,7 +66,7 @@ describe('expression params validation', () => {
       thresholdComparator: '<',
     };
     expect(validateExpression(initialParams).errors.threshold0.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.threshold0[0]).toBe('Threshold0 is required.');
+    expect(validateExpression(initialParams).errors.threshold0[0]).toBe('Threshold 0 is required.');
   });
 
   test('if threshold1 property is needed by thresholdComparator but not set should return proper error message', () => {
@@ -81,7 +79,7 @@ describe('expression params validation', () => {
       thresholdComparator: 'between',
     };
     expect(validateExpression(initialParams).errors.threshold1.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.threshold1[0]).toBe('Threshold1 is required.');
+    expect(validateExpression(initialParams).errors.threshold1[0]).toBe('Threshold 1 is required.');
   });
 
   test('if threshold0 property greater than threshold1 property should return proper error message', () => {
@@ -95,7 +93,7 @@ describe('expression params validation', () => {
     };
     expect(validateExpression(initialParams).errors.threshold1.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold1[0]).toBe(
-      'Threshold1 should be > Threshold0.'
+      'Threshold 1 must be > Threshold 0.'
     );
   });
 });

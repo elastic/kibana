@@ -22,15 +22,15 @@ describe('alertType', () => {
       Object {
         "context": Array [
           Object {
-            "description": "A pre-constructed message for the alert.",
+            "description": "A message for the alert.",
             "name": "message",
           },
           Object {
-            "description": "A pre-constructed title for the alert.",
+            "description": "A title for the alert.",
             "name": "title",
           },
           Object {
-            "description": "The date the alert met the threshold condition.",
+            "description": "The date that the alert met the threshold condition.",
             "name": "date",
           },
           Object {
@@ -42,7 +42,7 @@ describe('alertType', () => {
             "name": "hits",
           },
           Object {
-            "description": "A string describing the threshold condition.",
+            "description": "A string that describes the threshold condition.",
             "name": "conditions",
           },
         ],
@@ -52,7 +52,7 @@ describe('alertType', () => {
             "name": "index",
           },
           Object {
-            "description": "The stringifed ES query.",
+            "description": "The string representation of the ES query.",
             "name": "esQuery",
           },
           Object {
@@ -60,7 +60,7 @@ describe('alertType', () => {
             "name": "threshold",
           },
           Object {
-            "description": "A comparison function to use to determine if the threshold as been met.",
+            "description": "A function to determine if the threshold has been met.",
             "name": "thresholdComparator",
           },
         ],
