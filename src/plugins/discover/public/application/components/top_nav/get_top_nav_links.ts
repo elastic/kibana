@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { showOpenSearchPanel } from './show_open_search_panel';
-import { getSharingData } from '../../helpers/get_sharing_data';
+import { getSharingData, showPublicUrlSwitch } from '../../helpers/get_sharing_data';
 import { unhashUrl } from '../../../../../kibana_utils/public';
 import { DiscoverServices } from '../../../build_services';
 import { Adapters } from '../../../../../inspector/common/adapters';
@@ -16,14 +16,6 @@ import { SavedSearch } from '../../../saved_searches';
 import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../angular/discover_state';
 import { IndexPattern } from '../../../kibana_services';
-
-interface DiscoverCapabilities {
-  createShortUrl?: boolean;
-  save?: boolean;
-  saveQuery?: boolean;
-  show?: boolean;
-  storeSearchSession?: boolean;
-}
 
 /**
  * Helper function to build the top nav links
@@ -116,13 +108,7 @@ export const getTopNavLinks = ({
           title: savedSearch.title,
         },
         isDirty: !savedSearch.id || state.isAppStateDirty(),
-        showPublicUrlSwitch: (anonymousUserCapabilities) => {
-          if (!anonymousUserCapabilities.discover) return false;
-
-          const discover = (anonymousUserCapabilities.discover as unknown) as DiscoverCapabilities;
-
-          return !!discover.show;
-        },
+        showPublicUrlSwitch,
       });
     },
   };
