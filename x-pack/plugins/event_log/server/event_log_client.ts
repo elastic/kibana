@@ -6,14 +6,14 @@
 
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { LegacyClusterClient, KibanaRequest } from 'src/core/server';
+import { IClusterClient, KibanaRequest } from 'src/core/server';
 import { SpacesServiceStart } from '../../spaces/server';
 
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
-export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 const optionalDateFieldSchema = schema.maybe(

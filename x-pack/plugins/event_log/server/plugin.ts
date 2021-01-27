@@ -12,7 +12,7 @@ import {
   Logger,
   Plugin as CorePlugin,
   PluginInitializerContext,
-  LegacyClusterClient,
+  IClusterClient,
   SharedGlobalConfig,
   IContextProvider,
 } from 'src/core/server';
@@ -33,7 +33,7 @@ import { EventLogClientService } from './event_log_start_service';
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 import { findByIdsRoute } from './routes/find_by_ids';
 
-export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 
 const PROVIDER = 'eventLog';
 
