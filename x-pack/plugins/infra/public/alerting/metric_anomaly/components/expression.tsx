@@ -237,6 +237,7 @@ export const Expression: React.FC<Props> = (props) => {
       <EuiSpacer size={'m'} />
 
       <InfluencerFilter
+        derivedIndexPattern={derivedIndexPattern}
         nodeType={alertParams.nodeType}
         fieldName={influencerFieldName}
         fieldValue={alertParams.influencerFilter?.fieldValue ?? ''}

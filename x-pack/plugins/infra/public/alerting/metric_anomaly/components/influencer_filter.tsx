@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { first } from 'lodash';
+import { EuiFlexGroup, EuiFormRow, EuiCheckbox, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import {
-  EuiFlexGroup,
-  EuiFormRow,
-  EuiCheckbox,
-  EuiFlexItem,
-  EuiSelect,
-  EuiFieldSearch,
-} from '@elastic/eui';
+  MetricsExplorerKueryBar,
+  CurryLoadSuggestionsType,
+} from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
 
 interface Props {
@@ -23,7 +21,10 @@ interface Props {
   nodeType: MetricAnomalyParams['nodeType'];
   onChangeFieldName: (v: string) => void;
   onChangeFieldValue: (v: string) => void;
+  derivedIndexPattern: Parameters<typeof MetricsExplorerKueryBar>[0]['derivedIndexPattern'];
 }
+
+const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 export const InfluencerFilter = ({
   fieldName,
@@ -31,6 +32,7 @@ export const InfluencerFilter = ({
   nodeType,
   onChangeFieldName,
   onChangeFieldValue,
+  derivedIndexPattern,
 }: Props) => {
   const fieldNameOptions = useMemo(() => (nodeType === 'k8s' ? k8sFieldNames : hostFieldNames), [
     nodeType,
@@ -53,9 +55,9 @@ export const InfluencerFilter = ({
     onChangeFieldName,
   ]);
   const onUpdateFieldValue = useCallback(
-    (e) => {
-      updateStoredFieldValue(e.target.value);
-      onChangeFieldValue(e.target.value);
+    (value) => {
+      updateStoredFieldValue(value);
+      onChangeFieldValue(value);
     },
     [onChangeFieldValue]
   );
@@ -69,6 +71,36 @@ export const InfluencerFilter = ({
       onChangeFieldValue(storedFieldValue);
     }
   }, [isEnabled, updateIsEnabled, onChangeFieldValue, storedFieldValue]);
+
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  const debouncedOnUpdateFieldValue = useCallback(
+    debounce(onUpdateFieldValue, FILTER_TYPING_DEBOUNCE_MS),
+    [onUpdateFieldValue]
+  );
+
+  const affixFieldNameToQuery: CurryLoadSuggestionsType = (fn) => (
+    expression,
+    cursorPosition,
+    maxSuggestions
+  ) => {
+    // Add the field name to the front of the passed-in query
+    const prefix = `${fieldName}:`;
+    // Trim whitespace to prevent AND/OR suggestions
+    const modifiedExpression = `${prefix}${expression}`.trim();
+    // Move the cursor position forward by the length of the field name
+    const modifiedPosition = cursorPosition + prefix.length;
+    return fn(modifiedExpression, modifiedPosition, maxSuggestions, (suggestions) =>
+      suggestions
+        .map((s) => ({
+          ...s,
+          text: s.text.replace(/\"/g, '').trim(),
+          // Offset the returned suggestions' cursor positions so that they can be autocompleted accurately
+          start: s.start - prefix.length,
+          end: s.end - prefix.length,
+        }))
+        .filter((s) => !expression.startsWith(s.text))
+    );
+  };
 
   return (
     <EuiFormRow
@@ -108,9 +140,12 @@ export const InfluencerFilter = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFieldSearch
+            <MetricsExplorerKueryBar
+              derivedIndexPattern={derivedIndexPattern}
+              onChange={debouncedOnUpdateFieldValue}
+              onSubmit={onUpdateFieldValue}
               value={storedFieldValue}
-              onChange={onUpdateFieldValue}
+              curryLoadSuggestions={affixFieldNameToQuery}
               placeholder={i18n.translate(
                 'xpack.infra.metrics.alertFlyout.anomalyInfluencerFilterPlaceholder',
                 {
