@@ -15,9 +15,9 @@ import { SecurityPageName } from '../../../app/types';
 export interface ConfigureCaseButtonProps {
   label: string;
   isDisabled: boolean;
-  msgTooltip: JSX.Element;
-  showToolTip: boolean;
-  titleTooltip: string;
+  msgTooltip?: JSX.Element;
+  showToolTip?: boolean;
+  titleTooltip?: string;
   urlSearch: string;
 }
 
@@ -25,7 +25,7 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
   isDisabled,
   label,
   msgTooltip,
-  showToolTip,
+  showToolTip = false,
   titleTooltip,
   urlSearch,
 }: ConfigureCaseButtonProps) => {
@@ -38,6 +38,7 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
     },
     [history, urlSearch]
   );
+
   const configureCaseButton = useMemo(
     () => (
       <LinkButton
@@ -53,6 +54,7 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
     ),
     [label, isDisabled, formatUrl, goToCaseConfigure]
   );
+
   return showToolTip ? (
     <EuiToolTip
       position="top"

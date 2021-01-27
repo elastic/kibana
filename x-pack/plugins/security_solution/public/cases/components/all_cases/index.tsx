@@ -396,10 +396,7 @@ export const AllCases = React.memo<AllCasesProps>(
               <EuiFlexItem grow={false}>
                 <ConfigureCaseButton
                   label={i18n.CONFIGURE_CASES_BUTTON}
-                  isDisabled={!isEmpty(actionsErrors) || !userCanCrud}
-                  showToolTip={!isEmpty(actionsErrors)}
-                  msgTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].description : <></>}
-                  titleTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].title : ''}
+                  isDisabled={!userCanCrud}
                   urlSearch={urlSearch}
                 />
               </EuiFlexItem>
