@@ -212,6 +212,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
                 : undefined
             }
             legendType={getScatterplotMatrixLegendType(jobType)}
+            searchQuery={searchQuery}
           />
         )}
 

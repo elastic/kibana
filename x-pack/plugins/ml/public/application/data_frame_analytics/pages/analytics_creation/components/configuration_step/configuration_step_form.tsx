@@ -487,6 +487,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
                   : undefined
               }
               legendType={getScatterplotMatrixLegendType(jobType)}
+              searchQuery={jobConfigQuery}
             />
           </EuiPanel>
           <EuiSpacer />

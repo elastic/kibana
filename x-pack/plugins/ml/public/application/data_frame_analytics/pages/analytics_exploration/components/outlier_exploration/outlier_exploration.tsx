@@ -139,6 +139,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           fields={scatterplotFieldOptions}
           index={jobConfig?.dest.index}
           resultsField={jobConfig?.dest.results_field}
+          searchQuery={searchQuery}
         />
       )}
       {showLegacyFeatureInfluenceFormatCallout && (

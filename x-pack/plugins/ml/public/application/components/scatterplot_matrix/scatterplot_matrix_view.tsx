@@ -26,6 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { SearchResponse7 } from '../../../../common/types/es_client';
+import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analytics';
 
 import { useMlApiContext } from '../../contexts/kibana';
 
@@ -62,6 +63,7 @@ export interface ScatterplotMatrixViewProps {
   resultsField?: string;
   color?: string;
   legendType?: LegendType;
+  searchQuery?: ResultsSearchQuery;
 }
 
 export const ScatterplotMatrixView: FC<ScatterplotMatrixViewProps> = ({
@@ -70,6 +72,7 @@ export const ScatterplotMatrixView: FC<ScatterplotMatrixViewProps> = ({
   resultsField,
   color,
   legendType,
+  searchQuery,
 }) => {
   const { esSearch } = useMlApiContext();
 
@@ -140,13 +143,15 @@ export const ScatterplotMatrixView: FC<ScatterplotMatrixViewProps> = ({
           ...(legendType !== undefined ? [] : [`${resultsField}.${OUTLIER_SCORE_FIELD}`]),
         ];
 
+        const queryFallback = searchQuery !== undefined ? searchQuery : { match_all: {} };
         const query = randomizeQuery
           ? {
               function_score: {
+                query: queryFallback,
                 random_score: { seed: 10, field: '_seq_no' },
               },
             }
-          : { match_all: {} };
+          : queryFallback;
 
         const resp: SearchResponse7 = await esSearch({
           index,
@@ -180,8 +185,8 @@ export const ScatterplotMatrixView: FC<ScatterplotMatrixViewProps> = ({
     return () => {
       options.didCancel = true;
     };
-    // stringify the fields array, otherwise the comparator will trigger on new but identical instances.
-  }, [fetchSize, JSON.stringify(fields), index, randomizeQuery, resultsField]);
+    // stringify the fields array and search, otherwise the comparator will trigger on new but identical instances.
+  }, [fetchSize, JSON.stringify({ fields, searchQuery }), index, randomizeQuery, resultsField]);
 
   const htmlId = useMemo(() => htmlIdGenerator()(), []);
 
