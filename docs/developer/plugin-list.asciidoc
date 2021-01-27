@@ -45,8 +45,8 @@ NOTE:
 - Adds a dashboard embeddable that can be used in other applications.
 
 
-|{kib-repo}blob/{branch}/src/plugins/data[data]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/data/README.mdx[data]
+|The data plugin provides common data access services, such as search and query, for solutions and application developers.
 
 
 |{kib-repo}blob/{branch}/src/plugins/dev_tools/README.md[devTools]
