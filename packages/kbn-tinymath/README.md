@@ -1,17 +1,13 @@
-# Tinymath
+# kbn-tinymath
 
-[![Apache License](https://img.shields.io/badge/license-apache_2.0-a9215a.svg)](https://raw.githubusercontent.com/elastic/tinymath/master/LICENSE)
-[![Build Status](https://img.shields.io/travis/elastic/tinymath.svg?branch=master)](https://travis-ci.org/elastic/tinymath)
-[![npm](https://img.shields.io/npm/v/tinymath.svg)](https://www.npmjs.com/package/tinymath)
-
-Tinymath is a tiny arithmetic and function evaluator for simple numbers and arrays. Named properties can be accessed from an optional scope parameter and new functions can be added without rebuilding. Enjoy.
-
-**NOTE:** Tinymath requires an ES6 or newer environment. You can use it with your build system of choice to run in older environments.
+kbn-tinymath is a tiny arithmetic and function evaluator for simple numbers and arrays. Named properties can be accessed from an optional scope parameter.
+It's available as an expression function called `math` in Canvas, and the grammar/AST structure is available
+for use by Kibana plugins that want to use math.
 
 See [Function Documentation](/docs/functions.md) for details on built-in functions available in Tinymath.
 
 ```javascript
-import { evaluate } from tinymath
+import { evaluate } from '@kbn/tinymath';
 
 // Simple math
 evaluate('10 + 20'); // 30
@@ -31,7 +27,7 @@ evaluate('multiply(bar, baz) / 10', {bar: [1, 2, 3], baz: [4, 5, 6]}); // [0.4, 
 Functions can be injected, and built in function overwritten, via the 3rd argument to `evaluate`:
 
 ```javascript
-import { evaluate } from tinymath
+import { evaluate } from '@kbn/tinymath';
 
 evaluate('plustwo(foo)', {foo: 5}, {
     plustwo: function(a) {
@@ -45,7 +41,7 @@ evaluate('plustwo(foo)', {foo: 5}, {
 You can get to the parsed AST by importing `parse`
 
 ```javascript
-import { parse } from tinymath
+import { parse } from '@kbn/tinymath';
 
 parse('1 + random()')
 /*
@@ -65,3 +61,12 @@ parse('1 + random()')
 #### Notes
 
 * Floating point operations have the normal Javascript limitations
+
+### Building kbn-tinymath
+
+This package is rebuilt when running `yarn kbn bootstrap`, but can also be build directly
+using `yarn build` from the `packages/kbn-tinymath` directory.
+### Running tests
+
+To test `@kbn/tinymath` from Kibana, run `yarn run jest --watch packages/kbn-tinymath` from
+the top level of Kibana.
