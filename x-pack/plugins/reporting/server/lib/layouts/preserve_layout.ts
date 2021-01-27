@@ -9,7 +9,8 @@ import { CustomPageSize } from 'pdfmake/interfaces';
 import { getDefaultLayoutSelectors } from '../../../common';
 import { LAYOUT_TYPES } from '../../../common/constants';
 import { LayoutSelectorDictionary, PageSizeParams, Size } from '../../../common/types';
-import { Layout, LayoutInstance } from './';
+import type { LayoutInstance } from './';
+import { Layout } from './layout';
 
 // We use a zoom of two to bump up the resolution of the screenshot a bit.
 const ZOOM: number = 2;
