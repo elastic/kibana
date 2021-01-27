@@ -259,7 +259,7 @@ export const ScatterplotMatrixView: FC<ScatterplotMatrixViewProps> = ({
             </EuiFlexItem>
             <EuiFlexItem style={{ width: '200px' }} grow={false}>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.splom.SampleSizeLabel', {
+                label={i18n.translate('xpack.ml.splom.sampleSizeLabel', {
                   defaultMessage: 'Sample size',
                 })}
                 display="rowCompressed"
@@ -275,7 +275,7 @@ export const ScatterplotMatrixView: FC<ScatterplotMatrixViewProps> = ({
             </EuiFlexItem>
             <EuiFlexItem style={{ width: '120px' }} grow={false}>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.splom.RandomScoringLabel', {
+                label={i18n.translate('xpack.ml.splom.randomScoringLabel', {
                   defaultMessage: 'Random scoring',
                 })}
                 display="rowCompressed"
