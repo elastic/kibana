@@ -167,30 +167,6 @@ describe('DocViewTable at Discover', () => {
   });
 });
 
-describe('DocViewTable at Discover Doc', () => {
-  const hit = {
-    _index: 'logstash-2014.09.09',
-    _score: 1,
-    _type: 'doc',
-    _id: 'id123',
-    _source: {
-      extension: 'html',
-      not_mapped: 'yes',
-    },
-  };
-  // here no action buttons are rendered
-  const props = {
-    hit,
-    indexPattern,
-  };
-  const component = mount(<DocViewTable {...props} />);
-  const foundLength = findTestSubject(component, 'addInclusiveFilterButton').length;
-
-  it(`renders no action buttons`, () => {
-    expect(foundLength).toBe(0);
-  });
-});
-
 describe('DocViewTable at Discover Context', () => {
   // here no toggleColumnButtons  are rendered
   const hit = {
@@ -241,5 +217,174 @@ describe('DocViewTable at Discover Context', () => {
     expect(btn.length).toBe(1);
     btn.simulate('click');
     expect(component.html() !== html).toBeTruthy();
+  });
+});
+
+describe('DocViewTable at Discover Doc', () => {
+  const hit = {
+    _index: 'logstash-2014.09.09',
+    _score: 1,
+    _type: 'doc',
+    _id: 'id123',
+    _source: {
+      extension: 'html',
+      not_mapped: 'yes',
+    },
+  };
+  // here no action buttons are rendered
+  const props = {
+    hit,
+    indexPattern,
+  };
+  const component = mount(<DocViewTable {...props} />);
+  const foundLength = findTestSubject(component, 'addInclusiveFilterButton').length;
+
+  it(`renders no action buttons`, () => {
+    expect(foundLength).toBe(0);
+  });
+});
+
+describe('DocViewTable at Discover Doc with Fields API', () => {
+  const indexPatterneCommerce = ({
+    fields: {
+      getAll: () => [
+        {
+          name: '_index',
+          type: 'string',
+          scripted: false,
+          filterable: true,
+        },
+        {
+          name: 'category',
+          type: 'string',
+          scripted: false,
+          filterable: true,
+        },
+        {
+          name: 'category.keyword',
+          displayName: 'category.keyword',
+          type: 'string',
+          scripted: false,
+          filterable: true,
+          spec: {
+            subType: {
+              multi: {
+                parent: 'category',
+              },
+            },
+          },
+        },
+        {
+          name: 'customer_first_name',
+          type: 'string',
+          scripted: false,
+          filterable: true,
+        },
+        {
+          name: 'customer_first_name.keyword',
+          displayName: 'customer_first_name.keyword',
+          type: 'string',
+          scripted: false,
+          filterable: false,
+          spec: {
+            subType: {
+              multi: {
+                parent: 'customer_first_name',
+              },
+            },
+          },
+        },
+        {
+          name: 'customer_first_name.nickname',
+          displayName: 'customer_first_name.nickname',
+          type: 'string',
+          scripted: false,
+          filterable: false,
+          spec: {
+            subType: {
+              multi: {
+                parent: 'customer_first_name',
+              },
+            },
+          },
+        },
+      ],
+    },
+    metaFields: ['_index', '_type', '_score', '_id'],
+    flattenHit: jest.fn((hit) => {
+      const result = {} as Record<string, any>;
+      Object.keys(hit).forEach((key) => {
+        if (key !== 'fields') {
+          result[key] = hit[key];
+        } else {
+          Object.keys(hit.fields).forEach((field) => {
+            result[field] = hit.fields[field];
+          });
+        }
+      });
+      return result;
+    }),
+    formatHit: jest.fn((hit) => {
+      const result = {} as Record<string, any>;
+      Object.keys(hit).forEach((key) => {
+        if (key !== 'fields') {
+          result[key] = hit[key];
+        } else {
+          Object.keys(hit.fields).forEach((field) => {
+            result[field] = hit.fields[field];
+          });
+        }
+      });
+      return result;
+    }),
+  } as unknown) as IndexPattern;
+
+  indexPatterneCommerce.fields.getByName = (name: string) => {
+    return indexPatterneCommerce.fields.getAll().find((field) => field.name === name);
+  };
+
+  const fieldsHit = {
+    _index: 'logstash-2014.09.09',
+    _type: 'doc',
+    _id: 'id123',
+    _score: null,
+    fields: {
+      category: "Women's Clothing",
+      'category.keyword': "Women's Clothing",
+      customer_first_name: 'Betty',
+      'customer_first_name.keyword': 'Betty',
+      'customer_first_name.nickname': 'Betsy',
+    },
+  };
+  const props = {
+    hit: fieldsHit,
+    columns: ['Document'],
+    indexPattern: indexPatterneCommerce,
+    filter: jest.fn(),
+    onAddColumn: jest.fn(),
+    onRemoveColumn: jest.fn(),
+  };
+  // @ts-ignore
+  const component = mount(<DocViewTable {...props} />);
+  it('renders multifield rows', () => {
+    const categoryMultifieldRow = findTestSubject(
+      component,
+      'tableDocViewRow-multifieldsTitle-category'
+    );
+    expect(categoryMultifieldRow.length).toBe(1);
+    const categoryKeywordRow = findTestSubject(component, 'tableDocViewRow-category.keyword');
+    expect(categoryKeywordRow.length).toBe(1);
+
+    const customerNameMultiFieldRow = findTestSubject(
+      component,
+      'tableDocViewRow-multifieldsTitle-customer_first_name'
+    );
+    expect(customerNameMultiFieldRow.length).toBe(1);
+    expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword').length).toBe(
+      1
+    );
+    expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname').length).toBe(
+      1
+    );
   });
 });
