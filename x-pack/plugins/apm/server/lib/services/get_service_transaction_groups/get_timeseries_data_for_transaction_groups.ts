@@ -99,10 +99,8 @@ export async function getTimeseriesDataForTransactionGroups({
               },
               aggs: {
                 ...getLatencyAggregation(latencyAggregationType, field),
-                transaction_count: { value_count: { field } },
                 [EVENT_OUTCOME]: {
                   filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
-                  aggs: { transaction_count: { value_count: { field } } },
                 },
               },
             },
