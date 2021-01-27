@@ -39,7 +39,7 @@ import {
   createGridSortingConfig,
 } from './table_actions';
 
-const DataContext = React.createContext<DataContextType>({});
+export const DataContext = React.createContext<DataContextType>({});
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
