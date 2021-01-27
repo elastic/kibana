@@ -87,6 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should modify the time range when a bar is clicked', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.clickHistogramBar();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const time = await PageObjects.timePicker.getTimeConfig();
@@ -99,8 +100,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it.skip('should modify the time range when the histogram is brushed', async function () {
+      it('should modify the time range when the histogram is brushed', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
