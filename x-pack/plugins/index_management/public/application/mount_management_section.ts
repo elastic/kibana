@@ -10,28 +10,46 @@ import { ManagementAppMountParams } from 'src/plugins/management/public/';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
 import { FleetSetup } from '../../../fleet/public';
-import { PLUGIN } from '../../common/constants';
+import { UIM_APP_NAME } from '../../common/constants';
+import { PLUGIN } from '../../common/constants/plugin';
 import { ExtensionsService } from '../services';
 import { StartDependencies } from '../types';
 import { AppDependencies } from './app_context';
 import { breadcrumbService } from './services/breadcrumbs';
 import { documentationService } from './services/documentation';
-import { HttpService, NotificationService, UiMetricService } from './services';
+import { UiMetricService } from './services';
 
 import { renderApp } from '.';
+import { setUiMetricService } from './services/api';
+import { notificationService } from './services/notification';
+import { httpService } from './services/http';
 
-interface InternalServices {
-  httpService: HttpService;
-  notificationService: NotificationService;
-  uiMetricService: UiMetricService;
-  extensionsService: ExtensionsService;
+function initSetup({
+  usageCollection,
+  coreSetup,
+}: {
+  coreSetup: CoreSetup<StartDependencies>;
+  usageCollection: UsageCollectionSetup;
+}) {
+  const { http, notifications } = coreSetup;
+
+  httpService.setup(http);
+  notificationService.setup(notifications);
+
+  const uiMetricService = new UiMetricService(UIM_APP_NAME);
+
+  setUiMetricService(uiMetricService);
+
+  uiMetricService.setup(usageCollection);
+
+  return { uiMetricService };
 }
 
 export async function mountManagementSection(
   coreSetup: CoreSetup<StartDependencies>,
   usageCollection: UsageCollectionSetup,
-  services: InternalServices,
   params: ManagementAppMountParams,
+  extensionsService: ExtensionsService,
   fleet?: FleetSetup
 ) {
   const { element, setBreadcrumbs, history } = params;
@@ -50,6 +68,11 @@ export async function mountManagementSection(
   breadcrumbService.setup(setBreadcrumbs);
   documentationService.setup(docLinks);
 
+  const { uiMetricService } = initSetup({
+    usageCollection,
+    coreSetup,
+  });
+
   const appDependencies: AppDependencies = {
     core: {
       fatalErrors,
@@ -59,7 +82,7 @@ export async function mountManagementSection(
       usageCollection,
       fleet,
     },
-    services,
+    services: { httpService, notificationService, uiMetricService, extensionsService },
     history,
     setBreadcrumbs,
     uiSettings,
