@@ -281,10 +281,12 @@ export class SavedMap {
     returnToOrigin,
     newTags,
     saveByReference,
+    dashboardId,
   }: OnSaveProps & {
-    returnToOrigin: boolean;
+    returnToOrigin?: boolean;
     newTags?: string[];
     saveByReference: boolean;
+    dashboardId?: string | null;
   }) {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling save');
@@ -337,12 +339,21 @@ export class SavedMap {
         });
         return;
       }
-      this._getStateTransfer().navigateToWithEmbeddablePackage(this._originatingApp, {
+      await this._getStateTransfer().navigateToWithEmbeddablePackage(this._originatingApp, {
         state: {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
           input: updatedMapEmbeddableInput,
         },
+      });
+      return;
+    } else if (dashboardId) {
+      await this._getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
+        state: {
+          type: MAP_SAVED_OBJECT_TYPE,
+          input: updatedMapEmbeddableInput,
+        },
+        path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
       });
       return;
     }
