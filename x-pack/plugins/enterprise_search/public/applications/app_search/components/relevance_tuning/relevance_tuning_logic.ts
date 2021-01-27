@@ -10,8 +10,9 @@ import { omit, cloneDeep, isEmpty } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
+import { NUMBER } from '../../../shared/constants/field_types';
 import { HttpLogic } from '../../../shared/http';
-import { Schema, SchemaConflicts } from '../../../shared/types';
+import { Schema, SchemaConflicts, SchemaTypes } from '../../../shared/types';
 import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
 
 import { Result } from '../result/types';
@@ -56,6 +57,11 @@ interface RelevanceTuningActions {
     valueIndex: number,
     value: string | number
   ): { name: string; boostIndex: number; valueIndex: number; value: string | number };
+  updateBoostCenter: (
+    name: string,
+    boostIndex: number,
+    value: string | number
+  ) => { name: string; boostIndex: number; value: string | number };
 }
 
 interface RelevanceTuningValues {
@@ -116,6 +122,15 @@ const removeBoostStateProps = (searchSettings: SearchSettings) => {
   return updatedSettings;
 };
 
+const parseBoostCenter = (fieldType: SchemaTypes, value: string | number) => {
+  // Leave non-numeric fields alone
+  if (fieldType === NUMBER) {
+    const floatValue = parseFloat(value as string);
+    return isNaN(floatValue) ? value : floatValue;
+  }
+  return value;
+};
+
 export const RelevanceTuningLogic = kea<
   MakeLogicType<RelevanceTuningValues, RelevanceTuningActions>
 >({
@@ -150,6 +165,7 @@ export const RelevanceTuningLogic = kea<
       valueIndex,
       value,
     }),
+    updateBoostCenter: (name, boostIndex, value) => ({ name, boostIndex, value }),
   }),
   reducers: () => ({
     searchSettings: [
@@ -427,6 +443,22 @@ export const RelevanceTuningLogic = kea<
       } else {
         existingValue[valueIndex] = value;
       }
+
+      actions.setSearchSettings({
+        ...searchSettings,
+        boosts: {
+          ...boosts,
+          [name]: updatedBoosts,
+        },
+      });
+      actions.getSearchResults();
+    },
+    updateBoostCenter: ({ name, boostIndex, value }) => {
+      const { searchSettings } = values;
+      const { boosts } = searchSettings;
+      const updatedBoosts = cloneDeep(boosts[name]);
+      const fieldType = values.schema[name];
+      updatedBoosts[boostIndex].center = parseBoostCenter(fieldType, value);
 
       actions.setSearchSettings({
         ...searchSettings,
