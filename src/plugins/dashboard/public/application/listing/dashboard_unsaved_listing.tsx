@@ -59,7 +59,7 @@ const DashboardUnsavedItem = ({
             size="s"
             color="primary"
             onClick={onOpenClick}
-            data-test-subj={`edit-unsaved-${dashboard?.id ?? DASHBOARD_PANELS_UNSAVED_ID}`}
+            data-test-subj={`edit-unsaved-${title.split(' ').join('-')}`}
             aria-label={dashboardUnsavedListingStrings.getEditAriaLabel(title)}
           >
             {dashboardUnsavedListingStrings.getEditTitle()}
@@ -70,7 +70,7 @@ const DashboardUnsavedItem = ({
             size="s"
             color="danger"
             onClick={onDiscardClick}
-            data-test-subj={`discard-unsaved-${dashboard?.id ?? DASHBOARD_PANELS_UNSAVED_ID}`}
+            data-test-subj={`discard-unsaved-${title.split(' ').join('-')}`}
             aria-label={dashboardUnsavedListingStrings.getDiscardAriaLabel(title)}
           >
             {dashboardUnsavedListingStrings.getDiscardTitle()}
