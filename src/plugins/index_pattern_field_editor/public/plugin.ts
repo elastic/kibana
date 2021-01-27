@@ -10,20 +10,29 @@ import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 import { getFieldEditorOpener } from './open_editor';
+import { FormatEditorService } from './service';
 
 export class IndexPatternFieldEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
+  private readonly formatEditorService = new FormatEditorService();
+
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
-    return {};
+    const { fieldFormatEditors } = this.formatEditorService.setup();
+
+    return {
+      fieldFormatEditors,
+    };
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
+    const { fieldFormatEditors } = this.formatEditorService.start();
     const {
       application: { capabilities },
     } = core;
     const { data } = plugins;
 
     return {
+      fieldFormatEditors,
       openEditor: getFieldEditorOpener(core, data.indexPatterns),
       userPermissions: {
         editIndexPattern: () => {
