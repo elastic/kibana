@@ -33,7 +33,7 @@ export interface SchemaConflicts {
 export interface IIndexingStatus {
   percentageComplete: number;
   numDocumentsWithErrors: number;
-  activeReindexJobId: number;
+  activeReindexJobId: string;
 }
 
 export interface IndexJob extends IIndexingStatus {

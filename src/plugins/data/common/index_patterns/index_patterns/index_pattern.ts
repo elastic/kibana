@@ -8,6 +8,7 @@
 
 import _, { each, reject } from 'lodash';
 import { FieldAttrs, FieldAttrSet } from '../..';
+import type { RuntimeField } from '../types';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
@@ -17,6 +18,7 @@ import { flattenHitWrapper } from './flatten_hit';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
 import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
+import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
 
 interface IndexPatternDeps {
   spec?: IndexPatternSpec;
@@ -74,6 +76,8 @@ export class IndexPattern implements IIndexPattern {
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
   private fieldAttrs: FieldAttrs;
+  private runtimeFieldMap: Record<string, RuntimeField>;
+
   /**
    * prevents errors when index pattern exists before indices
    */
@@ -115,6 +119,7 @@ export class IndexPattern implements IIndexPattern {
     this.fieldAttrs = spec.fieldAttrs || {};
     this.intervalName = spec.intervalName;
     this.allowNoIndex = spec.allowNoIndex || false;
+    this.runtimeFieldMap = spec.runtimeFieldMap || {};
   }
 
   /**
@@ -160,7 +165,8 @@ export class IndexPattern implements IIndexPattern {
       return {
         storedFields: ['*'],
         scriptFields,
-        docvalueFields: [],
+        docvalueFields: [] as Array<{ field: string; format: string }>,
+        runtimeFields: {},
       };
     }
 
@@ -192,6 +198,7 @@ export class IndexPattern implements IIndexPattern {
       storedFields: ['*'],
       scriptFields,
       docvalueFields,
+      runtimeFields: this.runtimeFieldMap,
     };
   }
 
@@ -210,6 +217,7 @@ export class IndexPattern implements IIndexPattern {
       typeMeta: this.typeMeta,
       type: this.type,
       fieldFormats: this.fieldFormatMap,
+      runtimeFieldMap: this.runtimeFieldMap,
       fieldAttrs: this.fieldAttrs,
       intervalName: this.intervalName,
       allowNoIndex: this.allowNoIndex,
@@ -305,6 +313,7 @@ export class IndexPattern implements IIndexPattern {
       ? undefined
       : JSON.stringify(this.fieldFormatMap);
     const fieldAttrs = this.getFieldAttrs();
+    const runtimeFieldMap = this.runtimeFieldMap;
 
     return {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
@@ -319,6 +328,7 @@ export class IndexPattern implements IIndexPattern {
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
+      runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
     };
   }
 
@@ -338,6 +348,51 @@ export class IndexPattern implements IIndexPattern {
       field.type as KBN_FIELD_TYPES,
       field.esTypes as ES_FIELD_TYPES[]
     );
+  }
+
+  /**
+   * Add a runtime field - Appended to existing mapped field or a new field is
+   * created as appropriate
+   * @param name Field name
+   * @param runtimeField Runtime field definition
+   */
+
+  addRuntimeField(name: string, runtimeField: RuntimeField) {
+    const existingField = this.getFieldByName(name);
+    if (existingField) {
+      existingField.runtimeField = runtimeField;
+    } else {
+      this.fields.add({
+        name,
+        runtimeField,
+        type: castEsToKbnFieldTypeName(runtimeField.type),
+        aggregatable: true,
+        searchable: true,
+        count: 0,
+        readFromDocValues: false,
+      });
+    }
+    this.runtimeFieldMap[name] = runtimeField;
+  }
+
+  /**
+   * Remove a runtime field - removed from mapped field or removed unmapped
+   * field as appropriate
+   * @param name Field name
+   */
+
+  removeRuntimeField(name: string) {
+    const existingField = this.getFieldByName(name);
+    if (existingField) {
+      if (existingField.isMapped) {
+        // mapped field, remove runtimeField def
+        existingField.runtimeField = undefined;
+      } else {
+        // runtimeField only
+        this.fields.remove(existingField);
+      }
+    }
+    delete this.runtimeFieldMap[name];
   }
 
   /**

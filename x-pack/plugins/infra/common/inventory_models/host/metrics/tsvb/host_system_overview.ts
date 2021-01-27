@@ -16,7 +16,7 @@ export const hostSystemOverview: TSVBMetricModelCreator = (
   index_pattern: indexPattern,
   interval,
   time_field: timeField,
-  type: 'gauge',
+  type: 'top_n',
   series: [
     {
       id: 'cpu',

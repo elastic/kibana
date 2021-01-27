@@ -9,7 +9,7 @@ Register a new context provider.
 <b>Signature:</b>
 
 ```typescript
-registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
+registerContext<Context extends RequestHandlerContext, ContextName extends keyof Context>(pluginOpaqueId: PluginOpaqueId, contextName: ContextName, provider: IContextProvider<Context, ContextName>): this;
 ```
 
 ## Parameters
@@ -17,8 +17,8 @@ registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginO
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  pluginOpaqueId | <code>PluginOpaqueId</code> | The plugin opaque ID for the plugin that registers this context. |
-|  contextName | <code>TContextName</code> | The key of the <code>TContext</code> object this provider supplies the value for. |
-|  provider | <code>IContextProvider&lt;THandler, TContextName&gt;</code> | A [IContextProvider](./kibana-plugin-core-server.icontextprovider.md) to be called each time a new context is created. |
+|  contextName | <code>ContextName</code> | The key of the <code>TContext</code> object this provider supplies the value for. |
+|  provider | <code>IContextProvider&lt;Context, ContextName&gt;</code> | A [IContextProvider](./kibana-plugin-core-server.icontextprovider.md) to be called each time a new context is created. |
 
 <b>Returns:</b>
 
