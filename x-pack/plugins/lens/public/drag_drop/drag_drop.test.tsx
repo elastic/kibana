@@ -25,6 +25,7 @@ const defaultContext = {
   activeDropTarget: undefined,
   keyboardMode: false,
   setKeyboardMode: () => {},
+  setA11yMessage: jest.fn(),
 };
 
 describe('DragDrop', () => {
@@ -224,6 +225,7 @@ describe('DragDrop', () => {
 
     const component = mount(
       <ChildDragDropProvider
+        setA11yMessage={jest.fn()}
         dragging={dragging}
         setDragging={() => {
           dragging = { id: '1' };
@@ -288,6 +290,7 @@ describe('DragDrop', () => {
           activeDropTarget = { activeDropTarget: target } as ActiveDropTarget;
         },
         activeDropTarget,
+        setA11yMessage: jest.fn(),
       };
 
       return mount(

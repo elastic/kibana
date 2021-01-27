@@ -96,6 +96,7 @@ export function DraggableDimensionButton({
   return (
     <div className="lnsLayerPanel__dimensionContainer">
       <DragDrop
+        noKeyboardSupportYet={reorderableGroup.length < 2} // to be removed when navigating outside of groups is added
         draggable
         dragType={dragType}
         dropType={dropType}

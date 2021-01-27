@@ -41,6 +41,8 @@ export interface DragContextState {
   activeDropTarget?: ActiveDropTarget;
 
   setActiveDropTarget: (newTarget?: DragDropIdentifier) => void;
+
+  setA11yMessage: (message: string) => void;
 }
 
 /**
@@ -55,6 +57,7 @@ export const DragContext = React.createContext<DragContextState>({
   setKeyboardMode: () => {},
   activeDropTarget: undefined,
   setActiveDropTarget: () => {},
+  setA11yMessage: () => {},
 });
 
 /**
@@ -94,6 +97,8 @@ export interface ProviderProps {
    * The React children.
    */
   children: React.ReactNode;
+
+  setA11yMessage: (message: string) => void;
 }
 
 /**
@@ -108,6 +113,7 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
     dragging: undefined,
   });
   const [keyboardModeState, setKeyboardModeState] = useState(false);
+  const [a11yMessageState, setA11yMessageState] = useState('');
   const [activeDropTargetState, setActiveDropTargetState] = useState<{
     activeDropTarget?: DragDropIdentifier;
   }>({
@@ -119,6 +125,10 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
     [setDraggingState]
   );
 
+  const setA11yMessage = useMemo(() => (message: string) => setA11yMessageState(message), [
+    setA11yMessageState,
+  ]);
+
   const setActiveDropTarget = useMemo(
     () => (activeDropTarget?: DragDropIdentifier) =>
       setActiveDropTargetState((s) => ({ ...s, activeDropTarget })),
@@ -126,16 +136,38 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   );
 
   return (
-    <ChildDragDropProvider
-      keyboardMode={keyboardModeState}
-      setKeyboardMode={setKeyboardModeState}
-      dragging={draggingState.dragging}
-      setDragging={setDragging}
-      activeDropTarget={activeDropTargetState}
-      setActiveDropTarget={setActiveDropTarget}
-    >
-      {children}
-    </ChildDragDropProvider>
+    <div>
+      <ChildDragDropProvider
+        keyboardMode={keyboardModeState}
+        setKeyboardMode={setKeyboardModeState}
+        dragging={draggingState.dragging}
+        setA11yMessage={setA11yMessage}
+        setDragging={setDragging}
+        activeDropTarget={activeDropTargetState}
+        setActiveDropTarget={setActiveDropTarget}
+      >
+        {children}
+      </ChildDragDropProvider>
+      <EuiPortal>
+        <EuiScreenReaderOnly>
+          <div>
+            <p aria-live="assertive" aria-atomic={true}>
+              {a11yMessageState}
+            </p>
+            <p id={`lnsDragDrop-keyboardInstructions`}>
+              {i18n.translate('xpack.lens.dragDrop.keyboardInstructions', {
+                defaultMessage: `Press space bar to start reordering the dimension group. When dragging, use arrow keys to reorder. Press space bar again to finish.`,
+              })}
+            </p>
+            {/* <p id={`lnsDragDrop-groupMovementInstructions`}>
+              {i18n.translate('xpack.lens.dragDrop.groupMovementInstructions', {
+                defaultMessage: `Use right arrow and left key to move dimension to the next group.`,
+              })}
+            </p> */}
+          </div>
+        </EuiScreenReaderOnly>
+      </EuiPortal>
+    </div>
   );
 }
 
@@ -153,6 +185,7 @@ export function ChildDragDropProvider({
   keyboardMode,
   activeDropTarget,
   setActiveDropTarget,
+  setA11yMessage,
   children,
 }: ProviderProps) {
   const value = useMemo(
@@ -163,8 +196,17 @@ export function ChildDragDropProvider({
       setDragging,
       activeDropTarget,
       setActiveDropTarget,
+      setA11yMessage,
     }),
-    [setDragging, dragging, activeDropTarget, setActiveDropTarget, setKeyboardMode, keyboardMode]
+    [
+      setDragging,
+      dragging,
+      activeDropTarget,
+      setActiveDropTarget,
+      setKeyboardMode,
+      keyboardMode,
+      setA11yMessage,
+    ]
   );
   return <DragContext.Provider value={value}>{children}</DragContext.Provider>;
 }
@@ -188,14 +230,6 @@ export interface ReorderState {
    */
   isReorderOn: boolean;
   /**
-   * aria-live message for changes in reordering
-   */
-  keyboardReorderMessage: string;
-  /**
-   * aria-live message to use once the current action is comitted
-   */
-  pendingActionSuccessMessage?: string;
-  /**
    * reorder group needed for screen reader aria-described-by attribute
    */
   groupId: string;
@@ -214,7 +248,6 @@ export const ReorderContext = React.createContext<ReorderContextState>({
     direction: '-',
     draggingHeight: 40,
     isReorderOn: false,
-    keyboardReorderMessage: '',
     groupId: '',
   },
   setReorderState: () => () => {},
@@ -234,7 +267,6 @@ export function ReorderProvider({
     direction: '-',
     draggingHeight: 40,
     isReorderOn: false,
-    keyboardReorderMessage: '',
     groupId: id,
   });
 
@@ -250,25 +282,6 @@ export function ReorderProvider({
       <ReorderContext.Provider value={{ reorderState: state, setReorderState }}>
         {children}
       </ReorderContext.Provider>
-      <EuiPortal>
-        <EuiScreenReaderOnly>
-          <div>
-            <p aria-live="assertive" aria-atomic={true}>
-              {state.keyboardReorderMessage}
-            </p>
-            <p id={`lnsDragDrop-reorderInstructions-${id}`}>
-              {i18n.translate('xpack.lens.dragDrop.reorderInstructions', {
-                defaultMessage: `Press space bar to start reordering the dimension group. When dragging, use arrow keys to reorder. Press space bar again to finish.`,
-              })}
-            </p>
-            <p id={`lnsDragDrop-groupMovementInstructions-${id}`}>
-              {i18n.translate('xpack.lens.dragDrop.groupMovementInstructions', {
-                defaultMessage: `Use right arrow and left key to move dimension to the next group.`,
-              })}
-            </p>
-          </div>
-        </EuiScreenReaderOnly>
-      </EuiPortal>
     </div>
   );
 }

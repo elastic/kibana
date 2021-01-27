@@ -791,6 +791,7 @@ describe('workspace_panel', () => {
           activeDropTarget={undefined}
           keyboardMode={false}
           setKeyboardMode={() => {}}
+          setA11yMessage={() => {}}
         >
           <WorkspacePanel
             activeDatasourceId={'mock'}

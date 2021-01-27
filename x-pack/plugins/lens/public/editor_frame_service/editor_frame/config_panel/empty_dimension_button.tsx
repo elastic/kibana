@@ -55,6 +55,10 @@ export function EmptyDimensionButton({
         dataTestSubj={group.dataTestSubj}
         value={value}
         onDrop={handleDrop}
+        label={i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
+          defaultMessage: 'empty field of {groupLabel}',
+          values: { groupLabel: group.groupLabel },
+        })}
         droppable={
           Boolean(dragDropContext.dragging) &&
           // Verify that the dragged item is not coming from the same group

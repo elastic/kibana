@@ -203,6 +203,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         container={document.querySelector<HTMLElement>('.application') || undefined}
         button={
           <DragDrop
+            noKeyboardSupportYet
             draggable
             label={field.displayName}
             value={value}

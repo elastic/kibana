@@ -8,7 +8,6 @@ import './drag_drop.scss';
 import React, { useContext, useEffect, memo } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import {
   DragDropIdentifier,
   DragContext,
@@ -94,6 +93,11 @@ interface BaseProps {
    * replace something that is existing or add a new one
    */
   dropType?: 'add' | 'replace' | 'reorder';
+
+  /**
+   * temporary flag to exclude the draggable elements that don't have keyboard nav yet. To be removed along with the feature development
+   */
+  noKeyboardSupportYet?: boolean;
 }
 
 /**
@@ -107,9 +111,10 @@ interface DragInnerProps extends BaseProps {
   label?: string;
   isDragging: boolean;
   keyboardMode: boolean;
-  setDragging: DragContextState['setDragging'];
   setKeyboardMode: DragContextState['setKeyboardMode'];
+  setDragging: DragContextState['setDragging'];
   setActiveDropTarget: DragContextState['setActiveDropTarget'];
+  setA11yMessage: DragContextState['setA11yMessage'];
   activeDropTarget: DragContextState['activeDropTarget'];
   onDragStart?: (
     target?:
@@ -146,6 +151,7 @@ export const DragDrop = (props: BaseProps) => {
     setKeyboardMode,
     activeDropTarget,
     setActiveDropTarget,
+    setA11yMessage,
   } = useContext(DragContext);
 
   const { value, draggable, droppable, reorderableGroup } = props;
@@ -160,6 +166,7 @@ export const DragDrop = (props: BaseProps) => {
     setKeyboardMode,
     setDragging,
     setActiveDropTarget,
+    setA11yMessage,
   };
 
   const dropProps = {
@@ -171,6 +178,7 @@ export const DragDrop = (props: BaseProps) => {
     activeDropTarget,
     setActiveDropTarget,
     isDragging,
+    setA11yMessage,
     isNotDroppable:
       // If the configuration has provided a droppable flag, but this particular item is not
       // droppable, then it should be less prominent. Ignores items that are both
@@ -219,6 +227,7 @@ const DragInner = memo(function DragDropInner({
   onDragStart,
   onDragEnd,
   extraKeyboardHandler,
+  noKeyboardSupportYet,
 }: DragInnerProps) {
   const dragStart = (e?: DroppableEvent | React.KeyboardEvent<HTMLButtonElement>) => {
     // Setting stopPropgagation causes Chrome failures, so
@@ -267,35 +276,37 @@ const DragInner = memo(function DragDropInner({
 
   return (
     <div className={className}>
-      <EuiScreenReaderOnly showOnFocus>
-        <button
-          aria-label={label}
-          aria-describedby={`lnsDragDrop-keyboardInstructions`}
-          className="lnsDragDrop__keyboardHandler"
-          data-test-subj="lnsDragDrop-keyboardHandler"
-          onBlur={() => {
-            dragEnd();
-          }}
-          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-            if (e.key === keys.ENTER || e.key === keys.SPACE) {
-              if (isDragging) {
-                dragEnd();
-              } else {
-                dragStart(e);
-                setKeyboardMode(true);
-              }
-              if (activeDropTarget) {
-                dropToActiveDropTarget();
-              }
-            } else if (e.key === keys.ESCAPE) {
+      {!noKeyboardSupportYet && (
+        <EuiScreenReaderOnly showOnFocus>
+          <button
+            aria-label={label}
+            aria-describedby={`lnsDragDrop-keyboardInstructions`}
+            className="lnsDragDrop__keyboardHandler"
+            data-test-subj="lnsDragDrop-keyboardHandler"
+            onBlur={() => {
               dragEnd();
-            }
-            if (extraKeyboardHandler) {
-              extraKeyboardHandler(e);
-            }
-          }}
-        />
-      </EuiScreenReaderOnly>
+            }}
+            onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+              if (e.key === keys.ENTER || e.key === keys.SPACE) {
+                if (isDragging) {
+                  dragEnd();
+                } else {
+                  dragStart(e);
+                  setKeyboardMode(true);
+                }
+                if (activeDropTarget) {
+                  dropToActiveDropTarget();
+                }
+              } else if (e.key === keys.ESCAPE) {
+                dragEnd();
+              }
+              if (extraKeyboardHandler) {
+                extraKeyboardHandler(e);
+              }
+            }}
+          />
+        </EuiScreenReaderOnly>
+      )}
 
       {React.cloneElement(children, {
         'data-test-subj': dataTestSubj || 'lnsDragDrop',
@@ -415,6 +426,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
     activeDropTarget,
     reorderableGroup,
     onDrop,
+    setA11yMessage,
   } = props;
 
   const currentIndex = reorderableGroup.findIndex((i) => i.id === value.id);
@@ -446,15 +458,13 @@ const ReorderableDrag = memo(function ReorderableDrag(
     }
 
     if (!isReorderOn) {
-      setReorderState((s: ReorderState) => ({
-        ...s,
-        keyboardReorderMessage: reorderAnnouncements.lifted(label, currentIndex + 1),
-      }));
+      setA11yMessage(reorderAnnouncements.lifted(label, currentIndex + 1));
     }
   };
 
   const onReorderableDragEnd = () => {
-    resetReorderState(reorderAnnouncements.cancelled(currentIndex + 1));
+    resetReorderState();
+    setA11yMessage(reorderAnnouncements.cancelled(currentIndex + 1));
   };
 
   const onReorderableDrop = (dragging: DragDropIdentifier, target: DragDropIdentifier) => {
@@ -463,15 +473,16 @@ const ReorderableDrag = memo(function ReorderableDrag(
       const targetIndex = reorderableGroup.findIndex(
         (i) => i.id === activeDropTarget?.activeDropTarget?.id
       );
-      resetReorderState(reorderAnnouncements.dropped(targetIndex + 1, currentIndex + 1));
+
+      resetReorderState();
+      setA11yMessage(reorderAnnouncements.dropped(targetIndex + 1, currentIndex + 1));
     }
   };
 
-  const resetReorderState = (keyboardReorderMessage = '') =>
+  const resetReorderState = () =>
     setReorderState((s: ReorderState) => ({
       ...s,
       reorderedItems: [],
-      keyboardReorderMessage,
     }));
 
   const extraKeyboardHandler = (e: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -487,26 +498,17 @@ const ReorderableDrag = memo(function ReorderableDrag(
       }
       if (keys.ARROW_DOWN === e.key) {
         if (activeDropTargetIndex < reorderableGroup.length - 1) {
-          setReorderState((s: ReorderState) => ({
-            ...s,
-            keyboardReorderMessage: reorderAnnouncements.moved(
-              label,
-              activeDropTargetIndex + 2,
-              currentIndex + 1
-            ),
-          }));
+          setA11yMessage(
+            reorderAnnouncements.moved(label, activeDropTargetIndex + 2, currentIndex + 1)
+          );
           onReorderableDragOver(reorderableGroup[activeDropTargetIndex + 1]);
         }
       } else if (keys.ARROW_UP === e.key) {
         if (activeDropTargetIndex > 0) {
-          setReorderState((s: ReorderState) => ({
-            ...s,
-            keyboardReorderMessage: reorderAnnouncements.moved(
-              label,
-              activeDropTargetIndex,
-              currentIndex + 1
-            ),
-          }));
+          setA11yMessage(
+            reorderAnnouncements.moved(label, activeDropTargetIndex, currentIndex + 1)
+          );
+
           onReorderableDragOver(reorderableGroup[activeDropTargetIndex - 1]);
         }
       }
@@ -593,6 +595,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
     activeDropTarget,
     setActiveDropTarget,
     reorderableGroup,
+    setA11yMessage,
   } = props;
 
   const currentIndex = reorderableGroup.findIndex((i) => i.id === value.id);
@@ -665,14 +668,6 @@ const ReorderableDrop = memo(function ReorderableDrop(
     );
   };
 
-  const resetReorderState = (keyboardReorderMessage = '') =>
-    setReorderState((s: ReorderState) => ({
-      ...s,
-      reorderedItems: [],
-      isReorderOn: false,
-      keyboardReorderMessage,
-    }));
-
   const onReorderableDrop = (e: DroppableEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -688,7 +683,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
       const draggingIndex = reorderableGroup.findIndex((i) => i.id === dragging.id);
       // setTimeout ensures it will run after dragEnd messaging
       setTimeout(() =>
-        resetReorderState(reorderAnnouncements.dropped(currentIndex + 1, draggingIndex + 1))
+        setA11yMessage(reorderAnnouncements.dropped(currentIndex + 1, draggingIndex + 1))
       );
     }
   };

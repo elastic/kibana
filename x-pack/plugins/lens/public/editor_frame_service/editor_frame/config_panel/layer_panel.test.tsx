@@ -22,6 +22,16 @@ import { generateId } from '../../../id_generator';
 
 jest.mock('../../../id_generator');
 
+const defaultContext = {
+  dragging: undefined,
+  setDragging: jest.fn(),
+  setActiveDropTarget: () => {},
+  activeDropTarget: undefined,
+  keyboardMode: false,
+  setKeyboardMode: () => {},
+  setA11yMessage: jest.fn(),
+};
+
 describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
   let mockVisualization2: jest.Mocked<Visualization>;
@@ -441,14 +451,7 @@ describe('LayerPanel', () => {
       const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: '1' };
 
       const component = mountWithIntl(
-        <ChildDragDropProvider
-          dragging={draggingField}
-          setDragging={jest.fn()}
-          setActiveDropTarget={() => {}}
-          activeDropTarget={undefined}
-          keyboardMode={false}
-          setKeyboardMode={() => {}}
-        >
+        <ChildDragDropProvider {...defaultContext} dragging={draggingField}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -491,14 +494,7 @@ describe('LayerPanel', () => {
       const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: '1' };
 
       const component = mountWithIntl(
-        <ChildDragDropProvider
-          dragging={draggingField}
-          setDragging={jest.fn()}
-          setActiveDropTarget={() => {}}
-          activeDropTarget={undefined}
-          keyboardMode={false}
-          setKeyboardMode={() => {}}
-        >
+        <ChildDragDropProvider {...defaultContext} dragging={draggingField}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -549,14 +545,7 @@ describe('LayerPanel', () => {
       const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a' };
 
       const component = mountWithIntl(
-        <ChildDragDropProvider
-          dragging={draggingOperation}
-          setDragging={jest.fn()}
-          setActiveDropTarget={() => {}}
-          activeDropTarget={undefined}
-          keyboardMode={false}
-          setKeyboardMode={() => {}}
-        >
+        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -609,14 +598,7 @@ describe('LayerPanel', () => {
       const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a' };
 
       const component = mountWithIntl(
-        <ChildDragDropProvider
-          dragging={draggingOperation}
-          setDragging={jest.fn()}
-          setActiveDropTarget={() => {}}
-          activeDropTarget={undefined}
-          keyboardMode={false}
-          setKeyboardMode={() => {}}
-        >
+        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -652,14 +634,7 @@ describe('LayerPanel', () => {
       const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a' };
 
       const component = mountWithIntl(
-        <ChildDragDropProvider
-          dragging={draggingOperation}
-          setDragging={jest.fn()}
-          setActiveDropTarget={() => {}}
-          activeDropTarget={undefined}
-          keyboardMode={false}
-          setKeyboardMode={() => {}}
-        >
+        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
