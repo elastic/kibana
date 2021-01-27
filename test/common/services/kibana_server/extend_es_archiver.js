@@ -25,7 +25,7 @@ export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }) 
       const statsKeys = Object.keys(stats);
       const kibanaKeys = statsKeys.filter(
         // this also matches stats keys like '.kibana_1' and '.kibana_2,.kibana_1'
-        (key) => key.includes(KIBANA_INDEX) && (stats[key].created || stats[key].deleted)
+        (key) => key.includes(KIBANA_INDEX) && stats[key].created
       );
 
       // if the kibana index was created by the esArchiver then update the uiSettings
