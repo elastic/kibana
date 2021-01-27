@@ -8,34 +8,13 @@
 
 import { getVisualizeListItem } from './get_visualize_list_item_link';
 import { ApplicationStart } from 'kibana/public';
-import { Filter, esFilters, RefreshInterval } from '../../../../data/public';
-import { getQueryService } from '../../services';
+import { createHashHistory } from 'history';
+import { createKbnUrlStateStorage } from '../../../../kibana_utils/public';
+import { esFilters } from '../../../../data/public';
+import { GLOBAL_STATE_STORAGE_KEY } from '../../../common/constants';
 
 jest.mock('../../services', () => {
-  let timeFilter = { from: 'now-7d', to: 'now' };
-  let filters: Filter[] = [];
-  let refreshInterval: RefreshInterval | null = null;
   return {
-    getQueryService: () => ({
-      timefilter: {
-        timefilter: {
-          getTime: jest.fn(() => timeFilter),
-          setTime: jest.fn((newTimeFilter) => {
-            timeFilter = newTimeFilter;
-          }),
-          getRefreshInterval: jest.fn(() => refreshInterval),
-          setRefreshInterval: jest.fn((newInterval) => {
-            refreshInterval = newInterval;
-          }),
-        },
-      },
-      filterManager: {
-        getFilters: jest.fn(() => filters),
-        setFilters: jest.fn((newFilters) => {
-          filters = newFilters;
-        }),
-      },
-    }),
     getUISettings: () => ({
       get: jest.fn(),
     }),
@@ -48,75 +27,99 @@ const application = ({
   }),
 } as unknown) as ApplicationStart;
 
-beforeEach(() => {
-  jest.clearAllMocks();
+const history = createHashHistory();
+const kbnUrlStateStorage = createKbnUrlStateStorage({
+  history,
+  useHash: false,
 });
+kbnUrlStateStorage.set(GLOBAL_STATE_STORAGE_KEY, { time: { from: 'now-7d', to: 'now' } });
 
-describe('listing item link', () => {
+describe('listing item link is correct for each app', () => {
   test('creates a link to classic visualization if editApp is not defined', async () => {
     const editUrl = 'edit/id';
-    const url = getVisualizeListItem(application, undefined, editUrl);
+    const url = getVisualizeListItem(application, kbnUrlStateStorage, undefined, editUrl);
     expect(url).toMatchInlineSnapshot(`"/app/visualize#${editUrl}?_g=(time:(from:now-7d,to:now))"`);
   });
 
   test('creates a link for the app given if editApp is defined', async () => {
     const editUrl = '#/edit/id';
     const editApp = 'lens';
-    const url = getVisualizeListItem(application, editApp, editUrl);
+    const url = getVisualizeListItem(application, kbnUrlStateStorage, editApp, editUrl);
     expect(url).toMatchInlineSnapshot(`"/app/${editApp}${editUrl}?_g=(time:(from:now-7d,to:now))"`);
   });
 
-  test('propagates the correct time on the query', async () => {
-    const editUrl = '#/edit/id';
-    const editApp = 'lens';
-    getQueryService().timefilter.timefilter.setTime({
-      from: '2021-01-05T11:45:53.375Z',
-      to: '2021-01-21T11:46:00.990Z',
+  describe('when global time changes', () => {
+    beforeEach(() => {
+      kbnUrlStateStorage.set(GLOBAL_STATE_STORAGE_KEY, {
+        time: {
+          from: '2021-01-05T11:45:53.375Z',
+          to: '2021-01-21T11:46:00.990Z',
+        },
+      });
     });
-    const url = getVisualizeListItem(application, editApp, editUrl);
-    expect(url).toMatchInlineSnapshot(
-      `"/app/${editApp}${editUrl}?_g=(time:(from:'2021-01-05T11:45:53.375Z',to:'2021-01-21T11:46:00.990Z'))"`
-    );
+
+    test('it propagates the correct time on the query', async () => {
+      const editUrl = '#/edit/id';
+      const editApp = 'lens';
+      const url = getVisualizeListItem(application, kbnUrlStateStorage, editApp, editUrl);
+      expect(url).toMatchInlineSnapshot(
+        `"/app/${editApp}${editUrl}?_g=(time:(from:'2021-01-05T11:45:53.375Z',to:'2021-01-21T11:46:00.990Z'))"`
+      );
+    });
   });
 
-  test('propagates the refreshInterval on the query', async () => {
-    const editUrl = '#/edit/id';
-    const editApp = 'lens';
-    getQueryService().timefilter.timefilter.setRefreshInterval({ pause: false, value: 300 });
-    const url = getVisualizeListItem(application, editApp, editUrl);
-    expect(url).toMatchInlineSnapshot(
-      `"/app/${editApp}${editUrl}?_g=(refreshInterval:(pause:!f,value:300),time:(from:'2021-01-05T11:45:53.375Z',to:'2021-01-21T11:46:00.990Z'))"`
-    );
+  describe('when global refreshInterval changes', () => {
+    beforeEach(() => {
+      kbnUrlStateStorage.set(GLOBAL_STATE_STORAGE_KEY, {
+        refreshInterval: { pause: false, value: 300 },
+      });
+    });
+
+    test('it propagates the refreshInterval on the query', async () => {
+      const editUrl = '#/edit/id';
+      const editApp = 'lens';
+      const url = getVisualizeListItem(application, kbnUrlStateStorage, editApp, editUrl);
+      expect(url).toMatchInlineSnapshot(
+        `"/app/${editApp}${editUrl}?_g=(refreshInterval:(pause:!f,value:300))"`
+      );
+    });
   });
 
-  test('propagates the filters on the query', async () => {
-    const editUrl = '#/edit/id';
-    const editApp = 'lens';
-    const filters = [
-      {
-        meta: {
-          alias: null,
-          disabled: false,
-          negate: false,
+  describe('when global filters change', () => {
+    beforeEach(() => {
+      const filters = [
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+          },
+          query: { query: 'q1' },
         },
-        query: { query: 'q1' },
-      },
-      {
-        meta: {
-          alias: null,
-          disabled: false,
-          negate: false,
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+          },
+          query: { query: 'q1' },
+          $state: {
+            store: esFilters.FilterStateStore.GLOBAL_STATE,
+          },
         },
-        query: { query: 'q1' },
-        $state: {
-          store: esFilters.FilterStateStore.GLOBAL_STATE,
-        },
-      },
-    ];
-    getQueryService().filterManager.setFilters(filters);
-    const url = getVisualizeListItem(application, editApp, editUrl);
-    expect(url).toMatchInlineSnapshot(
-      `"/app/${editApp}${editUrl}?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))),refreshInterval:(pause:!f,value:300),time:(from:'2021-01-05T11:45:53.375Z',to:'2021-01-21T11:46:00.990Z'))"`
-    );
+      ];
+      kbnUrlStateStorage.set(GLOBAL_STATE_STORAGE_KEY, {
+        filters,
+      });
+    });
+
+    test('propagates the filters on the query', async () => {
+      const editUrl = '#/edit/id';
+      const editApp = 'lens';
+      const url = getVisualizeListItem(application, kbnUrlStateStorage, editApp, editUrl);
+      expect(url).toMatchInlineSnapshot(
+        `"/app/${editApp}${editUrl}?_g=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1)),('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))))"`
+      );
+    });
   });
 });

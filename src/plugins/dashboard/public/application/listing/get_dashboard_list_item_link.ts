@@ -6,16 +6,15 @@
  * Public License, v 1.
  */
 import { ApplicationStart } from 'kibana/public';
-import { QueryState, esFilters, DataPublicPluginStart } from '../../../../data/public';
-
+import { QueryState } from '../../../../data/public';
 import { setStateToKbnUrl } from '../../../../kibana_utils/public';
 import { createDashboardEditUrl, DashboardConstants } from '../../dashboard_constants';
-
-const GLOBAL_STATE_STORAGE_KEY = '_g';
+import { GLOBAL_STATE_STORAGE_KEY } from '../../url_generator';
+import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 
 export const getDashboardListItem = (
   application: ApplicationStart,
-  queryService: DataPublicPluginStart['query'],
+  kbnUrlStateStorage: IKbnUrlStateStorage,
   useHash: boolean,
   id: string,
   timeRestore: boolean
@@ -23,18 +22,12 @@ export const getDashboardListItem = (
   let url = application.getUrlForApp(DashboardConstants.DASHBOARDS_ID, {
     path: `#${createDashboardEditUrl(id)}`,
   });
-  const queryState: QueryState = {};
-  const timeRange = queryService.timefilter.timefilter.getTime();
-  const filters = queryService.filterManager.getFilters();
-  const refreshInterval = queryService.timefilter.timefilter.getRefreshInterval();
-  if (filters && filters.length) {
-    queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
+  const globalStateInUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) || {};
+
+  if (timeRestore) {
+    delete globalStateInUrl.time;
+    delete globalStateInUrl.refreshInterval;
   }
-  // if time is not saved with the dashboard, add the time on the url query
-  if (!timeRestore) {
-    if (timeRange) queryState.time = timeRange;
-    if (refreshInterval) queryState.refreshInterval = refreshInterval;
-  }
-  url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, queryState, { useHash }, url);
+  url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, globalStateInUrl, { useHash }, url);
   return url;
 };

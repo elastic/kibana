@@ -8,7 +8,10 @@
 
 import { getDashboardListItem } from './get_dashboard_list_item_link';
 import { ApplicationStart } from 'kibana/public';
-import { DataPublicPluginStart, RefreshInterval, esFilters, Filter } from '../../../../data/public';
+import { esFilters } from '../../../../data/public';
+import { createHashHistory } from 'history';
+import { createKbnUrlStateStorage } from '../../../../kibana_utils/public';
+import { GLOBAL_STATE_STORAGE_KEY } from '../../url_generator';
 
 const DASHBOARD_ID = '13823000-99b9-11ea-9eb6-d9e8adceb647';
 
@@ -18,86 +21,62 @@ const application = ({
   }),
 } as unknown) as ApplicationStart;
 
-const getQueryService = (
-  timeFilter: { from: string; to: string },
-  filters: Filter[],
-  refreshInterval?: RefreshInterval
-) => {
-  return ({
-    timefilter: {
-      timefilter: {
-        getTime: jest.fn(() => timeFilter),
-        getRefreshInterval: jest.fn(() => refreshInterval),
-      },
-    },
-    filterManager: {
-      getFilters: jest.fn(() => filters),
-    },
-  } as unknown) as DataPublicPluginStart['query'];
-};
-
-beforeEach(() => {
-  jest.clearAllMocks();
+const history = createHashHistory();
+const kbnUrlStateStorage = createKbnUrlStateStorage({
+  history,
+  useHash: false,
 });
+kbnUrlStateStorage.set(GLOBAL_STATE_STORAGE_KEY, { time: { from: 'now-7d', to: 'now' } });
 
-describe('listing item link', () => {
+describe('listing dashboard link', () => {
   test('creates a link to a dashboard without the timerange query if time is saved on the dashboard', async () => {
-    const url = getDashboardListItem(
-      application,
-      getQueryService({ from: 'now-7d', to: 'now' }, []),
-      false,
-      DASHBOARD_ID,
-      true
-    );
+    const url = getDashboardListItem(application, kbnUrlStateStorage, false, DASHBOARD_ID, true);
     expect(url).toMatchInlineSnapshot(`"/app/dashboards#/view/${DASHBOARD_ID}?_g=()"`);
   });
 
   test('creates a link to a dashboard with the timerange query if time is not saved on the dashboard', async () => {
-    const url = getDashboardListItem(
-      application,
-      getQueryService({ from: 'now-7d', to: 'now' }, []),
-      false,
-      DASHBOARD_ID,
-      false
-    );
+    const url = getDashboardListItem(application, kbnUrlStateStorage, false, DASHBOARD_ID, false);
     expect(url).toMatchInlineSnapshot(
       `"/app/dashboards#/view/${DASHBOARD_ID}?_g=(time:(from:now-7d,to:now))"`
     );
   });
+});
+
+describe('when global time changes', () => {
+  beforeEach(() => {
+    kbnUrlStateStorage.set(GLOBAL_STATE_STORAGE_KEY, {
+      time: {
+        from: '2021-01-05T11:45:53.375Z',
+        to: '2021-01-21T11:46:00.990Z',
+      },
+    });
+  });
 
   test('propagates the correct time on the query', async () => {
-    const url = getDashboardListItem(
-      application,
-      getQueryService(
-        {
-          from: '2021-01-05T11:45:53.375Z',
-          to: '2021-01-21T11:46:00.990Z',
-        },
-        []
-      ),
-      false,
-      DASHBOARD_ID,
-      false
-    );
+    const url = getDashboardListItem(application, kbnUrlStateStorage, false, DASHBOARD_ID, false);
     expect(url).toMatchInlineSnapshot(
       `"/app/dashboards#/view/${DASHBOARD_ID}?_g=(time:(from:'2021-01-05T11:45:53.375Z',to:'2021-01-21T11:46:00.990Z'))"`
     );
   });
+});
 
-  test('propagates the refreshInterval on the query', async () => {
-    const url = getDashboardListItem(
-      application,
-      getQueryService({ from: 'now-7d', to: 'now' }, [], { pause: false, value: 300 }),
-      false,
-      DASHBOARD_ID,
-      false
-    );
-    expect(url).toMatchInlineSnapshot(
-      `"/app/dashboards#/view/${DASHBOARD_ID}?_g=(refreshInterval:(pause:!f,value:300),time:(from:now-7d,to:now))"`
-    );
+describe('when global refreshInterval changes', () => {
+  beforeEach(() => {
+    kbnUrlStateStorage.set(GLOBAL_STATE_STORAGE_KEY, {
+      refreshInterval: { pause: false, value: 300 },
+    });
   });
 
-  test('propagates the filters on the query', async () => {
+  test('propagates the refreshInterval on the query', async () => {
+    const url = getDashboardListItem(application, kbnUrlStateStorage, false, DASHBOARD_ID, false);
+    expect(url).toMatchInlineSnapshot(
+      `"/app/dashboards#/view/${DASHBOARD_ID}?_g=(refreshInterval:(pause:!f,value:300))"`
+    );
+  });
+});
+
+describe('when global filters change', () => {
+  beforeEach(() => {
     const filters = [
       {
         meta: {
@@ -119,15 +98,15 @@ describe('listing item link', () => {
         },
       },
     ];
-    const url = getDashboardListItem(
-      application,
-      getQueryService({ from: 'now-7d', to: 'now' }, filters),
-      false,
-      DASHBOARD_ID,
-      false
-    );
+    kbnUrlStateStorage.set(GLOBAL_STATE_STORAGE_KEY, {
+      filters,
+    });
+  });
+
+  test('propagates the filters on the query', async () => {
+    const url = getDashboardListItem(application, kbnUrlStateStorage, false, DASHBOARD_ID, false);
     expect(url).toMatchInlineSnapshot(
-      `"/app/dashboards#/view/${DASHBOARD_ID}?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))),time:(from:now-7d,to:now))"`
+      `"/app/dashboards#/view/${DASHBOARD_ID}?_g=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1)),('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))))"`
     );
   });
 });

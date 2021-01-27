@@ -11,6 +11,7 @@ import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiLink, EuiBadge } f
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
+import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';
 import type { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_oss/public';
 import { RedirectAppLinks } from '../../../../kibana_react/public';
@@ -72,6 +73,7 @@ const renderItemTypeIcon = (item: VisualizationListItem) => {
 
 export const getTableColumns = (
   application: ApplicationStart,
+  kbnUrlStateStorage: IKbnUrlStateStorage,
   taggingApi?: SavedObjectsTaggingApi
 ) => [
   {
@@ -85,7 +87,7 @@ export const getTableColumns = (
       !error ? (
         <RedirectAppLinks application={application}>
           <EuiLink
-            href={getVisualizeListItem(application, editApp, editUrl)}
+            href={getVisualizeListItem(application, kbnUrlStateStorage, editApp, editUrl)}
             data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
           >
             {field}

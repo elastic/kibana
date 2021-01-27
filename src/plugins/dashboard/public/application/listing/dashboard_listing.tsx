@@ -13,7 +13,6 @@ import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../types';
 import { getDashboardBreadcrumb, dashboardListingTable } from '../../dashboard_strings';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
-import { DataPublicPluginStart } from '../../../../data/public';
 import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { TableListView, useKibana } from '../../services/kibana_react';
@@ -85,11 +84,11 @@ export const DashboardListing = ({
     () =>
       getTableColumns(
         core.application,
-        data.query,
+        kbnUrlStateStorage,
         core.uiSettings.get('state:storeInSessionStorage'),
         savedObjectsTagging
       ),
-    [core.application, core.uiSettings, data.query, savedObjectsTagging]
+    [core.application, core.uiSettings, kbnUrlStateStorage, savedObjectsTagging]
   );
 
   const noItemsFragment = useMemo(
@@ -169,7 +168,7 @@ export const DashboardListing = ({
 
 const getTableColumns = (
   application: ApplicationStart,
-  queryService: DataPublicPluginStart['query'],
+  kbnUrlStateStorage: IKbnUrlStateStorage,
   useHash: boolean,
   savedObjectsTagging?: SavedObjectsTaggingApi
 ) => {
@@ -182,7 +181,7 @@ const getTableColumns = (
         <EuiLink
           href={getDashboardListItem(
             application,
-            queryService,
+            kbnUrlStateStorage,
             useHash,
             record.id,
             record.timeRestore
