@@ -26,8 +26,8 @@ import {
   PhaseAgeInMilliseconds,
 } from '../../lib';
 
-import './_timeline.scss';
-import InfinityIconSvg from './infinity_icon.svg';
+import './timeline.scss';
+import { InfinityIconSvg } from './infinity_icon.svg';
 
 const InfinityIcon: FunctionComponent<Omit<EuiIconProps, 'type'>> = (props) => (
   <EuiIcon type={InfinityIconSvg} {...props} />
@@ -63,8 +63,8 @@ const i18nTexts = {
     defaultMessage: 'Cold phase',
   }),
   deleteIcon: {
-    toolTipContent: i18n.translate('xpack.indexLifecycleMgmt.timeline.delteIconToolTipContent', {
-      defaultMessage: 'Data will be deleted at the end of this policy',
+    toolTipContent: i18n.translate('xpack.indexLifecycleMgmt.timeline.deleteIconToolTipContent', {
+      defaultMessage: 'Policy deletes the index after lifecycle phases complete.',
     }),
   },
 };
@@ -122,7 +122,11 @@ export const Timeline: FunctionComponent = () => {
   const widths = calculateWidths(phaseTimingInMs);
 
   const getDurationInPhaseContent = (phase: PhasesExceptDelete): string | React.ReactNode =>
-    phaseTimingInMs.phases[phase] === Infinity ? <InfinityIcon /> : humanReadableTimings[phase];
+    phaseTimingInMs.phases[phase] === Infinity ? (
+      <InfinityIcon aria-label={humanReadableTimings[phase]} />
+    ) : (
+      humanReadableTimings[phase]
+    );
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
@@ -192,12 +196,7 @@ export const Timeline: FunctionComponent = () => {
                   data-test-subj="ilmTimelineDeletePhase"
                   className="ilmTimeline__deleteIconContainer"
                 >
-                  <EuiIconTip
-                    size="l"
-                    color="danger"
-                    type="trash"
-                    content={i18nTexts.deleteIcon.toolTipContent}
-                  />
+                  <EuiIconTip type="trash" content={i18nTexts.deleteIcon.toolTipContent} />
                 </div>
               </EuiFlexItem>
             )}

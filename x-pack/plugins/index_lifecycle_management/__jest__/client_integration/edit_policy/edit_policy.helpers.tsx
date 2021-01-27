@@ -41,6 +41,7 @@ jest.mock('@elastic/eui', () => {
         }}
       />
     ),
+    EuiIcon: 'eui-icon', // using custom react-svg icon causes issues, mocking for now.
   };
 });
 

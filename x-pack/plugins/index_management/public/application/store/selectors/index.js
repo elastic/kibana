@@ -9,15 +9,9 @@ import { createSelector } from 'reselect';
 import * as qs from 'query-string';
 import { indexStatusLabels } from '../../lib/index_status_labels';
 import { sortTable } from '../../services';
+import { extensionsService } from './extension_service';
 
-// Temporary hack to provide the extensionsService instance to this file.
-// TODO: Refactor and export all the app selectors through the app dependencies context
-
-let extensionsService;
-export const setExtensionsService = (_extensionsService) => {
-  extensionsService = _extensionsService;
-};
-// End hack
+export { extensionsService };
 
 export const getDetailPanelData = (state) => state.detailPanel.data;
 export const getDetailPanelError = (state) => state.detailPanel.error;
