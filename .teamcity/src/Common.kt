@@ -1,10 +1,10 @@
 import jetbrains.buildServer.configs.kotlin.v2019_2.DslContext
 
 // If set to true, github check/commit status will be reported, failed-test-reporter will run, etc.
-const val ENABLE_REPORTING = false
+const val ENABLE_REPORTING = true
 
 // If set to false, jobs with triggers (scheduled, on commit, etc) will be paused
-const val ENABLE_TRIGGERS = false
+const val ENABLE_TRIGGERS = true
 
 fun getProjectBranch(): String {
   return DslContext.projectName
