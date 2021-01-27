@@ -12,12 +12,13 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { BasicOptions, SwitchOption, VisOptionsProps } from '../../../../vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
+import { BasicOptions, SwitchOption } from '../../../../vis_default_editor/public';
 import { TruncateLabelsOption } from '../../../../vis_type_xy/public';
 
 import { PieVisParams } from '../../pie';
 
-function PieOptions(props: VisOptionsProps<PieVisParams>) {
+function PieOptions(props: VisEditorOptionsProps<PieVisParams>) {
   const { stateParams, setValue } = props;
   const setLabels = <T extends keyof PieVisParams['labels']>(
     paramName: T,

@@ -8,7 +8,7 @@
     "features",
     "inspector",
     "data",
-    "fileUpload",
+    "mapsFileUpload",
     "uiActions",
     "navigation",
     "visualizations",
@@ -23,5 +23,5 @@
   "ui": true,
   "server": true,
   "extraPublicDirs": ["common/constants"],
-  "requiredBundles": ["kibanaReact", "kibanaUtils", "home", "mapsOss"]
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "home", "presentationUtil"]
 }
