@@ -87,7 +87,6 @@ export function useLogStream({
 
   useSubscription(logEntriesAroundSearchResponses$, {
     next: ({ before, after, combined }) => {
-      // if (data != null && !isPartial) {
       if ((before.response.data != null || after?.response.data != null) && !combined.isPartial) {
         setState((prevState) => ({
           ...prevState,
@@ -98,9 +97,6 @@ export function useLogStream({
           topCursor: combined.topCursor,
         }));
       }
-    },
-    error: (err) => {
-      console.error(err);
     },
   });
 
@@ -124,11 +120,9 @@ export function useLogStream({
           entries: [...data.entries, ...prevState.entries],
           hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
           topCursor: data.topCursor ?? prevState.topCursor,
+          bottomCursor: prevState.bottomCursor ?? data.bottomCursor,
         }));
       }
-    },
-    error: (err) => {
-      console.error(err);
     },
   });
 
@@ -165,12 +159,10 @@ export function useLogStream({
           ...prevState,
           entries: [...prevState.entries, ...data.entries],
           hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
+          topCursor: prevState.topCursor ?? data.topCursor,
           bottomCursor: data.bottomCursor ?? prevState.bottomCursor,
         }));
       }
-    },
-    error: (err) => {
-      console.error(err);
     },
   });
 
