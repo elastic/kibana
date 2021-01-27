@@ -53,7 +53,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('long_window_logstash');
       await esArchiver.load('visualize');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await security.testUser.restoreDefaults();
     });
   });
