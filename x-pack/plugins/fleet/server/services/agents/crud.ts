@@ -91,10 +91,13 @@ export async function getAgentPolicyForAgent(
 ) {
   const agent = await getAgent(soClient, esClient, agentId);
   if (!agent.policy_id) {
-    throw new Error(`${agentId} is not enrolled in a policy`);
+    return;
   }
+
   const agentPolicy = await agentPolicyService.get(soClient, agent.policy_id, false);
-  return agentPolicy;
+  if (agentPolicy) {
+    return agentPolicy;
+  }
 }
 
 export async function getAgentByAccessAPIKeyId(
