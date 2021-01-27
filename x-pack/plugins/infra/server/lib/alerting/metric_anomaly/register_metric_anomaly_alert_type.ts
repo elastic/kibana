@@ -36,7 +36,7 @@ export const registerMetricAnomalyAlertType = (
 > => ({
   id: METRIC_ANOMALY_ALERT_TYPE_ID,
   name: i18n.translate('xpack.infra.metrics.anomaly.alertName', {
-    defaultMessage: 'Metric anomaly',
+    defaultMessage: 'Infrastructure anomaly',
   }),
   validate: {
     params: schema.object(
