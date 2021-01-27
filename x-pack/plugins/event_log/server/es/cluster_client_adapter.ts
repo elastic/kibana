@@ -13,7 +13,6 @@ import { EsContext } from '.';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 import { esKuery } from '../../../../../src/plugins/data/server';
-import { getEventLogIndexPattern } from '../lib/get_index_pattern';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
@@ -219,13 +218,7 @@ export class ClusterClientAdapter {
     let dslFilterQuery;
     try {
       dslFilterQuery = filter
-        ? esKuery.toElasticsearchQuery(
-            esKuery.fromKueryExpression(filter),
-            await getEventLogIndexPattern({
-              index,
-              esClient,
-            })
-          )
+        ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(filter))
         : [];
     } catch (err) {
       this.debug(`Invalid kuery syntax for the filter (${filter}) error:`, {
