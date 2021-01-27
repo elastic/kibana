@@ -7,13 +7,13 @@
 import { getTotalCountInUse } from './alerts_telemetry';
 
 describe('alerts telemetry', () => {
-  test('getTotalCountInUse should replace action types names with . to __', async () => {
+  test('getTotalCountInUse should replace first "." symbol to "__" in alert types names', async () => {
     const mockEsClient = jest.fn();
     mockEsClient.mockReturnValue({
       aggregations: {
         byAlertTypeId: {
           value: {
-            types: { '.index-threshold': 2 },
+            types: { '.index-threshold': 2, 'logs.alert.document.count': 1, 'document.test.': 1 },
           },
         },
       },
@@ -30,8 +30,10 @@ describe('alerts telemetry', () => {
 Object {
   "countByType": Object {
     "__index-threshold": 2,
+    "document.test__": 1,
+    "logs.alert.document.count": 1,
   },
-  "countTotal": 2,
+  "countTotal": 4,
 }
 `);
   });

@@ -14,7 +14,7 @@ export const awsOverview: TSVBMetricModelCreator = (timeField, indexPattern): TS
   id_type: 'cloud',
   interval: '>=5m',
   time_field: timeField,
-  type: 'gauge',
+  type: 'top_n',
   series: [
     {
       id: 'cpu-util',
