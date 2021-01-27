@@ -111,30 +111,26 @@ function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
   }) as ILayerTypeCount[];
 }
 
-function isFieldGeoShape(indexPatternId: string, geoField: string | undefined): boolean {
+async function isFieldGeoShape(
+  indexPatternId: string,
+  geoField: string | undefined
+): Promise<boolean> {
   if (!geoField) {
     return false;
   }
-
-  // const matchIndexPattern = getIndexPatternsService().get(indexPatternId);
-  const matchIndexPattern = false;
-  if (!matchIndexPattern) {
+  const indexPatternsService = await getIndexPatternsService();
+  const indexPattern = await indexPatternsService.get(indexPatternId);
+  if (!indexPattern) {
     return false;
   }
-
-  const fieldList: IFieldType[] =
-    matchIndexPattern.attributes && matchIndexPattern.attributes.fields
-      ? JSON.parse(matchIndexPattern.attributes.fields)
-      : [];
-
-  const matchField = fieldList.find((field: IFieldType) => {
-    return field.name === geoField;
-  });
-
-  return !!matchField && matchField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
+  const fieldsForIndexPattern = await indexPatternsService.getFieldsForIndexPattern(indexPattern);
+  return fieldsForIndexPattern.some(
+    (fieldDescriptor: IFieldType) =>
+      fieldDescriptor.esTypes && fieldDescriptor.esTypes.includes(geoField!)
+  );
 }
 
-function isGeoShapeAggLayer(layer: LayerDescriptor): boolean {
+async function isGeoShapeAggLayer(layer: LayerDescriptor): Promise<boolean> {
   if (layer.sourceDescriptor === null) {
     return false;
   }
@@ -149,7 +145,7 @@ function isGeoShapeAggLayer(layer: LayerDescriptor): boolean {
 
   const sourceDescriptor = layer.sourceDescriptor;
   if (sourceDescriptor.type === SOURCE_TYPES.ES_GEO_GRID) {
-    return isFieldGeoShape(
+    return await isFieldGeoShape(
       (sourceDescriptor as ESGeoGridSourceDescriptor).indexPatternId,
       (sourceDescriptor as ESGeoGridSourceDescriptor).geoField
     );
@@ -157,7 +153,7 @@ function isGeoShapeAggLayer(layer: LayerDescriptor): boolean {
     sourceDescriptor.type === SOURCE_TYPES.ES_SEARCH &&
     (sourceDescriptor as ESSearchSourceDescriptor).scalingType === SCALING_TYPES.CLUSTERS
   ) {
-    return isFieldGeoShape(
+    return await isFieldGeoShape(
       (sourceDescriptor as ESSearchSourceDescriptor).indexPatternId,
       (sourceDescriptor as ESSearchSourceDescriptor).geoField
     );
@@ -166,14 +162,15 @@ function isGeoShapeAggLayer(layer: LayerDescriptor): boolean {
   }
 }
 
-function getGeoShapeAggCount(layerLists: LayerDescriptor[][]): number {
-  const countsPerMap: number[] = layerLists.map((layerList: LayerDescriptor[]) => {
-    const geoShapeAggLayers = layerList.filter((layerDescriptor) => {
-      return isGeoShapeAggLayer(layerDescriptor);
-    });
-    return geoShapeAggLayers.length;
-  });
-
+async function getGeoShapeAggCount(layerLists: LayerDescriptor[][]): Promise<number> {
+  const countsPerMap: number[] = await Promise.all(
+    layerLists.map(async (layerList: LayerDescriptor[]) => {
+      const boolIsAggLayerArr = await Promise.all(
+        layerList.map(async (layerDescriptor) => await isGeoShapeAggLayer(layerDescriptor))
+      );
+      return boolIsAggLayerArr.filter((x) => x).length;
+    })
+  );
   return _.sum(countsPerMap);
 }
 
@@ -225,7 +222,7 @@ export async function buildMapsIndexPatternsTelemetry(
     ES_GEO_FIELD_TYPE.GEO_SHAPE,
   ]);
   // Tracks whether user uses Gold+ only functionality
-  const geoShapeAggLayersCount = getGeoShapeAggCount(layerLists);
+  const geoShapeAggLayersCount = await getGeoShapeAggCount(layerLists);
 
   return {
     indexPatternsWithGeoFieldCount: indexPatternsWithGeoField,
@@ -237,7 +234,6 @@ export async function buildMapsIndexPatternsTelemetry(
 
 export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]): LayersStatsUsage {
   const mapsCount = layerLists.length;
-
   const dataSourcesCount = layerLists.map((layerList: LayerDescriptor[]) => {
     // todo: not every source-descriptor has an id
     // @ts-ignore
