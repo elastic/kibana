@@ -52,6 +52,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       // Test replaced vislib chart types
       loadTestFile(require.resolve('./_area_chart'));
       loadTestFile(require.resolve('./_line_chart_split_series'));
+      loadTestFile(require.resolve('./_line_chart_split_chart'));
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
@@ -66,11 +67,15 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       this.tags('ciGroup9');
 
       loadTestFile(require.resolve('./_embedding_chart'));
-      loadTestFile(require.resolve('./_chart_types'));
       loadTestFile(require.resolve('./_area_chart'));
       loadTestFile(require.resolve('./_data_table'));
       loadTestFile(require.resolve('./_data_table_nontimeindex'));
       loadTestFile(require.resolve('./_data_table_notimeindex_filters'));
+
+      // this check is not needed when the CI doesn't run anymore for the OSS
+      if (!isOss) {
+        loadTestFile(require.resolve('./_chart_types'));
+      }
     });
 
     describe('', function () {

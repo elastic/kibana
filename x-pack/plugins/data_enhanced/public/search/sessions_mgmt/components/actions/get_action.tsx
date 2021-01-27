@@ -17,7 +17,7 @@ import { ACTION, OnActionComplete } from './types';
 export const getAction = (
   api: SearchSessionsMgmtAPI,
   actionType: string,
-  { id, name, reloadUrl }: UISession,
+  { id, name, expires, reloadUrl }: UISession,
   onActionComplete: OnActionComplete
 ): IClickActionDescriptor | null => {
   switch (actionType) {
@@ -39,7 +39,16 @@ export const getAction = (
       return {
         iconType: extendSessionIcon,
         textColor: 'default',
-        label: <ExtendButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
+        label: (
+          <ExtendButton
+            api={api}
+            id={id}
+            name={name}
+            expires={expires}
+            extendBy={api.getExtendByDuration()}
+            onActionComplete={onActionComplete}
+          />
+        ),
       };
 
     default:

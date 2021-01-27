@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '../../../../observability/public';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 interface AppNavigationProps {
   'aria-label': string;
