@@ -6,15 +6,6 @@
  * Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '.',
-  projects: [
-    '<rootDir>/packages/*/jest.config.js',
-    '<rootDir>/src/*/jest.config.js',
-    '<rootDir>/src/legacy/*/jest.config.js',
-    '<rootDir>/src/plugins/*/jest.config.js',
-    '<rootDir>/test/*/jest.config.js',
-    '<rootDir>/x-pack/plugins/*/jest.config.js',
-  ],
-};
+export function getLegendColors(colorRamp: unknown, numLegendColors?: number): string[];
+
+export function getColor(colorRamp: unknown, i: number): string;

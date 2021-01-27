@@ -6,14 +6,20 @@
  * Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '.',
-  projects: [
-    '<rootDir>/packages/*/jest.config.js',
-    '<rootDir>/src/*/jest.config.js',
-    '<rootDir>/src/legacy/*/jest.config.js',
-    '<rootDir>/src/plugins/*/jest.config.js',
-    '<rootDir>/test/*/jest.config.js',
-  ],
-};
+export class KibanaMapLayer {
+  constructor();
+
+  getBounds(): Promise<unknown>;
+
+  addToLeafletMap(leafletMap: unknown): void;
+
+  removeFromLeafletMap(leafletMap: unknown): void;
+
+  appendLegendContents(): void;
+
+  updateExtent(): void;
+
+  movePointer(): void;
+
+  getAttributions(): unknown;
+}
