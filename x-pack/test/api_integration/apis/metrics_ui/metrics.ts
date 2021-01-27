@@ -111,7 +111,10 @@ export default function ({ getService }: FtrProviderContext) {
           return;
         }
 
-        const hostSystemOverviewMetric = resp.metrics.find((metric) => metric.id == 'hostSystemOverview')
+        const hostSystemOverviewMetric = resp.metrics.find(
+          (metric) => metric.id === 'hostSystemOverview'
+        );
+
         expect(hostSystemOverviewMetric?.series.length).to.be.greaterThan(1);
       });
     });
