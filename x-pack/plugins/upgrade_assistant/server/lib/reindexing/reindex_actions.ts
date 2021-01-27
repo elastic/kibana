@@ -9,7 +9,7 @@ import moment from 'moment';
 import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
-  LegacyAPICaller,
+  ElasticsearchClient,
 } from 'src/core/server';
 import {
   IndexGroup,
@@ -122,7 +122,7 @@ export interface ReindexActions {
 
 export const reindexActionsFactory = (
   client: SavedObjectsClientContract,
-  callAsUser: LegacyAPICaller
+  esClient: ElasticsearchClient
 ): ReindexActions => {
   // ----- Internal functions
   const isLocked = (reindexOp: ReindexSavedObject) => {
@@ -242,9 +242,13 @@ export const reindexActionsFactory = (
     },
 
     async getFlatSettings(indexName: string) {
-      const flatSettings = (await callAsUser('transport.request', {
-        path: `/${encodeURIComponent(indexName)}?flat_settings=true&include_type_name=false`,
-      })) as { [indexName: string]: FlatSettings };
+      const { body: flatSettings } = await esClient.indices.getSettings<{
+        [indexName: string]: FlatSettings;
+      }>({
+        index: indexName,
+        flat_settings: true,
+        include_type_name: false,
+      });
 
       if (!flatSettings[indexName]) {
         return null;
@@ -254,9 +258,13 @@ export const reindexActionsFactory = (
     },
 
     async getFlatSettingsWithTypeName(indexName: string) {
-      const flatSettings = (await callAsUser('transport.request', {
-        path: `/${encodeURIComponent(indexName)}?flat_settings=true&include_type_name=true`,
-      })) as { [indexName: string]: FlatSettingsWithTypeName };
+      const { body: flatSettings } = await esClient.indices.getSettings<{
+        [indexName: string]: FlatSettings;
+      }>({
+        index: indexName,
+        flat_settings: true,
+        include_type_name: true,
+      });
 
       if (!flatSettings[indexName]) {
         return null;
