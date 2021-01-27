@@ -108,6 +108,16 @@ const serverHostZeroDeprecation: ConfigDeprecation = (settings, fromPath, log) =
     log(
       'Support for setting server.host to "0" in kibana.yml is deprecated and will be removed in Kibana version 8.0.0. ' +
         'Instead use "0.0.0.0" to bind to all interfaces.'
+        );
+      }
+      return settings;
+    };
+const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.events.ops')) {
+    log(
+      '"logging.events.ops" has been deprecated and will be removed ' +
+        'in 8.0. To access ops data moving forward, please enable debug logs for the ' +
+        '"metrics.ops" context in your logging configuration.'
     );
   }
   return settings;
@@ -159,4 +169,5 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   cspRulesDeprecation,
   mapManifestServiceUrlDeprecation,
   serverHostZeroDeprecation,
+  opsLoggingEventDeprecation,
 ];
