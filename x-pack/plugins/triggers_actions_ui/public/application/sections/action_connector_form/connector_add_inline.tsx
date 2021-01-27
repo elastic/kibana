@@ -75,6 +75,15 @@ export const AddConnectorInline = ({
     />
   );
 
+  const unableToLoadConnectorLabel = (
+    <EuiText color="danger">
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle"
+        defaultMessage="Unable to load connector."
+      />
+    </EuiText>
+  );
+
   useEffect(() => {
     if (connectors) {
       const altConnectorOptions = connectors
@@ -151,21 +160,6 @@ export const AddConnectorInline = ({
     </EuiFlexGroup>
   );
 
-  const addConnectorButton = (
-    <EuiButton
-      color="primary"
-      fill
-      size="s"
-      data-test-subj={`createActionConnectorButton-${index}`}
-      onClick={onAddConnector}
-    >
-      <FormattedMessage
-        id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
-        defaultMessage="Create a connector"
-      />
-    </EuiButton>
-  );
-
   return (
     <Fragment key={index}>
       <EuiAccordion
@@ -229,12 +223,24 @@ export const AddConnectorInline = ({
         {canSave ? (
           connectorOptionsList.length > 0 ? (
             connectorsDropdown
-          ) : isEmptyActionId ? (
-            <EuiEmptyPrompt title={noConnectorsLabel} actions={addConnectorButton} />
           ) : (
-            <EuiFlexGroup justifyContent="spaceAround">
-              <EuiFlexItem grow={false}>{addConnectorButton}</EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiEmptyPrompt
+              title={isEmptyActionId ? noConnectorsLabel : unableToLoadConnectorLabel}
+              actions={
+                <EuiButton
+                  color="primary"
+                  fill
+                  size="s"
+                  data-test-subj={`createActionConnectorButton-${index}`}
+                  onClick={onAddConnector}
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
+                    defaultMessage="Create a connector"
+                  />
+                </EuiButton>
+              }
+            />
           )
         ) : (
           <EuiCallOut title={noConnectorsLabel}>

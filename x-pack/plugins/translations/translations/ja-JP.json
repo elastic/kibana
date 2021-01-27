@@ -21655,6 +21655,7 @@
     "xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage": "コネクターを読み込めません",
     "xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage": "アクションタイプを読み込めません",
     "xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage": "アラートタイプを読み込めません",
+    "xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle": "コネクターを読み込めません。",
     "xpack.triggersActionsUI.sections.alertForm.unauthorizedToCreateForEmptyConnectors": "許可されたユーザーのみがコネクターを構成できます。管理者にお問い合わせください。",
     "xpack.triggersActionsUI.sections.alertsList.actionTypeFilterLabel": "アクションタイプ",
     "xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel": "アラートの作成",

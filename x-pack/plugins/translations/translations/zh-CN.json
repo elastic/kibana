@@ -21706,6 +21706,7 @@
     "xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage": "无法加载连接器",
     "xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage": "无法加载操作类型",
     "xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage": "无法加载告警类型",
+    "xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle": "无法加载连接器。",
     "xpack.triggersActionsUI.sections.alertForm.unauthorizedToCreateForEmptyConnectors": "只有获得授权的用户才能配置连接器。请联系您的管理员。",
     "xpack.triggersActionsUI.sections.alertsList.actionTypeFilterLabel": "操作类型",
     "xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel": "创建告警",
