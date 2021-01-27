@@ -16,7 +16,9 @@
  * tan([0, 1, -1]) // returns [0, 1.5574077246549023, -1.5574077246549023]
  */
 
-export function tan(a) {
+module.exports = { tan };
+
+function tan(a) {
   if (Array.isArray(a)) {
     return a.map((a) => Math.tan(a));
   }

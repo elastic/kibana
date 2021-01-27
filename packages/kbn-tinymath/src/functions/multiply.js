@@ -19,7 +19,9 @@
  * multiply([1, 2, 3, 4], [2, 7, 5, 12]) // returns [2, 14, 15, 48]
  */
 
-export function multiply(...args) {
+module.exports = { multiply };
+
+function multiply(...args) {
   return args.reduce((result, current) => {
     if (Array.isArray(result) && Array.isArray(current)) {
       if (current.length !== result.length) throw new Error('Array length mismatch');

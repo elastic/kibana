@@ -17,7 +17,9 @@
  * pow([1, 2, 3], 4) // returns [1, 16, 81]
  */
 
-export function pow(a, b) {
+module.exports = { pow };
+
+function pow(a, b) {
   if (b == null) throw new Error('Missing exponent');
   if (Array.isArray(a)) {
     return a.map((a) => Math.pow(a, b));

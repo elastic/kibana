@@ -16,7 +16,9 @@
  * sin([0, 1.5707963267948966]) // returns [0, 1]
  */
 
-export function sin(a) {
+module.exports = { sin };
+
+function sin(a) {
   if (Array.isArray(a)) {
     return a.map((a) => Math.sin(a));
   }

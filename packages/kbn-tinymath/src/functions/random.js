@@ -18,7 +18,9 @@
  * random(-10,10) // returns a random number between -10 (inclusive) and 10 (exclusive)
  */
 
-export function random(a, b) {
+module.exports = { random };
+
+function random(a, b) {
   if (a == null) return Math.random();
 
   // a: max, generate random number between 0 and a

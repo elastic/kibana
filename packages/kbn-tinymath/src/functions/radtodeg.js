@@ -16,7 +16,9 @@
  * radtodeg([0, 1.5707963267948966, 3.141592653589793, 6.283185307179586]) // returns [0, 90, 180, 360]
  */
 
-export function radtodeg(a) {
+module.exports = { radtodeg };
+
+function radtodeg(a) {
   if (Array.isArray(a)) {
     return a.map((a) => (a * 180) / Math.PI);
   }

@@ -16,7 +16,9 @@
  * last([1, 2, 3]) // returns 3
  */
 
-export function last(a) {
+module.exports = { last };
+
+function last(a) {
   if (Array.isArray(a)) {
     return a[a.length - 1];
   }

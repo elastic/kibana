@@ -14,6 +14,8 @@
  * pi() // 3.141592653589793
  */
 
-export function pi() {
+module.exports = { pi };
+
+function pi() {
   return Math.PI;
 }

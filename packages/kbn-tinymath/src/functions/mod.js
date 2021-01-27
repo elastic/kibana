@@ -20,7 +20,9 @@
  * mod([14, 42, 65, 108], [5, 4, 14, 2]) // returns [5, 2, 9, 0]
  */
 
-export function mod(a, b) {
+module.exports = { mod };
+
+function mod(a, b) {
   if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) throw new Error('Array length mismatch');
     return a.map((val, i) => {

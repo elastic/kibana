@@ -40,7 +40,9 @@ const findMode = (a) => {
  * mode([1, 9], 1, 4, [3, 5]) // returns [mode([1, 1, 4, 3]), mode([9, 1, 4, 5])] = [[1], [4, 5, 9]]
  */
 
-export function mode(...args) {
+module.exports = { mode };
+
+function mode(...args) {
   if (args.length === 1) {
     if (Array.isArray(args[0])) return findMode(args[0]);
     return args[0];

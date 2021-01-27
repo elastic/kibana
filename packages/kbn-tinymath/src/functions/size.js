@@ -17,7 +17,9 @@
  * size(100) // returns 1
  */
 
-export function size(a) {
+module.exports = { size };
+
+function size(a) {
   if (Array.isArray(a)) return a.length;
   throw new Error('Must pass an array');
 }

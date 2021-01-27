@@ -20,7 +20,9 @@
  * divide([14, 42, 65, 108], [2, 7, 5, 12]) // returns [7, 6, 13, 9]
  */
 
-export function divide(a, b) {
+module.exports = { divide };
+
+function divide(a, b) {
   if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) throw new Error('Array length mismatch');
     return a.map((val, i) => {

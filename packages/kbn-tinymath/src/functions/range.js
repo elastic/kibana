@@ -21,6 +21,8 @@ const { subtract } = require('./subtract.js');
  * range([1, 9], 4, [3, 5]) // returns [range([1, 4, 3]), range([9, 4, 5])] = [3, 5]
  */
 
-export function range(...args) {
+module.exports = { range };
+
+function range(...args) {
   return subtract(max(...args), min(...args));
 }

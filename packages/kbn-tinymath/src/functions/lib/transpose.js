@@ -18,7 +18,9 @@
  * transpose([4, [1, 9], [3, 5]], 1) // returns [[4, 1, 3], [4, 9, 5]]
  */
 
-export function transpose(args, index) {
+module.exports = { transpose };
+
+function transpose(args, index) {
   const len = args[index].length;
   return args[index].map((col, i) =>
     args.map((row) => {

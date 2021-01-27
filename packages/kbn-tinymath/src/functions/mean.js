@@ -19,7 +19,9 @@ const { add } = require('./add.js');
  * mean([1, 9], 5, [3, 4]) // returns [mean([1, 5, 3]), mean([9, 5, 4])] = [3, 6]
  */
 
-export function mean(...args) {
+module.exports = { mean };
+
+function mean(...args) {
   if (args.length === 1) {
     if (Array.isArray(args[0])) return add(args[0]) / args[0].length;
     return args[0];

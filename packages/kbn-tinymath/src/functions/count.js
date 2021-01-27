@@ -19,7 +19,9 @@ const { size } = require('./size.js');
  * count(100) // returns 1
  */
 
-export function count(a) {
+module.exports = { count };
+
+function count(a) {
   return size(a);
 }
 

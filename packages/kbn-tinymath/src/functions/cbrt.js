@@ -17,7 +17,9 @@
  * cbrt([27, 64, 125]) // returns [3, 4, 5]
  */
 
-export function cbrt(a) {
+module.exports = { cbrt };
+
+function cbrt(a) {
   if (Array.isArray(a)) {
     return a.map((a) => Math.cbrt(a));
   }

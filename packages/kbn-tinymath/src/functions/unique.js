@@ -18,7 +18,9 @@
  * unique([1, 2, 3, 4, 2, 2, 2, 3, 4, 2, 4, 5, 2, 1, 4, 2]) // returns 5
  */
 
-export function unique(a) {
+module.exports = { unique };
+
+function unique(a) {
   if (Array.isArray(a)) {
     return a.filter((val, i) => a.indexOf(val) === i).length;
   }

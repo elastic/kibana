@@ -16,7 +16,9 @@
  * cos([0, 1.5707963267948966]) // returns [1, 6.123233995736766e-17]
  */
 
-export function cos(a) {
+module.exports = { cos };
+
+function cos(a) {
   if (Array.isArray(a)) {
     return a.map((a) => Math.cos(a));
   }
