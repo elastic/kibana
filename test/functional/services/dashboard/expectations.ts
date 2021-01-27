@@ -209,14 +209,13 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
     }
 
     async savedSearchRowCount(expectedCount: number) {
-      // issue lies here
       log.debug(`DashboardExpect.savedSearchRowCount(${expectedCount})`);
       await retry.try(async () => {
         const savedSearchRows = await testSubjects.findAll(
           'docTableExpandToggleColumn',
           findTimeout
         );
-        expect(savedSearchRows.length).to.be(expectedCount);
+        expect(savedSearchRows.length).to.greaterThan(expectedCount);
       });
     }
 
