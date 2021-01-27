@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 import styled from 'styled-components';
@@ -45,7 +46,7 @@ interface Props {
 }
 
 export const PingTimestamp = ({ timestamp, ping }: Props) => {
-  const [stepNo, setStepNo] = useState(1);
+  const [stepNumber, setStepNumber] = useState(1);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
   const [stepImages, setStepImages] = useState<string[]>([]);
@@ -54,7 +55,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
 
   const { basePath } = useContext(UptimeSettingsContext);
 
-  const imgPath = basePath + `/api/uptime/journey/screenshot/${ping.monitor.check_group}/${stepNo}`;
+  const imgPath = `${basePath}/api/uptime/journey/screenshot/${ping.monitor.check_group}/${stepNumber}`;
 
   const intersection = useIntersection(intersectionRef, {
     root: null,
@@ -63,9 +64,9 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
   });
 
   const { data, status } = useFetcher(() => {
-    if (intersection && intersection.intersectionRatio === 1 && !stepImages[stepNo - 1])
+    if (intersection && intersection.intersectionRatio === 1 && !stepImages[stepNumber - 1])
       return getJourneyScreenshot(imgPath);
-  }, [intersection?.intersectionRatio, stepNo]);
+  }, [intersection?.intersectionRatio, stepNumber]);
 
   useEffect(() => {
     if (data) {
@@ -73,17 +74,23 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
     }
   }, [data]);
 
-  const imgSrc = stepImages[stepNo] || data?.src;
+  const imgSrc = stepImages[stepNumber] || data?.src;
 
-  const captionContent = `Step:${stepNo} ${data?.stepName}`;
+  const captionContent = i18n.translate('xpack.uptime.synthetics.pingTimestamp.captionContent', {
+    defaultMessage: 'Step: {stepNumber} {stepName}',
+    values: {
+      stepNumber,
+      stepName: data?.stepName,
+    },
+  });
 
   const ImageCaption = (
     <StepImageCaption
       captionContent={captionContent}
       imgSrc={imgSrc}
       maxSteps={data?.maxSteps}
-      setStepNo={setStepNo}
-      stepNo={stepNo}
+      setStepNo={setStepNumber}
+      stepNo={stepNumber}
       timestamp={timestamp}
     />
   );
@@ -111,8 +118,8 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
       <NavButtons
         maxSteps={data?.maxSteps}
         setIsImagePopoverOpen={setIsImagePopoverOpen}
-        setStepNo={setStepNo}
-        stepNo={stepNo}
+        setStepNo={setStepNumber}
+        stepNo={stepNumber}
       />
     </StepDiv>
   );
