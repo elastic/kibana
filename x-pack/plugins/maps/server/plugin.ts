@@ -29,7 +29,6 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
 import { EMSSettings } from '../common/ems_settings';
-import { DataPluginStart } from '../../../../src/plugins/data/server';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -37,10 +36,6 @@ interface SetupDeps {
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
   mapsLegacy: MapsLegacyPluginSetup;
-}
-
-interface StartDeps {
-  data: DataPluginStart;
 }
 
 export class MapsPlugin implements Plugin {
@@ -214,18 +209,6 @@ export class MapsPlugin implements Plugin {
   // @ts-ignore
   start(core: CoreStart, plugins: StartDeps) {
     setInternalRepository(core.savedObjects.createInternalRepository);
-    console.log('********************************************');
-    console.log('START START START');
-    core.elasticsearch.client.asInternalUser
-      .fieldCaps({
-        index: 'kibana_sample_data_ecommerce',
-        fields: '*',
-        ignore_unavailable: true,
-      })
-      .then((resp) => {
-        console.log('TEST REQ', resp);
-      });
-    console.log('END END END');
     setIndexPatternsService(
       plugins.data.indexPatterns.indexPatternsServiceFactory,
       core.elasticsearch.client.asInternalUser
