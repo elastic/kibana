@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, Logger } from 'kibana/server';
+import { ElasticsearchClient, Logger } from 'kibana/server';
+import { unwrapEsResponse } from '../../../../../observability/server';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
@@ -18,14 +19,14 @@ export async function getStoredAnnotations({
   setup,
   serviceName,
   environment,
-  apiCaller,
+  client,
   annotationsClient,
   logger,
 }: {
   setup: Setup & SetupTimeRange;
   serviceName: string;
   environment?: string;
-  apiCaller: LegacyAPICaller;
+  client: ElasticsearchClient;
   annotationsClient: ScopedAnnotationsClient;
   logger: Logger;
 }): Promise<Annotation[]> {
@@ -50,10 +51,12 @@ export async function getStoredAnnotations({
     const response: ESSearchResponse<
       ESAnnotation,
       { body: typeof body }
-    > = (await apiCaller('search', {
-      index: annotationsClient.index,
-      body,
-    })) as any;
+    > = await unwrapEsResponse(
+      client.search<any>({
+        index: annotationsClient.index,
+        body,
+      })
+    );
 
     return response.hits.hits.map((hit) => {
       return {

@@ -13,7 +13,7 @@ import { getIndexState } from '../../../plugins/upgrade_assistant/common/get_ind
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   // Utility function that keeps polling API until reindex operation has completed or failed.
   const waitForReindexToComplete = async (indexName) => {
@@ -65,14 +65,14 @@ export default function ({ getService }) {
       expect(lastState.status).to.equal(ReindexStatus.completed);
 
       const { newIndexName } = lastState;
-      const indexSummary = await es.indices.get({ index: 'dummydata' });
+      const { body: indexSummary } = await es.indices.get({ index: 'dummydata' });
 
       // The new index was created
       expect(indexSummary[newIndexName]).to.be.an('object');
       // The original index name is aliased to the new one
       expect(indexSummary[newIndexName].aliases.dummydata).to.be.an('object');
       // The number of documents in the new index matches what we expect
-      expect((await es.count({ index: lastState.newIndexName })).count).to.be(3);
+      expect((await es.count({ index: lastState.newIndexName })).body.count).to.be(3);
 
       // Cleanup newly created index
       await es.indices.delete({
@@ -95,9 +95,9 @@ export default function ({ getService }) {
           ],
         },
       });
-      expect((await es.count({ index: 'myAlias' })).count).to.be(3);
-      expect((await es.count({ index: 'wildcardAlias' })).count).to.be(3);
-      expect((await es.count({ index: 'myHttpsAlias' })).count).to.be(2);
+      expect((await es.count({ index: 'myAlias' })).body.count).to.be(3);
+      expect((await es.count({ index: 'wildcardAlias' })).body.count).to.be(3);
+      expect((await es.count({ index: 'myHttpsAlias' })).body.count).to.be(2);
 
       // Reindex
       await supertest
@@ -107,10 +107,10 @@ export default function ({ getService }) {
       const lastState = await waitForReindexToComplete('dummydata');
 
       // The regular aliases should still return 3 docs
-      expect((await es.count({ index: 'myAlias' })).count).to.be(3);
-      expect((await es.count({ index: 'wildcardAlias' })).count).to.be(3);
+      expect((await es.count({ index: 'myAlias' })).body.count).to.be(3);
+      expect((await es.count({ index: 'wildcardAlias' })).body.count).to.be(3);
       // The filtered alias should still return 2 docs
-      expect((await es.count({ index: 'myHttpsAlias' })).count).to.be(2);
+      expect((await es.count({ index: 'myHttpsAlias' })).body.count).to.be(2);
 
       // Cleanup newly created index
       await es.indices.delete({
@@ -204,8 +204,8 @@ export default function ({ getService }) {
         await assertQueueState(undefined, 0);
 
         // Check that the closed index is still closed after reindexing
-        const resolvedIndices = await es.transport.request({
-          path: `_resolve/index/${nameOfIndexThatShouldBeClosed}`,
+        const { body: resolvedIndices } = await es.indices.resolveIndex({
+          name: nameOfIndexThatShouldBeClosed,
         });
 
         const test1ReindexedState = getIndexState(nameOfIndexThatShouldBeClosed, resolvedIndices);

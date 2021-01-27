@@ -5,14 +5,10 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { TopValues } from '../../../index_based/components/field_data_row/top_values';
-import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { DocumentStatsTable } from './document_stats';
+import { ExpandedRowContent } from './expanded_row_content';
 
 export const IpContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;
@@ -22,17 +18,9 @@ export const IpContent: FC<FieldDataRowProps> = ({ config }) => {
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
 
   return (
-    <EuiFlexGroup gutterSize={'xl'}>
+    <ExpandedRowContent dataTestSubj={'mlDVIPContent'}>
       <DocumentStatsTable config={config} />
-      <EuiFlexItem>
-        <ExpandedRowFieldHeader>
-          <FormattedMessage
-            id="xpack.ml.fieldDataCard.cardIp.topValuesLabel"
-            defaultMessage="Top values"
-          />
-        </ExpandedRowFieldHeader>
-        <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
+    </ExpandedRowContent>
   );
 };

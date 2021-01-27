@@ -11,7 +11,7 @@ import { RendererFunction } from '../../utils/typed_react';
 import { LogHighlightsState } from './log_highlights/log_highlights';
 import { LogEntriesState, LogEntriesStateParams, LogEntriesCallbacks } from './log_entries';
 import { UniqueTimeKey } from '../../../common/time';
-import { LogEntry } from '../../../common/http_api';
+import { LogEntry } from '../../../common/log_entry';
 
 export const WithStreamItems: React.FunctionComponent<{
   children: RendererFunction<
