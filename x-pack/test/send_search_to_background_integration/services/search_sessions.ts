@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { SavedObjectsFindResponse } from 'src/core/server';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -20,7 +21,7 @@ type SessionStateType =
   | 'restored'
   | 'canceled';
 
-export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
+export function SearchSessionsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const retry = getService('retry');
@@ -34,6 +35,17 @@ export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
 
     public async exists(): Promise<boolean> {
       return testSubjects.exists(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
+    }
+
+    public async missingOrFail(): Promise<void> {
+      return testSubjects.missingOrFail(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
+    }
+
+    public async disabledOrFail() {
+      await this.exists();
+      await expect(await (await (await this.find()).findByTagName('button')).isEnabled()).to.be(
+        false
+      );
     }
 
     public async expectState(state: SessionStateType) {
@@ -93,12 +105,12 @@ export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
     }
 
     /*
-     * This cleanup function should be used by tests that create new background sesions.
-     * Tests should not end with new background sessions remaining in storage since that interferes with functional tests that check the _find API.
-     * Alternatively, a test can navigate to `Managment > Search Sessions` and use the UI to delete any created tests.
+     * This cleanup function should be used by tests that create new search sessions.
+     * Tests should not end with new search sessions remaining in storage since that interferes with functional tests that check the _find API.
+     * Alternatively, a test can navigate to `Management > Search Sessions` and use the UI to delete any created tests.
      */
     public async deleteAllSearchSessions() {
-      log.debug('Deleting created background sessions');
+      log.debug('Deleting created searcg sessions');
       // ignores 409 errs and keeps retrying
       await retry.tryForTime(10000, async () => {
         const { body } = await supertest
@@ -109,10 +121,10 @@ export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
           .expect(200);
 
         const { saved_objects: savedObjects } = body as SavedObjectsFindResponse;
-        log.debug(`Found created background sessions: ${savedObjects.map(({ id }) => id)}`);
+        log.debug(`Found created search sessions: ${savedObjects.map(({ id }) => id)}`);
         await Promise.all(
           savedObjects.map(async (so) => {
-            log.debug(`Deleting background session: ${so.id}`);
+            log.debug(`Deleting search session: ${so.id}`);
             await supertest
               .delete(`/internal/session/${so.id}`)
               .set(`kbn-xsrf`, `anything`)
