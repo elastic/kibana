@@ -17,7 +17,7 @@ describe('WaterfallChartWrapper', () => {
     );
 
     expect(getByText(`1. ${mockNetworkItems[0].url}`)).toBeInTheDocument();
-    expect(queryByText('Content Type')).not.toBeInTheDocument();
+    expect(queryByText('Content type')).not.toBeInTheDocument();
     expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
 
     // open flyout
@@ -26,7 +26,7 @@ describe('WaterfallChartWrapper', () => {
 
     // check for sample flyout items
     waitFor(() => {
-      expect(getByText('Content Type')).toBeInTheDocument();
+      expect(getByText('Content type')).toBeInTheDocument();
       expect(getByText(`${mockNetworkItems[0]?.mimeType}`)).toBeInTheDocument();
     });
 
@@ -36,7 +36,7 @@ describe('WaterfallChartWrapper', () => {
 
     // check that sample flyout items are gone from the DOM
     waitFor(() => {
-      expect(queryByText('Content Type')).not.toBeInTheDocument();
+      expect(queryByText('Content type')).not.toBeInTheDocument();
       expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
     });
   });

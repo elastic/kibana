@@ -540,9 +540,9 @@ describe('getSeriesAndDomain', () => {
     const metaDataEntry = metaData[0];
     expect(metaDataEntry.certificates).toEqual([
       { name: 'Issuer', value: networkItems[0].certificates?.issuer },
-      { name: 'Valid From', value: '01/07/2020 7:00 PM' },
-      { name: 'Valid Until', value: '04/08/2021 8:00 AM' },
-      { name: 'Common Name', value: networkItems[0].certificates?.subjectName },
+      { name: 'Valid from', value: '01/07/2020 7:00 PM' },
+      { name: 'Valid until', value: '04/08/2021 8:00 AM' },
+      { name: 'Common name', value: networkItems[0].certificates?.subjectName },
     ]);
     metaDataEntry.responseHeaders?.forEach((header) => {
       expect(header).toEqual({ name: header.name, value: header.value });
