@@ -176,6 +176,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
               size: 0,
               searchAfterSortId: undefined,
               timeField: timeField ? timeField : '',
+              track_total_hits: true,
             }),
           })
           .toPromise();

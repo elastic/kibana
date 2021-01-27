@@ -192,6 +192,7 @@ export function getAlertType(
       sortOrder: 'desc',
       searchAfterSortId: undefined,
       timeField: params.timeField,
+      track_total_hits: true,
     });
 
     logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`);

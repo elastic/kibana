@@ -7,7 +7,7 @@
 import { ESSearchBody, ESSearchRequest } from '../../../typings/elasticsearch';
 import { SortOrder } from '../../../typings/elasticsearch/aggregations';
 
-type BuildSortedEventsQueryOpts = Pick<ESSearchBody, 'aggs'> &
+type BuildSortedEventsQueryOpts = Pick<ESSearchBody, 'aggs' | 'track_total_hits'> &
   Pick<Required<ESSearchRequest>, 'index' | 'size'>;
 
 export interface BuildSortedEventsQuery extends BuildSortedEventsQueryOpts {
@@ -29,6 +29,8 @@ export const buildSortedEventsQuery = ({
   searchAfterSortId,
   sortOrder,
   timeField,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  track_total_hits,
 }: BuildSortedEventsQuery): ESSearchRequest => {
   const sortField = timeField;
   const docFields = [timeField].map((tstamp) => ({
@@ -54,7 +56,7 @@ export const buildSortedEventsQuery = ({
     index,
     size,
     ignoreUnavailable: true,
-    track_total_hits: true,
+    track_total_hits: track_total_hits ?? false,
     body: {
       docvalue_fields: docFields,
       query: {
