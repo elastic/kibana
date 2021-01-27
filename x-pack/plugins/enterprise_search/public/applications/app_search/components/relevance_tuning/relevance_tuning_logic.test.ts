@@ -633,6 +633,31 @@ describe('RelevanceTuningLogic', () => {
           },
         });
       });
+      it('works even if there are no boosts yet', () => {
+        mount({
+          searchSettings: {
+            ...searchSettings,
+            boosts: {},
+          },
+        });
+
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.addBoost('foo', 'functional');
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
+          ...searchSettings,
+          boosts: {
+            foo: [
+              {
+                factor: 1,
+                newBoost: true,
+                type: 'functional',
+              },
+            ],
+          },
+        });
+      });
     });
 
     describe('deleteBoost', () => {
