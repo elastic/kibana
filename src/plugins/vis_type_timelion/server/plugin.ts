@@ -11,8 +11,12 @@ import { first } from 'rxjs/operators';
 import { TypeOf, schema } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
+import type { RequestHandlerContext } from 'src/core/server';
 
-import { PluginStart } from '../../../../src/plugins/data/server';
+import type {
+  PluginStart,
+  DataApiRequestHandlerContext,
+} from '../../../../src/plugins/data/server';
 import { CoreSetup, PluginInitializerContext } from '../../../../src/core/server';
 import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
@@ -67,7 +71,9 @@ export class Plugin {
 
     const logger = this.initializerContext.logger.get('timelion');
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<
+      RequestHandlerContext & { search: DataApiRequestHandlerContext }
+    >();
 
     const deps = {
       configManager,
@@ -79,7 +85,7 @@ export class Plugin {
 
     functionsRoute(router, deps);
     runRoute(router, deps);
-    validateEsRoute(router, core);
+    validateEsRoute(router);
 
     core.uiSettings.register({
       'timelion:es.timefield': {
@@ -167,6 +173,7 @@ export class Plugin {
           defaultMessage: '{experimentalLabel} Your API key from www.quandl.com',
           values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` },
         }),
+        sensitive: true,
         category: ['timelion'],
         schema: schema.string(),
       },

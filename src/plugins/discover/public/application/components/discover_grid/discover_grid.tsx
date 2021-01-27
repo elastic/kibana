@@ -51,12 +51,6 @@ export interface DiscoverGridProps {
    */
   columns: string[];
   /**
-   * Determines whether the given columns are the default ones, so parts of the document
-   * are displayed (_source) with limited actions (cannor move, remove columns)
-   * Implemented for matching with legacy behavior
-   */
-  defaultColumns: boolean;
-  /**
    * The used index pattern
    */
   indexPattern: IndexPattern;
@@ -126,7 +120,6 @@ export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
 export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
-  defaultColumns,
   indexPattern,
   onAddColumn,
   onFilter,
@@ -144,6 +137,7 @@ export const DiscoverGrid = ({
   sort,
 }: DiscoverGridProps) => {
   const [expanded, setExpanded] = useState<ElasticSearchHit | undefined>(undefined);
+  const defaultColumns = columns.includes('_source');
 
   /**
    * Pagination

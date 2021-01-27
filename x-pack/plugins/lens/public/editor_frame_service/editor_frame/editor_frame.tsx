@@ -81,7 +81,8 @@ export function EditorFrame(props: EditorFrameProps) {
           props.datasourceMap,
           state.datasourceStates,
           props.doc?.references,
-          visualizeTriggerFieldContext
+          visualizeTriggerFieldContext,
+          { isFullEditor: true }
         )
           .then((result) => {
             if (!isUnmounted) {
@@ -252,7 +253,6 @@ export function EditorFrame(props: EditorFrameProps) {
       state.visualization,
       state.activeData,
       props.query,
-      props.dateRange,
       props.filters,
       props.savedQuery,
       state.title,

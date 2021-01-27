@@ -45,6 +45,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
+|  [addRuntimeField(name, runtimeField)](./kibana-plugin-plugins-data-server.indexpattern.addruntimefield.md) |  | Add a runtime field - Appended to existing mapped field or a new field is created as appropriate |
 |  [addScriptedField(name, script, fieldType)](./kibana-plugin-plugins-data-server.indexpattern.addscriptedfield.md) |  | Add scripted field to field list |
 |  [getAggregationRestrictions()](./kibana-plugin-plugins-data-server.indexpattern.getaggregationrestrictions.md) |  |  |
 |  [getAsSavedObjectBody()](./kibana-plugin-plugins-data-server.indexpattern.getassavedobjectbody.md) |  | Returns index pattern as saved object body for saving |
@@ -58,6 +59,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [getTimeField()](./kibana-plugin-plugins-data-server.indexpattern.gettimefield.md) |  |  |
 |  [isTimeBased()](./kibana-plugin-plugins-data-server.indexpattern.istimebased.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-server.indexpattern.istimenanosbased.md) |  |  |
+|  [removeRuntimeField(name)](./kibana-plugin-plugins-data-server.indexpattern.removeruntimefield.md) |  | Remove a runtime field - removed from mapped field or removed unmapped field as appropriate |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-server.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
 |  [setFieldAttrs(fieldName, attrName, value)](./kibana-plugin-plugins-data-server.indexpattern.setfieldattrs.md) |  |  |
 |  [setFieldCount(fieldName, count)](./kibana-plugin-plugins-data-server.indexpattern.setfieldcount.md) |  |  |

@@ -75,6 +75,12 @@ function isString(value: unknown): value is string {
   return typeof value === 'string';
 }
 
+// normalize the `index` parameter to be a string array
+function indexParamToArray(index: string | string[]): string[] {
+  if (!index) return [];
+  return isString(index) ? [index] : index;
+}
+
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
   AlertTypeParamsExpressionProps<IndexThresholdAlertParams>
 > = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, charts, data }) => {
@@ -92,6 +98,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     timeWindowUnit,
   } = alertParams;
 
+  const indexArray = indexParamToArray(index);
   const { http } = useKibana<KibanaDeps>().services;
 
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
@@ -131,8 +138,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     });
 
-    if (index && index.length > 0) {
-      const currentEsFields = await getFields(http, index);
+    if (indexArray.length > 0) {
+      const currentEsFields = await getFields(http, indexArray);
       const timeFields = getTimeFieldOptions(currentEsFields);
 
       setEsFields(currentEsFields);
@@ -170,7 +177,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
             defaultMessage="Indices to query"
           />
         }
-        isInvalid={errors.index.length > 0 && index !== undefined}
+        isInvalid={errors.index.length > 0 && indexArray.length > 0}
         error={errors.index}
         helpText={
           <FormattedMessage
@@ -183,11 +190,11 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           fullWidth
           async
           isLoading={isIndiciesLoading}
-          isInvalid={errors.index.length > 0 && index !== undefined}
+          isInvalid={errors.index.length > 0 && indexArray.length > 0}
           noSuggestions={!indexOptions.length}
           options={indexOptions}
           data-test-subj="thresholdIndexesComboBox"
-          selectedOptions={(index || []).map((anIndex: string) => {
+          selectedOptions={indexArray.map((anIndex: string) => {
             return {
               label: anIndex,
               value: anIndex,
@@ -306,12 +313,12 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
             description={i18n.translate('xpack.stackAlerts.threshold.ui.alertParams.indexLabel', {
               defaultMessage: 'index',
             })}
-            value={index && index.length > 0 ? renderIndices(index) : firstFieldOption.text}
+            value={indexArray.length > 0 ? renderIndices(indexArray) : firstFieldOption.text}
             isActive={indexPopoverOpen}
             onClick={() => {
               setIndexPopoverOpen(true);
             }}
-            isInvalid={!(index && index.length > 0 && timeField !== '')}
+            isInvalid={!(indexArray.length > 0 && timeField !== '')}
           />
         }
         isOpen={indexPopoverOpen}

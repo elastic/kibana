@@ -18,12 +18,12 @@ import {
   connectToQueryState,
   esFilters,
   indexPatterns as indexPatternsUtils,
+  noSearchSessionStorageCapabilityMessage,
   syncQueryStateWithUrl,
 } from '../../../../data/public';
 import { getSortArray } from './doc_table';
 import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
-import indexTemplateGrid from './discover_datagrid.html';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
 import {
@@ -115,9 +115,7 @@ app.config(($routeProvider) => {
   };
   const discoverRoute = {
     ...defaults,
-    template: getServices().uiSettings.get('doc_table:legacy', true)
-      ? indexTemplateLegacy
-      : indexTemplateGrid,
+    template: indexTemplateLegacy,
     reloadOnSearch: false,
     resolve: {
       savedObjects: function ($route, Promise) {
@@ -175,7 +173,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($element, $route, $scope, $timeout, Promise) {
+function discoverController($route, $scope, Promise) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
@@ -284,12 +282,21 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     }
   });
 
-  data.search.session.setSearchSessionInfoProvider(
+  data.search.session.enableStorage(
     createSearchSessionRestorationDataProvider({
       appStateContainer,
       data,
       getSavedSearch: () => savedSearch,
-    })
+    }),
+    {
+      isDisabled: () =>
+        capabilities.discover.storeSearchSession
+          ? { disabled: false }
+          : {
+              disabled: true,
+              reasonText: noSearchSessionStorageCapabilityMessage,
+            },
+    }
   );
 
   $scope.setIndexPattern = async (id) => {
@@ -725,20 +732,20 @@ function discoverController($element, $route, $scope, $timeout, Promise) {
     $route.reload();
   };
 
-  $scope.onSkipBottomButtonClick = function () {
+  $scope.onSkipBottomButtonClick = async () => {
     // show all the Rows
     $scope.minimumVisibleRows = $scope.hits;
 
     // delay scrolling to after the rows have been rendered
-    const bottomMarker = $element.find('#discoverBottomMarker');
-    $timeout(() => {
-      bottomMarker.focus();
-      // The anchor tag is not technically empty (it's a hack to make Safari scroll)
-      // so the browser will show a highlight: remove the focus once scrolled
-      $timeout(() => {
-        bottomMarker.blur();
-      }, 0);
-    }, 0);
+    const bottomMarker = document.getElementById('discoverBottomMarker');
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    while ($scope.rows.length !== document.getElementsByClassName('kbnDocTable__row').length) {
+      await wait(50);
+    }
+    bottomMarker.focus();
+    await wait(50);
+    bottomMarker.blur();
   };
 
   $scope.newQuery = function () {
