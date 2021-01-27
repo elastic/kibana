@@ -58,6 +58,13 @@ const i18nTexts = {
   hotPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.hotPhaseSectionTitle', {
     defaultMessage: 'Hot phase',
   }),
+  rolloverTooltip: i18n.translate(
+    'xpack.indexLifecycleMgmt.timeline.hotPhaseRolloverToolTipContent',
+    {
+      defaultMessage:
+        'Data age is only considered after rollover has occurred which adds variation to time in hot phase. See hot phase settings.',
+    }
+  ),
   warmPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.warmPhaseSectionTitle', {
     defaultMessage: 'Warm phase',
   }),
@@ -166,10 +173,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                           <>
                             {i18nTexts.hotPhase}
                             &nbsp;
-                            <EuiIconTip
-                              type="iInCircle"
-                              content={sharedi18nTexts.editPolicy.rolloverOffsetsHotPhaseTiming}
-                            />{' '}
+                            <EuiIconTip type="iInCircle" content={i18nTexts.rolloverTooltip} />
                           </>
                         ) : (
                           i18nTexts.hotPhase
