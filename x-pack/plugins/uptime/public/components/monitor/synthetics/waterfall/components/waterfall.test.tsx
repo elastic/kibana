@@ -13,7 +13,7 @@ import {
   renderLegendItem,
   renderSidebarItem,
 } from '../../step_detail/waterfall/waterfall_chart_wrapper';
-import { EuiThemeProvider } from '../../../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { WaterfallChartOuterContainer } from './styles';
 
 describe('waterfall', () => {
