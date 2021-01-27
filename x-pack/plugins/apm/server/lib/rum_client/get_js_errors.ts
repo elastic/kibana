@@ -93,6 +93,8 @@ export async function getJSErrors({
 
   const { apmEventClient } = setup;
 
+  console.log('ELASTICSEARCH QUERY ARGS:', JSON.stringify(params, null, 2));
+
   const response = await apmEventClient.search(params);
 
   const { totalErrorGroups, totalErrorPages, errors } =

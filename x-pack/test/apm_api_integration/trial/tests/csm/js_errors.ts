@@ -44,6 +44,8 @@ export default function rumJsErrorsApiTests({ getService }: FtrProviderContext) 
           '/api/apm/rum-client/js-errors?start=2021-01-18T12%3A20%3A17.202Z&end=2021-01-18T12%3A25%3A17.203Z&uiFilters=%7B%22environment%22%3A%22ENVIRONMENT_ALL%22%2C%22serviceName%22%3A%5B%22elastic-co-frontend%22%5D%7D&pageSize=5&pageIndex=0'
         );
 
+        console.log('RESPONSE DATA:', JSON.stringify(response, null, 2));
+        console.log('BODY:', JSON.stringify(response.body, null, 2));
         expect(response.status).to.be(200);
 
         expectSnapshot(response.body).toMatchInline(`
