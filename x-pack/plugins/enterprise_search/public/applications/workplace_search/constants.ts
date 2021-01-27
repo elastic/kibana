@@ -582,3 +582,10 @@ export const REMOVE_FIELD_LABEL = i18n.translate(
     defaultMessage: 'Remove field',
   }
 );
+
+export const RECENT_ACTIVITY_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.recentActivity.title',
+  {
+    defaultMessage: 'Recent activity',
+  }
+);
