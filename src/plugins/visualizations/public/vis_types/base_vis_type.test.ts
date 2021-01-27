@@ -16,7 +16,16 @@ describe('BaseVisType', () => {
           name: 'test',
           title: 'test',
           description: 'test',
-          visualization: {} as any,
+          visConfig: {
+            defaults: {},
+          },
+          toExpressionAst: () => ({
+            type: 'expression',
+            chain: [],
+          }),
+          editorConfig: {
+            editor: 'custom',
+          },
         });
       }).toThrow();
     });

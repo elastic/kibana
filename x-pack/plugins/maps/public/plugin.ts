@@ -34,7 +34,6 @@ import {
   VisualizationsStart,
 } from '../../../../src/plugins/visualizations/public';
 import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-import { PLUGIN_ID_OSS } from '../../../../src/plugins/maps_oss/common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
   createMapsUrlGenerator,
@@ -160,10 +159,15 @@ export class MapsPlugin
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
     setLicensingPluginStart(plugins.licensing);
-    plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
     setStartServices(core, plugins);
-    // unregisters the OSS alias
-    plugins.visualizations.unRegisterAlias(PLUGIN_ID_OSS);
+
+    if (core.application.capabilities.maps.show) {
+      plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
+    }
+
+    if (!core.application.capabilities.maps.save) {
+      plugins.visualizations.unRegisterAlias(APP_ID);
+    }
 
     return {
       createLayerDescriptors,
