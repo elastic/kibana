@@ -8,8 +8,9 @@ import { Logger, Plugin, CoreSetup, PluginInitializerContext } from 'src/core/se
 import { PluginSetupContract as AlertsPluginSetup } from '../../alerts/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { getService, register as registerDataService } from './data';
-import { healthRoute } from './routes/health';
+import { createHealthRoute } from './routes/health';
 
+const BASE_ROUTE = '/api/triggers_actions_ui';
 export interface PluginStartContract {
   data: ReturnType<typeof getService>;
 }
@@ -34,10 +35,10 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
       logger: this.logger,
       data: this.data,
       router,
-      baseRoute: '/api/triggers_actions_ui',
+      baseRoute: BASE_ROUTE,
     });
 
-    healthRoute(this.logger, router, '/api/triggers_actions_ui', plugins.alerts !== undefined);
+    createHealthRoute(this.logger, router, BASE_ROUTE, plugins.alerts !== undefined);
   }
 
   public async start(): Promise<PluginStartContract> {

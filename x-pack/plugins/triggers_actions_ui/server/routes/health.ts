@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// the business logic of this code is from watcher, in:
-//   x-pack/plugins/watcher/server/routes/api/register_list_fields_route.ts
-
 import {
   IRouter,
   RequestHandlerContext,
@@ -16,7 +13,7 @@ import {
 } from 'kibana/server';
 import { Logger } from '../../../../../src/core/server';
 
-export function healthRoute(
+export function createHealthRoute(
   logger: Logger,
   router: IRouter,
   baseRoute: string,

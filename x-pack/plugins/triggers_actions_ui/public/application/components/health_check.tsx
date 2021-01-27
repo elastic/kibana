@@ -51,12 +51,9 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
         hasPermanentEncryptionKey: false,
       };
       if (healthStatus.isAlertsAvailable) {
-        healthStatus.isSufficientlySecure = (
-          await alertingFrameworkHealth({ http })
-        ).isSufficientlySecure;
-        healthStatus.hasPermanentEncryptionKey = (
-          await alertingFrameworkHealth({ http })
-        ).hasPermanentEncryptionKey;
+        const alertingHealthResult = await alertingFrameworkHealth({ http });
+        healthStatus.isSufficientlySecure = alertingHealthResult.isSufficientlySecure;
+        healthStatus.hasPermanentEncryptionKey = alertingHealthResult.hasPermanentEncryptionKey;
       }
 
       setAlertingHealth(some(healthStatus));
@@ -207,7 +204,7 @@ const AlertsError = ({
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.healthCheck.alertsErrorTitle"
-          defaultMessage="You must enable Alerts"
+          defaultMessage="You must enable Alerts and Actions"
         />
       </h2>
     }
@@ -223,7 +220,7 @@ const AlertsError = ({
             target="_blank"
           >
             {i18n.translate('xpack.triggersActionsUI.components.healthCheck.alertsErrorAction', {
-              defaultMessage: 'Learn how to enable Alerts.',
+              defaultMessage: 'Learn how to enable Alerts and Actions.',
             })}
           </EuiLink>
         </p>
