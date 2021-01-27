@@ -52,10 +52,7 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
     props.columnId !== dragging.columnId
   ) {
     const op = props.state.layers[props.layerId].columns[dragging.columnId];
-    const isOperation = props.filterOperations(op);
-    if (isOperation) {
-      return true;
-    }
+    return props.filterOperations(op);
   }
   return false;
 }
@@ -210,10 +207,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
   }
 
   // replace or move to compatible group
-  const isFromOtherGroup =
-    isDraggedOperation(droppedItem) &&
-    droppedItem.groupId !== groupId &&
-    droppedItem.layerId === layerId;
+  const isFromOtherGroup = droppedItem.groupId !== groupId && droppedItem.layerId === layerId;
 
   if (isFromOtherGroup) {
     const layer = state.layers[layerId];

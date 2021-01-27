@@ -52,35 +52,30 @@ export function DraggableDimensionButton({
   }, [columnId, group.groupId, layerId]);
 
   const { dragging } = dragDropContext;
+
+  const isCurrentGroup = group.groupId === dragging?.groupId;
+  const isDragging = isDraggedOperation(dragging);
+  const layerCanHandleDrop = layerDatasource.canHandleDrop({
+    ...layerDatasourceDropProps,
+    columnId,
+    filterOperations: group.filterOperations,
+  });
+
   const dragType = isSelf(value, dragging)
     ? 'move'
-    : isDraggedOperation(dragging) && group.groupId === dragging.groupId
+    : isDragging && isCurrentGroup
     ? 'reorder'
     : 'copy';
 
-  const dropType = isDraggedOperation(dragging)
-    ? group.groupId !== dragging.groupId
-      ? 'replace'
-      : 'reorder'
-    : 'add';
+  const dropType = isDragging ? (!isCurrentGroup ? 'replace' : 'reorder') : 'add';
 
-  const isCompatibleFromOtherGroup =
-    dragging?.groupId !== group.groupId &&
-    layerDatasource.canHandleDrop({
-      ...layerDatasourceDropProps,
-      columnId,
-      filterOperations: group.filterOperations,
-    });
+  const isCompatibleFromOtherGroup = !isCurrentGroup && layerCanHandleDrop;
 
-  const isDroppable = isDraggedOperation(dragging)
+  const isDroppable = isDragging
     ? dragType === 'reorder'
       ? isFromTheSameGroup(value, dragging)
       : isCompatibleFromOtherGroup
-    : layerDatasource.canHandleDrop({
-        ...layerDatasourceDropProps,
-        columnId,
-        filterOperations: group.filterOperations,
-      });
+    : layerCanHandleDrop;
 
   const reorderableGroup = useMemo(
     () =>
@@ -94,13 +89,12 @@ export function DraggableDimensionButton({
   );
 
   return (
-    <div className="lnsLayerPanel__dimensionContainer">
+    <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
       <DragDrop
         noKeyboardSupportYet={reorderableGroup.length < 2} // to be removed when navigating outside of groups is added
         draggable
         dragType={dragType}
         dropType={dropType}
-        dataTestSubj={group.dataTestSubj}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
         label={label}

@@ -1334,7 +1334,7 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).filter('[dataTestSubj="mockVisA"]').prop('onDrop')!(
+        instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!(
           {
             indexPatternId: '1',
             field: {},

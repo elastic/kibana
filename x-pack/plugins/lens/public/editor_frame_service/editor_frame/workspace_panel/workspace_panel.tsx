@@ -83,6 +83,8 @@ interface WorkspaceState {
   expandError: boolean;
 }
 
+const workspaceDropValue = { id: 'lnsWorkspace' };
+
 // Exported for testing purposes only.
 export const WorkspacePanel = React.memo(function WorkspacePanel({
   activeDatasourceId,
@@ -217,8 +219,6 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
     }
   }
 
-  const value = useMemo(() => ({ id: 'lnsWorkspace' }), []);
-
   function renderEmptyWorkspace() {
     return (
       <EuiText
@@ -303,7 +303,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         draggable={false}
         droppable={Boolean(suggestionForDraggedField)}
         onDrop={onDrop}
-        value={value}
+        value={workspaceDropValue}
       >
         <div>
           {renderVisualization()}

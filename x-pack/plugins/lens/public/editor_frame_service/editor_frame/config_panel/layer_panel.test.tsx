@@ -148,7 +148,7 @@ describe('LayerPanel', () => {
       });
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
-      const group = component.find('DragDrop[dataTestSubj="lnsGroup"]');
+      const group = component.find('.lnsLayerPanel__dimensionContainer[data-test-subj="lnsGroup"]');
       expect(group).toHaveLength(1);
     });
 
@@ -167,7 +167,7 @@ describe('LayerPanel', () => {
       });
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
-      const group = component.find('DragDrop[dataTestSubj="lnsGroup"]');
+      const group = component.find('.lnsLayerPanel__dimensionContainer[data-test-subj="lnsGroup"]');
       expect(group).toHaveLength(1);
     });
 
@@ -464,7 +464,7 @@ describe('LayerPanel', () => {
         })
       );
 
-      component.find('DragDrop[dataTestSubj="lnsGroup"]').first().simulate('drop');
+      component.find('[data-test-subj="lnsGroup"] DragDrop').first().simulate('drop');
 
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -503,12 +503,12 @@ describe('LayerPanel', () => {
         expect.objectContaining({ columnId: 'a' })
       );
 
-      expect(component.find('DragDrop[dataTestSubj="lnsGroup"]').first().prop('droppable')).toEqual(
-        false
-      );
+      expect(
+        component.find('[data-test-subj="lnsGroup"] DragDrop').first().prop('droppable')
+      ).toEqual(false);
 
       component
-        .find('DragDrop[dataTestSubj="lnsGroup"]')
+        .find('[data-test-subj="lnsGroup"] DragDrop')
         .first()
         .find('.lnsLayerPanel__dimension')
         .simulate('drop');
@@ -559,7 +559,7 @@ describe('LayerPanel', () => {
       );
 
       // Simulate drop on the pre-populated dimension
-      component.find('DragDrop[dataTestSubj="lnsGroupB"]').at(0).simulate('drop');
+      component.find('[data-test-subj="lnsGroupB"] DragDrop').at(0).simulate('drop');
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'b',
@@ -570,7 +570,7 @@ describe('LayerPanel', () => {
       );
 
       // Simulate drop on the empty dimension
-      component.find('DragDrop[dataTestSubj="lnsGroupB"]').at(1).simulate('drop');
+      component.find('[data-test-subj="lnsGroupB"] DragDrop').at(1).simulate('drop');
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'newid',
@@ -639,7 +639,7 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
 
-      component.find('DragDrop[dataTestSubj="lnsGroup"]').at(2).prop('onDrop')!(
+      component.find('[data-test-subj="lnsGroup"] DragDrop').at(2).prop('onDrop')!(
         (draggingOperation as unknown) as DroppableEvent
       );
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(

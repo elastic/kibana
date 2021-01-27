@@ -50,9 +50,8 @@ export function EmptyDimensionButton({
   }, [group.accessors.length, group.groupId, layerId]);
 
   return (
-    <div className="lnsLayerPanel__dimensionContainer">
+    <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
       <DragDrop
-        dataTestSubj={group.dataTestSubj}
         value={value}
         onDrop={handleDrop}
         label={i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
