@@ -13,7 +13,7 @@ describe('alerts telemetry', () => {
       aggregations: {
         byAlertTypeId: {
           value: {
-            types: { '.index-threshold': 2, 'logs.alert.document.count': 1 },
+            types: { '.index-threshold': 2, 'logs.alert.document.count': 1, 'document.test.': 1 },
           },
         },
       },
@@ -30,9 +30,10 @@ describe('alerts telemetry', () => {
 Object {
   "countByType": Object {
     "__index-threshold": 2,
+    "document.test__": 1,
     "logs.alert.document.count": 1,
   },
-  "countTotal": 3,
+  "countTotal": 4,
 }
 `);
   });

@@ -13,7 +13,7 @@ describe('actions telemetry', () => {
       aggregations: {
         byActionTypeId: {
           value: {
-            types: { '.index': 1, '.server-log': 1, 'some.type': 1 },
+            types: { '.index': 1, '.server-log': 1, 'some.type': 1, 'another.type.': 1 },
           },
         },
       },
@@ -72,6 +72,22 @@ describe('actions telemetry', () => {
               updated_at: '2020-03-26T18:46:44.449Z',
             },
           },
+          {
+            _id: 'action:00000000-2',
+            _index: '.kibana_1',
+            _score: 0,
+            _source: {
+              action: {
+                actionTypeId: 'another.type.',
+                config: {},
+                name: 'test another type',
+                secrets: {},
+              },
+              references: [],
+              type: 'action',
+              updated_at: '2020-03-26T18:46:44.449Z',
+            },
+          },
         ],
       },
     });
@@ -85,9 +101,10 @@ Object {
   "countByType": Object {
     "__index": 1,
     "__server-log": 1,
+    "another.type__": 1,
     "some.type": 1,
   },
-  "countTotal": 3,
+  "countTotal": 4,
 }
 `);
   });
