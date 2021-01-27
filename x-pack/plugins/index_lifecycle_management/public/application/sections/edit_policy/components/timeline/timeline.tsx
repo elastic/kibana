@@ -5,15 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useMemo } from 'react';
-import {
-  EuiText,
-  EuiIcon,
-  EuiIconProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@elastic/eui';
 
 import { PhasesExceptDelete } from '../../../../../../common/types';
 import { useFormData } from '../../../../../shared_imports';
@@ -26,12 +18,9 @@ import {
   PhaseAgeInMilliseconds,
 } from '../../lib';
 
-import './timeline.scss';
-import { InfinityIconSvg } from './infinity_icon.svg';
+import { InfinityIcon } from '../infinity_icon';
 
-const InfinityIcon: FunctionComponent<Omit<EuiIconProps, 'type'>> = (props) => (
-  <EuiIcon type={InfinityIconSvg} {...props} />
-);
+import './timeline.scss';
 
 const toPercent = (n: number, total: number) => (n / total) * 100;
 

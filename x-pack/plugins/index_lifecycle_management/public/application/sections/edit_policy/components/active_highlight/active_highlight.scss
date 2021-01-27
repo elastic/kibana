@@ -1,16 +1,75 @@
 .ilmActivePhaseHighlight {
-  border-left: $euiBorderWidthThin solid $euiColorLightShade;
+  position: relative;
   height: 100%;
 
-  &.hotPhase.active {
-    border-left-color: $euiColorVis9_behindText;
+  .ilmActivePhaseHighlight__line {
+    height: 100%;
+    position: absolute;
+    border-left: $euiBorderWidthThin solid $euiColorLightShade;
+  }
+
+  .ilmActivePhaseHighlight__check {
+    position: absolute;
+    top: calc(#{$euiSize} * 1.5);
+    left: calc((#{$euiSize} - #{$euiBorderWidthThin}) / -2);
+    height: $euiSize;
+    width: $euiSize;
+    border: $euiBorderWidthThin solid $euiColorLightShade;
+    border-radius: 50%;
+    background-color: $euiColorLightestShade;
+
+    .ilmActivePhaseHighlight__icon {
+      fill: $euiColorLightShade;
+      position: absolute;
+      top: calc(50% - #{$euiSizeM} / 2);
+      left: calc(50% - #{$euiSizeM} / 2);
+    }
+  }
+
+  &.active {
+    .ilmActivePhaseHighlight__check {
+      background-color: $euiColorEmptyShade;
+    }
+
+  }
+
+  &.hotPhase {
+    &.active {
+      .ilmActivePhaseHighlight__line {
+        top: calc(#{$euiSize} * 1.5);
+        height: calc(100% - #{$euiSize} * 1.5);
+        border-left-color: $euiColorVis9_behindText;
+      }
+      .ilmActivePhaseHighlight__check {
+        border-color: $euiColorVis9_behindText;
+      }
+      .ilmActivePhaseHighlight__icon {
+        fill: $euiColorVis9_behindText;
+      }
+    }
   }
 
   &.warmPhase.active {
-    border-left-color: $euiColorVis5_behindText;
+    .ilmActivePhaseHighlight__line {
+      border-left-color: $euiColorVis5_behindText;
+    }
+    .ilmActivePhaseHighlight__check {
+      border-color: $euiColorVis5_behindText;
+    }
+    .ilmActivePhaseHighlight__icon {
+      fill: $euiColorVis5_behindText;
+    }
   }
 
   &.coldPhase.active {
-    border-left-color: $euiColorVis1_behindText;
+    .ilmActivePhaseHighlight__line {
+      border-left-color: $euiColorVis1_behindText;
+    }
+    .ilmActivePhaseHighlight__check {
+      border-color: $euiColorVis1_behindText;
+    }
+    .ilmActivePhaseHighlight__icon {
+      fill: $euiColorVis1_behindText;
+    }
   }
 }

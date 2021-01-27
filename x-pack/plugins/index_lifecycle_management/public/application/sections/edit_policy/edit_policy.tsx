@@ -44,6 +44,7 @@ import {
   PolicyJsonFlyout,
   WarmPhase,
   Timeline,
+  TimingFootersProvider,
 } from './components';
 
 import { createPolicyNameValidations, createSerializer, deserializer, Form, schema } from './form';
@@ -237,19 +238,21 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
 
             <EuiSpacer size="l" />
 
-            <HotPhase />
+            <TimingFootersProvider>
+              <HotPhase />
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            <WarmPhase />
+              <WarmPhase />
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            <ColdPhase />
+              <ColdPhase />
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            <DeletePhase />
+              <DeletePhase />
+            </TimingFootersProvider>
 
             <EuiHorizontalRule />
 

@@ -5,6 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { EuiIcon } from '@elastic/eui';
 
 import './active_highlight.scss';
 
@@ -13,5 +14,12 @@ interface Props {
   enabled: boolean;
 }
 export const ActiveHighlight: FunctionComponent<Props> = ({ phase, enabled }) => {
-  return <div className={`ilmActivePhaseHighlight ${phase}Phase ${enabled ? 'active' : ''} `} />;
+  return (
+    <div className={`ilmActivePhaseHighlight ${phase}Phase ${enabled ? 'active' : ''}`}>
+      <div className={`ilmActivePhaseHighlight__line`} />
+      <div className={'ilmActivePhaseHighlight__check'}>
+        <EuiIcon type="check" size={'s'} className={'ilmActivePhaseHighlight__icon'} />
+      </div>
+    </div>
+  );
 };

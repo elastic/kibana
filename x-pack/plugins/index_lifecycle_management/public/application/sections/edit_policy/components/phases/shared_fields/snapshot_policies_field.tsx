@@ -9,13 +9,13 @@ import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiCallOut, EuiComboBoxOptionOption, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiComboBoxOptionOption, EuiLink, EuiSpacer, EuiFormRow } from '@elastic/eui';
 
 import { UseField, ComboBoxField, useFormData } from '../../../../../../shared_imports';
 import { useLoadSnapshotPolicies } from '../../../../../services/api';
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
-import { FieldLoadingError } from '../../';
+import { FieldLoadingError, LearnMoreLink, OptionalLabel } from '../../';
 
 const waitForSnapshotFormField = 'phases.delete.actions.wait_for_snapshot.policy';
 
@@ -142,31 +142,52 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
             : [];
 
           return (
-            <ComboBoxField
-              field={
-                {
-                  ...field,
-                  value: singleSelectionArray,
-                } as any
+            <EuiFormRow
+              label={
+                <>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotTitle"
+                    defaultMessage="Wait for snapshot policy"
+                  />
+                  <OptionalLabel />
+                </>
               }
-              euiFieldProps={{
-                'data-test-subj': 'snapshotPolicyCombobox',
-                options: policies,
-                singleSelection: { asPlainText: true },
-                isLoading,
-                noSuggestions: !!(error || data.length === 0),
-                onCreateOption: (newOption: string) => {
-                  field.setValue(newOption);
-                },
-                onChange: (options: EuiComboBoxOptionOption[]) => {
-                  if (options.length > 0) {
-                    field.setValue(options[0].label);
-                  } else {
-                    field.setValue('');
-                  }
-                },
-              }}
-            />
+              helpText={
+                <>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotDescription"
+                    defaultMessage="Specify a snapshot policy to be executed before the deletion of the index. This ensures that a snapshot of the deleted index is available."
+                  />{' '}
+                  <LearnMoreLink docPath="ilm-wait-for-snapshot.html" />
+                </>
+              }
+            >
+              <ComboBoxField
+                field={
+                  {
+                    ...field,
+                    value: singleSelectionArray,
+                  } as any
+                }
+                euiFieldProps={{
+                  'data-test-subj': 'snapshotPolicyCombobox',
+                  options: policies,
+                  singleSelection: { asPlainText: true },
+                  isLoading,
+                  noSuggestions: !!(error || data.length === 0),
+                  onCreateOption: (newOption: string) => {
+                    field.setValue(newOption);
+                  },
+                  onChange: (options: EuiComboBoxOptionOption[]) => {
+                    if (options.length > 0) {
+                      field.setValue(options[0].label);
+                    } else {
+                      field.setValue('');
+                    }
+                  },
+                }}
+              />
+            </EuiFormRow>
           );
         }}
       </UseField>

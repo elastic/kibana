@@ -180,6 +180,12 @@ export const i18nTexts = {
       cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseTitle', {
         defaultMessage: 'Cold phase',
       }),
+      delete: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.deletePhasePhase.deletePhaseTitle',
+        {
+          defaultMessage: 'Delete Data',
+        }
+      ),
     },
     descriptions: {
       hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescription', {
