@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { getAnalysisType, getDependentVar } from '../../../../../../../common/util/analytics_utils';
 
 import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
+import { AucRocChartView } from '../../../../../components/auc_roc_chart/auc_roc_chart';
 
 import {
   defaultSearchQuery,
@@ -177,6 +178,11 @@ export const ExplorationPageWrapper: FC<Props> = ({
         <ExpandableSectionAnalytics jobId={jobConfig.id} />
       )}
 
+      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
+      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
+        <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
+      )}
+
       {isLoadingJobConfig === true &&
         jobConfig !== undefined &&
         totalFeatureImportance === undefined && <LoadingPanel />}
@@ -191,10 +197,8 @@ export const ExplorationPageWrapper: FC<Props> = ({
           </>
         )}
 
-      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
-        <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
-      )}
+      <AucRocChartView />
+      <EuiSpacer size="m" />
 
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false &&
