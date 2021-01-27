@@ -15,7 +15,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { getTpmRate } from '../helpers/get_tpm_rate';
+import { calculateThroughput } from '../helpers/calculate_throughput';
 
 export async function getTransactionCoordinates({
   setup,
@@ -67,7 +67,7 @@ export async function getTransactionCoordinates({
   return (
     aggregations?.distribution.buckets.map((bucket) => ({
       x: bucket.key,
-      y: getTpmRate(setup, bucket.count.value),
+      y: calculateThroughput({ start, end, value: bucket.count.value }),
     })) || []
   );
 }

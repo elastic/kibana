@@ -16,7 +16,7 @@ import {
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
-import { getTpmRate } from '../helpers/get_tpm_rate';
+import { calculateThroughput } from '../helpers/calculate_throughput';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 interface Options {
@@ -32,10 +32,11 @@ function transform(options: Options, response: ESResponse) {
   if (response.hits.total.value === 0) {
     return [];
   }
+  const { start, end } = options.setup;
   const buckets = response.aggregations?.throughput.buckets ?? [];
-  return buckets.map(({ key: x, doc_count: y }) => ({
+  return buckets.map(({ key: x, doc_count: value }) => ({
     x,
-    y: getTpmRate(options.setup, y),
+    y: calculateThroughput({ start, end, value }),
   }));
 }
 

@@ -6,7 +6,11 @@
 
 import { SetupTimeRange } from './setup_request';
 
-export function getTpmRate({ start, end }: SetupTimeRange, eventCount: number) {
+export function calculateThroughput({
+  start,
+  end,
+  value,
+}: SetupTimeRange & { value: number }) {
   const durationAsMinutes = (end - start) / 1000 / 60;
-  return eventCount / durationAsMinutes;
+  return value / durationAsMinutes;
 }

@@ -22,7 +22,7 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import { getTpmRate } from '../../helpers/get_tpm_rate';
+import { calculateThroughput } from '../../helpers/calculate_throughput';
 import {
   calculateTransactionErrorPercentage,
   getOutcomeAggregation,
@@ -168,14 +168,19 @@ export async function getServiceTransactionStats({
           ),
         },
         transactionsPerMinute: {
-          value: getTpmRate(
-            setup,
-            topTransactionTypeBucket.real_document_count.value
-          ),
+          value: calculateThroughput({
+            start,
+            end,
+            value: topTransactionTypeBucket.real_document_count.value,
+          }),
           timeseries: topTransactionTypeBucket.timeseries.buckets.map(
             (dateBucket) => ({
               x: dateBucket.key,
-              y: getTpmRate(setup, dateBucket.real_document_count.value),
+              y: calculateThroughput({
+                start,
+                end,
+                value: dateBucket.real_document_count.value,
+              }),
             })
           ),
         },
