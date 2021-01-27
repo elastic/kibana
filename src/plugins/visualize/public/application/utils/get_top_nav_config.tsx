@@ -9,6 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { Capabilities } from 'src/core/public';
 import { TopNavMenuData } from 'src/plugins/navigation/public';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
@@ -52,6 +53,14 @@ interface TopNavConfigParams {
   savedObjectsClient: SavedObjectsClientContract;
   embeddableId?: string;
 }
+
+export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
+  if (!anonymousUserCapabilities.visualize) return false;
+
+  const visualize = (anonymousUserCapabilities.visualize as unknown) as VisualizeCapabilities;
+
+  return !!visualize.show;
+};
 
 export const getTopNavConfig = (
   {
@@ -251,13 +260,7 @@ export const getTopNavConfig = (
               title: savedVis?.title,
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
-            showPublicUrlSwitch: (anonymousUserCapabilities) => {
-              if (!anonymousUserCapabilities.visualize) return false;
-
-              const visualize = (anonymousUserCapabilities.visualize as unknown) as VisualizeCapabilities;
-
-              return !!visualize.show;
-            },
+            showPublicUrlSwitch,
           });
         }
       },
