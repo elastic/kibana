@@ -23,6 +23,15 @@ const PERCENT_SIGN_25_SEQUENCE = 'test%25';
 
 window.scrollTo = jest.fn();
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    EuiIcon: 'eui-icon', // using custom react-svg icon causes issues, mocking for now.
+  };
+});
+
 describe('<App />', () => {
   let testBed: AppTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
