@@ -5,6 +5,7 @@
     { "path": "./plugins/alerts/tsconfig.json"},
     { "path": "./plugins/dashboard_enhanced/tsconfig.json" },
     { "path": "./plugins/licensing/tsconfig.json" },
+    { "path": "./plugins/lens/tsconfig.json" },
     { "path": "./plugins/console_extensions/tsconfig.json" },
     { "path": "./plugins/discover_enhanced/tsconfig.json" },
     { "path": "./plugins/data_enhanced/tsconfig.json" },
