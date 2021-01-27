@@ -28,8 +28,10 @@ Even though the new validation system provided by the `core` is also based on Jo
 rules tailored to our needs (e.g. `byteSize`, `duration` etc.). That means that config values that were previously accepted
 by the "legacy" Kibana may be rejected by the `core` now.
 
-Even though `core` has its own logging system it doesn't output log records directly (e.g. to file or terminal), but instead
-forward them to the "legacy" Kibana so that they look the same as the rest of the log records throughout Kibana.
+### Logging
+`core` has its own [logging system](./server/logging/README.md) and will output log records directly (e.g. to file or terminal) when configured. When no 
+specific configuration is provided, logs are forwarded to the "legacy" Kibana so that they look the same as the rest of the
+log records throughout Kibana.
 
 ## Core API Review
 To provide a stable API for plugin developers, it is important that the Core Public and Server API's are stable and
