@@ -4,19 +4,83 @@
 
 # Goal
 
-Automatically generate API documentation for every plugin that exposes a public API within Kibana.
-This does not cover REST API docs, but is targetted towards our javascript
+Automatically generate API documentation for every plugin that exposes a public API within Kibana in order to help Kibana plugin developers 
+find and understand the services available to them. Automatic generation ensures the APIs are _always_ up to date. The system will make it easy to find
+APIs that are lacking documentation.
+
+Note this does not cover REST API docs, but is targetted towards our javascript
 plugin APIs.
+
+# Technology: ts-morph vs api-extractor
+
+[Api-extractor](https://api-extractor.com/) is a utility built from microsoft that parses typescript code into json files that can then be used in a custom [api-documenter](https://api-extractor.com/pages/setup/generating_docs/) in order to build documentation. This is what we [have now](https://github.com/elastic/kibana/tree/master/docs/development), except we use the default api-documenter. 
+
+## Limitations with the current implementation using api-extractor & api-documenter
+
+The current implementation relies on the default api-documenter. It has the following limitations:
+
+- One page per API item
+- Files are .md not .mdx
+- There is no entry page per plugin (just an index.md per plugin/public and plugin/server)
+- Incorrectly marks these entries as packages.
+
+![image](../images/api_docs_package_current.png)
+
+- Does not generate links to APIs exposed from other plugins, nor inside the same plugin.
+
+![image](../images/current_api_doc_links.png)
+
+## Options to improve
+
+We have two options to improve on the current implementation. We can use a custom api-documenter, or use ts-morph.
+
+### Custom Api-Documenter
+
+- According to the current maintainer of the sample api-documenter, it's a surprising amount of work to maintain.
+- If we wish to re-use code from the sample api-documenter, we'll have to fork the rush-stack repo, or copy their code into our system.
+- No verified ability to support cross plugin links. We do have some ideas (can explore creating a package.json for every page, and/or adding source file information to every node).
+- More limited feature set, we wouldn't get thinks like references and source file paths.
+- There are very few examples of other companies using custom api-documenters to drive their documentation systems (I could not find any on github).
+
+### Custom implementation using ts-morph 
+
+[ts-morph](https://github.com/dsherret/ts-morph) is a utility built and maintained by a single person, which sits a layer above the raw typescript compiler.
+
+- Requires manually converting the types to how we want them to be displayed in the UI. Certain types have to be handled specially to show up
+in the right way (for example, for arrow functions to be categorized as functions). This special handling is the bulk of the logic in the PR, and
+may be a maintenance burden.
+- Relies on a package maintained by a single person, albiet they have been very responsive and have a history of keeping the library up to date with
+typescript upgrades.
+- Affords us flexibility to do things like extract the setup and start types, grab source file paths to create links to github, and get
+reference counts (reference counts not implemented in MVP). 
+- There are some issues with type links and signatures not working correctly (see https://github.com/dsherret/ts-morph/issues/923).
+
+![image](../images/new_api_docs_with_links.png)
+
+## Recommendation: ts-morph for the short term, switch to api-extractor when limitations can be worked around
+
+Both approaches will have a decent amount of code to maintain, but the api-extractor approach appears to be a more stable long term solution, since it's built and maintained by Microsoft and
+is likely going to grow in popularity as more TypeScript API doc systems exist.
+If we had a working example that supported cross plugin links, I would suggest continuing down that road. However, we don't, while we _do_ have a working ts-morph implementation.   
+
+I recommend that we move ahead with ts-morph in the short term, because we have an implementation that offers a much improved experience over the current system, but that we continually
+re-evaluate as time goes on and we learn more about the maintenance burden of the current approach, and see what happens with our priorities and the api-extractor library.
+
+Progress over perfection.
+
+![image](../images/api_doc_tech_compare.png)
+
+If we do switch, we can re-use all of the tests that take example TypeScript files and verify the resulting ApiDeclaration shapes.
 
 # Terminology
 
 **API** - A plugin's public API consists of every function, class, interface, type, variable, etc, that is exported from it's index.ts file, or returned from it's start or setup
 contract. 
 
-**Declaration** - Each function, class, interface, type, variable, etc, that is part of a plugins public API is a "declaration". This
+**API Declaration** - Each function, class, interface, type, variable, etc, that is part of a plugins public API is a "declaration". This
 terminology is motivated by [these docs](https://www.typescriptlang.org/docs/handbook/modules.html#exporting-a-declaration).
 
-# Screenshot
+# MVP
 
 Every plugin will have one or more API reference pages. Every exported declaration will be listed in the page. It is first split by "scope" - client, server and common. Underneath
 that, setup and start contracts are at the top, the remaining declarations are grouped by type (classes, functions, interfaces, etc).
@@ -25,8 +89,18 @@ always remain with the main plugin name.
 
 ![image](../images/api_docs.png)
 
+- Cross plugin API links work inside `signature`.
+- Github links with source file and line number
+- using `serviceFolders` to split large plugins
 
-# Information available for each declaration
+## Post MVP
+
+- Plugin `{@link AnApi}` links work. Will need to decide if we only support per plugin links, or if we should support a way to do this across plugins.
+- Ingesting stats like number of public APIs, and number of those missing comments
+- Include and expose API references
+- Use namespaces to split large plugins
+
+# Information available for each API declaration
 
 We have the following pieces of information available from each declaration:
 
@@ -37,11 +111,11 @@ is dependent on the elastic-docs team moving the infrastructure to NextJS instea
 
 - Tags. Any `@blahblah` tags that were extracted from comments. Known tags, like `beta`, will be show help text in a tooltip when hovered over.
 
-- Type. This can be thought of as the _kind_ of type. It allows us to group each type into a category. It can be a primitive, or a
+- Type. This can be thought of as the _kind_ of type (see [TypeKind](#typekind)). It allows us to group each type into a category. It can be a primitive, or a
 more complex grouping. Possibilities are: array, string, number, boolean, object, class, interface, function, compound (unions or intersections)
 
 - Required or optional. (whether or not the type was written with `| undefined` or `?`). This terminology makes the most sense for function
-parameters. It degrades when thinking about an exported variable that might be undefined.
+parameters, not as much when thinking about an exported variable that might be undefined.
 
 - Signature. This is only relevant for some types: functions, objects, type, arrays and compound. Classes and interfaces would be too large.
 For primitives, this is equivalent to "type".
@@ -64,7 +138,8 @@ interface ApiDeclaration {
   signature: TextWithLinks;
   tags: string[];  // Declarations may be tagged as beta, or deprecated.
   children: ApiDeclaration[]; // Recursive - this could be function parameters, class members, or interface/object properties.
-  returnComment?: TextWithLinks
+  returnComment?: TextWithLinks;
+  lifecycle?: Lifecycle.START | Lifecycle.SETUP;
 }
 
 ```
@@ -117,6 +192,9 @@ if (node.isClassDeclaration()) {
 ```
 
 The handling of each specific type is what encompasses the vast majority of the logic in the PR.
+
+The public and server scope have 0-2 special interfaces indicated by "lifecycle". This is determined by using ts-morph to extract the first two generic types 
+passed to `... extends Plugin<start, setup>` in the class defined inside the plugin's `plugin.ts` file.
 
 A [PluginApi](#pluginapi) is generated for each plugin, which is used to generate the json and mdx files. One or more json/mdx file pair
  per plugin may be created, depending on the value of `serviceFolders` inside the plugin's manifest files. This is because some plugins have such huge APIs that
@@ -247,34 +325,16 @@ Team owner can be determined via github CODEOWNERS file, but we want to encourag
 
 A brief description of the plugin can then be displayed in the automatically generated API documentation.
 
-## Technology: ts-morph vs api-extractor
+# Future features
 
-[Api-extractor](https://api-extractor.com/) is a utility built from microsoft that parses typescript code into json files that can then be used in a custom [api-documenter](https://api-extractor.com/pages/setup/generating_docs/) in order to build documentation. This is what we [have now](https://github.com/elastic/kibana/tree/master/docs/development), except we use the default api-documenter. Currently our plugins aren’t separate packages, and given the way api-extractor works, we can’t build cross plugin links. We could potentially work around this
-by supplying a `packageJsonFullPath` to a generated `packageJson` with the name of the plugin, in order to get the correct package names in the generated api.json files.
+## Indexing stats
 
-It is unknown whether the work with bazel will allow us to use this technology. I suspect not, because even though there will be separate `.d.ts` files, the plugins will still be importing types via relative links.
+Can we index statistics about our API as part of this system? For example, I'm dumping information about which api declarations are missing comments in the console.
 
-[ts-morph](https://github.com/dsherret/ts-morph) is a utility built and maintained by a single person, which sits a layer above the raw typescript compiler. It affords greater flexibility, thus supports cross plugin links (among other things like links to source files). The downsides of using this library are:
+## Longer term approach to "plugin service folders"
 
- 1. Risks of not being able to upgrade typescript without significant effort in the docs system.
- 2. Risks of relying on a package maintained by a single developer.
- 3. Less re-usability across repositories. What if EUI wanted to use the same system?  
-
-The first risk is the most concerning, as Kibana needs to be able to upgrade typescript.
-
-### Recommendation: ts-morph
-
-I recommend that we move ahead with ts-morph because we have a working implementation today, one that offers capabilities not possible with api-extractor, such as
-cross plugin linking and source file links. I consider cross plugin links essential to useful docs. In addition, both options require custom code that will come with a mainenance burden, since the
-default api-documenter (that is in use today) does not provide very useful
-results (for example, one file per declaration).
-
-We should however be prepared to re-evalute an api-extractor implementation, based on progress made in that repository, as well as what happens with the risks mentioned above.
-We should also be prepared to make the difficult decision to turn off our API reference documentation if it inhibits us from upgrading typescript, and the 
-realized efforts of maintaining our ts-morph implementation.
-
-![image](../images/api_doc_tech_compare.png)
-
+Using sub folders is a short term plan. A long term plan hasn't been established yet, but it should fit in with our folder structure hierarchy goals, along with
+any support we have for sharing services among a related set of plugins, that are not exposed as part of the public API.
 # Recommendations for writing comments
 
 ## @link comments for the referenced type
@@ -294,11 +354,6 @@ type will already be clickable. This ends up with a weird looking API:
 The plan is to make @link comments work like links, which means this is unneccessary information.
 
 I propose we avoid this kind of pattern.
-
-## Double check complicated types
-
-I haven't taken a look at every kind of possible crazy type that we can come up with. For example - I'm not sure how generics will
-look. I suggest an iterative approach. Start simple, see what looks awkward, work to make it look better.
 
 ## Export every referenced type
 
@@ -345,10 +400,16 @@ have the `required` tag?
 2. If no, should we include signatures when the only difference is `| undefined`? For function parameters this information is captured by
 the absence of the `required` badge. Is this obvious? What about class members/interface props?
 
-## REST API
+## Out of scope
+
+### REST API
 
 This RFC does not cover REST API documentation, though it worth considering where
 REST APIs registered by plugins should go in the docs. The docs team has a proposal for this but it is not inside the `Kibana Developer Docs` mission.
+
+### Package APIs
+
+Package APIs are not covered in this RFC.
 
 # Adoption strategy
 
@@ -367,3 +428,11 @@ The APIs WILL need to be well commented or they won't be useful. We can measure 
 
 - [Microsoft .NET](https://docs.microsoft.com/en-us/dotnet/api/microsoft.visualbasic?view=netcore-3.1)
 - [Android](https://developer.android.com/reference/androidx/packages)
+
+# Architecure review feedback
+
+The primary concern is over the technology choice of ts-morph vs api-extractor.
+
+I propose we move forward with merging the ts-morph implementation in the short term. This will provide immediate benefit 
+to platform service consumers, and buy the platform group time to iterate on implementation details. Having the end to end pieces in place
+will help the elastic-docs team understand what components we need, and we can iterate on the developer documentation navigation menu.
