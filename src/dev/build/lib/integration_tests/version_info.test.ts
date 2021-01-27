@@ -6,8 +6,9 @@
  * Public License, v 1.
  */
 
-import pkg from '../../../../package.json';
-import { getVersionInfo } from './version_info';
+import { kibanaPackageJSON as pkg } from '@kbn/dev-utils';
+
+import { getVersionInfo } from '../version_info';
 
 jest.mock('./get_build_number');
 
