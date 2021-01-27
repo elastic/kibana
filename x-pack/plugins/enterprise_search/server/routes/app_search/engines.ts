@@ -54,11 +54,9 @@ export function registerEnginesRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: `/as/engines/collection`,
+    })
   );
 
   // Single engine endpoints
