@@ -500,6 +500,10 @@ export const CONFIGURE_BUTTON = i18n.translate(
   }
 );
 
+export const SAVE_BUTTON = i18n.translate('xpack.enterpriseSearch.workplaceSearch.save.button', {
+  defaultMessage: 'Save',
+});
+
 export const CANCEL_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.cancel.button',
   {
@@ -532,5 +536,49 @@ export const CONNECTORS_HEADER_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.connectors.header.description',
   {
     defaultMessage: 'All of your configurable connectors.',
+  }
+);
+
+export const URL_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.url.label', {
+  defaultMessage: 'URL',
+});
+
+export const FIELD_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.field.label', {
+  defaultMessage: 'Field',
+});
+
+export const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.description.label',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const UPDATE_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.update.label', {
+  defaultMessage: 'Update',
+});
+
+export const ADD_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.add.label', {
+  defaultMessage: 'Add',
+});
+
+export const ADD_FIELD_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.addField.label',
+  {
+    defaultMessage: 'Add field',
+  }
+);
+
+export const EDIT_FIELD_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.editField.label',
+  {
+    defaultMessage: 'Edit field',
+  }
+);
+
+export const REMOVE_FIELD_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.removeField.label',
+  {
+    defaultMessage: 'Remove field',
   }
 );
