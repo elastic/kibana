@@ -20,6 +20,7 @@ import {
 const StyledButton = styled(EuiButtonEmpty)`
   &&& {
     height: auto;
+    border: none;
 
     .euiButtonContent {
       display: inline-block;
