@@ -4,4 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from '../../time/time_range';
+import * as rt from 'io-ts';
+
+export const timeRangeRT = rt.type({
+  startTime: rt.number,
+  endTime: rt.number,
+});
+
+export type TimeRange = rt.TypeOf<typeof timeRangeRT>;
