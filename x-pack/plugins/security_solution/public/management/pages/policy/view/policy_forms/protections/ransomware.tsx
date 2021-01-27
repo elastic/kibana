@@ -20,6 +20,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiCheckboxProps,
+  EuiRadioProps,
+  EuiSwitchProps,
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { APP_ID } from '../../../../../../../common/constants';
@@ -49,7 +52,7 @@ const ProtectionRadio = React.memo(
     // currently just taking windows.ransomware, but both windows.ransomware and mac.ransomware should be the same value
     const selected = policyDetailsConfig && policyDetailsConfig.windows.ransomware.mode;
 
-    const handleRadioChange = useCallback(() => {
+    const handleRadioChange: EuiRadioProps['onChange'] = useCallback(() => {
       if (policyDetailsConfig) {
         const newPayload = cloneDeep(policyDetailsConfig);
         for (const os of OSes) {
@@ -125,7 +128,7 @@ export const Ransomware = React.memo(() => {
     ];
   }, []);
 
-  const handleSwitchChange = useCallback(
+  const handleSwitchChange: EuiSwitchProps['onChange'] = useCallback(
     (event) => {
       if (policyDetailsConfig) {
         const newPayload = cloneDeep(policyDetailsConfig);
@@ -149,7 +152,7 @@ export const Ransomware = React.memo(() => {
     [dispatch, policyDetailsConfig]
   );
 
-  const handleUserNotificationCheckbox = useCallback(
+  const handleUserNotificationCheckbox: EuiCheckboxProps['onChange'] = useCallback(
     (event) => {
       if (policyDetailsConfig) {
         const newPayload = cloneDeep(policyDetailsConfig);
