@@ -15,6 +15,8 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
 
   describe('Monitoring is turned off', function () {
+    // You no longer enable monitoring through Kibana on cloud https://github.com/elastic/kibana/pull/88375
+    this.tags(['skipCloud']);
     before(async () => {
       const browser = getService('browser');
       await browser.setWindowSize(1600, 1000);
