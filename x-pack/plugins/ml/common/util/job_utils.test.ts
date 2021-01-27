@@ -281,6 +281,7 @@ describe('ML - job utils', () => {
       expect(isSourceDataChartableForDetector(job, 22)).toBe(true);
       expect(isSourceDataChartableForDetector(job, 23)).toBe(true);
       expect(isSourceDataChartableForDetector(job, 24)).toBe(true);
+      expect(isSourceDataChartableForDetector(job, 36)).toBe(true);
       expect(isSourceDataChartableForDetector(job, 37)).toBe(true);
     });
 
@@ -296,7 +297,6 @@ describe('ML - job utils', () => {
       expect(isSourceDataChartableForDetector(job, 33)).toBe(false);
       expect(isSourceDataChartableForDetector(job, 34)).toBe(false);
       expect(isSourceDataChartableForDetector(job, 35)).toBe(false);
-      expect(isSourceDataChartableForDetector(job, 36)).toBe(false);
     });
   });
 

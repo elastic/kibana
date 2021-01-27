@@ -4,8 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../../maps/common/constants';
+
 const FEATURE = 'Feature';
 const POINT = 'Point';
+const SEVERITY_COLOR_RAMP = [
+  {
+    stop: 0,
+    color: '#8BC8FB',
+  },
+  {
+    stop: 25,
+    color: '#FDEC25',
+  },
+  {
+    stop: 50,
+    color: '#FBA740',
+  },
+  {
+    stop: 75,
+    color: '#FE5050',
+  },
+];
 
 function getAnomalyFeatures(anomalies: any[], type: 'actual_point' | 'typical_point') {
   const anomalyFeatures = [];
@@ -90,6 +110,12 @@ export const getMLAnomaliesActualLayer = (anomalies: any) => {
     sourceDescriptor: {
       id: 'b7486535-171b-4d3b-bb2e-33c1a0a2854d',
       type: 'GEOJSON_FILE',
+      __fields: [
+        {
+          name: 'record_score',
+          type: 'number',
+        },
+      ],
       __featureCollection: {
         features: getAnomalyFeatures(anomalies, 'actual_point'),
         type: 'FeatureCollection',
@@ -100,9 +126,14 @@ export const getMLAnomaliesActualLayer = (anomalies: any) => {
       type: 'VECTOR',
       properties: {
         fillColor: {
-          type: 'STATIC',
+          type: STYLE_TYPE.DYNAMIC,
           options: {
-            color: '#FF0000',
+            customColorRamp: SEVERITY_COLOR_RAMP,
+            field: {
+              name: 'record_score',
+              origin: FIELD_ORIGIN.SOURCE,
+            },
+            useCustomColorRamp: true,
           },
         },
         lineColor: {

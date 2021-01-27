@@ -84,6 +84,7 @@ export const anomalyDataChange = function (
   );
 
   const seriesConfigs = recordsToPlot.map(buildConfig);
+  const seriesConfigsNoGeoData = [];
 
   // initialize the charts with loading indicators
   data.seriesToPlot = seriesConfigs.map((config) => ({
@@ -116,10 +117,10 @@ export const anomalyDataChange = function (
           loading: false,
           mapData: records,
         });
+      } else {
+        seriesConfigsNoGeoData.push(config);
       }
     }
-
-    data.seriesToPlot = mapData;
   }
 
   // Calculate the time range of the charts, which is a function of the chart width and max job bucket span.
@@ -306,26 +307,26 @@ export const anomalyDataChange = function (
   // TODO - if query returns no results e.g. source data has been deleted,
   // display a message saying 'No data between earliest/latest'.
   const seriesPromises = [];
-  seriesConfigs.forEach((seriesConfig) => {
-    if (!seriesConfig.detectorLabel.includes(ML_JOB_AGGREGATION.LAT_LONG)) {
-      seriesPromises.push(
-        Promise.all([
-          getMetricData(seriesConfig, chartRange),
-          getRecordsForCriteria(seriesConfig, chartRange),
-          getScheduledEvents(seriesConfig, chartRange),
-          getEventDistribution(seriesConfig, chartRange),
-        ])
-      );
-    }
+  // Use seriesConfigs list without geo data config so indices match up after seriesPromises are resolved and we map through the responses
+  const seriesCongifsForPromises = hasGeoData ? seriesConfigsNoGeoData : seriesConfigs;
+  seriesCongifsForPromises.forEach((seriesConfig) => {
+    seriesPromises.push(
+      Promise.all([
+        getMetricData(seriesConfig, chartRange),
+        getRecordsForCriteria(seriesConfig, chartRange),
+        getScheduledEvents(seriesConfig, chartRange),
+        getEventDistribution(seriesConfig, chartRange),
+      ])
+    );
   });
 
   function processChartData(response, seriesIndex) {
     const metricData = response[0].results;
     const records = response[1].records;
-    const jobId = seriesConfigs[seriesIndex].jobId;
+    const jobId = seriesCongifsForPromises[seriesIndex].jobId;
     const scheduledEvents = response[2].events[jobId];
     const eventDistribution = response[3];
-    const chartType = getChartType(seriesConfigs[seriesIndex]);
+    const chartType = getChartType(seriesCongifsForPromises[seriesIndex]);
 
     // Sort records in ascending time order matching up with chart data
     records.sort((recordA, recordB) => {
@@ -450,24 +451,20 @@ export const anomalyDataChange = function (
       );
       const overallChartLimits = chartLimits(allDataPoints);
 
-      data.seriesToPlot = response
-        .map((d, i) => {
-          if (!seriesConfigs[i].detectorLabel.includes(ML_JOB_AGGREGATION.LAT_LONG)) {
-            return {
-              ...seriesConfigs[i],
-              loading: false,
-              chartData: processedData[i],
-              plotEarliest: chartRange.min,
-              plotLatest: chartRange.max,
-              selectedEarliest: selectedEarliestMs,
-              selectedLatest: selectedLatestMs,
-              chartLimits: USE_OVERALL_CHART_LIMITS
-                ? overallChartLimits
-                : chartLimits(processedData[i]),
-            };
-          }
-        })
-        .filter((value) => value !== undefined);
+      data.seriesToPlot = response.map((d, i) => {
+        return {
+          ...seriesCongifsForPromises[i],
+          loading: false,
+          chartData: processedData[i],
+          plotEarliest: chartRange.min,
+          plotLatest: chartRange.max,
+          selectedEarliest: selectedEarliestMs,
+          selectedLatest: selectedLatestMs,
+          chartLimits: USE_OVERALL_CHART_LIMITS
+            ? overallChartLimits
+            : chartLimits(processedData[i]),
+        };
+      });
 
       if (mapData.length) {
         // push map data in if it's available
