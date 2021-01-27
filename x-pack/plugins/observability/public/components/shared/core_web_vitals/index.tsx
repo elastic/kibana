@@ -16,6 +16,7 @@ import {
 import { CoreVitalItem } from './core_vital_item';
 import { WebCoreVitalsTitle } from './web_core_vitals_title';
 import { ServiceName } from './service_name';
+import { CoreVitalProps } from '../types';
 
 export interface UXMetrics {
   cls: number | null;
@@ -29,7 +30,7 @@ export interface UXMetrics {
   clsRanks: number[];
 }
 
-export function formatToSec(value?: number | string, fromUnit = 'MicroSec'): string {
+function formatToSec(value?: number | string, fromUnit = 'MicroSec'): string {
   const valueInMs = Number(value ?? 0) / (fromUnit === 'MicroSec' ? 1000 : 1);
 
   if (valueInMs < 1000) {
@@ -51,23 +52,15 @@ const CoreVitalsThresholds = {
   CLS: { good: '0.1', bad: '0.25' },
 };
 
-interface Props {
-  loading: boolean;
-  data?: UXMetrics | null;
-  displayServiceName?: boolean;
-  serviceName?: string;
-  totalPageViews?: number;
-  displayTrafficMetric?: boolean;
-}
-
-export function CoreVitals({
+// eslint-disable-next-line import/no-default-export
+export default function CoreVitals({
   data,
   loading,
   displayServiceName,
   serviceName,
   totalPageViews,
   displayTrafficMetric = false,
-}: Props) {
+}: CoreVitalProps) {
   const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks, coreVitalPages } = data || {};
 
   return (

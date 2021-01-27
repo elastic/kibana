@@ -31,11 +31,6 @@ export interface VisualizationsAppExtension {
   toListItem: (savedObject: SavedObject) => VisualizationListItem;
 }
 
-export interface VisTypeAliasPromoTooltip {
-  description: string;
-  link: string;
-}
-
 export interface VisTypeAlias {
   aliasPath: string;
   aliasApp: string;
@@ -43,10 +38,8 @@ export interface VisTypeAlias {
   title: string;
   icon: string;
   promotion?: boolean;
-  promoTooltip?: VisTypeAliasPromoTooltip;
   description: string;
   note?: string;
-  disabled?: boolean;
   getSupportedTriggers?: () => string[];
   stage: VisualizationStage;
 

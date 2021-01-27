@@ -9,10 +9,10 @@ import { CoreStart } from 'kibana/public';
 import { merge } from 'lodash';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import { ServiceInventory } from '.';
-import { EuiThemeProvider } from '../../../../../observability/public';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,

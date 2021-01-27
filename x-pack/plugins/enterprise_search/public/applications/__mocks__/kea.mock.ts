@@ -120,4 +120,29 @@ export class LogicMounter {
   public unmount = () => {
     this.unmountFn();
   };
+
+  /**
+   * Some tests (e.g. async tests, tests that expect thrown errors) need to access
+   * listener functions directly instead of calling `SomeLogic.actions.someListener`,
+   * due to how Kea invokes/wraps action fns by design.
+   *
+   * Example usage:
+   *
+   * const { mount, getListeners } = new LogicMounter(SomeLogic);
+   *
+   * it('some test', async () => {
+   *   mount();
+   *   const { someListener } = getListeners({ values: { someMockValue: false } });
+   *
+   *   const mockBreakpoint = jest.fn();
+   *   await someListener({ someMockArgument: true }, mockBreakpoint);
+   * });
+   */
+  public getListeners = (listenersArgs: object = {}) => {
+    const { listeners } = this.logicFile.inputs[0];
+
+    return typeof listeners === 'function'
+      ? (listeners as Function)(listenersArgs) // e.g., listeners({ values, actions, props }) => ({ ... })
+      : listeners; // handles simpler logic files that just define listeners: { ... }
+  };
 }
