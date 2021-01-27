@@ -22,6 +22,7 @@ import {
   ViewMode,
 } from '../../../../../../../src/plugins/embeddable/public';
 import { useMlKibana } from '../../contexts/kibana';
+import { INITIAL_LOCATION } from '../../../../../maps/common/constants';
 
 export function MlEmbeddedMapComponent({
   layerList,
@@ -94,8 +95,7 @@ export function MlEmbeddedMapComponent({
           hideToolbarOverlay: false,
           hideLayerControl: false,
           hideViewControl: false,
-          // Doesn't currently work with GEO_JSON. Will uncomment when https://github.com/elastic/kibana/pull/88294 is in
-          // initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
+          initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
           autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
         },
       };
