@@ -18,6 +18,7 @@ import {
   connectToQueryState,
   esFilters,
   indexPatterns as indexPatternsUtils,
+  noSearchSessionStorageCapabilityMessage,
   syncQueryStateWithUrl,
 } from '../../../../data/public';
 import { getSortArray } from './doc_table';
@@ -284,12 +285,21 @@ function discoverController($route, $scope, Promise) {
     }
   });
 
-  data.search.session.setSearchSessionInfoProvider(
+  data.search.session.enableStorage(
     createSearchSessionRestorationDataProvider({
       appStateContainer,
       data,
       getSavedSearch: () => savedSearch,
-    })
+    }),
+    {
+      isDisabled: () =>
+        capabilities.discover.storeSearchSession
+          ? { disabled: false }
+          : {
+              disabled: true,
+              reasonText: noSearchSessionStorageCapabilityMessage,
+            },
+    }
   );
 
   $scope.setIndexPattern = async (id) => {
