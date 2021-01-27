@@ -12,7 +12,6 @@ export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
 
-  // flaky tests, see https://github.com/elastic/kibana/issues/88592
   describe('ml', () => {
     const esArchiver = getService('esArchiver');
 
@@ -244,16 +243,12 @@ export default function ({ getService }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
-        it('data frame analytics create job configuration step', async () => {
+        it('data frame analytics create job configuration step for outlier job', async () => {
           await ml.testExecution.logTestStep(
-            'job creation selects the source data and loads the DFA job wizard page'
+            'selects the source data and loads the DFA job wizard page'
           );
           await ml.jobSourceSelection.selectSourceForAnalyticsJob(ihpIndexPattern);
           await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
-          await a11y.testAppSnapshot();
-        });
-
-        it('data frame analytics create job configuration step for outlier job', async () => {
           await ml.testExecution.logTestStep('selects the outlier job type');
           await ml.dataFrameAnalyticsCreation.assertJobTypeSelectExists();
           await ml.dataFrameAnalyticsCreation.selectJobType(dfaJobType);
