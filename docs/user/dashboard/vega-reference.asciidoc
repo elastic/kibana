@@ -217,7 +217,7 @@ try to get about 10-15 data points (buckets).
 [[vega-with-a-map]]
 ==== Vega with a Map
 
-To enable *Maps*, the graph must specify `type=map` in the host configuration:
+experimental[] To enable *Maps*, the graph must specify `type=map` in the host configuration:
 
 [source,yaml]
 ----
