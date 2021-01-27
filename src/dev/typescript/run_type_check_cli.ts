@@ -61,7 +61,7 @@ export async function runTypeCheckCli() {
         Options:
 
           --project [path]    {dim Path to a tsconfig.json file determines the project to check}
-          --skip-lib-check    {dim Skip type checking of all declaration files (*.d.ts)}
+          --skip-lib-check    {dim Skip type checking of all declaration files (*.d.ts). Default is false}
           --help              {dim Show this message}
       `)
     );
@@ -77,7 +77,9 @@ export async function runTypeCheckCli() {
     ...['--emitDeclarationOnly', 'false'],
     '--noEmit',
     '--pretty',
-    ...(opts['skip-lib-check'] ? ['--skipLibCheck'] : []),
+    ...(opts['skip-lib-check']
+      ? ['--skipLibCheck', opts['skip-lib-check']]
+      : ['--skipLibCheck', 'false']),
   ];
   const projects = filterProjectsByFlag(opts.project).filter((p) => !p.disableTypeCheck);
 

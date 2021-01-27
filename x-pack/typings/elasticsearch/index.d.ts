@@ -5,6 +5,7 @@
  */
 import { ValuesType } from 'utility-types';
 import { Explanation, SearchParams, SearchResponse } from 'elasticsearch';
+import { RequestParams } from '@elastic/elasticsearch';
 import { AggregationResponseMap, AggregationInputMap, SortOptions } from './aggregations';
 export {
   AggregationInputMap,
@@ -73,9 +74,7 @@ export interface ESSearchBody {
   _source?: ESSourceOptions;
 }
 
-export type ESSearchRequest = Omit<SearchParams, 'body'> & {
-  body?: ESSearchBody;
-};
+export type ESSearchRequest = RequestParams.Search<ESSearchBody>;
 
 export interface ESSearchOptions {
   restTotalHitsAsInt: boolean;
