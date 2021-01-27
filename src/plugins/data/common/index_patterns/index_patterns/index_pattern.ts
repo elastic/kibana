@@ -29,14 +29,15 @@ interface IndexPatternDeps {
 
 interface SavedObjectBody {
   fieldAttrs?: string;
-  title?: string;
-  timeFieldName?: string;
-  intervalName?: string;
-  fields?: string;
-  sourceFilters?: string;
   fieldFormatMap?: string;
-  typeMeta?: string;
+  fields?: string;
+  intervalName?: string;
+  patternList?: string[];
+  sourceFilters?: string;
+  timeFieldName?: string;
+  title?: string;
   type?: string;
+  typeMeta?: string;
 }
 
 type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
@@ -328,21 +329,20 @@ export class IndexPattern implements IIndexPattern {
     const runtimeFieldMap = this.runtimeFieldMap;
 
     return {
+      allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
-      title: this.title,
-      timeFieldName: this.timeFieldName,
-      intervalName: this.intervalName,
-      sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
+      fieldFormatMap,
       fields: this.fields
         ? JSON.stringify(this.fields.filter((field) => field.scripted))
         : undefined,
-      fieldFormatMap,
-      type: this.type,
-      typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
-      allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
-      patternListActive: this.patternListActive,
+      intervalName: this.intervalName,
       patternList: this.patternList,
       runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
+      sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
+      timeFieldName: this.timeFieldName,
+      title: this.title,
+      type: this.type,
+      typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
     };
   }
 

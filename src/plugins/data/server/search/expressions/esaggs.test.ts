@@ -35,7 +35,7 @@ describe('esaggs expression function - server', () => {
   const args = {
     index: {
       type: 'index_pattern' as 'index_pattern',
-      value: { title: 'logstash-*', ...mockPatternLists },
+      value: { id: 'id', title: 'logstash-*', ...mockPatternLists },
     },
     aggs: [
       {

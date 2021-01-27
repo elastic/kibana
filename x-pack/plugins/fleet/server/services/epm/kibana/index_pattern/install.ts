@@ -11,6 +11,7 @@ import { dataTypes, installationStatuses } from '../../../../../common/constants
 import { ArchivePackage, Installation, InstallSource, ValueOf } from '../../../../../common/types';
 import { RegistryPackage, DataType } from '../../../../types';
 import { getInstallation, getPackageFromSource, getPackageSavedObjects } from '../../packages/get';
+import { IndexPatternAttributes } from '../../../../../../../../src/plugins/data/common/index_patterns';
 
 interface FieldFormatMap {
   [key: string]: FieldFormatMapItem;
@@ -165,11 +166,15 @@ export const getAllDataStreamFieldsByType = async (
 };
 
 // creates or updates index pattern
-export const createIndexPattern = (indexPatternType: string, fields: Fields) => {
+export const createIndexPattern = (
+  indexPatternType: string,
+  fields: Fields
+): Omit<IndexPatternAttributes, 'type' | 'typeMeta'> => {
   const { indexPatternFields, fieldFormatMap } = createIndexPatternFields(fields);
 
   return {
     title: `${indexPatternType}-*`,
+    patternList: [`${indexPatternType}-*`],
     timeFieldName: '@timestamp',
     fields: JSON.stringify(indexPatternFields),
     fieldFormatMap: JSON.stringify(fieldFormatMap),
