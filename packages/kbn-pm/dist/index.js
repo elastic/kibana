@@ -47982,28 +47982,16 @@ async function readBazelToolsVersionFile(repoRootPath, versionFilename) {
   const version = (await Object(_fs__WEBPACK_IMPORTED_MODULE_2__["readFile"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(repoRootPath, versionFilename))).toString().split('\n')[0];
 
   if (!version) {
-    throw new Error(`${versionFilename} file do not contain any version set`);
+    throw new Error(`[bazel_tools] Failed on reading bazel tools versions\n ${versionFilename} file do not contain any version set`);
   }
 
   return version;
 }
 
-async function readBazelToolsVersion(repoRootPath) {
-  try {
-    const bazeliskVersion = await readBazelToolsVersionFile(repoRootPath, '.bazeliskversion');
-    const bazelVersion = await readBazelToolsVersionFile(repoRootPath, '.bazelversion');
-    return {
-      bazelisk: bazeliskVersion,
-      bazel: bazelVersion
-    };
-  } catch (e) {
-    throw new Error(`[bazel_tools] Failed on reading bazel tools versions\n ${e}`);
-  }
-}
-
 async function installBazelTools(repoRootPath) {
   _log__WEBPACK_IMPORTED_MODULE_3__["log"].debug(`[bazel_tools] reading bazel tools versions from version files`);
-  const bazelToolsVersions = await readBazelToolsVersion(repoRootPath); // Check what globals are installed
+  const bazeliskVersion = await readBazelToolsVersionFile(repoRootPath, '.bazeliskversion');
+  const bazelVersion = await readBazelToolsVersionFile(repoRootPath, '.bazelversion'); // Check what globals are installed
 
   _log__WEBPACK_IMPORTED_MODULE_3__["log"].debug(`[bazel_tools] verify if bazelisk is installed`);
   const {
@@ -48012,12 +48000,12 @@ async function installBazelTools(repoRootPath) {
     stdio: 'pipe'
   }); // Install bazelisk if not installed
 
-  if (!stdout.includes(`@bazel/bazelisk@${bazelToolsVersions.bazelisk}`)) {
+  if (!stdout.includes(`@bazel/bazelisk@${bazeliskVersion}`)) {
     _log__WEBPACK_IMPORTED_MODULE_3__["log"].info(`[bazel_tools] installing Bazel tools`);
-    _log__WEBPACK_IMPORTED_MODULE_3__["log"].debug(`[bazel_tools] bazelisk is not installed. Installing @bazel/bazelisk@${bazelToolsVersions.bazelisk} and bazel@${bazelToolsVersions.bazel}`);
-    await Object(_child_process__WEBPACK_IMPORTED_MODULE_1__["spawn"])('yarn', ['global', 'add', `@bazel/bazelisk@${bazelToolsVersions.bazelisk}`], {
+    _log__WEBPACK_IMPORTED_MODULE_3__["log"].debug(`[bazel_tools] bazelisk is not installed. Installing @bazel/bazelisk@${bazeliskVersion} and bazel@${bazelVersion}`);
+    await Object(_child_process__WEBPACK_IMPORTED_MODULE_1__["spawn"])('yarn', ['global', 'add', `@bazel/bazelisk@${bazeliskVersion}`], {
       env: {
-        USE_BAZEL_VERSION: bazelToolsVersions.bazel
+        USE_BAZEL_VERSION: bazelVersion
       },
       stdio: 'pipe'
     });
