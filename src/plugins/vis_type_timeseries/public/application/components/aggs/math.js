@@ -119,7 +119,7 @@ export function MathAgg(props) {
                     >
                       <FormattedMessage
                         id="visTypeTimeseries.math.expressionDescription.tinyMathLinkText"
-                        defaultMessage="@kbn/tinymath"
+                        defaultMessage="TinyMath"
                       />
                     </EuiLink>
                   ),

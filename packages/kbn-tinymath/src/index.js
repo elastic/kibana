@@ -6,11 +6,13 @@
  * Public License, v 1.
  */
 
-import { get } from 'lodash';
-import { parse as parseFn } from './grammar';
-import { functions as includedFunctions } from './functions';
+const { get } = require('lodash');
+const { parse: parseFn } = require('./grammar');
+const { functions: includedFunctions } = require('./functions');
 
-export function parse(input, options) {
+module.exports = { parse, evaluate, interpret };
+
+function parse(input, options) {
   if (input == null) {
     throw new Error('Missing expression');
   }
@@ -26,12 +28,12 @@ export function parse(input, options) {
   }
 }
 
-export function evaluate(expression, scope = {}, injectedFunctions = {}) {
+function evaluate(expression, scope = {}, injectedFunctions = {}) {
   scope = scope || {};
   return interpret(parse(expression), scope, injectedFunctions);
 }
 
-export function interpret(node, scope, injectedFunctions) {
+function interpret(node, scope, injectedFunctions) {
   const functions = Object.assign({}, includedFunctions, injectedFunctions); // eslint-disable-line
   return exec(node);
 

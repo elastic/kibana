@@ -4233,7 +4233,7 @@
     "visTypeTimeseries.markdownEditor.valueLabel": "值",
     "visTypeTimeseries.math.aggregationLabel": "聚合",
     "visTypeTimeseries.math.expressionDescription": "此字段使用基本数学表达式（请参阅 {link}），变量是 {params} 对象上的键，例如 {paramsName}。要访问所有数据，请使用 {paramsValues} 表示值的数组，使用 {paramsTimestamps} 表示时间戳的数组。{paramsTimestamp} 可用于当前桶的时间戳，{paramsIndex} 可用于当前桶的索引，{paramsInterval} 可用于以毫秒为单位的时间间隔。",
-    "visTypeTimeseries.math.expressionDescription.tinyMathLinkText": "@kbn/tinymath",
+    "visTypeTimeseries.math.expressionDescription.tinyMathLinkText": "TinyMath",
     "visTypeTimeseries.math.expressionLabel": "表达式",
     "visTypeTimeseries.math.variablesLabel": "变量",
     "visTypeTimeseries.metric.dataTab.dataButtonLabel": "数据",
