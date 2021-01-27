@@ -43,6 +43,7 @@ export const CreateEngine: React.FC = () => {
   const { name, rawName, language } = useValues(CreateEngineLogic);
   const { setLanguage, setRawName, submitEngine } = useActions(CreateEngineLogic);
 
+  // TODO these need to come from AppLogic and/or the Enterprise Search server
   const supportedLanguages: EuiSelectOption[] = [
     { text: 'Universal', value: 'Universal' },
     { text: 'English', value: 'English' },
