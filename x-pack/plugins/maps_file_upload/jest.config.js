@@ -7,5 +7,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/file_upload'],
+  roots: ['<rootDir>/x-pack/plugins/maps_file_upload'],
 };

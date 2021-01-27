@@ -18,7 +18,7 @@ import { GeoJsonFileSource } from '../../sources/geojson_file_source';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { FileUploadComponentProps } from '../../../../../file_upload/public';
+import { FileUploadComponentProps } from '../../../../../maps_file_upload/public';
 
 export const INDEX_SETUP_STEP_ID = 'INDEX_SETUP_STEP_ID';
 export const INDEXING_STEP_ID = 'INDEXING_STEP_ID';
