@@ -72,6 +72,7 @@ describe('EnginesOverview', () => {
       const wrapper = shallow(<EnginesOverview />);
 
       expect(wrapper.find(EnginesTable)).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="appSearchEnginesCreateEngineButton"]')).toHaveLength(1);
       expect(actions.loadEngines).toHaveBeenCalled();
     });
 

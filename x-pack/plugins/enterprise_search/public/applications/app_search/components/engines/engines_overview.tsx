@@ -7,8 +7,10 @@
 import React, { useEffect } from 'react';
 import { useValues, useActions } from 'kea';
 import {
+  EuiButton,
   EuiPageContent,
   EuiPageContentHeader,
+  EuiPageContentHeaderSection,
   EuiPageContentBody,
   EuiTitle,
   EuiSpacer,
@@ -18,10 +20,12 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { LicensingLogic } from '../../../shared/licensing';
+import { CREATE_ENGINES_PATH } from '../../routes';
+import { KibanaLogic } from '../../../shared/kibana';
 
 import { EngineIcon } from './assets/engine_icon';
 import { MetaEngineIcon } from './assets/meta_engine_icon';
-import { ENGINES_TITLE, META_ENGINES_TITLE } from './constants';
+import { CREATE_AN_ENGINE_BUTTON_LABEL, ENGINES_TITLE, META_ENGINES_TITLE } from './constants';
 import { EnginesOverviewHeader, LoadingState, EmptyState } from './components';
 import { EnginesTable } from './engines_table';
 import { EnginesLogic } from './engines_logic';
@@ -63,11 +67,23 @@ export const EnginesOverview: React.FC = () => {
       <EuiPageContent panelPaddingSize="s" className="enginesOverview">
         <FlashMessages />
         <EuiPageContentHeader>
-          <EuiTitle size="s">
-            <h2>
-              <EngineIcon /> {ENGINES_TITLE}
-            </h2>
-          </EuiTitle>
+          <EuiPageContentHeaderSection>
+            <EuiTitle size="s">
+              <h2>
+                <EngineIcon /> {ENGINES_TITLE}
+              </h2>
+            </EuiTitle>
+          </EuiPageContentHeaderSection>
+          <EuiPageContentHeaderSection>
+            <EuiButton
+              color="secondary"
+              fill
+              data-test-subj="appSearchEnginesCreateEngineButton"
+              onClick={() => KibanaLogic.values.navigateToUrl(CREATE_ENGINES_PATH)}
+            >
+              {CREATE_AN_ENGINE_BUTTON_LABEL}
+            </EuiButton>
+          </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody data-test-subj="appSearchEngines">
           <EnginesTable
