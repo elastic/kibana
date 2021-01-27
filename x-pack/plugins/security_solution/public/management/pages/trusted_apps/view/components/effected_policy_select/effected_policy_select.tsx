@@ -59,6 +59,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   }) => {
     const { formatUrl } = useFormatUrl(SecurityPageName.administration);
 
+    const [, setIsFirstRender] = useState<boolean>(true);
     const [selectionState, setSelectionState] = useState<EffectedPolicySelection>({
       isGlobal,
       selected,
@@ -133,9 +134,15 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       );
     }, []);
 
-    // Anytime selection state is updated, call `onChange`
+    // Anytime selection state is updated, call `onChange`, but not on first render
     useEffect(() => {
-      onChange(selectionState);
+      setIsFirstRender((isFirstRender) => {
+        if (isFirstRender) {
+          return false;
+        }
+        onChange(selectionState);
+        return false;
+      });
     }, [onChange, selectionState]);
 
     return (
