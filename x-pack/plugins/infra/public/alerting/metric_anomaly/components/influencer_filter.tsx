@@ -93,11 +93,14 @@ export const InfluencerFilter = ({
       suggestions
         .map((s) => ({
           ...s,
+          // Remove quotes from suggestions
           text: s.text.replace(/\"/g, '').trim(),
           // Offset the returned suggestions' cursor positions so that they can be autocompleted accurately
           start: s.start - prefix.length,
           end: s.end - prefix.length,
         }))
+        // Removing quotes can lead to an already-selected suggestion still coming up in the autocomplete list,
+        // so filter these out
         .filter((s) => !expression.startsWith(s.text))
     );
   };
