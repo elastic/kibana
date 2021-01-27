@@ -1211,7 +1211,7 @@ export class DataVisualizer {
       const hits = body.hits.hits;
       for (let i = 0; i < hits.length; i++) {
         // Use lodash get() to support field names containing dots.
-        const doc: any = get(hits[i].fields, field);
+        const doc: object[] | undefined = get(hits[i].fields, field);
         // the results from fields query is always an array
         if (Array.isArray(doc) && doc.length > 0) {
           const example = doc[0];
