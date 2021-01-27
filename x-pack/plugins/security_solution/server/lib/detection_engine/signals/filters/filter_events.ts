@@ -21,12 +21,16 @@ export const filterEvents = <T>({
     return fieldAndSetTuples
       .map((tuple) => {
         const eventItem = item.fields ? item.fields[tuple.field] : undefined;
-        if (eventItem == null) {
-          return true;
-        } else if (tuple.operator === 'included') {
+        if (tuple.operator === 'included') {
+          if (eventItem == null) {
+            return true;
+          }
           // only create a signal if the event is not in the value list
           return !tuple.matchedSet.has(JSON.stringify(eventItem));
         } else if (tuple.operator === 'excluded') {
+          if (eventItem == null) {
+            return false;
+          }
           // only create a signal if the event is in the value list
           return tuple.matchedSet.has(JSON.stringify(eventItem));
         } else {
