@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
 import { fileUploadRoutes } from './routes';
-import { initTelemetry } from './telemetry';
+import { initFileUploadTelemetry } from './telemetry';
 
 export class FileUploadPlugin implements Plugin {
-  async setup(core: CoreSetup, plugins: SetupDeps) {
+  async setup(coreSetup: CoreSetup, plugins: SetupDeps) {
     fileUploadRoutes(coreSetup.http.createRouter());
 
-    initTelemetry(coreSetup, plugins.usageCollection);
+    initFileUploadTelemetry(coreSetup, plugins.usageCollection);
   }
 
   start(core: CoreStart) {}

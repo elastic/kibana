@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { initFileUploadTelemetry } from './usage_collector';
-export { updateTelemetry } from './telemetry';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/plugins/file_upload'],
+};

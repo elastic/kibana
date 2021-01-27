@@ -11,7 +11,10 @@ import { getTelemetry, initTelemetry, Telemetry } from './telemetry';
 import { telemetryMappingsType } from './mappings';
 import { setInternalRepository } from './internal_repository';
 
-export function initTelemetry(coreSetup: CoreSetup, usageCollection: UsageCollectionSetup) {
+export function initFileUploadTelemetry(
+  coreSetup: CoreSetup,
+  usageCollection: UsageCollectionSetup
+) {
   coreSetup.savedObjects.registerType(telemetryMappingsType);
   registerUsageCollector(usageCollection);
   coreSetup.getStartServices().then(([core]) => {
