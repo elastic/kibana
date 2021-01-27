@@ -229,7 +229,7 @@ export class ReindexWorker {
     const fakeRequest: FakeRequest = { headers: credential };
 
     const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
-    const callAsCurrentUser = scopedClusterClient.callAsCurrentUser.bind(scopedClusterClient);
+    const callAsCurrentUser = scopedClusterClient.asCurrentUser;
     const actions = reindexActionsFactory(this.client, callAsCurrentUser);
 
     const service = reindexServiceFactory(

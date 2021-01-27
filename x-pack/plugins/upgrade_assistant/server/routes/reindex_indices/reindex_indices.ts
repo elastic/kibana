@@ -55,7 +55,14 @@ export function createReindexWorker({
   apmIndexPatterns,
 }: CreateReindexWorker) {
   const esClient = elasticsearchService.client;
-  return new ReindexWorker(savedObjects, credentialStore, esClient, logger, licensing, apmIndexPatterns);
+  return new ReindexWorker(
+    savedObjects,
+    credentialStore,
+    esClient,
+    logger,
+    licensing,
+    apmIndexPatterns
+  );
 }
 
 const mapAnyErrorToKibanaHttpResponse = (e: any) => {

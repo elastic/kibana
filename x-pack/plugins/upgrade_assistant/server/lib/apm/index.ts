@@ -16,7 +16,7 @@ export async function getDeprecatedApmIndices(
   clusterClient: IScopedClusterClient,
   indexPatterns: string[] = []
 ): Promise<EnrichedDeprecationInfo[]> {
-  const indices = await clusterClient.asCurrentUser.indices.getMapping({
+  const { body: indices } = await clusterClient.asCurrentUser.indices.getMapping({
     index: indexPatterns.join(','),
     // we include @timestamp to prevent filtering mappings without a version
     // since @timestamp is expected to always exist

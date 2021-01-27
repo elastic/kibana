@@ -15,9 +15,9 @@ import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
 
 const asApiResponse = <T>(body: T): RequestEvent<T> =>
-({
-  body,
-} as RequestEvent<T>);
+  ({
+    body,
+  } as RequestEvent<T>);
 
 describe('getUpgradeAssistantStatus', () => {
   const resolvedIndices = {

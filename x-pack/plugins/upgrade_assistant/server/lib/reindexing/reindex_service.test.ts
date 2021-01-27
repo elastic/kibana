@@ -85,7 +85,7 @@ describe('reindexService', () => {
       actions,
       log,
       licensingPluginSetup,
-      [ 'apm-*'],
+      ['apm-*']
     );
   });
 
