@@ -77,12 +77,9 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       logger: this.systemLogger,
       // TODO: get index prefix from config.get(kibana.index)
       indexNameRoot: kibanaIndex,
-      clusterClientPromise: core
-        .getStartServices()
-        .then(([{ elasticsearch }]) => elasticsearch.legacy.client),
       elasticsearchClientPromise: core
         .getStartServices()
-        .then(([{ elasticsearch }]) => elasticsearch.client),
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
       kibanaVersion: this.kibanaVersion,
     });
 

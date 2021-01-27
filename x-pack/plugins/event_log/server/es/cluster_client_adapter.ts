@@ -7,20 +7,17 @@
 import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
 import { reject, isUndefined } from 'lodash';
-import { Client } from 'elasticsearch';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger, LegacyClusterClient } from 'src/core/server';
-import { ESSearchResponse } from '../../../../typings/elasticsearch';
+import { Logger, ElasticsearchClient } from 'src/core/server';
 import { EsContext } from '.';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 import { esKuery } from '../../../../../src/plugins/data/server';
-import { IndexPatternTitleAndFields } from '../lib/get_index_pattern';
+import { getEventLogIndexPattern } from '../lib/get_index_pattern';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
 
-export type EsClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 
 export interface Doc {
@@ -30,8 +27,7 @@ export interface Doc {
 
 export interface ConstructorOpts {
   logger: Logger;
-  clusterClientPromise: Promise<EsClusterClient>;
-  eventLogIndexPattern: Promise<IndexPatternTitleAndFields | undefined>;
+  elasticsearchClientPromise: Promise<ElasticsearchClient>;
   context: EsContext;
 }
 
@@ -44,16 +40,14 @@ export interface QueryEventsBySavedObjectResult {
 
 export class ClusterClientAdapter {
   private readonly logger: Logger;
-  private readonly clusterClientPromise: Promise<EsClusterClient>;
-  private readonly eventLogIndexPattern: Promise<IndexPatternTitleAndFields | undefined>;
+  private readonly elasticsearchClientPromise: Promise<ElasticsearchClient>;
   private readonly docBuffer$: Subject<Doc>;
   private readonly context: EsContext;
   private readonly docsBufferedFlushed: Promise<void>;
 
   constructor(opts: ConstructorOpts) {
     this.logger = opts.logger;
-    this.clusterClientPromise = opts.clusterClientPromise;
-    this.eventLogIndexPattern = opts.eventLogIndexPattern;
+    this.elasticsearchClientPromise = opts.elasticsearchClientPromise;
     this.context = opts.context;
     this.docBuffer$ = new Subject<Doc>();
 
@@ -102,7 +96,8 @@ export class ClusterClientAdapter {
     }
 
     try {
-      await this.callEs<ReturnType<Client['bulk']>>('bulk', { body: bulkBody });
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.bulk({ body: bulkBody });
     } catch (err) {
       this.logger.error(
         `error writing bulk events: "${err.message}"; docs: ${JSON.stringify(bulkBody)}`
@@ -116,7 +111,8 @@ export class ClusterClientAdapter {
       path: `/_ilm/policy/${policyName}`,
     };
     try {
-      await this.callEs('transport.request', request);
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.transport.request(request);
     } catch (err) {
       if (err.statusCode === 404) return false;
       throw new Error(`error checking existance of ilm policy: ${err.message}`);
@@ -124,14 +120,15 @@ export class ClusterClientAdapter {
     return true;
   }
 
-  public async createIlmPolicy(policyName: string, policy: unknown): Promise<void> {
+  public async createIlmPolicy(policyName: string, policy: Record<string, unknown>): Promise<void> {
     const request = {
       method: 'PUT',
       path: `/_ilm/policy/${policyName}`,
       body: policy,
     };
     try {
-      await this.callEs('transport.request', request);
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.transport.request(request);
     } catch (err) {
       throw new Error(`error creating ilm policy: ${err.message}`);
     }
@@ -140,27 +137,18 @@ export class ClusterClientAdapter {
   public async doesIndexTemplateExist(name: string): Promise<boolean> {
     let result;
     try {
-      result = await this.callEs<ReturnType<Client['indices']['existsTemplate']>>(
-        'indices.existsTemplate',
-        { name }
-      );
+      const esClient = await this.elasticsearchClientPromise;
+      result = (await esClient.indices.existsTemplate({ name })).body;
     } catch (err) {
       throw new Error(`error checking existance of index template: ${err.message}`);
     }
     return result as boolean;
   }
 
-  public async createIndexTemplate(name: string, template: unknown): Promise<void> {
-    const addTemplateParams = {
-      name,
-      create: true,
-      body: template,
-    };
+  public async createIndexTemplate(name: string, template: Record<string, unknown>): Promise<void> {
     try {
-      await this.callEs<ReturnType<Client['indices']['putTemplate']>>(
-        'indices.putTemplate',
-        addTemplateParams
-      );
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.indices.putTemplate({ name, body: template, create: true });
     } catch (err) {
       // The error message doesn't have a type attribute we can look to guarantee it's due
       // to the template already existing (only long message) so we'll check ourselves to see
@@ -176,19 +164,21 @@ export class ClusterClientAdapter {
   public async doesAliasExist(name: string): Promise<boolean> {
     let result;
     try {
-      result = await this.callEs<ReturnType<Client['indices']['existsAlias']>>(
-        'indices.existsAlias',
-        { name }
-      );
+      const esClient = await this.elasticsearchClientPromise;
+      result = (await esClient.indices.existsAlias({ name })).body;
     } catch (err) {
       throw new Error(`error checking existance of initial index: ${err.message}`);
     }
     return result as boolean;
   }
 
-  public async createIndex(name: string, body: unknown = {}): Promise<void> {
+  public async createIndex(
+    name: string,
+    body: string | Record<string, unknown> = {}
+  ): Promise<void> {
     try {
-      await this.callEs<ReturnType<Client['indices']['create']>>('indices.create', {
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.indices.create({
         index: name,
         body,
       });
@@ -225,12 +215,16 @@ export class ClusterClientAdapter {
     };
     const namespaceQuery = namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
 
+    const esClient = await this.elasticsearchClientPromise;
     let dslFilterQuery;
     try {
       dslFilterQuery = filter
         ? esKuery.toElasticsearchQuery(
             esKuery.fromKueryExpression(filter),
-            await this.eventLogIndexPattern
+            await getEventLogIndexPattern({
+              index,
+              esClient,
+            })
           )
         : [];
     } catch (err) {
@@ -304,8 +298,10 @@ export class ClusterClientAdapter {
 
     try {
       const {
-        hits: { hits, total },
-      }: ESSearchResponse<unknown, {}> = await this.callEs('search', {
+        body: {
+          hits: { hits, total },
+        },
+      } = await esClient.search({
         index,
         track_total_hits: true,
         body,
@@ -314,30 +310,12 @@ export class ClusterClientAdapter {
         page,
         per_page: perPage,
         total: total.value,
-        data: hits.map((hit) => hit._source) as IValidatedEvent[],
+        data: hits.map((hit: { _source: unknown }) => hit._source) as IValidatedEvent[],
       };
     } catch (err) {
       throw new Error(
         `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
       );
-    }
-  }
-
-  // We have a common problem typing ES-DSL Queries
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async callEs<ESQueryResult = unknown>(operation: string, body?: any) {
-    try {
-      this.debug(`callEs(${operation}) calls:`, body);
-      const clusterClient = await this.clusterClientPromise;
-      const result = await clusterClient.callAsInternalUser(operation, body);
-      this.debug(`callEs(${operation}) result:`, result);
-      return result as ESQueryResult;
-    } catch (err) {
-      this.debug(`callEs(${operation}) error:`, {
-        message: err.message,
-        statusCode: err.statusCode,
-      });
-      throw err;
     }
   }
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { FieldDescriptor, IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
 
 export interface IndexPatternTitleAndFields {
@@ -14,14 +14,12 @@ export interface IndexPatternTitleAndFields {
 
 export const getEventLogIndexPattern = async ({
   index,
-  elasticsearchClientPromise,
+  esClient,
 }: {
   index: string;
-  elasticsearchClientPromise: Promise<IClusterClient>;
+  esClient: ElasticsearchClient;
 }): Promise<IndexPatternTitleAndFields | undefined> => {
-  const indexPatternsFetcher = new IndexPatternsFetcher(
-    (await elasticsearchClientPromise).asInternalUser
-  );
+  const indexPatternsFetcher = new IndexPatternsFetcher(esClient);
 
   try {
     const fields = await indexPatternsFetcher.getFieldsForWildcard({

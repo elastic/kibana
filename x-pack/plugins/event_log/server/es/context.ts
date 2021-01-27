@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, LegacyClusterClient, IClusterClient } from 'src/core/server';
+import { Logger, ElasticsearchClient } from 'src/core/server';
 
 import { EsNames, getEsNames } from './names';
 import { initializeEs } from './init';
 import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
 import { createReadySignal, ReadySignal } from '../lib/ready_signal';
-import { getEventLogIndexPattern } from '../lib/get_index_pattern';
-
-export type EsClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
 export interface EsContext {
   logger: Logger;
@@ -35,10 +32,9 @@ export function createEsContext(params: EsContextCtorParams): EsContext {
 
 export interface EsContextCtorParams {
   logger: Logger;
-  clusterClientPromise: Promise<EsClusterClient>;
   indexNameRoot: string;
   kibanaVersion: string;
-  elasticsearchClientPromise: Promise<IClusterClient>;
+  elasticsearchClientPromise: Promise<ElasticsearchClient>;
 }
 
 class EsContextImpl implements EsContext {
@@ -55,11 +51,7 @@ class EsContextImpl implements EsContext {
     this.initialized = false;
     this.esAdapter = new ClusterClientAdapter({
       logger: params.logger,
-      clusterClientPromise: params.clusterClientPromise,
-      eventLogIndexPattern: getEventLogIndexPattern({
-        elasticsearchClientPromise: params.elasticsearchClientPromise,
-        index: this.esNames.indexPattern,
-      }),
+      elasticsearchClientPromise: params.elasticsearchClientPromise,
       context: this,
     });
   }
