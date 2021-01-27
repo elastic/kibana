@@ -26,6 +26,7 @@ export interface UiSettingsParams<T = unknown>
 |  [readonly](./kibana-plugin-core-server.uisettingsparams.readonly.md) | <code>boolean</code> | a flag indicating that value cannot be changed |
 |  [requiresPageReload](./kibana-plugin-core-server.uisettingsparams.requirespagereload.md) | <code>boolean</code> | a flag indicating whether new value applying requires page reloading |
 |  [schema](./kibana-plugin-core-server.uisettingsparams.schema.md) | <code>Type&lt;T&gt;</code> |  |
+|  [sensitive](./kibana-plugin-core-server.uisettingsparams.sensitive.md) | <code>boolean</code> | a flag indicating that value might contain user sensitive data. used by telemetry to mask the value of the setting when sent. |
 |  [type](./kibana-plugin-core-server.uisettingsparams.type.md) | <code>UiSettingsType</code> | defines a type of UI element [UiSettingsType](./kibana-plugin-core-server.uisettingstype.md) |
 |  [validation](./kibana-plugin-core-server.uisettingsparams.validation.md) | <code>ImageValidation &#124; StringValidation</code> |  |
 |  [value](./kibana-plugin-core-server.uisettingsparams.value.md) | <code>T</code> | default value to fall back to if a user doesn't provide any |
