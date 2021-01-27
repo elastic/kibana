@@ -312,6 +312,9 @@ logging:
     - context: telemetry
       level: all
       appenders: [json-file-appender]
+    - context: metrics.ops
+      level: debug
+      appenders: [console]
 ```
 
 Here is what we get with the config above:
@@ -324,6 +327,7 @@ Here is what we get with the config above:
 | server           | console, file            | fatal |
 | optimize         | console                  | error |
 | telemetry        | json-file-appender       | all   |
+| metrics.ops      | console                  | debug |
 
 
 The `root` logger has a dedicated configuration node since this context is special and should always exist. By 
@@ -341,7 +345,25 @@ Or disable logging entirely with `off`:
 ```yaml
 logging.root.level: off
 ```
+### Dedicated loggers
 
+The `metrics.ops` logger is configured with `debug` level and will automatically output sample system and process information at a regular interval.
+The metrics that are logged are a subset of the data collected and are formatted in the log message as follows:
+
+| Ops formatted log property | Location in metrics service | Log units
+| :------------------------- | :-------------------------- | :-------------------------- |
+| memory | process.memory.heap.used_in_bytes | [depends on the value](http://numeraljs.com/#format), typically MB or GB |
+| uptime  | process.uptime_in_millis | HH:mm:ss |
+| load  | os.load | [ "load for the last 1 min" "load for the last 5 min" "load for the last 15 min"] |
+| delay | process.event_loop_delay | ms |
+
+The log interval is the same as the interval at which system and process information is refreshed and is configurable under `ops.interval`:
+
+```yaml
+ops.interval: 5000
+```
+
+The minimum interval is 100ms and defaults to 5000ms.
 ## Usage
 
 Usage is very straightforward, one should just get a logger for a specific context and use it to log messages with 
