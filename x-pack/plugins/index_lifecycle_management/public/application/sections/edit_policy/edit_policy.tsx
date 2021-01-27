@@ -37,7 +37,7 @@ import { toasts } from '../../services/notification';
 
 import { savePolicy } from './save_policy';
 
-import { ColdPhase, DeletePhase, HotPhase, PolicyJsonFlyout, WarmPhase } from './components';
+import { ColdPhase, DeletePhase, HotPhase, PolicyJsonFlyout, WarmPhase, Timeline } from './components';
 
 import { createPolicyNameValidations, createSerializer, deserializer, Form, schema } from './form';
 

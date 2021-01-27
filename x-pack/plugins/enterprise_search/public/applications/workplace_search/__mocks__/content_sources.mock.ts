@@ -323,3 +323,14 @@ export const mostRecentIndexJob = {
   activeReindexJobId: '123',
   numDocumentsWithErrors: 1,
 };
+
+export const contentItems = [
+  {
+    id: '1234',
+    last_updated: '2021-01-21',
+  },
+  {
+    id: '1235',
+    last_updated: '2021-01-20',
+  },
+];

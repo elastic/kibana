@@ -12,5 +12,6 @@ export { PolicyJsonFlyout } from './policy_json_flyout';
 export { DescribedFormRow, ToggleFieldWithDescribedFormRow } from './described_form_row';
 export { FieldLoadingError } from './field_loading_error';
 export { ActiveHighlight } from './active_highlight';
+export { Timeline } from './timeline';
 
 export * from './phases';
