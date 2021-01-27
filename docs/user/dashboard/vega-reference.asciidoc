@@ -223,7 +223,7 @@ experimental[] Access the Elastic Map Service files via the same mechanism:
 ----
 url: {
   // "type" defaults to "elasticsearch" otherwise
-  type: emsfile
+  %type%: emsfile
   // Name of the file, exactly as in the Region map visualization
   name: World Countries
 }
@@ -289,7 +289,7 @@ experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[dat
 ----
 url: {
   // "type" defaults to "elasticsearch" otherwise
-  type: emsfile
+  %type%: emsfile
   // Name of the file, exactly as in the Region map visualization
   name: World Countries
 }
