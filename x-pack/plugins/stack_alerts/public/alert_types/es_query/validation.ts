@@ -37,7 +37,7 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
   if (!esQuery) {
     errors.esQuery.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredQueryText', {
-        defaultMessage: 'ES Query is required.',
+        defaultMessage: 'ES query is required.',
       })
     );
   } else {
@@ -46,7 +46,7 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
       if (!parsedQuery.query) {
         errors.esQuery.push(
           i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredEsQueryText', {
-            defaultMessage: `ES Query with "query" field is required.`,
+            defaultMessage: `Query field is required.`,
           })
         );
       }
@@ -61,7 +61,7 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
   if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
     errors.threshold0.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold0Text', {
-        defaultMessage: 'Threshold0 is required.',
+        defaultMessage: 'Threshold 0 is required.',
       })
     );
   }
@@ -74,14 +74,14 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
   ) {
     errors.threshold1.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold1Text', {
-        defaultMessage: 'Threshold1 is required.',
+        defaultMessage: 'Threshold 1 is required.',
       })
     );
   }
   if (threshold && threshold.length === 2 && threshold[0] > threshold[1]) {
     errors.threshold1.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.greaterThenThreshold0Text', {
-        defaultMessage: 'Threshold1 should be > Threshold0.',
+        defaultMessage: 'Threshold 1 must be > Threshold 0.',
       })
     );
   }

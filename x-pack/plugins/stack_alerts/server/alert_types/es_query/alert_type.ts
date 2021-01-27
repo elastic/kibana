@@ -40,7 +40,7 @@ export function getAlertType(
   const actionVariableContextDateLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextDateLabel',
     {
-      defaultMessage: 'The date the alert met the threshold condition.',
+      defaultMessage: 'The date that the alert met the threshold condition.',
     }
   );
 
@@ -61,14 +61,14 @@ export function getAlertType(
   const actionVariableContextMessageLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextMessageLabel',
     {
-      defaultMessage: 'A pre-constructed message for the alert.',
+      defaultMessage: 'A message for the alert.',
     }
   );
 
   const actionVariableContextTitleLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextTitleLabel',
     {
-      defaultMessage: 'A pre-constructed title for the alert.',
+      defaultMessage: 'A title for the alert.',
     }
   );
 
@@ -82,7 +82,7 @@ export function getAlertType(
   const actionVariableContextQueryLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextQueryLabel',
     {
-      defaultMessage: 'The stringifed ES query.',
+      defaultMessage: 'The string representation of the ES query.',
     }
   );
 
@@ -97,14 +97,14 @@ export function getAlertType(
   const actionVariableContextThresholdComparatorLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextThresholdComparatorLabel',
     {
-      defaultMessage: 'A comparison function to use to determine if the threshold as been met.',
+      defaultMessage: 'A function to determine if the threshold has been met.',
     }
   );
 
   const actionVariableContextConditionsLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextConditionsLabel',
     {
-      defaultMessage: 'A string describing the threshold condition.',
+      defaultMessage: 'A string that describes the threshold condition.',
     }
   );
 

@@ -183,7 +183,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         const hits = rawResponse.hits;
         setTestQueryResult(
           i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
-            defaultMessage: 'Query matched {count} documents in the last {window}',
+            defaultMessage: 'Query matched {count} documents in the last {window}.',
             values: { count: hits.total, window },
           })
         );
@@ -271,7 +271,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           >
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.queryPrompt.help"
-              defaultMessage="ES Query DSL documentation."
+              defaultMessage="ES Query DSL documentation"
             />
           </EuiLink>
         }
@@ -283,7 +283,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           theme="github"
           data-test-subj="queryJsonEditor"
           aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {
-            defaultMessage: 'Es query editor',
+            defaultMessage: 'ES query editor',
           })}
           value={xJson}
           onChange={(xjson: string) => {
