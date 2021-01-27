@@ -12,6 +12,7 @@ import {
 } from '../../../../../../common/mock/endpoint';
 import React from 'react';
 import { forceHTMLElementOffsetWith } from './test_utils';
+import { fireEvent, act } from '@testing-library/react';
 
 describe('when using EffectedPolicySelect component', () => {
   const generator = new EndpointDocGenerator('effected-poilcy-select');
@@ -55,12 +56,14 @@ describe('when using EffectedPolicySelect component', () => {
   describe('and policy entries exist', () => {
     let renderProps: Partial<EffectedPolicySelectProps>;
 
+    const policyId = 'abc123';
+    const policyTestSubj = `policy-${policyId}`;
     const renderWithPolicies = () => render(renderProps);
 
     beforeEach(() => {
       const policy = generator.generatePolicyPackagePolicy();
       policy.name = 'test policy A';
-      policy.id = 'abc123';
+      policy.id = policyId;
 
       renderProps = {
         options: [policy],
@@ -68,14 +71,23 @@ describe('when using EffectedPolicySelect component', () => {
     });
 
     it('should display policies', () => {
-      const renderResult = renderWithPolicies();
-      const { getByTestId } = renderResult;
-      expect(getByTestId('policy-abc123'));
+      const { getByTestId } = renderWithPolicies();
+      expect(getByTestId(policyTestSubj));
     });
 
-    it.todo('should disable policy items if global is checked');
+    it('should disable policy items if global is checked', () => {
+      const { getByTestId } = renderWithPolicies();
+      expect(getByTestId(policyTestSubj).getAttribute('aria-disabled')).toEqual('true');
+    });
 
-    it.todo('should enable policy items if global is unchecked');
+    it('should enable policy items if global is unchecked', async () => {
+      const { getByTestId } = renderWithPolicies();
+      act(() => {
+        fireEvent.click(getByTestId('test-globalSwitch'));
+      });
+      handleOnChange;
+      expect(getByTestId(policyTestSubj).getAttribute('aria-disabled')).toEqual('false');
+    });
 
     it.todo('should call onChange with selection');
 
