@@ -11,9 +11,7 @@ import { Map as MapboxMap, MapboxOptions, MapMouseEvent } from 'mapbox-gl';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 // @ts-expect-error
 import { spritesheet } from '@elastic/maki';
-// @ts-expect-error
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
-// @ts-expect-error
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';

@@ -24,7 +24,6 @@ import {
   euiPaletteGray,
   // @ts-ignore
   euiPaletteColorBlind,
-  // @ts-expect-error
 } from '@elastic/eui/lib/services';
 import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { PercentilesFieldMeta } from '../../../common/descriptor_types';
