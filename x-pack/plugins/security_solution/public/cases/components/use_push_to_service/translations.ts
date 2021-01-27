@@ -80,6 +80,13 @@ export const LINK_CLOUD_DEPLOYMENT = i18n.translate(
   }
 );
 
+export const LINK_APPROPRIATE_LICENSE = i18n.translate(
+  'xpack.securitySolution.case.caseView.appropiateLicense',
+  {
+    defaultMessage: 'appropriate license',
+  }
+);
+
 export const LINK_CONNECTOR_CONFIGURE = i18n.translate(
   'xpack.securitySolution.case.caseView.connectorConfigureLink',
   {
