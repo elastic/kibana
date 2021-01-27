@@ -8,14 +8,14 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 
-import { VisOptionsProps } from '../../../../../vis_default_editor/public';
+import { VisEditorOptionsProps } from '../../../../../visualizations/public';
 
-export interface ValidationVisOptionsProps<T, E = unknown> extends VisOptionsProps<T> {
+export interface ValidationVisOptionsProps<T, E = unknown> extends VisEditorOptionsProps<T> {
   setMultipleValidity(paramName: string, isValid: boolean): void;
   extraProps?: E;
 }
 
-interface ValidationWrapperProps<T, E> extends VisOptionsProps<T> {
+interface ValidationWrapperProps<T, E> extends VisEditorOptionsProps<T> {
   component: React.ComponentType<ValidationVisOptionsProps<T, E>>;
   extraProps?: E;
 }
