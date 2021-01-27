@@ -154,7 +154,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
               defaultMessage="Indices to query"
             />
           }
-          isInvalid={errors.index.length > 0 && index !== undefined && index.length > 0}
+          isInvalid={errors.index.length > 0 && index != null && index.length > 0}
           error={errors.index}
           helpText={
             <FormattedMessage
@@ -167,7 +167,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
             fullWidth
             async
             isLoading={areIndicesLoading}
-            isInvalid={errors.index.length > 0 && index !== undefined && index.length > 0}
+            isInvalid={errors.index.length > 0 && index != null && index.length > 0}
             noSuggestions={!indexOptions.length}
             options={indexOptions}
             data-test-subj="thresholdIndexesComboBox"
