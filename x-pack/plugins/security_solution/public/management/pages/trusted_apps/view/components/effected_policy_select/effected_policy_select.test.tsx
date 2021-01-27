@@ -15,20 +15,20 @@ import { forceHTMLElementOffsetWith } from './test_utils';
 import { fireEvent, act } from '@testing-library/react';
 
 describe('when using EffectedPolicySelect component', () => {
-  const generator = new EndpointDocGenerator('effected-poilcy-select');
+  const generator = new EndpointDocGenerator('effected-policy-select');
+
   let mockedContext: AppContextTestRender;
+  let componentProps: EffectedPolicySelectProps;
+  let renderResult: ReturnType<AppContextTestRender['render']>;
+
   const handleOnChange: jest.MockedFunction<EffectedPolicySelectProps['onChange']> = jest.fn();
   const render = (props: Partial<EffectedPolicySelectProps> = {}) => {
-    const componentProps = {
-      ...{
-        options: [],
-        isGlobal: true,
-        onChange: handleOnChange,
-        'data-test-subj': 'test',
-      },
+    componentProps = {
+      ...componentProps,
       ...props,
     };
-    return mockedContext.render(<EffectedPolicySelect {...componentProps} />);
+    renderResult = mockedContext.render(<EffectedPolicySelect {...componentProps} />);
+    return renderResult;
   };
   let resetHTMLElementOffsetWidth: () => void;
 
@@ -39,6 +39,13 @@ describe('when using EffectedPolicySelect component', () => {
   afterAll(() => resetHTMLElementOffsetWidth());
 
   beforeEach(() => {
+    // Default props
+    componentProps = {
+      options: [],
+      isGlobal: true,
+      onChange: handleOnChange,
+      'data-test-subj': 'test',
+    };
     mockedContext = createAppRootMockRenderer();
   });
 
@@ -54,43 +61,106 @@ describe('when using EffectedPolicySelect component', () => {
   });
 
   describe('and policy entries exist', () => {
-    let renderProps: Partial<EffectedPolicySelectProps>;
-
     const policyId = 'abc123';
     const policyTestSubj = `policy-${policyId}`;
-    const renderWithPolicies = () => render(renderProps);
+
+    const toggleGlobalSwitch = () => {
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('test-globalSwitch'));
+      });
+    };
+
+    const clickOnPolicy = () => {
+      act(() => {
+        fireEvent.click(renderResult.getByTestId(policyTestSubj));
+      });
+    };
 
     beforeEach(() => {
       const policy = generator.generatePolicyPackagePolicy();
       policy.name = 'test policy A';
       policy.id = policyId;
 
-      renderProps = {
+      componentProps = {
+        ...componentProps,
         options: [policy],
       };
+
+      handleOnChange.mockImplementation((selection) => {
+        componentProps = {
+          ...componentProps,
+          ...selection,
+        };
+        renderResult.rerender(<EffectedPolicySelect {...componentProps} />);
+      });
     });
 
     it('should display policies', () => {
-      const { getByTestId } = renderWithPolicies();
+      const { getByTestId } = render();
       expect(getByTestId(policyTestSubj));
     });
 
     it('should disable policy items if global is checked', () => {
-      const { getByTestId } = renderWithPolicies();
+      const { getByTestId } = render();
       expect(getByTestId(policyTestSubj).getAttribute('aria-disabled')).toEqual('true');
     });
 
     it('should enable policy items if global is unchecked', async () => {
-      const { getByTestId } = renderWithPolicies();
-      act(() => {
-        fireEvent.click(getByTestId('test-globalSwitch'));
-      });
-      handleOnChange;
+      const { getByTestId } = render();
+      toggleGlobalSwitch();
       expect(getByTestId(policyTestSubj).getAttribute('aria-disabled')).toEqual('false');
     });
 
-    it.todo('should call onChange with selection');
+    it('should call onChange with selection when global is toggled', () => {
+      render();
 
-    it.todo('should maintain policies selection even if global was checked');
+      toggleGlobalSwitch();
+      expect(handleOnChange.mock.calls[0][0]).toEqual({
+        isGlobal: false,
+        selected: [],
+      });
+
+      toggleGlobalSwitch();
+      expect(handleOnChange.mock.calls[1][0]).toEqual({
+        isGlobal: true,
+        selected: [],
+      });
+    });
+
+    it('should not allow clicking on policies when global is true', () => {
+      render();
+
+      clickOnPolicy();
+      expect(handleOnChange.mock.calls.length).toBe(0);
+
+      // Select a Policy, then switch back to global and try to click the policy again (should be disabled and trigger onChange())
+      toggleGlobalSwitch();
+      clickOnPolicy();
+      toggleGlobalSwitch();
+      clickOnPolicy();
+      expect(handleOnChange.mock.calls.length).toBe(3);
+      expect(handleOnChange.mock.calls[2][0]).toEqual({
+        isGlobal: true,
+        selected: [componentProps.options[0]],
+      });
+    });
+
+    it('should maintain policies selection even if global was checked', () => {
+      render();
+
+      toggleGlobalSwitch();
+      clickOnPolicy();
+      expect(handleOnChange.mock.calls[1][0]).toEqual({
+        isGlobal: false,
+        selected: [componentProps.options[0]],
+      });
+
+      // Toggle isGlobal back to True
+      toggleGlobalSwitch();
+      expect(handleOnChange.mock.calls[2][0]).toEqual({
+        isGlobal: true,
+        selected: [componentProps.options[0]],
+      });
+    });
   });
 });
