@@ -447,10 +447,10 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
 def allCiTasks() {
   withTasks {
     tasks.check()
-    tasks.lint()
-    tasks.test()
-    tasks.functionalOss()
-    tasks.functionalXpack()
+    // tasks.lint()
+    // tasks.test()
+    // tasks.functionalOss()
+    // tasks.functionalXpack()
   }
 }
 
