@@ -41,6 +41,7 @@ jest.mock('@elastic/eui', () => {
         }}
       />
     ),
+    EuiIcon: 'eui-icon', // using custom react-svg icon causes issues, mocking for now.
   };
 });
 
@@ -236,6 +237,12 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     actions: {
       setWaitForSnapshotPolicy,
       savePolicy,
+      timeline: {
+        hasHotPhase: () => exists('ilmTimelineHotPhase'),
+        hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
+        hasColdPhase: () => exists('ilmTimelineColdPhase'),
+        hasDeletePhase: () => exists('ilmTimelineDeletePhase'),
+      },
       hot: {
         setMaxSize,
         setMaxDocs,
