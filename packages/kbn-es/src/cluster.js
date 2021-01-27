@@ -274,14 +274,12 @@ exports.Cluster = class Cluster {
       (options.esEnvVars.ES_JAVA_OPTS ? `${options.esEnvVars.ES_JAVA_OPTS} ` : '') +
       '-Xms1g -Xmx1g';
 
-    // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
-    options.esEnvVars.JAVA_HOME = options.esEnvVars.JAVA_HOME || '';
-
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
       env: {
         ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
+        JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
         ...(options.esEnvVars || {}),
       },
       stdio: ['ignore', 'pipe', 'pipe'],
