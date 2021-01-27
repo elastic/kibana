@@ -14,6 +14,7 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
     public static mapping = {
       title: 'text',
       description: 'text',
+      hideHistogram: 'boolean',
       hits: 'integer',
       columns: 'keyword',
       grid: 'object',
@@ -34,6 +35,7 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
         mapping: {
           title: 'text',
           description: 'text',
+          hideHistogram: 'boolean',
           hits: 'integer',
           columns: 'keyword',
           grid: 'object',
