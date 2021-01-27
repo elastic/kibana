@@ -101,7 +101,7 @@ describe('Unsaved listing', () => {
 
   it('Redirects to the requested dashboard in edit mode when continue editing clicked', async () => {
     const { props, component } = mountWith({});
-    const getEditButton = () => findTestSubject(component, 'edit-unsaved-dashboardUnsavedOne');
+    const getEditButton = () => findTestSubject(component, 'edit-unsaved-Dashboard-Unsaved-One');
     await waitFor(() => {
       component.update();
       expect(getEditButton().length).toEqual(1);
@@ -120,8 +120,7 @@ describe('Unsaved listing', () => {
       .fn()
       .mockImplementation(() => [DASHBOARD_PANELS_UNSAVED_ID]);
     const { props, component } = mountWith({ services });
-    const getEditButton = () =>
-      findTestSubject(component, `edit-unsaved-${DASHBOARD_PANELS_UNSAVED_ID}`);
+    const getEditButton = () => findTestSubject(component, `edit-unsaved-New-Dashboard`);
     await waitFor(() => {
       component.update();
       expect(getEditButton().length).toBe(1);
@@ -137,7 +136,7 @@ describe('Unsaved listing', () => {
   it('Shows a warning then clears changes when delete unsaved changes is pressed', async () => {
     const { services, component } = mountWith({});
     const getDiscardButton = () =>
-      findTestSubject(component, 'discard-unsaved-dashboardUnsavedOne');
+      findTestSubject(component, 'discard-unsaved-Dashboard-Unsaved-One');
     await waitFor(() => {
       component.update();
       expect(getDiscardButton().length).toBe(1);
