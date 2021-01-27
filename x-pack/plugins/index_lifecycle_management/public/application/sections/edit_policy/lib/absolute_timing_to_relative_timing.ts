@@ -21,6 +21,7 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { flow } from 'fp-ts/function';
 
 import { splitSizeAndUnits } from '../../../lib/policies';
 
@@ -185,3 +186,14 @@ export const normalizeTimingsToHumanReadable = ({
     cold: millisecondsToDays(phases.cold),
   };
 };
+
+/**
+ * Given {@link FormInternal}, extract the min_age values for each phase
+ * and calculate human readable strings for communicating how long data will
+ * remain in a phase.
+ */
+export const absoluteTimingToRelativeTiming = flow(
+  formDataToAbsoluteTimings,
+  calculateRelativeFromAbsoluteMilliseconds,
+  normalizeTimingsToHumanReadable
+);
