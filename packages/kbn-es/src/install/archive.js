@@ -88,7 +88,6 @@ async function appendToConfig(installPath, key, value) {
  *
  * @param {String} installPath
  * @param {ToolingLog} log
- * @param {boolean} bundledJDK
  * @param {Array<[string, string]>} secureSettings List of custom Elasticsearch secure settings to
  * add into the keystore.
  */
