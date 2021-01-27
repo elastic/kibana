@@ -4,24 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { useCallback, useMemo } from 'react';
 import * as rt from 'io-ts';
-
+import { TimeRange } from '../../../../../../../src/plugins/data/public';
 import { useUrlState } from '../../../utils/use_url_state';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
 } from '../../../hooks/use_kibana_timefilter_time';
+import { decodeOrThrow } from '../../../../common/runtime_types';
 
-const autoRefreshRT = rt.union([
-  rt.type({
-    interval: rt.number,
-    isPaused: rt.boolean,
-  }),
-  rt.undefined,
-]);
+const autoRefreshRT = rt.type({
+  interval: rt.number,
+  isPaused: rt.boolean,
+});
+
+export type AutoRefresh = rt.TypeOf<typeof autoRefreshRT>;
+const urlAutoRefreshRT = rt.union([autoRefreshRT, rt.undefined]);
+const decodeAutoRefreshUrlState = decodeOrThrow(urlAutoRefreshRT);
+const defaultAutoRefreshState = {
+  isPaused: false,
+  interval: 30000,
+};
 
 export const stringTimeRangeRT = rt.type({
   startTime: rt.string,
@@ -30,6 +34,7 @@ export const stringTimeRangeRT = rt.type({
 export type StringTimeRange = rt.TypeOf<typeof stringTimeRangeRT>;
 
 const urlTimeRangeRT = rt.union([stringTimeRangeRT, rt.undefined]);
+const decodeTimeRangeUrlState = decodeOrThrow(urlTimeRangeRT);
 
 const TIME_RANGE_URL_STATE_KEY = 'timeRange';
 const AUTOREFRESH_URL_STATE_KEY = 'autoRefresh';
@@ -39,28 +44,39 @@ export const useLogAnalysisResultsUrlState = () => {
   const [getTime] = useKibanaTimefilterTime(TIME_DEFAULTS);
   const { from: start, to: end } = getTime();
 
-  const [timeRange, setTimeRange] = useUrlState({
-    defaultState: {
+  const defaultTimeRangeState = useMemo(() => {
+    return {
       startTime: start,
       endTime: end,
-    },
-    decodeUrlState: (value: unknown) =>
-      pipe(urlTimeRangeRT.decode(value), fold(constant(undefined), identity)),
+    };
+  }, [start, end]);
+
+  const [timeRange, setTimeRange] = useUrlState({
+    defaultState: defaultTimeRangeState,
+    decodeUrlState: decodeTimeRangeUrlState,
     encodeUrlState: urlTimeRangeRT.encode,
     urlStateKey: TIME_RANGE_URL_STATE_KEY,
     writeDefaultState: true,
   });
 
-  useSyncKibanaTimeFilterTime(TIME_DEFAULTS, { from: timeRange.startTime, to: timeRange.endTime });
+  const handleTimeFilterChange = useCallback(
+    (newTimeRange: TimeRange) => {
+      const { from, to } = newTimeRange;
+      setTimeRange({ startTime: from, endTime: to });
+    },
+    [setTimeRange]
+  );
+
+  useSyncKibanaTimeFilterTime(
+    TIME_DEFAULTS,
+    { from: timeRange.startTime, to: timeRange.endTime },
+    handleTimeFilterChange
+  );
 
   const [autoRefresh, setAutoRefresh] = useUrlState({
-    defaultState: {
-      isPaused: false,
-      interval: 30000,
-    },
-    decodeUrlState: (value: unknown) =>
-      pipe(autoRefreshRT.decode(value), fold(constant(undefined), identity)),
-    encodeUrlState: autoRefreshRT.encode,
+    defaultState: defaultAutoRefreshState,
+    decodeUrlState: decodeAutoRefreshUrlState,
+    encodeUrlState: urlAutoRefreshRT.encode,
     urlStateKey: AUTOREFRESH_URL_STATE_KEY,
     writeDefaultState: true,
   });

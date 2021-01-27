@@ -37,15 +37,13 @@ export const useUrlState = <State>({
     return getParamFromQueryString(queryString, urlStateKey);
   }, [queryString, urlStateKey]);
 
-  const decodedState = useMemo(() => decodeUrlState(decodeRisonUrlState(urlStateString)), [
-    decodeUrlState,
-    urlStateString,
-  ]);
+  const decodedState = useMemo(() => {
+    return decodeUrlState(decodeRisonUrlState(urlStateString));
+  }, [decodeUrlState, urlStateString]);
 
-  const state = useMemo(() => (typeof decodedState !== 'undefined' ? decodedState : defaultState), [
-    defaultState,
-    decodedState,
-  ]);
+  const state = useMemo(() => {
+    return typeof decodedState !== 'undefined' ? decodedState : defaultState;
+  }, [defaultState, decodedState]);
 
   const setState = useCallback(
     (newState: State | undefined) => {

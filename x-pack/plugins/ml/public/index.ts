@@ -38,6 +38,11 @@ export type {
   RenderCellValue,
 } from './shared';
 
+export type { AnomalySwimlaneEmbeddableInput } from './embeddables';
+
+export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './embeddables';
+export { CONTROLLED_BY_SWIM_LANE_FILTER } from './ui_actions';
+
 // Static exports
 export { getSeverityColor, getSeverityType } from '../common/util/anomaly_utils';
 export { ANOMALY_SEVERITY } from '../common';
