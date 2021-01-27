@@ -30,6 +30,7 @@ import {
   CARD_DELETE_BUTTON_LABEL,
   CONDITION_FIELD_TITLE,
   OPERATOR_TITLE,
+  CARD_EDIT_BUTTON_LABEL,
 } from '../../translations';
 
 type Entry = MacosLinuxConditionEntry | WindowsConditionEntry;
@@ -74,13 +75,15 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
   },
 ];
 
-interface TrustedAppCardProps {
+export interface TrustedAppCardProps {
   trustedApp: Immutable<TrustedApp>;
   onDelete: (trustedApp: Immutable<TrustedApp>) => void;
+  onEdit: (trustedApp: Immutable<TrustedApp>) => void;
 }
 
-export const TrustedAppCard = memo(({ trustedApp, onDelete }: TrustedAppCardProps) => {
+export const TrustedAppCard = memo(({ trustedApp, onDelete, onEdit }: TrustedAppCardProps) => {
   const handleDelete = useCallback(() => onDelete(trustedApp), [onDelete, trustedApp]);
+  const handleEdit = useCallback(() => onEdit(trustedApp), [onEdit, trustedApp]);
 
   return (
     <ItemDetailsCard>
@@ -131,6 +134,16 @@ export const TrustedAppCard = memo(({ trustedApp, onDelete }: TrustedAppCardProp
         badge="and"
         responsive
       />
+
+      <ItemDetailsAction
+        size="s"
+        color="primary"
+        fill
+        onClick={handleEdit}
+        data-test-subj="trustedAppEditButton"
+      >
+        {CARD_EDIT_BUTTON_LABEL}
+      </ItemDetailsAction>
 
       <ItemDetailsAction
         size="s"

@@ -32,7 +32,7 @@ import {
 
 import { NO_RESULTS_MESSAGE } from '../../translations';
 
-import { TrustedAppCard } from '../trusted_app_card';
+import { TrustedAppCard, TrustedAppCardProps } from '../trusted_app_card';
 
 export interface PaginationBarProps {
   pagination: Pagination;
@@ -83,6 +83,12 @@ export const TrustedAppsGrid = memo(() => {
     type: 'trustedAppDeletionDialogStarted',
     payload: { entry: trustedApp },
   }));
+
+  const handleTrustedAppEdit: TrustedAppCardProps['onEdit'] = useCallback(() => {
+    // eslint-disable-next-line no-console
+    console.log('edit TA');
+  }, []);
+
   const handlePaginationChange = useTrustedAppsNavigateCallback(({ index, size }) => ({
     page_index: index,
     page_size: size,
@@ -113,7 +119,11 @@ export const TrustedAppsGrid = memo(() => {
             <EuiFlexGroup direction="column">
               {listItems.map((item) => (
                 <EuiFlexItem grow={false} key={item.id}>
-                  <TrustedAppCard trustedApp={item} onDelete={handleTrustedAppDelete} />
+                  <TrustedAppCard
+                    trustedApp={item}
+                    onDelete={handleTrustedAppDelete}
+                    onEdit={handleTrustedAppEdit}
+                  />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
