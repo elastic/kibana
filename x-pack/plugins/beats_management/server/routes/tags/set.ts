@@ -5,13 +5,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { BeatsManagementRouter } from '../../lib/types';
 import { REQUIRED_LICENSES } from '../../../common/constants';
 import { BeatTag } from '../../../common/domain_types';
 import { ReturnTypeUpsert } from '../../../common/return_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-export const registerSetTagRoute = (router: IRouter) => {
+export const registerSetTagRoute = (router: BeatsManagementRouter) => {
   // TODO: write to Kibana audit log file
   router.put(
     {

@@ -6,6 +6,7 @@
 
 import { mergeServerAndStaticData } from '../views/content_sources/sources_logic';
 import { staticSourceData } from '../views/content_sources/source_data';
+import { groups } from './groups.mock';
 
 export const contentSources = [
   {
@@ -35,6 +36,62 @@ export const contentSources = [
     errorReason: 0,
     allowsReauth: true,
     boost: 0.5,
+  },
+];
+
+export const fullContentSources = [
+  {
+    ...contentSources[0],
+    activities: [
+      {
+        details: ['detail'],
+        event: 'this is an event',
+        time: '2021-01-20',
+        status: 'syncing',
+      },
+    ],
+    details: [
+      {
+        title: 'My Thing',
+        description: 'This is a thing.',
+      },
+    ],
+    summary: [
+      {
+        count: 1,
+        type: 'summary',
+      },
+    ],
+    groups,
+    custom: false,
+    accessToken: '123token',
+    urlField: 'myLink',
+    titleField: 'heading',
+    licenseSupportsPermissions: true,
+    serviceTypeSupportsPermissions: true,
+    indexPermissions: true,
+    hasPermissions: true,
+    urlFieldIsLinkable: true,
+    createdAt: '2021-01-20',
+    serviceName: 'myService',
+  },
+  {
+    ...contentSources[1],
+    activities: [],
+    details: [],
+    summary: [],
+    groups: [],
+    custom: true,
+    accessToken: '123token',
+    urlField: 'url',
+    titleField: 'title',
+    licenseSupportsPermissions: false,
+    serviceTypeSupportsPermissions: false,
+    indexPermissions: false,
+    hasPermissions: false,
+    urlFieldIsLinkable: false,
+    createdAt: '2021-01-20',
+    serviceName: 'custom',
   },
 ];
 
@@ -266,3 +323,14 @@ export const mostRecentIndexJob = {
   activeReindexJobId: '123',
   numDocumentsWithErrors: 1,
 };
+
+export const contentItems = [
+  {
+    id: '1234',
+    last_updated: '2021-01-21',
+  },
+  {
+    id: '1235',
+    last_updated: '2021-01-20',
+  },
+];
