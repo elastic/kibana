@@ -36,6 +36,7 @@ export interface IndexPatternManagmentContext {
   indexPatternManagementStart: IndexPatternManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   getMlCardState: () => MlCardState;
+  fieldFormatEditors: IndexPatternFieldEditorStart['fieldFormatEditors'];
 }
 
 export type IndexPatternManagmentContextValue = KibanaReactContextValue<IndexPatternManagmentContext>;
