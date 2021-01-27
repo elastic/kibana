@@ -70,9 +70,10 @@ export interface PhaseAgeInMilliseconds {
 const phaseOrder: Phase[] = ['hot', 'warm', 'cold', 'delete'];
 
 const getMinAge = (phase: MinAgePhase, formData: FormInternal) => ({
-  min_age: formData.phases[phase]?.min_age
-    ? formData.phases[phase]!.min_age! + formData._meta[phase].minAgeUnit
-    : '0ms',
+  min_age:
+    formData.phases && formData.phases[phase]?.min_age
+      ? formData.phases[phase]!.min_age! + formData._meta[phase].minAgeUnit
+      : '0ms',
 });
 
 const formDataToAbsoluteTimings = (formData: FormInternal): AbsoluteTimings => {
