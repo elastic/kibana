@@ -5,12 +5,7 @@
  */
 
 import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
-import indexPatternSavedObjects from './test_resources/sample_index_pattern_saved_objects';
-import {
-  buildMapsIndexPatternsTelemetry,
-  buildMapsSavedObjectsTelemetry,
-  getLayerLists,
-} from './maps_telemetry';
+import { buildMapsSavedObjectsTelemetry, getLayerLists } from './maps_telemetry';
 
 describe('buildMapsSavedObjectsTelemetry', () => {
   test('returns zeroed telemetry data when there are no saved objects', async () => {
@@ -82,18 +77,6 @@ describe('buildMapsSavedObjectsTelemetry', () => {
         },
       },
       mapsTotalCount: 5,
-    });
-  });
-
-  test('returns expected telemetry data from index patterns', async () => {
-    const layerLists = getLayerLists(mapSavedObjects);
-    const result = await buildMapsIndexPatternsTelemetry(layerLists);
-
-    expect(result).toMatchObject({
-      indexPatternsWithGeoFieldCount: 3,
-      indexPatternsWithGeoPointFieldCount: 2,
-      indexPatternsWithGeoShapeFieldCount: 1,
-      geoShapeAggLayersCount: 2,
     });
   });
 });
