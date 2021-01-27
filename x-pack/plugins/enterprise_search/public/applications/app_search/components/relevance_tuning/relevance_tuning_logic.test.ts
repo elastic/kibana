@@ -1037,7 +1037,7 @@ describe('RelevanceTuningLogic', () => {
         expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
 
-      it('will can also update operation', () => {
+      it('can also update operation', () => {
         mount({
           searchSettings: searchSettingsWithBoost({
             factor: 1,
@@ -1055,6 +1055,19 @@ describe('RelevanceTuningLogic', () => {
             operation: 'add',
           })
         );
+      });
+    });
+
+    describe('updateSearchValue', () => {
+      it('should update the query then update search results', () => {
+        mount();
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchQuery');
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.updateSearchValue('foo');
+
+        expect(RelevanceTuningLogic.actions.setSearchQuery).toHaveBeenCalledWith('foo');
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
     });
   });

@@ -68,17 +68,18 @@ interface RelevanceTuningActions {
     boostIndex: number,
     valueIndex: number
   ): { name: string; boostIndex: number; valueIndex: number };
-  updateBoostSelectOption: (
+  updateBoostSelectOption(
     name: string,
     boostIndex: number,
     optionType: keyof BaseBoost,
     value: string
-  ) => {
+  ): {
     name: string;
     boostIndex: number;
     optionType: keyof BaseBoost;
     value: string;
   };
+  updateSearchValue(query: string): string;
 }
 
 interface RelevanceTuningValues {
@@ -191,6 +192,7 @@ export const RelevanceTuningLogic = kea<
       optionType,
       value,
     }),
+    updateSearchValue: (query) => query,
   }),
   reducers: () => ({
     searchSettings: [
@@ -544,6 +546,10 @@ export const RelevanceTuningLogic = kea<
           [name]: updatedBoosts,
         },
       });
+      actions.getSearchResults();
+    },
+    updateSearchValue: (query) => {
+      actions.setSearchQuery(query);
       actions.getSearchResults();
     },
   }),
