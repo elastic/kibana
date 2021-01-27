@@ -12,11 +12,13 @@ interface MetricFieldVisConfig extends FieldVisConfig {
   statsMaxDecimalPlaces: number;
   docCountFormatted: string;
   topValuesCount: number;
+  viewableInLens: boolean;
 }
 
 interface NonMetricFieldVisConfig extends FieldVisConfig {
   docCountFormatted: string;
   exampleCount: number;
+  viewableInLens: boolean;
 }
 
 interface TestData {
@@ -68,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
           docCountFormatted: '5000 (100%)',
           statsMaxDecimalPlaces: 3,
           topValuesCount: 10,
+          viewableInLens: true,
         },
       ],
       nonMetricFields: [
@@ -79,6 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           docCountFormatted: '5000 (100%)',
           exampleCount: 2,
+          viewableInLens: true,
         },
         {
           fieldName: '@version',
@@ -88,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: '@version.keyword',
@@ -97,6 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'airline',
@@ -106,6 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 10,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'type',
@@ -115,6 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: 'type.keyword',
@@ -124,6 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
       ],
       emptyFields: ['sourcetype'],
@@ -157,6 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
           docCountFormatted: '5000 (100%)',
           statsMaxDecimalPlaces: 3,
           topValuesCount: 10,
+          viewableInLens: true,
         },
       ],
       nonMetricFields: [
@@ -168,6 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           docCountFormatted: '5000 (100%)',
           exampleCount: 2,
+          viewableInLens: true,
         },
         {
           fieldName: '@version',
@@ -177,6 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: '@version.keyword',
@@ -186,6 +198,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'airline',
@@ -195,6 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 5,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'type',
@@ -204,6 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: 'type.keyword',
@@ -213,6 +228,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
       ],
       emptyFields: ['sourcetype'],
@@ -246,6 +262,7 @@ export default function ({ getService }: FtrProviderContext) {
           docCountFormatted: '5000 (100%)',
           statsMaxDecimalPlaces: 3,
           topValuesCount: 10,
+          viewableInLens: true,
         },
       ],
       nonMetricFields: [
@@ -257,6 +274,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           docCountFormatted: '5000 (100%)',
           exampleCount: 2,
+          viewableInLens: true,
         },
         {
           fieldName: '@version',
@@ -266,6 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: '@version.keyword',
@@ -275,6 +294,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'airline',
@@ -284,6 +304,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 5,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
         {
           fieldName: 'type',
@@ -293,6 +314,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '',
+          viewableInLens: false,
         },
         {
           fieldName: 'type.keyword',
@@ -302,6 +324,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           exampleCount: 1,
           docCountFormatted: '5000 (100%)',
+          viewableInLens: true,
         },
       ],
       emptyFields: ['sourcetype'],
@@ -333,6 +356,7 @@ export default function ({ getService }: FtrProviderContext) {
           loading: false,
           docCountFormatted: '408 (100%)',
           exampleCount: 10,
+          viewableInLens: false,
         },
       ],
       emptyFields: [],
@@ -416,7 +440,8 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.dataVisualizerTable.assertNumberFieldContents(
           fieldRow.fieldName,
           fieldRow.docCountFormatted,
-          fieldRow.topValuesCount
+          fieldRow.topValuesCount,
+          fieldRow.viewableInLens
         );
       }
 
@@ -425,7 +450,8 @@ export default function ({ getService }: FtrProviderContext) {
           fieldRow.type,
           fieldRow.fieldName!,
           fieldRow.docCountFormatted,
-          fieldRow.exampleCount
+          fieldRow.exampleCount,
+          fieldRow.viewableInLens
         );
       }
 

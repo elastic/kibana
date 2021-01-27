@@ -147,12 +147,12 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
               data-test-subj="mlDataVisualizerCreateAdvancedJobCard"
             />
           </Link>
+          <EuiSpacer size="m" />
         </>
       )}
 
       {discoverLink && (
         <>
-          <EuiSpacer size="m" />
           <EuiTitle size="s">
             <h2>
               <FormattedMessage
@@ -164,14 +164,20 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
           <EuiSpacer size="m" />
           <EuiFlexItem>
             <EuiCard
+              data-test-subj="mlDataVisualizerViewInDiscoverCard"
               icon={<EuiIcon size="xxl" type={`discoverApp`} />}
+              description={i18n.translate(
+                'xpack.ml.datavisualizer.actionsPanel.viewIndexInDiscoverDescription',
+                {
+                  defaultMessage: 'Explore index in Discover',
+                }
+              )}
               title={
                 <FormattedMessage
                   id="xpack.ml.datavisualizer.actionsPanel.viewIndexInDiscoverTitle"
                   defaultMessage="View index in Discover"
                 />
               }
-              description=""
               href={discoverLink}
             />
           </EuiFlexItem>

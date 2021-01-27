@@ -10,7 +10,7 @@ import { IndexPattern } from '../../../../../../../../../../src/plugins/data/com
 import { LensPublicStart } from '../../../../../../../../lens/public';
 import { FieldVisConfig } from '../../../../stats_table/types';
 import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
-import { CombinedQuery } from '../../expanded_row/geo_point_content';
+import { CombinedQuery } from '../../../common';
 
 export function getActions(
   indexPattern: IndexPattern,
@@ -42,7 +42,7 @@ export function getActions(
           });
         }
       },
-      'data-test-subj': 'mlActionButtonStartDatafeed',
+      'data-test-subj': 'mlActionButtonViewInLens',
     },
   ];
 }

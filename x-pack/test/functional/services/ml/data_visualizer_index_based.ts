@@ -8,9 +8,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningDataVisualizerIndexBasedProvider({
   getService,
+  getPageObjects,
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const PageObjects = getPageObjects(['header', 'common', 'discover']);
+  const queryBar = getService('queryBar');
 
   return {
     async assertTimeRangeSelectorSectionExists() {
@@ -146,6 +149,30 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async clickCreateAdvancedJobButton() {
       await testSubjects.clickWhenNotDisabled('mlDataVisualizerCreateAdvancedJobCard');
+    },
+
+    async assertViewInDiscoverCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerViewInDiscoverCard');
+    },
+
+    async assertViewInDiscoverCardNotExists() {
+      await testSubjects.missingOrFail('mlDataVisualizerViewInDiscoverCard');
+    },
+
+    async clickViewInDiscoverButton() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlDataVisualizerViewInDiscoverCard');
+      });
+    },
+    async assertDiscoverPageQuery(expectedQueryString: string) {
+      await PageObjects.discover.waitForDiscoverAppOnScreen();
+      await retry.tryForTime(5000, async () => {
+        const queryString = await queryBar.getQueryString();
+        expect(queryString).to.eql(
+          expectedQueryString,
+          `Expected global query bar to have query ${expectedQueryString}, got ${queryString}`
+        );
+      });
     },
   };
 }

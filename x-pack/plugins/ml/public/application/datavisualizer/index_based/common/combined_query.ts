@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FieldHistogramRequestConfig, FieldRequestConfig } from './request';
-export type { CombinedQuery } from './combined_query';
+export interface CombinedQuery {
+  searchString: string | { [key: string]: any };
+  searchQueryLanguage: string;
+}

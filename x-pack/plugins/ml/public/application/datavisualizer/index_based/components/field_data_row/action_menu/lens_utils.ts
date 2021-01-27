@@ -12,8 +12,8 @@ import type { DataType } from '../../../../../../../../lens/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { IndexPatternColumn } from '../../../../../../../../lens/public/indexpattern_datasource/operations/definitions';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LayerConfig } from '../../../../../../../../lens/public/xy_visualization/types';
-import { CombinedQuery } from '../../expanded_row/geo_point_content';
+import type { LayerConfig } from '../../../../../../../../lens/public/xy_visualization/types';
+import type { CombinedQuery } from '../../../common';
 
 interface ColumnsAndLayer {
   columns: Record<string, IndexPatternColumn>;
