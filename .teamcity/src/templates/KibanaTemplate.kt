@@ -85,7 +85,7 @@ object KibanaTemplate : Template({
       password("env.KIBANA_CI_REPORTER_KEY", "", display = ParameterDisplay.HIDDEN)
       password(
         "env.KIBANA_CI_REPORTER_KEY_BASE64",
-        "credentialsJSON:86878779-4cf7-4434-82af-5164a1b992fb",
+        "credentialsJSON:57147e19-f9c6-4808-9c41-a1eb1b34677a",
         display = ParameterDisplay.HIDDEN
       )
     }
