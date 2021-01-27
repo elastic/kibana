@@ -5,9 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { first } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiFieldSearch } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFormRow,
+  EuiCheckbox,
+  EuiFlexItem,
+  EuiSelect,
+  EuiFieldSearch,
+} from '@elastic/eui';
 import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
 
 interface Props {
@@ -29,6 +36,11 @@ export const InfluencerFilter = ({
     nodeType,
   ]);
 
+  // If initial props contain a fieldValue, assume it was passed in from loaded alertParams,
+  // and enable the UI element
+  const [isEnabled, updateIsEnabled] = useState(fieldValue ? true : false);
+  const [storedFieldValue, updateStoredFieldValue] = useState(fieldValue);
+
   useEffect(
     () =>
       nodeType === 'k8s'
@@ -40,33 +52,78 @@ export const InfluencerFilter = ({
   const onSelectFieldName = useCallback((e) => onChangeFieldName(e.target.value), [
     onChangeFieldName,
   ]);
-  const onUpdateFieldValue = useCallback((e) => onChangeFieldValue(e.target.value), [
-    onChangeFieldValue,
-  ]);
+  const onUpdateFieldValue = useCallback(
+    (e) => {
+      updateStoredFieldValue(e.target.value);
+      onChangeFieldValue(e.target.value);
+    },
+    [onChangeFieldValue]
+  );
+
+  const toggleEnabled = useCallback(() => {
+    const nextState = !isEnabled;
+    updateIsEnabled(nextState);
+    if (!nextState) {
+      onChangeFieldValue('');
+    } else {
+      onChangeFieldValue(storedFieldValue);
+    }
+  }, [isEnabled, updateIsEnabled, onChangeFieldValue, storedFieldValue]);
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiSelect
-          id="selectInfluencerFieldName"
-          value={fieldName}
-          onChange={onSelectFieldName}
-          options={fieldNameOptions}
+    <EuiFormRow
+      label={
+        <EuiCheckbox
+          label={filterByNodeLabel}
+          id="anomalyAlertFilterByNodeCheckbox"
+          onChange={toggleEnabled}
+          checked={isEnabled}
         />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFieldSearch
-          value={fieldValue}
-          onChange={onUpdateFieldValue}
-          placeholder={i18n.translate(
-            'xpack.infra.metrics.alertFlyout.anomalyInfluencerFilterPlaceholder',
-            {
-              defaultMessage: '(Any)',
-            }
-          )}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      }
+      helpText={
+        isEnabled ? (
+          <>
+            {i18n.translate('xpack.infra.metrics.alertFlyout.anomalyFilterHelpText', {
+              defaultMessage:
+                'Limit the scope of your alert trigger to anomalies influenced by certain node(s).',
+            })}
+            <br />
+            {i18n.translate('xpack.infra.metrics.alertFlyout.anomalyFilterHelpTextExample', {
+              defaultMessage: 'For example: "my-node-1" or "my-node-*"',
+            })}
+          </>
+        ) : null
+      }
+      fullWidth
+      display="rowCompressed"
+    >
+      {isEnabled ? (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiSelect
+              id="selectInfluencerFieldName"
+              value={fieldName}
+              onChange={onSelectFieldName}
+              options={fieldNameOptions}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFieldSearch
+              value={storedFieldValue}
+              onChange={onUpdateFieldValue}
+              placeholder={i18n.translate(
+                'xpack.infra.metrics.alertFlyout.anomalyInfluencerFilterPlaceholder',
+                {
+                  defaultMessage: 'Everything',
+                }
+              )}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <></>
+      )}
+    </EuiFormRow>
   );
 };
 
@@ -91,3 +148,7 @@ const k8sFieldNames = [
     text: 'kubernetes.namespace',
   },
 ];
+
+const filterByNodeLabel = i18n.translate('xpack.infra.metrics.alertFlyout.filterByNodeLabel', {
+  defaultMessage: 'Filter by node',
+});

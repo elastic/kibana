@@ -74,7 +74,9 @@ export const Expression: React.FC<Props> = (props) => {
     createDerivedIndexPattern,
   ]);
 
-  const [influencerFieldName, updateInfluencerFieldName] = useState('host.name');
+  const [influencerFieldName, updateInfluencerFieldName] = useState(
+    alertParams.influencerFilter?.fieldName ?? 'host.name'
+  );
 
   useEffect(() => {
     setAlertParams('hasInfraMLCapabilities', hasInfraMLCapabilities);
@@ -234,25 +236,13 @@ export const Expression: React.FC<Props> = (props) => {
       </StyledExpressionRow>
       <EuiSpacer size={'m'} />
 
-      <EuiFormRow
-        label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
-          defaultMessage: 'Filter (optional)',
-        })}
-        helpText={i18n.translate('xpack.infra.metrics.alertFlyout.anomalyFilterHelpText', {
-          defaultMessage:
-            'Limit the scope of your alert trigger to anomalies influenced by certain node(s).',
-        })}
-        fullWidth
-        display="rowCompressed"
-      >
-        <InfluencerFilter
-          nodeType={alertParams.nodeType}
-          fieldName={influencerFieldName}
-          fieldValue={alertParams.influencerFilter?.fieldValue ?? ''}
-          onChangeFieldName={updateInfluencerFieldName}
-          onChangeFieldValue={updateInfluencerFieldValue}
-        />
-      </EuiFormRow>
+      <InfluencerFilter
+        nodeType={alertParams.nodeType}
+        fieldName={influencerFieldName}
+        fieldValue={alertParams.influencerFilter?.fieldValue ?? ''}
+        onChangeFieldName={updateInfluencerFieldName}
+        onChangeFieldValue={updateInfluencerFieldValue}
+      />
 
       <EuiSpacer size={'m'} />
       <AlertPreview
