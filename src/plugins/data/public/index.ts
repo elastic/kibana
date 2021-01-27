@@ -307,6 +307,7 @@ import {
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
+  boundsDescendingRaw,
   // expressions utils
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -383,6 +384,7 @@ export {
   SearchTimeoutError,
   TimeoutErrorMode,
   PainlessError,
+  noSearchSessionStorageCapabilityMessage,
 } from './search';
 
 export type {
@@ -416,6 +418,7 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    boundsDescendingRaw,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,

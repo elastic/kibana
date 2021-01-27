@@ -62,6 +62,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     requestType: RENDER_AS.POINT,
   });
   clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
+  clusterSourceDescriptor.applyGlobalTime = documentSource.getApplyGlobalTime();
   clusterSourceDescriptor.metrics = [
     {
       type: AGG_TYPE.COUNT,

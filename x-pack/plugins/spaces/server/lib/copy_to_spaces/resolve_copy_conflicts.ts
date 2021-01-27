@@ -29,6 +29,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
     options: Pick<CopyOptions, 'includeReferences' | 'objects'>
   ) => {
     const objectStream = await savedObjectsExporter.exportByObjects({
+      request,
       namespace: spaceIdToNamespace(sourceSpaceId),
       includeReferencesDeep: options.includeReferences,
       excludeExportDetails: true,
