@@ -7,7 +7,7 @@
 import { uniq } from 'lodash';
 import { SemVer } from 'semver';
 import {
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
@@ -15,14 +15,22 @@ import {
 } from 'src/core/server';
 import { CURRENT_VERSION } from '../../common/version';
 
+interface Nodes {
+  nodes: {
+    [nodeId: string]: { version: string };
+  };
+}
+
 /**
  * Returns an array of all the unique Elasticsearch Node Versions in the Elasticsearch cluster.
  */
-export const getAllNodeVersions = async (adminClient: ILegacyScopedClusterClient) => {
+export const getAllNodeVersions = async (adminClient: IScopedClusterClient) => {
   // Get the version information for all nodes in the cluster.
-  const { nodes } = (await adminClient.callAsInternalUser('nodes.info', {
-    filterPath: 'nodes.*.version',
-  })) as { nodes: { [nodeId: string]: { version: string } } };
+  const response = await adminClient.asInternalUser.nodes.info<Nodes>({
+    filter_path: 'nodes.*.version',
+  });
+
+  const nodes = response.body.nodes;
 
   const versionStrings = Object.values(nodes).map(({ version }) => version);
 
@@ -62,13 +70,13 @@ export const esVersionCheck = async (
   ctx: RequestHandlerContext,
   response: KibanaResponseFactory
 ) => {
-  const { client } = ctx.core.elasticsearch.legacy;
+  const { client } = ctx.core.elasticsearch;
   let allNodeVersions: SemVer[];
 
   try {
     allNodeVersions = await getAllNodeVersions(client);
   } catch (e) {
-    if (e.status === 403) {
+    if (e.statusCode === 403) {
       return response.forbidden({ body: e.message });
     }
 

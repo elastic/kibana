@@ -21,8 +21,10 @@ export function readCliArgs(argv: string[]) {
       'skip-os-packages',
       'rpm',
       'deb',
-      'docker',
+      'docker-images',
+      'docker-contexts',
       'skip-docker-ubi',
+      'skip-docker-centos',
       'release',
       'skip-node-download',
       'verbose',
@@ -42,7 +44,8 @@ export function readCliArgs(argv: string[]) {
       debug: true,
       rpm: null,
       deb: null,
-      docker: null,
+      'docker-images': null,
+      'docker-contexts': null,
       oss: null,
       'version-qualifier': '',
     },
@@ -69,7 +72,7 @@ export function readCliArgs(argv: string[]) {
 
   // In order to build a docker image we always need
   // to generate all the platforms
-  if (flags.docker) {
+  if (flags['docker-images'] || flags['docker-contexts']) {
     flags['all-platforms'] = true;
   }
 
@@ -79,7 +82,12 @@ export function readCliArgs(argv: string[]) {
     }
 
     // build all if no flags specified
-    if (flags.rpm === null && flags.deb === null && flags.docker === null) {
+    if (
+      flags.rpm === null &&
+      flags.deb === null &&
+      flags['docker-images'] === null &&
+      flags['docker-contexts'] === null
+    ) {
       return true;
     }
 
@@ -95,8 +103,10 @@ export function readCliArgs(argv: string[]) {
     createArchives: !Boolean(flags['skip-archives']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
-    createDockerPackage: isOsPackageDesired('docker'),
-    createDockerUbiPackage: isOsPackageDesired('docker') && !Boolean(flags['skip-docker-ubi']),
+    createDockerCentOS:
+      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-centos']),
+    createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
+    createDockerContexts: isOsPackageDesired('docker-contexts'),
     targetAllPlatforms: Boolean(flags['all-platforms']),
   };
 
