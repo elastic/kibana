@@ -28,7 +28,7 @@ import {
   migrateSettingsToV7100,
   migrateAgentActionToV7100,
 } from './migrations/to_v7_10_0';
-import { migrateAgentToV7120 } from './migrations/to_v7_12_0';
+import { migrateAgentToV7120, migrateAgentPolicyToV7120 } from './migrations/to_v7_12_0';
 
 /*
  * Saved object types and mappings
@@ -168,6 +168,7 @@ const getSavedObjectTypes = (
     },
     migrations: {
       '7.10.0': migrateAgentPolicyToV7100,
+      '7.12.0': migrateAgentPolicyToV7120,
     },
   },
   [ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE]: {
