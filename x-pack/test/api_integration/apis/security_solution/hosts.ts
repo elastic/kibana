@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
             to: TO,
             from: FROM,
           },
-          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           sort: {
             field: HostsFields.lastSeen,
@@ -76,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
             field: HostsFields.lastSeen,
             direction: Direction.asc,
           },
-          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           pagination: {
             activePage: 2,
@@ -132,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
             to: TO,
             from: FROM,
           },
-          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           inspect: false,
         })
@@ -147,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send({
           factoryQueryType: HostsQueries.firstLastSeen,
-          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           hostName: 'zeek-sensor-san-francisco',
         })
