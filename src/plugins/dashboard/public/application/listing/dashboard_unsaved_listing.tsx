@@ -36,7 +36,12 @@ const DashboardUnsavedItem = ({
   const title = dashboard?.title ?? getNewDashboardTitle();
   return (
     <div className="dshUnsavedListingItem">
-      <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        className="dshUnsavedListingItem__heading"
+        responsive={false}
+      >
         <EuiFlexItem grow={false}>
           <EuiIcon color="text" className="dshUnsavedListingItem__icon" type="dashboardApp" />
         </EuiFlexItem>
@@ -49,9 +54,10 @@ const DashboardUnsavedItem = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
-        gutterSize="none"
         alignItems="flexStart"
+        gutterSize="none"
         className="dshUnsavedListingItem__actions"
+        responsive={false}
       >
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -67,6 +73,7 @@ const DashboardUnsavedItem = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            flush="left"
             size="s"
             color="danger"
             onClick={onDiscardClick}
