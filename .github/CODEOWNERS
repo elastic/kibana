@@ -91,6 +91,7 @@
 /src/plugins/dashboard/ @elastic/kibana-presentation
 /src/plugins/input_control_vis/ @elastic/kibana-presentation
 /src/plugins/vis_type_markdown/ @elastic/kibana-presentation
+/test/functional/apps/dashboard/  @elastic/kibana-presentation
 /x-pack/plugins/canvas/  @elastic/kibana-presentation
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-presentation
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-presentation
