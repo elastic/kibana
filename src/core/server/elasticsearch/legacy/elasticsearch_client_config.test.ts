@@ -27,7 +27,8 @@ test('parses minimally specified config', () => {
         hosts: ['http://localhost/elasticsearch'],
         requestHeadersWhitelist: [],
       },
-      logger.get()
+      logger.get(),
+      'custom-type'
     )
   ).toMatchInlineSnapshot(`
     Object {
@@ -82,7 +83,8 @@ test('parses fully specified config', () => {
 
   const elasticsearchClientConfig = parseElasticsearchClientConfig(
     elasticsearchConfig,
-    logger.get()
+    logger.get(),
+    'custom-type'
   );
 
   // Check that original references aren't used.
@@ -169,7 +171,8 @@ test('parses config timeouts of moment.Duration type', () => {
         hosts: ['http://localhost:9200/elasticsearch'],
         requestHeadersWhitelist: [],
       },
-      logger.get()
+      logger.get(),
+      'custom-type'
     )
   ).toMatchInlineSnapshot(`
     Object {
@@ -213,6 +216,7 @@ describe('#auth', () => {
           requestHeadersWhitelist: [],
         },
         logger.get(),
+        'custom-type',
         { auth: false }
       )
     ).toMatchInlineSnapshot(`
@@ -263,6 +267,7 @@ describe('#auth', () => {
           password: 'changeme',
         },
         logger.get(),
+        'custom-type',
         { auth: true }
       )
     ).toMatchInlineSnapshot(`
@@ -302,6 +307,7 @@ describe('#auth', () => {
           username: 'elastic',
         },
         logger.get(),
+        'custom-type',
         { auth: true }
       )
     ).toMatchInlineSnapshot(`
@@ -341,7 +347,8 @@ describe('#customHeaders', () => {
         hosts: ['http://localhost/elasticsearch'],
         requestHeadersWhitelist: [],
       },
-      logger.get()
+      logger.get(),
+      'custom-type'
     );
     expect(parsedConfig.hosts[0].headers).toEqual({
       [headerKey]: 'foo',
@@ -360,7 +367,8 @@ describe('#log', () => {
         hosts: ['http://localhost/elasticsearch'],
         requestHeadersWhitelist: [],
       },
-      logger.get()
+      logger.get(),
+      'custom-type'
     );
 
     const esLogger = new parsedConfig.log();
@@ -414,7 +422,8 @@ describe('#log', () => {
         requestHeadersWhitelist: [],
         log: customLogger,
       },
-      logger.get()
+      logger.get(),
+      'custom-type'
     );
 
     expect(parsedConfig.log).toBe(customLogger);
@@ -434,7 +443,8 @@ describe('#ssl', () => {
           requestHeadersWhitelist: [],
           ssl: { verificationMode: 'none' },
         },
-        logger.get()
+        logger.get(),
+        'custom-type'
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -474,7 +484,8 @@ describe('#ssl', () => {
         requestHeadersWhitelist: [],
         ssl: { verificationMode: 'certificate' },
       },
-      logger.get()
+      logger.get(),
+      'custom-type'
     );
 
     // `checkServerIdentity` shouldn't check hostname when verificationMode is certificate.
@@ -522,7 +533,8 @@ describe('#ssl', () => {
           requestHeadersWhitelist: [],
           ssl: { verificationMode: 'full' },
         },
-        logger.get()
+        logger.get(),
+        'custom-type'
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -563,7 +575,8 @@ describe('#ssl', () => {
           requestHeadersWhitelist: [],
           ssl: { verificationMode: 'misspelled' as any },
         },
-        logger.get()
+        logger.get(),
+        'custom-type'
       )
     ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: misspelled"`);
   });
@@ -588,6 +601,7 @@ describe('#ssl', () => {
           },
         },
         logger.get(),
+        'custom-type',
         { ignoreCertAndKey: true }
       )
     ).toMatchInlineSnapshot(`

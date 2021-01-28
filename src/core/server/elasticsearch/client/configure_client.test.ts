@@ -76,14 +76,14 @@ describe('configureClient', () => {
   });
 
   it('calls `parseClientOptions` with the correct parameters', () => {
-    configureClient(config, { logger, scoped: false });
+    configureClient(config, { logger, type: 'test', scoped: false });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
     expect(parseClientOptionsMock).toHaveBeenCalledWith(config, false);
 
     parseClientOptionsMock.mockClear();
 
-    configureClient(config, { logger, scoped: true });
+    configureClient(config, { logger, type: 'test', scoped: true });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
     expect(parseClientOptionsMock).toHaveBeenCalledWith(config, true);
@@ -95,7 +95,7 @@ describe('configureClient', () => {
     };
     parseClientOptionsMock.mockReturnValue(parsedOptions);
 
-    const client = configureClient(config, { logger, scoped: false });
+    const client = configureClient(config, { logger, type: 'test', scoped: false });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(parsedOptions);
@@ -103,7 +103,7 @@ describe('configureClient', () => {
   });
 
   it('listens to client on `response` events', () => {
-    const client = configureClient(config, { logger, scoped: false });
+    const client = configureClient(config, { logger, type: 'test', scoped: false });
 
     expect(client.on).toHaveBeenCalledTimes(1);
     expect(client.on).toHaveBeenCalledWith('response', expect.any(Function));
@@ -124,8 +124,13 @@ describe('configureClient', () => {
     }
 
     describe('logs each query', () => {
+      it('creates a query logger context based on the `type` parameter', () => {
+        configureClient(createFakeConfig(), { logger, type: 'test123' });
+        expect(logger.get).toHaveBeenCalledWith('query', 'test123');
+      });
+
       it('when request body is an object', () => {
-        const client = configureClient(createFakeConfig(), { logger, scoped: false });
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createResponseWithBody({
           seq_no_primary_term: true,
@@ -147,7 +152,7 @@ describe('configureClient', () => {
       });
 
       it('when request body is a string', () => {
-        const client = configureClient(createFakeConfig(), { logger, scoped: false });
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createResponseWithBody(
           JSON.stringify({
@@ -171,7 +176,7 @@ describe('configureClient', () => {
       });
 
       it('when request body is a buffer', () => {
-        const client = configureClient(createFakeConfig(), { logger, scoped: false });
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createResponseWithBody(
           Buffer.from(
@@ -197,7 +202,7 @@ describe('configureClient', () => {
       });
 
       it('when request body is a readable stream', () => {
-        const client = configureClient(createFakeConfig(), { logger, scoped: false });
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createResponseWithBody(
           Readable.from(
@@ -223,7 +228,7 @@ describe('configureClient', () => {
       });
 
       it('when request body is not defined', () => {
-        const client = configureClient(createFakeConfig(), { logger, scoped: false });
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createResponseWithBody();
 
@@ -239,7 +244,7 @@ describe('configureClient', () => {
       });
 
       it('properly encode queries', () => {
-        const client = configureClient(createFakeConfig(), { logger, scoped: false });
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createApiResponse({
           body: {},
@@ -264,7 +269,7 @@ describe('configureClient', () => {
       });
 
       it('logs queries even in case of errors', () => {
-        const client = configureClient(createFakeConfig(), { logger, scoped: false });
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createApiResponse({
           statusCode: 500,
@@ -299,7 +304,7 @@ describe('configureClient', () => {
       });
 
       it('logs debug when the client emits an @elastic/elasticsearch error', () => {
-        const client = configureClient(createFakeConfig(), { logger, scoped: false });
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createApiResponse({ body: {} });
         client.emit('response', new errors.TimeoutError('message', response), response);
@@ -314,7 +319,7 @@ describe('configureClient', () => {
       });
 
       it('logs debug when the client emits an ResponseError returned by elasticsearch', () => {
-        const client = configureClient(createFakeConfig(), { logger, scoped: false });
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createApiResponse({
           statusCode: 400,
@@ -344,7 +349,7 @@ describe('configureClient', () => {
       });
 
       it('logs default error info when the error response body is empty', () => {
-        const client = configureClient(createFakeConfig(), { logger, scoped: false });
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         let response = createApiResponse({
           statusCode: 400,

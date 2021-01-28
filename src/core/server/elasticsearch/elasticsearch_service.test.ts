@@ -99,7 +99,8 @@ describe('#setup', () => {
 
       expect(MockLegacyClusterClient).toHaveBeenCalledWith(
         expect.objectContaining(customConfig),
-        expect.objectContaining({ context: ['elasticsearch', 'some-custom-type'] }),
+        expect.objectContaining({ context: ['elasticsearch'] }),
+        'some-custom-type',
         expect.any(Function)
       );
     });
@@ -275,7 +276,8 @@ describe('#start', () => {
       expect(MockClusterClient).toHaveBeenCalledTimes(1);
       expect(MockClusterClient).toHaveBeenCalledWith(
         expect.objectContaining(customConfig),
-        expect.objectContaining({ context: ['elasticsearch', 'custom-type'] }),
+        expect.objectContaining({ context: ['elasticsearch'] }),
+        'custom-type',
         expect.any(Function)
       );
     });

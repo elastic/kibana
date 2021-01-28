@@ -15,12 +15,12 @@ import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 
 export const configureClient = (
   config: ElasticsearchClientConfig,
-  { logger, scoped = false }: { logger: Logger; scoped?: boolean }
+  { logger, type, scoped = false }: { logger: Logger; type: string; scoped?: boolean }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);
 
   const client = new Client(clientOptions);
-  addLogging(client, logger);
+  addLogging(client, logger, type);
 
   return client;
 };
@@ -67,8 +67,8 @@ function getResponseMessage(event: RequestEvent): string {
   return `${event.statusCode}\n${params.method} ${url}${body}`;
 }
 
-const addLogging = (client: Client, logger: Logger) => {
-  const queryLogger = logger.get('query');
+const addLogging = (client: Client, logger: Logger, type: string) => {
+  const queryLogger = logger.get('query', type);
 
   client.on('response', (error, event) => {
     if (event) {

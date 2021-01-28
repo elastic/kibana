@@ -75,6 +75,7 @@ type ExtendedConfigOptions = ConfigOptions &
 export function parseElasticsearchClientConfig(
   config: LegacyElasticsearchClientConfig,
   log: Logger,
+  type: string,
   { ignoreCertAndKey = false, auth = true }: LegacyElasticsearchClientConfigOverrides = {}
 ) {
   const esClientConfig: ExtendedConfigOptions = {
@@ -90,7 +91,7 @@ export function parseElasticsearchClientConfig(
   };
 
   if (esClientConfig.log == null) {
-    esClientConfig.log = getLoggerClass(log);
+    esClientConfig.log = getLoggerClass(log, type);
   }
 
   if (config.pingTimeout != null) {
@@ -179,8 +180,8 @@ function getDurationAsMs(duration: number | Duration) {
   return duration.asMilliseconds();
 }
 
-function getLoggerClass(log: Logger) {
-  const queryLogger = log.get('query');
+function getLoggerClass(log: Logger, type: string) {
+  const queryLogger = log.get('query', type);
 
   return class ElasticsearchClientLogging {
     public error(err: string | Error) {
