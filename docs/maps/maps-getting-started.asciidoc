@@ -1,9 +1,9 @@
 [role="xpack"]
 [[maps-getting-started]]
-== Create a map with multiple layers and data sources
+== Build, analyze, and share a map to compare metrics by country or region
 
 ++++
-<titleabbrev>Create a multilayer map</titleabbrev>
+<titleabbrev>Build, analyze, and share a map</titleabbrev>
 ++++
 
 If you are new to **Maps**, this tutorial is a good place to start.
