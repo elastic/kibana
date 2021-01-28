@@ -19,15 +19,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
-  // Added to resolve Failing test: https://github.com/elastic/kibana/issues/89379
-  const kibanaServer = getService('kibanaServer');
 
   describe('sample data', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
-      await kibanaServer.uiSettings.update({
-        'discover:searchFieldsFromSource': true,
-      });
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
