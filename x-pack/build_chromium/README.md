@@ -15,7 +15,7 @@ gain familiarity.
 2. Click the "Compute Engine" tab.
 3. Ensure that `chromium-build-linux` and `chromium-build-windows-12-beefy` are there.
 4. If #3 fails, you'll have to spin up new instances. Generally, these need `n1-standard-8` types or 8 vCPUs/30 GB memory.
-5. Ensure that there's enough room left on the disk. `ncdu` is a good linux util to verify what's claming space.
+5. Ensure that there's enough room left on the disk: 100GB is required. `ncdu` is a good linux util to verify what's claming space.
 
 ## Usage
 
