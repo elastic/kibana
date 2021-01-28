@@ -6,6 +6,6 @@ This plugin registers the basic usage collectors from Kibana:
 - UI Metrics
 - Ops stats
 - Number of Saved Objects per type
-- Non-default UI Settings
+- [User-changed UI Settings](./server/collectors/management/README.md)
 - CSP configuration
 - Core Metrics

@@ -255,7 +255,7 @@ describe('state_sync', () => {
       expect(history.length).toBe(startHistoryLength);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
 
-      urlSyncStrategy.flush();
+      urlSyncStrategy.kbnUrlControls.flush();
 
       expect(history.length).toBe(startHistoryLength + 1);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
@@ -290,7 +290,7 @@ describe('state_sync', () => {
       expect(history.length).toBe(startHistoryLength);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
 
-      urlSyncStrategy.cancel();
+      urlSyncStrategy.kbnUrlControls.cancel();
 
       expect(history.length).toBe(startHistoryLength);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
