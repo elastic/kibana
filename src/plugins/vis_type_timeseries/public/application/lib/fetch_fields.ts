@@ -39,8 +39,10 @@ export async function fetchFields(
       }),
       {}
     );
-
-    if (defaultIndexPattern?.title && patterns.includes(defaultIndexPattern.title)) {
+    if (
+      defaultIndexPattern?.patternListActive.length &&
+      patterns.some((pattern) => defaultIndexPattern.patternListActive.includes(pattern))
+    ) {
       fields[''] = fields[defaultIndexPattern.title];
     }
     return fields;
