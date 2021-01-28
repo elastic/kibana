@@ -31,6 +31,14 @@ const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
 };
 
 describe('KibanaMigrator', () => {
+  describe('constructor', () => {
+    it('coerces the current Kibana version if it has a hyphen', () => {
+      const options = mockOptions();
+      options.kibanaVersion = '3.2.1-SNAPSHOT';
+      const migrator = new KibanaMigrator(options);
+      expect(migrator.kibanaVersion).toEqual('3.2.1');
+    });
+  });
   describe('getActiveMappings', () => {
     it('returns full index mappings w/ core properties', () => {
       const options = mockOptions();
