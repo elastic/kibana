@@ -72,6 +72,7 @@ export function fileUploadRoutes(router: IRouter) {
           index,
           settings,
           mappings,
+          // @ts-expect-error
           ingestPipeline,
           data
         );
