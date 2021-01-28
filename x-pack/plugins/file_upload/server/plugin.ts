@@ -7,6 +7,11 @@
 import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
 import { fileUploadRoutes } from './routes';
 import { initFileUploadTelemetry } from './telemetry';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+
+interface SetupDeps {
+  usageCollection: UsageCollectionSetup;
+}
 
 export class FileUploadPlugin implements Plugin {
   async setup(coreSetup: CoreSetup, plugins: SetupDeps) {

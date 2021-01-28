@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext } from 'src/core/server';
+
 import { FileUploadPlugin } from './plugin';
 
-export const plugin = (ctx: PluginInitializerContext) => new FileUploadPlugin(ctx);
+export const plugin = () => new FileUploadPlugin();

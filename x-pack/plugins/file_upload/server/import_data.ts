@@ -12,13 +12,13 @@ import {
   Settings,
   Mappings,
   IngestPipelineWrapper,
-} from '../../../common/types/file_datavisualizer';
+} from '../common';
 
 export type InputData = any[];
 
 export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   async function importData(
-    id: string,
+    id: string | undefined,
     index: string,
     settings: Settings,
     mappings: Mappings,
@@ -78,7 +78,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     } catch (error) {
       return {
         success: false,
-        id,
+        id: id!,
         index: createdIndex,
         pipelineId: createdPipelineId,
         error: error.body !== undefined ? error.body : error,

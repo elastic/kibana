@@ -11,14 +11,14 @@ export const importFileQuerySchema = schema.object({
 });
 
 export const importFileBodySchema = schema.object({
-  index: schema.maybe(schema.string()),
+  index: schema.string(),
   data: schema.arrayOf(schema.any()),
   settings: schema.maybe(schema.any()),
   /** Mappings */
   mappings: schema.any(),
   /** Ingest pipeline definition */
   ingestPipeline: schema.object({
-    id: schema.maybe(schema.string()),
-    pipeline: schema.maybe(schema.any()),
+    id: schema.string(),
+    pipeline: schema.any(),
   }),
 });
