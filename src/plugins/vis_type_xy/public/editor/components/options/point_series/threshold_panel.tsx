@@ -76,6 +76,7 @@ function ThresholdPanel({
             value={stateParams.thresholdLine.value}
             setValue={setThresholdLine}
             setValidity={setThresholdLineValidity}
+            data-test-subj="thresholdValueInputOption"
           />
 
           <RequiredNumberInputOption
