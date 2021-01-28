@@ -49,6 +49,7 @@ const createTrustedAppsServiceMock = (): jest.Mocked<TrustedAppsService> => ({
   getTrustedAppsList: jest.fn(),
   deleteTrustedApp: jest.fn(),
   createTrustedApp: jest.fn(),
+  getPolicyList: jest.fn(),
 });
 
 const createStoreSetup = (trustedAppsService: TrustedAppsService) => {

@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
 import {
   ConditionEntryField,
+  EffectScope,
   MacosLinuxConditionEntry,
   NewTrustedApp,
   OperatingSystem,
@@ -25,12 +26,18 @@ import {
 import { isValidHash } from '../../../../../../common/endpoint/validation/trusted_apps';
 
 import {
+  isGlobalEffectScope,
   isMacosLinuxTrustedAppCondition,
   isWindowsTrustedAppCondition,
 } from '../../state/type_guards';
 import { defaultConditionEntry, defaultNewTrustedApp } from '../../store/builders';
 import { OS_TITLES } from '../translations';
 import { LogicalConditionBuilder, LogicalConditionBuilderProps } from './logical_condition';
+import {
+  EffectedPolicySelect,
+  EffectedPolicySelection,
+  EffectedPolicySelectProps,
+} from './effected_policy_select';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -159,12 +166,17 @@ export type CreateTrustedAppFormProps = Pick<
   EuiFormProps,
   'className' | 'data-test-subj' | 'isInvalid' | 'error' | 'invalidCallout'
 > & {
+  onChange: (state: TrustedAppFormState) => void;
   /** if form should be shown full width of parent container */
   fullWidth?: boolean;
-  onChange: (state: TrustedAppFormState) => void;
+  /** Setting passed on to the EffectedPolicySelect component */
+  policies: {
+    options: EffectedPolicySelectProps['options'];
+    isLoading?: EffectedPolicySelectProps['isLoading'];
+  };
 };
 export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
-  ({ fullWidth, onChange, ...formProps }) => {
+  ({ fullWidth, onChange, policies = { options: [] }, ...formProps }) => {
     const dataTestSubj = formProps['data-test-subj'];
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
@@ -173,6 +185,13 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     );
 
     const [formValues, setFormValues] = useState<NewTrustedApp>(defaultNewTrustedApp());
+
+    // We create local state for the list of policies because we want the selected policies to
+    // persist while the user is on the form and possibly toggling between global/non-global
+    const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
+      isGlobal: isGlobalEffectScope(formValues.effectScope),
+      selected: [],
+    });
 
     const [validationResult, setValidationResult] = useState<ValidationResult>(() =>
       validateFormValues(formValues)
@@ -325,6 +344,33 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       });
     }, []);
 
+    const handlePolicySelectChange: EffectedPolicySelectProps['onChange'] = useCallback(
+      (selection) => {
+        setSelectedPolicies(() => selection);
+
+        let newEffectedScope: EffectScope;
+
+        if (selection.isGlobal) {
+          newEffectedScope = {
+            type: 'global',
+          };
+        } else {
+          newEffectedScope = {
+            type: 'policy',
+            policies: selection.selected.map((policy) => policy.id),
+          };
+        }
+
+        setFormValues((prevState) => {
+          return {
+            ...prevState,
+            effectScope: newEffectedScope,
+          };
+        });
+      },
+      []
+    );
+
     // Anytime the form values change, re-validate
     useEffect(() => {
       setValidationResult(validateFormValues(formValues));
@@ -408,6 +454,16 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             fullWidth
             maxLength={256}
             data-test-subj={getTestId('descriptionField')}
+          />
+        </EuiFormRow>
+        <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
+          <EffectedPolicySelect
+            isGlobal={selectedPolicies.isGlobal}
+            selected={selectedPolicies.selected}
+            options={policies.options}
+            onChange={handlePolicySelectChange}
+            isLoading={policies?.isLoading}
+            data-test-subj={getTestId('effectedPolicies')}
           />
         </EuiFormRow>
       </EuiForm>

@@ -29,6 +29,7 @@ import {
   TrustedAppCreationDialogConfirmed,
   TrustedAppCreationDialogClosed,
   TrustedAppsExistResponse,
+  TrustedAppsPoliciesStateChanged,
 } from './action';
 
 import { TrustedAppsListPageState } from '../state';
@@ -37,7 +38,7 @@ import {
   initialDeletionDialogState,
   initialTrustedAppsPageState,
 } from './builders';
-import { entriesExistState } from './selectors';
+import { entriesExistState, trustedAppsListPageActive } from './selectors';
 
 type StateReducer = ImmutableReducer<TrustedAppsListPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (
@@ -155,6 +156,16 @@ const updateEntriesExists: CaseReducer<TrustedAppsExistResponse> = (state, { pay
   return state;
 };
 
+const updatePolicies: CaseReducer<TrustedAppsPoliciesStateChanged> = (state, { payload }) => {
+  if (trustedAppsListPageActive(state)) {
+    return {
+      ...state,
+      policies: payload,
+    };
+  }
+  return state;
+};
+
 export const trustedAppsPageReducer: StateReducer = (
   state = initialTrustedAppsPageState(),
   action
@@ -198,6 +209,9 @@ export const trustedAppsPageReducer: StateReducer = (
 
     case 'trustedAppsExistStateChanged':
       return updateEntriesExists(state, action);
+
+    case 'trustedAppsPoliciesStateChanged':
+      return updatePolicies(state, action);
   }
 
   return state;

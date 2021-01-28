@@ -9,6 +9,7 @@ import { Action } from 'redux';
 
 import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
 import { AsyncResourceState, TrustedAppsListData } from '../state';
+import { GetPolicyListResponse } from '../../policy/types';
 
 export type TrustedAppsListDataOutdated = Action<'trustedAppsListDataOutdated'>;
 
@@ -59,6 +60,10 @@ export type TrustedAppsExistResponse = Action<'trustedAppsExistStateChanged'> & 
   payload: AsyncResourceState<boolean>;
 };
 
+export type TrustedAppsPoliciesStateChanged = Action<'trustedAppsPoliciesStateChanged'> & {
+  payload: AsyncResourceState<GetPolicyListResponse>;
+};
+
 export type TrustedAppsPageAction =
   | TrustedAppsListDataOutdated
   | TrustedAppsListResourceStateChanged
@@ -71,4 +76,5 @@ export type TrustedAppsPageAction =
   | TrustedAppCreationDialogFormStateUpdated
   | TrustedAppCreationDialogConfirmed
   | TrustedAppsExistResponse
+  | TrustedAppsPoliciesStateChanged
   | TrustedAppCreationDialogClosed;
