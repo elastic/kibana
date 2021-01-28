@@ -102,6 +102,10 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
         expect(result.status).to.eql('ok');
       });
+
+      after(() => {
+        webhookServer.close();
+      });
     });
   });
 }
