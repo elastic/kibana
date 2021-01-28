@@ -5,13 +5,12 @@
  */
 
 import * as rt from 'io-ts';
-import { logEntryCursorRT } from '../../log_entry';
+import { logEntryCursorRT, logEntryRT } from '../../log_entry';
 import {
   logEntriesBaseRequestRT,
   logEntriesBeforeRequestRT,
   logEntriesAfterRequestRT,
   logEntriesCenteredRequestRT,
-  logEntryRT,
 } from './entries';
 
 export const LOG_ENTRIES_HIGHLIGHTS_PATH = '/api/log_entries/highlights';
