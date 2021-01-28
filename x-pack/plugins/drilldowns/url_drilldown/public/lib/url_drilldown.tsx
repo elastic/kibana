@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { monaco } from '@kbn/monaco';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
 import { IExternalUrl } from 'src/core/public';
 import {
@@ -184,9 +186,22 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     // const contextVariables = Object.keys(getFlattenedObject(getPanelVariables(context))).map(
     //   (key) => 'context.panel.' + key
     // );
-    // const globalVariables = Object.keys(getFlattenedObject(this.deps.getGlobalScope()));
 
-    return [...eventVariables];
+    const globalVariables: UrlTemplateEditorVariable[] = [
+      {
+        label: 'kibanaUrl',
+        title: i18n.translate('xpack.urlDrilldown.global.kibanaUrl.documentation.title', {
+          defaultMessage: 'Link to Kibana homepage.',
+        }),
+        documentation: i18n.translate('xpack.urlDrilldown.global.kibanaUrl.documentation', {
+          defaultMessage:
+            'Kibana base URL. Useful for creating URL drilldowns that navigate within Kibana.',
+        }),
+        kind: monaco.languages.CompletionItemKind.Constant,
+      },
+    ];
+
+    return [...eventVariables, ...globalVariables];
     // return [...eventVariables.sort(), ...contextVariables.sort(), ...globalVariables.sort()];
   };
 }
