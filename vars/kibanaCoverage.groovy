@@ -150,8 +150,8 @@ def generateReports(title) {
     . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
     . src/dev/code_coverage/shell_scripts/merge_functional.sh
     . src/dev/code_coverage/shell_scripts/copy_jest_report.sh
-    # zip combined reports
-    tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*
+    # zip functional combined report
+    tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional/*
   """, title)
 }
 
@@ -163,7 +163,7 @@ def uploadCombinedReports() {
 
   kibanaPipeline.uploadGcsArtifact(
     "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/combined",
-    'kibana-coverage.tar.gz'
+    'kibana-functional-coverage.tar.gz'
   )
 }
 
