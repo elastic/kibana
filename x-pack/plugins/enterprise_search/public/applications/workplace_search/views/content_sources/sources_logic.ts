@@ -12,11 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { HttpLogic } from '../../../shared/http';
 
-import {
-  flashAPIErrors,
-  setQueuedSuccessMessage,
-  clearFlashMessages,
-} from '../../../shared/flash_messages';
+import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
 
 import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } from '../../types';
 
@@ -40,7 +36,6 @@ export interface ISourcesActions {
     additionalConfiguration: boolean,
     serviceType: string
   ): { addedSourceName: string; additionalConfiguration: boolean; serviceType: string };
-  resetFlashMessages(): void;
   resetPermissionsModal(): void;
   resetSourcesState(): void;
   initializeSources(): void;
@@ -78,7 +73,7 @@ interface ISourcesServerResponse {
 }
 
 let pollingInterval: number;
-const POLLING_INTERVAL = 10000;
+export const POLLING_INTERVAL = 10000;
 
 export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>({
   path: ['enterprise_search', 'workplace_search', 'sources_logic'],
@@ -91,7 +86,6 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       additionalConfiguration: boolean,
       serviceType: string
     ) => ({ addedSourceName, additionalConfiguration, serviceType }),
-    resetFlashMessages: () => true,
     resetPermissionsModal: () => true,
     resetSourcesState: () => true,
     initializeSources: () => true,
@@ -238,9 +232,6 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
         ].join(' ')
       );
     },
-    resetFlashMessages: () => {
-      clearFlashMessages();
-    },
     resetSourcesState: () => {
       clearInterval(pollingInterval);
     },
@@ -252,7 +243,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   }),
 });
 
-const fetchSourceStatuses = async (isOrganization: boolean) => {
+export const fetchSourceStatuses = async (isOrganization: boolean) => {
   const route = isOrganization
     ? '/api/workplace_search/org/sources/status'
     : '/api/workplace_search/account/sources/status';
@@ -273,7 +264,6 @@ const updateSourcesOnToggle = (
   sourceId: string,
   searchable: boolean
 ): ContentSourceDetails[] => {
-  if (!contentSources) return [];
   const sources = cloneDeep(contentSources) as ContentSourceDetails[];
   const index = findIndex(sources, ({ id }) => id === sourceId);
   const updatedSource = sources[index];
