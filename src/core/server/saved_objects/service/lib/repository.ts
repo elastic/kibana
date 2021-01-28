@@ -1776,9 +1776,7 @@ export class SavedObjectsRepository {
     //   want to always use the type registry to resolve a type's index
     //   (including the default index).
     if (this._migrator.savedObjectsConfig.enableV2) {
-      return `${
-        this._registry.getIndex(type) || this._index
-      }_${this._migrator.kibanaVersion.toLowerCase()}`;
+      return `${this._registry.getIndex(type) || this._index}_${this._migrator.kibanaVersion}`;
     } else {
       return this._registry.getIndex(type) || this._index;
     }
