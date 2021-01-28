@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CustomPageSize, PredefinedPageSize } from 'pdfmake/interfaces';
-import { PageSizeParams, PdfImageSize, Size } from './';
+import type { CustomPageSize, PredefinedPageSize } from 'pdfmake/interfaces';
+import type { PageSizeParams, PdfImageSize, Size } from '../../../common/types';
 
 export interface ViewZoomWidthHeight {
   zoom: number;

@@ -15,4 +15,4 @@ export { IndexManagementPluginSetup } from './types';
 
 export { getIndexListUri } from './application/services/routing';
 
-export { Index } from '../common';
+export type { Index } from '../common';

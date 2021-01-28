@@ -7,18 +7,25 @@
  */
 
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
-import { UsageStats } from './telemetry_management_collector';
+import { UsageStats } from './types';
 
-// Retrieved by changing all the current settings in Kibana (we'll need to revisit it in the future).
-// I would suggest we use flattened type for the mappings of this collector.
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
+  // sensitive
+  'timelion:quandl.key': { type: 'keyword' },
+  'securitySolution:defaultIndex': { type: 'keyword' },
+  'securitySolution:newsFeedUrl': { type: 'keyword' },
+  'xpackReporting:customPdfLogo': { type: 'keyword' },
+  'notifications:banner': { type: 'keyword' },
+  'timelion:graphite.url': { type: 'keyword' },
+  'xpackDashboardMode:roles': { type: 'keyword' },
+  'securitySolution:ipReputationLinks': { type: 'keyword' },
+  // non-sensitive
   'visualize:enableLabs': { type: 'boolean' },
   'visualization:heatmap:maxBuckets': { type: 'long' },
   'visualization:colorMapping': { type: 'text' },
   'visualization:regionmap:showWarnings': { type: 'boolean' },
   'visualization:dimmingOpacity': { type: 'float' },
   'visualization:tileMap:maxPrecision': { type: 'long' },
-  'securitySolution:ipReputationLinks': { type: 'text' },
   'csv:separator': { type: 'keyword' },
   'visualization:tileMap:WMSdefaults': { type: 'text' },
   'timelion:target_buckets': { type: 'long' },
@@ -27,14 +34,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'timelion:min_interval': { type: 'keyword' },
   'timelion:default_rows': { type: 'long' },
   'timelion:default_columns': { type: 'long' },
-  'timelion:quandl.key': { type: 'keyword' },
   'timelion:es.default_index': { type: 'keyword' },
   'timelion:showTutorial': { type: 'boolean' },
   'securitySolution:timeDefaults': { type: 'keyword' },
   'securitySolution:defaultAnomalyScore': { type: 'long' },
-  'securitySolution:defaultIndex': { type: 'keyword' }, // it's an array
   'securitySolution:refreshIntervalDefaults': { type: 'keyword' },
-  'securitySolution:newsFeedUrl': { type: 'keyword' },
   'securitySolution:enableNewsFeed': { type: 'boolean' },
   'search:includeFrozen': { type: 'boolean' },
   'courier:maxConcurrentShardRequests': { type: 'long' },
@@ -43,21 +47,29 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'courier:customRequestPreference': { type: 'keyword' },
   'courier:ignoreFilterIfFieldNotInIndex': { type: 'boolean' },
   'rollups:enableIndexPatterns': { type: 'boolean' },
-  'xpackReporting:customPdfLogo': { type: 'text' },
   'notifications:lifetime:warning': { type: 'long' },
   'notifications:lifetime:banner': { type: 'long' },
   'notifications:lifetime:info': { type: 'long' },
-  'notifications:banner': { type: 'text' },
   'notifications:lifetime:error': { type: 'long' },
   'doc_table:highlight': { type: 'boolean' },
   'discover:searchOnPageLoad': { type: 'boolean' },
   // eslint-disable-next-line @typescript-eslint/naming-convention
   'doc_table:hideTimeColumn': { type: 'boolean' },
   'discover:sampleSize': { type: 'long' },
-  defaultColumns: { type: 'keyword' }, // it's an array
+  defaultColumns: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+    },
+  },
   'context:defaultSize': { type: 'long' },
   'discover:aggs:terms:size': { type: 'long' },
-  'context:tieBreakerFields': { type: 'keyword' }, // it's an array
+  'context:tieBreakerFields': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+    },
+  },
   'discover:sort:defaultOrder': { type: 'keyword' },
   'context:step': { type: 'long' },
   'accessibility:disableAnimations': { type: 'boolean' },
@@ -77,10 +89,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'sort:options': { type: 'keyword' },
   'savedObjects:listingLimit': { type: 'long' },
   'query:queryString:options': { type: 'keyword' },
-  pageNavigation: { type: 'keyword' },
   'metrics:max_buckets': { type: 'long' },
   'query:allowLeadingWildcards': { type: 'boolean' },
-  metaFields: { type: 'keyword' }, // it's an array
+  metaFields: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+    },
+  },
   'indexPattern:placeholder': { type: 'keyword' },
   'histogram:barTarget': { type: 'long' },
   'histogram:maxBars': { type: 'long' },
@@ -102,4 +118,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'csv:quoteValues': { type: 'boolean' },
   'dateFormat:dow': { type: 'keyword' },
   dateFormat: { type: 'keyword' },
+  'autocomplete:useTimeRange': { type: 'boolean' },
+  'search:timeout': { type: 'long' },
+  'visualization:visualize:legacyChartsLibrary': { type: 'boolean' },
+  'doc_table:legacy': { type: 'boolean' },
+  'discover:modifyColumnsOnSwitch': { type: 'boolean' },
+  'discover:searchFieldsFromSource': { type: 'boolean' },
+  'securitySolution:rulesTableRefresh': { type: 'text' },
+  'apm:enableSignificantTerms': { type: 'boolean' },
+  'apm:enableServiceOverview': { type: 'boolean' },
+  'apm:enableCorrelations': { type: 'boolean' },
 };
