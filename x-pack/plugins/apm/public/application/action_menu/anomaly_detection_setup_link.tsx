@@ -57,7 +57,9 @@ export function AnomalyDetectionSetupLink() {
 export function MissingJobsAlert({ environment }: { environment?: string }) {
   const { data = DEFAULT_DATA, status } = useFetcher(
     (callApmApi) =>
-      callApmApi({ endpoint: `GET /api/apm/settings/anomaly-detection/jobs` }),
+      callApmApi({
+        endpoint: `GET /api/apm/settings/anomaly-detection/jobs`,
+      }),
     [],
     { preservePreviousData: false, showToastOnError: false }
   );

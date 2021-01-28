@@ -74,6 +74,7 @@ async function saveApmIndices({
 }) {
   await callApmApi({
     endpoint: 'POST /api/apm/settings/apm-indices/save',
+    signal: null,
     params: {
       body: apmIndices,
     },

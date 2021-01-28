@@ -73,6 +73,7 @@ async function deleteConfig(
   try {
     await callApmApi({
       endpoint: 'DELETE /api/apm/settings/agent-configuration',
+      signal: null,
       params: {
         body: {
           service: {

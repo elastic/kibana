@@ -12,11 +12,17 @@ import { APMAPI } from '../../../server/routes/create_apm_api';
 import { Client } from '../../../server/routes/typings';
 
 export type APMClient = Client<APMAPI['_S']>;
+export type LifecycleManagedAPMClient = Client<
+  APMAPI['_S'],
+  { lifecycleManaged: true }
+>;
+
 export type APMClientOptions = Omit<
   FetchOptions,
-  'query' | 'body' | 'pathname'
+  'query' | 'body' | 'pathname' | 'signal'
 > & {
   endpoint: string;
+  signal: AbortSignal | null;
   params?: {
     body?: any;
     query?: any;

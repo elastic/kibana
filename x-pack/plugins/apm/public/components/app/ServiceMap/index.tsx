@@ -17,7 +17,6 @@ import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { DatePicker } from '../../shared/DatePicker';
 import { LicensePrompt } from '../../shared/LicensePrompt';
 import { Controls } from './Controls';
@@ -86,28 +85,31 @@ export function ServiceMap({
   const license = useLicenseContext();
   const { urlParams } = useUrlParams();
 
-  const { data = { elements: [] }, status, error } = useFetcher(() => {
-    // When we don't have a license or a valid license, don't make the request.
-    if (!license || !isActivePlatinumLicense(license)) {
-      return;
-    }
+  const { data = { elements: [] }, status, error } = useFetcher(
+    (callApmApi) => {
+      // When we don't have a license or a valid license, don't make the request.
+      if (!license || !isActivePlatinumLicense(license)) {
+        return;
+      }
 
-    const { start, end, environment } = urlParams;
-    if (start && end) {
-      return callApmApi({
-        isCachable: false,
-        endpoint: 'GET /api/apm/service-map',
-        params: {
-          query: {
-            start,
-            end,
-            environment,
-            serviceName,
+      const { start, end, environment } = urlParams;
+      if (start && end) {
+        return callApmApi({
+          isCachable: false,
+          endpoint: 'GET /api/apm/service-map',
+          params: {
+            query: {
+              start,
+              end,
+              environment,
+              serviceName,
+            },
           },
-        },
-      });
-    }
-  }, [license, serviceName, urlParams]);
+        });
+      }
+    },
+    [license, serviceName, urlParams]
+  );
 
   const { ref, height } = useRefDimensions();
 

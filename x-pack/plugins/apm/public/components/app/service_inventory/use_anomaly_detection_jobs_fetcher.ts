@@ -8,7 +8,9 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 export function useAnomalyDetectionJobsFetcher() {
   const { data, status } = useFetcher(
     (callApmApi) =>
-      callApmApi({ endpoint: `GET /api/apm/settings/anomaly-detection/jobs` }),
+      callApmApi({
+        endpoint: `GET /api/apm/settings/anomaly-detection/jobs`,
+      }),
     [],
     { showToastOnError: false }
   );

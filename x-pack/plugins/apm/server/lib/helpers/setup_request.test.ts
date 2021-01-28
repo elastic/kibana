@@ -92,7 +92,7 @@ function getMockRequest() {
     url: '',
     events: {
       aborted$: {
-        subscribe: jest.fn(),
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
       },
     },
   } as unknown) as KibanaRequest;

@@ -87,5 +87,6 @@ function isCachable(fetchOptions: FetchOptions) {
 // order the options object to make sure that two objects with the same arguments, produce produce the
 // same cache key regardless of the order of properties
 function getCacheKey(options: FetchOptions) {
-  return hash(options);
+  const { pathname, method, body, query, headers } = options;
+  return hash({ pathname, method, body, query, headers });
 }

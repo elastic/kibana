@@ -20,6 +20,7 @@ export const fetchObservabilityOverviewPageData = async ({
 }: FetchDataParams): Promise<ApmFetchDataResponse> => {
   const data = await callApmApi({
     endpoint: 'GET /api/apm/observability_overview',
+    signal: null,
     params: {
       query: {
         start: new Date(absoluteTime.start).toISOString(),
@@ -59,5 +60,6 @@ export const fetchObservabilityOverviewPageData = async ({
 export async function hasData() {
   return await callApmApi({
     endpoint: 'GET /api/apm/observability_overview/has_data',
+    signal: null,
   });
 }

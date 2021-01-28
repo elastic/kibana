@@ -131,14 +131,21 @@ type MaybeOptional<T extends { params: Record<string, any> }> = RequiredKeys<
   ? { params?: T['params'] }
   : { params: T['params'] };
 
-export type Client<TRouteState> = <
-  TEndpoint extends keyof TRouteState & string
->(
-  options: Omit<FetchOptions, 'query' | 'body' | 'pathname' | 'method'> & {
+export type Client<
+  TRouteState,
+  TOptions extends { lifecycleManaged: boolean } = { lifecycleManaged: false }
+> = <TEndpoint extends keyof TRouteState & string>(
+  options: Omit<
+    FetchOptions,
+    'query' | 'body' | 'pathname' | 'method' | 'signal'
+  > & {
     forceCache?: boolean;
     endpoint: TEndpoint;
   } & (TRouteState[TEndpoint] extends { params: t.Any }
       ? MaybeOptional<{ params: t.TypeOf<TRouteState[TEndpoint]['params']> }>
+      : {}) &
+    (TOptions extends { lifecycleManaged: false }
+      ? { signal: AbortSignal | null }
       : {})
 ) => Promise<
   TRouteState[TEndpoint] extends { ret: any }

@@ -23,10 +23,7 @@ import {
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import {
-  APIReturnType,
-  callApmApi,
-} from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { px, unit } from '../../../../style/variables';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
@@ -110,53 +107,56 @@ export function ServiceOverviewTransactionsTable(props: Props) {
       },
     },
     status,
-  } = useFetcher(() => {
-    if (!start || !end || !latencyAggregationType || !transactionType) {
-      return;
-    }
+  } = useFetcher(
+    (callApmApi) => {
+      if (!start || !end || !latencyAggregationType || !transactionType) {
+        return;
+      }
 
-    return callApmApi({
-      endpoint:
-        'GET /api/apm/services/{serviceName}/transactions/groups/overview',
-      params: {
-        path: { serviceName },
-        query: {
-          start,
-          end,
-          uiFilters: JSON.stringify(uiFilters),
-          size: PAGE_SIZE,
-          numBuckets: 20,
-          pageIndex: tableOptions.pageIndex,
-          sortField: tableOptions.sort.field,
-          sortDirection: tableOptions.sort.direction,
-          transactionType,
-          latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-        },
-      },
-    }).then((response) => {
-      return {
-        items: response.transactionGroups,
-        totalItemCount: response.totalTransactionGroups,
-        tableOptions: {
-          pageIndex: tableOptions.pageIndex,
-          sort: {
-            field: tableOptions.sort.field,
-            direction: tableOptions.sort.direction,
+      return callApmApi({
+        endpoint:
+          'GET /api/apm/services/{serviceName}/transactions/groups/overview',
+        params: {
+          path: { serviceName },
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters),
+            size: PAGE_SIZE,
+            numBuckets: 20,
+            pageIndex: tableOptions.pageIndex,
+            sortField: tableOptions.sort.field,
+            sortDirection: tableOptions.sort.direction,
+            transactionType,
+            latencyAggregationType: latencyAggregationType as LatencyAggregationType,
           },
         },
-      };
-    });
-  }, [
-    serviceName,
-    start,
-    end,
-    uiFilters,
-    tableOptions.pageIndex,
-    tableOptions.sort.field,
-    tableOptions.sort.direction,
-    transactionType,
-    latencyAggregationType,
-  ]);
+      }).then((response) => {
+        return {
+          items: response.transactionGroups,
+          totalItemCount: response.totalTransactionGroups,
+          tableOptions: {
+            pageIndex: tableOptions.pageIndex,
+            sort: {
+              field: tableOptions.sort.field,
+              direction: tableOptions.sort.direction,
+            },
+          },
+        };
+      });
+    },
+    [
+      serviceName,
+      start,
+      end,
+      uiFilters,
+      tableOptions.pageIndex,
+      tableOptions.sort.field,
+      tableOptions.sort.direction,
+      transactionType,
+      latencyAggregationType,
+    ]
+  );
 
   const {
     items,
