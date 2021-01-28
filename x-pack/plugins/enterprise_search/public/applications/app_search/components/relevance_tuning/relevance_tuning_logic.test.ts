@@ -252,6 +252,7 @@ describe('RelevanceTuningLogic', () => {
 
     afterAll(() => {
       scrollToSpy.mockRestore();
+      confirmSpy.mockRestore();
     });
 
     describe('initializeRelevanceTuning', () => {
@@ -309,14 +310,13 @@ describe('RelevanceTuningLogic', () => {
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');
         jest.spyOn(RelevanceTuningLogic.actions, 'setResultsLoading');
-
         http.post.mockReturnValueOnce(
           Promise.resolve({
             results: searchResults,
           })
         );
-        RelevanceTuningLogic.actions.getSearchResults();
 
+        RelevanceTuningLogic.actions.getSearchResults();
         jest.runAllTimers();
         await nextTick();
 
@@ -338,12 +338,12 @@ describe('RelevanceTuningLogic', () => {
           query: 'foo',
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');
-
         http.post.mockReturnValueOnce(
           Promise.resolve({
             results: searchResults,
           })
         );
+
         RelevanceTuningLogic.actions.getSearchResults();
 
         jest.runAllTimers();
@@ -381,7 +381,6 @@ describe('RelevanceTuningLogic', () => {
         mount({
           query: 'foo',
         });
-
         http.post.mockReturnValueOnce(Promise.reject('error'));
         RelevanceTuningLogic.actions.getSearchResults();
 
@@ -422,10 +421,9 @@ describe('RelevanceTuningLogic', () => {
           searchSettings,
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'onSearchSettingsSuccess');
-
         http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
-        RelevanceTuningLogic.actions.updateSearchSettings();
 
+        RelevanceTuningLogic.actions.updateSearchSettings();
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
@@ -460,10 +458,9 @@ describe('RelevanceTuningLogic', () => {
         mount();
         jest.spyOn(RelevanceTuningLogic.actions, 'onSearchSettingsSuccess');
         confirmSpy.mockImplementation(() => true);
-
         http.post.mockReturnValueOnce(Promise.resolve(searchSettings));
-        RelevanceTuningLogic.actions.resetSearchSettings();
 
+        RelevanceTuningLogic.actions.resetSearchSettings();
         await nextTick();
 
         expect(http.post).toHaveBeenCalledWith(
@@ -611,7 +608,6 @@ describe('RelevanceTuningLogic', () => {
             },
           },
         });
-
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
 
         RelevanceTuningLogic.actions.addBoost('foo', 'functional');
@@ -633,6 +629,7 @@ describe('RelevanceTuningLogic', () => {
           },
         });
       });
+
       it('works even if there are no boosts yet', () => {
         mount({
           searchSettings: {
@@ -640,7 +637,6 @@ describe('RelevanceTuningLogic', () => {
             boosts: {},
           },
         });
-
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
 
         RelevanceTuningLogic.actions.addBoost('foo', 'functional');
@@ -755,7 +751,6 @@ describe('RelevanceTuningLogic', () => {
             type: 'functional',
           }),
         });
-
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
         jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
@@ -777,7 +772,6 @@ describe('RelevanceTuningLogic', () => {
             type: 'functional',
           }),
         });
-
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
 
         RelevanceTuningLogic.actions.updateBoostFactor('foo', 1, 5.293191);
