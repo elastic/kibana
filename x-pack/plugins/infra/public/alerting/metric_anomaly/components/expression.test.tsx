@@ -24,6 +24,13 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
+jest.mock('../../../containers/ml/infra_ml_capabilities', () => ({
+  useInfraMLCapabilities: () => ({
+    isLoading: false,
+    hasInfraMLCapabilities: true,
+  }),
+}));
+
 describe('Expression', () => {
   async function setup(currentOptions: AlertContextMeta) {
     const alertParams = {
