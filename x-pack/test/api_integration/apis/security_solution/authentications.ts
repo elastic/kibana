@@ -43,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
             fakePossibleCount: 3,
             querySize: 1,
           },
-          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           inspect: false,
         })
@@ -71,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
             fakePossibleCount: 5,
             querySize: 2,
           },
-          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           inspect: false,
         })

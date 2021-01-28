@@ -34,15 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: NetworkQueries.topNFlow,
             flowTarget: FlowTargetSourceDest.source,
             sort: { field: NetworkTopTablesFields.bytes_in, direction: Direction.desc },
@@ -80,15 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',
             filterQuery:
               '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
@@ -128,15 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',
             filterQuery:
               '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
@@ -170,15 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',
             filterQuery:
               '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',

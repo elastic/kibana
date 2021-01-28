@@ -31,15 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             factoryQueryType: NetworkQueries.dns,
             filterQuery:
@@ -69,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send({
             ip: '151.205.0.17',
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             factoryQueryType: NetworkQueries.dns,
             docValueFields: [],
             inspect: false,
