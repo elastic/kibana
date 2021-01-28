@@ -120,6 +120,13 @@ export class SearchSessionService implements ISessionService {
     | SavedObject<SearchSessionSavedObjectAttributes>
     | undefined
   > => {
+    const retryOnConflict = async (e: any) => {
+      this.logger.debug(`Conflict error | ${sessionId}`);
+      // Randomize sleep to spread updates out in case of conflicts
+      await sleep(100 + Math.random() * 50);
+      return await this.updateOrCreate(sessionId, attributes, deps, retry + 1);
+    };
+
     this.logger.debug(`updateOrCreate | ${sessionId} | ${retry}`);
     try {
       return await this.update(sessionId, attributes, deps);
@@ -133,10 +140,7 @@ export class SearchSessionService implements ISessionService {
             SavedObjectsErrorHelpers.isConflictError(createError) &&
             retry < this.config.maxUpdateRetries
           ) {
-            this.logger.debug(`Conflict error | ${sessionId}`);
-            // TODO: Randomize sleep
-            await sleep(100);
-            return await this.updateOrCreate(sessionId, attributes, deps, retry + 1);
+            return await retryOnConflict(createError);
           } else {
             this.logger.error(createError);
           }
@@ -145,9 +149,7 @@ export class SearchSessionService implements ISessionService {
         SavedObjectsErrorHelpers.isConflictError(e) &&
         retry < this.config.maxUpdateRetries
       ) {
-        this.logger.debug(`Conflict error | ${sessionId}`);
-        await sleep(100);
-        return await this.updateOrCreate(sessionId, attributes, deps, retry + 1);
+        return await retryOnConflict(e);
       } else {
         this.logger.error(e);
       }
