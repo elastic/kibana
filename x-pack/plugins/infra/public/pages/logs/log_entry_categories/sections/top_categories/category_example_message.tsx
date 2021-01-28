@@ -10,7 +10,7 @@ import { encode } from 'rison-node';
 import moment from 'moment';
 
 import { LogEntry, LogEntryContext } from '../../../../../../common/log_entry';
-import { TimeRange } from '../../../../../../common/http_api/shared';
+import { TimeRange } from '../../../../../../common/time';
 import {
   getFriendlyNameForPartitionId,
   partitionField,

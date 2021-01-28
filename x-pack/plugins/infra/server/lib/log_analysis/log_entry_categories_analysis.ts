@@ -10,8 +10,8 @@ import {
   getJobId,
   jobCustomSettingsRT,
   logEntryCategoriesJobTypes,
+  CategoriesSort,
 } from '../../../common/log_analysis';
-import { CategorySort } from '../../../common/http_api/log_analysis';
 import { LogEntryContext } from '../../../common/log_entry';
 import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
@@ -51,7 +51,7 @@ export async function getTopLogEntryCategories(
   categoryCount: number,
   datasets: string[],
   histograms: HistogramParameters[],
-  sort: CategorySort
+  sort: CategoriesSort
 ) {
   const finalizeTopLogEntryCategoriesSpan = startTracingSpan('get top categories');
 
@@ -218,7 +218,7 @@ async function fetchTopLogEntryCategories(
   endTime: number,
   categoryCount: number,
   datasets: string[],
-  sort: CategorySort
+  sort: CategoriesSort
 ) {
   const finalizeEsSearchSpan = startTracingSpan('Fetch top categories from ES');
 

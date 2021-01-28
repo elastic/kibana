@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { DefaultSearchCapabilities } from '../../../search_strategies/default_search_capabilities';
+import { DefaultSearchCapabilities } from '../../../search_strategies/capabilities/default_search_capabilities';
 import { dateHistogram } from './date_histogram';
 import { UI_SETTINGS } from '../../../../../../data/common';
 

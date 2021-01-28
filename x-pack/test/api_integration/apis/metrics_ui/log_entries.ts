@@ -7,9 +7,9 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import {
+  LOG_ENTRIES_PATH,
   logEntriesRequestRT,
   logEntriesResponseRT,
-  LOG_ENTRIES_PATH,
 } from '../../../../plugins/infra/common/http_api';
 import {
   LogFieldColumn,

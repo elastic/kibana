@@ -12,6 +12,7 @@ import {
   LogEntriesSummaryHighlightsBucket,
   LogEntriesRequest,
 } from '../../../../common/http_api';
+import { LogEntry, LogColumn } from '../../../../common/log_entry';
 import {
   InfraSourceConfiguration,
   InfraSources,
