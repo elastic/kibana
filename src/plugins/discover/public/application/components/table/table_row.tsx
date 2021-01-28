@@ -18,7 +18,7 @@ import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
 import { FieldName } from '../field_name/field_name';
 
 export interface Props {
-  field: string;
+  field?: string;
   fieldMapping?: FieldMapping;
   fieldType: string;
   displayUnderscoreWarning: boolean;
@@ -51,25 +51,30 @@ export function DocViewTableRow({
     kbnDocViewer__value: true,
     'truncate-by-height': isCollapsible && isCollapsed,
   });
-
+  const key = field ? field : fieldMapping?.displayName;
   return (
-    <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
+    <tr key={key} data-test-subj={`tableDocViewRow-${key}`}>
       <td className="kbnDocViewer__field">
-        <FieldName
-          fieldName={field}
-          fieldType={fieldType}
-          fieldMapping={fieldMapping}
-          scripted={Boolean(fieldMapping?.scripted)}
-        />
+        {field ? (
+          <FieldName
+            fieldName={field}
+            fieldType={fieldType}
+            fieldMapping={fieldMapping}
+            scripted={Boolean(fieldMapping?.scripted)}
+          />
+        ) : (
+          <span>&nbsp;</span>
+        )}
       </td>
       <td>
         {isCollapsible && (
           <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
         )}
         {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
+        {field ? null : <div className={valueClassName}>{key}:&nbsp;</div>}
         <div
           className={valueClassName}
-          data-test-subj={`tableDocViewRow-${field}-value`}
+          data-test-subj={`tableDocViewRow-${key}-value`}
           /*
            * Justification for dangerouslySetInnerHTML:
            * We just use values encoded by our field formatters

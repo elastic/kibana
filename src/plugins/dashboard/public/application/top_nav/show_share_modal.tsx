@@ -103,7 +103,7 @@ export function ShowShareModal({
   share.toggleShareContextMenu({
     anchorElement,
     allowEmbed: true,
-    allowShortUrl: !dashboardCapabilities.hideWriteControls || dashboardCapabilities.createShortUrl,
+    allowShortUrl: dashboardCapabilities.createShortUrl,
     shareableUrl: setStateToKbnUrl(
       '_a',
       dashboardStateManager.getAppState(),
