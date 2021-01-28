@@ -60,12 +60,14 @@ describe('TraceLink', () => {
   describe('when no transaction is found', () => {
     it('renders a trace page', () => {
       jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
+        incrementRangeId: () => {},
+        rangeId: 0,
+        refreshTimeRange: jest.fn(),
+        uiFilters: {},
         urlParams: {
           rangeFrom: 'now-24h',
           rangeTo: 'now',
         },
-        refreshTimeRange: jest.fn(),
-        uiFilters: {},
       });
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: { transaction: undefined },
@@ -87,12 +89,14 @@ describe('TraceLink', () => {
   describe('transaction page', () => {
     beforeAll(() => {
       jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
+        incrementRangeId: () => {},
+        rangeId: 0,
+        refreshTimeRange: jest.fn(),
+        uiFilters: {},
         urlParams: {
           rangeFrom: 'now-24h',
           rangeTo: 'now',
         },
-        refreshTimeRange: jest.fn(),
-        uiFilters: {},
       });
     });
 
