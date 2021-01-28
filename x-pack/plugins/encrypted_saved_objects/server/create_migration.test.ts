@@ -163,6 +163,77 @@ describe('createMigration()', () => {
         attributes
       );
     });
+
+    describe('uses the object `namespaces` field to populate the descriptor when the input type has the `convertToMultiNamespaceType` option enabled', () => {
+      const doTest = async ({
+        objectNamespace,
+        decryptDescriptorNamespace,
+      }: {
+        objectNamespace: string | undefined;
+        decryptDescriptorNamespace: string | undefined;
+      }) => {
+        const serviceWithLegacyType = encryptedSavedObjectsServiceMock.create();
+        const instantiateServiceWithLegacyType = jest.fn(() => serviceWithLegacyType);
+
+        const migrationCreator = getCreateMigration(
+          encryptionSavedObjectService,
+          instantiateServiceWithLegacyType
+        );
+        const noopMigration = migrationCreator<InputType, MigrationType>(
+          function (doc): doc is SavedObjectUnsanitizedDoc<InputType> {
+            return true;
+          },
+          (doc) => doc,
+          { ...inputType, convertToMultiNamespaceType: true }
+        );
+
+        const attributes = {
+          firstAttr: 'first_attr',
+        };
+
+        serviceWithLegacyType.decryptAttributesSync.mockReturnValueOnce(attributes);
+        encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(attributes);
+
+        noopMigration(
+          {
+            id: '123',
+            type: 'known-type-1',
+            namespaces: objectNamespace ? [objectNamespace] : [],
+            attributes,
+          },
+          { log }
+        );
+
+        expect(serviceWithLegacyType.decryptAttributesSync).toHaveBeenCalledWith(
+          {
+            id: '123',
+            type: 'known-type-1',
+            namespace: decryptDescriptorNamespace,
+          },
+          attributes
+        );
+
+        expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
+          {
+            id: '123',
+            type: 'known-type-1',
+          },
+          attributes
+        );
+      };
+
+      it('when namespaces is an empty array', async () => {
+        doTest({ objectNamespace: undefined, decryptDescriptorNamespace: undefined });
+      });
+
+      it('when the first namespace element is "default"', async () => {
+        doTest({ objectNamespace: 'default', decryptDescriptorNamespace: undefined });
+      });
+
+      it('when the first namespace element is another string', async () => {
+        doTest({ objectNamespace: 'foo', decryptDescriptorNamespace: 'foo' });
+      });
+    });
   });
 
   describe('migration across two legacy types', () => {

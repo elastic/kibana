@@ -16,6 +16,14 @@ export class EncryptedSavedObjectAttributesDefinition {
   public readonly attributesToEncrypt: ReadonlySet<string>;
   private readonly attributesToExcludeFromAAD: ReadonlySet<string> | undefined;
   private readonly attributesToStrip: ReadonlySet<string>;
+  /**
+   * Indicates whether objects of this type are being converted from a single-namespace type to a multi-namespace type. In this case, we may
+   * need to attempt decryption twice: once with a namespace in the descriptor (for use during index migration), and again without a
+   * namespace in the descriptor (for use during object migration). In other words, if the object is being decrypted during index migration,
+   * the object was previously encrypted with its namespace in the descriptor portion of the AAD; on the other hand, if the object is being
+   * decrypted during object migration, the object was never encrypted with its namespace in the descriptor portion of the AAD.
+   */
+  public readonly convertToMultiNamespaceType: boolean;
 
   constructor(typeRegistration: EncryptedSavedObjectTypeRegistration) {
     const attributesToEncrypt = new Set<string>();
@@ -35,6 +43,7 @@ export class EncryptedSavedObjectAttributesDefinition {
     this.attributesToEncrypt = attributesToEncrypt;
     this.attributesToStrip = attributesToStrip;
     this.attributesToExcludeFromAAD = typeRegistration.attributesToExcludeFromAAD;
+    this.convertToMultiNamespaceType = !!typeRegistration.convertToMultiNamespaceType;
   }
 
   /**

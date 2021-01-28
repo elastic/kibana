@@ -32,6 +32,12 @@ export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
   readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>;
   readonly attributesToExcludeFromAAD?: ReadonlySet<string>;
+  /**
+   * This should only be used in the `inputType` argument in an encrypted saved objects migration function. Consumers should only use it if
+   * they have also defined a conversion for this object in the core SavedObjectsTypeRegistry using the `convertToMultiNamespaceTypeVersion`
+   * field.
+   */
+  readonly convertToMultiNamespaceType?: boolean;
 }
 
 /**
@@ -356,18 +362,20 @@ export class EncryptedSavedObjectsService {
 
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
-      const [attributeValue, encryptionAAD] = iteratorResult.value;
+      const [attributeValue, encryptionAADs] = iteratorResult.value;
 
       let decryptionError;
-      for (const decrypter of decrypters) {
-        try {
-          iteratorResult = iterator.next(await decrypter.decrypt(attributeValue, encryptionAAD));
-          decryptionError = undefined;
-          break;
-        } catch (err) {
-          // Remember the error thrown when we tried to decrypt with the primary key.
-          if (!decryptionError) {
-            decryptionError = err;
+      loop: for (const decrypter of decrypters) {
+        for (const encryptionAAD of encryptionAADs) {
+          try {
+            iteratorResult = iterator.next(await decrypter.decrypt(attributeValue, encryptionAAD));
+            decryptionError = undefined;
+            break loop;
+          } catch (err) {
+            // Remember the error thrown when we tried to decrypt with the primary key.
+            if (!decryptionError) {
+              decryptionError = err;
+            }
           }
         }
       }
@@ -400,18 +408,20 @@ export class EncryptedSavedObjectsService {
 
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
-      const [attributeValue, encryptionAAD] = iteratorResult.value;
+      const [attributeValue, encryptionAADs] = iteratorResult.value;
 
       let decryptionError;
-      for (const decrypter of decrypters) {
-        try {
-          iteratorResult = iterator.next(decrypter.decryptSync(attributeValue, encryptionAAD));
-          decryptionError = undefined;
-          break;
-        } catch (err) {
-          // Remember the error thrown when we tried to decrypt with the primary key.
-          if (!decryptionError) {
-            decryptionError = err;
+      loop: for (const decrypter of decrypters) {
+        for (const encryptionAAD of encryptionAADs) {
+          try {
+            iteratorResult = iterator.next(decrypter.decryptSync(attributeValue, encryptionAAD));
+            decryptionError = undefined;
+            break loop;
+          } catch (err) {
+            // Remember the error thrown when we tried to decrypt with the primary key.
+            if (!decryptionError) {
+              decryptionError = err;
+            }
           }
         }
       }
@@ -428,12 +438,12 @@ export class EncryptedSavedObjectsService {
     descriptor: SavedObjectDescriptor,
     attributes: T,
     params?: CommonParameters
-  ): Iterator<[string, string], T, EncryptOutput> {
+  ): Iterator<[string, string[]], T, EncryptOutput> {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
       return attributes;
     }
-    let encryptionAAD: string | undefined;
+    const encryptionAADs: string[] = [];
     const decryptedAttributes: Record<string, EncryptOutput> = {};
     for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
@@ -449,11 +459,16 @@ export class EncryptedSavedObjectsService {
           )}`
         );
       }
-      if (!encryptionAAD) {
-        encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
+      if (!encryptionAADs.length) {
+        encryptionAADs.push(this.getAAD(typeDefinition, descriptor, attributes));
+        if (typeDefinition.convertToMultiNamespaceType && descriptor.namespace) {
+          // This is happening during a migration; create an alternate AAD for decrypting the object attributes by stripping out the namespace from the descriptor.
+          const { namespace, ...alternateDescriptor } = descriptor;
+          encryptionAADs.push(this.getAAD(typeDefinition, alternateDescriptor, attributes));
+        }
       }
       try {
-        decryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
+        decryptedAttributes[attributeName] = (yield [attributeValue, encryptionAADs])!;
       } catch (err) {
         this.options.logger.error(
           `Failed to decrypt "${attributeName}" attribute: ${err.message || err}`

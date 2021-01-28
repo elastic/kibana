@@ -701,6 +701,56 @@ describe('#decryptAttributes', () => {
     );
   });
 
+  it('retries decryption without namespace if incorrect namespace is provided and convertToMultiNamespaceType option is enabled', async () => {
+    const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
+
+    service.registerType({
+      type: 'known-type-1',
+      attributesToEncrypt: new Set(['attrThree']),
+      convertToMultiNamespaceType: true,
+    });
+
+    const encryptedAttributes = service.encryptAttributesSync(
+      { type: 'known-type-1', id: 'object-id' }, // namespace was not included in descriptor during encryption
+      attributes
+    );
+    expect(encryptedAttributes).toEqual({
+      attrOne: 'one',
+      attrTwo: 'two',
+      attrThree: expect.not.stringMatching(/^three$/),
+    });
+
+    const mockUser = mockAuthenticatedUser();
+    await expect(
+      service.decryptAttributes(
+        { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+        encryptedAttributes,
+        { user: mockUser }
+      )
+    ).resolves.toEqual({
+      attrOne: 'one',
+      attrTwo: 'two',
+      attrThree: 'three',
+    });
+    expect(mockNodeCrypto.decrypt).toHaveBeenCalledTimes(2);
+    expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
+      1, // first attempted to decrypt with the namespace in the descriptor (fail)
+      expect.anything(),
+      `["object-ns","known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
+    );
+    expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
+      2, // then attempted to decrypt without the namespace in the descriptor (success)
+      expect.anything(),
+      `["known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
+    );
+    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
+      ['attrThree'],
+      { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+      mockUser
+    );
+  });
+
   it('decrypts even if no attributes are included into AAD', async () => {
     const attributes = { attrOne: 'one', attrThree: 'three' };
     service.registerType({
@@ -896,6 +946,44 @@ describe('#decryptAttributes', () => {
         'attrThree',
         { type: 'known-type-1', id: 'object-id' },
         mockUser
+      );
+    });
+
+    it('fails if retry decryption without namespace is not correct', async () => {
+      const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
+
+      service.registerType({
+        type: 'known-type-3',
+        attributesToEncrypt: new Set(['attrThree']),
+        convertToMultiNamespaceType: true,
+      });
+
+      encryptedAttributes = service.encryptAttributesSync(
+        { type: 'known-type-3', id: 'object-id', namespace: 'some-other-ns' },
+        attributes
+      );
+      expect(encryptedAttributes).toEqual({
+        attrOne: 'one',
+        attrTwo: 'two',
+        attrThree: expect.not.stringMatching(/^three$/),
+      });
+
+      await expect(() =>
+        service.decryptAttributes(
+          { type: 'known-type-3', id: 'object-id', namespace: 'object-ns' },
+          encryptedAttributes
+        )
+      ).rejects.toThrowError(EncryptionError);
+      expect(mockNodeCrypto.decrypt).toHaveBeenCalledTimes(2);
+      expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
+        1, // first attempted to decrypt with the namespace in the descriptor (fail)
+        expect.anything(),
+        `["object-ns","known-type-3","object-id",{"attrOne":"one","attrTwo":"two"}]`
+      );
+      expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
+        2, // then attempted to decrypt without the namespace in the descriptor (fail)
+        expect.anything(),
+        `["known-type-3","object-id",{"attrOne":"one","attrTwo":"two"}]`
       );
     });
 
@@ -1455,6 +1543,56 @@ describe('#decryptAttributesSync', () => {
     });
   });
 
+  it('retries decryption without namespace if incorrect namespace is provided and convertToMultiNamespaceType option is enabled', () => {
+    const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
+
+    service.registerType({
+      type: 'known-type-1',
+      attributesToEncrypt: new Set(['attrThree']),
+      convertToMultiNamespaceType: true,
+    });
+
+    const encryptedAttributes = service.encryptAttributesSync(
+      { type: 'known-type-1', id: 'object-id' }, // namespace was not included in descriptor during encryption
+      attributes
+    );
+    expect(encryptedAttributes).toEqual({
+      attrOne: 'one',
+      attrTwo: 'two',
+      attrThree: expect.not.stringMatching(/^three$/),
+    });
+
+    const mockUser = mockAuthenticatedUser();
+    expect(
+      service.decryptAttributesSync(
+        { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+        encryptedAttributes,
+        { user: mockUser }
+      )
+    ).toEqual({
+      attrOne: 'one',
+      attrTwo: 'two',
+      attrThree: 'three',
+    });
+    expect(mockNodeCrypto.decryptSync).toHaveBeenCalledTimes(2);
+    expect(mockNodeCrypto.decryptSync).toHaveBeenNthCalledWith(
+      1, // first attempted to decrypt with the namespace in the descriptor (fail)
+      expect.anything(),
+      `["object-ns","known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
+    );
+    expect(mockNodeCrypto.decryptSync).toHaveBeenNthCalledWith(
+      2, // then attempted to decrypt without the namespace in the descriptor (success)
+      expect.anything(),
+      `["known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
+    );
+    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
+      ['attrThree'],
+      { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+      mockUser
+    );
+  });
+
   it('decrypts even if no attributes are included into AAD', () => {
     const attributes = { attrOne: 'one', attrThree: 'three' };
     service.registerType({
@@ -1598,6 +1736,44 @@ describe('#decryptAttributesSync', () => {
           encryptedAttributes
         )
       ).toThrowError(EncryptionError);
+    });
+
+    it('fails if retry decryption without namespace is not correct', () => {
+      const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
+
+      service.registerType({
+        type: 'known-type-3',
+        attributesToEncrypt: new Set(['attrThree']),
+        convertToMultiNamespaceType: true,
+      });
+
+      encryptedAttributes = service.encryptAttributesSync(
+        { type: 'known-type-3', id: 'object-id', namespace: 'some-other-ns' },
+        attributes
+      );
+      expect(encryptedAttributes).toEqual({
+        attrOne: 'one',
+        attrTwo: 'two',
+        attrThree: expect.not.stringMatching(/^three$/),
+      });
+
+      expect(() =>
+        service.decryptAttributesSync(
+          { type: 'known-type-3', id: 'object-id', namespace: 'object-ns' },
+          encryptedAttributes
+        )
+      ).toThrowError(EncryptionError);
+      expect(mockNodeCrypto.decryptSync).toHaveBeenCalledTimes(2);
+      expect(mockNodeCrypto.decryptSync).toHaveBeenNthCalledWith(
+        1, // first attempted to decrypt with the namespace in the descriptor (fail)
+        expect.anything(),
+        `["object-ns","known-type-3","object-id",{"attrOne":"one","attrTwo":"two"}]`
+      );
+      expect(mockNodeCrypto.decryptSync).toHaveBeenNthCalledWith(
+        2, // then attempted to decrypt without the namespace in the descriptor (fail)
+        expect.anything(),
+        `["known-type-3","object-id",{"attrOne":"one","attrTwo":"two"}]`
+      );
     });
 
     it('fails to decrypt if encrypted attribute is defined, but not a string', () => {
