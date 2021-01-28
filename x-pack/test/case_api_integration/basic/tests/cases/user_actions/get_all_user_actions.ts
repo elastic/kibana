@@ -9,7 +9,12 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../../plugins/case/common/constants';
 import { CommentType } from '../../../../../../plugins/case/common/api';
-import { defaultUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
+import {
+  userActionPostResp,
+  defaultUser,
+  postCaseReq,
+  postCommentUserReq,
+} from '../../../../common/lib/mock';
 import {
   deleteCases,
   deleteCasesUserActions,
@@ -72,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
       ]);
       expect(body[0].action).to.eql('create');
       expect(body[0].old_value).to.eql(null);
-      expect(body[0].new_value).to.eql(JSON.stringify(postCaseReq));
+      expect(body[0].new_value).to.eql(JSON.stringify(userActionPostResp));
     });
 
     it(`on close case, user action: 'update' should be called with actionFields: ['status']`, async () => {

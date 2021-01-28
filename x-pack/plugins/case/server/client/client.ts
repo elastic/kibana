@@ -9,7 +9,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+import {
+  ILegacyScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 import {
   CaseClientFactoryArguments,
   CaseClient,
@@ -44,6 +48,8 @@ import {
 
 // TODO: rename
 export class CaseClientImpl implements CaseClient {
+  // TODO: we have to use the one that the actions API gives us which is deprecated, but we'll need it updated there first I think
+  private readonly _callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   private readonly _caseConfigureService: CaseConfigureServiceSetup;
   private readonly _caseService: CaseServiceSetup;
   private readonly _connectorMappingsService: ConnectorMappingsServiceSetup;
@@ -54,6 +60,7 @@ export class CaseClientImpl implements CaseClient {
 
   // TODO: refactor so these are created in the constructor instead of passed in
   constructor(clientArgs: CaseClientFactoryArguments) {
+    this._callCluster = clientArgs.callCluster;
     this._caseConfigureService = clientArgs.caseConfigureService;
     this._caseService = clientArgs.caseService;
     this._connectorMappingsService = clientArgs.connectorMappingsService;
@@ -162,7 +169,7 @@ export class CaseClientImpl implements CaseClient {
     return updateAlertsStatus({
       ...args,
       alertsService: this._alertsService,
-      request: this.request,
+      callCluster: this._callCluster,
     });
   }
 }

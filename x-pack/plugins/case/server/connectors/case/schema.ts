@@ -42,7 +42,6 @@ const ContextTypeAlertGroupSchema = schema.object({
   type: schema.literal(CommentType.generatedAlert),
   alerts: schema.oneOf([schema.arrayOf(AlertIDSchema), AlertIDSchema]),
   index: schema.string(),
-  ruleId: schema.string(),
 });
 
 const ContextTypeAlertSchema = schema.object({

@@ -49,7 +49,6 @@ export function initPostPushToService({ router }: RouteDeps) {
 
         const myConnectorMappings = await caseClient.getMappings({
           actionsClient,
-          caseClient,
           connectorId: params.connector_id,
           connectorType: body.connector_type,
         });

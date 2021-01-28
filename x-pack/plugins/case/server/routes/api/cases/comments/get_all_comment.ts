@@ -19,6 +19,11 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
         params: schema.object({
           case_id: schema.string(),
         }),
+        query: schema.maybe(
+          schema.object({
+            sub_case_id: schema.string(),
+          })
+        ),
       },
     },
     async (context, request, response) => {
@@ -27,6 +32,7 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
         const comments = await caseService.getAllCaseComments({
           client,
           id: request.params.case_id,
+          subCaseID: request.query?.sub_case_id,
         });
         return response.ok({
           body: AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects)),

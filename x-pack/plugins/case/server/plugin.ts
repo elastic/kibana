@@ -8,7 +8,6 @@ import { first, map } from 'rxjs/operators';
 import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
-import Boom from '@hapi/boom';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as ActionsPluginSetup } from '../../actions/server';
 import { APP_ID } from '../common/constants';
@@ -123,13 +122,13 @@ export class CasePlugin {
 
   public async start(core: CoreStart) {
     this.log.debug(`Starting Case Workflow`);
-    this.alertsService!.initialize(core.elasticsearch.client);
 
     const getCaseClientWithRequestAndContext = async (
       context: CasesRequestHandlerContext,
       request: KibanaRequest
     ) => {
       return createExternalCaseClient({
+        callCluster: context.core.elasticsearch.legacy.client.callAsCurrentUser,
         savedObjectsClient: core.savedObjects.getScopedClient(request),
         request,
         caseService: this.caseService!,
@@ -170,6 +169,7 @@ export class CasePlugin {
       return {
         getCaseClient: () => {
           return new CaseClientImpl({
+            callCluster: context.core.elasticsearch.legacy.client.callAsCurrentUser,
             savedObjectsClient: savedObjects.getScopedClient(request),
             caseService,
             caseConfigureService,

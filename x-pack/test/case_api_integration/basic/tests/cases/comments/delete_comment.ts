@@ -41,7 +41,6 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .expect(204)
         .send();
-
       expect(comment).to.eql({});
     });
 

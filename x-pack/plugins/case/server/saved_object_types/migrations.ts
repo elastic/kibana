@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '../../../../../src/core/server';
-import { ConnectorTypes, CommentType, CaseType } from '../../common/api';
+import { ConnectorTypes, CommentType, CaseType, AssociationType } from '../../common/api';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -178,6 +178,10 @@ interface SanitizedComment {
   type: CommentType;
 }
 
+interface SanitizedCommentAssociationType {
+  associationType: AssociationType;
+}
+
 export const commentsMigrations = {
   '7.11.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
@@ -187,6 +191,18 @@ export const commentsMigrations = {
       attributes: {
         ...doc.attributes,
         type: CommentType.user,
+      },
+      references: doc.references || [],
+    };
+  },
+  '7.12.0': (
+    doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
+  ): SavedObjectSanitizedDoc<SanitizedCommentAssociationType> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        associationType: AssociationType.case,
       },
       references: doc.references || [],
     };

@@ -72,7 +72,6 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           try {
             mappings = await caseClient.getMappings({
               actionsClient,
-              caseClient,
               connectorId: connector.id,
               connectorType: connector.type,
             });

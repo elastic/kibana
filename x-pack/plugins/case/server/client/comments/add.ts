@@ -115,12 +115,11 @@ const addGeneratedAlerts = async ({
         ...userDetails,
       }),
       references: [
-        // TODO: I don't think  we need this?
-        // {
-        //   type: CASE_SAVED_OBJECT,
-        //   name: `associated-${CASE_SAVED_OBJECT}`,
-        //   id: myCase.id,
-        // },
+        {
+          type: CASE_SAVED_OBJECT,
+          name: `associated-${CASE_SAVED_OBJECT}`,
+          id: myCase.id,
+        },
         {
           type: SUB_CASE_SAVED_OBJECT,
           name: `associated-${SUB_CASE_SAVED_OBJECT}`,
@@ -158,7 +157,7 @@ const addGeneratedAlerts = async ({
     myCase.attributes.settings.syncAlerts
   ) {
     const ids = getAlertIds(query);
-    caseClient.updateAlertsStatus({
+    await caseClient.updateAlertsStatus({
       ids,
       status: myCase.attributes.status,
       indices: new Set([newComment.attributes.index]),
@@ -316,7 +315,7 @@ export const addComment = async ({
     const ids = Array.isArray(newComment.attributes.alertId)
       ? newComment.attributes.alertId
       : [newComment.attributes.alertId];
-    caseClient.updateAlertsStatus({
+    await caseClient.updateAlertsStatus({
       ids,
       status: updatedCase.status,
       indices: new Set([newComment.attributes.index]),

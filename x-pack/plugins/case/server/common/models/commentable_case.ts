@@ -111,6 +111,7 @@ export class CommentableCase {
       const subCaseComments = await this.service.getAllCaseComments({
         client: this.soClient,
         id: this.subCase.id,
+        subCaseID: this.subCase.id,
       });
 
       return CollectWithSubCaseResponseRt.encode({

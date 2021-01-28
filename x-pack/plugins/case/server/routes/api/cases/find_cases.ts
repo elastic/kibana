@@ -108,6 +108,7 @@ async function getCaseCommentStats({
       caseService.getAllCaseComments({
         client,
         id,
+        subCaseID: type === SUB_CASE_SAVED_OBJECT ? id : undefined,
         options: {
           fields: [],
           page: 1,
@@ -125,6 +126,7 @@ async function getCaseCommentStats({
       caseService.getAllCaseComments({
         client,
         id,
+        subCaseID: type === SUB_CASE_SAVED_OBJECT ? id : undefined,
         options: {
           filter: `(${type}.attributes.type: ${CommentType.alert} OR ${type}.attributes.type: ${CommentType.generatedAlert}) AND ${type}.attributes.associationType: ${associationType}`,
         },

@@ -52,6 +52,7 @@ export function initGetSubCaseApi({ caseService, router }: RouteDeps) {
             sortField: 'created_at',
             sortOrder: 'asc',
           },
+          subCaseID: request.params.sub_case_id,
         });
 
         return response.ok({

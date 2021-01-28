@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import {
+  ILegacyScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { ActionsClient } from '../../../actions/server';
 import {
   CaseClientPostRequest,
@@ -53,6 +57,8 @@ export interface CaseClientUpdateAlertsStatus {
 }
 
 export interface CaseClientFactoryArguments {
+  // TODO: we have to use the one that the actions API gives us which is deprecated, but we'll need it updated there first I think
+  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
   connectorMappingsService: ConnectorMappingsServiceSetup;
@@ -85,7 +91,6 @@ export interface CaseClient extends CaseClientPluginContract {
 }
 export interface MappingsClient {
   actionsClient: ActionsClient;
-  caseClient: CaseClient;
   connectorId: string;
   connectorType: string;
 }

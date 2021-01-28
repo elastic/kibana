@@ -5,6 +5,9 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
+// TODO: fix this
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { legacyClientMock } from 'src/core/server/elasticsearch/legacy/mocks';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import {
   connectorMappingsServiceMock,
@@ -18,6 +21,7 @@ jest.mock('./client');
 import { CaseClientImpl } from './client';
 import { createExternalCaseClient } from './index';
 
+const esLegacyCluster = legacyClientMock.createScopedClusterClient();
 const caseConfigureService = createConfigureServiceMock();
 const alertsService = createAlertServiceMock();
 const caseService = createCaseServiceMock();
@@ -29,6 +33,7 @@ const userActionService = createUserActionServiceMock();
 describe('createExternalCaseClient()', () => {
   test('it creates the client correctly', async () => {
     createExternalCaseClient({
+      callCluster: esLegacyCluster.callAsCurrentUser,
       alertsService,
       caseConfigureService,
       caseService,

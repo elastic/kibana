@@ -15,6 +15,7 @@ import {
   SavedObjectReference,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsBulkResponse,
+  SavedObjectsFindOptionsReference,
 } from 'kibana/server';
 
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
@@ -59,6 +60,7 @@ interface GetCasesArgs extends ClientArgs {
 
 interface FindCommentsArgs extends GetCaseArgs {
   options?: SavedObjectFindOptions;
+  subCaseID?: string;
 }
 
 interface FindCasesArgs extends ClientArgs {
@@ -358,17 +360,19 @@ export class CaseService implements CaseServiceSetup {
     client,
     id,
     options,
+    subCaseID,
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
     try {
-      this.log.debug(`Attempting to GET all comments for case ${id}`);
+      const ref =
+        subCaseID == null
+          ? { type: CASE_SAVED_OBJECT, id }
+          : { type: SUB_CASE_SAVED_OBJECT, id: subCaseID };
+      this.log.debug(`Attempting to GET all comments for case caseID ${id} subCaseID ${subCaseID}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
         return client.find({
           type: CASE_COMMENT_SAVED_OBJECT,
           hasReferenceOperator: 'OR',
-          hasReference: [
-            { type: CASE_SAVED_OBJECT, id },
-            { type: SUB_CASE_SAVED_OBJECT, id },
-          ],
+          hasReference: [ref],
           ...options,
         });
       }
@@ -376,10 +380,7 @@ export class CaseService implements CaseServiceSetup {
       const stats = await client.find({
         type: CASE_COMMENT_SAVED_OBJECT,
         hasReferenceOperator: 'OR',
-        hasReference: [
-          { type: CASE_SAVED_OBJECT, id },
-          { type: SUB_CASE_SAVED_OBJECT, id },
-        ],
+        hasReference: [ref],
         fields: [],
         page: 1,
         perPage: 1,
@@ -390,16 +391,13 @@ export class CaseService implements CaseServiceSetup {
       return client.find({
         type: CASE_COMMENT_SAVED_OBJECT,
         hasReferenceOperator: 'OR',
-        hasReference: [
-          { type: CASE_SAVED_OBJECT, id },
-          { type: SUB_CASE_SAVED_OBJECT, id },
-        ],
+        hasReference: [ref],
         page: 1,
         perPage: stats.total,
         ...options,
       });
     } catch (error) {
-      this.log.debug(`Error on GET all comments for case ${id}: ${error}`);
+      this.log.debug(`Error on GET all comments for case ${id} subCaseID: ${subCaseID}: ${error}`);
       throw error;
     }
   }

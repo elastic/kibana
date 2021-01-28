@@ -9,7 +9,7 @@ import { curry } from 'lodash';
 import { KibanaRequest } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import { CasePatchRequest, CasePostRequest, CaseType } from '../../../common/api';
-import { CaseClientImpl, createExternalCaseClient } from '../../client';
+import { createExternalCaseClient } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema } from './schema';
 import {
   CaseExecutorResponse,
@@ -67,11 +67,12 @@ async function executor(
   const { subAction, subActionParams } = params;
   let data: CaseExecutorResponse | null = null;
 
-  const { savedObjectsClient } = services;
+  const { savedObjectsClient, callCluster } = services;
   // TODO: ??? calling a constructor in a curry generates this error, TypeError: _client.CaseClientImpl is not a constructor
   // const caseClient = new CaseClientImpl({
   const caseClient = createExternalCaseClient({
     savedObjectsClient,
+    callCluster,
     // TODO: refactor this
     request: {} as KibanaRequest,
     caseService,
@@ -88,11 +89,10 @@ async function executor(
   }
 
   if (subAction === 'create') {
-    data = await caseClient.create(
-      // TODO: is it possible for the action framework to create an individual case that is not associated with sub cases?
-      // TODO: I think this should be an individual case...
-      { ...(subActionParams as CasePostRequest), type: CaseType.parent }
-    );
+    data = await caseClient.create({
+      ...(subActionParams as CasePostRequest),
+      type: CaseType.individual,
+    });
   }
 
   if (subAction === 'update') {

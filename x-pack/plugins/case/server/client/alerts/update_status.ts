@@ -4,25 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import { ILegacyScopedClusterClient, KibanaRequest } from 'src/core/server';
 import { CaseStatuses } from '../../../common/api';
 import { AlertServiceContract } from '../../services';
 
 interface UpdateAlertsStatusArgs {
   alertsService: AlertServiceContract;
-  request: KibanaRequest;
   ids: string[];
   status: CaseStatuses;
   indices: Set<string>;
+  // TODO: we have to use the one that the actions API gives us which is deprecated, but we'll need it updated there first I think
+  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
 }
 
 // TODO: remove this file
 export const updateAlertsStatus = async ({
   alertsService,
-  request,
   ids,
   status,
   indices,
+  callCluster,
 }: UpdateAlertsStatusArgs): Promise<void> => {
-  await alertsService.updateAlertsStatus({ ids, status, indices, request });
+  await alertsService.updateAlertsStatus({ ids, status, indices, callCluster });
 };

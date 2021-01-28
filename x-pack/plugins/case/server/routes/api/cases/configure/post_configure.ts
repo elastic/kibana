@@ -64,7 +64,6 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
         try {
           mappings = await caseClient.getMappings({
             actionsClient,
-            caseClient,
             connectorId: query.connector.id,
             connectorType: query.connector.type,
           });

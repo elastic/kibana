@@ -34,7 +34,12 @@ async function unremovableCases({
 
   const cases = await caseService.getCases({ caseIds: ids, client });
   const parentCases = cases.saved_objects.filter(
-    (caseObj) => caseObj.attributes.type === CaseType.parent
+    /**
+     * getCases will return an array of saved_objects and some can be successful cases where as others
+     * might have failed to find the ID. If it fails to find it, it will set the error field but not
+     * the attributes so check that we didn't receive an error.
+     */
+    (caseObj) => !caseObj.error && caseObj.attributes.type === CaseType.parent
   );
 
   return parentCases.map((parentCase) => parentCase.id);
@@ -55,7 +60,7 @@ async function deleteSubCases({
   );
 
   const commentsForSubCases = await Promise.all(
-    caseIds.map((id) => caseService.getAllCaseComments({ client, id }))
+    caseIds.map((id) => caseService.getAllCaseComments({ client, id, subCaseID: id }))
   );
 
   await Promise.all(

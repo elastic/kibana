@@ -22,7 +22,6 @@ describe('updateAlertsStatus', () => {
     expect(caseClient.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith({
       ids: ['alert-id-1'],
       indices: new Set<string>(['.siem-signals']),
-      request: {},
       status: CaseStatuses.closed,
     });
   });

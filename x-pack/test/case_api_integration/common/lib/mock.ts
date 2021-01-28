@@ -14,6 +14,8 @@ import {
   CommentRequestAlertType,
   CommentType,
   CaseStatuses,
+  CaseType,
+  CaseClientPostRequest,
 } from '../../../../plugins/case/common/api';
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 export const postCaseReq: CasePostRequest = {
@@ -29,6 +31,14 @@ export const postCaseReq: CasePostRequest = {
   settings: {
     syncAlerts: true,
   },
+};
+
+/**
+ * This is needed because the post api does not allow specifying the case type. But the response will include the type.
+ */
+export const userActionPostResp: CaseClientPostRequest = {
+  ...postCaseReq,
+  type: CaseType.individual,
 };
 
 export const postCommentUserReq: CommentRequestUserType = {
@@ -49,8 +59,11 @@ export const postCaseResp = (
   ...req,
   id,
   comments: [],
+  totalAlerts: 0,
   totalComment: 0,
+  type: CaseType.individual,
   closed_by: null,
+  converted_by: null,
   created_by: defaultUser,
   external_service: null,
   status: CaseStatuses.open,
