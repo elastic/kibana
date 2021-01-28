@@ -244,6 +244,10 @@ export class SearchSource {
     return this.parent;
   }
 
+  /**
+   * Fetch this source from Elasticsearch, returning an observable over the response(s)
+   * @param options
+   */
   fetch$(options: ISearchOptions = {}) {
     const { getConfig } = this.dependencies;
     return defer(() => this.requestIsStarting(options)).pipe(
@@ -266,8 +270,7 @@ export class SearchSource {
 
   /**
    * Fetch this source and reject the returned Promise on error
-   *
-   * @async
+   * @deprecated Use fetch$ instead
    */
   fetch(options: ISearchOptions = {}) {
     return this.fetch$(options).toPromise();
