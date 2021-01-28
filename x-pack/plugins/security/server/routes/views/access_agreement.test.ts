@@ -33,9 +33,11 @@ describe('Access agreement view routes', () => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
     httpResources = routeParamsMock.httpResources;
-    session = routeParamsMock.session;
     config = routeParamsMock.config;
     license = routeParamsMock.license;
+
+    session = sessionMock.create();
+    routeParamsMock.getSession.mockReturnValue(session);
 
     license.getFeatures.mockReturnValue({
       allowAccessAgreement: true,

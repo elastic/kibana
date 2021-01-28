@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   InfraWaffleMapBounds,
   InfraFormatter,

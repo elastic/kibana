@@ -19,6 +19,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./ui_actions'),
       require.resolve('./state_sync'),
       require.resolve('./routing'),
+      require.resolve('./expressions_explorer'),
     ],
     services: {
       ...functionalConfig.get('services'),

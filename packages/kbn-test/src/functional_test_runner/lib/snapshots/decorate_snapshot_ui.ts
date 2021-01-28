@@ -15,9 +15,9 @@ import {
 import path from 'path';
 import prettier from 'prettier';
 import babelTraverse from '@babel/traverse';
-import { flatten, once } from 'lodash';
+import { once } from 'lodash';
 import { Lifecycle } from '../lifecycle';
-import { Test, Suite } from '../../fake_mocha_types';
+import { Suite, Test } from '../../fake_mocha_types';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
@@ -28,40 +28,17 @@ interface SnapshotContext {
   currentTestName: string;
 }
 
-let testContext: {
-  file: string;
-  snapshotTitle: string;
-  snapshotContext: SnapshotContext;
-} | null = null;
-
-let registered: boolean = false;
-
-function getSnapshotMeta(currentTest: Test) {
-  // Make sure snapshot title is unique per-file, rather than entire
-  // suite. This allows reuse of tests, for instance to compare
-  // results for different configurations.
-
-  const titles = [currentTest.title];
-  const file = currentTest.file;
-
-  let test: Suite | undefined = currentTest?.parent;
-
-  while (test && test.file === file) {
-    titles.push(test.title);
-    test = test.parent;
-  }
-
-  const snapshotTitle = titles.reverse().join(' ');
-
-  if (!file || !snapshotTitle) {
-    throw new Error(`file or snapshotTitle not available in Mocha test context`);
-  }
-
-  return {
-    file,
-    snapshotTitle,
-  };
-}
+const globalState: {
+  updateSnapshot: SnapshotUpdateState;
+  registered: boolean;
+  currentTest: Test | null;
+  snapshotStates: Record<string, ISnapshotState>;
+} = {
+  updateSnapshot: 'none',
+  registered: false,
+  currentTest: null,
+  snapshotStates: {},
+};
 
 const modifyStackTracePrepareOnce = once(() => {
   const originalPrepareStackTrace = Error.prepareStackTrace;
@@ -72,7 +49,7 @@ const modifyStackTracePrepareOnce = once(() => {
 
   Error.prepareStackTrace = (error, structuredStackTrace) => {
     let filteredStrackTrace: NodeJS.CallSite[] = structuredStackTrace;
-    if (registered) {
+    if (globalState.registered) {
       filteredStrackTrace = filteredStrackTrace.filter((callSite) => {
         // check for both compiled and uncompiled files
         return !callSite.getFileName()?.match(/decorate_snapshot_ui\.(js|ts)/);
@@ -94,21 +71,16 @@ export function decorateSnapshotUi({
   updateSnapshots: boolean;
   isCi: boolean;
 }) {
-  let snapshotStatesByFilePath: Record<
-    string,
-    { snapshotState: ISnapshotState; testsInFile: Test[] }
-  > = {};
-
-  registered = true;
-
-  let updateSnapshot: SnapshotUpdateState;
+  globalState.registered = true;
+  globalState.snapshotStates = {};
+  globalState.currentTest = null;
 
   if (isCi) {
     // make sure snapshots that have not been committed
     // are not written to file on CI, passing the test
-    updateSnapshot = 'none';
+    globalState.updateSnapshot = 'none';
   } else {
-    updateSnapshot = updateSnapshots ? 'all' : 'new';
+    globalState.updateSnapshot = updateSnapshots ? 'all' : 'new';
   }
 
   modifyStackTracePrepareOnce();
@@ -125,50 +97,40 @@ export function decorateSnapshotUi({
   // @ts-expect-error
   global.expectSnapshot = expectSnapshot;
 
-  lifecycle.beforeEachTest.add((currentTest: Test) => {
-    const { file, snapshotTitle } = getSnapshotMeta(currentTest);
-
-    if (!snapshotStatesByFilePath[file]) {
-      snapshotStatesByFilePath[file] = getSnapshotState(file, currentTest, updateSnapshot);
-    }
-
-    testContext = {
-      file,
-      snapshotTitle,
-      snapshotContext: {
-        snapshotState: snapshotStatesByFilePath[file].snapshotState,
-        currentTestName: snapshotTitle,
-      },
-    };
+  lifecycle.beforeEachTest.add((test: Test) => {
+    globalState.currentTest = test;
   });
 
-  lifecycle.afterTestSuite.add(function (testSuite) {
+  lifecycle.afterTestSuite.add(function (testSuite: Suite) {
     // save snapshot & check unused after top-level test suite completes
-    if (testSuite.parent?.parent) {
+    if (!testSuite.root) {
       return;
     }
 
-    const unused: string[] = [];
+    testSuite.eachTest((test) => {
+      const file = test.file;
 
-    Object.keys(snapshotStatesByFilePath).forEach((file) => {
-      const { snapshotState, testsInFile } = snapshotStatesByFilePath[file];
-
-      testsInFile.forEach((test) => {
-        const snapshotMeta = getSnapshotMeta(test);
-        // If test is failed or skipped, mark snapshots as used. Otherwise,
-        // running a test in isolation will generate false positives.
-        if (!test.isPassed()) {
-          snapshotState.markSnapshotsAsCheckedForTest(snapshotMeta.snapshotTitle);
-        }
-      });
-
-      if (!updateSnapshots) {
-        unused.push(...snapshotState.getUncheckedKeys());
-      } else {
-        snapshotState.removeUncheckedKeys();
+      if (!file) {
+        return;
       }
 
-      snapshotState.save();
+      const snapshotState = globalState.snapshotStates[file];
+
+      if (snapshotState && !test.isPassed()) {
+        snapshotState.markSnapshotsAsCheckedForTest(test.fullTitle());
+      }
+    });
+
+    const unused: string[] = [];
+
+    Object.values(globalState.snapshotStates).forEach((state) => {
+      if (globalState.updateSnapshot === 'all') {
+        state.removeUncheckedKeys();
+      }
+
+      unused.push(...state.getUncheckedKeys());
+
+      state.save();
     });
 
     if (unused.length) {
@@ -179,27 +141,13 @@ export function decorateSnapshotUi({
       );
     }
 
-    snapshotStatesByFilePath = {};
+    globalState.snapshotStates = {};
   });
 }
 
-function recursivelyGetTestsFromSuite(suite: Suite): Test[] {
-  return suite.tests.concat(flatten(suite.suites.map((s) => recursivelyGetTestsFromSuite(s))));
-}
-
-function getSnapshotState(file: string, test: Test, updateSnapshot: SnapshotUpdateState) {
+function getSnapshotState(file: string, updateSnapshot: SnapshotUpdateState) {
   const dirname = path.dirname(file);
   const filename = path.basename(file);
-
-  let parent: Suite | undefined = test.parent;
-
-  while (parent && parent.parent?.file === file) {
-    parent = parent.parent;
-  }
-
-  if (!parent) {
-    throw new Error('Top-level suite not found');
-  }
 
   const snapshotState = new SnapshotState(
     path.join(dirname + `/__snapshots__/` + filename.replace(path.extname(filename), '.snap')),
@@ -211,24 +159,40 @@ function getSnapshotState(file: string, test: Test, updateSnapshot: SnapshotUpda
     }
   );
 
-  return { snapshotState, testsInFile: recursivelyGetTestsFromSuite(parent) };
+  return snapshotState;
 }
 
 export function expectSnapshot(received: any) {
-  if (!registered) {
-    throw new Error(
-      'Mocha hooks were not registered before expectSnapshot was used. Call `registerMochaHooksForSnapshots` in your top-level describe().'
-    );
+  if (!globalState.registered) {
+    throw new Error('expectSnapshot UI was not initialized before calling expectSnapshot()');
   }
 
-  if (!testContext) {
-    throw new Error('A current Mocha context is needed to match snapshots');
+  const test = globalState.currentTest;
+
+  if (!test) {
+    throw new Error('expectSnapshot can only be called inside of an it()');
   }
+
+  if (!test.file) {
+    throw new Error('File for test not found');
+  }
+
+  let snapshotState = globalState.snapshotStates[test.file];
+
+  if (!snapshotState) {
+    snapshotState = getSnapshotState(test.file, globalState.updateSnapshot);
+    globalState.snapshotStates[test.file] = snapshotState;
+  }
+
+  const context: SnapshotContext = {
+    snapshotState,
+    currentTestName: test.fullTitle(),
+  };
 
   return {
-    toMatch: expectToMatchSnapshot.bind(null, testContext.snapshotContext, received),
+    toMatch: expectToMatchSnapshot.bind(null, context, received),
     // use bind to support optional 3rd argument (actual)
-    toMatchInline: expectToMatchInlineSnapshot.bind(null, testContext.snapshotContext, received),
+    toMatchInline: expectToMatchInlineSnapshot.bind(null, context, received),
   };
 }
 
