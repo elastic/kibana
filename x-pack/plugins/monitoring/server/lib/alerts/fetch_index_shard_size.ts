@@ -17,11 +17,13 @@ const memoizedIndexPatterns = (globPatterns: string) => {
   ) as RegExPatterns;
 };
 
+const gbMultiplier = 1000000000;
+
 export async function fetchIndexShardSize(
   callCluster: any,
   clusters: AlertCluster[],
   index: string,
-  thresholdBytes: number,
+  threshold: number,
   shardIndexPatterns: string,
   size: number
 ): Promise<IndexShardSizeStats[]> {
@@ -60,7 +62,7 @@ export async function fetchIndexShardSize(
               filter: {
                 range: {
                   'index_stats.primaries.store.size_in_bytes': {
-                    gt: thresholdBytes,
+                    gt: threshold * gbMultiplier,
                   },
                 },
               },
@@ -107,7 +109,7 @@ export async function fetchIndexShardSize(
   }
 
   for (const clusterBucket of clusterBuckets) {
-    const indexBuckets = clusterBucket.index.buckets;
+    const indexBuckets = clusterBucket.over_threshold.index.buckets;
     const clusterUuid = clusterBucket.key;
 
     for (const indexBucket of indexBuckets) {
@@ -120,9 +122,9 @@ export async function fetchIndexShardSize(
         _source: { source_node: sourceNode, index_stats: indexStats },
       } = get(indexBucket, 'hits.hits.hits[0]');
 
-      const { size_in_bytes: shardSize } = indexStats.primaries.store;
+      const { size_in_bytes: shardSizeBytes } = indexStats.primaries.store;
       const { name: nodeName, uuid: nodeId } = sourceNode;
-
+      const shardSize = +(shardSizeBytes / gbMultiplier).toFixed(2);
       stats.push({
         shardIndex,
         shardSize,

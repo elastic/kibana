@@ -58,7 +58,7 @@ const getColumns = (alerts) => {
           <AlertsStatus
             showBadge={true}
             alerts={alerts}
-            stateFilter={(state) => state.shardIndex === index.resolver}
+            stateFilter={(state) => state.shardIndex === index.resolver.name}
           />
         );
       },

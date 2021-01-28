@@ -39,7 +39,7 @@ export class LargeShardSizeAlert extends BaseAlert {
       id: ALERT_LARGE_SHARD_SIZE,
       name: ALERT_DETAILS[ALERT_LARGE_SHARD_SIZE].label,
       throttle: '12h',
-      defaultParams: { indexPattern: '*' },
+      defaultParams: { indexPattern: '*', threshold: 55 },
       actionVariables: [
         {
           name: 'shardIndices',
@@ -147,8 +147,8 @@ export class LargeShardSizeAlert extends BaseAlert {
     filters: Array<CommonAlertFilter & { shardIndex: string }>
   ) {
     const alertInstanceStates = alertInstance.state?.alertStates as AlertState[];
-    const alertFilter = filters?.find((filter) => filter.shardId);
-    if (!filters || !filters.length || !alertInstanceStates?.length || !alertFilter?.shardId) {
+    const alertFilter = filters?.find((filter) => filter.shardIndex);
+    if (!filters || !filters.length || !alertInstanceStates?.length || !alertFilter?.shardIndex) {
       return alertInstance;
     }
     const alertStates = alertInstanceStates.filter(

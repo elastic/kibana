@@ -476,13 +476,14 @@ export const ALERT_DETAILS = {
     paramDetails: {
       threshold: {
         label: i18n.translate('xpack.monitoring.alerts.shardSize.paramDetails.threshold.label', {
-          defaultMessage: `Notify when a shard exceeds size (GB)`,
+          defaultMessage: `Notify when a shard exceeds this size`,
         }),
         type: AlertParamType.Number,
+        append: 'GB',
       },
       indexPattern: {
         label: i18n.translate('xpack.monitoring.alerts.shardSize.paramDetails.indexPattern.label', {
-          defaultMessage: `Only check the following index patterns`,
+          defaultMessage: `Check the following index patterns`,
         }),
         placeholder: 'eg: data-*, *prod-data, -.internal-data*',
         type: AlertParamType.TextField,
@@ -518,6 +519,7 @@ export const ALERT_PANEL_MENU = [
       { alertName: ALERT_CPU_USAGE },
       { alertName: ALERT_DISK_USAGE },
       { alertName: ALERT_MEMORY_USAGE },
+      { alertName: ALERT_LARGE_SHARD_SIZE },
     ],
   },
   {
@@ -530,7 +532,6 @@ export const ALERT_PANEL_MENU = [
       { alertName: ALERT_THREAD_POOL_SEARCH_REJECTIONS },
       { alertName: ALERT_THREAD_POOL_WRITE_REJECTIONS },
       { alertName: ALERT_CCR_READ_EXCEPTIONS },
-      { alertName: ALERT_LARGE_SHARD_SIZE },
     ],
   },
 ];

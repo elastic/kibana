@@ -28,6 +28,7 @@ export interface CommonAlertFilter {
 export interface CommonAlertParamDetail {
   label: string;
   type?: AlertParamType;
+  [name: string]: unknown | undefined;
 }
 
 export interface CommonAlertParamDetails {

@@ -24,7 +24,7 @@ export interface Props {
 export const Expression: React.FC<Props> = (props) => {
   const { alertParams, paramDetails, setAlertParams, errors } = props;
 
-  const alertParamsUi = Object.keys(alertParams).map((alertParamName) => {
+  const alertParamsUi = Object.keys(paramDetails).map((alertParamName) => {
     const details = paramDetails[alertParamName];
     const value = alertParams[alertParamName];
 
@@ -56,7 +56,7 @@ export const Expression: React.FC<Props> = (props) => {
           <AlertParamNumber
             key={alertParamName}
             name={alertParamName}
-            label={details?.label}
+            details={details}
             value={value}
             errors={errors[alertParamName]}
             setAlertParams={setAlertParams}
