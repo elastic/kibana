@@ -7,7 +7,7 @@
  */
 
 import { Capabilities } from 'kibana/public';
-import { getSharingData, showPublicUrlSwitch, DiscoverCapabilities } from './get_sharing_data';
+import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 import { IUiSettingsClient } from 'kibana/public';
 import { createSearchSourceMock } from '../../../../data/common/search/search_source/mocks';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
