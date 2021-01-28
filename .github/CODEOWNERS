@@ -9,7 +9,6 @@
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
 /x-pack/plugins/graph/ @elastic/kibana-app
-/x-pack/plugins/vis_type_timeseries_enhanced/ @elastic/kibana-app
 /src/plugins/advanced_settings/ @elastic/kibana-app
 /src/plugins/charts/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
@@ -329,6 +328,9 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
+
+# Security Asset Management
+/x-pack/plugins/osquery @elastic/security-asset-management
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
