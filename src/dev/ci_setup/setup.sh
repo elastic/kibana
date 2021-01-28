@@ -67,6 +67,6 @@ if [ "$GIT_CHANGES" ]; then
 fi
 
 ###
-### copy .bazelrc for ci into $HOME/.bazelrc
+### copy .bazelrc-ci into $HOME/.bazelrc
 ###
-cp "src/dev/ci_setup/.bazelrc" "$HOME/.bazelrc";
+cp "src/dev/ci_setup/.bazelrc-ci" "$HOME/.bazelrc";
