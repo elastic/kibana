@@ -9,9 +9,9 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useMount from 'react-use/lib/useMount';
-import { euiStyled } from '../../../../../../../observability/public';
-import { LogEntryAnomaly } from '../../../../../../common/http_api';
-import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { LogEntryAnomaly, isCategoryAnomaly } from '../../../../../../common/log_analysis';
+import { TimeRange } from '../../../../../../common/time/time_range';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { useLogSourceContext } from '../../../../../containers/logs/log_source';
 import { useLogEntryExamples } from '../../use_log_entry_examples';
@@ -40,7 +40,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     exampleCount: EXAMPLE_COUNT,
     sourceId,
     startTime: anomaly.startTime,
-    categoryId: anomaly.categoryId,
+    categoryId: isCategoryAnomaly(anomaly) ? anomaly.categoryId : undefined,
   });
 
   useMount(() => {

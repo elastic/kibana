@@ -9,7 +9,8 @@
 import { schema } from '@kbn/config-schema';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
-describe('ui settings service', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/89191
+describe.skip('ui settings service', () => {
   describe('routes', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeAll(async () => {
