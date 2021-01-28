@@ -14,7 +14,6 @@ import {
   EuiToolTip,
   EuiTextAlign,
   EuiCallOut,
-  EuiText,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';

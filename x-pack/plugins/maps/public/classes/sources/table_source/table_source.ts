@@ -37,7 +37,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     return {
       type: SOURCE_TYPES.TABLE_SOURCE,
       __rows: descriptor.__rows || [],
-      columns: descriptor.__columns || [],
+      __columns: descriptor.__columns || [],
       term: descriptor.term || '',
       id: descriptor.id || uuid(),
     };
