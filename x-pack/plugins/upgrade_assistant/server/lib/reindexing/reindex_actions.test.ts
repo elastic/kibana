@@ -3,7 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ScopedClusterClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import moment from 'moment';
 
 import {
@@ -18,7 +22,7 @@ import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_ac
 
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
-  let callCluster: jest.Mock;
+  let clusterClient: ScopedClusterClientMock;
   let actions: ReindexActions;
 
   const unimplemented = (name: string) => () =>
@@ -38,8 +42,8 @@ describe('ReindexActions', () => {
         Promise.resolve({ id, attributes } as ReindexSavedObject)
       ) as any,
     };
-    callCluster = jest.fn();
-    actions = reindexActionsFactory(client, callCluster);
+    clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    actions = reindexActionsFactory(client, clusterClient.asCurrentUser);
   });
 
   describe('createReindexOp', () => {
@@ -281,13 +285,20 @@ describe('ReindexActions', () => {
   });
 
   describe('getFlatSettings', () => {
+    const asApiResponse = <T>(body: T): RequestEvent<T> =>
+      ({
+        body,
+      } as RequestEvent<T>);
+
     it('returns flat settings', async () => {
-      callCluster.mockResolvedValueOnce({
-        myIndex: {
-          settings: { 'index.mySetting': '1' },
-          mappings: {},
-        },
-      });
+      clusterClient.asCurrentUser.indices.getSettings.mockResolvedValueOnce(
+        asApiResponse({
+          myIndex: {
+            settings: { 'index.mySetting': '1' },
+            mappings: {},
+          },
+        })
+      );
       await expect(actions.getFlatSettings('myIndex')).resolves.toEqual({
         settings: { 'index.mySetting': '1' },
         mappings: {},
@@ -295,7 +306,7 @@ describe('ReindexActions', () => {
     });
 
     it('returns null if index does not exist', async () => {
-      callCluster.mockResolvedValueOnce({});
+      clusterClient.asCurrentUser.indices.getSettings.mockResolvedValueOnce(asApiResponse({}));
       await expect(actions.getFlatSettings('myIndex')).resolves.toBeNull();
     });
   });

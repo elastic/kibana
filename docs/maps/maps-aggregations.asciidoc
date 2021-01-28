@@ -98,6 +98,13 @@ Point to point uses an {es} {ref}/search-aggregations-bucket-terms-aggregation.h
 Then, a nested {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[GeoTile grid aggregation] groups sources for each destination into grids.
 A line connects each source grid centroid to each destination.
 
+Point-to-point layers are used in several common use cases:
+
+* Source-destination maps for network traffic
+* Origin-destination maps for flight data
+* Origin-destination flows for import/export/migration
+* Origin-destination for pick-up/drop-off data
+
 image::maps/images/point_to_point.png[]
 
 [role="xpack"]
