@@ -53,7 +53,7 @@ export const TrustedAppsPage = memo(() => {
     view_type: viewType,
   }));
 
-  const showCreateFlyout = location.show === 'create';
+  const showCreateFlyout = !!location.show;
 
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {

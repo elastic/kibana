@@ -199,3 +199,10 @@ export const listOfPolicies: (
 ) => Immutable<GetPolicyListResponse['items']> = createSelector(policiesState, (policies) => {
   return isLoadedResourceState(policies) ? policies.data.items : [];
 });
+
+export const isEdit: (state: Immutable<TrustedAppsListPageState>) => boolean = createSelector(
+  getCurrentLocation,
+  ({ show }) => {
+    return show === 'edit';
+  }
+);
