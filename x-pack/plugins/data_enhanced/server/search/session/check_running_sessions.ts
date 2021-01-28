@@ -69,7 +69,7 @@ async function updateSessionStatus(
           const currentStatus = await getSearchStatus(client, searchInfo.id);
 
           if (currentStatus.status !== searchInfo.status) {
-            logger.warn(`${currentStatus.status}`);
+            logger.debug(`search ${searchInfo.id} | status changed to ${currentStatus.status}`);
             updateSearchRequest(currentStatus);
           }
         } catch (e) {

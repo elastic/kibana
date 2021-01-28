@@ -11,6 +11,7 @@ import {
 } from '@elastic/elasticsearch/api/requestParams';
 import { ISearchOptions, UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { getDefaultSearchParams } from '../../../../../src/plugins/data/server';
+import { ConfigSchema } from '../../config';
 
 /**
  * @internal
@@ -27,6 +28,7 @@ export async function getIgnoreThrottled(
  */
 export async function getDefaultAsyncSubmitParams(
   uiSettingsClient: IUiSettingsClient,
+  config: ConfigSchema,
   options: ISearchOptions
 ): Promise<
   Pick<
@@ -42,7 +44,7 @@ export async function getDefaultAsyncSubmitParams(
   >
 > {
   return {
-    keep_alive: '7d',
+    keep_alive: `${config.search.sessions.defaultExpiration.asMilliseconds()}ms`,
     batched_reduce_size: 64,
     keep_on_completion: !!options.sessionId, // Always return an ID, even if the request completes quickly
     ...getDefaultAsyncGetParams(),
