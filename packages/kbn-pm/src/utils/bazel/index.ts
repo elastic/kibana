@@ -7,3 +7,4 @@
  */
 
 export * from './install_tools';
+export * from './run';

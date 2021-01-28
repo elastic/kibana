@@ -1,4 +1,4 @@
-# Inspired on from https://raw.githubusercontent.com/bazelbuild/rules_nodejs/master/common.bazelrc
+# Inspired on https://raw.githubusercontent.com/bazelbuild/rules_nodejs/master/common.bazelrc
 # Common Bazel settings for JavaScript/NodeJS workspaces
 # This rc file is automatically discovered when Bazel is run in this workspace,
 # see https://docs.bazel.build/versions/master/guide.html#bazelrc

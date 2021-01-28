@@ -6,28 +6,31 @@
  * Public License, v 1.
  */
 
+import dedent from 'dedent';
 import del from 'del';
 import ora from 'ora';
 import { join, relative } from 'path';
 
+import { runBazel } from '../utils/bazel';
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
 import { ICommand } from './';
 
 export const CleanCommand: ICommand = {
-  description: 'Remove the node_modules and target directories from all projects.',
+  description:
+    'Remove target directories from all projects, remove extra patterns and runs a Bazel state soft clean.',
   name: 'clean',
 
   async run(projects) {
+    log.warning(dedent`
+
+      'yarn kbn clean' does not remove node_modules now. It runs a more soft clean and should be used as the way to go between branches using Bazel.
+      When switching between a non Bazel branch and a Bazel branch (or the other way around) or for situations where you need a deeper clean, run 'yarn kbn destroy' instead.
+
+    `);
+
     const toDelete = [];
     for (const project of projects.values()) {
-      if (await isDirectory(project.nodeModulesLocation)) {
-        toDelete.push({
-          cwd: project.path,
-          pattern: relative(project.path, project.nodeModulesLocation),
-        });
-      }
-
       if (await isDirectory(project.targetLocation)) {
         toDelete.push({
           cwd: project.path,
@@ -43,6 +46,10 @@ export const CleanCommand: ICommand = {
         });
       }
     }
+
+    // Runs Bazel soft clean
+    await runBazel(['clean']);
+    log.success('Soft cleaned bazel');
 
     if (toDelete.length === 0) {
       log.success('Nothing to delete');
