@@ -90,29 +90,47 @@ export function registerRoutes(
       } catch (error) {
         return response.badRequest();
       }
-      try {
-        const fieldsArr: Array<FieldDescriptor[] | boolean> = await Promise.all(
-          patternList
-            .map((pattern) =>
-              indexPatterns.getFieldsForWildcard({
-                fieldCapsOptions: {
-                  allow_no_indices: allowNoIndex || false,
-                },
-                metaFields: parsedFields,
-                pattern,
-                rollupIndex,
-                type,
-              })
-            )
-            .map((p) => p.catch(() => false))
-        );
-        const responsesIndexFields = fieldsArr.filter(
-          (rif) => rif !== false
-        ) as FieldDescriptor[][];
-        const fields = !formatFields
-          ? await combineFields(responsesIndexFields)
-          : await formatIndexFields(responsesIndexFields, patternList);
 
+      try {
+        if (formatFields) {
+          // need to know which pattern the field is from in order to properly format
+          // so we split up the requests for each pattern in the patternList
+          const fieldsArr: Array<FieldDescriptor[] | boolean> = await Promise.all(
+            patternList
+              .map((pattern) =>
+                indexPatterns.getFieldsForWildcard({
+                  fieldCapsOptions: {
+                    allow_no_indices: allowNoIndex || false,
+                  },
+                  metaFields: parsedFields,
+                  pattern,
+                  rollupIndex,
+                  type,
+                })
+              )
+              .map((p) => p.catch(() => false))
+          );
+          const responsesIndexFields = fieldsArr.filter(
+            (rif) => rif !== false
+          ) as FieldDescriptor[][];
+          const fields = await formatIndexFields(responsesIndexFields, patternList);
+          return response.ok({
+            body: { fields },
+            headers: {
+              'content-type': 'application/json',
+            },
+          });
+        }
+
+        const fields = await indexPatterns.getFieldsForWildcard({
+          pattern: patternList.join(','),
+          metaFields: parsedFields,
+          type,
+          rollupIndex,
+          fieldCapsOptions: {
+            allow_no_indices: allowNoIndex || false,
+          },
+        });
         return response.ok({
           body: { fields },
           headers: {
@@ -139,6 +157,114 @@ export function registerRoutes(
       }
     }
   );
+
+  // router.get(
+  //   {
+  //     path: '/api/index_patterns/_fields_for_wildcard',
+  //     validate: {
+  //       query: schema.object({
+  //         pattern_list: schema.arrayOf(schema.string()),
+  //         format_fields: schema.maybe(schema.boolean()),
+  //         meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+  //           defaultValue: [],
+  //         }),
+  //         type: schema.maybe(schema.string()),
+  //         rollup_index: schema.maybe(schema.string()),
+  //         allow_no_index: schema.maybe(schema.boolean()),
+  //       }),
+  //     },
+  //   },
+  //   async (context, request, response) => {
+  //     const { asCurrentUser } = context.core.elasticsearch.client;
+  //     const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
+  //     const {
+  //       pattern_list: patternList,
+  //       format_fields: formatFields,
+  //       meta_fields: metaFields,
+  //       type,
+  //       rollup_index: rollupIndex,
+  //       allow_no_index: allowNoIndex,
+  //     } = request.query;
+  //
+  //     let parsedFields: string[] = [];
+  //     try {
+  //       parsedFields = parseMetaFields(metaFields);
+  //     } catch (error) {
+  //       return response.badRequest();
+  //     }
+  //     try {
+  //       const fields = await indexPatterns.getFieldsForWildcard({
+  //         fieldCapsOptions: {
+  //           allow_no_indices: allowNoIndex || false,
+  //         },
+  //         metaFields: parsedFields,
+  //         pattern: patternList.join(','),
+  //         rollupIndex,
+  //         type,
+  //       });
+  //       // return resp;
+  //       // const fieldsArr: Array<FieldDescriptor[] | boolean> = await Promise.all(
+  //       //   patternList
+  //       //     .map((pattern) =>
+  //       //       indexPatterns.getFieldsForWildcard({
+  //       //         fieldCapsOptions: {
+  //       //           allow_no_indices: allowNoIndex || false,
+  //       //         },
+  //       //         metaFields: parsedFields,
+  //       //         pattern,
+  //       //         rollupIndex,
+  //       //         type,
+  //       //       })
+  //       //     )
+  //       //     .map((p) => p.catch(() => false))
+  //       // );
+  //       // const responsesIndexFields = fieldsArr.filter(
+  //       //   (rif) => rif !== false
+  //       // ) as FieldDescriptor[][];
+  //       //
+  //       // const other = await indexPatterns.getFieldsForWildcard({
+  //       //   fieldCapsOptions: {
+  //       //     allow_no_indices: allowNoIndex || false,
+  //       //   },
+  //       //   metaFields: parsedFields,
+  //       //   pattern: patternList.join(','),
+  //       //   rollupIndex,
+  //       //   type,
+  //       // });
+  //       // const nowFormat = await combineFields(responsesIndexFields);
+  //       // console.log('responsesIndexFields route', nowFormat[0], other[0]);
+  //       // console.log('responsesIndexFields route169', nowFormat[169], other[169]);
+  //       //
+  //       // const fields = !formatFields
+  //       //   ? await combineFields(responsesIndexFields)
+  //       //   : await formatIndexFields(responsesIndexFields, patternList);
+  //
+  //       return response.ok({
+  //         body: { fields },
+  //         headers: {
+  //           'content-type': 'application/json',
+  //         },
+  //       });
+  //     } catch (error) {
+  //       if (
+  //         typeof error === 'object' &&
+  //         !!error?.isBoom &&
+  //         !!error?.output?.payload &&
+  //         typeof error?.output?.payload === 'object'
+  //       ) {
+  //         const payload = error?.output?.payload;
+  //         return response.notFound({
+  //           body: {
+  //             message: payload.message,
+  //             attributes: payload,
+  //           },
+  //         });
+  //       } else {
+  //         return response.notFound();
+  //       }
+  //     }
+  //   }
+  // );
 
   router.get(
     {

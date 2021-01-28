@@ -15,7 +15,7 @@ import {
   ValidatePatternListActive,
 } from '../../common/index_patterns';
 import { IndexPatternsFetcher } from './fetcher';
-import { combineFields, formatIndexFields } from './utils';
+import { formatIndexFields } from './utils';
 
 export class IndexPatternsApiServer implements IIndexPatternsApiClient {
   esClient: ElasticsearchClient;
@@ -35,22 +35,30 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
     type,
   }: GetFieldsOptions) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
-    const fieldsArr: Array<FieldDescriptor[] | boolean> = await Promise.all(
-      patternList
-        .map((pattern) =>
-          indexPatterns.getFieldsForWildcard({
-            metaFields,
-            pattern,
-            rollupIndex,
-            type,
-          })
-        )
-        .map((p) => p.catch(() => false))
-    );
-    const responsesIndexFields = fieldsArr.filter((rif) => rif !== false) as FieldDescriptor[][];
-    return !formatFields
-      ? combineFields(responsesIndexFields)
-      : formatIndexFields(responsesIndexFields, patternList);
+    if (formatFields) {
+      // need to know which pattern the field is from in order to properly format
+      // so we split up the requests for each pattern in the patternList
+      const fieldsArr: Array<FieldDescriptor[] | boolean> = await Promise.all(
+        patternList
+          .map((pattern) =>
+            indexPatterns.getFieldsForWildcard({
+              metaFields,
+              pattern,
+              rollupIndex,
+              type,
+            })
+          )
+          .map((p) => p.catch(() => false))
+      );
+      const responsesIndexFields = fieldsArr.filter((rif) => rif !== false) as FieldDescriptor[][];
+      return formatIndexFields(responsesIndexFields, patternList);
+    }
+    return indexPatterns.getFieldsForWildcard({
+      metaFields,
+      pattern: patternList.join(','),
+      rollupIndex,
+      type,
+    });
   }
   async getFieldsForTimePattern(options: GetFieldsOptionsTimePattern) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient);

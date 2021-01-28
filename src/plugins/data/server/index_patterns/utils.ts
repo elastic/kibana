@@ -62,25 +62,6 @@ const missingFields: FieldDescriptor[] = [
   },
 ];
 
-export const combineFields = async (fields: FieldDescriptor[][]): Promise<FieldDescriptor[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const indexFieldNameHash: Record<string, number> = {};
-      const combined = fields.reduce((acc, f) => [...acc, ...f], []);
-      const reduced = combined.reduce((accumulator: FieldDescriptor[], field: FieldDescriptor) => {
-        const alreadyExistingIndexField = indexFieldNameHash[field.name];
-        if (alreadyExistingIndexField != null) {
-          return accumulator;
-        }
-        accumulator.push(field);
-        indexFieldNameHash[field.name] = accumulator.length - 1;
-        return accumulator;
-      }, []);
-      resolve(reduced);
-    });
-  });
-};
-
 /**
  * Creates a single field item.
  *
