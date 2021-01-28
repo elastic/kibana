@@ -14,7 +14,7 @@
         "names": [
           "*"
         ],
-        "privileges": ["read", "view_index_metadata"]
+        "privileges": ["read", "maintenance", "view_index_metadata"]
       }
     ]
   },

@@ -21,6 +21,8 @@ import { TrustedAppsHttpService, TrustedAppsService } from '../service';
 import {
   AsyncResourceState,
   getLastLoadedResourceState,
+  isLoadedResourceState,
+  isLoadingResourceState,
   isStaleResourceState,
   StaleResourceState,
   TrustedAppsListData,
@@ -47,6 +49,10 @@ import {
   getCreationDialogFormEntry,
   isCreationDialogLocation,
   isCreationDialogFormValid,
+  entriesExist,
+  getListTotalItemsCount,
+  trustedAppsListPageActive,
+  entriesExistState,
 } from './selectors';
 
 const createTrustedAppsListResourceStateChangedAction = (
@@ -95,20 +101,13 @@ const refreshListIfNeeded = async (
       store.dispatch(
         createTrustedAppsListResourceStateChangedAction({
           type: 'FailedResourceState',
-          error,
+          error: error.body,
           lastLoadedState: getLastLoadedListResourceState(store.getState()),
         })
       );
     }
   }
 };
-
-const createTrustedAppDeletionSubmissionResourceStateChanged = (
-  newState: Immutable<AsyncResourceState>
-): Immutable<TrustedAppDeletionSubmissionResourceStateChanged> => ({
-  type: 'trustedAppDeletionSubmissionResourceStateChanged',
-  payload: { newState },
-});
 
 const updateCreationDialogIfNeeded = (
   store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>
@@ -167,13 +166,20 @@ const submitCreationIfNeeded = async (
       store.dispatch(
         createTrustedAppCreationSubmissionResourceStateChanged({
           type: 'FailedResourceState',
-          error,
+          error: error.body,
           lastLoadedState: getLastLoadedResourceState(submissionResourceState),
         })
       );
     }
   }
 };
+
+const createTrustedAppDeletionSubmissionResourceStateChanged = (
+  newState: Immutable<AsyncResourceState>
+): Immutable<TrustedAppDeletionSubmissionResourceStateChanged> => ({
+  type: 'trustedAppDeletionSubmissionResourceStateChanged',
+  payload: { newState },
+});
 
 const submitDeletionIfNeeded = async (
   store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
@@ -209,10 +215,54 @@ const submitDeletionIfNeeded = async (
       store.dispatch(
         createTrustedAppDeletionSubmissionResourceStateChanged({
           type: 'FailedResourceState',
-          error,
+          error: error.body,
           lastLoadedState: getLastLoadedResourceState(submissionResourceState),
         })
       );
+    }
+  }
+};
+
+const checkTrustedAppsExistIfNeeded = async (
+  store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const currentState = store.getState();
+  const currentEntriesExistState = entriesExistState(currentState);
+
+  if (
+    trustedAppsListPageActive(currentState) &&
+    !isLoadingResourceState(currentEntriesExistState)
+  ) {
+    const currentListTotal = getListTotalItemsCount(currentState);
+    const currentDoEntriesExist = entriesExist(currentState);
+
+    if (
+      !isLoadedResourceState(currentEntriesExistState) ||
+      (currentListTotal === 0 && currentDoEntriesExist) ||
+      (currentListTotal > 0 && !currentDoEntriesExist)
+    ) {
+      store.dispatch({
+        type: 'trustedAppsExistStateChanged',
+        payload: { type: 'LoadingResourceState', previousState: currentEntriesExistState },
+      });
+
+      let doTheyExist: boolean;
+      try {
+        const { total } = await trustedAppsService.getTrustedAppsList({
+          page: 1,
+          per_page: 1,
+        });
+        doTheyExist = total > 0;
+      } catch (e) {
+        // If a failure occurs, lets assume entries exits so that the UI is not blocked to the user
+        doTheyExist = true;
+      }
+
+      store.dispatch({
+        type: 'trustedAppsExistStateChanged',
+        payload: { type: 'LoadedResourceState', data: doTheyExist },
+      });
     }
   }
 };
@@ -226,6 +276,7 @@ export const createTrustedAppsPageMiddleware = (
     // TODO: need to think if failed state is a good condition to consider need for refresh
     if (action.type === 'userChangedUrl' || action.type === 'trustedAppsListDataOutdated') {
       await refreshListIfNeeded(store, trustedAppsService);
+      await checkTrustedAppsExistIfNeeded(store, trustedAppsService);
     }
 
     if (action.type === 'userChangedUrl') {

@@ -246,7 +246,8 @@ export function MachineLearningDataVisualizerTableProvider(
     public async assertNumberFieldContents(
       fieldName: string,
       docCountFormatted: string,
-      topValuesCount: number
+      topValuesCount: number,
+      checkDistributionPreviewExist = true
     ) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
@@ -257,7 +258,9 @@ export function MachineLearningDataVisualizerTableProvider(
       await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlTopValues'));
       await this.assertTopValuesContents(fieldName, topValuesCount);
 
-      await this.assertDistributionPreviewExist(fieldName);
+      if (checkDistributionPreviewExist) {
+        await this.assertDistributionPreviewExist(fieldName);
+      }
 
       await this.ensureDetailsClosed(fieldName);
     }
@@ -285,6 +288,16 @@ export function MachineLearningDataVisualizerTableProvider(
       await this.ensureDetailsClosed(fieldName);
     }
 
+    public async assertExamplesList(fieldName: string, expectedExamplesCount: number) {
+      const examplesList = await testSubjects.find(
+        this.detailsSelector(fieldName, 'mlFieldDataExamplesList')
+      );
+      const examplesListItems = await examplesList.findAllByTagName('li');
+      expect(examplesListItems).to.have.length(
+        expectedExamplesCount,
+        `Expected example list item count for field '${fieldName}' to be '${expectedExamplesCount}' (got '${examplesListItems.length}')`
+      );
+    }
     public async assertTextFieldContents(
       fieldName: string,
       docCountFormatted: string,
@@ -294,14 +307,33 @@ export function MachineLearningDataVisualizerTableProvider(
       await this.assertFieldDocCount(fieldName, docCountFormatted);
       await this.ensureDetailsOpen(fieldName);
 
-      const examplesList = await testSubjects.find(
-        this.detailsSelector(fieldName, 'mlFieldDataExamplesList')
-      );
-      const examplesListItems = await examplesList.findAllByTagName('li');
-      expect(examplesListItems).to.have.length(
-        expectedExamplesCount,
-        `Expected example list item count for field '${fieldName}' to be '${expectedExamplesCount}' (got '${examplesListItems.length}')`
-      );
+      await this.assertExamplesList(fieldName, expectedExamplesCount);
+      await this.ensureDetailsClosed(fieldName);
+    }
+
+    public async assertGeoPointFieldContents(
+      fieldName: string,
+      docCountFormatted: string,
+      expectedExamplesCount: number
+    ) {
+      await this.assertRowExists(fieldName);
+      await this.assertFieldDocCount(fieldName, docCountFormatted);
+      await this.ensureDetailsOpen(fieldName);
+
+      await this.assertExamplesList(fieldName, expectedExamplesCount);
+
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlEmbeddedMapContent'));
+
+      await this.ensureDetailsClosed(fieldName);
+    }
+
+    public async assertUnknownFieldContents(fieldName: string, docCountFormatted: string) {
+      await this.assertRowExists(fieldName);
+      await this.assertFieldDocCount(fieldName, docCountFormatted);
+      await this.ensureDetailsOpen(fieldName);
+
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlDVDocumentStatsContent'));
+
       await this.ensureDetailsClosed(fieldName);
     }
 
@@ -318,7 +350,25 @@ export function MachineLearningDataVisualizerTableProvider(
         await this.assertKeywordFieldContents(fieldName, docCountFormatted, exampleCount);
       } else if (fieldType === ML_JOB_FIELD_TYPES.TEXT) {
         await this.assertTextFieldContents(fieldName, docCountFormatted, exampleCount);
+      } else if (fieldType === ML_JOB_FIELD_TYPES.GEO_POINT) {
+        await this.assertGeoPointFieldContents(fieldName, docCountFormatted, exampleCount);
+      } else if (fieldType === ML_JOB_FIELD_TYPES.UNKNOWN) {
+        await this.assertUnknownFieldContents(fieldName, docCountFormatted);
       }
+    }
+
+    public async ensureNumRowsPerPage(n: 10 | 25 | 50) {
+      const paginationButton = 'mlDataVisualizerTable > tablePaginationPopoverButton';
+      await retry.tryForTime(10000, async () => {
+        await testSubjects.existOrFail(paginationButton);
+        await testSubjects.click(paginationButton);
+        await testSubjects.click(`tablePagination-${n}-rows`);
+
+        const visibleTexts = await testSubjects.getVisibleText(paginationButton);
+
+        const [, pagination] = visibleTexts.split(': ');
+        expect(pagination).to.eql(n.toString());
+      });
     }
   })();
 }

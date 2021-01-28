@@ -34,7 +34,7 @@ interface MostRecentErrorProps {
 }
 
 export const MostRecentError = ({ error, monitorId, timestamp }: MostRecentErrorProps) => {
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
+  const params = useGetUrlParams();
   params.statusFilter = 'down';
   const linkParameters = stringifyUrlParams(params, true);
 

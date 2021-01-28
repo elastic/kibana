@@ -194,11 +194,11 @@ export class ClusterClientAdapter {
     }
   }
 
-  public async queryEventsBySavedObject(
+  public async queryEventsBySavedObjects(
     index: string,
     namespace: string | undefined,
     type: string,
-    id: string,
+    ids: string[],
     // eslint-disable-next-line @typescript-eslint/naming-convention
     { page, per_page: perPage, start, end, sort_field, sort_order }: FindOptionsType
   ): Promise<QueryEventsBySavedObjectResult> {
@@ -249,10 +249,9 @@ export class ClusterClientAdapter {
                           },
                         },
                         {
-                          term: {
-                            'kibana.saved_objects.id': {
-                              value: id,
-                            },
+                          terms: {
+                            // default maximum of 65,536 terms, configurable by index.max_terms_count
+                            'kibana.saved_objects.id': ids,
                           },
                         },
                         namespaceQuery,
@@ -298,7 +297,7 @@ export class ClusterClientAdapter {
       };
     } catch (err) {
       throw new Error(
-        `querying for Event Log by for type "${type}" and id "${id}" failed with: ${err.message}`
+        `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
       );
     }
   }

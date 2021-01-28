@@ -7,7 +7,7 @@
 import {
   emptyTable,
   testTable,
-} from '../../canvas_plugin_src/functions/common/__tests__/fixtures/test_tables';
+} from '../../canvas_plugin_src/functions/common/__fixtures__/test_tables';
 import { getFieldType } from './get_field_type';
 
 describe('getFieldType', () => {

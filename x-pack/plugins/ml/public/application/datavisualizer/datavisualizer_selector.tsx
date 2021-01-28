@@ -27,6 +27,7 @@ import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kiban
 
 import { NavigationMenu } from '../components/navigation_menu';
 import { getMaxBytesFormatted } from './file_based/components/utils';
+import { HelpMenu } from '../components/help_menu';
 
 function startTrialDescription() {
   return (
@@ -55,8 +56,10 @@ export const DatavisualizerSelector: FC = () => {
     services: {
       licenseManagement,
       http: { basePath },
+      docLinks,
     },
   } = useMlKibana();
+  const helpLink = docLinks.links.ml.guide;
   const navigateToPath = useNavigateToPath();
 
   const startTrialVisible =
@@ -205,6 +208,7 @@ export const DatavisualizerSelector: FC = () => {
           )}
         </EuiPageBody>
       </EuiPage>
+      <HelpMenu docLink={helpLink} />
     </Fragment>
   );
 };

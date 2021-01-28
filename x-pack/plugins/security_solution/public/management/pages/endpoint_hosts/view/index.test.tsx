@@ -25,7 +25,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
-import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_utils';
+import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -39,8 +39,8 @@ jest.mock('@kbn/i18n/react', () => {
   };
 });
 jest.mock('../../../../common/components/link_to');
-jest.mock('../../policy/store/policy_list/services/ingest', () => {
-  const originalModule = jest.requireActual('../../policy/store/policy_list/services/ingest');
+jest.mock('../../policy/store/services/ingest', () => {
+  const originalModule = jest.requireActual('../../policy/store/services/ingest');
   return {
     ...originalModule,
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),

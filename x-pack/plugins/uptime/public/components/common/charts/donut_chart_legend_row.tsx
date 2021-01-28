@@ -31,7 +31,7 @@ export const DonutChartLegendRow = ({ color, content, message, 'data-test-subj':
     <EuiFlexItemReducedMargin component="span" grow={false}>
       <EuiHealth color={color} />
     </EuiFlexItemReducedMargin>
-    <EuiFlexItemReducedMargin component="span" grow={false}>
+    <EuiFlexItemReducedMargin component="span" grow={false} data-test-subj={`${dts}.label`}>
       {message}
     </EuiFlexItemReducedMargin>
     <EuiFlexItemAlignRight component="span" data-test-subj={dts}>

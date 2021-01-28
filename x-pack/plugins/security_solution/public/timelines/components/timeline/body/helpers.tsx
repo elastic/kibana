@@ -16,12 +16,11 @@ import {
   TimelineTypeLiteral,
   TimelineType,
   TimelineId,
+  TimelineTabs,
 } from '../../../../../common/types/timeline';
 import { OnPinEvent, OnUnPinEvent } from '../events';
 import { ActionIconItem } from './actions/action_icon_item';
-
 import * as i18n from './translations';
-import { TimelineTabs } from '../../../store/timeline/model';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>

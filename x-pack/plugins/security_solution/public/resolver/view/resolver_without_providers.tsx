@@ -24,6 +24,7 @@ import { SideEffectContext } from './side_effect_context';
 import { ResolverProps, ResolverState } from '../types';
 import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
+import { useSyncSelectedNode } from './use_sync_selected_node';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -55,6 +56,11 @@ export const ResolverWithoutProviders = React.memo(
       shouldUpdate,
       filters,
     });
+
+    /**
+     * This will keep the selectedNode in the view in sync with the nodeID specified in the url
+     */
+    useSyncSelectedNode();
 
     const { timestamp } = useContext(SideEffectContext);
 

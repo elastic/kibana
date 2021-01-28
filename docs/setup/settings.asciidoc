@@ -205,6 +205,9 @@ the username and password that the {kib} server uses to perform maintenance
 on the {kib} index at startup. {kib} users still need to authenticate with
 {es}, which is proxied through the {kib} server.
 
+| `enterpriseSearch.host`
+  | The URL of your Enterprise Search instance
+
 | `interpreter.enableInVisualize`
   | Enables use of interpreter in Visualize. *Default: `true`*
 
@@ -230,6 +233,16 @@ This value must be a whole number greater than zero. *Default: `"1000"`*
  | Maximum number of documents loaded by each shard to generate autocomplete
 suggestions. This value must be a whole number greater than zero.
 *Default: `"100000"`*
+
+|===
+
+[NOTE]
+============
+To reload the logging settings, send a SIGHUP signal to {kib}.
+============
+
+[cols="2*<"]
+|===
 
 |[[logging-dest]] `logging.dest:`
  | Enables you to specify a file where {kib} stores log output.

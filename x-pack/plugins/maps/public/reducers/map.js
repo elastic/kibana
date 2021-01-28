@@ -39,11 +39,6 @@ import {
   SET_SCROLL_ZOOM,
   SET_MAP_INIT_ERROR,
   UPDATE_DRAW_STATE,
-  SET_INTERACTIVE,
-  DISABLE_TOOLTIP_CONTROL,
-  HIDE_TOOLBAR_OVERLAY,
-  HIDE_LAYER_CONTROL,
-  HIDE_VIEW_CONTROL,
   SET_WAITING_FOR_READY_HIDDEN_LAYERS,
   SET_MAP_SETTINGS,
   ROLLBACK_MAP_SETTINGS,
@@ -118,11 +113,6 @@ export const DEFAULT_MAP_STATE = {
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
     drawState: null,
-    disableInteractive: false,
-    disableTooltipControl: false,
-    hideToolbarOverlay: false,
-    hideLayerControl: false,
-    hideViewControl: false,
   },
   selectedLayerId: null,
   layerList: [],
@@ -354,46 +344,6 @@ export function map(state = DEFAULT_MAP_STATE, action) {
       return {
         ...state,
         mapInitError: action.errorMessage,
-      };
-    case SET_INTERACTIVE:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          disableInteractive: action.disableInteractive,
-        },
-      };
-    case DISABLE_TOOLTIP_CONTROL:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          disableTooltipControl: action.disableTooltipControl,
-        },
-      };
-    case HIDE_TOOLBAR_OVERLAY:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          hideToolbarOverlay: action.hideToolbarOverlay,
-        },
-      };
-    case HIDE_LAYER_CONTROL:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          hideLayerControl: action.hideLayerControl,
-        },
-      };
-    case HIDE_VIEW_CONTROL:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          hideViewControl: action.hideViewControl,
-        },
       };
     case SET_WAITING_FOR_READY_HIDDEN_LAYERS:
       return {

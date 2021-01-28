@@ -22,7 +22,6 @@ describe('ResultView', () => {
     },
     _meta: {
       id: '1',
-      scopedId: '1',
       score: 100,
       engine: 'my-engine',
     },
@@ -33,11 +32,14 @@ describe('ResultView', () => {
   };
 
   it('renders', () => {
-    const wrapper = shallow(<ResultView result={result} schemaForTypeHighlights={schema} />);
+    const wrapper = shallow(
+      <ResultView result={result} schemaForTypeHighlights={schema} isMetaEngine={true} />
+    );
     expect(wrapper.find(Result).props()).toEqual({
       result,
       shouldLinkToDetailPage: true,
       schemaForTypeHighlights: schema,
+      isMetaEngine: true,
     });
   });
 });

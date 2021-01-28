@@ -5,7 +5,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { euiStyled } from '../../../observability/public';
+import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 
 export const ToolbarPanel = euiStyled(EuiPanel).attrs(() => ({
   grow: false,

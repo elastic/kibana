@@ -127,6 +127,7 @@ export const StepDetail: React.FC<Props> = ({
                 onClick={handleNextRun}
                 disabled={!nextCheckGroup}
                 iconType="arrowRight"
+                iconSide="right"
                 aria-label={NEXT_CHECK_BUTTON_TEXT}
               >
                 {NEXT_CHECK_BUTTON_TEXT}

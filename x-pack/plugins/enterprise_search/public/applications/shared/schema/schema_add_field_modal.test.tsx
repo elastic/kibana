@@ -41,10 +41,10 @@ describe('SchemaAddFieldModal', () => {
     expect(wrapper.find(EuiModal)).toHaveLength(1);
   });
 
-  // No matter what I try I can't get this to actually achieve coverage.
   it('sets loading state in useEffect', () => {
     setState(true);
-    const wrapper = mount(<SchemaAddFieldModal {...props} {...errors} />);
+    const wrapper = mount(<SchemaAddFieldModal {...props} />);
+    wrapper.setProps({ ...errors });
     const input = wrapper.find(EuiFieldText);
 
     expect(input.prop('isLoading')).toEqual(false);

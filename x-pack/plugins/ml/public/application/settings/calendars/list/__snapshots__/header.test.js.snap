@@ -90,7 +90,7 @@ exports[`CalendarListsHeader renders header 1`] = `
             Object {
               "br": <br />,
               "learnMoreLink": <EuiLink
-                href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/ml-calendars.html"
+                href="jest-metadata-mock-url"
                 target="_blank"
               >
                 <FormattedMessage

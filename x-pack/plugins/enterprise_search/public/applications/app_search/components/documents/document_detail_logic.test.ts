@@ -4,59 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
-
-import { mockHttpValues } from '../../../__mocks__';
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: mockHttpValues },
-}));
-const { http } = mockHttpValues;
-
-jest.mock('../engine', () => ({
-  EngineLogic: { values: { engineName: 'engine1' } },
-}));
-
-jest.mock('../../../shared/kibana', () => ({
-  KibanaLogic: { values: { navigateToUrl: jest.fn() } },
-}));
-import { KibanaLogic } from '../../../shared/kibana';
-
-jest.mock('../../../shared/flash_messages', () => ({
-  setQueuedSuccessMessage: jest.fn(),
-  flashAPIErrors: jest.fn(),
-}));
-import { setQueuedSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockKibanaValues,
+  mockFlashMessageHelpers,
+  expectedAsyncError,
+} from '../../../__mocks__';
+import { mockEngineValues } from '../../__mocks__';
 
 import { DocumentDetailLogic } from './document_detail_logic';
 import { InternalSchemaTypes } from '../../../shared/types';
 
 describe('DocumentDetailLogic', () => {
+  const { mount } = new LogicMounter(DocumentDetailLogic);
+  const { http } = mockHttpValues;
+  const { navigateToUrl } = mockKibanaValues;
+  const { setQueuedSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+
   const DEFAULT_VALUES = {
     dataLoading: true,
     fields: [],
   };
 
-  const mount = (defaults?: object) => {
-    if (!defaults) {
-      resetContext({});
-    } else {
-      resetContext({
-        defaults: {
-          enterprise_search: {
-            app_search: {
-              document_detail_logic: {
-                ...defaults,
-              },
-            },
-          },
-        },
-      });
-    }
-    DocumentDetailLogic.mount();
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
+    mockEngineValues.engineName = 'engine1';
   });
 
   describe('actions', () => {
@@ -98,14 +71,11 @@ describe('DocumentDetailLogic', () => {
         const promise = Promise.reject('An error occurred');
         http.get.mockReturnValue(promise);
 
-        try {
-          DocumentDetailLogic.actions.getDocumentDetails('1');
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        DocumentDetailLogic.actions.getDocumentDetails('1');
+        await expectedAsyncError(promise);
+
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occurred', { isQueued: true });
-        expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith('/engines/engine1/documents');
+        expect(navigateToUrl).toHaveBeenCalledWith('/engines/engine1/documents');
       });
     });
 
@@ -133,7 +103,7 @@ describe('DocumentDetailLogic', () => {
         expect(setQueuedSuccessMessage).toHaveBeenCalledWith(
           'Successfully marked document for deletion. It will be deleted momentarily.'
         );
-        expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith('/engines/engine1/documents');
+        expect(navigateToUrl).toHaveBeenCalledWith('/engines/engine1/documents');
       });
 
       it('will do nothing if not confirmed', async () => {
@@ -151,12 +121,9 @@ describe('DocumentDetailLogic', () => {
         promise = Promise.reject('An error occured');
         http.delete.mockReturnValue(promise);
 
-        try {
-          DocumentDetailLogic.actions.deleteDocument('1');
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        DocumentDetailLogic.actions.deleteDocument('1');
+        await expectedAsyncError(promise);
+
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });

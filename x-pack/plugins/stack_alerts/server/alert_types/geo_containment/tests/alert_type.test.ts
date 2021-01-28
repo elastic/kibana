@@ -18,6 +18,10 @@ describe('alertType', () => {
     expect(alertType.actionGroups).toEqual([
       { id: 'Tracked entity contained', name: 'Tracking containment met' },
     ]);
+    expect(alertType.recoveryActionGroup).toEqual({
+      id: 'notGeoContained',
+      name: 'No longer contained',
+    });
 
     expect(alertType.actionVariables).toMatchSnapshot();
   });
@@ -34,7 +38,6 @@ describe('alertType', () => {
       boundaryIndexId: 'testIndex',
       boundaryGeoField: 'testField',
       boundaryNameField: 'testField',
-      delayOffsetWithUnits: 'testOffset',
     };
 
     expect(alertType.validate?.params?.validate(params)).toBeTruthy();

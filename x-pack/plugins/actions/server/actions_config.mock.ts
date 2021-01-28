@@ -14,6 +14,8 @@ const createActionsConfigMock = () => {
     ensureHostnameAllowed: jest.fn().mockReturnValue({}),
     ensureUriAllowed: jest.fn().mockReturnValue({}),
     ensureActionTypeEnabled: jest.fn().mockReturnValue({}),
+    isRejectUnauthorizedCertificatesEnabled: jest.fn().mockReturnValue(true),
+    getProxySettings: jest.fn().mockReturnValue(undefined),
   };
   return mocked;
 };

@@ -15,11 +15,10 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import React from 'react';
 import { UiComponent } from 'src/plugins/kibana_utils/public';
 
-// Warning: (ae-forgotten-export) The symbol "BaseContext" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "Action" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface Action<Context extends BaseContext = {}, T = ActionType> extends Partial<UiActionsPresentable<ActionExecutionContext<Context>>> {
+export interface Action<Context extends object = object> extends Partial<UiActionsPresentable<ActionExecutionContext<Context>>> {
     execute(context: ActionExecutionContext<Context>): Promise<void>;
     getDisplayName(context: ActionExecutionContext<Context>): string;
     getHref?(context: ActionExecutionContext<Context>): Promise<string | undefined>;
@@ -31,7 +30,7 @@ export interface Action<Context extends BaseContext = {}, T = ActionType> extend
     }>;
     order?: number;
     shouldAutoExecute?(context: ActionExecutionContext<Context>): Promise<boolean>;
-    readonly type: T;
+    readonly type: string;
 }
 
 // Warning: (ae-missing-release-tag) "ACTION_VISUALIZE_FIELD" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -49,36 +48,10 @@ export const ACTION_VISUALIZE_GEO_FIELD = "ACTION_VISUALIZE_GEO_FIELD";
 // @public (undocumented)
 export const ACTION_VISUALIZE_LENS_FIELD = "ACTION_VISUALIZE_LENS_FIELD";
 
-// Warning: (ae-missing-release-tag) "ActionByType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T], T>;
-
-// Warning: (ae-missing-release-tag) "ActionContextMapping" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface ActionContextMapping {
-    // Warning: (ae-forgotten-export) The symbol "DEFAULT_ACTION" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    [DEFAULT_ACTION]: BaseContext;
-    // (undocumented)
-    [ACTION_VISUALIZE_FIELD]: VisualizeFieldContext;
-    // (undocumented)
-    [ACTION_VISUALIZE_GEO_FIELD]: VisualizeFieldContext;
-    // (undocumented)
-    [ACTION_VISUALIZE_LENS_FIELD]: VisualizeFieldContext;
-}
-
-// Warning: (ae-missing-release-tag) "ActionDefinitionByType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type ActionDefinitionByType<T extends ActionType> = UiActionsActionDefinition<ActionContextMapping[T]>;
-
 // Warning: (ae-missing-release-tag) "ActionExecutionContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export type ActionExecutionContext<Context extends BaseContext = BaseContext> = Context & ActionExecutionMeta;
+export type ActionExecutionContext<Context extends object = object> = Context & ActionExecutionMeta;
 
 // Warning: (ae-missing-release-tag) "ActionExecutionMeta" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -87,22 +60,16 @@ export interface ActionExecutionMeta {
     trigger: Trigger;
 }
 
-// Warning: (ae-missing-release-tag) "ActionType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type ActionType = keyof ActionContextMapping;
-
 // Warning: (ae-forgotten-export) The symbol "BuildContextMenuParams" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "buildContextMenuForActions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
 export function buildContextMenuForActions({ actions, title, closeMenu, }: BuildContextMenuParams): Promise<EuiContextMenuPanelDescriptor[]>;
 
-// Warning: (ae-forgotten-export) The symbol "ActionDefinitionByType" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "createAction" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export function createAction<T extends ActionType>(action: ActionDefinitionByType_2<T>): ActionByType<T>;
+export function createAction<Context extends object = object>(action: UiActionsActionDefinition<Context>): Action<Context>;
 
 // Warning: (ae-missing-release-tag) "IncompatibleActionError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -142,61 +109,34 @@ export interface RowClickContext {
 // Warning: (ae-missing-release-tag) "rowClickTrigger" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const rowClickTrigger: Trigger<'ROW_CLICK_TRIGGER'>;
+export const rowClickTrigger: Trigger;
 
 // Warning: (ae-missing-release-tag) "Trigger" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface Trigger<ID extends TriggerId = TriggerId> {
+export interface Trigger {
     description?: string;
-    id: ID;
+    id: string;
     title?: string;
 }
-
-// Warning: (ae-missing-release-tag) "TriggerContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type TriggerContext<T> = T extends TriggerId ? TriggerContextMapping[T] : never;
-
-// Warning: (ae-missing-release-tag) "TriggerContextMapping" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface TriggerContextMapping {
-    // Warning: (ae-forgotten-export) The symbol "DEFAULT_TRIGGER" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "TriggerContext" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    [DEFAULT_TRIGGER]: TriggerContext_2;
-    // (undocumented)
-    [ROW_CLICK_TRIGGER]: RowClickContext;
-    // (undocumented)
-    [VISUALIZE_FIELD_TRIGGER]: VisualizeFieldContext;
-    // (undocumented)
-    [VISUALIZE_GEO_FIELD_TRIGGER]: VisualizeFieldContext;
-}
-
-// Warning: (ae-missing-release-tag) "TriggerId" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type TriggerId = keyof TriggerContextMapping;
 
 // Warning: (ae-forgotten-export) The symbol "ActionDefinitionContext" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ActionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface UiActionsActionDefinition<Context extends BaseContext = {}> extends Partial<UiActionsPresentable<ActionDefinitionContext<Context>>> {
+export interface UiActionsActionDefinition<Context extends object = object> extends Partial<UiActionsPresentable<ActionDefinitionContext<Context>>> {
     execute(context: ActionDefinitionContext<Context>): Promise<void>;
     getHref?(context: ActionDefinitionContext<Context>): Promise<string | undefined>;
     readonly id: string;
     isCompatible?(context: ActionDefinitionContext<Context>): Promise<boolean>;
     shouldAutoExecute?(context: ActionDefinitionContext<Context>): Promise<boolean>;
-    readonly type?: ActionType;
+    readonly type?: string;
 }
 
 // Warning: (ae-missing-release-tag) "Presentable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface UiActionsPresentable<Context extends object = object> {
+export interface UiActionsPresentable<Context = unknown> {
     getDisplayName(context: Context): string;
     getDisplayNameTooltip(context: Context): string;
     getHref?(context: Context): Promise<string | undefined>;
@@ -214,7 +154,7 @@ export interface UiActionsPresentable<Context extends object = object> {
 // Warning: (ae-missing-release-tag) "PresentableGrouping" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type UiActionsPresentableGrouping<Context extends object = object> = Array<PresentableGroup<Context>>;
+export type UiActionsPresentableGrouping<Context = unknown> = Array<PresentableGroup<Context>>;
 
 // Warning: (ae-missing-release-tag) "UiActionsService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -225,35 +165,35 @@ export class UiActionsService {
     //
     // (undocumented)
     protected readonly actions: ActionRegistry;
-    readonly addTriggerAction: <T extends "" | "ROW_CLICK_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "FILTER_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER">(triggerId: T, action: UiActionsActionDefinition<TriggerContextMapping[T]> | Action<TriggerContextMapping[T], "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_VISUALIZE_LENS_FIELD" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel">) => void;
+    readonly addTriggerAction: (triggerId: string, action: UiActionsActionDefinition) => void;
     // (undocumented)
-    readonly attachAction: <T extends "" | "ROW_CLICK_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "FILTER_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER">(triggerId: T, actionId: string) => void;
+    readonly attachAction: (triggerId: string, actionId: string) => void;
     readonly clear: () => void;
     // (undocumented)
-    readonly detachAction: (triggerId: TriggerId, actionId: string) => void;
+    readonly detachAction: (triggerId: string, actionId: string) => void;
     // @deprecated (undocumented)
-    readonly executeTriggerActions: <T extends "" | "ROW_CLICK_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "FILTER_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER">(triggerId: T, context: TriggerContext<T>) => Promise<void>;
+    readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>;
     // Warning: (ae-forgotten-export) The symbol "UiActionsExecutionService" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     readonly executionService: UiActionsExecutionService;
     readonly fork: () => UiActionsService;
     // (undocumented)
-    readonly getAction: <T extends UiActionsActionDefinition<{}>>(id: string) => Action<ActionContext<T>, "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_VISUALIZE_LENS_FIELD" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel">;
+    readonly getAction: <T extends UiActionsActionDefinition<object>>(id: string) => Action<ActionContext<T>>;
     // Warning: (ae-forgotten-export) The symbol "TriggerContract" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    readonly getTrigger: <T extends "" | "ROW_CLICK_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "FILTER_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER">(triggerId: T) => TriggerContract<T>;
+    readonly getTrigger: (triggerId: string) => TriggerContract;
     // (undocumented)
-    readonly getTriggerActions: <T extends "" | "ROW_CLICK_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "FILTER_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER">(triggerId: T) => Action<TriggerContextMapping[T], "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_VISUALIZE_LENS_FIELD" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel">[];
+    readonly getTriggerActions: (triggerId: string) => Action[];
     // (undocumented)
-    readonly getTriggerCompatibleActions: <T extends "" | "ROW_CLICK_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "FILTER_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER">(triggerId: T, context: TriggerContextMapping[T]) => Promise<Action<TriggerContextMapping[T], "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_VISUALIZE_LENS_FIELD" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel">[]>;
+    readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<Action[]>;
     // (undocumented)
     readonly hasAction: (actionId: string) => boolean;
     // Warning: (ae-forgotten-export) The symbol "ActionContext" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    readonly registerAction: <A extends UiActionsActionDefinition<{}>>(definition: A) => Action<ActionContext<A>, "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_VISUALIZE_LENS_FIELD" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel">;
+    readonly registerAction: <A extends UiActionsActionDefinition<object>>(definition: A) => Action<ActionContext<A>>;
     // (undocumented)
     readonly registerTrigger: (trigger: Trigger) => void;
     // Warning: (ae-forgotten-export) The symbol "TriggerRegistry" needs to be exported by the entry point index.d.ts
@@ -314,17 +254,17 @@ export interface VisualizeFieldContext {
 // Warning: (ae-missing-release-tag) "visualizeFieldTrigger" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const visualizeFieldTrigger: Trigger<'VISUALIZE_FIELD_TRIGGER'>;
+export const visualizeFieldTrigger: Trigger;
 
 // Warning: (ae-missing-release-tag) "visualizeGeoFieldTrigger" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const visualizeGeoFieldTrigger: Trigger<'VISUALIZE_GEO_FIELD_TRIGGER'>;
+export const visualizeGeoFieldTrigger: Trigger;
 
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/ui_actions/public/triggers/row_click_trigger.ts:46:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
+// src/plugins/ui_actions/public/triggers/row_click_trigger.ts:35:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

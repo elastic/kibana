@@ -34,7 +34,7 @@ import {
   NUM_BUCKETS,
 } from '../../../common/criterion_preview_chart/criterion_preview_chart';
 import {
-  AlertParams,
+  PartialAlertParams,
   Threshold,
   Criterion,
   Comparator,
@@ -50,7 +50,7 @@ import { decodeOrThrow } from '../../../../../common/runtime_types';
 const GROUP_LIMIT = 5;
 
 interface Props {
-  alertParams: Partial<AlertParams>;
+  alertParams: PartialAlertParams;
   chartCriterion: Partial<Criterion>;
   sourceId: string;
   showThreshold: boolean;

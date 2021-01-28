@@ -5,7 +5,7 @@
  */
 
 import { curry } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { validate } from './validators';
 import {
@@ -32,6 +32,7 @@ import {
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
 
+export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -47,6 +48,7 @@ const supportedSubActions: string[] = [
   'issue',
 ];
 
+export const ActionTypeId = '.jira';
 // action type definition
 export function getActionType(
   params: GetActionTypeParams
@@ -58,7 +60,7 @@ export function getActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: '.jira',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.NAME,
     validate: {
@@ -70,13 +72,16 @@ export function getActionType(
       }),
       params: ExecutorParamsSchema,
     },
-    executor: curry(executor)({ logger }),
+    executor: curry(executor)({ logger, configurationUtilities }),
   };
 }
 
 // action executor
 async function executor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: ActionTypeExecutorOptions<
     JiraPublicConfigurationType,
     JiraSecretConfigurationType,
@@ -93,7 +98,7 @@ async function executor(
       secrets,
     },
     logger,
-    execOptions.proxySettings
+    configurationUtilities
   );
 
   if (!api[subAction]) {

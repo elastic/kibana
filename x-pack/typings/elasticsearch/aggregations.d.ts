@@ -99,6 +99,7 @@ export interface AggregationOptionsByType {
   extended_stats: {
     field: string;
   };
+  string_stats: { field: string };
   top_hits: {
     from?: number;
     size?: number;
@@ -274,6 +275,13 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
       lower: number | null;
     };
   };
+  string_stats: {
+    count: number;
+    min_length: number;
+    max_length: number;
+    avg_length: number;
+    entropy: number;
+  };
   top_hits: {
     hits: {
       total: {
@@ -379,22 +387,24 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
   };
   bucket_sort: undefined;
   bucket_selector: undefined;
-  top_metrics: [
-    {
-      sort: [string | number];
-      metrics: UnionToIntersection<
-        TAggregationOptionsMap extends {
-          top_metrics: { metrics: { field: infer TFieldName } };
-        }
-          ? TopMetricsMap<TFieldName>
-          : TAggregationOptionsMap extends {
-              top_metrics: { metrics: MaybeReadonlyArray<{ field: infer TFieldName }> };
-            }
-          ? TopMetricsMap<TFieldName>
-          : TopMetricsMap<string>
-      >;
-    }
-  ];
+  top_metrics: {
+    top: [
+      {
+        sort: [string | number];
+        metrics: UnionToIntersection<
+          TAggregationOptionsMap extends {
+            top_metrics: { metrics: { field: infer TFieldName } };
+          }
+            ? TopMetricsMap<TFieldName>
+            : TAggregationOptionsMap extends {
+                top_metrics: { metrics: MaybeReadonlyArray<{ field: infer TFieldName }> };
+              }
+            ? TopMetricsMap<TFieldName>
+            : TopMetricsMap<string>
+        >;
+      }
+    ];
+  };
   avg_bucket: {
     value: number | null;
   };

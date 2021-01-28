@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
+import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import { MlCoreSetup } from '../plugin';
 import { ML_APP_URL_GENERATOR } from '../../common/constants/ml_url_generator';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
@@ -13,10 +13,10 @@ import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../e
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 
 export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<typeof OPEN_IN_ANOMALY_EXPLORER_ACTION>({
+  return createAction<SwimLaneDrilldownContext>({
     id: 'open-in-anomaly-explorer',
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
-    getIconType(context: ActionContextMapping[typeof OPEN_IN_ANOMALY_EXPLORER_ACTION]): string {
+    getIconType(context): string {
       return 'visTable';
     },
     getDisplayName() {
@@ -24,7 +24,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         defaultMessage: 'Open in Anomaly Explorer',
       });
     },
-    async getHref({ embeddable, data }: SwimLaneDrilldownContext): Promise<string> {
+    async getHref({ embeddable, data }): Promise<string> {
       const [, pluginsStart] = await getStartServices();
       const urlGenerator = pluginsStart.share.urlGenerators.getUrlGenerator(ML_APP_URL_GENERATOR);
       const { jobIds, timeRange, viewBy } = embeddable.getInput();
@@ -50,7 +50,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         },
       });
     },
-    async execute({ embeddable, data }: SwimLaneDrilldownContext) {
+    async execute({ embeddable, data }) {
       if (!embeddable) {
         throw new Error('Not possible to execute an action without the embeddable context');
       }

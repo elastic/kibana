@@ -36,7 +36,7 @@ export function TransactionErrorRateChart({
   const { start, end, transactionName } = urlParams;
 
   const { data, status } = useFetcher(() => {
-    if (serviceName && start && end) {
+    if (transactionType && serviceName && start && end) {
       return callApmApi({
         endpoint:
           'GET /api/apm/services/{serviceName}/transactions/charts/error_rate',
@@ -77,7 +77,6 @@ export function TransactionErrorRateChart({
             data: errorRates,
             type: 'linemark',
             color: theme.eui.euiColorVis7,
-            hideLegend: true,
             title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
               defaultMessage: 'Error rate (avg.)',
             }),

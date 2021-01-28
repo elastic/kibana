@@ -16,6 +16,34 @@ export const FLYOUT_CONTINUE_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.appSearch.documentCreation.flyoutContinue',
   { defaultMessage: 'Continue' }
 );
+export const FLYOUT_CLOSE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.documentCreation.modalClose',
+  { defaultMessage: 'Close' }
+);
+
+export const DOCUMENT_CREATION_ERRORS = {
+  TITLE: i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.errorsTitle', {
+    defaultMessage: 'Something went wrong. Please address the errors and try again.',
+  }),
+  NO_FILE: i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.noFileFound', {
+    defaultMessage: 'No file found.',
+  }),
+  NO_VALID_FILE: i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.noValidFile', {
+    defaultMessage: 'Problem parsing file.',
+  }),
+  NOT_VALID: i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.notValidJson', {
+    defaultMessage: 'Document contents must be a valid JSON array or object.',
+  }),
+};
+export const DOCUMENT_CREATION_WARNINGS = {
+  TITLE: i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.warningsTitle', {
+    defaultMessage: 'Warning!',
+  }),
+  LARGE_FILE: i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.largeFile', {
+    defaultMessage:
+      "You're uploading an extremely large file. This could potentially lock your browser, or take a very long time to process. If possible, try splitting your data up into multiple smaller files.",
+  }),
+};
 
 // This is indented the way it is to work with ApiCodeExample.
 // Use dedent() when calling this alone

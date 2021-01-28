@@ -24,6 +24,12 @@ Object {
 }
 `;
 
+exports[`accepts valid hostnames 5`] = `
+Object {
+  "host": "0.0.0.0",
+}
+`;
+
 exports[`basePath throws if appends a slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
 
 exports[`basePath throws if is an empty string 1`] = `"[basePath]: must start with a slash, don't end with one"`;
@@ -105,6 +111,8 @@ Object {
 
 exports[`throws if invalid hostname 1`] = `"[host]: value must be a valid hostname (see RFC 1123)."`;
 
+exports[`throws if invalid hostname 2`] = `"[host]: value 0 is not a valid hostname (use \\"0.0.0.0\\" to bind to all interfaces)"`;
+
 exports[`with TLS throws if TLS is enabled but \`redirectHttpFromPort\` is equal to \`port\` 1`] = `"Kibana does not accept http traffic to [port] when ssl is enabled (only https is allowed), so [ssl.redirectHttpFromPort] cannot be configured to the same value. Both are [1234]."`;
 
 exports[`with compression accepts valid referrer whitelist 1`] = `
@@ -113,6 +121,7 @@ Array [
   "8.8.8.8",
   "::1",
   "localhost",
+  "0.0.0.0",
 ]
 `;
 

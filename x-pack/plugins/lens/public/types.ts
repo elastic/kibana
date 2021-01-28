@@ -8,7 +8,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
-import { ROW_CLICK_TRIGGER } from '../../../../src/plugins/ui_actions/public';
+import { RowClickContext } from '../../../../src/plugins/ui_actions/public';
 import {
   ExpressionAstExpression,
   ExpressionRendererEvent,
@@ -16,15 +16,12 @@ import {
   Datatable,
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
-import { DragContextState } from './drag_drop';
+import { DragContextState, Dragging } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
-import { TriggerContext, VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
-import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-} from '../../../../src/plugins/embeddable/public';
+import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
+import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
 import type {
   LensSortActionData,
   LENS_EDIT_SORT_ACTION,
@@ -46,6 +43,7 @@ export interface EditorFrameProps {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
+  searchSessionId: string;
   initialContext?: VisualizeFieldContext;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
@@ -141,6 +139,10 @@ export interface DatasourceSuggestion<T = unknown> {
 
 export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
 
+export interface InitializationOptions {
+  isFullEditor?: boolean;
+}
+
 /**
  * Interface for the datasource registry
  */
@@ -153,7 +155,8 @@ export interface Datasource<T = unknown, P = unknown> {
   initialize: (
     state?: P,
     savedObjectReferences?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext
+    initialContext?: VisualizeFieldContext,
+    options?: InitializationOptions
   ) => Promise<T>;
 
   // Given the current state, which parts should be saved?
@@ -219,6 +222,8 @@ export interface DatasourceDataPanelProps<T = unknown> {
   query: Query;
   dateRange: DateRange;
   filters: Filter[];
+  dropOntoWorkspace: (field: Dragging) => void;
+  hasSuggestionForField: (field: Dragging) => boolean;
 }
 
 interface SharedDimensionProps {
@@ -245,7 +250,10 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns
-  setState: (newState: Parameters<StateSetter<T>>[0], publishToVisualization?: boolean) => void;
+  setState: (
+    newState: Parameters<StateSetter<T>>[0],
+    publishToVisualization?: { shouldReplaceDimension?: boolean; shouldRemoveDimension?: boolean }
+  ) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
@@ -456,6 +464,7 @@ export interface FramePublicAPI {
   dateRange: DateRange;
   query: Query;
   filters: Filter[];
+  searchSessionId: string;
 
   /**
    * A map of all available palettes (keys being the ids).
@@ -621,12 +630,12 @@ export interface Visualization<T = unknown> {
 
 export interface LensFilterEvent {
   name: 'filter';
-  data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data'];
+  data: ValueClickContext['data'];
 }
 
 export interface LensBrushEvent {
   name: 'brush';
-  data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
+  data: RangeSelectContext['data'];
 }
 
 // Use same technique as TriggerContext
@@ -647,7 +656,7 @@ export interface LensEditEvent<T> {
 }
 export interface LensTableRowContextMenuEvent {
   name: 'tableRowContextMenuClick';
-  data: TriggerContext<typeof ROW_CLICK_TRIGGER>['data'];
+  data: RowClickContext['data'];
 }
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {

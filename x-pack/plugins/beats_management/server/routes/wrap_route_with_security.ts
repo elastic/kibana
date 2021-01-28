@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  KibanaRequest,
-  KibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-  RouteMethod,
-} from 'src/core/server';
+import { KibanaRequest, KibanaResponseFactory, RequestHandler, RouteMethod } from 'src/core/server';
 import { difference } from 'lodash';
+import type { BeatsManagementRequestHandlerContext } from '../lib/types';
 
-export function wrapRouteWithSecurity<P, Q, B>(
+export function wrapRouteWithSecurity<
+  P,
+  Q,
+  B,
+  Context extends BeatsManagementRequestHandlerContext
+>(
   {
     requiredLicense = [],
     requiredRoles = [],
   }: { requiredLicense?: string[]; requiredRoles?: string[] },
-  handler: RequestHandler<P, Q, B>
-): RequestHandler<P, Q, B> {
+  handler: RequestHandler<P, Q, B, Context>
+): RequestHandler<P, Q, B, Context> {
   return async (
-    context: RequestHandlerContext,
+    context: Context,
     request: KibanaRequest<P, Q, B, RouteMethod>,
     response: KibanaResponseFactory
   ) => {

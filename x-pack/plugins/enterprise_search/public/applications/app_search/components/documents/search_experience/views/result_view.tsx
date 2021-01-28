@@ -13,15 +13,17 @@ import { Result } from '../../../result/result';
 export interface Props {
   result: ResultType;
   schemaForTypeHighlights?: Schema;
+  isMetaEngine: boolean;
 }
 
-export const ResultView: React.FC<Props> = ({ result, schemaForTypeHighlights }) => {
+export const ResultView: React.FC<Props> = ({ result, schemaForTypeHighlights, isMetaEngine }) => {
   return (
     <li>
       <Result
         result={result}
         shouldLinkToDetailPage={true}
         schemaForTypeHighlights={schemaForTypeHighlights}
+        isMetaEngine={isMetaEngine}
       />
     </li>
   );

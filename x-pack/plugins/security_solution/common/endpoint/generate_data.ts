@@ -17,7 +17,7 @@ import {
   PolicyData,
   SafeEndpointEvent,
 } from './types';
-import { factory as policyFactory } from './models/policy_config';
+import { policyFactory } from './models/policy_config';
 import {
   ancestryArray,
   entityIDSafeVersion,
@@ -1332,6 +1332,7 @@ export class EndpointDocGenerator {
             { id: 'logs-endpoint.events.security', type: 'index_template' },
             { id: 'metrics-endpoint.telemetry', type: 'index_template' },
           ] as EsAssetReference[],
+          package_assets: [],
           es_index_patterns: {
             alerts: 'logs-endpoint.alerts-*',
             events: 'events-endpoint-*',

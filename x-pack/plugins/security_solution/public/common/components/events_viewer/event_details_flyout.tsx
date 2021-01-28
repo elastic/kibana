@@ -25,6 +25,20 @@ const StyledEuiFlyout = styled(EuiFlyout)`
   z-index: ${({ theme }) => theme.eui.euiZLevel7};
 `;
 
+const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
+  .euiFlyoutBody__overflow {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+
+    .euiFlyoutBody__overflowContent {
+      flex: 1;
+      overflow: hidden;
+      padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 64px`};
+    }
+  }
+`;
+
 interface EventDetailsFlyoutProps {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
@@ -39,7 +53,7 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const expandedEvent = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults)?.expandedEvent ?? {}
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults)?.expandedEvent?.query ?? {}
   );
 
   const handleClearSelection = useCallback(() => {
@@ -67,7 +81,7 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
       <EuiFlyoutHeader hasBorder>
         <ExpandableEventTitle isAlert={isAlert} loading={loading} />
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <StyledEuiFlyoutBody>
         <ExpandableEvent
           browserFields={browserFields}
           detailsData={detailsData}
@@ -75,8 +89,9 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
           isAlert={isAlert}
           loading={loading}
           timelineId={timelineId}
+          timelineTabType="flyout"
         />
-      </EuiFlyoutBody>
+      </StyledEuiFlyoutBody>
     </StyledEuiFlyout>
   );
 };

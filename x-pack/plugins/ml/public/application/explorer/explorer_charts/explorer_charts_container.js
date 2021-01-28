@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -54,14 +54,33 @@ function getChartId(series) {
 }
 
 // Wrapper for a single explorer chart
-function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel, mlUrlGenerator }) {
-  const redirectToSingleMetricViewer = useCallback(async () => {
-    const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
-    addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, singleMetricViewerLink);
+function ExplorerChartContainer({
+  series,
+  severity,
+  tooManyBuckets,
+  wrapLabel,
+  mlUrlGenerator,
+  basePath,
+}) {
+  const [explorerSeriesLink, setExplorerSeriesLink] = useState();
 
-    window.open(singleMetricViewerLink, '_blank');
-  }, [mlUrlGenerator]);
+  useEffect(() => {
+    let isCancelled = false;
+    const generateLink = async () => {
+      const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
+      if (!isCancelled) {
+        setExplorerSeriesLink(singleMetricViewerLink);
+      }
+    };
+    generateLink();
+    return () => {
+      isCancelled = true;
+    };
+  }, [mlUrlGenerator, series]);
 
+  const addToRecentlyAccessed = useCallback(() => {
+    addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, explorerSeriesLink);
+  }, [explorerSeriesLink]);
   const { detectorLabel, entityFields } = series;
 
   const chartType = getChartType(series);
@@ -111,16 +130,22 @@ function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel, m
                 />
               </span>
             )}
-            <EuiToolTip position="top" content={textViewButton}>
-              <EuiButtonEmpty
-                iconSide="right"
-                iconType="visLine"
-                size="xs"
-                onClick={redirectToSingleMetricViewer}
-              >
-                <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
-              </EuiButtonEmpty>
-            </EuiToolTip>
+            {explorerSeriesLink && (
+              <EuiToolTip position="top" content={textViewButton}>
+                {/* href needs to be full link with base path while ChromeRecentlyAccessed requires only relative path */}
+                {/* disabling because we need button to behave as link and to have a callback */}
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiButtonEmpty
+                  iconSide="right"
+                  iconType="visLine"
+                  size="xs"
+                  href={`${basePath}/app/ml${explorerSeriesLink}`}
+                  onClick={addToRecentlyAccessed}
+                >
+                  <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            )}
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -170,14 +195,13 @@ export const ExplorerChartsContainerUI = ({
 }) => {
   const {
     services: {
-      application: { navigateToApp },
-
+      http: { basePath },
       share: {
         urlGenerators: { getUrlGenerator },
       },
     },
   } = kibana;
-  const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+  const mlUrlGenerator = useMemo(() => getUrlGenerator(ML_APP_URL_GENERATOR), [getUrlGenerator]);
 
   // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
   // If that's the case we trick it doing that with the following settings:
@@ -201,8 +225,8 @@ export const ExplorerChartsContainerUI = ({
                 severity={severity}
                 tooManyBuckets={tooManyBuckets}
                 wrapLabel={wrapLabel}
-                navigateToApp={navigateToApp}
                 mlUrlGenerator={mlUrlGenerator}
+                basePath={basePath.get()}
               />
             </EuiFlexItem>
           ))}

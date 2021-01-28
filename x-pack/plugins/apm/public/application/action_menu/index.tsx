@@ -28,6 +28,7 @@ export function ActionMenu() {
     canSaveAlerts,
     canReadAnomalies,
   } = getAlertingCapabilities(plugins, capabilities);
+  const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
 
   function apmHref(path: string) {
     return getAPMHref({ basePath, path, search });
@@ -52,7 +53,7 @@ export function ActionMenu() {
         <AlertingPopoverAndFlyout
           basePath={basePath}
           canReadAlerts={canReadAlerts}
-          canSaveAlerts={canSaveAlerts}
+          canSaveAlerts={canSaveApmAlerts}
           canReadAnomalies={canReadAnomalies}
           includeTransactionDuration={serviceName !== undefined}
         />

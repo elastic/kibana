@@ -8,7 +8,8 @@
   ],
   "from": "now-30m",
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-o365*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -26,7 +27,7 @@
     "Elastic",
     "Cloud",
     "Microsoft 365",
-    "Continuous Monioring",
+    "Continuous Monitoring",
     "SecOps",
     "Identity and Access"
   ],
