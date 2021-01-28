@@ -6,8 +6,8 @@
 
 import { docLinks } from './';
 
-describe('DocLinks#setDocLinks()', () => {
-  it('adds links from docLinks', () => {
+describe('DocLinks', () => {
+  it('setDocLinks', () => {
     const links = {
       DOC_LINK_VERSION: '',
       ELASTIC_WEBSITE_URL: 'https://elastic.co/',

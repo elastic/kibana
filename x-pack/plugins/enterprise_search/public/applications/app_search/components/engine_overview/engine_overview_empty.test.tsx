@@ -24,7 +24,7 @@ describe('EmptyEngineOverview', () => {
     expect(wrapper.find('h1').text()).toEqual('Engine setup');
   });
 
-  it('renders correctly versioned documentation URLs', () => {
+  it('renders a documentation link', () => {
     expect(wrapper.find(EuiButton).prop('href')).toEqual(`${docLinks.appSearchBase}/index.html`);
   });
 
