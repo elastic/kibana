@@ -24,6 +24,23 @@ export interface Plugin<
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
 > {
+  setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
+  start(core: CoreStart, plugins: TPluginsStart): TStart;
+  stop?(): void;
+}
+
+/**
+ * A plugin with asynchronous lifecycle methods.
+ *
+ * @deprecated Asynchronous lifecycles are deprecated, and should be migrated to sync
+ * @public
+ */
+export interface AsyncPlugin<
+  TSetup = void,
+  TStart = void,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
+> {
   setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
   stop?(): void;
@@ -40,7 +57,11 @@ export type PluginInitializer<
   TStart,
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
-> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+> = (
+  core: PluginInitializerContext
+) =>
+  | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -58,7 +79,9 @@ export class PluginWrapper<
   public readonly configPath: DiscoveredPlugin['configPath'];
   public readonly requiredPlugins: DiscoveredPlugin['requiredPlugins'];
   public readonly optionalPlugins: DiscoveredPlugin['optionalPlugins'];
-  private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  private instance?:
+    | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+    | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();

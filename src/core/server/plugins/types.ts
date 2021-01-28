@@ -249,9 +249,9 @@ export interface Plugin<
 }
 
 /**
- * The interface that should be returned by a `PluginInitializer`.
+ * A plugin with asynchronous lifecycle methods.
  *
- * @deprecated Asynchronous plugins should be migrated to {@link Plugin}
+ * @deprecated Asynchronous lifecycles are deprecated, and should be migrated to sync
  * @public
  */
 export interface AsyncPlugin<
@@ -264,22 +264,6 @@ export interface AsyncPlugin<
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
   stop?(): void;
 }
-
-/**
- * Internal representation of a synchronous or asynchronous plugin.
- *
- * Should be removed and usages replaced by `Plugin` once sync lifecycle migration is complete
- *
- * @internal
- */
-export type SyncOrAsyncPlugin<
-  TSetup = void,
-  TStart = void,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
-> =
-  | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
-  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 export const SharedGlobalConfigKeys = {
   // We can add more if really needed
@@ -418,4 +402,6 @@ export type PluginInitializer<
   TPluginsStart extends object = object
 > = (
   core: PluginInitializerContext
-) => SyncOrAsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+) =>
+  | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
