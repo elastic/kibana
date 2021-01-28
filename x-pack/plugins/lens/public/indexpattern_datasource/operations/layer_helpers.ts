@@ -17,6 +17,7 @@ import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../type
 import { getSortScoreByPriority } from './operations';
 import { generateId } from '../../id_generator';
 import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
+import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
 
 interface ColumnChange {
   op: OperationType;
@@ -57,6 +58,10 @@ export function insertNewColumn({
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
     if (field) {
       throw new Error(`Can't create operation ${op} with the provided field ${field.name}`);
+    }
+    if (operationDefinition.input === 'managedReference') {
+      // TODO: need to create on the fly the new columns for Formula,
+      // like we do for fullReferences to show a seamless transition
     }
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation?.isBucketed);
@@ -293,6 +298,44 @@ export function replaceColumn({
       }
     }
 
+    // TODO: Refactor all this to be more generic and know less about Formula
+    // if managed it has to look at the full picture to have a seamless transition
+    if (operationDefinition.input === 'managedReference') {
+      const newColumn = copyCustomLabel(
+        operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer }),
+        previousColumn
+      ) as FormulaIndexPatternColumn;
+
+      // now remove the previous references
+      if (previousDefinition.input === 'fullReference') {
+        (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
+          tempLayer = deleteColumn({ layer: tempLayer, columnId: id, indexPattern });
+        });
+      }
+
+      const basicLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
+      // rebuild the references again for the specific AST generated
+      const newLayer = newColumn.params?.ast
+        ? regenerateLayerFromAst(
+            newColumn.params.ast,
+            basicLayer,
+            columnId,
+            newColumn,
+            indexPattern,
+            operationDefinitionMap
+          )
+        : basicLayer;
+
+      return updateDefaultLabels(
+        {
+          ...tempLayer,
+          columnOrder: getColumnOrder(newLayer),
+          columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
+        },
+        indexPattern
+      );
+    }
+
     // This logic comes after the transitions because they need to look at previous columns
     if (previousDefinition.input === 'fullReference') {
       (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
@@ -300,7 +343,7 @@ export function replaceColumn({
       });
     }
 
-    if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
+    if (operationDefinition.input === 'none') {
       let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
       newColumn = copyCustomLabel(newColumn, previousColumn);
 
@@ -823,7 +866,11 @@ export function getExistingColumnGroups(layer: IndexPatternLayer): [string[], st
  * Returns true if the given column can be applied to the given index pattern
  */
 export function isColumnTransferable(column: IndexPatternColumn, newIndexPattern: IndexPattern) {
-  return operationDefinitionMap[column.operationType].isTransferable(column, newIndexPattern);
+  return operationDefinitionMap[column.operationType].isTransferable(
+    column,
+    newIndexPattern,
+    operationDefinitionMap
+  );
 }
 
 export function updateLayerIndexPattern(

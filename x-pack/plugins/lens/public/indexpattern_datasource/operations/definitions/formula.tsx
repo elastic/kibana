@@ -43,19 +43,18 @@ export const formulaOperation: OperationDefinition<
       return;
     }
     const ast = parse(column.params.ast);
-    /*
-      { name: 'add', args: [ { name: 'abc', args: [5] }, 5 ] }
-      */
     const extracted = extractColumns(columnId, operationDefinitionMap, ast, layer, indexPattern);
 
     const errors = extracted
       .flatMap(({ operationType, label }) => {
-        return operationDefinitionMap[operationType]?.getErrorMessage?.(
-          layer,
-          label,
-          indexPattern,
-          operationDefinitionMap
-        );
+        if (layer.columns[label]) {
+          return operationDefinitionMap[operationType]?.getErrorMessage?.(
+            layer,
+            label,
+            indexPattern,
+            operationDefinitionMap
+          );
+        }
       })
       .filter(Boolean) as string[];
     return errors.length ? errors : undefined;
@@ -68,6 +67,7 @@ export const formulaOperation: OperationDefinition<
     };
   },
   toExpression: (layer, columnId) => {
+    console.log(layer.columns[columnId]);
     return [
       {
         type: 'function',
@@ -94,21 +94,34 @@ export const formulaOperation: OperationDefinition<
       },
     ];
   },
-  buildColumn({ referenceIds, previousColumn, layer }) {
-    const metric = layer.columns[referenceIds[0]];
+  buildColumn({ previousColumn, layer }) {
+    let previousFormula = '';
+    if (previousColumn) {
+      if ('references' in previousColumn) {
+        const metric = layer.columns[previousColumn.references[0]];
+        const fieldName = getSafeFieldName(metric?.sourceField);
+        // TODO need to check the input type from the definition
+        previousFormula += `${previousColumn.operationType}(${metric.operationType}(${fieldName}))`;
+      } else {
+        previousFormula += `${previousColumn.operationType}(${getSafeFieldName(
+          previousColumn?.sourceField
+        )})`;
+      }
+    }
     return {
       label: 'Formula',
       dataType: 'number',
       operationType: 'formula',
       isBucketed: false,
       scale: 'ratio',
-      params: {},
+      params: previousFormula ? { ast: previousFormula } : {},
       references: [],
     };
   },
-  isTransferable: (column, newIndexPattern) => {
-    // TODO has to check all children
-    return true;
+  isTransferable: (column, newIndexPattern, operationDefinitionMap) => {
+    // Basic idea: if it has any math operation in it, probably it cannot be transferable
+    const ast = parse(column.params.ast);
+    return hasMathNode(ast, operationDefinitionMap);
   },
 
   paramEditor: function ParamEditor({
@@ -130,53 +143,16 @@ export const formulaOperation: OperationDefinition<
         />
         <EuiButton
           onClick={() => {
-            const ast = parse(text);
-            /*
-            { name: 'add', args: [ { name: 'abc', args: [5] }, 5 ] }
-            */
-            const extracted = extractColumns(
-              columnId,
-              operationDefinitionMap,
-              ast,
-              layer,
-              indexPattern
+            updateLayer(
+              regenerateLayerFromAst(
+                text,
+                layer,
+                columnId,
+                currentColumn,
+                indexPattern,
+                operationDefinitionMap
+              )
             );
-
-            const columns = {
-              ...layer.columns,
-            };
-
-            Object.keys(columns).forEach((k) => {
-              if (k.startsWith(columnId)) {
-                delete columns[k];
-              }
-            });
-
-            extracted.forEach((extractedColumn, index) => {
-              columns[`${columnId}X${index}`] = extractedColumn;
-            });
-
-            columns[columnId] = {
-              ...currentColumn,
-              params: {
-                ...currentColumn.params,
-                ast: text,
-              },
-              references: [`${columnId}X${extracted.length - 1}`],
-            };
-
-            updateLayer({
-              ...layer,
-              columns,
-              columnOrder: getColumnOrder({
-                ...layer,
-                columns,
-              }),
-            });
-
-            // TODO
-            // turn ast into referenced columns
-            // set state
           }}
         >
           Submit
@@ -185,6 +161,57 @@ export const formulaOperation: OperationDefinition<
     );
   },
 };
+
+export function regenerateLayerFromAst(
+  text: unknown,
+  layer: IndexPatternLayer,
+  columnId: string,
+  currentColumn: FormulaIndexPatternColumn,
+  indexPattern: IndexPattern,
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+) {
+  const ast = parse(text);
+  /*
+            { name: 'add', args: [ { name: 'abc', args: [5] }, 5 ] }
+            */
+  const extracted = extractColumns(columnId, operationDefinitionMap, ast, layer, indexPattern);
+
+  const columns = {
+    ...layer.columns,
+  };
+
+  Object.keys(columns).forEach((k) => {
+    if (k.startsWith(columnId)) {
+      delete columns[k];
+    }
+  });
+
+  extracted.forEach((extractedColumn, index) => {
+    columns[`${columnId}X${index}`] = extractedColumn;
+  });
+
+  columns[columnId] = {
+    ...currentColumn,
+    params: {
+      ...currentColumn.params,
+      ast: text,
+    },
+    references: [`${columnId}X${extracted.length - 1}`],
+  };
+
+  return {
+    ...layer,
+    columns,
+    columnOrder: getColumnOrder({
+      ...layer,
+      columns,
+    }),
+  };
+
+  // TODO
+  // turn ast into referenced columns
+  // set state
+}
 
 function extractColumns(
   idPrefix: string,
@@ -294,4 +321,28 @@ function findVariables(node: any): string[] {
     return [];
   }
   return node.args.flatMap(findVariables);
+}
+
+function hasMathNode(root: any, operations: Record<string, GenericOperationDefinition>): boolean {
+  function findMathNodes(node: any): boolean[] {
+    if (typeof node === 'string') {
+      return [false];
+    }
+    if (typeof node === 'number') {
+      return [false];
+    }
+    if (node.name in operations) {
+      return [false];
+    }
+    return node.args.flatMap(findMathNodes);
+  }
+  return Boolean(findMathNodes(root).filter(Boolean).length);
+}
+
+function getSafeFieldName(fieldName: string | undefined) {
+  // clean up the "Records" field for now
+  if (!fieldName || fieldName === 'Records') {
+    return '';
+  }
+  return fieldName;
 }

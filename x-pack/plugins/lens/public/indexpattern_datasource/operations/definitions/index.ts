@@ -182,7 +182,11 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * If this function returns false, the column is removed when switching index pattern
    * for a layer
    */
-  isTransferable: (column: C, newIndexPattern: IndexPattern) => boolean;
+  isTransferable: (
+    column: C,
+    newIndexPattern: IndexPattern,
+    operationDefinitionMap: Record<string, GenericOperationDefinition>
+  ) => boolean;
   /**
    * Transfering a column to another index pattern. This can be used to
    * adjust operation specific settings such as reacting to aggregation restrictions
@@ -372,7 +376,11 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
   /**
    * Builds the column object for the given parameters. Should include default p
    */
-  buildColumn: (arg: BaseBuildColumnArgs) => ReferenceBasedIndexPatternColumn & C;
+  buildColumn: (
+    arg: BaseBuildColumnArgs & {
+      previousColumn?: IndexPatternColumn | ReferenceBasedIndexPatternColumn;
+    }
+  ) => ReferenceBasedIndexPatternColumn & C;
   /**
    * Returns the meta data of the operation if applied. Undefined
    * if the operation can't be added with these fields.

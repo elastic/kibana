@@ -58,7 +58,11 @@ export function getInvalidFieldMessage(
     sourceField &&
       operationDefinition &&
       field &&
-      !operationDefinition.isTransferable(column as IndexPatternColumn, indexPattern)
+      !operationDefinition.isTransferable(
+        column as IndexPatternColumn,
+        indexPattern,
+        operationDefinitionMap
+      )
   );
   if (isInvalid) {
     if (isWrongType) {
