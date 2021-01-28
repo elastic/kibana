@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first } from 'rxjs/operators';
-
 import {
   CoreStart,
   CoreSetup,
@@ -22,11 +20,9 @@ interface SetupPluginDeps {
 export class XpackLegacyPlugin implements Plugin {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup, { usageCollection }: SetupPluginDeps) {
+  public setup(core: CoreSetup, { usageCollection }: SetupPluginDeps) {
     const router = core.http.createRouter();
-    const globalConfig = await this.initContext.config.legacy.globalConfig$
-      .pipe(first())
-      .toPromise();
+    const globalConfig = this.initContext.config.legacy.get();
     const serverInfo = core.http.getServerInfo();
 
     registerSettingsRoute({

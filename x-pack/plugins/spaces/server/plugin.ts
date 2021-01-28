@@ -12,6 +12,7 @@ import {
   CoreStart,
   Logger,
   PluginInitializerContext,
+  Plugin,
 } from '../../../../src/core/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
@@ -61,7 +62,8 @@ export interface SpacesPluginStart {
   spacesService: SpacesServiceStart;
 }
 
-export class Plugin {
+export class SpacesPlugin
+  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart> {
   private readonly config$: Observable<ConfigType>;
 
   private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
