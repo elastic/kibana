@@ -7,7 +7,6 @@
 import { monaco } from '@kbn/monaco';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { getFlattenedObject } from '@kbn/std';
 import { IExternalUrl } from 'src/core/public';
 import {
   ChartActionContext,
@@ -33,8 +32,9 @@ import {
   urlDrilldownCompileUrl,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '../../../../ui_actions_enhanced/public';
-import { getPanelVariables, getEventScope, getEventVariableList } from './url_drilldown_scope';
 import { txtUrlDrilldownDisplayName } from './i18n';
+import { getEventVariableList, getEventScopeValues } from './variables/event_variables';
+import { getContextVariableList, getContextScopeValues } from './variables/context_variables';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;
@@ -171,11 +171,9 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly getRuntimeVariables = (context: ActionContext) => {
     return {
+      event: getEventScopeValues(context),
+      context: getContextScopeValues(context),
       ...this.deps.getGlobalScope(),
-      context: {
-        panel: getPanelVariables(context),
-      },
-      event: getEventScope(context),
     };
   };
 
@@ -183,10 +181,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     context: ActionFactoryContext
   ): UrlTemplateEditorVariable[] => {
     const eventVariables = getEventVariableList(context);
-    // const contextVariables = Object.keys(getFlattenedObject(getPanelVariables(context))).map(
-    //   (key) => 'context.panel.' + key
-    // );
-
+    const contextVariables = getContextVariableList(context);
     const globalVariables: UrlTemplateEditorVariable[] = [
       {
         label: 'kibanaUrl',
@@ -201,7 +196,6 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       },
     ];
 
-    return [...eventVariables, ...globalVariables];
-    // return [...eventVariables.sort(), ...contextVariables.sort(), ...globalVariables.sort()];
+    return [...eventVariables, ...contextVariables, ...globalVariables];
   };
 }

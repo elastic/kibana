@@ -9,12 +9,12 @@ import {
   ValueClickTriggerEventScope,
   getEventVariableList,
   getPanelVariables,
-} from './url_drilldown_scope';
+} from '../url_drilldown_scope';
 import {
   RowClickContext,
   ROW_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/ui_actions/public';
-import { createPoint, rowClickData, TestEmbeddable } from './test/data';
+} from '../../../../../../../src/plugins/ui_actions/public';
+import { createPoint, rowClickData, TestEmbeddable } from '../test/data';
 
 describe('VALUE_CLICK_TRIGGER', () => {
   describe('supports `points[]`', () => {
