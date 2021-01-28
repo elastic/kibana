@@ -10,7 +10,7 @@ export { IndexPattern, IndexPatternField, DataPublicPluginStart } from '../../da
 
 export { RuntimeType } from '../../data/common';
 
-export { createKibanaReactContext, toMountPoint } from '../../kibana_react/public';
+export { createKibanaReactContext, toMountPoint, CodeEditor } from '../../kibana_react/public';
 
 export {
   useForm,

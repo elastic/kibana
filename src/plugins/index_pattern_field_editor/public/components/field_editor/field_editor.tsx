@@ -7,15 +7,24 @@
  */
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { Form, useForm, FormHook, UseField, TextField, useFormData } from '../../shared_imports';
+import {
+  Form,
+  useForm,
+  FormHook,
+  UseField,
+  TextField,
+  useFormData,
+  RuntimeType,
+} from '../../shared_imports';
 import { Field } from '../../types';
 
+import { RUNTIME_FIELD_OPTIONS } from './constants';
 import { schema } from './form_schema';
 import { getNameFieldConfig } from './lib';
 import { ShadowingFieldWarning } from './shadowing_field_warning';
-import { TypeField, CustomLabelField, PopularityField } from './form_fields';
+import { TypeField, CustomLabelField, ScriptField, PopularityField } from './form_fields';
 import { FormRow } from './form_row';
 import { AdvancedParametersSection } from './advanced_parameters_section';
 
@@ -25,7 +34,8 @@ export interface FieldEditorFormState {
   submit: FormHook<Field>['submit'];
 }
 
-export interface FieldFormInternal extends Field {
+export interface FieldFormInternal extends Omit<Field, 'type'> {
+  type: Array<EuiComboBoxOptionOption<RuntimeType>>;
   __meta__: {
     isCustomLabelVisible: boolean;
     isValueVisible: boolean;
@@ -57,7 +67,7 @@ export interface Props {
      * to indicate that this runtime field will shadow the concrete field.
      * It is also used to provide the list of field autocomplete suggestions to the code editor.
      */
-    existingConcreteFields?: Field[];
+    existingConcreteFields?: Array<{ name: string; type: string }>;
   };
 }
 
@@ -97,8 +107,17 @@ const geti18nTexts = () => ({
 });
 
 const formDeserializer = (field: Field): FieldFormInternal => {
+  let fieldType: Array<EuiComboBoxOptionOption<RuntimeType>>;
+  if (!field.type) {
+    fieldType = [];
+  } else {
+    const label = RUNTIME_FIELD_OPTIONS.find(({ value }) => value === field.type)?.label;
+    fieldType = [{ label: label ?? field.type, value: field.type as RuntimeType }];
+  }
+
   return {
     ...field,
+    type: fieldType,
     __meta__: {
       isCustomLabelVisible: field.customLabel !== undefined,
       isValueVisible: field.script !== undefined,
@@ -109,13 +128,17 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 };
 
 const formSerializer = (field: FieldFormInternal): Field => {
-  const { __meta__, ...rest } = field;
-  return rest;
+  const { __meta__, type, ...rest } = field;
+  return {
+    type: type[0].value!,
+    ...rest,
+  };
 };
 
 const FieldEditorComponent = ({
   field,
   onChange,
+  links,
   ctx: { namesNotAllowed, existingConcreteFields = [] } = {},
 }: Props) => {
   const { form } = useForm<Field, FieldFormInternal>({
@@ -189,7 +212,7 @@ const FieldEditorComponent = ({
         formFieldPath="__meta__.isValueVisible"
         withDividerRule
       >
-        <div>Block value (script)</div>
+        <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
       </FormRow>
 
       {/* Set custom format */}

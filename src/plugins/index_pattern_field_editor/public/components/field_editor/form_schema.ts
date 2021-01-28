@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormSchema, fieldValidators, RuntimeType } from '../../shared_imports';
-import { ComboBoxOption } from '../../types';
-import { RUNTIME_FIELD_OPTIONS } from './constants';
+import { FormSchema, fieldValidators } from '../../shared_imports';
+
 import type { FieldFormInternal } from './field_editor';
+import { RUNTIME_FIELD_OPTIONS } from './constants';
 
 const { emptyField } = fieldValidators;
 
@@ -36,21 +36,12 @@ export const schema: FormSchema<FieldFormInternal> = {
     label: i18n.translate('indexPatternFieldEditor.editor.form.runtimeTypeLabel', {
       defaultMessage: 'Type',
     }),
-    defaultValue: 'keyword',
-    deserializer: (fieldType?: RuntimeType | string) => {
-      if (!fieldType) {
-        return [];
-      }
-
-      const label = RUNTIME_FIELD_OPTIONS.find(({ value }) => value === fieldType)?.label;
-      return [{ label: label ?? fieldType, value: fieldType }];
-    },
-    serializer: (value: Array<ComboBoxOption<RuntimeType>>) => value[0].value!,
+    defaultValue: [RUNTIME_FIELD_OPTIONS[0]],
   },
   script: {
     source: {
       label: i18n.translate('indexPatternFieldEditor.editor.form.defineFieldLabel', {
-        defaultMessage: 'Define script (optional)',
+        defaultMessage: 'Define script',
       }),
     },
   },

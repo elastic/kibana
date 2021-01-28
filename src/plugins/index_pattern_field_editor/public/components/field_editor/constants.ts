@@ -5,10 +5,10 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-import { ComboBoxOption } from '../../types';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { RuntimeType } from '../../shared_imports';
 
-export const RUNTIME_FIELD_OPTIONS: Array<ComboBoxOption<RuntimeType>> = [
+export const RUNTIME_FIELD_OPTIONS: Array<EuiComboBoxOptionOption<RuntimeType>> = [
   {
     label: 'Keyword',
     value: 'keyword',
