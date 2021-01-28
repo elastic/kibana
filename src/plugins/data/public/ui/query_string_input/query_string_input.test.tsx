@@ -113,7 +113,7 @@ describe('QueryStringInput', () => {
     expect(component.find(QueryLanguageSwitcher).prop('language')).toBe(luceneQuery.language);
   });
 
-  it('Should disable autoFocus on EuiTextArea when disableAutoFocus prop is true', () => {
+  it.skip('Should disable autoFocus on EuiTextArea when disableAutoFocus prop is true', () => {
     const component = mount(
       wrapQueryStringInputInContext({
         query: kqlQuery,
