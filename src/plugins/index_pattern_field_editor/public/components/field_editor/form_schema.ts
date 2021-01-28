@@ -8,12 +8,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormSchema, fieldValidators, RuntimeType } from '../../shared_imports';
-import { Field, ComboBoxOption } from '../../types';
+import { ComboBoxOption } from '../../types';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
+import type { FieldFormInternal } from './field_editor';
 
 const { emptyField } = fieldValidators;
 
-export const schema: FormSchema<Field> = {
+export const schema: FormSchema<FieldFormInternal> = {
   name: {
     label: i18n.translate('indexPatternFieldEditor.editor.form.nameLabel', {
       defaultMessage: 'Name',
@@ -51,6 +52,17 @@ export const schema: FormSchema<Field> = {
       label: i18n.translate('indexPatternFieldEditor.editor.form.defineFieldLabel', {
         defaultMessage: 'Define script (optional)',
       }),
+    },
+  },
+  __meta__: {
+    isCustomLabelVisible: {
+      defaultValue: false,
+    },
+    isValueVisible: {
+      defaultValue: false,
+    },
+    isFormatVisible: {
+      defaultValue: false,
     },
   },
 };

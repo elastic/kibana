@@ -5,7 +5,7 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -16,11 +16,20 @@ import { schema } from './form_schema';
 import { getNameFieldConfig } from './lib';
 import { ShadowingFieldWarning } from './shadowing_field_warning';
 import { TypeField } from './form_fields';
+import { FormRow } from './form_row';
 
 export interface FieldEditorFormState {
   isValid: boolean | undefined;
   isSubmitted: boolean;
   submit: FormHook<Field>['submit'];
+}
+
+export interface FieldFormInternal extends Field {
+  __meta__: {
+    isCustomLabelVisible: boolean;
+    isValueVisible: boolean;
+    isFormatVisible: boolean;
+  };
 }
 
 export interface Props {
@@ -50,17 +59,76 @@ export interface Props {
   };
 }
 
+const geti18nTexts = (isAdvancedSettingsVisible: boolean) => ({
+  customLabel: {
+    title: i18n.translate('indexPatternFieldEditor.editor.form.customLabelTitle', {
+      defaultMessage: 'Set custom label',
+    }),
+    description: i18n.translate('indexPatternFieldEditor.editor.form.customLabelDescription', {
+      defaultMessage: `Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name.`,
+    }),
+  },
+  value: {
+    title: i18n.translate('indexPatternFieldEditor.editor.form.valueTitle', {
+      defaultMessage: 'Set value',
+    }),
+    description: i18n.translate('indexPatternFieldEditor.editor.form.valueDescription', {
+      defaultMessage: `Define the value of the field. If you don't set the value, the value of the field will be retrieved from the field with the same name in the _source object.`,
+    }),
+  },
+  format: {
+    title: i18n.translate('indexPatternFieldEditor.editor.form.formatTitle', {
+      defaultMessage: 'Set format',
+    }),
+    description: i18n.translate('indexPatternFieldEditor.editor.form.formatDescription', {
+      defaultMessage: `Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working.`,
+    }),
+  },
+  advancedSettingsButtonLabel: isAdvancedSettingsVisible
+    ? i18n.translate('indexPatternFieldEditor.editor.form.advancedSettings.hideButtonLabel', {
+        defaultMessage: 'Hide advanced settings',
+      })
+    : i18n.translate('indexPatternFieldEditor.editor.form.advancedSettings.showButtonLabel', {
+        defaultMessage: 'Show advanced settings',
+      }),
+});
+
+const formDeserializer = (field: Field): FieldFormInternal => {
+  return {
+    ...field,
+    __meta__: {
+      isCustomLabelVisible: field.customLabel !== undefined,
+      isValueVisible: field.script !== undefined,
+      isFormatVisible: field.format !== undefined,
+    },
+  };
+};
+
+const formSerializer = (field: FieldFormInternal): Field => {
+  const { __meta__, ...rest } = field;
+  return rest;
+};
+
 const FieldEditorComponent = ({
   field,
   onChange,
   ctx: { namesNotAllowed, existingConcreteFields = [] } = {},
 }: Props) => {
-  const { form } = useForm<Field>({ defaultValue: field, schema });
+  const [isAdvancedSettingsVisible, setIsAdvancedSettingsVisible] = useState(false);
+  const { form } = useForm<Field, FieldFormInternal>({
+    defaultValue: field,
+    schema,
+    deserializer: formDeserializer,
+    serializer: formSerializer,
+  });
   const { submit, isValid: isFormValid, isSubmitted } = form;
-  const [{ name }] = useFormData<Field>({ form, watch: 'name' });
+  const [{ name }] = useFormData<FieldFormInternal>({ form, watch: 'name' });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const isShadowingField = existingConcreteFields.find((_field) => _field.name === name);
+  const i18nTexts = geti18nTexts(isAdvancedSettingsVisible);
+
+  // const toggleAdvancedSettings = () => setIsAdvancedSettingsVisible((prev) => !prev);
 
   useEffect(() => {
     if (onChange) {
@@ -102,6 +170,35 @@ const FieldEditorComponent = ({
       )}
 
       <EuiSpacer size="l" />
+
+      {/* Set custom label */}
+      <FormRow
+        title={i18nTexts.customLabel.title}
+        description={i18nTexts.customLabel.description}
+        formFieldPath="__meta__.isCustomLabelVisible"
+      >
+        <div>Block custom label</div>
+      </FormRow>
+      <EuiSpacer />
+
+      {/* Set value */}
+      <FormRow
+        title={i18nTexts.value.title}
+        description={i18nTexts.value.description}
+        formFieldPath="__meta__.isValueVisible"
+      >
+        <div>Block value (script)</div>
+      </FormRow>
+      <EuiSpacer />
+
+      {/* Set custom format */}
+      <FormRow
+        title={i18nTexts.format.title}
+        description={i18nTexts.format.description}
+        formFieldPath="__meta__.isFormatVisible"
+      >
+        <div>Block custom format</div>
+      </FormRow>
     </Form>
   );
 };
