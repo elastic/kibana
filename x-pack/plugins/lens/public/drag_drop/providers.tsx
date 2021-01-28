@@ -275,6 +275,7 @@ export function ReorderProvider({
   ]);
   return (
     <div
+      data-test-subj="lnsDragDrop-reorderableGroup"
       className={classNames(className, {
         'lnsDragDrop-isActiveGroup': state.isReorderOn && React.Children.count(children) > 1,
       })}

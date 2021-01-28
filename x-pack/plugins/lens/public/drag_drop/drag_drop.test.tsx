@@ -28,6 +28,11 @@ const defaultContext = {
   setA11yMessage: jest.fn(),
 };
 
+const dataTransfer = {
+  setData: jest.fn(),
+  getData: jest.fn(),
+};
+
 describe('DragDrop', () => {
   const value = { id: '1', label: 'hello' };
   test('renders if nothing is being dragged', () => {
@@ -68,10 +73,6 @@ describe('DragDrop', () => {
 
   test('dragstart sets dragging in the context', async () => {
     const setDragging = jest.fn();
-    const dataTransfer = {
-      setData: jest.fn(),
-      getData: jest.fn(),
-    };
 
     const component = mount(
       <ChildDragDropProvider {...defaultContext} dragging={value} setDragging={setDragging}>
@@ -203,10 +204,6 @@ describe('DragDrop', () => {
       </ChildDragDropProvider>
     );
 
-    const dataTransfer = {
-      setData: jest.fn(),
-      getData: jest.fn(),
-    };
     component
       .find('[data-test-subj="lnsDragDrop"]')
       .first()
@@ -251,10 +248,6 @@ describe('DragDrop', () => {
       </ChildDragDropProvider>
     );
 
-    const dataTransfer = {
-      setData: jest.fn(),
-      getData: jest.fn(),
-    };
     component
       .find('[data-test-subj="lnsDragDrop"]')
       .first()
@@ -340,16 +333,38 @@ describe('DragDrop', () => {
         </ChildDragDropProvider>
       );
     };
-    test(`Reorderable component renders properly`, () => {
+    test(`Inactive reorderable group renders properly`, () => {
       const component = mountComponent(undefined, jest.fn());
       expect(component.find('.lnsDragDrop-reorderable')).toHaveLength(3);
     });
-    test(`Elements between dragged and drop get extra styles to show the reorder effect when dragging`, () => {
+
+    test(`Reorderable group with lifted element renders properly`, () => {
+      const setDragging = jest.fn();
+      const setA11yMessage = jest.fn();
+      const component = mountComponent(
+        { dragging: { id: '1' }, setA11yMessage, setDragging },
+        jest.fn()
+      );
+      act(() => {
+        component
+          .find('[data-test-subj="lnsDragDrop"]')
+          .first()
+          .simulate('dragstart', { dataTransfer });
+        jest.runAllTimers();
+      });
+
+      expect(setDragging).toBeCalledWith({ id: '1' });
+      expect(setA11yMessage).toBeCalledWith('You have lifted an item 1 in position 1');
+      expect(
+        component
+          .find('[data-test-subj="lnsDragDrop-reorderableGroup"]')
+          .hasClass('lnsDragDrop-isActiveGroup')
+      ).toEqual(true);
+    });
+
+    test(`Reordered elements get extra styles to show the reorder effect when dragging`, () => {
       const component = mountComponent({ dragging: { id: '1' } }, jest.fn());
-      const dataTransfer = {
-        setData: jest.fn(),
-        getData: jest.fn(),
-      };
+
       act(() => {
         component
           .find('[data-test-subj="lnsDragDrop"]')
@@ -387,17 +402,28 @@ describe('DragDrop', () => {
         component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(1).prop('style')
       ).toEqual(undefined);
     });
+
     test(`Dropping an item runs onDrop function`, () => {
+      const setDragging = jest.fn();
+      const setA11yMessage = jest.fn();
       const preventDefault = jest.fn();
       const stopPropagation = jest.fn();
       const onDrop = jest.fn();
 
-      const component = mountComponent({ dragging: { id: '1' } }, onDrop);
+      const component = mountComponent(
+        { dragging: { id: '1' }, setA11yMessage, setDragging },
+        onDrop
+      );
 
       component
         .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
         .at(1)
         .simulate('drop', { preventDefault, stopPropagation });
+      jest.runAllTimers();
+
+      expect(setA11yMessage).toBeCalledWith(
+        'You have dropped the item. You have moved the item from position 1 to positon 3'
+      );
       expect(preventDefault).toBeCalled();
       expect(stopPropagation).toBeCalled();
       expect(onDrop).toBeCalledWith({ id: '1' }, { id: '3' });
@@ -425,11 +451,52 @@ describe('DragDrop', () => {
       expect(onDrop).toBeCalledWith({ id: '1' }, { id: '3' });
     });
 
+    test(`Keyboard Navigation: Reordered elements get extra styles to show the reorder effect`, () => {
+      const setA11yMessage = jest.fn();
+      const component = mountComponent(
+        { dragging: { id: '1' }, keyboardMode: true, setA11yMessage },
+        jest.fn()
+      );
+
+      const keyboardHandler = component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
+      keyboardHandler.simulate('keydown', { key: 'Space' });
+      keyboardHandler.simulate('keydown', { key: 'ArrowDown' });
+
+      expect(
+        component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
+      ).toEqual({
+        transform: 'translateY(+8px)',
+      });
+      expect(
+        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(0).prop('style')
+      ).toEqual({
+        transform: 'translateY(-40px)',
+      });
+      expect(
+        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(1).prop('style')
+      ).toEqual(undefined);
+      expect(setA11yMessage).toBeCalledWith(
+        'You have moved the item 1 from position 1 to position 2'
+      );
+
+      component
+        .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
+        .at(1)
+        .simulate('dragleave');
+      expect(
+        component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
+      ).toEqual(undefined);
+      expect(
+        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(1).prop('style')
+      ).toEqual(undefined);
+    });
+
     test(`Keyboard Navigation: User cannot move an element outside of the group`, () => {
       const onDrop = jest.fn();
       const setActiveDropTarget = jest.fn();
+      const setA11yMessage = jest.fn();
       const component = mountComponent(
-        { dragging: { id: '1' }, keyboardMode: true, setActiveDropTarget },
+        { dragging: { id: '1' }, keyboardMode: true, setActiveDropTarget, setA11yMessage },
         onDrop
       );
       const keyboardHandler = component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
@@ -442,51 +509,34 @@ describe('DragDrop', () => {
       keyboardHandler.simulate('keydown', { key: 'ArrowDown' });
 
       expect(setActiveDropTarget).toBeCalledWith({ id: '2' });
+      expect(setA11yMessage).toBeCalledWith(
+        'You have moved the item 1 from position 1 to position 2'
+      );
     });
-    test(`Keyboard Navigation: Dragged element and elements between dragged and drop get extra styles to show the reorder effect`, () => {
-      const component = mountComponent({ dragging: { id: '1' }, keyboardMode: true }, jest.fn());
-      const dataTransfer = {
-        setData: jest.fn(),
-        getData: jest.fn(),
-      };
-      act(() => {
-        component
-          .find('[data-test-subj="lnsDragDrop"]')
-          .first()
-          .simulate('dragstart', { dataTransfer });
-        jest.runAllTimers();
-      });
 
-      component
-        .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
-        .at(1)
-        .simulate('dragover');
-      expect(
-        component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
-      ).toEqual({
-        transform: 'translateY(+16px)',
-      });
-      expect(
-        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(0).prop('style')
-      ).toEqual({
-        transform: 'translateY(-8px)',
-      });
-      expect(
-        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(1).prop('style')
-      ).toEqual({
-        transform: 'translateY(-8px)',
-      });
+    test(`Keyboard Navigation: Doesn't call onDrop when movement is cancelled`, () => {
+      const setA11yMessage = jest.fn();
+      const onDrop = jest.fn();
 
-      component
-        .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
-        .at(1)
-        .simulate('dragleave');
-      expect(
-        component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
-      ).toEqual(undefined);
-      expect(
-        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(1).prop('style')
-      ).toEqual(undefined);
+      const component = mountComponent({ dragging: { id: '1' }, setA11yMessage }, onDrop);
+      const keyboardHandler = component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
+      keyboardHandler.simulate('keydown', { key: 'Space' });
+      keyboardHandler.simulate('keydown', { key: 'Escape' });
+
+      jest.runAllTimers();
+
+      expect(onDrop).not.toHaveBeenCalled();
+      expect(setA11yMessage).toBeCalledWith(
+        'Movement cancelled. The item has returned to its starting position 1'
+      );
+      keyboardHandler.simulate('keydown', { key: 'Space' });
+      keyboardHandler.simulate('keydown', { key: 'ArrowDown' });
+      keyboardHandler.simulate('blur');
+
+      expect(onDrop).not.toHaveBeenCalled();
+      expect(setA11yMessage).toBeCalledWith(
+        'Movement cancelled. The item has returned to its starting position 1'
+      );
     });
   });
 });

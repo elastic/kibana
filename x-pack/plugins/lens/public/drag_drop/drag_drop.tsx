@@ -457,9 +457,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
       }));
     }
 
-    if (!isReorderOn) {
-      setA11yMessage(reorderAnnouncements.lifted(label, currentIndex + 1));
-    }
+    setA11yMessage(reorderAnnouncements.lifted(label, currentIndex + 1));
   };
 
   const onReorderableDragEnd = () => {

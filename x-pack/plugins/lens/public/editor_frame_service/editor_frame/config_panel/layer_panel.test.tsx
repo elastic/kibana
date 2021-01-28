@@ -99,14 +99,6 @@ describe('LayerPanel', () => {
     mockDatasource = createMockDatasource('ds1');
   });
 
-  // in what case is this test needed?
-  it.skip('should fail to render if the public API is out of date', () => {
-    const props = getDefaultProps();
-    props.framePublicAPI.datasourceLayers = {};
-    const component = mountWithIntl(<LayerPanel {...props} />);
-    expect(component.isEmptyRender()).toBe(true);
-  });
-
   describe('layer reset and remove', () => {
     it('should show the reset button when single layer', () => {
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
