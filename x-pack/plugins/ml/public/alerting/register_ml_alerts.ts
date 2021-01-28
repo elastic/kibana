@@ -19,7 +19,7 @@ export function registerMlAlerts(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/ml-alerts.html`;
     },
     alertParamsExpression: lazy(() => import('./ml_anomaly_threshold_trigger')),
     validate: () => ({
@@ -30,11 +30,7 @@ export function registerMlAlerts(
       'xpack.ml.alertTypes.anomalyThreshold.defaultActionMessage',
       {
         defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
-
-- Service name: \\{\\{context.serviceName\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\} errors
-- Triggered value: \\{\\{context.triggerValue\\}\\} errors over the last \\{\\{context.interval\\}\\}`,
+- Threshold: \\{\\{context.threshold\\}\\}`,
       }
     ),
   });

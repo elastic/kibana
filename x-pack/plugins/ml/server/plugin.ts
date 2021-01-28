@@ -59,6 +59,7 @@ import {
 import { RouteGuard } from './lib/route_guard';
 import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
 import { ML_ALERT_TYPES } from '../common/constants/alerts';
+import { alertingRoutes } from './routes/alerting';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -198,6 +199,7 @@ export class MlServerPlugin
       resolveMlCapabilities,
     });
     trainedModelsRoutes(routeInit);
+    alertingRoutes(routeInit);
 
     initMlServerLog({ log: this.log });
     initMlTelemetry(coreSetup, plugins.usageCollection);

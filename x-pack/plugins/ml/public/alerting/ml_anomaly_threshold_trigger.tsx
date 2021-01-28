@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { JobSelectorControl } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
@@ -13,8 +14,10 @@ import { SeveritySelector } from './severity_selector';
 import { ResultTypeSelector } from './result_type_selector';
 import type { AnomalyResultType } from '../../common/types/anomalies';
 import { IntervalSelector } from './interval_selector';
+import { alertingApiProvider } from '../application/services/ml_api_service/alerting';
+import { PreviewAlertCondition } from './preview_alert_condition';
 
-interface MlAnomalyThresholdAlertParams {
+export interface MlAnomalyThresholdAlertParams {
   jobSelection: {
     jobIds?: string[];
     groupIds?: string[];
@@ -38,7 +41,9 @@ const MlAlertThresholdAlertTrigger: FC<Props> = ({
   const {
     services: { http },
   } = useMlKibana();
-  const adJobsApiService = jobsApiProvider(new HttpService(http));
+  const mlHttpService = useMemo(() => new HttpService(http), [http]);
+  const adJobsApiService = jobsApiProvider(mlHttpService);
+  const alertingApiService = alertingApiProvider(mlHttpService);
 
   const onAlertParamChange = useCallback(
     (param) => (update: any) => {
@@ -60,6 +65,9 @@ const MlAlertThresholdAlertTrigger: FC<Props> = ({
       />
       <SeveritySelector value={alertParams.severity} onChange={onAlertParamChange('severity')} />
       <IntervalSelector value={alertParams.timeRange} onChange={onAlertParamChange('timeRange')} />
+      <PreviewAlertCondition alertingApiService={alertingApiService} alertParams={alertParams} />
+
+      <EuiSpacer size="m" />
     </>
   );
 };

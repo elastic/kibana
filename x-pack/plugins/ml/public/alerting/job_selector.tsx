@@ -95,6 +95,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
 
   return (
     <EuiFormRow
+      fullWidth
       label={
         <FormattedMessage
           id="xpack.ml.jobSelector.formControlLabel"
@@ -106,6 +107,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
         selectedOptions={selectedOptions}
         options={options}
         onChange={onChange}
+        fullWidth
       />
     </EuiFormRow>
   );
