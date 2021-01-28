@@ -335,8 +335,6 @@ function getBaseTemplate(
         properties: mappings.properties,
         _meta,
       },
-      // To be filled with the aliases that we need
-      aliases: {},
     },
     data_stream: { hidden },
     composed_of: composedOfTemplates,

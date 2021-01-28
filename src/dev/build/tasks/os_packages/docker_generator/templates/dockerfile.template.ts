@@ -16,6 +16,7 @@ function generator(options: TemplateContext) {
   const template = readFileSync(resolve(__dirname, './Dockerfile'));
   return Mustache.render(template.toString(), {
     packageManager: options.ubiImageFlavor ? 'microdnf' : 'yum',
+    tiniBin: options.architecture === 'aarch64' ? 'tini-arm64' : 'tini-amd64',
     ...options,
   });
 }

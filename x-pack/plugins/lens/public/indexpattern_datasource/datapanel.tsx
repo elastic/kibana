@@ -504,8 +504,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               onChange={(e) => {
                 setLocalState({ ...localState, nameFilter: e.target.value });
               }}
-              aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameAriaLabel', {
-                defaultMessage: 'Search fields',
+              aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
+                defaultMessage: 'Search field names',
+                description: 'Search the list of fields in the index pattern for the provided text',
               })}
               aria-describedby={fieldSearchDescriptionId}
             />

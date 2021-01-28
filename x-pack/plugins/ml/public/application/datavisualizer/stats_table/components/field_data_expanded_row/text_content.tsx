@@ -5,13 +5,14 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExamplesList } from '../../../index_based/components/field_data_row/examples_list';
+import { ExpandedRowContent } from './expanded_row_content';
 
 export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;
@@ -23,7 +24,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
   const numExamples = examples.length;
 
   return (
-    <EuiFlexGroup gutterSize={'xl'} data-test-subj={'mlDVTextContent'}>
+    <ExpandedRowContent dataTestSubj={'mlDVTextContent'}>
       <EuiFlexItem>
         {numExamples > 0 && <ExamplesList examples={examples} />}
         {numExamples === 0 && (
@@ -59,6 +60,6 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
           </Fragment>
         )}
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </ExpandedRowContent>
   );
 };
