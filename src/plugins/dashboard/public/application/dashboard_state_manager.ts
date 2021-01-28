@@ -77,8 +77,9 @@ export class DashboardStateManager {
     DashboardAppStateTransitions
   >;
   private readonly stateContainerChangeSub: Subscription;
-  private readonly kbnUrlStateStorage: IKbnUrlStateStorage;
   private readonly dashboardPanelStorage?: DashboardPanelStorage;
+  private readonly STATE_STORAGE_KEY = '_a';
+  public readonly kbnUrlStateStorage: IKbnUrlStateStorage;
   private readonly stateSyncRef: ISyncStateRef;
   private readonly allowByValueEmbeddables: boolean;
 
@@ -636,7 +637,7 @@ export class DashboardStateManager {
       this.toUrlState(this.stateContainer.get())
     );
     // immediately forces scheduled updates and changes location
-    return this.kbnUrlStateStorage.flush({ replace });
+    return !!this.kbnUrlStateStorage.kbnUrlControls.flush(replace);
   }
 
   public setQuery(query: Query) {
