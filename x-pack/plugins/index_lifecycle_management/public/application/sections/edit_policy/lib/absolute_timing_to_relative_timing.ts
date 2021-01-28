@@ -51,7 +51,7 @@ const i18nTexts = {
 const phaseOrder: Phase[] = ['hot', 'warm', 'cold', 'delete'];
 
 const getMinAge = (phase: MinAgePhase, formData: FormInternal) => ({
-  min_age: formData.phases[phase]?.min_age
+  min_age: formData.phases?.[phase]?.min_age
     ? formData.phases[phase]!.min_age! + formData._meta[phase].minAgeUnit
     : '0ms',
 });
@@ -99,20 +99,7 @@ export interface PhaseAgeInMilliseconds {
   };
 }
 
-<<<<<<< HEAD
 export const formDataToAbsoluteTimings = (formData: FormInternal): AbsoluteTimings => {
-=======
-const phaseOrder: Phase[] = ['hot', 'warm', 'cold', 'delete'];
-
-const getMinAge = (phase: MinAgePhase, formData: FormInternal) => ({
-  min_age:
-    formData.phases && formData.phases[phase]?.min_age
-      ? formData.phases[phase]!.min_age! + formData._meta[phase].minAgeUnit
-      : '0ms',
-});
-
-const formDataToAbsoluteTimings = (formData: FormInternal): AbsoluteTimings => {
->>>>>>> 457f0111515eda3ff24637eb238fae229d8ed986
   const { _meta } = formData;
   if (!_meta) {
     return { hot: { min_age: undefined } };
@@ -201,9 +188,8 @@ export const normalizeTimingsToHumanReadable = ({
 };
 
 /**
- * Given {@link FormInternal}, extract the min_age values for each phase
- * and calculate human readable strings for communicating how long data will
- * remain in a phase.
+ * Given {@link FormInternal}, extract the min_age values for each phase and calculate
+ * human readable strings for communicating how long data will remain in a phase.
  */
 export const absoluteTimingToRelativeTiming = flow(
   formDataToAbsoluteTimings,
