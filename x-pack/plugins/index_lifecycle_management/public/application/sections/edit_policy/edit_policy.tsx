@@ -34,6 +34,7 @@ import {
 import { TextField, UseField, useForm, useFormData } from '../../../shared_imports';
 
 import { toasts } from '../../services/notification';
+import { createDocLink } from '../../services/documentation';
 
 import { savePolicy } from './save_policy';
 
@@ -44,6 +45,7 @@ import {
   PolicyJsonFlyout,
   WarmPhase,
   Timeline,
+  FormErrorsCallout,
 } from './components';
 
 import { createPolicyNameValidations, createSerializer, deserializer, Form, schema } from './form';
@@ -51,7 +53,6 @@ import { createPolicyNameValidations, createSerializer, deserializer, Form, sche
 import { useEditPolicyContext } from './edit_policy_context';
 
 import { FormInternal } from './types';
-import { createDocLink } from '../../services/documentation';
 
 export interface Props {
   history: RouteComponentProps['history'];
@@ -252,6 +253,8 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
             <DeletePhase />
 
             <EuiHorizontalRule />
+
+            <FormErrorsCallout />
 
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
