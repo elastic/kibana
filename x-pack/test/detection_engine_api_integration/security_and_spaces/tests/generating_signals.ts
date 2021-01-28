@@ -265,7 +265,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const { id } = await createRule(supertest, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
+          await waitForSignalsToBePresent(supertest, 10, [id]);
           const signalsOpen = await getSignalsByRuleIds(supertest, ['eql-rule']);
           const sequenceSignal = signalsOpen.hits.hits.find(
             (signal) => signal._source.signal.depth === 2

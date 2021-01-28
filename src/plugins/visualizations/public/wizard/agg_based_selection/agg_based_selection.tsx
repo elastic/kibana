@@ -25,17 +25,17 @@ import {
 } from '@elastic/eui';
 
 import { memoizeLast } from '../../legacy/memoize';
-import type { VisType, TypesStart } from '../../vis_types';
+import type { BaseVisType, TypesStart } from '../../vis_types';
 import { VisGroups } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
 
 interface VisTypeListEntry {
-  type: VisType;
+  type: BaseVisType;
   highlighted: boolean;
 }
 
 interface AggBasedSelectionProps {
-  onVisTypeSelected: (visType: VisType) => void;
+  onVisTypeSelected: (visType: BaseVisType) => void;
   visTypesRegistry: TypesStart;
   toggleGroups: (flag: boolean) => void;
 }
