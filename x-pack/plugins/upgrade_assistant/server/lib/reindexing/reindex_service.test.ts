@@ -829,7 +829,7 @@ describe('reindexService', () => {
       });
 
       it('fails if create index is not acknowledged', async () => {
-        clusterClient.asCurrentUser.indices.getSettings.mockResolvedValueOnce(
+        clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
           asApiResponse({ myIndex: settingsMappings })
         );
 
@@ -844,7 +844,7 @@ describe('reindexService', () => {
       });
 
       it('fails if create index fails', async () => {
-        clusterClient.asCurrentUser.indices.getSettings.mockResolvedValueOnce(
+        clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
           asApiResponse({ myIndex: settingsMappings })
         );
 
