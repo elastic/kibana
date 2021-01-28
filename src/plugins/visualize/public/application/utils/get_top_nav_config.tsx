@@ -19,7 +19,6 @@ import {
 } from '../../../../saved_objects/public';
 import { SavedObjectSaveModalDashboard } from '../../../../presentation_util/public';
 import { unhashUrl } from '../../../../kibana_utils/public';
-import { SavedObjectsClientContract } from '../../../../../core/public';
 
 import {
   VisualizeServices,
@@ -41,7 +40,6 @@ interface TopNavConfigParams {
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
-  savedObjectsClient: SavedObjectsClientContract;
   embeddableId?: string;
 }
 
@@ -55,7 +53,6 @@ export const getTopNavConfig = (
     hasUnappliedChanges,
     visInstance,
     stateContainer,
-    savedObjectsClient,
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
