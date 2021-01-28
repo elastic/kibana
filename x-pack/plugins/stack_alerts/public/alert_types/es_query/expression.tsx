@@ -220,6 +220,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
       <EuiSpacer size="s" />
       <IndexSelectPopover
         index={index}
+        data-test-subj="indexSelectPopover"
         esFields={esFields}
         timeField={timeField}
         errors={errors}
@@ -334,6 +335,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
       </EuiTitle>
       <EuiSpacer size="s" />
       <ThresholdExpression
+        data-test-subj="thresholdExpression"
         thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
         threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
         errors={errors}
@@ -347,6 +349,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         }
       />
       <ForLastExpression
+        data-test-subj="forLastExpression"
         popupPosition={'upLeft'}
         timeWindowSize={timeWindowSize}
         timeWindowUnit={timeWindowUnit}
