@@ -7,6 +7,7 @@
 import { enhancedEsSearchStrategyProvider } from './es_search_strategy';
 import { BehaviorSubject } from 'rxjs';
 import { SearchStrategyDependencies } from '../../../../../src/plugins/data/server/search';
+import moment from 'moment';
 
 const mockAsyncResponse = {
   body: {
@@ -56,11 +57,21 @@ describe('ES search strategy', () => {
       },
     },
   } as unknown) as SearchStrategyDependencies;
-  const mockConfig$ = new BehaviorSubject<any>({
+  const mockLegacyConfig$ = new BehaviorSubject<any>({
     elasticsearch: {
       shardTimeout: {
         asMilliseconds: () => {
           return 100;
+        },
+      },
+    },
+  });
+
+  const mockConfig$ = new BehaviorSubject<any>({
+    search: {
+      sessions: {
+        defaultExpiration: () => {
+          return moment.duration('1', 'm');
         },
       },
     },
@@ -74,7 +85,11 @@ describe('ES search strategy', () => {
   });
 
   it('returns a strategy with `search and `cancel`', async () => {
-    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+    const esSearch = await enhancedEsSearchStrategyProvider(
+      mockConfig$,
+      mockLegacyConfig$,
+      mockLogger
+    );
 
     expect(typeof esSearch.search).toBe('function');
   });
@@ -84,7 +99,11 @@ describe('ES search strategy', () => {
       mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
 
       const params = { index: 'logstash-*', body: { query: {} } };
-      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+      const esSearch = await enhancedEsSearchStrategyProvider(
+        mockConfig$,
+        mockLegacyConfig$,
+        mockLogger
+      );
 
       await esSearch.search({ params }, {}, mockDeps).toPromise();
 
@@ -98,7 +117,11 @@ describe('ES search strategy', () => {
       mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
       const params = { index: 'logstash-*', body: { query: {} } };
-      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+      const esSearch = await enhancedEsSearchStrategyProvider(
+        mockConfig$,
+        mockLegacyConfig$,
+        mockLogger
+      );
 
       await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
 
@@ -113,7 +136,11 @@ describe('ES search strategy', () => {
       mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
 
       const params = { index: 'foo-程', body: {} };
-      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+      const esSearch = await enhancedEsSearchStrategyProvider(
+        mockConfig$,
+        mockLegacyConfig$,
+        mockLogger
+      );
 
       await esSearch
         .search(
@@ -136,7 +163,11 @@ describe('ES search strategy', () => {
       mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
 
       const params = { index: 'foo-*', body: {} };
-      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+      const esSearch = await enhancedEsSearchStrategyProvider(
+        mockConfig$,
+        mockLegacyConfig$,
+        mockLogger
+      );
 
       await esSearch.search({ params }, {}, mockDeps).toPromise();
 
@@ -152,7 +183,11 @@ describe('ES search strategy', () => {
       mockDeleteCaller.mockResolvedValueOnce(200);
 
       const id = 'some_id';
-      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+      const esSearch = await enhancedEsSearchStrategyProvider(
+        mockConfig$,
+        mockLegacyConfig$,
+        mockLogger
+      );
 
       await esSearch.cancel!(id, {}, mockDeps);
 
@@ -168,7 +203,11 @@ describe('ES search strategy', () => {
 
       const id = 'some_other_id';
       const keepAlive = '1d';
-      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+      const esSearch = await enhancedEsSearchStrategyProvider(
+        mockConfig$,
+        mockLegacyConfig$,
+        mockLogger
+      );
 
       await esSearch.extend!(id, keepAlive, {}, mockDeps);
 
