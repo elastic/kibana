@@ -1,0 +1,15 @@
+# Bazel does not support wildcards like .gitignore
+# Issues are opened for to include that feature but not available yet
+# https://github.com/bazelbuild/bazel/issues/7093
+# https://github.com/bazelbuild/bazel/issues/8106
+.ci
+.git
+.github
+.idea
+.teamcity
+.yarn-local-mirror
+bazel-cache
+bazel-dist
+build
+node_modules
+target
