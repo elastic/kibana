@@ -11,3 +11,5 @@ export { WarmPhase } from './warm_phase';
 export { ColdPhase } from './cold_phase';
 
 export { DeletePhase } from './delete_phase';
+
+export { Phase } from './phase';
