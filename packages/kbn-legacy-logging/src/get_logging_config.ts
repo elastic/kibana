@@ -28,7 +28,10 @@ export function getLoggingConfiguration(config: LegacyLoggingConfig, opsInterval
   } else if (config.verbose) {
     _.defaults(events, {
       log: '*',
-      ops: '*',
+      // To avoid duplicate logs, we explicitly disable this in verbose
+      // mode as it is already provided by the new logging config under
+      // the `metrics.ops` context.
+      ops: '!',
       request: '*',
       response: '*',
       error: '*',
