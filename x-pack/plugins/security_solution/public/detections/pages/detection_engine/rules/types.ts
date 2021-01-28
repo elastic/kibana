@@ -156,8 +156,10 @@ export interface DefineStepRuleJson {
   query?: string;
   language?: string;
   threshold?: {
-    field: string;
+    field: string[];
     value: number;
+    cardinality_field: string;
+    cardinality_value: number;
   };
   timeline_id?: string;
   timeline_title?: string;
