@@ -18,6 +18,7 @@ export interface UsageStats {
   'timelion:graphite.url': string;
   'xpackDashboardMode:roles': string;
   'securitySolution:ipReputationLinks': string;
+  'xPack:defaultAdminEmail': string;
   /**
    * non-sensitive settings
    */

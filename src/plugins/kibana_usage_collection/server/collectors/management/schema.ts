@@ -19,6 +19,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'timelion:graphite.url': { type: 'keyword' },
   'xpackDashboardMode:roles': { type: 'keyword' },
   'securitySolution:ipReputationLinks': { type: 'keyword' },
+  'xPack:defaultAdminEmail': { type: 'keyword' },
   // non-sensitive
   'visualize:enableLabs': { type: 'boolean' },
   'visualization:heatmap:maxBuckets': { type: 'long' },
