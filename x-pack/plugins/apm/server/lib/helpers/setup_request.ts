@@ -26,6 +26,7 @@ import {
   APMInternalClient,
   createInternalESClient,
 } from './create_es_client/create_internal_es_client';
+import { getEnvironmentFilter } from './get_environment_filter';
 
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933
@@ -48,6 +49,7 @@ export interface SetupTimeRange {
 interface SetupRequestParams {
   query?: {
     _debug?: boolean;
+    environment?: string;
 
     /**
      * Timestamp in ms since epoch
@@ -106,7 +108,10 @@ export async function setupRequest<TParams extends SetupRequestParams>(
         : undefined,
     config,
     uiFilters,
-    esFilter: getEsFilter(uiFilters),
+    esFilter: [
+      ...getEsFilter(uiFilters),
+      ...getEnvironmentFilter(query.environment),
+    ],
   };
 
   return {

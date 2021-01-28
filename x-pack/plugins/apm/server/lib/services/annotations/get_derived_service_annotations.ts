@@ -15,7 +15,7 @@ import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getDerivedServiceAnnotations({
@@ -36,7 +36,7 @@ export async function getDerivedServiceAnnotations({
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    ...getEnvironmentUiFilterES(environment),
+    ...getEnvironmentFilter(environment),
   ];
 
   const versions =

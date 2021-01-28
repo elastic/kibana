@@ -8,7 +8,7 @@ import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
@@ -27,7 +27,7 @@ export async function getTransactionErrorCountChartPreview({
       filter: [
         { range: rangeFilter(start, end) },
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
-        ...getEnvironmentUiFilterES(environment),
+        ...getEnvironmentFilter(environment),
       ],
     },
   };

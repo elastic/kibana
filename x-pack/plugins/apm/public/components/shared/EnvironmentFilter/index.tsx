@@ -63,10 +63,9 @@ export function EnvironmentFilter() {
   const history = useHistory();
   const location = useLocation();
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { uiFilters, urlParams } = useUrlParams();
+  const { urlParams } = useUrlParams();
 
-  const { environment } = uiFilters;
-  const { start, end } = urlParams;
+  const { environment, start, end } = urlParams;
   const { environments, status = 'loading' } = useEnvironmentsFetcher({
     serviceName,
     start,

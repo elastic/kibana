@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../typings/elasticsearch';
 import {
   ENVIRONMENT_NOT_DEFINED,
   ENVIRONMENT_ALL,
-} from '../../../../common/environment_filter_values';
-import { SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
+} from '../../../common/environment_filter_values';
+import { SERVICE_ENVIRONMENT } from '../../../common/elasticsearch_fieldnames';
 
-export function getEnvironmentUiFilterES(environment?: string): ESFilter[] {
+export function getEnvironmentFilter(environment?: string): ESFilter[] {
   if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];
   }

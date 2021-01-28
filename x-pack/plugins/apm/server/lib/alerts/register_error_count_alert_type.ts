@@ -26,7 +26,7 @@ import {
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getEnvironmentFilter } from '../helpers/get_environment_filter';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
@@ -103,7 +103,7 @@ export function registerErrorCountAlertType({
                 ...(alertParams.serviceName
                   ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
                   : []),
-                ...getEnvironmentUiFilterES(alertParams.environment),
+                ...getEnvironmentFilter(alertParams.environment),
               ],
             },
           },

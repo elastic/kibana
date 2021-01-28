@@ -15,7 +15,7 @@ import {
 import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getEnvironmentFilter } from '../helpers/get_environment_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 const MAX_TRACES_TO_INSPECT = 1000;
@@ -50,7 +50,7 @@ export async function getTraceSampleIds({
     query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
   }
 
-  query.bool.filter.push(...getEnvironmentUiFilterES(environment));
+  query.bool.filter.push(...getEnvironmentFilter(environment));
 
   const fingerprintBucketSize = serviceName
     ? config['xpack.apm.serviceMapFingerprintBucketSize']

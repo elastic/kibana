@@ -20,7 +20,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
@@ -47,7 +47,7 @@ export const getDestinationMap = async ({
             { term: { [SERVICE_NAME]: serviceName } },
             { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
             { range: rangeFilter(start, end) },
-            ...getEnvironmentUiFilterES(environment),
+            ...getEnvironmentFilter(environment),
           ],
         },
       },

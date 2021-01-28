@@ -19,7 +19,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getDurationFormatter } from '../../../common/utils/formatters';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getEnvironmentFilter } from '../helpers/get_environment_filter';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
@@ -95,7 +95,7 @@ export function registerTransactionDurationAlertType({
                 { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
                 { term: { [SERVICE_NAME]: alertParams.serviceName } },
                 { term: { [TRANSACTION_TYPE]: alertParams.transactionType } },
-                ...getEnvironmentUiFilterES(alertParams.environment),
+                ...getEnvironmentFilter(alertParams.environment),
               ],
             },
           },

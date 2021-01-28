@@ -7,7 +7,7 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { environmentRt, rangeRt, uiFiltersRt } from './default_api_types';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -138,6 +138,7 @@ export const transactionLatencyChatsRoute = createRoute({
         transactionType: t.string,
         latencyAggregationType: latencyAggregationTypeRt,
       }),
+      environmentRt,
       uiFiltersRt,
       rangeRt,
     ]),
@@ -148,14 +149,15 @@ export const transactionLatencyChatsRoute = createRoute({
     const logger = context.logger;
     const { serviceName } = context.params.path;
     const {
+      environment,
       transactionType,
       transactionName,
       latencyAggregationType,
     } = context.params.query;
 
-    if (!setup.uiFilters.environment) {
+    if (!environment) {
       throw Boom.badRequest(
-        `environment is a required property of the ?uiFilters JSON for transaction_groups/charts.`
+        `environment is a required parameter for transactions/charts/latency.`
       );
     }
 

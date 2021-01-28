@@ -13,7 +13,7 @@ import { getServices } from '../lib/services/get_services';
 import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
 import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
 import { createRoute } from './create_route';
-import { uiFiltersRt, rangeRt } from './default_api_types';
+import { uiFiltersRt, rangeRt, environmentRt } from './default_api_types';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
@@ -28,7 +28,7 @@ import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_ic
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
   params: t.type({
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: t.intersection([environmentRt, uiFiltersRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {

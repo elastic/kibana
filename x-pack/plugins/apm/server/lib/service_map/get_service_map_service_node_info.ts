@@ -24,7 +24,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getEnvironmentFilter } from '../helpers/get_environment_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   percentCgroupMemoryUsedScript,
@@ -58,7 +58,7 @@ export async function getServiceMapServiceNodeInfo({
   const filter: ESFilter[] = [
     { range: rangeFilter(start, end) },
     { term: { [SERVICE_NAME]: serviceName } },
-    ...getEnvironmentUiFilterES(uiFilters.environment),
+    ...getEnvironmentFilter(uiFilters.environment),
   ];
 
   const minutes = Math.abs((end - start) / (1000 * 60));
@@ -104,7 +104,7 @@ async function getErrorStats({
   const setupWithBlankUiFilters = {
     ...setup,
     uiFilters: { environment },
-    esFilter: getEnvironmentUiFilterES(environment),
+    esFilter: getEnvironmentFilter(environment),
   };
   const { noHits, average } = await getErrorRate({
     setup: setupWithBlankUiFilters,

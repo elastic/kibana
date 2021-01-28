@@ -14,7 +14,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -45,7 +45,7 @@ export const getMetrics = async ({
             { term: { [SERVICE_NAME]: serviceName } },
             { exists: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT } },
             { range: rangeFilter(start, end) },
-            ...getEnvironmentUiFilterES(environment),
+            ...getEnvironmentFilter(environment),
           ],
         },
       },

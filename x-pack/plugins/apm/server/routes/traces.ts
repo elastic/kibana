@@ -9,14 +9,14 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getTrace } from '../lib/traces/get_trace';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { environmentRt, rangeRt, uiFiltersRt } from './default_api_types';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getRootTransactionByTraceId } from '../lib/transactions/get_transaction_by_trace';
 
 export const tracesRoute = createRoute({
   endpoint: 'GET /api/apm/traces',
   params: t.type({
-    query: t.intersection([rangeRt, uiFiltersRt]),
+    query: t.intersection([environmentRt, rangeRt, uiFiltersRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {

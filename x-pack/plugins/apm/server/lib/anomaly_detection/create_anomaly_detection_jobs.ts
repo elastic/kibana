@@ -16,7 +16,7 @@ import {
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getEnvironmentFilter } from '../helpers/get_environment_filter';
 
 export async function createAnomalyDetectionJobs(
   setup: Setup,
@@ -79,7 +79,7 @@ async function createAnomalyDetectionJob({
         filter: [
           { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
           { exists: { field: TRANSACTION_DURATION } },
-          ...getEnvironmentUiFilterES(environment),
+          ...getEnvironmentFilter(environment),
         ],
       },
     },

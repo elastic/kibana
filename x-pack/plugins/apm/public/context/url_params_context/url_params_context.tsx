@@ -25,7 +25,6 @@ import {
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
 import { LocalUIFilterName } from '../../../common/ui_filter';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 interface TimeRange {
   rangeFrom: string;
@@ -41,7 +40,6 @@ function useUiFilters(params: IUrlParams): UIFilters {
 
   return useDeepObjectIdentity({
     kuery,
-    environment: environment || ENVIRONMENT_ALL.value,
     ...localUiFilters,
   });
 }
