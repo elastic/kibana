@@ -17,6 +17,7 @@ interface CreateTestConfigOptions {
   disabledPlugins?: string[];
   ssl?: boolean;
   enableActionsProxy: boolean;
+  rejectUnauthorized?: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -39,7 +40,12 @@ const enabledActionTypes = [
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
-  const { license = 'trial', disabledPlugins = [], ssl = false } = options;
+  const {
+    license = 'trial',
+    disabledPlugins = [],
+    ssl = false,
+    rejectUnauthorized = true,
+  } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
@@ -95,6 +101,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerts.invalidateApiKeysTask.interval="15s"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+          `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           ...actionsProxyUrl,
 
           '--xpack.eventLog.logEntries=true',
