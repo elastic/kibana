@@ -24,10 +24,33 @@ import {
 
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
 
-// @ts-ignore
+// @ts-expect-error
 import { vega } from '../../lib/vega';
 
 import './vega_map_view.scss';
+
+async function updateVegaView(mapBoxInstance: Map, vegaView: vega.View) {
+  const mapCanvas = mapBoxInstance.getCanvas();
+  const { lat, lng } = mapBoxInstance.getCenter();
+  let shouldRender = false;
+
+  const sendSignal = (sig: string, value: any) => {
+    if (vegaView.signal(sig) !== value) {
+      vegaView.signal(sig, value);
+      shouldRender = true;
+    }
+  };
+
+  sendSignal('width', mapCanvas.clientWidth);
+  sendSignal('height', mapCanvas.clientHeight);
+  sendSignal('latitude', lat);
+  sendSignal('longitude', lng);
+  sendSignal('zoom', mapBoxInstance.getZoom());
+
+  if (shouldRender) {
+    await vegaView.runAsync();
+  }
+}
 
 export class VegaMapView extends VegaBaseView {
   private mapServiceSettings: MapServiceSettings = getMapServiceSettings();
@@ -110,29 +133,6 @@ export class VegaMapView extends VegaBaseView {
     mapBoxInstance.once('load', initMapComponents);
   }
 
-  private async updateVegaView(mapBoxInstance: Map, vegaView: vega.View) {
-    const mapCanvas = mapBoxInstance.getCanvas();
-    const { lat, lng } = mapBoxInstance.getCenter();
-    let shouldRender = false;
-
-    const sendSignal = (sig: string, value: any) => {
-      if (vegaView.signal(sig) !== value) {
-        vegaView.signal(sig, value);
-        shouldRender = true;
-      }
-    };
-
-    sendSignal('width', mapCanvas.clientWidth);
-    sendSignal('height', mapCanvas.clientHeight);
-    sendSignal('latitude', lat);
-    sendSignal('longitude', lng);
-    sendSignal('zoom', mapBoxInstance.getZoom());
-
-    if (shouldRender) {
-      await vegaView.runAsync();
-    }
-  }
-
   private initControls(mapBoxInstance: Map) {
     if (this.shouldShowZoomControl) {
       mapBoxInstance.addControl(new NavigationControl({ showCompass: false }), 'top-left');
@@ -162,12 +162,12 @@ export class VegaMapView extends VegaBaseView {
       map: mapBoxInstance,
       context: {
         vegaView,
-        updateVegaView: this.updateVegaView,
+        updateVegaView,
       },
     });
   }
 
-  public async _initViewCustomizations() {
+  protected async _initViewCustomizations() {
     const vegaView = new vega.View(
       vega.parse(injectMapPropsIntoSpec(this._parser.spec)),
       this._vegaViewConfig

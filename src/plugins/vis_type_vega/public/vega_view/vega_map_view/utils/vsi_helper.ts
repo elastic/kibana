@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-// @ts-ignore
+// @ts-expect-error
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Vsi from 'vega-spec-injector';
 
