@@ -18,7 +18,7 @@ export interface Sample {
 export interface ExecuteScriptParams {
   name: string;
   script: string;
-  indexPatternTitle: string;
+  indexPatternString: string;
   query?: Query['query'];
   additionalFields?: string[];
   http: HttpStart;

@@ -797,11 +797,10 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       this.setState({
         isSaving: true,
       });
-
       const isValid = await isScriptValid({
         name: field.name,
         script: field.script as string,
-        indexPatternTitle: indexPattern.title,
+        indexPatternString: indexPattern.patternListActive.join(','),
         http: this.context.services.http,
       });
 

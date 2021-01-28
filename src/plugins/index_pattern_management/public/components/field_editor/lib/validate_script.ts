@@ -12,7 +12,7 @@ import { ExecuteScriptParams, ExecuteScriptResult } from '../types';
 export const executeScript = async ({
   name,
   script,
-  indexPatternTitle,
+  indexPatternString,
   query,
   additionalFields = [],
   http,
@@ -20,7 +20,7 @@ export const executeScript = async ({
   return http
     .post('/internal/index-pattern-management/preview_scripted_field', {
       body: JSON.stringify({
-        index: indexPatternTitle,
+        index: indexPatternString,
         name,
         script,
         query,
@@ -40,18 +40,18 @@ export const executeScript = async ({
 export const isScriptValid = async ({
   name,
   script,
-  indexPatternTitle,
+  indexPatternString,
   http,
 }: {
   name: string;
   script: string;
-  indexPatternTitle: string;
+  indexPatternString: string;
   http: HttpStart;
 }) => {
   const scriptResponse = await executeScript({
     name,
     script,
-    indexPatternTitle,
+    indexPatternString,
     http,
   });
 

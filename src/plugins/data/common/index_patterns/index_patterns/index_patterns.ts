@@ -87,12 +87,12 @@ export class IndexPatternsService {
   }
 
   /**
-   * Refresh cache of index pattern ids, titles, and patternLists
+   * Refresh cache of index pattern ids, titles, fields, and patternLists
    */
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternAttributes>({
       type: 'index-pattern',
-      fields: ['patternList', 'title'],
+      fields: ['fields', 'patternList', 'title'],
       perPage: 10000,
     });
     if (this.savedObjectsCache) {
