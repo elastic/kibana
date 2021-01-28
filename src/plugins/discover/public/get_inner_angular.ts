@@ -42,7 +42,6 @@ import {
 } from '../../kibana_legacy/public';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
-import { createDiscoverLegacyDirective } from './application/components/create_discover_legacy_directive';
 import { createDiscoverDirective } from './application/components/create_discover_directive';
 
 /**
@@ -124,7 +123,6 @@ export function initializeInnerAngularModule(
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
     .directive('renderComplete', createRenderCompleteDirective)
-    .directive('discoverLegacy', createDiscoverLegacyDirective)
     .directive('discover', createDiscoverDirective);
 }
 

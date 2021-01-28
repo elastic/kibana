@@ -84,12 +84,12 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   );
 }
 
-describe('QueryStringInput', () => {
+describe.skip('QueryStringInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('Should render the given query', async () => {
+  it.skip('Should render the given query', async () => {
     const { getByText } = render(
       wrapQueryStringInputInContext({
         query: kqlQuery,
