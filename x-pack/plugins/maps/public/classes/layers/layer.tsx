@@ -161,7 +161,9 @@ export class AbstractLayer implements ILayer {
     if (clonedDescriptor.joins) {
       clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
         if (joinDescriptor.right && joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
-          return;
+          throw new Error(
+            'Cannot clone table-source. Should only be used in MapEmbeddable, not in UX'
+          );
         }
         const termSourceDescriptor: ESTermSourceDescriptor = joinDescriptor.right as ESTermSourceDescriptor;
 

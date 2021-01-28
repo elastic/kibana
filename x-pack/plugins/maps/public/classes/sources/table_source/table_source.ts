@@ -37,7 +37,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     return {
       type: SOURCE_TYPES.TABLE_SOURCE,
       __rows: descriptor.__rows || [],
-      columns: descriptor.columns || [],
+      columns: descriptor.__columns || [],
       term: descriptor.term || '',
       id: descriptor.id || uuid(),
     };
@@ -88,14 +88,14 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   }
 
   getTermField(): IField {
-    const column = this._descriptor.columns.find((c) => {
+    const column = this._descriptor.__columns.find((c) => {
       return c.name === this._descriptor.term;
     });
 
     if (!column) {
       throw new Error(
         `Cannot find column for ${this._descriptor.term} in ${JSON.stringify(
-          this._descriptor.columns
+          this._descriptor.__columns
         )}`
       );
     }
@@ -121,7 +121,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   }
 
   getRightFields(): IField[] {
-    return this._descriptor.columns.map((column) => {
+    return this._descriptor.__columns.map((column) => {
       return new InlineField<TableSource>({
         fieldName: column.name,
         source: this,
@@ -132,7 +132,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   }
 
   getFieldNames(): string[] {
-    return this._descriptor.columns.map((column) => {
+    return this._descriptor.__columns.map((column) => {
       return column.name;
     });
   }
@@ -157,7 +157,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   }
 
   getFieldByName(fieldName: string): IField | null {
-    const column = this._descriptor.columns.find((c) => {
+    const column = this._descriptor.__columns.find((c) => {
       return c.name === fieldName;
     });
 

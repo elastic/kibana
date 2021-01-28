@@ -185,7 +185,7 @@ export type TableSourceDescriptor = {
   id: string;
   type: SOURCE_TYPES.TABLE_SOURCE;
   __rows: TableSourceValue[][];
-  columns: InlineFieldDescriptor[];
+  __columns: InlineFieldDescriptor[];
   term: string;
 };
 
