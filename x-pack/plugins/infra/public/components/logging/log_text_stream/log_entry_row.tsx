@@ -17,7 +17,7 @@ import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 import { monospaceTextStyle, hoveredContentStyle, highlightedContentStyle } from './text_styles';
-import { LogEntry, LogColumn } from '../../../../common/http_api';
+import { LogEntry, LogColumn } from '../../../../common/log_entry';
 import { LogEntryContextMenu } from './log_entry_context_menu';
 import {
   LogColumnRenderConfiguration,
