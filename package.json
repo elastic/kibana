@@ -346,6 +346,7 @@
     "@babel/register": "^7.12.10",
     "@babel/traverse": "^7.12.12",
     "@babel/types": "^7.12.12",
+    "@bazel/ibazel": "^0.14.0",
     "@cypress/snapshot": "^2.1.7",
     "@cypress/webpack-preprocessor": "^5.5.0",
     "@elastic/apm-rum": "^5.6.1",

@@ -514,6 +514,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
+    it('should transition from unique count to last value', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'cardinality',
+        field: 'ip',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
+        operation: 'last_value',
+        field: 'bytes',
+        isPreviousIncompatible: true,
+      });
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        'Last value of bytes'
+      );
+    });
+
     it('should allow to change index pattern', async () => {
       await PageObjects.lens.switchFirstLayerIndexPattern('log*');
       expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal('log*');
