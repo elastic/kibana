@@ -55,7 +55,7 @@ export function SectionSpacer() {
 }
 
 export const Section = styled.div`
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   &:last-of-type {
     margin-bottom: 0;
   }
