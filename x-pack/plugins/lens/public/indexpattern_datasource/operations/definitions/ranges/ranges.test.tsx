@@ -51,13 +51,15 @@ dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ p
 type ReactMouseEvent = React.MouseEvent<HTMLAnchorElement, MouseEvent> &
   React.MouseEvent<HTMLButtonElement, MouseEvent>;
 
+// need this for MAX_HISTOGRAM value
+const uiSettingsMock = ({
+  get: jest.fn().mockReturnValue(100),
+} as unknown) as IUiSettingsClient;
+
 const sourceField = 'MyField';
 const defaultOptions = {
   storage: {} as IStorageWrapper,
-  // need this for MAX_HISTOGRAM value
-  uiSettings: ({
-    get: () => 100,
-  } as unknown) as IUiSettingsClient,
+  uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: {
     fromDate: 'now-1y',
@@ -143,7 +145,8 @@ describe('ranges', () => {
         layer.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
       expect(esAggsFn).toMatchInlineSnapshot(`
         Object {
@@ -166,6 +169,9 @@ describe('ranges', () => {
             "interval": Array [
               "auto",
             ],
+            "maxBars": Array [
+              49.5,
+            ],
             "min_doc_count": Array [
               false,
             ],
@@ -186,7 +192,8 @@ describe('ranges', () => {
         layer.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
 
       expect(esAggsFn).toEqual(
@@ -206,7 +213,8 @@ describe('ranges', () => {
         layer.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
 
       expect(esAggsFn).toEqual(
@@ -226,7 +234,8 @@ describe('ranges', () => {
         layer.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
 
       expect((esAggsFn as { arguments: unknown }).arguments).toEqual(
