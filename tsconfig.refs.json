@@ -24,7 +24,6 @@
     { "path": "./src/plugins/kibana_utils/tsconfig.json" },
     { "path": "./src/plugins/management/tsconfig.json" },
     { "path": "./src/plugins/maps_legacy/tsconfig.json" },
-    { "path": "./src/plugins/maps_oss/tsconfig.json" },
     { "path": "./src/plugins/navigation/tsconfig.json" },
     { "path": "./src/plugins/newsfeed/tsconfig.json" },
     { "path": "./src/plugins/region_map/tsconfig.json" },
