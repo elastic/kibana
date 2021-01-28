@@ -13,7 +13,7 @@ import { RuntimeType } from './shared_imports';
 export interface PluginSetup {}
 
 export interface PluginStart {
-  openEditor(options: OpenFieldEditorOptions): void;
+  openEditor(options: OpenFieldEditorOptions): () => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
