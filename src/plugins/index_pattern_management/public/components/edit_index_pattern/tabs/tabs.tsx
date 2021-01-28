@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import React, { useState, useCallback, useEffect, Fragment, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -93,6 +93,7 @@ export function Tabs({
   const [syncingStateFunc, setSyncingStateFunc] = useState<any>({
     getCurrentTab: () => TAB_INDEXED_FIELDS,
   });
+  const closeEditorHandler = useRef<() => void | undefined>();
 
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
@@ -113,9 +114,15 @@ export function Tabs({
     );
   }, [indexPattern]);
 
+  const closeFieldEditor = useCallback(() => {
+    if (closeEditorHandler.current) {
+      closeEditorHandler.current();
+    }
+  }, []);
+
   const openFieldEditor = useCallback(
     (fieldName?: string) => {
-      indexPatternFieldEditor.openEditor({
+      closeEditorHandler.current = indexPatternFieldEditor.openEditor({
         ctx: {
           indexPattern,
         },
@@ -129,6 +136,13 @@ export function Tabs({
   useEffect(() => {
     refreshFilters();
   }, [indexPattern, indexPattern.fields, refreshFilters]);
+
+  useEffect(() => {
+    return () => {
+      // When the component unmounts, make sure to close the field editor
+      closeFieldEditor();
+    };
+  }, [closeFieldEditor]);
 
   const fieldWildcardMatcherDecorated = useCallback(
     (filters: string[]) => fieldWildcardMatcher(filters, uiSettings.get(UI_SETTINGS.META_FIELDS)),

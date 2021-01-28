@@ -8,6 +8,7 @@
 
 import { DataPublicPluginStart } from './shared_imports';
 import { OpenFieldEditorOptions } from './open_editor';
+import { RuntimeType } from './shared_imports';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
 
 export interface PluginSetup {
@@ -15,7 +16,7 @@ export interface PluginSetup {
 }
 
 export interface PluginStart {
-  openEditor(options: OpenFieldEditorOptions): void;
+  openEditor(options: OpenFieldEditorOptions): () => void;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   userPermissions: {
     editIndexPattern: () => boolean;
@@ -27,4 +28,15 @@ export interface SetupPlugins {}
 
 export interface StartPlugins {
   data: DataPublicPluginStart;
+}
+
+export interface Field {
+  name: string;
+  type: RuntimeType | string;
+  script?: {
+    source: string;
+  };
+  customLabel?: string;
+  popularity?: number;
+  format?: Record<string, any>; // TODO set correct interface
 }

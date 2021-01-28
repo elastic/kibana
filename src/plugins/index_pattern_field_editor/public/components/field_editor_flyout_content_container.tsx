@@ -10,12 +10,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { DocLinksStart } from 'src/core/public';
 
 import { IndexPatternField, IndexPattern, DataPublicPluginStart } from '../shared_imports';
+import { Field } from '../types';
+import { deserializeField, serializeField } from '../lib';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 
 export interface FieldEditorContext {
   indexPattern: IndexPattern;
 }
+
 export interface Props {
   /**
    * Handler for the "save" footer button
@@ -49,6 +52,7 @@ export interface Props {
  * The <FieldEditorFlyoutContent /> component is the presentational component that won't know
  * anything about where a field comes from and where it should be persisted.
  */
+/*
 export const FieldEditorFlyoutContentContainer = ({
   field,
   onSave,
@@ -64,6 +68,29 @@ export const FieldEditorFlyoutContentContainer = ({
       onSave({} as any);
     });
   }, [onSave, indexPatternService, indexPattern]);
+  */
+export const FieldEditorFlyoutContentContainer = ({
+  field,
+  onSave,
+  onCancel,
+  docLinks,
+  indexPatternService,
+  ctx: { indexPattern },
+}: Props) => {
+  const fieldToEdit = deserializeField(field);
+  const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
+
+  const saveField = useCallback(
+    async (updatedField: Field) => {
+      const indexPatternField = serializeField(updatedField);
+      indexPatternService.updateSavedObject(indexPattern).then(() => {
+        onSave({} as any);
+      });
+      // TODO: here we will put the logic to update the Kibana saved object
+      onSave(indexPatternField);
+    },
+    [onSave, indexPatternService, indexPattern]
+  );
 
   const loadEditor = useCallback(async () => {
     const { FieldEditor } = await import('./field_editor');
@@ -81,7 +108,7 @@ export const FieldEditorFlyoutContentContainer = ({
       onSave={saveField}
       onCancel={onCancel}
       docLinks={docLinks}
-      field={field}
+      field={fieldToEdit}
       FieldEditor={Editor}
     />
   );
