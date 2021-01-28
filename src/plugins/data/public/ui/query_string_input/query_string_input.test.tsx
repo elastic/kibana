@@ -102,7 +102,7 @@ describe('QueryStringInput', () => {
     await waitFor(() => getByText('KQL'));
   });
 
-  it('Should pass the query language to the language switcher', () => {
+  it.skip('Should pass the query language to the language switcher', () => {
     const component = mount(
       wrapQueryStringInputInContext({
         query: luceneQuery,
