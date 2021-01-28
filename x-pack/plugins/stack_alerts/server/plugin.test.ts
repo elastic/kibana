@@ -48,25 +48,6 @@ describe('AlertingBuiltins Plugin', () => {
         }
       `);
 
-      const geoThresholdArgs = alertingSetup.registerType.mock.calls[1][0];
-      const testedGeoThresholdArgs = {
-        id: geoThresholdArgs.id,
-        name: geoThresholdArgs.name,
-        actionGroups: geoThresholdArgs.actionGroups,
-      };
-      expect(testedGeoThresholdArgs).toMatchInlineSnapshot(`
-        Object {
-          "actionGroups": Array [
-            Object {
-              "id": "tracking threshold met",
-              "name": "Tracking threshold met",
-            },
-          ],
-          "id": ".geo-threshold",
-          "name": "Tracking threshold",
-        }
-      `);
-
       expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith(BUILT_IN_ALERTS_FEATURE);
     });
   });
