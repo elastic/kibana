@@ -24,9 +24,9 @@ export function getActions(
         defaultMessage: 'Explore in Lens',
       }),
       description: i18n.translate(
-        'xpack.ml.dataVisualizer.indexBasedDataGrid.viewInLensDescription',
+        'xpack.ml.dataVisualizer.indexBasedDataGrid.exploreInLensDescription',
         {
-          defaultMessage: 'View in Lens',
+          defaultMessage: 'Explore in Lens',
         }
       ),
       type: 'icon',
