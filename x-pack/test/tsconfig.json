@@ -58,6 +58,7 @@
     { "path": "../plugins/beats_management/tsconfig.json" },
     { "path": "../plugins/cloud/tsconfig.json" },
     { "path": "../plugins/saved_objects_tagging/tsconfig.json" },
-    { "path": "../plugins/global_search_bar/tsconfig.json" }
+    { "path": "../plugins/global_search_bar/tsconfig.json" },
+    { "path": "../plugins/license_management/tsconfig.json" }
   ]
 }
