@@ -16,13 +16,12 @@ interface Props {
   bounds: InfraWaffleMapBounds;
   formatter: InfraFormatter;
 }
-type TickValue = 0 | 0.5 | 1;
+type TickValue = 0 | 1;
 export const SteppedGradientLegend: React.FC<Props> = ({ legend, bounds, formatter }) => {
   return (
     <LegendContainer>
       <Ticks>
         <TickLabel value={0} bounds={bounds} formatter={formatter} />
-        <TickLabel value={0.5} bounds={bounds} formatter={formatter} />
         <TickLabel value={1} bounds={bounds} formatter={formatter} />
       </Ticks>
       <GradientContainer>
@@ -44,9 +43,7 @@ interface TickProps {
 }
 
 const TickLabel = ({ value, bounds, formatter }: TickProps) => {
-  // if looking for the midpoint (0.5), calculate from min and max bounds
-  const normalizedValue =
-    value === 0 ? bounds.min : value === 0.5 ? (bounds.min + bounds.max) / 2 : bounds.max * value;
+  const normalizedValue = value === 0 ? bounds.min : bounds.max * value;
   const style = { left: `${value * 100}%` };
   const label = formatter(normalizedValue);
   return <Tick style={style}>{label}</Tick>;
