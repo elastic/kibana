@@ -123,7 +123,12 @@ export const caseSavedObjectType: SavedObjectsType = {
         },
       },
       title: {
-        type: 'keyword',
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
       },
       status: {
         type: 'keyword',

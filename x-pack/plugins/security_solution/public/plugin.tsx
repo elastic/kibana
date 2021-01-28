@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { pluck } from 'rxjs/operators';
+import { pluck, take } from 'rxjs/operators';
 import {
   PluginSetup,
   PluginStart,
@@ -18,6 +18,7 @@ import {
 } from './types';
 import {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   PluginInitializerContext,
@@ -45,6 +46,7 @@ import {
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
+import { registerSearchLinks } from './app/search';
 import { manageOldSiemRoutes } from './helpers';
 import {
   OVERVIEW,
@@ -65,7 +67,6 @@ import { licenseService } from './common/hooks/use_license';
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
-import { getSearchProvider } from './search_provider';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -73,6 +74,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
+  private detectionsUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private hostsUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private networkUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   private storage = new Storage(localStorage);
 
@@ -184,6 +188,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_DETECTIONS_PATH,
+      updater$: this.detectionsUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { detections: subPlugin } = await this.subPlugins();
@@ -206,6 +211,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_HOSTS_PATH,
+      updater$: this.hostsUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { hosts: subPlugin } = await this.subPlugins();
@@ -227,6 +233,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_NETWORK_PATH,
+      updater$: this.networkUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { network: subPlugin } = await this.subPlugins();
@@ -315,20 +322,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         return () => true;
       },
     });
-    const { globalSearch } = plugins;
-    if (globalSearch) {
-      globalSearch.registerResultProvider(
-        getSearchProvider(
-          core.getStartServices().then(
-            ([
-              {
-                application: { capabilities },
-              },
-            ]) => capabilities
-          )
-        )
-      );
-    }
 
     plugins.triggersActionsUi.actionTypeRegistry.register(getCaseConnectorUI());
 
@@ -370,7 +363,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
     licenseService.start(plugins.licensing.license$);
-
+    const licensing = licenseService.getLicenseInformation$();
+    if (licensing !== null) {
+      const license = licensing.pipe(take(1));
+      license.subscribe((currentLicense) => {
+        if (currentLicense.type !== undefined) {
+          registerSearchLinks(SecurityPageName.network, this.networkUpdater$, currentLicense.type);
+          registerSearchLinks(
+            SecurityPageName.detections,
+            this.detectionsUpdater$,
+            currentLicense.type
+          );
+          registerSearchLinks(SecurityPageName.hosts, this.hostsUpdater$, currentLicense.type);
+        }
+      });
+    }
     return {};
   }
 

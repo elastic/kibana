@@ -25,7 +25,6 @@ import { SecurityPluginSetup } from '../../security/public';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
 import { MlPluginSetup, MlPluginStart } from '../../ml/public';
-import { GlobalSearchPluginSetup } from '../../global_search/public';
 
 import { Detections } from './detections';
 import { Cases } from './cases';
@@ -34,16 +33,16 @@ import { Network } from './network';
 import { Overview } from './overview';
 import { Timelines } from './timelines';
 import { Management } from './management';
-import { LicensingPluginStart } from '../../licensing/public';
+import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
+  licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
   telemetryManagementSection?: TelemetryManagementSectionPluginSetup;
   ml?: MlPluginSetup;
-  globalSearch?: GlobalSearchPluginSetup;
 }
 
 export interface StartPlugins {
