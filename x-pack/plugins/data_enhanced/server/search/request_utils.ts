@@ -33,6 +33,7 @@ export async function getDefaultAsyncSubmitParams(
 ): Promise<
   Pick<
     AsyncSearchSubmit,
+    | 'keep_alive'
     | 'batched_reduce_size'
     | 'keep_alive'
     | 'wait_for_completion_timeout'
@@ -44,23 +45,32 @@ export async function getDefaultAsyncSubmitParams(
   >
 > {
   return {
-    keep_alive: `${config.search.sessions.defaultExpiration.asMilliseconds()}ms`,
     batched_reduce_size: 64,
     keep_on_completion: !!options.sessionId, // Always return an ID, even if the request completes quickly
-    ...getDefaultAsyncGetParams(),
+    ...getDefaultAsyncGetParams(options),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),
+    ...(options.sessionId
+      ? {
+          keep_alive: `${config.search.sessions.defaultExpiration.asMilliseconds()}ms`,
+        }
+      : {}),
   };
 }
 
 /**
  @internal
  */
-export function getDefaultAsyncGetParams(): Pick<
-  AsyncSearchGet,
-  'keep_alive' | 'wait_for_completion_timeout'
-> {
+export function getDefaultAsyncGetParams(
+  options: ISearchOptions
+): Pick<AsyncSearchGet, 'keep_alive' | 'wait_for_completion_timeout'> {
   return {
     wait_for_completion_timeout: '100ms', // Wait up to 100ms for the response to return
+    ...(options.sessionId
+      ? undefined
+      : {
+          keep_alive: '1m',
+          // We still need to do polling for searches not within the context of a search session
+        }),
   };
 }
