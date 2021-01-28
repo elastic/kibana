@@ -263,7 +263,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   ransomware: {
                     enabled: true,
-                    message: '',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
               },
@@ -287,7 +287,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   ransomware: {
                     enabled: true,
-                    message: '',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
                 antivirus_registration: {
@@ -417,7 +417,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   ransomware: {
                     enabled: true,
-                    message: '',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
               },
@@ -441,7 +441,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   ransomware: {
                     enabled: true,
-                    message: '',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
                 antivirus_registration: {
@@ -564,7 +564,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   ransomware: {
                     enabled: true,
-                    message: '',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
               },
@@ -588,7 +588,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   ransomware: {
                     enabled: true,
-                    message: '',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
                 antivirus_registration: {
