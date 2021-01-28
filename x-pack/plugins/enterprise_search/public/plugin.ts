@@ -157,6 +157,8 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public start(core: CoreStart) {
+    // This must be called here in start() and not in `applications/index.tsx` to prevent loading
+    // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinksService.setDocLinks(core.docLinks);
   }
 
