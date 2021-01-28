@@ -7,7 +7,7 @@
 import { createEsContext } from './context';
 import { ElasticsearchClient, Logger } from '../../../../../src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { DeeplyMockedKeys } from 'packages/kbn-utility-types/target/jest';
+import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { RequestEvent } from '@elastic/elasticsearch';
 jest.mock('../lib/../../../../package.json', () => ({ version: '1.2.3' }));
 jest.mock('./init');

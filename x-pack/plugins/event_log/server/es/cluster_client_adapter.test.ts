@@ -15,7 +15,7 @@ import { contextMock } from './context.mock';
 import { findOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { times } from 'lodash';
-import { DeeplyMockedKeys } from 'packages/kbn-utility-types/target/jest';
+import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { RequestEvent } from '@elastic/elasticsearch';
 
 type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
