@@ -65,7 +65,6 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
 
     const startTimestamp = datemathToEpochMillis(this.input.timeRange.from);
     const endTimestamp = datemathToEpochMillis(this.input.timeRange.to);
-    const query = processQuery(this.input.query);
 
     if (!startTimestamp || !endTimestamp) {
       return;
@@ -80,7 +79,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
                 startTimestamp={startTimestamp}
                 endTimestamp={endTimestamp}
                 height="100%"
-                query={query}
+                query={this.input.query}
               />
             </div>
           </KibanaContextProvider>
@@ -88,26 +87,5 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
       </I18nProvider>,
       this.node
     );
-  }
-}
-
-function processQuery(queryObj: Query): string | undefined {
-  if (!queryObj) {
-    return;
-  }
-
-  if (typeof queryObj === 'string') {
-    return queryObj;
-  }
-
-  if (queryObj.language === 'kuery') {
-    // `Query` is a funky type
-    return queryObj.query as string;
-  }
-
-  if (queryObj.language === 'lucene') {
-    // TODO This will need some transformation
-    // `Query` is funky type
-    return queryObj.query as string;
   }
 }
