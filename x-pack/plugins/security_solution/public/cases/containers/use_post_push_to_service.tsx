@@ -6,6 +6,7 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
+import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import { CaseConnector } from '../../../../case/common/api';
 import {
   errorToToaster,
@@ -72,10 +73,10 @@ export const usePostPushToService = (): UsePostPushToService => {
   const pushCaseToExternalService = useCallback(
     async ({ caseId, connector }: PushToServiceRequest) => {
       try {
-        dispatch({ type: 'FETCH_INIT' });
         abortCtrl.current.abort();
         cancel.current = false;
         abortCtrl.current = new AbortController();
+        dispatch({ type: 'FETCH_INIT' });
 
         const response = await pushCase(caseId, connector.id, abortCtrl.current.signal);
 
@@ -90,11 +91,13 @@ export const usePostPushToService = (): UsePostPushToService => {
         return response;
       } catch (error) {
         if (!cancel.current) {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+          if (!(error instanceof AbortError)) {
+            errorToToaster({
+              title: i18n.ERROR_TITLE,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+          }
           dispatch({ type: 'FETCH_FAILURE' });
         }
       }

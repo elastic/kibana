@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useReducer } from 'react';
-
+import { useEffect, useReducer, useRef, useCallback } from 'react';
+import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { getTags } from './api';
 import * as i18n from './translations';
@@ -59,37 +59,42 @@ export const useGetTags = (): UseGetTags => {
     tags: initialData,
   });
   const [, dispatchToaster] = useStateToaster();
+  const didCancel = useRef(false);
+  const abortCtrl = useRef(new AbortController());
 
-  const callFetch = () => {
-    let didCancel = false;
-    const abortCtrl = new AbortController();
-
-    const fetchData = async () => {
+  const callFetch = useCallback(async () => {
+    try {
+      didCancel.current = false;
+      abortCtrl.current.abort();
+      abortCtrl.current = new AbortController();
       dispatch({ type: 'FETCH_INIT' });
-      try {
-        const response = await getTags(abortCtrl.signal);
-        if (!didCancel) {
-          dispatch({ type: 'FETCH_SUCCESS', payload: response });
-        }
-      } catch (error) {
-        if (!didCancel) {
+
+      const response = await getTags(abortCtrl.current.signal);
+
+      if (!didCancel.current) {
+        dispatch({ type: 'FETCH_SUCCESS', payload: response });
+      }
+    } catch (error) {
+      if (!didCancel.current) {
+        if (!(error instanceof AbortError)) {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          dispatch({ type: 'FETCH_FAILURE' });
         }
+        dispatch({ type: 'FETCH_FAILURE' });
       }
-    };
-    fetchData();
-    return () => {
-      abortCtrl.abort();
-      didCancel = true;
-    };
-  };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     callFetch();
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return { ...state, fetchTags: callFetch };

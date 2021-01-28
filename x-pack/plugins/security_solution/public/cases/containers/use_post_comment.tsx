@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useReducer, useCallback } from 'react';
-
+import { useReducer, useCallback, useRef, useEffect } from 'react';
+import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import { CommentRequest } from '../../../../case/common/api';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 
@@ -58,38 +58,47 @@ export const usePostComment = (): UsePostComment => {
     isError: false,
   });
   const [, dispatchToaster] = useStateToaster();
+  const didCancel = useRef(false);
+  const abortCtrl = useRef(new AbortController());
 
   const postMyComment = useCallback(
     async ({ caseId, data, updateCase, subCaseId }: PostComment) => {
-      let cancel = false;
-      const abortCtrl = new AbortController();
-
       try {
+        didCancel.current = false;
+        abortCtrl.current.abort();
+        abortCtrl.current = new AbortController();
         dispatch({ type: 'FETCH_INIT' });
-        const response = await postComment(data, caseId, abortCtrl.signal, subCaseId);
-        if (!cancel) {
+
+        const response = await postComment(data, caseId, abortCtrl.current.signal, subCaseId);
+
+        if (!didCancel.current) {
           dispatch({ type: 'FETCH_SUCCESS' });
           if (updateCase) {
             updateCase(response);
           }
         }
       } catch (error) {
-        if (!cancel) {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+        if (!didCancel.current) {
+          if (!(error instanceof AbortError)) {
+            errorToToaster({
+              title: i18n.ERROR_TITLE,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+          }
           dispatch({ type: 'FETCH_FAILURE' });
         }
       }
-      return () => {
-        abortCtrl.abort();
-        cancel = true;
-      };
     },
     [dispatchToaster]
   );
+
+  useEffect(() => {
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
+  }, []);
 
   return { ...state, postComment: postMyComment };
 };

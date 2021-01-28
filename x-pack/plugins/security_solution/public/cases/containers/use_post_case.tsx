@@ -6,7 +6,7 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-
+import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import { CasePostRequest } from '../../../../case/common/api';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { postCase } from './api';
@@ -51,38 +51,41 @@ export const usePostCase = (): UsePostCase => {
     isError: false,
   });
   const [, dispatchToaster] = useStateToaster();
-  const cancel = useRef(false);
+  const didCancel = useRef(false);
   const abortCtrl = useRef(new AbortController());
-  const postMyCase = useCallback(
-    async (data: CasePostRequest) => {
-      try {
-        dispatch({ type: 'FETCH_INIT' });
-        abortCtrl.current.abort();
-        cancel.current = false;
-        abortCtrl.current = new AbortController();
-        const response = await postCase(data, abortCtrl.current.signal);
-        if (!cancel.current) {
-          dispatch({ type: 'FETCH_SUCCESS' });
-        }
-        return response;
-      } catch (error) {
-        if (!cancel.current) {
+
+  const postMyCase = useCallback(async (data: CasePostRequest) => {
+    try {
+      didCancel.current = false;
+      abortCtrl.current.abort();
+      abortCtrl.current = new AbortController();
+
+      dispatch({ type: 'FETCH_INIT' });
+      const response = await postCase(data, abortCtrl.current.signal);
+
+      if (!didCancel.current) {
+        dispatch({ type: 'FETCH_SUCCESS' });
+      }
+      return response;
+    } catch (error) {
+      if (!didCancel.current) {
+        if (!(error instanceof AbortError)) {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          dispatch({ type: 'FETCH_FAILURE' });
         }
+        dispatch({ type: 'FETCH_FAILURE' });
       }
-    },
-    [dispatchToaster]
-  );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     return () => {
+      didCancel.current = true;
       abortCtrl.current.abort();
-      cancel.current = true;
     };
   }, []);
   return { ...state, postCase: postMyCase };

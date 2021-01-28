@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useReducer, useCallback, useEffect, useRef } from 'react';
+import { useReducer, useCallback, useRef, useEffect } from 'react';
 
+import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 
 import { patchCase, patchSubCase } from './api';
@@ -70,8 +71,8 @@ export const useUpdateCase = ({
     updateKey: null,
   });
   const [, dispatchToaster] = useStateToaster();
-  const abortCtrl = useRef(new AbortController());
   const didCancel = useRef(false);
+  const abortCtrl = useRef(new AbortController());
 
   const dispatchUpdateCaseProperty = useCallback(
     async ({
@@ -85,8 +86,10 @@ export const useUpdateCase = ({
     }: UpdateByKey) => {
       try {
         didCancel.current = false;
+        abortCtrl.current.abort();
         abortCtrl.current = new AbortController();
         dispatch({ type: 'FETCH_INIT', payload: updateKey });
+
         const response = await (updateKey === 'status' && subCaseId
           ? patchSubCase(
               caseId,
@@ -101,6 +104,7 @@ export const useUpdateCase = ({
               caseData.version,
               abortCtrl.current.signal
             ));
+
         if (!didCancel.current) {
           if (fetchCaseUserActions != null) {
             fetchCaseUserActions(caseId, subCaseId);
@@ -120,7 +124,7 @@ export const useUpdateCase = ({
         }
       } catch (error) {
         if (!didCancel.current) {
-          if (error.name !== 'AbortError') {
+          if (!(error instanceof AbortError)) {
             errorToToaster({
               title: i18n.ERROR_TITLE,
               error: error.body && error.body.message ? new Error(error.body.message) : error,

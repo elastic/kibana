@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 
+import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { getCasesStatus } from './api';
 import * as i18n from './translations';
@@ -32,51 +33,56 @@ export interface UseGetCasesStatus extends CasesStatusState {
 export const useGetCasesStatus = (): UseGetCasesStatus => {
   const [casesStatusState, setCasesStatusState] = useState<CasesStatusState>(initialData);
   const [, dispatchToaster] = useStateToaster();
+  const didCancel = useRef(false);
+  const abortCtrl = useRef(new AbortController());
 
-  const fetchCasesStatus = useCallback(() => {
-    let didCancel = false;
-    const abortCtrl = new AbortController();
-    const fetchData = async () => {
+  const fetchCasesStatus = useCallback(async () => {
+    try {
+      didCancel.current = false;
+      abortCtrl.current.abort();
+      abortCtrl.current = new AbortController();
       setCasesStatusState({
-        ...casesStatusState,
+        ...initialData,
         isLoading: true,
       });
-      try {
-        const response = await getCasesStatus(abortCtrl.signal);
-        if (!didCancel) {
-          setCasesStatusState({
-            ...response,
-            isLoading: false,
-            isError: false,
-          });
-        }
-      } catch (error) {
-        if (!didCancel) {
+
+      const response = await getCasesStatus(abortCtrl.current.signal);
+
+      if (!didCancel.current) {
+        setCasesStatusState({
+          ...response,
+          isLoading: false,
+          isError: false,
+        });
+      }
+    } catch (error) {
+      if (!didCancel.current) {
+        if (!(error instanceof AbortError)) {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          setCasesStatusState({
-            countClosedCases: 0,
-            countInProgressCases: 0,
-            countOpenCases: 0,
-            isLoading: false,
-            isError: true,
-          });
         }
+        setCasesStatusState({
+          countClosedCases: 0,
+          countInProgressCases: 0,
+          countOpenCases: 0,
+          isLoading: false,
+          isError: true,
+        });
       }
-    };
-    fetchData();
-    return () => {
-      didCancel = true;
-      abortCtrl.abort();
-    };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [casesStatusState]);
+  }, []);
 
   useEffect(() => {
     fetchCasesStatus();
+
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

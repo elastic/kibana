@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, ToastsApi } from 'kibana/public';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { ActionConnector } from '../../../containers/types';
 import { getChoices } from './api';
 import { Choice } from './types';
@@ -37,20 +38,20 @@ export const useGetChoices = ({
 }: UseGetChoicesProps): UseGetChoices => {
   const [isLoading, setIsLoading] = useState(false);
   const [choices, setChoices] = useState<Choice[]>([]);
+  const didCancel = useRef(false);
   const abortCtrl = useRef(new AbortController());
 
   useEffect(() => {
-    let didCancel = false;
     const fetchData = async () => {
       if (!connector) {
         setIsLoading(false);
         return;
       }
 
-      abortCtrl.current = new AbortController();
-      setIsLoading(true);
-
       try {
+        abortCtrl.current = new AbortController();
+        setIsLoading(true);
+
         const res = await getChoices({
           http,
           signal: abortCtrl.current.signal,
@@ -58,7 +59,7 @@ export const useGetChoices = ({
           fields,
         });
 
-        if (!didCancel) {
+        if (!didCancel.current) {
           setIsLoading(false);
           setChoices(res.data ?? []);
           if (res.status && res.status === 'error') {
@@ -71,22 +72,24 @@ export const useGetChoices = ({
           }
         }
       } catch (error) {
-        if (!didCancel) {
+        if (!didCancel.current) {
           setIsLoading(false);
-          toastNotifications.addDanger({
-            title: i18n.CHOICES_API_ERROR,
-            text: error.message,
-          });
+          if (!(error instanceof AbortError)) {
+            toastNotifications.addDanger({
+              title: i18n.CHOICES_API_ERROR,
+              text: error.message,
+            });
+          }
         }
       }
     };
 
+    didCancel.current = false;
     abortCtrl.current.abort();
     fetchData();
 
     return () => {
-      didCancel = true;
-      setIsLoading(false);
+      didCancel.current = true;
       abortCtrl.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
