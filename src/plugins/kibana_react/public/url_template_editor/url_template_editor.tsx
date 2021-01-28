@@ -22,6 +22,7 @@ export interface UrlTemplateEditorVariable {
   label: string;
   title?: string;
   documentation?: string;
+  kind?: monaco.languages.CompletionItemKind;
 }
 export interface UrlTemplateEditorProps {
   initialValue: string;
@@ -52,15 +53,22 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
           endColumn: word.endColumn,
         };
         return {
-          suggestions: variables.map(({ label, title = '', documentation = '' }) => ({
-            kind: monaco.languages.CompletionItemKind.Variable,
-            label,
-            insertText: '{{' + label + '}}',
-            detail: title,
-            documentation,
-            range,
-            sortText: label,
-          })),
+          suggestions: variables.map(
+            ({
+              label,
+              title = '',
+              documentation = '',
+              kind = monaco.languages.CompletionItemKind.Variable,
+            }) => ({
+              kind,
+              label,
+              insertText: '{{' + label + '}}',
+              detail: title,
+              documentation,
+              range,
+              sortText: label,
+            })
+          ),
         };
       },
     });

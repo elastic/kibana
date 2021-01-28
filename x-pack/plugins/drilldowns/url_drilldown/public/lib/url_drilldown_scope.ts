@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { monaco } from '@kbn/monaco';
 import type { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/public';
 import {
   isRangeSelectTriggerContext,
@@ -230,6 +231,7 @@ function getEventScopeFromRowClickTriggerContext(ctx: RowClickContext): RowClick
 
 export function getEventVariableList(context: ActionFactoryContext): UrlTemplateEditorVariable[] {
   const [trigger] = context.triggers;
+  const kind = monaco.languages.CompletionItemKind.Event;
 
   switch (trigger) {
     case VALUE_CLICK_TRIGGER:
@@ -242,6 +244,7 @@ export function getEventVariableList(context: ActionFactoryContext): UrlTemplate
           documentation: i18n.translate('xpack.urlDrilldown.click.event.key.documentation', {
             defaultMessage: 'Value behind clicked data point.',
           }),
+          kind,
         },
         {
           label: 'event.key',
@@ -251,6 +254,7 @@ export function getEventVariableList(context: ActionFactoryContext): UrlTemplate
           documentation: i18n.translate('xpack.urlDrilldown.click.event.value.documentation', {
             defaultMessage: 'Field name behind clicked data point.',
           }),
+          kind,
         },
         {
           label: 'event.negate',
@@ -261,6 +265,7 @@ export function getEventVariableList(context: ActionFactoryContext): UrlTemplate
             defaultMessage:
               'Boolean, indicating whether clicked data point resulted in negative filter.',
           }),
+          kind,
         },
         {
           label: 'event.points',
@@ -271,6 +276,7 @@ export function getEventVariableList(context: ActionFactoryContext): UrlTemplate
             defaultMessage:
               'Some visualizations have clickable points that emit more than one data point. Use list of data points in case a single value is insufficient.',
           }),
+          kind,
         },
       ];
     case ROW_CLICK_TRIGGER:
@@ -284,6 +290,7 @@ export function getEventVariableList(context: ActionFactoryContext): UrlTemplate
             defaultMessage:
               'An array of all cell values for the raw on which the action will execute.',
           }),
+          kind,
         },
         {
           label: 'event.keys',
@@ -293,6 +300,7 @@ export function getEventVariableList(context: ActionFactoryContext): UrlTemplate
           documentation: i18n.translate('xpack.urlDrilldown.row.event.keys.documentation', {
             defaultMessage: 'An array of field names for each column.',
           }),
+          kind,
         },
         {
           label: 'event.columnNames',
@@ -302,6 +310,7 @@ export function getEventVariableList(context: ActionFactoryContext): UrlTemplate
           documentation: i18n.translate('xpack.urlDrilldown.row.event.columnNames.documentation', {
             defaultMessage: 'An array of column names.',
           }),
+          kind,
         },
         {
           label: 'event.rowIndex',
@@ -311,6 +320,7 @@ export function getEventVariableList(context: ActionFactoryContext): UrlTemplate
           documentation: i18n.translate('xpack.urlDrilldown.row.event.rowIndex.documentation', {
             defaultMessage: 'Number, representing the row that was clicked, starting from 0.',
           }),
+          kind,
         },
       ];
     case SELECT_RANGE_TRIGGER:
@@ -323,6 +333,7 @@ export function getEventVariableList(context: ActionFactoryContext): UrlTemplate
           documentation: i18n.translate('xpack.urlDrilldown.range.event.key.documentation', {
             defaultMessage: 'Aggregation field behind the selected range, if available.',
           }),
+          kind,
         },
         {
           label: 'event.from',
@@ -333,6 +344,7 @@ export function getEventVariableList(context: ActionFactoryContext): UrlTemplate
             defaultMessage:
               '`from` value of the selected range. Depending on your data, could be either a date or number.',
           }),
+          kind,
         },
         {
           label: 'event.to',
@@ -343,6 +355,7 @@ export function getEventVariableList(context: ActionFactoryContext): UrlTemplate
             defaultMessage:
               '`to` value of the selected range. Depending on your data, could be either a date or number.',
           }),
+          kind,
         },
       ];
   }
