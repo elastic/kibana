@@ -48,7 +48,12 @@ export function buildEuiGridColumn(
     id: columnName,
     schema: getSchemaByKbnType(indexPatternField?.type),
     isSortable: indexPatternField?.sortable,
-    display: indexPatternField?.displayName,
+    display:
+      columnName === '_source'
+        ? i18n.translate('discover.grid.documentHeader', {
+            defaultMessage: 'Document',
+          })
+        : indexPatternField?.displayName,
     actions: {
       showHide:
         defaultColumns || columnName === indexPattern.timeFieldName

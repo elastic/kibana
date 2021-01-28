@@ -197,13 +197,6 @@ def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, teamAssignmen
 def runTests() {
   parallel([
     'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
-    'x-pack-intake-agent': {
-      withEnv([
-        'NODE_ENV=test' // Needed for jest tests only
-      ]) {
-        workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
-      }
-    },
     'kibana-oss-agent'   : workers.functional(
       'kibana-oss-tests',
       { kibanaPipeline.buildOss() },
