@@ -13,10 +13,13 @@ import {
   LOG_ENTRIES_PATH,
   logEntriesRequestRT,
   logEntriesResponseRT,
+} from '../../../../plugins/infra/common/http_api';
+
+import {
   LogTimestampColumn,
   LogFieldColumn,
   LogMessageColumn,
-} from '../../../../plugins/infra/common/http_api';
+} from '../../../../plugins/infra/common/log_entry';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
