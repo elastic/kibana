@@ -17,7 +17,7 @@ import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { TableListView, useKibana } from '../../services/kibana_react';
 import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
-import { getDashboardListItem } from './get_dashboard_list_item_link';
+import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 
 export interface DashboardListingProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -179,7 +179,7 @@ const getTableColumns = (
       sortable: true,
       render: (field: string, record: { id: string; title: string; timeRestore: boolean }) => (
         <EuiLink
-          href={getDashboardListItem(
+          href={getDashboardListItemLink(
             application,
             kbnUrlStateStorage,
             useHash,

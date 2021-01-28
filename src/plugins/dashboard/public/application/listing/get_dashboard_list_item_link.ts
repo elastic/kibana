@@ -12,7 +12,7 @@ import { createDashboardEditUrl, DashboardConstants } from '../../dashboard_cons
 import { GLOBAL_STATE_STORAGE_KEY } from '../../url_generator';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 
-export const getDashboardListItem = (
+export const getDashboardListItemLink = (
   application: ApplicationStart,
   kbnUrlStateStorage: IKbnUrlStateStorage,
   useHash: boolean,
