@@ -46,12 +46,8 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
       };
 
       if (joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
-        // PEBKAC - unsupported. table-source should only be used in embeddables.
-        return (
-          <Fragment key={index}>
-            <EuiSpacer size="m" />
-            <EuiText>Table sources cannot be edited</EuiText>
-          </Fragment>
+        throw new Error(
+          'PEBKAC - Table sources cannot be edited in the UX and should only be used in MapEmbeddable'
         );
       } else {
         return (
