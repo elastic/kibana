@@ -41,10 +41,7 @@ export async function isFleetServerSetup() {
 }
 
 export async function runFleetServerMigration() {
-  const logger = appContextService.getLogger();
-  logger.info('Starting fleet server migration');
   await migrateEnrollmentApiKeys();
-  logger.info('Fleet server migration finished');
 }
 
 function getInternalUserSOClient() {
