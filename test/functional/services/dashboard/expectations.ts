@@ -215,7 +215,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
           'docTableExpandToggleColumn',
           findTimeout
         );
-        expect(savedSearchRows.length).to.greaterThan(expectedCount);
+        expect(savedSearchRows.length).to.be(expectedCount);
       });
     }
 
@@ -223,9 +223,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       log.debug(`DashboardExpect.dataTableRowCount(${expectedCount})`);
       await retry.try(async () => {
         const dataTableRows = await PageObjects.visChart.getTableVisContent();
-        expect(dataTableRows.length).to.be.greaterThan(10);
-        // Failing: See https://github.com/elastic/kibana/issues/89379
-        // expect(dataTableRows.length).to.be(expectedCount);
+        expect(dataTableRows.length).to.be(expectedCount);
       });
     }
 

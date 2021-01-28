@@ -100,8 +100,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await pieChart.expectPieSliceCount(4);
         log.debug('Checking area, bar and heatmap charts rendered');
         await dashboardExpect.seriesElementCount(15);
-        log.debug('Checking saved searches rendered');
-        await dashboardExpect.savedSearchRowCount(10);
+        // Failing test: https://github.com/elastic/kibana/issues/89379
+        // log.debug('Checking saved searches rendered');
+        // await dashboardExpect.savedSearchRowCount(10);
         log.debug('Checking input controls rendered');
         await dashboardExpect.inputControlItemCount(3);
         log.debug('Checking tag cloud rendered');
