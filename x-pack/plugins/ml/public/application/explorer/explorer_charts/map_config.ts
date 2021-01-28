@@ -5,25 +5,26 @@
  */
 
 import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../../maps/common/constants';
+import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../../common';
 
 const FEATURE = 'Feature';
 const POINT = 'Point';
 const SEVERITY_COLOR_RAMP = [
   {
-    stop: 0,
-    color: '#8BC8FB',
+    stop: ANOMALY_THRESHOLD.LOW,
+    color: SEVERITY_COLORS.WARNING,
   },
   {
-    stop: 25,
-    color: '#FDEC25',
+    stop: ANOMALY_THRESHOLD.MINOR,
+    color: SEVERITY_COLORS.MINOR,
   },
   {
-    stop: 50,
-    color: '#FBA740',
+    stop: ANOMALY_THRESHOLD.MAJOR,
+    color: SEVERITY_COLORS.MAJOR,
   },
   {
-    stop: 75,
-    color: '#FE5050',
+    stop: ANOMALY_THRESHOLD.CRITICAL,
+    color: SEVERITY_COLORS.CRITICAL,
   },
 ];
 
@@ -102,7 +103,6 @@ export const getMLAnomaliesTypicalLayer = (anomalies: any) => {
   };
 };
 
-// GEOJSON_FILE type layer does not support source-type to inject custom data for styling
 export const getMLAnomaliesActualLayer = (anomalies: any) => {
   return {
     id: 'anomalies_actual_layer',

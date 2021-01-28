@@ -22,6 +22,7 @@ import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
+  isMappableJob,
 } from '../../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
@@ -498,7 +499,10 @@ function processRecordsForDisplay(anomalyRecords) {
       return;
     }
 
-    let isChartable = isSourceDataChartableForDetector(job, record.detector_index);
+    let isChartable =
+      isSourceDataChartableForDetector(job, record.detector_index) ||
+      isMappableJob(job, record.detector_index);
+
     if (isChartable === false) {
       if (isModelPlotChartableForDetector(job, record.detector_index)) {
         // Check if model plot is enabled for this job.

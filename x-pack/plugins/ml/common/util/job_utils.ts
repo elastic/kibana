@@ -78,6 +78,18 @@ export function isTimeSeriesViewDetector(job: CombinedJob, detectorIndex: number
   );
 }
 
+// Returns a flag to indicate whether the specified job is suitable for embedded map viewing.
+export function isMappableJob(job: CombinedJob, detectorIndex: number): boolean {
+  let isMappable = false;
+  const { detectors } = job.analysis_config;
+  if (detectorIndex >= 0 && detectorIndex < detectors.length) {
+    const dtr = detectors[detectorIndex];
+    const functionName = dtr.function;
+    isMappable = functionName === ML_JOB_AGGREGATION.LAT_LONG;
+  }
+  return isMappable;
+}
+
 // Returns a flag to indicate whether the source data can be plotted in a time
 // series chart for the specified detector.
 export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex: number): boolean {
@@ -93,8 +105,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
     // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
     // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
     isSourceDataChartable =
-      (mlFunctionToESAggregation(functionName) !== null ||
-        functionName === ML_JOB_AGGREGATION.LAT_LONG) &&
+      mlFunctionToESAggregation(functionName) !== null &&
       dtr.by_field_name !== MLCATEGORY &&
       dtr.partition_field_name !== MLCATEGORY &&
       dtr.over_field_name !== MLCATEGORY;
