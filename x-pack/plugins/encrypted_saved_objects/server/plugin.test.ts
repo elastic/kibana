@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin } from './plugin';
+import { EncryptedSavedObjectsPlugin } from './plugin';
 import { ConfigSchema } from './config';
 
 import { coreMock } from 'src/core/server/mocks';
@@ -13,7 +13,7 @@ import { securityMock } from '../../security/server/mocks';
 describe('EncryptedSavedObjects Plugin', () => {
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      const plugin = new Plugin(
+      const plugin = new EncryptedSavedObjectsPlugin(
         coreMock.createPluginInitializerContext(ConfigSchema.validate({}, { dist: true }))
       );
       await expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
@@ -29,7 +29,7 @@ describe('EncryptedSavedObjects Plugin', () => {
 
   describe('start()', () => {
     it('exposes proper contract', async () => {
-      const plugin = new Plugin(
+      const plugin = new EncryptedSavedObjectsPlugin(
         coreMock.createPluginInitializerContext(ConfigSchema.validate({}, { dist: true }))
       );
       await plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() });
