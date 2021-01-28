@@ -5,7 +5,6 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-
 import './discover.scss';
 import React, { useState, useRef } from 'react';
 import {
@@ -21,6 +20,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import { HitsCounter } from './hits_counter';
@@ -31,7 +32,7 @@ import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DocTableLegacy, DocTableLegacyProps } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
-import { search } from '../../../../data/public';
+import { esFilters, IndexPatternField, search } from '../../../../data/public';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
@@ -40,7 +41,11 @@ import { DiscoverProps } from './types';
 import { getDisplayedColumns } from '../helpers/columns';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid/discover_grid';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
+import { MODIFY_COLUMNS_ON_SWITCH, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
+import { popularizeField } from '../helpers/popularize_field';
+import * as columnActions from '../angular/doc_table/actions/columns';
+import { DocViewFilterFn } from '../doc_views/doc_views_types';
+import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
 
 const DocTableLegacyMemoized = React.memo((props: DocTableLegacyProps) => (
   <DocTableLegacy {...props} />
@@ -60,22 +65,13 @@ export function Discover({
   hits,
   indexPattern,
   minimumVisibleRows,
-  onAddColumn,
-  onAddFilter,
-  onChangeInterval,
-  onMoveColumn,
-  onRemoveColumn,
-  onSetColumns,
   onSkipBottomButtonClick,
-  onSort,
   opts,
   resetQuery,
   resultState,
   rows,
   searchSource,
-  setIndexPattern,
   state,
-  timefilterUpdateHandler,
   timeRange,
   topNavMenu,
   updateQuery,
@@ -92,8 +88,8 @@ export function Discover({
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const services = getServices();
   const { TopNavMenu } = services.navigation.ui;
-  const { trackUiMetric } = services;
-  const { savedSearch, indexPatternList, config } = opts;
+  const { trackUiMetric, capabilities, indexPatterns } = services;
+  const { savedSearch, indexPatternList, config, setAppState, data } = opts;
   const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
   const bucketInterval =
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
@@ -102,6 +98,91 @@ export function Discover({
   const contentCentered = resultState === 'uninitialized';
   const isLegacy = services.uiSettings.get('doc_table:legacy');
   const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+
+  function onAddColumn(columnName: string) {
+    if (capabilities.discover.save) {
+      popularizeField(indexPattern, columnName, indexPatterns);
+    }
+    const columns = columnActions.addColumn(state.columns || [], columnName, useNewFieldsApi);
+    setAppState({ columns });
+  }
+
+  function onRemoveColumn(columnName: string) {
+    if (capabilities.discover.save) {
+      popularizeField(indexPattern, columnName, indexPatterns);
+    }
+    const columns = columnActions.removeColumn(state.columns || [], columnName, useNewFieldsApi);
+    // The state's sort property is an array of [sortByColumn,sortDirection]
+    const sort =
+      state.sort && state.sort.length
+        ? state.sort.filter((subArr) => subArr[0] !== columnName)
+        : [];
+    setAppState({ columns, sort });
+  }
+
+  function onMoveColumn(columnName: string, newIndex: number) {
+    const columns = columnActions.moveColumn(state.columns || [], columnName, newIndex);
+    setAppState({ columns });
+  }
+
+  function onSetColumns(columns: string[]) {
+    // remove first element of columns if it's the configured timeFieldName, which is prepended automatically
+    const actualColumns =
+      indexPattern.timeFieldName && indexPattern.timeFieldName === columns[0]
+        ? columns.slice(1)
+        : columns;
+    setAppState({ columns: actualColumns });
+  }
+
+  function onSort(sort: string[][]) {
+    setAppState({ sort });
+  }
+
+  function onAddFilter(field: IndexPatternField | string, values: string, operation: '+' | '-') {
+    const fieldName = typeof field === 'string' ? field : field.name;
+    popularizeField(indexPattern, fieldName, indexPatterns);
+    const newFilters = esFilters.generateFilters(
+      opts.filterManager,
+      field,
+      values,
+      operation,
+      String(indexPattern.id)
+    );
+    if (trackUiMetric) {
+      trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
+    }
+    return opts.filterManager.addFilters(newFilters);
+  }
+
+  async function setIndexPattern(id: string) {
+    const nextIndexPattern = await indexPatterns.get(id);
+    if (nextIndexPattern) {
+      const nextAppState = getSwitchIndexPatternAppState(
+        indexPattern,
+        nextIndexPattern,
+        state.columns || [],
+        (state.sort || []) as SortPairArr[],
+        config.get(MODIFY_COLUMNS_ON_SWITCH),
+        useNewFieldsApi
+      );
+      await setAppState(nextAppState);
+    }
+  }
+
+  function onChangeInterval(interval: string) {
+    if (interval) {
+      setAppState({ interval });
+    }
+  }
+
+  function timefilterUpdateHandler(ranges: { from: number; to: number }) {
+    data.query.timefilter.timefilter.setTime({
+      from: moment(ranges.from).toISOString(),
+      to: moment(ranges.to).toISOString(),
+      mode: 'absolute',
+    });
+  }
+
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
@@ -322,7 +403,7 @@ export function Discover({
                               services={services}
                               settings={state.grid}
                               onAddColumn={onAddColumn}
-                              onFilter={onAddFilter}
+                              onFilter={onAddFilter as DocViewFilterFn}
                               onRemoveColumn={onRemoveColumn}
                               onSetColumns={onSetColumns}
                               onSort={onSort}

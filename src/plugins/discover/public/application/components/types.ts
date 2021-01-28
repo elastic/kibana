@@ -8,7 +8,7 @@
 import { IUiSettingsClient, MountPoint, SavedObject } from 'kibana/public';
 import { Chart } from '../angular/helpers/point_series';
 import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns';
-import { DocViewFilterFn, ElasticSearchHit } from '../doc_views/doc_views_types';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { AggConfigs } from '../../../../data/common/search/aggs';
 
 import {
@@ -58,30 +58,6 @@ export interface DiscoverProps {
    * Increased when scrolling down
    */
   minimumVisibleRows: number;
-  /**
-   * Function to add a column to state
-   */
-  onAddColumn: (column: string) => void;
-  /**
-   * Function to add a filter to state
-   */
-  onAddFilter: DocViewFilterFn;
-  /**
-   * Function to change the used time interval of the date histogram
-   */
-  onChangeInterval: (interval: string) => void;
-  /**
-   * Function to move a given column to a given index, used in legacy table
-   */
-  onMoveColumn: (columns: string, newIdx: number) => void;
-  /**
-   * Function to remove a given column from state
-   */
-  onRemoveColumn: (column: string) => void;
-  /**
-   * Function to replace columns in state
-   */
-  onSetColumns: (columns: string[]) => void;
   /**
    * Function to scroll down the legacy table to the bottom
    */
@@ -149,17 +125,9 @@ export interface DiscoverProps {
    */
   searchSource: ISearchSource;
   /**
-   * Function to change the current index pattern
-   */
-  setIndexPattern: (id: string) => void;
-  /**
    * Current app state of URL
    */
   state: AppState;
-  /**
-   * Function to update the time filter
-   */
-  timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   /**
    * Currently selected time range
    */

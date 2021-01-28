@@ -22,7 +22,6 @@ import {
   syncQueryStateWithUrl,
 } from '../../../../data/public';
 import { getSortArray } from './doc_table';
-import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
@@ -43,15 +42,11 @@ import {
   setBreadcrumbsTitle,
 } from '../helpers/breadcrumbs';
 import { validateTimeRange } from '../helpers/validate_time_range';
-import { popularizeField } from '../helpers/popularize_field';
-import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
 import { addFatalError } from '../../../../kibana_legacy/public';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
 import { getQueryParams, removeQueryParam } from '../../../../kibana_utils/public';
 import {
   DEFAULT_COLUMNS_SETTING,
-  MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SEARCH_ON_PAGE_LOAD_SETTING,
@@ -71,12 +66,10 @@ const {
   chrome,
   data,
   history: getHistory,
-  indexPatterns,
   filterManager,
   timefilter,
   toastNotifications,
   uiSettings: config,
-  trackUiMetric,
 } = getServices();
 
 const fetchStatuses = {
@@ -299,21 +292,6 @@ function discoverController($route, $scope, Promise) {
     }
   );
 
-  $scope.setIndexPattern = async (id) => {
-    const nextIndexPattern = await indexPatterns.get(id);
-    if (nextIndexPattern) {
-      const nextAppState = getSwitchIndexPatternAppState(
-        $scope.indexPattern,
-        nextIndexPattern,
-        $scope.state.columns,
-        $scope.state.sort,
-        config.get(MODIFY_COLUMNS_ON_SWITCH),
-        $scope.useNewFieldsApi
-      );
-      await setAppState(nextAppState);
-    }
-  };
-
   // update data source when filters update
   subscriptions.add(
     subscribeWithScope(
@@ -331,14 +309,6 @@ function discoverController($route, $scope, Promise) {
 
   const inspectorAdapters = {
     requests: new RequestAdapter(),
-  };
-
-  $scope.timefilterUpdateHandler = (ranges) => {
-    timefilter.setTime({
-      from: moment(ranges.from).toISOString(),
-      to: moment(ranges.to).toISOString(),
-      mode: 'absolute',
-    });
   };
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
@@ -511,12 +481,6 @@ function discoverController($route, $scope, Promise) {
           (error) => addFatalError(core.fatalErrors, error)
         )
       );
-
-      $scope.changeInterval = (interval) => {
-        if (interval) {
-          setAppState({ interval });
-        }
-      };
 
       $scope.$watchMulti(
         ['rows', 'fetchStatus'],
@@ -763,65 +727,6 @@ function discoverController($route, $scope, Promise) {
       useNewFieldsApi,
     });
     return Promise.resolve();
-  };
-
-  $scope.setSortOrder = function setSortOrder(sort) {
-    setAppState({ sort });
-  };
-
-  // TODO: On array fields, negating does not negate the combination, rather all terms
-  $scope.filterQuery = function (field, values, operation) {
-    const { indexPattern } = $scope;
-
-    popularizeField(indexPattern, field.name, indexPatterns);
-    const newFilters = esFilters.generateFilters(
-      filterManager,
-      field,
-      values,
-      operation,
-      $scope.indexPattern.id
-    );
-    if (trackUiMetric) {
-      trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
-    }
-    return filterManager.addFilters(newFilters);
-  };
-
-  $scope.addColumn = function addColumn(columnName) {
-    const { indexPattern, useNewFieldsApi } = $scope;
-    if (capabilities.discover.save) {
-      popularizeField(indexPattern, columnName, indexPatterns);
-    }
-    const columns = columnActions.addColumn($scope.state.columns, columnName, useNewFieldsApi);
-    setAppState({ columns });
-  };
-
-  $scope.removeColumn = function removeColumn(columnName) {
-    const { indexPattern, useNewFieldsApi } = $scope;
-    if (capabilities.discover.save) {
-      popularizeField(indexPattern, columnName, indexPatterns);
-    }
-    const columns = columnActions.removeColumn($scope.state.columns, columnName, useNewFieldsApi);
-    // The state's sort property is an array of [sortByColumn,sortDirection]
-    const sort = $scope.state.sort.length
-      ? $scope.state.sort.filter((subArr) => subArr[0] !== columnName)
-      : [];
-    setAppState({ columns, sort });
-  };
-
-  $scope.moveColumn = function moveColumn(columnName, newIndex) {
-    const columns = columnActions.moveColumn($scope.state.columns, columnName, newIndex);
-    setAppState({ columns });
-  };
-
-  $scope.setColumns = function setColumns(columns) {
-    // remove first element of columns if it's the configured timeFieldName, which is prepended automatically
-    const actualColumns =
-      $scope.indexPattern.timeFieldName && $scope.indexPattern.timeFieldName === columns[0]
-        ? columns.slice(1)
-        : columns;
-    $scope.state = { ...$scope.state, columns: actualColumns };
-    setAppState({ columns: actualColumns });
   };
 
   async function setupVisualization() {
