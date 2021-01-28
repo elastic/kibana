@@ -54,6 +54,7 @@ export const usePostCase = (): UsePostCase => {
       try {
         dispatch({ type: 'FETCH_INIT' });
         abortCtrl.current.abort();
+        cancel.current = false;
         abortCtrl.current = new AbortController();
         const response = await postCase(data, abortCtrl.current.signal);
         if (!cancel.current) {
