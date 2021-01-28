@@ -9,7 +9,7 @@ import { curry } from 'lodash';
 import { KibanaRequest } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import { CasePatchRequest, CasePostRequest, CaseType } from '../../../common/api';
-import { CaseClientImpl } from '../../client';
+import { CaseClientImpl, createExternalCaseClient } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema } from './schema';
 import {
   CaseExecutorResponse,
@@ -68,7 +68,9 @@ async function executor(
   let data: CaseExecutorResponse | null = null;
 
   const { savedObjectsClient } = services;
-  const caseClient = new CaseClientImpl({
+  // TODO: ??? calling a constructor in a curry generates this error, TypeError: _client.CaseClientImpl is not a constructor
+  // const caseClient = new CaseClientImpl({
+  const caseClient = createExternalCaseClient({
     savedObjectsClient,
     // TODO: refactor this
     request: {} as KibanaRequest,

@@ -27,7 +27,7 @@ export function initPostCaseApi({ router }: RouteDeps) {
 
       try {
         return response.ok({
-          body: await caseClient.create({ theCase: { ...theCase, type: CaseType.individual } }),
+          body: await caseClient.create({ ...theCase, type: CaseType.individual }),
         });
       } catch (error) {
         return response.customError(wrapError(error));

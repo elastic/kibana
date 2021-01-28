@@ -29,7 +29,6 @@ const CaseBasicNoTypeRt = rt.type({
   status: CaseStatusRt,
   tags: rt.array(rt.string),
   title: rt.string,
-  type: CaseTypeRt,
   connector: CaseConnectorRt,
   settings: SettingsRt,
 });

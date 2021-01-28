@@ -97,7 +97,6 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
             body: `Case IDs: [${unremovable.join(' ,')}] are not removable`,
           });
         }
-
         await Promise.all(
           request.query.ids.map((id) =>
             caseService.deleteCase({
@@ -131,7 +130,6 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
         }
 
         await deleteSubCases({ caseService, client, caseIds: request.query.ids });
-
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const deleteDate = new Date().toISOString();

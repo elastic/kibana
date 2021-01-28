@@ -228,42 +228,7 @@ describe('Utils', () => {
       // @ts-ignore this is to update old case saved objects to include connector
       const res = flattenCaseSavedObjects([mockCaseNoConnectorId], extraCaseData);
 
-      expect(res).toEqual([
-        {
-          id: mockCaseNoConnectorId.id,
-          closed_at: null,
-          closed_by: null,
-          connector: {
-            id: 'none',
-            name: 'none',
-            type: ConnectorTypes.none,
-            fields: null,
-          },
-          created_at: '2019-11-25T21:54:48.952Z',
-          created_by: {
-            full_name: 'elastic',
-            email: 'testemail@elastic.co',
-            username: 'elastic',
-          },
-          description: 'This is a brand new case of a bad meanie defacing data',
-          external_service: null,
-          title: 'Super Bad Security Issue',
-          status: CaseStatuses.open,
-          tags: ['defacement'],
-          updated_at: '2019-11-25T21:54:48.952Z',
-          updated_by: {
-            full_name: 'elastic',
-            email: 'testemail@elastic.co',
-            username: 'elastic',
-          },
-          comments: [],
-          totalComment: 0,
-          version: 'WzAsMV0=',
-          settings: {
-            syncAlerts: true,
-          },
-        },
-      ]);
+      expect(res).toMatchSnapshot();
     });
   });
 
@@ -275,17 +240,7 @@ describe('Utils', () => {
         totalComment: 2,
       });
 
-      expect(res).toEqual({
-        id: myCase.id,
-        version: myCase.version,
-        comments: [],
-        totalComment: 2,
-        ...myCase.attributes,
-        connector: {
-          ...myCase.attributes.connector,
-          fields: { issueType: 'Task', priority: 'High', parent: null },
-        },
-      });
+      expect(res).toMatchSnapshot();
     });
 
     it('flattens correctly without version', () => {
@@ -296,17 +251,7 @@ describe('Utils', () => {
         totalComment: 2,
       });
 
-      expect(res).toEqual({
-        id: myCase.id,
-        version: '0',
-        comments: [],
-        totalComment: 2,
-        ...myCase.attributes,
-        connector: {
-          ...myCase.attributes.connector,
-          fields: { issueType: 'Task', priority: 'High', parent: null },
-        },
-      });
+      expect(res).toMatchSnapshot();
     });
 
     it('flattens correctly with comments', () => {
@@ -318,17 +263,7 @@ describe('Utils', () => {
         totalComment: 2,
       });
 
-      expect(res).toEqual({
-        id: myCase.id,
-        version: myCase.version,
-        comments: flattenCommentSavedObjects(comments),
-        totalComment: 2,
-        ...myCase.attributes,
-        connector: {
-          ...myCase.attributes.connector,
-          fields: { issueType: 'Task', priority: 'High', parent: null },
-        },
-      });
+      expect(res).toMatchSnapshot();
     });
 
     it('inserts missing connector', () => {
@@ -342,40 +277,7 @@ describe('Utils', () => {
         ...extraCaseData,
       });
 
-      expect(res).toEqual({
-        id: mockCaseNoConnectorId.id,
-        closed_at: null,
-        closed_by: null,
-        connector: {
-          id: 'none',
-          name: 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
-        created_at: '2019-11-25T21:54:48.952Z',
-        created_by: {
-          full_name: 'elastic',
-          email: 'testemail@elastic.co',
-          username: 'elastic',
-        },
-        description: 'This is a brand new case of a bad meanie defacing data',
-        external_service: null,
-        title: 'Super Bad Security Issue',
-        status: CaseStatuses.open,
-        tags: ['defacement'],
-        updated_at: '2019-11-25T21:54:48.952Z',
-        updated_by: {
-          full_name: 'elastic',
-          email: 'testemail@elastic.co',
-          username: 'elastic',
-        },
-        comments: [],
-        totalComment: 2,
-        version: 'WzAsMV0=',
-        settings: {
-          syncAlerts: true,
-        },
-      });
+      expect(res).toMatchSnapshot();
     });
   });
 

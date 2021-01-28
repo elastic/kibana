@@ -891,20 +891,18 @@ describe('case connector', () => {
 
         expect(result).toEqual({ actionId, status: 'ok', data: createReturn });
         expect(mockCaseClient.create).toHaveBeenCalledWith({
-          theCase: {
-            ...params.subActionParams,
-            connector: {
-              id: 'jira',
-              name: 'Jira',
-              type: '.jira',
-              fields: {
-                issueType: '10006',
-                priority: 'High',
-                parent: null,
-              },
+          ...params.subActionParams,
+          connector: {
+            id: 'jira',
+            name: 'Jira',
+            type: '.jira',
+            fields: {
+              issueType: '10006',
+              priority: 'High',
+              parent: null,
             },
-            type: CaseType.parent,
           },
+          type: CaseType.parent,
         });
       });
     });
@@ -984,17 +982,14 @@ describe('case connector', () => {
 
         expect(result).toEqual({ actionId, status: 'ok', data: updateReturn });
         expect(mockCaseClient.update).toHaveBeenCalledWith({
-          caseClient: mockCaseClient,
           // Null values have been striped out.
-          cases: {
-            cases: [
-              {
-                id: 'case-id',
-                version: '123',
-                title: 'Update title',
-              },
-            ],
-          },
+          cases: [
+            {
+              id: 'case-id',
+              version: '123',
+              title: 'Update title',
+            },
+          ],
         });
       });
     });
@@ -1074,7 +1069,6 @@ describe('case connector', () => {
 
         expect(result).toEqual({ actionId, status: 'ok', data: commentReturn });
         expect(mockCaseClient.addComment).toHaveBeenCalledWith({
-          caseClient: mockCaseClient,
           caseId: 'case-id',
           comment: {
             comment: 'a comment',

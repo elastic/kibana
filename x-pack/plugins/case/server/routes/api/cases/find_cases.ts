@@ -162,6 +162,29 @@ async function getCaseCommentStats({
 
 /**
  * Constructs the filters used for finding cases and sub cases.
+ * There are a few scenarios that this function tries to handle when constructing the filters used for finding cases
+ * and sub cases.
+ *
+ * Scenario 1:
+ *  Type == Individual
+ *  If the API request specifies that it wants only individual cases (aka not collections) then we need to add that
+ *  specific filter when call the saved objects find api. This will filter out any collection cases.
+ *
+ * Scenario 2:
+ *  Type == collection
+ *  If the API request specifies that it only wants collection cases (cases that have sub cases) then we need to add
+ *  the filter for collections AND we need to ignore any status filter for the case find call. This is because a
+ *  collection's status is no longer relevant when it has sub cases. The user cannot change the status for a collection
+ *  only for its sub cases. The status filter will be applied to the find request when looking for sub cases.
+ *
+ * Scenario 3:
+ *  No Type is specified
+ *  If the API request does not want to filter on type but instead get both collections and regular individual cases then
+ *  we need to find all cases that match the other filter criteria and sub cases. To do this we construct the following query:
+ *
+ *    ((status == some_status and type === individual) or type == collection) and (tags == blah) and (reporter == yo)
+ *  This forces us to honor the status request for individual cases but gets us ALL collection cases that match the other
+ *  filter criteria. When we search for sub cases we will use that status filter in that find call as well.
  */
 function constructQueries({
   tags,
@@ -220,9 +243,18 @@ function constructQueries({
       };
     }
     default: {
-      // The cases filter will result in this structure "(status == open or type == parent) and (tags == blah) and (reporter == yo)"
-      // The sub case filter will use the query.status if it exists
-      const statusFilter = addStatusFilter({ status });
+      /**
+       * In this scenario no type filter was sent, so we want to honor the status filter if one exists.
+       * To construct the filter and honor the status portion we need to find all individual cases that
+       * have that particular status. We also need to find cases that have sub cases but we want to ignore the
+       * case collection's status because it is not relevant. We only care about the status of the sub cases if the
+       * case is a collection.
+       *
+       * The cases filter will result in this structure "((status == open and type === individual) or type == parent) and (tags == blah) and (reporter == yo)"
+       * The sub case filter will use the query.status if it exists
+       */
+      const typeIndividual = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.individual}`;
+      const statusFilter = combineFilters([addStatusFilter({ status }), typeIndividual], 'AND');
       const typeFilter = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.parent}`;
       const statusAndType = combineFilters([statusFilter, typeFilter], 'OR');
       const caseFilters = combineFilters([statusAndType, tagsFilter, reportersFilter], 'AND');
@@ -365,14 +397,17 @@ async function findCases({
     ids: cases.saved_objects.map((caseInfo) => caseInfo.id),
     includeCommentsStats,
   });
-
   const casesMap = cases.saved_objects.reduce((accMap, caseInfo) => {
     const subCasesForCase = subCases.get(caseInfo.id);
-    // if we don't have the sub cases for the case and the case is a collection then ignore it
-    // unless we're forcing retrieval of empty collections
+    /**
+     * If we don't have the sub cases for the case and the case is a collection then ignore it
+     * unless we're forcing retrieval of empty collections. Otherwise if the case is an individual case
+     * then include it.
+     */
     if (
       (subCasesForCase && caseInfo.attributes.type === CaseType.parent) ||
-      includeEmptyCollections
+      includeEmptyCollections ||
+      caseInfo.attributes.type === CaseType.individual
     ) {
       accMap.set(caseInfo.id, { case: caseInfo, subCases: subCasesForCase });
     }
@@ -449,6 +484,7 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
             includeCommentsStats: true,
           }),
           ...caseStatuses.map((status) => {
+            // TODO: maybe clean this up
             const statusQuery = constructQueries({ ...queryArgs, status });
             return findCases({
               client,
