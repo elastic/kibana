@@ -39,7 +39,7 @@ import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
-import { setVisEditorsRegistry } from './services';
+import { setVisEditorsRegistry, setUISettings } from './services';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 
 export interface VisualizePluginStartDependencies {
@@ -116,6 +116,8 @@ export class VisualizePlugin
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
+
+    setUISettings(core.uiSettings);
 
     core.application.register({
       id: 'visualize',

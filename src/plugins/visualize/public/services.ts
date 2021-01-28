@@ -5,9 +5,11 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-
+import { IUiSettingsClient } from '../../../core/public';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
 import { VisEditorsRegistry } from './vis_editors_registry';
+
+export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
 export const [
   getVisEditorsRegistry,
