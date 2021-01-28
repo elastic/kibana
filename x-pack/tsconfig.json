@@ -47,7 +47,6 @@
   "references": [
     { "path": "../src/core/tsconfig.json" },
     { "path": "../src/plugins/bfetch/tsconfig.json" },
-    { "path": "../src/plugins/canvas/tsconfig.json" },
     { "path": "../src/plugins/charts/tsconfig.json" },
     { "path": "../src/plugins/console/tsconfig.json" },
     { "path": "../src/plugins/dashboard/tsconfig.json" },
@@ -81,6 +80,7 @@
     { "path": "./plugins/actions/tsconfig.json"},
     { "path": "./plugins/alerts/tsconfig.json"},
     { "path": "./plugins/beats_management/tsconfig.json" },
+    { "path": "./plugins/canvas/tsconfig.json" },
     { "path": "./plugins/cloud/tsconfig.json" },
     { "path": "./plugins/console_extensions/tsconfig.json" },
     { "path": "./plugins/data_enhanced/tsconfig.json" },

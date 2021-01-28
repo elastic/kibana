@@ -10,17 +10,6 @@
   "include": [
     "public/**/*",
     "server/**/*",
-<<<<<<< HEAD
-  ],
-  "references": [
-    { "path": "../kibana_react/tsconfig.json" },
-    //
-    // The following are dependencies that have not been typed yet.
-    // { "path": "../data/tsconfig.json"},
-    // { "path": "../expressions/tsconfig.json" },
-    // { "path": "../visualizations/tsconfig.json" },
-    // { "path": "../vis_default_editor/tsconfig.json" },
-=======
     "*.ts"
   ],
   "references": [
@@ -29,6 +18,5 @@
     { "path": "../visualizations/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../vis_default_editor/tsconfig.json" },
->>>>>>> elastic
   ]
 }
