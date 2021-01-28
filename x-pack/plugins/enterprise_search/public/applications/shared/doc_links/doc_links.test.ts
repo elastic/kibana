@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { docLinksService } from './doc_links';
+import { docLinks } from './';
 
-describe('DocLinksService#setDocLinks()', () => {
+describe('DocLinks#setDocLinks()', () => {
   it('adds links from docLinks', () => {
-    const docLinks = {
+    const links = {
       DOC_LINK_VERSION: '',
       ELASTIC_WEBSITE_URL: 'https://elastic.co/',
       links: {
@@ -20,11 +20,11 @@ describe('DocLinksService#setDocLinks()', () => {
       },
     };
 
-    docLinksService.setDocLinks(docLinks as any);
+    docLinks.setDocLinks(links as any);
 
-    expect(docLinksService.enterpriseSearchBase).toEqual('http://elastic.enterprise.search');
-    expect(docLinksService.appSearchBase).toEqual('http://elastic.app.search');
-    expect(docLinksService.workplaceSearchBase).toEqual('http://elastic.workplace.search');
-    expect(docLinksService.cloudBase).toEqual('https://elastic.co/guide/en/cloud/current');
+    expect(docLinks.enterpriseSearchBase).toEqual('http://elastic.enterprise.search');
+    expect(docLinks.appSearchBase).toEqual('http://elastic.app.search');
+    expect(docLinks.workplaceSearchBase).toEqual('http://elastic.workplace.search');
+    expect(docLinks.cloudBase).toEqual('https://elastic.co/guide/en/cloud/current');
   });
 });

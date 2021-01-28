@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { docLinksService } from '../shared/doc_links/doc_links';
+import { docLinks } from '../shared/doc_links';
 
-export const DOCS_PREFIX = docLinksService.appSearchBase;
+export const DOCS_PREFIX = docLinks.appSearchBase;
 
 export const ROOT_PATH = '/';
 export const SETUP_GUIDE_PATH = '/setup_guide';

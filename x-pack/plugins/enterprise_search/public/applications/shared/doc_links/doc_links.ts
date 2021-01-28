@@ -6,7 +6,7 @@
 
 import { DocLinksStart } from 'kibana/public';
 
-class DocLinksService {
+class DocLinks {
   public enterpriseSearchBase: string;
   public appSearchBase: string;
   public workplaceSearchBase: string;
@@ -27,4 +27,4 @@ class DocLinksService {
   }
 }
 
-export const docLinksService = new DocLinksService();
+export const docLinks = new DocLinks();

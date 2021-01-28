@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 
-import { docLinksService } from '../../../shared/doc_links/doc_links';
+import { docLinks } from '../../../shared/doc_links';
 
 import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 import { EmptyEngineOverview } from './engine_overview_empty';
@@ -25,9 +25,7 @@ describe('EmptyEngineOverview', () => {
   });
 
   it('renders correctly versioned documentation URLs', () => {
-    expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      `${docLinksService.appSearchBase}/index.html`
-    );
+    expect(wrapper.find(EuiButton).prop('href')).toEqual(`${docLinks.appSearchBase}/index.html`);
   });
 
   it('renders document creation components', () => {

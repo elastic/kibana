@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { docLinksService } from './doc_links'; 
+export { docLinks } from './doc_links';
