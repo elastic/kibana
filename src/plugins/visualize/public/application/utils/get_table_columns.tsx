@@ -15,7 +15,7 @@ import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';
 import type { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_oss/public';
 import { RedirectAppLinks } from '../../../../kibana_react/public';
-import { getVisualizeListItem } from './get_visualize_list_item_link';
+import { getVisualizeListItemLink } from './get_visualize_list_item_link';
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {
@@ -87,7 +87,7 @@ export const getTableColumns = (
       !error ? (
         <RedirectAppLinks application={application}>
           <EuiLink
-            href={getVisualizeListItem(application, kbnUrlStateStorage, editApp, editUrl)}
+            href={getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl)}
             data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
           >
             {field}

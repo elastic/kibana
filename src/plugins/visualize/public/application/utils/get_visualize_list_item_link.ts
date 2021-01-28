@@ -13,7 +13,7 @@ import { getUISettings } from '../../services';
 import { GLOBAL_STATE_STORAGE_KEY } from '../../../common/constants';
 import { APP_NAME } from '../visualize_constants';
 
-export const getVisualizeListItem = (
+export const getVisualizeListItemLink = (
   application: ApplicationStart,
   kbnUrlStateStorage: IKbnUrlStateStorage,
   editApp: string | undefined,

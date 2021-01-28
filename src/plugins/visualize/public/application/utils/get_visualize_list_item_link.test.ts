@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { getVisualizeListItem } from './get_visualize_list_item_link';
+import { getVisualizeListItemLink } from './get_visualize_list_item_link';
 import { ApplicationStart } from 'kibana/public';
 import { createHashHistory } from 'history';
 import { createKbnUrlStateStorage } from '../../../../kibana_utils/public';
@@ -37,14 +37,14 @@ kbnUrlStateStorage.set(GLOBAL_STATE_STORAGE_KEY, { time: { from: 'now-7d', to: '
 describe('listing item link is correct for each app', () => {
   test('creates a link to classic visualization if editApp is not defined', async () => {
     const editUrl = 'edit/id';
-    const url = getVisualizeListItem(application, kbnUrlStateStorage, undefined, editUrl);
+    const url = getVisualizeListItemLink(application, kbnUrlStateStorage, undefined, editUrl);
     expect(url).toMatchInlineSnapshot(`"/app/visualize#${editUrl}?_g=(time:(from:now-7d,to:now))"`);
   });
 
   test('creates a link for the app given if editApp is defined', async () => {
     const editUrl = '#/edit/id';
     const editApp = 'lens';
-    const url = getVisualizeListItem(application, kbnUrlStateStorage, editApp, editUrl);
+    const url = getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl);
     expect(url).toMatchInlineSnapshot(`"/app/${editApp}${editUrl}?_g=(time:(from:now-7d,to:now))"`);
   });
 
@@ -61,7 +61,7 @@ describe('listing item link is correct for each app', () => {
     test('it propagates the correct time on the query', async () => {
       const editUrl = '#/edit/id';
       const editApp = 'lens';
-      const url = getVisualizeListItem(application, kbnUrlStateStorage, editApp, editUrl);
+      const url = getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl);
       expect(url).toMatchInlineSnapshot(
         `"/app/${editApp}${editUrl}?_g=(time:(from:'2021-01-05T11:45:53.375Z',to:'2021-01-21T11:46:00.990Z'))"`
       );
@@ -78,7 +78,7 @@ describe('listing item link is correct for each app', () => {
     test('it propagates the refreshInterval on the query', async () => {
       const editUrl = '#/edit/id';
       const editApp = 'lens';
-      const url = getVisualizeListItem(application, kbnUrlStateStorage, editApp, editUrl);
+      const url = getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl);
       expect(url).toMatchInlineSnapshot(
         `"/app/${editApp}${editUrl}?_g=(refreshInterval:(pause:!f,value:300))"`
       );
@@ -116,7 +116,7 @@ describe('listing item link is correct for each app', () => {
     test('propagates the filters on the query', async () => {
       const editUrl = '#/edit/id';
       const editApp = 'lens';
-      const url = getVisualizeListItem(application, kbnUrlStateStorage, editApp, editUrl);
+      const url = getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl);
       expect(url).toMatchInlineSnapshot(
         `"/app/${editApp}${editUrl}?_g=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1)),('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))))"`
       );
