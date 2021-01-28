@@ -11,16 +11,47 @@ import * as helpers from './helpers';
 describe('url_params_context helpers', () => {
   describe('getDateRange', () => {
     describe('with non-rounded dates', () => {
-      it('rounds the lower value', () => {
-        expect(
-          helpers.getDateRange({
-            state: {},
-            rangeFrom: '1970-01-05T01:22:33.234Z',
-            rangeTo: '1971-01-10T10:11:12.123Z',
-          })
-        ).toEqual({
-          start: '1970-01-01T00:00:00.000Z',
-          end: '1971-01-10T10:11:12.123Z',
+      describe('one minute', () => {
+        it('rounds the values', () => {
+          expect(
+            helpers.getDateRange({
+              state: {},
+              rangeFrom: '2021-01-28T05:47:52.134Z',
+              rangeTo: '2021-01-28T05:48:55.304Z',
+            })
+          ).toEqual({
+            start: '2021-01-28T05:47:50.000Z',
+            end: '2021-01-28T05:49:00.000Z',
+          });
+        });
+      });
+      describe('one day', () => {
+        it('rounds the values', () => {
+          expect(
+            helpers.getDateRange({
+              state: {},
+              rangeFrom: '2021-01-27T05:46:07.377Z',
+              rangeTo: '2021-01-28T05:46:13.367Z',
+            })
+          ).toEqual({
+            start: '2021-01-27T03:00:00.000Z',
+            end: '2021-01-28T06:00:00.000Z',
+          });
+        });
+      });
+
+      describe('one year', () => {
+        it('rounds the values', () => {
+          expect(
+            helpers.getDateRange({
+              state: {},
+              rangeFrom: '2020-01-28T05:52:36.290Z',
+              rangeTo: '2021-01-28T05:52:39.741Z',
+            })
+          ).toEqual({
+            start: '2020-01-01T00:00:00.000Z',
+            end: '2021-02-01T00:00:00.000Z',
+          });
         });
       });
     });

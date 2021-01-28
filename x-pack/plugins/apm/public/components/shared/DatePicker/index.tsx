@@ -35,7 +35,7 @@ export function DatePicker() {
     })
   );
 
-  const { urlParams, refreshTimeRange } = useUrlParams();
+  const { incrementRangeId, urlParams, refreshTimeRange } = useUrlParams();
 
   function updateUrl(nextQuery: {
     rangeFrom?: string;
@@ -111,6 +111,7 @@ export function DatePicker() {
       onTimeChange={onTimeChange}
       onRefresh={({ start, end }) => {
         clearCache();
+        incrementRangeId();
         refreshTimeRange({ rangeFrom: start, rangeTo: end });
       }}
       onRefreshChange={onRefreshChange}

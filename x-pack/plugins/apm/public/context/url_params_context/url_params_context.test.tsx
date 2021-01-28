@@ -52,7 +52,7 @@ describe('UrlParamsContext', () => {
 
     expect([params.start, params.end]).toEqual([
       '2010-03-15T00:00:00.000Z',
-      '2010-04-10T12:00:00.000Z',
+      '2010-04-11T00:00:00.000Z',
     ]);
   });
 
@@ -71,7 +71,7 @@ describe('UrlParamsContext', () => {
 
     expect([params.start, params.end]).toEqual([
       '2009-03-15T00:00:00.000Z',
-      '2009-04-10T12:00:00.000Z',
+      '2009-04-11T00:00:00.000Z',
     ]);
   });
 
@@ -91,7 +91,7 @@ describe('UrlParamsContext', () => {
 
     expect([params.start, params.end]).toEqual([
       '1969-12-31T00:00:00.000Z',
-      '1969-12-31T23:59:59.999Z',
+      '1970-01-01T00:00:00.000Z',
     ]);
 
     nowSpy.mockRestore();
@@ -145,7 +145,7 @@ describe('UrlParamsContext', () => {
 
     expect([params.start, params.end]).toEqual([
       '2005-09-19T00:00:00.000Z',
-      '2005-10-21T12:00:00.000Z',
+      '2005-10-23T00:00:00.000Z',
     ]);
   });
 
@@ -195,7 +195,7 @@ describe('UrlParamsContext', () => {
 
     expect([params.start, params.end]).toEqual([
       '2000-06-14T00:00:00.000Z',
-      '2000-06-14T23:59:59.999Z',
+      '2000-06-15T00:00:00.000Z',
     ]);
   });
 });

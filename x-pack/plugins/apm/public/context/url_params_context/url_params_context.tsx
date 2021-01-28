@@ -48,9 +48,11 @@ function useUiFilters(params: IUrlParams): UIFilters {
 const defaultRefresh = (_time: TimeRange) => {};
 
 const UrlParamsContext = createContext({
-  urlParams: {} as IUrlParams,
+  incrementRangeId: () => {},
+  rangeId: 0,
   refreshTimeRange: defaultRefresh,
   uiFilters: {} as UIFilters,
+  urlParams: {} as IUrlParams,
 });
 
 const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
@@ -58,6 +60,9 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
     const refUrlParams = useRef(resolveUrlParams(location, {}));
 
     const { start, end, rangeFrom, rangeTo } = refUrlParams.current;
+
+    // Counter to force an update in useFetcher when the refresh button is clicked.
+    const [rangeId, setRangeId] = useState(0);
 
     const [, forceUpdate] = useState('');
 
@@ -73,6 +78,8 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
     );
 
     refUrlParams.current = urlParams;
+
+    const incrementRangeId = () => setRangeId((prevRangeId) => prevRangeId + 1);
 
     const refreshTimeRange = useCallback(
       (timeRange: TimeRange) => {
@@ -90,11 +97,13 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
 
     const contextValue = useMemo(() => {
       return {
-        urlParams,
+        incrementRangeId,
+        rangeId,
         refreshTimeRange,
+        urlParams,
         uiFilters,
       };
-    }, [urlParams, refreshTimeRange, uiFilters]);
+    }, [rangeId, refreshTimeRange, uiFilters, urlParams]);
 
     return (
       <UrlParamsContext.Provider children={children} value={contextValue} />

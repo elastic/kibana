@@ -41,15 +41,13 @@ export function getDateRange({
     return { start: state.start, end: state.end };
   }
 
-  // Calculate ticks for the time ranges to produce nicely rounded values. We
-  // only use lower value since the upper end is not likely to matter because the
-  // cache is constancly cleared when there are writes to the shard.
+  // Calculate ticks for the time ranges to produce nicely rounded values.
   const ticks = scaleUtc().domain([start, end]).nice().ticks();
 
   // Return the first and last tick values.
   return {
     start: ticks[0].toISOString(),
-    end: end.toISOString(),
+    end: ticks[ticks.length - 1].toISOString(),
   };
 }
 

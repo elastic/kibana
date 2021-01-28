@@ -10,6 +10,7 @@ import { IHttpFetchError } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { APMClient, callApmApi } from '../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
+import { useUrlParams } from '../context/url_params_context/use_url_params';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -49,6 +50,7 @@ export function useFetcher<TReturn>(
     status: FETCH_STATUS.NOT_INITIATED,
   });
   const [counter, setCounter] = useState(0);
+  const { rangeId } = useUrlParams();
 
   useEffect(() => {
     let didCancel = false;
@@ -132,6 +134,7 @@ export function useFetcher<TReturn>(
   }, [
     counter,
     preservePreviousData,
+    rangeId,
     showToastOnError,
     ...fnDeps,
     /* eslint-enable react-hooks/exhaustive-deps */
