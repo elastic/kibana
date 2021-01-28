@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { coreMock, savedObjectsServiceMock } from 'src/core/server/mocks';
-import { Plugin } from './plugin';
+import { FeaturesPlugin } from './plugin';
 
 describe('Features Plugin', () => {
   let initContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
@@ -29,7 +29,7 @@ describe('Features Plugin', () => {
   });
 
   it('returns OSS + registered kibana features', async () => {
-    const plugin = new Plugin(initContext);
+    const plugin = new FeaturesPlugin(initContext);
     const { registerKibanaFeature } = await plugin.setup(coreSetup, {});
     registerKibanaFeature({
       id: 'baz',
@@ -56,7 +56,7 @@ describe('Features Plugin', () => {
   });
 
   it('returns OSS + registered kibana features with timelion when available', async () => {
-    const plugin = new Plugin(initContext);
+    const plugin = new FeaturesPlugin(initContext);
     const { registerKibanaFeature: registerFeature } = await plugin.setup(coreSetup, {
       visTypeTimelion: { uiEnabled: true },
     });
@@ -86,7 +86,7 @@ describe('Features Plugin', () => {
   });
 
   it('registers kibana features with not hidden saved objects types', async () => {
-    const plugin = new Plugin(initContext);
+    const plugin = new FeaturesPlugin(initContext);
     await plugin.setup(coreSetup, {});
     const { getKibanaFeatures } = plugin.start(coreStart);
 
@@ -99,7 +99,7 @@ describe('Features Plugin', () => {
   });
 
   it('returns registered elasticsearch features', async () => {
-    const plugin = new Plugin(initContext);
+    const plugin = new FeaturesPlugin(initContext);
     const { registerElasticsearchFeature } = await plugin.setup(coreSetup, {});
     registerElasticsearchFeature({
       id: 'baz',
@@ -121,7 +121,7 @@ describe('Features Plugin', () => {
   });
 
   it('registers a capabilities provider', async () => {
-    const plugin = new Plugin(initContext);
+    const plugin = new FeaturesPlugin(initContext);
     await plugin.setup(coreSetup, {});
 
     expect(coreSetup.capabilities.registerProvider).toHaveBeenCalledTimes(1);

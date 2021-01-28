@@ -19,7 +19,7 @@ import { graphWorkspace } from './saved_objects';
 export class GraphPlugin implements Plugin {
   private licenseState: LicenseState | null = null;
 
-  public async setup(
+  public setup(
     core: CoreSetup,
     {
       licensing,

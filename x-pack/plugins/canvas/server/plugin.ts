@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first } from 'rxjs/operators';
 import { CoreSetup, PluginInitializerContext, Plugin, Logger, CoreStart } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
@@ -33,7 +32,7 @@ export class CanvasPlugin implements Plugin {
     this.logger = initializerContext.logger.get();
   }
 
-  public async setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
+  public setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
     coreSetup.savedObjects.registerType(customElementType);
     coreSetup.savedObjects.registerType(workpadType);
     coreSetup.savedObjects.registerType(workpadTemplateType);
@@ -83,9 +82,7 @@ export class CanvasPlugin implements Plugin {
     );
 
     // we need the kibana index provided by global config for the Canvas usage collector
-    const globalConfig = await this.initializerContext.config.legacy.globalConfig$
-      .pipe(first())
-      .toPromise();
+    const globalConfig = this.initializerContext.config.legacy.get();
     registerCanvasUsageCollector(plugins.usageCollection, globalConfig.kibana.index);
 
     setupInterpreter(plugins.expressions);

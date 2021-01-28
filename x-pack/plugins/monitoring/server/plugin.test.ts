@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { coreMock } from 'src/core/server/mocks';
-import { Plugin } from './plugin';
+import { MonitoringPlugin } from './plugin';
 import { combineLatest } from 'rxjs';
 import { AlertsFactory } from './alerts';
 
@@ -102,14 +102,14 @@ describe('Monitoring plugin', () => {
   });
 
   it('always create the bulk uploader', async () => {
-    const plugin = new Plugin(initializerContext as any);
+    const plugin = new MonitoringPlugin(initializerContext as any);
     await plugin.setup(coreSetup, setupPlugins as any);
     expect(coreSetup.status.overall$.subscribe).toHaveBeenCalled();
   });
 
   it('should register all alerts', async () => {
     const alerts = AlertsFactory.getAll();
-    const plugin = new Plugin(initializerContext as any);
+    const plugin = new MonitoringPlugin(initializerContext as any);
     await plugin.setup(coreSetup as any, setupPlugins as any);
     expect(setupPlugins.alerts.registerType).toHaveBeenCalledTimes(alerts.length);
   });
