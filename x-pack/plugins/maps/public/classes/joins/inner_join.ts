@@ -68,7 +68,7 @@ export class InnerJoin {
   }
 
   getJoinFields(): IField[] {
-    return this._rightSource ? this._rightSource.getMetricFields() : [];
+    return this._rightSource ? this._rightSource.getRightFields() : [];
   }
 
   // Source request id must be static and unique because the re-fetch logic uses the id to locate the previous request.
@@ -97,7 +97,7 @@ export class InnerJoin {
     if (!feature.properties || !this._leftField || !this._rightSource) {
       return false;
     }
-    const rightMetricFields = this._rightSource.getMetricFields();
+    const rightMetricFields: IField[] = this._rightSource.getRightFields();
     // delete feature properties added by previous join
     for (let j = 0; j < rightMetricFields.length; j++) {
       const metricPropertyKey = rightMetricFields[j].getName();

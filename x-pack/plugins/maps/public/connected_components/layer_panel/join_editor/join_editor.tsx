@@ -14,6 +14,7 @@ import {
   EuiToolTip,
   EuiTextAlign,
   EuiCallOut,
+  EuiText,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -23,6 +24,7 @@ import { Join } from './resources/join';
 import { ILayer } from '../../../classes/layers/layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
 import { IField } from '../../../classes/fields/field';
+import { SOURCE_TYPES } from '../../../../common/constants';
 
 export interface Props {
   joins: JoinDescriptor[];
@@ -43,19 +45,29 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
         onChange(layer, [...joins.slice(0, index), ...joins.slice(index + 1)]);
       };
 
-      return (
-        <Fragment key={index}>
-          <EuiSpacer size="m" />
-          <Join
-            join={joinDescriptor}
-            layer={layer}
-            onChange={handleOnChange}
-            onRemove={handleOnRemove}
-            leftFields={leftJoinFields}
-            leftSourceName={layerDisplayName}
-          />
-        </Fragment>
-      );
+      if (joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
+        // PEBKAC - unsupported. table-source should only be used in embeddables.
+        return (
+          <Fragment key={index}>
+            <EuiSpacer size="m" />
+            <EuiText>Table sources cannot be edited</EuiText>
+          </Fragment>
+        );
+      } else {
+        return (
+          <Fragment key={index}>
+            <EuiSpacer size="m" />
+            <Join
+              join={joinDescriptor}
+              layer={layer}
+              onChange={handleOnChange}
+              onRemove={handleOnRemove}
+              leftFields={leftJoinFields}
+              leftSourceName={layerDisplayName}
+            />
+          </Fragment>
+        );
+      }
     });
   };
 

@@ -31,6 +31,7 @@ import { Adapters } from '../../../../../../../src/plugins/inspector/common/adap
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { ITermJoinSource } from '../term_join_source/term_join_source';
+import { IField } from '../../fields/field';
 
 const TERMS_AGG_NAME = 'join';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
@@ -173,5 +174,9 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
           size: this._descriptor.size,
         }
       : null;
+  }
+
+  getRightFields(): IField[] {
+    return this.getMetricFields();
   }
 }
