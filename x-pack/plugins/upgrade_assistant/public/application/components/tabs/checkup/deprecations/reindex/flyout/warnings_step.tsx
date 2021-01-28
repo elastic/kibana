@@ -91,14 +91,13 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const optionId = e.target.id;
-    const nextCheckedIds = {
-      ...checkedIds,
+
+    setCheckedIds((prev) => ({
+      ...prev,
       ...{
         [optionId]: !checkedIds[optionId],
       },
-    };
-
-    setCheckedIds(nextCheckedIds);
+    }));
   };
 
   const { docLinks } = useAppContext();
