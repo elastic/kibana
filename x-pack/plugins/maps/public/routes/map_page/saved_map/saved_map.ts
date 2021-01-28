@@ -8,16 +8,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import {
-  COLOR_MAP_TYPE,
-  FIELD_ORIGIN,
-  LABEL_BORDER_SIZES,
-  MAP_PATH,
-  MAP_SAVED_OBJECT_TYPE,
-  SOURCE_TYPES,
-  STYLE_TYPE,
-  SYMBOLIZE_AS_TYPES,
-} from '../../../../common/constants';
+import { MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
 import {
   getTimeFilters,

@@ -184,7 +184,6 @@ export type TableSourceDescriptor = {
   __rows: TableSourceValue[][];
   columns: TableSourceColumn[];
   term: string;
-  // metrics: AggDescriptor[];
 };
 
 export type TermJoinSourceDescriptor = ESTermSourceDescriptor | TableSourceDescriptor;

@@ -5,7 +5,6 @@
  */
 
 import uuid from 'uuid';
-import { GeoJsonProperties } from 'geojson';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import {
   MapExtent,
@@ -17,13 +16,10 @@ import {
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { AbstractSource } from '../source';
 import { ITermJoinSource } from '../term_join_source';
 import { BucketProperties, PropertiesMap } from '../../../../common/elasticsearch_util';
 import { IField } from '../../fields/field';
 import { Query } from '../../../../../../../src/plugins/data/common/query';
-import { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { IESAggField } from '../../fields/agg';
 import {
   AbstractVectorSource,
   BoundsFilters,
@@ -75,7 +71,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     for (let i = 0; i < this._descriptor.__rows.length; i++) {
       const bucketProperties: BucketProperties = {};
       const row: TableSourceValue[] = this._descriptor.__rows[i];
-      let propKey: string | number;
+      let propKey: string | number | undefined;
       for (let j = 0; j < row.length; j++) {
         if (row[j].key === this._descriptor.term) {
           propKey = row[j].value;
@@ -84,7 +80,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
         }
       }
       if (propKey) {
-        propertiesMap.set(propKey, bucketProperties);
+        propertiesMap.set(propKey.toString(), bucketProperties);
       }
     }
 

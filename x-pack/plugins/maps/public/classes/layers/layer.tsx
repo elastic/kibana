@@ -20,11 +20,13 @@ import {
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
   SOURCE_DATA_REQUEST_ID,
+  SOURCE_TYPES,
   STYLE_TYPE,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/util';
 import {
   AggDescriptor,
+  ESTermSourceDescriptor,
   JoinDescriptor,
   LayerDescriptor,
   MapExtent,
@@ -158,6 +160,11 @@ export class AbstractLayer implements ILayer {
 
     if (clonedDescriptor.joins) {
       clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
+        if (joinDescriptor.right && joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
+          return;
+        }
+        const termSourceDescriptor: ESTermSourceDescriptor = joinDescriptor.right as ESTermSourceDescriptor;
+
         // todo: must tie this to generic thing
         const originalJoinId = joinDescriptor.right.id!;
 
@@ -167,8 +174,8 @@ export class AbstractLayer implements ILayer {
         // Update all data driven styling properties using join fields
         if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
           const metrics =
-            joinDescriptor.right.metrics && joinDescriptor.right.metrics.length
-              ? joinDescriptor.right.metrics
+            termSourceDescriptor.metrics && termSourceDescriptor.metrics.length
+              ? termSourceDescriptor.metrics
               : [{ type: AGG_TYPE.COUNT }];
           metrics.forEach((metricsDescriptor: AggDescriptor) => {
             const originalJoinKey = getJoinAggKey({
