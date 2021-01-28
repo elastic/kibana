@@ -21,11 +21,8 @@ import {
   Installation,
   Output,
   DEFAULT_AGENT_POLICIES_PACKAGES,
-  ENROLLMENT_API_KEYS_INDEX,
-  AGENT_POLICY_INDEX,
-  AGENT_ACTIONS_INDEX,
-  AGENTS_INDEX,
-  FleetServerPackage,
+  FLEET_SERVER_PACKAGE,
+  FLEET_SERVER_INDICES,
 } from '../../common';
 import { SO_SEARCH_LIMIT } from '../constants';
 import { getPackageInfo } from './epm/packages';
@@ -85,11 +82,10 @@ async function createSetupSideEffects(
   // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
   // packages that are stuck in the installing state.
   await ensurePackagesCompletedInstall(soClient, callCluster);
-
   if (appContextService.getConfig()?.agents.fleetServerEnabled) {
     await ensureInstalledPackage({
       savedObjectsClient: soClient,
-      pkgName: FleetServerPackage,
+      pkgName: FLEET_SERVER_PACKAGE,
       callCluster,
     });
     await ensureFleetServerIndicesCreated(esClient);
@@ -163,15 +159,8 @@ async function updateFleetRoleIfExists(callCluster: CallESAsCurrentUser) {
 }
 
 async function ensureFleetServerIndicesCreated(esClient: ElasticsearchClient) {
-  const indexes = [
-    ENROLLMENT_API_KEYS_INDEX,
-    AGENT_POLICY_INDEX,
-    AGENTS_INDEX,
-    AGENT_ACTIONS_INDEX,
-  ];
-
   await Promise.all(
-    indexes.map(async (index) => {
+    FLEET_SERVER_INDICES.map(async (index) => {
       const res = await esClient.indices.exists({
         index,
       });

@@ -8,11 +8,9 @@ import { KibanaRequest } from 'src/core/server';
 import {
   ENROLLMENT_API_KEYS_INDEX,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_INDEX,
-  AGENT_ACTIONS_INDEX,
-  AGENTS_INDEX,
   FleetServerEnrollmentAPIKey,
-  FleetServerPackage,
+  FLEET_SERVER_PACKAGE,
+  FLEET_SERVER_INDICES,
 } from '../../common';
 import { listEnrollmentApiKeys, getEnrollmentAPIKey } from './api_keys/enrollment_api_key_so';
 import { appContextService } from './app_context';
@@ -21,7 +19,7 @@ import { getInstallation } from './epm/packages';
 export async function isFleetServerSetup() {
   const pkgInstall = await getInstallation({
     savedObjectsClient: getInternalUserSOClient(),
-    pkgName: FleetServerPackage,
+    pkgName: FLEET_SERVER_PACKAGE,
   });
 
   if (!pkgInstall) {
@@ -29,15 +27,9 @@ export async function isFleetServerSetup() {
   }
 
   const esClient = appContextService.getInternalUserESClient();
-  const indexes = [
-    ENROLLMENT_API_KEYS_INDEX,
-    AGENT_POLICY_INDEX,
-    AGENTS_INDEX,
-    AGENT_ACTIONS_INDEX,
-  ];
 
   const exists = await Promise.all(
-    indexes.map(async (index) => {
+    FLEET_SERVER_INDICES.map(async (index) => {
       const res = await esClient.indices.exists({
         index,
       });
