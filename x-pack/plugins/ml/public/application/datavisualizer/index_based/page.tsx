@@ -33,9 +33,6 @@ import { NavigationMenu } from '../../components/navigation_menu';
 import { DatePickerWrapper } from '../../components/navigation_menu/date_picker_wrapper';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../../../common/constants/search';
-import { isFullLicense } from '../../license';
-import { checkPermission } from '../../capabilities/check_capabilities';
-import { mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useMlContext } from '../../contexts/ml';
@@ -172,8 +169,6 @@ export const Page: FC = () => {
   indexedFieldTypes = indexedFieldTypes.sort();
 
   const defaults = getDefaultPageState();
-
-  const showActionsPanel = isFullLicense() && checkPermission('canCreateJob') && mlNodesAvailable();
 
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
     const searchData = extractSearchData(currentSavedSearch);
@@ -790,15 +785,13 @@ export const Page: FC = () => {
                   />
                 </EuiPanel>
               </EuiFlexItem>
-              {showActionsPanel === true && (
-                <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }}>
-                  <ActionsPanel
-                    indexPattern={currentIndexPattern}
-                    searchQueryLanguage={searchQueryLanguage}
-                    searchString={searchString}
-                  />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }}>
+                <ActionsPanel
+                  indexPattern={currentIndexPattern}
+                  searchQueryLanguage={searchQueryLanguage}
+                  searchString={searchString}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageContentBody>
         </EuiPageBody>

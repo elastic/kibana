@@ -27,6 +27,9 @@ import {
   DiscoverUrlGeneratorState,
 } from '../../../../../../../../../src/plugins/discover/public';
 import { useMlKibana } from '../../../../contexts/kibana';
+import { isFullLicense } from '../../../../license';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { mlNodesAvailable } from '../../../../ml_nodes_check';
 
 interface Props {
   indexPattern: IndexPattern;
@@ -35,7 +38,6 @@ interface Props {
 }
 
 export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQueryLanguage }) => {
-  const showCreateJob = indexPattern.timeFieldName !== undefined;
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
   const [discoverLink, setDiscoverLink] = useState('');
   const {
@@ -52,6 +54,11 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
       setRecognizerResultsCount(recognizerResults.count);
     },
   };
+  const showCreateJob =
+    isFullLicense() &&
+    checkPermission('canCreateJob') &&
+    mlNodesAvailable() &&
+    indexPattern.timeFieldName !== undefined;
   const createJobLink = `/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB}/advanced?index=${indexPattern.id}`;
 
   useEffect(() => {

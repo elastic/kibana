@@ -14,9 +14,14 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     );
 
     // The data visualizer should work the same as with a trial license, except the missing create actions
-    // That's why 'index_data_visualizer_actions_panel' is not loaded here
+    // That's why 'index_data_visualizer_actions_panel_trial' is not loaded here
     loadTestFile(
       require.resolve('../../../../functional/apps/ml/data_visualizer/index_data_visualizer')
+    );
+    loadTestFile(
+      require.resolve(
+        '../../../../functional/apps/ml/data_visualizer/index_data_visualizer_actions_panel_basic'
+      )
     );
   });
 }

@@ -348,8 +348,11 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should display the data visualizer table');
             await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
-            await ml.testExecution.logTestStep('should not display the actions panel');
-            await ml.dataVisualizerIndexBased.assertActionsPanelNotExists();
+            await ml.testExecution.logTestStep(
+              'should display the actions panel with Discover card'
+            );
+            await ml.dataVisualizerIndexBased.assertActionsPanelExists();
+            await ml.dataVisualizerIndexBased.assertViewInDiscoverCardExists();
           });
 
           it('should display elements on File Data Visualizer page correctly', async () => {

@@ -126,8 +126,11 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('should display the data visualizer table');
           await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
+          await ml.testExecution.logTestStep('should display the actions panel with Discover card');
+          await ml.dataVisualizerIndexBased.assertActionsPanelExists();
+          await ml.dataVisualizerIndexBased.assertViewInDiscoverCardExists();
+
           await ml.testExecution.logTestStep('should not display the actions panel with cards');
-          await ml.dataVisualizerIndexBased.assertActionsPanelNotExists();
           await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
           await ml.dataVisualizerIndexBased.assertRecognizerCardNotExists(ecExpectedModuleId);
         });
