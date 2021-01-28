@@ -9,21 +9,29 @@ import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import { FtrProviderContext } from './../functional/ftr_provider_context';
 
+/**
+ *
+ * GatlingTestRunner is used to run load simulation against local Kibana instance
+ *
+ * Use GATLING_SIMULATIONS to pass comma-separated class names
+ * Use GATLING_PROJECT_PATH to override path to 'kibana-load-testing' project
+ */
 export async function GatlingTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const gatlingProjectRootPath = resolve(REPO_ROOT, '../kibana-load-testing');
 
   await withProcRunner(log, async (procs) => {
-    await procs.run('gatling', {
+    const simulationPackage = 'org.kibanaLoadTest.simulation';
+    const gatlingProjectRootPath: string =
+      process.env.GATLING_PROJECT_PATH || resolve(REPO_ROOT, '../kibana-load-testing');
+    const simulations: string = process.env.GATLING_SIMULATIONS || 'DemoJourney';
+    await procs.run('mvn: clean compile', {
       cmd: 'mvn',
       args: [
-        'clean',
-        '-q',
+        '-Dmaven.wagon.http.retryHandler.count=3',
         '-Dmaven.test.failure.ignore=true',
-        'compile',
-        'gatling:test',
         '-q',
-        '-Dgatling.simulationClass=org.kibanaLoadTest.simulation.DemoJourney',
+        'clean',
+        'compile',
       ],
       cwd: gatlingProjectRootPath,
       env: {
@@ -31,5 +39,20 @@ export async function GatlingTestRunner({ getService }: FtrProviderContext) {
       },
       wait: true,
     });
+    for (const simulationClass of simulations.split(',').filter((i) => i.length > 0)) {
+      await procs.run('gatling: test', {
+        cmd: 'mvn',
+        args: [
+          'gatling:test',
+          '-q',
+          `-Dgatling.simulationClass=${simulationPackage}.${simulationClass}`,
+        ],
+        cwd: gatlingProjectRootPath,
+        env: {
+          ...process.env,
+        },
+        wait: true,
+      });
+    }
   });
 }

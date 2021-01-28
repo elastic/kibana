@@ -25,6 +25,7 @@ echo " -> test setup"
 source test/scripts/jenkins_test_setup_xpack.sh
 
 echo " -> run gatling load testing"
-node scripts/functional_tests \
+GATLING_SIMULATIONS = build.AllAtOnceJourney \
+    node scripts/functional_tests \
     --kibana-install-dir "$KIBANA_INSTALL_DIR" \
     --config test/load/config.ts
