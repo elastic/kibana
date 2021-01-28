@@ -11,7 +11,7 @@ import { EuiBadgeGroup, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { Query } from '../../types';
 
 interface Props {
-  tags: Query['tags'];
+  tags?: Query['tags'];
 }
 export const InlineTagsList: React.FC<Props> = ({ tags }) => {
   if (!tags?.length) return null;
