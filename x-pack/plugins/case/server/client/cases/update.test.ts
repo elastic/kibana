@@ -39,10 +39,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.update({
-        caseClient: caseClient.client,
-        cases: patchCases,
-      });
+      const res = await caseClient.client.update(patchCases);
 
       expect(res).toMatchSnapshot();
 
@@ -95,10 +92,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.update({
-        caseClient: caseClient.client,
-        cases: patchCases,
-      });
+      const res = await caseClient.client.update(patchCases);
 
       expect(res).toMatchSnapshot();
     });
@@ -119,10 +113,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.update({
-        caseClient: caseClient.client,
-        cases: patchCases,
-      });
+      const res = await caseClient.client.update(patchCases);
 
       expect(res).toMatchSnapshot();
     });
@@ -143,10 +134,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.update({
-        caseClient: caseClient.client,
-        cases: patchCases,
-      });
+      const res = await caseClient.client.update(patchCases);
 
       expect(res).toMatchSnapshot();
     });
@@ -172,10 +160,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.update({
-        caseClient: caseClient.client,
-        cases: patchCases,
-      });
+      const res = await caseClient.client.update(patchCases);
 
       expect(res).toMatchSnapshot();
     });
@@ -199,10 +184,7 @@ describe('update', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.updateAlertsStatus = jest.fn();
 
-      await caseClient.client.update({
-        caseClient: caseClient.client,
-        cases: patchCases,
-      });
+      await caseClient.client.update(patchCases);
 
       expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
         ids: ['test-id'],
@@ -235,10 +217,7 @@ describe('update', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.updateAlertsStatus = jest.fn();
 
-      await caseClient.client.update({
-        caseClient: caseClient.client,
-        cases: patchCases,
-      });
+      await caseClient.client.update(patchCases);
 
       expect(caseClient.client.updateAlertsStatus).not.toHaveBeenCalled();
     });
@@ -267,10 +246,7 @@ describe('update', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.updateAlertsStatus = jest.fn();
 
-      await caseClient.client.update({
-        caseClient: caseClient.client,
-        cases: patchCases,
-      });
+      await caseClient.client.update(patchCases);
 
       expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
         ids: ['test-id'],
@@ -298,10 +274,7 @@ describe('update', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.updateAlertsStatus = jest.fn();
 
-      await caseClient.client.update({
-        caseClient: caseClient.client,
-        cases: patchCases,
-      });
+      await caseClient.client.update(patchCases);
 
       expect(caseClient.client.updateAlertsStatus).not.toHaveBeenCalled();
     });
@@ -338,10 +311,7 @@ describe('update', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.updateAlertsStatus = jest.fn();
 
-      await caseClient.client.update({
-        caseClient: caseClient.client,
-        cases: patchCases,
-      });
+      await caseClient.client.update(patchCases);
 
       expect(caseClient.client.updateAlertsStatus).toHaveBeenNthCalledWith(1, {
         ids: ['test-id', 'test-id-2'],
@@ -374,10 +344,7 @@ describe('update', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.updateAlertsStatus = jest.fn();
 
-      await caseClient.client.update({
-        caseClient: caseClient.client,
-        cases: patchCases,
-      });
+      await caseClient.client.update(patchCases);
 
       expect(caseClient.client.updateAlertsStatus).not.toHaveBeenCalled();
     });
@@ -463,7 +430,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
+      caseClient.client.update(patchCases).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(406);
@@ -493,7 +460,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
+      caseClient.client.update(patchCases).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(404);
@@ -520,7 +487,7 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
+      caseClient.client.update(patchCases).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(409);

@@ -45,35 +45,9 @@ describe('create', () => {
         caseConfigureSavedObject: mockCaseConfigure,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.create({ theCase: postCase });
+      const res = await caseClient.client.create(postCase);
 
-      expect(res).toEqual({
-        id: 'mock-it',
-        comments: [],
-        totalComment: 0,
-        closed_at: null,
-        closed_by: null,
-        connector: {
-          id: '123',
-          name: 'Jira',
-          type: ConnectorTypes.jira,
-          fields: { issueType: 'Task', priority: 'High', parent: null },
-        },
-        created_at: '2019-11-25T21:54:48.952Z',
-        created_by: { full_name: 'Awesome D00d', email: 'd00d@awesome.com', username: 'awesome' },
-        description: 'This is a brand new case of a bad meanie defacing data',
-        external_service: null,
-        title: 'Super Bad Security Issue',
-        status: CaseStatuses.open,
-        tags: ['defacement'],
-        type: CaseType.individual,
-        updated_at: null,
-        updated_by: null,
-        version: 'WzksMV0=',
-        settings: {
-          syncAlerts: true,
-        },
-      });
+      expect(res).toMatchSnapshot();
 
       expect(
         caseClient.services.userActionService.postUserActions.mock.calls[0][0].actions
@@ -102,30 +76,9 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.create({ theCase: postCase });
+      const res = await caseClient.client.create(postCase);
 
-      expect(res).toEqual({
-        id: 'mock-it',
-        comments: [],
-        totalComment: 0,
-        closed_at: null,
-        closed_by: null,
-        connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
-        created_at: '2019-11-25T21:54:48.952Z',
-        created_by: { full_name: 'Awesome D00d', email: 'd00d@awesome.com', username: 'awesome' },
-        description: 'This is a brand new case of a bad meanie defacing data',
-        external_service: null,
-        title: 'Super Bad Security Issue',
-        status: CaseStatuses.open,
-        tags: ['defacement'],
-        type: CaseType.individual,
-        updated_at: null,
-        updated_by: null,
-        version: 'WzksMV0=',
-        settings: {
-          syncAlerts: true,
-        },
-      });
+      expect(res).toMatchSnapshot();
     });
 
     test('Allow user to create case without authentication', async () => {
@@ -152,34 +105,9 @@ describe('create', () => {
         savedObjectsClient,
         badAuth: true,
       });
-      const res = await caseClient.client.create({ theCase: postCase });
+      const res = await caseClient.client.create(postCase);
 
-      expect(res).toEqual({
-        id: 'mock-it',
-        comments: [],
-        totalComment: 0,
-        closed_at: null,
-        closed_by: null,
-        connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
-        created_at: '2019-11-25T21:54:48.952Z',
-        created_by: {
-          email: null,
-          full_name: null,
-          username: null,
-        },
-        description: 'This is a brand new case of a bad meanie defacing data',
-        external_service: null,
-        title: 'Super Bad Security Issue',
-        status: CaseStatuses.open,
-        tags: ['defacement'],
-        type: CaseType.individual,
-        updated_at: null,
-        updated_by: null,
-        version: 'WzksMV0=',
-        settings: {
-          syncAlerts: true,
-        },
-      });
+      expect(res).toMatchSnapshot();
     });
   });
 
@@ -338,7 +266,7 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.create({ theCase: postCase }).catch((e) => {
+      caseClient.client.create(postCase).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(400);
@@ -366,7 +294,7 @@ describe('create', () => {
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
 
-      caseClient.client.create({ theCase: postCase }).catch((e) => {
+      caseClient.client.create(postCase).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(400);

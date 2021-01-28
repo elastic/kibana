@@ -5,7 +5,6 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
-import { caseMigrations } from './migrations';
 
 export const SUB_CASE_SAVED_OBJECT = 'sub_case';
 
@@ -55,5 +54,4 @@ export const subCaseSavedObjectType: SavedObjectsType = {
       },
     },
   },
-  // TODO migration
 };

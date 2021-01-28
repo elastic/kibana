@@ -188,7 +188,14 @@ const getCommentContent = (
   if (comment.type === CommentType.user) {
     return comment.comment;
   } else if (comment.type === CommentType.alert) {
-    const alert = alerts[comment.alertId];
+    // TODO: handle generated alerts here to
+    // TODO: clean this up
+    const alertId = Array.isArray(comment.alertId)
+      ? comment.alertId.length > 0
+        ? comment.alertId[0]
+        : ''
+      : comment.alertId;
+    const alert = alerts[alertId];
     const ruleDetailsLink = formatUrl(getRuleDetailsUrl(alert.rule.id), {
       absolute: true,
       skipSearch: true,

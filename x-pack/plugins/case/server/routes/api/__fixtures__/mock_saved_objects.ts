@@ -38,6 +38,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      converted_by: null,
       description: 'This is a brand new case of a bad meanie defacing data',
       external_service: null,
       title: 'Super Bad Security Issue',
@@ -64,6 +65,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
     attributes: {
       closed_at: null,
       closed_by: null,
+      converted_by: null,
       connector: {
         id: 'none',
         name: 'none',
@@ -102,6 +104,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
     attributes: {
       closed_at: null,
       closed_by: null,
+      converted_by: null,
       connector: {
         id: '123',
         name: 'My connector',
@@ -148,6 +151,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      converted_by: null,
       connector: {
         id: '123',
         name: 'My connector',

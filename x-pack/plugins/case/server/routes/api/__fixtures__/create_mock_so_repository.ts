@@ -86,13 +86,15 @@ export const createMockSavedObjectsRepository = ({
           throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
         }
         return result[0];
-      }
-
-      const result = caseSavedObject.filter((s) => s.id === id);
-      if (!result.length) {
+      } else if (type === CASE_SAVED_OBJECT) {
+        const result = caseSavedObject.filter((s) => s.id === id);
+        if (!result.length) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        return result[0];
+      } else {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
-      return result[0];
     }),
     find: jest.fn((findArgs) => {
       if (findArgs.hasReference && findArgs.hasReference.id === 'bad-guy') {

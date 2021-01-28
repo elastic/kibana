@@ -9,7 +9,7 @@ import { curry } from 'lodash';
 import { KibanaRequest } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import { CasePatchRequest, CasePostRequest, CaseType } from '../../../common/api';
-import { createCaseClient } from '../../client';
+import { CaseClientImpl } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema } from './schema';
 import {
   CaseExecutorResponse,
@@ -18,7 +18,6 @@ import {
   CaseActionTypeExecutorOptions,
 } from './types';
 import * as i18n from './translations';
-import type { CasesRequestHandlerContext } from '../../types';
 
 import { GetActionTypeParams } from '..';
 
@@ -69,7 +68,7 @@ async function executor(
   let data: CaseExecutorResponse | null = null;
 
   const { savedObjectsClient } = services;
-  const caseClient = createCaseClient({
+  const caseClient = new CaseClientImpl({
     savedObjectsClient,
     // TODO: refactor this
     request: {} as KibanaRequest,
@@ -78,8 +77,6 @@ async function executor(
     connectorMappingsService,
     userActionService,
     alertsService,
-    // TODO: When case connector is enabled we should figure out how to pass the context.
-    context: {} as CasesRequestHandlerContext,
   });
 
   if (!supportedSubActions.includes(subAction)) {
@@ -110,7 +107,7 @@ async function executor(
 
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    data = await caseClient.addComment(caseId, comment);
+    data = await caseClient.addComment({ caseId, comment });
   }
 
   return { status: 'ok', data: data ?? {}, actionId };

@@ -127,7 +127,7 @@ async function getCaseCommentStats({
         client,
         id,
         options: {
-          filter: `(${type}.attributes.type: ${CommentType.alert} OR ${type}.attributes.type: ${CommentType.alertGroup}) AND ${type}.attributes.associationType: ${associationType}`,
+          filter: `(${type}.attributes.type: ${CommentType.alert} OR ${type}.attributes.type: ${CommentType.generatedAlert}) AND ${type}.attributes.associationType: ${associationType}`,
         },
       })
     )

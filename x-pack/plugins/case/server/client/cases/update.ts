@@ -16,12 +16,10 @@ import {
   throwErrors,
   excess,
   CasesResponseRt,
-  CasesPatchRequestRt,
   ESCasePatchRequest,
   CasePatchRequest,
   CasesResponse,
   CaseStatuses,
-  CasesPatchRequest,
   CasesUpdateRequest,
   CasesUpdateRequestRt,
   CommentType,
@@ -32,7 +30,6 @@ import {
   transformCaseConnectorToEsConnector,
 } from '../../routes/api/cases/helpers';
 
-import { CaseClientUpdate, CaseClientFactoryArguments } from '../types';
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseClientImpl } from '..';
@@ -180,7 +177,7 @@ export const update = async ({
         id: theCase.id,
         options: {
           fields: [],
-          filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alertGroup}`,
+          filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
           page: 1,
           perPage: 1,
         },
@@ -191,7 +188,7 @@ export const update = async ({
         id: theCase.id,
         options: {
           fields: [],
-          filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alertGroup}`,
+          filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
           page: 1,
           perPage: totalComments.total,
         },

@@ -1,6 +1,88 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`create happy path Allow user to create case without authentication 1`] = `
+Object {
+  "closed_at": null,
+  "closed_by": null,
+  "comments": Array [],
+  "connector": Object {
+    "fields": null,
+    "id": "none",
+    "name": "none",
+    "type": ".none",
+  },
+  "converted_by": null,
+  "created_at": "2019-11-25T21:54:48.952Z",
+  "created_by": Object {
+    "email": null,
+    "full_name": null,
+    "username": null,
+  },
+  "description": "This is a brand new case of a bad meanie defacing data",
+  "external_service": null,
+  "id": "mock-it",
+  "settings": Object {
+    "syncAlerts": true,
+  },
+  "status": "open",
+  "subCases": undefined,
+  "tags": Array [
+    "defacement",
+  ],
+  "title": "Super Bad Security Issue",
+  "totalAlerts": 0,
+  "totalComment": 0,
+  "type": "individual",
+  "updated_at": null,
+  "updated_by": null,
+  "version": "WzksMV0=",
+}
+`;
+
 exports[`create happy path it creates the case correctly 1`] = `
+Object {
+  "closed_at": null,
+  "closed_by": null,
+  "comments": Array [],
+  "connector": Object {
+    "fields": Object {
+      "issueType": "Task",
+      "parent": null,
+      "priority": "High",
+    },
+    "id": "123",
+    "name": "Jira",
+    "type": ".jira",
+  },
+  "converted_by": null,
+  "created_at": "2019-11-25T21:54:48.952Z",
+  "created_by": Object {
+    "email": "d00d@awesome.com",
+    "full_name": "Awesome D00d",
+    "username": "awesome",
+  },
+  "description": "This is a brand new case of a bad meanie defacing data",
+  "external_service": null,
+  "id": "mock-it",
+  "settings": Object {
+    "syncAlerts": true,
+  },
+  "status": "open",
+  "subCases": undefined,
+  "tags": Array [
+    "defacement",
+  ],
+  "title": "Super Bad Security Issue",
+  "totalAlerts": 0,
+  "totalComment": 0,
+  "type": "individual",
+  "updated_at": null,
+  "updated_by": null,
+  "version": "WzksMV0=",
+}
+`;
+
+exports[`create happy path it creates the case correctly 2`] = `
 Array [
   Object {
     "attributes": Object {
@@ -31,4 +113,43 @@ Array [
     ],
   },
 ]
+`;
+
+exports[`create happy path it creates the case without connector in the configuration 1`] = `
+Object {
+  "closed_at": null,
+  "closed_by": null,
+  "comments": Array [],
+  "connector": Object {
+    "fields": null,
+    "id": "none",
+    "name": "none",
+    "type": ".none",
+  },
+  "converted_by": null,
+  "created_at": "2019-11-25T21:54:48.952Z",
+  "created_by": Object {
+    "email": "d00d@awesome.com",
+    "full_name": "Awesome D00d",
+    "username": "awesome",
+  },
+  "description": "This is a brand new case of a bad meanie defacing data",
+  "external_service": null,
+  "id": "mock-it",
+  "settings": Object {
+    "syncAlerts": true,
+  },
+  "status": "open",
+  "subCases": undefined,
+  "tags": Array [
+    "defacement",
+  ],
+  "title": "Super Bad Security Issue",
+  "totalAlerts": 0,
+  "totalComment": 0,
+  "type": "individual",
+  "updated_at": null,
+  "updated_by": null,
+  "version": "WzksMV0=",
+}
 `;

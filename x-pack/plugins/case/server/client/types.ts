@@ -13,9 +13,10 @@ import {
   CasesPatchRequest,
   CasesResponse,
   CaseStatuses,
+  CasesUpdateRequest,
   CollectionWithSubCaseResponse,
   CommentRequest,
-  CommentRequestAlertGroupType,
+  CommentRequestGeneratedAlertType,
   ConnectorMappingsAttributes,
   GetFieldsResponse,
   SubCaseResponse,
@@ -40,7 +41,6 @@ export interface CaseClientUpdate {
 }
 
 export interface CaseClientAddComment {
-  caseClient: CaseClient;
   caseId: string;
   comment: CommentRequest;
 }
@@ -64,7 +64,6 @@ export interface CaseClientFactoryArguments {
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
-  context?: Omit<CasesRequestHandlerContext, 'case'>;
 }
 
 export interface ConfigureFields {
@@ -72,20 +71,26 @@ export interface ConfigureFields {
   connectorId: string;
   connectorType: string;
 }
-export interface CaseClient {
-  addComment: (caseId: string, comment: CommentRequest) => Promise<CollectionWithSubCaseResponse>;
-  addAlertGroup: (
-    caseId: string,
-    comment: CommentRequestAlertGroupType
-  ) => Promise<CollectionWithSubCaseResponse>;
+
+/**
+ * This represents the interface that other plugins can access.
+ */
+export interface CaseClientPluginContract {
+  addComment(args: CaseClientAddComment): Promise<CollectionWithSubCaseResponse>;
   create(theCase: CaseClientPostRequest): Promise<CaseResponse>;
-  convertCaseToCollection(caseInfo: CaseConvertRequest): Promise<CasesResponse>;
   getFields(args: ConfigureFields): Promise<GetFieldsResponse>;
   getMappings(args: MappingsClient): Promise<ConnectorMappingsAttributes[]>;
-  update(cases: CasesPatchRequest): Promise<CasesResponse>;
+  update(args: CasesPatchRequest): Promise<CasesResponse>;
   updateAlertsStatus(args: CaseClientUpdateAlertsStatus): Promise<void>;
 }
 
+export interface CaseClient extends CaseClientPluginContract {
+  addGeneratedAlerts(
+    caseId: string,
+    comment: CommentRequestGeneratedAlertType
+  ): Promise<CollectionWithSubCaseResponse>;
+  convertCaseToCollection(caseInfo: CaseConvertRequest): Promise<CasesResponse>;
+}
 export interface MappingsClient {
   actionsClient: ActionsClient;
   caseClient: CaseClient;

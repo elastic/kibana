@@ -30,6 +30,7 @@ import {
   CaseStatuses,
   AssociationType,
   CaseType,
+  CaseResponse,
 } from '../../../common/api';
 
 describe('Utils', () => {
@@ -181,40 +182,25 @@ describe('Utils', () => {
 
   describe('transformCases', () => {
     it('transforms correctly', () => {
-      const extraCaseData = [
-        { caseId: mockCases[0].id, totalComments: 2 },
-        { caseId: mockCases[1].id, totalComments: 2 },
-        { caseId: mockCases[2].id, totalComments: 2 },
-        { caseId: mockCases[3].id, totalComments: 2 },
-      ];
-
-      const res = transformCases(
-        {
-          saved_objects: mockCases.map((obj) => ({ ...obj, score: 1 })),
-          total: mockCases.length,
-          per_page: 10,
-          page: 1,
-        },
-        2,
-        2,
-        2,
-        extraCaseData
+      const casesMap = new Map<string, CaseResponse>(
+        mockCases.map((obj) => {
+          return [obj.id, flattenCaseSavedObject({ savedObject: obj, totalComment: 2 })];
+        })
       );
-      expect(res).toEqual({
+      const res = transformCases({
+        casesMap,
+        countOpenCases: 2,
+        countInProgressCases: 2,
+        countClosedCases: 2,
         page: 1,
-        per_page: 10,
-        total: mockCases.length,
-        cases: flattenCaseSavedObjects(
-          mockCases.map((obj) => ({ ...obj, score: 1 })),
-          extraCaseData
-        ),
-        count_open_cases: 2,
-        count_closed_cases: 2,
-        count_in_progress_cases: 2,
+        perPage: 10,
+        total: casesMap.size,
       });
+      expect(res).toMatchSnapshot();
     });
   });
 
+  // TODO: remove these
   describe('flattenCaseSavedObjects', () => {
     it('flattens correctly', () => {
       const extraCaseData = [{ caseId: mockCases[0].id, totalComments: 2 }];

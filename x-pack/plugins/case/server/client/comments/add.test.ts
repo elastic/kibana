@@ -31,7 +31,6 @@ describe('addComment', () => {
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.addComment({
-        caseClient: caseClient.client,
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
@@ -52,7 +51,6 @@ describe('addComment', () => {
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.addComment({
-        caseClient: caseClient.client,
         caseId: 'mock-id-1',
         comment: {
           type: CommentType.alert,
@@ -74,7 +72,6 @@ describe('addComment', () => {
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.addComment({
-        caseClient: caseClient.client,
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
@@ -98,7 +95,6 @@ describe('addComment', () => {
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       await caseClient.client.addComment({
-        caseClient: caseClient.client,
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
@@ -149,7 +145,6 @@ describe('addComment', () => {
         badAuth: true,
       });
       const res = await caseClient.client.addComment({
-        caseClient: caseClient.client,
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
@@ -175,7 +170,6 @@ describe('addComment', () => {
       caseClient.client.updateAlertsStatus = jest.fn();
 
       await caseClient.client.addComment({
-        caseClient: caseClient.client,
         caseId: 'mock-id-1',
         comment: {
           type: CommentType.alert,
@@ -210,7 +204,6 @@ describe('addComment', () => {
       caseClient.client.updateAlertsStatus = jest.fn();
 
       await caseClient.client.addComment({
-        caseClient: caseClient.client,
         caseId: 'mock-id-1',
         comment: {
           type: CommentType.alert,
@@ -290,7 +283,6 @@ describe('addComment', () => {
       ['alertId', 'index'].forEach((attribute) => {
         caseClient.client
           .addComment({
-            caseClient: caseClient.client,
             caseId: 'mock-id-1',
             comment: {
               [attribute]: attribute,
@@ -352,7 +344,6 @@ describe('addComment', () => {
       ['comment'].forEach((attribute) => {
         caseClient.client
           .addComment({
-            caseClient: caseClient.client,
             caseId: 'mock-id-1',
             comment: {
               [attribute]: attribute,
@@ -379,7 +370,6 @@ describe('addComment', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         .addComment({
-          caseClient: caseClient.client,
           caseId: 'not-exists',
           comment: {
             comment: 'Wow, good luck catching that bad meanie!',
@@ -403,7 +393,6 @@ describe('addComment', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         .addComment({
-          caseClient: caseClient.client,
           caseId: 'mock-id-1',
           comment: {
             comment: 'Throw an error',
@@ -428,7 +417,6 @@ describe('addComment', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         .addComment({
-          caseClient: caseClient.client,
           caseId: 'mock-id-4',
           comment: {
             type: CommentType.alert,

@@ -9,12 +9,15 @@ import {
   CaseSettings,
   CaseStatuses,
   CollectionWithSubCaseAttributes,
+  CollectWithSubCaseResponseRt,
   ESCaseAttributes,
   SubCaseAttributes,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from '../../routes/api/cases/helpers';
+import { flattenCommentSavedObjects, flattenSubCaseSavedObject } from '../../routes/api/utils';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseServiceSetup } from '../../services';
+import { countAlerts } from '../index';
 
 interface UserInfo {
   username: string | null | undefined;
@@ -22,15 +25,28 @@ interface UserInfo {
   email: string | null | undefined;
 }
 
+interface CommentableCaseParams {
+  collection: SavedObject<ESCaseAttributes>;
+  subCase?: SavedObject<SubCaseAttributes>;
+  soClient: SavedObjectsClientContract;
+  service: CaseServiceSetup;
+}
+
 /**
  * This class represents a case that can have a comment attached to it. This includes
  * a Sub Case, Case, and Collection.
  */
 export class CommentableCase {
-  constructor(
-    private collection: SavedObject<ESCaseAttributes>,
-    private subCase?: SavedObject<SubCaseAttributes>
-  ) {}
+  private readonly collection: SavedObject<ESCaseAttributes>;
+  private readonly subCase?: SavedObject<SubCaseAttributes>;
+  private readonly soClient: SavedObjectsClientContract;
+  private readonly service: CaseServiceSetup;
+  constructor({ collection, subCase, soClient, service }: CommentableCaseParams) {
+    this.collection = collection;
+    this.subCase = subCase;
+    this.soClient = soClient;
+    this.service = service;
+  }
 
   public get status(): CaseStatuses {
     return this.subCase?.attributes.status ?? this.collection.attributes.status;
@@ -50,8 +66,8 @@ export class CommentableCase {
 
   public get attributes(): CollectionWithSubCaseAttributes {
     return {
-      subCase: this.subCase?.attributes ?? null,
-      caseCollection: {
+      subCase: this.subCase?.attributes,
+      case: {
         ...this.collection.attributes,
         connector: transformESConnectorToCaseConnector(this.collection.attributes.connector),
       },
@@ -70,20 +86,64 @@ export class CommentableCase {
     ];
   }
 
-  public async update({
-    service,
-    soClient,
-    date,
-    user,
-  }: {
-    service: CaseServiceSetup;
-    soClient: SavedObjectsClientContract;
-    date: string;
-    user: UserInfo;
-  }): Promise<CommentableCase> {
+  private formatCollectionForEncoding(totalComment: number) {
+    return {
+      id: this.collection.id,
+      version: this.collection.version ?? '0',
+      totalComment,
+      ...this.collection.attributes,
+      connector: transformESConnectorToCaseConnector(this.collection.attributes.connector),
+    };
+  }
+
+  public async encode() {
+    const collectionCommentStats = await this.service.getAllCaseComments({
+      client: this.soClient,
+      id: this.collection.id,
+      options: {
+        fields: [],
+        page: 1,
+        perPage: 1,
+      },
+    });
+
     if (this.subCase) {
-      const updated = await service.patchSubCase({
-        client: soClient,
+      const subCaseComments = await this.service.getAllCaseComments({
+        client: this.soClient,
+        id: this.subCase.id,
+      });
+
+      return CollectWithSubCaseResponseRt.encode({
+        subCase: flattenSubCaseSavedObject({
+          savedObject: this.subCase,
+          comments: subCaseComments.saved_objects,
+          totalAlerts: countAlerts(subCaseComments),
+        }),
+        ...this.formatCollectionForEncoding(collectionCommentStats.total),
+      });
+    }
+
+    const collectionComments = await this.service.getAllCaseComments({
+      client: this.soClient,
+      id: this.collection.id,
+      options: {
+        fields: [],
+        page: 1,
+        perPage: collectionCommentStats.total,
+      },
+    });
+
+    return CollectWithSubCaseResponseRt.encode({
+      comments: flattenCommentSavedObjects(collectionComments.saved_objects),
+      totalAlerts: countAlerts(collectionComments),
+      ...this.formatCollectionForEncoding(collectionCommentStats.total),
+    });
+  }
+
+  public async update({ date, user }: { date: string; user: UserInfo }): Promise<CommentableCase> {
+    if (this.subCase) {
+      const updated = await this.service.patchSubCase({
+        client: this.soClient,
         subCaseId: this.subCase.id,
         updatedAttributes: {
           updated_at: date,
@@ -94,18 +154,23 @@ export class CommentableCase {
         version: this.subCase.version,
       });
 
-      return new CommentableCase(this.collection, {
-        ...this.subCase,
-        attributes: {
-          ...this.subCase.attributes,
-          ...updated.attributes,
+      return new CommentableCase({
+        soClient: this.soClient,
+        service: this.service,
+        collection: this.collection,
+        subCase: {
+          ...this.subCase,
+          attributes: {
+            ...this.subCase.attributes,
+            ...updated.attributes,
+          },
+          version: updated.version ?? this.subCase.version,
         },
-        version: updated.version ?? this.subCase.version,
       });
     }
 
-    const updated = await service.patchCase({
-      client: soClient,
+    const updated = await this.service.patchCase({
+      client: this.soClient,
       caseId: this.collection.id,
       updatedAttributes: {
         updated_at: date,
@@ -114,8 +179,8 @@ export class CommentableCase {
       version: this.collection.version,
     });
 
-    return new CommentableCase(
-      {
+    return new CommentableCase({
+      collection: {
         ...this.collection,
         attributes: {
           ...this.collection.attributes,
@@ -123,7 +188,9 @@ export class CommentableCase {
         },
         version: updated.version ?? this.collection.version,
       },
-      this.subCase
-    );
+      subCase: this.subCase,
+      soClient: this.soClient,
+      service: this.service,
+    });
   }
 }

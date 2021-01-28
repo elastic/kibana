@@ -33,7 +33,7 @@ export function initPostCommentApi({ router }: RouteDeps) {
 
       try {
         return response.ok({
-          body: await caseClient.addComment({ caseClient, caseId, comment }),
+          body: await caseClient.addComment({ caseId, comment }),
         });
       } catch (error) {
         return response.customError(wrapError(error));

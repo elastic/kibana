@@ -9,23 +9,9 @@ import * as rt from 'io-ts';
 import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
-import { CasesStatusResponseRt } from './status';
+import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt, ESCaseConnector } from '../connectors';
 import { SubCaseResponseRt } from './sub_case';
-
-export enum CaseStatuses {
-  open = 'open',
-  'in-progress' = 'in-progress',
-  closed = 'closed',
-}
-
-export const CaseStatusRt = rt.union([
-  rt.literal(CaseStatuses.open),
-  rt.literal(CaseStatuses['in-progress']),
-  rt.literal(CaseStatuses.closed),
-]);
-
-export const caseStatuses = Object.values(CaseStatuses);
 
 export enum CaseType {
   parent = 'parent',

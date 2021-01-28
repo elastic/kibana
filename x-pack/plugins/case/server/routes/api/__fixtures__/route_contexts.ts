@@ -7,7 +7,7 @@
 import { KibanaRequest } from 'src/core/server';
 import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { actionsClientMock } from '../../../../../actions/server/mocks';
-import { createCaseClient } from '../../../client';
+import { createExternalCaseClient } from '../../../client';
 import {
   AlertService,
   CaseService,
@@ -54,7 +54,7 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   } as unknown) as CasesRequestHandlerContext;
 
   const connectorMappingsService = await connectorMappingsServicePlugin.setup();
-  const caseClient = createCaseClient({
+  const caseClient = createExternalCaseClient({
     savedObjectsClient: client,
     request: {} as KibanaRequest,
     caseService,

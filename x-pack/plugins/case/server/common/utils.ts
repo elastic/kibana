@@ -12,7 +12,7 @@ export const countAlerts = (comments: SavedObjectsFindResponse<CommentAttributes
   for (const comment of comments.saved_objects) {
     if (
       comment.attributes.type === CommentType.alert ||
-      comment.attributes.type === CommentType.alertGroup
+      comment.attributes.type === CommentType.generatedAlert
     ) {
       if (Array.isArray(comment.attributes.alertId)) {
         totalAlerts += comment.attributes.alertId.length;

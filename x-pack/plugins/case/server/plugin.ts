@@ -35,7 +35,7 @@ import {
   AlertService,
   AlertServiceContract,
 } from './services';
-import { createCaseClient } from './client';
+import { CaseClientImpl, createExternalCaseClient } from './client';
 import { registerConnectors } from './connectors';
 import type { CasesRequestHandlerContext } from './types';
 
@@ -129,7 +129,7 @@ export class CasePlugin {
       context: CasesRequestHandlerContext,
       request: KibanaRequest
     ) => {
-      return createCaseClient({
+      return createExternalCaseClient({
         savedObjectsClient: core.savedObjects.getScopedClient(request),
         request,
         caseService: this.caseService!,
@@ -169,7 +169,7 @@ export class CasePlugin {
       const [{ savedObjects }] = await core.getStartServices();
       return {
         getCaseClient: () => {
-          return createCaseClient({
+          return new CaseClientImpl({
             savedObjectsClient: savedObjects.getScopedClient(request),
             caseService,
             caseConfigureService,

@@ -37,9 +37,8 @@ import {
   AssociationType,
   SubCaseAttributes,
   SubCaseResponse,
-  CommentRequestAlertGroupType,
-  ContextTypeAlertGroupRt,
-  CommentAlertGroupAttributesType,
+  CommentRequestGeneratedAlertType,
+  ContextTypeGeneratedAlertRt,
   CollectionWithSubCaseResponse,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
@@ -105,7 +104,7 @@ type NewCommentArgs = CommentRequest & {
  * @param comment the comment from the add comment request
  */
 export const getAlertIds = (comment: CommentRequest): string[] => {
-  if (isAlertGroupContext(comment)) {
+  if (isGeneratedAlertContext(comment)) {
     const ids: string[] = [];
     if (Array.isArray(comment.alerts)) {
       ids.push(
@@ -133,14 +132,13 @@ export const transformNewComment = ({
   username,
   ...comment
 }: NewCommentArgs): CommentAttributes => {
-  if (isAlertGroupContext(comment)) {
+  if (isGeneratedAlertContext(comment)) {
     const ids = getAlertIds(comment);
 
     return {
       associationType,
       alertId: ids,
       index: comment.index,
-      ruleId: comment.ruleId,
       type: comment.type,
       created_at: createdDate,
       created_by: { email, full_name, username },
@@ -199,6 +197,7 @@ export const transformCases = ({
   count_closed_cases: countClosedCases,
 });
 
+// TODO: remove because it is no longer used
 export const flattenCaseSavedObjects = (
   savedObjects: Array<SavedObject<ESCaseAttributes>>,
   totalCommentByCase: TotalCommentByCase[]
@@ -235,23 +234,6 @@ export const flattenCaseSavedObject = ({
   ...savedObject.attributes,
   connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
   subCases,
-});
-
-export const flattenCommentableCaseSavedObject = ({
-  combinedCase,
-  comments = [],
-  totalComment = comments.length,
-}: {
-  combinedCase: CommentableCase;
-  comments?: Array<SavedObject<CommentAttributes>>;
-  totalComment?: number;
-  totalAlerts?: number;
-}): CollectionWithSubCaseResponse => ({
-  id: combinedCase.id,
-  version: combinedCase.version ?? '0',
-  comments: flattenCommentSavedObjects(comments),
-  totalComment,
-  ...combinedCase.attributes,
 });
 
 export const flattenSubCaseSavedObject = ({
@@ -326,10 +308,17 @@ const isAlertContext = (
   return context.type === CommentType.alert;
 };
 
-export const isAlertGroupContext = (
+/**
+ * This is used to test if the posted comment is an generated alert. A generated alert will have one or many alerts.
+ * An alert is essentially an object with a _id field. This differs from a regular attached alert because the _id is
+ * passed directly in the request, it won't be in an object. Internally case will strip off the outer object and store
+ * both a generated and user attached alert in the same structure but this function is useful to determine which
+ * structure the new alert in the request has.
+ */
+export const isGeneratedAlertContext = (
   context: CommentRequest
-): context is CommentRequestAlertGroupType => {
-  return context.type === CommentType.alertGroup;
+): context is CommentRequestGeneratedAlertType => {
+  return context.type === CommentType.generatedAlert;
 };
 
 export const decodeComment = (comment: CommentRequest) => {
@@ -337,28 +326,25 @@ export const decodeComment = (comment: CommentRequest) => {
     pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
   } else if (isAlertContext(comment)) {
     pipe(excess(ContextTypeAlertRt).decode(comment), fold(throwErrors(badRequest), identity));
-  } else if (isAlertGroupContext(comment)) {
-    pipe(excess(ContextTypeAlertGroupRt).decode(comment), fold(throwErrors(badRequest), identity));
+  } else if (isGeneratedAlertContext(comment)) {
+    pipe(
+      excess(ContextTypeGeneratedAlertRt).decode(comment),
+      fold(throwErrors(badRequest), identity)
+    );
   }
 };
 
 export const getCommentContextFromAttributes = (
   attributes: CommentAttributes
-): CommentRequestUserType | CommentRequestAlertType | CommentAlertGroupAttributesType =>
+): CommentRequestUserType | CommentRequestAlertType =>
   isUserContext(attributes)
     ? {
         type: CommentType.user,
         comment: attributes.comment,
       }
-    : isAlertContext(attributes)
-    ? {
-        type: CommentType.alert,
-        alertId: attributes.alertId,
-        index: attributes.index,
-      }
     : {
-        type: CommentType.alertGroup,
+        // this can be either alert or generated_alert so just grab it from the attributes
+        type: attributes.type,
         alertId: attributes.alertId,
         index: attributes.index,
-        ruleId: attributes.ruleId,
       };

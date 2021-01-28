@@ -15,6 +15,9 @@ import {
   CaseStatuses,
   CaseType,
   AssociationType,
+  CaseResponse,
+  CasesResponse,
+  CollectionWithSubCaseResponse,
 } from '../../../common/api';
 import {
   connectorMappingsServiceMock,
@@ -25,12 +28,12 @@ import {
 } from '../../services/mocks';
 import { CaseActionType, CaseActionTypeExecutorOptions, CaseExecutorParams } from './types';
 import { getActionType } from '.';
-import { createCaseClientMock } from '../../client/mocks';
+import { createExternalCaseClientMock } from '../../client/mocks';
 
-const mockCaseClient = createCaseClientMock();
+const mockCaseClient = createExternalCaseClientMock();
 
 jest.mock('../../client', () => ({
-  createCaseClient: () => mockCaseClient,
+  createExternalCaseClient: () => mockCaseClient,
 }));
 
 const services = actionsMock.createServices();
@@ -822,12 +825,14 @@ describe('case connector', () => {
 
     describe('create', () => {
       it('executes correctly', async () => {
-        const createReturn = {
+        const createReturn: CaseResponse = {
           id: 'mock-it',
           comments: [],
           totalComment: 0,
+          totalAlerts: 0,
           closed_at: null,
           closed_by: null,
+          converted_by: null,
           connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
@@ -906,7 +911,7 @@ describe('case connector', () => {
 
     describe('update', () => {
       it('executes correctly', async () => {
-        const updateReturn = [
+        const updateReturn: CasesResponse = [
           {
             closed_at: '2019-11-25T21:54:48.952Z',
             closed_by: {
@@ -927,6 +932,7 @@ describe('case connector', () => {
               full_name: 'elastic',
               username: 'elastic',
             },
+            converted_by: null,
             description: 'This is a brand new case of a bad meanie defacing data',
             id: 'mock-id-1',
             external_service: null,
@@ -934,6 +940,7 @@ describe('case connector', () => {
             tags: ['defacement'],
             title: 'Update title',
             totalComment: 0,
+            totalAlerts: 0,
             type: CaseType.parent,
             updated_at: '2019-11-25T21:54:48.952Z',
             updated_by: {
@@ -994,14 +1001,21 @@ describe('case connector', () => {
 
     describe('addComment', () => {
       it('executes correctly', async () => {
-        const commentReturn = {
+        const commentReturn: CollectionWithSubCaseResponse = {
           id: 'mock-it',
           totalComment: 0,
+          version: 'WzksMV0=',
+
           closed_at: null,
           closed_by: null,
           connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
           created_at: '2019-11-25T21:54:48.952Z',
-          created_by: { full_name: 'Awesome D00d', email: 'd00d@awesome.com', username: 'awesome' },
+          created_by: {
+            full_name: 'Awesome D00d',
+            email: 'd00d@awesome.com',
+            username: 'awesome',
+          },
+          converted_by: null,
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
@@ -1010,7 +1024,6 @@ describe('case connector', () => {
           type: CaseType.parent,
           updated_at: null,
           updated_by: null,
-          version: 'WzksMV0=',
           comments: [
             {
               associationType: AssociationType.case,
