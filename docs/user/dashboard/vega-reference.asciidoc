@@ -214,6 +214,26 @@ on the currently picked range: `"interval": {"%autointerval%": 10}` will
 try to get about 10-15 data points (buckets).
 
 [float]
+[[vega-esmfiles]]
+===== Access Elastic Map Service files
+
+experimental[] Access the Elastic Map Service files via the same mechanism:
+
+[source,yaml]
+----
+url: {
+  // "type" defaults to "elasticsearch" otherwise
+  %type%: emsfile
+  // Name of the file, exactly as in the Region map visualization
+  name: World Countries
+}
+// The result is a geojson file, get its features to use
+// this data source with the "shape" marks
+// https://vega.github.io/vega/docs/marks/shape/
+format: {property: "features"}
+----
+
+[float]
 [[vega-with-a-map]]
 ==== Vega with a Map
 
@@ -270,7 +290,7 @@ vector shapes of administrative boundaries in your Vega map by setting `url.data
 ----
 url: {
   // "type" defaults to "elasticsearch" otherwise
-  type: emsfile
+  %type%: emsfile
   // Name of the file, exactly as in the Region map visualization
   name: World Countries
 }
