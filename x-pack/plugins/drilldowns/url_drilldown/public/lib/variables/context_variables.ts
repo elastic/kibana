@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
+import { getFlattenedObject } from '@kbn/std';
 import type { Filter, Query, TimeRange } from '../../../../../../../src/plugins/data/public';
 import {
   EmbeddableInput,
@@ -116,11 +117,77 @@ type VariableDescription = Pick<UrlTemplateEditorVariable, 'title' | 'documentat
 
 const variableDescriptions: Record<string, undefined | VariableDescription> = {
   id: {
-    title: i18n.translate('xpack.urlDrilldown.context.panel.title', {
-      defaultMessage: 'List of row cell values.',
+    title: i18n.translate('xpack.urlDrilldown.context.panel.id.title', {
+      defaultMessage: 'Panel ID.',
     }),
-    documentation: i18n.translate('xpack.urlDrilldown.row.event.values.documentation', {
-      defaultMessage: 'An array of all cell values for the raw on which the action will execute.',
+    documentation: i18n.translate('xpack.urlDrilldown.context.panel.id.documentation', {
+      defaultMessage: 'ID of the panel where drilldown is executed.',
+    }),
+  },
+  title: {
+    title: i18n.translate('xpack.urlDrilldown.context.panel.title.title', {
+      defaultMessage: 'Panel title.',
+    }),
+    documentation: i18n.translate('xpack.urlDrilldown.context.panel.title.documentation', {
+      defaultMessage: 'Title of the panel where drilldown is executed.',
+    }),
+  },
+  filters: {
+    title: i18n.translate('xpack.urlDrilldown.context.panel.filters.title', {
+      defaultMessage: 'Panel filters.',
+    }),
+    documentation: i18n.translate('xpack.urlDrilldown.context.panel.filters.documentation', {
+      defaultMessage: 'List of Kibana filters applied to a panel.',
+    }),
+  },
+  'query.query': {
+    title: i18n.translate('xpack.urlDrilldown.context.panel.query.query.title', {
+      defaultMessage: 'Query string.',
+    }),
+  },
+  'query.language': {
+    title: i18n.translate('xpack.urlDrilldown.context.panel.query.language.title', {
+      defaultMessage: 'Query language.',
+    }),
+  },
+  'timeRange.from': {
+    title: i18n.translate('xpack.urlDrilldown.context.panel.timeRange.from.title', {
+      defaultMessage: 'Time picker "from" value.',
+    }),
+  },
+  'timeRange.to': {
+    title: i18n.translate('xpack.urlDrilldown.context.panel.timeRange.to.title', {
+      defaultMessage: 'Time picker "to" value.',
+    }),
+  },
+  indexPatternId: {
+    title: i18n.translate('xpack.urlDrilldown.context.panel.timeRange.indexPatternId.title', {
+      defaultMessage: 'Index pattern ID.',
+    }),
+    documentation: i18n.translate(
+      'xpack.urlDrilldown.context.panel.timeRange.indexPatternId.documentation',
+      {
+        defaultMessage: 'First index pattern ID used by the panel.',
+      }
+    ),
+  },
+  indexPatternIds: {
+    title: i18n.translate('xpack.urlDrilldown.context.panel.timeRange.indexPatternIds.title', {
+      defaultMessage: 'Index pattern IDs.',
+    }),
+    documentation: i18n.translate(
+      'xpack.urlDrilldown.context.panel.timeRange.indexPatternIds.documentation',
+      {
+        defaultMessage: 'List of all index pattern IDs used by the panel.',
+      }
+    ),
+  },
+  savedObjectId: {
+    title: i18n.translate('xpack.urlDrilldown.context.panel.savedObjectId.title', {
+      defaultMessage: 'Saved object ID.',
+    }),
+    documentation: i18n.translate('xpack.urlDrilldown.context.panel.savedObjectId.documentation', {
+      defaultMessage: 'ID of the saved object behind the panel.',
     }),
   },
 };
@@ -130,7 +197,8 @@ const sortPrefix = '2.';
 
 const getPanelVariableList = (values: PanelValues): UrlTemplateEditorVariable[] => {
   const variables: UrlTemplateEditorVariable[] = [];
-  const keys = Object.keys(values).sort();
+  const flattenedValues = getFlattenedObject(values);
+  const keys = Object.keys(flattenedValues).sort();
 
   for (const key of keys) {
     const description = variableDescriptions[key];
