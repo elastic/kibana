@@ -201,12 +201,6 @@ This page has moved. Refer to <<url-template-variables>>.
 This page was deleted. Refer to <<dashboard>>.
 
 [float]
-[[development-functional-tests]]
-=== Development Functional Tests
-
-This page has been moved. Refer to <<Testing>>.
-
-[float]
 [[kibana-keystore-has-moved-from-the-data-folder-to-the-config-folder]]
 === Kibana Keystore has moved from the Data Folder to the Config Folder
 
@@ -230,12 +224,6 @@ This page has been deleted. Refer to <<dashboard>>.
 === Line, Area, and Bar Chart
 
 This page has been deleted. Refer to <<dashboard>>.
-
-[float]
-[[watcher-create-threshold-alert]]
-=== Create Threshold Alert
-
-This page has been moved. Refer to <<watcher>>.
 
 [float]
 [[add-canvas-events]]
