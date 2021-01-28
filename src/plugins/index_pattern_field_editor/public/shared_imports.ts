@@ -25,4 +25,4 @@ export {
 
 export { fieldValidators } from '../../es_ui_shared/static/forms/helpers';
 
-export { TextField, ToggleField } from '../../es_ui_shared/static/forms/components';
+export { TextField, ToggleField, NumericField } from '../../es_ui_shared/static/forms/components';

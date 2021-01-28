@@ -5,7 +5,10 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
+import React from 'react';
 
-export { TypeField } from './type_field';
-export { CustomLabelField } from './custom_label_field';
-export { PopularityField } from './popularity_field';
+import { UseField, TextField } from '../../../shared_imports';
+
+export const CustomLabelField = () => {
+  return <UseField path="customLabel" component={TextField} />;
+};

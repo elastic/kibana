@@ -15,7 +15,7 @@ import { Field } from '../../types';
 import { schema } from './form_schema';
 import { getNameFieldConfig } from './lib';
 import { ShadowingFieldWarning } from './shadowing_field_warning';
-import { TypeField } from './form_fields';
+import { TypeField, CustomLabelField, PopularityField } from './form_fields';
 import { FormRow } from './form_row';
 import { AdvancedParametersSection } from './advanced_parameters_section';
 
@@ -30,6 +30,7 @@ export interface FieldFormInternal extends Field {
     isCustomLabelVisible: boolean;
     isValueVisible: boolean;
     isFormatVisible: boolean;
+    isPopularityVisible: boolean;
   };
 }
 
@@ -85,6 +86,14 @@ const geti18nTexts = () => ({
       defaultMessage: `Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working.`,
     }),
   },
+  popularity: {
+    title: i18n.translate('indexPatternFieldEditor.editor.form.popularityTitle', {
+      defaultMessage: 'Set popularity',
+    }),
+    description: i18n.translate('indexPatternFieldEditor.editor.form.popularityDescription', {
+      defaultMessage: `By default fields in Discover are ordered from the most used fields to the least used. Each time a field is selected its popularity increases. You can manually set here the popularity of the field.`,
+    }),
+  },
 });
 
 const formDeserializer = (field: Field): FieldFormInternal => {
@@ -94,6 +103,7 @@ const formDeserializer = (field: Field): FieldFormInternal => {
       isCustomLabelVisible: field.customLabel !== undefined,
       isValueVisible: field.script !== undefined,
       isFormatVisible: field.format !== undefined,
+      isPopularityVisible: field.popularity !== undefined,
     },
   };
 };
@@ -160,15 +170,16 @@ const FieldEditorComponent = ({
         </>
       )}
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="xl" />
 
       {/* Set custom label */}
       <FormRow
         title={i18nTexts.customLabel.title}
         description={i18nTexts.customLabel.description}
         formFieldPath="__meta__.isCustomLabelVisible"
+        withDividerRule
       >
-        <div>Block custom label</div>
+        <CustomLabelField />
       </FormRow>
 
       {/* Set value */}
@@ -176,6 +187,7 @@ const FieldEditorComponent = ({
         title={i18nTexts.value.title}
         description={i18nTexts.value.description}
         formFieldPath="__meta__.isValueVisible"
+        withDividerRule
       >
         <div>Block value (script)</div>
       </FormRow>
@@ -185,13 +197,21 @@ const FieldEditorComponent = ({
         title={i18nTexts.format.title}
         description={i18nTexts.format.description}
         formFieldPath="__meta__.isFormatVisible"
+        withDividerRule
       >
         <div>Block custom format</div>
       </FormRow>
 
       {/* Advanced settings */}
       <AdvancedParametersSection>
-        <div>Placeholder for advanced settings</div>
+        <FormRow
+          title={i18nTexts.popularity.title}
+          description={i18nTexts.popularity.description}
+          formFieldPath="__meta__.isPopularityVisible"
+          withDividerRule
+        >
+          <PopularityField />
+        </FormRow>
       </AdvancedParametersSection>
     </Form>
   );

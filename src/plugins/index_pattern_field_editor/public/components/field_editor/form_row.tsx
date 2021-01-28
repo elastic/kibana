@@ -24,9 +24,16 @@ interface Props {
   formFieldPath: string;
   children: React.ReactNode;
   description?: string | JSX.Element;
+  withDividerRule?: boolean;
 }
 
-export const FormRow = ({ title, description, children, formFieldPath }: Props) => {
+export const FormRow = ({
+  title,
+  description,
+  children,
+  formFieldPath,
+  withDividerRule = false,
+}: Props) => {
   const [formData] = useFormData({ watch: formFieldPath });
   const isContentVisible = Boolean(get(formData, formFieldPath));
 
@@ -71,7 +78,7 @@ export const FormRow = ({ title, description, children, formFieldPath }: Props) 
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiHorizontalRule />
+      {withDividerRule && <EuiHorizontalRule />}
     </>
   );
 };

@@ -54,6 +54,16 @@ export const schema: FormSchema<FieldFormInternal> = {
       }),
     },
   },
+  customLabel: {
+    label: i18n.translate('indexPatternFieldEditor.editor.form.customLabelLabel', {
+      defaultMessage: 'Custom label',
+    }),
+  },
+  popularity: {
+    label: i18n.translate('indexPatternFieldEditor.editor.form.popularityLabel', {
+      defaultMessage: 'Popularity',
+    }),
+  },
   __meta__: {
     isCustomLabelVisible: {
       defaultValue: false,
@@ -62,6 +72,9 @@ export const schema: FormSchema<FieldFormInternal> = {
       defaultValue: false,
     },
     isFormatVisible: {
+      defaultValue: false,
+    },
+    isPopularityVisible: {
       defaultValue: false,
     },
   },
