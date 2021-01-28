@@ -13,8 +13,6 @@ import { ActionsTable } from '../../actions/actions_table';
 const QueriesPageComponent = () => {
   const newQueryLinkProps = useRouterNavigate('/live_query/queries/new');
 
-  console.error('newQueryLinkProps', newQueryLinkProps);
-
   return (
     <>
       <EuiFlexGroup>

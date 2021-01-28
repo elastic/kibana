@@ -25,7 +25,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../src/plugins/
 import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
 
-const ID = 'resultsAllQuery';
+const ID = 'resultsActionQuery';
 
 export interface ResultsArgs {
   results: ResultEdges;
@@ -36,7 +36,7 @@ export interface ResultsArgs {
   totalCount: number;
 }
 
-interface UseAllResults {
+interface UseActionResults {
   actionId: string;
   activePage: number;
   direction: Direction;
@@ -47,7 +47,7 @@ interface UseAllResults {
   skip?: boolean;
 }
 
-export const useAllResults = ({
+export const useActionResults = ({
   actionId,
   activePage,
   direction,
@@ -56,7 +56,7 @@ export const useAllResults = ({
   docValueFields,
   filterQuery,
   skip = false,
-}: UseAllResults): [boolean, ResultsArgs] => {
+}: UseActionResults): [boolean, ResultsArgs] => {
   const { data, notifications } = useKibana().services;
 
   const abortCtrl = useRef(new AbortController());
@@ -114,13 +114,16 @@ export const useAllResults = ({
                   setLoading(false);
                 }
                 // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_ALL_RESULTS);
+                notifications.toasts.addWarning(i18n.ERROR_ACTION_RESULTS);
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
               if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({ title: i18n.FAIL_ALL_RESULTS, text: msg.message });
+                notifications.toasts.addDanger({
+                  title: i18n.FAIL_ACTION_RESULTS,
+                  text: msg.message,
+                });
               }
             },
           });

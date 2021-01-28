@@ -22,7 +22,7 @@ export function defineRoutes(router: IRouter) {
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asInternalUser;
       const query = await esClient.index<{}, {}>({
-        index: '.fleet-actions-new',
+        index: '.fleet-actions',
         body: {
           action_id: uuid.v4(),
           '@timestamp': moment().toISOString(),

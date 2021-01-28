@@ -39,6 +39,7 @@ export interface ResultsArgs {
 interface UseAllResults {
   actionId: string;
   activePage: number;
+  agentId?: string;
   direction: Direction;
   limit: number;
   sortField: string;
@@ -50,6 +51,7 @@ interface UseAllResults {
 export const useAllResults = ({
   actionId,
   activePage,
+  agentId,
   direction,
   limit,
   sortField,
@@ -140,6 +142,7 @@ export const useAllResults = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         actionId,
+        agentId,
         docValueFields: docValueFields ?? [],
         factoryQueryType: OsqueryQueries.results,
         filterQuery: createFilter(filterQuery),
@@ -154,7 +157,7 @@ export const useAllResults = ({
       }
       return prevRequest;
     });
-  }, [actionId, activePage, direction, docValueFields, filterQuery, limit, sortField]);
+  }, [actionId, activePage, agentId, direction, docValueFields, filterQuery, limit, sortField]);
 
   useEffect(() => {
     resultsSearch(resultsRequest);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import { UseField, Form, useForm } from '../../shared_imports';
@@ -41,11 +41,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ actionDetails, o
     }),
   });
 
+  const { submit } = form;
+
   return (
     <Form form={form}>
       <UseField path="agents" component={AgentsTableField} />
       <EuiSpacer />
       <UseField path="command" component={CodeEditorField} />
+      <EuiButton onClick={submit}>{'Send query'}</EuiButton>
     </Form>
   );
 };

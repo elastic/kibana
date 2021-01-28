@@ -5,20 +5,22 @@
  */
 
 import { isEmpty, isEqual, keys, map } from 'lodash/fp';
-import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn, EuiLink } from '@elastic/eui';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { EuiDataGridSorting } from '@elastic/eui';
 import { useAllResults } from './use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
+import { useRouterNavigate } from '../common/lib/kibana';
 
 const DataContext = createContext<ResultEdges>([]);
 
 interface ResultsTableComponentProps {
   actionId: string;
+  agentId?: string;
 }
 
-const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId }) => {
+const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId, agentId }) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
@@ -47,6 +49,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId 
 
   const [, { results, totalCount }] = useAllResults({
     actionId,
+    agentId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     direction: Direction.asc,
@@ -66,9 +69,18 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId 
 
       const value = data[rowIndex].fields[columnId];
 
+      if (columnId === 'agent.name') {
+        const agentIdValue = data[rowIndex].fields['agent.id'];
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const linkProps = useRouterNavigate(
+          `/live_query/queries/${actionId}/results/${agentIdValue}`
+        );
+        return <EuiLink {...linkProps}>{value}</EuiLink>;
+      }
+
       return !isEmpty(value) ? value : '-';
     },
-    []
+    [actionId]
   );
 
   const tableSorting = useMemo(() => ({ columns: sortingColumns, onSort }), [
@@ -87,13 +99,33 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId 
   );
 
   useEffect(() => {
-    const newColumns: EuiDataGridColumn[] = keys(results[0]?.fields)
+    const newColumns = keys(results[0]?.fields)
       .sort()
-      .map((fieldName) => ({
-        id: fieldName,
-        displayAsText: fieldName.split('.')[1],
-        defaultSortDirection: 'asc',
-      }));
+      .reduce((acc, fieldName) => {
+        if (fieldName === 'agent.name') {
+          return [
+            ...acc,
+            {
+              id: fieldName,
+              displayAsText: 'agent',
+              defaultSortDirection: Direction.asc,
+            },
+          ];
+        }
+
+        if (fieldName.startsWith('osquery.')) {
+          return [
+            ...acc,
+            {
+              id: fieldName,
+              displayAsText: fieldName.split('.')[1],
+              defaultSortDirection: Direction.asc,
+            },
+          ];
+        }
+
+        return acc;
+      }, [] as EuiDataGridColumn[]);
 
     if (!isEqual(columns, newColumns)) {
       setColumns(newColumns);

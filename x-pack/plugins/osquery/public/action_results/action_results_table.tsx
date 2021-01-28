@@ -4,12 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, isEqual, keys, map } from 'lodash/fp';
-import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
+import { isEmpty, isEqual, keys, find, map } from 'lodash/fp';
+import {
+  EuiDataGrid,
+  EuiDataGridProps,
+  EuiDataGridColumn,
+  EuiDataGridSorting,
+  EuiHealth,
+  EuiIcon,
+  EuiLink,
+} from '@elastic/eui';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
-import { useAllResults } from './use_action_results';
+import { useAllAgents } from './../agents/use_all_agents';
+import { useActionResults } from './use_action_results';
+import { useAllResults } from '../results/use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
+import { useRouterNavigate } from '../common/lib/kibana';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -33,12 +44,38 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     [setPagination]
   );
 
-  const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
+  const [columns, setColumns] = useState<EuiDataGridColumn[]>([
+    {
+      id: 'status',
+      displayAsText: 'status',
+      defaultSortDirection: Direction.asc,
+    },
+    {
+      id: 'rows_count',
+      displayAsText: '# rows',
+      defaultSortDirection: Direction.asc,
+    },
+    {
+      id: 'agent_status',
+      displayAsText: 'online',
+      defaultSortDirection: Direction.asc,
+    },
+    {
+      id: 'agent',
+      displayAsText: 'agent',
+      defaultSortDirection: Direction.asc,
+    },
+    {
+      id: '@timestamp',
+      displayAsText: '@timestamp',
+      defaultSortDirection: Direction.asc,
+    },
+  ]);
 
   // ** Sorting config
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
-  const [, { results, totalCount }] = useAllResults({
+  const [, { results, totalCount }] = useActionResults({
     actionId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
@@ -47,22 +84,86 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
   });
 
   // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState<string[]>([]); // initialize to the full set of columns
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(() => map('id', columns)); // initialize to the full set of columns
 
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [
     visibleColumns,
     setVisibleColumns,
   ]);
 
+  const [, { agents }] = useAllAgents({
+    activePage: 0,
+    limit: 1000,
+    direction: Direction.desc,
+    sortField: '@timestamp',
+  });
+
+  console.error('agenmts', agents);
+
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
     () => ({ rowIndex, columnId, setCellProps }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
-      const value = data[rowIndex].fields[columnId];
+      const value = data[rowIndex];
 
-      return !isEmpty(value) ? value : '-';
+      if (columnId === 'status') {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const linkProps = useRouterNavigate(
+          `/live_query/queries/${actionId}/results/${value.fields.agent_id[0]}`
+        );
+
+        return (
+          <>
+            <EuiIcon type="checkInCircleFilled" />
+            <EuiLink {...linkProps}>{'View results'}</EuiLink>
+          </>
+        );
+      }
+
+      if (columnId === 'rows_count') {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const [, { totalCount: agentResultsCount }] = useAllResults({
+          actionId,
+          agentId: value.fields.agent_id[0],
+          activePage: pagination.pageIndex,
+          limit: pagination.pageSize,
+          direction: Direction.asc,
+          sortField: '@timestamp',
+        });
+        return agentResultsCount;
+      }
+
+      if (columnId === 'agent_status') {
+        const agentIdValue = value.fields.agent_id[0];
+        const agent = find(['_id', agentIdValue], agents);
+        const online = agent?.active;
+        const color = online ? 'success' : 'danger';
+        const label = online ? 'Online' : 'Offline';
+        return <EuiHealth color={color}>{label}</EuiHealth>;
+      }
+
+      if (columnId === 'agent') {
+        const agentIdValue = value.fields.agent_id[0];
+        const agent = find(['_id', agentIdValue], agents);
+        const agentName = agent?.local_metadata.host.name;
+
+        console.error('aaa', value, agentIdValue, agentName, find(['_id', agentIdValue], agents));
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const linkProps = useRouterNavigate(
+          `/live_query/queries/${actionId}/results/${agentIdValue}`
+        );
+        return (
+          <EuiLink {...linkProps}>{`(${agent?.local_metadata.os.name}) ${agentName}`}</EuiLink>
+        );
+      }
+
+      if (columnId === '@timestamp') {
+        return value.fields['@timestamp'];
+      }
+
+      return '-';
     },
-    []
+    [actionId, agents]
   );
 
   const tableSorting: EuiDataGridSorting = useMemo(
@@ -79,21 +180,6 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     }),
     [onChangeItemsPerPage, onChangePage, pagination]
   );
-
-  useEffect(() => {
-    const newColumns = keys(results[0]?.fields)
-      .sort()
-      .map((fieldName) => ({
-        id: fieldName,
-        displayAsText: fieldName.split('.')[1],
-        defaultSortDirection: Direction.asc,
-      }));
-
-    if (!isEqual(columns, newColumns)) {
-      setColumns(newColumns);
-      setVisibleColumns(map('id', newColumns));
-    }
-  }, [columns, results]);
 
   return (
     <DataContext.Provider value={results}>

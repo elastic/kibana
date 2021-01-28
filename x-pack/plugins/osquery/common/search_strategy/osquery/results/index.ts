@@ -21,4 +21,5 @@ export interface ResultsStrategyResponse extends IEsSearchResponse {
 
 export interface ResultsRequestOptions extends RequestOptionsPaginated<{}> {
   actionId: string;
+  agentId?: string;
 }
