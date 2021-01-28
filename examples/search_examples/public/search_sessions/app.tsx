@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import useObservable from 'react-use/lib/useObservable';
@@ -43,8 +43,13 @@ import {
   IndexPatternField,
   isCompleteResponse,
   isErrorResponse,
+  QueryState,
   SearchSessionState,
 } from '../../../../src/plugins/data/public';
+import {
+  createStateContainer,
+  useContainerState,
+} from '../../../../src/plugins/kibana_utils/public';
 
 interface SearchSessionsExampleAppDeps {
   notifications: CoreStart['notifications'];
@@ -72,19 +77,37 @@ function formatFieldsToComboBox(fields?: IndexPatternField[]) {
   });
 }
 
+interface State extends QueryState {
+  indexPatternId?: string;
+  numericFieldName?: string;
+}
+
 export const SearchSessionsExampleApp = ({
   notifications,
   navigation,
   data,
 }: SearchSessionsExampleAppDeps) => {
   const { IndexPatternSelect } = data.ui;
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
-  const [fields, setFields] = useState<IndexPatternField[]>();
-  const [selectedFields, setSelectedFields] = useState<IndexPatternField[]>([]);
-  const [selectedNumericField, setSelectedNumericField] = useState<
-    IndexPatternField | null | undefined
-  >();
 
+  const stateContainer = useMemo(() => {
+    return createStateContainer<State>({});
+  }, []);
+  const setState = useCallback(
+    (state: Partial<State>) => stateContainer.set({ ...stateContainer.get(), ...state }),
+    [stateContainer]
+  );
+  const state = useContainerState(stateContainer);
+  useEffect(() => {
+    return connectToQueryState(data.query, stateContainer, {
+      time: true,
+      query: true,
+      filters: true,
+      refreshInterval: false,
+    });
+  }, [stateContainer, data.query]);
+
+  const [fields, setFields] = useState<IndexPatternField[]>();
+  const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
   const [request, setRequest] = useState<Record<string, any> | null>(null);
   const [response, setResponse] = useState<Record<string, any> | null>(null);
 
@@ -98,6 +121,13 @@ export const SearchSessionsExampleApp = ({
   const isRestoreStarted = !!restoreRequest;
   const isRestoreLoading = !!restoreRequest && !restoreResponse;
   const isRestoreLoaded = !!restoreResponse;
+
+  // const reset = useCallback(() => {
+  //   setRequest(null);
+  //   setResponse(null);
+  //   setRestoreRequest(null);
+  //   setRestoreResponse(null);
+  // }, [setRequest, setResponse, setRestoreRequest, setRestoreResponse]);
 
   const sessionState = useObservable(data.search.session.state$) || SearchSessionState.None;
 
@@ -118,24 +148,43 @@ export const SearchSessionsExampleApp = ({
 
   // Fetch the default index pattern using the `data.indexPatterns` service, as the component is mounted.
   useEffect(() => {
-    const setDefaultIndexPattern = async () => {
-      const defaultIndexPattern = await data.indexPatterns.getDefault();
-      setIndexPattern(defaultIndexPattern);
+    let canceled = false;
+    const loadIndexPattern = async () => {
+      const loadedIndexPattern = state.indexPatternId
+        ? await data.indexPatterns.get(state.indexPatternId)
+        : await data.indexPatterns.getDefault();
+      if (canceled) return;
+      if (!loadedIndexPattern) return;
+      if (!state.indexPatternId) {
+        setState({
+          indexPatternId: loadedIndexPattern.id,
+        });
+      }
+
+      setIndexPattern(loadedIndexPattern);
     };
 
-    setDefaultIndexPattern();
-  }, [data]);
+    loadIndexPattern();
+    return () => {
+      canceled = true;
+    };
+  }, [data, setState, state.indexPatternId]);
 
   // Update the fields list every time the index pattern is modified.
   useEffect(() => {
     setFields(indexPattern?.fields);
   }, [indexPattern]);
   useEffect(() => {
-    setSelectedNumericField(fields?.length ? getNumeric(fields)[0] : null);
-  }, [fields]);
+    setState({ numericFieldName: fields?.length ? getNumeric(fields)[0]?.name : undefined });
+  }, [setState, fields]);
+
+  const selectedField: IndexPatternField | undefined = useMemo(
+    () => indexPattern?.fields.find((field) => field.name === state.numericFieldName),
+    [indexPattern?.fields, state.numericFieldName]
+  );
 
   const doAsyncSearch = async (restoreSearchSessionId?: string) => {
-    if (!indexPattern || !selectedNumericField) return;
+    if (!indexPattern || !state.numericFieldName) return;
 
     // start a new session or restore an existing one
     if (restoreSearchSessionId) {
@@ -148,7 +197,7 @@ export const SearchSessionsExampleApp = ({
     const query = data.query.getEsQuery(indexPattern);
 
     // Construct the aggregations portion of the search request by using the `data.search.aggs` service.
-    const aggs = [{ type: 'avg', params: { field: selectedNumericField!.name } }];
+    const aggs = [{ type: 'avg', params: { field: state.numericFieldName } }];
     const aggsDsl = data.search.aggs.createAggConfigs(indexPattern, aggs).toDsl();
 
     const req = {
@@ -182,7 +231,7 @@ export const SearchSessionsExampleApp = ({
           const message = (
             <EuiText>
               Searched {res.rawResponse.hits.total} documents. <br />
-              The average of {selectedNumericField!.name} is {avgResult ? Math.floor(avgResult) : 0}
+              The average of {state.numericFieldName} is {avgResult ? Math.floor(avgResult) : 0}
               .
               <br />
             </EuiText>
@@ -242,7 +291,7 @@ export const SearchSessionsExampleApp = ({
                 placeholder={i18n.translate('searchSessionExample.selectIndexPatternPlaceholder', {
                   defaultMessage: 'Select index pattern',
                 })}
-                indexPatternId={indexPattern?.id || ''}
+                indexPatternId={state.indexPatternId ?? ''}
                 onChange={async (newIndexPatternId: any) => {
                   const newIndexPattern = await data.indexPatterns.get(newIndexPatternId);
                   setIndexPattern(newIndexPattern);
@@ -254,26 +303,13 @@ export const SearchSessionsExampleApp = ({
               <EuiFormLabel>Numeric Field to Aggregate</EuiFormLabel>
               <EuiComboBox
                 options={formatFieldsToComboBox(getNumeric(fields))}
-                selectedOptions={formatFieldToComboBox(selectedNumericField)}
+                selectedOptions={formatFieldToComboBox(selectedField)}
                 singleSelection={true}
                 onChange={(option) => {
                   const fld = indexPattern?.getFieldByName(option[0].label);
-                  setSelectedNumericField(fld || null);
-                }}
-                sortMatchesBy="startsWith"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFormLabel>Fields to query (leave blank to include all fields)</EuiFormLabel>
-              <EuiComboBox
-                options={formatFieldsToComboBox(fields)}
-                selectedOptions={formatFieldsToComboBox(selectedFields)}
-                singleSelection={false}
-                onChange={(option) => {
-                  const flds = option
-                    .map((opt) => indexPattern?.getFieldByName(opt?.label))
-                    .filter((f) => f);
-                  setSelectedFields(flds.length ? (flds as IndexPatternField[]) : []);
+                  setState({
+                    numericFieldName: fld?.name,
+                  });
                 }}
                 sortMatchesBy="startsWith"
               />
