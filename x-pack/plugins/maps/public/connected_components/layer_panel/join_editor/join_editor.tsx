@@ -25,7 +25,7 @@ import { ILayer } from '../../../classes/layers/layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
 import { IField } from '../../../classes/fields/field';
 
-interface Props {
+export interface Props {
   joins: JoinDescriptor[];
   layer: ILayer;
   layerDisplayName: string;
