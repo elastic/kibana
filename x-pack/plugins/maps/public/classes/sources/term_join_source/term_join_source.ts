@@ -29,6 +29,5 @@ export interface ITermJoinSource extends ISource {
   getId(): string;
   getRightFields(): IField[];
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
-  hasMatchingMetricField(fieldName: string): boolean;
   getFieldByName(fieldName: string): IField | null;
 }

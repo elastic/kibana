@@ -137,10 +137,6 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     });
   }
 
-  hasMatchingMetricField(fieldName: string): boolean {
-    return !!this.getFieldByName(fieldName);
-  }
-
   canFormatFeatureProperties(): boolean {
     return false;
   }
