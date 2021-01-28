@@ -37,6 +37,7 @@ import { BAR_HEIGHT, CANVAS_MAX_ITEMS, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from 
 import { Sidebar } from './sidebar';
 import { Legend } from './legend';
 import { useBarCharts } from './use_bar_charts';
+import { NetworkRequestsTotal } from './network_requests_total';
 
 const Tooltip = (tooltipInfo: TooltipInfo) => {
   const { data, renderTooltipItem } = useWaterfallContext();
@@ -84,7 +85,13 @@ export const WaterfallChart = ({
   maxHeight = '800px',
   fullHeight = false,
 }: WaterfallChartProps) => {
-  const { data, sidebarItems, legendItems } = useWaterfallContext();
+  const {
+    data,
+    sidebarItems,
+    legendItems,
+    totalNetworkRequests,
+    fetchedNetworkRequests,
+  } = useWaterfallContext();
 
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
@@ -115,7 +122,12 @@ export const WaterfallChart = ({
           <EuiFlexGroup gutterSize="none" responsive={false}>
             {shouldRenderSidebar && (
               <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
-                <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false} />
+                <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false}>
+                  <NetworkRequestsTotal
+                    totalNetworkRequests={totalNetworkRequests}
+                    fetchedNetworkRequests={fetchedNetworkRequests}
+                  />
+                </WaterfallChartFixedTopContainerSidebarCover>
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}>

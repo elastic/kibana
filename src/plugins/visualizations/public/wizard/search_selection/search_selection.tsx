@@ -13,12 +13,12 @@ import React from 'react';
 import { IUiSettingsClient, SavedObjectsStart } from '../../../../../core/public';
 
 import { SavedObjectFinderUi } from '../../../../../plugins/saved_objects/public';
-import type { VisType } from '../../vis_types';
+import type { BaseVisType } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
-  visType: VisType;
+  visType: BaseVisType;
   uiSettings: IUiSettingsClient;
   savedObjects: SavedObjectsStart;
   goBack: () => void;
