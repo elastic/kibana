@@ -15,6 +15,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
+import { calculateThroughput } from '../helpers/calculate_throughput';
 
 export async function getTransactionCoordinates({
   setup,
@@ -63,12 +64,10 @@ export async function getTransactionCoordinates({
     },
   });
 
-  const deltaAsMinutes = (end - start) / 1000 / 60;
-
   return (
     aggregations?.distribution.buckets.map((bucket) => ({
       x: bucket.key,
-      y: bucket.count.value / deltaAsMinutes,
+      y: calculateThroughput({ start, end, value: bucket.count.value }),
     })) || []
   );
 }

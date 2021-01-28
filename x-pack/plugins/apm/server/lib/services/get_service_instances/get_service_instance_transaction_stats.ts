@@ -19,6 +19,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
+import { calculateThroughput } from '../../helpers/calculate_throughput';
 
 export async function getServiceInstanceTransactionStats({
   setup,
@@ -112,8 +113,6 @@ export async function getServiceInstanceTransactionStats({
     },
   });
 
-  const deltaAsMinutes = (end - start) / 60 / 1000;
-
   return (
     response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
       (serviceNodeBucket) => {
@@ -135,10 +134,14 @@ export async function getServiceInstanceTransactionStats({
             })),
           },
           throughput: {
-            value: count.value / deltaAsMinutes,
+            value: calculateThroughput({ start, end, value: count.value }),
             timeseries: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
-              y: dateBucket.count.value / deltaAsMinutes,
+              y: calculateThroughput({
+                start,
+                end,
+                value: dateBucket.count.value,
+              }),
             })),
           },
           latency: {
