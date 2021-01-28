@@ -291,7 +291,7 @@ describe('ReindexActions', () => {
       } as RequestEvent<T>);
 
     it('returns flat settings', async () => {
-      clusterClient.asCurrentUser.indices.getSettings.mockResolvedValueOnce(
+      clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
         asApiResponse({
           myIndex: {
             settings: { 'index.mySetting': '1' },

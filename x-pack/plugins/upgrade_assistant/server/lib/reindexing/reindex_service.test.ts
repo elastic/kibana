@@ -980,7 +980,7 @@ describe('reindexService', () => {
         } as ReindexSavedObject);
         expect(clusterClient.asCurrentUser.reindex).toHaveBeenLastCalledWith({
           refresh: true,
-          waitForCompletion: false,
+          wait_for_completion: false,
           body: {
             source: { index: indexName },
             dest: { index: newIndexName },
