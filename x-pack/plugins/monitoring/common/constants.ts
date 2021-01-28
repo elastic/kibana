@@ -482,8 +482,9 @@ export const ALERT_DETAILS = {
       },
       indexPattern: {
         label: i18n.translate('xpack.monitoring.alerts.shardSize.paramDetails.indexPattern.label', {
-          defaultMessage: `Check for the following index patterns`,
+          defaultMessage: `Only check the following index patterns`,
         }),
+        placeholder: 'eg: data-*, *prod-data, -.internal-data*',
         type: AlertParamType.TextField,
       },
     },

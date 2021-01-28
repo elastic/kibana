@@ -6,13 +6,23 @@
 
 import { get } from 'lodash';
 import { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts';
+import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
+import { Globals } from '../../static_globals';
+
+const memoizedIndexPatterns = (globPatterns: string) => {
+  const createRegExPatterns = () => ESGlobPatterns.createRegExPatterns(globPatterns);
+  return Globals.app.getKeyStoreValue(
+    `large_shard_size_alert::${globPatterns}`,
+    createRegExPatterns
+  ) as RegExPatterns;
+};
 
 export async function fetchIndexShardSize(
   callCluster: any,
   clusters: AlertCluster[],
   index: string,
   thresholdBytes: number,
-  shardIndexPattern: string,
+  shardIndexPatterns: string,
   size: number
 ): Promise<IndexShardSizeStats[]> {
   const params = {
@@ -90,6 +100,7 @@ export async function fetchIndexShardSize(
   const response = await callCluster('search', params);
   const stats: IndexShardSizeStats[] = [];
   const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
+  const validIndexPatterns = memoizedIndexPatterns(shardIndexPatterns);
 
   if (!clusterBuckets.length) {
     return stats;
@@ -101,6 +112,9 @@ export async function fetchIndexShardSize(
 
     for (const indexBucket of indexBuckets) {
       const shardIndex = indexBucket.key;
+      if (!ESGlobPatterns.isValid(shardIndex, validIndexPatterns)) {
+        continue;
+      }
       const {
         _index: monitoringIndexName,
         _source: { source_node: sourceNode, index_stats: indexStats },

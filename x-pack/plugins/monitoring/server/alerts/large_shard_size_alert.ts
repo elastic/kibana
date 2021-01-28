@@ -39,6 +39,7 @@ export class LargeShardSizeAlert extends BaseAlert {
       id: ALERT_LARGE_SHARD_SIZE,
       name: ALERT_DETAILS[ALERT_LARGE_SHARD_SIZE].label,
       throttle: '12h',
+      defaultParams: { indexPattern: '*' },
       actionVariables: [
         {
           name: 'shardIndices',
@@ -64,14 +65,14 @@ export class LargeShardSizeAlert extends BaseAlert {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const { threshold, indexPattern: shardIndexPattern } = params;
+    const { threshold, indexPattern: shardIndexPatterns } = params;
 
     const stats = await fetchIndexShardSize(
       callCluster,
       clusters,
       esIndexPattern,
       threshold!,
-      shardIndexPattern,
+      shardIndexPatterns,
       Globals.app.config.ui.max_bucket_size
     );
 

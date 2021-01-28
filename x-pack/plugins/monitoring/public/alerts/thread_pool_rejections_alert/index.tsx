@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { Expression, Props } from '../components/duration/expression';
+import { Expression, Props } from '../components/param_details_form/expression';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { CommonAlertParamDetails } from '../../../common/types/alerts';

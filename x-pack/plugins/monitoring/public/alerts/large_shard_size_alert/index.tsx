@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Expression, Props } from '../components/duration/expression';
+import { Expression, Props } from '../components/param_details_form/expression';
 import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
 import { ALERT_LARGE_SHARD_SIZE, ALERT_DETAILS } from '../../../common/constants';
 import { AlertTypeParams } from '../../../../alerts/common';
@@ -20,9 +20,9 @@ const validate = (inputValues: ValidateOptions): ValidationResult => {
   const errors: { [key: string]: string[] } = {
     indexPattern: [],
   };
-  if (!inputValues.duration) {
+  if (!inputValues.indexPattern) {
     errors.indexPattern.push(
-      i18n.translate('xpack.monitoring.alerts.validation.duration', {
+      i18n.translate('xpack.monitoring.alerts.validation.indexPattern', {
         defaultMessage: 'A valid index pattern/s is required.',
       })
     );

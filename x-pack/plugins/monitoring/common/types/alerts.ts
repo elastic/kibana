@@ -38,6 +38,7 @@ export interface CommonAlertParams {
   duration: string;
   threshold?: number;
   limit?: string;
+  [key: string]: unknown;
 }
 
 export interface ThreadPoolRejectionsAlertParams {
