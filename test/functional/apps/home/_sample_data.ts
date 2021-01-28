@@ -19,10 +19,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
+  // Added to resolve Failing test: https://github.com/elastic/kibana/issues/89379
+  const kibanaServer = getService('kibanaServer');
 
   describe('sample data', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
+      await kibanaServer.uiSettings.update({
+        'discover:searchFieldsFromSource': true,
+      });
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
@@ -100,9 +105,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await pieChart.expectPieSliceCount(4);
         log.debug('Checking area, bar and heatmap charts rendered');
         await dashboardExpect.seriesElementCount(15);
-        // Failing test: https://github.com/elastic/kibana/issues/89379
-        // log.debug('Checking saved searches rendered');
-        // await dashboardExpect.savedSearchRowCount(10);
+        log.debug('Checking saved searches rendered');
+        await dashboardExpect.savedSearchRowCount(50);
         log.debug('Checking input controls rendered');
         await dashboardExpect.inputControlItemCount(3);
         log.debug('Checking tag cloud rendered');
