@@ -3,16 +3,35 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import fs from 'fs';
 import expect from '@kbn/expect';
 import http from 'http';
+import https from 'https';
+import { promisify } from 'util';
 import { fromNullable, map, filter, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { constant } from 'fp-ts/lib/function';
+import { KBN_KEY_PATH, KBN_CERT_PATH } from '@kbn/dev-utils';
 
 export async function initPlugin() {
-  const payloads: string[] = [];
+  const httpsServerKey = await promisify(fs.readFile)(KBN_KEY_PATH, 'utf8');
+  const httpsServerCert = await promisify(fs.readFile)(KBN_CERT_PATH, 'utf8');
 
-  return http.createServer((request, response) => {
+  return {
+    httpServer: http.createServer(createServerCallback()),
+    httpsServer: https.createServer(
+      {
+        key: httpsServerKey,
+        cert: httpsServerCert,
+      },
+      createServerCallback()
+    ),
+  };
+}
+
+function createServerCallback() {
+  const payloads: string[] = [];
+  return (request: http.IncomingMessage, response: http.ServerResponse) => {
     const credentials = pipe(
       fromNullable(request.headers.authorization),
       map((authorization) => authorization.split(/\s+/)),
@@ -77,7 +96,7 @@ export async function initPlugin() {
         return;
       });
     }
-  });
+  };
 }
 
 function validateAuthentication(credentials: any, res: any) {

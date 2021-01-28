@@ -37,7 +37,11 @@
     "plugins/cloud/**/*",
     "plugins/saved_objects_tagging/**/*",
     "plugins/global_search_bar/**/*",
+<<<<<<< HEAD
     "plugins/ingest_pipelines/**/*",
+=======
+    "plugins/license_management/**/*",
+>>>>>>> 1ab03d0cb089aed5a8c1fbb6955b248cfff18362
     "test/**/*"
   ],
   "compilerOptions": {
@@ -109,5 +113,6 @@
     { "path": "./plugins/triggers_actions_ui/tsconfig.json"},
     { "path": "./plugins/stack_alerts/tsconfig.json"},
     { "path": "./plugins/ingest_pipelines/tsconfig.json"},
+    { "path": "./plugins/license_management/tsconfig.json" },
   ]
 }
