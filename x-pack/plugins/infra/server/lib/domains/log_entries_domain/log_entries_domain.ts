@@ -12,7 +12,7 @@ import {
   LogEntriesSummaryHighlightsBucket,
   LogEntriesRequest,
 } from '../../../../common/http_api';
-import { LogEntry, LogColumn } from '../../../../common/log_entry';
+import { LogColumn, LogEntryCursor, LogEntry } from '../../../../common/log_entry';
 import {
   InfraSourceConfiguration,
   InfraSources,
@@ -33,7 +33,6 @@ import {
   CompositeDatasetKey,
   createLogEntryDatasetsQuery,
 } from './queries/log_entry_datasets';
-import { LogEntry, LogColumn, LogEntryCursor } from '../../../../common/log_entry';
 
 export interface LogEntriesParams {
   startTimestamp: number;
