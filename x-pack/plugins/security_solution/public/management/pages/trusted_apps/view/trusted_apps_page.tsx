@@ -44,7 +44,10 @@ export const TrustedAppsPage = memo(() => {
   const totalItemsCount = useTrustedAppsSelector(getListTotalItemsCount);
   const isCheckingIfEntriesExists = useTrustedAppsSelector(checkingIfEntriesExist);
   const doEntriesExist = useTrustedAppsSelector(entriesExist) === true;
-  const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({ show: 'create' }));
+  const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({
+    show: 'create',
+    id: undefined,
+  }));
   const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({ show: undefined }));
   const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({
     view_type: viewType,
