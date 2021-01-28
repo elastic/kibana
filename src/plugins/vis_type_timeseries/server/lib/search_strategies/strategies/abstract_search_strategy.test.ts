@@ -7,29 +7,35 @@
  */
 
 import { from } from 'rxjs';
-import { AbstractSearchStrategy } from './abstract_search_strategy';
+import { AbstractSearchStrategy, ReqFacade } from './abstract_search_strategy';
+import type { VisPayload } from '../../../../common/types';
+import type { IFieldType } from '../../../../../data/common';
+
+class FooSearchStrategy extends AbstractSearchStrategy {}
 
 describe('AbstractSearchStrategy', () => {
-  let abstractSearchStrategy;
-  let req;
-  let mockedFields;
-  let indexPattern;
+  let abstractSearchStrategy: AbstractSearchStrategy;
+  let req: ReqFacade;
+  let mockedFields: IFieldType[];
+  let indexPattern: string;
 
   beforeEach(() => {
     mockedFields = [];
-    req = {
+    req = ({
       payload: {},
       pre: {
         indexPatternsFetcher: {
           getFieldsForWildcard: jest.fn().mockReturnValue(mockedFields),
         },
       },
-      getIndexPatternsService: jest.fn(() => ({
-        find: jest.fn(() => []),
-      })),
-    };
+      getIndexPatternsService: jest.fn(() =>
+        Promise.resolve({
+          find: jest.fn(() => []),
+        })
+      ),
+    } as unknown) as ReqFacade<VisPayload>;
 
-    abstractSearchStrategy = new AbstractSearchStrategy();
+    abstractSearchStrategy = new FooSearchStrategy();
   });
 
   test('should init an AbstractSearchStrategy instance', () => {
@@ -42,7 +48,7 @@ describe('AbstractSearchStrategy', () => {
     const fields = await abstractSearchStrategy.getFieldsForWildcard(req, indexPattern);
 
     expect(fields).toEqual(mockedFields);
-    expect(req.pre.indexPatternsFetcher.getFieldsForWildcard).toHaveBeenCalledWith({
+    expect(req.pre.indexPatternsFetcher!.getFieldsForWildcard).toHaveBeenCalledWith({
       pattern: indexPattern,
       metaFields: [],
       fieldCapsOptions: { allow_no_indices: true },
@@ -54,7 +60,7 @@ describe('AbstractSearchStrategy', () => {
     const searchFn = jest.fn().mockReturnValue(from(Promise.resolve({})));
 
     const responses = await abstractSearchStrategy.search(
-      {
+      ({
         payload: {
           searchSession: {
             sessionId: '1',
@@ -65,7 +71,7 @@ describe('AbstractSearchStrategy', () => {
         requestContext: {
           search: { search: searchFn },
         },
-      },
+      } as unknown) as ReqFacade<VisPayload>,
       searches
     );
 
