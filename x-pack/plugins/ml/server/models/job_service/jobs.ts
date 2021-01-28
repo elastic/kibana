@@ -18,6 +18,8 @@ import {
   AuditMessage,
   DatafeedWithStats,
   CombinedJobWithStats,
+  Datafeed,
+  Job,
 } from '../../../common/types/anomaly_detection_jobs';
 import {
   MlJobsResponse,
@@ -47,7 +49,7 @@ interface Results {
 export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   const { asInternalUser } = client;
 
-  const { forceDeleteDatafeed, getDatafeedIdsByJobId, getDatafeedIdByJobId } = datafeedsProvider(
+  const { forceDeleteDatafeed, getDatafeedIdsByJobId, getDatafeedByJobId } = datafeedsProvider(
     mlClient
   );
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(client, mlClient);
@@ -260,29 +262,22 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   }
 
   async function getJobForCloning(jobId: string) {
-    const datafeedId = await getDatafeedIdByJobId(jobId);
-
-    const [{ body: jobResults }, { body: datafeedResults }] = await Promise.all([
+    const [{ body: jobResults }, datafeedResult] = await Promise.all([
       mlClient.getJobs<MlJobsResponse>({ job_id: jobId, exclude_generated: true }),
-      mlClient.getDatafeeds<MlDatafeedsResponse>({
-        datafeed_id: datafeedId,
-        exclude_generated: true,
-      }),
+      getDatafeedByJobId(jobId, true),
     ]);
-
-    let datafeed;
-    if (Array.isArray(datafeedResults?.datafeeds) && datafeedResults.datafeeds.length === 1) {
-      datafeed = datafeedResults?.datafeeds[0];
+    const result: { datafeed?: Datafeed; job?: Job } = { job: undefined, datafeed: undefined };
+    if (datafeedResult && datafeedResult.job_id === jobId) {
+      result.datafeed = datafeedResult;
     }
 
-    // create jobs objects containing job stats, datafeeds, datafeed stats and calendars
     if (jobResults && jobResults.jobs) {
       const job = jobResults.jobs.find((j) => j.job_id === jobId);
-      if (job && datafeed) {
-        return { job, datafeed };
+      if (job) {
+        result.job = job;
       }
     }
-    return undefined;
+    return result;
   }
 
   async function createFullJobsList(jobIds: string[] = []) {

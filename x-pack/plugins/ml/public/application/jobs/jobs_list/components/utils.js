@@ -41,7 +41,7 @@ export function loadJobForCloning(jobId) {
     ml.jobs
       .jobForCloning(jobId)
       .then((resp) => {
-        if (resp?.job) {
+        if (resp) {
           resolve(resp);
         } else {
           throw new Error(`Could not find job ${jobId}`);
