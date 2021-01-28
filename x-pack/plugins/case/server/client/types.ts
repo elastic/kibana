@@ -13,13 +13,10 @@ import {
   CasesPatchRequest,
   CasesResponse,
   CaseStatuses,
-  CasesUpdateRequest,
   CollectionWithSubCaseResponse,
   CommentRequest,
-  CommentRequestGeneratedAlertType,
   ConnectorMappingsAttributes,
   GetFieldsResponse,
-  SubCaseResponse,
 } from '../../common/api';
 import {
   CaseConfigureServiceSetup,
@@ -30,7 +27,6 @@ import {
 import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
 
 // TODO: Remove unused types
-import type { CasesRequestHandlerContext } from '../types';
 
 export interface CaseClientCreate {
   theCase: CaseClientPostRequest;
@@ -85,10 +81,6 @@ export interface CaseClientPluginContract {
 }
 
 export interface CaseClient extends CaseClientPluginContract {
-  addGeneratedAlerts(
-    caseId: string,
-    comment: CommentRequestGeneratedAlertType
-  ): Promise<CollectionWithSubCaseResponse>;
   convertCaseToCollection(caseInfo: CaseConvertRequest): Promise<CasesResponse>;
 }
 export interface MappingsClient {

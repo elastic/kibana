@@ -66,7 +66,7 @@ interface AddCommentFromRuleArgs {
   userActionService: CaseUserActionServiceSetup;
 }
 
-export const addGeneratedAlerts = async ({
+const addGeneratedAlerts = async ({
   savedObjectsClient,
   caseService,
   userActionService,
@@ -115,11 +115,12 @@ export const addGeneratedAlerts = async ({
         ...userDetails,
       }),
       references: [
-        {
-          type: CASE_SAVED_OBJECT,
-          name: `associated-${CASE_SAVED_OBJECT}`,
-          id: myCase.id,
-        },
+        // TODO: I don't think  we need this?
+        // {
+        //   type: CASE_SAVED_OBJECT,
+        //   name: `associated-${CASE_SAVED_OBJECT}`,
+        //   id: myCase.id,
+        // },
         {
           type: SUB_CASE_SAVED_OBJECT,
           name: `associated-${SUB_CASE_SAVED_OBJECT}`,
@@ -267,7 +268,14 @@ export const addComment = async ({
   );
 
   if (isGeneratedAlertContext(comment)) {
-    return caseClient.addGeneratedAlerts(caseId, comment);
+    return addGeneratedAlerts({
+      caseId,
+      comment,
+      caseClient,
+      savedObjectsClient,
+      userActionService,
+      caseService,
+    });
   }
 
   decodeComment(comment);

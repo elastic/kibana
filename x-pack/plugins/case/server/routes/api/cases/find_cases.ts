@@ -25,7 +25,6 @@ import {
   ESCaseAttributes,
   SubCaseAttributes,
   CommentType,
-  CommentAttributes,
   CaseType,
   SavedObjectFindOptions,
   CaseResponse,

@@ -17,11 +17,10 @@ import {
   MappingsClient,
   CaseClientUpdateAlertsStatus,
   CaseClientAddComment,
-  CaseClientPluginContract,
 } from './types';
 import { create } from './cases/create';
 import { update } from './cases/update';
-import { addComment, addGeneratedAlerts } from './comments/add';
+import { addComment } from './comments/add';
 import { getFields } from './configure/get_fields';
 import { getMappings } from './configure/get_mappings';
 import { updateAlertsStatus } from './alerts/update_status';
@@ -39,7 +38,6 @@ import {
   CasesPatchRequest,
   CasesPatchRequestRt,
   CaseType,
-  CommentRequestGeneratedAlertType,
   excess,
   throwErrors,
 } from '../../common/api';
@@ -132,17 +130,6 @@ export class CaseClientImpl implements CaseClient {
         cases: [{ ...validatedRequest, type: CaseType.parent }],
       },
       caseClient: this,
-    });
-  }
-
-  public async addGeneratedAlerts(caseId: string, comment: CommentRequestGeneratedAlertType) {
-    return addGeneratedAlerts({
-      savedObjectsClient: this._savedObjectsClient,
-      caseService: this._caseService,
-      userActionService: this._userActionService,
-      caseClient: this,
-      caseId,
-      comment,
     });
   }
 
