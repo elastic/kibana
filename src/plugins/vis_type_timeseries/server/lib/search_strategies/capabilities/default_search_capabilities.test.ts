@@ -7,8 +7,8 @@
  */
 
 import { DefaultSearchCapabilities } from './default_search_capabilities';
-import { ReqFacade } from './strategies/abstract_search_strategy';
-import { VisPayload } from '../../../common/types';
+import type { ReqFacade } from '../strategies/abstract_search_strategy';
+import type { VisPayload } from '../../../../common/types';
 
 describe('DefaultSearchCapabilities', () => {
   let defaultSearchCapabilities: DefaultSearchCapabilities;

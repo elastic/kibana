@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
-import { RollupSearchStrategy } from './rollup_search_strategy';
-import type { ReqFacade, VisPayload } from '../../../../../src/plugins/vis_type_timeseries/server';
 
-jest.mock('../../../../../src/plugins/vis_type_timeseries/server', () => {
-  const actual = jest.requireActual('../../../../../src/plugins/vis_type_timeseries/server');
+import { RollupSearchStrategy } from './rollup_search_strategy';
+
+import type { VisPayload } from '../../../../common/types';
+import type { ReqFacade } from './abstract_search_strategy';
+
+jest.mock('./abstract_search_strategy', () => {
   class AbstractSearchStrategyMock {
     getFieldsForWildcard() {
       return [
@@ -23,7 +27,6 @@ jest.mock('../../../../../src/plugins/vis_type_timeseries/server', () => {
   }
 
   return {
-    ...actual,
     AbstractSearchStrategy: AbstractSearchStrategyMock,
   };
 });
@@ -52,7 +55,7 @@ describe('Rollup Search Strategy', () => {
   test('should create instance of RollupSearchRequest', () => {
     const rollupSearchStrategy = new RollupSearchStrategy();
 
-    expect(rollupSearchStrategy.name).toBe('rollup');
+    expect(rollupSearchStrategy).toBeDefined();
   });
 
   describe('checkForViability', () => {
