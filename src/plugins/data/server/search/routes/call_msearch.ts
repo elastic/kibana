@@ -79,11 +79,13 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
         body: {
           ...response,
           body: {
-            responses: response.body.responses?.map((r: SearchResponse<any>) => shimHitsTotal(r)),
+            responses: response.body.responses?.map((r: SearchResponse<unknown>) =>
+              shimHitsTotal(r)
+            ),
           },
         },
       };
-    } catch (e: any) {
+    } catch (e) {
       throw getKbnServerError(e);
     }
   };

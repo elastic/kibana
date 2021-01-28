@@ -23,10 +23,10 @@ export class KbnServerError extends KbnError {
  * @param e `Error` or `ElasticsearchClientError`
  * @returns `KbnServerError`
  */
-export function getKbnServerError(e: any) {
+export function getKbnServerError(e: Error) {
   return new KbnServerError(
     e.message ?? 'Unknown error',
-    e.statusCode ?? 500,
+    e instanceof ResponseError ? e.statusCode : 500,
     e instanceof ResponseError ? e.body : undefined
   );
 }

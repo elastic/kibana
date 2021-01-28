@@ -9,14 +9,14 @@
 import React from 'react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { ApplicationStart } from 'kibana/public';
-import { KbnError, KibanaServerError } from '../../../../kibana_utils/common';
+import { KbnError } from '../../../../kibana_utils/common';
 import { IEsError } from './types';
 import { getRootCause } from './utils';
 
 export class EsError extends KbnError {
   readonly attributes: IEsError['attributes'];
 
-  constructor(protected readonly err: KibanaServerError) {
+  constructor(protected readonly err: IEsError) {
     super('EsError');
     this.attributes = err.attributes;
   }

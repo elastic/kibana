@@ -120,7 +120,7 @@ export class SearchInterceptor {
 
   /**
    * @internal
-   * @throws `AbortError` | Object
+   * @throws `AbortError` | `ErrorLike`
    */
   protected runSearch(
     request: IKibanaSearchRequest,

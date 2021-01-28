@@ -141,10 +141,18 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
+      describe('painless', () => {
+        before(async () => {
+          await esArchiver.loadIfNeeded(
+            '../../../functional/fixtures/es_archiver/logstash_functional'
+          );
+        });
+
+        after(async () => {
+          await esArchiver.unload('../../../functional/fixtures/es_archiver/logstash_functional');
+        });
+      });
       it('should return 400 for Painless error', async () => {
-        await esArchiver.loadIfNeeded(
-          '../../../functional/fixtures/es_archiver/logstash_functional'
-        );
         const resp = await supertest.post(`/internal/bsearch`).send({
           batch: [
             {
@@ -158,8 +166,6 @@ export default function ({ getService }: FtrProviderContext) {
           expect(responseJson.id).to.be(i);
           verifyErrorResponse(responseJson.error, 400, 'search_phase_execution_exception', true);
         });
-
-        await esArchiver.unload('../../../functional/fixtures/es_archiver/logstash_functional');
       });
     });
   });

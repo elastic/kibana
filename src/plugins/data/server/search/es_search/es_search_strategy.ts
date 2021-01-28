@@ -47,7 +47,7 @@ export const esSearchStrategyProvider = (
         const promise = esClient.asCurrentUser.search<SearchResponse<unknown>>(params);
         const { body } = await shimAbortSignal(promise, abortSignal);
         return toKibanaSearchResponse(body);
-      } catch (e: any) {
+      } catch (e) {
         throw getKbnServerError(e);
       }
     };

@@ -5,7 +5,7 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-export interface KibanaServerError<T = any> {
+export interface KibanaServerError<T = unknown> {
   statusCode: number;
   message: string;
   attributes?: T;
