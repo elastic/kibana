@@ -6,12 +6,13 @@
 
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { PackagePolicy } from '../../../../../fleet/common';
-import { migratePackagePolicyToV7110 } from './to_v7_11.0';
+import { PolicyData, ProtectionModes } from '../../types';
+import { migratePackagePolicyToV7120 } from './to_v7_12_0';
 
-describe('7.11.0 Endpoint Package Policy migration', () => {
-  const migration = migratePackagePolicyToV7110;
-  it('adds malware notification checkbox and optional message and adds AV registration config', () => {
-    const doc: SavedObjectUnsanitizedDoc<PackagePolicy> = {
+describe('7.12.0 Endpoint Package Policy migration', () => {
+  const migration = migratePackagePolicyToV7120;
+  it('adds ransomware option and notification customization', () => {
+    const doc: SavedObjectUnsanitizedDoc<PolicyData> = {
       id: 'mock-saved-object-id',
       attributes: {
         name: 'Some Policy Name',
@@ -38,8 +39,24 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
             config: {
               policy: {
                 value: {
-                  windows: {},
-                  mac: {},
+                  windows: {
+                    // @ts-expect-error
+                    popup: {
+                      malware: {
+                        message: '',
+                        enabled: false,
+                      },
+                    },
+                  },
+                  mac: {
+                    // @ts-expect-error
+                    popup: {
+                      malware: {
+                        message: '',
+                        enabled: false,
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -50,7 +67,7 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
     };
 
     expect(
-      migration(doc, {} as SavedObjectMigrationContext) as SavedObjectUnsanitizedDoc<PackagePolicy>
+      migration(doc, {} as SavedObjectMigrationContext) as SavedObjectUnsanitizedDoc<PolicyData>
     ).toEqual({
       attributes: {
         name: 'Some Policy Name',
@@ -78,17 +95,26 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
               policy: {
                 value: {
                   windows: {
-                    antivirus_registration: { enabled: false },
+                    ransomware: ProtectionModes.off,
                     popup: {
                       malware: {
+                        message: '',
+                        enabled: false,
+                      },
+                      ransomware: {
                         message: '',
                         enabled: false,
                       },
                     },
                   },
                   mac: {
+                    ransomware: ProtectionModes.off,
                     popup: {
                       malware: {
+                        message: '',
+                        enabled: false,
+                      },
+                      ransomware: {
                         message: '',
                         enabled: false,
                       },
