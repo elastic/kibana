@@ -62,7 +62,7 @@ export async function getFields(
   if (!indexPatternString) {
     const defaultIndexPattern = await indexPatternsService.getDefault();
 
-    indexPatternString = defaultIndexPattern?.title ?? '';
+    indexPatternString = defaultIndexPattern?.patternListActive.join(',') ?? '';
   }
 
   const {

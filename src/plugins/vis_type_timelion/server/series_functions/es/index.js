@@ -96,20 +96,15 @@ export default new Datasource('es', {
       kibana: true,
       fit: 'nearest',
     });
-
-    const findResp = await tlConfig.savedObjectsClient.find({
-      type: 'index-pattern',
-      fields: ['title', 'fields'],
-      search: `"${config.index}"`,
-      search_fields: ['title'],
-    });
-    const indexPatternSavedObject = findResp.saved_objects.find((savedObject) => {
-      return savedObject.attributes.title === config.index;
+    const indexPatternsService = await tlConfig.getIndexPatternsService();
+    const allIndexPatterns = await indexPatternsService.getPatternCache();
+    const indexPatternSpec = allIndexPatterns.find((indexPattern) => {
+      return indexPattern.patternListActive.join(',') === config.index;
     });
     let scriptedFields = [];
-    if (indexPatternSavedObject) {
-      const fields = JSON.parse(indexPatternSavedObject.attributes.fields);
-      scriptedFields = fields.filter((field) => {
+    if (indexPatternSpec) {
+      const { fields } = indexPatternSpec;
+      scriptedFields = Object.values(fields).filter((field) => {
         return field.scripted;
       });
     }

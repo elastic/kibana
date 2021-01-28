@@ -79,6 +79,16 @@ export function runRoute(
       try {
         const uiSettings = await context.core.uiSettings.client.getAll();
 
+        const getIndexPatternsService = async () => {
+          // @ts-ignore need help resolving this one
+          const [, { data }] = await core.getStartServices();
+          return await data.indexPatterns.indexPatternsServiceFactory(
+            context.core.savedObjects.client,
+            context.core.elasticsearch.client.asCurrentUser
+          );
+        };
+
+        const indexPatternsService = await getIndexPatternsService();
         const tlConfig = getTlConfig({
           context,
           request,
@@ -88,6 +98,7 @@ export function runRoute(
           allowedGraphiteUrls: configManager.getGraphiteUrls(),
           esShardTimeout: configManager.getEsShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
+          getIndexPatternsService: async () => indexPatternsService,
         });
         const chainRunner = chainRunnerFn(tlConfig);
         const sheet = await Bluebird.all(chainRunner.processRequest(request.body));
