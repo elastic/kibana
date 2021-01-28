@@ -14,6 +14,7 @@ import { Client } from '@elastic/elasticsearch';
 
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 
+import supertestAsPromised from 'supertest-as-promised';
 import {
   isGzip,
   createStats,
@@ -26,6 +27,8 @@ import {
   Progress,
   createDefaultSpace,
 } from '../lib';
+// @ts-ignore
+import { fetchSavedObjects } from '../../../../test/utils/fetch_saved_objects';
 
 // pipe a series of streams into each other so that data and errors
 // flow from the first stream to the last. Errors from the last stream
@@ -105,6 +108,9 @@ export async function loadAction({
       log.debug('[%s] Ensured that default space exists in .kibana', name);
     }
   }
+  await fetchSavedObjects()(name)(log)(
+    supertestAsPromised('http://elastic:changeme@localhost:5620')
+  );
 
   return result;
 }
