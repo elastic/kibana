@@ -5,7 +5,6 @@
  */
 
 import path from 'path';
-import { LegacyEsProvider } from './services';
 
 export default async function ({ readConfigFile }) {
   // Read the Kibana API integration tests config file so that we can utilize its services.
@@ -25,7 +24,6 @@ export default async function ({ readConfigFile }) {
     services: {
       ...kibanaCommonConfig.get('services'),
       supertest: kibanaAPITestsConfig.get('services.supertest'),
-      legacyEs: LegacyEsProvider,
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
