@@ -7,7 +7,10 @@
 import {
   ConditionEntry,
   ConditionEntryField,
+  EffectScope,
+  GlobalEffectScope,
   MacosLinuxConditionEntry,
+  PolicyEffectScope,
   WindowsConditionEntry,
 } from '../../../../../common/endpoint/types';
 
@@ -21,4 +24,16 @@ export const isMacosLinuxTrustedAppCondition = (
   condition: ConditionEntry
 ): condition is MacosLinuxConditionEntry => {
   return condition.field !== ConditionEntryField.SIGNER;
+};
+
+export const isGlobalEffectScope = (
+  effectedScope: EffectScope
+): effectedScope is GlobalEffectScope => {
+  return effectedScope.type === 'global';
+};
+
+export const isPolicyEffectScope = (
+  effectedScope: EffectScope
+): effectedScope is PolicyEffectScope => {
+  return effectedScope.type === 'policy';
 };
