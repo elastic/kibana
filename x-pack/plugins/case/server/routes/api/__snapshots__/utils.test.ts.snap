@@ -12,6 +12,7 @@ Array [
       "name": "none",
       "type": ".none",
     },
+    "converted_by": null,
     "created_at": "2019-11-25T21:54:48.952Z",
     "created_by": Object {
       "email": "testemail@elastic.co",
@@ -25,10 +26,12 @@ Array [
       "syncAlerts": true,
     },
     "status": "open",
+    "subCases": undefined,
     "tags": Array [
       "defacement",
     ],
     "title": "Super Bad Security Issue",
+    "totalAlerts": 0,
     "totalComment": 2,
     "type": "individual",
     "updated_at": "2019-11-25T21:54:48.952Z",
@@ -54,6 +57,7 @@ Array [
       "name": "none",
       "type": ".none",
     },
+    "converted_by": null,
     "created_at": "2019-11-25T21:54:48.952Z",
     "created_by": Object {
       "email": "testemail@elastic.co",
@@ -67,10 +71,12 @@ Array [
       "syncAlerts": true,
     },
     "status": "open",
+    "subCases": undefined,
     "tags": Array [
       "defacement",
     ],
     "title": "Super Bad Security Issue",
+    "totalAlerts": 0,
     "totalComment": 0,
     "type": "individual",
     "updated_at": "2019-11-25T21:54:48.952Z",
@@ -292,6 +298,7 @@ Object {
     "name": "My connector",
     "type": ".jira",
   },
+  "converted_by": null,
   "created_at": "2020-04-09T09:43:51.778Z",
   "created_by": Object {
     "email": "elastic@elastic.co",
@@ -338,6 +345,7 @@ Object {
     "name": "My connector",
     "type": ".jira",
   },
+  "converted_by": null,
   "created_at": "2020-04-09T09:43:51.778Z",
   "created_by": Object {
     "email": null,
@@ -384,6 +392,7 @@ Object {
     "name": "My connector",
     "type": ".jira",
   },
+  "converted_by": null,
   "created_at": "2020-04-09T09:43:51.778Z",
   "created_by": Object {
     "email": undefined,
