@@ -105,10 +105,7 @@ export default new Datasource('es', {
 
     if (indexPatternSpec) {
       const { fields } = indexPatternSpec;
-      scriptedFields = Object.values(fields).filter((field, i) => {
-        if (i === indexPatternSpec.fields.length - 1) {
-          console.log('field', { scripted: field.scripted, spec: field.spec.scripted });
-        }
+      scriptedFields = Object.values(fields).filter((field) => {
         return field.scripted;
       });
     }
