@@ -18,7 +18,7 @@ export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
   (path: 'count', opts: CountOpts): Promise<{ count: number; _shards: ShardsInfo }>;
   (path: 'clearScroll', opts: { scrollId: string }): Promise<any>;
-  (path: 'indices.create' | 'indices.delete', opts: IndexCreationOpts): Promise<any>;
+  (path: 'indices.create', opts: IndexCreationOpts): Promise<any>;
   (path: 'indices.exists', opts: IndexOpts): Promise<boolean>;
   (path: 'indices.existsAlias', opts: { name: string }): Promise<boolean>;
   (path: 'indices.get', opts: IndexOpts & Ignorable): Promise<IndicesInfo | NotFound>;

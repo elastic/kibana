@@ -6,10 +6,11 @@
 
 import { DEFAULT_META } from '../../shared/constants';
 
-export const mockMeta = {
+export const meta = {
   ...DEFAULT_META,
   page: {
     current: 1,
+    size: 5,
     total_results: 50,
     total_pages: 5,
   },

@@ -26,7 +26,8 @@
     "security",
     "spaces",
     "management",
-    "licenseManagement"
+    "licenseManagement",
+    "maps"
   ],
   "server": true,
   "ui": true,
@@ -38,7 +39,8 @@
     "savedObjects",
     "home",
     "spaces",
-    "alerts"
+    "alerts",
+    "maps"
   ],
   "extraPublicDirs": [
     "common"
