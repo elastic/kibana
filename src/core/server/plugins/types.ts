@@ -307,7 +307,10 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
      * @remarks Naming not final here, it may be renamed in a near future
      * @deprecated Accessing configuration values outside of the plugin's config scope is highly discouraged
      */
-    legacy: { globalConfig$: Observable<SharedGlobalConfig> };
+    legacy: {
+      globalConfig$: Observable<SharedGlobalConfig>;
+      get: () => SharedGlobalConfig;
+    };
     /**
      * Return an observable of the plugin's configuration
      *

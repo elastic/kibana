@@ -12,6 +12,7 @@ Accessors for the plugin's configuration
 config: {
         legacy: {
             globalConfig$: Observable<SharedGlobalConfig>;
+            get: () => SharedGlobalConfig;
         };
         create: <T = ConfigSchema>() => Observable<T>;
         get: <T = ConfigSchema>() => T;
