@@ -137,8 +137,6 @@ describe('vega_map_view/view', () => {
       setMapService(userConfiguredLayerId);
       const vegaMapView = await createVegaMapView();
 
-      expect(vegaMapView._initViewCustomizations).toBeDefined();
-
       await vegaMapView.init();
 
       const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
