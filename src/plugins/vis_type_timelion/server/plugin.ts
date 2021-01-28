@@ -7,7 +7,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { first } from 'rxjs/operators';
 import { TypeOf, schema } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
@@ -17,7 +16,7 @@ import type {
   PluginStart,
   DataApiRequestHandlerContext,
 } from '../../../../src/plugins/data/server';
-import { CoreSetup, PluginInitializerContext } from '../../../../src/core/server';
+import { CoreSetup, PluginInitializerContext, Plugin } from '../../../../src/core/server';
 import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';
@@ -43,14 +42,12 @@ export interface TimelionPluginStartDeps {
 /**
  * Represents Timelion Plugin instance that will be managed by the Kibana plugin system.
  */
-export class Plugin {
+export class TimelionPlugin
+  implements Plugin<RecursiveReadonly<PluginSetupContract>, void, TimelionPluginStartDeps> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup): Promise<RecursiveReadonly<PluginSetupContract>> {
-    const config = await this.initializerContext.config
-      .create<TypeOf<typeof configSchema>>()
-      .pipe(first())
-      .toPromise();
+  public setup(core: CoreSetup): RecursiveReadonly<PluginSetupContract> {
+    const config = this.initializerContext.config.get<TypeOf<typeof configSchema>>();
 
     const configManager = new ConfigManager(this.initializerContext.config);
 

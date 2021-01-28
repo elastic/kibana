@@ -7,16 +7,13 @@
  */
 
 import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
-import { first } from 'rxjs/operators';
 import { registerRoutes } from './routes';
 
 export class LegacyExportPlugin implements Plugin<{}, {}> {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
-  public async setup({ http }: CoreSetup) {
-    const globalConfig = await this.initContext.config.legacy.globalConfig$
-      .pipe(first())
-      .toPromise();
+  public setup({ http }: CoreSetup) {
+    const globalConfig = this.initContext.config.legacy.get();
 
     const router = http.createRouter();
     registerRoutes(
