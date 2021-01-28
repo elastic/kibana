@@ -5,3 +5,4 @@
  */
 
 export { Watch } from './watch';
+export { defaultWatch } from './default_watch';
