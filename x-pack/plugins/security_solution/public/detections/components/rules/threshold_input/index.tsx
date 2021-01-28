@@ -18,11 +18,15 @@ const FIELD_COMBO_BOX_WIDTH = 410;
 export interface FieldValueThreshold {
   field: string[];
   value: string;
+  cardinality_field: string;
+  cardinality_value: string;
 }
 
 interface ThresholdInputProps {
   thresholdField: FieldHook;
   thresholdValue: FieldHook;
+  thresholdCardinalityField: FieldHook;
+  thresholdCardinalityValue: FieldHook;
   browserFields: BrowserFields;
 }
 
@@ -37,11 +41,13 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
   thresholdField,
   thresholdValue,
   browserFields,
+  thresholdCardinalityField,
+  thresholdCardinalityValue,
 }: ThresholdInputProps) => {
   const fieldEuiFieldProps = useMemo(
     () => ({
       fullWidth: true,
-      singleSelection: { asPlainText: true },
+      // singleSelection: { asPlainText: true },
       noSuggestions: false,
       options: getCategorizedFieldNames(browserFields),
       placeholder: THRESHOLD_FIELD_PLACEHOLDER,

@@ -27,7 +27,7 @@ interface GetThresholdBucketFiltersParams {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   ruleId: string;
-  bucketByField: string;
+  bucketByFields: string[];
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
 }
@@ -39,7 +39,7 @@ export const getThresholdBucketFilters = async ({
   services,
   logger,
   ruleId,
-  bucketByField,
+  bucketByFields,
   timestampOverride,
   buildRuleMessage,
 }: GetThresholdBucketFiltersParams): Promise<{
@@ -53,7 +53,7 @@ export const getThresholdBucketFilters = async ({
     services,
     logger,
     ruleId,
-    bucketByField,
+    bucketByFields,
     timestampOverride,
     buildRuleMessage,
   });
@@ -74,10 +74,12 @@ export const getThresholdBucketFilters = async ({
         },
       } as ESFilter;
 
-      if (!isEmpty(bucketByField)) {
+      if (!isEmpty(bucketByFields)) {
+        // TODO: account for array
         (filter.bool.filter as ESFilter[]).push({
           term: {
-            [bucketByField]: bucket.key,
+            // [bucketByFields]: bucket.key,
+            [bucketByFields[0]]: bucket.key,
           },
         });
       }

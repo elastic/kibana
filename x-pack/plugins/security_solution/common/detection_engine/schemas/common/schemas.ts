@@ -460,8 +460,10 @@ export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
 
 export const threshold = t.exact(
   t.type({
-    field: t.string,
+    field: t.union([t.string, t.array(t.string)]),
     value: PositiveIntegerGreaterThanZero,
+    cardinality_field: t.union([t.string, t.undefined]),
+    cardinality_value: t.union([PositiveInteger, t.undefined]),
   })
 );
 export type Threshold = t.TypeOf<typeof threshold>;

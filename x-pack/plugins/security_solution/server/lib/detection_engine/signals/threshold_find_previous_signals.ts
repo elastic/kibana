@@ -23,7 +23,7 @@ interface FindPreviousThresholdSignalsParams {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   ruleId: string;
-  bucketByField: string;
+  bucketByFields: string[];
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
 }
@@ -35,7 +35,7 @@ export const findPreviousThresholdSignals = async ({
   services,
   logger,
   ruleId,
-  bucketByField,
+  bucketByFields,
   timestampOverride,
   buildRuleMessage,
 }: FindPreviousThresholdSignalsParams): Promise<{
@@ -68,7 +68,9 @@ export const findPreviousThresholdSignals = async ({
         },
         {
           term: {
-            'signal.rule.threshold.field': bucketByField,
+            // TODO: account for array
+            // 'signal.rule.threshold.field': bucketByFields,
+            'signal.rule.threshold.field': bucketByFields[0],
           },
         },
       ],

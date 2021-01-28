@@ -81,6 +81,8 @@ const stepDefineDefaultValue: DefineStepRule = {
   threshold: {
     field: [],
     value: '200',
+    cardinality_field: '',
+    cardinality_value: '',
   },
   timeline: {
     id: null,
@@ -279,11 +281,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [formThresholdField, formThresholdValue]);
 
   const ThresholdInputChildren = useCallback(
-    ({ thresholdField, thresholdValue }) => (
+    ({ thresholdField, thresholdValue, thresholdCardinalityField, thresholdCardinalityValue }) => (
       <ThresholdInput
         browserFields={aggregatableFields}
         thresholdField={thresholdField}
         thresholdValue={thresholdValue}
+        thresholdCardinalityField={thresholdCardinalityField}
+        thresholdCardinalityValue={thresholdCardinalityValue}
       />
     ),
     [aggregatableFields]
@@ -427,6 +431,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   },
                   thresholdValue: {
                     path: 'threshold.value',
+                  },
+                  thresholdCardinalityField: {
+                    path: 'threshold.cardinality_field',
+                  },
+                  thresholdCardinalityValue: {
+                    path: 'threshold.cardinality_value',
                   },
                 }}
               >
