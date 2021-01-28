@@ -18,13 +18,18 @@ import {
   ApmIndicesName,
 } from '../../../settings/apm_indices/get_apm_indices';
 
-export const processorEventIndexMap: Record<ProcessorEvent, ApmIndicesName> = {
+const processorEventIndexMap: Record<ProcessorEvent, ApmIndicesName> = {
   [ProcessorEvent.transaction]: 'apm_oss.transactionIndices',
   [ProcessorEvent.span]: 'apm_oss.spanIndices',
   [ProcessorEvent.metric]: 'apm_oss.metricsIndices',
   [ProcessorEvent.error]: 'apm_oss.errorIndices',
-  [ProcessorEvent.sourcemap]: 'apm_oss.sourcemapIndices',
-  [ProcessorEvent.onboarding]: 'apm_oss.onboardingIndices',
+};
+
+const dataStreamsIndexMap: Record<ProcessorEvent, string> = {
+  [ProcessorEvent.transaction]: 'traces-apm*',
+  [ProcessorEvent.span]: 'traces-apm*',
+  [ProcessorEvent.metric]: 'metrics-apm*',
+  [ProcessorEvent.error]: 'logs-apm*',
 };
 
 export function unpackProcessorEvents(
@@ -35,7 +40,10 @@ export function unpackProcessorEvents(
 
   const events = uniq(apm.events);
 
-  const index = events.map((event) => indices[processorEventIndexMap[event]]);
+  const index = events.flatMap((event) => [
+    dataStreamsIndexMap[event],
+    indices[processorEventIndexMap[event]],
+  ]);
 
   const withFilterForProcessorEvent: ESSearchRequest & {
     body: { query: { bool: { filter: ESFilter[] } } };
