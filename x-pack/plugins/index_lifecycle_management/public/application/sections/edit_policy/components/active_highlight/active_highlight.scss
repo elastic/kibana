@@ -5,16 +5,17 @@
   .ilmActivePhaseHighlight__line {
     height: 100%;
     position: absolute;
-    border-left: $euiBorderWidthThin solid $euiColorLightShade;
+    border-left: $euiBorderThin;
   }
 
   .ilmActivePhaseHighlight__check {
     position: absolute;
-    top: calc(#{$euiSize} * 1.5);
+    // to align check with phase title, if panel's padding-top is $euiSize and check's height is $euiSize
+    top: $euiSizeL;
     left: calc((#{$euiSize} - #{$euiBorderWidthThin}) / -2);
     height: $euiSize;
     width: $euiSize;
-    border: $euiBorderWidthThin solid $euiColorLightShade;
+    border: $euiBorderThin;
     border-radius: 50%;
     background-color: $euiColorLightestShade;
 
@@ -36,7 +37,8 @@
   &.hotPhase {
     &.active {
       .ilmActivePhaseHighlight__line {
-        top: calc(#{$euiSize} * 1.5);
+        // to align the line with phase title, if panel's padding-top is $euiSize and check's height is $euiSize
+        top: $euiSizeL;
         height: calc(100% - #{$euiSize} * 1.5);
         border-left-color: $euiColorVis9_behindText;
       }
