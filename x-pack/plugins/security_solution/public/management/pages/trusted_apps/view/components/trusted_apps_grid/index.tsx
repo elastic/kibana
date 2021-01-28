@@ -15,9 +15,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { useHistory } from 'react-router-dom';
 import { Pagination } from '../../../state';
 
 import {
+  getCurrentLocation,
   getListErrorMessage,
   getListItems,
   getListPagination,
@@ -33,6 +35,7 @@ import {
 import { NO_RESULTS_MESSAGE } from '../../translations';
 
 import { TrustedAppCard, TrustedAppCardProps } from '../trusted_app_card';
+import { getTrustedAppsListPath } from '../../../../../common/routing';
 
 export interface PaginationBarProps {
   pagination: Pagination;
@@ -74,20 +77,30 @@ const GridMessage: FC = ({ children }) => (
 );
 
 export const TrustedAppsGrid = memo(() => {
+  const history = useHistory();
   const pagination = useTrustedAppsSelector(getListPagination);
   const listItems = useTrustedAppsSelector(getListItems);
   const isLoading = useTrustedAppsSelector(isListLoading);
   const error = useTrustedAppsSelector(getListErrorMessage);
+  const location = useTrustedAppsSelector(getCurrentLocation);
 
   const handleTrustedAppDelete = useTrustedAppsStoreActionCallback((trustedApp) => ({
     type: 'trustedAppDeletionDialogStarted',
     payload: { entry: trustedApp },
   }));
 
-  const handleTrustedAppEdit: TrustedAppCardProps['onEdit'] = useCallback(() => {
-    // eslint-disable-next-line no-console
-    console.log('edit TA');
-  }, []);
+  const handleTrustedAppEdit: TrustedAppCardProps['onEdit'] = useCallback(
+    (trustedApp) => {
+      history.push(
+        getTrustedAppsListPath({
+          ...location,
+          show: 'edit',
+          id: trustedApp.id,
+        })
+      );
+    },
+    [history, location]
+  );
 
   const handlePaginationChange = useTrustedAppsNavigateCallback(({ index, size }) => ({
     page_index: index,

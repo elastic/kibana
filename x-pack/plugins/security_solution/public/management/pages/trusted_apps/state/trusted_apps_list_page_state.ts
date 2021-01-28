@@ -28,7 +28,9 @@ export interface TrustedAppsListPageLocation {
   page_index: number;
   page_size: number;
   view_type: ViewType;
-  show?: 'create';
+  show?: 'create' | 'edit';
+  /** Used for editing. The ID of the selected trusted app */
+  id?: string;
 }
 
 export interface TrustedAppsListPageState {
