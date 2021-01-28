@@ -37,7 +37,7 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                         edit your deployment
                       </EuiLink>
                     ) : (
-                      'Visit the Elastic Cloud console'
+                      'edit your deployment'
                     ),
                   }}
                 />
