@@ -181,7 +181,7 @@ def withGcsArtifactUpload(workerName, closure) {
   def ARTIFACT_PATTERNS = [
     'target/junit/**/*',
     'target/kibana-*',
-    'target/kibana-coverage/jest*/**/*',
+    'target/kibana-coverage/jest/**/*',
     'target/kibana-security-solution/**/*.png',
     'target/test-metrics/*',
     'target/test-suites-ci-plan.json',
