@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
-import { TimeRange } from '../../../../../../common/http_api/shared';
+import { TimeRange } from '../../../../../../common/time/time_range';
 import { CategoryExampleMessage } from './category_example_message';
 
 const exampleCount = 5;
