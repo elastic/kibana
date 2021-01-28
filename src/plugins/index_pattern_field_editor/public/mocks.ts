@@ -8,13 +8,30 @@
 
 import { IndexPatternFieldEditorPlugin } from './plugin';
 export type Start = jest.Mocked<ReturnType<IndexPatternFieldEditorPlugin['start']>>;
+export type Setup = jest.Mocked<ReturnType<IndexPatternFieldEditorPlugin['setup']>>;
+
+const createSetupContract = (): Setup => {
+  return {
+    fieldFormatEditors: {
+      register: jest.fn(),
+    } as any,
+  };
+};
 
 const createStartContract = (): Start => {
   return {
     openEditor: jest.fn(),
+    fieldFormatEditors: {
+      getAll: jest.fn(),
+      getById: jest.fn(),
+    } as any,
+    userPermissions: {
+      editIndexPattern: jest.fn(),
+    },
   };
 };
 
 export const indexPatternFieldEditorPluginMock = {
+  createSetupContract,
   createStartContract,
 };

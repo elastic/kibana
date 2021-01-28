@@ -26,10 +26,6 @@ const createSetupContract = (): IndexPatternManagementSetup => ({
   list: {
     addListConfig: jest.fn(),
   } as any,
-  fieldFormatEditors: {
-    getAll: jest.fn(),
-    getById: jest.fn(),
-  } as any,
   environment: {
     update: jest.fn(),
   },
@@ -44,10 +40,6 @@ const createStartContract = (): IndexPatternManagementStart => ({
     getIndexPatternTags: jest.fn(),
     getFieldInfo: jest.fn(),
     areScriptedFieldsEnabled: jest.fn(),
-  } as any,
-  fieldFormatEditors: {
-    getAll: jest.fn(),
-    getById: jest.fn(),
   } as any,
 });
 
@@ -109,6 +101,7 @@ const createIndexPatternManagmentContext = (): {
     indexPatternManagementStart: createStartContract(),
     setBreadcrumbs: () => {},
     getMlCardState: () => 2,
+    fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
   };
 };
 
