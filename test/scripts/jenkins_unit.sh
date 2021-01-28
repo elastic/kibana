@@ -2,6 +2,12 @@
 
 source test/scripts/jenkins_test_setup.sh
 
+rename_coverage_file() {
+  test -f target/kibana-coverage/jest/coverage-final.json \
+    && mv target/kibana-coverage/jest/coverage-final.json \
+    target/kibana-coverage/jest/$1-coverage-final.json
+}
+
 if [[ -z "$CODE_COVERAGE" ]] ; then
   # Lint
   ./test/scripts/lint/eslint.sh
@@ -28,8 +34,13 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
   ./test/scripts/checks/test_hardening.sh
 else
   echo " -> Running jest tests with coverage"
-  node scripts/jest --ci --verbose --maxWorkers=6 --coverage || true;
-
+  node scripts/jest --ci --verbose --coverage --config jest.config.oss.js || true;
+  rename_coverage_file "oss"
+  echo ""
+  echo ""
   echo " -> Running jest integration tests with coverage"
-  node scripts/jest_integration --ci --verbose --coverage || true;
+  node --max-old-space-size=8192 scripts/jest_integration --ci --verbose --coverage || true;
+  rename_coverage_file "oss-integration"
+  echo ""
+  echo ""
 fi
