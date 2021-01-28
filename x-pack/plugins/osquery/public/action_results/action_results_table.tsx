@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, isEqual, keys, find, map } from 'lodash/fp';
+import {  find, map } from 'lodash/fp';
 import {
   EuiDataGrid,
   EuiDataGridProps,
@@ -14,13 +14,14 @@ import {
   EuiIcon,
   EuiLink,
 } from '@elastic/eui';
-import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
+import React, { createContext, useState, useCallback, useContext, useMemo } from 'react';
 
 import { useAllAgents } from './../agents/use_all_agents';
 import { useActionResults } from './use_action_results';
 import { useAllResults } from '../results/use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
 import { useRouterNavigate } from '../common/lib/kibana';
+
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -44,7 +45,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     [setPagination]
   );
 
-  const [columns, setColumns] = useState<EuiDataGridColumn[]>([
+  const [columns] = useState<EuiDataGridColumn[]>([
     {
       id: 'status',
       displayAsText: 'status',
@@ -83,7 +84,6 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     sortField: '@timestamp',
   });
 
-  // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => map('id', columns)); // initialize to the full set of columns
 
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [
@@ -180,6 +180,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     }),
     [onChangeItemsPerPage, onChangePage, pagination]
   );
+
 
   return (
     <DataContext.Provider value={results}>
