@@ -97,14 +97,18 @@ export default new Datasource('es', {
       fit: 'nearest',
     });
     const indexPatternsService = await tlConfig.getIndexPatternsService();
-    const allIndexPatterns = await indexPatternsService.getPatternCache();
-    const indexPatternSpec = allIndexPatterns.find((indexPattern) => {
+    const searchIndexPatterns = await indexPatternsService.find(config.index);
+    const indexPatternSpec = searchIndexPatterns.find((indexPattern) => {
       return indexPattern.patternListActive.join(',') === config.index;
     });
     let scriptedFields = [];
+
     if (indexPatternSpec) {
       const { fields } = indexPatternSpec;
-      scriptedFields = Object.values(fields).filter((field) => {
+      scriptedFields = Object.values(fields).filter((field, i) => {
+        if (i === indexPatternSpec.fields.length - 1) {
+          console.log('field', { scripted: field.scripted, spec: field.spec.scripted });
+        }
         return field.scripted;
       });
     }

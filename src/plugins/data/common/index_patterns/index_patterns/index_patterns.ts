@@ -141,7 +141,7 @@ export class IndexPatternsService {
       type: 'index-pattern',
       fields: ['patternList', 'title'],
       search,
-      searchFields: ['title'],
+      searchFields: ['title', 'patternList'],
       perPage: size,
     });
     const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
