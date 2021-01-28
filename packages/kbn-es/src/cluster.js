@@ -279,7 +279,7 @@ exports.Cluster = class Cluster {
       env: {
         ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
-        ...(options.bundledJDK ? { JAVA_HOME: '' } : {}),
+        JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
         ...(options.esEnvVars || {}),
       },
       stdio: ['ignore', 'pipe', 'pipe'],
