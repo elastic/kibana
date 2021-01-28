@@ -292,7 +292,7 @@ export const SOURCE_CONFIG_LINK = i18n.translate(
 );
 
 export const SOURCE_REMOVE_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.config.title',
+  'xpack.enterpriseSearch.workplaceSearch.sources.remove.title',
   {
     defaultMessage: 'Remove this source',
   }
