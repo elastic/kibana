@@ -59,7 +59,7 @@ def uploadBaseWebsiteFiles(prefix) {
 def uploadCoverageHtmls(prefix) {
   [
     'target/kibana-coverage/functional-combined',
-    'target/kibana-coverage/jest-combined',
+    //'target/kibana-coverage/jest-combined',
   ].each { uploadWithVault(prefix, it) }
 }
 
@@ -148,7 +148,8 @@ def generateReports(title) {
     cd ..
     . src/dev/code_coverage/shell_scripts/extract_archives.sh
     . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
-    . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
+    . src/dev/code_coverage/shell_scripts/merge_functional.sh
+    . src/dev/code_coverage/shell_scripts/copy_jest_report.sh
     # zip combined reports
     tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*
   """, title)

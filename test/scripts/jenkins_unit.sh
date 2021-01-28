@@ -32,4 +32,7 @@ else
 
   echo " -> Running jest integration tests with coverage"
   node scripts/jest_integration --ci --verbose --coverage || true;
+
+  echo " -> Combine code coverage in a single report"
+  yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.jest.config.js
 fi
