@@ -54247,7 +54247,7 @@ const CleanCommand = {
     _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
 
       'yarn kbn clean' does not remove node_modules now. It runs a more soft clean and should be used as the way to go between branches using Bazel.
-      When switching between a non Bazel branch and a Bazel branch (or the other way around) or for situations where you need a deeper clean, run 'yarn kbn destroy' instead.
+      When switching between a non Bazel branch and a Bazel branch or for situations where you need a deeper clean, run 'yarn kbn destroy' instead.
 
     `);
     const toDelete = [];
@@ -58914,13 +58914,13 @@ __webpack_require__.r(__webpack_exports__);
 
 const DestroyCommand = {
   description: 'Remove the node_modules, remove target directories from all projects, remove extra patterns and runs a Bazel state hard clean.',
-  name: 'clean',
+  name: 'destroy',
 
   async run(projects) {
     _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
 
       'yarn kbn destroy' is the most deeper and destroying clean command. Use it only when switching between a non Bazel branch into a
-      Bazel branch (or the other way around) or when you are having problems with node_modules.
+      Bazel branch or when you are having problems with node_modules.
       Otherwise please just run 'yarn kbn clean'.
 
     `);

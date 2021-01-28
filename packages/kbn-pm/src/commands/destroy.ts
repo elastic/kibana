@@ -19,13 +19,13 @@ import { ICommand } from './';
 export const DestroyCommand: ICommand = {
   description:
     'Remove the node_modules, remove target directories from all projects, remove extra patterns and runs a Bazel state hard clean.',
-  name: 'clean',
+  name: 'destroy',
 
   async run(projects) {
     log.warning(dedent`
 
       'yarn kbn destroy' is the most deeper and destroying clean command. Use it only when switching between a non Bazel branch into a
-      Bazel branch (or the other way around) or when you are having problems with node_modules.
+      Bazel branch or when you are having problems with node_modules.
       Otherwise please just run 'yarn kbn clean'.
 
     `);
