@@ -70,9 +70,7 @@ describe('ES search strategy', () => {
   const mockConfig$ = new BehaviorSubject<any>({
     search: {
       sessions: {
-        defaultExpiration: () => {
-          return moment.duration('1', 'm');
-        },
+        defaultExpiration: moment.duration('1', 'm'),
       },
     },
   });
@@ -129,7 +127,6 @@ describe('ES search strategy', () => {
       const request = mockGetCaller.mock.calls[0][0];
       expect(request.id).toEqual('foo');
       expect(request).toHaveProperty('wait_for_completion_timeout');
-      expect(request).toHaveProperty('keep_alive');
     });
 
     it('calls the rollup API if the index is a rollup type', async () => {
