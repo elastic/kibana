@@ -7,7 +7,7 @@
  */
 
 import { registerTestBed, TestBed, noop, docLinks } from '../../test_utils';
-import { IndexPatternField } from '../shared_imports';
+import { Field } from '../types';
 import { FieldEditorFlyoutContent, Props } from './field_editor_flyout_content';
 
 const setup = (props?: Props) =>
@@ -25,7 +25,7 @@ describe('<FieldEditorFlyoutContent />', () => {
   });
 
   test('should allow a runtime field to be provided', () => {
-    const field: IndexPatternField = {
+    const field: Field = {
       name: 'foo',
     } as any;
 
