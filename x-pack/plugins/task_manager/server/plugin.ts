@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { first, map, distinctUntilChanged } from 'rxjs/operators';
+import { map, distinctUntilChanged } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   Plugin,
@@ -57,11 +57,8 @@ export class TaskManagerPlugin
     this.definitions = new TaskTypeDictionary(this.logger);
   }
 
-  public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
-    this.config = await this.initContext.config
-      .create<TaskManagerConfig>()
-      .pipe(first())
-      .toPromise();
+  public setup(core: CoreSetup): TaskManagerSetupContract {
+    this.config = this.initContext.config.get<TaskManagerConfig>();
 
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 

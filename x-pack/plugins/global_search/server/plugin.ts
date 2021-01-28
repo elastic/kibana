@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
 import { LicensingPluginStart } from '../../licensing/server';
 import { LicenseChecker, ILicenseChecker } from '../common/license_checker';
@@ -32,20 +30,19 @@ export class GlobalSearchPlugin
       GlobalSearchPluginSetupDeps,
       GlobalSearchPluginStartDeps
     > {
-  private readonly config$: Observable<GlobalSearchConfigType>;
+  private readonly config: GlobalSearchConfigType;
   private readonly searchService = new SearchService();
   private searchServiceStart?: SearchServiceStart;
   private licenseChecker?: ILicenseChecker;
 
   constructor(context: PluginInitializerContext) {
-    this.config$ = context.config.create<GlobalSearchConfigType>();
+    this.config = context.config.get<GlobalSearchConfigType>();
   }
 
-  public async setup(core: CoreSetup<{}, GlobalSearchPluginStart>) {
-    const config = await this.config$.pipe(take(1)).toPromise();
+  public setup(core: CoreSetup<{}, GlobalSearchPluginStart>) {
     const { registerResultProvider } = this.searchService.setup({
       basePath: core.http.basePath,
-      config,
+      config: this.config,
     });
 
     registerRoutes(core.http.createRouter());

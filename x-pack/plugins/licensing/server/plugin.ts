@@ -5,7 +5,6 @@
  */
 
 import { Observable, Subject, Subscription, timer } from 'rxjs';
-import { take } from 'rxjs/operators';
 import moment from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
@@ -82,7 +81,7 @@ function sign({
 export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPluginStart, {}, {}> {
   private stop$ = new Subject();
   private readonly logger: Logger;
-  private readonly config$: Observable<LicenseConfigType>;
+  private readonly config: LicenseConfigType;
   private loggingSubscription?: Subscription;
   private featureUsage = new FeatureUsageService();
 
@@ -91,13 +90,12 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
-    this.config$ = this.context.config.create<LicenseConfigType>();
+    this.config = this.context.config.get<LicenseConfigType>();
   }
 
-  public async setup(core: CoreSetup<{}, LicensingPluginStart>) {
+  public setup(core: CoreSetup<{}, LicensingPluginStart>) {
     this.logger.debug('Setting up Licensing plugin');
-    const config = await this.config$.pipe(take(1)).toPromise();
-    const pollingFrequency = config.api_polling_frequency;
+    const pollingFrequency = this.config.api_polling_frequency;
 
     async function callAsInternalUser(
       ...args: Parameters<ILegacyScopedClusterClient['callAsInternalUser']>
@@ -224,7 +222,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     return error.message;
   }
 
-  public async start() {
+  public start() {
     if (!this.refresh || !this.license$) {
       throw new Error('Setup has not been completed');
     }

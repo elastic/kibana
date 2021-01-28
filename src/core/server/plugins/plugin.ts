@@ -14,7 +14,7 @@ import { isConfigSchema } from '@kbn/config-schema';
 
 import { Logger } from '../logging';
 import {
-  Plugin,
+  SyncOrAsyncPlugin,
   PluginInitializerContext,
   PluginManifest,
   PluginInitializer,
@@ -49,7 +49,7 @@ export class PluginWrapper<
   private readonly log: Logger;
   private readonly initializerContext: PluginInitializerContext;
 
-  private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  private instance?: SyncOrAsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();

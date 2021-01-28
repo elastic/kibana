@@ -8,7 +8,6 @@
 
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { APMOSSConfig } from './';
 import { HomeServerPluginSetup, TutorialProvider } from '../../home/server';
 import { tutorialProvider } from './tutorial';
@@ -17,10 +16,10 @@ export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
   }
-  public async setup(core: CoreSetup, plugins: { home: HomeServerPluginSetup }) {
+  public setup(core: CoreSetup, plugins: { home: HomeServerPluginSetup }) {
     const config$ = this.initContext.config.create<APMOSSConfig>();
 
-    const config = await config$.pipe(take(1)).toPromise();
+    const config = this.initContext.config.get<APMOSSConfig>();
 
     const apmTutorialProvider = tutorialProvider({
       indexPatternTitle: config.indexPattern,
@@ -35,6 +34,7 @@ export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {
     plugins.home.tutorials.registerTutorial(apmTutorialProvider);
 
     return {
+      config,
       config$,
       getRegisteredTutorialProvider: () => apmTutorialProvider,
     };
@@ -45,6 +45,7 @@ export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {
 }
 
 export interface APMOSSPluginSetup {
+  config: APMOSSConfig;
   config$: Observable<APMOSSConfig>;
   getRegisteredTutorialProvider(): TutorialProvider;
 }

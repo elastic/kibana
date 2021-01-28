@@ -20,7 +20,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
     this.data = getService();
   }
 
-  public async setup(core: CoreSetup): Promise<void> {
+  public setup(core: CoreSetup): void {
     registerDataService({
       logger: this.logger,
       data: this.data,
@@ -29,7 +29,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
     });
   }
 
-  public async start(): Promise<PluginStartContract> {
+  public start(): PluginStartContract {
     return {
       data: this.data,
     };
