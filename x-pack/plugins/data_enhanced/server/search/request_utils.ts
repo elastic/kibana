@@ -42,6 +42,7 @@ export async function getDefaultAsyncSubmitParams(
   >
 > {
   return {
+    keep_alive: '7d',
     batched_reduce_size: 64,
     keep_on_completion: !!options.sessionId, // Always return an ID, even if the request completes quickly
     ...getDefaultAsyncGetParams(),
@@ -58,7 +59,6 @@ export function getDefaultAsyncGetParams(): Pick<
   'keep_alive' | 'wait_for_completion_timeout'
 > {
   return {
-    keep_alive: '1m', // Extend the TTL for this search request by one minute
     wait_for_completion_timeout: '100ms', // Wait up to 100ms for the response to return
   };
 }

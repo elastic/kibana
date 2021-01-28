@@ -117,7 +117,6 @@ describe('EQL search strategy', () => {
         expect(request).toEqual(
           expect.objectContaining({
             wait_for_completion_timeout: '100ms',
-            keep_alive: '1m',
           })
         );
       });
@@ -156,7 +155,6 @@ describe('EQL search strategy', () => {
         expect(request).toEqual(
           expect.objectContaining({
             wait_for_completion_timeout: '5ms',
-            keep_alive: '1m',
             keep_on_completion: false,
           })
         );

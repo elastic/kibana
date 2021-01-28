@@ -4,10 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchSessionStatus } from '../../../common';
+import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
 import { ACTION } from './components/actions';
 
 export const DATE_STRING_FORMAT = 'D MMM, YYYY, HH:mm:ss';
+
+/**
+ * Some properties are optional for a non-persisted Search Session.
+ * This interface makes them mandatory, because management only shows persisted search sessions.
+ */
+export interface PersistedSearchSessionSavedObjectAttributes
+  extends SearchSessionSavedObjectAttributes {
+  name: string;
+  appId: string;
+  urlGeneratorId: string;
+  initialState: Record<string, unknown>;
+  restoreState: Record<string, unknown>;
+}
 
 export interface UISession {
   id: string;
