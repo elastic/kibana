@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogMessagePart } from '../../../../common/http_api/log_entries';
+import { LogMessagePart } from '../../../../common/log_entry';
 import { JsonArray, JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
 import {
   LogMessageFormattingCondition,
