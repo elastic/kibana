@@ -21,7 +21,18 @@ import {
 } from '@elastic/eui';
 
 import { DisplaySettingsLogic } from './display_settings_logic';
-import { LEAVE_UNASSIGNED_FIELD } from './constants';
+
+import { DESCRIPTION_LABEL } from '../../../../constants';
+import {
+  LEAVE_UNASSIGNED_FIELD,
+  SEARCH_RESULTS_TITLE,
+  SEARCH_RESULTS_ROW_HELP_TEXT,
+  PREVIEW_TITLE,
+  FEATURED_RESULTS_TITLE,
+  FEATURED_RESULTS_DESCRIPTION,
+  STANDARD_RESULTS_TITLE,
+  STANDARD_RESULTS_DESCRIPTION,
+} from './constants';
 
 import { ExampleSearchResultGroup } from './example_search_result_group';
 import { ExampleStandoutResult } from './example_standout_result';
@@ -51,7 +62,7 @@ export const SearchResults: React.FC = () => {
         <EuiFlexItem>
           <EuiSpacer size="m" />
           <EuiTitle size="s">
-            <h3>Search Result Settings</h3>
+            <h3>{SEARCH_RESULTS_TITLE}</h3>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiForm>
@@ -89,7 +100,7 @@ export const SearchResults: React.FC = () => {
             </EuiFormRow>
             <EuiFormRow
               label="Subtitle"
-              helpText="This area is optional"
+              helpText={SEARCH_RESULTS_ROW_HELP_TEXT}
               onMouseOver={toggleSubtitleFieldHover}
               onMouseOut={toggleSubtitleFieldHover}
               onFocus={toggleSubtitleFieldHover}
@@ -107,8 +118,8 @@ export const SearchResults: React.FC = () => {
               />
             </EuiFormRow>
             <EuiFormRow
-              label="Description"
-              helpText="This area is optional"
+              label={DESCRIPTION_LABEL}
+              helpText={SEARCH_RESULTS_ROW_HELP_TEXT}
               onMouseOver={toggleDescriptionFieldHover}
               onMouseOut={toggleDescriptionFieldHover}
               onFocus={toggleDescriptionFieldHover}
@@ -130,27 +141,23 @@ export const SearchResults: React.FC = () => {
         <EuiFlexItem>
           <EuiPanel>
             <EuiTitle size="s">
-              <h3>Preview</h3>
+              <h3>{PREVIEW_TITLE}</h3>
             </EuiTitle>
             <EuiSpacer />
             <div className="section-header">
               <EuiTitle size="xs">
-                <h4>Featured Results</h4>
+                <h4>{FEATURED_RESULTS_TITLE}</h4>
               </EuiTitle>
-              <p className="section-header__description">
-                A matching document will appear as a single bold card.
-              </p>
+              <p className="section-header__description">{FEATURED_RESULTS_DESCRIPTION}</p>
             </div>
             <EuiSpacer />
             <ExampleStandoutResult />
             <EuiSpacer />
             <div className="section-header">
               <EuiTitle size="xs">
-                <h4>Standard Results</h4>
+                <h4>{STANDARD_RESULTS_TITLE}</h4>
               </EuiTitle>
-              <p className="section-header__description">
-                Somewhat matching documents will appear as a set.
-              </p>
+              <p className="section-header__description">{STANDARD_RESULTS_DESCRIPTION}</p>
             </div>
             <EuiSpacer />
             <ExampleSearchResultGroup />
