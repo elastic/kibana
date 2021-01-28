@@ -119,7 +119,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
      * Alternatively, a test can navigate to `Management > Search Sessions` and use the UI to delete any created tests.
      */
     public async deleteAllSearchSessions() {
-      log.debug('Deleting created searcg sessions');
+      log.debug('Deleting created search sessions');
       // ignores 409 errs and keeps retrying
       await retry.tryForTime(10000, async () => {
         const { body } = await supertest
