@@ -93,5 +93,30 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.metrics.length).to.equal(2);
       });
     });
+
+    it('should return multiple values for hostSystemOverview metric', () => {
+      const data = fetchNodeDetails({
+        sourceId: 'default',
+        metrics: ['hostSystemOverview'],
+        timerange: {
+          to: max,
+          from: min,
+          interval: '>=1m',
+        },
+        nodeId: 'demo-stack-mysql-01',
+        nodeType: 'host' as InfraNodeType,
+      });
+      return data.then((resp) => {
+        if (!resp) {
+          return;
+        }
+
+        const hostSystemOverviewMetric = resp.metrics.find(
+          (metric) => metric.id === 'hostSystemOverview'
+        );
+
+        expect(hostSystemOverviewMetric?.series.length).to.be.greaterThan(1);
+      });
+    });
   });
 }

@@ -8,9 +8,7 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 import { MapsLegacyPlugin } from './plugin';
-// @ts-ignore
 import * as colorUtil from './map/color_util';
-// @ts-ignore
 import { KibanaMapLayer } from './map/kibana_map_layer';
 import {
   VectorLayer,
@@ -19,7 +17,6 @@ import {
   TmsLayer,
   IServiceSettings,
 } from './map/service_settings_types';
-// @ts-ignore
 import { mapTooltipProvider } from './tooltip_provider';
 
 import './map/index.scss';
