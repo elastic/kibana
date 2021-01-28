@@ -64,10 +64,11 @@ export const getCreateMigration = (
       return encryptedDoc;
     }
 
-    // If a document has been converted right before this migration function is called, it will no longer have a `namespace` field, but it
+    // If an object has been converted right before this migration function is called, it will no longer have a `namespace` field, but it
     // will have a `namespaces` field; in that case, the first/only element in that array should be used as the namespace in the descriptor
     // during decryption.
-    const { convertToMultiNamespaceType } = inputType ?? {};
+    const convertToMultiNamespaceType =
+      context.convertToMultiNamespaceTypeVersion === context.migrationVersion;
     const decryptDescriptorNamespace = convertToMultiNamespaceType
       ? normalizeNamespace(encryptedDoc.namespaces?.[0]) // `namespaces` contains string values, but we need to normalize this to the namespace ID representation
       : encryptedDoc.namespace;
@@ -83,7 +84,9 @@ export const getCreateMigration = (
     return mapAttributes(
       migration(
         mapAttributes(encryptedDoc, (inputAttributes) =>
-          inputService.decryptAttributesSync<any>(decryptDescriptor, inputAttributes)
+          inputService.decryptAttributesSync<any>(decryptDescriptor, inputAttributes, {
+            convertToMultiNamespaceType,
+          })
         ),
         context
       ),

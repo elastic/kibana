@@ -32,12 +32,6 @@ export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
   readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>;
   readonly attributesToExcludeFromAAD?: ReadonlySet<string>;
-  /**
-   * This should only be used in the `inputType` argument in an encrypted saved objects migration function. Consumers should only use it if
-   * they have also defined a conversion for this object in the core SavedObjectsTypeRegistry using the `convertToMultiNamespaceTypeVersion`
-   * field.
-   */
-  readonly convertToMultiNamespaceType?: boolean;
 }
 
 /**
@@ -67,6 +61,14 @@ interface DecryptParameters extends CommonParameters {
    * Indicates whether decryption should only be performed using secondary decryption-only keys.
    */
   omitPrimaryEncryptionKey?: boolean;
+  /**
+   * Indicates whether the object to be decrypted is being converted from a single-namespace type to a multi-namespace type. In this case,
+   * we may need to attempt decryption twice: once with a namespace in the descriptor (for use during index migration), and again without a
+   * namespace in the descriptor (for use during object migration). In other words, if the object is being decrypted during index migration,
+   * the object was previously encrypted with its namespace in the descriptor portion of the AAD; on the other hand, if the object is being
+   * decrypted during object migration, the object was never encrypted with its namespace in the descriptor portion of the AAD.
+   */
+  convertToMultiNamespaceType?: boolean;
 }
 
 interface EncryptedSavedObjectsServiceOptions {
@@ -437,7 +439,7 @@ export class EncryptedSavedObjectsService {
   private *attributesToDecryptIterator<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
-    params?: CommonParameters
+    params?: DecryptParameters
   ): Iterator<[string, string[]], T, EncryptOutput> {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
@@ -461,7 +463,7 @@ export class EncryptedSavedObjectsService {
       }
       if (!encryptionAADs.length) {
         encryptionAADs.push(this.getAAD(typeDefinition, descriptor, attributes));
-        if (typeDefinition.convertToMultiNamespaceType && descriptor.namespace) {
+        if (params?.convertToMultiNamespaceType && descriptor.namespace) {
           // This is happening during a migration; create an alternate AAD for decrypting the object attributes by stripping out the namespace from the descriptor.
           const { namespace, ...alternateDescriptor } = descriptor;
           encryptionAADs.push(this.getAAD(typeDefinition, alternateDescriptor, attributes));

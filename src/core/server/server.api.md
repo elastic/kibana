@@ -2093,7 +2093,9 @@ export interface SavedObjectExportBaseOptions {
 
 // @public
 export interface SavedObjectMigrationContext {
+    convertToMultiNamespaceTypeVersion?: string;
     log: SavedObjectsMigrationLogger;
+    migrationVersion: string;
 }
 
 // @public

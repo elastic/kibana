@@ -707,7 +707,6 @@ describe('#decryptAttributes', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrThree']),
-      convertToMultiNamespaceType: true,
     });
 
     const encryptedAttributes = service.encryptAttributesSync(
@@ -725,7 +724,7 @@ describe('#decryptAttributes', () => {
       service.decryptAttributes(
         { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
         encryptedAttributes,
-        { user: mockUser }
+        { user: mockUser, convertToMultiNamespaceType: true }
       )
     ).resolves.toEqual({
       attrOne: 'one',
@@ -952,14 +951,8 @@ describe('#decryptAttributes', () => {
     it('fails if retry decryption without namespace is not correct', async () => {
       const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
-      service.registerType({
-        type: 'known-type-3',
-        attributesToEncrypt: new Set(['attrThree']),
-        convertToMultiNamespaceType: true,
-      });
-
       encryptedAttributes = service.encryptAttributesSync(
-        { type: 'known-type-3', id: 'object-id', namespace: 'some-other-ns' },
+        { type: 'known-type-1', id: 'object-id', namespace: 'some-other-ns' },
         attributes
       );
       expect(encryptedAttributes).toEqual({
@@ -970,20 +963,21 @@ describe('#decryptAttributes', () => {
 
       await expect(() =>
         service.decryptAttributes(
-          { type: 'known-type-3', id: 'object-id', namespace: 'object-ns' },
-          encryptedAttributes
+          { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+          encryptedAttributes,
+          { convertToMultiNamespaceType: true }
         )
       ).rejects.toThrowError(EncryptionError);
       expect(mockNodeCrypto.decrypt).toHaveBeenCalledTimes(2);
       expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
         1, // first attempted to decrypt with the namespace in the descriptor (fail)
         expect.anything(),
-        `["object-ns","known-type-3","object-id",{"attrOne":"one","attrTwo":"two"}]`
+        `["object-ns","known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
       );
       expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
         2, // then attempted to decrypt without the namespace in the descriptor (fail)
         expect.anything(),
-        `["known-type-3","object-id",{"attrOne":"one","attrTwo":"two"}]`
+        `["known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
       );
     });
 
@@ -1549,7 +1543,6 @@ describe('#decryptAttributesSync', () => {
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrThree']),
-      convertToMultiNamespaceType: true,
     });
 
     const encryptedAttributes = service.encryptAttributesSync(
@@ -1567,7 +1560,7 @@ describe('#decryptAttributesSync', () => {
       service.decryptAttributesSync(
         { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
         encryptedAttributes,
-        { user: mockUser }
+        { user: mockUser, convertToMultiNamespaceType: true }
       )
     ).toEqual({
       attrOne: 'one',
@@ -1741,14 +1734,8 @@ describe('#decryptAttributesSync', () => {
     it('fails if retry decryption without namespace is not correct', () => {
       const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
-      service.registerType({
-        type: 'known-type-3',
-        attributesToEncrypt: new Set(['attrThree']),
-        convertToMultiNamespaceType: true,
-      });
-
       encryptedAttributes = service.encryptAttributesSync(
-        { type: 'known-type-3', id: 'object-id', namespace: 'some-other-ns' },
+        { type: 'known-type-1', id: 'object-id', namespace: 'some-other-ns' },
         attributes
       );
       expect(encryptedAttributes).toEqual({
@@ -1759,20 +1746,21 @@ describe('#decryptAttributesSync', () => {
 
       expect(() =>
         service.decryptAttributesSync(
-          { type: 'known-type-3', id: 'object-id', namespace: 'object-ns' },
-          encryptedAttributes
+          { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+          encryptedAttributes,
+          { convertToMultiNamespaceType: true }
         )
       ).toThrowError(EncryptionError);
       expect(mockNodeCrypto.decryptSync).toHaveBeenCalledTimes(2);
       expect(mockNodeCrypto.decryptSync).toHaveBeenNthCalledWith(
         1, // first attempted to decrypt with the namespace in the descriptor (fail)
         expect.anything(),
-        `["object-ns","known-type-3","object-id",{"attrOne":"one","attrTwo":"two"}]`
+        `["object-ns","known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
       );
       expect(mockNodeCrypto.decryptSync).toHaveBeenNthCalledWith(
         2, // then attempted to decrypt without the namespace in the descriptor (fail)
         expect.anything(),
-        `["known-type-3","object-id",{"attrOne":"one","attrTwo":"two"}]`
+        `["known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
       );
     });
 
