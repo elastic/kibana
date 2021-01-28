@@ -8,7 +8,7 @@ import { ILicense } from '../../../../../licensing/common/types';
 import {
   AppLocation,
   Immutable,
-  MalwareFields,
+  ProtectionFields,
   PolicyData,
   UIPolicyConfig,
 } from '../../../../common/endpoint/types';
@@ -108,7 +108,16 @@ export type KeysByValueCriteria<O, Criteria> = {
 }[keyof O];
 
 /** Returns an array of the policy OSes that have a malware protection field */
-export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
+export type MalwareProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { malware: ProtectionFields }
+>;
+
+/** Returns an array of the policy OSes that have a ransomware protection field */
+export type RansomwareProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { ransomware: ProtectionFields }
+>;
 
 export interface GetPolicyListResponse extends GetPackagePoliciesResponse {
   items: PolicyData[];

@@ -16,7 +16,7 @@ import {
   GetFullAgentPolicyResponse,
   GetPackagesResponse,
 } from '../../../plugins/fleet/common';
-import { factory as policyConfigFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
+import { policyFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
 import { Immutable } from '../../../plugins/security_solution/common/endpoint/types';
 
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
@@ -178,7 +178,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
               streams: [],
               config: {
                 policy: {
-                  value: policyConfigFactory(),
+                  value: policyFactory(),
                 },
               },
             },
