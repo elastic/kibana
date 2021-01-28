@@ -1867,8 +1867,8 @@ export interface OptionedValueProp {
 //
 // @public (undocumented)
 export class PainlessError extends EsError {
-    // Warning: (ae-forgotten-export) The symbol "KibanaServerError" needs to be exported by the entry point index.d.ts
-    constructor(err: KibanaServerError);
+    // Warning: (ae-forgotten-export) The symbol "IEsError" needs to be exported by the entry point index.d.ts
+    constructor(err: IEsError);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
     // (undocumented)
@@ -2282,6 +2282,7 @@ export class SearchInterceptor {
     protected readonly deps: SearchInterceptorDeps;
     // (undocumented)
     protected getTimeoutMode(): TimeoutErrorMode;
+    // Warning: (ae-forgotten-export) The symbol "KibanaServerError" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "AbortError" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)

@@ -151,20 +151,20 @@ export default function ({ getService }: FtrProviderContext) {
         after(async () => {
           await esArchiver.unload('../../../functional/fixtures/es_archiver/logstash_functional');
         });
-      });
-      it('should return 400 for Painless error', async () => {
-        const resp = await supertest.post(`/internal/bsearch`).send({
-          batch: [
-            {
-              request: painlessErrReq,
-            },
-          ],
-        });
+        it('should return 400 for Painless error', async () => {
+          const resp = await supertest.post(`/internal/bsearch`).send({
+            batch: [
+              {
+                request: painlessErrReq,
+              },
+            ],
+          });
 
-        expect(resp.status).to.be(200);
-        parseBfetchResponse(resp).forEach((responseJson, i) => {
-          expect(responseJson.id).to.be(i);
-          verifyErrorResponse(responseJson.error, 400, 'search_phase_execution_exception', true);
+          expect(resp.status).to.be(200);
+          parseBfetchResponse(resp).forEach((responseJson, i) => {
+            expect(responseJson.id).to.be(i);
+            verifyErrorResponse(responseJson.error, 400, 'search_phase_execution_exception', true);
+          });
         });
       });
     });
