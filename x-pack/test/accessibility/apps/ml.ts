@@ -237,18 +237,19 @@ export default function ({ getService }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
-        it('data frame analytics create job select index pattern modal', async () => {
+        it('data frame analytics create job configuration step', async () => {
+          await ml.testExecution.logTestStep(
+            'job creation selects the source data and loads the DFA job wizard page'
+          );
+          await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
           await ml.dataFrameAnalytics.startAnalyticsCreation();
+          await ml.jobSourceSelection.selectSourceForAnalyticsJob(ihpIndexPattern);
+          await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
           await a11y.testAppSnapshot();
         });
 
         it('data frame analytics create job configuration step for outlier job', async () => {
-          await ml.testExecution.logTestStep(
-            'selects the source data and loads the DFA job wizard page'
-          );
-          await ml.jobSourceSelection.selectSourceForAnalyticsJob(ihpIndexPattern);
-          await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
           await ml.testExecution.logTestStep('selects the outlier job type');
           await ml.dataFrameAnalyticsCreation.assertJobTypeSelectExists();
           await ml.dataFrameAnalyticsCreation.selectJobType(dfaJobType);
