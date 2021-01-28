@@ -28,7 +28,14 @@ export const PhaseErrorIndicator: FunctionComponent<Props> = memo(({ phase }) =>
   } = useFormErrorsContext();
 
   if (phaseErrors.length > 0) {
-    return <EuiIconTip type="alert" color="danger" content={i18nTexts.toolTipContent} />;
+    return (
+      <EuiIconTip
+        data-test-subj={`phaseErrorIndicator-${phase}`}
+        type="alert"
+        color="danger"
+        content={i18nTexts.toolTipContent}
+      />
+    );
   }
 
   return null;

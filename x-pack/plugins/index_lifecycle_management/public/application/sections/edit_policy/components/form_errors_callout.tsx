@@ -30,7 +30,11 @@ export const FormErrorsCallout: FunctionComponent = () => {
 
   return (
     <>
-      <EuiCallOut color="danger" title={i18nTexts.callout.title}>
+      <EuiCallOut
+        data-test-subj="policyFormErrorsCallout"
+        color="danger"
+        title={i18nTexts.callout.title}
+      >
         {i18nTexts.callout.body}
       </EuiCallOut>
       <EuiSpacer />

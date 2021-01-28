@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useContext, FunctionComponent, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  FunctionComponent,
+  useEffect,
+  useState,
+  useRef,
+} from 'react';
 import { produce } from 'immer';
 
 import { useFormData, useFormContext } from '../../../../shared_imports';
@@ -40,11 +47,19 @@ const isColdPhaseField = isXPhaseField('cold');
 
 export const FormErrorsProvider: FunctionComponent = ({ children }) => {
   const [errors, setErrors] = useState<ContextValue>(defaultContextValue);
+  const isMounted = useRef<boolean>(false);
 
   const form = useFormContext<FormInternal>();
 
   // Hook into form updates
   const [formData] = useFormData<FormInternal>();
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     // This is a hack, we need to wait for the next tick to let all of the async validation complete.
@@ -68,7 +83,9 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
           }
         });
       });
-      setErrors(result);
+      if (isMounted.current) {
+        setErrors(result);
+      }
     });
   }, [form, formData, setErrors]);
 
