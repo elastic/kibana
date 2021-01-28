@@ -16,7 +16,6 @@ import { coreMock } from 'src/core/server/mocks';
 import { ConfigSchema } from '../../../config';
 // @ts-ignore
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { SearchStatus } from './types';
 
 const INMEM_TRACKING_INTERVAL = 10000;
 const MAX_UPDATE_RETRIES = 3;
@@ -263,29 +262,6 @@ describe('SearchSessionService', () => {
       expect(setParams.ids.get(requestHash).id).toBe(searchId);
       expect(setParams.ids.get(requestHash).strategy).toBe(MOCK_STRATEGY);
       expect(setSessionId).toBe(sessionId);
-    });
-
-    it('updates saved object when `isStored` is `true`', async () => {
-      const searchRequest = { params: {} };
-      const requestHash = createRequestHash(searchRequest.params);
-      const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
-      const isStored = true;
-
-      await service.trackId({ savedObjectsClient }, searchRequest, searchId, {
-        sessionId,
-        isStored,
-        strategy: MOCK_STRATEGY,
-      });
-
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(SEARCH_SESSION_TYPE, sessionId, {
-        idMapping: {
-          [requestHash]: {
-            id: searchId,
-            strategy: MOCK_STRATEGY,
-            status: SearchStatus.IN_PROGRESS,
-          },
-        },
-      });
     });
   });
 
