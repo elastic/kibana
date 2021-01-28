@@ -36,7 +36,8 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
   }: GetFieldsOptions) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
     if (formatFields) {
-      // need to know which pattern the field is from in order to properly format
+      // need to know which pattern the field is from in order to properly
+      // document the field [required for Security Solution Timeline]
       // so we split up the requests for each pattern in the patternList
       const fieldsArr: Array<FieldDescriptor[] | boolean> = await Promise.all(
         patternList
