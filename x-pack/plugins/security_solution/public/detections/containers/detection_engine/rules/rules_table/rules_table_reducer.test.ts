@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { FilterOptions, PaginationOptions } from '../../../../containers/detection_engine/rules';
+import { mockRule } from '../../../../pages/detection_engine/rules/all/__mocks__/mock';
+import { FilterOptions, PaginationOptions } from '../types';
+import { RulesTableAction, RulesTableState, createRulesTableReducer } from './rules_table_reducer';
 
-import { Action, State, allRulesReducer } from './reducer';
-import { mockRule } from './__mocks__/mock';
-
-const initialState: State = {
-  exportRuleIds: [],
+const initialState: RulesTableState = {
+  rules: [],
+  pagination: {
+    page: 1,
+    perPage: 20,
+    total: 0,
+  },
   filterOptions: {
     filter: '',
     sortField: 'enabled',
@@ -20,29 +24,24 @@ const initialState: State = {
     showCustomRules: false,
     showElasticRules: false,
   },
-  loadingRuleIds: [],
   loadingRulesAction: null,
-  pagination: {
-    page: 1,
-    perPage: 20,
-    total: 0,
-  },
-  rules: [],
+  loadingRuleIds: [],
   selectedRuleIds: [],
+  exportRuleIds: [],
   lastUpdated: 0,
-  showIdleModal: false,
   isRefreshOn: false,
+  showIdleModal: false,
 };
 
 describe('allRulesReducer', () => {
-  let reducer: (state: State, action: Action) => State;
+  let reducer: (state: RulesTableState, action: RulesTableAction) => RulesTableState;
 
   beforeEach(() => {
     jest.useFakeTimers();
     jest
       .spyOn(global.Date, 'now')
       .mockImplementationOnce(() => new Date('2020-10-31T11:01:58.135Z').valueOf());
-    reducer = allRulesReducer({ current: undefined });
+    reducer = createRulesTableReducer({ current: undefined });
   });
 
   afterEach(() => {
