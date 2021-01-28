@@ -49,3 +49,17 @@
 .dshUnsavedListingItem__actions {
   margin-left: $euiSizeL + $euiSizeXS;
 }
+
+@include euiBreakpoint('xs', 's') {
+  .dshUnsavedListingItem {
+    margin-top: $euiSize;
+  }
+
+  .dshUnsavedListingItem__heading {
+    margin-bottom: $euiSizeXS;
+  }
+
+  .dshUnsavedListingItem__actions {
+    flex-direction: column;
+  }
+}
