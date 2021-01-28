@@ -29,6 +29,7 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
 import { EMSSettings } from '../common/ems_settings';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -36,6 +37,10 @@ interface SetupDeps {
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
   mapsLegacy: MapsLegacyPluginSetup;
+}
+
+export interface StartDeps {
+  data: DataPluginStart;
 }
 
 export class MapsPlugin implements Plugin {

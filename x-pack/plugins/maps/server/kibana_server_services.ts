@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ElasticsearchClient,
-  ISavedObjectsRepository,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { ElasticsearchClient, ISavedObjectsRepository } from 'kibana/server';
 import { IndexPatternsService } from '../../../../src/plugins/data/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IndexPatternsServiceStart } from '../../../../src/plugins/data/server/index_patterns';
 
 let internalRepository: ISavedObjectsRepository;
 export const setInternalRepository = (
@@ -21,13 +19,11 @@ export const getInternalRepository = () => internalRepository;
 
 let indexPatternsService: IndexPatternsService;
 export const setIndexPatternsService = async (
-  indexPatternsServiceFactory: (
-    savedObjectsClient: Omit<SavedObjectsClientContract, 'errors'>,
-    elasticsearchClient: ElasticsearchClient
-  ) => Promise<IndexPatternsService>,
+  indexPatternsServiceFactory: IndexPatternsServiceStart['indexPatternsServiceFactory'],
   elasticsearchClient: ElasticsearchClient
 ) => {
   const savedObjectsClient = getInternalRepository();
+  // @ts-ignore
   indexPatternsService = await indexPatternsServiceFactory(savedObjectsClient, elasticsearchClient);
 };
 export const getIndexPatternsService = () => indexPatternsService;
