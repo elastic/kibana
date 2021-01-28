@@ -84,7 +84,7 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
     };
   }
 
-  private static transformPlugins(configValue: LegacyVars) {
+  private static transformPlugins(configValue: LegacyVars = {}) {
     // These properties are the only ones we use from the existing `plugins` config node
     // since `scanDirs` isn't respected by new platform plugin discovery.
     return {
