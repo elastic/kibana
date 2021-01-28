@@ -22,11 +22,15 @@ import { OverlayStart } from '../../../../../core/public';
 import { createConfirmStrings, leaveConfirmStrings } from '../../dashboard_strings';
 import { toMountPoint } from '../../services/kibana_react';
 
-export const confirmDiscardUnsavedChanges = (overlays: OverlayStart, discardCallback: () => void) =>
+export const confirmDiscardUnsavedChanges = (
+  overlays: OverlayStart,
+  discardCallback: () => void,
+  cancelButtonText = leaveConfirmStrings.getCancelButtonText()
+) =>
   overlays
     .openConfirm(leaveConfirmStrings.getDiscardSubtitle(), {
       confirmButtonText: leaveConfirmStrings.getConfirmButtonText(),
-      cancelButtonText: leaveConfirmStrings.getCancelButtonText(),
+      cancelButtonText,
       buttonColor: 'danger',
       defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
       title: leaveConfirmStrings.getDiscardTitle(),

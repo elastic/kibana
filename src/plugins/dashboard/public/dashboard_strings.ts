@@ -264,6 +264,24 @@ export const createConfirmStrings = {
     }),
 };
 
+export const panelStorageErrorStrings = {
+  getPanelsGetError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.getError', {
+      defaultMessage: 'Error encountered while fetching unsaved changes: {message}',
+      values: { message },
+    }),
+  getPanelsSetError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.setError', {
+      defaultMessage: 'Error encountered while setting unsaved changes: {message}',
+      values: { message },
+    }),
+  getPanelsClearError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.clearError', {
+      defaultMessage: 'Error encountered while clearing unsaved changes: {message}',
+      values: { message },
+    }),
+};
+
 /*
   Empty Screen
 */

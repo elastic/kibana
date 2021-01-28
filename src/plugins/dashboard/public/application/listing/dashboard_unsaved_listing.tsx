@@ -18,7 +18,11 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { DashboardSavedObject } from '../..';
-import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
+import {
+  createConfirmStrings,
+  dashboardUnsavedListingStrings,
+  getNewDashboardTitle,
+} from '../../dashboard_strings';
 import { useKibana } from '../../services/kibana_react';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardAppServices, DashboardRedirect } from '../types';
@@ -109,10 +113,14 @@ export const DashboardUnsavedListing = ({ redirectTo }: { redirectTo: DashboardR
 
   const onDiscard = useCallback(
     (id?: string) => {
-      confirmDiscardUnsavedChanges(overlays, () => {
-        dashboardPanelStorage.clearPanels(id);
-        setDashboardIds(dashboardPanelStorage.getDashboardIdsWithUnsavedChanges());
-      });
+      confirmDiscardUnsavedChanges(
+        overlays,
+        () => {
+          dashboardPanelStorage.clearPanels(id);
+          setDashboardIds(dashboardPanelStorage.getDashboardIdsWithUnsavedChanges());
+        },
+        createConfirmStrings.getCancelButtonText()
+      );
     },
     [overlays, dashboardPanelStorage]
   );
