@@ -28,7 +28,7 @@ import {
   SourceTooltipConfig,
 } from '../vector_source';
 import { DataRequest } from '../../util/data_request';
-import { TableField } from '../../fields/table_field';
+import { InlineField } from '../../fields/inline_field';
 
 export class TableSource extends AbstractVectorSource implements ITermJoinSource, IVectorSource {
   static type = SOURCE_TYPES.TABLE_SOURCE;
@@ -100,7 +100,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
       );
     }
 
-    return new TableField({
+    return new InlineField<TableSource>({
       fieldName: column.name,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
@@ -122,7 +122,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
   getRightFields(): IField[] {
     return this._descriptor.columns.map((column) => {
-      return new TableField({
+      return new InlineField<TableSource>({
         fieldName: column.name,
         source: this,
         origin: FIELD_ORIGIN.SOURCE,
@@ -169,7 +169,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
       return null;
     }
 
-    return new TableField({
+    return new InlineField<TableSource>({
       fieldName: column.name,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,

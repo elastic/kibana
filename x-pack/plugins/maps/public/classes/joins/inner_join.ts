@@ -9,8 +9,8 @@ import { Feature, GeoJsonProperties } from 'geojson';
 import { ESTermSource } from '../sources/es_term_source';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
 import {
-  META_DATA_REQUEST_ID_SUFFIX,
   FORMATTERS_DATA_REQUEST_ID_SUFFIX,
+  META_DATA_REQUEST_ID_SUFFIX,
   SOURCE_TYPES,
 } from '../../../common/constants';
 import {
@@ -34,11 +34,9 @@ function createJoinTermSource(
     return;
   }
 
-  if ('indexPatternId' in descriptor && 'term' in descriptor) {
+  if (typeof descriptor.type === 'undefined' || descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE) {
     return new ESTermSource(descriptor as ESTermSourceDescriptor, inspectorAdapters);
-  }
-
-  if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
+  } else if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
     return new TableSource(descriptor as TableSourceDescriptor, inspectorAdapters);
   }
 }
