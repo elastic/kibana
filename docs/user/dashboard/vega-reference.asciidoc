@@ -1,8 +1,6 @@
 [[vega-reference]]
 == Vega reference
 
-experimental[]
-
 For additional *Vega* and *Vega-Lite* information, refer to the reference sections.
 
 [float]
