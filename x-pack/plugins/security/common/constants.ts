@@ -29,7 +29,7 @@ export const NEXT_URL_QUERY_STRING_PARAMETER = 'next';
  * - Must contain only letters, numbers, spaces, punctuation and printable symbols.
  * - Must not contain leading or trailing spaces.
  */
-export const NAME_REGEX = /^(?! )[a-zA-Z0-9 !"#$%&'()*+,\-./\\:;<=>?@\[\]^_`{|}~]+(?<! )$/;
+export const NAME_REGEX = /^(?! )[a-zA-Z0-9 !"#$%&'()*+,\-./\\:;<=>?@\[\]^_`{|}~]*[a-zA-Z0-9!"#$%&'()*+,\-./\\:;<=>?@\[\]^_`{|}~]$/;
 
 /**
  * Maximum length of usernames and role names.
