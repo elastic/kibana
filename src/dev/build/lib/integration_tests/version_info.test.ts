@@ -10,7 +10,7 @@ import { kibanaPackageJSON as pkg } from '@kbn/dev-utils';
 
 import { getVersionInfo } from '../version_info';
 
-jest.mock('./get_build_number');
+jest.mock('../get_build_number');
 
 describe('isRelease = true', () => {
   it('returns unchanged package.version, build sha, and build number', async () => {
