@@ -30,6 +30,6 @@ export function updateGlobalState(newState: MapsGlobalState, flushUrlState = fal
     ...newState,
   });
   if (flushUrlState) {
-    kbnUrlStateStorage.flush({ replace: true });
+    kbnUrlStateStorage.kbnUrlControls.flush(true);
   }
 }
