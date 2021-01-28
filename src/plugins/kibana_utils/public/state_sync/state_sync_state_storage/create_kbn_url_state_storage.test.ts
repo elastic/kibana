@@ -39,11 +39,11 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
-      expect(urlStateStorage.flush()).toBe(true);
+      expect(!!urlStateStorage.kbnUrlControls.flush()).toBe(true);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=(ok:1,test:test)"`);
       expect(urlStateStorage.get(key)).toEqual(state);
 
-      expect(urlStateStorage.flush()).toBe(false); // nothing to flush, not update
+      expect(!!urlStateStorage.kbnUrlControls.flush()).toBe(false); // nothing to flush, not update
     });
 
     it('should cancel url updates', async () => {
@@ -51,7 +51,7 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       const pr = urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
-      urlStateStorage.cancel();
+      urlStateStorage.kbnUrlControls.cancel();
       await pr;
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
       expect(urlStateStorage.get(key)).toEqual(null);
@@ -215,11 +215,11 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/kibana/app/"`);
-      expect(urlStateStorage.flush()).toBe(true);
+      expect(!!urlStateStorage.kbnUrlControls.flush()).toBe(true);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/kibana/app/#?_s=(ok:1,test:test)"`);
       expect(urlStateStorage.get(key)).toEqual(state);
 
-      expect(urlStateStorage.flush()).toBe(false); // nothing to flush, not update
+      expect(!!urlStateStorage.kbnUrlControls.flush()).toBe(false); // nothing to flush, not update
     });
 
     it('should cancel url updates', async () => {
@@ -227,7 +227,7 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       const pr = urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/kibana/app/"`);
-      urlStateStorage.cancel();
+      urlStateStorage.kbnUrlControls.cancel();
       await pr;
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/kibana/app/"`);
       expect(urlStateStorage.get(key)).toEqual(null);
