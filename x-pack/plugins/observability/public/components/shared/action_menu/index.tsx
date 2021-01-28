@@ -63,7 +63,7 @@ export const Section = styled.div`
 
 export type SectionLinkProps = EuiListGroupItemProps;
 export function SectionLink(props: SectionLinkProps) {
-  return <EuiListGroupItem style={{ padding: 0 }} size={'s'} {...props} />;
+  return <EuiListGroupItem style={{ padding: 0 }} size={'xs'} {...props} />;
 }
 
 export function ActionMenuDivider() {
