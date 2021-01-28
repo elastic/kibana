@@ -11,10 +11,10 @@ import {
   convertIntervalToUnit,
   parseInterval,
   getSuitableUnit,
-} from '../vis_data/helpers/unit_to_seconds';
-import { RESTRICTIONS_KEYS } from '../../../common/ui_restrictions';
-import { ReqFacade } from './strategies/abstract_search_strategy';
-import { VisPayload } from '../../../common/types';
+} from '../../vis_data/helpers/unit_to_seconds';
+import { RESTRICTIONS_KEYS } from '../../../../common/ui_restrictions';
+import type { ReqFacade } from '../strategies/abstract_search_strategy';
+import type { VisPayload } from '../../../../common/types';
 
 const getTimezoneFromRequest = (request: ReqFacade<VisPayload>) => {
   return request.payload.timerange.timezone;
