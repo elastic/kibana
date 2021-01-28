@@ -18,7 +18,8 @@ export interface IField {
   getSource(): IVectorSource;
   getOrigin(): FIELD_ORIGIN;
   isValid(): boolean;
-  getOrdinalFieldMetaRequest(): Promise<unknown>;
+  getExtendedStatsFieldMetaRequest(): Promise<unknown | null>;
+  getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null>;
   getCategoricalFieldMetaRequest(size: number): Promise<unknown>;
 
   // Whether Maps-app can automatically determine the domain of the field-values
@@ -85,7 +86,11 @@ export class AbstractField implements IField {
     return false;
   }
 
-  async getOrdinalFieldMetaRequest(): Promise<unknown> {
+  async getExtendedStatsFieldMetaRequest(): Promise<unknown> {
+    return null;
+  }
+
+  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
     return null;
   }
 

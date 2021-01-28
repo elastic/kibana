@@ -12,7 +12,7 @@ import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 const EMPTY_VALUE = '';
 
-interface Break {
+export interface Break {
   color: string;
   label: ReactElement<any> | string | number;
   symbolId?: string;

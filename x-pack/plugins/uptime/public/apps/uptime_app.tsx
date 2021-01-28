@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from 'react-router-dom';
-import { I18nStart, ChromeBreadcrumb, CoreStart } from 'kibana/public';
+import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from 'kibana/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -25,14 +25,11 @@ import {
 import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
 import { setBasePath } from '../state/actions';
 import { PageRouter } from '../routes';
-import {
-  UptimeAlertsContextProvider,
-  UptimeAlertsFlyoutWrapper,
-} from '../components/overview/alerts';
+import { UptimeAlertsFlyoutWrapper } from '../components/overview/alerts';
 import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
-import { ScopedHistory } from '../../../../../src/core/public';
-import { EuiThemeProvider } from '../../../observability/public';
+import { ActionMenu } from '../components/common/header/action_menu';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 
 export interface UptimeAppColors {
   danger: string;
@@ -50,7 +47,6 @@ export interface UptimeAppProps {
   canSave: boolean;
   core: CoreStart;
   darkMode: boolean;
-  history: ScopedHistory;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
@@ -61,6 +57,7 @@ export interface UptimeAppProps {
   renderGlobalHelpControls(): void;
   commonlyUsedRanges: CommonlyUsedRange[];
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  appMountParameters: AppMountParameters;
 }
 
 const Application = (props: UptimeAppProps) => {
@@ -74,6 +71,7 @@ const Application = (props: UptimeAppProps) => {
     renderGlobalHelpControls,
     setBadge,
     startPlugins,
+    appMountParameters,
   } = props;
 
   useEffect(() => {
@@ -104,22 +102,21 @@ const Application = (props: UptimeAppProps) => {
           <KibanaContextProvider
             services={{ ...core, ...plugins, triggersActionsUi: startPlugins.triggersActionsUi }}
           >
-            <Router history={props.history}>
+            <Router history={appMountParameters.history}>
               <EuiThemeProvider darkMode={darkMode}>
                 <UptimeRefreshContextProvider>
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <UptimeStartupPluginsContextProvider {...startPlugins}>
-                        <UptimeAlertsContextProvider>
-                          <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                            <RedirectAppLinks application={core.application}>
-                              <main>
-                                <UptimeAlertsFlyoutWrapper />
-                                <PageRouter />
-                              </main>
-                            </RedirectAppLinks>
-                          </EuiPage>
-                        </UptimeAlertsContextProvider>
+                        <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                          <RedirectAppLinks application={core.application}>
+                            <main>
+                              <UptimeAlertsFlyoutWrapper />
+                              <PageRouter />
+                              <ActionMenu appMountParameters={appMountParameters} />
+                            </main>
+                          </RedirectAppLinks>
+                        </EuiPage>
                       </UptimeStartupPluginsContextProvider>
                     </UptimeThemeContextProvider>
                   </UptimeSettingsContextProvider>

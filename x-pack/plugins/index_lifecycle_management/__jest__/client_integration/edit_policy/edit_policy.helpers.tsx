@@ -41,6 +41,7 @@ jest.mock('@elastic/eui', () => {
         }}
       />
     ),
+    EuiIcon: 'eui-icon', // using custom react-svg icon causes issues, mocking for now.
   };
 });
 
@@ -88,6 +89,13 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     component.update();
   };
 
+  const createFormCheckboxAction = (dataTestSubject: string) => async (checked: boolean) => {
+    await act(async () => {
+      form.selectCheckBox(dataTestSubject, checked);
+    });
+    component.update();
+  };
+
   function createFormSetValueAction<V extends string = string>(dataTestSubject: string) {
     return async (value: V) => {
       await act(async () => {
@@ -110,6 +118,8 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     });
     component.update();
   };
+
+  const toggleDefaultRollover = createFormToggleAction('useDefaultRolloverSwitch');
 
   const toggleRollover = createFormToggleAction('rolloverSwitch');
 
@@ -143,16 +153,20 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       forceMergeFieldExists: () => exists(toggleSelector),
       toggleForceMerge: createFormToggleAction(toggleSelector),
       setForcemergeSegmentsCount: createFormSetValueAction(`${phase}-selectedForceMergeSegments`),
-      setBestCompression: createFormToggleAction(`${phase}-bestCompression`),
+      setBestCompression: createFormCheckboxAction(`${phase}-bestCompression`),
     };
   };
 
-  const setIndexPriority = (phase: Phases) =>
-    createFormSetValueAction(`${phase}-phaseIndexPriority`);
+  const createIndexPriorityActions = (phase: Phases) => {
+    const toggleSelector = `${phase}-indexPrioritySwitch`;
+    return {
+      indexPriorityExists: () => exists(toggleSelector),
+      toggleIndexPriority: createFormToggleAction(toggleSelector),
+      setIndexPriority: createFormSetValueAction(`${phase}-indexPriority`),
+    };
+  };
 
   const enable = (phase: Phases) => createFormToggleAction(`enablePhaseSwitch-${phase}`);
-
-  const warmPhaseOnRollover = createFormToggleAction(`warm-warmPhaseOnRollover`);
 
   const setMinAgeValue = (phase: Phases) => createFormSetValueAction(`${phase}-selectedMinimumAge`);
 
@@ -187,24 +201,33 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     await createFormSetValueAction(`${phase}-selectedReplicaCount`)(value);
   };
 
-  const setShrink = async (value: string) => {
-    await createFormToggleAction('shrinkSwitch')(true);
-    await createFormSetValueAction('warm-selectedPrimaryShardCount')(value);
+  const createShrinkActions = (phase: Phases) => {
+    const toggleSelector = `${phase}-shrinkSwitch`;
+    return {
+      shrinkExists: () => exists(toggleSelector),
+      toggleShrink: createFormToggleAction(toggleSelector),
+      setShrink: createFormSetValueAction(`${phase}-primaryShardCount`),
+    };
   };
-
-  const shrinkExists = () => exists('shrinkSwitch');
 
   const setFreeze = createFormToggleAction('freezeSwitch');
   const freezeExists = () => exists('freezeSwitch');
 
+  const setReadonly = (phase: Phases) => async (value: boolean) => {
+    await createFormToggleAction(`${phase}-readonlySwitch`)(value);
+  };
+
   const createSearchableSnapshotActions = (phase: Phases) => {
     const fieldSelector = `searchableSnapshotField-${phase}`;
     const licenseCalloutSelector = `${fieldSelector}.searchableSnapshotDisabledDueToLicense`;
+    const rolloverCalloutSelector = `${fieldSelector}.searchableSnapshotFieldsNoRolloverCallout`;
     const toggleSelector = `${fieldSelector}.searchableSnapshotToggle`;
 
     const toggleSearchableSnapshot = createFormToggleAction(toggleSelector);
     return {
-      searchableSnapshotDisabled: () => exists(licenseCalloutSelector),
+      searchableSnapshotDisabledDueToRollover: () => exists(rolloverCalloutSelector),
+      searchableSnapshotDisabled: () =>
+        exists(licenseCalloutSelector) && find(licenseCalloutSelector).props().disabled === true,
       searchableSnapshotsExists: () => exists(fieldSelector),
       findSearchableSnapshotToggle: () => find(toggleSelector),
       searchableSnapshotDisabledDueToLicense: () =>
@@ -227,27 +250,35 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     actions: {
       setWaitForSnapshotPolicy,
       savePolicy,
+      timeline: {
+        hasHotPhase: () => exists('ilmTimelineHotPhase'),
+        hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
+        hasColdPhase: () => exists('ilmTimelineColdPhase'),
+        hasDeletePhase: () => exists('ilmTimelineDeletePhase'),
+      },
       hot: {
         setMaxSize,
         setMaxDocs,
         setMaxAge,
         toggleRollover,
+        toggleDefaultRollover,
         ...createForceMergeActions('hot'),
-        setIndexPriority: setIndexPriority('hot'),
+        ...createIndexPriorityActions('hot'),
+        ...createShrinkActions('hot'),
+        setReadonly: setReadonly('hot'),
         ...createSearchableSnapshotActions('hot'),
       },
       warm: {
         enable: enable('warm'),
-        warmPhaseOnRollover,
         setMinAgeValue: setMinAgeValue('warm'),
         setMinAgeUnits: setMinAgeUnits('warm'),
         setDataAllocation: setDataAllocation('warm'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
-        setShrink,
-        shrinkExists,
+        ...createShrinkActions('warm'),
         ...createForceMergeActions('warm'),
-        setIndexPriority: setIndexPriority('warm'),
+        setReadonly: setReadonly('warm'),
+        ...createIndexPriorityActions('warm'),
       },
       cold: {
         enable: enable('cold'),
@@ -258,7 +289,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setReplicas: setReplicas('cold'),
         setFreeze,
         freezeExists,
-        setIndexPriority: setIndexPriority('cold'),
+        ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
       },
       delete: {

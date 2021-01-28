@@ -40,6 +40,7 @@ export const TargetField: FunctionComponent<Props> = (props) => {
       }}
       component={Field}
       path={TARGET_FIELD_PATH}
+      data-test-subj="targetField"
     />
   );
 };

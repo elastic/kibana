@@ -6,7 +6,6 @@
 
 import {
   EMSFileSourceDescriptor,
-  EMSTMSSourceDescriptor,
   ESTermSourceDescriptor,
   LayerDescriptor as BaseLayerDescriptor,
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
@@ -77,10 +76,6 @@ export const TRANSACTION_DURATION_REGION =
 export const TRANSACTION_DURATION_COUNTRY =
   '__kbnjoin__avg_of_transaction.duration.us__3657625d-17b0-41ef-99ba-3a2b2938655c';
 
-interface LayerDescriptor extends BaseLayerDescriptor {
-  sourceDescriptor: EMSTMSSourceDescriptor;
-}
-
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;
 }
@@ -89,18 +84,6 @@ export function useLayerList() {
   const { urlParams } = useUrlParams();
 
   const { serviceName } = urlParams;
-
-  const baseLayer: LayerDescriptor = {
-    sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'b7af286d-2580-4f47-be93-9653d594ce7e',
-    label: null,
-    minZoom: 0,
-    maxZoom: 24,
-    alpha: 1,
-    visible: true,
-    style: { type: 'TILE' },
-    type: 'VECTOR_TILE',
-  };
 
   ES_TERM_SOURCE_COUNTRY.whereQuery = getWhereQuery(serviceName!);
 
@@ -197,8 +180,7 @@ export function useLayerList() {
   };
 
   return [
-    baseLayer,
     pageLoadDurationByCountryLayer,
     pageLoadDurationByAdminRegionLayer,
-  ];
+  ] as BaseLayerDescriptor[];
 }

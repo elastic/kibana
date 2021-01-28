@@ -46,6 +46,7 @@
             class="kbnDocTable__row"
             on-add-column="onAddColumn"
             on-remove-column="onRemoveColumn"
+            use-new-fields-api="useNewFieldsApi"
           ></tr>
         </tbody>
       </table>
@@ -97,6 +98,7 @@
         data-test-subj="docTableRow{{ row['$$_isAnchor'] ? ' docTableAnchorRow' : ''}}"
         on-add-column="onAddColumn"
         on-remove-column="onRemoveColumn"
+        use-new-fields-api="useNewFieldsApi"
       ></tr>
     </tbody>
   </table>

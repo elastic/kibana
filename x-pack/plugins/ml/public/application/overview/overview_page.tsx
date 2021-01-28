@@ -12,7 +12,10 @@ import { NavigationMenu } from '../components/navigation_menu';
 import { OverviewSideBar } from './components/sidebar';
 import { OverviewContent } from './components/content';
 import { NodeAvailableWarning } from '../components/node_available_warning';
+import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { UpgradeWarning } from '../components/upgrade';
+import { HelpMenu } from '../components/help_menu';
+import { useMlKibana } from '../contexts/kibana';
 
 export const OverviewPage: FC = () => {
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
@@ -20,12 +23,17 @@ export const OverviewPage: FC = () => {
     !mlNodesAvailable() ||
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics');
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const helpLink = docLinks.links.ml.guide;
   return (
     <Fragment>
       <NavigationMenu tabId="overview" />
       <EuiPage data-test-subj="mlPageOverview">
         <EuiPageBody>
           <NodeAvailableWarning />
+          <SavedObjectsWarning />
           <UpgradeWarning />
 
           <EuiFlexGroup>
@@ -37,6 +45,7 @@ export const OverviewPage: FC = () => {
           </EuiFlexGroup>
         </EuiPageBody>
       </EuiPage>
+      <HelpMenu docLink={helpLink} />
     </Fragment>
   );
 };

@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface BackgroundSessionSavedObjectAttributes {
-  realmType?: string;
-  realmName?: string;
-  username?: string;
+import { SearchSessionStatus } from './';
+
+export interface SearchSessionSavedObjectAttributes {
   /**
    * User-facing session name to be displayed in session management
    */
@@ -16,16 +15,64 @@ export interface BackgroundSessionSavedObjectAttributes {
    * App that created the session. e.g 'discover'
    */
   appId: string;
+  /**
+   * Creation time of the session
+   */
   created: string;
+  /**
+   * Expiration time of the session. Expiration itself is managed by Elasticsearch.
+   */
   expires: string;
-  status: string;
+  /**
+   * status
+   */
+  status: SearchSessionStatus;
+  /**
+   * urlGeneratorId
+   */
   urlGeneratorId: string;
+  /**
+   * The application state that was used to create the session.
+   * Should be used, for example, to re-load an expired search session.
+   */
   initialState: Record<string, unknown>;
+  /**
+   * Application state that should be used to restore the session.
+   * For example, relative dates are conveted to absolute ones.
+   */
   restoreState: Record<string, unknown>;
-  idMapping: Record<string, string>;
+  /**
+   * Mapping of search request hashes to their corresponsing info (async search id, etc.)
+   */
+  idMapping: Record<string, SearchSessionRequestInfo>;
+  /**
+   * The realm type/name & username uniquely identifies the user who created this search session
+   */
+  realmType?: string;
+  realmName?: string;
+  username?: string;
 }
 
-export interface BackgroundSessionFindOptions {
+export interface SearchSessionRequestInfo {
+  /**
+   * ID of the async search request
+   */
+  id: string;
+  /**
+   * Search strategy used to submit the search request
+   */
+  strategy: string;
+  /**
+   * status
+   */
+  status: string;
+  /**
+   * An optional error. Set if status is set to error.
+   */
+  error?: string;
+}
+
+export interface SearchSessionFindOptions {
   page?: number;
   perPage?: number;
   sortField?: string;

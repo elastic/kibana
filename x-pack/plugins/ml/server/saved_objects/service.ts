@@ -77,7 +77,17 @@ export function jobSavedObjectServiceFactory(
     const id = savedObjectId(job);
 
     try {
-      await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, { force: true });
+      const [existingJobObject] = await getAllJobObjectsForAllSpaces(jobType, jobId);
+      if (existingJobObject !== undefined) {
+        // a saved object for this job already exists, this may be left over from a previously deleted job
+        if (existingJobObject.namespaces?.length) {
+          // use a force delete just in case the saved object exists only in another space.
+          await _forceDeleteJob(jobType, jobId, existingJobObject.namespaces[0]);
+        } else {
+          // the saved object has no spaces, this is unexpected, attempt a normal delete
+          await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, { force: true });
+        }
+      }
     } catch (error) {
       // the saved object may exist if a previous job with the same ID has been deleted.
       // if not, this error will be throw which we ignore.
@@ -114,6 +124,21 @@ export function jobSavedObjectServiceFactory(
     await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, job.id, { force: true });
   }
 
+  async function _forceDeleteJob(jobType: JobType, jobId: string, namespace: string) {
+    const id = savedObjectId({
+      job_id: jobId,
+      datafeed_id: null,
+      type: jobType,
+    });
+
+    // * space cannot be used in a delete call, so use undefined which
+    // is the same as specifying the default space
+    await internalSavedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, {
+      namespace: namespace === '*' ? undefined : namespace,
+      force: true,
+    });
+  }
+
   async function createAnomalyDetectionJob(jobId: string, datafeedId?: string) {
     await _createJob('anomaly-detector', jobId, datafeedId);
   }
@@ -122,12 +147,20 @@ export function jobSavedObjectServiceFactory(
     await _deleteJob('anomaly-detector', jobId);
   }
 
+  async function forceDeleteAnomalyDetectionJob(jobId: string, namespace: string) {
+    await _forceDeleteJob('anomaly-detector', jobId, namespace);
+  }
+
   async function createDataFrameAnalyticsJob(jobId: string) {
     await _createJob('data-frame-analytics', jobId);
   }
 
   async function deleteDataFrameAnalyticsJob(jobId: string) {
     await _deleteJob('data-frame-analytics', jobId);
+  }
+
+  async function forceDeleteDataFrameAnalyticsJob(jobId: string, namespace: string) {
+    await _forceDeleteJob('data-frame-analytics', jobId, namespace);
   }
 
   async function bulkCreateJobs(jobs: Array<{ job: JobObject; namespaces: string[] }>) {
@@ -147,12 +180,16 @@ export function jobSavedObjectServiceFactory(
     return jobObject;
   }
 
-  async function getAllJobObjectsForAllSpaces(jobType?: JobType) {
+  async function getAllJobObjectsForAllSpaces(jobType?: JobType, jobId?: string) {
     await isMlReady();
     const filterObject: JobObjectFilter = {};
 
     if (jobType !== undefined) {
       filterObject.type = jobType;
+    }
+
+    if (jobId !== undefined) {
+      filterObject.job_id = jobId;
     }
 
     const { filter, searchFields } = createSavedObjectFilter(filterObject);
@@ -325,7 +362,9 @@ export function jobSavedObjectServiceFactory(
     createAnomalyDetectionJob,
     createDataFrameAnalyticsJob,
     deleteAnomalyDetectionJob,
+    forceDeleteAnomalyDetectionJob,
     deleteDataFrameAnalyticsJob,
+    forceDeleteDataFrameAnalyticsJob,
     addDatafeed,
     deleteDatafeed,
     filterJobsForSpace,

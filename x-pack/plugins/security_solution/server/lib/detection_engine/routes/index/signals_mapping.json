@@ -3,6 +3,13 @@
     "properties": {
       "signal": {
         "properties": {
+          "_meta": {
+            "properties": {
+              "version": {
+                "type": "long"
+              }
+            }
+          },
           "parent": {
             "properties": {
               "rule": {
@@ -201,6 +208,19 @@
                       },
                       "reference": {
                         "type": "keyword"
+                      },
+                      "subtechnique": {
+                        "properties": {
+                          "id": {
+                            "type": "keyword"
+                          },
+                          "name": {
+                            "type": "keyword"
+                          },
+                          "reference": {
+                            "type": "keyword"
+                          }
+                        }
                       }
                     }
                   }

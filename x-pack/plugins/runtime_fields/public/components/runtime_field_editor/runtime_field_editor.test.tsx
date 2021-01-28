@@ -78,7 +78,7 @@ describe('Runtime field editor', () => {
   });
 
   test('should accept a list of existing concrete fields and display a callout when shadowing one of the fields', async () => {
-    const existingConcreteFields = ['myConcreteField'];
+    const existingConcreteFields = [{ name: 'myConcreteField', type: 'keyword' }];
 
     testBed = setup({ onChange, docLinks, ctx: { existingConcreteFields } });
 
@@ -87,7 +87,7 @@ describe('Runtime field editor', () => {
     expect(exists('shadowingFieldCallout')).toBe(false);
 
     await act(async () => {
-      form.setInputValue('nameField.input', existingConcreteFields[0]);
+      form.setInputValue('nameField.input', existingConcreteFields[0].name);
     });
     component.update();
 

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext, KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   NodeDetailsRequest,
   NodeDetailsMetricData,
@@ -23,7 +24,7 @@ export interface InfraMetricsRequestOptions
 
 export interface InfraMetricsAdapter {
   getMetrics(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     options: InfraMetricsRequestOptions,
     request: KibanaRequest
   ): Promise<NodeDetailsMetricData[]>;

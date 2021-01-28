@@ -78,7 +78,10 @@ export const RuntimeFieldsList = () => {
           docLinks: docLinks!,
           ctx: {
             namesNotAllowed: Object.values(runtimeFields).map((field) => field.source.name),
-            existingConcreteFields: Object.values(fields.byId).map((field) => field.source.name),
+            existingConcreteFields: Object.values(fields.byId).map((field) => ({
+              name: field.source.name,
+              type: field.source.type,
+            })),
           },
         },
         flyoutProps: {

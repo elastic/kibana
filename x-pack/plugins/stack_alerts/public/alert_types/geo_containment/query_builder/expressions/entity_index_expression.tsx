@@ -8,9 +8,11 @@ import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { HttpSetup } from 'kibana/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   IErrorObject,
-  AlertsContextValue,
   AlertTypeParamsExpressionProps,
 } from '../../../../../../triggers_actions_ui/public';
 import { ES_GEO_FIELD_TYPES } from '../../types';
@@ -23,7 +25,6 @@ import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/i
 interface Props {
   dateField: string;
   geoField: string;
-  alertsContext: AlertsContextValue;
   errors: IErrorObject;
   setAlertParamsDate: (date: string) => void;
   setAlertParamsGeoField: (geoField: string) => void;
@@ -31,21 +32,26 @@ interface Props {
   setIndexPattern: (indexPattern: IIndexPattern) => void;
   indexPattern: IIndexPattern;
   isInvalid: boolean;
+  data: DataPublicPluginStart;
+}
+
+interface KibanaDeps {
+  http: HttpSetup;
 }
 
 export const EntityIndexExpression: FunctionComponent<Props> = ({
   setAlertParamsDate,
   setAlertParamsGeoField,
   errors,
-  alertsContext,
   setIndexPattern,
   indexPattern,
   isInvalid,
   dateField: timeField,
   geoField,
+  data,
 }) => {
-  const { dataUi, dataIndexPatterns, http } = alertsContext;
-  const IndexPatternSelect = (dataUi && dataUi.IndexPatternSelect) || null;
+  const { http } = useKibana<KibanaDeps>().services;
+  const IndexPatternSelect = (data.ui && data.ui.IndexPatternSelect) || null;
 
   const usePrevious = <T extends unknown>(value: T): T | undefined => {
     const ref = useRef<T>();
@@ -98,7 +104,7 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
           }}
           value={indexPattern.id}
           IndexPatternSelectComponent={IndexPatternSelect}
-          indexPatternService={dataIndexPatterns}
+          indexPatternService={data.indexPatterns}
           http={http}
           includedGeoTypes={ES_GEO_FIELD_TYPES}
         />
@@ -149,7 +155,9 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
     <ExpressionWithPopover
       isInvalid={isInvalid}
       value={indexPattern.title}
-      defaultValue={'Select an index pattern and geo shape/point field'}
+      defaultValue={i18n.translate('xpack.stackAlerts.geoContainment.entityIndexSelect', {
+        defaultMessage: 'Select an index pattern and geo point field',
+      })}
       popoverContent={indexPopover}
       expressionDescription={i18n.translate('xpack.stackAlerts.geoContainment.entityIndexLabel', {
         defaultMessage: 'index',

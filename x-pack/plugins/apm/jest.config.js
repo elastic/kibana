@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+const path = require('path');
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
+  rootDir: path.resolve(__dirname, '../../..'),
   roots: ['<rootDir>/x-pack/plugins/apm'],
 };

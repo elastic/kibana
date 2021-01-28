@@ -8,4 +8,3 @@ export { getActionType as getCaseConnectorUI } from './case';
 
 export * from './config';
 export * from './types';
-export * from './utils';

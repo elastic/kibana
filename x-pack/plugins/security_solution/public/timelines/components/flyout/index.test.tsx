@@ -40,6 +40,10 @@ jest.mock('../timeline', () => ({
 describe('Flyout', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
+  const props = {
+    onAppLeave: jest.fn(),
+    timelineId: 'test',
+  };
 
   beforeEach(() => {
     mockDispatch.mockClear();
@@ -49,7 +53,7 @@ describe('Flyout', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <Flyout timelineId="test" />
+          <Flyout {...props} />
         </TestProviders>
       );
       expect(wrapper.find('Flyout')).toMatchSnapshot();
@@ -58,7 +62,7 @@ describe('Flyout', () => {
     test('it renders the default flyout state as a bottom bar', () => {
       const wrapper = mount(
         <TestProviders>
-          <Flyout timelineId="test" />
+          <Flyout {...props} />
         </TestProviders>
       );
 
@@ -79,7 +83,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <TestProviders store={storeShowIsTrue}>
-          <Flyout timelineId="test" />
+          <Flyout {...props} />
         </TestProviders>
       );
 
@@ -91,7 +95,7 @@ describe('Flyout', () => {
     test('should call the onOpen when the mouse is clicked for rendering', () => {
       const wrapper = mount(
         <TestProviders>
-          <Flyout timelineId="test" />
+          <Flyout {...props} />
         </TestProviders>
       );
 

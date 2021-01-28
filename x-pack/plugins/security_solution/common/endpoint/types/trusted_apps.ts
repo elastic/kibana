@@ -33,13 +33,20 @@ export interface PostTrustedAppCreateResponse {
   data: TrustedApp;
 }
 
+export interface GetTrustedAppsSummaryResponse {
+  total: number;
+  windows: number;
+  macos: number;
+  linux: number;
+}
+
 export enum ConditionEntryField {
   HASH = 'process.hash.*',
   PATH = 'process.executable.caseless',
   SIGNER = 'process.Ext.code_signature',
 }
 
-export interface ConditionEntry<T extends ConditionEntryField> {
+export interface ConditionEntry<T extends ConditionEntryField = ConditionEntryField> {
   field: T;
   type: 'match';
   operator: 'included';

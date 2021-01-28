@@ -1,5 +1,8 @@
 package projects
 
+import jetbrains.buildServer.configs.kotlin.v2019_2.AbsoluteId
+import jetbrains.buildServer.configs.kotlin.v2019_2.DslContext
+import makeSafeId
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -18,10 +21,11 @@ class KibanaTest {
 
   @Test
   fun test_CloudImages_Exist() {
+    DslContext.projectId = AbsoluteId("My Project")
     val project = Kibana(TestConfig)
 
     assertTrue(project.features.items.any {
-      it.type == "CloudImage" && it.params.any { param -> param.name == "network" && param.value == "network"}
+      it.type == "CloudImage" && it.params.any { param -> param.name == "network" && param.value == "teamcity" }
     })
   }
 }

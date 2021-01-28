@@ -12,7 +12,7 @@ import {
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import { MockField } from './properties/__tests__/test_util';
+import { MockField } from './properties/test_helpers/test_util';
 
 jest.mock('../../../kibana_services');
 
@@ -220,6 +220,14 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
                 type: 'MultiLineString',
               },
               properties: {},
+            },
+            {
+              geometry: {
+                type: 'Point',
+              },
+              properties: {
+                __kbn_is_centroid_feature__: true,
+              },
             },
           ],
         },

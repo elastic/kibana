@@ -18,6 +18,7 @@ describe('RulesTableFilters', () => {
           onFilterChanged={jest.fn()}
           rulesCustomInstalled={null}
           rulesInstalled={null}
+          currentFilterTags={[]}
         />
       );
 
@@ -37,6 +38,7 @@ describe('RulesTableFilters', () => {
           onFilterChanged={jest.fn()}
           rulesCustomInstalled={10}
           rulesInstalled={9}
+          currentFilterTags={[]}
         />
       );
 

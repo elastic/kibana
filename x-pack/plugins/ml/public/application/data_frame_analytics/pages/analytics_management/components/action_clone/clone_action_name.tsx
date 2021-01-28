@@ -343,7 +343,7 @@ export const useNavigateToWizardWithClonedJob = () => {
 
   const savedObjectsClient = savedObjects.client;
 
-  return async (item: DataFrameAnalyticsListRow) => {
+  return async (item: Pick<DataFrameAnalyticsListRow, 'config' | 'stats'>) => {
     const sourceIndex = Array.isArray(item.config.source.index)
       ? item.config.source.index.join(',')
       : item.config.source.index;

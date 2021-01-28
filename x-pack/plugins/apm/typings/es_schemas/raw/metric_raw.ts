@@ -89,11 +89,28 @@ type TransactionDurationMetric = BaseMetric & {
   kubernetes?: Kubernetes;
 };
 
+export type SpanDestinationMetric = BaseMetric & {
+  span: {
+    destination: {
+      service: {
+        resource: string;
+        response_time: {
+          count: number;
+          sum: {
+            us: number;
+          };
+        };
+      };
+    };
+  };
+};
+
 export type MetricRaw =
   | BaseMetric
   | TransactionBreakdownMetric
   | SpanBreakdownMetric
   | TransactionDurationMetric
+  | SpanDestinationMetric
   | SystemMetric
   | CGroupMetric
   | JVMMetric;

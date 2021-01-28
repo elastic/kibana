@@ -1,30 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { Datatable } from 'src/plugins/expressions/public';
-import { FormatFactory } from '../../../../data/common/field_formats/utils';
-import { DataPublicPluginStart, exporters } from '../../../../data/public';
-import { downloadMultipleAs } from '../../../../share/public';
-import { Adapters, IEmbeddable } from '../../../../embeddable/public';
-import { ActionByType } from '../../../../ui_actions/public';
 import { CoreStart } from '../../../../../core/public';
+import { FormatFactory } from '../../../../data/common/field_formats/utils';
+
+import { DataPublicPluginStart, exporters } from '../../services/data';
+import { downloadMultipleAs } from '../../services/share';
+import { Adapters, IEmbeddable } from '../../services/embeddable';
+import { Action } from '../../services/ui_actions';
+import { dashboardExportCsvAction } from '../../dashboard_strings';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
 
@@ -43,7 +33,7 @@ export interface ExportContext {
  * This is "Export CSV" action which appears in the context
  * menu of a dashboard panel.
  */
-export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
+export class ExportCSVAction implements Action<ExportContext> {
   public readonly id = ACTION_EXPORT_CSV;
 
   public readonly type = ACTION_EXPORT_CSV;
@@ -57,16 +47,14 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
   }
 
   public readonly getDisplayName = (context: ExportContext): string =>
-    i18n.translate('dashboard.actions.DownloadCreateDrilldownAction.displayName', {
-      defaultMessage: 'Download as CSV',
-    });
+    dashboardExportCsvAction.getDisplayName();
 
   public async isCompatible(context: ExportContext): Promise<boolean> {
     return !!this.hasDatatableContent(context.embeddable?.getInspectorAdapters?.());
   }
 
   private hasDatatableContent = (adapters: Adapters | undefined) => {
-    return Object.keys(adapters?.tables || {}).length > 0;
+    return Object.keys(adapters?.tables || {}).length > 0 && adapters!.tables.allowCsvExport;
   };
 
   private getFormatter = (): FormatFactory | undefined => {
@@ -77,7 +65,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
 
   private getDataTableContent = (adapters: Adapters | undefined) => {
     if (this.hasDatatableContent(adapters)) {
-      return adapters?.tables;
+      return adapters?.tables.tables;
     }
     return;
   };
@@ -99,12 +87,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
           // skip empty datatables
           if (datatable) {
             const postFix = datatables.length > 1 ? `-${i + 1}` : '';
-            const untitledFilename = i18n.translate(
-              'dashboard.actions.downloadOptionsUnsavedFilename',
-              {
-                defaultMessage: 'unsaved',
-              }
-            );
+            const untitledFilename = dashboardExportCsvAction.getUntitledFilename();
 
             memo[`${context!.embeddable!.getTitle() || untitledFilename}${postFix}.csv`] = {
               content: exporters.datatableToCSV(datatable, {

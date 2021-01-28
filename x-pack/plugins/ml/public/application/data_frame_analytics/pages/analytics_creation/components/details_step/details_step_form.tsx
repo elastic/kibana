@@ -43,8 +43,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   const {
     services: { docLinks, notifications },
   } = useMlKibana();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
-
+  const createIndexLink = docLinks.links.apis.createIndex;
   const { setFormState } = actions;
   const { form, cloneJob, hasSwitchedToEditor, isJobCreated } = state;
   const {
@@ -240,10 +239,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
                   }
                 )}
                 <br />
-                <EuiLink
-                  href={`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/indices-create-index.html#indices-create-index`}
-                  target="_blank"
-                >
+                <EuiLink href={createIndexLink} target="_blank">
                   {i18n.translate(
                     'xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidErrorLink',
                     {

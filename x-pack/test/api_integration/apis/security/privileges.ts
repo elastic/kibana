@@ -20,9 +20,23 @@ export default function ({ getService }: FtrProviderContext) {
         // Roles are associated with these privileges, and we shouldn't be removing them in a minor version.
         const expected = {
           features: {
-            discover: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
+            discover: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'url_create',
+              'store_search_session',
+            ],
             visualize: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
-            dashboard: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
+            dashboard: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'url_create',
+              'store_search_session',
+            ],
             dev_tools: ['all', 'read'],
             advancedSettings: ['all', 'read'],
             indexPatterns: ['all', 'read'],

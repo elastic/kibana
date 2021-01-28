@@ -74,6 +74,9 @@ export const initialData: Case = {
   updatedAt: null,
   updatedBy: null,
   version: '',
+  settings: {
+    syncAlerts: true,
+  },
 };
 
 export interface UseGetCase extends CaseState {

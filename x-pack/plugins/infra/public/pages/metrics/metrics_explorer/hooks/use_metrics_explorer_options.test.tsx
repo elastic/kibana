@@ -24,6 +24,11 @@ jest.mock('../../../../alerting/use_alert_prefill', () => ({
   }),
 }));
 
+jest.mock('../../../../hooks/use_kibana_timefilter_time', () => ({
+  useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
+  useSyncKibanaTimeFilterTime: () => [() => {}],
+}));
+
 const renderUseMetricsExplorerOptionsHook = () => renderHook(() => useMetricsExplorerOptions());
 
 interface LocalStore {

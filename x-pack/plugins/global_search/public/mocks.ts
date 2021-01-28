@@ -20,6 +20,7 @@ const createStartMock = (): jest.Mocked<GlobalSearchPluginStart> => {
 
   return {
     find: searchMock.find,
+    getSearchableTypes: searchMock.getSearchableTypes,
   };
 };
 

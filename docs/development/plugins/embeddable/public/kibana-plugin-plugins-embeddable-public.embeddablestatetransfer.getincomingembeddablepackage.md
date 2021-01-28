@@ -4,21 +4,19 @@
 
 ## EmbeddableStateTransfer.getIncomingEmbeddablePackage() method
 
-Fetches an [embeddable package](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.md) argument from the scoped history's location state.
+Fetches an [embeddable package](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.md) argument from the sessionStorage
 
 <b>Signature:</b>
 
 ```typescript
-getIncomingEmbeddablePackage(options?: {
-        keysToRemoveAfterFetch?: string[];
-    }): EmbeddablePackageState | undefined;
+getIncomingEmbeddablePackage(removeAfterFetch?: boolean): EmbeddablePackageState | undefined;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>{</code><br/><code>        keysToRemoveAfterFetch?: string[];</code><br/><code>    }</code> |  |
+|  removeAfterFetch | <code>boolean</code> | Whether to remove the package state after fetch to prevent duplicates. |
 
 <b>Returns:</b>
 

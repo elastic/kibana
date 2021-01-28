@@ -21,6 +21,7 @@ import {
   TimestampOverride,
   Type,
   Severity,
+  Threats,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   List,
@@ -99,7 +100,7 @@ export interface AboutStepRule {
   ruleNameOverride: string;
   tags: string[];
   timestampOverride: string;
-  threat: IMitreEnterpriseAttack[];
+  threat: Threats;
   note: string;
 }
 
@@ -178,7 +179,7 @@ export interface AboutStepRuleJson {
   false_positives: string[];
   rule_name_override?: RuleNameOverride;
   tags: string[];
-  threat: IMitreEnterpriseAttack[];
+  threat: Threats;
   timestamp_override?: TimestampOverride;
   note?: string;
 }
@@ -195,15 +196,4 @@ export interface ActionsStepRuleJson {
   enabled: boolean;
   throttle?: string | null;
   meta?: unknown;
-}
-
-export interface IMitreAttack {
-  id: string;
-  name: string;
-  reference: string;
-}
-export interface IMitreEnterpriseAttack {
-  framework: string;
-  tactic: IMitreAttack;
-  technique: IMitreAttack[];
 }

@@ -41,7 +41,7 @@ export function ServiceStatsList({
       title: i18n.translate(
         'xpack.apm.serviceMap.avgTransDurationPopoverStat',
         {
-          defaultMessage: 'Trans. duration (avg.)',
+          defaultMessage: 'Latency (avg.)',
         }
       ),
       description: isNumber(transactionStats.avgTransactionDuration)
@@ -52,7 +52,7 @@ export function ServiceStatsList({
       title: i18n.translate(
         'xpack.apm.serviceMap.avgReqPerMinutePopoverMetric',
         {
-          defaultMessage: 'Req. per minute (avg.)',
+          defaultMessage: 'Throughput (avg.)',
         }
       ),
       description: asTransactionRate(transactionStats.avgRequestsPerMinute),

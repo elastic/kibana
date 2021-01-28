@@ -102,10 +102,7 @@ export const persistTimelineMutation = gql`
           end
         }
         savedQueryId
-        sort {
-          columnId
-          sortDirection
-        }
+        sort
         created
         createdBy
         updated

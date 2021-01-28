@@ -8,13 +8,14 @@
   ],
   "from": "now-25m",
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-azure*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Azure Firewall Policy Deletion",
   "note": "The Azure Filebeat module must be enabled to use this rule.",
-  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:MICROSOFT.NETWORK/FIREWALLPOLICIES/DELETE and event.outcome:Success",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:MICROSOFT.NETWORK/FIREWALLPOLICIES/DELETE and event.outcome:(Success or success)",
   "references": [
     "https://docs.microsoft.com/en-us/azure/firewall-manager/policy-overview"
   ],
@@ -39,13 +40,20 @@
       },
       "technique": [
         {
-          "id": "T1089",
-          "name": "Disabling Security Tools",
-          "reference": "https://attack.mitre.org/techniques/T1089/"
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

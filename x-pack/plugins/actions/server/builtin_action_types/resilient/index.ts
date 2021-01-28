@@ -5,7 +5,7 @@
  */
 
 import { curry } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { validate } from './validators';
 import {
@@ -30,8 +30,7 @@ import {
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
 
-// TODO: to remove, need to support Case
-import { buildMap, mapParams } from '../case/utils';
+export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 
 interface GetActionTypeParams {
   logger: Logger;
@@ -40,6 +39,7 @@ interface GetActionTypeParams {
 
 const supportedSubActions: string[] = ['getFields', 'pushToService', 'incidentTypes', 'severity'];
 
+export const ActionTypeId = '.resilient';
 // action type definition
 export function getActionType(
   params: GetActionTypeParams
@@ -51,7 +51,7 @@ export function getActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: '.resilient',
+    id: ActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.NAME,
     validate: {
@@ -104,19 +104,9 @@ async function executor(
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
 
-    const { comments, externalId, ...restParams } = pushToServiceParams;
-    const mapping = config.incidentConfiguration
-      ? buildMap(config.incidentConfiguration.mapping)
-      : null;
-    const externalObject =
-      config.incidentConfiguration && mapping
-        ? mapParams<ExecutorSubActionPushParams>(restParams as ExecutorSubActionPushParams, mapping)
-        : {};
-
     data = await api.pushToService({
       externalService,
-      mapping,
-      params: { ...pushToServiceParams, externalObject },
+      params: pushToServiceParams,
       logger,
     });
 

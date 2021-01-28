@@ -22,7 +22,6 @@ import {
   AlertConditionsGroup,
   AlertTypeModel,
   AlertTypeParamsExpressionProps,
-  AlertsContextValue,
 } from '../../../../plugins/triggers_actions_ui/public';
 import {
   AlwaysFiringParams,
@@ -33,7 +32,6 @@ import {
 export function getAlertType(): AlertTypeModel {
   return {
     id: 'example.always-firing',
-    name: 'Always Fires',
     description: 'Alert when called',
     iconClass: 'bolt',
     documentationUrl: null,
@@ -65,7 +63,7 @@ const DEFAULT_THRESHOLDS: AlwaysFiringParams['thresholds'] = {
 };
 
 export const AlwaysFiringExpression: React.FunctionComponent<
-  AlertTypeParamsExpressionProps<AlwaysFiringParams, AlertsContextValue>
+  AlertTypeParamsExpressionProps<AlwaysFiringParams>
 > = ({ alertParams, setAlertParams, actionGroups, defaultActionGroupId }) => {
   const {
     instances = DEFAULT_INSTANCES_TO_GENERATE,
@@ -135,8 +133,10 @@ export const AlwaysFiringExpression: React.FunctionComponent<
 };
 
 interface TShirtSelectorProps {
-  actionGroup?: ActionGroupWithCondition<number>;
-  setTShirtThreshold: (actionGroup: ActionGroupWithCondition<number>) => void;
+  actionGroup?: ActionGroupWithCondition<number, AlwaysFiringActionGroupIds>;
+  setTShirtThreshold: (
+    actionGroup: ActionGroupWithCondition<number, AlwaysFiringActionGroupIds>
+  ) => void;
 }
 const TShirtSelector = ({ actionGroup, setTShirtThreshold }: TShirtSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);

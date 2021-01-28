@@ -76,9 +76,6 @@ describe('<EditPolicy />', () => {
                 max_size: '50gb',
                 unknown_setting: 123, // Made up setting that should stay preserved
               },
-              set_priority: {
-                priority: 100,
-              },
             },
             min_age: '0ms',
           },
@@ -119,12 +116,17 @@ describe('<EditPolicy />', () => {
       test('setting all values', async () => {
         const { actions } = testBed;
 
+        await actions.hot.toggleDefaultRollover(false);
         await actions.hot.setMaxSize('123', 'mb');
         await actions.hot.setMaxDocs('123');
         await actions.hot.setMaxAge('123', 'h');
         await actions.hot.toggleForceMerge(true);
         await actions.hot.setForcemergeSegmentsCount('123');
         await actions.hot.setBestCompression(true);
+        await actions.hot.toggleShrink(true);
+        await actions.hot.setShrink('2');
+        await actions.hot.setReadonly(true);
+        await actions.hot.toggleIndexPriority(true);
         await actions.hot.setIndexPriority('123');
 
         await actions.savePolicy();
@@ -140,6 +142,7 @@ describe('<EditPolicy />', () => {
                     "index_codec": "best_compression",
                     "max_num_segments": 123,
                   },
+                  "readonly": Object {},
                   "rollover": Object {
                     "max_age": "123h",
                     "max_docs": 123,
@@ -147,6 +150,9 @@ describe('<EditPolicy />', () => {
                   },
                   "set_priority": Object {
                     "priority": 123,
+                  },
+                  "shrink": Object {
+                    "number_of_shards": 2,
                   },
                 },
                 "min_age": "0ms",
@@ -171,20 +177,15 @@ describe('<EditPolicy />', () => {
 
       test('disabling rollover', async () => {
         const { actions } = testBed;
-        await actions.hot.toggleRollover(true);
+        await actions.hot.toggleDefaultRollover(false);
+        await actions.hot.toggleRollover(false);
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
         const policy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
         const hotActions = policy.phases.hot.actions;
         const rolloverAction = hotActions.rollover;
         expect(rolloverAction).toBe(undefined);
-        expect(hotActions).toMatchInlineSnapshot(`
-          Object {
-            "set_priority": Object {
-              "priority": 100,
-            },
-          }
-        `);
+        expect(hotActions).toMatchInlineSnapshot(`Object {}`);
       });
 
       test('enabling searchable snapshot should hide force merge, freeze and shrink in subsequent phases', async () => {
@@ -205,6 +206,17 @@ describe('<EditPolicy />', () => {
         // searchable snapshot in cold is still visible
         expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
         expect(actions.cold.freezeExists()).toBeFalsy();
+      });
+
+      test('disabling rollover toggle, but enabling default rollover', async () => {
+        const { actions } = testBed;
+        await actions.hot.toggleDefaultRollover(false);
+        await actions.hot.toggleRollover(false);
+        await actions.hot.toggleDefaultRollover(true);
+
+        expect(actions.hot.forceMergeFieldExists()).toBeTruthy();
+        expect(actions.hot.shrinkExists()).toBeTruthy();
+        expect(actions.hot.searchableSnapshotsExists()).toBeTruthy();
       });
     });
   });
@@ -241,6 +253,7 @@ describe('<EditPolicy />', () => {
                 "priority": 50,
               },
             },
+            "min_age": "0ms",
           }
         `);
       });
@@ -251,10 +264,12 @@ describe('<EditPolicy />', () => {
         await actions.warm.setDataAllocation('node_attrs');
         await actions.warm.setSelectedNodeAttribute('test:123');
         await actions.warm.setReplicas('123');
+        await actions.warm.toggleShrink(true);
         await actions.warm.setShrink('123');
         await actions.warm.toggleForceMerge(true);
         await actions.warm.setForcemergeSegmentsCount('123');
         await actions.warm.setBestCompression(true);
+        await actions.warm.setReadonly(true);
         await actions.warm.setIndexPriority('123');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
@@ -269,9 +284,6 @@ describe('<EditPolicy />', () => {
                   "rollover": Object {
                     "max_age": "30d",
                     "max_size": "50gb",
-                  },
-                  "set_priority": Object {
-                    "priority": 100,
                   },
                 },
                 "min_age": "0ms",
@@ -288,6 +300,7 @@ describe('<EditPolicy />', () => {
                     "index_codec": "best_compression",
                     "max_num_segments": 123,
                   },
+                  "readonly": Object {},
                   "set_priority": Object {
                     "priority": 123,
                   },
@@ -295,23 +308,11 @@ describe('<EditPolicy />', () => {
                     "number_of_shards": 123,
                   },
                 },
+                "min_age": "0ms",
               },
             },
           }
         `);
-      });
-
-      test('setting warm phase on rollover to "false"', async () => {
-        const { actions } = testBed;
-        await actions.warm.enable(true);
-        await actions.warm.warmPhaseOnRollover(false);
-        await actions.warm.setMinAgeValue('123');
-        await actions.warm.setMinAgeUnits('d');
-        await actions.savePolicy();
-        const latestRequest = server.requests[server.requests.length - 1];
-        const warmPhaseMinAge = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
-          .min_age;
-        expect(warmPhaseMinAge).toBe('123d');
       });
     });
 
@@ -436,9 +437,6 @@ describe('<EditPolicy />', () => {
                   "rollover": Object {
                     "max_age": "30d",
                     "max_size": "50gb",
-                  },
-                  "set_priority": Object {
-                    "priority": 100,
                   },
                 },
                 "min_age": "0ms",
@@ -641,9 +639,6 @@ describe('<EditPolicy />', () => {
             "allocate": Object {
               "number_of_replicas": 123,
             },
-            "set_priority": Object {
-              "priority": 50,
-            },
           }
         `);
       });
@@ -679,33 +674,60 @@ describe('<EditPolicy />', () => {
 
   describe('searchable snapshot', () => {
     describe('on cloud', () => {
-      beforeEach(async () => {
-        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-        httpRequestsMockHelpers.setListNodes({
-          isUsingDeprecatedDataRoleConfig: false,
-          nodesByAttributes: { test: ['123'] },
-          nodesByRoles: { data: ['123'] },
-        });
-        httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+      describe('new policy', () => {
+        beforeEach(async () => {
+          // simulate creating a new policy
+          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('')]);
+          httpRequestsMockHelpers.setListNodes({
+            isUsingDeprecatedDataRoleConfig: false,
+            nodesByAttributes: { test: ['123'] },
+            nodesByRoles: { data: ['123'] },
+          });
+          httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
-        await act(async () => {
-          testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
-        });
+          await act(async () => {
+            testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+          });
 
-        const { component } = testBed;
-        component.update();
+          const { component } = testBed;
+          component.update();
+        });
+        test('defaults searchable snapshot to true on cloud', async () => {
+          const { find, actions } = testBed;
+          await actions.cold.enable(true);
+          expect(
+            find('searchableSnapshotField-cold.searchableSnapshotToggle').props()['aria-checked']
+          ).toBe(true);
+        });
       });
+      describe('existing policy', () => {
+        beforeEach(async () => {
+          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+          httpRequestsMockHelpers.setListNodes({
+            isUsingDeprecatedDataRoleConfig: false,
+            nodesByAttributes: { test: ['123'] },
+            nodesByRoles: { data: ['123'] },
+          });
+          httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
-      test('correctly sets snapshot repository default to "found-snapshots"', async () => {
-        const { actions } = testBed;
-        await actions.cold.enable(true);
-        await actions.cold.toggleSearchableSnapshot(true);
-        await actions.savePolicy();
-        const latestRequest = server.requests[server.requests.length - 1];
-        const request = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-        expect(request.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
-          'found-snapshots'
-        );
+          await act(async () => {
+            testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+          });
+
+          const { component } = testBed;
+          component.update();
+        });
+        test('correctly sets snapshot repository default to "found-snapshots"', async () => {
+          const { actions } = testBed;
+          await actions.cold.enable(true);
+          await actions.cold.toggleSearchableSnapshot(true);
+          await actions.savePolicy();
+          const latestRequest = server.requests[server.requests.length - 1];
+          const request = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+          expect(request.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
+            'found-snapshots'
+          );
+        });
       });
     });
     describe('on non-enterprise license', () => {
@@ -743,6 +765,83 @@ describe('<EditPolicy />', () => {
         expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
         expect(actions.cold.searchableSnapshotDisabledDueToLicense()).toBeTruthy();
       });
+    });
+  });
+  describe('without rollover', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+      httpRequestsMockHelpers.setListNodes({
+        isUsingDeprecatedDataRoleConfig: false,
+        nodesByAttributes: { test: ['123'] },
+        nodesByRoles: { data: ['123'] },
+      });
+      httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+      await act(async () => {
+        testBed = await setup({
+          appServicesContext: {
+            license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
+          },
+        });
+      });
+
+      const { component } = testBed;
+      component.update();
+    });
+    test('hiding and disabling searchable snapshot field', async () => {
+      const { actions } = testBed;
+      await actions.hot.toggleDefaultRollover(false);
+      await actions.hot.toggleRollover(false);
+      await actions.cold.enable(true);
+
+      expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
+      expect(actions.cold.searchableSnapshotDisabledDueToRollover()).toBeTruthy();
+    });
+  });
+
+  describe('policy timeline', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { test: ['123'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component } = testBed;
+      component.update();
+    });
+
+    test('showing all phases on the timeline', async () => {
+      const { actions } = testBed;
+      // This is how the default policy should look
+      expect(actions.timeline.hasHotPhase()).toBe(true);
+      expect(actions.timeline.hasWarmPhase()).toBe(false);
+      expect(actions.timeline.hasColdPhase()).toBe(false);
+      expect(actions.timeline.hasDeletePhase()).toBe(false);
+
+      await actions.warm.enable(true);
+      expect(actions.timeline.hasHotPhase()).toBe(true);
+      expect(actions.timeline.hasWarmPhase()).toBe(true);
+      expect(actions.timeline.hasColdPhase()).toBe(false);
+      expect(actions.timeline.hasDeletePhase()).toBe(false);
+
+      await actions.cold.enable(true);
+      expect(actions.timeline.hasHotPhase()).toBe(true);
+      expect(actions.timeline.hasWarmPhase()).toBe(true);
+      expect(actions.timeline.hasColdPhase()).toBe(true);
+      expect(actions.timeline.hasDeletePhase()).toBe(false);
+
+      await actions.delete.enable(true);
+      expect(actions.timeline.hasHotPhase()).toBe(true);
+      expect(actions.timeline.hasWarmPhase()).toBe(true);
+      expect(actions.timeline.hasColdPhase()).toBe(true);
+      expect(actions.timeline.hasDeletePhase()).toBe(true);
     });
   });
 });

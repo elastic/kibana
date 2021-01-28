@@ -2,6 +2,10 @@
   .sui-results-container {
     flex-grow: 1;
     padding: 0;
+
+    > li + li {
+      margin-top: $euiSize;
+    }
   }
 
   .documentsSearchExperience__sidebar {
@@ -15,5 +19,18 @@
 
   .documentsSearchExperience__pagingInfo {
     flex-grow: 0;
+  }
+
+  .customizationCallout {
+    background-color: $euiPageBackgroundColor;
+    padding: $euiSizeL;
+  }
+
+  .documentsSearchExperience__facet {
+    line-height: 0;
+
+    .euiCheckbox__label {
+      @include euiTextTruncate;
+    }
   }
 }

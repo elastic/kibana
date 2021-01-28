@@ -4,4 +4,5 @@ set -euo pipefail
 
 source "$(dirname "${0}")/../util.sh"
 
-yarn run grunt run:i18nCheck
+checks-reporter-with-killswitch "Check i18n" \
+  node scripts/i18n_check --ignore-missing

@@ -29,7 +29,7 @@ import { useConfigurationIssues } from '../../../../form';
 
 import { i18nTexts } from '../../../../i18n_texts';
 
-import { FieldLoadingError, DescribedFormField, LearnMoreLink } from '../../../index';
+import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../../';
 
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 
@@ -51,17 +51,28 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   const {
     services: { cloud },
   } = useKibana();
-  const { getUrlForApp, policy, license } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const { getUrlForApp, policy, license, isNewPolicy } = useEditPolicyContext();
+  const { isUsingSearchableSnapshotInHotPhase, isUsingRollover } = useConfigurationIssues();
+
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
 
-  const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
-  const isDisabledInColdDueToHotPhase = phase === 'cold' && isUsingSearchableSnapshotInHotPhase;
+  const [formData] = useFormData({ watch: searchableSnapshotPath });
+  const searchableSnapshotRepo = get(formData, searchableSnapshotPath);
 
-  const isDisabled = isDisabledDueToLicense || isDisabledInColdDueToHotPhase;
+  const isColdPhase = phase === 'cold';
+  const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
+  const isDisabledInColdDueToHotPhase = isColdPhase && isUsingSearchableSnapshotInHotPhase;
+  const isDisabledInColdDueToRollover = isColdPhase && !isUsingRollover;
+
+  const isDisabled =
+    isDisabledDueToLicense || isDisabledInColdDueToHotPhase || isDisabledInColdDueToRollover;
 
   const [isFieldToggleChecked, setIsFieldToggleChecked] = useState(() =>
-    Boolean(policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository)
+    Boolean(
+      // New policy on cloud should have searchable snapshot on in cold phase
+      (isColdPhase && isNewPolicy && cloud?.isCloudEnabled) ||
+        policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
+    )
   );
 
   useEffect(() => {
@@ -69,9 +80,6 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
       setIsFieldToggleChecked(false);
     }
   }, [isDisabled]);
-
-  const [formData] = useFormData({ watch: searchableSnapshotPath });
-  const searchableSnapshotRepo = get(formData, searchableSnapshotPath);
 
   const renderField = () => (
     <SearchableSnapshotDataProvider>
@@ -280,7 +288,21 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledCalloutBody',
             {
               defaultMessage:
-                'Cannot perform searchable snapshot in cold when it is configured in hot phase.',
+                'Cannot create a searchable snapshot in cold when it is configured in hot phase.',
+            }
+          )}
+        />
+      );
+    } else if (isDisabledInColdDueToRollover) {
+      infoCallout = (
+        <EuiCallOut
+          size="s"
+          data-test-subj="searchableSnapshotFieldsNoRolloverCallout"
+          title={i18n.translate(
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotNoRolloverCalloutBody',
+            {
+              defaultMessage:
+                'Cannot create a searchable snapshot when rollover is disabled in the hot phase.',
             }
           )}
         />
@@ -297,7 +319,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   };
 
   return (
-    <DescribedFormField
+    <DescribedFormRow
       data-test-subj={`searchableSnapshotField-${phase}`}
       switchProps={{
         checked: isFieldToggleChecked,
@@ -327,12 +349,12 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
               }}
             />
           </EuiTextColor>
-          {renderInfoCallout()}
         </>
       }
+      fieldNotices={renderInfoCallout()}
       fullWidth
     >
       {isDisabled ? <div /> : renderField}
-    </DescribedFormField>
+    </DescribedFormRow>
   );
 };

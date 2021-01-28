@@ -1,30 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
-import { SavedObject, SavedObjectsStart } from '../../../../plugins/saved_objects/public';
 
-import { Filter, ISearchSource, Query, RefreshInterval } from '../../../../plugins/data/public';
+import { EmbeddableStart } from '../services/embeddable';
+import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
+import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
+
 import { createDashboardEditUrl } from '../dashboard_constants';
-import { EmbeddableStart } from '../../../embeddable/public';
-import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
 import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
 
-export interface SavedObjectDashboard extends SavedObject {
+import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
+
+export interface DashboardSavedObject extends SavedObject {
   id?: string;
   timeRestore: boolean;
   timeTo?: string;
@@ -45,7 +36,7 @@ export interface SavedObjectDashboard extends SavedObject {
 export function createSavedDashboardClass(
   savedObjectStart: SavedObjectsStart,
   embeddableStart: EmbeddableStart
-): new (id: string) => SavedObjectDashboard {
+): new (id: string) => DashboardSavedObject {
   class SavedDashboard extends savedObjectStart.SavedObjectClass {
     // save these objects with the 'dashboard' type
     public static type = 'dashboard';
@@ -84,7 +75,7 @@ export function createSavedDashboardClass(
           attributes: SavedObjectAttributes;
           references: SavedObjectReference[];
         }) => extractReferences(opts, { embeddablePersistableStateService: embeddableStart }),
-        injectReferences: (so: SavedObjectDashboard, references: SavedObjectReference[]) => {
+        injectReferences: (so: DashboardSavedObject, references: SavedObjectReference[]) => {
           const newAttributes = injectReferences(
             { attributes: so._serialize().attributes, references },
             {
@@ -129,5 +120,5 @@ export function createSavedDashboardClass(
 
   // Unfortunately this throws a typescript error without the casting.  I think it's due to the
   // convoluted way SavedObjects are created.
-  return (SavedDashboard as unknown) as new (id: string) => SavedObjectDashboard;
+  return (SavedDashboard as unknown) as new (id: string) => DashboardSavedObject;
 }

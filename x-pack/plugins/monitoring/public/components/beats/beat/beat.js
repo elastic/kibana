@@ -20,9 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { SummaryStatus } from '../../summary_status';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AlertsCallout } from '../../../alerts/callout';
 
-export function Beat({ summary, metrics, alerts, ...props }) {
+export function Beat({ summary, metrics, ...props }) {
   const metricsToShow = [
     metrics.beat_event_rates,
     metrics.beat_fail_rates,
@@ -135,26 +134,12 @@ export function Beat({ summary, metrics, alerts, ...props }) {
     <EuiPage>
       <EuiPageBody>
         <EuiPanel>
-          <SummaryStatus
-            metrics={summarytStatsTop}
-            alerts={alerts}
-            data-test-subj="beatSummaryStatus01"
-          />
+          <SummaryStatus metrics={summarytStatsTop} data-test-subj="beatSummaryStatus01" />
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPanel>
           <SummaryStatus metrics={summarytStatsBot} data-test-subj="beatSummaryStatus02" />
         </EuiPanel>
-        <EuiSpacer size="m" />
-        <AlertsCallout
-          alerts={alerts}
-          nextStepsFilter={(nextStep) => {
-            if (nextStep.text.includes('Beat instances')) {
-              return false;
-            }
-            return true;
-          }}
-        />
         <EuiPageContent>
           <EuiScreenReaderOnly>
             <h1>

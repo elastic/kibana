@@ -41,6 +41,7 @@ import {
   APP_CASES_PATH,
   APP_PATH,
   DEFAULT_INDEX_KEY,
+  DETECTION_ENGINE_INDEX_URL,
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
@@ -63,6 +64,7 @@ import { getCaseConnectorUI } from './cases/components/connectors';
 import { licenseService } from './common/hooks/use_license';
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
+import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -345,6 +347,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         view: 'package-policy-create',
         component: LazyEndpointPolicyCreateExtension,
       });
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-detail-custom',
+        component: getLazyEndpointPackageCustomExtension(core, plugins),
+      });
     }
     licenseService.start(plugins.licensing.license$);
 
@@ -435,6 +443,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           .toPromise(),
       ]);
 
+      let signal: { name: string | null } = { name: null };
+      try {
+        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+          method: 'GET',
+        });
+      } catch {
+        signal = { name: null };
+      }
+
       const { apolloClient } = composeLibs(coreStart);
       const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
@@ -468,6 +485,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           {
             kibanaIndexPatterns,
             configIndexPatterns: configIndexPatterns.indicesExist,
+            signalIndexName: signal.name,
           }
         ),
         {

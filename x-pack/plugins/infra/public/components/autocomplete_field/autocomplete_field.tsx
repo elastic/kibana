@@ -4,16 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFieldSearch,
-  EuiFieldSearchProps,
-  EuiOutsideClickDetector,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui';
 import React from 'react';
-
-import { euiStyled } from '../../../../observability/public';
 import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
 
@@ -64,7 +58,7 @@ export class AutocompleteField extends React.Component<
     return (
       <EuiOutsideClickDetector onOutsideClick={this.handleBlur}>
         <AutocompleteContainer>
-          <FixedEuiFieldSearch
+          <EuiFieldSearch
             fullWidth
             disabled={disabled}
             inputRef={this.handleChangeInputRef}
@@ -303,14 +297,6 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   ...state,
   isFocused: false,
 });
-
-const FixedEuiFieldSearch: React.FC<
-  React.InputHTMLAttributes<HTMLInputElement> &
-    EuiFieldSearchProps & {
-      inputRef?: (element: HTMLInputElement | null) => void;
-      onSearch: (value: string) => void;
-    }
-> = EuiFieldSearch as any;
 
 const AutocompleteContainer = euiStyled.div`
   position: relative;

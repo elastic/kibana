@@ -7,7 +7,10 @@
 import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IErrorObject, AlertsContextValue } from '../../../../../../triggers_actions_ui/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { HttpSetup } from 'kibana/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { IErrorObject } from '../../../../../../triggers_actions_ui/public';
 import { ES_GEO_SHAPE_TYPES, GeoContainmentAlertParams } from '../../types';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';
@@ -17,29 +20,33 @@ import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/i
 
 interface Props {
   alertParams: GeoContainmentAlertParams;
-  alertsContext: AlertsContextValue;
   errors: IErrorObject;
   boundaryIndexPattern: IIndexPattern;
   boundaryNameField?: string;
   setBoundaryIndexPattern: (boundaryIndexPattern?: IIndexPattern) => void;
   setBoundaryGeoField: (boundaryGeoField?: string) => void;
   setBoundaryNameField: (boundaryNameField?: string) => void;
+  data: DataPublicPluginStart;
+}
+
+interface KibanaDeps {
+  http: HttpSetup;
 }
 
 export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   alertParams,
-  alertsContext,
   errors,
   boundaryIndexPattern,
   boundaryNameField,
   setBoundaryIndexPattern,
   setBoundaryGeoField,
   setBoundaryNameField,
+  data,
 }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const BOUNDARY_NAME_ENTITY_TYPES = ['string', 'number', 'ip'];
-  const { dataUi, dataIndexPatterns, http } = alertsContext;
-  const IndexPatternSelect = (dataUi && dataUi.IndexPatternSelect) || null;
+  const { http } = useKibana<KibanaDeps>().services;
+  const IndexPatternSelect = (data.ui && data.ui.IndexPatternSelect) || null;
   const { boundaryGeoField } = alertParams;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const nothingSelected: IFieldType = {
@@ -110,7 +117,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
           }}
           value={boundaryIndexPattern.id}
           IndexPatternSelectComponent={IndexPatternSelect}
-          indexPatternService={dataIndexPatterns}
+          indexPatternService={data.indexPatterns}
           http={http}
           includedGeoTypes={ES_GEO_SHAPE_TYPES}
         />

@@ -1,26 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import './visualize_listing.scss';
 
-import React, { useCallback, useRef, useMemo, useEffect } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect, MouseEvent } from 'react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import useUnmount from 'react-use/lib/useUnmount';
 import useMount from 'react-use/lib/useMount';
 
@@ -38,15 +29,18 @@ export const VisualizeListing = () => {
     services: {
       application,
       chrome,
+      dashboard,
       history,
       savedVisualizations,
       toastNotifications,
       visualizations,
+      stateTransferService,
       savedObjects,
       savedObjectsPublic,
       savedObjectsTagging,
       uiSettings,
       visualizeCapabilities,
+      kbnUrlStateStorage,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -69,6 +63,8 @@ export const VisualizeListing = () => {
   }, [history, pathname, visualizations]);
 
   useMount(() => {
+    // Reset editor state if the visualize listing page is loaded.
+    stateTransferService.clearEditorState();
     chrome.setBreadcrumbs([
       {
         text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
@@ -99,11 +95,10 @@ export const VisualizeListing = () => {
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
-  const tableColumns = useMemo(() => getTableColumns(application, history, savedObjectsTagging), [
-    application,
-    history,
-    savedObjectsTagging,
-  ]);
+  const tableColumns = useMemo(
+    () => getTableColumns(application, kbnUrlStateStorage, savedObjectsTagging),
+    [application, kbnUrlStateStorage, savedObjectsTagging]
+  );
 
   const fetchItems = useCallback(
     (filter) => {
@@ -150,35 +145,67 @@ export const VisualizeListing = () => {
       : [];
   }, [savedObjectsTagging]);
 
+  const calloutMessage = (
+    <>
+      <FormattedMessage
+        id="visualize.visualizeListingDashboardFlowDescription"
+        defaultMessage="Building a dashboard? Create content directly from the {dashboardApp} using a new integrated workflow."
+        values={{
+          dashboardApp: (
+            <EuiLink
+              className="visListingCallout__link"
+              onClick={(event: MouseEvent) => {
+                event.preventDefault();
+                application.navigateToUrl(application.getUrlForApp('dashboards'));
+              }}
+            >
+              <FormattedMessage
+                id="visualize.visualizeListingDashboardAppName"
+                defaultMessage="Dashboard application"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </>
+  );
+
   return (
-    <TableListView
-      headingId="visualizeListingHeading"
-      // we allow users to create visualizations even if they can't save them
-      // for data exploration purposes
-      createItem={createNewVis}
-      tableCaption={i18n.translate('visualize.listing.table.listTitle', {
-        defaultMessage: 'Visualizations',
-      })}
-      findItems={fetchItems}
-      deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
-      editItem={visualizeCapabilities.save ? editItem : undefined}
-      tableColumns={tableColumns}
-      listingLimit={listingLimit}
-      initialPageSize={savedObjectsPublic.settings.getPerPage()}
-      initialFilter={''}
-      rowHeader="title"
-      noItemsFragment={noItemsFragment}
-      entityName={i18n.translate('visualize.listing.table.entityName', {
-        defaultMessage: 'visualization',
-      })}
-      entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
-        defaultMessage: 'visualizations',
-      })}
-      tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
-        defaultMessage: 'Visualizations',
-      })}
-      toastNotifications={toastNotifications}
-      searchFilters={searchFilters}
-    />
+    <>
+      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && (
+        <div className="visListingCallout">
+          <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+        </div>
+      )}
+      <TableListView
+        headingId="visualizeListingHeading"
+        // we allow users to create visualizations even if they can't save them
+        // for data exploration purposes
+        createItem={createNewVis}
+        tableCaption={i18n.translate('visualize.listing.table.listTitle', {
+          defaultMessage: 'Visualizations',
+        })}
+        findItems={fetchItems}
+        deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
+        editItem={visualizeCapabilities.save ? editItem : undefined}
+        tableColumns={tableColumns}
+        listingLimit={listingLimit}
+        initialPageSize={savedObjectsPublic.settings.getPerPage()}
+        initialFilter={''}
+        rowHeader="title"
+        noItemsFragment={noItemsFragment}
+        entityName={i18n.translate('visualize.listing.table.entityName', {
+          defaultMessage: 'visualization',
+        })}
+        entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
+          defaultMessage: 'visualizations',
+        })}
+        tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
+          defaultMessage: 'Visualizations',
+        })}
+        toastNotifications={toastNotifications}
+        searchFilters={searchFilters}
+      />
+    </>
   );
 };

@@ -19,7 +19,7 @@ interface SupportedSchema {
   /**
    * A constraint to search for in the documented returned by Elasticsearch
    */
-  constraint: { field: string; value: string };
+  constraints: Array<{ field: string; value: string }>;
 
   /**
    * Schema to return to the frontend so that it can be passed in to call to the /tree API
@@ -34,10 +34,12 @@ interface SupportedSchema {
 const supportedSchemas: SupportedSchema[] = [
   {
     name: 'endpoint',
-    constraint: {
-      field: 'agent.type',
-      value: 'endpoint',
-    },
+    constraints: [
+      {
+        field: 'agent.type',
+        value: 'endpoint',
+      },
+    ],
     schema: {
       id: 'process.entity_id',
       parent: 'process.parent.entity_id',
@@ -47,10 +49,16 @@ const supportedSchemas: SupportedSchema[] = [
   },
   {
     name: 'winlogbeat',
-    constraint: {
-      field: 'agent.type',
-      value: 'winlogbeat',
-    },
+    constraints: [
+      {
+        field: 'agent.type',
+        value: 'winlogbeat',
+      },
+      {
+        field: 'event.module',
+        value: 'sysmon',
+      },
+    ],
     schema: {
       id: 'process.entity_id',
       parent: 'process.parent.entity_id',
@@ -104,14 +112,17 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
     const responseBody: ResolverEntityIndex = [];
     for (const hit of queryResponse.body.hits.hits) {
       for (const supportedSchema of supportedSchemas) {
-        const fieldValue = getFieldAsString(hit._source, supportedSchema.constraint.field);
-        const id = getFieldAsString(hit._source, supportedSchema.schema.id);
+        let foundSchema = true;
         // check that the constraint and id fields are defined and that the id field is not an empty string
-        if (
-          fieldValue?.toLowerCase() === supportedSchema.constraint.value.toLowerCase() &&
-          id !== undefined &&
-          id !== ''
-        ) {
+        const id = getFieldAsString(hit._source, supportedSchema.schema.id);
+        for (const constraint of supportedSchema.constraints) {
+          const fieldValue = getFieldAsString(hit._source, constraint.field);
+          // track that all the constraints are true, if one of them is false then this schema is not valid so mark it
+          // that we did not find the schema
+          foundSchema = foundSchema && fieldValue?.toLowerCase() === constraint.value.toLowerCase();
+        }
+
+        if (foundSchema && id !== undefined && id !== '') {
           responseBody.push({
             name: supportedSchema.name,
             schema: supportedSchema.schema,

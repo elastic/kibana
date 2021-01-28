@@ -69,13 +69,6 @@ export const CRITICAL = i18n.translate(
   }
 );
 
-export const CUSTOM_MITRE_ATTACK_TECHNIQUES_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customMitreAttackTechniquesFieldRequiredError',
-  {
-    defaultMessage: 'At least one Technique is required with a Tactic.',
-  }
-);
-
 export const URL_FORMAT_INVALID = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.referencesUrlInvalidError',
   {

@@ -3,9 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { PainlessLang } from '@kbn/monaco';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
+import { PainlessLang, PainlessContext } from '@kbn/monaco';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,7 +30,7 @@ import {
   ValidationFunc,
   FieldConfig,
 } from '../../shared_imports';
-import { RuntimeField } from '../../types';
+import { RuntimeField, RuntimeType } from '../../types';
 import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 import { schema } from './schema';
 
@@ -36,6 +38,11 @@ export interface FormState {
   isValid: boolean | undefined;
   isSubmitted: boolean;
   submit: FormHook<RuntimeField>['submit'];
+}
+
+interface Field {
+  name: string;
+  type: string;
 }
 
 export interface Props {
@@ -54,8 +61,9 @@ export interface Props {
      * An array of existing concrete fields. If the user gives a name to the runtime
      * field that matches one of the concrete fields, a callout will be displayed
      * to indicate that this runtime field will shadow the concrete field.
+     * It is also used to provide the list of field autocomplete suggestions to the code editor.
      */
-    existingConcreteFields?: string[];
+    existingConcreteFields?: Field[];
   };
 }
 
@@ -105,17 +113,50 @@ const getNameFieldConfig = (
   };
 };
 
+const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessContext => {
+  switch (runtimeType) {
+    case 'keyword':
+      return 'string_script_field_script_field';
+    case 'long':
+      return 'long_script_field_script_field';
+    case 'double':
+      return 'double_script_field_script_field';
+    case 'date':
+      return 'date_script_field';
+    case 'ip':
+      return 'ip_script_field_script_field';
+    case 'boolean':
+      return 'boolean_script_field_script_field';
+    default:
+      return 'string_script_field_script_field';
+  }
+};
+
 const RuntimeFieldFormComp = ({
   defaultValue,
   onChange,
   links,
   ctx: { namesNotAllowed, existingConcreteFields = [] } = {},
 }: Props) => {
+  const typeFieldConfig = schema.type as FieldConfig<RuntimeType, RuntimeField>;
+
+  const [painlessContext, setPainlessContext] = useState<PainlessContext>(
+    mapReturnTypeToPainlessContext(typeFieldConfig!.defaultValue!)
+  );
   const { form } = useForm<RuntimeField>({ defaultValue, schema });
   const { submit, isValid: isFormValid, isSubmitted } = form;
   const [{ name }] = useFormData<RuntimeField>({ form, watch: 'name' });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, defaultValue);
+
+  const onTypeChange = useCallback((newType: Array<EuiComboBoxOptionOption<RuntimeType>>) => {
+    setPainlessContext(mapReturnTypeToPainlessContext(newType[0]!.value!));
+  }, []);
+
+  const suggestionProvider = PainlessLang.getSuggestionProvider(
+    painlessContext,
+    existingConcreteFields
+  );
 
   useEffect(() => {
     if (onChange) {
@@ -145,7 +186,10 @@ const RuntimeFieldFormComp = ({
 
         {/* Return type */}
         <EuiFlexItem>
-          <UseField<EuiComboBoxOptionOption[]> path="type">
+          <UseField<Array<EuiComboBoxOptionOption<RuntimeType>>>
+            path="type"
+            onChange={onTypeChange}
+          >
             {({ label, value, setValue }) => {
               if (value === undefined) {
                 return null;
@@ -185,7 +229,7 @@ const RuntimeFieldFormComp = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {existingConcreteFields.includes(name) && (
+      {existingConcreteFields.find((field) => field.name === name) && (
         <>
           <EuiSpacer />
           <EuiCallOut
@@ -218,25 +262,31 @@ const RuntimeFieldFormComp = ({
               error={getErrorsMessages()}
               isInvalid={!isValid}
               helpText={
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiLink
-                      href={links.runtimePainless}
-                      target="_blank"
-                      external
-                      data-test-subj="painlessSyntaxLearnMoreLink"
-                    >
-                      {i18n.translate('xpack.runtimeFields.form.script.learnMoreLinkText', {
-                        defaultMessage: 'Learn more about syntax.',
-                      })}
-                    </EuiLink>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <FormattedMessage
+                  id="xpack.runtimeFields.form.source.scriptFieldHelpText"
+                  defaultMessage="Runtime fields without a script retrieve values from a field with the same name in {source}. If a field with the same name doesn’t exist, no values return when a search request includes the runtime field. {learnMoreLink}"
+                  values={{
+                    learnMoreLink: (
+                      <EuiLink
+                        href={links.runtimePainless}
+                        target="_blank"
+                        external
+                        data-test-subj="painlessSyntaxLearnMoreLink"
+                      >
+                        {i18n.translate('xpack.runtimeFields.form.script.learnMoreLinkText', {
+                          defaultMessage: 'Learn about script syntax.',
+                        })}
+                      </EuiLink>
+                    ),
+                    source: <EuiCode>{'_source'}</EuiCode>,
+                  }}
+                />
               }
               fullWidth
             >
               <CodeEditor
                 languageId={PainlessLang.ID}
+                suggestionProvider={suggestionProvider}
                 width="100%"
                 height="300px"
                 value={value}
@@ -250,6 +300,9 @@ const RuntimeFieldFormComp = ({
                   wordWrap: 'on',
                   wrappingIndent: 'indent',
                   automaticLayout: true,
+                  suggest: {
+                    snippetsPreventQuickSuggestions: false,
+                  },
                 }}
                 data-test-subj="scriptField"
                 aria-label={i18n.translate('xpack.runtimeFields.form.scriptEditorAriaLabel', {

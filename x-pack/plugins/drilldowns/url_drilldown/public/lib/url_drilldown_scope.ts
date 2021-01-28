@@ -11,52 +11,60 @@
 
 import type { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/public';
 import {
-  IEmbeddable,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  isRowClickTriggerContext,
   isContextMenuTriggerContext,
   RangeSelectContext,
-  ValueClickContext,
-} from '../../../../../../src/plugins/embeddable/public';
-import type { ActionContext, ActionFactoryContext, UrlTrigger } from './url_drilldown';
-import {
   SELECT_RANGE_TRIGGER,
+  ValueClickContext,
   VALUE_CLICK_TRIGGER,
+  EmbeddableInput,
+  EmbeddableOutput,
+} from '../../../../../../src/plugins/embeddable/public';
+import type {
+  ActionContext,
+  ActionFactoryContext,
+  EmbeddableWithQueryInput,
+} from './url_drilldown';
+import {
+  RowClickContext,
+  ROW_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
-
-type ContextScopeInput = ActionContext | ActionFactoryContext;
 
 /**
  * Part of context scope extracted from an embeddable
  * Expose on the scope as: `{{context.panel.id}}`, `{{context.panel.filters.[0]}}`
  */
-interface EmbeddableUrlDrilldownContextScope {
+interface EmbeddableUrlDrilldownContextScope extends EmbeddableInput {
+  /**
+   * ID of the embeddable panel.
+   */
   id: string;
+
+  /**
+   * Title of the embeddable panel.
+   */
   title?: string;
+
+  /**
+   * In case panel supports only 1 index pattern.
+   */
+  indexPatternId?: string;
+
+  /**
+   * In case panel supports more then 1 index pattern.
+   */
+  indexPatternIds?: string[];
+
   query?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
   savedObjectId?: string;
-  /**
-   * In case panel supports only 1 index patterns
-   */
-  indexPatternId?: string;
-  /**
-   * In case panel supports more then 1 index patterns
-   */
-  indexPatternIds?: string[];
 }
 
-/**
- * Url drilldown context scope
- * `{{context.$}}`
- */
-interface UrlDrilldownContextScope {
-  panel?: EmbeddableUrlDrilldownContextScope;
-}
-
-export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilldownContextScope {
-  function hasEmbeddable(val: unknown): val is { embeddable: IEmbeddable } {
+export function getPanelVariables(contextScopeInput: unknown): EmbeddableUrlDrilldownContextScope {
+  function hasEmbeddable(val: unknown): val is { embeddable: EmbeddableWithQueryInput } {
     if (val && typeof val === 'object' && 'embeddable' in val) return true;
     return false;
   }
@@ -64,41 +72,52 @@ export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilld
     throw new Error(
       "UrlDrilldown [getContextScope] can't build scope because embeddable object is missing in context"
     );
-
   const embeddable = contextScopeInput.embeddable;
+
+  return getEmbeddableVariables(embeddable);
+}
+
+function hasSavedObjectId(obj: Record<string, any>): obj is { savedObjectId: string } {
+  return 'savedObjectId' in obj && typeof obj.savedObjectId === 'string';
+}
+
+/**
+ * @todo Same functionality is implemented in x-pack/plugins/discover_enhanced/public/actions/explore_data/shared.ts,
+ *       combine both implementations into a common approach.
+ */
+function getIndexPatternIds(output: EmbeddableOutput): string[] {
+  function hasIndexPatterns(
+    _output: Record<string, any>
+  ): _output is { indexPatterns: Array<{ id?: string }> } {
+    return (
+      'indexPatterns' in _output &&
+      Array.isArray(_output.indexPatterns) &&
+      _output.indexPatterns.length > 0
+    );
+  }
+  return hasIndexPatterns(output)
+    ? (output.indexPatterns.map((ip) => ip.id).filter(Boolean) as string[])
+    : [];
+}
+
+export function getEmbeddableVariables(
+  embeddable: EmbeddableWithQueryInput
+): EmbeddableUrlDrilldownContextScope {
   const input = embeddable.getInput();
   const output = embeddable.getOutput();
-  function hasSavedObjectId(obj: Record<string, any>): obj is { savedObjectId: string } {
-    return 'savedObjectId' in obj && typeof obj.savedObjectId === 'string';
-  }
-  function getIndexPatternIds(): string[] {
-    function hasIndexPatterns(
-      _output: Record<string, any>
-    ): _output is { indexPatterns: Array<{ id?: string }> } {
-      return (
-        'indexPatterns' in _output &&
-        Array.isArray(_output.indexPatterns) &&
-        _output.indexPatterns.length > 0
-      );
-    }
-    return hasIndexPatterns(output)
-      ? (output.indexPatterns.map((ip) => ip.id).filter(Boolean) as string[])
-      : [];
-  }
-  const indexPatternsIds = getIndexPatternIds();
-  return {
-    panel: cleanEmptyKeys({
-      id: input.id,
-      title: output.title ?? input.title,
-      savedObjectId:
-        output.savedObjectId ?? (hasSavedObjectId(input) ? input.savedObjectId : undefined),
-      query: input.query,
-      timeRange: input.timeRange,
-      filters: input.filters,
-      indexPatternIds: indexPatternsIds.length > 1 ? indexPatternsIds : undefined,
-      indexPatternId: indexPatternsIds.length === 1 ? indexPatternsIds[0] : undefined,
-    }),
-  };
+  const indexPatternsIds = getIndexPatternIds(output);
+
+  return deleteUndefinedKeys({
+    id: input.id,
+    title: output.title ?? input.title,
+    savedObjectId:
+      output.savedObjectId ?? (hasSavedObjectId(input) ? input.savedObjectId : undefined),
+    query: input.query,
+    timeRange: input.timeRange,
+    filters: input.filters,
+    indexPatternIds: indexPatternsIds.length > 1 ? indexPatternsIds : undefined,
+    indexPatternId: indexPatternsIds.length === 1 ? indexPatternsIds[0] : undefined,
+  });
 }
 
 /**
@@ -108,7 +127,9 @@ export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilld
 export type UrlDrilldownEventScope =
   | ValueClickTriggerEventScope
   | RangeSelectTriggerEventScope
+  | RowClickTriggerEventScope
   | ContextMenuTriggerEventScope;
+
 export type EventScopeInput = ActionContext;
 export interface ValueClickTriggerEventScope {
   key?: string;
@@ -122,6 +143,12 @@ export interface RangeSelectTriggerEventScope {
   to?: string | number;
 }
 
+export interface RowClickTriggerEventScope {
+  rowIndex: number;
+  values: Primitive[];
+  keys: string[];
+  columnNames: string[];
+}
 export type ContextMenuTriggerEventScope = object;
 
 export function getEventScope(eventScopeInput: EventScopeInput): UrlDrilldownEventScope {
@@ -129,6 +156,8 @@ export function getEventScope(eventScopeInput: EventScopeInput): UrlDrilldownEve
     return getEventScopeFromRangeSelectTriggerContext(eventScopeInput);
   } else if (isValueClickTriggerContext(eventScopeInput)) {
     return getEventScopeFromValueClickTriggerContext(eventScopeInput);
+  } else if (isRowClickTriggerContext(eventScopeInput)) {
+    return getEventScopeFromRowClickTriggerContext(eventScopeInput);
   } else if (isContextMenuTriggerContext(eventScopeInput)) {
     return {};
   } else {
@@ -141,7 +170,7 @@ function getEventScopeFromRangeSelectTriggerContext(
 ): RangeSelectTriggerEventScope {
   const { table, column: columnIndex, range } = eventScopeInput.data;
   const column = table.columns[columnIndex];
-  return cleanEmptyKeys({
+  return deleteUndefinedKeys({
     key: toPrimitiveOrUndefined(column?.meta.field) as string,
     from: toPrimitiveOrUndefined(range[0]) as string | number | undefined,
     to: toPrimitiveOrUndefined(range[range.length - 1]) as string | number | undefined,
@@ -160,7 +189,7 @@ function getEventScopeFromValueClickTriggerContext(
     };
   });
 
-  return cleanEmptyKeys({
+  return deleteUndefinedKeys({
     key: points[0]?.key,
     value: points[0]?.value,
     negate,
@@ -168,37 +197,53 @@ function getEventScopeFromValueClickTriggerContext(
   });
 }
 
-/**
- * @remarks
- * Difference between `event` and `context` variables, is that real `context` variables are available during drilldown creation (e.g. embeddable panel)
- * `event` variables are mapped from trigger context. Since there is no trigger context during drilldown creation, we have to provide some _mock_ variables for validating and previewing the URL
- */
-export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventScope {
-  if (trigger === SELECT_RANGE_TRIGGER) {
-    return {
-      key: 'event.key',
-      from: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 minutes ago
-      to: new Date().toISOString(),
-    };
+function getEventScopeFromRowClickTriggerContext(ctx: RowClickContext): RowClickTriggerEventScope {
+  const { data } = ctx;
+  const embeddable = ctx.embeddable as EmbeddableWithQueryInput;
+
+  const { rowIndex } = data;
+  const columns = data.columns || data.table.columns.map(({ id }) => id);
+  const values: Primitive[] = [];
+  const keys: string[] = [];
+  const columnNames: string[] = [];
+  const row = data.table.rows[rowIndex];
+
+  for (const columnId of columns) {
+    const column = data.table.columns.find(({ id }) => id === columnId);
+    if (!column) {
+      // This should never happe, but in case it does we log data necessary for debugging.
+      // eslint-disable-next-line no-console
+      console.error(data, embeddable ? `Embeddable [${embeddable.getTitle()}]` : null);
+      throw new Error('Could not find a datatable column.');
+    }
+    values.push(row[columnId]);
+    keys.push(column.meta.field || '');
+    columnNames.push(column.name || column.meta.field || '');
   }
 
-  if (trigger === VALUE_CLICK_TRIGGER) {
-    // number of mock points to generate
-    // should be larger or equal of any possible data points length emitted by VALUE_CLICK_TRIGGER
-    const nPoints = 4;
-    const points = new Array(nPoints).fill(0).map((_, index) => ({
-      key: `event.points.${index}.key`,
-      value: `event.points.${index}.value`,
-    }));
-    return {
-      key: `event.key`,
-      value: `event.value`,
-      negate: false,
-      points,
-    };
+  const scope: RowClickTriggerEventScope = {
+    rowIndex,
+    values,
+    keys,
+    columnNames,
+  };
+
+  return scope;
+}
+
+export function getEventVariableList(context: ActionFactoryContext): string[] {
+  const [trigger] = context.triggers;
+
+  switch (trigger) {
+    case SELECT_RANGE_TRIGGER:
+      return ['event.key', 'event.from', 'event.to'];
+    case VALUE_CLICK_TRIGGER:
+      return ['event.key', 'event.value', 'event.negate', 'event.points'];
+    case ROW_CLICK_TRIGGER:
+      return ['event.rowIndex', 'event.values', 'event.keys', 'event.columnNames'];
   }
 
-  return {};
+  return [];
 }
 
 type Primitive = string | number | boolean | null;
@@ -210,7 +255,7 @@ function toPrimitiveOrUndefined(v: unknown): Primitive | undefined {
   return String(v);
 }
 
-function cleanEmptyKeys<T extends Record<string, any>>(obj: T): T {
+function deleteUndefinedKeys<T extends Record<string, any>>(obj: T): T {
   Object.keys(obj).forEach((key) => {
     if (obj[key] === undefined) {
       delete obj[key];

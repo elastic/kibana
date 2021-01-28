@@ -11,6 +11,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { AppMountParameters } from '../../../../../src/core/public';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import '../index.scss';
 import { NotFoundPage } from '../pages/404';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
@@ -25,14 +26,22 @@ import { prepareMountElement } from './common_styles';
 export const renderApp = (
   core: CoreStart,
   plugins: InfraClientStartDeps,
-  { element, history }: AppMountParameters
+  { element, history, setHeaderActionMenu }: AppMountParameters
 ) => {
   const apolloClient = createApolloClient(core.http.fetch);
+  const storage = new Storage(window.localStorage);
 
   prepareMountElement(element);
 
   ReactDOM.render(
-    <MetricsApp apolloClient={apolloClient} core={core} history={history} plugins={plugins} />,
+    <MetricsApp
+      apolloClient={apolloClient}
+      core={core}
+      history={history}
+      plugins={plugins}
+      setHeaderActionMenu={setHeaderActionMenu}
+      storage={storage}
+    />,
     element
   );
 
@@ -46,13 +55,18 @@ const MetricsApp: React.FC<{
   core: CoreStart;
   history: History<unknown>;
   plugins: InfraClientStartDeps;
-}> = ({ apolloClient, core, history, plugins }) => {
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  storage: Storage;
+}> = ({ apolloClient, core, history, plugins, setHeaderActionMenu, storage }) => {
   const uiCapabilities = core.application.capabilities;
 
   return (
     <CoreProviders core={core} plugins={plugins}>
       <CommonInfraProviders
         apolloClient={apolloClient}
+        appName="Metrics UI"
+        setHeaderActionMenu={setHeaderActionMenu}
+        storage={storage}
         triggersActionsUI={plugins.triggersActionsUi}
       >
         <Router history={history}>

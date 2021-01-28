@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies attempts to clear Windows event log stores. This is often done by attackers in an attempt to evade detection or destroy forensic evidence on a system.",
+  "description": "Identifies attempts to clear or disable Windows event log stores using Windows wevetutil command. This is often done by attackers in an attempt to evade detection or destroy forensic evidence on a system.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "Clearing Windows Event Logs",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:wevtutil.exe and process.args:cl or process.name:powershell.exe and process.args:Clear-EventLog",
+  "query": "event.category:process and event.type:(process_started or start) and (process.name:\"wevtutil.exe\" or process.pe.original_file_name:\"wevtutil.exe\") and process.args:(\"/e:false\" or cl or \"clear-log\") or process.name:\"powershell.exe\" and process.args:\"Clear-EventLog\"",
   "risk_score": 21,
   "rule_id": "d331bbe2-6db4-4941-80a5-8270db72eb61",
   "severity": "low",
@@ -40,5 +40,5 @@
     }
   ],
   "type": "query",
-  "version": 5
+  "version": 6
 }

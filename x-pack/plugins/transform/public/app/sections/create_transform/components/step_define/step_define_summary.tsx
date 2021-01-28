@@ -6,11 +6,10 @@
 
 import React, { Fragment, FC } from 'react';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
-
-import { dictionaryToArray } from '../../../../../../common/types/common';
+import { EuiBadge, EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import {
@@ -27,6 +26,8 @@ import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
 
 import { StepDefineExposedState } from './common';
+import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
+import { isLatestPartialRequest } from './common/types';
 
 interface Props {
   formState: StepDefineExposedState;
@@ -34,35 +35,48 @@ interface Props {
 }
 
 export const StepDefineSummary: FC<Props> = ({
-  formState: { searchString, searchQuery, groupByList, aggList },
+  formState: {
+    searchString,
+    searchQuery,
+    groupByList,
+    aggList,
+    transformFunction,
+    previewRequest: partialPreviewRequest,
+    validationStatus,
+  },
   searchItems,
 }) => {
   const {
     ml: { DataGrid },
   } = useAppDependencies();
   const toastNotifications = useToastNotifications();
-  const pivotAggsArr = dictionaryToArray(aggList);
-  const pivotGroupByArr = dictionaryToArray(groupByList);
+
   const pivotQuery = getPivotQuery(searchQuery);
 
   const previewRequest = getPreviewTransformRequestBody(
     searchItems.indexPattern.title,
     pivotQuery,
-    pivotGroupByArr,
-    pivotAggsArr
+    partialPreviewRequest
   );
 
   const pivotPreviewProps = usePivotData(
     searchItems.indexPattern.title,
     pivotQuery,
-    aggList,
-    groupByList
+    validationStatus,
+    partialPreviewRequest
   );
 
   const isModifiedQuery =
     typeof searchString === 'undefined' &&
     !isDefaultQuery(pivotQuery) &&
     !isMatchAllQuery(pivotQuery);
+
+  let uniqueKeys: string[] = [];
+  let sortField = '';
+  if (isLatestPartialRequest(previewRequest)) {
+    uniqueKeys = previewRequest.latest.unique_key;
+    sortField = previewRequest.latest.sort;
+  }
 
   return (
     <div data-test-subj="transformStepDefineSummary">
@@ -116,21 +130,55 @@ export const StepDefineSummary: FC<Props> = ({
           </EuiFormRow>
         )}
 
-        <EuiFormRow
-          label={i18n.translate('xpack.transform.stepDefineSummary.groupByLabel', {
-            defaultMessage: 'Group by',
-          })}
-        >
-          <GroupByListSummary list={groupByList} />
-        </EuiFormRow>
+        {transformFunction === TRANSFORM_FUNCTION.PIVOT ? (
+          <>
+            <EuiFormRow
+              label={i18n.translate('xpack.transform.stepDefineSummary.groupByLabel', {
+                defaultMessage: 'Group by',
+              })}
+            >
+              <GroupByListSummary list={groupByList} />
+            </EuiFormRow>
 
-        <EuiFormRow
-          label={i18n.translate('xpack.transform.stepDefineSummary.aggregationsLabel', {
-            defaultMessage: 'Aggregations',
-          })}
-        >
-          <AggListSummary list={aggList} />
-        </EuiFormRow>
+            <EuiFormRow
+              label={i18n.translate('xpack.transform.stepDefineSummary.aggregationsLabel', {
+                defaultMessage: 'Aggregations',
+              })}
+            >
+              <AggListSummary list={aggList} />
+            </EuiFormRow>
+          </>
+        ) : (
+          <>
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.transform.stepDefineForm.uniqueKeysLabel"
+                  defaultMessage="Unique keys"
+                />
+              }
+            >
+              <>
+                {uniqueKeys.map((k) => (
+                  <EuiBadge color="hollow" key={k}>
+                    {k}
+                  </EuiBadge>
+                ))}
+              </>
+            </EuiFormRow>
+
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.transform.stepDefineForm.sortLabel"
+                  defaultMessage="Sort field"
+                />
+              }
+            >
+              <EuiText>{sortField}</EuiText>
+            </EuiFormRow>
+          </>
+        )}
 
         <EuiSpacer size="m" />
         <DataGrid
@@ -139,12 +187,13 @@ export const StepDefineSummary: FC<Props> = ({
           copyToClipboardDescription={i18n.translate(
             'xpack.transform.pivotPreview.copyClipboardTooltip',
             {
-              defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
+              defaultMessage:
+                'Copy Dev Console statement of the transform preview to the clipboard.',
             }
           )}
           dataTestSubj="transformPivotPreview"
-          title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewTitle', {
-            defaultMessage: 'Transform pivot preview',
+          title={i18n.translate('xpack.transform.pivotPreview.transformPreviewTitle', {
+            defaultMessage: 'Transform preview',
           })}
           toastNotifications={toastNotifications}
         />

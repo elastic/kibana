@@ -19,6 +19,7 @@ interface BuildEventsSearchQuery {
   sortOrder?: SortOrderOrUndefined;
   searchAfterSortId: string | number | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
+  excludeDocsWithTimestampOverride: boolean;
 }
 
 export const buildEventsSearchQuery = ({
@@ -31,66 +32,44 @@ export const buildEventsSearchQuery = ({
   searchAfterSortId,
   sortOrder,
   timestampOverride,
+  excludeDocsWithTimestampOverride,
 }: BuildEventsSearchQuery) => {
-  const timestamp = timestampOverride ?? '@timestamp';
-  const docFields =
-    timestampOverride != null
-      ? [
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-          {
-            field: timestampOverride,
-            format: 'strict_date_optional_time',
-          },
-        ]
-      : [
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ];
+  const defaultTimeFields = ['@timestamp'];
+  const timestamps =
+    timestampOverride != null ? [timestampOverride, ...defaultTimeFields] : defaultTimeFields;
+  const docFields = timestamps.map((tstamp) => ({
+    field: tstamp,
+    format: 'strict_date_optional_time',
+  }));
 
-  const filterWithTime = [
-    filter,
+  const sortField =
+    timestampOverride != null && !excludeDocsWithTimestampOverride
+      ? timestampOverride
+      : '@timestamp';
+
+  const rangeFilter: unknown[] = [
     {
-      bool: {
-        filter: [
-          {
-            bool: {
-              should: [
-                {
-                  range: {
-                    [timestamp]: {
-                      gte: from,
-                      format: 'strict_date_optional_time',
-                    },
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-          {
-            bool: {
-              should: [
-                {
-                  range: {
-                    [timestamp]: {
-                      lte: to,
-                      format: 'strict_date_optional_time',
-                    },
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ],
+      range: {
+        [sortField]: {
+          lte: to,
+          gte: from,
+          format: 'strict_date_optional_time',
+        },
       },
     },
   ];
+  if (excludeDocsWithTimestampOverride) {
+    rangeFilter.push({
+      bool: {
+        must_not: {
+          exists: {
+            field: timestampOverride,
+          },
+        },
+      },
+    });
+  }
+  const filterWithTime = [filter, { bool: { filter: rangeFilter } }];
 
   const searchQuery = {
     allowNoIndices: true,
@@ -112,7 +91,7 @@ export const buildEventsSearchQuery = ({
       ...(aggregations ? { aggregations } : {}),
       sort: [
         {
-          [timestamp]: {
+          [sortField]: {
             order: sortOrder ?? 'asc',
           },
         },

@@ -81,6 +81,7 @@ export class SavedObjectTaggingPlugin
 
     return {
       client: this.tagClient,
+      cache: this.tagCache,
       ui: getUiApi({
         cache: this.tagCache,
         client: this.tagClient,

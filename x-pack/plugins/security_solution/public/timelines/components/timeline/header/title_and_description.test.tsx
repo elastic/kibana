@@ -5,25 +5,20 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
+
+import { TestProviders } from '../../../../common/mock';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import { TimelineTitleAndDescription } from './title_and_description';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
-import { useCreateTimelineButton } from '../properties/use_create_timeline';
-import { TimelineType } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn(),
-}));
-
-jest.mock('../../../../timelines/store/timeline', () => ({
-  timelineSelectors: {
-    selectTimeline: jest.fn(),
-  },
+  useDeepEqualSelector: jest.fn(),
 }));
 
 jest.mock('../properties/use_create_timeline', () => ({
-  useCreateTimelineButton: jest.fn(),
+  useCreateTimeline: jest.fn(),
 }));
 
 jest.mock('react-redux', () => {
@@ -37,8 +32,9 @@ jest.mock('react-redux', () => {
 describe('TimelineTitleAndDescription', () => {
   describe('save timeline', () => {
     const props = {
+      initialFocus: 'title' as const,
+      closeSaveTimeline: jest.fn(),
       timelineId: 'timeline-1',
-      toggleSaveTimeline: jest.fn(),
       onSaveTimeline: jest.fn(),
       updateTitle: jest.fn(),
       updateDescription: jest.fn(),
@@ -47,73 +43,86 @@ describe('TimelineTitleAndDescription', () => {
     const mockGetButton = jest.fn().mockReturnValue(<div data-test-subj="mock-discard-button" />);
 
     beforeEach(() => {
-      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: '',
         isSaving: true,
-        savedObjectId: null,
+        status: TimelineStatus.draft,
         title: 'my timeline',
         timelineType: TimelineType.default,
-      });
-      (useCreateTimelineButton as jest.Mock).mockReturnValue({
-        getButton: mockGetButton,
       });
     });
 
     afterEach(() => {
-      (useShallowEqualSelector as jest.Mock).mockReset();
-      (useCreateTimelineButton as jest.Mock).mockReset();
+      (useDeepEqualSelector as jest.Mock).mockReset();
       mockGetButton.mockClear();
     });
 
-    test('show proress bar while saving', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
+    test('show process bar while saving', () => {
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
       expect(component.find('[data-test-subj="progress-bar"]').exists()).toEqual(true);
     });
 
     test('Show correct header for save timeline modal', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
-      expect(component.find('[data-test-subj="modal-header"]').prop('children')).toEqual(
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
+      expect(component.find('[data-test-subj="modal-header"]').at(1).prop('children')).toEqual(
         i18n.SAVE_TIMELINE
       );
     });
 
     test('Show correct header for save timeline template modal', () => {
-      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: '',
         isSaving: true,
-        savedObjectId: null,
+        status: TimelineStatus.draft,
         title: 'my timeline',
         timelineType: TimelineType.template,
       });
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
-      expect(component.find('[data-test-subj="modal-header"]').prop('children')).toEqual(
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
+      expect(component.find('[data-test-subj="modal-header"]').at(1).prop('children')).toEqual(
         i18n.SAVE_TIMELINE_TEMPLATE
       );
     });
 
     test('Show name field', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
-      expect(component.find('[data-test-subj="save-timeline-name"]').exists()).toEqual(true);
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
+      expect(component.find('[data-test-subj="save-timeline-title"]').exists()).toEqual(true);
     });
 
     test('Show description field', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
       expect(component.find('[data-test-subj="save-timeline-description"]').exists()).toEqual(true);
     });
 
     test('Show close button', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
       expect(component.find('[data-test-subj="close-button"]').exists()).toEqual(true);
     });
 
     test('Show saveButton', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
       expect(component.find('[data-test-subj="save-button"]').exists()).toEqual(true);
     });
   });
 
   describe('update timeline', () => {
     const props = {
+      initialFocus: 'title' as const,
+      closeSaveTimeline: jest.fn(),
+      openSaveTimeline: jest.fn(),
       timelineId: 'timeline-1',
       toggleSaveTimeline: jest.fn(),
       onSaveTimeline: jest.fn(),
@@ -124,68 +133,79 @@ describe('TimelineTitleAndDescription', () => {
     const mockGetButton = jest.fn().mockReturnValue(<div data-test-subj="mock-discard-button" />);
 
     beforeEach(() => {
-      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: 'xxxx',
         isSaving: true,
-        savedObjectId: '1234',
+        status: TimelineStatus.active,
         title: 'my timeline',
         timelineType: TimelineType.default,
-      });
-      (useCreateTimelineButton as jest.Mock).mockReturnValue({
-        getButton: mockGetButton,
       });
     });
 
     afterEach(() => {
-      (useShallowEqualSelector as jest.Mock).mockReset();
-      (useCreateTimelineButton as jest.Mock).mockReset();
+      (useDeepEqualSelector as jest.Mock).mockReset();
       mockGetButton.mockClear();
     });
 
-    test('show proress bar while saving', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
+    test('show process bar while saving', () => {
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
       expect(component.find('[data-test-subj="progress-bar"]').exists()).toEqual(true);
     });
 
     test('Show correct header for save timeline modal', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
-      expect(component.find('[data-test-subj="modal-header"]').prop('children')).toEqual(
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
+      expect(component.find('[data-test-subj="modal-header"]').at(1).prop('children')).toEqual(
         i18n.NAME_TIMELINE
       );
     });
 
     test('Show correct header for save timeline template modal', () => {
-      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: 'xxxx',
         isSaving: true,
-        savedObjectId: '1234',
+        status: TimelineStatus.active,
         title: 'my timeline',
         timelineType: TimelineType.template,
       });
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
-      expect(component.find('[data-test-subj="modal-header"]').prop('children')).toEqual(
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
+      expect(component.find('[data-test-subj="modal-header"]').at(1).prop('children')).toEqual(
         i18n.NAME_TIMELINE_TEMPLATE
       );
     });
 
     test('Show name field', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
-      expect(component.find('[data-test-subj="save-timeline-name"]').exists()).toEqual(true);
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
+      expect(component.find('[data-test-subj="save-timeline-title"]').exists()).toEqual(true);
     });
 
     test('Show description field', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
       expect(component.find('[data-test-subj="save-timeline-description"]').exists()).toEqual(true);
     });
 
     test('Show saveButton', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
       expect(component.find('[data-test-subj="save-button"]').exists()).toEqual(true);
     });
   });
 
   describe('showWarning', () => {
     const props = {
+      initialFocus: 'title' as const,
+      closeSaveTimeline: jest.fn(),
+      openSaveTimeline: jest.fn(),
       timelineId: 'timeline-1',
       toggleSaveTimeline: jest.fn(),
       onSaveTimeline: jest.fn(),
@@ -197,65 +217,56 @@ describe('TimelineTitleAndDescription', () => {
     const mockGetButton = jest.fn().mockReturnValue(<div data-test-subj="mock-discard-button" />);
 
     beforeEach(() => {
-      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: '',
         isSaving: true,
-        savedObjectId: null,
+        status: TimelineStatus.draft,
         title: 'my timeline',
         timelineType: TimelineType.default,
         showWarnging: true,
       });
-      (useCreateTimelineButton as jest.Mock).mockReturnValue({
-        getButton: mockGetButton,
-      });
     });
 
     afterEach(() => {
-      (useShallowEqualSelector as jest.Mock).mockReset();
-      (useCreateTimelineButton as jest.Mock).mockReset();
+      (useDeepEqualSelector as jest.Mock).mockReset();
       mockGetButton.mockClear();
     });
 
     test('Show EuiCallOut', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
+      });
       expect(component.find('[data-test-subj="save-timeline-callout"]').exists()).toEqual(true);
     });
 
     test('Show discardTimelineButton', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
-      expect(component.find('[data-test-subj="mock-discard-button"]').exists()).toEqual(true);
-    });
-
-    test('get discardTimelineButton with correct props', () => {
-      shallow(<TimelineTitleAndDescription {...props} />);
-      expect(mockGetButton).toBeCalledWith({
-        title: i18n.DISCARD_TIMELINE,
-        outline: true,
-        iconType: '',
-        fill: false,
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
       });
+      expect(component.find('[data-test-subj="close-button"]').at(2).text()).toEqual(
+        'Discard Timeline'
+      );
     });
 
     test('get discardTimelineTemplateButton with correct props', () => {
-      (useShallowEqualSelector as jest.Mock).mockReturnValue({
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({
         description: 'xxxx',
         isSaving: true,
-        savedObjectId: null,
+        status: TimelineStatus.draft,
         title: 'my timeline',
         timelineType: TimelineType.template,
       });
-      shallow(<TimelineTitleAndDescription {...props} />);
-      expect(mockGetButton).toBeCalledWith({
-        title: i18n.DISCARD_TIMELINE_TEMPLATE,
-        outline: true,
-        iconType: '',
-        fill: false,
+      const component = mount(<TimelineTitleAndDescription {...props} />, {
+        wrappingComponent: TestProviders,
       });
+      expect(component.find('[data-test-subj="close-button"]').at(2).text()).toEqual(
+        'Discard Timeline Template'
+      );
     });
 
     test('Show saveButton', () => {
-      const component = shallow(<TimelineTitleAndDescription {...props} />);
-      expect(component.find('[data-test-subj="save-button"]').exists()).toEqual(true);
+      const component = mount(<TimelineTitleAndDescription {...props} />);
+      expect(component.find('[data-test-subj="save-button"]').at(1).exists()).toEqual(true);
     });
   });
 });

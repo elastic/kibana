@@ -90,17 +90,15 @@ describe('fetchMissingMonitoringData', () => {
     );
     expect(result).toEqual([
       {
-        stackProduct: 'elasticsearch',
-        stackProductUuid: 'nodeUuid1',
-        stackProductName: 'nodeName1',
+        nodeId: 'nodeUuid1',
+        nodeName: 'nodeName1',
         clusterUuid: 'clusterUuid1',
         gapDuration: 1,
         ccs: null,
       },
       {
-        stackProduct: 'elasticsearch',
-        stackProductUuid: 'nodeUuid2',
-        stackProductName: 'nodeName2',
+        nodeId: 'nodeUuid2',
+        nodeName: 'nodeName2',
         clusterUuid: 'clusterUuid1',
         gapDuration: 8,
         ccs: null,
@@ -148,9 +146,8 @@ describe('fetchMissingMonitoringData', () => {
     );
     expect(result).toEqual([
       {
-        stackProduct: 'elasticsearch',
-        stackProductUuid: 'nodeUuid1',
-        stackProductName: 'nodeName1',
+        nodeId: 'nodeUuid1',
+        nodeName: 'nodeName1',
         clusterUuid: 'clusterUuid1',
         gapDuration: 1,
         ccs: 'Monitoring',

@@ -9,6 +9,7 @@ import { CoreSetup, CoreStart, Plugin as CorePlugin } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { ReactElement } from 'react';
 import { FeaturesPluginStart } from '../../features/public';
+import { KibanaFeature } from '../../features/common';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
 import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
@@ -28,21 +29,31 @@ import type { ConnectorAddFlyoutProps } from './application/sections/action_conn
 import type { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
+import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
+import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
+import { AlertAddProps } from './application/sections/alert_form/alert_add';
+import { AlertEditProps } from './application/sections/alert_form/alert_edit';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel<any>>;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel<any>>;
   getAddConnectorFlyout: (
     props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>
-  ) => ReactElement<ConnectorAddFlyoutProps> | null;
+  ) => ReactElement<ConnectorAddFlyoutProps>;
   getEditConnectorFlyout: (
     props: Omit<ConnectorEditFlyoutProps, 'actionTypeRegistry'>
-  ) => ReactElement<ConnectorEditFlyoutProps> | null;
+  ) => ReactElement<ConnectorEditFlyoutProps>;
+  getAddAlertFlyout: (
+    props: Omit<AlertAddProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+  ) => ReactElement<AlertAddProps>;
+  getEditAlertFlyout: (
+    props: Omit<AlertEditProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+  ) => ReactElement<AlertEditProps>;
 }
 
 interface PluginsSetup {
@@ -112,7 +123,17 @@ export class Plugin
         ];
 
         const { renderApp } = await import('./application/app');
-        const kibanaFeatures = await pluginsStart.features.getFeatures();
+
+        // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
+        // subset of this privilege are not authorized to access this endpoint and will receive a 404
+        // error that causes the Alerting view to fail to load.
+        let kibanaFeatures: KibanaFeature[];
+        try {
+          kibanaFeatures = await pluginsStart.features.getFeatures();
+        } catch (err) {
+          kibanaFeatures = [];
+        }
+
         return renderApp({
           ...coreStart,
           data: pluginsStart.data,
@@ -150,6 +171,24 @@ export class Plugin
         return getEditConnectorFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
+        });
+      },
+      getAddAlertFlyout: (
+        props: Omit<AlertAddProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+      ) => {
+        return getAddAlertFlyoutLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+          alertTypeRegistry: this.alertTypeRegistry,
+        });
+      },
+      getEditAlertFlyout: (
+        props: Omit<AlertEditProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+      ) => {
+        return getEditAlertFlyoutLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+          alertTypeRegistry: this.alertTypeRegistry,
         });
       },
     };

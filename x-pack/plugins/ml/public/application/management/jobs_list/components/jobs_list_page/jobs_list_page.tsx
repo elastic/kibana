@@ -156,10 +156,8 @@ export const JobsListPage: FC<{
     return null;
   }
 
-  const docLinks = getDocLinks();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
-  const anomalyDetectionJobsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-jobs.html`;
-  const anomalyJobsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics.html`;
+  const anomalyDetectionJobsUrl = getDocLinks().links.ml.anomalyDetectionJobs;
+  const dataFrameAnalyticsUrl = getDocLinks().links.ml.dataFrameAnalytics;
 
   const anomalyDetectionDocsLabel = i18n.translate(
     'xpack.ml.management.jobsList.anomalyDetectionDocsLabel',
@@ -222,7 +220,7 @@ export const JobsListPage: FC<{
                         href={
                           currentTabId === 'anomaly_detection_jobs'
                             ? anomalyDetectionJobsUrl
-                            : anomalyJobsUrl
+                            : dataFrameAnalyticsUrl
                         }
                       >
                         {currentTabId === 'anomaly_detection_jobs'

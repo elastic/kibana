@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-getStateTransfer: (history?: ScopedHistory) => EmbeddableStateTransfer;
+getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
 ```

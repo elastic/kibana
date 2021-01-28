@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract } from 'src/core/server';
+import {
+  ElasticsearchClient,
+  KibanaRequest,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 import uuid from 'uuid';
 import { AuthenticatedUser } from '../../../security/server';
 import {
@@ -25,6 +30,8 @@ import {
   PackagePolicySOAttributes,
   RegistryPackage,
   CallESAsCurrentUser,
+  NewPackagePolicySchema,
+  UpdatePackagePolicySchema,
 } from '../types';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
@@ -33,6 +40,8 @@ import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/p
 import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
+import { appContextService } from '.';
+import { ExternalCallback } from '..';
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
@@ -43,6 +52,7 @@ function getDataset(st: string) {
 class PackagePolicyService {
   public async create(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     callCluster: CallESAsCurrentUser,
     packagePolicy: NewPackagePolicy,
     options?: { id?: string; user?: AuthenticatedUser; bumpRevision?: boolean }
@@ -112,10 +122,16 @@ class PackagePolicyService {
     );
 
     // Assign it to the given agent policy
-    await agentPolicyService.assignPackagePolicies(soClient, packagePolicy.policy_id, [newSo.id], {
-      user: options?.user,
-      bumpRevision: options?.bumpRevision ?? true,
-    });
+    await agentPolicyService.assignPackagePolicies(
+      soClient,
+      esClient,
+      packagePolicy.policy_id,
+      [newSo.id],
+      {
+        user: options?.user,
+        bumpRevision: options?.bumpRevision ?? true,
+      }
+    );
 
     return {
       id: newSo.id,
@@ -126,6 +142,7 @@ class PackagePolicyService {
 
   public async bulkCreate(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     packagePolicies: NewPackagePolicy[],
     agentPolicyId: string,
     options?: { user?: AuthenticatedUser; bumpRevision?: boolean }
@@ -163,6 +180,7 @@ class PackagePolicyService {
     // Assign it to the given agent policy
     await agentPolicyService.assignPackagePolicies(
       soClient,
+      esClient,
       agentPolicyId,
       newSos.map((newSo) => newSo.id),
       {
@@ -248,6 +266,7 @@ class PackagePolicyService {
 
   public async update(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     id: string,
     packagePolicy: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser }
@@ -304,7 +323,7 @@ class PackagePolicyService {
     );
 
     // Bump revision of associated agent policy
-    await agentPolicyService.bumpRevision(soClient, packagePolicy.policy_id, {
+    await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
       user: options?.user,
     });
 
@@ -313,6 +332,7 @@ class PackagePolicyService {
 
   public async delete(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     ids: string[],
     options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean }
   ): Promise<DeletePackagePoliciesResponse> {
@@ -327,6 +347,7 @@ class PackagePolicyService {
         if (!options?.skipUnassignFromAgentPolicies) {
           await agentPolicyService.unassignPackagePolicies(
             soClient,
+            esClient,
             packagePolicy.policy_id,
             [packagePolicy.id],
             {
@@ -391,6 +412,32 @@ class PackagePolicyService {
 
     return Promise.all(inputsPromises);
   }
+
+  public async runExternalCallbacks(
+    externalCallbackType: ExternalCallback[0],
+    newPackagePolicy: NewPackagePolicy,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<NewPackagePolicy> {
+    let newData = newPackagePolicy;
+
+    const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+    if (externalCallbacks && externalCallbacks.size > 0) {
+      let updatedNewData: NewPackagePolicy = newData;
+
+      for (const callback of externalCallbacks) {
+        const result = await callback(updatedNewData, context, request);
+        if (externalCallbackType === 'packagePolicyCreate') {
+          updatedNewData = NewPackagePolicySchema.validate(result);
+        } else if (externalCallbackType === 'packagePolicyUpdate') {
+          updatedNewData = UpdatePackagePolicySchema.validate(result);
+        }
+      }
+
+      newData = updatedNewData;
+    }
+    return newData;
+  }
 }
 
 function assignStreamIdToInput(packagePolicyId: string, input: NewPackagePolicyInput) {
@@ -407,7 +454,7 @@ async function _compilePackagePolicyInput(
   pkgInfo: PackageInfo,
   input: PackagePolicyInput
 ) {
-  if (!input.enabled || !pkgInfo.policy_templates?.[0].inputs) {
+  if ((!input.enabled || !pkgInfo.policy_templates?.[0]?.inputs?.length) ?? 0 > 0) {
     return undefined;
   }
 

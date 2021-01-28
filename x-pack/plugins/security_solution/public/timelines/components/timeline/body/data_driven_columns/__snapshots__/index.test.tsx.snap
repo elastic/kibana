@@ -5,12 +5,23 @@ exports[`Columns it renders the expected columns 1`] = `
   data-test-subj="data-driven-columns"
 >
   <styled.div
+    $ariaColumnIndex={2}
     key="message"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 2
+        </p>
+      </EuiScreenReaderOnly>
       <DraggableWrapper
         dataProvider={
           Object {
@@ -35,12 +46,23 @@ exports[`Columns it renders the expected columns 1`] = `
     </styled.div>
   </styled.div>
   <styled.div
+    $ariaColumnIndex={3}
     key="event.category"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 3
+        </p>
+      </EuiScreenReaderOnly>
       <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
@@ -54,12 +76,23 @@ exports[`Columns it renders the expected columns 1`] = `
     </styled.div>
   </styled.div>
   <styled.div
+    $ariaColumnIndex={4}
     key="event.action"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 4
+        </p>
+      </EuiScreenReaderOnly>
       <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
@@ -73,12 +106,23 @@ exports[`Columns it renders the expected columns 1`] = `
     </styled.div>
   </styled.div>
   <styled.div
+    $ariaColumnIndex={5}
     key="host.name"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 5
+        </p>
+      </EuiScreenReaderOnly>
       <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
@@ -92,12 +136,23 @@ exports[`Columns it renders the expected columns 1`] = `
     </styled.div>
   </styled.div>
   <styled.div
+    $ariaColumnIndex={6}
     key="source.ip"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 6
+        </p>
+      </EuiScreenReaderOnly>
       <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
@@ -111,12 +166,23 @@ exports[`Columns it renders the expected columns 1`] = `
     </styled.div>
   </styled.div>
   <styled.div
+    $ariaColumnIndex={7}
     key="destination.ip"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 7
+        </p>
+      </EuiScreenReaderOnly>
       <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
@@ -130,12 +196,23 @@ exports[`Columns it renders the expected columns 1`] = `
     </styled.div>
   </styled.div>
   <styled.div
+    $ariaColumnIndex={8}
     key="user.name"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 8
+        </p>
+      </EuiScreenReaderOnly>
       <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"

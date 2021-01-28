@@ -15,9 +15,13 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   ElasticsearchClient,
+  RequestHandlerContext,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
 export { ActionTypeExecutorResult } from '../common';
+export { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
+export { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
+export { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './builtin_action_types/resilient/types';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
@@ -28,19 +32,22 @@ export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 
 export interface Services {
+  /**
+   * @deprecated Use `scopedClusterClient` instead.
+   */
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
   getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    actions?: {
-      getActionsClient: () => ActionsClient;
-      listTypes: ActionTypeRegistry['list'];
-    };
-  }
+export interface ActionsApiRequestHandlerContext {
+  getActionsClient: () => ActionsClient;
+  listTypes: ActionTypeRegistry['list'];
+}
+
+export interface ActionsRequestHandlerContext extends RequestHandlerContext {
+  actions: ActionsApiRequestHandlerContext;
 }
 
 export interface ActionsPlugin {
@@ -112,6 +119,7 @@ export interface ActionType<
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
   };
+  renderParameterTemplates?(params: Params, variables: Record<string, unknown>): Params;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
 

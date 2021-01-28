@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExceptionListClient } from '../../../lists/server';
 import { PluginStartContract as AlertsStartContract } from '../../../alerts/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ExternalCallback } from '../../../fleet/server';
 import { KibanaRequest, Logger, RequestHandlerContext } from '../../../../../src/core/server';
-import { NewPackagePolicy } from '../../../fleet/common/types/models';
+import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common/types/models';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
 import { ManifestManager } from './services/artifacts';
@@ -20,6 +21,8 @@ import { AppClientFactory } from '../client';
 import { createDetectionIndex } from '../lib/detection_engine/routes/index/create_index_route';
 import { createPrepackagedRules } from '../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
 import { buildFrameworkRequest } from '../lib/timeline/routes/utils/common';
+import { isEndpointPolicyValidForLicense } from '../../common/license/policy_config';
+import { LicenseService } from '../../common/license/license';
 
 const getManifest = async (logger: Logger, manifestManager: ManifestManager): Promise<Manifest> => {
   let manifest: Manifest | null = null;
@@ -74,7 +77,7 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
 };
 
 /**
- * Callback to handle creation of PackagePolicies in Ingest Manager
+ * Callback to handle creation of PackagePolicies in Fleet
  */
 export const getPackagePolicyCreateCallback = (
   logger: Logger,
@@ -82,7 +85,8 @@ export const getPackagePolicyCreateCallback = (
   appClientFactory: AppClientFactory,
   maxTimelineImportExportSize: number,
   securitySetup: SecurityPluginSetup,
-  alerts: AlertsStartContract
+  alerts: AlertsStartContract,
+  exceptionsClient: ExceptionListClient | undefined
 ): ExternalCallback[1] => {
   const handlePackagePolicyCreate = async (
     newPackagePolicy: NewPackagePolicy,
@@ -96,10 +100,15 @@ export const getPackagePolicyCreateCallback = (
 
     // prep for detection rules creation
     const appClient = appClientFactory.create(request);
+    // This callback is called by fleet plugin.
+    // It doesn't have access to SecuritySolutionRequestHandlerContext in runtime.
+    // Muting the error to have green CI.
+    // @ts-expect-error
     const frameworkRequest = await buildFrameworkRequest(context, securitySetup, request);
 
     // Create detection index & rules (if necessary). move past any failure, this is just a convenience
     try {
+      // @ts-expect-error
       await createDetectionIndex(context, appClient);
     } catch (err) {
       if (err.statusCode !== 409) {
@@ -113,11 +122,13 @@ export const getPackagePolicyCreateCallback = (
       // this checks to make sure index exists first, safe to try in case of failure above
       // may be able to recover from minor errors
       await createPrepackagedRules(
+        // @ts-expect-error
         context,
         appClient,
         alerts.getAlertsClientWithRequest(request),
         frameworkRequest,
-        maxTimelineImportExportSize
+        maxTimelineImportExportSize,
+        exceptionsClient
       );
     } catch (err) {
       logger.error(
@@ -163,4 +174,33 @@ export const getPackagePolicyCreateCallback = (
   };
 
   return handlePackagePolicyCreate;
+};
+
+export const getPackagePolicyUpdateCallback = (
+  logger: Logger,
+  licenseService: LicenseService
+): ExternalCallback[1] => {
+  const handlePackagePolicyUpdate = async (
+    newPackagePolicy: NewPackagePolicy,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<UpdatePackagePolicy> => {
+    if (newPackagePolicy.package?.name !== 'endpoint') {
+      return newPackagePolicy;
+    }
+
+    if (
+      !isEndpointPolicyValidForLicense(
+        newPackagePolicy.inputs[0].config?.policy?.value,
+        licenseService.getLicenseInformation()
+      )
+    ) {
+      logger.warn('Incorrect license tier for paid policy fields');
+      const licenseError: Error & { statusCode?: number } = new Error('Requires Platinum license');
+      licenseError.statusCode = 403;
+      throw licenseError;
+    }
+    return newPackagePolicy;
+  };
+  return handlePackagePolicyUpdate;
 };

@@ -7,8 +7,8 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   KibanaRequest,
   LoggerFactory,
-  ILegacyClusterClient,
   IBasePath,
+  IClusterClient,
 } from '../../../../../src/core/server';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -68,13 +68,13 @@ export interface ProviderLoginAttempt {
 export interface AuthenticatorOptions {
   legacyAuditLogger: SecurityAuditLogger;
   audit: AuditServiceSetup;
-  getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
+  featureUsageService: SecurityFeatureUsageServiceStart;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   config: Pick<ConfigType, 'authc'>;
   basePath: IBasePath;
   license: SecurityLicense;
   loggers: LoggerFactory;
-  clusterClient: ILegacyClusterClient;
+  clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
 }
 
@@ -201,7 +201,7 @@ export class Authenticator {
       client: this.options.clusterClient,
       basePath: this.options.basePath,
       tokens: new Tokens({
-        client: this.options.clusterClient,
+        client: this.options.clusterClient.asInternalUser,
         logger: this.options.loggers.get('tokens'),
       }),
     };
@@ -422,14 +422,6 @@ export class Authenticator {
   }
 
   /**
-   * Checks whether specified provider type is currently enabled.
-   * @param providerType Type of the provider (`basic`, `saml`, `pki` etc.).
-   */
-  isProviderTypeEnabled(providerType: string) {
-    return [...this.providers.values()].some((provider) => provider.type === providerType);
-  }
-
-  /**
    * Acknowledges access agreement on behalf of the currently authenticated user.
    * @param request Request instance.
    */
@@ -456,7 +448,7 @@ export class Authenticator {
       existingSessionValue.provider
     );
 
-    this.options.getFeatureUsageService().recordPreAccessAgreementUsage();
+    this.options.featureUsageService.recordPreAccessAgreementUsage();
   }
 
   /**

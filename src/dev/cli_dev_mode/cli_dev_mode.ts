@@ -1,27 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/dev-utils';
 import * as Rx from 'rxjs';
-import { mapTo, filter, take } from 'rxjs/operators';
+import { mapTo, filter, take, tap, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 import { CliArgs } from '../../core/server/config';
 import { LegacyConfig } from '../../core/server/legacy';
@@ -142,6 +131,15 @@ export class CliDevMode {
             ]
           : []),
       ],
+      mapLogLine: (line) => {
+        if (!this.basePathProxy) {
+          return line;
+        }
+
+        return line
+          .split(`${this.basePathProxy.host}:${this.basePathProxy.targetPort}`)
+          .join(`${this.basePathProxy.host}:${this.basePathProxy.port}`);
+      },
     });
 
     this.optimizer = new Optimizer({
@@ -168,10 +166,41 @@ export class CliDevMode {
     this.subscription = new Rx.Subscription();
 
     if (basePathProxy) {
-      const delay$ = firstAllTrue(this.devServer.isReady$(), this.optimizer.isReady$());
+      const serverReady$ = new Rx.BehaviorSubject(false);
+      const optimizerReady$ = new Rx.BehaviorSubject(false);
+      const userWaiting$ = new Rx.BehaviorSubject(false);
+
+      this.subscription.add(
+        Rx.merge(
+          this.devServer.isReady$().pipe(tap(serverReady$)),
+          this.optimizer.isReady$().pipe(tap(optimizerReady$)),
+          userWaiting$.pipe(
+            distinctUntilChanged(),
+            switchMap((waiting) =>
+              !waiting
+                ? Rx.EMPTY
+                : Rx.timer(1000).pipe(
+                    tap(() => {
+                      this.log.warn(
+                        'please hold',
+                        !optimizerReady$.getValue()
+                          ? 'optimizer is still bundling so requests have been paused'
+                          : 'server is not ready so requests have been paused'
+                      );
+                    })
+                  )
+            )
+          )
+        ).subscribe(this.observer('readiness checks'))
+      );
 
       basePathProxy.start({
-        delayUntil: () => delay$,
+        delayUntil: () => {
+          userWaiting$.next(true);
+          return firstAllTrue(serverReady$, optimizerReady$).pipe(
+            tap(() => userWaiting$.next(false))
+          );
+        },
         shouldRedirectFromOldBasePath,
       });
 

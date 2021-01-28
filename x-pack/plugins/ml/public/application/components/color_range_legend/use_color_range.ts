@@ -187,6 +187,8 @@ export const useColorRange = (
   return scaleTypes[colorRangeScale];
 };
 
+export type EuiThemeType = typeof euiThemeLight | typeof euiThemeDark;
+
 export function useCurrentEuiTheme() {
   const uiSettings = useUiSettings();
   return useMemo(

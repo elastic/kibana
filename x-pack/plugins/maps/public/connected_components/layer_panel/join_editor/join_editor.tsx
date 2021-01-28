@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import _ from 'lodash';
 import uuid from 'uuid/v4';
 
 import {
@@ -24,7 +25,7 @@ import { ILayer } from '../../../classes/layers/layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
 import { IField } from '../../../classes/fields/field';
 
-interface Props {
+export interface Props {
   joins: JoinDescriptor[];
   layer: ILayer;
   layerDisplayName: string;

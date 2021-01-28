@@ -8,15 +8,14 @@ import { errors } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import {
   Headers,
-  IRouter,
   kibanaResponseFactory,
   RequestHandler,
-  RequestHandlerContext,
   RouteConfig,
 } from '../../../../../../src/core/server';
-import { Authentication, AuthenticationResult } from '../../authentication';
+import { AuthenticationResult, AuthenticationServiceStart } from '../../authentication';
 import { Session } from '../../session_management';
 import { defineChangeUserPasswordRoutes } from './change_password';
 
@@ -24,14 +23,15 @@ import { coreMock, httpServerMock } from '../../../../../../src/core/server/mock
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { sessionMock } from '../../session_management/session.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 
 describe('Change password', () => {
-  let router: jest.Mocked<IRouter>;
-  let authc: jest.Mocked<Authentication>;
+  let router: jest.Mocked<SecurityRouter>;
+  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
-  let routeHandler: RequestHandler<any, any, any>;
+  let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
   let routeConfig: RouteConfig<any, any, any, any>;
-  let mockContext: DeeplyMockedKeys<RequestHandlerContext>;
+  let mockContext: DeeplyMockedKeys<SecurityRequestHandlerContext>;
 
   function checkPasswordChangeAPICall(username: string, headers?: Headers) {
     expect(
@@ -48,8 +48,12 @@ describe('Change password', () => {
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
-    authc = routeParamsMock.authc;
-    session = routeParamsMock.session;
+
+    session = sessionMock.create();
+    routeParamsMock.getSession.mockReturnValue(session);
+
+    authc = authenticationServiceMock.createStart();
+    routeParamsMock.getAuthenticationService.mockReturnValue(authc);
 
     authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser(mockAuthenticatedUser()));
     authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
@@ -102,6 +106,7 @@ describe('Change password', () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       params: { username },
       body: { password: 'old-password', newPassword: 'new-password' },
+      headers: { 'some-custom-header': 'foo' }, // the test cases below assert that this custom request header is NOT included in the ES API calls
     });
 
     it('returns 403 if old password is wrong.', async () => {
@@ -118,7 +123,6 @@ describe('Change password', () => {
       expect(response.payload).toEqual(changePasswordFailure);
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
@@ -140,7 +144,6 @@ describe('Change password', () => {
       expect(response.payload).toEqual(loginFailureReason);
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
@@ -157,7 +160,6 @@ describe('Change password', () => {
       expect(response.payload).toEqual(failureReason);
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
@@ -169,7 +171,6 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 
@@ -197,7 +198,6 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 
@@ -216,7 +216,6 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 

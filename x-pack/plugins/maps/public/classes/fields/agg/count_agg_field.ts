@@ -14,9 +14,9 @@ import { IESAggField, CountAggFieldParams } from './agg_field_types';
 
 // Agg without field. Essentially a count-aggregation.
 export class CountAggField implements IESAggField {
-  private readonly _source: IESAggSource;
+  protected readonly _source: IESAggSource;
   private readonly _origin: FIELD_ORIGIN;
-  private readonly _label?: string;
+  protected readonly _label?: string;
   private readonly _canReadFromGeoJson: boolean;
 
   constructor({ label, source, origin, canReadFromGeoJson = true }: CountAggFieldParams) {
@@ -47,9 +47,7 @@ export class CountAggField implements IESAggField {
   }
 
   async getLabel(): Promise<string> {
-    return this._label
-      ? this._label
-      : this._source.getAggLabel(this._getAggType(), this.getRootName());
+    return this._label ? this._label : this._source.getAggLabel(AGG_TYPE.COUNT, '');
   }
 
   isValid(): boolean {
@@ -82,7 +80,11 @@ export class CountAggField implements IESAggField {
     return false;
   }
 
-  async getOrdinalFieldMetaRequest(): Promise<unknown> {
+  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
+    return null;
+  }
+
+  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
     return null;
   }
 

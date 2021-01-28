@@ -38,7 +38,7 @@ const StatusActionButtonComponent: React.FC<Props> = ({
 
   return (
     <EuiButton
-      data-test-subj={'case-view-status-action-button'}
+      data-test-subj="case-view-status-action-button"
       iconType={statuses[caseStatuses[nextStatusIndex]].button.icon}
       isDisabled={disabled}
       isLoading={isLoading}

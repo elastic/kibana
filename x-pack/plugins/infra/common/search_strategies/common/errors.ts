@@ -6,12 +6,22 @@
 
 import * as rt from 'io-ts';
 
-const genericErrorRT = rt.type({
+const abortedRequestSearchStrategyErrorRT = rt.type({
+  type: rt.literal('aborted'),
+});
+
+export type AbortedRequestSearchStrategyError = rt.TypeOf<
+  typeof abortedRequestSearchStrategyErrorRT
+>;
+
+const genericSearchStrategyErrorRT = rt.type({
   type: rt.literal('generic'),
   message: rt.string,
 });
 
-const shardFailureErrorRT = rt.type({
+export type GenericSearchStrategyError = rt.TypeOf<typeof genericSearchStrategyErrorRT>;
+
+const shardFailureSearchStrategyErrorRT = rt.type({
   type: rt.literal('shardFailure'),
   shardInfo: rt.type({
     shard: rt.number,
@@ -21,6 +31,12 @@ const shardFailureErrorRT = rt.type({
   message: rt.string,
 });
 
-export const searchStrategyErrorRT = rt.union([genericErrorRT, shardFailureErrorRT]);
+export type ShardFailureSearchStrategyError = rt.TypeOf<typeof shardFailureSearchStrategyErrorRT>;
+
+export const searchStrategyErrorRT = rt.union([
+  abortedRequestSearchStrategyErrorRT,
+  genericSearchStrategyErrorRT,
+  shardFailureSearchStrategyErrorRT,
+]);
 
 export type SearchStrategyError = rt.TypeOf<typeof searchStrategyErrorRT>;

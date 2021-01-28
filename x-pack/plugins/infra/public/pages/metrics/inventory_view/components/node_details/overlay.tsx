@@ -8,7 +8,9 @@ import { EuiPortal, EuiTabs, EuiTab, EuiPanel, EuiTitle, EuiSpacer } from '@elas
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../observability/public';
+import { EuiOutsideClickDetector } from '@elastic/eui';
+import { EuiIcon, EuiButtonIcon } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { MetricsTab } from './tabs/metrics/metrics';
@@ -19,6 +21,7 @@ import { OVERLAY_Y_START, OVERLAY_BOTTOM_MARGIN } from './tabs/shared';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
 import { getNodeDetailUrl } from '../../../../link_to';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
+import { createUptimeLink } from '../../lib/create_uptime_link';
 
 interface Props {
   isOpen: boolean;
@@ -27,6 +30,7 @@ interface Props {
   currentTime: number;
   node: InfraWaffleMapNode;
   nodeType: InventoryItemType;
+  openAlertFlyout(): void;
 }
 export const NodeContextPopover = ({
   isOpen,
@@ -35,6 +39,7 @@ export const NodeContextPopover = ({
   currentTime,
   options,
   onClose,
+  openAlertFlyout,
 }: Props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab];
@@ -63,6 +68,15 @@ export const NodeContextPopover = ({
       to: currentTime,
     }),
   });
+  const apmField = nodeType === 'host' ? 'host.hostname' : inventoryModel.fields.id;
+  const apmTracesMenuItemLinkProps = useLinkProps({
+    app: 'apm',
+    hash: 'traces',
+    search: {
+      kuery: `${apmField}:"${node.id}"`,
+    },
+  });
+  const uptimeMenuItemLinkProps = useLinkProps(createUptimeLink(options, nodeType, node));
 
   if (!isOpen) {
     return null;
@@ -70,52 +84,81 @@ export const NodeContextPopover = ({
 
   return (
     <EuiPortal>
-      <OverlayPanel>
-        <OverlayHeader>
-          <EuiFlexGroup responsive={false} gutterSize="m">
-            <EuiFlexItem grow={true}>
-              <EuiTitle size="xs">
-                <h4>{node.name}</h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="m" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconSide={'left'}
-                    iconType={'popout'}
-                    href={nodeDetailMenuItemLinkProps.href}
-                    flush="both"
-                  >
-                    <FormattedMessage
-                      id="xpack.infra.infra.nodeDetails.openAsPage"
-                      defaultMessage="Open as page"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty size="xs" onClick={onClose} iconType="cross" flush="both">
-                    <FormattedMessage
-                      id="xpack.infra.infra.nodeDetails.close"
-                      defaultMessage="Close"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiTabs size="s">
-            {tabs.map((tab, i) => (
-              <EuiTab key={tab.id} isSelected={i === selectedTab} onClick={() => setSelectedTab(i)}>
-                {tab.name}
+      <EuiOutsideClickDetector onOutsideClick={onClose}>
+        <OverlayPanel>
+          <OverlayHeader>
+            <EuiFlexGroup responsive={false} gutterSize="m">
+              <EuiFlexItem grow={true}>
+                <EuiTitle size="xs">
+                  <h4>{node.name}</h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      onClick={openAlertFlyout}
+                      size="xs"
+                      iconSide={'left'}
+                      flush="both"
+                      iconType="bell"
+                    >
+                      <FormattedMessage
+                        id="xpack.infra.infra.nodeDetails.createAlertLink"
+                        defaultMessage="Create alert"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      iconSide={'left'}
+                      iconType={'popout'}
+                      href={nodeDetailMenuItemLinkProps.href}
+                      flush="both"
+                    >
+                      <FormattedMessage
+                        id="xpack.infra.infra.nodeDetails.openAsPage"
+                        defaultMessage="Open as page"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon size="s" onClick={onClose} iconType="cross" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiTabs size="s">
+              {tabs.map((tab, i) => (
+                <EuiTab
+                  key={tab.id}
+                  isSelected={i === selectedTab}
+                  onClick={() => setSelectedTab(i)}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+              <EuiTab {...apmTracesMenuItemLinkProps}>
+                <EuiIcon type="popout" />{' '}
+                <FormattedMessage
+                  id="xpack.infra.infra.nodeDetails.apmTabLabel"
+                  defaultMessage="APM"
+                />
               </EuiTab>
-            ))}
-          </EuiTabs>
-        </OverlayHeader>
-        {tabs[selectedTab].content}
-      </OverlayPanel>
+              <EuiTab {...uptimeMenuItemLinkProps}>
+                <EuiIcon type="popout" />{' '}
+                <FormattedMessage
+                  id="xpack.infra.infra.nodeDetails.updtimeTabLabel"
+                  defaultMessage="Uptime"
+                />
+              </EuiTab>
+            </EuiTabs>
+          </OverlayHeader>
+          {tabs[selectedTab].content}
+        </OverlayPanel>
+      </EuiOutsideClickDetector>
     </EuiPortal>
   );
 };

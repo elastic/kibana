@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertTypeParams } from '../../../../alerts/common';
 import { Query } from '../../../../../../src/plugins/data/common';
 
 export enum TrackingEvent {
@@ -12,7 +13,7 @@ export enum TrackingEvent {
   crossed = 'crossed',
 }
 
-export interface GeoThresholdAlertParams {
+export interface GeoThresholdAlertParams extends AlertTypeParams {
   index: string;
   indexId: string;
   geoField: string;

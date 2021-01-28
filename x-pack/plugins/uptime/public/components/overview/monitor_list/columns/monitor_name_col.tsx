@@ -17,7 +17,7 @@ interface Props {
   summary: MonitorSummary;
 }
 
-const parseCurrentFilters = (filters: string) => {
+export const parseCurrentFilters = (filters: string) => {
   let parsedFilters: Map<string, string[]>;
   try {
     parsedFilters = new Map<string, string[]>(JSON.parse(filters));
@@ -35,7 +35,7 @@ const MONITOR_TYPES: Record<string, string> = {
 };
 
 export const MonitorNameColumn = ({ summary }: Props) => {
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
+  const params = useGetUrlParams();
 
   const linkParameters = stringifyUrlParams(params, true);
 

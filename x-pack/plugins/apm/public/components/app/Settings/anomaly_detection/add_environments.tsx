@@ -71,8 +71,7 @@ export function AddEnvironments({
     );
   }
 
-  const isLoading =
-    status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
+  const isLoading = status === FETCH_STATUS.LOADING;
   return (
     <EuiPanel>
       <EuiTitle>

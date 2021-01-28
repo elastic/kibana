@@ -7,13 +7,13 @@
 import React, { memo, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
 import { UseField, useFormData, FieldHook } from '../../../shared_imports';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { ConnectorSelector } from '../connector_selector/form';
 import { SettingFieldsForm } from '../settings/fields_form';
 import { ActionConnector } from '../../containers/types';
 import { getConnectorById } from '../configure_cases/utils';
+import { FormProps } from './schema';
 
 interface Props {
   isLoading: boolean;
@@ -21,7 +21,7 @@ interface Props {
 
 interface SettingsFieldProps {
   connectors: ActionConnector[];
-  field: FieldHook<ConnectorTypeFields['fields']>;
+  field: FieldHook<FormProps['fields']>;
   isEdit: boolean;
 }
 
