@@ -1,4 +1,4 @@
-[[vega]]
+[[create-panels-with-vega]]
 === Vega
 
 *Vega* and *Vega-Lite* are both grammars for creating custom visualizations.
