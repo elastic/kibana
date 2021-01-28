@@ -126,6 +126,7 @@ const variableDescriptions: Record<string, undefined | VariableDescription> = {
 };
 
 const kind = monaco.languages.CompletionItemKind.Variable;
+const sortPrefix = '2.';
 
 const getPanelVariableList = (values: PanelValues): UrlTemplateEditorVariable[] => {
   const variables: UrlTemplateEditorVariable[] = [];
@@ -133,17 +134,20 @@ const getPanelVariableList = (values: PanelValues): UrlTemplateEditorVariable[] 
 
   for (const key of keys) {
     const description = variableDescriptions[key];
+    const label = 'context.panel.' + key;
 
     if (!description) {
       variables.push({
-        label: 'context.panel.' + key,
+        label,
+        sortText: sortPrefix + label,
         kind,
       });
       continue;
     }
 
     variables.push({
-      label: 'context.panel.' + key,
+      label,
+      sortText: sortPrefix + label,
       title: description.title,
       documentation: description.documentation,
       kind,

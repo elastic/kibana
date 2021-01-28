@@ -23,6 +23,7 @@ export interface UrlTemplateEditorVariable {
   title?: string;
   documentation?: string;
   kind?: monaco.languages.CompletionItemKind;
+  sortText?: string;
 }
 export interface UrlTemplateEditorProps {
   initialValue: string;
@@ -59,6 +60,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
               title = '',
               documentation = '',
               kind = monaco.languages.CompletionItemKind.Variable,
+              sortText,
             }) => ({
               kind,
               label,
@@ -66,7 +68,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
               detail: title,
               documentation,
               range,
-              sortText: label,
+              sortText,
             })
           ),
         };

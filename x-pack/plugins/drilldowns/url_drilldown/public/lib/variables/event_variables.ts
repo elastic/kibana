@@ -144,10 +144,12 @@ export const getEventScopeValues = (eventScopeInput: EventScopeInput): UrlDrilld
 };
 
 const kind = monaco.languages.CompletionItemKind.Event;
+const sortPrefix = '1.';
 
 const valueClickVariables: readonly UrlTemplateEditorVariable[] = [
   {
     label: 'event.value',
+    sortText: sortPrefix + 'event.value',
     title: i18n.translate('xpack.urlDrilldown.click.event.value.title', {
       defaultMessage: 'Click value.',
     }),
@@ -158,6 +160,7 @@ const valueClickVariables: readonly UrlTemplateEditorVariable[] = [
   },
   {
     label: 'event.key',
+    sortText: sortPrefix + 'event.key',
     title: i18n.translate('xpack.urlDrilldown.click.event.value.title', {
       defaultMessage: 'Name of clicked field.',
     }),
@@ -168,6 +171,7 @@ const valueClickVariables: readonly UrlTemplateEditorVariable[] = [
   },
   {
     label: 'event.negate',
+    sortText: sortPrefix + 'event.negate',
     title: i18n.translate('xpack.urlDrilldown.click.event.negate.title', {
       defaultMessage: 'Whether the filter is negated.',
     }),
@@ -178,6 +182,7 @@ const valueClickVariables: readonly UrlTemplateEditorVariable[] = [
   },
   {
     label: 'event.points',
+    sortText: sortPrefix + 'event.points',
     title: i18n.translate('xpack.urlDrilldown.click.event.points.title', {
       defaultMessage: 'List of all clicked points.',
     }),
@@ -192,6 +197,7 @@ const valueClickVariables: readonly UrlTemplateEditorVariable[] = [
 const rowClickVariables: readonly UrlTemplateEditorVariable[] = [
   {
     label: 'event.values',
+    sortText: sortPrefix + 'event.values',
     title: i18n.translate('xpack.urlDrilldown.row.event.values.title', {
       defaultMessage: 'List of row cell values.',
     }),
@@ -202,6 +208,7 @@ const rowClickVariables: readonly UrlTemplateEditorVariable[] = [
   },
   {
     label: 'event.keys',
+    sortText: sortPrefix + 'event.keys',
     title: i18n.translate('xpack.urlDrilldown.row.event.keys.title', {
       defaultMessage: 'List of row cell fields.',
     }),
@@ -212,6 +219,7 @@ const rowClickVariables: readonly UrlTemplateEditorVariable[] = [
   },
   {
     label: 'event.columnNames',
+    sortText: sortPrefix + 'event.columnNames',
     title: i18n.translate('xpack.urlDrilldown.row.event.columnNames.title', {
       defaultMessage: 'List of table column names.',
     }),
@@ -222,6 +230,7 @@ const rowClickVariables: readonly UrlTemplateEditorVariable[] = [
   },
   {
     label: 'event.rowIndex',
+    sortText: sortPrefix + 'event.rowIndex',
     title: i18n.translate('xpack.urlDrilldown.row.event.rowIndex.title', {
       defaultMessage: 'Clicked row index.',
     }),
@@ -235,6 +244,7 @@ const rowClickVariables: readonly UrlTemplateEditorVariable[] = [
 const selectRangeVariables: readonly UrlTemplateEditorVariable[] = [
   {
     label: 'event.key',
+    sortText: sortPrefix + 'event.key',
     title: i18n.translate('xpack.urlDrilldown.range.event.key.title', {
       defaultMessage: 'Name of aggregation field.',
     }),
@@ -245,6 +255,7 @@ const selectRangeVariables: readonly UrlTemplateEditorVariable[] = [
   },
   {
     label: 'event.from',
+    sortText: sortPrefix + 'event.from',
     title: i18n.translate('xpack.urlDrilldown.range.event.from.title', {
       defaultMessage: 'Range start value.',
     }),
@@ -256,6 +267,7 @@ const selectRangeVariables: readonly UrlTemplateEditorVariable[] = [
   },
   {
     label: 'event.to',
+    sortText: sortPrefix + 'event.to',
     title: i18n.translate('xpack.urlDrilldown.range.event.to.title', {
       defaultMessage: 'Range end value.',
     }),

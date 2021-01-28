@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { monaco } from '@kbn/monaco';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { IExternalUrl } from 'src/core/public';
 import {
   ChartActionContext,
@@ -35,6 +33,7 @@ import {
 import { txtUrlDrilldownDisplayName } from './i18n';
 import { getEventVariableList, getEventScopeValues } from './variables/event_variables';
 import { getContextVariableList, getContextScopeValues } from './variables/context_variables';
+import { getGlobalVariableList } from './variables/global_variables';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;
@@ -182,19 +181,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
   ): UrlTemplateEditorVariable[] => {
     const eventVariables = getEventVariableList(context);
     const contextVariables = getContextVariableList(context);
-    const globalVariables: UrlTemplateEditorVariable[] = [
-      {
-        label: 'kibanaUrl',
-        title: i18n.translate('xpack.urlDrilldown.global.kibanaUrl.documentation.title', {
-          defaultMessage: 'Link to Kibana homepage.',
-        }),
-        documentation: i18n.translate('xpack.urlDrilldown.global.kibanaUrl.documentation', {
-          defaultMessage:
-            'Kibana base URL. Useful for creating URL drilldowns that navigate within Kibana.',
-        }),
-        kind: monaco.languages.CompletionItemKind.Constant,
-      },
-    ];
+    const globalVariables = getGlobalVariableList();
 
     return [...eventVariables, ...contextVariables, ...globalVariables];
   };
