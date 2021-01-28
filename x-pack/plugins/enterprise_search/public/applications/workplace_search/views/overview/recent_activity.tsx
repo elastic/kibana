@@ -16,6 +16,7 @@ import { ContentSection } from '../../components/shared/content_section';
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { SOURCE_DETAILS_PATH, getContentSourcePath } from '../../routes';
+import { RECENT_ACTIVITY_TITLE } from '../../constants';
 
 import { AppLogic } from '../../app_logic';
 import { OverviewLogic } from './overview_logic';
@@ -38,15 +39,7 @@ export const RecentActivity: React.FC = () => {
   const { activityFeed } = useValues(OverviewLogic);
 
   return (
-    <ContentSection
-      title={
-        <FormattedMessage
-          id="xpack.enterpriseSearch.workplaceSearch.recentActivity.title"
-          defaultMessage="Recent activity"
-        />
-      }
-      headerSpacer="m"
-    >
+    <ContentSection title={RECENT_ACTIVITY_TITLE} headerSpacer="m">
       <EuiPanel>
         {activityFeed.length > 0 ? (
           <>
