@@ -16,13 +16,13 @@ import {
 } from './components';
 import { ProcessorsEditor, GlobalOnFailureProcessorsEditor } from './editors';
 
-import './pipeline_processors_editor.scss';
+import './pipeline_editor.scss';
 
 interface Props {
   onLoadJson: OnDoneLoadJsonHandler;
 }
 
-export const PipelineProcessorsEditor: React.FunctionComponent<Props> = ({ onLoadJson }) => {
+export const PipelineEditor: React.FunctionComponent<Props> = ({ onLoadJson }) => {
   const {
     state: { processors: allProcessors },
   } = usePipelineProcessorsContext();
@@ -52,12 +52,12 @@ export const PipelineProcessorsEditor: React.FunctionComponent<Props> = ({ onLoa
   }
 
   return (
-    <div className="pipelineProcessorsEditor">
+    <div className="pipelineEditor">
       <EuiFlexGroup gutterSize="m" responsive={false} direction="column">
         <EuiFlexItem grow={false}>
           <ProcessorsHeader onLoadJson={onLoadJson} hasProcessors={processors.length > 0} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false} className="pipelineProcessorsEditor__container">
+        <EuiFlexItem grow={false} className="pipelineEditor__container">
           {content}
         </EuiFlexItem>
       </EuiFlexGroup>
