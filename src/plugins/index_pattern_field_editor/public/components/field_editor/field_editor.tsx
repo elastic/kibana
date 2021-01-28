@@ -5,7 +5,7 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -17,6 +17,7 @@ import { getNameFieldConfig } from './lib';
 import { ShadowingFieldWarning } from './shadowing_field_warning';
 import { TypeField } from './form_fields';
 import { FormRow } from './form_row';
+import { AdvancedParametersSection } from './advanced_parameters_section';
 
 export interface FieldEditorFormState {
   isValid: boolean | undefined;
@@ -59,7 +60,7 @@ export interface Props {
   };
 }
 
-const geti18nTexts = (isAdvancedSettingsVisible: boolean) => ({
+const geti18nTexts = () => ({
   customLabel: {
     title: i18n.translate('indexPatternFieldEditor.editor.form.customLabelTitle', {
       defaultMessage: 'Set custom label',
@@ -84,13 +85,6 @@ const geti18nTexts = (isAdvancedSettingsVisible: boolean) => ({
       defaultMessage: `Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working.`,
     }),
   },
-  advancedSettingsButtonLabel: isAdvancedSettingsVisible
-    ? i18n.translate('indexPatternFieldEditor.editor.form.advancedSettings.hideButtonLabel', {
-        defaultMessage: 'Hide advanced settings',
-      })
-    : i18n.translate('indexPatternFieldEditor.editor.form.advancedSettings.showButtonLabel', {
-        defaultMessage: 'Show advanced settings',
-      }),
 });
 
 const formDeserializer = (field: Field): FieldFormInternal => {
@@ -114,7 +108,6 @@ const FieldEditorComponent = ({
   onChange,
   ctx: { namesNotAllowed, existingConcreteFields = [] } = {},
 }: Props) => {
-  const [isAdvancedSettingsVisible, setIsAdvancedSettingsVisible] = useState(false);
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
     schema,
@@ -126,9 +119,7 @@ const FieldEditorComponent = ({
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const isShadowingField = existingConcreteFields.find((_field) => _field.name === name);
-  const i18nTexts = geti18nTexts(isAdvancedSettingsVisible);
-
-  // const toggleAdvancedSettings = () => setIsAdvancedSettingsVisible((prev) => !prev);
+  const i18nTexts = geti18nTexts();
 
   useEffect(() => {
     if (onChange) {
@@ -179,7 +170,6 @@ const FieldEditorComponent = ({
       >
         <div>Block custom label</div>
       </FormRow>
-      <EuiSpacer />
 
       {/* Set value */}
       <FormRow
@@ -189,7 +179,6 @@ const FieldEditorComponent = ({
       >
         <div>Block value (script)</div>
       </FormRow>
-      <EuiSpacer />
 
       {/* Set custom format */}
       <FormRow
@@ -199,6 +188,11 @@ const FieldEditorComponent = ({
       >
         <div>Block custom format</div>
       </FormRow>
+
+      {/* Advanced settings */}
+      <AdvancedParametersSection>
+        <div>Placeholder for advanced settings</div>
+      </AdvancedParametersSection>
     </Form>
   );
 };

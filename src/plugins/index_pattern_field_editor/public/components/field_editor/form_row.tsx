@@ -8,7 +8,14 @@
 
 import React from 'react';
 import { get } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiText,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { UseField, ToggleField, useFormData } from '../../shared_imports';
 
@@ -24,39 +31,47 @@ export const FormRow = ({ title, description, children, formFieldPath }: Props) 
   const isContentVisible = Boolean(get(formData, formFieldPath));
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <UseField<boolean>
-          path={formFieldPath}
-          component={ToggleField}
-          componentProps={{
-            euiFieldProps: {
-              label: title,
-              showLabel: false,
-              'data-test-subj': 'formRowToggle',
-            },
-          }}
-        />
-      </EuiFlexItem>
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <UseField
+            path={formFieldPath}
+            component={ToggleField}
+            componentProps={{
+              euiFieldProps: {
+                label: title,
+                showLabel: false,
+                'data-test-subj': 'formRowToggle',
+              },
+            }}
+          />
+        </EuiFlexItem>
 
-      <EuiFlexItem>
-        <div>
+        <EuiFlexItem>
           <div>
             {/* Title */}
             <EuiTitle size="xs">
               <h3>{title}</h3>
             </EuiTitle>
+            <EuiSpacer size="xs" />
 
             {/* Description */}
             <EuiText size="s" color="subdued">
               {description}
             </EuiText>
-          </div>
 
-          {/* Content */}
-          {isContentVisible && children}
-        </div>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            {/* Content */}
+            {isContentVisible && (
+              <>
+                <EuiSpacer size="l" />
+                {children}
+              </>
+            )}
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule />
+    </>
   );
 };
