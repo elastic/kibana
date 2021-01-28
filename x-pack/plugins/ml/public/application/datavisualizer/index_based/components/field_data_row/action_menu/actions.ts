@@ -20,8 +20,8 @@ export function getActions(
   const canUseLensEditor = lensPlugin.canUseEditor();
   return [
     {
-      name: i18n.translate('xpack.ml.dataVisualizer.indexBasedDataGrid.viewInLensTitle', {
-        defaultMessage: 'View in Lens',
+      name: i18n.translate('xpack.ml.dataVisualizer.indexBasedDataGrid.exploreInLensTitle', {
+        defaultMessage: 'Explore in Lens',
       }),
       description: i18n.translate(
         'xpack.ml.dataVisualizer.indexBasedDataGrid.viewInLensDescription',

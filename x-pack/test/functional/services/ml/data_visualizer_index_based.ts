@@ -12,7 +12,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['header', 'common', 'discover']);
+  const PageObjects = getPageObjects(['discover']);
   const queryBar = getService('queryBar');
 
   return {
@@ -162,6 +162,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     async clickViewInDiscoverButton() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.clickWhenNotDisabled('mlDataVisualizerViewInDiscoverCard');
+        await PageObjects.discover.waitForDiscoverAppOnScreen();
       });
     },
     async assertDiscoverPageQuery(expectedQueryString: string) {

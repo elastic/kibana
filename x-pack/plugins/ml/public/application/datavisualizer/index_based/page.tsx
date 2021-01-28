@@ -15,7 +15,6 @@ import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiPanel,
-  EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -698,14 +697,10 @@ export const Page: FC = () => {
     }
     const actionColumn: EuiTableActionsColumnType<FieldVisConfig> = {
       name: (
-        <EuiScreenReaderOnly>
-          <p>
-            <FormattedMessage
-              id="xpack.ml.dataVisualizer.indexBasedDataGrid.actionsColumnLabel"
-              defaultMessage="This column contains extra actions that can be performed on each field"
-            />
-          </p>
-        </EuiScreenReaderOnly>
+        <FormattedMessage
+          id="xpack.ml.dataVisualizer.indexBasedDataGrid.actionsColumnLabel"
+          defaultMessage="Actions"
+        />
       ),
       actions: getActions(currentIndexPattern, lensPlugin, { searchQueryLanguage, searchString }),
       width: '100px',

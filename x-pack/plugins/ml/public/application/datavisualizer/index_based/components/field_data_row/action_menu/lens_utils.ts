@@ -21,6 +21,39 @@ interface ColumnsAndLayer {
 }
 
 export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: IndexPattern) {
+  // if index has no timestamp field
+  if (defaultIndexPattern.timeFieldName === undefined) {
+    const columns: Record<string, IndexPatternColumn> = {
+      col1: {
+        label: item.fieldName!,
+        dataType: 'number',
+        isBucketed: true,
+        operationType: 'range',
+        params: {
+          type: 'histogram',
+          maxBars: 'auto',
+          ranges: [],
+        },
+        sourceField: item.fieldName!,
+      },
+      col2: {
+        label: 'Count',
+        dataType: 'number',
+        isBucketed: false,
+        sourceField: 'Records',
+        operationType: 'count',
+      },
+    };
+
+    const layer: LayerConfig = {
+      accessors: ['col2'],
+      layerId: 'layer1',
+      seriesType: 'bar',
+      xAccessor: 'col1',
+    };
+    return { columns, layer };
+  }
+
   const columns: Record<string, IndexPatternColumn> = {
     col2: {
       dataType: 'number',
@@ -32,13 +65,14 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
     col1: {
       dataType: 'date',
       isBucketed: true,
-      label: '@timestamp',
+      label: defaultIndexPattern.timeFieldName!,
       operationType: 'date_histogram',
       params: { interval: 'auto' },
       scale: 'interval',
       sourceField: defaultIndexPattern.timeFieldName!,
     },
   };
+
   const layer: LayerConfig = {
     accessors: ['col2'],
     layerId: 'layer1',
@@ -61,7 +95,7 @@ export function getDateSettings(item: FieldVisConfig, defaultIndexPattern: Index
     col1: {
       dataType: 'date',
       isBucketed: true,
-      label: '@timestamp',
+      label: defaultIndexPattern.timeFieldName!,
       operationType: 'date_histogram',
       params: { interval: 'auto' },
       scale: 'interval',
@@ -86,9 +120,41 @@ export function getKeywordSettings(item: FieldVisConfig) {
       isBucketed: true,
       operationType: 'terms',
       params: {
-        orderBy: { type: 'alphabetical' },
+        orderBy: { type: 'column', columnId: 'col2' },
         size: 10,
-        orderDirection: 'asc',
+        orderDirection: 'desc',
+      },
+      sourceField: item.fieldName!,
+    },
+    col2: {
+      label: 'Count',
+      dataType: 'number',
+      isBucketed: false,
+      sourceField: 'Records',
+      operationType: 'count',
+    },
+  };
+  const layer: LayerConfig = {
+    accessors: ['col2'],
+    layerId: 'layer1',
+    seriesType: 'bar',
+    xAccessor: 'col1',
+  };
+
+  return { columns, layer };
+}
+
+export function getBooleanSettings(item: FieldVisConfig) {
+  const columns: Record<string, IndexPatternColumn> = {
+    col1: {
+      label: 'Top value of category',
+      dataType: 'string',
+      isBucketed: true,
+      operationType: 'terms',
+      params: {
+        orderBy: { type: 'alphabetical' },
+        size: 2,
+        orderDirection: 'desc',
       },
       sourceField: item.fieldName!,
     },
@@ -125,6 +191,9 @@ export function getCompatibleLensDataType(type: FieldVisConfig['type']): DataTyp
     case ML_JOB_FIELD_TYPES.IP:
       lensType = 'ip';
       break;
+    case ML_JOB_FIELD_TYPES.BOOLEAN:
+      lensType = 'string';
+      break;
     default:
       lensType = undefined;
   }
@@ -146,6 +215,9 @@ function getColumnsAndLayer(
   }
   if (fieldType === ML_JOB_FIELD_TYPES.IP || fieldType === ML_JOB_FIELD_TYPES.KEYWORD) {
     return getKeywordSettings(item);
+  }
+  if (fieldType === ML_JOB_FIELD_TYPES.BOOLEAN) {
+    return getBooleanSettings(item);
   }
 }
 // Get formatted Lens visualization format depending on field type

@@ -322,7 +322,6 @@ export function MachineLearningDataVisualizerTableProvider(
     ) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
-      await this.assertViewInLensActionNotExists(fieldName);
 
       await this.ensureDetailsOpen(fieldName);
 
@@ -337,7 +336,6 @@ export function MachineLearningDataVisualizerTableProvider(
     ) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
-      await this.assertViewInLensActionNotExists(fieldName);
 
       await this.ensureDetailsOpen(fieldName);
 
@@ -351,7 +349,6 @@ export function MachineLearningDataVisualizerTableProvider(
     public async assertUnknownFieldContents(fieldName: string, docCountFormatted: string) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
-      await this.assertViewInLensActionNotExists(fieldName);
 
       await this.ensureDetailsOpen(fieldName);
 

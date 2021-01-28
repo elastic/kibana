@@ -174,8 +174,8 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
               )}
               title={
                 <FormattedMessage
-                  id="xpack.ml.datavisualizer.actionsPanel.viewIndexInDiscoverTitle"
-                  defaultMessage="View index in Discover"
+                  id="xpack.ml.datavisualizer.actionsPanel.discoverAppTitle"
+                  defaultMessage="Discover"
                 />
               }
               href={discoverLink}
