@@ -95,7 +95,9 @@ const FieldEditorFlyoutContentComponent = ({
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>{FieldEditor && <FieldEditor links={getLinks(docLinks)} />}</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        {FieldEditor && <FieldEditor links={getLinks(docLinks)} field={field} />}
+      </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         {FieldEditor && (
