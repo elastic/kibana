@@ -54,7 +54,7 @@ export function fileUploadRoutes(router: IRouter) {
         tags: ['access:ml:canFindFileStructure'],
       },
     },
-    async ({ context, request, response }) => {
+    async (context, request, response) => {
       try {
         const { id } = request.query;
         const { index, data, settings, mappings, ingestPipeline } = request.body;

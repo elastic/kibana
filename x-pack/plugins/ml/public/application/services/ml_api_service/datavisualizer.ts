@@ -45,7 +45,7 @@ export const fileDatavisualizer = {
     });
 
     return http<ImportResponse>({
-      path: `${basePath()}/file_data_visualizer/import`,
+      path: `/api/file_upload/import`,
       method: 'POST',
       query,
       body,
