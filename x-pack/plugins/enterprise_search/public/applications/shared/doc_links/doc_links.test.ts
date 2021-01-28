@@ -10,7 +10,7 @@ describe('DocLinksService#setDocLinks()', () => {
   it('adds links from docLinks', () => {
     const docLinks = {
       DOC_LINK_VERSION: '',
-      ELASTIC_WEBSITE_URL: 'https://elastic.co',
+      ELASTIC_WEBSITE_URL: 'https://elastic.co/',
       links: {
         enterpriseSearch: {
           base: 'http://elastic.enterprise.search',
@@ -22,13 +22,9 @@ describe('DocLinksService#setDocLinks()', () => {
 
     docLinksService.setDocLinks(docLinks as any);
 
-    expect(docLinksService.enterpriseSearchBase).toEqual(docLinks.links.enterpriseSearch.base);
-    expect(docLinksService.appSearchBase).toEqual(docLinks.links.enterpriseSearch.appSearchBase);
-    expect(docLinksService.workplaceSearchBase).toEqual(
-      docLinks.links.enterpriseSearch.workplaceSearchBase
-    );
-    expect(docLinksService.cloudBase).toEqual(
-      `${docLinks.ELASTIC_WEBSITE_URL}guide/en/cloud/current`
-    );
+    expect(docLinksService.enterpriseSearchBase).toEqual('http://elastic.enterprise.search');
+    expect(docLinksService.appSearchBase).toEqual('http://elastic.app.search');
+    expect(docLinksService.workplaceSearchBase).toEqual('http://elastic.workplace.search');
+    expect(docLinksService.cloudBase).toEqual('https://elastic.co/guide/en/cloud/current');
   });
 });
