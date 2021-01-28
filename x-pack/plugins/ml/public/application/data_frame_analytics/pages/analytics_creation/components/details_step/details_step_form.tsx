@@ -94,6 +94,32 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     }
   }, 400);
 
+  const debouncedJobIdCheck = debounce(async () => {
+    try {
+      const { results } = await ml.dataFrameAnalytics.jobsExists([jobId], true);
+      setFormState({ jobIdExists: results[jobId] });
+    } catch (e) {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.ml.dataframe.analytics.create.errorCheckingJobIdExists', {
+          defaultMessage: 'The following error occurred checking if job id exists: {error}',
+          values: { error: extractErrorMessage(e) },
+        })
+      );
+    }
+  }, 400);
+
+  useEffect(() => {
+    if (jobIdValid === true) {
+      debouncedJobIdCheck();
+    } else if (typeof jobId === 'string' && jobId.trim() === '' && jobIdExists === true) {
+      setFormState({ jobIdExists: false });
+    }
+
+    return () => {
+      debouncedJobIdCheck.cancel();
+    };
+  }, [jobId]);
+
   useEffect(() => {
     if (destinationIndexNameValid === true) {
       debouncedIndexCheck();
