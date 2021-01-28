@@ -20,12 +20,19 @@ interface DisableWatchesResponse {
   >;
 }
 
-async function callMigrationApi(callCluster: LegacyAPICaller) {
-  return await callCluster('monitoring.disableWatches');
+async function callMigrationApi(callCluster: LegacyAPICaller, logger: Logger) {
+  try {
+    return await callCluster('monitoring.disableWatches');
+  } catch (err) {
+    logger.warn(
+      `Unable to call migration api to disable cluster alert watches. Message=${err.message}`
+    );
+    return undefined;
+  }
 }
 
 export async function disableWatcherClusterAlerts(callCluster: LegacyAPICaller, logger: Logger) {
-  const response: DisableWatchesResponse = await callMigrationApi(callCluster);
+  const response: DisableWatchesResponse = await callMigrationApi(callCluster, logger);
   if (!response || response.exporters.length === 0) {
     return true;
   }
