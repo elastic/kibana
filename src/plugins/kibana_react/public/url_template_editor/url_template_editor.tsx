@@ -18,20 +18,32 @@ monaco.languages.register({
 monaco.languages.setMonarchTokensProvider(LANG, language);
 monaco.languages.setLanguageConfiguration(LANG, conf);
 
+export interface Variable {
+  label: string;
+  description?: string;
+  documentation?: string;
+}
 export interface UrlTemplateEditorProps {
   initialValue: string;
   height?: CodeEditorProps['height'];
+  variables?: Variable[];
   onChange: CodeEditorProps['onChange'];
 }
 
 export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   height = 200,
   initialValue,
+  variables,
   onChange,
 }) => {
   React.useEffect(() => {
+    if (!variables) {
+      return;
+    }
+
     const { dispose } = monaco.languages.registerCompletionItemProvider(LANG, {
-      provideCompletionItems(model, position) {
+      triggerCharacters: ['{'],
+      provideCompletionItems(model, position, context, token) {
         const word = model.getWordUntilPosition(position);
         const range = {
           startLineNumber: position.lineNumber,
@@ -40,22 +52,15 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
           endColumn: word.endColumn,
         };
         return {
-          suggestions: [
-            {
-              label: 'event.value',
-              kind: monaco.languages.CompletionItemKind.Variable,
-              documentation: 'Value of the click event',
-              insertText: '{{event.value}}',
-              range,
-            },
-            {
-              label: 'event.key',
-              kind: monaco.languages.CompletionItemKind.Variable,
-              documentation: 'Field name.',
-              insertText: '{{event.key}}',
-              range,
-            },
-          ],
+          suggestions: variables.map(({ label, description = '', documentation = '' }) => ({
+            kind: monaco.languages.CompletionItemKind.Variable,
+            label,
+            insertText: '{{' + label + '}}',
+            detail: description,
+            documentation,
+            range,
+            sortText: label,
+          })),
         };
       },
     });
@@ -63,7 +68,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
     return () => {
       dispose();
     };
-  }, []);
+  }, [variables]);
 
   return (
     <CodeEditor

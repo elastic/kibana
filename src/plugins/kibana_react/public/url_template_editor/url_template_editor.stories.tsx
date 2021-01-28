@@ -11,9 +11,32 @@ import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { UrlTemplateEditor } from './url_template_editor';
 
-storiesOf('UrlTemplateEditor', module).add('default', () => (
-  <UrlTemplateEditor
-    initialValue={'http://elastic.co/{{event.value}}'}
-    onChange={action('onChange')}
-  />
-));
+storiesOf('UrlTemplateEditor', module)
+  .add('default', () => (
+    <UrlTemplateEditor
+      initialValue={'http://elastic.co/{{event.value}}'}
+      onChange={action('onChange')}
+    />
+  ))
+  .add('with variables', () => (
+    <UrlTemplateEditor
+      initialValue={'http://elastic.co/{{event.value}}'}
+      variables={[
+        {
+          label: 'event.value',
+        },
+        {
+          label: 'event.key',
+          description: 'Field key.',
+          documentation:
+            'Field key is Elasticsearch document key as described in Elasticsearch index pattern.',
+        },
+        {
+          label: 'kibanaUrl',
+          description: 'Kibana deployment URL.',
+          documentation: 'Kibana URL is the link to homepage of Kibana deployment.',
+        },
+      ]}
+      onChange={action('onChange')}
+    />
+  ));
