@@ -14,7 +14,7 @@ const fileType = 'json';
 
 export async function indexData(parsedFile, transformDetails, indexName, dataType, appName) {
   if (!parsedFile) {
-    throw i18n.translate('xpack.mapsFileUpload.indexingService.noFileImported', {
+    throw i18n.translate('xpack.fileUpload.indexingService.noFileImported', {
       defaultMessage: 'No file imported.',
     });
   }
@@ -22,7 +22,7 @@ export async function indexData(parsedFile, transformDetails, indexName, dataTyp
   // Perform any processing required on file prior to indexing
   const transformResult = transformDataByFormatForIndexing(transformDetails, parsedFile, dataType);
   if (!transformResult.success) {
-    throw i18n.translate('xpack.mapsFileUpload.indexingService.transformResultError', {
+    throw i18n.translate('xpack.fileUpload.indexingService.transformResultError', {
       defaultMessage: 'Error transforming data: {error}',
       values: { error: transformResult.error },
     });
@@ -40,7 +40,7 @@ export async function indexData(parsedFile, transformDetails, indexName, dataTyp
   const id = createdIndex && createdIndex.id;
   try {
     if (!id) {
-      throw i18n.translate('xpack.mapsFileUpload.indexingService.errorCreatingIndex', {
+      throw i18n.translate('xpack.fileUpload.indexingService.errorCreatingIndex', {
         defaultMessage: 'Error creating index',
       });
     }
@@ -67,7 +67,7 @@ function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
   if (!transform) {
     return {
       success: false,
-      error: i18n.translate('xpack.mapsFileUpload.indexingService.noTransformDefined', {
+      error: i18n.translate('xpack.fileUpload.indexingService.noTransformDefined', {
         defaultMessage: 'No transform defined',
       }),
     };
@@ -80,7 +80,7 @@ function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
       default:
         return {
           success: false,
-          error: i18n.translate('xpack.mapsFileUpload.indexingService.noHandlingForTransform', {
+          error: i18n.translate('xpack.fileUpload.indexingService.noHandlingForTransform', {
             defaultMessage: 'No handling defined for transform: {transform}',
             values: { transform },
           }),
@@ -98,7 +98,7 @@ function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
   } else if (indexingDetails && indexingDetails.data) {
     return {
       success: false,
-      error: i18n.translate('xpack.mapsFileUpload.indexingService.noIndexingDetailsForDatatype', {
+      error: i18n.translate('xpack.fileUpload.indexingService.noIndexingDetailsForDatatype', {
         defaultMessage: `No indexing details defined for datatype: {dataType}`,
         values: { dataType },
       }),
@@ -106,7 +106,7 @@ function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
   } else {
     return {
       success: false,
-      error: i18n.translate('xpack.mapsFileUpload.indexingService.unknownTransformError', {
+      error: i18n.translate('xpack.fileUpload.indexingService.unknownTransformError', {
         defaultMessage: 'Unknown error performing transform: {transform}',
         values: { transform },
       }),
@@ -138,7 +138,7 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
   if (!index) {
     return {
       success: false,
-      error: i18n.translate('xpack.mapsFileUpload.noIndexSuppliedErrorMessage', {
+      error: i18n.translate('xpack.fileUpload.noIndexSuppliedErrorMessage', {
         defaultMessage: 'No index provided.',
       }),
     };

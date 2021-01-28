@@ -67,7 +67,7 @@ export class JsonIndexFilePicker extends Component {
         const humanReadableSize = bytesToSize(size);
         const humanReadableMaxSize = bytesToSize(MAX_FILE_SIZE);
         throw new Error(
-          i18n.translate('xpack.mapsFileUpload.jsonIndexFilePicker.acceptableFileSize', {
+          i18n.translate('xpack.fileUpload.jsonIndexFilePicker.acceptableFileSize', {
             defaultMessage: 'File size {fileSize} exceeds max file size of {maxFileSize}',
             values: {
               fileSize: humanReadableSize,
@@ -78,7 +78,7 @@ export class JsonIndexFilePicker extends Component {
       }
     } catch (error) {
       this.setState({
-        fileUploadError: i18n.translate('xpack.mapsFileUpload.jsonIndexFilePicker.fileSizeError', {
+        fileUploadError: i18n.translate('xpack.fileUpload.jsonIndexFilePicker.fileSizeError', {
           defaultMessage: 'File size error: {errorMessage}',
           values: {
             errorMessage: error.message,
@@ -95,7 +95,7 @@ export class JsonIndexFilePicker extends Component {
     try {
       if (!name) {
         throw new Error(
-          i18n.translate('xpack.mapsFileUpload.jsonIndexFilePicker.noFileNameError', {
+          i18n.translate('xpack.fileUpload.jsonIndexFilePicker.noFileNameError', {
             defaultMessage: 'No file name provided',
           })
         );
@@ -106,7 +106,7 @@ export class JsonIndexFilePicker extends Component {
       if (!ACCEPTABLE_FILETYPES.includes(fileType)) {
         //should only occur if browser does not accept the <File> accept parameter
         throw new Error(
-          i18n.translate('xpack.mapsFileUpload.jsonIndexFilePicker.acceptableTypesError', {
+          i18n.translate('xpack.fileUpload.jsonIndexFilePicker.acceptableTypesError', {
             defaultMessage: 'File is not one of acceptable types: {types}',
             values: {
               types: ACCEPTABLE_FILETYPES.join(', '),
@@ -119,7 +119,7 @@ export class JsonIndexFilePicker extends Component {
     } catch (error) {
       this.setState({
         fileUploadError: i18n.translate(
-          'xpack.mapsFileUpload.jsonIndexFilePicker.fileProcessingError',
+          'xpack.fileUpload.jsonIndexFilePicker.fileProcessingError',
           {
             defaultMessage: 'File processing error: {errorMessage}',
             values: {
@@ -173,7 +173,7 @@ export class JsonIndexFilePicker extends Component {
           featuresProcessed: 0,
           fileUploadError: (
             <FormattedMessage
-              id="xpack.mapsFileUpload.jsonIndexFilePicker.unableParseFile"
+              id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
               defaultMessage="Unable to parse file: {error}"
               values={{
                 error: err.message,
@@ -206,7 +206,7 @@ export class JsonIndexFilePicker extends Component {
       this.setState({
         fileUploadError: (
           <FormattedMessage
-            id="xpack.mapsFileUpload.jsonIndexFilePicker.fileParseError"
+            id="xpack.fileUpload.jsonIndexFilePicker.fileParseError"
             defaultMessage="File parse error(s) detected: {error}"
             values={{ error }}
           />
@@ -235,7 +235,7 @@ export class JsonIndexFilePicker extends Component {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.mapsFileUpload.jsonIndexFilePicker.filePickerLabel"
+              id="xpack.fileUpload.jsonIndexFilePicker.filePickerLabel"
               defaultMessage="Select a file to upload"
             />
           }
@@ -243,7 +243,7 @@ export class JsonIndexFilePicker extends Component {
           error={[fileUploadError]}
           helpText={
             percentageProcessed ? (
-              i18n.translate('xpack.mapsFileUpload.jsonIndexFilePicker.parsingFile', {
+              i18n.translate('xpack.fileUpload.jsonIndexFilePicker.parsingFile', {
                 defaultMessage: '{featuresProcessed} features parsed...',
                 values: {
                   featuresProcessed,
@@ -251,7 +251,7 @@ export class JsonIndexFilePicker extends Component {
               })
             ) : (
               <span>
-                {i18n.translate('xpack.mapsFileUpload.jsonIndexFilePicker.formatsAccepted', {
+                {i18n.translate('xpack.fileUpload.jsonIndexFilePicker.formatsAccepted', {
                   defaultMessage: 'Formats accepted: {acceptedFileTypeStringMessage}',
                   values: {
                     acceptedFileTypeStringMessage,
@@ -259,19 +259,16 @@ export class JsonIndexFilePicker extends Component {
                 })}{' '}
                 <br />
                 <FormattedMessage
-                  id="xpack.mapsFileUpload.jsonIndexFilePicker.maxSize"
+                  id="xpack.fileUpload.jsonIndexFilePicker.maxSize"
                   defaultMessage="Max size: {maxFileSize}"
                   values={{
                     maxFileSize: bytesToSize(MAX_FILE_SIZE),
                   }}
                 />
                 <br />
-                {i18n.translate(
-                  'xpack.mapsFileUpload.jsonIndexFilePicker.coordinateSystemAccepted',
-                  {
-                    defaultMessage: 'Coordinates must be in EPSG:4326 coordinate reference system.',
-                  }
-                )}{' '}
+                {i18n.translate('xpack.fileUpload.jsonIndexFilePicker.coordinateSystemAccepted', {
+                  defaultMessage: 'Coordinates must be in EPSG:4326 coordinate reference system.',
+                })}{' '}
               </span>
             )
           }
@@ -279,7 +276,7 @@ export class JsonIndexFilePicker extends Component {
           <EuiFilePicker
             initialPromptText={
               <FormattedMessage
-                id="xpack.mapsFileUpload.jsonIndexFilePicker.filePicker"
+                id="xpack.fileUpload.jsonIndexFilePicker.filePicker"
                 defaultMessage="Upload file"
               />
             }
