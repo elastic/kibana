@@ -8,6 +8,7 @@
 
 import type { Request } from '@hapi/hapi';
 import { Boom } from '@hapi/boom';
+import { loggerMock, MockedLogger } from '../../logging/logger.mock';
 import { getEcsResponseLog } from './get_response_log';
 
 jest.mock('./get_payload_size', () => ({
@@ -53,7 +54,10 @@ function createMockHapiRequest({
 }
 
 describe('getEcsResponseLog', () => {
+  let logger: MockedLogger;
+
   beforeEach(() => {
+    logger = loggerMock.create();
     jest.clearAllMocks();
   });
 
@@ -64,7 +68,7 @@ describe('getEcsResponseLog', () => {
         received: 1610660231000,
       },
     });
-    const result = getEcsResponseLog(req);
+    const result = getEcsResponseLog(req, logger);
     expect(result.message).toMatchInlineSnapshot(`"GET /path 200 1000ms - 1.2KB"`);
   });
 
@@ -76,7 +80,7 @@ describe('getEcsResponseLog', () => {
           received: 1610660231000,
         },
       });
-      const result = getEcsResponseLog(req);
+      const result = getEcsResponseLog(req, logger);
       expect(result.http.response.responseTime).toBe(1000);
     });
 
@@ -87,13 +91,13 @@ describe('getEcsResponseLog', () => {
           received: 1610660233000,
         },
       });
-      const result = getEcsResponseLog(req);
+      const result = getEcsResponseLog(req, logger);
       expect(result.http.response.responseTime).toBe(500);
     });
 
     test('excludes responseTime from message if none is provided', () => {
       const req = createMockHapiRequest();
-      const result = getEcsResponseLog(req);
+      const result = getEcsResponseLog(req, logger);
       expect(result.message).toMatchInlineSnapshot(`"GET /path 200 - 1.2KB"`);
       expect(result.http.response.responseTime).toBeUndefined();
     });
@@ -107,7 +111,7 @@ describe('getEcsResponseLog', () => {
           b: 'world',
         },
       });
-      const result = getEcsResponseLog(req);
+      const result = getEcsResponseLog(req, logger);
       expect(result.url.query).toMatchInlineSnapshot(`"a=hello&b=world"`);
       expect(result.message).toMatchInlineSnapshot(`"GET /path?a=hello&b=world 200 - 1.2KB"`);
     });
@@ -116,7 +120,7 @@ describe('getEcsResponseLog', () => {
       const req = createMockHapiRequest({
         query: { a: '¡hola!' },
       });
-      const result = getEcsResponseLog(req);
+      const result = getEcsResponseLog(req, logger);
       expect(result.url.query).toMatchInlineSnapshot(`"a=%C2%A1hola!"`);
       expect(result.message).toMatchInlineSnapshot(`"GET /path?a=%C2%A1hola! 200 - 1.2KB"`);
     });
@@ -125,14 +129,14 @@ describe('getEcsResponseLog', () => {
   test('calls getResponsePayloadBytes to calculate payload bytes', () => {
     const response = { headers: {}, source: '...' };
     const req = createMockHapiRequest({ response });
-    getEcsResponseLog(req);
-    expect(getResponsePayloadBytes).toHaveBeenCalledWith(response);
+    getEcsResponseLog(req, logger);
+    expect(getResponsePayloadBytes).toHaveBeenCalledWith(response, logger);
   });
 
   test('excludes payload bytes from message if unavailable', () => {
     (getResponsePayloadBytes as jest.Mock).mockReturnValueOnce(undefined);
     const req = createMockHapiRequest();
-    const result = getEcsResponseLog(req);
+    const result = getEcsResponseLog(req, logger);
     expect(result.message).toMatchInlineSnapshot(`"GET /path 200"`);
   });
 
@@ -140,7 +144,7 @@ describe('getEcsResponseLog', () => {
     const req = createMockHapiRequest({
       response: new Boom('oops'),
     });
-    const result = getEcsResponseLog(req);
+    const result = getEcsResponseLog(req, logger);
     expect(result.http.response.status_code).toBe(500);
   });
 
@@ -150,7 +154,7 @@ describe('getEcsResponseLog', () => {
         headers: { authorization: 'a', cookie: 'b', 'user-agent': 'hi' },
         response: { headers: { 'content-length': 123, 'set-cookie': 'c' } },
       });
-      const result = getEcsResponseLog(req);
+      const result = getEcsResponseLog(req, logger);
       expect(result.http.request.headers).toMatchInlineSnapshot(`
         Object {
           "authorization": "[REDACTED]",
@@ -171,7 +175,7 @@ describe('getEcsResponseLog', () => {
         headers: { Authorization: 'a', COOKIE: 'b', 'user-agent': 'hi' },
         response: { headers: { 'content-length': 123, 'Set-Cookie': 'c' } },
       });
-      const result = getEcsResponseLog(req);
+      const result = getEcsResponseLog(req, logger);
       expect(result.http.request.headers.Authorization).toBe('[REDACTED]');
       expect(result.http.request.headers.COOKIE).toBe('[REDACTED]');
       expect(result.http.response.headers['Set-Cookie']).toBe('[REDACTED]');
@@ -181,13 +185,13 @@ describe('getEcsResponseLog', () => {
   describe('ecs', () => {
     test('specifies correct ECS version', () => {
       const req = createMockHapiRequest();
-      const result = getEcsResponseLog(req);
+      const result = getEcsResponseLog(req, logger);
       expect(result.ecs.version).toBe('1.7.0');
     });
 
     test('provides an ECS-compatible response', () => {
       const req = createMockHapiRequest();
-      const result = getEcsResponseLog(req);
+      const result = getEcsResponseLog(req, logger);
       expect(result).toMatchInlineSnapshot(`
         Object {
           "client": Object {

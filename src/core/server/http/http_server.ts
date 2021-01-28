@@ -299,7 +299,7 @@ export class HttpServer {
     const log = this.logger.get('http', 'server', 'response');
 
     this.handleServerResponseEvent = (request) => {
-      const { message, ...meta } = getEcsResponseLog(request);
+      const { message, ...meta } = getEcsResponseLog(request, this.log);
       log.debug(message!, meta);
     };
 

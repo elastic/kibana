@@ -9,6 +9,7 @@
 import type { ReadStream } from 'fs';
 import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
+import { Logger } from '../../logging';
 
 /**
  * Attempts to determine the size (in bytes) of a Hapi response
@@ -19,7 +20,10 @@ import type { Request } from '@hapi/hapi';
  *
  * @internal
  */
-export function getResponsePayloadBytes(response: Request['response']): number | undefined {
+export function getResponsePayloadBytes(
+  response: Request['response'],
+  log: Logger
+): number | undefined {
   const isReadStream = (obj: any): obj is ReadStream => {
     return !isBoom(response) && response.variety === 'stream' && response.source === obj;
   };
@@ -52,6 +56,7 @@ export function getResponsePayloadBytes(response: Request['response']): number |
     // We intentionally swallow any errors as this information is
     // only a nicety for logging purposes, and should not cause the
     // server to crash if it cannot be determined.
+    log.warn('Failed to calculate response payload bytes.', e);
   }
 
   return undefined;

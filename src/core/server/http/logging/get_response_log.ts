@@ -11,7 +11,7 @@ import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import numeral from '@elastic/numeral';
 import { LogMeta } from '@kbn/logging';
-import { EcsEvent } from '../../logging';
+import { EcsEvent, Logger } from '../../logging';
 import { getResponsePayloadBytes } from './get_payload_size';
 
 const ECS_VERSION = '1.7.0';
@@ -34,7 +34,7 @@ function redactSensitiveHeaders(headers: Record<string, unknown>): Record<string
  *
  * @internal
  */
-export function getEcsResponseLog(request: Request): LogMeta {
+export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
   const { path, response } = request;
   const method = request.method.toUpperCase();
 
@@ -49,7 +49,7 @@ export function getEcsResponseLog(request: Request): LogMeta {
   const responseTime = (request.info.completed || request.info.responded) - request.info.received;
   const responseTimeMsg = !isNaN(responseTime) ? ` ${responseTime}ms` : '';
 
-  const bytes = getResponsePayloadBytes(response);
+  const bytes = getResponsePayloadBytes(response, log);
   const bytesMsg = bytes ? ` - ${numeral(bytes).format('0.0b')}` : '';
 
   const meta: EcsEvent = {
