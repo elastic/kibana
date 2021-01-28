@@ -89,7 +89,7 @@ export interface InheritedChildInput extends IndexSignature {
 export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerServices>;
 export type DashboardReactContext = KibanaReactContext<DashboardContainerServices>;
 
-const defaultCapabilities = {
+const defaultCapabilities: DashboardCapabilities = {
   show: false,
   createNew: false,
   saveQuery: false,
@@ -97,6 +97,7 @@ const defaultCapabilities = {
   hideWriteControls: true,
   mapsCapabilities: { save: false },
   visualizeCapabilities: { save: false },
+  storeSearchSession: true,
 };
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
