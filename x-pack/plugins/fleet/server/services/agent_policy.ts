@@ -486,7 +486,7 @@ class AgentPolicyService {
     agentPolicyId: string
   ) {
     const esClient = appContextService.getInternalUserESClient();
-    if (appContextService.getConfig()?.agents.fleetServerEnabled) {
+    if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
       await this.createFleetPolicyChangeFleetServer(soClient, esClient, agentPolicyId);
     }
 

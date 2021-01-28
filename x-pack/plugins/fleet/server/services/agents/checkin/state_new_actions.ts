@@ -110,7 +110,7 @@ async function getOrCreateAgentDefaultOutputAPIKey(
   esClient: ElasticsearchClient,
   agent: Agent
 ): Promise<string> {
-  if (appContextService.getConfig()?.agents.fleetServerEnabled) {
+  if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
     if (agent.default_api_key) {
       return agent.default_api_key;
     }

@@ -86,7 +86,7 @@ async function createSetupSideEffects(
   // packages that are stuck in the installing state.
   await ensurePackagesCompletedInstall(soClient, callCluster);
 
-  if (appContextService.getConfig()?.agents.fleetServerEnabled) {
+  if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
     await ensureInstalledPackage({
       savedObjectsClient: soClient,
       pkgName: FleetServerPackage,
