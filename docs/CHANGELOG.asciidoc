@@ -541,7 +541,6 @@ Monitoring::
 * Fixes dead links {kibana-pull}78696[#78696]
 * Fixes cluster listing page in how it handles global state {kibana-pull}78979[#78979]
 * Ensures alerting is optional {kibana-pull}79168[#79168]
-* Improves indices loading against larger metricbeat-* indices {kibana-pull}79190[#79190]
 * Adds in cluster version number for sec telemetry sender {kibana-pull}80545[#80545]
 * Fixes sorting of alerts {kibana-pull}80546[#80546]
 * Fixes a couple of issues with the cpu usage alert {kibana-pull}80737[#80737]
