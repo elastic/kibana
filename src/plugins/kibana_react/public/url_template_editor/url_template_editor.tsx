@@ -20,7 +20,7 @@ monaco.languages.setLanguageConfiguration(LANG, conf);
 
 export interface UrlTemplateEditorVariable {
   label: string;
-  description?: string;
+  title?: string;
   documentation?: string;
 }
 export interface UrlTemplateEditorProps {
@@ -52,11 +52,11 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
           endColumn: word.endColumn,
         };
         return {
-          suggestions: variables.map(({ label, description = '', documentation = '' }) => ({
+          suggestions: variables.map(({ label, title = '', documentation = '' }) => ({
             kind: monaco.languages.CompletionItemKind.Variable,
             label,
             insertText: '{{' + label + '}}',
-            detail: description,
+            detail: title,
             documentation,
             range,
             sortText: label,

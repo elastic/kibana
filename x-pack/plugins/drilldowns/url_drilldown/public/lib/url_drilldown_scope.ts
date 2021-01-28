@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * This file contains all the logic for mapping from trigger's context and action factory context to variables for URL drilldown scope,
- * Please refer to ./README.md for explanation of different scope sources
- */
-
+import { i18n } from '@kbn/i18n';
 import type { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/public';
 import {
   isRangeSelectTriggerContext,
@@ -236,46 +232,117 @@ export function getEventVariableList(context: ActionFactoryContext): UrlTemplate
   const [trigger] = context.triggers;
 
   switch (trigger) {
-    case SELECT_RANGE_TRIGGER:
-      return [
-        {
-          label: 'event.key',
-        },
-        {
-          label: 'event.from',
-        },
-        {
-          label: 'event.to',
-        },
-      ];
     case VALUE_CLICK_TRIGGER:
       return [
         {
-          label: 'event.key',
+          label: 'event.value',
+          title: i18n.translate('xpack.urlDrilldown.click.event.value.title', {
+            defaultMessage: 'Click value.',
+          }),
+          documentation: i18n.translate('xpack.urlDrilldown.click.event.key.documentation', {
+            defaultMessage: 'Value behind clicked data point.',
+          }),
         },
         {
-          label: 'event.value',
+          label: 'event.key',
+          title: i18n.translate('xpack.urlDrilldown.click.event.value.title', {
+            defaultMessage: 'Name of clicked field.',
+          }),
+          documentation: i18n.translate('xpack.urlDrilldown.click.event.value.documentation', {
+            defaultMessage: 'Field name behind clicked data point.',
+          }),
         },
         {
           label: 'event.negate',
+          title: i18n.translate('xpack.urlDrilldown.click.event.negate.title', {
+            defaultMessage: 'Whether the filter is negated.',
+          }),
+          documentation: i18n.translate('xpack.urlDrilldown.click.event.negate.documentation', {
+            defaultMessage:
+              'Boolean, indicating whether clicked data point resulted in negative filter.',
+          }),
         },
         {
           label: 'event.points',
+          title: i18n.translate('xpack.urlDrilldown.click.event.points.title', {
+            defaultMessage: 'List of all clicked points.',
+          }),
+          documentation: i18n.translate('xpack.urlDrilldown.click.event.points.documentation', {
+            defaultMessage:
+              'Some visualizations have clickable points that emit more than one data point. Use list of data points in case a single value is insufficient.',
+          }),
         },
       ];
     case ROW_CLICK_TRIGGER:
       return [
         {
-          label: 'event.rowIndex',
-        },
-        {
           label: 'event.values',
+          title: i18n.translate('xpack.urlDrilldown.row.event.values.title', {
+            defaultMessage: 'List of row cell values.',
+          }),
+          documentation: i18n.translate('xpack.urlDrilldown.row.event.values.documentation', {
+            defaultMessage:
+              'An array of all cell values for the raw on which the action will execute.',
+          }),
         },
         {
           label: 'event.keys',
+          title: i18n.translate('xpack.urlDrilldown.row.event.keys.title', {
+            defaultMessage: 'List of row cell fields.',
+          }),
+          documentation: i18n.translate('xpack.urlDrilldown.row.event.keys.documentation', {
+            defaultMessage: 'An array of field names for each column.',
+          }),
         },
         {
           label: 'event.columnNames',
+          title: i18n.translate('xpack.urlDrilldown.row.event.columnNames.title', {
+            defaultMessage: 'List of table column names.',
+          }),
+          documentation: i18n.translate('xpack.urlDrilldown.row.event.columnNames.documentation', {
+            defaultMessage: 'An array of column names.',
+          }),
+        },
+        {
+          label: 'event.rowIndex',
+          title: i18n.translate('xpack.urlDrilldown.row.event.rowIndex.title', {
+            defaultMessage: 'Clicked row index.',
+          }),
+          documentation: i18n.translate('xpack.urlDrilldown.row.event.rowIndex.documentation', {
+            defaultMessage: 'Number, representing the row that was clicked, starting from 0.',
+          }),
+        },
+      ];
+    case SELECT_RANGE_TRIGGER:
+      return [
+        {
+          label: 'event.key',
+          title: i18n.translate('xpack.urlDrilldown.range.event.key.title', {
+            defaultMessage: 'Name of aggregation field.',
+          }),
+          documentation: i18n.translate('xpack.urlDrilldown.range.event.key.documentation', {
+            defaultMessage: 'Aggregation field behind the selected range, if available.',
+          }),
+        },
+        {
+          label: 'event.from',
+          title: i18n.translate('xpack.urlDrilldown.range.event.from.title', {
+            defaultMessage: 'Range start value.',
+          }),
+          documentation: i18n.translate('xpack.urlDrilldown.range.event.from.documentation', {
+            defaultMessage:
+              '`from` value of the selected range. Depending on your data, could be either a date or number.',
+          }),
+        },
+        {
+          label: 'event.to',
+          title: i18n.translate('xpack.urlDrilldown.range.event.to.title', {
+            defaultMessage: 'Range end value.',
+          }),
+          documentation: i18n.translate('xpack.urlDrilldown.range.event.to.documentation', {
+            defaultMessage:
+              '`to` value of the selected range. Depending on your data, could be either a date or number.',
+          }),
         },
       ];
   }

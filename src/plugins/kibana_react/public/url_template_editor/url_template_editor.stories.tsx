@@ -27,13 +27,13 @@ storiesOf('UrlTemplateEditor', module)
         },
         {
           label: 'event.key',
-          description: 'Field key.',
+          title: 'Field key.',
           documentation:
             'Field key is Elasticsearch document key as described in Elasticsearch index pattern.',
         },
         {
           label: 'kibanaUrl',
-          description: 'Kibana deployment URL.',
+          title: 'Kibana deployment URL.',
           documentation: 'Kibana URL is the link to homepage of Kibana deployment.',
         },
       ]}
