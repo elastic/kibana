@@ -54,24 +54,26 @@ export function DraggableDimensionButton({
   const { dragging } = dragDropContext;
 
   const isCurrentGroup = group.groupId === dragging?.groupId;
-  const isDragging = isDraggedOperation(dragging);
-  const canHandleDrop = layerDatasource.canHandleDrop({
-    ...layerDatasourceDropProps,
-    columnId,
-    filterOperations: group.filterOperations,
-  });
+  const isOperationDragged = isDraggedOperation(dragging);
+  const canHandleDrop =
+    Boolean(dragDropContext.dragging) &&
+    layerDatasource.canHandleDrop({
+      ...layerDatasourceDropProps,
+      columnId,
+      filterOperations: group.filterOperations,
+    });
 
   const dragType = isSelf(value, dragging)
     ? 'move'
-    : isDragging && isCurrentGroup
+    : isOperationDragged && isCurrentGroup
     ? 'reorder'
     : 'copy';
 
-  const dropType = isDragging ? (!isCurrentGroup ? 'replace' : 'reorder') : 'add';
+  const dropType = isOperationDragged ? (!isCurrentGroup ? 'replace' : 'reorder') : 'add';
 
   const isCompatibleFromOtherGroup = !isCurrentGroup && canHandleDrop;
 
-  const isDroppable = isDragging
+  const isDroppable = isOperationDragged
     ? dragType === 'reorder'
       ? isFromTheSameGroup(value, dragging)
       : isCompatibleFromOtherGroup
