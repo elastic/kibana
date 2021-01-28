@@ -24,7 +24,13 @@ import { RUNTIME_FIELD_OPTIONS } from './constants';
 import { schema } from './form_schema';
 import { getNameFieldConfig } from './lib';
 import { ShadowingFieldWarning } from './shadowing_field_warning';
-import { TypeField, CustomLabelField, ScriptField, PopularityField } from './form_fields';
+import {
+  TypeField,
+  CustomLabelField,
+  ScriptField,
+  FormatField,
+  PopularityField,
+} from './form_fields';
 import { FormRow } from './form_row';
 import { AdvancedParametersSection } from './advanced_parameters_section';
 
@@ -222,7 +228,7 @@ const FieldEditorComponent = ({
         formFieldPath="__meta__.isFormatVisible"
         withDividerRule
       >
-        <div>Block custom format</div>
+        <FormatField />
       </FormRow>
 
       {/* Advanced settings */}

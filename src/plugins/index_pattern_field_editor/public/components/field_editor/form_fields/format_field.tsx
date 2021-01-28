@@ -5,13 +5,16 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
+import React from 'react';
 
-export { TypeField } from './type_field';
+import { UseField } from '../../../shared_imports';
 
-export { CustomLabelField } from './custom_label_field';
-
-export { PopularityField } from './popularity_field';
-
-export { ScriptField } from './script_field';
-
-export { FormatField } from './format_field';
+export const FormatField = () => {
+  return (
+    <UseField path="format">
+      {({ value, setValue }) => {
+        return <div>Format editor</div>;
+      }}
+    </UseField>
+  );
+};
