@@ -114,7 +114,7 @@ export class SearchInterceptor {
         return new EsError(e);
       }
     } else {
-      return new Error(e.message);
+      return e instanceof Error ? e : new Error(e.message);
     }
   }
 
