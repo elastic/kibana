@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import { Unit } from '@elastic/datemath';
 import { RollupSearchCapabilities } from './rollup_search_capabilities';
 
-import { ReqFacade, VisPayload } from '../../../../../src/plugins/vis_type_timeseries/server';
+import type { VisPayload } from '../../../../common/types';
+import type { ReqFacade } from '../strategies/abstract_search_strategy';
 
 describe('Rollup Search Capabilities', () => {
   const testTimeZone = 'time_zone';

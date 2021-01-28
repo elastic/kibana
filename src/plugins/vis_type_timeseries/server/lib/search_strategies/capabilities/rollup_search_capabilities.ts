@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
-import { get, has } from 'lodash';
-import { leastCommonInterval, isCalendarInterval } from './lib/interval_helper';
 
-import {
-  ReqFacade,
-  DefaultSearchCapabilities,
-  VisPayload,
-} from '../../../../../src/plugins/vis_type_timeseries/server';
+import { get, has } from 'lodash';
+import { leastCommonInterval, isCalendarInterval } from '../lib/interval_helper';
+
+import { DefaultSearchCapabilities } from './default_search_capabilities';
+
+import type { VisPayload } from '../../../../common/types';
+import type { ReqFacade } from '../strategies/abstract_search_strategy';
 
 export class RollupSearchCapabilities extends DefaultSearchCapabilities {
   rollupIndex: string;
