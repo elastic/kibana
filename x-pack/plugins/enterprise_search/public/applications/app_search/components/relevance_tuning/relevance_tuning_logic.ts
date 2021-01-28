@@ -62,7 +62,7 @@ interface RelevanceTuningActions {
     boostIndex: number,
     value: string | number
   ): { name: string; boostIndex: number; value: string | number };
-  addBoostValue(name: string, boostIndex: number): { name: string; boostIndex: index };
+  addBoostValue(name: string, boostIndex: number): { name: string; boostIndex: number };
   removeBoostValue(
     name: string,
     boostIndex: number,
