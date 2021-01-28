@@ -43,3 +43,6 @@ snapshots.js
 /packages/kbn-ui-framework/dist
 /packages/kbn-ui-shared-deps/flot_charts
 /packages/kbn-monaco/src/painless/antlr
+
+# Bazel
+/bazel-*
