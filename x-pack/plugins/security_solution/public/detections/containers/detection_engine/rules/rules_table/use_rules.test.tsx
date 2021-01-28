@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useRules, UseRules, ReturnRules } from './use_rules';
-import * as api from './api';
+import * as api from '../api';
 
 jest.mock('./api');
 
