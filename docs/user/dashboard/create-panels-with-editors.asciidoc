@@ -1,7 +1,45 @@
-[[add-panels-with-advanced-editors]]
-== Create panels with the advanced editors
+[[create-panels-with-editors]]
+== Create panels with editors
 
-{kib} provides you with three advanced editors that you can use to manually create dashboard panels.
+{kib} provides several editors that you can use to create dashboard panels.
+
+[cols="2"]
+|===
+
+| <<lens-editor,*Lens*>>
+| The drag and drop editor that creates visualizations of your data. *Lens* is recommended for most users.
+
+| <<maps,*Maps*>>
+| Create visualizations with your geographical data.
+
+| <<create-panels-with-tsvb,*TSVB*>>
+| Create visualizations with your time series data.
+
+| <<create-panels-with-vega,*Vega*>>
+| Create custom visualizations with the *Vega* and *Vega-Lite* grammars.
+
+| <<add-aggregation-based-visualization-panels,Aggregation-based visualization panels>>
+| Build most visualization types using {es} <<aggregation-reference,aggregations>>. 
+
+| <<create-panels-with-timelion,*Timelion*>>
+| Create visualizations with your time series data using a simple expression language.
+
+|===
+
+[float]
+[[lens-recommended-editor]]
+=== Lens
+
+*Lens* is the drag and drop editor that creates visualizations of your data.
+
+With *Lens*, you can:
+
+* Use the automatically generated suggestions to change the visualization type.
+* Create visualizations with multiple layers and indices.
+* Change the aggregation and labels to customize the data.
+
+//[role="screenshot"]
+//image:dashboard/images/lens.png[Lens]
 
 [float]
 [[tsvb-advanced-editor]]
@@ -17,6 +55,7 @@ With *TSVB*, you can:
 * Display multiple <<index-patterns, index patterns>> in each visualization.
 * Customize the data with labels and colors.
 
+[role="screenshot"]
 image::images/tsvb.png[TSVB UI]
 
 [float]
@@ -44,6 +83,7 @@ Use *Vega* or *Vega-Lite* when you want to create visualizations with:
 
 These grammars have some limitations: they do not support tables, and can't run queries conditionally.
 
+[role="screenshot"]
 image::images/vega.png[Vega UI]
 
 For detailed *Vega* and *Vega-Lite* information and examples, refer to <<resources-and-examples,Resources and examples>>. 
@@ -58,8 +98,11 @@ For detailed *Vega* and *Vega-Lite* information and examples, refer to <<resourc
 * Perform math across two or more time series
 * Visualize the results
 
+[role="screenshot"]
 image:dashboard/images/timelion.png[Timelion]
 
+include::lens.asciidoc[]
 include::tsvb.asciidoc[]
 include::vega.asciidoc[]
+include::aggregation-based.asciidoc[]
 include::timelion.asciidoc[]

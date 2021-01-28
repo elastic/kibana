@@ -1,5 +1,5 @@
 [[add-aggregation-based-visualization-panels]]
-== Create aggregation-based visualization panels
+=== Aggregation-based
 
 Aggregation-based visualizations are the core {kib} panels, and are not optimized
 for a specific use case. If you are new to {kib}, <<create-panels-with-lens,Lens>> is recommended as a
@@ -24,7 +24,7 @@ These panel types also have some limitations:
 
 [float]
 [[types-of-visualization-panels]]
-=== Types of aggregation-based panels
+==== Types of aggregation-based panels
 
 {kib} supports the following types of aggregation-based panels.
 
@@ -106,7 +106,7 @@ create visual art for a specific topic.
 
 [float]
 [[create-aggregation-based-panel]]
-=== Create an aggregation-based panel
+==== Create an aggregation-based panel
 
 Choose the type of panel you want to create, then use the editor to configure the options. Each panel type supports different options. 
 
@@ -132,13 +132,13 @@ image:images/aggregation-based-color-picker.png[Color picker]
 
 [float]
 [[try-it-aggregation-based-panel]]
-=== Try it: Create an aggregation-based bar chart
+==== Try it: Create an aggregation-based bar chart
 
 You collected data from your web server, and you want to visualize and analyze the data on a dashboard. To create a dashboard panel of the data, create
 a bar chart that displays the top five log traffic sources for every three hours.
 
 [float]
-==== Add the data and create the dashboard
+===== Add the data and create the dashboard
 
 Add the sample web logs data that you'll use to create the bar chart, then create the dashboard.
 
@@ -151,7 +151,7 @@ Add the sample web logs data that you'll use to create the bar chart, then creat
 . On the *Dashboards* page, click *Create dashboard*.
 
 [float]
-==== Open and set up the aggregation-based bar chart
+===== Open and set up the aggregation-based bar chart
 
 Open the bar chart visualization builder and change the time range. 
 
@@ -165,7 +165,7 @@ Open the bar chart visualization builder and change the time range.
 
 [float]
 [[tutorial-configure-the-bar-chart]]
-==== Create the bar chart
+===== Create the bar chart
 
 To create the bar chart, add a <<bucket-aggregations,bucket aggregation>>, then add the terms sub-aggregation to display the top values.
 
@@ -196,7 +196,7 @@ TIP: Aggregation-based panels support a maximum of three *Split series*.
 image:images/bar-chart-tutorial-2.png[Bar chart with sample logs data]
 
 [float]
-==== Save the panel
+===== Save the panel
 
 Save and add the visualization panel to the dashboard.
 

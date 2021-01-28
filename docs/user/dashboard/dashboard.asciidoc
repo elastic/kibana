@@ -14,34 +14,6 @@ image:images/Dashboard_example.png[Example dashboard]
 
 [[tsvb]]
 
-Dashboards support many types of panels, and provide several editors that you can use to create panels.
-
-[cols="2"]
-|===
-
-| <<create-panels-with-lens,Lens>>
-| The drag and drop editor that creates visualizations of your data. *Lens* is recommended for most users.
-
-| <<maps,Maps>>
-| Create beautiful displays of your geographical data.
-
-| <<add-panels-with-advanced-editors,Advanced editors>>
-| Visualize time series data with *TSVB* or *Timelion*, or create a custom visualization using *Vega* or *Vega-Lite*.
-
-| <<add-aggregation-based-visualization-panels,Aggregation-based visualization panels>>
-| Build most visualization types using {es} <<aggregation-reference,aggregations>>. 
-
-| <<enhance-dashboards,Tools>>
-| Add context to your panels with <<add-text,text>>, or add dynamic filters with <<add-controls,*Controls*>>.
-
-| <<save-your-search,Saved search table>>
-| Display a previously saved search table from <<discover, *Discover*>>. The table results are not aggregated.
-
-| <<xpack-ml-anomalies,Machine Learning>>
-| Display a previously saved visualization of <<xpack-ml, machine learning>> anomaly detection data.
-
-|===
-
 [float]
 [[create-dashboards]]
 == Create dashboards
@@ -269,11 +241,9 @@ log in using their {kib} credentials, via reverse proxy, or enable <<anonymous-a
 To automate {kib}, you can export dashboards as JSON using the <<dashboard-api,import and export dashboard APIs>>. It is important to export dashboards with all references needed.
 
 --
-include::lens.asciidoc[]
+include::tutorial-create-a-dashboard-of-lens-panels.asciidoc[]
 
-include::advanced-editors.asciidoc[]
-
-include::aggregation-based.asciidoc[]
+include::create-panels-with-editors.asciidoc[]
 
 include::enhance-dashboards.asciidoc[]
 

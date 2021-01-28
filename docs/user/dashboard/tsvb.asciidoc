@@ -1,4 +1,4 @@
-[[TSVB]]
+[[create-panels-with-tsvb]]
 === TSVB
 
 *TSVB* requires a date field and supports <<aggregation-reference, most {es} metric aggregations>>, multiple visualization types, custom functions,
@@ -95,7 +95,7 @@ Math::
 [[tsvb-faq]]
 ==== Frequently asked questions
 
-Why is my TSVB visualization missing data?::
+Why is my *TSVB* visualization missing data?::
   It depends, but most often it's two causes:
 
   1. If looking at a *Time series* chart with a derivative function, the time interval might be too small.
@@ -106,12 +106,12 @@ Why is my TSVB visualization missing data?::
     current time is 9:41, then TSVB metrics will be only show 10 minutes: from 9:30 to 9:40.
 
 How do I calculate the difference between two series?::
-  TSVB doesn't support math across series, but <<create-panels-with-timelion, Timelion>> does. <<vega, Vega>> can also do this.
+  TSVB doesn't support math across series, but <<create-panels-with-timelion, Timelion>> does. <<create-panels-with-vega, Vega>> can also do this.
 
 How do I view the current vs previous month?::
   While it's not possible to do math on these two, TSVB supports series with time offsets.
-  Click *Clone Series*, and then choose a new color for the new series. Go toc
-  *Options > Offset series time by* and choose an offset value.
+  Click *Clone Series*, and then choose a new color for the new series. Click
+  *Options > Offset series time by*, then choose an offset value.
 
 How do I calculate a month over month change?::
   This is not fully supported in TSVB, but there is a special case that is supported *if* the TSVB
@@ -119,7 +119,7 @@ How do I calculate a month over month change?::
   to get the absolute monthly change. To convert to a percent, add a `math` function with the formula
   `params.current / (params.current - params.derivative)`, and then set the formatter to Percent.
   +
-  For other types of month over month calculations, use <<create-panels-with-timelion, Timelion>> or <<vega, Vega>>.
+  For other types of month over month calculations, use <<create-panels-with-timelion, Timelion>> or <<create-panels-with-vega, Vega>>.
 
 How do I calculate the duration between start and end of an event?::
   TSVB can't do this because it requires correlation between different time periods. TSVB requires
