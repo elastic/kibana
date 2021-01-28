@@ -8,6 +8,7 @@
 .idea
 .teamcity
 .yarn-local-mirror
+bazel-cache
 bazel-dist
 build
 node_modules
