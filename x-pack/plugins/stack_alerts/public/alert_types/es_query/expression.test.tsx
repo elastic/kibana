@@ -17,7 +17,6 @@ import {
   IKibanaSearchResponse,
   ISearchStart,
 } from 'src/plugins/data/public';
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { EsQueryAlertParams } from './types';
 
