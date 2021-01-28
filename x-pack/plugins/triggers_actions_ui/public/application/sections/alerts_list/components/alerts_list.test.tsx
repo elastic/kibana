@@ -270,6 +270,13 @@ describe('alerts_list component with items', () => {
     expect(wrapper.find('[data-test-subj="alertStatus-ok"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="alertStatus-pending"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="alertStatus-unknown"]').length).toBe(0);
+    expect(wrapper.find('[data-test-subj="refreshAlertsButton"]').exists()).toBeTruthy();
+  });
+
+  it('loads alerts when refresh button is clicked', async () => {
+    await setup();
+    wrapper.find('[data-test-subj="refreshAlertsButton"]').first().simulate('click');
+    expect(loadAlerts).toHaveBeenCalled();
   });
 });
 
