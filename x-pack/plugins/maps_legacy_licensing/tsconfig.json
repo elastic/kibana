@@ -7,8 +7,8 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts"],
+  "include": ["public/**/*"],
   "references": [
-    { "path": "../visualizations/tsconfig.json" },
+     { "path": "../licensing/tsconfig.json" },
   ]
 }

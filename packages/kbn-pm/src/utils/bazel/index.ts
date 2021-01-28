@@ -6,4 +6,4 @@
  * Public License, v 1.
  */
 
-export { runDockerGenerator } from './run';
+export * from './install_tools';
